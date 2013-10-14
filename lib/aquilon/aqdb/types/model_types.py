@@ -41,6 +41,12 @@ class ChassisType(HardwareEntityType):
 
 class NetworkDeviceType(HardwareEntityType):
     Switch = 'switch'
+    Router = 'router'
+    SwitchRouter = 'switch-router'
+    WirelessAP = 'wireless-ap'
+    WirelessController = 'wireless-controller'
+    LoadBalancer = 'load-balancer'
+    NetworkAppliance = 'network-appliance'
 
 class NicType(ModelType):
     Nic = 'nic'

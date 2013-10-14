@@ -37,8 +37,11 @@ class CommandAddSwitch(BrokerCommand):
     def render(self, session, logger, switch, label, model, rack, type, ip,
                interface, mac, vendor, serial, comments, **arguments):
         dbmodel = Model.get_unique(session, name=model, vendor=vendor,
-                                   model_type=NetworkDeviceType.Switch,
                                    compel=True)
+
+        if not dbmodel.model_type.isNetworkDeviceType():
+            raise ArgumentError("This command can only be used to "
+                                "add network devices.")
 
         dblocation = get_location(session, rack=rack)
 
