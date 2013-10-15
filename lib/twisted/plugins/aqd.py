@@ -60,6 +60,31 @@ def log_module_load(cmd, mod):
         log.msg("Failed loading module %s, return code %d and stderr '%s'." %
                 (mod, e.exitcode, e.stderr))
 
+def set_umask(config):
+    os.umask(int(config.get("broker", "umask"), 8))
+
+def set_thread_pool_size(config):
+    # This is a somewhat made up number.  The default is ten.
+    # We are resource-limited in 32-bit, can't just make this
+    # a huge number.
+    # We need at least 10 threads for the normal sqlalchemy
+    # thread pool and 10 for the special "no locks allowed"
+    # pool.  Anything beyond that are just being allowed to
+    # queue and get themselves a logger.
+    # We are also constrained by the number of knc sockets
+    # that can be open at once (max file descriptors).
+    pool_size = config.get("broker", "twisted_thread_pool_size")
+    reactor.suggestThreadPoolSize(int(pool_size))
+
+def make_required_dirs(config):
+    for d in ["basedir", "profilesdir", "plenarydir", "rundir"]:
+        dir = config.get("broker", d)
+        if os.path.exists(dir):
+            continue
+        try:
+            os.makedirs(dir)
+        except OSError, e:
+            log.msg("Could not create directory '%s': %s" % (dir, e))
 
 class AQDMaker(object):
     implements(IServiceMaker, IPlugin)
@@ -147,10 +172,12 @@ class AQDMaker(object):
 
         # twisted is nicely changing the umask for us when the process is
         # set to daemonize.  This sets it back.
-        restServer.set_umask()
-        reactor.addSystemEventTrigger('after', 'startup', restServer.set_umask)
+        set_umask(config)
+        reactor.addSystemEventTrigger('after', 'startup', set_umask, config)
         reactor.addSystemEventTrigger('after', 'startup',
-                                      restServer.set_thread_pool_size)
+                                      set_thread_pool_size, config)
+
+        make_required_dirs(config)
 
         sockdir = config.get("broker", "sockdir")
         if not os.path.exists(sockdir):

@@ -410,7 +410,6 @@ class RestServer(ResponsePage):
 
         cache_version(config)
         log.msg("Starting aqd version %s" % config.get("broker", "version"))
-        self.make_required_dirs()
 
         def _logChildren(level, container):
             for (key, child) in container.listStaticEntities():
@@ -424,28 +423,3 @@ class RestServer(ResponsePage):
 
         #_logChildren(0, self)
 
-    def set_umask(self):
-        os.umask(int(self.config.get("broker", "umask"), 8))
-
-    def set_thread_pool_size(self):
-        # This is a somewhat made up number.  The default is ten.
-        # We are resource-limited in 32-bit, can't just make this
-        # a huge number.
-        # We need at least 10 threads for the normal sqlalchemy
-        # thread pool and 10 for the special "no locks allowed"
-        # pool.  Anything beyond that are just being allowed to
-        # queue and get themselves a logger.
-        # We are also constrained by the number of knc sockets
-        # that can be open at once (max file descriptors).
-        pool_size = self.config.get("broker", "twisted_thread_pool_size")
-        reactor.suggestThreadPoolSize(int(pool_size))
-
-    def make_required_dirs(self):
-        for d in ["basedir", "profilesdir", "plenarydir", "rundir"]:
-            dir = self.config.get("broker", d)
-            if os.path.exists(dir):
-                continue
-            try:
-                os.makedirs(dir)
-            except OSError, e:
-                log.msg("Could not create directory '%s': %s" % (dir, e))
