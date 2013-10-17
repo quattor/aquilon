@@ -37,11 +37,6 @@ class TestAddRebootIntervention(TestBrokerCommand):
                    "--hostname=server1.aqd-unittest.ms.com"]
         out = self.notfoundtest(command)
 
-        command = ["add_reboot_schedule",
-                   "--week=all", "--day=Sun", "--time=08:00",
-                   "--hostname=server1.aqd-unittest.ms.com"]
-        self.successtest(command)
-
         command = ["show_reboot_intervention",
                    "--hostname=server1.aqd-unittest.ms.com"]
         out = self.notfoundtest(command)
@@ -85,12 +80,20 @@ class TestAddRebootIntervention(TestBrokerCommand):
                          command)
 
     def test_11_addexisting(self):
-        # FIXME: this fails if the test is run on Sunday
-        command = ["add_reboot_intervention", "--expiry=Sun",
+        EXPIRY = datetime.utcnow().replace(microsecond=0) + timedelta(days=2)
+        command = ["add_reboot_intervention", "--expiry", EXPIRY,
                    "--justification=test",
                    "--hostname=server1.aqd-unittest.ms.com"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "already exists", command)
+
+    def test_12_addbadtime(self):
+        command = ["add_reboot_intervention", "--start_time=2013/01/01",
+                   "--expiry=2013/01/14",
+                   "--justification=test",
+                   "--hostname=server1.aqd-unittest.ms.com"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "The start time or expiry time are in the past.", command)
 
     def test_15_notfoundri(self):
         command = ["cat", "--reboot_intervention=ri-does-not-exist",
@@ -127,9 +130,6 @@ class TestAddRebootIntervention(TestBrokerCommand):
 
     def test_del_reboot_intervention(self):
         command = ["del_reboot_intervention",
-                   "--hostname=server1.aqd-unittest.ms.com"]
-        self.successtest(command)
-        command = ["del_reboot_schedule",
                    "--hostname=server1.aqd-unittest.ms.com"]
         self.successtest(command)
 
