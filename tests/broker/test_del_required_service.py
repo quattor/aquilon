@@ -152,9 +152,6 @@ class TestDelRequiredService(TestBrokerCommand):
         command = ["del_required_service", "--service=esx_management_server",
                    "--archetype=esx_cluster", "--justification", "tcm=12345678"]
         self.noouttest(command)
-        command = ["del_required_service", "--service=esx_management_server",
-                   "--archetype=vmhost", "--personality=vulcan2-10g-test"]
-        self.noouttest(command)
         command = ["del_required_service", "--service=vmseasoning",
                    "--archetype=vmhost", "--personality=vulcan-1g-desktop-prod"]
         self.noouttest(command)

@@ -23,9 +23,15 @@ if __name__ == "__main__":
 
 import unittest2 as unittest
 from brokertest import TestBrokerCommand
+from personalitytest import PersonalityTestMixin
 
 
-class TestAddMetaCluster(TestBrokerCommand):
+class TestAddMetaCluster(PersonalityTestMixin, TestBrokerCommand):
+
+    def testaddpersonality(self):
+        # The broker currently assumes this personality to exist
+        self.create_personality("metacluster", "metacluster",
+                                grn="grn:/ms/ei/aquilon/aqd")
 
     def testaddutmc1(self):
         command = ["add_metacluster", "--metacluster=utmc1",

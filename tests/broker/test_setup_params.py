@@ -25,158 +25,162 @@ import unittest2 as unittest
 from broker.brokertest import TestBrokerCommand
 
 ## validation parameters by templates
-PARAM_DEFS = {
-"access": [
-    {
-        "path": "access/netgroup",
-        "value_type": "list",
-        "description": "netgroups access"
-    },
-    {
-        "path": "access/users",
-        "value_type": "list",
-        "description": "users access"
-    },
-],
-"actions": [
-    {
-        "path": "action/\w+/user",
-        "value_type": "string",
-        "description": "action user"
-    },
-    {
-        "path": "action/\w+/command",
-        "value_type": "string",
-        "description": "action command"
-    },
-    {
-        "path": "action/\w+",
-        "value_type": "json",
-        "description": "per action block"
-    },
-    {
-        "path": "action",
-        "value_type": "json",
-        "description": "per action block"
-    },
-],
-"startup": [
-    {
-        "path": "startup/actions",
-        "value_type": "list",
-        "description": "startup actions"
-    },
-],
-"shutdown": [
-    {
-        "path": "shutdown/actions",
-        "value_type": "list",
-        "description": "shutdown actions"
-    },
-],
-"maintenance": [
-    {
-        "path": "maintenance/actions",
-        "value_type": "list",
-        "description": "maintenance actions"
-    },
-],
-"monitoring": [
-    {
-        "path": "monitoring/alert",
-        "value_type": "json",
-        "description": "monitoring"
-    },
-],
-"espinfo": [
-    {
-        "path": "espinfo/function",
-        "value_type": "string",
-        "description": "espinfo function",
-        "required": True
-    },
-    {
-        "path": "espinfo/class",
-        "value_type": "string",
-        "description": "espinfo class",
-        "required": True
-    },
-    {
-        "path": "espinfo/users",
-        "value_type": "list",
-        "description": "espinfo users",
-        "required": True
-    },
-    {
-        "path": "espinfo/threshold",
-        "value_type": "int",
-        "description": "espinfo threshold",
-        "required": True
-    },
-    {
-        "path": "espinfo/description",
-        "value_type": "string",
-        "description": "espinfo desc"
-    },
-],
-"windows": [
-    {
-        "path": "windows/windows",
-        "value_type": "json",
-        "required": True,
-        "default": '[{"duration": 8, "start": "08:00", "day": "Sun"}]'
-    }
-],
-"testrebuild": [
-    {
-        "path": "test/rebuild_required",
-        "value_type": "string",
-        "rebuild_required": True
-    }
-],
+AQUILON_PARAM_DEFS = {
+    "access": [
+        {
+            "path": "access/netgroup",
+            "value_type": "list",
+            "description": "netgroups access"
+        },
+        {
+            "path": "access/users",
+            "value_type": "list",
+            "description": "users access"
+        },
+    ],
+    "actions": [
+        {
+            "path": "action/\w+/user",
+            "value_type": "string",
+            "description": "action user"
+        },
+        {
+            "path": "action/\w+/command",
+            "value_type": "string",
+            "description": "action command"
+        },
+        {
+            "path": "action/\w+",
+            "value_type": "json",
+            "description": "per action block"
+        },
+        {
+            "path": "action",
+            "value_type": "json",
+            "description": "per action block"
+        },
+    ],
+    "startup": [
+        {
+            "path": "startup/actions",
+            "value_type": "list",
+            "description": "startup actions"
+        },
+    ],
+    "shutdown": [
+        {
+            "path": "shutdown/actions",
+            "value_type": "list",
+            "description": "shutdown actions"
+        },
+    ],
+    "maintenance": [
+        {
+            "path": "maintenance/actions",
+            "value_type": "list",
+            "description": "maintenance actions"
+        },
+    ],
+    "monitoring": [
+        {
+            "path": "monitoring/alert",
+            "value_type": "json",
+            "description": "monitoring"
+        },
+    ],
+    "espinfo": [
+        {
+            "path": "espinfo/function",
+            "value_type": "string",
+            "description": "espinfo function",
+            "required": True
+        },
+        {
+            "path": "espinfo/class",
+            "value_type": "string",
+            "description": "espinfo class",
+            "required": True
+        },
+        {
+            "path": "espinfo/users",
+            "value_type": "list",
+            "description": "espinfo users",
+            "required": True
+        },
+        {
+            "path": "espinfo/threshold",
+            "value_type": "int",
+            "description": "espinfo threshold",
+            "required": True
+        },
+        {
+            "path": "espinfo/description",
+            "value_type": "string",
+            "description": "espinfo desc"
+        },
+    ],
+    "windows": [
+        {
+            "path": "windows/windows",
+            "value_type": "json",
+            "required": True,
+            "default": '[{"duration": 8, "start": "08:00", "day": "Sun"}]'
+        }
+    ],
+    "testrebuild": [
+        {
+            "path": "test/rebuild_required",
+            "value_type": "string",
+            "rebuild_required": True
+        }
+    ],
+}
 
+VMHOST_PARAM_DEFS = {
+    "espinfo": [
+        {
+            "path": "espinfo/function",
+            "value_type": "string",
+            "description": "espinfo function",
+            "required": True
+        },
+        {
+            "path": "espinfo/class",
+            "value_type": "string",
+            "description": "espinfo class",
+            "required": True
+        },
+        {
+            "path": "espinfo/users",
+            "value_type": "list",
+            "description": "espinfo users",
+            "required": True
+        },
+    ],
 }
 
 
 class TestSetupParams(TestBrokerCommand):
 
-    def test_000_add_parameter_definitions(self):
+    def add_param_def(self, archetype, template, params):
+        cmd = ["add_parameter_definition", "--archetype", archetype,
+               "--path", params["path"], "--template", template,
+               "--value_type", params["value_type"]]
+        if "required" in params:
+            cmd.append("--required")
+        if "rebuild_required" in params:
+            cmd.append("--rebuild_required")
+        if "default" in params:
+            cmd.extend(["--default", params["default"]])
+        self.noouttest(cmd)
 
-        for template in PARAM_DEFS:
-            paths = PARAM_DEFS[template]
-            for p in paths:
-                cmd = ["add_parameter_definition", "--archetype=aquilon",
-                       "--path", p["path"], "--template", template,
-                       "--value_type", p["value_type"]]
-                if "required" in p:
-                    cmd.append("--required")
-                if "rebuild_required" in p:
-                    cmd.append("--rebuild_required")
-                if "default" in p:
-                    cmd.extend(["--default", p["default"]])
-
-                self.noouttest(cmd)
-
-    def add_parameter(self, archetype, personality, data):
-        cmd = ["add_parameter", "--archetype=%s" % archetype,
-               "--personality=%s" % personality]
-        for key, value in data.items():
-            cmd.append("--path=%s" % key)
-            cmd.append("--value=%s" % value)
-            self.successtest(cmd)
-
-    def test_010_setup_personality(self):
-        data = {"espinfo/function": "development",
-                "espinfo/class": "INFRASTRUCTURE",
-                "espinfo/users": "IT / TECHNOLOGY",
-                "espinfo/threshold": 0}
-
-        self.add_parameter("aquilon", "compileserver", data)
-        self.add_parameter("aquilon", "inventory", data)
-        self.add_parameter("aquilon", "eaitools", data)
-        self.add_parameter("aquilon", "unixeng-test", data)
-        self.add_parameter("aquilon", "sybase-test", data)
-        self.add_parameter("aquilon", "infra", data)
+    def test_100_add_parameter_definitions(self):
+        for template, paramlist in AQUILON_PARAM_DEFS.items():
+            for params in paramlist:
+                self.add_param_def("aquilon", template, params)
+        for template, paramlist in VMHOST_PARAM_DEFS.items():
+            for params in paramlist:
+                self.add_param_def("vmhost", template, params)
 
 
 if __name__ == '__main__':

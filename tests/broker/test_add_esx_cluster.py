@@ -25,9 +25,59 @@ if __name__ == "__main__":
 
 import unittest2 as unittest
 from brokertest import TestBrokerCommand
+from personalitytest import PersonalityTestMixin
 
 
-class TestAddESXCluster(TestBrokerCommand):
+class TestAddESXCluster(PersonalityTestMixin, TestBrokerCommand):
+    def testaddpersonality(self):
+        vmhost_maps = {
+            "esx_management_server": {
+                "ut.a": {
+                    "building": ["ut"],
+                },
+                "ut.b": {
+                    "building": ["ut"],
+                },
+                "np": {
+                    "building": ["np"],
+                },
+            },
+            "vmseasoning": {
+                "salt": {
+                    "building": ["ut"],
+                },
+                "pepper": {
+                    "building": ["ut"],
+                },
+                "sugar": {
+                    "building": ["np"],
+                },
+            },
+        }
+        esx_cluster_maps = {
+            "esx_management_server": {
+                "ut.a": {
+                    "building": ["ut"],
+                },
+                "ut.b": {
+                    "building": ["ut"],
+                },
+                "np": {
+                    "building": ["np"],
+                },
+            },
+        }
+
+        self.create_personality("vmhost", "vulcan-1g-desktop-prod",
+                                grn="grn:/ms/ei/aquilon/aqd",
+                                environment="prod",
+                                required=["esx_management_server",
+                                          "vmseasoning"],
+                                maps=vmhost_maps)
+        self.create_personality("esx_cluster", "vulcan-1g-desktop-prod",
+                                grn="grn:/ms/ei/aquilon/aqd",
+                                environment="prod",
+                                maps=esx_cluster_maps)
 
     def testaddutecl1(self):
         # For this cluster, we'll use the default for buildstatus
