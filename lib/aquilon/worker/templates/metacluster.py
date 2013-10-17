@@ -24,7 +24,8 @@ from aquilon.aqdb.model import MetaCluster
 from aquilon.worker.templates import (Plenary, ObjectPlenary, StructurePlenary,
                                       PlenaryCollection, PlenaryPersonalityBase,
                                       PlenaryResource,
-                                      PlenaryServiceInstanceClientDefault)
+                                      PlenaryServiceInstanceClientDefault,
+                                      add_location_info)
 from aquilon.worker.templates.panutils import (StructureTemplate, PanValue,
                                                pan_assign, pan_include,
                                                pan_append)
@@ -42,8 +43,8 @@ class PlenaryMetaCluster(PlenaryCollection):
         super(PlenaryMetaCluster, self).__init__(logger=logger)
 
         self.dbobj = dbcluster
-        self.plenaries.append(PlenaryMetaClusterObject(dbcluster, logger=logger))
-        self.plenaries.append(PlenaryMetaClusterData(dbcluster, logger=logger))
+        self.plenaries.append(PlenaryMetaClusterObject.get_plenary(dbcluster))
+        self.plenaries.append(PlenaryMetaClusterData.get_plenary(dbcluster))
 
 
 class PlenaryMetaClusterData(StructurePlenary):
@@ -57,32 +58,12 @@ class PlenaryMetaClusterData(StructurePlenary):
         pan_assign(lines, "system/metacluster/type", self.dbobj.cluster_type)
 
         dbloc = self.dbobj.location_constraint
+        add_location_info(lines, dbloc, prefix="system/metacluster/")
         pan_assign(lines, "system/metacluster/sysloc/location", dbloc.sysloc())
-        if dbloc.continent:
-            pan_assign(lines, "system/metacluster/sysloc/continent",
-                       dbloc.continent.name)
-        if dbloc.city:
-            pan_assign(lines, "system/metacluster/sysloc/city", dbloc.city.name)
         if dbloc.campus:
-            pan_assign(lines, "system/metacluster/sysloc/campus",
-                       dbloc.campus.name)
             ## maintaining this so templates dont break
             ## during transtion period.. should be DEPRECATED
             pan_assign(lines, "system/metacluster/campus", dbloc.campus.name)
-        if dbloc.building:
-            pan_assign(lines, "system/metacluster/sysloc/building",
-                       dbloc.building.name)
-        if dbloc.room:
-            pan_assign(lines, "system/cluster/rack/room", dbloc.room)
-        if dbloc.bunker:
-            pan_assign(lines, "system/cluster/sysloc/bunker", dbloc.bunker.name)
-        if dbloc.rack:
-            pan_assign(lines, "system/metacluster/rack/row",
-                       dbloc.rack.rack_row)
-            pan_assign(lines, "system/metacluster/rack/column",
-                       dbloc.rack.rack_column)
-            pan_assign(lines, "system/metacluster/rack/name",
-                       dbloc.rack.name)
 
         lines.append("")
 

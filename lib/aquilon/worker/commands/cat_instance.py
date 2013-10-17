@@ -35,17 +35,16 @@ class CommandCatInstance(BrokerCommand):
                                           name=instance, compel=True)
         if default:
             if server:
-                plenary_info = PlenaryServiceInstanceServerDefault(dbsi,
-                                                                   logger=logger)
+                cls = PlenaryServiceInstanceServerDefault
             else:
-                plenary_info = PlenaryServiceInstanceClientDefault(dbsi,
-                                                                   logger=logger)
+                cls = PlenaryServiceInstanceClientDefault
         else:
             if server:
-                plenary_info = PlenaryServiceInstanceServer(dbsi, logger=logger)
+                cls = PlenaryServiceInstanceServer
             else:
-                plenary_info = PlenaryServiceInstanceToplevel(dbsi,
-                                                              logger=logger)
+                cls = PlenaryServiceInstanceToplevel
+
+        plenary_info = cls.get_plenary(dbsi, logger=logger)
 
         if generate:
             return plenary_info._generate_content()

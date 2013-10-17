@@ -16,7 +16,7 @@
 # limitations under the License.
 """Contains the logic for `aq del machine`."""
 
-from aquilon.exceptions_ import ArgumentError, AquilonError
+from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.locks import CompileKey
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
@@ -30,13 +30,14 @@ class CommandDelMachine(BrokerCommand):
     def render(self, session, logger, machine, **arguments):
         dbmachine = Machine.get_unique(session, machine, compel=True)
 
+        plenaries = PlenaryCollection(logger=logger)
         remove_plenaries = PlenaryCollection(logger=logger)
+
         remove_plenaries.append(Plenary.get_plenary(dbmachine))
         if dbmachine.vm_container:
             remove_plenaries.append(Plenary.get_plenary(dbmachine.vm_container))
-            dbcontainer = dbmachine.vm_container.holder.holder_object
-        else:
-            dbcontainer = None
+            holder = dbmachine.vm_container.holder.holder_object
+            plenaries.append(Plenary.get_plenary(holder))
 
         if dbmachine.host:
             raise ArgumentError("{0} is still in use by {1:l} and cannot be "
@@ -53,27 +54,15 @@ class CommandDelMachine(BrokerCommand):
         session.delete(dbmachine)
         session.flush()
 
-        key = remove_plenaries.get_key()
-        if dbcontainer:
-            plenary_container = Plenary.get_plenary(dbcontainer, logger=logger)
-            key = CompileKey.merge([key, plenary_container.get_key()])
-        with key:
+        with CompileKey.merge([remove_plenaries.get_key(),
+                               plenaries.get_key()]):
+            plenaries.stash()
             remove_plenaries.stash()
             try:
-                if dbcontainer:
-                    plenary_container.write(locked=True)
+                plenaries.write(locked=True)
                 remove_plenaries.remove(locked=True)
             except:
                 remove_plenaries.restore_stash()
-                if dbcontainer:
-                    plenary_container.restore_stash()
+                plenaries.restore_stash()
                 raise
-        return
-
-    def _remove_from_rp(self, na_obj):
-        try:
-            na_obj.delete()
-        except Exception, e:
-            raise AquilonError('Failed while removing nas assignment in '
-                               'resource pool: %s' % e)
         return

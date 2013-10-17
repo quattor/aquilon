@@ -16,12 +16,11 @@
 # limitations under the License.
 """Contains the logic for `aq cat --hostname`."""
 
-
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.host import hostname_to_host
 from aquilon.worker.dbwrappers.resources import get_resource
-from aquilon.worker.templates.base import Plenary
-from aquilon.worker.templates.host import PlenaryToplevelHost, PlenaryHostData
+from aquilon.worker.templates import (Plenary, PlenaryToplevelHost,
+                                      PlenaryHostData)
 
 
 class CommandCatHostname(BrokerCommand):
@@ -35,9 +34,11 @@ class CommandCatHostname(BrokerCommand):
             plenary_info = Plenary.get_plenary(dbresource, logger=logger)
         else:
             if data:
-                plenary_info = PlenaryHostData(dbhost, logger=logger)
+                cls = PlenaryHostData
             else:
-                plenary_info = PlenaryToplevelHost(dbhost, logger=logger)
+                cls = PlenaryToplevelHost
+
+            plenary_info = cls.get_plenary(dbhost, logger=logger)
 
         if generate:
             return plenary_info._generate_content()

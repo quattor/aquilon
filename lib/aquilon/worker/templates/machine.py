@@ -23,7 +23,8 @@ from sqlalchemy.inspection import inspect
 
 from aquilon.aqdb.model import Machine
 from aquilon.worker.locks import CompileKey, NoLockKey
-from aquilon.worker.templates import Plenary, StructurePlenary
+from aquilon.worker.templates import (Plenary, StructurePlenary,
+                                      add_location_info)
 from aquilon.worker.templates.panutils import (StructureTemplate, pan_assign,
                                                pan_include, PanMetric)
 
@@ -37,52 +38,6 @@ class PlenaryMachineInfo(StructurePlenary):
         loc = dbmachine.location
         return "machine/%s/%s/%s/%s" % (loc.hub.fullname.lower(), loc.building,
                                         loc.rack, dbmachine.label)
-
-    def __init__(self, dbmachine, logger=LOGGER):
-        super(PlenaryMachineInfo, self).__init__(dbmachine, logger=logger)
-
-        self.machine = dbmachine.label
-
-        loc = dbmachine.location
-        self.hub = loc.hub.fullname.lower()
-        self.building = loc.building.name
-        self.city = loc.city.name
-        self.continent = loc.continent.name
-
-        if loc.rack:
-            self.rack = loc.rack.name
-            self.rackrow = loc.rack.rack_row
-            self.rackcol = loc.rack.rack_column
-        else:
-            self.rack = None
-
-        if loc.room:
-            self.room = loc.room.name
-        else:
-            self.room = None
-
-        if loc.bunker:
-            self.bunker = loc.bunker.name
-        else:
-            self.bunker = None
-
-        if loc.campus:
-            self.campus = loc.campus.name
-        else:
-            self.campus = None
-
-        self.dns_search_domains = []
-        parents = loc.parents[:]
-        parents.append(loc)
-        parents.reverse()
-        for parent in parents:
-            # Filter out duplicates
-            extra_domains = [map.dns_domain.name
-                             for map in parent.dns_maps
-                             if map.dns_domain.name not in self.dns_search_domains]
-            self.dns_search_domains.extend(extra_domains)
-
-        self.sysloc = loc.sysloc()
 
     def get_key(self, exclusive=True):
         if not exclusive:
@@ -135,7 +90,7 @@ class PlenaryMachineInfo(StructurePlenary):
             elif disk.disk_type == 'virtual_disk':
                 share = disk.share
 
-                params["path"] = "%s/%s.vmdk" % (self.machine, disk.device_name)
+                params["path"] = "%s/%s.vmdk" % (self.dbobj.label, disk.device_name)
                 params["address"] = disk.address
                 params["sharename"] = share.name
                 params["server"] = share.server
@@ -146,7 +101,7 @@ class PlenaryMachineInfo(StructurePlenary):
             elif disk.disk_type == 'virtual_localdisk':
                 filesystem = disk.filesystem
 
-                params["path"] = "%s/%s.vmdk" % (self.machine, disk.device_name)
+                params["path"] = "%s/%s.vmdk" % (self.dbobj.label, disk.device_name)
                 params["address"] = disk.address
                 params["filesystemname"] = filesystem.name
                 params["mountpoint"] = filesystem.mountpoint
@@ -187,18 +142,8 @@ class PlenaryMachineInfo(StructurePlenary):
                     interfaces[interface.name] = StructureTemplate(path, ifinfo)
 
         # Firstly, location
-        pan_assign(lines, "location", self.sysloc)
-        pan_assign(lines, "sysloc/building", self.building)
-        pan_assign(lines, "sysloc/city", self.city)
-        pan_assign(lines, "sysloc/continent", self.continent)
-        if self.rack:
-            pan_assign(lines, "rack/name", self.rack)
-            if self.rackrow:
-                pan_assign(lines, "rack/row", self.rackrow)
-            if self.rackcol:
-                pan_assign(lines, "rack/column", self.rackcol)
-        if self.room:
-            pan_assign(lines, "rack/room", self.room)
+        add_location_info(lines, self.dbobj.location)
+        pan_assign(lines, "location", self.dbobj.location.sysloc())
 
         # And a chassis location?
         if self.dbobj.chassis_slot:
@@ -206,21 +151,25 @@ class PlenaryMachineInfo(StructurePlenary):
             pan_assign(lines, "chassis", slot.chassis.fqdn)
             pan_assign(lines, "slot", slot.slot_number)
 
-        #if self.hub:
-        #    pan_assign(lines, "sysloc/hub", self.hub)
-        if self.campus:
-            pan_assign(lines, "sysloc/campus", self.campus)
-        if self.bunker:
-            pan_assign(lines, "sysloc/bunker", self.bunker)
-        if self.dns_search_domains:
-            pan_assign(lines, "sysloc/dns_search_domains",
-                       self.dns_search_domains)
+        dns_search_domains = []
+        parents = self.dbobj.location.parents[:]
+        parents.append(self.dbobj.location)
+        parents.reverse()
+        for parent in parents:
+            # Filter out duplicates
+            extra_domains = [map.dns_domain.name
+                             for map in parent.dns_maps
+                             if map.dns_domain.name not in dns_search_domains]
+            dns_search_domains.extend(extra_domains)
+
+        if dns_search_domains:
+            pan_assign(lines, "sysloc/dns_search_domains", dns_search_domains)
 
         # Now describe the hardware
         lines.append("")
         if self.dbobj.serial_no:
             pan_assign(lines, "serialnumber", self.dbobj.serial_no)
-        pan_assign(lines, "nodename", self.machine)
+        pan_assign(lines, "nodename", self.dbobj.label)
         pan_include(lines, "hardware/machine/%s/%s" %
                     (self.dbobj.model.vendor.name, self.dbobj.model.name))
 
@@ -238,11 +187,3 @@ class PlenaryMachineInfo(StructurePlenary):
             pan_assign(lines, "console/%s" % manager, managers[manager])
 
 Plenary.handlers[Machine] = PlenaryMachineInfo
-
-
-def machine_plenary_will_move(old, new):
-    """Helper to see if updating a machine's location will move its plenary."""
-    if old.hub != new.hub or old.building != new.building or \
-       old.rack != new.rack:
-        return True
-    return False

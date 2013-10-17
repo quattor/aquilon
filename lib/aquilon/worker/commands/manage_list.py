@@ -33,15 +33,15 @@ class CommandManageList(BrokerCommand):
 
     def render(self, session, logger, list, domain, sandbox, force,
                **arguments):
-        (dbbranch, dbauthor) = get_branch_and_author(session, logger,
-                                                     domain=domain,
-                                                     sandbox=sandbox,
-                                                     compel=True)
+        dbbranch, dbauthor = get_branch_and_author(session, logger,
+                                                   domain=domain,
+                                                   sandbox=sandbox, compel=True)
 
         if hasattr(dbbranch, "allow_manage") and not dbbranch.allow_manage:
             raise ArgumentError("Managing hosts to {0:l} is not allowed."
                                 .format(dbbranch))
         check_hostlist_size(self.command, self.config, list)
+
         dbhosts = hostlist_to_hosts(session, list)
 
         failed = []
@@ -76,7 +76,6 @@ class CommandManageList(BrokerCommand):
                                CompileKey(domain=dbbranch.name, logger=logger)]):
             plenaries.stash()
             try:
-                plenaries.remove(locked=True)
                 plenaries.write(locked=True)
             except:
                 plenaries.restore_stash()

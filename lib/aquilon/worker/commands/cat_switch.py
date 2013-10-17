@@ -16,7 +16,6 @@
 # limitations under the License.
 """Contains the logic for `aq cat --switch`."""
 
-
 from aquilon.aqdb.model import Switch
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.templates import Plenary

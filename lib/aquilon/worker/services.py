@@ -406,7 +406,8 @@ class Chooser(object):
         for instance in self.instances_bound.union(self.instances_unbound):
             changed_servers.update(instance.servers)
 
-            plenary = PlenaryServiceInstanceServer(instance, logger=self.logger)
+            plenary = PlenaryServiceInstanceServer.get_plenary(instance,
+                                                               logger=self.logger)
             self.plenaries.append(plenary)
 
         for srv in changed_servers:

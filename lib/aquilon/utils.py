@@ -253,7 +253,8 @@ def remove_dir(dir, logger=LOGGER):
     return
 
 
-def write_file(filename, content, mode=None, logger=LOGGER, compress=None):
+def write_file(filename, content, mode=None, compress=None,
+               create_directory=False, logger=LOGGER):
     """Atomically write content into the specified filename.
 
     The content is written into a temp file in the same directory as
@@ -291,8 +292,12 @@ def write_file(filename, content, mode=None, logger=LOGGER, compress=None):
             old_mode = os.stat(filename).st_mode
         except OSError, e:
             old_mode = 0644
-    (dirname, basename) = os.path.split(filename)
-    (fd, fpath) = mkstemp(prefix=basename, dir=dirname)
+    dirname, basename = os.path.split(filename)
+
+    if not os.path.exists(dirname) and create_directory:
+        os.makedirs(dirname)
+
+    fd, fpath = mkstemp(prefix=basename, dir=dirname)
     try:
         with os.fdopen(fd, 'w') as f:
             f.write(content)
@@ -314,9 +319,14 @@ def read_file(path, filename, logger=LOGGER):
         raise AquilonError("Could not read contents of %s: %s" % (fullfile, e))
 
 
-def remove_file(filename, logger=LOGGER):
+def remove_file(filename, cleanup_directory=False, logger=LOGGER):
     try:
         os.remove(filename)
     except OSError, e:
         if e.errno != errno.ENOENT:
             logger.info("Could not remove file '%s': %s" % (filename, e))
+    if cleanup_directory:
+        try:
+            os.removedirs(os.path.dirname(filename))
+        except OSError:
+            pass

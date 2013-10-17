@@ -54,12 +54,11 @@ class CommandUpdateMetaCluster(BrokerCommand):
         # TODO update_cluster_location would update VMs. Metaclusters
         # will contain VMs in Vulcan2 model.
         plenaries = PlenaryCollection(logger=logger)
-        remove_plenaries = PlenaryCollection(logger=logger)
+        plenaries.append(Plenary.get_plenary(dbmetacluster))
 
         location_updated = update_cluster_location(session, logger,
                                                    dbmetacluster, fix_location,
-                                                   plenaries, remove_plenaries,
-                                                   **arguments)
+                                                   plenaries, **arguments)
 
         if location_updated:
             cluster_updated = True
@@ -70,7 +69,6 @@ class CommandUpdateMetaCluster(BrokerCommand):
         session.flush()
         dbmetacluster.validate()
 
-        plenary_info = Plenary.get_plenary(dbmetacluster, logger=logger)
-        plenary_info.write()
+        plenaries.write(locked=False)
 
         return

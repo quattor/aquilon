@@ -16,9 +16,10 @@
 # limitations under the License.
 """Any work by the broker to write out (or read in?) templates lives here."""
 
-
 import os
 import logging
+import threading
+import weakref
 
 from mako.lookup import TemplateLookup
 
@@ -34,12 +35,13 @@ from aquilon.utils import write_file, read_file, remove_file
 
 LOGGER = logging.getLogger(__name__)
 
-_config = Config()
-TEMPLATE_EXTENSION = _config.get("panc", "template_extension")
+# Maintain a cache of plenaries, to avoid creating multiple plenary objects
+# referencing the same file. The cache is per-thread, to avoid mixing objects
+# from different sessions.
+_mylocal = threading.local()
 
 
 class Plenary(object):
-
     template_type = ""
     """ Specifies the PAN template type to generate """
 
@@ -49,20 +51,27 @@ class Plenary(object):
         subclass.
 
     """
+
+    config = Config()
+    TEMPLATE_EXTENSION = config.get("panc", "template_extension")
+
     def __init__(self, dbobj, logger=LOGGER):
         super(Plenary, self).__init__()
 
         if not dbobj:
             raise ValueError("A plenary instance must be bound to a DB object.")
 
-        self.config = Config()
         self.dbobj = dbobj
         self.logger = logger
 
         self.new_content = None
 
+        # We may no longer be able to calculate this during remove()
+        self.debug_name = str(dbobj)
+
         # The following attributes are for stash/restore_stash
         self.old_path = self.full_path(dbobj)
+        self.new_path = None
         self.old_content = None
         self.old_mtime = None
         self.stashed = False
@@ -87,7 +96,7 @@ class Plenary(object):
 
     def __repr__(self):
         """For debug output."""
-        return "%s(%s)" % (self.__class__.__name__, self.dbobj)
+        return "%s(%s)" % (self.__class__.__name__, self.debug_name)
 
     @classmethod
     def template_name(cls, dbobj):  # pylint: disable=W0613
@@ -103,7 +112,7 @@ class Plenary(object):
     @classmethod
     def base_dir(cls, dbobj):  # pylint: disable=W0613
         """ Base directory of the plenary template """
-        return _config.get("broker", "plenarydir")
+        return cls.config.get("broker", "plenarydir")
 
     @classmethod
     def full_path(cls, dbobj):
@@ -111,10 +120,10 @@ class Plenary(object):
         loadpath = cls.loadpath(dbobj)
         if loadpath:
             return "%s/%s/%s%s" % (cls.base_dir(dbobj), loadpath,
-                                   cls.template_name(dbobj), TEMPLATE_EXTENSION)
+                                   cls.template_name(dbobj), cls.TEMPLATE_EXTENSION)
         else:
             return "%s/%s%s" % (cls.base_dir(dbobj), cls.template_name(dbobj),
-                                TEMPLATE_EXTENSION)
+                                cls.TEMPLATE_EXTENSION)
 
     def body(self, lines):
         """
@@ -195,12 +204,19 @@ class Plenary(object):
                 # if nothing is actually changed
                 return 0
 
-            path = self.full_path(self.dbobj)
-            dirname = os.path.dirname(path)
-            if not os.path.exists(dirname):
-                os.makedirs(dirname)
+            if not self.new_path:
+                raise InternalError("New path not set - likely write() is "
+                                    "called on deleted object.")
 
-            write_file(path, content, logger=self.logger)
+            # If the plenary has moved, then clean up any potential leftover
+            # files from the old location
+            if self.new_path != self.old_path:
+                self.remove(locked=True)
+
+            self.logger.debug("Writing %r [%s]" % (self, self.new_path))
+
+            write_file(self.new_path, content, create_directory=True,
+                       logger=self.logger)
             self.removed = False
             if self.old_content != content:
                 self.changed = True
@@ -229,11 +245,9 @@ class Plenary(object):
                 lock_queue.acquire(key)
             self.stash()
 
-            remove_file(self.old_path, logger=self.logger)
-            try:
-                os.removedirs(os.path.dirname(self.old_path))
-            except OSError:
-                pass
+            self.logger.debug("Removing %r [%s]" % (self, self.old_path))
+            remove_file(self.old_path, cleanup_directory=True,
+                        logger=self.logger)
             self.removed = True
         # Most of the error handling routines would restore_stash...
         # but there's no need here if the remove failed. :)
@@ -250,6 +264,15 @@ class Plenary(object):
         """
         if self.stashed:
             return
+
+        if isinstance(self.dbobj, Base):
+            state = inspect(self.dbobj)
+            if not state.deleted:
+                self.new_path = self.full_path(self.dbobj)
+        else:
+            # Ouch. Personality parameters...
+            self.new_path = self.full_path(self.dbobj)
+
         try:
             self.old_content = self.read()
             self.old_mtime = os.stat(self.old_path).st_atime
@@ -270,26 +293,43 @@ class Plenary(object):
         # Should this optimization be in use?
         # if not self.changed and not self.removed:
         #    return
-        dirname = os.path.dirname(self.old_path)
+
+        # If the plenary has moved, then we need to clean up the new location
+        if self.new_path and self.new_path != self.old_path:
+            self.logger.debug("Removing %r [%s]" % (self, self.new_path))
+            remove_file(self.new_path, cleanup_directory=True,
+                        logger=self.logger)
+
+        self.logger.debug("Restoring %r [%s]" % (self, self.old_path))
         if self.old_content is None:
-            remove_file(self.old_path, logger=self.logger)
-            try:
-                os.removedirs(dirname)
-            except OSError:
-                pass
+            remove_file(self.old_path, cleanup_directory=True,
+                        logger=self.logger)
         else:
-            if not os.path.exists(dirname):
-                os.makedirs(dirname)
-            write_file(self.old_path, self.old_content, logger=self.logger)
+            write_file(self.old_path, self.old_content, create_directory=True,
+                       logger=self.logger)
             atime = os.stat(self.old_path).st_atime
             os.utime(self.old_path, (atime, self.old_mtime))
 
-    @staticmethod
-    def get_plenary(dbobj, logger=LOGGER):
-        if dbobj.__class__ not in Plenary.handlers:
-            raise InternalError("Class %s does not have a plenary handler" %
-                                dbobj.__class__.__name__)
-        return Plenary.handlers[dbobj.__class__](dbobj, logger=logger)
+    @classmethod
+    def get_plenary(cls, dbobj, logger=LOGGER):
+        if cls == Plenary:
+            if dbobj.__class__ not in Plenary.handlers:
+                raise InternalError("Class %s does not have a plenary handler" %
+                                    dbobj.__class__.__name__)
+            handler = Plenary.handlers[dbobj.__class__]
+        else:
+            handler = cls
+
+        if not hasattr(_mylocal, "plenaries"):
+            _mylocal.plenaries = weakref.WeakValueDictionary()
+
+        key = (handler, dbobj)
+        try:
+            return _mylocal.plenaries[key]
+        except KeyError:
+            plenary = handler(dbobj, logger=logger)
+            _mylocal.plenaries[key] = plenary
+            return plenary
 
     def set_logger(self, logger):
         self.logger = logger
@@ -321,7 +361,7 @@ class ObjectPlenary(Plenary):
 
     @classmethod
     def base_dir(cls, dbobj):
-        return os.path.join(_config.get("broker", "builddir"),
+        return os.path.join(cls.config.get("broker", "builddir"),
                             "domains", dbobj.branch.name, "profiles")
 
     @classmethod
@@ -329,7 +369,7 @@ class ObjectPlenary(Plenary):
         # loadpath is interpreted differently for object templates, it's not
         # parth of the full path
         return "%s/%s%s" % (cls.base_dir(dbobj), cls.template_name(dbobj),
-                            TEMPLATE_EXTENSION)
+                            cls.TEMPLATE_EXTENSION)
 
     def get_key(self, exclusive=True):
         if not exclusive:
@@ -403,7 +443,7 @@ class ObjectPlenary(Plenary):
                 remove_file(os.path.join(self.config.get("broker",
                                                          "quattordir"),
                                          "objects",
-                                         self.old_name + TEMPLATE_EXTENSION),
+                                         self.old_name + self.TEMPLATE_EXTENSION),
                             logger=self.logger)
         except:
             if not locked:
@@ -463,8 +503,9 @@ class PlenaryCollection(object):
 
     def __str__(self):
         """For debug output."""
-        return "PlenaryCollection(%s)" % ", ".join([str(plenary) for plenary
-                                                    in self.plenaries])
+        return "%s(%s)" % (self.__class__.__name__,
+                           ", ".join([str(plenary)
+                                      for plenary in self.plenaries]))
 
     def __iter__(self):
         for plen in self.plenaries:
@@ -570,3 +611,25 @@ class TemplateFormatter(ObjectFormatter):
                                                   'aquilon.worker.formats.formatters '
                                                   'import shift'],
                                          default_filters=['unicode', 'rstrip'])
+
+
+def add_location_info(lines, dblocation, prefix=""):
+    if dblocation.continent:
+        pan_assign(lines, prefix + "sysloc/continent", dblocation.continent.name)
+    if dblocation.city:
+        pan_assign(lines, prefix + "sysloc/city", dblocation.city.name)
+    if dblocation.building:
+        pan_assign(lines, prefix + "sysloc/building", dblocation.building.name)
+    # FIXME: add hub?
+    if dblocation.campus:
+        pan_assign(lines, prefix + "sysloc/campus", dblocation.campus.name)
+    if dblocation.bunker:
+        pan_assign(lines, prefix + "sysloc/bunker", dblocation.bunker.name)
+    if dblocation.rack:
+        pan_assign(lines, prefix + "rack/name", dblocation.rack.name)
+        if dblocation.rack_row:
+            pan_assign(lines, prefix + "rack/row", dblocation.rack_row)
+        if dblocation.rack_column:
+            pan_assign(lines, prefix + "rack/column", dblocation.rack_column)
+    if dblocation.room:
+        pan_assign(lines, prefix + "rack/room", dblocation.room.name)

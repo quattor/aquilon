@@ -692,9 +692,7 @@ class TestBrokerCommand(unittest.TestCase):
         domaindir = os.path.join(qdir, 'build', 'xml', domain)
         xmlfile = os.path.join(domaindir, object + self.profile_suffix)
         depfile = os.path.join(domaindir, object + '.dep')
-        builddir = self.config.get('broker', 'builddir')
-        profile = os.path.join(builddir, 'domains', domain, 'profiles',
-                               object + self.template_extension)
+        profile = self.build_profile_name(object, domain=domain)
         for f in [xmlfile, depfile, profile]:
             if want_exist:
                 self.failUnless(os.path.exists(f),

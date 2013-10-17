@@ -16,15 +16,13 @@
 # limitations under the License.
 """Contains the logic for `aq cat --cluster`."""
 
-
 from aquilon.aqdb.model import Cluster, MetaCluster
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.resources import get_resource
-from aquilon.worker.templates.base import Plenary
-from aquilon.worker.templates.cluster import (PlenaryClusterObject,
-                                              PlenaryClusterData)
-from aquilon.worker.templates.metacluster import (PlenaryMetaClusterObject,
-                                                  PlenaryMetaClusterData)
+from aquilon.worker.templates import (Plenary, PlenaryClusterObject,
+                                      PlenaryClusterData,
+                                      PlenaryMetaClusterObject,
+                                      PlenaryMetaClusterData)
 
 
 class CommandCatCluster(BrokerCommand):
@@ -39,14 +37,16 @@ class CommandCatCluster(BrokerCommand):
         else:
             if isinstance(dbcluster, MetaCluster):
                 if data:
-                    plenary_info = PlenaryMetaClusterData(dbcluster, logger=logger)
+                    cls = PlenaryMetaClusterData
                 else:
-                    plenary_info = PlenaryMetaClusterObject(dbcluster, logger=logger)
+                    cls = PlenaryMetaClusterObject
             else:
                 if data:
-                    plenary_info = PlenaryClusterData(dbcluster, logger=logger)
+                    cls = PlenaryClusterData
                 else:
-                    plenary_info = PlenaryClusterObject(dbcluster, logger=logger)
+                    cls = PlenaryClusterObject
+
+            plenary_info = cls.get_plenary(dbcluster, logger=logger)
 
         if generate:
             return plenary_info._generate_content()

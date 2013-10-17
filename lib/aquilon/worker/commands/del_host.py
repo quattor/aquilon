@@ -60,7 +60,7 @@ class CommandDelHost(BrokerCommand):
         ip = dbmachine.primary_ip
 
         for si in dbhost.services_used:
-            plenaries.append(PlenaryServiceInstanceServer(si))
+            plenaries.append(PlenaryServiceInstanceServer.get_plenary(si))
             logger.info("Before deleting {0:l}, removing binding to {1:l}"
                         .format(dbhost, si))
 

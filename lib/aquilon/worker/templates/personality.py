@@ -21,7 +21,6 @@ from collections import defaultdict
 from sqlalchemy.inspection import inspect
 from sqlalchemy.orm import object_session
 
-from aquilon.config import Config
 from aquilon.aqdb.model import Personality, Parameter
 from aquilon.worker.locks import NoLockKey, PlenaryKey
 from aquilon.worker.templates.base import (Plenary, StructurePlenary,
@@ -33,8 +32,6 @@ from aquilon.worker.dbwrappers.parameter import (validate_value,
                                                  get_parameters)
 
 LOGGER = logging.getLogger(__name__)
-
-_config = Config()
 
 
 def string_to_list(data):
@@ -149,17 +146,14 @@ class PlenaryPersonality(PlenaryCollection):
 
         self.dbobj = dbpersonality
 
-        self.plenaries.append(PlenaryPersonalityBase(dbpersonality,
-                                                     logger=logger))
-        self.plenaries.append(PlenaryPersonalityPreFeature(dbpersonality,
-                                                           logger=logger))
-        self.plenaries.append(PlenaryPersonalityPostFeature(dbpersonality,
-                                                            logger=logger))
+        self.plenaries.append(PlenaryPersonalityBase.get_plenary(dbpersonality))
+        self.plenaries.append(PlenaryPersonalityPreFeature.get_plenary(dbpersonality))
+        self.plenaries.append(PlenaryPersonalityPostFeature.get_plenary(dbpersonality))
 
         ## mulitple structure templates for parameters
         for path, values in get_parameters_by_tmpl(dbpersonality).items():
             ptmpl = ParameterTemplate(dbpersonality, path, values)
-            self.plenaries.append(PlenaryPersonalityParameter(ptmpl))
+            self.plenaries.append(PlenaryPersonalityParameter.get_plenary(ptmpl))
 
         self.name = dbpersonality.name
 

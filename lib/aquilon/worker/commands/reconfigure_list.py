@@ -179,12 +179,13 @@ class CommandReconfigureList(BrokerCommand):
             return
 
         plenaries = PlenaryCollection(logger=logger)
+
+        # chooser.plenaries is a PlenaryCollection - this flattens
+        # that top level.
+        plenary_set = set()
         for chooser in choosers:
-            # chooser.plenaries is a PlenaryCollection - this flattens
-            # that top level.
-            # FIXME: this does not really work as expected, as the actual
-            # Plenary objects are different even if they point to the same file
-            plenaries.extend(chooser.plenaries.plenaries)
+            plenary_set.update(chooser.plenaries.plenaries)
+        plenaries.extend(plenary_set)
 
         td = TemplateDomain(dbbranch, dbauthor, logger=logger)
 
@@ -195,11 +196,8 @@ class CommandReconfigureList(BrokerCommand):
         with plenaries.get_key():
             plenaries.stash()
             try:
-                logger.client_info("Writing %s plenary templates.",
-                                   len(plenaries.plenaries))
                 errors = []
                 for template in plenaries.plenaries:
-                    logger.debug("Writing %s", template)
                     try:
                         template.write(locked=True)
                     except IncompleteError, err:
@@ -214,11 +212,9 @@ class CommandReconfigureList(BrokerCommand):
 
                 if errors:
                     raise ArgumentError("\n".join(errors))
-
                 td.compile(session, only=plenaries.object_templates,
                            locked=True)
             except:
-                logger.client_info("Restoring plenary templates.")
                 plenaries.restore_stash()
                 raise
 

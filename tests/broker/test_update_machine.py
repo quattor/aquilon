@@ -123,7 +123,7 @@ class TestUpdateMachine(TestBrokerCommand):
                         "--cpuname", "xeon_3000"])
 
     def testupdateut3c1n4rack(self):
-        # Changing the rack will hit the machine_plenary_will_move logic so we
+        # Changing the rack will change the location of the plenary, so we
         # can test if the host profile gets written
         self.noouttest(["update", "machine", "--machine", "ut3c1n4",
                         "--rack", "ut4"])
@@ -286,13 +286,7 @@ class TestUpdateMachine(TestBrokerCommand):
         self.noouttest(command)
         command = ["update", "machine", "--machine", "ut9s03p9",
                    "--rack", "ut8"]
-        (out, err) = self.successtest(command)
-        self.matchoutput(err,
-                         "Warning: Host server9.aqd-unittest.ms.com is missing "
-                         "the following required services, please run 'aq "
-                         "reconfigure': afs, aqd, bootserver, dns, lemon, "
-                         "ntp, support-group, syslogng.",
-                         command)
+        self.noouttest(command)
 
     def testverifydifferentrack(self):
         command = ["show", "machine", "--machine", "ut9s03p9"]

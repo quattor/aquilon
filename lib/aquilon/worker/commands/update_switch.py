@@ -28,7 +28,6 @@ from aquilon.worker.dbwrappers.hardware_entity import (update_primary_ip,
 from aquilon.worker.dbwrappers.observed_mac import (
     update_or_create_observed_mac)
 from aquilon.worker.dbwrappers.switch import discover_switch
-from aquilon.worker.locks import CompileKey
 from aquilon.worker.processes import DSDBRunner
 from aquilon.worker.templates.base import Plenary
 
@@ -42,6 +41,7 @@ class CommandUpdateSwitch(BrokerCommand):
         dbswitch = Switch.get_unique(session, switch, compel=True)
 
         oldinfo = DSDBRunner.snapshot_hw(dbswitch)
+        plenary = Plenary.get_plenary(dbswitch, logger=logger)
 
         if discover:
             discover_switch(session, logger, self.config, dbswitch, False)
@@ -72,7 +72,6 @@ class CommandUpdateSwitch(BrokerCommand):
         if comments is not None:
             dbswitch.comments = comments
 
-        remove_plenary = None
         if rename_to:
             # Handling alias renaming would not be difficult in AQDB, but the
             # DSDB synchronization would be painful, so don't do that for now.
@@ -81,7 +80,6 @@ class CommandUpdateSwitch(BrokerCommand):
             if dbswitch.primary_name and dbswitch.primary_name.fqdn.aliases:
                 raise ArgumentError("The switch has aliases and it cannot be "
                                     "renamed. Please remove all aliases first.")
-            remove_plenary = Plenary.get_plenary(dbswitch, logger=logger)
             rename_hardware(session, dbswitch, rename_to)
 
         if clear:
@@ -94,27 +92,16 @@ class CommandUpdateSwitch(BrokerCommand):
 
         session.flush()
 
-        switch_plenary = Plenary.get_plenary(dbswitch, logger=logger)
-
-        key = switch_plenary.get_key()
-        if remove_plenary:
-            key = CompileKey.merge([key, remove_plenary.get_key()])
-        with key:
-            if remove_plenary:
-                remove_plenary.stash()
-            switch_plenary.stash()
+        with plenary.get_key():
+            plenary.stash()
             try:
-                if remove_plenary:
-                    remove_plenary.remove(locked=True)
-                switch_plenary.write(locked=True)
+                plenary.write(locked=True)
 
                 dsdb_runner = DSDBRunner(logger=logger)
                 dsdb_runner.update_host(dbswitch, oldinfo)
                 dsdb_runner.commit_or_rollback("Could not update switch in DSDB")
             except:
-                if remove_plenary:
-                    remove_plenary.restore_stash()
-                switch_plenary.restore_stash()
+                plenary.restore_stash()
                 raise
 
         return

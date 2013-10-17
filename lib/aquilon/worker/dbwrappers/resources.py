@@ -110,12 +110,18 @@ def del_resource(session, logger, dbresource, dsdb_callback=None, **arguments):
     holder_plenary = Plenary.get_plenary(holder.holder_object, logger=logger)
     remove_plenary = Plenary.get_plenary(dbresource, logger=logger)
 
+    if isinstance(dbresource, ResourceGroup):
+        # We have to tell the ORM that these are going to be deleted, we can't
+        # just rely on the DB-side cascading
+        del dbresource.resholder.resources[:]
     holder.resources.remove(dbresource)
     session.flush()
 
     with CompileKey.merge([remove_plenary.get_key(), holder_plenary.get_key()]):
         try:
             remove_plenary.stash()
+            holder_plenary.stash()
+
             try:
                 holder_plenary.write(locked=True)
             except IncompleteError:
@@ -145,6 +151,7 @@ def add_resource(session, logger, holder, dbresource, dsdb_callback=None,
 
     with CompileKey.merge([res_plenary.get_key(), holder_plenary.get_key()]):
         try:
+            holder_plenary.stash()
             res_plenary.write(locked=True)
             try:
                 holder_plenary.write(locked=True)
