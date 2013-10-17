@@ -331,8 +331,6 @@ class CommandFlush(BrokerCommand):
                               subqueryload("services_used"),
                               subqueryload("services_provided"),
                               subqueryload("_cluster"),
-                              lazyload("_cluster.host"),
-                              lazyload("_cluster.cluster"),
                               subqueryload("personality"),
                               subqueryload("personality._grns"))
 
@@ -364,7 +362,6 @@ class CommandFlush(BrokerCommand):
                 q = session.query(Cluster)
                 q = q.with_polymorphic('*')
                 q = q.options(subqueryload('_hosts'),
-                              lazyload('_hosts.cluster'),
                               joinedload('_hosts.host'),
                               joinedload('_hosts.host.hardware_entity'),
                               subqueryload('_metacluster'),

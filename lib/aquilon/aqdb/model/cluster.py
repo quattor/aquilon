@@ -554,11 +554,11 @@ class HostClusterMember(Base):
     # of the Cluster and it's links. On the contrary do not have
     # cascade='all' on the forward mapper here, else deletion of
     # clusters and their links also causes deleteion of hosts (BAD)
-    cluster = relation(Cluster, lazy=False, innerjoin=True,
+    cluster = relation(Cluster, innerjoin=True,
                        backref=backref('_hosts', cascade='all, delete-orphan'))
 
     # This is a one-to-one relation, so we need uselist=False on the backref
-    host = relation(Host, lazy=False, innerjoin=True,
+    host = relation(Host, innerjoin=True,
                     backref=backref('_cluster', uselist=False,
                                     cascade='all, delete-orphan'))
 

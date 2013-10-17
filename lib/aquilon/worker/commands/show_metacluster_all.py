@@ -15,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from sqlalchemy.orm import joinedload, subqueryload, lazyload
+from sqlalchemy.orm import joinedload, subqueryload
 
 from aquilon.exceptions_ import NotFoundException
 from aquilon.aqdb.model import MetaCluster
@@ -36,7 +36,6 @@ class CommandShowMetaClusterAll(BrokerCommand):
         q = q.options(subqueryload('_clusters'),
                       joinedload('_clusters.cluster'),
                       subqueryload('_clusters.cluster._hosts'),
-                      lazyload('_clusters.cluster._hosts.cluster'),
                       joinedload('_clusters.cluster._hosts.host'),
                       joinedload('_clusters.cluster._hosts.host.hardware_entity'),
                       joinedload('_clusters.cluster.resholder'),

@@ -16,7 +16,7 @@
 # limitations under the License.
 """Contains the logic for `aq update personality`."""
 
-from sqlalchemy.orm import joinedload, subqueryload, lazyload
+from sqlalchemy.orm import joinedload, subqueryload
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import (Personality, PersonalityESXClusterInfo,
@@ -132,7 +132,6 @@ class CommandUpdatePersonality(BrokerCommand):
         # The validation will touch all member hosts/machines, so it's better to
         # pre-load everything
         q = q.options(subqueryload('_hosts'),
-                      lazyload('_hosts.cluster'),
                       joinedload('_hosts.host'),
                       joinedload('_hosts.host.hardware_entity'),
                       joinedload('resholder'),
