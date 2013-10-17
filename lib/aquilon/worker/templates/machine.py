@@ -19,6 +19,8 @@
 
 import logging
 
+from sqlalchemy.inspection import inspect
+
 from aquilon.aqdb.model import Machine
 from aquilon.worker.locks import CompileKey, NoLockKey
 from aquilon.worker.templates import Plenary, StructurePlenary
@@ -82,28 +84,26 @@ class PlenaryMachineInfo(StructurePlenary):
 
         self.sysloc = loc.sysloc()
 
-    def get_key(self):
-        host = self.dbobj.host
-        container = self.dbobj.vm_container
+    def get_key(self, exclusive=True):
+        if not exclusive:
+            # CompileKey() does not support shared mode
+            raise InternalError("Shared locks are not implemented for machine "
+                                "plenaries.")
+
         # Need a compile key if:
         # - There is a host attached.
         # - This is a virtual machine in a container.
-        if not host and not container:
-            return NoLockKey(logger=self.logger)
-        # We have at least host or container, maybe both...
-        if host:
-            # PlenaryHost is actually a PlenaryCollection... can't call
-            # get_key() directly, so using get_remove_key().
-            ph = Plenary.get_plenary(host, logger=self.logger)
-            host_key = ph.get_remove_key()
-        if container:
-            pc = Plenary.get_plenary(container, self.logger)
-            container_key = pc.get_key()
-        if not container:
-            return host_key
-        if not host:
-            return container_key
-        return CompileKey.merge([host_key, container_key])
+        keylist = [NoLockKey(logger=self.logger)]
+        if not inspect(self.dbobj).deleted:
+            if self.dbobj.host:
+                plenary = Plenary.get_plenary(self.dbobj.host,
+                                              logger=self.logger)
+                keylist.append(plenary.get_key())
+            if self.dbobj.vm_container:
+                plenary = Plenary.get_plenary(self.dbobj.vm_container,
+                                              logger=self.logger)
+                keylist.append(plenary.get_key())
+        return CompileKey.merge(keylist)
 
     def body(self, lines):
         ram = [StructureTemplate("hardware/ram/generic",

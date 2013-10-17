@@ -22,7 +22,8 @@ import os.path
 from aquilon.aqdb.model import (Application, Filesystem, Intervention,
                                 ResourceGroup, Hostlink, RebootSchedule,
                                 RebootIntervention, ServiceAddress,
-                                VirtualMachine, Share, BundleResource)
+                                VirtualMachine, Share, BundleResource, Host)
+from aquilon.worker.locks import CompileKey
 from aquilon.worker.templates import (Plenary, StructurePlenary,
                                       PlenaryCollection, PlenaryMachineInfo)
 from aquilon.worker.templates.panutils import (StructureTemplate, pan_assign,
@@ -32,6 +33,35 @@ LOGGER = logging.getLogger('aquilon.server.templates.resource')
 
 
 class PlenaryResource(StructurePlenary):
+
+    def __init__(self, dbresource, logger=LOGGER):
+        super(PlenaryResource, self).__init__(dbresource, logger=logger)
+
+        holder_object = dbresource.holder.holder_object
+        if isinstance(holder_object, ResourceGroup):
+            holder_object = holder_object.holder.holder_object
+        if isinstance(holder_object, Host):
+            # Avoid circular dependency
+            from aquilon.worker.templates import PlenaryToplevelHost
+
+            self.profile = PlenaryToplevelHost.template_name(holder_object)
+        else:
+            # Avoid circular dependency
+            from aquilon.worker.templates import PlenaryClusterObject
+
+            self.profile = PlenaryClusterObject.template_name(holder_object)
+
+        self.branch = holder_object.branch.name
+
+    def get_key(self, exclusive=True):
+        # Resources are tightly bound to their holder, so always lock the
+        # holder
+        if not exclusive:
+            # CompileKey() does not support shared mode
+            raise InternalError("Shared locks are not implemented for resource "
+                                "plenaries.")
+        return CompileKey(domain=self.branch, profile=self.profile,
+                          logger=self.logger)
 
     @classmethod
     def template_name(cls, dbresource):

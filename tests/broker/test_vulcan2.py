@@ -434,12 +434,12 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
                    "--instance", "ut"]
         err = self.statustest(command)
         self.matchoutput(err, "Metacluster utmc8 adding binding for "
-                         "service vcenter instance ut", command)
+                         "service instance vcenter/ut", command)
 
         command = ["make", "--hostname", "utpgh0.aqd-unittest.ms.com"]
         err = self.statustest(command)
         self.matchoutput(err, "Host utpgh0.aqd-unittest.ms.com adding binding "
-                         "for service vcenter instance ut", command)
+                         "for service instance vcenter/ut", command)
 
         command = ["show", "host", "--hostname", "utpgh0.aqd-unittest.ms.com"]
         out = self.commandtest(command)
@@ -503,7 +503,7 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
         command = ["make", "--hostname", "utpgh0.aqd-unittest.ms.com"]
         err = self.statustest(command)
         self.matchoutput(err, "Host utpgh0.aqd-unittest.ms.com removing "
-                         "binding for service vcenter instance ut", command)
+                         "binding for service instance vcenter/ut", command)
 
         command = ["show", "host", "--hostname", "utpgh0.aqd-unittest.ms.com"]
         out = self.commandtest(command)
@@ -538,7 +538,7 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
                    "--instance", "ut.mc"]
         err = self.statustest(command)
         self.matchoutput(err, "Metacluster utmc8 adding binding for "
-                         "service esx_management_server instance ut.mc", command)
+                         "service instance esx_management_server/ut.mc", command)
 
     def test_170_fail_make_host(self):
         command = ["make", "--hostname", "utpgh0.aqd-unittest.ms.com"]
@@ -565,7 +565,7 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
                    "esx_management_server", "--instance", "ut.mc"]
         err = self.statustest(command)
         self.matchoutput(err, "ESX Cluster utpgcl3 adding binding for service "
-                         "esx_management_server instance ut.mc", command)
+                         "instance esx_management_server/ut.mc", command)
 
         command = ["show_service", "--service=esx_management_server",
                    "--instance=ut.mc"]

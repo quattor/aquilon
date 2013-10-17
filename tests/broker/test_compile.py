@@ -152,9 +152,7 @@ class TestCompile(VerifyNotificationsMixin, TestBrokerCommand):
     def test_405_compileempty(self):
         command = "compile --sandbox %s/out_of_date" % self.user
         (out, err) = self.successtest(command.split(' '))
-        # Funny enough, this message doesn't actually get returned
-        # to the client.
-        #self.matchoutput(out, "no hosts: nothing to do", command)
+        self.matchoutput(err, "No object profiles: nothing to do.", command)
         self.assertEmptyOut(out, command)
         self.matchoutput(err,
                          "Sandbox %s/out_of_date does not contain the "
@@ -299,6 +297,9 @@ class TestCompile(VerifyNotificationsMixin, TestBrokerCommand):
     def test_580_reset_data(self):
         command = ['manage', '--hostname=unittest02.one-nyp.ms.com',
                    '--domain=unittest', '--force']
+        self.successtest(command)
+        # Make sure the build files exist - further tests depend on that
+        command = ['compile', '--hostname=unittest02.one-nyp.ms.com']
         self.successtest(command)
 
     def test_600_aqcompile(self):

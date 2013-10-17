@@ -16,10 +16,9 @@
 # limitations under the License.
 """Contains the logic for `aq compile`."""
 
-
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.templates.domain import TemplateDomain
 from aquilon.worker.dbwrappers.host import hostname_to_host
+from aquilon.worker.templates import Plenary, TemplateDomain
 
 
 class CommandCompileHostname(BrokerCommand):
@@ -36,8 +35,10 @@ class CommandCompileHostname(BrokerCommand):
             pancexclude = r'components/spma/functions'
         dom = TemplateDomain(dbhost.branch, dbhost.sandbox_author,
                              logger=logger)
-        dom.compile(session, only=[dbhost.fqdn],
-                    panc_debug_include=pancinclude,
-                    panc_debug_exclude=pancexclude,
-                    cleandeps=cleandeps)
+        plenary = Plenary.get_plenary(dbhost, logger=logger)
+        with plenary.get_key():
+            dom.compile(session, only=plenary.object_templates,
+                        panc_debug_include=pancinclude,
+                        panc_debug_exclude=pancexclude,
+                        cleandeps=cleandeps, locked=True)
         return

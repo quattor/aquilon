@@ -137,8 +137,7 @@ class CommandCluster(BrokerCommand):
         chooser.set_required()
         chooser.flush_changes()
         # the chooser will include the host plenary
-        with CompileKey.merge([chooser.get_write_key(),
-                               plenaries.get_write_key()]):
+        with CompileKey.merge([chooser.get_key(), plenaries.get_key()]):
             plenaries.stash()
             try:
                 chooser.write_plenary_templates(locked=True)

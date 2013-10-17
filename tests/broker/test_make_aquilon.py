@@ -50,7 +50,7 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
         (out, err) = self.successtest(command)
         self.matchoutput(err,
                          "unittest02.one-nyp.ms.com adding binding for "
-                         "service aqd instance ny-prod",
+                         "service instance aqd/ny-prod",
                          command)
         self.matchclean(err, "removing binding", command)
         self.matchoutput(err, "Index rebuild and notifications will happen in "
@@ -150,15 +150,15 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
         (out, err) = self.successtest(command)
         self.matchoutput(err,
                          "unittest00.one-nyp.ms.com adding binding for "
-                         "service aqd instance ny-prod",
+                         "service instance aqd/ny-prod",
                          command)
         self.matchoutput(err,
                          "unittest00.one-nyp.ms.com adding binding for "
-                         "service dns instance unittest",
+                         "service instance dns/unittest",
                          command)
         self.matchoutput(err,
                          "unittest00.one-nyp.ms.com adding binding for "
-                         "service afs instance q.ny.ms.com",
+                         "service instance afs/q.ny.ms.com",
                          command)
         self.matchclean(err, "removing binding", command)
         self.matchoutput(err, "Index rebuild and notifications will happen in "
@@ -339,10 +339,9 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
             h = hostname.strip()
             self.matchoutput(err, "%s adding binding" % h, command)
         self.matchclean(err, "removing binding", command)
-        self.matchoutput(err, "service chooser1", command)
-        self.matchoutput(err, "service chooser2", command)
-        self.matchoutput(err, "service chooser3", command)
-        self.matchclean(err, "removing binding", command)
+        self.matchoutput(err, "service instance chooser1", command)
+        self.matchoutput(err, "service instance chooser2", command)
+        self.matchoutput(err, "service instance chooser3", command)
 
     def testmissingrequiredservice(self):
         command = ["make", "aquilon",
@@ -356,7 +355,7 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
                    "--hostname", "aquilon92.aqd-unittest.ms.com",
                    "--personality", "badpersonality2"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "Creating service Chooser", command)
+        self.matchoutput(out, "Creating service chooser", command)
         self.matchoutput(out, "Could not find a relevant service map", command)
 
     def testmissingpersonalitytemplate(self):

@@ -120,9 +120,8 @@ class TestCluster(TestBrokerCommand):
                    "--buildstatus=rebuild"]
         (out, err) = self.successtest(command)
         self.matchoutput(err,
-                         "Warning: Host aquilon61.aqd-unittest.ms.com "
-                         "personality esx_server requires cluster membership, "
-                         "please run 'aq cluster'.",
+                         "Warning: Personality vmhost/esx_server requires "
+                         "cluster membership, please run 'aq cluster'.",
                          command)
         command = ["cluster", "--cluster=utecl1",
                    "--personality=vulcan-1g-desktop-prod",

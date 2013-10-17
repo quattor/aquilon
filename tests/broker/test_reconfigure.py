@@ -50,11 +50,11 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
         (out, err) = self.successtest(command)
         self.matchoutput(err,
                          "unittest02.one-nyp.ms.com adding binding for "
-                         "service afs instance q.ny.ms.com",
+                         "service instance afs/q.ny.ms.com",
                          command)
         self.matchoutput(err,
                          "unittest02.one-nyp.ms.com removing binding for "
-                         "service afs instance q.ln.ms.com",
+                         "service instance afs/q.ln.ms.com",
                          command)
         self.matchoutput(err, "Index rebuild and notifications will happen in "
                          "the background.", command)
@@ -392,9 +392,9 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
                    "--hostname", "aquilon87.aqd-unittest.ms.com",
                    "--personality", "inventory"]
         (out, err) = self.successtest(command)
-        self.matchoutput(err, "removing binding for service chooser1", command)
-        self.matchoutput(err, "removing binding for service chooser2", command)
-        self.matchoutput(err, "removing binding for service chooser3", command)
+        self.matchoutput(err, "removing binding for service instance chooser1", command)
+        self.matchoutput(err, "removing binding for service instance chooser2", command)
+        self.matchoutput(err, "removing binding for service instance chooser3", command)
         self.matchclean(err, "adding binding", command)
 
     def testverifyremovebindings(self):
@@ -455,7 +455,7 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
                    "--hostname", "aquilon88.aqd-unittest.ms.com",
                    "--personality", "inventory"]
         (out, err) = self.successtest(command)
-        self.matchoutput(err, "Creating service Chooser", command)
+        self.matchoutput(err, "Creating service chooser", command)
 
     def testreconfigureboundvmhosts(self):
         # This will exercise the cluster-aligned services code,

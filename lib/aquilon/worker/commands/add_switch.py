@@ -81,7 +81,7 @@ class CommandAddSwitch(BrokerCommand):
         session.flush()
 
         plenary = Plenary.get_plenary(dbswitch, logger=logger)
-        with plenary.get_write_key() as key:
+        with plenary.get_key():
             plenary.stash()
             try:
                 plenary.write(locked=True)

@@ -33,7 +33,7 @@ class TestUnbindClient(TestBrokerCommand):
         (out, err) = self.successtest(command)
         self.matchoutput(err,
                          "unittest02.one-nyp.ms.com adding binding for "
-                         "service unmapped instance instance1",
+                         "service instance unmapped/instance1",
                          command)
         self.matchclean(err, "removing binding", command)
 
@@ -43,7 +43,7 @@ class TestUnbindClient(TestBrokerCommand):
         (out, err) = self.successtest(command)
         self.matchoutput(err,
                          "aquilon94.aqd-unittest.ms.com adding binding for "
-                         "service unmapped instance instance1",
+                         "service instance unmapped/instance1",
                          command)
         self.matchclean(err, "removing binding", command)
 

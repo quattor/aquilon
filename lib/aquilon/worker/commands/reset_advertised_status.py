@@ -16,13 +16,10 @@
 # limitations under the License.
 """Contains the logic for `aq reset advertised status --hostname`."""
 
-
 from aquilon.exceptions_ import ArgumentError, IncompleteError
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.host import hostname_to_host
-from aquilon.worker.templates.domain import TemplateDomain
-from aquilon.worker.templates import Plenary
-from aquilon.worker.locks import CompileKey
+from aquilon.worker.templates import Plenary, TemplateDomain
 
 
 class CommandResetAdvertisedStatus(BrokerCommand):
@@ -35,32 +32,25 @@ class CommandResetAdvertisedStatus(BrokerCommand):
         if dbhost.status.name == 'ready':
             raise ArgumentError("{0:l} is in ready status, "
                                 "advertised status can be reset only "
-                                "when host is in non ready state"
+                                "when host is in non ready state."
                                 .format(dbhost))
 
         dbhost.advertise_status = False
 
         session.flush()
 
-        if dbhost.archetype.is_compileable:
-            return self.compile(session, logger, dbhost)
-
-        return
-
-    def compile(self, session, logger, dbhost):
-        """ compile plenary templates """
+        td = TemplateDomain(dbhost.branch, dbhost.sandbox_author, logger=logger)
         plenary = Plenary.get_plenary(dbhost, logger=logger)
         # Force a host lock as pan might overwrite the profile...
-        with CompileKey(domain=dbhost.branch.name, profile=dbhost.fqdn,
-                        logger=logger):
+        with plenary.get_key():
             try:
                 plenary.write(locked=True)
-                td = TemplateDomain(dbhost.branch, dbhost.sandbox_author,
-                                    logger=logger)
-                td.compile(session, only=[dbhost.fqdn], locked=True)
+                td.compile(session, only=plenary.object_templates, locked=True)
             except IncompleteError:
                 raise ArgumentError("Run aq make for host %s first." %
                                     dbhost.fqdn)
             except:
                 plenary.restore_stash()
                 raise
+
+        return

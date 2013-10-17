@@ -132,7 +132,8 @@ class CommandManageHostname(BrokerCommand):
         # We're crossing domains, need to lock everything.
         # XXX: There's a directory per domain.  Do we need subdirectories
         # for different authors for a sandbox?
-        with CompileKey(logger=logger):
+        with CompileKey.merge([CompileKey(domain=dbsource.name, logger=logger),
+                               CompileKey(domain=dbbranch.name, logger=logger)]):
             plenary_host.stash()
             try:
                 plenary_host.remove(locked=True)

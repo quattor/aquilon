@@ -230,8 +230,8 @@ class CommandUpdateMachine(BrokerCommand):
         if remove_plenaries.plenaries and dbmachine.host:
             plenaries.append(Plenary.get_plenary(dbmachine.host))
 
-        with CompileKey.merge([plenaries.get_write_key(),
-                               remove_plenaries.get_remove_key()]):
+        with CompileKey.merge([plenaries.get_key(),
+                               remove_plenaries.get_key()]):
             remove_plenaries.stash()
             try:
                 plenaries.write(locked=True)

@@ -143,8 +143,8 @@ class CommandUpdateCluster(BrokerCommand):
         session.flush()
 
         plenaries.append(Plenary.get_plenary(dbcluster))
-        with CompileKey.merge([plenaries.get_write_key(),
-                               remove_plenaries.get_remove_key()]):
+        with CompileKey.merge([plenaries.get_key(),
+                               remove_plenaries.get_key()]):
             remove_plenaries.stash()
             try:
                 plenaries.write(locked=True)

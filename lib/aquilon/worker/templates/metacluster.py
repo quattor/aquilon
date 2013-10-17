@@ -18,6 +18,8 @@
 from operator import attrgetter
 import logging
 
+from sqlalchemy.inspection import inspect
+
 from aquilon.aqdb.model import MetaCluster
 from aquilon.worker.templates import (Plenary, ObjectPlenary, StructurePlenary,
                                       PlenaryCollection, PlenaryPersonalityBase,
@@ -26,7 +28,7 @@ from aquilon.worker.templates import (Plenary, ObjectPlenary, StructurePlenary,
 from aquilon.worker.templates.panutils import (StructureTemplate, PanValue,
                                                pan_assign, pan_include,
                                                pan_append)
-from aquilon.worker.locks import CompileKey
+from aquilon.worker.locks import CompileKey, PlenaryKey
 
 
 LOGGER = logging.getLogger(__name__)
@@ -49,11 +51,6 @@ class PlenaryMetaClusterData(StructurePlenary):
     @classmethod
     def template_name(cls, dbmetacluster):
         return "clusterdata/" + dbmetacluster.name
-
-    def get_key(self):
-        return CompileKey(domain=self.dbobj.branch.name,
-                          profile=self.template_name(self.dbobj),
-                          logger=self.logger)
 
     def body(self, lines):
         pan_assign(lines, "system/metacluster/name", self.dbobj.name)
@@ -111,10 +108,17 @@ class PlenaryMetaClusterObject(ObjectPlenary):
     def template_name(cls, dbmetacluster):
         return "clusters/" + dbmetacluster.name
 
-    def get_key(self):
-        return CompileKey(domain=self.dbobj.branch.name,
-                          profile=self.template_name(self.dbobj),
-                          logger=self.logger)
+    def get_key(self, exclusive=True):
+        keylist = [super(PlenaryMetaClusterObject, self).get_key(exclusive=exclusive)]
+
+        if not inspect(self.dbobj).deleted:
+            keylist.append(PlenaryKey(exclusive=False,
+                                      personality=self.dbobj.personality,
+                                      logger=self.logger))
+            for si in self.dbobj.service_bindings:
+                keylist.append(PlenaryKey(exclusive=False, service_instance=si,
+                                          logger=self.logger))
+        return CompileKey.merge(keylist)
 
     def body(self, lines):
         pan_include(lines, ["pan/units", "pan/functions"])

@@ -37,7 +37,7 @@ class TestMakeCluster(VerifyNotificationsMixin, TestBrokerCommand):
         (out, err) = self.successtest(command)
         self.matchoutput(err,
                          "ESX Cluster utecl1 adding binding for "
-                         "service esx_management_server",
+                         "service instance esx_management_server",
                          command)
         self.matchclean(err, "removing binding", command)
         self.matchoutput(err, "Index rebuild and notifications will happen in "
@@ -130,7 +130,7 @@ class TestMakeCluster(VerifyNotificationsMixin, TestBrokerCommand):
         (out, err) = self.successtest(command)
         self.matchoutput(err,
                          "ESX Cluster utecl2 adding binding for "
-                         "service esx_management_server",
+                         "service instance esx_management_server",
                          command)
         self.matchclean(err, "removing binding", command)
         self.matchoutput(err, "Index rebuild and notifications will happen in "

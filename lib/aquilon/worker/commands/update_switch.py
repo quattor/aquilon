@@ -96,9 +96,9 @@ class CommandUpdateSwitch(BrokerCommand):
 
         switch_plenary = Plenary.get_plenary(dbswitch, logger=logger)
 
-        key = switch_plenary.get_write_key()
+        key = switch_plenary.get_key()
         if remove_plenary:
-            key = CompileKey.merge([key, remove_plenary.get_remove_key()])
+            key = CompileKey.merge([key, remove_plenary.get_key()])
         with key:
             if remove_plenary:
                 remove_plenary.stash()

@@ -15,15 +15,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from aquilon.exceptions_ import (ArgumentError, PartialError, IncompleteError,
-                                 InternalError, AuthorizationException,
-                                 UnimplementedError)
+from aquilon.exceptions_ import (ArgumentError, InternalError,
+                                 AuthorizationException, UnimplementedError)
 from aquilon.aqdb.model import Feature, Archetype, Personality, Model
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.locks import CompileKey
 from aquilon.worker.commands.deploy import validate_justification
 from aquilon.worker.dbwrappers.feature import add_link
-from aquilon.worker.templates import Plenary
+from aquilon.worker.templates import Plenary, PlenaryCollection
 
 
 class CommandBindFeature(BrokerCommand):
@@ -106,41 +104,13 @@ class CommandBindFeature(BrokerCommand):
         self.do_link(session, logger, dbfeature, params)
         session.flush()
 
-        idx = 0
-        written = 0
-        successful = []
-        failed = []
+        plenaries = PlenaryCollection(logger=logger)
+        for dbpersonality in q:
+            plenaries.append(Plenary.get_plenary(dbpersonality))
 
-        with CompileKey(logger=logger):
-            personalities = q.all()
-
-            for personality in personalities:
-                idx += 1
-                if idx % 1000 == 0:  # pragma: no cover
-                    logger.client_info("Processing personality %d of %d..." %
-                                       (idx, cnt))
-
-                if not personality.archetype.is_compileable:  # pragma: no cover
-                    continue
-
-                try:
-                    plenary_personality = Plenary.get_plenary(personality,
-                                                              logger=logger)
-                    written += plenary_personality.write(locked=True)
-                    successful.append(plenary_personality)
-                except IncompleteError:
-                    pass
-                except Exception, err:  # pragma: no cover
-                    failed.append("{0} failed: {1}".format(personality, err))
-
-            if failed:  # pragma: no cover
-                for plenary in successful:
-                    plenary.restore_stash()
-                raise PartialError([], failed)
-
+        written = plenaries.write()
         logger.client_info("Flushed %d/%d templates." %
-                           (written, written + len(failed)))
-
+                           (written, len(plenaries.plenaries)))
         return
 
     def do_link(self, session, logger, dbfeature, params):

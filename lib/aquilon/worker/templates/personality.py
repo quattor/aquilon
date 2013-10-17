@@ -18,10 +18,12 @@
 import logging
 from collections import defaultdict
 
+from sqlalchemy.inspection import inspect
 from sqlalchemy.orm import object_session
 
 from aquilon.config import Config
 from aquilon.aqdb.model import Personality, Parameter
+from aquilon.worker.locks import NoLockKey, PlenaryKey
 from aquilon.worker.templates.base import (Plenary, StructurePlenary,
                                            TemplateFormatter, PlenaryCollection)
 from aquilon.worker.templates.panutils import (pan_include, pan_variable,
@@ -158,6 +160,15 @@ class PlenaryPersonality(PlenaryCollection):
         for path, values in get_parameters_by_tmpl(dbpersonality).items():
             ptmpl = ParameterTemplate(dbpersonality, path, values)
             self.plenaries.append(PlenaryPersonalityParameter(ptmpl))
+
+        self.name = dbpersonality.name
+
+    def get_key(self, exclusive=True):
+        if inspect(self.dbobj).deleted:
+            return NoLockKey(logger=self.logger)
+        else:
+            return PlenaryKey(personality=self.dbobj, logger=self.logger,
+                              exclusive=exclusive)
 
 Plenary.handlers[Personality] = PlenaryPersonality
 
