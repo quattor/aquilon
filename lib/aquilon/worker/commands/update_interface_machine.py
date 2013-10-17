@@ -24,7 +24,7 @@ from aquilon.worker.dbwrappers.interface import (verify_port_group,
                                                  choose_port_group,
                                                  assign_address,
                                                  rename_interface)
-from aquilon.worker.templates import Plenary
+from aquilon.worker.templates import Plenary, PlenaryCollection
 from aquilon.worker.processes import DSDBRunner
 from aquilon.utils import first_of
 
@@ -141,20 +141,28 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
 
         session.flush()
 
-        plenary_info = Plenary.get_plenary(dbhw_ent, logger=logger)
-        with plenary_info.get_key():
+        plenaries = PlenaryCollection(logger=logger)
+        plenaries.append(Plenary.get_plenary(dbhw_ent))
+        # Interface renaming affects the host and service addresses
+        if dbhw_ent.host:
+            plenaries.append(Plenary.get_plenary(dbhw_ent.host))
+        for addr in dbinterface.assignments:
+            if addr.service_address:
+                plenaries.append(Plenary.get_plenary(addr.service_address))
+
+        with plenaries.get_key():
             try:
-                plenary_info.write(locked=True)
+                plenaries.write(locked=True)
 
                 if dbhw_ent.host and dbhw_ent.host.archetype.name != "aurora":
                     dsdb_runner = DSDBRunner(logger=logger)
                     dsdb_runner.update_host(dbhw_ent, oldinfo)
                     dsdb_runner.commit_or_rollback()
             except AquilonError, err:
-                plenary_info.restore_stash()
+                plenaries.restore_stash()
                 raise ArgumentError(err)
             except:
-                plenary_info.restore_stash()
+                plenaries.restore_stash()
                 raise
 
         for name, value in audit_results:

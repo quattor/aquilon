@@ -76,11 +76,12 @@ def run_domain_compile(options, config):
                 config.get("panc", "template_extension"))
     args.append("-Ddomain.templates=%s" % options.templates)
     args.append("-Ddomain=%s" % options.domain)
-    args.append("-Dpanc.batch.size=%s" % config.get("panc", "batch_size"))
     args.append("-Dgzip.output=%s" % options.compress_output)
 
     if options.batch_size:
         args.append("-Dpanc.batch.size=%d" % options.batch_size)
+    else:
+        args.append("-Dpanc.batch.size=%s" % config.get("panc", "batch_size"))
 
     print "Running %s" % " ".join(args)
     return call(args, env=panc_env, cwd=options.basedir)

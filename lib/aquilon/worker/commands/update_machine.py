@@ -186,7 +186,7 @@ class CommandUpdateMachine(BrokerCommand):
                     continue
                 old_share = dbdisk.share
                 if isinstance(old_share.holder, BundleResource):
-                    resourcegroup = old_share.holder.name
+                    resourcegroup = old_share.holder.holder_name
                 else:
                     resourcegroup = None
                 new_share = find_share(new_holder, resourcegroup, old_share.name,

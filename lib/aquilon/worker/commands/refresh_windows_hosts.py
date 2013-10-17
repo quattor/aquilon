@@ -110,6 +110,8 @@ class CommandRefreshWindowsHosts(BrokerCommand):
                            (dbmachine.label, dbmachine.fqdn))
             if dbmachine.vm_container:
                 containers.add(dbmachine.vm_container)
+            logger.info("Deleting {0:l} (machine {1.label})"
+                        .format(dbhost, dbmachine))
             session.delete(dbhost)
             dbdns_rec = dbmachine.primary_name
             dbmachine.primary_name = None
@@ -205,6 +207,8 @@ class CommandRefreshWindowsHosts(BrokerCommand):
             dbmachine.primary_name = dbdns_rec
             success.append("Added host entry for %s (%s)." %
                            (dbmachine.label, dbdns_rec.fqdn))
+            logger.info("Added {0:l} to machine {1.label}".format(dbhost,
+                                                                  dbmachine))
             if dbmachine.vm_container:
                 containers.add(dbmachine.vm_container)
             session.flush()

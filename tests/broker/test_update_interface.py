@@ -131,7 +131,7 @@ class TestUpdateInterface(TestBrokerCommand):
                          "unittest21.aqd-unittest.ms.com is not a slave.",
                          command)
 
-    def test_160_rename(self):
+    def test_160_rename_switch_if(self):
         command = ["update", "interface", "--switch", "ut3gd1r04",
                    "--interface", "vlan110", "--rename_to", "vlan220"]
         self.dsdb_expect_rename("ut3gd1r04-vlan110.aqd-unittest.ms.com",
@@ -142,6 +142,82 @@ class TestUpdateInterface(TestBrokerCommand):
                                 "vlan110_hsrp", "vlan220_hsrp")
         self.noouttest(command)
         self.dsdb_verify()
+
+    def test_170_add_service_addr(self):
+        ip = self.net["zebra_vip"].usable[5]
+        command = ["add_service_address", "--ip", ip,
+                   "--hostname", "ivirt11.aqd-unittest.ms.com",
+                   "--interfaces", "eth0", "--name", "renametest",
+                   "--service_address", "renametest-ivirt.aqd-unittest.ms.com"]
+        self.dsdb_expect_add("renametest-ivirt.aqd-unittest.ms.com", ip, "le0")
+        self.noouttest(command)
+        self.dsdb_verify()
+
+    def test_171_verify_plenaries(self):
+        command = ["cat", "--data", "--hostname", "ivirt11.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchclean(out, "eth1", command)
+        self.searchoutput(out,
+                          r'"system/network/interfaces" = nlist\(\s*'
+                          r'"eth0", nlist\(',
+                          command)
+
+        command = ["cat", "--machine", "evm20"]
+        out = self.commandtest(command)
+        self.matchclean(out, "eth1", command)
+        self.searchoutput(out,
+                          r'"cards/nic" = nlist\(\s*'
+                          r'"eth0", create\("hardware/nic/utvirt/default",\s*',
+                          command)
+
+        command = ["cat", "--hostname", "ivirt11.aqd-unittest.ms.com",
+                   "--service_address", "renametest"]
+        out = self.commandtest(command)
+        self.searchoutput(out,
+                          r'"interfaces" = list\(\s*"eth0"\s*\);',
+                          command)
+
+    def test_172_rename_host_if(self):
+        command = ["update_interface", "--machine", "evm20",
+                   "--interface", "eth0", "--rename_to", "eth1"]
+        self.dsdb_expect_rename("ivirt11.aqd-unittest.ms.com", iface="eth0",
+                                new_iface="eth1")
+        self.noouttest(command)
+        self.dsdb_verify()
+
+    def test_173_verify_rename(self):
+        command = ["cat", "--data", "--hostname", "ivirt11.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchclean(out, "eth0", command)
+        self.searchoutput(out,
+                          r'"system/network/interfaces" = nlist\(\s*'
+                          r'"eth1", nlist\(',
+                          command)
+
+        command = ["cat", "--machine", "evm20"]
+        out = self.commandtest(command)
+        self.matchclean(out, "eth0", command)
+        self.searchoutput(out,
+                          r'"cards/nic" = nlist\(\s*'
+                          r'"eth1", create\("hardware/nic/utvirt/default",\s*',
+                          command)
+
+        command = ["cat", "--hostname", "ivirt11.aqd-unittest.ms.com",
+                   "--service_address", "renametest"]
+        out = self.commandtest(command)
+        self.searchoutput(out,
+                          r'"interfaces" = list\(\s*"eth1"\s*\);',
+                          command)
+
+    def test_174_cleanup(self):
+        ip = self.net["zebra_vip"].usable[5]
+        self.dsdb_expect_delete(ip)
+        self.noouttest(["del_service_address", "--name", "renametest",
+                        "--hostname", "ivirt11.aqd-unittest.ms.com"])
+        self.dsdb_verify()
+
+        self.notfoundtest(["cat", "--hostname", "ivirt11.aqd-unittest.ms.com",
+                           "--service_address", "renametest"])
 
     def test_200_update_bad_mac(self):
         mac = self.net["verari_eth1"].usable[0].mac

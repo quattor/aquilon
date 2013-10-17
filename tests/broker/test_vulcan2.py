@@ -402,6 +402,33 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
         self.matchoutput(out, "utpgm2", command)
         self.matchclean(out, "utpgs01p0", command)
 
+    def test_120_move_machine_pre(self):
+        command = ["show_machine", "--machine", "utpgm0"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Hosted by: ESX Cluster utpgcl0", command)
+        self.searchoutput(out,
+                          r"Disk: sda 34 GB scsi "
+                          r"\(virtual_disk from test_v2_share\) "
+                          r"\[boot,snapshot\]$",
+                          command)
+
+    def test_121_move_machine(self):
+        # Moving the machine from one cluster to the other exercises the case in
+        # the disk movement logic when the old share is inside a resource group.
+        command = ["update_machine", "--machine", "utpgm0",
+                   "--cluster", "utpgcl1"]
+        self.noouttest(command)
+
+    def test_122_verify_move(self):
+        command = ["show_machine", "--machine", "utpgm0"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Hosted by: ESX Cluster utpgcl1", command)
+        self.searchoutput(out,
+                          r"Disk: sda 34 GB scsi "
+                          r"\(virtual_disk from test_v2_share\) "
+                          r"\[boot,snapshot\]$",
+                          command)
+
 #    metacluster aligned svc tests
     def test_150_addvcenterservices(self):
         command = ["add", "service", "--service", "vcenter", "--instance", "ut"]

@@ -109,6 +109,11 @@ class TestHub(TestBrokerCommand):
         command = "del organization --organization hubtest"
         self.noouttest(command.split(" "))
 
+    def test_250_add_hub_badname(self):
+        command = ["add_hub", "--hub", "foo bar"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "'foo bar' is not a valid value for Hub", command)
+
     def test_300_verify_hub1(self):
         command = "show hub --hub hub1"
         out = self.notfoundtest(command.split(" "))
