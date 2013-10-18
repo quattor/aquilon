@@ -24,6 +24,42 @@ if __name__ == "__main__":
 import unittest2 as unittest
 from brokertest import TestBrokerCommand
 
+instance_servers = {
+    "aqd": {
+        "ny-prod": ["nyaqd1.ms.com"],
+    },
+    "bootserver": {
+        "unittest": ["infra1.aqd-unittest.ms.com"],
+        "one-nyp": ["infra1.one-nyp.ms.com"],
+    },
+    "chooser1": {
+        "ut.a": ["server1.aqd-unittest.ms.com"],
+        "ut.b": ["server2.aqd-unittest.ms.com"],
+        "ut.c": ["server3.aqd-unittest.ms.com"],
+    },
+    "chooser2": {
+        "ut.a": ["server1.aqd-unittest.ms.com"],
+        "ut.c": ["server3.aqd-unittest.ms.com"],
+    },
+    "chooser3": {
+        "ut.a": ["server1.aqd-unittest.ms.com"],
+        "ut.b": ["server2.aqd-unittest.ms.com"],
+    },
+    "dns": {
+        "unittest": ["infra1.aqd-unittest.ms.com", "nyaqd1.ms.com"],
+        "one-nyp": ["infra1.one-nyp.ms.com"],
+    },
+    "lemon": {
+        "ny-prod": ["nyaqd1.ms.com"],
+    },
+    "ntp": {
+        "pa.ny.na": ["nyaqd1.ms.com"],
+    },
+    "syslogng": {
+        "ny-prod": ["nyaqd1.ms.com"],
+    },
+}
+
 
 class TestUnbindServer(TestBrokerCommand):
     def check_last_server_msg(self, out, command, service, instance, host):
@@ -104,109 +140,25 @@ class TestUnbindServer(TestBrokerCommand):
         self.matchclean(out, "unittest02.one-nyp.ms.com", command)
         self.matchclean(out, "unittest00.one-nyp.ms.com", command)
 
-    def testunbinddns(self):
-        command = ["unbind", "server", "--service", "dns", "--all",
-                   "--hostname", "infra1.one-nyp.ms.com"]
-        err = self.statustest(command)
-        self.check_last_server_msg(err, command, "dns", "one-nyp",
-                                   "infra1.one-nyp.ms.com")
-
-        self.noouttest(["unbind", "server",
-                        "--hostname", "infra1.aqd-unittest.ms.com",
-                        "--service", "dns", "--all"])
-
-        command = ["unbind", "server", "--service", "dns", "--all",
-                   "--hostname", "nyaqd1.ms.com"]
-        err = self.statustest(command)
-        self.check_last_server_msg(err, command, "dns", "unittest",
-                                   "nyaqd1.ms.com")
-
-    def testunbindntp(self):
-        command = ["unbind", "server",
-                   "--hostname", "nyaqd1.ms.com", "--service", "ntp", "--all"]
-        err = self.statustest(command)
-        self.check_last_server_msg(err, command, "ntp", "pa.ny.na",
-                                   "nyaqd1.ms.com")
-
-    def testverifyunbindntp(self):
-        command = "show service --service ntp"
-        out = self.commandtest(command.split(" "))
-        self.matchclean(out, "nyaqd1.ms.com", command)
-
-    def testunbindaqd(self):
-        command = ["unbind", "server",
-                   "--hostname", "nyaqd1.ms.com", "--service", "aqd", "--all"]
-        err = self.statustest(command)
-        self.check_last_server_msg(err, command, "aqd", "ny-prod",
-                                   "nyaqd1.ms.com")
-
-    def testverifyunbindaqd(self):
-        command = "show service --service aqd"
-        out = self.commandtest(command.split(" "))
-        self.matchclean(out, "nyaqd1.ms.com", command)
-
-    def testunbindlemon(self):
-        command = ["unbind", "server", "--hostname", "nyaqd1.ms.com",
-                   "--service", "lemon", "--all"]
-        err = self.statustest(command)
-        self.check_last_server_msg(err, command, "lemon", "ny-prod",
-                                   "nyaqd1.ms.com")
-
-    def testverifyunbindlemon(self):
-        command = "show service --service lemon"
-        out = self.commandtest(command.split(" "))
-        self.matchclean(out, "nyaqd1.ms.com", command)
-
-    def testunbindsyslogng(self):
-        command = ["unbind", "server", "--hostname", "nyaqd1.ms.com",
-                   "--service", "syslogng", "--all"]
-        err = self.statustest(command)
-        self.check_last_server_msg(err, command, "syslogng", "ny-prod",
-                                   "nyaqd1.ms.com")
-
-    def testverifyunbindsyslogng(self):
-        command = "show service --service syslogng"
-        out = self.commandtest(command.split(" "))
-        self.matchclean(out, "nyaqd1.ms.com", command)
-
-    def testunbindbootserver(self):
-        command = ["unbind_server",
-                   "--hostname=infra1.aqd-unittest.ms.com",
-                   "--service=bootserver", "--all"]
-        err = self.statustest(command)
-        self.check_last_server_msg(err, command, "bootserver", "unittest",
-                                   "infra1.aqd-unittest.ms.com")
-
-        command = ["unbind_server",
-                   "--hostname=infra1.one-nyp.ms.com",
-                   "--service=bootserver", "--all"]
-        err = self.statustest(command)
-        self.check_last_server_msg(err, command, "bootserver", "one-nyp",
-                                   "infra1.one-nyp.ms.com")
-
-    def testverifyunbindbootserver(self):
-        command = "show service --service bootserver"
-        out = self.commandtest(command.split(" "))
-        self.matchclean(out, "infra1.aqd-unittest.ms.com", command)
-        self.matchclean(out, "infra1.one-nyp.ms.com", command)
-
-    def testunbindchooser(self):
-        for service in ["chooser1", "chooser2", "chooser3"]:
-            for (s, n) in [(1, 'a'), (2, 'b'), (3, 'c')]:
-                if service == 'chooser2' and n == 'b':
-                    continue
-                if service == 'chooser3' and n == 'c':
-                    continue
-                server = "server%d.aqd-unittest.ms.com" % s
-                instance = "ut.%s" % n
-                command = ["unbind", "server", "--hostname", server,
-                           "--service", service, "--instance", instance]
-                self.statustest(command)
-
     def testunbindpollhelper(self):
         service = self.config.get("broker", "poll_helper_service")
         self.statustest(["unbind", "server", "--hostname", "nyaqd1.ms.com",
                          "--service", service, "--instance", "unittest"])
+
+    def testunbindall(self):
+        for service, instances in instance_servers.items():
+            for instance, servers in instances.items():
+                for server in servers:
+                    command = ["unbind_server", "--hostname", server,
+                               "--service", service, "--instance", instance]
+                    self.statustest(command)
+
+            for instance, servers in instances.items():
+                command = ["show_service", "--service", service,
+                           "--instance", instance]
+                out = self.commandtest(command)
+                for server in servers:
+                    self.matchclean(out, server, command)
 
 
 if __name__ == '__main__':

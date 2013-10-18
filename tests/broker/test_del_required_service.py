@@ -24,6 +24,13 @@ if __name__ == "__main__":
 import unittest2 as unittest
 from brokertest import TestBrokerCommand
 
+archetype_required = {
+    'aquilon': ["aqd", "bootserver", "dns", "lemon", "ntp", "support-group",
+                "syslogng"],
+    'esx_cluster': ["esx_management_server"],
+    'vmhost': ["dns", "ntp", "syslogng"],
+}
+
 
 class TestDelRequiredService(TestBrokerCommand):
 
@@ -51,47 +58,17 @@ class TestDelRequiredService(TestBrokerCommand):
         command += " --justification tcm=12345678"
         self.notfoundtest(command.split(" "))
 
-    def testdelrequireddns(self):
-        command = "del required service --service dns --archetype aquilon"
-        command += " --justification tcm=12345678"
-        self.noouttest(command.split(" "))
+    def testdelrequiredall(self):
+        for archetype, services in archetype_required.items():
+            for service in services:
+                self.noouttest(["del_required_service", "--service", service,
+                                "--archetype", archetype,
+                                "--justification", "tcm=12345678"])
 
-    def testdelrequiredaqd(self):
-        command = "del required service --service aqd --archetype aquilon"
-        command += " --justification tcm=12345678"
-        self.noouttest(command.split(" "))
-
-    def testdelrequiredlemon(self):
-        command = "del required service --service lemon --archetype aquilon"
-        command += " --justification tcm=12345678"
-        self.noouttest(command.split(" "))
-
-    def testdelrequiredntp(self):
-        command = "del required service --service ntp --archetype aquilon"
-        command += " --justification tcm=12345678"
-        self.noouttest(command.split(" "))
-
-    def testdelrequiredbootserver(self):
-        command = ["del_required_service",
-                   "--service=bootserver", "--archetype=aquilon",
-                   "--justification", "tcm=12345678"]
-        self.noouttest(command)
-
-    def testdelrequiredsupportgroup(self):
-        command = ["del_required_service",
-                   "--service=support-group", "--archetype=aquilon",
-                   "--justification", "tcm=12345678"]
-        self.noouttest(command)
-
-    def testverifydelrequiredservices(self):
-        command = "show archetype --archetype aquilon"
-        out = self.commandtest(command.split(" "))
-        self.matchclean(out, "Service: afs", command)
-        self.matchclean(out, "Service: aqd", command)
-        self.matchclean(out, "Service: bootserver", command)
-        self.matchclean(out, "Service: dns", command)
-        self.matchclean(out, "Service: ntp", command)
-        self.matchclean(out, "Service: lemon", command)
+            command = ["show_archetype", "--archetype", archetype]
+            out = self.commandtest(command)
+            for service in services:
+                self.matchclean(out, "Service: %s" % service, command)
 
     def testdelrequiredpersonality(self):
         for service in ["chooser1", "chooser2", "chooser3"]:
@@ -123,34 +100,9 @@ class TestDelRequiredService(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchclean(out, "Service: badservice", command)
 
-    def testdelrequiredvmhost(self):
-        command = ["del_required_service",
-                   "--service=dns", "--archetype=vmhost",
-                   "--justification=tcm=12345678"]
-        self.noouttest(command)
-        command = ["del_required_service",
-                   "--service=ntp", "--archetype=vmhost",
-                   "--justification=tcm=12345678"]
-        self.noouttest(command)
-        command = ["del_required_service",
-                   "--service=syslogng", "--archetype=vmhost",
-                   "--justification=tcm=12345678"]
-        self.noouttest(command)
-
-    def testverifydelrequiredvmhost(self):
-        command = "show archetype --archetype vmhost"
-        out = self.commandtest(command.split(" "))
-        self.matchclean(out, "Service: afs", command)
-        self.matchclean(out, "Service: dns", command)
-        self.matchclean(out, "Service: ntp", command)
-        self.matchclean(out, "Service: syslogng", command)
-
     def testdelrequiredesx(self):
         command = ["del_required_service", "--service=esx_management_server",
                    "--archetype=vmhost", "--personality=vulcan-1g-desktop-prod"]
-        self.noouttest(command)
-        command = ["del_required_service", "--service=esx_management_server",
-                   "--archetype=esx_cluster", "--justification", "tcm=12345678"]
         self.noouttest(command)
         command = ["del_required_service", "--service=vmseasoning",
                    "--archetype=vmhost", "--personality=vulcan-1g-desktop-prod"]

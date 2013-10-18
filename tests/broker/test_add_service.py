@@ -26,13 +26,31 @@ from brokertest import TestBrokerCommand
 
 default_services = {
     "aqd": ["ny-prod"],
+
+    # This service will not have any instances...
+    "badservice": [],
+
+    # Testing server affinity - ut.a will be available to all
+    # three of chooser[123], but it will be the only instance
+    # (with corresponding server) in common to all three.
+    "chooser1": ["ut.a", "ut.b", "ut.c"],
+    # Skipping ut.b for chooser2
+    "chooser2": ["ut.a", "ut.c"],
+    # Skipping ut.c for chooser3
+    "chooser3": ["ut.a", "ut.b"],
+
     "dns": ["unittest", "one-nyp"],
     "esx_management_server": ["ut.a", "ut.b", "np"],
     "lemon": ["ny-prod"],
     "ntp": ["pa.ny.na"],
     "support-group": ["ec-service"],
     "syslogng": ["ny-prod"],
+
+    # These service instances will not have any maps...
+    "unmapped": ["instance1"],
+
     "utnotify": ["localhost"],
+    "utsvc": ["utsi1", "utsi2"],
     "vcenter": ["ut", "np"],
     "vmseasoning": ["salt", "pepper", "sugar"],
 }
@@ -137,10 +155,6 @@ class TestAddService(TestBrokerCommand):
         self.matchoutput(out, "Service: bootserver Instance: one-nyp", command)
         self.searchoutput(out, r"^  Comments: Some service comments", command)
 
-    def testaddutsi1instance(self):
-        command = "add service --service utsvc --instance utsi1"
-        self.noouttest(command.split(" "))
-
     def testcatutsvcserverdefault(self):
         command = ["cat", "--service", "utsvc", "--server", "--default"]
         out = self.commandtest(command)
@@ -190,10 +204,6 @@ class TestAddService(TestBrokerCommand):
                          'include { "service/utsvc/server/config" };',
                          command)
 
-    def testaddutsi2instance(self):
-        command = "add service --service utsvc --instance utsi2"
-        self.noouttest(command.split(" "))
-
     def testcatutsi2(self):
         command = "cat --service utsvc --instance utsi2"
         out = self.commandtest(command.split(" "))
@@ -226,77 +236,6 @@ class TestAddService(TestBrokerCommand):
         command = "cat --service utsvc --default"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "template service/utsvc/client/config;", command)
-
-    def testverifyaddutsvcinstances(self):
-        command = "show service --service utsvc"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Service: utsvc Instance: utsi1", command)
-        self.matchoutput(out, "Service: utsvc Instance: utsi2", command)
-
-    def testaddchooser1(self):
-        command = "add service --service chooser1"
-        self.noouttest(command.split(" "))
-
-    def testaddchooser2(self):
-        command = "add service --service chooser2"
-        self.noouttest(command.split(" "))
-
-    def testaddchooser3(self):
-        command = "add service --service chooser3"
-        self.noouttest(command.split(" "))
-
-    # Testing server affinity - ut.a will be available to all
-    # three of chooser[123], but it will be the only instance
-    # (with corresponding server) in common to all three.
-    def testaddchooser1uta(self):
-        command = "add service --service chooser1 --instance ut.a"
-        self.noouttest(command.split(" "))
-
-    def testaddchooser1utb(self):
-        command = "add service --service chooser1 --instance ut.b"
-        self.noouttest(command.split(" "))
-
-    def testaddchooser1utc(self):
-        command = "add service --service chooser1 --instance ut.c"
-        self.noouttest(command.split(" "))
-
-    # Skipping ut.b for chooser2
-    def testaddchooser2uta(self):
-        command = "add service --service chooser2 --instance ut.a"
-        self.noouttest(command.split(" "))
-
-    def testaddchooser2utc(self):
-        command = "add service --service chooser2 --instance ut.c"
-        self.noouttest(command.split(" "))
-
-    # Skipping ut.c for chooser3
-    def testaddchooser3uta(self):
-        command = "add service --service chooser3 --instance ut.a"
-        self.noouttest(command.split(" "))
-
-    def testaddchooser3utb(self):
-        command = "add service --service chooser3 --instance ut.b"
-        self.noouttest(command.split(" "))
-
-    def testaddbadservice(self):
-        # This service will not have any instances...
-        command = "add service --service badservice"
-        self.noouttest(command.split(" "))
-
-    def testverifyaddbadservice(self):
-        command = "show service --service badservice"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Service: badservice", command)
-
-    def testaddunmappedservice(self):
-        # These service instances will not have any maps...
-        command = "add service --service unmapped --instance instance1"
-        self.noouttest(command.split(" "))
-
-    def testverifyunmappedservice(self):
-        command = "show service --service unmapped"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Service: unmapped", command)
 
     def testaddpollhelper(self):
         service = self.config.get("broker", "poll_helper_service")
