@@ -39,7 +39,7 @@ class Model(Base):
     vendor_id = Column(Integer, ForeignKey('vendor.id',
                                            name='model_vendor_fk'),
                        nullable=False)
-    machine_type = Column(AqStr(16), nullable=False)
+    model_type = Column(AqStr(16), nullable=False)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
@@ -57,7 +57,7 @@ class Model(Base):
     @classmethod
     def default_nic_model(cls, session):
         # TODO: make this configurable
-        return cls.get_unique(session, machine_type='nic', name='generic_nic',
+        return cls.get_unique(session, model_type='nic', name='generic_nic',
                               vendor='generic', compel=AquilonError)
 
     @property
@@ -70,4 +70,4 @@ class Model(Base):
 
 model = Model.__table__  # pylint: disable=C0103
 model.info['unique_fields'] = ['name', 'vendor']
-model.info['extra_search_fields'] = ['machine_type']
+model.info['extra_search_fields'] = ['model_type']

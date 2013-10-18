@@ -30,7 +30,7 @@ class CommandShowChassisMissing(BrokerCommand):
         q = q.filter(~exists().where(ChassisSlot.machine_id ==
                                      Machine.machine_id))
         q = q.join(Model)
-        q = q.filter_by(machine_type='blade')
+        q = q.filter_by(model_type='blade')
         q = q.reset_joinpoint()
         q = q.order_by(Machine.label)
         return MissingChassisList(q.all())

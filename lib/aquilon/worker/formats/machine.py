@@ -54,7 +54,7 @@ ObjectFormatter.handlers[MachineInterfacePair] = MachineInterfacePairFormatter()
 
 class MachineFormatter(ObjectFormatter):
     def format_raw(self, machine, indent=""):
-        details = [indent + "%s: %s" % (machine.model.machine_type.capitalize(),
+        details = [indent + "%s: %s" % (machine.model.model_type.capitalize(),
                                         machine.label)]
         if machine.primary_name:
             details.append(indent + "  Primary Name: "

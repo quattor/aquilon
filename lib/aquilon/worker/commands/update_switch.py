@@ -52,7 +52,7 @@ class CommandUpdateSwitch(BrokerCommand):
             model = dbnetdev.model.name
         if model:
             dbmodel = Model.get_unique(session, name=model, vendor=vendor,
-                                       machine_type='switch', compel=True)
+                                       model_type='switch', compel=True)
             dbnetdev.model = dbmodel
 
         dblocation = get_location(session, rack=rack)

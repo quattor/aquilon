@@ -134,7 +134,7 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
                                     .format(dbinterface))
 
             dbmodel = Model.get_unique(session, name=model, vendor=vendor,
-                                       machine_type='nic', compel=True)
+                                       model_type='nic', compel=True)
             dbinterface.model = dbmodel
         if rename_to:
             rename_interface(session, dbinterface, rename_to)

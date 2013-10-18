@@ -35,7 +35,7 @@ class CommandSearchModel(BrokerCommand):
             dbvendor = Vendor.get_unique(session, vendor)
             q = q.filter_by(vendor=dbvendor)
         if machine_type:
-            q = q.filter_by(machine_type=machine_type)
+            q = q.filter_by(model_type=machine_type)
 
         # We need an explicit join for ORDER BY
         q = q.join(Vendor)

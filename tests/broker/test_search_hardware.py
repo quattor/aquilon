@@ -55,7 +55,7 @@ class TestSearchHardware(TestBrokerCommand):
         command = ["search_hardware", "--model=vb1205xm",
                    "--machine_type=virtual_machine"]
         out = self.notfoundtest(command)
-        self.matchoutput(out, "Model vb1205xm, machine_type "
+        self.matchoutput(out, "Model vb1205xm, model_type "
                          "virtual_machine not found.", command)
 
     def testvendoravailable(self):
@@ -79,7 +79,7 @@ class TestSearchHardware(TestBrokerCommand):
     def testmachinetypeunavailable(self):
         command = "search hardware --machine_type machine_type-does-not-exist"
         out = self.notfoundtest(command.split(" "))
-        self.matchoutput(out, "Model machine_type "
+        self.matchoutput(out, "Model model_type "
                          "machine_type-does-not-exist not found.", command)
 
     def testserialavailable(self):

@@ -118,7 +118,7 @@ class CommandUpdateModel(BrokerCommand):
                 dbcpu = Cpu.get_unique(session, compel=True, **cpu_info)
                 if nic_values:
                     dbnic = Model.get_unique(session, compel=True,
-                                             machine_type='nic', **nic_info)
+                                             model_type='nic', **nic_info)
                 else:
                     dbnic = Model.default_nic_model(session)
                 dbmachine_specs = MachineSpecs(model=dbmodel, cpu=dbcpu,

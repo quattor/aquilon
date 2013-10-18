@@ -36,7 +36,7 @@ class CommandAddSwitch(BrokerCommand):
     def render(self, session, logger, switch, label, model, rack, type, ip,
                interface, mac, vendor, serial, comments, **arguments):
         dbmodel = Model.get_unique(session, name=model, vendor=vendor,
-                                   machine_type='switch', compel=True)
+                                   model_type='switch', compel=True)
 
         dblocation = get_location(session, rack=rack)
 

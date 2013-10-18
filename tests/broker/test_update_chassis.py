@@ -60,7 +60,7 @@ class TestUpdateChassis(TestBrokerCommand, VerifyChassisMixin):
                    "--chassis", "ut3c1.aqd-unittest.ms.com"]
         out = self.notfoundtest(command)
         self.matchoutput(out,
-                         "Model uttorswitch, machine_type chassis not found.",
+                         "Model uttorswitch, model_type chassis not found.",
                          command)
 
     def test_200_not_chassis(self):
@@ -79,7 +79,7 @@ class TestUpdateChassis(TestBrokerCommand, VerifyChassisMixin):
         out = self.notfoundtest(command)
         self.matchoutput(out,
                          "Model utchassis, vendor generic, "
-                         "machine_type chassis not found.",
+                         "model_type chassis not found.",
                          command)
 
 

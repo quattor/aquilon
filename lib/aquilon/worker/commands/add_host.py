@@ -99,7 +99,7 @@ class CommandAddHost(BrokerCommand):
                                           version=osversion,
                                           archetype=dbarchetype, compel=True)
 
-        if (dbmachine.model.machine_type == 'aurora_node' and
+        if (dbmachine.model.model_type == 'aurora_node' and
                 dbpersonality.archetype.name != 'aurora'):
             raise ArgumentError("Machines of type aurora_node can only be "
                                 "added with archetype aurora.")

@@ -34,7 +34,7 @@ class TestUpdateSwitch(TestBrokerCommand, VerifySwitchMixin):
         out = self.notfoundtest(command)
         self.matchoutput(out,
                          "Model uttorswitch, vendor generic, "
-                         "machine_type switch not found.",
+                         "model_type switch not found.",
                          command)
 
     def testupdateut3gd1r04(self):

@@ -54,18 +54,18 @@ class CommandAddMachine(BrokerCommand):
         dbmodel = Model.get_unique(session, name=model, vendor=vendor,
                                    compel=True)
 
-        if dbmodel.machine_type not in ['blade', 'rackmount', 'workstation',
+        if dbmodel.model_type not in ['blade', 'rackmount', 'workstation',
                                         'aurora_node', 'virtual_machine']:
             raise ArgumentError("The add_machine command cannot add machines "
                                 "of type %(type)s.  Try 'add %(type)s'." %
-                                {"type": dbmodel.machine_type})
+                                {"type": dbmodel.model_type})
 
         vmholder = None
         if cluster or vmhost:
             if cluster and vmhost:
                 raise ArgumentError("Cluster and vmhost cannot be specified "
                                     "together.")
-            if dbmodel.machine_type != 'virtual_machine':
+            if dbmodel.model_type != 'virtual_machine':
                 raise ArgumentError("{0} is not a virtual machine."
                                     .format(dbmodel))
 
@@ -88,7 +88,7 @@ class CommandAddMachine(BrokerCommand):
                                     "with location {1}.".format(container_loc,
                                                                 dblocation))
             dblocation = container_loc
-        elif dbmodel.machine_type == 'virtual_machine':
+        elif dbmodel.model_type == 'virtual_machine':
             raise ArgumentError("Virtual machines must be assigned to a "
                                 "cluster or a host.")
 

@@ -36,7 +36,7 @@ class TestAddSwitch(TestBrokerCommand, VerifySwitchMixin):
                    "--ip", self.net["tor_net_9"].usable[-1]]
         out = self.notfoundtest(command)
         self.matchoutput(out,
-                         "Model hs21-8853l5u, machine_type switch not found.",
+                         "Model hs21-8853l5u, model_type switch not found.",
                          command)
 
     def testverifyrejectut3gd1r03(self):

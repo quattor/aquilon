@@ -32,7 +32,7 @@ class CommandDelModel(BrokerCommand):
         dbmodel = Model.get_unique(session, name=model, vendor=dbvendor,
                                    compel=True)
 
-        if dbmodel.machine_type == 'nic':
+        if dbmodel.model_type == 'nic':
             q = session.query(Interface)
             q = q.filter_by(model=dbmodel)
             if q.first():
@@ -54,7 +54,7 @@ class CommandDelModel(BrokerCommand):
             # FIXME: Log some details...
             logger.info("Before deleting model %s %s '%s', "
                         "removing machine specifications." %
-                        (dbmodel.machine_type, dbvendor.name, dbmodel.name))
+                        (dbmodel.model_type, dbvendor.name, dbmodel.name))
             session.delete(dbmodel.machine_specs)
         session.delete(dbmodel)
         return

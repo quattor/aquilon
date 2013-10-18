@@ -41,7 +41,7 @@ class CommandAddModel(BrokerCommand):
             raise ArgumentError("The model's machine type must be one of: %s." %
                                 ", ".join(allowed_types))
 
-        dbmodel = Model(name=model, vendor=dbvendor, machine_type=type,
+        dbmodel = Model(name=model, vendor=dbvendor, model_type=type,
                         comments=comments)
         session.add(dbmodel)
         session.flush()
@@ -50,7 +50,7 @@ class CommandAddModel(BrokerCommand):
             dbcpu = Cpu.get_unique(session, name=cpuname, vendor=cpuvendor,
                                    speed=cpuspeed, compel=True)
             if nicmodel or nicvendor:
-                dbnic = Model.get_unique(session, machine_type='nic',
+                dbnic = Model.get_unique(session, model_type='nic',
                                          name=nicmodel, vendor=nicvendor,
                                          compel=True)
             else:

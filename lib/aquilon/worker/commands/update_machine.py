@@ -119,21 +119,21 @@ class CommandUpdateMachine(BrokerCommand):
                 vendor = dbmachine.model.vendor.name
             dbmodel = Model.get_unique(session, name=model, vendor=vendor,
                                        compel=True)
-            if dbmodel.machine_type not in ['blade', 'rackmount',
+            if dbmodel.model_type not in ['blade', 'rackmount',
                                             'workstation', 'aurora_node',
                                             'virtual_machine']:
                 raise ArgumentError("The update_machine command cannot update "
                                     "machines of type %s." %
-                                    dbmodel.machine_type)
+                                    dbmodel.model_type)
             # We probably could do this by forcing either cluster or
             # location data to be available as appropriate, but really?
             # Failing seems reasonable.
-            if dbmodel.machine_type != dbmachine.model.machine_type and \
-               'virtual_machine' in [dbmodel.machine_type,
-                                     dbmachine.model.machine_type]:
+            if dbmodel.model_type != dbmachine.model.model_type and \
+               'virtual_machine' in [dbmodel.model_type,
+                                     dbmachine.model.model_type]:
                 raise ArgumentError("Cannot change machine from %s to %s." %
-                                    (dbmachine.model.machine_type,
-                                     dbmodel.machine_type))
+                                    (dbmachine.model.model_type,
+                                     dbmodel.model_type))
 
             old_nic_model = dbmachine.model.nic_model
             new_nic_model = dbmodel.nic_model

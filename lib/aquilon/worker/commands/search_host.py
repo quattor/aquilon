@@ -87,7 +87,7 @@ class CommandSearchHost(BrokerCommand):
 
         if model or vendor or machine_type:
             subq = Model.get_matching_query(session, name=model, vendor=vendor,
-                                            machine_type=machine_type,
+                                            model_type=machine_type,
                                             compel=True)
             q = q.filter(HardwareEntity.model_id.in_(subq))
 

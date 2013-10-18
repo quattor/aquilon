@@ -38,7 +38,7 @@ class CommandUpdateChassis(BrokerCommand):
             model = dbchassis.model.name
         if model:
             dbmodel = Model.get_unique(session, name=model, vendor=vendor,
-                                       machine_type='chassis', compel=True)
+                                       model_type='chassis', compel=True)
             dbchassis.model = dbmodel
 
         dblocation = get_location(session, rack=rack)

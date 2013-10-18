@@ -247,7 +247,7 @@ def verify_port_group(dbmachine, port_group):
         return None
     session = object_session(dbmachine)
     dbvi = VlanInfo.get_unique(session, port_group=port_group, compel=True)
-    if dbmachine.model.machine_type == "virtual_machine":
+    if dbmachine.model.model_type == "virtual_machine":
         dbnetdev = dbmachine.cluster.network_device
         if not dbnetdev:
             raise ArgumentError("Cannot verify port group availability: no "
@@ -280,7 +280,7 @@ def verify_port_group(dbmachine, port_group):
 
 
 def choose_port_group(session, logger, dbmachine):
-    if dbmachine.model.machine_type != "virtual_machine":
+    if dbmachine.model.model_type != "virtual_machine":
         raise ArgumentError("Can only automatically generate "
                             "portgroup entry for virtual hardware.")
     if not dbmachine.cluster.network_device:
@@ -446,7 +446,7 @@ def get_or_create_interface(session, dbhw_ent, name=None, mac=None,
                             cls._get_class_label(tolower=True))
     else:
         dbmodel = Model.get_unique(session, name=model, vendor=vendor,
-                                   machine_type="nic", compel=True)
+                                   model_type="nic", compel=True)
 
     # VLAN interfaces need some special handling
     if interface_type == 'vlan':
