@@ -233,27 +233,6 @@ class TestAddService(TestBrokerCommand):
         self.matchoutput(out, "Service: utsvc Instance: utsi1", command)
         self.matchoutput(out, "Service: utsvc Instance: utsi2", command)
 
-    def testaddutsvc2(self):
-        command = "add service --service utsvc2"
-        self.noouttest(command.split(" "))
-
-    def testcatutsvc2(self):
-        command = "cat --service utsvc2"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "structure template servicedata/utsvc2/config;",
-                         command)
-
-    def testcatutsvc2default(self):
-        command = "cat --service utsvc2 --default"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "template service/utsvc2/client/config;",
-                         command)
-
-    def testverifyutsvc2(self):
-        command = "show service --service utsvc2"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Service: utsvc2", command)
-
     def testaddchooser1(self):
         command = "add service --service chooser1"
         self.noouttest(command.split(" "))

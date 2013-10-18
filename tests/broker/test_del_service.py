@@ -135,20 +135,6 @@ class TestDelService(TestBrokerCommand):
         self.matchclean(out, "Service: utsvc Instance: utsi1", command)
         self.matchclean(out, "Service: utsvc Instance: utsi2", command)
 
-    def testdelutsvc2(self):
-        command = "del service --service utsvc2"
-        self.noouttest(command.split(" "))
-
-    def testverifydelutsvc2(self):
-        command = "show service --service utsvc2"
-        self.notfoundtest(command.split(" "))
-
-    def tetverifydelutsvc2plenary(self):
-        dir = os.path.join(self.config.get("broker", "plenarydir"),
-                           "service", "utsvc2")
-        self.failIf(os.path.exists(dir),
-                    "Plenary directory '%s' still exists" % dir)
-
     def testdelunmappedservice(self):
         command = "del service --service unmapped --instance instance1"
         self.noouttest(command.split(" "))
