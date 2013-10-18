@@ -33,29 +33,29 @@ from brokertest import TestBrokerCommand
 
 class TestBindServer(TestBrokerCommand):
 
-    def testbindutsi1unittest02(self):
+    def test_100_bind_utsi1_unittest02(self):
         self.noouttest(["bind", "server",
                         "--hostname", "unittest02.one-nyp.ms.com",
                         "--service", "utsvc", "--instance", "utsi1"])
 
     # Test binding multiple servers to a single instance
-    def testbindutsi1unittest00(self):
+    def test_110_bind_utsi1_unittest00(self):
         self.noouttest(["bind", "server",
                         "--hostname", "unittest00.one-nyp.ms.com",
                         "--service", "utsvc", "--instance", "utsi1"])
 
     # Test binding a server to multiple instances
-    def testbindutsi2unittest00(self):
+    def test_130_bind_utsi2_unittest00(self):
         self.noouttest(["bind", "server",
                         "--hostname", "unittest00.one-nyp.ms.com",
                         "--service", "utsvc", "--instance", "utsi2"])
 
-    def testreconfigureunittest00(self):
+    def test_140_reconfigure_unittest00(self):
         command = "reconfigure --hostname unittest00.one-nyp.ms.com"
         (out, err) = self.successtest(command.split(" "))
         self.assertEmptyOut(out, command)
 
-    def testcatutsi1(self):
+    def test_300_cat_utsi1(self):
         command = "cat --service utsvc --instance utsi1"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
@@ -71,13 +71,13 @@ class TestBindServer(TestBrokerCommand):
                           command)
         self.matchclean(out, "server_ips", command)
 
-    def testverifybindutsi1(self):
+    def test_300_show_utsi1(self):
         command = "show service --service utsvc --instance utsi1"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Server: unittest00.one-nyp.ms.com", command)
         self.matchoutput(out, "Server: unittest02.one-nyp.ms.com", command)
 
-    def testverifybindutsi1proto(self):
+    def test_300_show_utsi1_proto(self):
         command = "show service --service utsvc --instance utsi1 --format proto"
         out = self.commandtest(command.split(" "))
         msg = self.parse_service_msg(out, 1)
@@ -98,7 +98,7 @@ class TestBindServer(TestBrokerCommand):
                              "instance utsi1: %s\n" %
                              " ".join(list(servers)))
 
-    def testcatutsi2(self):
+    def test_300_cat_utsi2(self):
         command = "cat --service utsvc --instance utsi2"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
@@ -113,25 +113,25 @@ class TestBindServer(TestBrokerCommand):
                           command)
         self.matchclean(out, "server_ips", command)
 
-    def testverifybindutsi2(self):
+    def test_300_show_utsi2(self):
         command = "show service --service utsvc --instance utsi2"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Server: unittest00.one-nyp.ms.com", command)
 
-    def testverifyshowserviceserver(self):
+    def test_300_show_service_server(self):
         command = "show service --server unittest00.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Server: unittest00.one-nyp.ms.com", command)
         self.matchoutput(out, "Service: utsvc Instance: utsi1", command)
         self.matchoutput(out, "Service: utsvc Instance: utsi2", command)
 
-    def testverifyshowserviceserviceserver(self):
+    def test_300_show_service_name_server(self):
         command = "show service --service utsvc --server unittest02.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Server: unittest02.one-nyp.ms.com", command)
         self.matchoutput(out, "Service: utsvc Instance: utsi1", command)
 
-    def testverifycatunittest00(self):
+    def test_300_cat_unittest00(self):
         command = "cat --hostname unittest00.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "object template unittest00.one-nyp.ms.com",
@@ -143,7 +143,7 @@ class TestBindServer(TestBrokerCommand):
                          'include { "service/utsvc/utsi2/server/config" };',
                          command)
 
-    def testverifyshowunittest00(self):
+    def test_300_show_unittest00(self):
         command = "show host --hostname unittest00.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Primary Name: unittest00.one-nyp.ms.com",
@@ -155,7 +155,7 @@ class TestBindServer(TestBrokerCommand):
                          "Provides Service: utsvc Instance: utsi2",
                          command)
 
-    def testverifyshowunittest00proto(self):
+    def test_300_show_unittest00_proto(self):
         command = "show host --hostname unittest00.one-nyp.ms.com --format proto"
         out = self.commandtest(command.split(" "))
         hostlist = self.parse_hostlist_msg(out, expect=1)

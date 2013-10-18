@@ -31,7 +31,7 @@ class TestUpdateService(TestBrokerCommand):
         command = "update service --service afs --max_clients 2500"
         self.noouttest(command.split(" "))
 
-    def test_500_verifyupdateafsservice(self):
+    def test_105_verifyupdateafsservice(self):
         command = "show service --service afs"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Service: afs", command)
@@ -39,7 +39,7 @@ class TestUpdateService(TestBrokerCommand):
         self.matchoutput(out, "Service: afs Instance: q.ny", command)
         self.matchoutput(out, "Maximum Client Count: Default (2500)", command)
 
-    def test_000_preverifybootserverservice(self):
+    def test_110_preverifybootserverservice(self):
         command = "show service --service bootserver"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Service: bootserver", command)
@@ -49,11 +49,11 @@ class TestUpdateService(TestBrokerCommand):
         self.matchoutput(out, "Maximum Client Count: Default (Unlimited)",
                          command)
 
-    def test_100_updatebootserverservice(self):
+    def test_111_updatebootserverservice(self):
         command = "update service --service bootserver --default"
         self.noouttest(command.split(" "))
 
-    def test_500_verifyupdatebootserverservice(self):
+    def test_115_verifyupdatebootserverservice(self):
         command = "show service --service bootserver"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Service: bootserver", command)
@@ -63,12 +63,12 @@ class TestUpdateService(TestBrokerCommand):
         self.matchoutput(out, "Maximum Client Count: Default (Unlimited)",
                          command)
 
-    def test_600_updatebootserverinstance(self):
+    def test_120_updatebootserverinstance(self):
         command = ["update_service", "--service=bootserver",
                    "--instance=one-nyp", "--max_clients=1000"]
         self.noouttest(command)
 
-    def test_700_verifyupdatebootserverservice(self):
+    def test_125_verifyupdatebootserverservice(self):
         command = "show service --service bootserver"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Service: bootserver", command)
@@ -77,16 +77,16 @@ class TestUpdateService(TestBrokerCommand):
         self.matchoutput(out, "Service: bootserver Instance: one-nyp", command)
         self.matchoutput(out, "Maximum Client Count: 1000", command)
 
-    def test_100_updateutsvc(self):
+    def test_130_updateutsvc(self):
         command = "update service --service utsvc --max_clients 1000"
         self.noouttest(command.split(" "))
 
-    def test_200_updateutsi1(self):
+    def test_131_updateutsi1(self):
         command = ["update_service", "--service=utsvc", "--instance=utsi1",
                    "--max_clients=900"]
         self.noouttest(command)
 
-    def test_500_verifyupdateutsvc(self):
+    def test_132_verifyupdateutsvc(self):
         command = "show service --service utsvc"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Service: utsvc", command)
@@ -96,11 +96,11 @@ class TestUpdateService(TestBrokerCommand):
         self.matchoutput(out, "Service: utsvc Instance: utsi2", command)
         self.matchoutput(out, "Maximum Client Count: Default (1000)", command)
 
-    def test_600_updateutsvc(self):
+    def test_133_updateutsvc(self):
         command = "update service --service utsvc --max_clients 1100"
         self.noouttest(command.split(" "))
 
-    def test_700_verifyupdateutsvc(self):
+    def test_134_verifyupdateutsvc(self):
         command = "show service --service utsvc"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Service: utsvc", command)
@@ -110,11 +110,11 @@ class TestUpdateService(TestBrokerCommand):
         self.matchoutput(out, "Service: utsvc Instance: utsi2", command)
         self.matchoutput(out, "Maximum Client Count: Default (1100)", command)
 
-    def test_800_updateutsvc(self):
+    def test_135_updateutsvc(self):
         command = "update service --service utsvc --instance utsi1 --default"
         self.noouttest(command.split(" "))
 
-    def test_900_verifyupdateutsvc(self):
+    def test_136_verifyupdateutsvc(self):
         command = "show service --service utsvc"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Service: utsvc", command)

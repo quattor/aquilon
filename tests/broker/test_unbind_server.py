@@ -69,7 +69,7 @@ class TestUnbindServer(TestBrokerCommand):
                          (host, service, instance),
                          command)
 
-    def testcheckinitialplenary(self):
+    def test_100_check_initial_plenary(self):
         # This test must use the same regular expressions as
         # testverifycatunittest02() does, to verify that the success of
         # searchclean() is not due to errors in the expressions
@@ -77,7 +77,7 @@ class TestUnbindServer(TestBrokerCommand):
         out = self.commandtest(command)
         self.searchoutput(out, r'/utsvc/[^/]+/server', command)
 
-    def testunbindutsi1unittest02(self):
+    def test_110_unbind_utsi1_unittest02(self):
         command = ["unbind", "server",
                    "--hostname", "unittest02.one-nyp.ms.com",
                    "--service", "utsvc", "--all"]
@@ -93,7 +93,7 @@ class TestUnbindServer(TestBrokerCommand):
     #        "--hostname", "unittest00.one-nyp.ms.com",
     #        "--service", "utsvc", "--instance", "utsi1"])
 
-    def testverifycatutsi1(self):
+    def test_115_verify_cat_utsi1(self):
         command = "cat --service utsvc --instance utsi1"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
@@ -104,18 +104,18 @@ class TestUnbindServer(TestBrokerCommand):
         self.matchoutput(out, '"instance" = "utsi1";', command)
         self.searchoutput(out, r'"servers" = list\(\s*\);', command)
 
-    def testverifycatunittest02(self):
+    def test_115_verify_cat_unittest02(self):
         command = ["cat", "--hostname", "unittest02.one-nyp.ms.com"]
         out = self.commandtest(command)
         self.searchclean(out, r'/utsvc/[^/]+/server', command)
 
-    def testverifybindutsi1(self):
+    def test_115_verify_show_utsi1(self):
         command = "show service --service utsvc --instance utsi1"
         out = self.commandtest(command.split(" "))
         self.matchclean(out, "unittest02.one-nyp.ms.com", command)
         self.matchclean(out, "unittest00.one-nyp.ms.com", command)
 
-    def testunbindutsi2unittest00(self):
+    def test_120_unbind_utsi2_unittest00(self):
         command = ["unbind", "server",
                    "--hostname", "unittest00.one-nyp.ms.com",
                    "--service", "utsvc", "--instance", "utsi2"]
@@ -123,7 +123,7 @@ class TestUnbindServer(TestBrokerCommand):
         self.check_last_server_msg(err, command, "utsvc", "utsi2",
                                    "unittest00.one-nyp.ms.com")
 
-    def testverifycatutsi2(self):
+    def test_125_verify_cat_utsi2(self):
         command = "cat --service utsvc --instance utsi2"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
@@ -134,18 +134,18 @@ class TestUnbindServer(TestBrokerCommand):
         self.matchoutput(out, '"instance" = "utsi2";', command)
         self.searchoutput(out, r'"servers" = list\(\s*\);', command)
 
-    def testverifybindutsi2(self):
+    def test_125_verify_show_utsi2(self):
         command = "show service --service utsvc --instance utsi2"
         out = self.commandtest(command.split(" "))
         self.matchclean(out, "unittest02.one-nyp.ms.com", command)
         self.matchclean(out, "unittest00.one-nyp.ms.com", command)
 
-    def testunbindpollhelper(self):
+    def test_130_unbind_pollhelper(self):
         service = self.config.get("broker", "poll_helper_service")
         self.statustest(["unbind", "server", "--hostname", "nyaqd1.ms.com",
                          "--service", service, "--instance", "unittest"])
 
-    def testunbindall(self):
+    def test_150_unbind_all(self):
         for service, instances in instance_servers.items():
             for instance, servers in instances.items():
                 for server in servers:
