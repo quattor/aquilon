@@ -52,16 +52,17 @@ class TemplateDomain(object):
             dirs.append(os.path.join(config.get("broker", "domainsdir"),
                                      self.domain.name))
 
-        dirs.append(os.path.join(config.get("broker", "builddir"),
+        dirs.append(os.path.join(config.get("broker", "cfgdir"),
                                  "domains", self.domain.name))
 
         # This is a bit redundant. When creating the directories, the "clusters"
         # subdir would be enough; when removing them, the base dir would be
         # enough. Having both does not hurt and does not need such extra logic.
         dirs.append(os.path.join(config.get("broker", "quattordir"),
-                                 "build", "xml", self.domain.name))
+                                 "build", self.domain.name))
         dirs.append(os.path.join(config.get("broker", "quattordir"),
-                                 "build", "xml", self.domain.name, "clusters"))
+                                 "build", self.domain.name, "clusters"))
+
         return dirs
 
     def compile(self, session, only=None, locked=False,

@@ -361,7 +361,7 @@ class ObjectPlenary(Plenary):
 
     @classmethod
     def base_dir(cls, dbobj):
-        return os.path.join(cls.config.get("broker", "builddir"),
+        return os.path.join(cls.config.get("broker", "cfgdir"),
                             "domains", dbobj.branch.name, "profiles")
 
     @classmethod
@@ -419,8 +419,7 @@ class ObjectPlenary(Plenary):
             # .xml.dep is used up to and including panc 9.2
             # .dep is used by panc 9.4 and higher
             basename = os.path.join(self.config.get("broker", "quattordir"),
-                                    "build", "xml", self.old_branch,
-                                    self.old_name)
+                                    "build", self.old_branch, self.old_name)
             for ext in (".xml", ".xml.gz", ".xml.dep", ".dep"):
                 remove_file(basename + ext, logger=self.logger)
             try:

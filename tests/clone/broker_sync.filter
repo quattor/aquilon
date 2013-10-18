@@ -1,9 +1,8 @@
 # These are meant to be relative to the base dir, i.e. /var/quattor
-# Just picking up the /build/xml directory structure, not the files!
+# Just picking up the /build directory structure, not the files!
 + /build/
-+ /build/xml/
-+ /build/xml/*/
-+ /build/xml/*/clusters/
++ /build/*/
++ /build/*/clusters/
 + /cfg/
 + /cfg/domains/
 + /cfg/domains/**

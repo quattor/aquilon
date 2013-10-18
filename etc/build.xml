@@ -34,8 +34,8 @@
 	<property name="domain" value="ny-prod" />
 	<!-- cfg/domains/$domain/profiles/*.tpl = input host profiles -->
 	<property name="source.profiles" location="${basedir}/cfg/domains/${domain}/profiles" />
-	<!-- plenary = 'complete' supplemental broker-generated templates -->
-	<property name="plenary" location="${basedir}/plenary" />
+	<!-- cfg/plenary = 'complete' supplemental broker-generated templates -->
+	<property name="plenary" location="${basedir}/cfg/plenary" />
 	<!-- swrep = auto-generated templates for the rpms -->
 	<property name="swrep" location="${basedir}/swrep" />
 	<!-- templates/${domain} = domain template source repo -->
@@ -43,8 +43,8 @@
 
 	<!-- objects/*.tpl = working object tpls, copied from source.profiles -->
 	<property name="global.profiles" location="${basedir}/objects" />
-	<!-- build/xml/$domain/* = (pan deps and pan output xml files) -->
-	<property name="compiled.profiles" location="${basedir}/build/xml/${domain}" />
+	<!-- build/$domain/* = (pan deps and pan output files) -->
+	<property name="compiled.profiles" location="${basedir}/build/${domain}" />
 	<!-- web/htdocs/profiles = compiled profiles to be served to clients -->
 	<property name="distributed.profiles" location="${basedir}/web/htdocs/profiles" />
 
