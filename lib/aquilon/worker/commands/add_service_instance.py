@@ -16,15 +16,28 @@
 # limitations under the License.
 """Contains a wrapper for `aq add service --instance`."""
 
-
+from aquilon.aqdb.model import Service, ServiceInstance
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.commands.add_service import CommandAddService
+from aquilon.worker.templates.base import Plenary, PlenaryCollection
 
 
-class CommandAddServiceInstance(CommandAddService):
-    """ CommandAddService already has all the necessary logic to
-        handle the extra instance parameter.
-
-    """
+class CommandAddServiceInstance(BrokerCommand):
 
     required_parameters = ["service", "instance"]
+
+    def render(self, session, logger, service, instance, comments,
+               **arguments):
+        dbservice = Service.get_unique(session, service, compel=True)
+        ServiceInstance.get_unique(session, service=dbservice, name=instance,
+                                   preclude=True)
+
+        dbsi = ServiceInstance(service=dbservice, name=instance,
+                               comments=comments)
+        session.add(dbsi)
+
+        plenaries = PlenaryCollection(logger=logger)
+        plenaries.append(Plenary.get_plenary(dbsi))
+
+        session.flush()
+        plenaries.write()
+        return

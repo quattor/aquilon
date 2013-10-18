@@ -105,7 +105,17 @@ class TestAddService(TestBrokerCommand):
                                  "Service: %s Instance: %s" % (service, instance),
                                  command)
 
-    def test_110_add_afs_instance(self):
+    def test_110_add_instance_no_service(self):
+        command = ["add", "service", "--service", "afs",
+                   "--instance", "q.ny.ms.com",
+                   "--comments", "Some instance comments"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out, "Service afs not found.", command)
+
+    def test_111_add_afs(self):
+        self.noouttest(["add_service", "--service", "afs"])
+
+    def test_112_add_afs_instance(self):
         command = ["add", "service", "--service", "afs",
                    "--instance", "q.ny.ms.com",
                    "--comments", "Some instance comments"]
@@ -128,6 +138,8 @@ class TestAddService(TestBrokerCommand):
         self.noouttest(command)
 
     def test_130_add_netmappers_instances(self):
+        self.noouttest(["add_service", "--service", "netmap"])
+
         command = ["add", "service", "--service", "netmap",
                    "--instance", "q.ny.ms.com",
                    "--comments", "For location based maps"]
@@ -161,11 +173,15 @@ class TestAddService(TestBrokerCommand):
 
     def test_200_add_duplicate_service(self):
         command = "add service --service afs"
-        self.badrequesttest(command.split(" "))
+        out = self.badrequesttest(command.split(" "))
+        self.matchoutput(out, "Service afs already exists.", command)
 
     def test_200_add_duplicate_instance(self):
         command = "add service --service afs --instance q.ny.ms.com"
-        self.badrequesttest(command.split(" "))
+        out = self.badrequesttest(command.split(" "))
+        self.matchoutput(out,
+                         "Service Instance q.ny.ms.com, service afs already exists.",
+                         command)
 
     def test_300_show_afs(self):
         command = "show service --service afs"

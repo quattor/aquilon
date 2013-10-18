@@ -319,11 +319,15 @@ class TestSearchHost(TestBrokerCommand):
 
     def testserverofservice00(self):
         """search host by server of service provided """
+        self.noouttest(["add_service", "--service", "foo"])
+
         self.noouttest(["add", "service", "--service", "foo",
                         "--instance", "fooinst1"])
 
         self.noouttest(["add", "service", "--service", "foo",
                         "--instance", "fooinst2"])
+
+        self.noouttest(["add_service", "--service", "baa"])
 
         self.noouttest(["add", "service", "--service", "baa",
                         "--instance", "fooinst1"])
