@@ -44,6 +44,17 @@ class TestBindServer(TestBrokerCommand):
                         "--hostname", "unittest00.one-nyp.ms.com",
                         "--service", "utsvc", "--instance", "utsi1"])
 
+    # Test binding a server to multiple instances
+    def testbindutsi2unittest00(self):
+        self.noouttest(["bind", "server",
+                        "--hostname", "unittest00.one-nyp.ms.com",
+                        "--service", "utsvc", "--instance", "utsi2"])
+
+    def testreconfigureunittest00(self):
+        command = "reconfigure --hostname unittest00.one-nyp.ms.com"
+        (out, err) = self.successtest(command.split(" "))
+        self.assertEmptyOut(out, command)
+
     def testcatutsi1(self):
         command = "cat --service utsvc --instance utsi1"
         out = self.commandtest(command.split(" "))
@@ -87,12 +98,6 @@ class TestBindServer(TestBrokerCommand):
                              "instance utsi1: %s\n" %
                              " ".join(list(servers)))
 
-    # Test binding a server to multiple instances
-    def testbindutsi2unittest00(self):
-        self.noouttest(["bind", "server",
-                        "--hostname", "unittest00.one-nyp.ms.com",
-                        "--service", "utsvc", "--instance", "utsi2"])
-
     def testcatutsi2(self):
         command = "cat --service utsvc --instance utsi2"
         out = self.commandtest(command.split(" "))
@@ -107,11 +112,6 @@ class TestBindServer(TestBrokerCommand):
                           r'"unittest00.one-nyp.ms.com"\s*\);',
                           command)
         self.matchclean(out, "server_ips", command)
-
-    def testreconfigureunittest00(self):
-        command = "reconfigure --hostname unittest00.one-nyp.ms.com"
-        (out, err) = self.successtest(command.split(" "))
-        self.assertEmptyOut(out, command)
 
     def testverifybindutsi2(self):
         command = "show service --service utsvc --instance utsi2"

@@ -80,6 +80,10 @@ class TestAddService(TestBrokerCommand):
                    "--comments", "Some instance comments"]
         self.noouttest(command)
 
+    def testaddextraafsinstance(self):
+        command = "add service --service afs --instance q.ln.ms.com"
+        self.noouttest(command.split(" "))
+
     def testaddafsbynetinstance(self):
         command = ["add", "service", "--service", "afs",
                    "--instance", "afs-by-net",
@@ -108,6 +112,22 @@ class TestAddService(TestBrokerCommand):
                    "--comments", "For network based maps"]
         self.noouttest(command)
 
+    def testaddbootserver(self):
+        """ add service without instance first """
+        command = ["add", "service", "--service", "bootserver",
+                   "--comments", "Some service comments"]
+        self.noouttest(command)
+
+    def testaddbootserverinstance(self):
+        self.noouttest(["add_service", "--service", "bootserver", "--instance", "unittest"])
+        self.noouttest(["add_service", "--service", "bootserver", "--instance", "one-nyp"])
+
+    def testaddpollhelper(self):
+        service = self.config.get("broker", "poll_helper_service")
+        self.noouttest(["add", "service", "--service", service])
+        self.noouttest(["add", "service", "--service", service,
+                        "--instance", "unittest"])
+
     def testaddduplicateservice(self):
         command = "add service --service afs"
         self.badrequesttest(command.split(" "))
@@ -120,33 +140,11 @@ class TestAddService(TestBrokerCommand):
         command = "show service --service afs"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Service: afs Instance: q.ny.ms.com", command)
-
-    def testverifiyaddafsbynetinstance(self):
-        command = "show service --service afs"
-        out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Service: afs Instance: afs-by-net", command)
-
-    def testaddextraafsinstance(self):
-        command = "add service --service afs --instance q.ln.ms.com"
-        self.noouttest(command.split(" "))
-
-    def testverifyaddextraafsinstance(self):
-        command = "show service --service afs"
-        out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Service: afs Instance: q.ln.ms.com", command)
         # Make sure the right object got the comments
         self.matchoutput(out, "    Comments: Some instance comments", command)
         self.searchclean(out, r"^  Comments:", command)
-
-    def testaddbootserver(self):
-        """ add service without instance first """
-        command = ["add", "service", "--service", "bootserver",
-                   "--comments", "Some service comments"]
-        self.noouttest(command)
-
-    def testaddbootserverinstance(self):
-        self.noouttest(["add_service", "--service", "bootserver", "--instance", "unittest"])
-        self.noouttest(["add_service", "--service", "bootserver", "--instance", "one-nyp"])
 
     def testverifyaddbootserverinstance(self):
         command = "show service --service bootserver"
@@ -236,12 +234,6 @@ class TestAddService(TestBrokerCommand):
         command = "cat --service utsvc --default"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "template service/utsvc/client/config;", command)
-
-    def testaddpollhelper(self):
-        service = self.config.get("broker", "poll_helper_service")
-        self.noouttest(["add", "service", "--service", service])
-        self.noouttest(["add", "service", "--service", service,
-                        "--instance", "unittest"])
 
 
 if __name__ == '__main__':

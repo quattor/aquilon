@@ -53,11 +53,6 @@ class TestDelRequiredService(TestBrokerCommand):
                    "--personality=eaitools", "--archetype=aquilon"]
         self.noouttest(command)
 
-    def testdelrequiredafsagain(self):
-        command = "del required service --service afs --archetype aquilon"
-        command += " --justification tcm=12345678"
-        self.notfoundtest(command.split(" "))
-
     def testdelrequiredall(self):
         for archetype, services in archetype_required.items():
             for service in services:
@@ -75,11 +70,6 @@ class TestDelRequiredService(TestBrokerCommand):
             command = ["del_required_service", "--service", service,
                        "--archetype=aquilon", "--personality=unixeng-test"]
             self.noouttest(command)
-
-    def testdelrequiredpersonalityagain(self):
-        command = ["del", "required", "service", "--service", "chooser1",
-                   "--archetype=aquilon", "--personality=unixeng-test"]
-        self.notfoundtest(command)
 
     def testverifydelrequiredpersonality(self):
         command = ["show_personality", "--archetype=aquilon",
@@ -118,6 +108,16 @@ class TestDelRequiredService(TestBrokerCommand):
                    "--archetype=esx_cluster"]
         out = self.commandtest(command)
         self.matchclean(out, "Service: esx_management_server", command)
+
+    def testdelrequiredafsagain(self):
+        command = "del required service --service afs --archetype aquilon"
+        command += " --justification tcm=12345678"
+        self.notfoundtest(command.split(" "))
+
+    def testdelrequiredpersonalityagain(self):
+        command = ["del", "required", "service", "--service", "chooser1",
+                   "--archetype=aquilon", "--personality=unixeng-test"]
+        self.notfoundtest(command)
 
 
 if __name__ == '__main__':
