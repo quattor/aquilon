@@ -22,7 +22,7 @@ from aquilon.aqdb.model import Service
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.host import hostname_to_host
 from aquilon.worker.dbwrappers.service_instance import get_service_instance
-from aquilon.worker.templates.base import Plenary
+from aquilon.worker.templates.base import Plenary, PlenaryCollection
 
 
 class CommandBindServer(BrokerCommand):
@@ -38,17 +38,19 @@ class CommandBindServer(BrokerCommand):
             raise ArgumentError("Server {0} is already bound to {1:l}."
                                 .format(hostname, dbinstance))
 
+        plenaries = PlenaryCollection(logger=logger)
+        plenaries.append(Plenary.get_plenary(dbinstance))
+        plenaries.append(Plenary.get_plenary(dbhost))
+
         # The ordering_list will manage the position for us
         if position is not None:
             dbinstance.server_hosts.insert(position, dbhost)
         else:
             dbinstance.server_hosts.append(dbhost)
+        session.expire(dbhost, ['_services_provided'])
 
         session.flush()
 
-        plenary_info = Plenary.get_plenary(dbinstance, logger=logger)
-        plenary_info.write()
-
-        # XXX: Need to recompile...
+        plenaries.write()
 
         return

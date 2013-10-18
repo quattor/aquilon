@@ -45,22 +45,15 @@ class TestBindServer(TestBrokerCommand):
                         "--service", "utsvc", "--instance", "utsi1"])
 
     def test_120_bind_utsi1_server1(self):
-        self.noouttest(["bind", "server", "--position", 1,
-                        "--hostname", "server1.aqd-unittest.ms.com",
-                        "--service", "utsvc", "--instance", "utsi1"])
+        self.statustest(["bind", "server", "--position", 1,
+                         "--hostname", "server1.aqd-unittest.ms.com",
+                         "--service", "utsvc", "--instance", "utsi1"])
 
     # Test binding a server to multiple instances
     def test_130_bind_utsi2_unittest00(self):
         self.noouttest(["bind", "server",
                         "--hostname", "unittest00.one-nyp.ms.com",
                         "--service", "utsvc", "--instance", "utsi2"])
-
-    # TODO: bind_server does not update the server's plenary, so we have to
-    # force that
-    def test_140_reconfigure_unittest00(self):
-        command = "reconfigure --hostname unittest00.one-nyp.ms.com"
-        (out, err) = self.successtest(command.split(" "))
-        self.assertEmptyOut(out, command)
 
     def test_200_bind_utsi2_unittest00_again(self):
         command = ["bind", "server", "--hostname", "unittest00.one-nyp.ms.com",

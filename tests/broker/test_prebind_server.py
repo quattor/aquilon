@@ -74,7 +74,17 @@ class TestPrebindServer(TestBrokerCommand):
                 for server in servers:
                     command = ["bind_server", "--hostname", server,
                                "--service", service, "--instance", instance]
-                    self.noouttest(command)
+                    out = self.statustest(command)
+                    # This test runs early when none of the servers are
+                    # configured yet, so bind_server will complain - but only if
+                    # the server is of a compileable archetype.
+                    if re.match(r"[^.]+\.ms\.com$", server):
+                        self.assertEmptyErr(out, command)
+                    else:
+                        self.matchoutput(out, "Warning: Host %s is missing the "
+                                         "following required services" % server,
+                                         command)
+
                     server_provides[server][service].append(instance)
 
                 command = ["show_service", "--service", service,

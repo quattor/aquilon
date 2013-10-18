@@ -40,8 +40,11 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
                         "--domain", "unittest", "--buildstatus", "ready",
                         "--archetype", "aquilon",
                         "--personality", "compileserver"])
-        self.noouttest(["bind", "server", "--service", "utnotify",
-                        "--instance", "localhost", "--hostname", hostname])
+        command = ["bind", "server", "--service", "utnotify",
+                   "--instance", "localhost", "--hostname", hostname]
+        out = self.statustest(command)
+        self.matchoutput(out, "Warning: Host %s is missing the following "
+                         "required services" % hostname, command)
 
     def testaddunittest02(self):
         ip = self.net["unknown0"].usable[0]
