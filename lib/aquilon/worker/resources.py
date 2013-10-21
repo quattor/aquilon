@@ -189,9 +189,9 @@ class ResponsePage(resource.Resource):
                                                     **arguments))
         if broker_command.defer_to_thread:
             d = d.addCallback(lambda arguments: threads.deferToThread(
-                broker_command.render, **arguments))
+                broker_command.invoke_render, **arguments))
         else:
-            d = d.addCallback(lambda arguments: broker_command.render(**arguments))
+            d = d.addCallback(lambda arguments: broker_command.invoke_render(**arguments))
         d = d.addCallback(self.finishRender, request)
         d = d.addErrback(self.wrapNonInternalError, request)
         d = d.addErrback(self.wrapError, request)
