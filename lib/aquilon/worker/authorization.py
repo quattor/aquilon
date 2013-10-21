@@ -201,6 +201,10 @@ class AuthorizationBroker(object):
                               'update_interface_hostname',
                               'update_interface_machine']:
                 self.raise_auth_error(principal, action, resource)
+        if dbuser.role.name == 'template_admin':
+            if action not in ['add_sandbox', 'del_sandbox',
+                              'manage', 'publish', 'reconfigure']:
+                self.raise_auth_error(principal, action, resource)
 
         if dbuser.role.name == 'laf':
             if action not in ['reconfigure',
