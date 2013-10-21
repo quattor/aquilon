@@ -85,14 +85,6 @@ class TestUnbindServer(TestBrokerCommand):
         self.check_last_server_msg(err, command, "utsvc", "utsi1",
                                    "unittest02.one-nyp.ms.com")
 
-    # Should have already been unbound...
-    # Hmm... this (as implemented) actually returns 0.  Kind of a pointless
-    # test case, at least for now.
-    #def testrejectunbindutsi1unittest00(self):
-    #    self.badrequesttest(["unbind", "server",
-    #        "--hostname", "unittest00.one-nyp.ms.com",
-    #        "--service", "utsvc", "--instance", "utsi1"])
-
     def test_115_verify_cat_utsi1(self):
         command = "cat --service utsvc --instance utsi1"
         out = self.commandtest(command.split(" "))
@@ -153,10 +145,9 @@ class TestUnbindServer(TestBrokerCommand):
                                "--service", service, "--instance", instance]
                     self.statustest(command)
 
+            command = ["show_service", "--service", service]
+            out = self.commandtest(command)
             for instance, servers in instances.items():
-                command = ["show_service", "--service", service,
-                           "--instance", instance]
-                out = self.commandtest(command)
                 for server in servers:
                     self.matchclean(out, server, command)
 

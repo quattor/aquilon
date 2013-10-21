@@ -39,6 +39,7 @@ services_to_delete = {
     "syslogng": ["ny-prod"],
     "unmapped": ["instance1"],
     "utnotify": ["localhost"],
+    "utsvc": ["utsi1", "utsi2"],
     "vcenter": ["ut", "np"],
     "vmseasoning": ["salt", "pepper", "sugar"],
 }
@@ -47,10 +48,33 @@ services_to_delete = {
 class TestDelService(TestBrokerCommand):
 
     def test_100_delete_services(self):
+        service_plenaries = ["servicedata/%s/config",
+                             "service/%s/client/config",
+                             "service/%s/server/config"]
+        instance_plenaries = ["servicedata/%s/%s/config",
+                              "servicedata/%s/%s/srvconfig",
+                              "service/%s/%s/client/config",
+                              "service/%s/%s/server/config"]
+
         for service, instances in services_to_delete.items():
+            for pattern in service_plenaries:
+                plenary = self.plenary_name(pattern % service)
+                self.failUnless(os.path.exists(plenary),
+                                "Plenary '%s' does not exist." % plenary)
+
             for instance in instances:
+                for pattern in instance_plenaries:
+                    plenary = self.plenary_name(pattern % (service, instance))
+                    self.failUnless(os.path.exists(plenary),
+                                    "Plenary '%s' does not exist." % plenary)
+
                 self.noouttest(["del_service", "--service", service,
                                 "--instance", instance])
+
+                for pattern in instance_plenaries:
+                    plenary = self.plenary_name(pattern % (service, instance))
+                    self.failIf(os.path.exists(plenary),
+                                "Plenary '%s' still exists." % plenary)
 
             command = ["show_service", "--service", service]
             out = self.commandtest(command)
@@ -58,15 +82,19 @@ class TestDelService(TestBrokerCommand):
                 self.matchclean(out, instance, command)
 
             self.noouttest(["del_service", "--service", service])
-
-    def test_105_verify_dns_instance_plenary(self):
-        dir = os.path.join(self.config.get("broker", "plenarydir"),
-                           "service", "dns", "unittest")
-        self.failIf(os.path.exists(dir),
-                    "Plenary directory '%s' still exists" % dir)
+            for pattern in service_plenaries:
+                plenary = self.plenary_name(pattern % service)
+                self.failIf(os.path.exists(plenary),
+                            "Plenary '%s' still exist." % plenary)
 
     # At this point, pa.ny.na still is still mapped.  del_service
     # should silently remove the mappings.
+    def test_110_verify_ntp_map(self):
+        command = ["show_map", "--service", "ntp"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Service: ntp Instance: pa.ny.na Map: City ny",
+                         command)
+
     def test_111_del_ntp_instance(self):
         command = "del service --service ntp --instance pa.ny.na"
         self.noouttest(command.split(" "))
@@ -76,25 +104,31 @@ class TestDelService(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchclean(out, "Service: ntp Instance: pa.ny.na", command)
 
-    def test_120_del_utsi1_instance(self):
-        command = "del service --service utsvc --instance utsi1"
-        self.noouttest(command.split(" "))
+    def test_113_verify_map_gone(self):
+        command = ["show_map", "--service", "ntp"]
+        self.notfoundtest(command)
 
-    def test_130_del_utsi2_instance(self):
-        command = "del service --service utsvc --instance utsi2"
-        self.noouttest(command.split(" "))
+        command = ["show_map", "--all"]
+        out = self.commandtest(command)
+        self.matchclean(out, "ntp", command)
 
-    def test_140_verify_del_utsvc_instance(self):
-        command = "show service --service utsvc"
-        out = self.commandtest(command.split(" "))
-        self.matchclean(out, "Service: utsvc Instance: utsi1", command)
-        self.matchclean(out, "Service: utsvc Instance: utsi2", command)
-
-    def test_150_del_poll_helper_instance(self):
+    def test_120_del_poll_helper_instance(self):
         service = self.config.get("broker", "poll_helper_service")
         self.noouttest(["del", "service", "--service", service,
                         "--instance", "unittest"])
+
+    def test_125_del_poll_helper_instance_again(self):
+        service = self.config.get("broker", "poll_helper_service")
+        self.notfoundtest(["del", "service", "--service", service,
+                           "--instance", "unittest"])
+
+    def test_130_del_poll_helper(self):
+        service = self.config.get("broker", "poll_helper_service")
         self.noouttest(["del", "service", "--service", service])
+
+    def test_135_del_poll_helper_again(self):
+        service = self.config.get("broker", "poll_helper_service")
+        self.notfoundtest(["del", "service", "--service", service])
 
 
 if __name__ == '__main__':

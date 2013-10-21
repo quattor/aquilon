@@ -48,6 +48,11 @@ class TestDelRequiredService(TestBrokerCommand):
                          "requires --justification.",
                          command)
 
+    def test_110_del_required_afs_again(self):
+        command = "del required service --service afs --archetype aquilon"
+        command += " --justification tcm=12345678"
+        self.notfoundtest(command.split(" "))
+
     def test_120_del_required_netmap(self):
         command = ["del_required_service", "--service=netmap",
                    "--personality=eaitools", "--archetype=aquilon"]
@@ -108,6 +113,11 @@ class TestDelRequiredService(TestBrokerCommand):
                    "--archetype=esx_cluster"]
         out = self.commandtest(command)
         self.matchclean(out, "Service: esx_management_server", command)
+
+    def test_170_del_required_utsvc(self):
+        command = ["del_required_service", "--personality=compileserver",
+                   "--service=utsvc", "--archetype=aquilon"]
+        self.noouttest(command)
 
     def test_200_del_required_afs_again(self):
         command = "del required service --service afs --archetype aquilon"

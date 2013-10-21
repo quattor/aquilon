@@ -17,6 +17,8 @@
 # limitations under the License.
 """Module for testing the add service command."""
 
+import os.path
+
 if __name__ == "__main__":
     import utils
     utils.import_depends()
@@ -59,11 +61,40 @@ default_services = {
 class TestAddService(TestBrokerCommand):
 
     def test_100_add_defaults(self):
+        service_plenaries = ["servicedata/%s/config",
+                             "service/%s/client/config",
+                             "service/%s/server/config"]
+        instance_plenaries = ["servicedata/%s/%s/config",
+                              "servicedata/%s/%s/srvconfig",
+                              "service/%s/%s/client/config",
+                              "service/%s/%s/server/config"]
+
         for service, instances in default_services.items():
+            for pattern in service_plenaries:
+                plenary = self.plenary_name(pattern % service)
+                self.failIf(os.path.exists(plenary),
+                            "Plenary '%s' was not expected to exist." % plenary)
+
             self.noouttest(["add_service", "--service", service])
+
             for instance in instances:
+                for pattern in instance_plenaries:
+                    plenary = self.plenary_name(pattern % (service, instance))
+                    self.failIf(os.path.exists(plenary),
+                                "Plenary '%s' was not expected to exist." % plenary)
+
                 self.noouttest(["add_service", "--service", service,
                                 "--instance", instance])
+
+                for pattern in instance_plenaries:
+                    plenary = self.plenary_name(pattern % (service, instance))
+                    self.failUnless(os.path.exists(plenary),
+                                    "Plenary '%s' does not exist." % plenary)
+
+            for pattern in service_plenaries:
+                plenary = self.plenary_name(pattern % service)
+                self.failUnless(os.path.exists(plenary),
+                                "Plenary '%s' does not exist." % plenary)
 
     def test_105_verify_defaults(self):
         for service, instances in default_services.items():
