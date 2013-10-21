@@ -17,7 +17,7 @@
 """Contains the logic for `aq add disk`."""
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import (Machine, LocalDisk, VirtualDisk,
+from aquilon.aqdb.model import (Machine, LocalDisk, VirtualNasDisk,
                                 VirtualLocalDisk, Filesystem)
 from aquilon.aqdb.model.disk import controller_types
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
@@ -78,9 +78,10 @@ class CommandAddDisk(BrokerCommand):
 
             dbshare = find_share(dbmachine.vm_container.holder.holder_object,
                                  resourcegroup, share)
-            dbdisk = VirtualDisk(device_name=disk, controller_type=controller,
-                                 bootable=boot, capacity=size, address=address,
-                                 snapshotable=snapshot, comments=comments)
+            dbdisk = VirtualNasDisk(device_name=disk,
+                                    controller_type=controller, bootable=boot,
+                                    capacity=size, address=address,
+                                    snapshotable=snapshot, comments=comments)
 
             dbshare.disks.append(dbdisk)
         elif filesystem:

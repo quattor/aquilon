@@ -19,7 +19,7 @@
 from sqlalchemy.orm import aliased, subqueryload, joinedload
 
 from aquilon.aqdb.model import (Machine, Cpu, Cluster, ClusterResource, Share,
-                                VirtualDisk, Disk, MetaCluster, DnsRecord)
+                                VirtualNasDisk, Disk, MetaCluster, DnsRecord)
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.hardware_entity import (
     search_hardware_entity_query)
@@ -63,7 +63,7 @@ class CommandSearchMachine(BrokerCommand):
             #v2
             v2shares = session.query(Share.id).filter_by(name=share).all()
             if v2shares:
-                NasAlias = aliased(VirtualDisk)
+                NasAlias = aliased(VirtualNasDisk)
                 q = q.join('disks', (NasAlias, NasAlias.id == Disk.id))
                 q = q.filter(
                     NasAlias.share_id.in_(map(lambda s: s[0], v2shares)))

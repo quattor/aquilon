@@ -17,20 +17,17 @@
 """ Polymorphic representation of disks which may be local or san """
 
 from datetime import datetime
-import re
 
 from sqlalchemy import (Column, Integer, DateTime, Sequence, String, Boolean,
                         ForeignKey, UniqueConstraint)
-from sqlalchemy.orm import relation, backref, deferred, validates
+from sqlalchemy.orm import relation, backref, deferred
 
-from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Base, Machine
 from aquilon.aqdb.column_types import AqStr, Enum
 
 # FIXME: this list should not be hardcoded here
 controller_types = ['cciss', 'ide', 'sas', 'sata', 'scsi', 'flash',
                     'fibrechannel']
-address_re = re.compile(r"\d+:\d+$")
 
 _TN = 'disk'
 
@@ -47,12 +44,6 @@ class Disk(Base):
     capacity = Column(Integer, nullable=False)
     device_name = Column(AqStr(128), nullable=False, default='sda')
     controller_type = Column(Enum(64, controller_types), nullable=False)
-
-    # We need to know the bus address of each disk.
-    # This isn't really nullable, but single-table inheritance means
-    # that the base class will end up with the column and the base class
-    # wants it to be nullable. We enforce this via __init__ instead.
-    address = Column(AqStr(128), nullable=True)
 
     machine_id = Column(Integer, ForeignKey('machine.machine_id',
                                             name='disk_machine_fk',
@@ -74,13 +65,6 @@ class Disk(Base):
                                        name='disk_mach_dev_name_uk'),)
     __mapper_args__ = {'polymorphic_on': disk_type,
                        'with_polymorphic': '*'}
-
-    @validates('address')
-    def validate_address(self, key, value):  # pylint: disable=W0613
-        if not address_re.match(value):
-            raise ArgumentError(r"Disk address '%s' is not valid, it must "
-                                r"match \d+:\d+ (e.g. 0:0)." % value)
-        return value
 
     def __repr__(self):
         # The default __repr__() is too long

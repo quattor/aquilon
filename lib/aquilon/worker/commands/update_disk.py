@@ -17,8 +17,8 @@
 """Contains the logic for `aq update disk`."""
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import (Machine, Disk, VirtualDisk, VirtualLocalDisk,
-                                Filesystem)
+from aquilon.aqdb.model import (Machine, Disk, VirtualDisk, VirtualNasDisk,
+                                VirtualLocalDisk, Filesystem)
 from aquilon.aqdb.model.disk import controller_types
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.resources import find_share
@@ -82,21 +82,19 @@ class CommandUpdateDisk(BrokerCommand):
         if address:
             # TODO: do we really care? Bus address makes sense for physical
             # disks as well, even if we cannot use that information today.
-            if not isinstance(dbdisk, VirtualDisk) and \
-               not isinstance(dbdisk, VirtualLocalDisk):
+            if not isinstance(dbdisk, VirtualDisk):
                 raise ArgumentError("Bus address can only be set for virtual "
                                     "disks.")
             dbdisk.address = address
 
         if snapshot is not None:
-            if not isinstance(dbdisk, VirtualDisk) and \
-               not isinstance(dbdisk, VirtualLocalDisk):
+            if not isinstance(dbdisk, VirtualDisk):
                 raise ArgumentError("Snapshot capability can only be set for "
                                     "virtual disks.")
             dbdisk.snapshotable = snapshot
 
         if share or filesystem:
-            if isinstance(dbdisk, VirtualDisk):
+            if isinstance(dbdisk, VirtualNasDisk):
                 old_share = dbdisk.share
                 old_share.disks.remove(dbdisk)
             elif isinstance(dbdisk, VirtualLocalDisk):
@@ -108,8 +106,8 @@ class CommandUpdateDisk(BrokerCommand):
                                     "possible.".format(dbdisk, dbmachine))
 
             if share:
-                if not isinstance(dbdisk, VirtualDisk):
-                    new_dbdisk = copy_virt_disk(session, VirtualDisk, dbdisk)
+                if not isinstance(dbdisk, VirtualNasDisk):
+                    new_dbdisk = copy_virt_disk(session, VirtualNasDisk, dbdisk)
                     session.delete(dbdisk)
                     session.flush()
                     session.add(new_dbdisk)
