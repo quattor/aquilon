@@ -27,12 +27,21 @@ from brokertest import TestBrokerCommand
 
 class TestAddDisk(TestBrokerCommand):
 
-    def testaddut3c5n10disk(self):
+    def test_100_add_ut3c5n10_disk(self):
         self.noouttest(["add", "disk", "--machine", "ut3c5n10",
                         "--disk", "sdb", "--controller", "scsi",
                         "--size", "34"])
 
-    def testfailaddut3c5n10disk(self):
+    def test_110_add_ut3c1n3_disk(self):
+        # Use the deprecated option names here
+        command = ["add", "disk", "--machine", "ut3c1n3", "--disk", "c0d0",
+                   "--type", "cciss", "--capacity", "34"]
+        (out, err) = self.successtest(command)
+        self.assertEmptyOut(out, command)
+        self.matchoutput(err, "The --type option is deprecated.", command)
+        self.matchoutput(err, "The --capacity option is deprecated.", command)
+
+    def test_200_bad_controller(self):
         command = ["add_disk", "--machine=ut3c5n10", "--disk=sdc",
                    "--controller=controller-does-not-exist", "--size=34"]
         out = self.badrequesttest(command)
@@ -41,27 +50,27 @@ class TestAddDisk(TestBrokerCommand):
                          "controller type",
                          command)
 
-    def testfailduplicatedisk(self):
+    def test_200_duplicate_disk(self):
         command = ["add", "disk", "--machine", "ut3c5n10", "--disk", "sdb",
                    "--controller", "scsi", "--size", "34"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Machine ut3c5n10 already has a disk named sdb.",
                          command)
 
-    def testfailextrabootdisk(self):
+    def test_200_extra_boot_disk(self):
         command = ["add", "disk", "--machine", "ut3c5n10", "--disk", "sdc",
                    "--controller", "scsi", "--size", "34", "--boot"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Machine ut3c5n10 already has a boot disk.",
                          command)
 
-    def testverifyaddut3c5n10disk(self):
+    def test_300_show_ut3c5n10(self):
         command = "show machine --machine ut3c5n10"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Disk: sda 68 GB scsi (local) [boot]", command)
         self.searchoutput(out, r"Disk: sdb 34 GB scsi \(local\)$", command)
 
-    def testverifycatut3c5n10disk(self):
+    def test_300_cat_ut3c5n10(self):
         command = "cat --machine ut3c5n10"
         out = self.commandtest(command.split(" "))
         self.searchoutput(out,
@@ -78,22 +87,13 @@ class TestAddDisk(TestBrokerCommand):
                           r'"interface", "scsi"\s*\);',
                           command)
 
-    def testaddut3c1n3disk(self):
-        # Use the deprecated option names here
-        command = ["add", "disk", "--machine", "ut3c1n3", "--disk", "c0d0",
-                   "--type", "cciss", "--capacity", "34"]
-        (out, err) = self.successtest(command)
-        self.assertEmptyOut(out, command)
-        self.matchoutput(err, "The --type option is deprecated.", command)
-        self.matchoutput(err, "The --capacity option is deprecated.", command)
-
-    def testverifyaddut3c1n3disk(self):
+    def test_300_show_ut3c1n3(self):
         command = "show machine --machine ut3c1n3"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Disk: sda 68 GB scsi (local) [boot]", command)
         self.searchoutput(out, r"Disk: c0d0 34 GB cciss \(local\)$", command)
 
-    def testverifycatut3c1n3disk(self):
+    def test_300_cat_ut3c1n3(self):
         command = "cat --machine ut3c1n3"
         out = self.commandtest(command.split(" "))
         self.searchoutput(out,

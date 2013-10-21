@@ -27,31 +27,27 @@ from brokertest import TestBrokerCommand
 
 class TestDelDisk(TestBrokerCommand):
 
-    def testdelut3c1n3sda(self):
+    def test_100_del_ut3c1n3_sda(self):
         self.noouttest(["del", "disk", "--machine", "ut3c1n3",
                         "--controller", "scsi", "--size", "68"])
 
-    def testdelut3c1n3sdb(self):
+    def test_101_del_ut3c1n3_c0d0(self):
         self.noouttest(["del", "disk", "--machine", "ut3c1n3",
                         "--disk", "c0d0"])
 
-    def testverifydelut3c1n3sda(self):
+    def test_200_show_ut3c1n3(self):
         command = "show machine --machine ut3c1n3"
         out = self.commandtest(command.split(" "))
         self.matchclean(out, "Disk: sda 68 GB scsi", command)
-
-    def testverifydelut3c1n3sdb(self):
-        command = "show machine --machine ut3c1n3"
-        out = self.commandtest(command.split(" "))
         self.matchclean(out, "Disk: c0d0", command)
 
     # This should now list the 34 GB disk that was added previously...
-    def testverifycatut3c1n3disk(self):
+    def test_200_cat_ut3c1n3(self):
         command = "cat --machine ut3c1n3"
         out = self.commandtest(command.split(" "))
         self.matchclean(out, "harddisks", command)
 
-    def testfaildelunknowntype(self):
+    def test_300_del_unknown_type(self):
         command = ["del", "disk", "--machine", "ut3c1n3",
                    "--type", "type-does-not-exist"]
         out = self.badrequesttest(command)
