@@ -117,13 +117,15 @@ class MachineFormatter(ObjectFormatter):
                 flag_list.append("snapshot")
 
             if flag_list:
-                flags = " [%s]" % ",".join(flag_list)
+                flags = " [%s]" % ", ".join(flag_list)
             else:
                 flags = ""
 
             details.append(indent + "  Disk: %s %d GB %s (%s)%s" %
                            (d.device_name, d.capacity, d.controller_type,
                             extra, flags))
+            if d.comments:
+                details.append(indent + "    Comments: %s" % d.comments)
         for i in sorted(machine.interfaces, key=attrgetter('name')):
             details.append(self.redirect_raw(i, indent + "  "))
         if machine.comments:

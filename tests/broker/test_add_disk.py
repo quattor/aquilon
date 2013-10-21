@@ -30,7 +30,7 @@ class TestAddDisk(TestBrokerCommand):
     def test_100_add_ut3c5n10_disk(self):
         self.noouttest(["add", "disk", "--machine", "ut3c5n10",
                         "--disk", "sdb", "--controller", "scsi",
-                        "--size", "34"])
+                        "--size", "34", "--comments", "Disk comments"])
 
     def test_110_add_ut3c1n3_disk(self):
         # Use the deprecated option names here
@@ -68,7 +68,10 @@ class TestAddDisk(TestBrokerCommand):
         command = "show machine --machine ut3c5n10"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Disk: sda 68 GB scsi (local) [boot]", command)
-        self.searchoutput(out, r"Disk: sdb 34 GB scsi \(local\)$", command)
+        self.searchoutput(out,
+                          r"Disk: sdb 34 GB scsi \(local\)\s*"
+                          r"Comments: Disk comments",
+                          command)
 
     def test_300_cat_ut3c5n10(self):
         command = "cat --machine ut3c5n10"
