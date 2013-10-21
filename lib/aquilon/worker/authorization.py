@@ -201,6 +201,18 @@ class AuthorizationBroker(object):
                               'update_interface_hostname',
                               'update_interface_machine']:
                 self.raise_auth_error(principal, action, resource)
+
+        if dbuser.role.name == 'laf':
+            if action not in ['reconfigure',
+                              'add_reboot_intervention',
+                              'add_reboot_schedule',
+                              'del_reboot_intervention',
+                              'del_reboot_schedule',
+                              'map_grn', 'unmap_grn',
+                              'add_hostlink', 'del_hostlink',
+                              'add_alias', 'del_alias']:
+                self.raise_auth_error(principal, action, resource)
+
         if dbuser.role.name == 'itsec':
             if action not in ['pxeswitch', 'pxeswitch_list',
                               'compile', 'compile_hostname',
