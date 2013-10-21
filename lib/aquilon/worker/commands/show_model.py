@@ -44,6 +44,6 @@ class CommandShowModel(BrokerCommand):
         if type is not None:
             self.deprecated_option("type", "Please use the search_model "
                                    "command instead.", **arguments)
-            q = q.filter(Model.model_type.like(type + '%'))
+            q = q.filter(Model.model_type == type)
         q = q.order_by(Vendor.name, Model.name)
         return q.all()

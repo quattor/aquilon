@@ -18,6 +18,7 @@
 
 from sqlalchemy.sql import exists
 
+from aquilon.aqdb.types import MachineType
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.formats.chassis import MissingChassisList
 from aquilon.aqdb.model import Machine, Model, ChassisSlot
@@ -30,7 +31,7 @@ class CommandShowChassisMissing(BrokerCommand):
         q = q.filter(~exists().where(ChassisSlot.machine_id ==
                                      Machine.machine_id))
         q = q.join(Model)
-        q = q.filter_by(model_type='blade')
+        q = q.filter_by(model_type=MachineType.Blade)
         q = q.reset_joinpoint()
         q = q.order_by(Machine.label)
         return MissingChassisList(q.all())

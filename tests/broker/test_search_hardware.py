@@ -78,9 +78,9 @@ class TestSearchHardware(TestBrokerCommand):
 
     def testmachinetypeunavailable(self):
         command = "search hardware --machine_type machine_type-does-not-exist"
-        out = self.notfoundtest(command.split(" "))
-        self.matchoutput(out, "Model model_type "
-                         "machine_type-does-not-exist not found.", command)
+        out = self.badrequesttest(command.split(" "))
+        self.matchoutput(out, "Unknown machine type "
+                         "machine_type-does-not-exist", command)
 
     def testserialavailable(self):
         command = "search hardware --serial 99C5553"

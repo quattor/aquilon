@@ -102,7 +102,7 @@ class HardwareFeature(Feature):
         return "features/hardware/%s" % self.name
 
     def validate_link(self, key, link):
-        if not link.model or link.model.model_type == 'nic':
+        if not link.model or not link.model.model_type.isHardwareEntityType():
             raise InternalError("Hardware features can only be bound to "
                                 "machine models.")
         return link
@@ -118,7 +118,7 @@ class InterfaceFeature(Feature):
         return "features/interface/%s" % self.name
 
     def validate_link(self, key, link):
-        if (link.model and link.model.model_type == 'nic') or \
+        if (link.model and link.model.model_type.isNic()) or \
            (link.interface_name and link.personality):
             return link
 

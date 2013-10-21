@@ -25,8 +25,9 @@ from sqlalchemy.orm import relation, object_session, deferred
 
 from aquilon.exceptions_ import AquilonError
 from aquilon.aqdb.model import Base, Vendor
-from aquilon.aqdb.column_types.aqstr import AqStr
+from aquilon.aqdb.column_types import AqStr, StringEnumColumn
 
+from aquilon.aqdb.types import ModelType, NicType
 
 class Model(Base):
     """ Vendor and Model are representations of the various manufacturers and
@@ -39,7 +40,8 @@ class Model(Base):
     vendor_id = Column(Integer, ForeignKey('vendor.id',
                                            name='model_vendor_fk'),
                        nullable=False)
-    model_type = Column(AqStr(16), nullable=False)
+
+    model_type = Column(StringEnumColumn(ModelType, 16, True), nullable=False)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
@@ -57,7 +59,7 @@ class Model(Base):
     @classmethod
     def default_nic_model(cls, session):
         # TODO: make this configurable
-        return cls.get_unique(session, model_type='nic', name='generic_nic',
+        return cls.get_unique(session, model_type=NicType.Nic, name='generic_nic',
                               vendor='generic', compel=AquilonError)
 
     @property

@@ -18,6 +18,7 @@
 
 
 from aquilon.exceptions_ import ArgumentError
+from aquilon.aqdb.types import ChassisType
 from aquilon.aqdb.model import Chassis, Model
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
@@ -50,7 +51,7 @@ class CommandAddChassis(BrokerCommand):
 
         dblocation = get_location(session, rack=rack)
         dbmodel = Model.get_unique(session, name=model, vendor=vendor,
-                                   model_type='chassis', compel=True)
+                                   model_type=ChassisType.Chassis, compel=True)
         # FIXME: Precreate chassis slots?
         dbchassis = Chassis(label=label, location=dblocation, model=dbmodel,
                             serial_no=serial, comments=comments)

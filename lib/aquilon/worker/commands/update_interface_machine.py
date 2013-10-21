@@ -16,7 +16,7 @@
 # limitations under the License.
 """Contains the logic for `aq update interface --machine`."""
 
-
+from aquilon.aqdb.types import NicType
 from aquilon.exceptions_ import ArgumentError, AquilonError
 from aquilon.aqdb.model import Machine, Interface, Model
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
@@ -134,7 +134,7 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
                                     .format(dbinterface))
 
             dbmodel = Model.get_unique(session, name=model, vendor=vendor,
-                                       model_type='nic', compel=True)
+                                       model_type=NicType.Nic, compel=True)
             dbinterface.model = dbmodel
         if rename_to:
             rename_interface(session, dbinterface, rename_to)

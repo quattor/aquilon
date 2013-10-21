@@ -75,7 +75,7 @@ class CommandBindFeature(BrokerCommand):
             dbmodel = Model.get_unique(session, name=model, vendor=vendor,
                                        compel=True)
 
-            if dbmodel.model_type == "nic":
+            if dbmodel.model_type.isNic():
                 feature_type = "interface"
             else:
                 feature_type = "hardware"

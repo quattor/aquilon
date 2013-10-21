@@ -32,7 +32,7 @@ class CommandDelModel(BrokerCommand):
         dbmodel = Model.get_unique(session, name=model, vendor=dbvendor,
                                    compel=True)
 
-        if dbmodel.model_type == 'nic':
+        if dbmodel.model_type.isNic():
             q = session.query(Interface)
             q = q.filter_by(model=dbmodel)
             if q.first():

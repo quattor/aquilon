@@ -16,7 +16,7 @@
 # limitations under the License.
 """Contains the logic for `aq update machine`."""
 
-
+from aquilon.aqdb.types import VirtualMachineType
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import (Cpu, Chassis, ChassisSlot, Model, Cluster,
                                 Machine, BundleResource, VirtualNasDisk,
@@ -119,9 +119,7 @@ class CommandUpdateMachine(BrokerCommand):
                 vendor = dbmachine.model.vendor.name
             dbmodel = Model.get_unique(session, name=model, vendor=vendor,
                                        compel=True)
-            if dbmodel.model_type not in ['blade', 'rackmount',
-                                            'workstation', 'aurora_node',
-                                            'virtual_machine']:
+            if not dbmodel.model_type.isMachineType():
                 raise ArgumentError("The update_machine command cannot update "
                                     "machines of type %s." %
                                     dbmodel.model_type)
@@ -129,7 +127,7 @@ class CommandUpdateMachine(BrokerCommand):
             # location data to be available as appropriate, but really?
             # Failing seems reasonable.
             if dbmodel.model_type != dbmachine.model.model_type and \
-               'virtual_machine' in [dbmodel.model_type,
+               VirtualMachineType.VirtualMachine in [dbmodel.model_type,
                                      dbmachine.model.model_type]:
                 raise ArgumentError("Cannot change machine from %s to %s." %
                                     (dbmachine.model.model_type,

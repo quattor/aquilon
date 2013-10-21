@@ -19,6 +19,7 @@
 
 from datetime import datetime
 
+from aquilon.aqdb.types import NetworkDeviceType
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Model, NetworkDevice, ObservedMac
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
@@ -52,7 +53,8 @@ class CommandUpdateSwitch(BrokerCommand):
             model = dbnetdev.model.name
         if model:
             dbmodel = Model.get_unique(session, name=model, vendor=vendor,
-                                       model_type='switch', compel=True)
+                                       model_type=NetworkDeviceType.Switch,
+                                       compel=True)
             dbnetdev.model = dbmodel
 
         dblocation = get_location(session, rack=rack)

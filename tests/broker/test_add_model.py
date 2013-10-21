@@ -149,7 +149,8 @@ class TestAddModel(TestBrokerCommand):
         command = ["add_model", "--model=invalid", "--vendor=aurora_vendor",
                    "--type=aurora_node"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "The model's machine type must be one of",
+        self.matchoutput(out, "The model's machine type must "
+                         "not be an aurora type",
                          command)
 
     def test_300_fail_duplicate(self):

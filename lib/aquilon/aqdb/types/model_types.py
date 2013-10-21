@@ -14,23 +14,33 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Contains the logic for `aq cat --machine`."""
 
-from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import Machine
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.templates import Plenary
+from aquilon.aqdb.types import StringEnum
 
+class ModelType(StringEnum):
+    pass
 
-class CommandCatMachine(BrokerCommand):
+class HardwareEntityType(ModelType):
+    pass
 
-    required_parameters = ["machine"]
+class MachineType(HardwareEntityType):
+    pass
 
-    def render(self, session, logger, machine, generate, **kwargs):
-        dbmachine = Machine.get_unique(session, machine, compel=True)
-        plenary_info = Plenary.get_plenary(dbmachine, logger=logger)
+class PhysicalMachineType(MachineType):
+    Blade = 'blade'
+    Rackmount = 'rackmount'
+    Workstation = 'workstation'
+    AuroraNode = 'aurora_node'
 
-        if generate:
-            return plenary_info._generate_content()
-        else:
-            return plenary_info.read()
+class VirtualMachineType(MachineType):
+    VirtualMachine = 'virtual_machine'
+
+class ChassisType(HardwareEntityType):
+    Chassis = 'chassis'
+    AuroraChassis = 'aurora_chassis'
+
+class NetworkDeviceType(HardwareEntityType):
+    Switch = 'switch'
+
+class NicType(ModelType):
+    Nic = 'nic'

@@ -56,6 +56,7 @@ from twisted.web import server, resource, http
 from twisted.internet import defer, threads, reactor
 from twisted.python import log
 
+from aquilon.aqdb.types import StringEnum
 from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.formats.formatters import ResponseFormatter
 from aquilon.worker.broker import BrokerCommand, ERROR_TO_CODE
@@ -375,6 +376,13 @@ class RestServer(ResponsePage):
                             myinstance.parameter_checks[option_name] = force_ascii
                         elif paramtype == "list":
                             myinstance.parameter_checks[option_name] = force_list
+                        elif paramtype == "enum":
+                            enumtype = option.attrib["enum"]
+                            try:
+                                enumclass = StringEnum(enumtype)
+                                myinstance.parameter_checks[option_name] = enumclass.from_argument
+                            except ValueError, e:
+                                log.msg("Unknown Enum: %s" % e)
                         else:  # pragma: no cover
                             log.msg("Warning: unknown option type %s" % paramtype)
                     else:  # pragma: no cover

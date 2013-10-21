@@ -18,6 +18,7 @@
 
 
 from aquilon.exceptions_ import ArgumentError
+from aquilon.aqdb.types import NicType
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.aqdb.model import Vendor, Model, MachineSpecs, Cpu
 
@@ -35,11 +36,9 @@ class CommandAddModel(BrokerCommand):
 
         # Specifically not allowing new models to be added that are of
         # type aurora_node - that is only meant for the dummy aurora_model.
-        allowed_types = ["blade", "rackmount", "workstation", "switch",
-                         "chassis", "virtual_machine", "nic"]
-        if type not in allowed_types:
-            raise ArgumentError("The model's machine type must be one of: %s." %
-                                ", ".join(allowed_types))
+        if type.isAuroraChassis() or type.isAuroraNode():
+            raise ArgumentError("The model's machine type must not be"
+                                " an aurora type")
 
         dbmodel = Model(name=model, vendor=dbvendor, model_type=type,
                         comments=comments)
@@ -50,7 +49,7 @@ class CommandAddModel(BrokerCommand):
             dbcpu = Cpu.get_unique(session, name=cpuname, vendor=cpuvendor,
                                    speed=cpuspeed, compel=True)
             if nicmodel or nicvendor:
-                dbnic = Model.get_unique(session, model_type='nic',
+                dbnic = Model.get_unique(session, model_type=NicType.Nic,
                                          name=nicmodel, vendor=nicvendor,
                                          compel=True)
             else:

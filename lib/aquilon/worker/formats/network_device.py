@@ -48,7 +48,7 @@ ObjectFormatter.handlers[NetworkDeviceInterfaceTuple] = NetworkDeviceInterfaceTu
 
 class NetworkDeviceFormatter(ObjectFormatter):
     def format_raw(self, device, indent=""):
-        details = [indent + "%s: %s" % (device.model.model_type.capitalize(),
+        details = [indent + "%s: %s" % (str(device.model.model_type).capitalize(),
                                         device.label)]
         if device.primary_name:
             details.append(indent + "  Primary Name: "

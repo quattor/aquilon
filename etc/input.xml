@@ -182,7 +182,7 @@
       --exact_location option can be used to override this behavior.
       <optgroup name="search_hardware_opts" mandatory="True" fields="any">
          <option name="model" type="string">model name</option>
-         <option name="machine_type" type="string">machine type for the model (blade, virtual_machine, etc.)</option>
+         <option name="machine_type" type="enum" enum="MachineType">machine type for the model (blade, virtual_machine, etc.)</option>
          <option name="vendor" type="string">vendor name</option>
          <option name="ip" type="ipv4">IP address</option>
          <option name="mac" type="mac">MAC address of an attached interface</option>
@@ -230,7 +230,7 @@
          <option name="memory" type="int">memory in MB</option>
          <option name="cluster" type="string">cluster or metacluster name</option>
          <option name="model" type="string">model name</option>
-         <option name="machine_type" type="string">machine type for the model (blade, virtual_machine, etc.)</option>
+         <option name="machine_type" type="enum" enum="MachineType">machine type for the model (blade, virtual_machine, etc.)</option>
          <option name="vendor" type="string">vendor name</option>
          <option name="ip" type="ipv4">IP address</option>
          <option name="mac" type="mac">MAC address of an attached interface</option>
@@ -269,7 +269,7 @@
          <option name="fqdn" type="string">fully qualified domain name</option>
          <option name="dns_domain" type="string">DNS domain</option>
          <option name="shortname" type="string">First segment of the fqdn</option>
-         <option name="type" type="string">System type (host, chassis, switch, manager, auxiliary)</option>
+         <option name="type" type="enum" enum="HardwareEntityType">System type (host, chassis, switch, manager, auxiliary)</option>
          <option name="ip" type="ipv4">IP address</option>
          <option name="networkip" type="ipv4">Network IP address</option>
          <option name="mac" type="mac">primary MAC address</option>
@@ -376,7 +376,7 @@
          <option name="service" type="string">client of service (single service only)</option>
          <option name="instance" type="string">client of service instance (single instance only)</option>
          <option name="model" type="string">machine model name</option>
-         <option name="machine_type" type="string">machine type for the model (blade, virtual_machine, etc.)</option>
+         <option name="machine_type" type="enum" enum="MachineType">machine type for the model (blade, virtual_machine, etc.)</option>
          <option name="vendor" type="string">machine vendor name</option>
          <option name="serial" type="string">machine serial number</option>
          <option name="cluster" type="string">cluster or metacluster name</option>
@@ -1198,7 +1198,7 @@
       <optgroup name="add_model_opts" mandatory="True" fields="all">
          <option name="model" type="string">Name of the new model</option>
          <option name="vendor" type="string">Vendor name</option>
-         <option name="type" type="string">Machine type name</option>
+         <option name="type" type="enum" enum="ModelType">Machine type name</option>
       </optgroup>
       <optgroup name="default_config_opts" mandatory="False" fields="all">
          <option name="cpuname" type="string">CPU model name</option>
@@ -1224,7 +1224,7 @@
       <optgroup name="show_model_opts" mandatory="True" fields="any">
          <option name="model" type="string" conflicts="all">Name of the model</option>
          <option name="vendor" type="string" conflicts="all">Vendor name</option>
-         <option name="type" type="string" conflicts="all">Machine type name</option>
+         <option name="type" type="enum" enum="ModelType" conflicts="all">Machine type name</option>
          <option name="all" type="flag" conflicts="model vendor">Show all models</option>
       </optgroup>
       <transport method="get" trigger="all" path="hardware/model" />
@@ -1237,7 +1237,7 @@
       <optgroup name="search_model_opts" mandatory="True" fields="any">
          <option name="model" type="string">Name of the model</option>
          <option name="vendor" type="string">Vendor name</option>
-         <option name="machine_type" type="string">Machine type name</option>
+         <option name="machine_type" type="enum" enum="ModelType">Machine type name</option>
          <option name="cpuname" type="string" conflicts="cputype">CPU type</option>
          <option name="cpuvendor" type="string">CPU vendor</option>
          <option name="cpuspeed" type="int">CPU speed</option>
@@ -1267,7 +1267,7 @@
       <optgroup name="update_model_values" mandatory="False">
          <option name="newmodel" type="string">Change model name</option>
          <option name="newvendor" type="string">Change model vendor</option>
-         <option name="machine_type" type="string">Machine type name</option>
+         <option name="machine_type" type="enum" enum="ModelType">Machine type name</option>
          <option name="cpuname" type="string">CPU name</option>
          <option name="cpuvendor" type="string">CPU vendor</option>
          <option name="cpuspeed" type="int">CPU speed</option>
@@ -3351,7 +3351,7 @@
          </optgroup>
          <option name="model" type="string">machine model</option>
          <option name="vendor" type="string">machine vendor</option>
-         <option name="machine_type" type="string">machine type</option>
+         <option name="machine_type" type="enum" enum="MachineType">machine type</option>
       </optgroup>
       <transport trigger="all" method="get" path="machine" />
       <transport trigger="machine" method="get" path="machine/%(machine)s" />

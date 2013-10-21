@@ -18,6 +18,7 @@
 
 
 from aquilon.exceptions_ import ArgumentError
+from aquilon.aqdb.types import NetworkDeviceType
 from aquilon.aqdb.model import NetworkDevice, Model
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
@@ -36,7 +37,8 @@ class CommandAddSwitch(BrokerCommand):
     def render(self, session, logger, switch, label, model, rack, type, ip,
                interface, mac, vendor, serial, comments, **arguments):
         dbmodel = Model.get_unique(session, name=model, vendor=vendor,
-                                   model_type='switch', compel=True)
+                                   model_type=NetworkDeviceType.Switch,
+                                   compel=True)
 
         dblocation = get_location(session, rack=rack)
 

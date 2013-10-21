@@ -476,9 +476,9 @@ class TestSearchHost(TestBrokerCommand):
 
     def testmachinetypeunavailable(self):
         command = "search host --machine_type machine_type-does-not-exist"
-        out = self.notfoundtest(command.split(" "))
-        self.matchoutput(out, "Model model_type "
-                         "machine_type-does-not-exist not found.", command)
+        out = self.badrequesttest(command.split(" "))
+        self.matchoutput(out, "Unknown machine type "
+                         "machine_type-does-not-exist", command)
 
     def testserialavailable(self):
         def testfunc():

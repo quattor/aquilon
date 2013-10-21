@@ -17,6 +17,7 @@
 """Contains the logic for `aq update chassis`."""
 
 
+from aquilon.aqdb.types import ChassisType
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.dbwrappers.hardware_entity import update_primary_ip
@@ -38,7 +39,8 @@ class CommandUpdateChassis(BrokerCommand):
             model = dbchassis.model.name
         if model:
             dbmodel = Model.get_unique(session, name=model, vendor=vendor,
-                                       model_type='chassis', compel=True)
+                                       model_type=ChassisType.Chassis,
+                                       compel=True)
             dbchassis.model = dbmodel
 
         dblocation = get_location(session, rack=rack)

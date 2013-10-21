@@ -14,12 +14,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from aquilon.aqdb.column_types.aqstr import AqStr
-from aquilon.aqdb.column_types.aqmac import AqMac
-from aquilon.aqdb.column_types.IPV4 import IPV4
-from aquilon.aqdb.column_types.enum import Enum
-from aquilon.aqdb.column_types.guid import GUID
-from aquilon.aqdb.column_types.utc_datetime import UTCDateTime
-from aquilon.aqdb.column_types.json_dict import JSONEncodedDict
-from aquilon.aqdb.column_types.mutation_dict import MutationDict
-from aquilon.aqdb.column_types.string_enum import StringEnumColumn
+
+from aquilon.aqdb.types.enum import StringEnum
+
+from aquilon.aqdb.types.model_types import ModelType
+from aquilon.aqdb.types.model_types import HardwareEntityType
+from aquilon.aqdb.types.model_types import MachineType
+from aquilon.aqdb.types.model_types import PhysicalMachineType
+from aquilon.aqdb.types.model_types import VirtualMachineType
+from aquilon.aqdb.types.model_types import ChassisType
+from aquilon.aqdb.types.model_types import NetworkDeviceType
+from aquilon.aqdb.types.model_types import NicType
