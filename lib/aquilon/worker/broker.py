@@ -46,12 +46,17 @@ from aquilon.worker.processes import sync_domain
 # Things we don't need cluttering up the transaction details table
 _IGNORED_AUDIT_ARGS = ('requestid', 'bundle', 'debug')
 
-audit_id = 0
+__audit_id = 0
 """This will help with debugging active incoming requests.
 
    Eventually it will be replaced by a primary key in the audit log table.
 
    """
+
+def next_audit_id():
+    global __audit_id
+    __audit_id += 1
+    return __audit_id
 
 # Mapping of command exceptions to client return code.
 ERROR_TO_CODE = {NotFoundException: http.NOT_FOUND,
@@ -342,11 +347,6 @@ class BrokerCommand(object):
             session.commit()
             session.execute(text("set transaction read only"))
 
-    def _add_audit_id(self, request):
-        global audit_id
-        audit_id += 1
-        request.aq_audit_id = audit_id
-
     def _audit(self, **kwargs):
         logger = kwargs.pop('logger')
         status = kwargs.pop('message_status')
@@ -385,7 +385,7 @@ class BrokerCommand(object):
     def add_logger(self, **command_kwargs):
         request = command_kwargs.get("request")
         command_kwargs["user"] = request.channel.getPrincipal()
-        self._add_audit_id(request)
+        request.aq_audit_id = next_audit_id()
         if self.command == "show_request":
             status = self.catalog.get_request_status(
                 auditid=command_kwargs.get("auditid", None),
