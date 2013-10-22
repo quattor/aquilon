@@ -270,7 +270,11 @@ class BrokerCommand(object):
                     # This does a COMMIT, which in turn invalidates the session.
                     # We should therefore avoid looking up anything in the DB
                     # before this point which might be used later.
-                    self._record_xtn(session, logger.get_status())
+                    status = logger.get_status()
+                    start_xtn(session, status.requestid, status.user,
+                              status.command, self.requires_readonly,
+                              status.kwargs,
+                              self.parameters_by_type.get('list'))
 
                     dbuser = get_or_create_user_principal(session, principal,
                                                           commitoncreate=True)
@@ -412,25 +416,6 @@ class BrokerCommand(object):
                 logger.debug("Server finishing request.")
                 logger.remove_status_by_auditid(self.catalog)
             logger.close_handlers()
-
-    def _record_xtn(self, session, status):
-        details = dict()
-        for k, v in status.kwargs.items():
-            # Skip uber-redundant raw format parameter
-            if (k == 'format') and v == 'raw':
-                continue
-            # Sometimes we delete a value and the arg comes in as an empty
-            # string.  Denote this with a dash '-' to work around Oracle
-            # not being able to store the concept of a non-NULL empty string.
-            if v == '':
-                v = '-'
-            try:
-                details[k] = str(v).decode('ascii')
-            except UnicodeDecodeError:
-                details[k] = '<Non-ASCII value>'
-        start_xtn(session, status.requestid, status.user, status.command,
-                  self.requires_readonly, details,
-                  self.parameters_by_type.get('list'))
 
     @property
     def is_lock_free(self):
