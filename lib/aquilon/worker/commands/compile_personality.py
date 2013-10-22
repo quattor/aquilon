@@ -54,6 +54,9 @@ class CommandCompilePersonality(BrokerCommand):
 
         host_list = q.all()
 
+        if not host_list:
+            return
+
         # If the domain was not specified, set it to the domain of first host
         dbdomain, dbauthor = validate_branch_author(host_list)
 
