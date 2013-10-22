@@ -16,8 +16,8 @@
 # limitations under the License.
 
 from aquilon.aqdb.model import OperatingSystem, Archetype
-from aquilon.worker.broker import (BrokerCommand, validate_template_name,
-                                   validate_nlist_key)
+from aquilon.worker.broker import BrokerCommand
+from aquilon.utils import validate_template_name, validate_nlist_key
 
 
 class CommandAddOS(BrokerCommand):

@@ -18,7 +18,8 @@
 
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.worker.broker import BrokerCommand, validate_nlist_key
+from aquilon.utils import validate_nlist_key
+from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import NetworkEnvironment, DnsEnvironment
 from aquilon.worker.dbwrappers.location import get_location
 

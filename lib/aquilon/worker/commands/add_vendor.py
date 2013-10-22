@@ -16,7 +16,8 @@
 # limitations under the License.
 
 from aquilon.aqdb.model import Vendor
-from aquilon.worker.broker import BrokerCommand, validate_template_name
+from aquilon.worker.broker import BrokerCommand
+from aquilon.utils import validate_template_name
 
 
 class CommandAddVendor(BrokerCommand):

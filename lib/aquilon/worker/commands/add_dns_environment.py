@@ -16,7 +16,8 @@
 # limitations under the License.
 """ Provides adding dns_evironment functionality """
 
-from aquilon.worker.broker import BrokerCommand, validate_nlist_key
+from aquilon.utils import validate_nlist_key
+from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import DnsEnvironment
 
 

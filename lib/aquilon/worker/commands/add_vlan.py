@@ -18,7 +18,8 @@
 
 
 from aquilon.aqdb.model import VlanInfo
-from aquilon.worker.broker import BrokerCommand, validate_nlist_key  # pylint: disable=W0611
+from aquilon.utils import validate_nlist_key
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 
 
 class CommandAddVlan(BrokerCommand):

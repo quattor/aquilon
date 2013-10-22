@@ -17,7 +17,6 @@
 """ Module containing the base class BrokerCommand """
 
 import sys
-import re
 from inspect import isclass
 
 from sqlalchemy.sql import text
@@ -45,13 +44,6 @@ from aquilon.worker.processes import sync_domain
 
 # Things we don't need cluttering up the transaction details table
 _IGNORED_AUDIT_ARGS = ('requestid', 'bundle', 'debug')
-
-# Regexp used to check if a value is suitable to be used as an nlist key,
-# without escaping.
-nlist_key_re = re.compile('^[a-zA-Z_][a-zA-Z0-9_.-]*$')
-
-# Regexp used to check if a value is suitable to be used as a template name
-template_name_re = re.compile(r'^[a-zA-Z0-9_.-]+$')
 
 __audit_id = 0
 """This will help with debugging active incoming requests.
@@ -519,15 +511,3 @@ class BrokerCommand(object):
                 names = ["--%s" % arg for arg in kwargs.keys()]
             raise ArgumentError("Exactly one of %s should be sepcified." %
                                 (', '.join(names[:-1]) + ' and ' + names[-1]))
-
-
-def validate_nlist_key(label, value):
-    if not nlist_key_re.match(value):
-        raise ArgumentError("'%s' is not a valid value for %s." %
-                            (value, label))
-
-
-def validate_template_name(label, value):
-    if not template_name_re.match(value):
-        raise ArgumentError("'%s' is not a valid value for %s." %
-                            (value, label))

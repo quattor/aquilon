@@ -21,7 +21,7 @@ from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 
 from aquilon.exceptions_ import NotFoundException, ArgumentError
 from aquilon.aqdb.model import Location
-from aquilon.worker.broker import validate_nlist_key
+from aquilon.utils import validate_nlist_key
 
 
 def get_location(session, query_options=None, compel=False, **kwargs):

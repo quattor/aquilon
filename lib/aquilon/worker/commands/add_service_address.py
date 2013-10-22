@@ -18,7 +18,8 @@
 
 from aquilon.exceptions_ import ArgumentError, UnimplementedError
 from aquilon.aqdb.model import ServiceAddress, Cluster, Host
-from aquilon.worker.broker import BrokerCommand, validate_nlist_key
+from aquilon.utils import validate_nlist_key
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.interface import assign_address
 from aquilon.worker.dbwrappers.dns import grab_address
 from aquilon.worker.dbwrappers.resources import (add_resource,

@@ -43,6 +43,13 @@ _nocolons_re = re.compile(r'^([0-9a-f]{2}){6}$')
 _two_re = re.compile(r'[0-9a-f]{2}')
 _padded_re = re.compile(r'^([0-9a-f]{2}:){5}([0-9a-f]{2})$')
 
+# Regexp used to check if a value is suitable to be used as an nlist key,
+# without escaping.
+nlist_key_re = re.compile('^[a-zA-Z_][a-zA-Z0-9_.-]*$')
+
+# Regexp used to check if a value is suitable to be used as a template name
+template_name_re = re.compile(r'^[a-zA-Z0-9_.-]+$')
+
 
 def kill_from_pid_file(pid_file):  # pragma: no cover
     if os.path.isfile(pid_file):
@@ -102,6 +109,18 @@ def confirm(prompt=None, resp=False):  # pragma: no cover
             return True
         if ans == 'n' or ans == 'N' or ans == 'no':
             return False
+
+
+def validate_nlist_key(label, value):
+    if not nlist_key_re.match(value):
+        raise ArgumentError("'%s' is not a valid value for %s." %
+                            (value, label))
+
+
+def validate_template_name(label, value):
+    if not template_name_re.match(value):
+        raise ArgumentError("'%s' is not a valid value for %s." %
+                            (value, label))
 
 
 def force_ipv4(label, value):

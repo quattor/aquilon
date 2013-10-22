@@ -16,7 +16,8 @@
 # limitations under the License.
 """Contains the logic for `aq add interface address`."""
 
-from aquilon.worker.broker import BrokerCommand, validate_nlist_key
+from aquilon.utils import validate_nlist_key
+from aquilon.worker.broker import BrokerCommand
 from aquilon.exceptions_ import ArgumentError, IncompleteError
 from aquilon.aqdb.model import HardwareEntity, NetworkEnvironment, Interface
 from aquilon.worker.dbwrappers.dns import grab_address

@@ -17,7 +17,8 @@
 
 
 from aquilon.exceptions_ import ArgumentError, AquilonError
-from aquilon.worker.broker import BrokerCommand, validate_nlist_key
+from aquilon.utils import validate_nlist_key
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.utils import force_ratio

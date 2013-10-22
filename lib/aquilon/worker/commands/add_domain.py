@@ -21,9 +21,9 @@ import os
 from aquilon.exceptions_ import (AuthorizationException, ArgumentError,
                                  InternalError, ProcessException)
 from aquilon.aqdb.model import Domain, Branch
-from aquilon.worker.broker import BrokerCommand, validate_template_name
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.processes import run_git
-from aquilon.utils import remove_dir
+from aquilon.utils import remove_dir, validate_template_name
 
 
 class CommandAddDomain(BrokerCommand):
