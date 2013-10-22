@@ -214,7 +214,7 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
         data_command = ["cat", "--cluster", "utpgcl0", "--data"]
         data = self.commandtest(data_command)
 
-        self.matchoutput(data, '"system/cluster/rack/room" = "utroom1";',
+        self.matchoutput(data, '"system/cluster/sysloc/room" = "utroom1";',
                          data_command)
 
         data_command = ["cat", "--machine", "utpgs01p0"]
@@ -223,6 +223,8 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
         self.matchoutput(data, '"rack/name" = "ut3";',
                          data_command)
         self.matchoutput(data, '"rack/room" = "utroom1";',
+                         data_command)
+        self.matchoutput(data, '"sysloc/room" = "utroom1";',
                          data_command)
 
     # Autopg test
