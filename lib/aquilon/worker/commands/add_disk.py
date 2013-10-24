@@ -16,10 +16,8 @@
 # limitations under the License.
 """Contains the logic for `aq add disk`."""
 
-import re
-
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import (Machine, LocalDisk, VirtualDisk,
+from aquilon.aqdb.model import (Machine, LocalDisk, VirtualNasDisk,
                                 VirtualLocalDisk, Filesystem)
 from aquilon.aqdb.model.disk import controller_types
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
@@ -32,8 +30,6 @@ class CommandAddDisk(BrokerCommand):
     # FIXME: add "controller" and "size" once the deprecated alternatives are
     # removed
     required_parameters = ["machine", "disk"]
-
-    REGEX_ADDRESS = re.compile(r"\d+:\d+$")
 
     def render(self, session, logger, machine, disk, controller, share,
                filesystem, resourcegroup, address, comments, size, boot,
@@ -75,9 +71,6 @@ class CommandAddDisk(BrokerCommand):
             boot = (disk == "sda" or disk == "c0d0")
 
         if share:
-            if not CommandAddDisk.REGEX_ADDRESS.match(address):
-                raise ArgumentError(r"Disk address '%s' is not valid, it must "
-                                    r"match \d+:\d+ (e.g. 0:0)." % address)
             if not dbmachine.vm_container:
                 raise ArgumentError("{0} is not a virtual machine, it is not "
                                     "possible to define a virtual disk."
@@ -85,9 +78,10 @@ class CommandAddDisk(BrokerCommand):
 
             dbshare = find_share(dbmachine.vm_container.holder.holder_object,
                                  resourcegroup, share)
-            dbdisk = VirtualDisk(device_name=disk, controller_type=controller,
-                                 bootable=boot, capacity=size, address=address,
-                                 snapshotable=snapshot, comments=comments)
+            dbdisk = VirtualNasDisk(device_name=disk,
+                                    controller_type=controller, bootable=boot,
+                                    capacity=size, address=address,
+                                    snapshotable=snapshot, comments=comments)
 
             dbshare.disks.append(dbdisk)
         elif filesystem:

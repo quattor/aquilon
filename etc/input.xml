@@ -872,6 +872,29 @@
       <transport method="post" path="hardware/disk/%(machine)s/command/del" />
    </command>
 
+   <command name="update_disk">
+      Update the parameters of an existing disk.
+      <optgroup name="update_disk_opts" mandatory="True" fields="all">
+         <option name="machine" type="string">Machine name</option>
+         <option name="disk" type="string">Disk/device name</option>
+      </optgroup>
+      <optgroup name="optional_opts">
+         <option name="rename_to" type="string">New name of the disk</option>
+         <optgroup name="share_opts" fields="any">
+            <option name="share" type="string" conflicts="filesystem">Share backing the disk image</option>
+            <option name="filesystem" type="string" conflicts="share">Filesystem backing the disk image</option>
+            <option name="resourcegroup" type="string">Resourcegroup to add share</option>
+         </optgroup>
+         <option name="address" type="string">Bus address (e.g. 0:0)</option>
+         <option name="controller" type="string" conflicts="type">Type of the controller/interface</option>
+         <option name="size" type="int" conflicts="capacity">Capacity of the disk (GB)</option>
+         <option name="comments" type="string">Comments</option>
+         <option name="boot" type="boolean">Mark the disk as bootable</option>
+         <option name="snapshot" type="boolean">Mark the disk as snapshotable</option>
+      </optgroup>
+      <transport method="post" path="machine/%(machine)s/disk/%(disk)s" />
+   </command>
+
    <command name="add_host">
       Add a new host to the database.  Requires a machine with a bootable
       interface and a valid IP address.

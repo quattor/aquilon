@@ -19,7 +19,7 @@
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import (Cpu, Chassis, ChassisSlot, Model, Cluster,
-                                Machine, BundleResource, VirtualDisk)
+                                Machine, BundleResource, VirtualNasDisk)
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.hardware_entity import update_primary_ip
 from aquilon.worker.dbwrappers.location import get_location
@@ -181,7 +181,7 @@ class CommandUpdateMachine(BrokerCommand):
             dbmachine.vm_container.holder = resholder
 
             for dbdisk in dbmachine.disks:
-                if not isinstance(dbdisk, VirtualDisk):
+                if not isinstance(dbdisk, VirtualNasDisk):
                     continue
                 old_share = dbdisk.share
                 if isinstance(old_share.holder, BundleResource):

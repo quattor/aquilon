@@ -23,7 +23,7 @@ from aquilon.exceptions_ import NotFoundException
 from aquilon.aqdb.model import (Host, Cluster, Archetype, Personality,
                                 PersonalityGrnMap, HostGrnMap, HostLifecycle,
                                 OperatingSystem, Service, ServiceInstance,
-                                Share, VirtualDisk, Disk, Machine, Model,
+                                Share, VirtualNasDisk, Disk, Machine, Model,
                                 DnsRecord, ARecord, Fqdn, DnsDomain, Interface,
                                 AddressAssignment, NetworkEnvironment, Network,
                                 MetaCluster, VirtualMachine, ClusterResource)
@@ -250,7 +250,7 @@ class CommandSearchHost(BrokerCommand):
                 raise NotFoundException("No shares found with name {0}."
                                         .format(guest_on_share))
 
-            NasAlias = aliased(VirtualDisk)
+            NasAlias = aliased(VirtualNasDisk)
             q = q.join('machine', 'disks', (NasAlias, NasAlias.id == Disk.id))
             q = q.filter(
                 NasAlias.share_id.in_(map(lambda s: s[0], v2shares)))
@@ -263,7 +263,7 @@ class CommandSearchHost(BrokerCommand):
                 raise NotFoundException("No shares found with name {0}."
                                         .format(guest_on_share))
 
-            NasAlias = aliased(VirtualDisk)
+            NasAlias = aliased(VirtualNasDisk)
 
             q = q.join('_cluster', 'cluster', 'resholder', VirtualMachine,
                        'machine', 'disks', (NasAlias, NasAlias.id == Disk.id))

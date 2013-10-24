@@ -16,26 +16,44 @@
 # limitations under the License.
 """ Disk for share """
 
+import re
+
 from sqlalchemy import Column, Boolean, Integer, ForeignKey, Index
-from sqlalchemy.ext.declarative import declared_attr
-from sqlalchemy.orm import relation, backref, column_property
+from sqlalchemy.orm import relation, backref, column_property, validates
 from sqlalchemy.sql import select, func
 
+from aquilon.exceptions_ import ArgumentError
+from aquilon.aqdb.column_types import AqStr
 from aquilon.aqdb.model import Disk, Share, Filesystem
 
+address_re = re.compile(r"\d+:\d+$")
 _TN = 'disk'
 
 
-class SnapshotableMixin(object):
-    @declared_attr
-    def snapshotable(cls):
-        col = Column(Boolean(name="%s_snapshotable_ck" % _TN),
-                     nullable=True)
-        return Disk.__table__.c.get('snapshotable', col)
+class VirtualDisk(Disk):
+    # We need to know the bus address of each disk.
+    # This isn't really nullable, but single-table inheritance means
+    # that the base class will end up with the column and the base class
+    # wants it to be nullable. We enforce this via __init__ instead.
+    address = Column(AqStr(128), nullable=True)
+
+    snapshotable = Column(Boolean(name="%s_snapshotable_ck" % _TN),
+                          nullable=True)
+
+    @validates('address')
+    def validate_address(self, key, value):  # pylint: disable=W0613
+        if not address_re.match(value):
+            raise ArgumentError(r"Disk address '%s' is not valid, it must "
+                                r"match \d+:\d+ (e.g. 0:0)." % value)
+        return value
+
+    def __init__(self, **kw):
+        if 'address' not in kw or kw['address'] is None:
+            raise ValueError("Address is mandatory for virtual disks.")
+        super(VirtualDisk, self).__init__(**kw)
 
 
-# Disk subclass for Share class
-class VirtualDisk(SnapshotableMixin,Disk):
+class VirtualNasDisk(VirtualDisk):
     share_id = Column(Integer, ForeignKey('share.id', name='%s_share_fk' % _TN,
                                           ondelete='CASCADE'),
                       nullable=True)
@@ -45,11 +63,6 @@ class VirtualDisk(SnapshotableMixin,Disk):
 
     __extra_table_args__ = (Index('%s_share_idx' % _TN, share_id),)
     __mapper_args__ = {'polymorphic_identity': 'virtual_disk'}
-
-    def __init__(self, **kw):
-        if 'address' not in kw or kw['address'] is None:
-            raise ValueError("address is mandatory for shared disks")
-        super(VirtualDisk, self).__init__(**kw)
 
     def __repr__(self):
         return "<%s %s (%s) of machine %s, %d GB, provided by %s>" % \
@@ -61,16 +74,16 @@ class VirtualDisk(SnapshotableMixin,Disk):
 # cheaper to query the DB than to load all entities into memory
 Share.disk_count = column_property(
     select([func.count()],
-           VirtualDisk.share_id == Share.id)
+           VirtualNasDisk.share_id == Share.id)
     .label("disk_count"), deferred=True)
 
 Share.machine_count = column_property(
-    select([func.count(func.distinct(VirtualDisk.machine_id))],
-           VirtualDisk.share_id == Share.id)
+    select([func.count(func.distinct(VirtualNasDisk.machine_id))],
+           VirtualNasDisk.share_id == Share.id)
     .label("machine_count"), deferred=True)
 
 
-class VirtualLocalDisk(SnapshotableMixin,Disk):
+class VirtualLocalDisk(VirtualDisk):
     filesystem_id = Column(Integer, ForeignKey('filesystem.id',
                                                name='%s_filesystem_fk' % _TN,
                                                ondelete='CASCADE'),
@@ -81,11 +94,6 @@ class VirtualLocalDisk(SnapshotableMixin,Disk):
 
     __extra_table_args__ = (Index('%s_filesystem_idx' % _TN, filesystem_id),)
     __mapper_args__ = {'polymorphic_identity': 'virtual_localdisk'}
-
-    def __init__(self, **kw):
-        if 'address' not in kw or kw['address'] is None:
-            raise ValueError("address is mandatory for filesystem disks")
-        super(VirtualLocalDisk, self).__init__(**kw)
 
     def __repr__(self):
         return "<%s %s (%s) of machine %s, %d GB, provided by %s>" % \

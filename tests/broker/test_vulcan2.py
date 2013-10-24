@@ -373,7 +373,7 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
         out = self.commandtest(command.split(" "))
         self.searchoutput(out, r"Disk: sda 34 GB scsi "
                           r"\(virtual_disk from test_v2_share\) "
-                          r"\[boot,snapshot\]$", command)
+                          r"\[boot, snapshot\]$", command)
 
         command = ["show_share", "--resourcegroup=utmc8as1",
                    "--cluster=utmc8", "--share=test_v2_share"]
@@ -445,7 +445,7 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
         self.searchoutput(out,
                           r"Disk: sda 34 GB scsi "
                           r"\(virtual_disk from test_v2_share\) "
-                          r"\[boot,snapshot\]$",
+                          r"\[boot, snapshot\]$",
                           command)
 
     def test_121_move_machine(self):
@@ -462,7 +462,7 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
         self.searchoutput(out,
                           r"Disk: sda 34 GB scsi "
                           r"\(virtual_disk from test_v2_share\) "
-                          r"\[boot,snapshot\]$",
+                          r"\[boot, snapshot\]$",
                           command)
 
 #    metacluster aligned svc tests

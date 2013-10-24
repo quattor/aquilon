@@ -25,7 +25,7 @@ from sqlalchemy.orm import relation, backref, deferred
 from aquilon.aqdb.model import Base, Machine
 from aquilon.aqdb.column_types import AqStr, Enum
 
-disk_types = ['local', 'san', 'virtual_disk', 'virtual_localdisk']
+# FIXME: this list should not be hardcoded here
 controller_types = ['cciss', 'ide', 'sas', 'sata', 'scsi', 'flash',
                     'fibrechannel']
 
@@ -37,18 +37,13 @@ class Disk(Base):
         Base Class for polymorphic representation of disk or disk-like resources
     """
     __tablename__ = _TN
+    _instance_label = 'device_name'
 
     id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
-    disk_type = Column(Enum(64, disk_types), nullable=False)
+    disk_type = Column(String(64), nullable=False)
     capacity = Column(Integer, nullable=False)
     device_name = Column(AqStr(128), nullable=False, default='sda')
     controller_type = Column(Enum(64, controller_types), nullable=False)
-
-    # We need to know the bus address of each disk.
-    # This isn't really nullable, but single-table inheritance means
-    # that the base class will end up with the column and the base class
-    # wants it to be nullable. We enforce this via __init__ instead.
-    address = Column(AqStr(128), nullable=True)
 
     machine_id = Column(Integer, ForeignKey('machine.machine_id',
                                             name='disk_machine_fk',
