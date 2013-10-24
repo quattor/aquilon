@@ -244,6 +244,7 @@ def send_notification(ntype, modified, sock=None, logger=LOGGER):
 def trigger_notifications(config, logger=LOGGER, loglevel=logging.INFO):
     sockname = os.path.join(config.get("broker", "sockdir"), "notifysock")
     sd = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+    logger.debug("Attempting connection to notification socket: %s" % sockname)
     try:
         sd.connect(sockname)
     except socket.error, err:
