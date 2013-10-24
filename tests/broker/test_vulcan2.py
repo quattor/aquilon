@@ -730,7 +730,7 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
 
         self.assertFalse(os.path.exists(os.path.join(
             self.config.get("broker", "profilesdir"), "clusters",
-            "utmc8%s" % self.profile_suffix)))
+            "utmc8%s" % self.xml_suffix)))
 
     def test_800_cleanup(self):
         self.drop_personality("vmhost", "vulcan2-10g-test")

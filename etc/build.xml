@@ -11,7 +11,8 @@
 	The panc.version line is not used if panc.jar is overridden.
 	-->
 	<property name="panc.version" value="prod" />
-	<property name="panc.formatter" value="pan" />
+	<property name="panc.formats" value="pan,dep" />
+	<property name="profile.suffixes" value=".xml" />
 	<property name="panc.batch.size" value="1000" />
 	<property name="panc.jar" location="/ms/dist/elfms/PROJ/panc/${panc.version}/lib/panc.jar" />
 	<property name="panc.debug.include" value="" />
@@ -20,7 +21,10 @@
 	<property name="ant-contrib.version" value="1.0b2" />
 	<property name="ant-contrib.jar" location="/ms/dist/msjava/PROJ/ant-contrib/${ant-contrib.version}/common/lib/ant-contrib.jar" />
 	<property name="force.build" value="false" />
-	<property name="gzip.output" value="false" />
+
+	<condition property="panc.checkDependencies" else="false">
+		<isfalse value="${force.build}"/>
+	</condition>
 
 	<!--
 	Be careful of the clean.dep.files property... if it is set at
@@ -47,11 +51,6 @@
 	<property name="compiled.profiles" location="${basedir}/build/${domain}" />
 	<!-- web/htdocs/profiles = compiled profiles to be served to clients -->
 	<property name="distributed.profiles" location="${basedir}/web/htdocs/profiles" />
-
-	<!-- Profiles will have a .gz suffix if gzip output is requested. -->
-	<condition property="profile.suffix" value=".xml.gz" else=".xml">
-		<istrue value="${gzip.output}" />
-	</condition>
 
 	<!--
 	Note that the old 'deps' directory was only needed for the
@@ -119,13 +118,18 @@
 		<for list="${object.profile}" delimiter=" " param="profile">
 			<sequential>
 				<var name="source.includes" value="${source.includes} @{profile}${panc.template_extension}" />
-				<var name="compiled.includes" value="${compiled.includes} @{profile}${profile.suffix}" />
+				<for list="${profile.suffixes}" delimiter="," param="suffix">
+					<sequential>
+						<var name="compiled.includes" value="${compiled.includes} @{profile}@{suffix}" />
+					</sequential>
+				</for>
 			</sequential>
 		</for>
-		<panc nthread="0" depWriteEnabled="true" outputDirectory="${compiled.profiles}" verbose="true" forceBuild="${force.build}" formatter="${panc.formatter}" gzipOutput="${gzip.output}">
+		<!-- <echo message="source.includes: ${source.includes}"/> -->
+		<!-- <echo message="compiled.includes: ${compiled.includes}"/> -->
+		<panc outputDir="${compiled.profiles}" verbose="true" checkDependencies="${panc.checkDependencies}" formats="${panc.formats}" debugNsInclude="${panc.debug.include}" debugNsExclude="${panc.debug.exclude}">
 			<path refid="pan.objectloadpath" />
 			<fileset dir="${source.profiles}" includes="${source.includes}" />
-			<debug include="${panc.debug.include}" exclude="${panc.debug.exclude}" />
 		</panc>
 		<!-- Cache the valid profile in the global pool. -->
 		<copy todir="${global.profiles}" preservelastmodified="true" overwrite="${force.build}">
@@ -139,10 +143,9 @@
 
 	<target name="compile.domain.profiles" description="compile all objects managed by a domain" depends="delete.domain.deps">
 		<fileset id="source.fileset" dir="${source.profiles}" includes="**/*${panc.template_extension}" />
-		<panc nthread="0" depWriteEnabled="true" outputDirectory="${compiled.profiles}" verbose="true" batchSize="${panc.batch.size}" forceBuild="${force.build}" formatter="${panc.formatter}" gzipOutput="${gzip.output}">
+		<panc outputDir="${compiled.profiles}" verbose="true" batchSize="${panc.batch.size}" checkDependencies="${panc.checkDependencies}" formats="${panc.formats}" debugNsInclude="${panc.debug.include}" debugNsExclude="${panc.debug.exclude}">
 			<path refid="pan.objectloadpath" />
 			<fileset refid="source.fileset" />
-			<debug include="${panc.debug.include}" exclude="${panc.debug.exclude}" />
 		</panc>
 		<!-- Cache all of these valid profiles in the global pool. -->
 		<copy todir="${global.profiles}" preservelastmodified="true" overwrite="${force.build}">
@@ -157,7 +160,7 @@
 			CoreTypes/selectors.html#scriptselector
 			OptionalTasks/script.html
 			-->
-			<fileset dir="${compiled.profiles}" includes="**/*${profile.suffix}">
+			<fileset dir="${compiled.profiles}" includes="**/*">
 				<scriptselector language="javascript"> <![CDATA[
 					importClass(java.io.File);
 					// importClass(java.lang.System);
@@ -167,10 +170,18 @@
 					// This could be more rigorous...
 					var base = thisfile.substring(prefix.length());
 					var source = self.getProject().getProperty("source.profiles");
-					var suffix = self.getProject().getProperty("profile.suffix").toString();
-					var counterpart = new File(source, base.replaceAll(suffix + "$", self.getProject().getProperty("panc.template_extension").toString()));
-					// System.out.println("Comparing '" + thisfile + "' with source '" + counterpart + "' and exists=" + counterpart.exists());
-					self.setSelected(counterpart.exists());
+					var suffixes = self.getProject().getProperty("profile.suffixes").toString().split(",");
+					var extension = self.getProject().getProperty("panc.template_extension").toString();
+					for (var i = 0; i < suffixes.length; i++) {
+						var suffix = suffixes[i];
+						if (!base.endsWith(suffix)) {
+							// System.out.println(base + " does not end with " + suffix);
+							continue;
+						}
+						var counterpart = new File(source, base.replaceAll(suffix + "$", extension));
+						// System.out.println("Comparing '" + thisfile + "' with source '" + counterpart + "' and exists=" + counterpart.exists());
+						self.setSelected(counterpart.exists());
+					}
 				]]></scriptselector>
 			</fileset>
 		</copy>

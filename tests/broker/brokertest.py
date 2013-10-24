@@ -67,7 +67,18 @@ class TestBrokerCommand(unittest.TestCase):
 
         cls.template_extension = cls.config.get("panc", "template_extension")
         cls.gzip_profiles = cls.config.getboolean("panc", "gzip_output")
-        cls.profile_suffix = ".xml.gz" if cls.gzip_profiles else ".xml"
+        if cls.gzip_profiles:
+            compress_suffix = ".gz"
+        else:
+            compress_suffix = ""
+        if cls.config.getboolean("panc", "xml_profiles"):
+            cls.xml_suffix = ".xml" + compress_suffix
+        else:
+            cls.xml_suffix = None
+        if cls.config.getboolean("panc", "json_profiles"):
+            cls.json_suffix = ".json" + compress_suffix
+        else:
+            cls.json_suffix = None
 
         # Need to import protocol buffers after we have the config
         # object all squared away and we can set the sys.path
@@ -688,12 +699,20 @@ class TestBrokerCommand(unittest.TestCase):
 
     def verify_buildfiles(self, domain, object,
                           want_exist=True, command='manage'):
+        buildfiles = []
+
         qdir = self.config.get('broker', 'quattordir')
         domaindir = os.path.join(qdir, 'build', domain)
-        xmlfile = os.path.join(domaindir, object + self.profile_suffix)
-        depfile = os.path.join(domaindir, object + '.dep')
-        profile = self.build_profile_name(object, domain=domain)
-        for f in [xmlfile, depfile, profile]:
+
+        buildfiles.append(os.path.join(domaindir, object + '.dep'))
+        buildfiles.append(self.build_profile_name(object, domain=domain))
+
+        if self.xml_suffix:
+            buildfiles.append(os.path.join(domaindir, object + self.xml_suffix))
+        if self.json_suffix:
+            buildfiles.append(os.path.join(domaindir, object + self.json_suffix))
+
+        for f in buildfiles:
             if want_exist:
                 self.failUnless(os.path.exists(f),
                                 "Expecting %s to exist before running %s." %

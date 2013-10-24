@@ -55,18 +55,17 @@ def build_index(config, session, logger=LOGGER):
 
     profilesdir = config.get("broker", "profilesdir")
 
-    # Profiles are xml files, and can be configured to (additionally) be gzip'd
-    profile_suffix = '.xml'
-    if gzip_output:
-        profile_suffix += '.gz'
+    # Profiles are xml or json files, and can be configured to (additionally) be gzip'd
+    if config.getboolean('panc', 'gzip_output'):
+        compress_suffix = ".gz"
+    else:
+        compress_suffix = ""
 
-    # The index generally just lists whatever is produced.  However, the
-    # webserver may be configured to transparently serve up .xml.gz files
-    # when just the .xml is requested.  In this case, the index should just
-    # list (advertise) the profile as a .xml file.
-    advertise_suffix = profile_suffix
-    if transparent_gzip:
-        advertise_suffix = '.xml'
+    suffixes = []
+    if config.getboolean('panc', 'xml_profiles'):
+        suffixes.append(".xml" + compress_suffix)
+    if config.getboolean('panc', 'json_profiles'):
+        suffixes.append(".json" + compress_suffix)
 
     # The profile should be .xml, unless webserver trickery is going to
     # redirect all requests for .xml files to be .xml.gz requests. :)
@@ -93,12 +92,17 @@ def build_index(config, session, logger=LOGGER):
                 if not obj:
                     continue
 
-                for ext in [".xml", ".xml.gz"]:
+                # If the broker configuration changes, the old index may
+                # still contain extensions we no longer want to
+                # generate, so we have to handle all possible values
+                # here
+                for ext in [".xml", ".xml.gz", ".json", ".json.gz"]:
                     if obj.endswith(ext):
                         obj = obj[:-len(ext)]
                         break
 
-                old_object_index[obj] = mtime
+                if obj not in old_object_index or old_object_index[obj] < mtime:
+                    old_object_index[obj] = mtime
         except Exception, e:  # pragma: no cover
             logger.info("Error processing %s, continuing: %s" %
                         (index_path, e))
@@ -118,25 +122,38 @@ def build_index(config, session, logger=LOGGER):
         for profile in files:
             if profile == profile_index:
                 continue
-            if not profile.endswith(profile_suffix):
-                continue
-            obj = os.path.join(root, profile[:-len(profile_suffix)])
-            # Remove the common prefix: our profilesdir, so that the
-            # remaining object name is relative to that root (+1 in order
-            # to remove the slash separator)
-            obj = obj[len(profilesdir) + 1:]
-            # This operation is not done with a lock, and it's possible
-            # that the file has been removed since calling os.walk().
-            # If that's the case, no need to add it to the modified_index.
-            try:
-                mtime = os.path.getmtime(os.path.join(root, profile))
-            except OSError, e:
-                continue
-            if obj in old_object_index and mtime > old_object_index[obj]:
-                modified_index[obj] = mtime
 
-            content.append("<profile mtime='%d'>%s%s</profile>" %
-                           (mtime, obj, advertise_suffix))
+            for suffix in suffixes:
+                if not profile.endswith(suffix):
+                    continue
+
+                obj = os.path.join(root, profile[:-len(suffix)])
+                # Remove the common prefix: our profilesdir, so that the
+                # remaining object name is relative to that root (+1 in order
+                # to remove the slash separator)
+                obj = obj[len(profilesdir) + 1:]
+                # This operation is not done with a lock, and it's possible
+                # that the file has been removed since calling os.walk().
+                # If that's the case, no need to add it to the modified_index.
+                try:
+                    mtime = os.path.getmtime(os.path.join(root, profile))
+                except OSError, e:
+                    continue
+                if obj in old_object_index and mtime > old_object_index[obj]:
+                    modified_index[obj] = mtime
+
+                # The index generally just lists whatever is produced.  However,
+                # the webserver may be configured to transparently serve up
+                # .xml.gz files when just the .xml is requested.  In this case,
+                # the index should just list (advertise) the profile as a .xml
+                # file.
+                if transparent_gzip:
+                    advertise_suffix = suffix.rstrip(".gz")
+                else:
+                    advertise_suffix = suffix
+
+                content.append("<profile mtime='%d'>%s%s</profile>" %
+                               (mtime, obj, advertise_suffix))
 
     content.append("</profiles>")
 

@@ -353,7 +353,7 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, MachineTestMixin,
 
         self.assertFalse(os.path.exists(os.path.join(
             self.config.get("broker", "profilesdir"), "clusters",
-            self.metacluster + self.profile_suffix)))
+            self.metacluster + self.xml_suffix)))
 
     def test_500_del_vlocal(self):
         self.drop_personality("aquilon", "virteng-perf-test")
