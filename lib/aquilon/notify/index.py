@@ -246,12 +246,12 @@ def trigger_notifications(config, logger=LOGGER, loglevel=logging.INFO):
     sd = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
     try:
         sd.connect(sockname)
-    except OSError, err:
+    except socket.error, err:
         logger.error("Failed to connect to notification socket: %s" % err)
 
     try:
         sd.send("update")
-    except OSError, err:
+    except socket.error, err:
         logger.error("Failed to send to notification socket: %s" % err)
 
     sd.close()
