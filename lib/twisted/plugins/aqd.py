@@ -213,6 +213,8 @@ class AQDMaker(object):
                                        "sbin", "aq_notifyd")
                 if not os.path.exists(notifyd):
                     notifyd = notifyd + ".py"
+                if not os.path.exists(notifyd):
+                    notifyd = "/usr/bin/aq_notifyd.py"
                 args = [notifyd, "--config", config.baseconfig]
                 mon.addProcess("notifyd", args, env=os.environ)
             mon.startService()
