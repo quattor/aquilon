@@ -141,6 +141,19 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
                          command)
         self.matchclean(out, '"/metadata/template/branch/author"', command)
 
+    def testverifyunittest02services(self):
+        for service, instance in [("afs", "q.ny.ms.com"),
+                                  ("bootserver", "unittest"),
+                                  ("dns", "unittest"),
+                                  ("ntp", "pa.ny.na"),
+                                  ("support-group", "ec-service")]:
+            command = ["cat", "--service", service, "--instance", instance,
+                       "--server"]
+            out = self.commandtest(command)
+            self.searchoutput(out,
+                              r'"clients" = list\(([^)]|\s)*"unittest02.one-nyp.ms.com"',
+                              command)
+
     def testmakeunittest00(self):
         basetime = datetime.now()
         command = ["make", "aquilon",

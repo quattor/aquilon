@@ -22,36 +22,35 @@ from aquilon.aqdb.model import Service
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.host import hostname_to_host
 from aquilon.worker.dbwrappers.service_instance import get_service_instance
-from aquilon.worker.templates.base import Plenary
+from aquilon.worker.templates.base import Plenary, PlenaryCollection
 
 
 class CommandBindServer(BrokerCommand):
 
     required_parameters = ["hostname", "service", "instance"]
 
-    def render(self, session, logger, hostname, service, instance, **arguments):
+    def render(self, session, logger, hostname, service, instance, position,
+               **arguments):
         dbhost = hostname_to_host(session, hostname)
         dbservice = Service.get_unique(session, service, compel=True)
         dbinstance = get_service_instance(session, dbservice, instance)
         if dbhost in dbinstance.server_hosts:
-            # FIXME: This should just be a warning.  There is currently
-            # no way of returning output that would "do the right thing"
-            # on the client but still show status 200 (OK).
-            # The right thing would generally be writing to stderr for
-            # a CLI (either raw or csv), and some sort of generic error
-            # page for a web client.
-            raise ArgumentError("Server %s is already bound to service %s "
-                                "instance %s." %
-                                (hostname, service, instance))
+            raise ArgumentError("Server {0} is already bound to {1:l}."
+                                .format(hostname, dbinstance))
+
+        plenaries = PlenaryCollection(logger=logger)
+        plenaries.append(Plenary.get_plenary(dbinstance))
+        plenaries.append(Plenary.get_plenary(dbhost))
 
         # The ordering_list will manage the position for us
-        dbinstance.server_hosts.append(dbhost)
+        if position is not None:
+            dbinstance.server_hosts.insert(position, dbhost)
+        else:
+            dbinstance.server_hosts.append(dbhost)
+        session.expire(dbhost, ['_services_provided'])
 
         session.flush()
 
-        plenary_info = Plenary.get_plenary(dbinstance, logger=logger)
-        plenary_info.write()
-
-        # XXX: Need to recompile...
+        plenaries.write()
 
         return

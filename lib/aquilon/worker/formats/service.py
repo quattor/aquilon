@@ -16,6 +16,8 @@
 # limitations under the License.
 """Service formatter."""
 
+from operator import attrgetter
+
 from aquilon.aqdb.model import Service
 from aquilon.worker.formats.formatters import ObjectFormatter
 
@@ -28,10 +30,13 @@ class ServiceFormatter(ObjectFormatter):
             max_clients = "Unlimited"
         details.append(indent + "  Default Maximum Client Count: %s" %
                        max_clients)
-        for archetype in service.archetypes:
+        details.append(indent + "  Need Client List: %s" %
+                       service.need_client_list)
+        for archetype in sorted(service.archetypes, key=attrgetter("name")):
             details.append(indent + "  Required for Archetype: " +
                            archetype.name)
-        for personality in service.personalities:
+        for personality in sorted(service.personalities,
+                                  key=attrgetter("archetype.name", "name")):
             details.append(indent +
                            "  Required for Personality: %s Archetype: %s" %
                            (personality.name, personality.archetype.name))

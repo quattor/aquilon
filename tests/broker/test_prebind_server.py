@@ -18,7 +18,8 @@
 """ This is needed to make sure that a server is bound to the aqd service
     before make aquilon runs."""
 
-import socket
+from collections import defaultdict
+import re
 
 if __name__ == "__main__":
     import utils
@@ -27,82 +28,90 @@ if __name__ == "__main__":
 import unittest2 as unittest
 from brokertest import TestBrokerCommand
 
+instance_servers = {
+    "aqd": {
+        "ny-prod": ["nyaqd1.ms.com"],
+    },
+    "bootserver": {
+        "unittest": ["infra1.aqd-unittest.ms.com"],
+        "one-nyp": ["infra1.one-nyp.ms.com"],
+    },
+    "chooser1": {
+        "ut.a": ["server1.aqd-unittest.ms.com"],
+        "ut.b": ["server2.aqd-unittest.ms.com"],
+        "ut.c": ["server3.aqd-unittest.ms.com"],
+    },
+    "chooser2": {
+        "ut.a": ["server1.aqd-unittest.ms.com"],
+        "ut.c": ["server3.aqd-unittest.ms.com"],
+    },
+    "chooser3": {
+        "ut.a": ["server1.aqd-unittest.ms.com"],
+        "ut.b": ["server2.aqd-unittest.ms.com"],
+    },
+    "dns": {
+        "unittest": ["infra1.aqd-unittest.ms.com", "nyaqd1.ms.com"],
+        "one-nyp": ["infra1.one-nyp.ms.com"],
+    },
+    "lemon": {
+        "ny-prod": ["nyaqd1.ms.com"],
+    },
+    "ntp": {
+        "pa.ny.na": ["nyaqd1.ms.com"],
+    },
+    "syslogng": {
+        "ny-prod": ["nyaqd1.ms.com"],
+    },
+}
+
 
 class TestPrebindServer(TestBrokerCommand):
 
-    def testbindntpserver(self):
-        self.noouttest(["bind", "server",
-                        "--hostname", "nyaqd1.ms.com",
-                        "--service", "ntp", "--instance", "pa.ny.na"])
+    def test_100_bind_servers(self):
+        server_provides = defaultdict(lambda: defaultdict(list))
+        for service, instances in instance_servers.items():
+            for instance, servers in instances.items():
+                for server in servers:
+                    command = ["bind_server", "--hostname", server,
+                               "--service", service, "--instance", instance]
+                    out = self.statustest(command)
+                    # This test runs early when none of the servers are
+                    # configured yet, so bind_server will complain - but only if
+                    # the server is of a compileable archetype.
+                    if re.match(r"[^.]+\.ms\.com$", server):
+                        self.assertEmptyErr(out, command)
+                    else:
+                        self.matchoutput(out, "Warning: Host %s is missing the "
+                                         "following required services" % server,
+                                         command)
 
-    def testverifybindntp(self):
-        command = "show service --service ntp --instance pa.ny.na"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Server: nyaqd1.ms.com", command)
+                    server_provides[server][service].append(instance)
 
-    def testbindaqdserver(self):
-        self.noouttest(["bind", "server",
-                        "--hostname", "nyaqd1.ms.com",
-                        "--service", "aqd", "--instance", "ny-prod"])
+                command = ["show_service", "--service", service,
+                           "--instance", instance]
+                out = self.commandtest(command)
+                for server in servers:
+                    self.matchoutput(out, "Server: %s" % server, command)
 
-    def testverifybindaqd(self):
-        command = "show service --service aqd --instance ny-prod"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Server: nyaqd1.ms.com", command)
+                command = ["cat", "--service", service, "--instance", instance]
+                out = self.commandtest(command)
+                self.searchoutput(out,
+                                  r'"servers" = list\(\s*' +
+                                  r',\s*'.join(['"%s"' % server for server in
+                                                servers]) +
+                                  r'\s*\);',
+                                  command)
 
-    def testbindlemonserver(self):
-        self.noouttest(["bind", "server", "--hostname", "nyaqd1.ms.com",
-                        "--service", "lemon", "--instance", "ny-prod"])
+        for server, services in server_provides.items():
+            command = ["show_host", "--hostname", server]
+            out = self.commandtest(command)
+            for service, instances in services.items():
+                for instance in instances:
+                    self.matchoutput(out, "Provides Service: %s Instance: %s" %
+                                     (service, instance),
+                                     command)
 
-    def testverifybindlemon(self):
-        command = "show service --service lemon --instance ny-prod"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Server: nyaqd1.ms.com", command)
-
-    def testbindsyslogngserver(self):
-        self.noouttest(["bind", "server", "--hostname", "nyaqd1.ms.com",
-                        "--service", "syslogng", "--instance", "ny-prod"])
-
-    def testverifybindsyslogng(self):
-        command = "show service --service syslogng --instance ny-prod"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Server: nyaqd1.ms.com", command)
-
-    def testbindbootserver(self):
-        self.noouttest(["bind_server", "--hostname=infra1.aqd-unittest.ms.com",
-                        "--service=bootserver", "--instance=unittest"])
-        self.noouttest(["bind_server", "--hostname=infra1.one-nyp.ms.com",
-                        "--service=bootserver", "--instance=one-nyp"])
-
-    def testverifybindbootserver(self):
-        command = "show service --service bootserver --instance one-nyp"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Server: infra1.one-nyp.ms.com", command)
-
-    def testbindchooser(self):
-        for service in ["chooser1", "chooser2", "chooser3"]:
-            for (s, n) in [(1, 'a'), (2, 'b'), (3, 'c')]:
-                if service == 'chooser2' and n == 'b':
-                    continue
-                if service == 'chooser3' and n == 'c':
-                    continue
-                server = "server%d.aqd-unittest.ms.com" % s
-                instance = "ut.%s" % n
-                self.noouttest(["bind", "server", "--hostname", server,
-                                "--service", service, "--instance", instance])
-
-    def testbinddns(self):
-        self.noouttest(["bind", "server",
-                        "--hostname", "infra1.aqd-unittest.ms.com",
-                        "--service", "dns", "--instance", "unittest"])
-        self.noouttest(["bind", "server",
-                        "--hostname", "nyaqd1.ms.com",
-                        "--service", "dns", "--instance", "unittest"])
-        self.noouttest(["bind", "server",
-                        "--hostname", "infra1.one-nyp.ms.com",
-                        "--service", "dns", "--instance", "one-nyp"])
-
-    def testcatdns(self):
+    def test_200_cat_dns(self):
         command = "cat --service dns --instance unittest"
         out = self.commandtest(command.split(" "))
         self.searchoutput(out,

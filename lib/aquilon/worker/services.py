@@ -404,6 +404,9 @@ class Chooser(object):
     def stash_services(self):
         changed_servers = set()
         for instance in self.instances_bound.union(self.instances_unbound):
+            if not instance.service.need_client_list:
+                continue
+
             changed_servers.update(instance.servers)
 
             plenary = PlenaryServiceInstanceServer.get_plenary(instance,

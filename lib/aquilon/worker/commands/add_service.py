@@ -16,10 +16,8 @@
 # limitations under the License.
 """Contains the logic for `aq add service`."""
 
-
-from aquilon.exceptions_ import ArgumentError
+from aquilon.aqdb.model import Service
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.aqdb.model import Service, ServiceInstance
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
 
 
@@ -27,33 +25,15 @@ class CommandAddService(BrokerCommand):
 
     required_parameters = ["service"]
 
-    def render(self, session, logger, service, instance, comments,
+    def render(self, session, logger, service, need_client_list, comments,
                **arguments):
-        dbservice = session.query(Service).filter_by(name=service).first()
-        if dbservice and instance is None:
-            raise ArgumentError("Service %s already exists." % dbservice.name)
-        if not dbservice:
-            # "add_service --service foo --comments blah" should add the comments
-            # to Service,
-            # "add_service --service foo --instance bar --comments blah" should
-            # add the comments to ServiceInstance
-            if instance:
-                srvcomments = None
-            else:
-                srvcomments = comments
-            dbservice = Service(name=service, comments=srvcomments)
-            session.add(dbservice)
+        Service.get_unique(session, service, preclude=True)
+        dbservice = Service(name=service, comments=comments,
+                            need_client_list=need_client_list)
+        session.add(dbservice)
 
         plenaries = PlenaryCollection(logger=logger)
         plenaries.append(Plenary.get_plenary(dbservice))
-
-        if instance:
-            ServiceInstance.get_unique(session, service=dbservice,
-                                       name=instance, preclude=True)
-            dbsi = ServiceInstance(service=dbservice, name=instance,
-                                   comments=comments)
-            session.add(dbsi)
-            plenaries.append(Plenary.get_plenary(dbsi))
 
         session.flush()
         plenaries.write()

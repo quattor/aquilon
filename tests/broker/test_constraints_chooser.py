@@ -28,6 +28,7 @@ from brokertest import TestBrokerCommand
 class TestChooserConstraints(TestBrokerCommand):
 
     def test_000_setupservice(self):
+        self.noouttest(["add_service", "--service", "chooser_test"])
         command = "add service --service chooser_test --instance max_clients"
         self.noouttest(command.split(" "))
 

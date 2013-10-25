@@ -141,7 +141,7 @@ class ServiceInstance(Base):
         q = q.join((Fqdn, DnsRecord.fqdn_id == Fqdn.id), DnsDomain)
         q = q.options(contains_eager('fqdn'))
         q = q.options(contains_eager('fqdn.dns_domain'))
-        q = q.order_by(DnsDomain.name, Fqdn.name)
+        q = q.order_by(ServiceInstanceServer.position)
         return [str(sys.fqdn) for sys in q.all()]
 
     @property

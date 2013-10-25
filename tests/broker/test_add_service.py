@@ -17,6 +17,8 @@
 # limitations under the License.
 """Module for testing the add service command."""
 
+import os.path
+
 if __name__ == "__main__":
     import utils
     utils.import_depends()
@@ -26,13 +28,31 @@ from brokertest import TestBrokerCommand
 
 default_services = {
     "aqd": ["ny-prod"],
+
+    # This service will not have any instances...
+    "badservice": [],
+
+    # Testing server affinity - ut.a will be available to all
+    # three of chooser[123], but it will be the only instance
+    # (with corresponding server) in common to all three.
+    "chooser1": ["ut.a", "ut.b", "ut.c"],
+    # Skipping ut.b for chooser2
+    "chooser2": ["ut.a", "ut.c"],
+    # Skipping ut.c for chooser3
+    "chooser3": ["ut.a", "ut.b"],
+
     "dns": ["unittest", "one-nyp"],
     "esx_management_server": ["ut.a", "ut.b", "np"],
     "lemon": ["ny-prod"],
     "ntp": ["pa.ny.na"],
     "support-group": ["ec-service"],
     "syslogng": ["ny-prod"],
+
+    # These service instances will not have any maps...
+    "unmapped": ["instance1"],
+
     "utnotify": ["localhost"],
+    "utsvc": ["utsi1", "utsi2"],
     "vcenter": ["ut", "np"],
     "vmseasoning": ["salt", "pepper", "sugar"],
 }
@@ -40,14 +60,43 @@ default_services = {
 
 class TestAddService(TestBrokerCommand):
 
-    def testadddefaults(self):
+    def test_100_add_defaults(self):
+        service_plenaries = ["servicedata/%s/config",
+                             "service/%s/client/config",
+                             "service/%s/server/config"]
+        instance_plenaries = ["servicedata/%s/%s/config",
+                              "servicedata/%s/%s/srvconfig",
+                              "service/%s/%s/client/config",
+                              "service/%s/%s/server/config"]
+
         for service, instances in default_services.items():
+            for pattern in service_plenaries:
+                plenary = self.plenary_name(pattern % service)
+                self.failIf(os.path.exists(plenary),
+                            "Plenary '%s' was not expected to exist." % plenary)
+
             self.noouttest(["add_service", "--service", service])
+
             for instance in instances:
+                for pattern in instance_plenaries:
+                    plenary = self.plenary_name(pattern % (service, instance))
+                    self.failIf(os.path.exists(plenary),
+                                "Plenary '%s' was not expected to exist." % plenary)
+
                 self.noouttest(["add_service", "--service", service,
                                 "--instance", instance])
 
-    def testverifydefaults(self):
+                for pattern in instance_plenaries:
+                    plenary = self.plenary_name(pattern % (service, instance))
+                    self.failUnless(os.path.exists(plenary),
+                                    "Plenary '%s' does not exist." % plenary)
+
+            for pattern in service_plenaries:
+                plenary = self.plenary_name(pattern % service)
+                self.failUnless(os.path.exists(plenary),
+                                "Plenary '%s' does not exist." % plenary)
+
+    def test_105_verify_defaults(self):
         for service, instances in default_services.items():
             command = ["show_service", "--service", service]
             out = self.commandtest(command)
@@ -56,25 +105,41 @@ class TestAddService(TestBrokerCommand):
                                  "Service: %s Instance: %s" % (service, instance),
                                  command)
 
-    def testaddafsinstance(self):
+    def test_110_add_instance_no_service(self):
+        command = ["add", "service", "--service", "afs",
+                   "--instance", "q.ny.ms.com",
+                   "--comments", "Some instance comments"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out, "Service afs not found.", command)
+
+    def test_111_add_afs(self):
+        self.noouttest(["add_service", "--service", "afs"])
+
+    def test_112_add_afs_instance(self):
         command = ["add", "service", "--service", "afs",
                    "--instance", "q.ny.ms.com",
                    "--comments", "Some instance comments"]
         self.noouttest(command)
 
-    def testaddafsbynetinstance(self):
+    def test_120_add_extra_afs_instance(self):
+        command = "add service --service afs --instance q.ln.ms.com"
+        self.noouttest(command.split(" "))
+
+    def test_120_add_afsbynet(self):
         command = ["add", "service", "--service", "afs",
                    "--instance", "afs-by-net",
                    "--comments", "For network based maps"]
         self.noouttest(command)
 
-    def testaddafsbynetdupinstance(self):
+    def test_121_add_afsbynet_duplicate(self):
         command = ["add", "service", "--service", "afs",
                    "--instance", "afs-by-net2",
                    "--comments", "afs-by-net duplicate"]
         self.noouttest(command)
 
-    def testaddnetmappersinstances(self):
+    def test_130_add_netmappers_instances(self):
+        self.noouttest(["add_service", "--service", "netmap"])
+
         command = ["add", "service", "--service", "netmap",
                    "--instance", "q.ny.ms.com",
                    "--comments", "For location based maps"]
@@ -90,63 +155,60 @@ class TestAddService(TestBrokerCommand):
                    "--comments", "For network based maps"]
         self.noouttest(command)
 
-    def testaddduplicateservice(self):
-        command = "add service --service afs"
-        self.badrequesttest(command.split(" "))
-
-    def testaddduplicateinstance(self):
-        command = "add service --service afs --instance q.ny.ms.com"
-        self.badrequesttest(command.split(" "))
-
-    def testverifyaddafsinstance(self):
-        command = "show service --service afs"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Service: afs Instance: q.ny.ms.com", command)
-
-    def testverifiyaddafsbynetinstance(self):
-        command = "show service --service afs"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Service: afs Instance: afs-by-net", command)
-
-    def testaddextraafsinstance(self):
-        command = "add service --service afs --instance q.ln.ms.com"
-        self.noouttest(command.split(" "))
-
-    def testverifyaddextraafsinstance(self):
-        command = "show service --service afs"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Service: afs Instance: q.ln.ms.com", command)
-        # Make sure the right object got the comments
-        self.matchoutput(out, "    Comments: Some instance comments", command)
-        self.searchclean(out, r"^  Comments:", command)
-
-    def testaddbootserver(self):
+    def test_140_add_bootserver(self):
         """ add service without instance first """
         command = ["add", "service", "--service", "bootserver",
                    "--comments", "Some service comments"]
         self.noouttest(command)
 
-    def testaddbootserverinstance(self):
+    def test_141_add_bootserver_instance(self):
         self.noouttest(["add_service", "--service", "bootserver", "--instance", "unittest"])
         self.noouttest(["add_service", "--service", "bootserver", "--instance", "one-nyp"])
 
-    def testverifyaddbootserverinstance(self):
+    def test_150_add_poll_helper(self):
+        service = self.config.get("broker", "poll_helper_service")
+        self.noouttest(["add", "service", "--service", service])
+        self.noouttest(["add", "service", "--service", service,
+                        "--instance", "unittest"])
+
+    def test_200_add_duplicate_service(self):
+        command = "add service --service afs"
+        out = self.badrequesttest(command.split(" "))
+        self.matchoutput(out, "Service afs already exists.", command)
+
+    def test_200_add_duplicate_instance(self):
+        command = "add service --service afs --instance q.ny.ms.com"
+        out = self.badrequesttest(command.split(" "))
+        self.matchoutput(out,
+                         "Service Instance q.ny.ms.com, service afs already exists.",
+                         command)
+
+    def test_300_show_afs(self):
+        command = "show service --service afs"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Service: afs Instance: q.ny.ms.com", command)
+        self.matchoutput(out, "Service: afs Instance: afs-by-net", command)
+        self.matchoutput(out, "Service: afs Instance: q.ln.ms.com", command)
+
+        # Make sure the right object got the comments
+        self.matchoutput(out, "    Comments: Some instance comments", command)
+        self.searchclean(out, r"^  Comments:", command)
+
+        self.matchoutput(out, "Need Client List: True", command)
+
+    def test_300_show_bootserver(self):
         command = "show service --service bootserver"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Service: bootserver Instance: unittest", command)
         self.matchoutput(out, "Service: bootserver Instance: one-nyp", command)
         self.searchoutput(out, r"^  Comments: Some service comments", command)
 
-    def testaddutsi1instance(self):
-        command = "add service --service utsvc --instance utsi1"
-        self.noouttest(command.split(" "))
-
-    def testcatutsvcserverdefault(self):
+    def test_300_cat_utsvc_server_default(self):
         command = ["cat", "--service", "utsvc", "--server", "--default"]
         out = self.commandtest(command)
         self.matchoutput(out, "template service/utsvc/server/config;", command)
 
-    def testcatutsi1(self):
+    def test_300_cat_utsi1(self):
         command = "cat --service utsvc --instance utsi1"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
@@ -157,7 +219,7 @@ class TestAddService(TestBrokerCommand):
         self.matchoutput(out, '"instance" = "utsi1";', command)
         self.searchoutput(out, r'"servers" = list\(\s*\);', command)
 
-    def testcatutsi1default(self):
+    def test_300_cat_utsi1_default(self):
         command = "cat --service utsvc --instance utsi1 --default"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "template service/utsvc/utsi1/client/config;",
@@ -168,7 +230,7 @@ class TestAddService(TestBrokerCommand):
         self.matchoutput(out, 'include { "service/utsvc/client/config" };',
                          command)
 
-    def testcatutsi1uiserver(self):
+    def test_300_cat_utsi1_server(self):
         command = "cat --service utsvc --instance utsi1 --server"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
@@ -177,7 +239,7 @@ class TestAddService(TestBrokerCommand):
         self.matchoutput(out, '"instance" = "utsi1";', command)
         self.searchoutput(out, r'"clients" = list\(\s*\);', command)
 
-    def testcatutsi1uiserverdefault(self):
+    def test_300_cat_utsi1_server_default(self):
         command = "cat --service utsvc --instance utsi1 --server --default"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
@@ -190,11 +252,7 @@ class TestAddService(TestBrokerCommand):
                          'include { "service/utsvc/server/config" };',
                          command)
 
-    def testaddutsi2instance(self):
-        command = "add service --service utsvc --instance utsi2"
-        self.noouttest(command.split(" "))
-
-    def testcatutsi2(self):
+    def test_300_cat_utsi2(self):
         command = "cat --service utsvc --instance utsi2"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
@@ -205,7 +263,7 @@ class TestAddService(TestBrokerCommand):
         self.matchoutput(out, '"instance" = "utsi2";', command)
         self.searchoutput(out, r'"servers" = list\(\s*\);', command)
 
-    def testcatutsi2default(self):
+    def test_300_cat_utsi2_default(self):
         command = "cat --service utsvc --instance utsi2 --default"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "template service/utsvc/utsi2/client/config;",
@@ -216,114 +274,16 @@ class TestAddService(TestBrokerCommand):
         self.matchoutput(out, 'include { "service/utsvc/client/config" };',
                          command)
 
-    def testcatutsvc(self):
+    def test_300_cat_utsvc(self):
         command = "cat --service utsvc"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "structure template servicedata/utsvc/config;",
                          command)
 
-    def testcatutsvcdefault(self):
+    def test_300_cat_utsvc_default(self):
         command = "cat --service utsvc --default"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "template service/utsvc/client/config;", command)
-
-    def testverifyaddutsvcinstances(self):
-        command = "show service --service utsvc"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Service: utsvc Instance: utsi1", command)
-        self.matchoutput(out, "Service: utsvc Instance: utsi2", command)
-
-    def testaddutsvc2(self):
-        command = "add service --service utsvc2"
-        self.noouttest(command.split(" "))
-
-    def testcatutsvc2(self):
-        command = "cat --service utsvc2"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "structure template servicedata/utsvc2/config;",
-                         command)
-
-    def testcatutsvc2default(self):
-        command = "cat --service utsvc2 --default"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "template service/utsvc2/client/config;",
-                         command)
-
-    def testverifyutsvc2(self):
-        command = "show service --service utsvc2"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Service: utsvc2", command)
-
-    def testaddchooser1(self):
-        command = "add service --service chooser1"
-        self.noouttest(command.split(" "))
-
-    def testaddchooser2(self):
-        command = "add service --service chooser2"
-        self.noouttest(command.split(" "))
-
-    def testaddchooser3(self):
-        command = "add service --service chooser3"
-        self.noouttest(command.split(" "))
-
-    # Testing server affinity - ut.a will be available to all
-    # three of chooser[123], but it will be the only instance
-    # (with corresponding server) in common to all three.
-    def testaddchooser1uta(self):
-        command = "add service --service chooser1 --instance ut.a"
-        self.noouttest(command.split(" "))
-
-    def testaddchooser1utb(self):
-        command = "add service --service chooser1 --instance ut.b"
-        self.noouttest(command.split(" "))
-
-    def testaddchooser1utc(self):
-        command = "add service --service chooser1 --instance ut.c"
-        self.noouttest(command.split(" "))
-
-    # Skipping ut.b for chooser2
-    def testaddchooser2uta(self):
-        command = "add service --service chooser2 --instance ut.a"
-        self.noouttest(command.split(" "))
-
-    def testaddchooser2utc(self):
-        command = "add service --service chooser2 --instance ut.c"
-        self.noouttest(command.split(" "))
-
-    # Skipping ut.c for chooser3
-    def testaddchooser3uta(self):
-        command = "add service --service chooser3 --instance ut.a"
-        self.noouttest(command.split(" "))
-
-    def testaddchooser3utb(self):
-        command = "add service --service chooser3 --instance ut.b"
-        self.noouttest(command.split(" "))
-
-    def testaddbadservice(self):
-        # This service will not have any instances...
-        command = "add service --service badservice"
-        self.noouttest(command.split(" "))
-
-    def testverifyaddbadservice(self):
-        command = "show service --service badservice"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Service: badservice", command)
-
-    def testaddunmappedservice(self):
-        # These service instances will not have any maps...
-        command = "add service --service unmapped --instance instance1"
-        self.noouttest(command.split(" "))
-
-    def testverifyunmappedservice(self):
-        command = "show service --service unmapped"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Service: unmapped", command)
-
-    def testaddpollhelper(self):
-        service = self.config.get("broker", "poll_helper_service")
-        self.noouttest(["add", "service", "--service", service])
-        self.noouttest(["add", "service", "--service", service,
-                        "--instance", "unittest"])
 
 
 if __name__ == '__main__':
