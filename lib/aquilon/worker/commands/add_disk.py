@@ -18,10 +18,10 @@
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import (Machine, LocalDisk, VirtualNasDisk,
-                                VirtualLocalDisk, Filesystem)
+                                VirtualLocalDisk, Share, Filesystem)
 from aquilon.aqdb.model.disk import controller_types
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.dbwrappers.resources import find_share
+from aquilon.worker.dbwrappers.resources import find_resource
 from aquilon.worker.templates import Plenary
 
 
@@ -76,7 +76,7 @@ class CommandAddDisk(BrokerCommand):
                                     "possible to define a virtual disk."
                                     .format(dbmachine))
 
-            dbshare = find_share(dbmachine.vm_container.holder.holder_object,
+            dbshare = find_resource(Share, dbmachine.vm_container.holder.holder_object,
                                  resourcegroup, share)
             dbdisk = VirtualNasDisk(device_name=disk,
                                     controller_type=controller, bootable=boot,

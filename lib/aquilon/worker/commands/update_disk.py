@@ -18,10 +18,10 @@
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import (Machine, Disk, VirtualDisk, VirtualNasDisk,
-                                VirtualLocalDisk, Filesystem)
+                                VirtualLocalDisk, Filesystem, Share)
 from aquilon.aqdb.model.disk import controller_types
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.dbwrappers.resources import find_share
+from aquilon.worker.dbwrappers.resources import find_resource
 from aquilon.worker.templates import Plenary, PlenaryCollection
 
 
@@ -113,8 +113,9 @@ class CommandUpdateDisk(BrokerCommand):
                     session.add(new_dbdisk)
                     dbdisk = new_dbdisk
 
-                new_share = find_share(dbmachine.vm_container.holder.holder_object,
-                                       resourcegroup, share)
+                new_share = find_resource(Share,
+                                          dbmachine.vm_container.holder.holder_object,
+                                          resourcegroup, share)
                 new_share.disks.append(dbdisk)
 
             if filesystem:
@@ -125,9 +126,9 @@ class CommandUpdateDisk(BrokerCommand):
                     session.add(new_dbdisk)
                     dbdisk = new_dbdisk
 
-                new_fs = Filesystem.get_unique(session, name=filesystem,
-                                               holder=dbmachine.vm_container.holder,
-                                               compel=True)
+                new_fs = find_resource(Filesystem,
+                                       dbmachine.vm_container.holder.holder_object,
+                                       resourcegroup, filesystem)
                 new_fs.disks.append(dbdisk)
 
         session.flush()
