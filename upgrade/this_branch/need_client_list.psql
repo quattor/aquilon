@@ -1,0 +1,3 @@
+ALTER TABLE service ADD need_client_list BOOLEAN;
+UPDATE service SET need_client_list = 'f';
+ALTER TABLE service ALTER need_client_list SET NOT NULL;
