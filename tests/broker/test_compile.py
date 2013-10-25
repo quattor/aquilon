@@ -294,6 +294,12 @@ class TestCompile(VerifyNotificationsMixin, TestBrokerCommand):
         self.matchoutput(err, "1/1 object template(s) being processed",
                          command)
 
+    def test_575_compilepersonalitynohost(self):
+        command = ['compile', '--personality=utpersonality/dev', '--archetype=aquilon',
+                   '--domain=ut-prod']
+        (out, err) = self.successtest(command)
+        self.noouttest(command)
+
     def test_580_reset_data(self):
         command = ['manage', '--hostname=unittest02.one-nyp.ms.com',
                    '--domain=unittest', '--force']
