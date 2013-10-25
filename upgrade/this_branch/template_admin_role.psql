@@ -1,0 +1,3 @@
+INSERT INTO role (id, name, creation_date, comments)
+	VALUES (nextval('role_id_seq'), 'template_admin', current_timestamp,
+		'used for template development');
