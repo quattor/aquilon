@@ -57,13 +57,13 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
                          "the background.", command)
         self.wait_notification(basetime, 1)
 
-        self.assert_(os.path.exists(os.path.join(
-            self.config.get("broker", "profilesdir"),
-            "unittest02.one-nyp.ms.com%s" % self.xml_suffix)))
+        self.verify_buildfiles("unittest", "unittest02.one-nyp.ms.com",
+                               command="make_aquilon")
 
-        self.failUnless(os.path.exists(
-            self.build_profile_name("unittest02.one-nyp.ms.com",
-                                    domain="unittest")))
+        # The .dep file should not get copied into the web directory
+        profilesdir = self.config.get("broker", "profilesdir")
+        self.failIf(os.path.exists(os.path.join(profilesdir,
+            "unittest02.one-nyp.ms.com.dep")))
 
         servicedir = os.path.join(self.config.get("broker", "plenarydir"),
                                   "servicedata")

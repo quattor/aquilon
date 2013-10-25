@@ -172,6 +172,7 @@
 					var source = self.getProject().getProperty("source.profiles");
 					var suffixes = self.getProject().getProperty("profile.suffixes").toString().split(",");
 					var extension = self.getProject().getProperty("panc.template_extension").toString();
+					self.setSelected(false);
 					for (var i = 0; i < suffixes.length; i++) {
 						var suffix = suffixes[i];
 						if (!base.endsWith(suffix)) {
