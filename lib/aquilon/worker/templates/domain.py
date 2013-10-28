@@ -92,12 +92,6 @@ class TemplateDomain(object):
             if not os.path.exists(sandboxdir):
                 raise ArgumentError("Sandbox directory '%s' does not exist." %
                                     sandboxdir)
-            if not self.sandbox_has_latest(config, sandboxdir):
-                self.logger.warn("Sandbox %s/%s does not contain the "
-                                 "latest changes from the prod domain.  If "
-                                 "there are failures try "
-                                 "`git fetch && git merge origin/prod`" %
-                                 (self.author.name, self.domain.name))
 
         self.logger.info("preparing domain %s for compile" % self.domain.name)
 
@@ -221,25 +215,3 @@ class TemplateDomain(object):
                 lock_queue.release(key)
 
         trigger_notifications(config, self.logger, CLIENT_INFO)
-
-    def sandbox_has_latest(self, config, sandboxdir):
-        domainsdir = config.get('broker', 'domainsdir')
-        prod_domain = config.get('broker', 'default_domain_start')
-        proddir = os.path.join(domainsdir, prod_domain)
-        try:
-            prod_commit = run_git(['rev-list', '-n', '1', 'HEAD'],
-                                  path=proddir, logger=self.logger).strip()
-        except ProcessException:
-            prod_commit = ''
-        if not prod_commit:
-            raise InternalError("Error finding top commit for %s" %
-                                prod_domain)
-        filterre = re.compile('^' + prod_commit + '$')
-        try:
-            found_latest = run_git(['rev-list', 'HEAD'], path=sandboxdir,
-                                   logger=self.logger, filterre=filterre)
-        except ProcessException:
-            self.logger.warn("Failed to run git command in sandbox %s." %
-                             sandboxdir)
-            found_latest = ''
-        return bool(found_latest)
