@@ -172,6 +172,15 @@ class TestAddSandbox(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "utsandbox", command)
 
+    def testaddexistingpath(self):
+        sandboxdir = os.path.join(self.sandboxdir, "existingsand")
+        os.makedirs(sandboxdir)
+        command = ["add", "sandbox", "--sandbox", "existingsand"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Sandbox directory %s already exists; "
+                         "cannot create branch." % sandboxdir, command)
+        os.removedirs(sandboxdir)
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddSandbox)

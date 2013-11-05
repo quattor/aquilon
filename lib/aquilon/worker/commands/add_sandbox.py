@@ -18,6 +18,7 @@
 
 
 import re
+import os
 
 from aquilon.exceptions_ import (AuthorizationException, ArgumentError)
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
@@ -50,6 +51,17 @@ class CommandAddSandbox(CommandGet):
 
         Branch.get_unique(session, sandbox, preclude=True)
 
+        # Check that the user has cleared up a directory of the same
+        # name; if this is not the case the branch may be created (in git)
+        # and added to the database - however CommandGet will fail roleing
+        # back the database leaving the branch created in git
+        templatesdir = self.config.get("broker", "templatesdir")
+        sandboxdir = os.path.join(templatesdir, dbuser.name, sandbox)
+        if os.path.exists(sandboxdir):
+            raise ArgumentError("Sandbox directory %s already exists; "
+                                "cannot create branch." %
+                                sandboxdir)
+
         if not start:
             start = self.config.get("broker", "default_domain_start")
         dbstart = Branch.get_unique(session, start, compel=True)
@@ -68,6 +80,12 @@ class CommandAddSandbox(CommandGet):
         # That seems like the right behavior.  It's an internal
         # consistency issue that would need to be addressed explicitly.
         run_git(["branch", sandbox, dbstart.name], logger=logger, path=kingdir)
+
+        # If we arrive there the above "git branch" command has succeeded;
+        # therefore we should comit the changes to the database.  If this is
+        # not done, and CommandGet fails (see dir check above), then the
+        # git branch will be created but the database changes roled back.
+        session.commit()
 
         if get == False:
             # The client knows to interpret an empty response as no action.
