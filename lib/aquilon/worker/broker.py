@@ -496,6 +496,24 @@ class BrokerCommand(object):
                     (user, option, cls.__name__))
         logger.client_info("The --%s option is deprecated.  %s" % (option, msg))
 
+    @classmethod
+    def require_one_of(cls, *args, **kwargs):
+        if args:
+            # Take 'args' as the list of keys that we are going to check
+            # exist in 'kwargs', we will ignore any addition 'kwargs'
+            count = sum([1 if kwargs.get(arg, None) else 0 for arg in args])
+        else:
+            # Make sure only one of the supplied arguments is set
+            count = sum([1 if x else 0 for x in kwargs.values()])
+        if count != 1:
+            if args:
+                names = ["--%s" % arg for arg in args]
+            else:
+                names = ["--%s" % arg for arg in kwargs.keys()]
+            raise ArgumentError("Exactly one of %s should be sepcified." %
+                                (', '.join(names[:-1]) + ' and ' + names[-1]))
+
+
 
 # This might belong somewhere else.  The functionality that uses this
 # might end up in aqdb (in a similar class as AqStr).

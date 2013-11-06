@@ -34,15 +34,13 @@ class CommandDelInterface(BrokerCommand):
 
     def render(self, session, logger, interface, machine, network_device,
                switch, chassis, mac, user, **arguments):
-
-        if not (machine or network_device or switch or chassis or mac):
-            raise ArgumentError("Please specify at least one of --chassis, "
-                                "--machine, --network_device or --mac.")
         if switch:
             self.deprecated_option("switch", "Please use --network_device"
                                    "instead.", logger=logger, **arguments)
             if not network_device:
                 network_device = switch
+        self.require_one_of(machine=machine, network_device=network_device,
+                            chassis=chassis, mac=mac)
 
         if machine:
             dbhw_ent = Machine.get_unique(session, machine, compel=True)

@@ -31,23 +31,14 @@ class CommandAddNetwork(BrokerCommand):
 
     def render(self, session, dbuser,
                network, ip, network_environment, type, side, comments, logger,
-               **arguments):
+               netmask, prefixlen, mask, **arguments):
 
         # Handle the different ways of specifying the netmask
-        mask_options = ["netmask", "prefixlen", "mask"]
-        numopts = sum([1 if arguments.get(opt, None) else 0
-                       for opt in mask_options])
-        if numopts != 1:
-            raise ArgumentError("Exactly one of --netmask, --prefixlen and "
-                                "--mask should be specified.")
-
-        if arguments.get("netmask", None):
-            netmask = arguments["netmask"]
-        elif arguments.get("prefixlen", None):
-            # IPv4Network can handle it just fine
-            netmask = arguments["prefixlen"]
-        elif arguments.get("mask"):
-            netmask = 32 - int(math.log(arguments["mask"], 2))
+        self.require_one_of(netmask=netmask, prefixlen=prefixlen, mask=mask)
+        if prefixlen:
+            netmask = prefixlen
+        elif mask:
+            netmask = 32 - int(math.log(mask, 2))
 
         try:
             address = IPv4Network("%s/%s" % (ip, netmask))
