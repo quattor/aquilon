@@ -40,6 +40,24 @@ class TestAddStaticRoute(TestBrokerCommand):
                    "--ip", "192.168.252.0", "--prefixlen", "23"]
         self.noouttest(command)
 
+    def test_100_add_route2_guess(self):
+        net = self.net["routing2"]
+        command = ["add", "static", "route", "--networkip", net.ip,
+                   "--ip", "192.168.254.0", "--prefixlen", "24"]
+        out = self.statustest(command)
+        self.matchoutput(out, "Gateway %s taken from default offset "
+                         "1 for network %s." % (net.gateway, str(net)),
+                         command)
+
+    def test_100_add_route3(self):
+        net = self.net["routing3"]
+        ip = net[3]
+        command = ["add", "static", "route", "--networkip", net.ip,
+                   "--ip", "192.168.254.0", "--prefixlen", "24"]
+        out = self.statustest(command)
+        self.matchoutput(out, "Gateway %s taken from router address "
+                         "of network %s." % (ip, str(net)), command)
+
     def test_110_add_overlap(self):
         net = self.net["routing2"]
         gw = net.usable[-1]

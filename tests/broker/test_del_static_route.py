@@ -49,7 +49,20 @@ class TestDelStaticRoute(TestBrokerCommand):
                    "--ip", "192.168.252.0", "--prefixlen", "23"]
         self.noouttest(command)
 
+    def testdelroute2_guess(self):
+        gw = self.net["routing2"].gateway
+        command = ["del", "static", "route", "--gateway", gw,
+                   "--ip", "192.168.254.0", "--prefixlen", "24"]
+        self.noouttest(command)
+
     def testdelroute3(self):
+        net = self.net["routing3"]
+        gw = net[3]
+        command = ["del", "static", "route", "--gateway", gw,
+                   "--ip", "192.168.254.0", "--prefixlen", "24"]
+        self.noouttest(command)
+
+    def testdelroute4(self):
         gw = self.net["unknown0"].gateway
         command = ["del", "static", "route", "--gateway", gw,
                    "--ip", "250.250.0.0", "--prefixlen", "16"]

@@ -43,6 +43,14 @@ class TestAddRouter(TestBrokerCommand):
         self.matchoutput(out, "IP address %s is already present as a router "
                          "for network %s." % (net.gateway, net.name), command)
 
+    def testadddefaultrouter(self):
+        net = self.net["routing3"]
+        ip = net[3]
+        command = ["add", "router", "--ip", ip,
+                   "--fqdn", "ut3gd1r01-v111-hsrp.aqd-unittest.ms.com",
+                   "--building", "ut", "--comments", "Test router"]
+        self.noouttest(command)
+
     def testaddnormalhostasrouter(self):
         net = self.net["ut01ga2s01_v710"]
         ip = net.usable[0]
@@ -125,6 +133,7 @@ class TestAddRouter(TestBrokerCommand):
         self.matchoutput(out, "Router: ut3gd1r02-v109-hsrp.aqd-unittest.ms.com", command)
         self.matchoutput(out, "Router: ut3gd1r02-v110-hsrp.aqd-unittest.ms.com", command)
         self.matchoutput(out, "Router: ut3gd1r04-v109-hsrp.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "Router: ut3gd1r01-v111-hsrp.aqd-unittest.ms.com", command)
         self.matchclean(out, "excx", command)
         self.matchclean(out, "utcolo", command)
 
