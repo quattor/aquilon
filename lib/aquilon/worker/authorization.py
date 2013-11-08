@@ -147,6 +147,9 @@ class AuthorizationBroker(object):
         if dbuser.role.name == 'resource_pool':
             if action not in ['add_address', 'del_address']:
                 self.raise_auth_error(principal, action, resource)
+        if dbuser.role.name == 'secadmin':
+            if action not in ['permission']:
+                self.raise_auth_error(principal, action, resource)
         if dbuser.role.name == 'hpevelo':
             if action not in ['reconfigure', 'pxeswitch', 'change_status',
                               'add_disk', 'del_disk', 'del_disk_disk']:
