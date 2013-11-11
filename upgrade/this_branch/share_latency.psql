@@ -1,0 +1,3 @@
+ALTER TABLE share ADD latency_threshold INTEGER;
+
+UPDATE share SET latency_threshold = 20;

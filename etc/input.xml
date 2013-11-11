@@ -4816,7 +4816,6 @@
       </optgroup>
       <optgroup name="optional_opts">
          <option name="comments" type="string">Comments</option>
-         <option name="latency" type="int">Latency</option>
       </optgroup>
       <optgroup name="resource_mapping_opts" mandatory="True" fields="any">
          <option name="hostname" type="string">Hostname to add share</option>
@@ -4824,6 +4823,18 @@
          <option name="cluster" type="string">cluster to add share</option>
       </optgroup>
       <transport method="put" path="resource/share/%(share)s" />
+   </command>
+
+   <command name="update_share">
+      Update a share resource.
+      <optgroup name="update_share_opts" mandatory="True" fields="all">
+         <option name="share" type="string">name</option>
+      </optgroup>
+      <optgroup name="optional_opts">
+         <option name="comments" type="string">Comments</option>
+         <option name="latency_threshold" type="string">Latency threshold</option>
+      </optgroup>
+      <transport method="post" path="resource/share/%(share)s" />
    </command>
 
    <command name="del_share">
