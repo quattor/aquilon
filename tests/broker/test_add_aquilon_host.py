@@ -50,18 +50,6 @@ class TestAddAquilonHost(TestBrokerCommand):
         self.matchoutput(out, "Build Status: blind", command)
         self.matchoutput(out, "Advertise Status: False", command)
 
-    def testverifyshowmanagermissing(self):
-        command = "show manager --missing"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out,
-                         "aq add manager --hostname 'unittest00.one-nyp.ms.com' --ip 'IP'",
-                         command)
-
-    def testverifyshowmanagermissingcsv(self):
-        command = "show manager --missing --format=csv"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "unittest00.one-nyp.ms.com", command)
-
     def testaddunittest12(self):
         ip = self.net["unknown0"].usable[7]
         self.dsdb_expect_add("unittest12.aqd-unittest.ms.com", ip, "eth0",

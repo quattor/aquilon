@@ -20,7 +20,6 @@ from operator import attrgetter
 
 from aquilon.aqdb.model import Machine, Location
 from aquilon.worker.formats.formatters import ObjectFormatter
-from aquilon.worker.formats.list import ListFormatter
 from aquilon.worker.dbwrappers.feature import (model_features,
                                                personality_features)
 
@@ -193,15 +192,3 @@ class MachineFormatter(ObjectFormatter):
             return [MachineInterfacePair((machine, None))]
 
 ObjectFormatter.handlers[Machine] = MachineFormatter()
-
-
-class MachineMacList(list):
-    """ Holds MAC, machine-name [, hostname] """
-    pass
-
-
-class MachineMacListFormatter(ListFormatter):
-    def csv_fields(self, result):
-        return result
-
-ObjectFormatter.handlers[MachineMacList] = MachineMacListFormatter()

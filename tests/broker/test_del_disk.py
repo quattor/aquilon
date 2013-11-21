@@ -47,12 +47,12 @@ class TestDelDisk(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchclean(out, "harddisks", command)
 
-    def test_300_del_unknown_type(self):
+    def test_300_del_unknown_controller(self):
         command = ["del", "disk", "--machine", "ut3c1n3",
-                   "--type", "type-does-not-exist"]
+                   "--controller", "controller-does-not-exist"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
-                         "type-does-not-exist is not a valid controller type",
+                         "controller-does-not-exist is not a valid controller type",
                          command)
 
 if __name__ == '__main__':
