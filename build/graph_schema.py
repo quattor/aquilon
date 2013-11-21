@@ -48,10 +48,11 @@ Base.metadata.bind = db.engine
 Base.metadata.create_all()
 
 import ms.modulecmd
-ms.modulecmd.load("fsf/graphviz/2.6")
+ms.modulecmd.load("fsf/graphviz/2.28.0")
 
 from aquilon.aqdb.utils import schema2dot
-schema2dot.write_schema_png(db.meta,
-                            os.path.join(opts.dir, "%s.png" % opts.prefix))
-schema2dot.write_schema_dot(db.meta,
-                            os.path.join(opts.dir, "%s.dot" % opts.prefix))
+
+
+dot = schema2dot.create_schema_graph(metadata=db.meta)
+dot.write(os.path.join(opts.dir, "%s.dot" % opts.prefix))
+dot.write_png(os.path.join(opts.dir, "%s.png" % opts.prefix))
