@@ -153,13 +153,6 @@ class TestCompile(VerifyNotificationsMixin, TestBrokerCommand):
         command = "compile --sandbox %s/out_of_date" % self.user
         (out, err) = self.successtest(command.split(' '))
         self.matchoutput(err, "No object profiles: nothing to do.", command)
-        self.assertEmptyOut(out, command)
-        self.matchoutput(err,
-                         "Sandbox %s/out_of_date does not contain the "
-                         "latest changes from the prod domain.  If "
-                         "there are failures try "
-                         "`git fetch && git merge origin/prod`" % self.user,
-                         command)
 
     def test_410_manage(self):
         # using --force to bypass normal checks due to git status
@@ -167,16 +160,6 @@ class TestCompile(VerifyNotificationsMixin, TestBrokerCommand):
         command = ['manage', '--hostname=unittest02.one-nyp.ms.com',
                    '--sandbox=%s/out_of_date' % self.user, '--force']
         self.successtest(command)
-
-    def test_415_compilebehind(self):
-        command = ['compile', '--sandbox=%s/out_of_date' % self.user]
-        (out, err) = self.successtest(command)
-        self.matchoutput(err,
-                         "Sandbox %s/out_of_date does not contain the "
-                         "latest changes from the prod domain.  If "
-                         "there are failures try "
-                         "`git fetch && git merge origin/prod`" % self.user,
-                         command)
 
     def test_420_update(self):
         sandboxdir = os.path.join(self.sandboxdir, 'out_of_date')
