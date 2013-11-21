@@ -189,7 +189,7 @@ default_personality = inventory
 default_osname = linux
 default_osversion = 6.0-x86_64
 default_grn_target = esp
-host_grn_targets = esp,invited
+host_grn_targets = esp
 personality_grn_targets = esp,invited
 
 [archetype_aurora]

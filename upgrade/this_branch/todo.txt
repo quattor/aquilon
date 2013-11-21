@@ -1,0 +1,4 @@
+When adding the branch to a release, the per host mappings should be removed from the broker, the can be looked up the following way:
+
+aq search_audit --command map_grn --after 08/01/2013 |grep invited|grep hostname
+
