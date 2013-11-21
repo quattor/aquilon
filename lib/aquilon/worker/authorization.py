@@ -212,12 +212,20 @@ class AuthorizationBroker(object):
         if dbuser.role.name == 'laf':
             if action not in ['reconfigure',
                               'add_reboot_intervention',
+                              'compile_hostname', 'compile_personality',
                               'add_reboot_schedule',
                               'del_reboot_intervention',
                               'del_reboot_schedule',
                               'map_grn', 'unmap_grn',
+                              'unmap_grn_clearall',
                               'add_hostlink', 'del_hostlink',
-                              'add_alias', 'del_alias']:
+                              'add_personality', 'update_personality',
+                              'del_personality',
+                              'add_parameter', 'update_parameter',
+                              'del_parameter',
+                              'bind_feature', 'unbind_feature',
+                              'map_service',
+                              'add_alias', 'del_alias', 'update_alias']:
                 self.raise_auth_error(principal, action, resource)
 
         if dbuser.role.name == 'itsec':
