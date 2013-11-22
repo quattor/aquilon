@@ -66,7 +66,7 @@ class StreamLoggerThread(Thread):
                 self.logger.log(self.loglevel, data.rstrip())
 
 
-def run_command(args, env=None, path=".", logger=LOGGER, loglevel=logging.INFO,
+def run_command(args, env=None, path="/", logger=LOGGER, loglevel=logging.INFO,
                 filterre=None, input=None):
     '''Run the specified command (args should be a list corresponding to ARGV).
 
@@ -100,7 +100,8 @@ def run_command(args, env=None, path=".", logger=LOGGER, loglevel=logging.INFO,
     command_args = [str(arg) for arg in args]
 
     simple_command = " ".join(command_args)
-    logger.info("run_command: %s" % simple_command)
+    logger.info("run_command: %s (CWD: %s)" % (simple_command,
+                                               os.path.abspath(path)))
 
     if input:
         proc_stdin = PIPE
