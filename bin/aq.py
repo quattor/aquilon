@@ -42,6 +42,7 @@ MANDIR = os.path.join(SRCDIR, "doc", "man")
 
 sys.path.append(LIBDIR)
 
+from aquilon.config import lookup_file_path
 from aquilon.exceptions_ import AquilonError
 from aquilon.client import depends
 from aquilon.client.knchttp import KNCHTTPConnection
@@ -138,8 +139,7 @@ class CustomAction(object):
         if os.path.exists(os.path.join(testdir, 'Makefile')):
             p = Popen(['/usr/bin/make', '-C', testdir, 'test',
                        'AQCMD=%s' % os.path.realpath(sys.argv[0]),
-                       'AQBUILDXML=%s' % os.path.join(SRCDIR, "etc",
-                                                      "build.xml")],
+                       'AQBUILDXML=%s' % lookup_file_path("build.xml")],
                       cwd=testdir, env=self.env)
             p.wait()
             if p.returncode != 0:
@@ -304,7 +304,7 @@ if __name__ == "__main__":
     # path, so we have to normalize it
     os.environ["MANPATH"] = os.path.realpath(MANDIR)
 
-    parser = OptParser(os.path.join(BINDIR, '..', 'etc', 'input.xml'))
+    parser = OptParser(lookup_file_path('input.xml'))
     try:
         (command, transport, commandOptions, globalOptions) = \
             parser.parse(sys.argv[1:])

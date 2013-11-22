@@ -110,7 +110,6 @@ git_templates_url = git://%(servername)s:%(git_port)s/quattor/template-king
 git_daemon_basedir = %(basedir)s
 run_git_daemon = False
 cfgdir = %(quattordir)s/cfg
-compiletooldir = %(srcdir)s/etc
 kingdir = %(quattordir)s/template-king
 templatesdir = %(quattordir)s/templates
 domainsdir = %(quattordir)s/domains
