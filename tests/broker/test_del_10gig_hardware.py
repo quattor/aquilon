@@ -32,7 +32,7 @@ class TestDel10GigHardware(TestBrokerCommand):
                 self.net["ut01ga2s01_v712"], self.net["ut01ga2s01_v713"],
                 self.net["ut01ga2s02_v710"], self.net["ut01ga2s02_v711"],
                 self.net["ut01ga2s02_v712"], self.net["ut01ga2s02_v713"])
-        for i in range(0, 8) + range(9, 17):
+        for i in range(0, 8) + range(9, 16):
             hostname = "ivirt%d.aqd-unittest.ms.com" % (1 + i)
             command = "del_host --hostname %s" % hostname
 
@@ -59,7 +59,7 @@ class TestDel10GigHardware(TestBrokerCommand):
         self.dsdb_verify()
 
     def test_700_delmachines(self):
-        for i in range(0, 8) + range(9, 17):
+        for i in range(0, 8) + range(9, 16):
             machine = "evm%d" % (10 + i)
             self.noouttest(["del", "machine", "--machine", machine])
 

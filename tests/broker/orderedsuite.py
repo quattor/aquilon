@@ -128,6 +128,7 @@ from test_rebind_esx_cluster import TestRebindESXCluster
 from test_rebind_metacluster import TestRebindMetaCluster
 from test_add_virtual_hardware import TestAddVirtualHardware
 from test_add_10gig_hardware import TestAdd10GigHardware
+from test_appliance import TestAppliance
 from test_unbind_client import TestUnbindClient
 from test_rebind_client import TestRebindClient
 from test_reconfigure import TestReconfigure
@@ -335,6 +336,7 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestRebindMetaCluster,
                      TestUpdateBuilding,
                      TestAddVirtualHardware, TestAdd10GigHardware,
+                     TestAppliance,
                      TestUnbindClient, TestRebindClient, TestReconfigure,
                      TestChangeStatus, TestResetAdvertisedStatus,
                      TestParameter, TestParameterFeature,

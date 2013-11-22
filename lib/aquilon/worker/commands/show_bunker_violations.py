@@ -52,6 +52,7 @@ class CommandShowBunkerViolations(BrokerCommand):
         q = q.filter(HardwareEntity.location_id == HwRack.id)
         q = q.filter(HardwareEntity.model_id == Model.id)
         q = q.filter(Model.machine_type != 'virtual_machine')
+        q = q.filter(Model.machine_type != 'virtual_appliance')
         q = q.filter(Interface.hardware_entity_id == HardwareEntity.id)
         q = q.filter(AddressAssignment.interface_id == Interface.id)
         q = q.filter(AddressAssignment.network_id == Network.id)

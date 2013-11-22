@@ -39,6 +39,10 @@ class TestDelArchetype(TestBrokerCommand):
         command = ["del_archetype", "--archetype=utarchetype3"]
         self.noouttest(command)
 
+    def testdelutappliance(self):
+        command = ["del_archetype", "--archetype=utappliance"]
+        self.noouttest(command)
+
     def testverifydelutarchetype1(self):
         command = ["show_archetype", "--archetype=utarchetype1"]
         self.notfoundtest(command)
@@ -55,6 +59,7 @@ class TestDelArchetype(TestBrokerCommand):
         command = ["show_archetype", "--all"]
         out = self.commandtest(command)
         self.matchclean(out, "Archetype: utarchetype", command)
+        self.matchclean(out, "Archetype: utappliance", command)
 
 
 if __name__ == '__main__':

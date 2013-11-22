@@ -3248,7 +3248,8 @@
       </optgroup>
       <optgroup name="add_machine_optional">
 	 <option name="serial" type="string">Serial number</option>
-	 <option name="comments" type="string">Comments</option>
+         <option name="comments" type="string">Comments</option>
+         <option name="uri" type="string">URI to point to a template describing the virtual appliance</option>
       </optgroup>
       <transport method="put" path="machine/%(machine)s" />
       <transport method="put" trigger="prefix" path="next_machine/%(prefix)s" />
@@ -3283,6 +3284,7 @@
          <option name="allow_metacluster_change" type="boolean">when changing clusters, allow the cluster to be in a different metacluster</option>
          <option name="vmhost" type="string">Host name hosting the VM</option>
          <option name="ip" type="ipv4">New primary IP address</option>
+         <option name="uri" type="string">URI to point to a template describing the virtual appliance</option>
       </optgroup>
       <transport method="post" trigger="hostname" path="host/%(hostname)s/command/update_hardware" />
       <transport method="post" path="machine/%(machine)s/command/update" />

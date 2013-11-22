@@ -359,6 +359,32 @@ class TestAdd10GigHardware(TestBrokerCommand):
             command = ["make", "--hostname", hostname]
             (out, err) = self.successtest(command)
 
+    # drop evm26 for appliance reuse
+
+    def test_950_del_ivirt17(self):
+        # TODO factor it out.
+        nets = (self.net["ut01ga2s01_v710"], self.net["ut01ga2s01_v711"],
+                self.net["ut01ga2s01_v712"], self.net["ut01ga2s01_v713"],
+                self.net["ut01ga2s02_v710"], self.net["ut01ga2s02_v711"],
+                self.net["ut01ga2s02_v712"], self.net["ut01ga2s02_v713"])
+
+        i = 16
+        hostname = "ivirt%d.aqd-unittest.ms.com" % (1 + i)
+        net_index = ((i - 9) % 4) + 4
+        usable_index = (i - 9) / 4
+        ip = nets[net_index].usable[usable_index]
+
+        ip = "4.2.6.190"
+        command = ["del_host", "--hostname", hostname]
+
+        self.dsdb_expect_delete(ip)
+        (out, err) = self.successtest(command)
+        self.assertEmptyOut(out, command)
+        self.dsdb_verify()
+
+    def test_960_del_evm26(self):
+        machine = "evm26"
+        self.noouttest(["del_machine", "--machine", machine])
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAdd10GigHardware)

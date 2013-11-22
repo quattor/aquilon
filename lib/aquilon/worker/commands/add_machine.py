@@ -35,7 +35,7 @@ class CommandAddMachine(BrokerCommand):
     # arguments will contain one of --chassis --rack or --desk
     def render(self, session, logger, machine, model, vendor, serial, chassis,
                slot, cpuname, cpuvendor, cpuspeed, cpucount, memory, cluster,
-               vmhost, comments, **arguments):
+               vmhost, uri, comments, **arguments):
         dblocation = get_location(session,
                                   query_options=[subqueryload('parents'),
                                                  joinedload('parents.dns_maps')],
@@ -55,17 +55,19 @@ class CommandAddMachine(BrokerCommand):
                                    compel=True)
 
         if dbmodel.machine_type not in ['blade', 'rackmount', 'workstation',
-                                        'aurora_node', 'virtual_machine']:
+                                        'aurora_node', 'virtual_machine',
+                                        'virtual_appliance']:
             raise ArgumentError("The add_machine command cannot add machines "
                                 "of type %(type)s.  Try 'add %(type)s'." %
                                 {"type": dbmodel.machine_type})
 
         vmholder = None
+
         if cluster or vmhost:
             if cluster and vmhost:
                 raise ArgumentError("Cluster and vmhost cannot be specified "
                                     "together.")
-            if dbmodel.machine_type != 'virtual_machine':
+            if not dbmodel.is_virtual:
                 raise ArgumentError("{0} is not a virtual machine."
                                     .format(dbmodel))
 
@@ -88,7 +90,7 @@ class CommandAddMachine(BrokerCommand):
                                     "with location {1}.".format(container_loc,
                                                                 dblocation))
             dblocation = container_loc
-        elif dbmodel.machine_type == 'virtual_machine':
+        elif dbmodel.is_virtual:
             raise ArgumentError("Virtual machines must be assigned to a "
                                 "cluster or a host.")
 
@@ -96,6 +98,14 @@ class CommandAddMachine(BrokerCommand):
         dbmachine = create_machine(session, machine, dblocation, dbmodel,
                                    cpuname, cpuvendor, cpuspeed, cpucount,
                                    memory, serial, comments)
+
+
+        if uri and dbmodel.machine_type != 'virtual_appliance':
+            raise ArgumentError("URI can be specified only for virtual "
+                                "appliances and the model's type is %(type)s" %
+                                {"type": dbmodel.machine_type})
+
+        dbmachine.uri = uri
 
         if chassis:
             # FIXME: Are virtual machines allowed to be in a chassis?

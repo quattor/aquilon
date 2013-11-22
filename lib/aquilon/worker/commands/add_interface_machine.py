@@ -262,7 +262,7 @@ class CommandAddInterfaceMachine(BrokerCommand):
           in the water - the mac address would just need to be given manually.]
 
         """
-        if dbmachine.model.machine_type != "virtual_machine":
+        if not dbmachine.model.is_virtual:
             raise ArgumentError("Can only automatically generate MAC "
                                 "addresses for virtual hardware.")
         if not dbmachine.cluster or dbmachine.cluster.cluster_type != 'esx':

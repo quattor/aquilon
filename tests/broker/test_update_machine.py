@@ -490,6 +490,20 @@ class TestUpdateMachine(TestBrokerCommand):
         self.matchoutput(out, "Cannot convert a physical machine to virtual.",
                          command)
 
+    def testrejectmachineuri(self):
+        command = ["update", "machine", "--machine", "ut3c1n9",
+                        "--uri", "file:///somepath/to/ovf"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "URI can be specified only for virtual "
+                                "appliances and the model's type is blade",
+                                command)
+
+    def testverifyrejectmachineuri(self):
+        command = ["show", "machine", "--machine", "ut3c1n9"]
+        out = self.commandtest(command)
+
+        self.searchclean(out, r"URI: file:///somepath/to/ovf", command)
+
     # These tests would be nice, but twisted just ignores the permission
     # on the files since we're still the owner.  Which is good, but means
     # the recovery routines can't be easily tested.

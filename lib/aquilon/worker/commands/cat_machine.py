@@ -28,10 +28,6 @@ class CommandCatMachine(BrokerCommand):
 
     def render(self, session, logger, machine, generate, **kwargs):
         dbmachine = Machine.get_unique(session, machine, compel=True)
-        if dbmachine.model.machine_type not in ['blade', 'virtual_machine',
-                                                'workstation', 'rackmount']:
-            raise ArgumentError("Plenary file not available for %s machines." %
-                                dbmachine.model.machine_type)
         plenary_info = Plenary.get_plenary(dbmachine, logger=logger)
 
         if generate:

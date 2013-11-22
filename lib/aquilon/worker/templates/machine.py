@@ -186,4 +186,7 @@ class PlenaryMachineInfo(StructurePlenary):
         for manager in sorted(managers.keys()):
             pan_assign(lines, "console/%s" % manager, managers[manager])
 
+        if self.dbobj.uri:
+            pan_assign(lines, "uri", self.dbobj.uri)
+
 Plenary.handlers[Machine] = PlenaryMachineInfo

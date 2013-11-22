@@ -90,6 +90,10 @@ class TestAddArchetype(TestBrokerCommand):
         self.matchclean(out, "[", command)
         self.matchclean(out, "Required Service", command)
 
+    def testaddutappliance1(self):
+        command = "add archetype --archetype utappliance --nocompilable"
+        self.noouttest(command.split(" "))
+
     def testverifyutarchetypeall(self):
         command = "show archetype --all"
         out = self.commandtest(command.split(" "))

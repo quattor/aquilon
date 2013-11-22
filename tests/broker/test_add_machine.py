@@ -349,6 +349,20 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
         command = "show machine --machine ut3c1n7"
         out = self.notfoundtest(command.split(" "))
 
+
+    def testrejectmachineuri(self):
+        command = ["add", "machine", "--machine", "ut3c1n10",
+                        "--rack", "ut3", "--model", "hs21-8853l5u",
+                        "--uri", "file:///somepath/to/ovf"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "URI can be specified only for virtual "
+                                "appliances and the model's type is blade",
+                                command)
+
+    def testverifyrejectmachineuri(self):
+        command = "show machine --machine ut3c1n10"
+        out = self.notfoundtest(command.split(" "))
+
     # When doing an end-to-end test, these two entries should be
     # created as part of a sweep of a Dell rack.  They represent
     # two mac addresses seen on the same port, only one of which

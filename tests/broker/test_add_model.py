@@ -120,6 +120,13 @@ class TestAddModel(TestBrokerCommand):
         self.matchoutput(out, "Disk: c0d0 466 GB cciss (local)",
                          command)
 
+    def test_180_addutva(self):
+        command = ["add_model", "--model=utva", "--vendor=utvendor",
+                   "--type=virtual_appliance", "--cpuname=utcpu",
+                   "--cpunum=0", "--memory=0", "--disktype=virtual_disk",
+                   "--diskcontroller=sata", "--disksize=0", "--nics=0"]
+        self.noouttest(command)
+
     def test_200_show_type_switch(self):
         command = "show model --type switch"
         out = self.commandtest(command.split(" "))
