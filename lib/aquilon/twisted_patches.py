@@ -21,10 +21,10 @@ thus the code here cannot use super().
 
 """
 
-
 import sys
 import logging
 import errno
+from fcntl import fcntl, F_GETFL, F_SETFL, FD_CLOEXEC
 
 from twisted.python import log, syslog, logfile
 from twisted.internet import reactor, error
@@ -114,6 +114,11 @@ def set_log_file(logFile, setStdout=True, start=True):
 
     """
     log_file = logfile.LogFile.fromFullPath(logFile, rotateLength=0)
+
+    # Make sure fork()ed processes don't inherit the log file.
+    fileno = log_file._file.fileno()
+    fcntl(fileno, F_SETFL, fcntl(fileno, F_GETFL, 0) | FD_CLOEXEC)
+
     observer = log.FileLogObserver(log_file).emit
     try:
         import signal
