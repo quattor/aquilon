@@ -27,11 +27,14 @@
 	    <group>
 		<synopfragmentref linkend="global-options">Global options</synopfragmentref>
 	    </group>
-	    <arg choice="plain"><option>--gateway <replaceable>GW</replaceable></option></arg>
 	    <arg choice="plain"><option>--ip <replaceable>IP</replaceable></option></arg>
 	    <group choice="req">
 	        <arg choice="plain"><option>--netmask <replaceable>MASK</replaceable></option></arg>
 	        <arg choice="plain"><option>--prefixlen <replaceable>PREFIX</replaceable></option></arg>
+	    </group>
+	    <group choice="req">
+	        <arg choice="plain"><option>--gateway <replaceable>GW</replaceable></option></arg>
+	        <arg choice="plain"><option>--networkip <replaceable>NETIP</replaceable></option></arg>
 	    </group>
 	    <arg choice="opt"><option>--network_environment <replaceable>NETENV</replaceable></option></arg>
 	    <arg choice="opt"><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
@@ -79,6 +82,18 @@
 			IP address of the gateway that will route the traffic to the destination.
 			The address must be part of a network that is already defined in the
 			database.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--networkip <replaceable>NETIP</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			IP address of the network that this static route is being created on.
+			The gateway address will be infered from either a router address, or
+			gatwway offset for this network.
 		    </para>
 		</listitem>
 	    </varlistentry>

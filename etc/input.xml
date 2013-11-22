@@ -1532,11 +1532,14 @@
    <command name="add_static_route">
       Add a static route.
       <optgroup name="add_static_route_mandatory" mandatory="True" fields="all">
-         <option name="gateway" type="ipv4">Address of the gateway</option>
          <option name="ip" type="ipv4">Address of the destination network range</option>
          <optgroup name="add_static_route_netmask" mandatory="True" fields="any">
             <option name="netmask" type="string" conflicts="prefixlen">Netmask as dotted quad</option>
             <option name="prefixlen" type="int" conflicts="netmask">Network prefix length</option>
+         </optgroup>
+         <optgroup name="add_static_route_gateway" mandatory="True" fields="any">
+            <option name="gateway" type="ipv4">Address of the gateway</option>
+            <option name="networkip" type="ipv4">Network IP address</option>
          </optgroup>
       </optgroup>
       <optgroup name="add_static_route_optional" mandatory="False" fields="any">

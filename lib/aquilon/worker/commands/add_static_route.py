@@ -22,17 +22,43 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.aqdb.model import NetworkEnvironment, StaticRoute
 from aquilon.aqdb.model.network import get_net_id_from_ip
+from aquilon.worker.dbwrappers.network import get_network_byip
 
 
 class CommandAddStaticRoute(BrokerCommand):
 
-    required_parameters = ["gateway", "ip"]
+    required_parameters = ["ip"]
 
-    def render(self, session, gateway, ip, netmask, prefixlen,
-               network_environment, comments, **arguments):
+    def render(self, session, logger, gateway, networkip, ip, netmask,
+               prefixlen, network_environment, comments, **arguments):
         dbnet_env = NetworkEnvironment.get_unique_or_default(session,
                                                              network_environment)
-        dbnetwork = get_net_id_from_ip(session, gateway, dbnet_env)
+
+        if gateway and networkip:
+            raise ArgumentError("Exactly one of --gateway and --networkip "
+                                "should be specified.")
+        elif gateway:
+            dbnetwork = get_net_id_from_ip(session, gateway, dbnet_env)
+        elif networkip:
+            dbnetwork = get_network_byip(session, networkip, dbnet_env)
+            if dbnetwork.routers:
+                if len(dbnetwork.routers) > 1:
+                    raise ArgumentError("More than one router exists.  "
+                                        "Please specify one with --gateway")
+                else:
+                    gateway = dbnetwork.routers[0].ip
+                    logger.client_info("Gateway %s taken from router address "
+                                       "of network %s." %
+                                       (gateway, dbnetwork.network))
+            else:
+                # No routers are defined, so take an educated guess
+                gateway = dbnetwork.network[dbnetwork.default_gateway_offset]
+                logger.client_info("Gateway %s taken from default offset %d "
+                                   "for network %s." % (gateway,
+                                    dbnetwork.default_gateway_offset,
+                                    dbnetwork.network))
+        else:
+            raise ArgumentError("Please either --gateway or --networkip")
 
         if netmask:
             dest = IPv4Network("%s/%s" % (ip, netmask))
