@@ -30,9 +30,15 @@ class CommandAddInterfaceChassis(BrokerCommand):
     required_parameters = ["interface", "chassis", "mac"]
     invalid_parameters = ["automac", "pg", "autopg", "model", "vendor"]
 
-    def render(self, session, logger, interface, chassis, mac, type, comments,
-               **arguments):
-        if type and type != "oa":
+    def render(self, session, logger, interface, chassis, mac, iftype, type,
+               comments, **arguments):
+        if type:
+            self.deprecated_option("type", "Please use --iftype"
+                                   "instead.", logger=logger, **arguments)
+            if not iftype:
+                iftype = type
+
+        if iftype and iftype != "oa":
             raise ArgumentError("Only 'oa' is allowed as the interface type "
                                 "for chassis.")
 

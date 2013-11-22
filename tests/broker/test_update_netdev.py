@@ -80,18 +80,14 @@ class TestUpdateNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
     def testaddinterface(self):
         ip = self.net["tor_net_8"].usable[0]
         mac = self.net["tor_net_8"].usable[1].mac
-        self.dsdb_expect_update("ut3gd1r06.aqd-unittest.ms.com", "xge", mac=mac)
-        self.dsdb_expect_rename("ut3gd1r06.aqd-unittest.ms.com", iface="xge",
-                                new_iface="xge49")
-        command = ["add_interface", "--network_device=ut3gd1r06.aqd-unittest.ms.com",
+        self.dsdb_expect_update("ut3gd1r06.aqd-unittest.ms.com", "xge49", mac=mac)
+        command = ["update_interface", "--network_device=ut3gd1r06.aqd-unittest.ms.com",
                    "--interface=xge49", "--mac", mac]
         self.noouttest(command)
         (out, cmd) = self.verifynetdev("ut3gd1r06.aqd-unittest.ms.com",
                                        "generic", "temp_switch", "ut3", "a", "3",
                                        switch_type='tor',
                                        ip=ip, mac=mac, interface="xge49")
-        # Verify that the auto-created dummy interface is gone
-        self.matchclean(out, "Interface: xge ", command)
         self.dsdb_verify()
 
     def testupdatewithinterface(self):
@@ -127,7 +123,8 @@ class TestUpdateNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
     def testverifydsdbrollback(self):
         self.verifynetdev("ut3gd1r07.aqd-unittest.ms.com", "generic",
                           "temp_switch", "ut3", "a", "3", switch_type='bor',
-                          ip=self.net["tor_net_9"].usable[0])
+                          ip=self.net["tor_net_9"].usable[0],
+                          interface="xge")
 
 
 if __name__ == '__main__':

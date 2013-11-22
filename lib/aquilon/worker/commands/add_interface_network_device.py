@@ -20,7 +20,9 @@
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import NetworkDevice
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.dbwrappers.interface import get_or_create_interface
+from aquilon.worker.dbwrappers.interface import (get_or_create_interface,
+                                                 check_netdev_iftype,
+                                                 infer_netdev_iftype)
 from aquilon.worker.processes import DSDBRunner
 
 
@@ -28,31 +30,31 @@ class CommandAddInterfaceNetworkDevice(BrokerCommand):
 
     required_parameters = ["interface", "network_device"]
     invalid_parameters = ["automac", "pg", "autopg", "model", "vendor"]
-    valid_interface_types = ["oa", "loopback"]
 
-    def render(self, session, logger, interface, network_device, mac, type,
-               comments, **arguments):
-        if type and type not in self.valid_interface_types:
-            raise ArgumentError("Interface type %s is not allowed for "
-                                "network devices." % type)
-
-        if not type:
-            if interface.lower().startswith("lo"):
-                type = "loopback"
-            else:
-                type = "oa"
-
+    def render(self, session, logger, interface, network_device,
+               mac, iftype, type, comments, **arguments):
         for arg in self.invalid_parameters:
             if arguments.get(arg) is not None:
                 raise ArgumentError("Cannot use argument --%s when adding an "
                                     "interface to a network device." % arg)
+
+        if type:
+            self.deprecated_option("type", "Please use --iftype"
+                                   "instead.", logger=logger, **arguments)
+            if not iftype:
+                iftype = type
+
+        if iftype is None:
+            iftype = infer_netdev_iftype(interface)
+        else:
+            check_netdev_iftype(iftype)
 
         dbnetdev = NetworkDevice.get_unique(session, network_device, compel=True)
         oldinfo = DSDBRunner.snapshot_hw(dbnetdev)
 
         dbinterface = get_or_create_interface(session, dbnetdev,
                                               name=interface, mac=mac,
-                                              interface_type=type,
+                                              interface_type=iftype,
                                               comments=comments, preclude=True)
 
         session.flush()

@@ -24,17 +24,19 @@ from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.dns import grab_address
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.dbwrappers.interface import (get_or_create_interface,
-                                                 assign_address)
+                                                 assign_address,
+                                                 check_netdev_iftype,
+                                                 infer_netdev_iftype)
 from aquilon.worker.processes import DSDBRunner
 from aquilon.worker.templates import Plenary
 
 
 class CommandAddNetworkDevice(BrokerCommand):
 
-    required_parameters = ["network_device", "model", "type", "ip"]
+    required_parameters = ["network_device", "model", "type", "ip", "interface"]
 
     def render(self, session, logger, network_device, label, model, type, ip,
-               interface, mac, vendor, serial, comments, **arguments):
+               interface, iftype, mac, vendor, serial, comments, **arguments):
         dbmodel = Model.get_unique(session, name=model, vendor=vendor,
                                    compel=True)
 
@@ -65,20 +67,14 @@ class CommandAddNetworkDevice(BrokerCommand):
         session.add(dbnetdev)
         dbnetdev.primary_name = dbdns_rec
 
-        # FIXME: get default name from the model
-        iftype = "oa"
-        if not interface:
-            interface = "xge"
-            ifcomments = "Created automatically by add_network_device"
+        if iftype is None:
+            iftype = infer_netdev_iftype(interface)
         else:
-            ifcomments = None
-            if interface.lower().startswith("lo"):
-                iftype = "loopback"
+            check_netdev_iftype(iftype)
 
         dbinterface = get_or_create_interface(session, dbnetdev,
                                               name=interface, mac=mac,
-                                              interface_type=iftype,
-                                              comments=ifcomments)
+                                              interface_type=iftype)
         dbnetwork = get_net_id_from_ip(session, ip)
         # TODO: should we call check_ip_restrictions() here?
         assign_address(dbinterface, ip, dbnetwork, logger=logger)

@@ -617,3 +617,16 @@ def rename_interface(session, dbinterface, rename_to):
             Fqdn.get_unique(session, name=new_name, dns_domain=dbdns_domain,
                             dns_environment=dbdns_env, preclude=True)
             dbfqdn.name = new_name
+
+def check_netdev_iftype(type):
+    valid_interface_types = ['oa', 'loopback']
+    if type not in valid_interface_types:
+        raise ArgumentError("Interface type %s is not allowed for "
+                            "network devices." % str(type))
+
+def infer_netdev_iftype(interface):
+    if interface.lower().startswith("lo"):
+        return 'loopback'
+    else:
+        return 'oa'
+
