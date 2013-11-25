@@ -28,7 +28,8 @@ class CommandSearchNetworkDevice(BrokerCommand):
 
     required_parameters = []
 
-    def render(self, session, network_device, type, vlan, fullinfo, **arguments):
+    def render(self, session, network_device, type, vlan, fullinfo, style,
+               **arguments):
         q = search_hardware_entity_query(session, hardware_type=NetworkDevice,
                                          **arguments)
         if type:
@@ -50,7 +51,7 @@ class CommandSearchNetworkDevice(BrokerCommand):
         q = q.reset_joinpoint()
         q = q.order_by(Fqdn.name, DnsDomain.name, NetworkDevice.label)
 
-        if fullinfo:
+        if fullinfo or style != 'raw':
             q = q.options(joinedload('location'),
                           subqueryload('interfaces'),
                           joinedload('interfaces.assignments'),

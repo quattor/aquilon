@@ -29,6 +29,7 @@
 	    </group>
 	    <arg choice="opt"><option>--building <replaceable>BUILDING</replaceable></option></arg>
 	    <arg choice="opt"><option>--network_environment <replaceable>ENV</replaceable></option></arg>
+	    <arg choice="opt"><option>--fullinfo</option></arg>
 	    <xi:include href="../common/global_options.xml"/>
 	</cmdsynopsis>
     </refsynopsisdiv>
@@ -61,6 +62,17 @@
 		<listitem>
 		    <para>
 			Select only the named environment.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--fullinfo</option>
+		</term>
+		<listitem>
+		    <para>
+			Return the full description of the matching network environments. By default, only the
+			name of the environment is returned.
 		    </para>
 		</listitem>
 	    </varlistentry>

@@ -254,6 +254,6 @@ class CommandSearchCluster(BrokerCommand):
         else:
             q = q.order_by(Cluster.name)
 
-        if fullinfo:
+        if fullinfo or style != "raw":
             return q.all()
         return StringAttributeList(q.all(), "name")

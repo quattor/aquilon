@@ -69,7 +69,7 @@ class CommandSearchMachine(BrokerCommand):
                     NasAlias.share_id.in_(map(lambda s: s[0], v2shares)))
                 q = q.reset_joinpoint()
 
-        if fullinfo:
+        if fullinfo or style != "raw":
             q = q.options(joinedload('location'),
                           subqueryload('interfaces'),
                           lazyload('interfaces.hardware_entity'),

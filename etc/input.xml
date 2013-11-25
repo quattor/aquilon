@@ -1361,6 +1361,9 @@
 	 <!-- TODO: Do we need any other kind of location? -->
 	 <option name="building" type="string">Building</option>
       </optgroup>
+      <optgroup name="search_netenv_optional" mandatory="False">
+         <option name="fullinfo" type="flag">Show full information for the matching network environments</option>
+      </optgroup>
       <transport method="get" path="find/network_environment"/>
    </command>
 

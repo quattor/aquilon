@@ -18,16 +18,18 @@
 
 from sqlalchemy.orm import joinedload, undefer
 
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.aqdb.model import NetworkEnvironment
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.location import get_location
+from aquilon.worker.formats.list import StringAttributeList
 
 
 class CommandSearchNetworkEnvironment(BrokerCommand):
 
     required_parameters = []
 
-    def render(self, session, network_environment, **arguments):
+    def render(self, session, network_environment, fullinfo, style,
+               **arguments):
         q = session.query(NetworkEnvironment)
         q = q.options(undefer('comments'),
                       joinedload('dns_environment'),
@@ -39,4 +41,8 @@ class CommandSearchNetworkEnvironment(BrokerCommand):
         if location:
             q = q.filter_by(location=location)
         q = q.order_by(NetworkEnvironment.name)
-        return q.all()
+
+        if fullinfo or style != "raw":
+            return q.all()
+        else:
+            return StringAttributeList(q.all(), "name")
