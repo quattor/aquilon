@@ -16,12 +16,13 @@
 # limitations under the License.
 """Contains the logic for `aq show auxiliary --all`."""
 
-from sqlalchemy.orm import contains_eager, aliased
+from sqlalchemy.orm import contains_eager
 from sqlalchemy.sql import and_
 
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.aqdb.model import (Interface, AddressAssignment, HardwareEntity,
-                                ARecord, DnsDomain, Fqdn)
+from aquilon.aqdb.model import (PublicInterface, AddressAssignment,
+                                HardwareEntity, Machine, ARecord, DnsDomain,
+                                Fqdn)
 
 
 class CommandShowAuxiliaryAll(BrokerCommand):
@@ -37,11 +38,9 @@ class CommandShowAuxiliaryAll(BrokerCommand):
         q = q.join((AddressAssignment,
                     and_(ARecord.network_id == AddressAssignment.network_id,
                          ARecord.ip == AddressAssignment.ip)))
-        q = q.join(Interface)
-        q = q.filter_by(interface_type='public')
+        q = q.join(AddressAssignment.interface.of_type(PublicInterface))
         # ... of a machine.
-        q = q.join(aliased(HardwareEntity))
-        q = q.filter_by(hardware_type='machine')
+        q = q.join(PublicInterface.hardware_entity.of_type(Machine))
         q = q.reset_joinpoint()
         q = q.join(ARecord.fqdn, DnsDomain)
         q = q.options(contains_eager('fqdn'), contains_eager('fqdn.dns_domain'))

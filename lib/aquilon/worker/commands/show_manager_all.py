@@ -20,7 +20,7 @@ from sqlalchemy.orm import contains_eager
 from sqlalchemy.sql import and_
 
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.aqdb.model import (AddressAssignment, Interface, ARecord,
+from aquilon.aqdb.model import (AddressAssignment, ManagementInterface, ARecord,
                                 DnsDomain, Fqdn)
 
 
@@ -31,8 +31,7 @@ class CommandShowManagerAll(BrokerCommand):
         q = q.join((AddressAssignment,
                     and_(ARecord.network_id == AddressAssignment.network_id,
                          ARecord.ip == AddressAssignment.ip)))
-        q = q.join(Interface)
-        q = q.filter_by(interface_type='management')
+        q = q.join(AddressAssignment.interface.of_type(ManagementInterface))
         q = q.reset_joinpoint()
         q = q.join(ARecord.fqdn, DnsDomain)
         q = q.options(contains_eager('fqdn'),

@@ -30,8 +30,9 @@ from aquilon.aqdb.model import (Service, Machine, Chassis, Host, Personality,
                                 HostResource, ClusterResource, VirtualMachine,
                                 Filesystem, RebootSchedule, Hostlink,
                                 ServiceAddress, Share, Disk, Interface,
-                                AddressAssignment, ServiceInstance, Switch,
-                                ParamDefHolder, Feature)
+                                ManagementInterface, AddressAssignment,
+                                ServiceInstance, Switch, ParamDefHolder,
+                                Feature)
 from aquilon.aqdb.data_sync.storage import cache_storage_data
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.templates.base import Plenary
@@ -108,8 +109,7 @@ class CommandFlush(BrokerCommand):
             q = q.options(subqueryload("network.static_routes"),
                           subqueryload("network.routers"))
         else:
-            q = q.join(Interface)
-            q = q.filter_by(interface_type='management')
+            q = q.join(AddressAssignment.interface.of_type(ManagementInterface))
 
         for addr in q:
             addrs_by_iface[addr.interface_id].append(addr)
