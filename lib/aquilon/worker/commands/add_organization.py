@@ -14,12 +14,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Contains the logic for `aq add hub`."""
+"""Contains the logic for `aq add organization`."""
 
-
-from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.aqdb.model import Location, Company
+from aquilon.aqdb.model import Company
 
 
 class CommandAddOrganization(BrokerCommand):
@@ -27,12 +25,8 @@ class CommandAddOrganization(BrokerCommand):
     required_parameters = ["organization"]
 
     def render(self, session, organization, fullname, comments, **arguments):
-        if organization:
-            org = session.query(Location).filter_by(location_type='company',
-                                                    name=organization).first()
-            if org:
-                raise ArgumentError("Organization %s already exists." %
-                                    organization)
+        Company.get_unique(session, organization, preclude=True)
+
         if not fullname:
             fullname = organization
 
