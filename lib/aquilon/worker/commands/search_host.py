@@ -29,7 +29,8 @@ from aquilon.aqdb.model import (Host, Cluster, Archetype, Personality,
                                 Fqdn, DnsDomain, Interface, AddressAssignment,
                                 NetworkEnvironment, Network, MetaCluster,
                                 VirtualMachine, ClusterResource, HardwareEntity,
-                                HostEnvironment, User, Branch)
+                                HostEnvironment, User, Branch,
+                                Feature, FeatureLink)
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.formats.list import StringAttributeList
@@ -52,7 +53,7 @@ class CommandSearchHost(BrokerCommand):
                sandbox, branch, sandbox_author, dns_domain, shortname, mac, ip,
                networkip, network_environment, exact_location, metacluster,
                server_of_service, server_of_instance, grn, eon_id, fullinfo,
-               orphaned, style, **arguments):
+               orphaned, style, feature, **arguments):
         dbnet_env = NetworkEnvironment.get_unique_or_default(session,
                                                              network_environment)
 
@@ -200,6 +201,11 @@ class CommandSearchHost(BrokerCommand):
                                                               host_environment)
                     q = q.filter_by(host_environment=dbhost_env)
 
+            q = q.reset_joinpoint()
+
+        if feature:
+            q = q.join(Personality).join(FeatureLink).join(Feature)
+            q = q.filter_by(name=feature)
             q = q.reset_joinpoint()
 
         if buildstatus:
