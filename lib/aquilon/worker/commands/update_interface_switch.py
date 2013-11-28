@@ -18,7 +18,7 @@
 
 
 from aquilon.exceptions_ import UnimplementedError
-from aquilon.aqdb.model import Switch, Interface
+from aquilon.aqdb.model import NetworkDevice, Interface
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.interface import rename_interface
 from aquilon.worker.processes import DSDBRunner
@@ -36,11 +36,11 @@ class CommandUpdateInterfaceSwitch(BrokerCommand):
                 raise UnimplementedError("update_interface --switch cannot use "
                                          "the --%s option." % arg)
 
-        dbswitch = Switch.get_unique(session, switch, compel=True)
-        dbinterface = Interface.get_unique(session, hardware_entity=dbswitch,
+        dbnetdev = NetworkDevice.get_unique(session, switch, compel=True)
+        dbinterface = Interface.get_unique(session, hardware_entity=dbnetdev,
                                            name=interface, compel=True)
 
-        oldinfo = DSDBRunner.snapshot_hw(dbswitch)
+        oldinfo = DSDBRunner.snapshot_hw(dbnetdev)
 
         if comments:
             dbinterface.comments = comments
@@ -52,7 +52,7 @@ class CommandUpdateInterfaceSwitch(BrokerCommand):
         session.flush()
 
         dsdb_runner = DSDBRunner(logger=logger)
-        dsdb_runner.update_host(dbswitch, oldinfo)
+        dsdb_runner.update_host(dbnetdev, oldinfo)
         dsdb_runner.commit_or_rollback("Could not update switch in DSDB")
 
         return

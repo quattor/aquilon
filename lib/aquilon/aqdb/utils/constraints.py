@@ -75,6 +75,7 @@ _long_nms['PERSONALITY_GRN_MAP'] = 'PERS_GRN_MAP'
 _long_nms['SERVICE_ADDRESS'] = 'SRV_ADDR'
 _long_nms['REBUILD_REQUIRED'] = 'REBLD_REQ'
 _long_nms['HOST_ENVIRONMENT_ID'] = 'HOST_ENV_ID'
+_long_nms['NETWORK_DEVICE_ID'] = 'NETDEV_ID'
 
 
 def rename_sys_pks(db, debug=False):

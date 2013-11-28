@@ -54,7 +54,7 @@ class TestVendorConstraints(TestBrokerCommand):
         self.matchoutput(out,
                          "Cpu xeon_2500 is still used by the following "
                          "models, and cannot be deleted: hp/bl260c, "
-                         "hp/utccissmodel, hp/uttorswitch, verari/vb1205xm",
+                         "hp/utccissmodel, verari/vb1205xm",
                          command)
 
 

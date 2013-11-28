@@ -18,7 +18,7 @@
 
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import Switch
+from aquilon.aqdb.model import NetworkDevice
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.dns import delete_dns_record
 from aquilon.worker.locks import CompileKey
@@ -31,25 +31,25 @@ class CommandDelSwitch(BrokerCommand):
     required_parameters = ["switch"]
 
     def render(self, session, logger, switch, **arguments):
-        dbswitch = Switch.get_unique(session, switch, compel=True)
+        dbnetdev = NetworkDevice.get_unique(session, switch, compel=True)
 
         # Check and complain if the switch has any other addresses than its
         # primary address
         addrs = []
-        for addr in dbswitch.all_addresses():
-            if addr.ip == dbswitch.primary_ip:
+        for addr in dbnetdev.all_addresses():
+            if addr.ip == dbnetdev.primary_ip:
                 continue
             addrs.append(str(addr.ip))
         if addrs:
             raise ArgumentError("{0} still provides the following addresses, "
                                 "delete them first: {1}.".format
-                                (dbswitch, ", ".join(addrs)))
+                                (dbnetdev, ", ".join(addrs)))
 
-        dbdns_rec = dbswitch.primary_name
-        ip = dbswitch.primary_ip
-        old_fqdn = str(dbswitch.primary_name.fqdn)
-        old_comments = dbswitch.comments
-        session.delete(dbswitch)
+        dbdns_rec = dbnetdev.primary_name
+        ip = dbnetdev.primary_ip
+        old_fqdn = str(dbnetdev.primary_name.fqdn)
+        old_comments = dbnetdev.comments
+        session.delete(dbnetdev)
         if dbdns_rec:
             delete_dns_record(dbdns_rec)
 
@@ -58,19 +58,19 @@ class CommandDelSwitch(BrokerCommand):
         # Any switch ports hanging off this switch should be deleted with
         # the cascade delete of the switch.
 
-        switch_plenary = Plenary.get_plenary(dbswitch, logger=logger)
+        netdev_plenary = Plenary.get_plenary(dbnetdev, logger=logger)
 
         # clusters connected to this switch
         plenaries = PlenaryCollection(logger=logger)
 
-        for dbcluster in dbswitch.esx_clusters:
+        for dbcluster in dbnetdev.esx_clusters:
             plenaries.append(Plenary.get_plenary(dbcluster))
 
-        with CompileKey.merge([switch_plenary.get_key(), plenaries.get_key()]):
-            switch_plenary.stash()
+        with CompileKey.merge([netdev_plenary.get_key(), plenaries.get_key()]):
+            netdev_plenary.stash()
             try:
                 plenaries.write(locked=True)
-                switch_plenary.remove(locked=True)
+                netdev_plenary.remove(locked=True)
 
                 if ip:
                     dsdb_runner = DSDBRunner(logger=logger)
@@ -81,6 +81,6 @@ class CommandDelSwitch(BrokerCommand):
                                                    "from DSDB")
             except:
                 plenaries.restore_stash()
-                switch_plenary.restore_stash()
+                netdev_plenary.restore_stash()
                 raise
         return

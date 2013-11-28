@@ -16,7 +16,7 @@
 # limitations under the License.
 """Contains the logic for `aq update machine`."""
 
-
+from aquilon.aqdb.types import VirtualMachineType
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import (Cpu, Chassis, ChassisSlot, Model, Cluster,
                                 Machine, BundleResource, VirtualNasDisk,
@@ -119,23 +119,19 @@ class CommandUpdateMachine(BrokerCommand):
                 vendor = dbmachine.model.vendor.name
             dbmodel = Model.get_unique(session, name=model, vendor=vendor,
                                        compel=True)
-
-            if dbmodel.machine_type not in ['blade', 'rackmount',
-                                            'workstation', 'aurora_node',
-                                            'virtual_machine',
-                                            'virtual_appliance']:
+            if not dbmodel.model_type.isMachineType():
                 raise ArgumentError("The update_machine command cannot update "
                                     "machines of type %s." %
-                                    dbmodel.machine_type)
-
+                                    dbmodel.model_type)
             # We probably could do this by forcing either cluster or
             # location data to be available as appropriate, but really?
             # Failing seems reasonable.
-            if dbmodel.machine_type != dbmachine.model.machine_type and \
-               (dbmodel.is_virtual or dbmachine.model.is_virtual):
+            if dbmodel.model_type != dbmachine.model.model_type and \
+               (dbmodel.isVirtualMachineType() or
+                dbmachine.model.isVirtualMachineType()):
                 raise ArgumentError("Cannot change machine from %s to %s." %
-                                    (dbmachine.model.machine_type,
-                                     dbmodel.machine_type))
+                                    (dbmachine.model.model_type,
+                                     dbmodel.model_type))
 
             old_nic_model = dbmachine.model.nic_model
             new_nic_model = dbmodel.nic_model
@@ -161,10 +157,10 @@ class CommandUpdateMachine(BrokerCommand):
         if ip:
             update_primary_ip(session, logger, dbmachine, ip)
 
-        if uri and dbmachine.model.machine_type != 'virtual_appliance':
+        if uri and not dbmachine.model.model_type.isVirtualAppliance():
             raise ArgumentError("URI can be specified only for virtual "
-                                "appliances and the model's type is %(type)s" %
-                                {"type": dbmachine.model.machine_type})
+                                "appliances and the model's type is %s" %
+                                dbmachine.model.model_type)
 
         if uri:
             dbmachine.uri = uri
@@ -229,7 +225,7 @@ class CommandUpdateMachine(BrokerCommand):
                 dbmachine.location = new_holder.location_constraint
             else:
                 # vmhost
-                dbmachine.location = new_holder.machine.location
+                dbmachine.location = new_holder.hardware_entity.location
 
         session.flush()
 

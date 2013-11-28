@@ -34,7 +34,7 @@ def del_srv_dsdb_callback(session, logger, holder, dbsrv_addr, oldinfo,
 
     dsdb_runner = DSDBRunner(logger=logger)
     if isinstance(real_holder, Host):
-        dsdb_runner.update_host(real_holder.machine, oldinfo)
+        dsdb_runner.update_host(real_holder.hardware_entity, oldinfo)
         if keep_dns:
             dsdb_runner.add_host_details(dbsrv_addr.dns_record.fqdn,
                                          dbsrv_addr.dns_record.ip,
@@ -65,7 +65,7 @@ class CommandDelServiceAddress(BrokerCommand):
                                           compel=True)
 
         if isinstance(holder.holder_object, Host):
-            oldinfo = DSDBRunner.snapshot_hw(holder.holder_object.machine)
+            oldinfo = DSDBRunner.snapshot_hw(holder.holder_object.hardware_entity)
         else:
             oldinfo = None
 

@@ -18,7 +18,7 @@
 
 
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.aqdb.model import ObservedMac, Switch
+from aquilon.aqdb.model import ObservedMac, NetworkDevice
 
 
 class CommandSearchObservedMac(BrokerCommand):
@@ -30,8 +30,8 @@ class CommandSearchObservedMac(BrokerCommand):
                **arguments):
         q = session.query(ObservedMac)
         if switch:
-            dbswitch = Switch.get_unique(session, switch, compel=True)
-            q = q.filter_by(switch=dbswitch)
+            dbnetdev = NetworkDevice.get_unique(session, switch, compel=True)
+            q = q.filter_by(network_device=dbnetdev)
         if port is not None:
             q = q.filter_by(port=port)
         if mac:

@@ -262,6 +262,15 @@ class TestUpdateModel(TestBrokerCommand):
         self.matchoutput(out, "NIC count: 2", command)
         self.matchoutput(out, "Disk: sda 30 GB scsi (local)", command)
 
+    def test_811_addspecsswitch(self):
+        command = ['update_model', '--model=uttorswitch', '--vendor=hp',
+                   '--cpuname=intel', '--cpunum=1', '--memory=1',
+                   '--disktype=local', '--diskcontroller=sata',
+                   '--disksize=1', '--nics=1']
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Machine specfications are only valid "
+                         "for machine types", command)
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUpdateModel)

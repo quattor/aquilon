@@ -24,7 +24,7 @@ from sqlalchemy import (Column, Integer, DateTime, ForeignKey,
                         PrimaryKeyConstraint)
 from sqlalchemy.orm import relation, backref, deferred
 
-from aquilon.aqdb.model import Base, Switch
+from aquilon.aqdb.model import Base, NetworkDevice
 from aquilon.aqdb.column_types.aqmac import AqMac
 from aquilon.aqdb.column_types import AqStr
 
@@ -35,10 +35,11 @@ class ObservedMac(Base):
     """ reports the observance of a mac address on a switch port. """
     __tablename__ = _TN
 
-    switch_id = Column(Integer, ForeignKey('switch.hardware_entity_id',
-                                           ondelete='CASCADE',
-                                           name='obs_mac_hw_fk'),
-                       nullable=False)
+    network_device_id = Column(Integer, 
+                               ForeignKey('network_device.hardware_entity_id',
+                                          ondelete='CASCADE',
+                                          name='obs_mac_hw_fk'),
+                               nullable=False)
 
     port = Column(AqStr(32), nullable=False)
 
@@ -50,8 +51,9 @@ class ObservedMac(Base):
     last_seen = Column('last_seen', DateTime,
                        default=datetime.now, nullable=False)
 
-    switch = relation(Switch, innerjoin=True,
-                      backref=backref('observed_macs', cascade='delete',
-                                      order_by=[port]))
+    network_device = relation(NetworkDevice, innerjoin=True,
+                              backref=backref('observed_macs', 
+                                              cascade='delete',
+                                              order_by=[port]))
 
-    __table_args__ = (PrimaryKeyConstraint(switch_id, port, mac_address),)
+    __table_args__ = (PrimaryKeyConstraint(network_device_id, port, mac_address),)

@@ -20,7 +20,7 @@
 from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.commands.poll_switch import CommandPollSwitch
-from aquilon.aqdb.model import Switch
+from aquilon.aqdb.model import NetworkDevice
 
 
 class CommandPollSwitchSwitch(CommandPollSwitch):
@@ -28,9 +28,9 @@ class CommandPollSwitchSwitch(CommandPollSwitch):
     required_parameters = ["switch"]
 
     def render(self, session, logger, switch, type, clear, vlan, **arguments):
-        Switch.check_type(type)
-        dbswitch = Switch.get_unique(session, switch, compel=True)
-        if type is not None and dbswitch.switch_type != type:
-            raise ArgumentError("{0} is not a {1} switch.".format(dbswitch,
+        NetworkDevice.check_type(type)
+        dbnetdev = NetworkDevice.get_unique(session, switch, compel=True)
+        if type is not None and dbnetdev.switch_type != type:
+            raise ArgumentError("{0} is not a {1} switch.".format(dbnetdev,
                                                                   type))
-        return self.poll(session, logger, [dbswitch], clear, vlan)
+        return self.poll(session, logger, [dbnetdev], clear, vlan)

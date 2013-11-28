@@ -93,7 +93,8 @@ class CommandRefreshWindowsHosts(BrokerCommand):
         q = session.query(Host)
         q = q.filter_by(comments='Created by refresh_windows_host')
         for dbhost in q.all():
-            mac_addresses = [iface.mac for iface in dbhost.machine.interfaces]
+            dbmachine = dbhost.hardware_entity
+            mac_addresses = [iface.mac for iface in dbmachine.interfaces]
             if dbhost.fqdn in windows_hosts and \
                windows_hosts[dbhost.fqdn] in mac_addresses:
                 # All is well
@@ -105,7 +106,6 @@ class CommandRefreshWindowsHosts(BrokerCommand):
                 failed.append(msg)
                 logger.info(msg)
                 continue
-            dbmachine = dbhost.machine
             success.append("Removed host entry for %s (%s)" %
                            (dbmachine.label, dbmachine.fqdn))
             if dbmachine.vm_container:
@@ -194,7 +194,7 @@ class CommandRefreshWindowsHosts(BrokerCommand):
                 failed.append(msg)
                 logger.info(msg)
                 continue
-            dbhost = Host(machine=dbmachine, branch=dbdomain,
+            dbhost = Host(hardware_entity=dbmachine, branch=dbdomain,
                           status=dbstatus,
                           personality=dbpersonality, operating_system=dbos,
                           comments="Created by refresh_windows_host")

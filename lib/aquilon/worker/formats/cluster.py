@@ -123,8 +123,8 @@ class ClusterFormatter(ObjectFormatter):
                            len(cluster.virtual_machines))
             details.append(indent + "  ESX VMHost count: %s" %
                            len(cluster.hosts))
-            if cluster.switch:
-                details.append(indent + "  {0:c}: {0!s}".format(cluster.switch))
+            if cluster.network_device:
+                details.append(indent + "  {0:c}: {0!s}".format(cluster.network_device))
             caps = cluster.get_total_capacity()
             if caps:
                 overrides = cluster.get_capacity_overrides()

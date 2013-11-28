@@ -62,7 +62,7 @@ class CommandSearchNetwork(BrokerCommand):
         if machine:
             dbmachine = Machine.get_unique(session, machine, compel=True)
             vlans = []
-            if dbmachine.cluster and dbmachine.cluster.switch:
+            if dbmachine.cluster and dbmachine.cluster.network_device:
                 # If this is a VM on a cluster, consult the VLANs.  There
                 # could be functionality here for real hardware to consult
                 # interface port groups... there's no real use case yet.
@@ -70,7 +70,7 @@ class CommandSearchNetwork(BrokerCommand):
                          for i in dbmachine.interfaces if i.port_group]
                 if vlans:
                     q = q.join('observed_vlans')
-                    q = q.filter_by(switch=dbmachine.cluster.switch)
+                    q = q.filter_by(network_device=dbmachine.cluster.network_device)
                     q = q.filter(ObservedVlan.vlan_id.in_(vlans))
                     q = q.reset_joinpoint()
             if not vlans:
@@ -94,13 +94,13 @@ class CommandSearchNetwork(BrokerCommand):
             q = q.filter(Network.id.in_(networks))
         if cluster:
             dbcluster = Cluster.get_unique(session, cluster, compel=True)
-            if dbcluster.switch:
+            if dbcluster.network_device:
                 q = q.join('observed_vlans')
-                q = q.filter_by(switch=dbcluster.switch)
+                q = q.filter_by(network_device=dbcluster.network_device)
                 q = q.reset_joinpoint()
             else:
-                net_ids = [h.machine.primary_name.network.id for h in
-                           dbcluster.hosts if getattr(h.machine.primary_name,
+                net_ids = [h.hardware_entity.primary_name.network.id for h in
+                           dbcluster.hosts if getattr(h.hardware_entity.primary_name,
                                                       "network")]
                 q = q.filter(Network.id.in_(net_ids))
         if pg:

@@ -428,7 +428,7 @@ class Option(Element):
         elif self.type == "flag":
             parser.add_option(*names, dest=self.name, action="store_true",
                               **extra_args)
-        elif self.type in ['string', 'ipv4', 'mac', 'json']:
+        elif self.type in ['string', 'ipv4', 'mac', 'json', 'enum']:
             parser.add_option(*names, dest=self.name, action="store",
                               **extra_args)
         elif self.type == 'int':
@@ -460,10 +460,10 @@ class Option(Element):
                 return "--[no]" + self.name
             else:
                 return "--%s|--%s" % (self.name, self.reverse)
-        elif self.type in ["string", "file", "list", "int"]:
-            return "--" + self.name + " " + self.name.upper()
-        else:
+        elif self.type in ["flag"]:
             return "--" + self.name
+        else:
+            return "--" + self.name + " " + self.name.upper()
 
     def recursiveHelp(self, indentlevel, width=None):
         whitespace = " " * (4 * indentlevel)

@@ -23,7 +23,7 @@ from aquilon.aqdb.model import ObservedMac
 
 class ObservedMacFormatter(ObjectFormatter):
     def csv_fields(self, item):
-        return [item.switch.fqdn, item.port, item.mac_address,
+        return [item.network_device.fqdn, item.port, item.mac_address,
                 item.last_seen]
 
 ObjectFormatter.handlers[ObservedMac] = ObservedMacFormatter()

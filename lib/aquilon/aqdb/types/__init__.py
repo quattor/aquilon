@@ -14,22 +14,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Contains the logic for `aq cat --switch`."""
 
-from aquilon.aqdb.model import NetworkDevice
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.templates import Plenary
+from aquilon.aqdb.types.enum import StringEnum
 
-
-class CommandCatSwitch(BrokerCommand):
-
-    required_parameters = ["switch"]
-
-    def render(self, generate, session, logger, switch, **kwargs):
-        dbnetdev = NetworkDevice.get_unique(session, switch, compel=True)
-        plenary_info = Plenary.get_plenary(dbnetdev, logger=logger)
-
-        if generate:
-            return plenary_info._generate_content()
-        else:
-            return plenary_info.read()
+from aquilon.aqdb.types.model_types import ModelType
+from aquilon.aqdb.types.model_types import HardwareEntityType
+from aquilon.aqdb.types.model_types import MachineType
+from aquilon.aqdb.types.model_types import PhysicalMachineType
+from aquilon.aqdb.types.model_types import VirtualMachineType
+from aquilon.aqdb.types.model_types import ChassisType
+from aquilon.aqdb.types.model_types import NetworkDeviceType
+from aquilon.aqdb.types.model_types import NicType

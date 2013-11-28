@@ -99,7 +99,7 @@ class CommandAddHost(BrokerCommand):
                                           version=osversion,
                                           archetype=dbarchetype, compel=True)
 
-        if (dbmachine.model.machine_type == 'aurora_node' and
+        if (dbmachine.model.model_type.isAuroraNode() and
                 dbpersonality.archetype.name != 'aurora'):
             raise ArgumentError("Machines of type aurora_node can only be "
                                 "added with archetype aurora.")
@@ -113,9 +113,10 @@ class CommandAddHost(BrokerCommand):
             dbgrn = lookup_grn(session, grn, eon_id, logger=logger,
                                config=self.config)
 
-        dbhost = Host(machine=dbmachine, branch=dbbranch, owner_grn=dbgrn,
-                      sandbox_author=dbauthor, personality=dbpersonality,
-                      status=dbstatus, operating_system=dbos, comments=comments)
+        dbhost = Host(hardware_entity=dbmachine, branch=dbbranch,
+                      owner_grn=dbgrn, sandbox_author=dbauthor,
+                      personality=dbpersonality, status=dbstatus,
+                      operating_system=dbos, comments=comments)
         session.add(dbhost)
 
         if dbgrn and self.config.has_option("archetype_" + archetype, "default_grn_target"):

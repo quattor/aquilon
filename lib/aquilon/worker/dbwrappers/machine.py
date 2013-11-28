@@ -83,7 +83,7 @@ def create_machine(session, machine, dblocation, dbmodel, cpuname=None,
                         serial_no=serial, comments=comments)
     session.add(dbmachine)
 
-    if dbmodel.machine_specs and dbmodel.machine_type != 'aurora_node' \
+    if dbmodel.machine_specs and not dbmodel.model_type.isAuroraNode() \
        and dbmodel.machine_specs.disk_type == 'local':
         specs = dbmodel.machine_specs
         dbdisk = LocalDisk(machine=dbmachine, device_name=specs.disk_name,

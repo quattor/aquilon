@@ -22,7 +22,7 @@ from aquilon.worker.dbwrappers.branch import get_branch_and_author
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.utils import force_ratio
 from aquilon.aqdb.model import (Personality, ClusterLifecycle, MetaCluster,
-                                Switch, Cluster)
+                                NetworkDevice, Cluster)
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
 
 
@@ -101,8 +101,10 @@ class CommandAddCluster(BrokerCommand):
             kw["vm_count"] = vm_count
             kw["host_count"] = host_count
 
-        if switch and hasattr(clus_type, 'switch'):
-            kw['switch'] = Switch.get_unique(session, switch, compel=True)
+        if switch and hasattr(clus_type, 'network_device'):
+            kw['network_device'] = NetworkDevice.get_unique(session, 
+                                                            switch, 
+                                                            compel=True)
 
         if maint_threshold is not None:
             (down_hosts_pct, dht) = Cluster.parse_threshold(maint_threshold)

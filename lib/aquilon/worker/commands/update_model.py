@@ -19,6 +19,7 @@
 
 from sqlalchemy.orm.session import object_session
 
+from aquilon.aqdb.types import NicType
 from aquilon.exceptions_ import ArgumentError, UnimplementedError
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.aqdb.model import (Vendor, Model, Cpu, MachineSpecs, Machine, Disk,
@@ -45,7 +46,7 @@ class CommandUpdateModel(BrokerCommand):
             # Cleaning the strings isn't strictly necessary but allows
             # for simple equality checks below and removes the need to
             # call refresh().
-            if arg in ['newmodel', 'newvendor', 'machine_type',
+            if arg in ['newmodel', 'newvendor',
                        'cpuname', 'cpuvendor', 'disktype', 'diskcontroller',
                        'nicmodel', 'nicvendor']:
                 if value is not None:
@@ -82,7 +83,7 @@ class CommandUpdateModel(BrokerCommand):
             q = session.query(Machine).filter_by(model=dbmodel)
             dbmachines.update(q.all())
 
-        # For now, can't update machine_type.  There are too many spots
+        # For now, can't update model_type.  There are too many spots
         # that special case things like aurora_node or virtual_machine to
         # know that the transistion is safe.  If there is enough need we
         # can always add those transitions later.
@@ -110,6 +111,11 @@ class CommandUpdateModel(BrokerCommand):
 
         if not dbmodel.machine_specs:
             if cpu_values or nic_values or spec_values:
+                # You can't add a non-machine model with machine_specs
+                # thus we only need to check here if you try and update
+                if not dbmodel.model_type.isMachineType():
+                    raise ArgumentError("Machine specfications are only valid"
+                                        " for machine types")
                 if not cpu_values or len(spec_values) < len(spec_args):
                     raise ArgumentError("Missing required parameters to store "
                                         "machine specs for the model.  Please "
@@ -118,7 +124,7 @@ class CommandUpdateModel(BrokerCommand):
                 dbcpu = Cpu.get_unique(session, compel=True, **cpu_info)
                 if nic_values:
                     dbnic = Model.get_unique(session, compel=True,
-                                             machine_type='nic', **nic_info)
+                                             model_type=NicType.Nic, **nic_info)
                 else:
                     dbnic = Model.default_nic_model(session)
                 dbmachine_specs = MachineSpecs(model=dbmodel, cpu=dbcpu,

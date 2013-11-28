@@ -18,9 +18,9 @@
 
 from sqlalchemy.orm import joinedload, subqueryload, undefer
 
-from aquilon.aqdb.model import Switch
+from aquilon.aqdb.model import NetworkDevice
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.dbwrappers.switch import discover_switch
+from aquilon.worker.dbwrappers.network_device import discover_network_device
 from aquilon.worker.formats.list import StringList
 
 
@@ -37,11 +37,11 @@ class CommandShowSwitchSwitch(BrokerCommand):
                        joinedload('observed_vlans.network'),
                        subqueryload('observed_macs'),
                        undefer('observed_macs.creation_date')]
-        dbswitch = Switch.get_unique(session, switch, compel=True,
-                                     query_options=options)
+        dbnetdev = NetworkDevice.get_unique(session, switch, compel=True,
+                                            query_options=options)
         if discover:
-            results = discover_switch(session, logger, self.config, dbswitch,
-                                      True)
+            results = discover_network_device(session, logger, self.config,
+                                              dbnetdev, True)
             return StringList(results)
         else:
-            return dbswitch
+            return dbnetdev

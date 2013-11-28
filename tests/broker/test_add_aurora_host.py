@@ -110,6 +110,13 @@ class TestAddAuroraHost(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Aurora_node: ny00l4as01", command)
 
+    def testcatmachine(self):
+        command = "cat --machine %s" % self.aurora_without_node
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "structure template "
+                         "machine/americas/ut/None/%s" % self.aurora_without_node,
+                         command)
+
     def testshowhostproto(self):
         fqdn = self.aurora_with_node
         if not fqdn.endswith(".ms.com"):

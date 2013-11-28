@@ -455,7 +455,7 @@ class TestSearchHost(TestBrokerCommand):
     def testmodelmachinetypeconflict(self):
         command = "search host --model vb1205xm --machine_type virtual_machine"
         out = self.notfoundtest(command.split(" "))
-        self.matchoutput(out, "Model vb1205xm, machine_type "
+        self.matchoutput(out, "Model vb1205xm, model_type "
                          "virtual_machine not found.", command)
 
     def testvendoravailable(self):
@@ -476,9 +476,9 @@ class TestSearchHost(TestBrokerCommand):
 
     def testmachinetypeunavailable(self):
         command = "search host --machine_type machine_type-does-not-exist"
-        out = self.notfoundtest(command.split(" "))
-        self.matchoutput(out, "Model machine_type "
-                         "machine_type-does-not-exist not found.", command)
+        out = self.badrequesttest(command.split(" "))
+        self.matchoutput(out, "Unknown machine type "
+                         "machine_type-does-not-exist", command)
 
     def testserialavailable(self):
         def testfunc():

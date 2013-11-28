@@ -33,7 +33,7 @@ def add_srv_dsdb_callback(session, logger, dbsrv, real_holder=None,
     if not newly_created:
         dsdb_runner.delete_host_details(dbsrv.dns_record.fqdn, dbsrv.dns_record.ip)
     if isinstance(real_holder, Host):
-        dsdb_runner.update_host(real_holder.machine, oldinfo)
+        dsdb_runner.update_host(real_holder.hardware_entity, oldinfo)
     else:
         dsdb_runner.add_host_details(dbsrv.dns_record.fqdn,
                                      dbsrv.dns_record.ip, comments=comments)
@@ -86,7 +86,7 @@ class CommandAddServiceAddress(BrokerCommand):
             if not isinstance(real_holder, Host):
                 raise ArgumentError("The --map_to_primary option works only "
                                     "for host-based service addresses.")
-            dbdns_rec.reverse_ptr = real_holder.machine.primary_name.fqdn
+            dbdns_rec.reverse_ptr = real_holder.hardware_entity.primary_name.fqdn
 
         # Disable autoflush, since the ServiceAddress object won't be complete
         # until add_resource() is called
@@ -106,7 +106,7 @@ class CommandAddServiceAddress(BrokerCommand):
                 for host in real_holder.hosts:
                     apply_service_address(host, ifnames, dbsrv, logger)
             elif isinstance(real_holder, Host):
-                oldinfo = DSDBRunner.snapshot_hw(real_holder.machine)
+                oldinfo = DSDBRunner.snapshot_hw(real_holder.hardware_entity)
                 apply_service_address(real_holder, ifnames, dbsrv, logger)
             else:  # pragma: no cover
                 raise UnimplementedError("{0} as a resource holder is not "
@@ -123,13 +123,13 @@ class CommandAddServiceAddress(BrokerCommand):
 def apply_service_address(dbhost, ifnames, srv_addr, logger):
     for ifname in ifnames:
         dbinterface = None
-        for iface in dbhost.machine.interfaces:
+        for iface in dbhost.hardware_entity.interfaces:
             if iface.name == ifname:
                 dbinterface = iface
                 break
         if not dbinterface:
             raise ArgumentError("{0} does not have an interface named "
-                                "{1}.".format(dbhost.machine, ifname))
+                                "{1}.".format(dbhost.hardware_entity, ifname))
 
         assign_address(dbinterface, srv_addr.dns_record.ip,
                        srv_addr.dns_record.network, label=srv_addr.name,

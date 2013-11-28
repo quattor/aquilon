@@ -54,7 +54,7 @@ class CommandDelHost(BrokerCommand):
         remove_plenaries.append(Plenary.get_plenary(dbhost))
 
         archetype = dbhost.archetype.name
-        dbmachine = dbhost.machine
+        dbmachine = dbhost.hardware_entity
         oldinfo = DSDBRunner.snapshot_hw(dbmachine)
 
         ip = dbmachine.primary_ip

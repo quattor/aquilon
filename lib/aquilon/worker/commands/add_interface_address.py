@@ -40,7 +40,7 @@ class CommandAddInterfaceAddress(BrokerCommand):
             hwtype = 'chassis'
             hwname = chassis
         elif switch:
-            hwtype = 'switch'
+            hwtype = 'network_device'
             hwname = switch
 
         dbnet_env = NetworkEnvironment.get_unique_or_default(session,

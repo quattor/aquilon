@@ -29,10 +29,7 @@ class TestAddModel(TestBrokerCommand):
 
     def test_100_add_uttorswitch(self):
         command = ["add_model", "--model=uttorswitch", "--vendor=hp",
-                   "--type=switch", "--cpuname=xeon_2500", "--cpunum=1",
-                   "--memory=8192", "--disktype=local", "--diskcontroller=scsi",
-                   "--disksize=36", "--nics=4",
-                   "--comments", "Some model comments"]
+                   "--type=switch", "--comments", "Some model comments"]
         self.noouttest(command)
 
     def test_115_show_uttorswitch(self):
@@ -40,11 +37,6 @@ class TestAddModel(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Vendor: hp Model: uttorswitch", command)
         self.matchoutput(out, "Type: switch", command)
-        self.matchoutput(out, "MachineSpecs for hp uttorswitch", command)
-        self.matchoutput(out, "Cpu: xeon_2500 x 1", command)
-        self.matchoutput(out, "Memory: 8192 MB", command)
-        self.matchoutput(out, "NIC count: 4", command)
-        self.matchoutput(out, "Disk: sda 36 GB scsi (local)", command)
         self.matchoutput(out, "Comments: Some model comments", command)
 
     def test_120_add_utchassis(self):
@@ -156,7 +148,8 @@ class TestAddModel(TestBrokerCommand):
         command = ["add_model", "--model=invalid", "--vendor=aurora_vendor",
                    "--type=aurora_node"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "The model's machine type must be one of",
+        self.matchoutput(out, "The model's machine type must "
+                         "not be an aurora type",
                          command)
 
     def test_300_fail_duplicate(self):

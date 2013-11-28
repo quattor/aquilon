@@ -24,7 +24,7 @@ from aquilon.worker.formats.formatters import ObjectFormatter
 
 class ChassisFormatter(ObjectFormatter):
     def format_raw(self, chassis, indent=""):
-        details = [indent + "%s: %s" % (chassis.model.machine_type.capitalize(),
+        details = [indent + "%s: %s" % (str(chassis.model.model_type).capitalize(),
                                         chassis.label)]
         if chassis.primary_name:
             details.append(indent + "  Primary Name: "

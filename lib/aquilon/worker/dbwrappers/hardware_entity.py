@@ -54,7 +54,7 @@ def search_hardware_entity_query(session, hardware_type=HardwareEntity,
             q = q.filter(HardwareEntity.location_id.in_(childids))
     if model or vendor or machine_type:
         subq = Model.get_matching_query(session, name=model, vendor=vendor,
-                                        machine_type=machine_type, compel=True)
+                                        model_type=machine_type, compel=True)
         q = q.filter(HardwareEntity.model_id.in_(subq))
     if ip or mac or pg or interface_vendor or interface_model:
         q = q.join('interfaces')

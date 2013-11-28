@@ -18,7 +18,7 @@
 
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import Switch
+from aquilon.aqdb.model import NetworkDevice
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.interface import get_or_create_interface
 from aquilon.worker.processes import DSDBRunner
@@ -47,10 +47,10 @@ class CommandAddInterfaceSwitch(BrokerCommand):
                 raise ArgumentError("Cannot use argument --%s when adding an "
                                     "interface to a switch." % arg)
 
-        dbswitch = Switch.get_unique(session, switch, compel=True)
-        oldinfo = DSDBRunner.snapshot_hw(dbswitch)
+        dbnetdev = NetworkDevice.get_unique(session, switch, compel=True)
+        oldinfo = DSDBRunner.snapshot_hw(dbnetdev)
 
-        dbinterface = get_or_create_interface(session, dbswitch,
+        dbinterface = get_or_create_interface(session, dbnetdev,
                                               name=interface, mac=mac,
                                               interface_type=type,
                                               comments=comments, preclude=True)
@@ -58,7 +58,7 @@ class CommandAddInterfaceSwitch(BrokerCommand):
         session.flush()
 
         dsdb_runner = DSDBRunner(logger=logger)
-        dsdb_runner.update_host(dbswitch, oldinfo)
+        dsdb_runner.update_host(dbnetdev, oldinfo)
         dsdb_runner.commit_or_rollback("Could not update switch in DSDB")
 
         return

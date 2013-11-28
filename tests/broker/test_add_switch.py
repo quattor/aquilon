@@ -34,10 +34,9 @@ class TestAddSwitch(TestBrokerCommand, VerifySwitchMixin):
                    "--switch", "ut3gd1r03.aqd-unittest.ms.com",
                    "--rack", "ut3", "--model", "hs21-8853l5u",
                    "--ip", self.net["tor_net_9"].usable[-1]]
-        out = self.notfoundtest(command)
-        self.matchoutput(out,
-                         "Model hs21-8853l5u, machine_type switch not found.",
-                         command)
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "This command can only be used "
+                         "to add network devices.", command)
 
     def testverifyrejectut3gd1r03(self):
         command = "show switch --switch ut3gd1r03.aqd-unittest.ms.com"

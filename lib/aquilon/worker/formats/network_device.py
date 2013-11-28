@@ -14,79 +14,79 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Switch formatter."""
+"""NetworkDevice formatter."""
 
-from aquilon.aqdb.model import Switch
+from aquilon.aqdb.model import NetworkDevice
 from aquilon.worker.formats.formatters import ObjectFormatter
 
 
-class SwitchInterfaceTuple(tuple):
+class NetworkDeviceInterfaceTuple(tuple):
     """Encapsulates a (switch, selected interface) triplet"""
 
 
-class SwitchInterfaceTupleFormatter(ObjectFormatter):
+class NetworkDeviceInterfaceTupleFormatter(ObjectFormatter):
     def csv_fields(self, item):
-        switch = item[0]
+        device = item[0]
         interface = item[1]
 
-        details = [switch.fqdn,
-                   switch.primary_ip,
-                   switch.switch_type,
-                   switch.location.rack.name,
-                   switch.location.building.name,
-                   switch.model.vendor.name,
-                   switch.model.name,
-                   switch.serial_no]
+        details = [device.fqdn,
+                   device.primary_ip,
+                   device.switch_type,
+                   device.location.rack.name,
+                   device.location.building.name,
+                   device.model.vendor.name,
+                   device.model.name,
+                   device.serial_no]
         if interface:
             details.extend([interface.name, interface.mac])
         else:
             details.extend([None, None])
         return details
 
-ObjectFormatter.handlers[SwitchInterfaceTuple] = SwitchInterfaceTupleFormatter()
+ObjectFormatter.handlers[NetworkDeviceInterfaceTuple] = NetworkDeviceInterfaceTupleFormatter()
 
 
-class SwitchFormatter(ObjectFormatter):
-    def format_raw(self, switch, indent=""):
-        details = [indent + "%s: %s" % (switch.model.machine_type.capitalize(),
-                                        switch.label)]
-        if switch.primary_name:
+class NetworkDeviceFormatter(ObjectFormatter):
+    def format_raw(self, device, indent=""):
+        details = [indent + "%s: %s" % (str(device.model.model_type).capitalize(),
+                                        device.label)]
+        if device.primary_name:
             details.append(indent + "  Primary Name: "
-                           "{0:a}".format(switch.primary_name))
-        details.append(indent + "  Switch Type: %s" % switch.switch_type)
-        details.append(self.redirect_raw(switch.location, indent + "  "))
-        details.append(self.redirect_raw(switch.model, indent + "  "))
-        if switch.serial_no:
-            details.append(indent + "  Serial: %s" % switch.serial_no)
-        for om in switch.observed_macs:
+                           "{0:a}".format(device.primary_name))
+        details.append(indent + "  Switch Type: %s" % device.switch_type)
+        details.append(self.redirect_raw(device.location, indent + "  "))
+        details.append(self.redirect_raw(device.model, indent + "  "))
+        if device.serial_no:
+            details.append(indent + "  Serial: %s" % device.serial_no)
+        for om in device.observed_macs:
             details.append(indent + "  Port %s: %s" %
                            (om.port, om.mac_address))
             details.append(indent + "    Created: %s Last Seen: %s" %
                            (om.creation_date, om.last_seen))
-        for ov in switch.observed_vlans:
+        for ov in device.observed_vlans:
             details.append(indent + "  VLAN %d: %s" %
                            (ov.vlan_id, ov.network.ip))
             details.append(indent + "    Created: %s" % ov.creation_date)
-        for i in switch.interfaces:
+        for i in device.interfaces:
             details.append(self.redirect_raw(i, indent + "  "))
-        if switch.comments:
-            details.append(indent + "  Comments: %s" % switch.comments)
+        if device.comments:
+            details.append(indent + "  Comments: %s" % device.comments)
         return "\n".join(details)
 
-    def csv_tolist(self, switch):
+    def csv_tolist(self, device):
         interfaces = []
-        for i in switch.interfaces:
+        for i in device.interfaces:
             # XXX What semantics do we want here?
             if not i.mac:
                 continue
             interfaces.append(i)
         if len(interfaces):
-            return [SwitchInterfaceTuple((switch, i)) for i in interfaces]
+            return [NetworkDeviceInterfaceTuple((device, i)) for i in interfaces]
         else:
-            return [SwitchInterfaceTuple((switch, None))]
+            return [NetworkDeviceInterfaceTuple((device, None))]
 
     def csv_fields(self, item):
-        f = SwitchInterfaceTupleFormatter()
+        f = NetworkDeviceInterfaceTupleFormatter()
         return f.csv_fields(item)
 
-ObjectFormatter.handlers[Switch] = SwitchFormatter()
+ObjectFormatter.handlers[NetworkDevice] = NetworkDeviceFormatter()

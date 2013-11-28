@@ -14,7 +14,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-""" Switches """
+""" Network Devices """
 from datetime import datetime
 
 from sqlalchemy import Column, Integer, ForeignKey, DateTime
@@ -24,11 +24,12 @@ from aquilon.aqdb.model import HardwareEntity
 from aquilon.aqdb.column_types import Enum
 
 SWITCH_TYPES = ('tor', 'bor', 'agg', 'misc')
-_TN = 'switch'
+_TN = 'network_device'
 
 
-class Switch(HardwareEntity):
+class NetworkDevice(HardwareEntity):
     __tablename__ = _TN
+    _class_label = 'Switch'
     __mapper_args__ = {'polymorphic_identity': _TN}
 
     hardware_entity_id = Column(Integer,

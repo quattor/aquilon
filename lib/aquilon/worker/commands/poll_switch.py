@@ -28,11 +28,11 @@ from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.dbwrappers.observed_mac import (
     update_or_create_observed_mac)
-from aquilon.worker.dbwrappers.switch import (determine_helper_hostname,
-                                              determine_helper_args)
+from aquilon.worker.dbwrappers.network_device import (determine_helper_hostname,
+                                                      determine_helper_args)
 from aquilon.worker.processes import run_command
-from aquilon.aqdb.model import (Switch, ObservedMac, ObservedVlan, Network,
-                                NetworkEnvironment, VlanInfo)
+from aquilon.aqdb.model import (NetworkDevice, ObservedMac, ObservedVlan,
+                                Network, NetworkEnvironment, VlanInfo)
 from aquilon.utils import force_ipv4
 
 
@@ -42,58 +42,58 @@ class CommandPollSwitch(BrokerCommand):
 
     def render(self, session, logger, rack, type, clear, vlan, **arguments):
         dblocation = get_location(session, rack=rack)
-        Switch.check_type(type)
-        q = session.query(Switch)
+        NetworkDevice.check_type(type)
+        q = session.query(NetworkDevice)
         q = q.filter_by(location=dblocation)
         if type:
             q = q.filter_by(switch_type=type)
-        switches = q.all()
-        if not switches:
+        netdevs = q.all()
+        if not netdevs:
             raise NotFoundException("No switch found.")
-        return self.poll(session, logger, switches, clear, vlan)
+        return self.poll(session, logger, netdevs, clear, vlan)
 
-    def poll(self, session, logger, switches, clear, vlan):
+    def poll(self, session, logger, netdevs, clear, vlan):
         now = datetime.now()
         failed_vlan = 0
         default_ssh_args = determine_helper_args(self.config)
-        for switch in switches:
+        for netdev in netdevs:
             if clear:
-                self.clear(session, switch)
+                self.clear(session, netdev)
 
             hostname = determine_helper_hostname(session, logger, self.config,
-                                                 switch)
+                                                 netdev)
             if hostname:
                 ssh_args = default_ssh_args[:]
                 ssh_args.append(hostname)
             else:
                 ssh_args = []
 
-            self.poll_mac(session, switch, now, ssh_args)
+            self.poll_mac(session, netdev, now, ssh_args)
             if vlan:
-                if switch.switch_type != "tor":
+                if netdev.switch_type != "tor":
                     logger.client_info("Skipping VLAN probing on {0:l}, it's "
-                                       "not a ToR switch.".format(switch))
+                                       "not a ToR switch.".format(netdev))
                     continue
 
                 try:
-                    self.poll_vlan(session, logger, switch, now, ssh_args)
+                    self.poll_vlan(session, logger, netdev, now, ssh_args)
                 except ProcessException, e:
                     failed_vlan += 1
                     logger.client_info("Failed getting VLAN info for {0:l}: "
-                                       "{1!s}".format(switch, e))
-        if switches and failed_vlan == len(switches):
+                                       "{1!s}".format(netdev, e))
+        if netdevs and failed_vlan == len(netdevs):
             raise ArgumentError("Failed getting VLAN info.")
         return
 
-    def poll_mac(self, session, switch, now, ssh_args):
+    def poll_mac(self, session, netdev, now, ssh_args):
         importer = self.config.get("broker", "get_camtable")
 
-        if not switch.primary_name:
-            hostname = switch.label
-        elif switch.primary_name.fqdn.dns_domain.name == 'ms.com':
-            hostname = switch.primary_name.fqdn.name
+        if not netdev.primary_name:
+            hostname = netdev.label
+        elif netdev.primary_name.fqdn.dns_domain.name == 'ms.com':
+            hostname = netdev.primary_name.fqdn.name
         else:
-            hostname = switch.fqdn
+            hostname = netdev.fqdn
         args = []
 
         if ssh_args:
@@ -109,17 +109,17 @@ class CommandPollSwitch(BrokerCommand):
 
         macports = JSONDecoder().decode(out)
         for (mac, port) in macports:
-            update_or_create_observed_mac(session, switch, port, mac, now)
+            update_or_create_observed_mac(session, netdev, port, mac, now)
 
-    def clear(self, session, switch):
-        session.query(ObservedMac).filter_by(switch=switch).delete()
+    def clear(self, session, netdev):
+        session.query(ObservedMac).filter_by(network_device=netdev).delete()
         session.flush()
 
-    def poll_vlan(self, session, logger, switch, now, ssh_args):
-        if not switch.primary_ip:
+    def poll_vlan(self, session, logger, netdev, now, ssh_args):
+        if not netdev.primary_ip:
             raise ArgumentError("Cannot poll VLAN info for {0:l} without "
-                                "a registered IP address.".format(switch))
-        session.query(ObservedVlan).filter_by(switch=switch).delete()
+                                "a registered IP address.".format(netdev))
+        session.query(ObservedVlan).filter_by(network_device=netdev).delete()
         session.flush()
 
         # Restrict operations to the internal network
@@ -130,7 +130,7 @@ class CommandPollSwitch(BrokerCommand):
             args.extend(ssh_args)
         args.append(self.config.get("broker", "vlan2net"))
         args.append("-ip")
-        args.append(switch.primary_ip)
+        args.append(netdev.primary_ip)
         out = run_command(args)
 
         try:
@@ -171,7 +171,7 @@ class CommandPollSwitch(BrokerCommand):
                 if dbnetwork.cidr != bitmask_int:
                     logger.client_info("{0}: skipping VLAN {1}, because network "
                                        "bitmask value {2} differs from prefixlen "
-                                       "{3.cidr} of {3:l}.".format(switch, vlan,
+                                       "{3.cidr} of {3:l}.".format(netdev, vlan,
                                                                    bitmask,
                                                                    dbnetwork))
                     continue
@@ -187,7 +187,7 @@ class CommandPollSwitch(BrokerCommand):
                 if vlan_info.vlan_type == "unknown":
                     continue
 
-                dbvlan = ObservedVlan(vlan_id=vlan_int, switch=switch,
+                dbvlan = ObservedVlan(vlan_id=vlan_int, network_device=netdev,
                                       network=dbnetwork, creation_date=now)
                 session.add(dbvlan)
         except CSVError, e:

@@ -89,7 +89,7 @@ def remove_service_addresses(dbcluster, dbhost):
                                 "last cluster member is not allowed."
                                 .format(dbcluster, res))
 
-        for iface in dbhost.machine.interfaces:
+        for iface in dbhost.hardware_entity.interfaces:
             addrs = [addr for addr in iface.assignments
                      if addr.service_address == res]
             for addr in addrs:

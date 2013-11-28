@@ -41,7 +41,7 @@ class CommandDelInterfaceAddress(BrokerCommand):
             hwtype = 'chassis'
             hwname = chassis
         elif switch:
-            hwtype = 'switch'
+            hwtype = 'network_device'
             hwname = switch
 
         dbhw_ent = HardwareEntity.get_unique(session, hwname,

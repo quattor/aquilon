@@ -87,7 +87,7 @@ class CompileKey(LockKey):
 
 class PlenaryKey(LockKey):
     def __init__(self, personality=None, service_instance=None,
-                 cluster_member=None, switch=None, exclusive=True,
+                 cluster_member=None, network_device=None, exclusive=True,
                  logger=LOGGER, loglevel=CLIENT_INFO):
         super(PlenaryKey, self).__init__(logger=logger, loglevel=loglevel,
                                          lock_queue=lock_queue)
@@ -112,8 +112,8 @@ class PlenaryKey(LockKey):
             lockset["service"].add(key)
         if cluster_member:
             lockset["cluster_member"].add(str(cluster_member))
-        if switch:
-            lockset["switch"].add(str(switch))
+        if network_device:
+            lockset["network_device"].add(str(network_device))
 
         # Make sure plenary updates conflict with the global compile lock, which
         # is used by e.g. the flush command.

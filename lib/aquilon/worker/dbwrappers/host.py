@@ -19,7 +19,8 @@
 from sqlalchemy.orm import joinedload
 
 from aquilon.exceptions_ import NotFoundException, ArgumentError
-from aquilon.aqdb.model import Machine, DnsEnvironment, DnsDomain, DnsRecord
+from aquilon.aqdb.model import (HardwareEntity, DnsEnvironment, DnsDomain,
+                                DnsRecord)
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 from collections import defaultdict
 from types import ListType
@@ -32,7 +33,7 @@ def hostname_to_host(session, hostname):
     # found"
     parse_fqdn(session, hostname)
     try:
-        dbmachine = Machine.get_unique(session, hostname, compel=True)
+        dbmachine = HardwareEntity.get_unique(session, hostname, compel=True)
     except NotFoundException:
         raise NotFoundException("Host %s not found." % hostname)
 
@@ -64,7 +65,7 @@ def hostlist_to_hosts(session, hostlist):
                                              dns_environment=dbdns_env,
                                              query_options=[joinedload('hardware_entity')],
                                              compel=True)
-            if not isinstance(dbdns_rec.hardware_entity, Machine) or \
+            if not dbdns_rec.hardware_entity or \
                not dbdns_rec.hardware_entity.host:
                 raise NotFoundException("Host %s not found." % host)
             dbhosts.append(dbdns_rec.hardware_entity.host)

@@ -25,7 +25,7 @@ from sqlalchemy.sql import or_
 
 from aquilon.exceptions_ import ArgumentError, InternalError
 from aquilon.aqdb.model import (Host, Cluster, Service, ServiceInstance,
-                                MetaCluster, Archetype, Personality)
+                                MetaCluster, EsxCluster, Archetype, Personality)
 from aquilon.worker.templates import (Plenary, PlenaryCollection,
                                       PlenaryServiceInstanceServer)
 
@@ -453,17 +453,17 @@ class HostChooser(Chooser):
             raise InternalError("HostChooser can only choose services for "
                                 "hosts, got %r (%s)" % (dbhost, type(dbhost)))
         super(HostChooser, self).__init__(dbhost, *args, **kwargs)
-        self.location = dbhost.machine.location
+        self.location = dbhost.hardware_entity.location
 
         # If the primary name is a ReservedName, then it does not have a network
         # attribute
-        if hasattr(dbhost.machine.primary_name, 'network'):
-            self.network = dbhost.machine.primary_name.network
+        if hasattr(dbhost.hardware_entity.primary_name, 'network'):
+            self.network = dbhost.hardware_entity.primary_name.network
         else:
             self.network = None
 
         # all of them would be self. but that should be optimized
-        # dbhost.machine.interfaces[x].assignments[y].network
+        # dbhost.hardware_entity.interfaces[x].assignments[y].network
 
         """Stores interim service instance lists."""
         q = self.session.query(Service)
@@ -569,7 +569,7 @@ class HostChooser(Chooser):
         # This may be too much action at a distance... however, if
         # we are potentially re-writing a host plenary, it seems like
         # a good idea to also verify and refresh known dependencies.
-        self.plenaries.append(Plenary.get_plenary(self.dbobj.machine))
+        self.plenaries.append(Plenary.get_plenary(self.dbobj.hardware_entity))
         if self.dbobj.resholder:
             for dbres in self.dbobj.resholder.resources:
                 self.plenaries.append(Plenary.get_plenary(dbres))
@@ -645,8 +645,8 @@ class ClusterChooser(Chooser):
                 for dbres in cluster.resholder.resources:
                     self.plenaries.append(Plenary.get_plenary(dbres))
 
-            if hasattr(cluster, 'switch') and cluster.switch:
-                self.plenaries.append(Plenary.get_plenary(cluster.switch))
+            if isinstance(cluster, EsxCluster) and cluster.network_device:
+                self.plenaries.append(Plenary.get_plenary(cluster.network_device))
 
         add_cluster_dependencies(self.dbobj)
 

@@ -54,12 +54,9 @@ class CommandAddMachine(BrokerCommand):
         dbmodel = Model.get_unique(session, name=model, vendor=vendor,
                                    compel=True)
 
-        if dbmodel.machine_type not in ['blade', 'rackmount', 'workstation',
-                                        'aurora_node', 'virtual_machine',
-                                        'virtual_appliance']:
+        if not dbmodel.model_type.isMachineType():
             raise ArgumentError("The add_machine command cannot add machines "
-                                "of type %(type)s.  Try 'add %(type)s'." %
-                                {"type": dbmodel.machine_type})
+                                "of type %s." % str(dbmodel.model_type))
 
         vmholder = None
 
@@ -67,7 +64,7 @@ class CommandAddMachine(BrokerCommand):
             if cluster and vmhost:
                 raise ArgumentError("Cluster and vmhost cannot be specified "
                                     "together.")
-            if not dbmodel.is_virtual:
+            if not dbmodel.model_type.isVirtualMachineType():
                 raise ArgumentError("{0} is not a virtual machine."
                                     .format(dbmodel))
 
@@ -83,14 +80,14 @@ class CommandAddMachine(BrokerCommand):
             if cluster:
                 container_loc = vmholder.holder_object.location_constraint
             else:
-                container_loc = vmholder.holder_object.machine.location
+                container_loc = vmholder.holder_object.hardware_entity.location
 
             if dblocation and dblocation != container_loc:
                 raise ArgumentError("Cannot override container location {0} "
                                     "with location {1}.".format(container_loc,
                                                                 dblocation))
             dblocation = container_loc
-        elif dbmodel.is_virtual:
+        elif dbmodel.model_type.isVirtualMachineType():
             raise ArgumentError("Virtual machines must be assigned to a "
                                 "cluster or a host.")
 
@@ -100,10 +97,10 @@ class CommandAddMachine(BrokerCommand):
                                    memory, serial, comments)
 
 
-        if uri and dbmodel.machine_type != 'virtual_appliance':
+        if uri and not dbmodel.model_type.isVirtualAppliance():
             raise ArgumentError("URI can be specified only for virtual "
-                                "appliances and the model's type is %(type)s" %
-                                {"type": dbmodel.machine_type})
+                                "appliances and the model's type is %s." %
+                                dbmodel.model_type)
 
         dbmachine.uri = uri
 

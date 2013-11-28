@@ -18,7 +18,7 @@
 
 from sqlalchemy.orm import contains_eager
 
-from aquilon.aqdb.model import Host, Machine, DnsRecord, DnsDomain, Fqdn
+from aquilon.aqdb.model import Host, HardwareEntity, DnsRecord, DnsDomain, Fqdn
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.formats.list import StringAttributeList
 
@@ -27,11 +27,11 @@ class CommandShowHostAll(BrokerCommand):
 
     def render(self, session, **arguments):
         q = session.query(Host)
-        q = q.join(Machine, DnsRecord, (Fqdn, DnsRecord.fqdn_id == Fqdn.id),
+        q = q.join(HardwareEntity, DnsRecord, (Fqdn, DnsRecord.fqdn_id == Fqdn.id),
                    DnsDomain)
-        q = q.options(contains_eager('machine'),
-                      contains_eager('machine.primary_name'),
-                      contains_eager('machine.primary_name.fqdn'),
-                      contains_eager('machine.primary_name.fqdn.dns_domain'))
+        q = q.options(contains_eager('hardware_entity'),
+                      contains_eager('hardware_entity.primary_name'),
+                      contains_eager('hardware_entity.primary_name.fqdn'),
+                      contains_eager('hardware_entity.primary_name.fqdn.dns_domain'))
         q = q.order_by(Fqdn.name, DnsDomain.name)
         return StringAttributeList(q.all(), "fqdn")

@@ -18,7 +18,7 @@
 
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import Chassis, Machine, Switch, Interface
+from aquilon.aqdb.model import Chassis, Machine, NetworkDevice, Interface
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.interface import assign_address
 from aquilon.worker.templates import Plenary
@@ -42,7 +42,7 @@ class CommandDelInterface(BrokerCommand):
         if machine:
             dbhw_ent = Machine.get_unique(session, machine, compel=True)
         elif switch:
-            dbhw_ent = Switch.get_unique(session, switch, compel=True)
+            dbhw_ent = NetworkDevice.get_unique(session, switch, compel=True)
         elif chassis:
             dbhw_ent = Chassis.get_unique(session, chassis, compel=True)
         else:

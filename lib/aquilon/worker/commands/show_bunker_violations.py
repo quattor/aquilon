@@ -20,7 +20,7 @@ from collections import defaultdict
 
 from sqlalchemy.orm import (contains_eager, subqueryload, joinedload, defer,
                             aliased)
-
+from aquilon.aqdb.types import VirtualMachineType
 from aquilon.aqdb.model import (AddressAssignment, Network, Location, Bunker,
                                 Rack, Building, HardwareEntity, Interface,
                                 Model, NetworkEnvironment)
@@ -51,8 +51,8 @@ class CommandShowBunkerViolations(BrokerCommand):
         q = session.query(HwRack, NetLoc)
         q = q.filter(HardwareEntity.location_id == HwRack.id)
         q = q.filter(HardwareEntity.model_id == Model.id)
-        q = q.filter(Model.machine_type != 'virtual_machine')
-        q = q.filter(Model.machine_type != 'virtual_appliance')
+        q = q.filter(Model.model_type != VirtualMachineType.VirtualMachine)
+        q = q.filter(Model.model_type != VirtualMachineType.VirtualAppliance)
         q = q.filter(Interface.hardware_entity_id == HardwareEntity.id)
         q = q.filter(AddressAssignment.interface_id == Interface.id)
         q = q.filter(AddressAssignment.network_id == Network.id)
@@ -103,7 +103,7 @@ class CommandShowBunkerViolations(BrokerCommand):
         q = q.filter_by(network_environment=def_env)
         q = q.reset_joinpoint()
         q = q.join(Interface, HardwareEntity, Model)
-        q = q.filter(Model.machine_type != 'virtual_machine')
+        q = q.filter(Model.model_type != VirtualMachineType.VirtualMachine)
         q = q.options(defer('service_address_id'),
                       contains_eager('network'),
                       defer('network.cidr'),
