@@ -118,7 +118,7 @@ class TestUsecaseHACluster(TestBrokerCommand):
                                   "--resourcegroup", "hacl%dg%d" % (cl, rg),
                                   "--filesystem", "hacl%dg%dfs" % (cl, rg),
                                   "--mountpoint", "/d/d%d/app" % rg,
-                                  "--blockdevice", "/dev/vx/dg.0/gnr.%d" % rg,
+                                  "--blockdevice", "/dev/vx/dsk/dg.0/gnr.%d" % rg,
                                   "--bootmount", "--dumpfreq=1",
                                   "--fsckpass=3", "--options=rw"])
                 self.failUnless(os.path.exists(plenary),

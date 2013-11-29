@@ -61,11 +61,11 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
 
         # We can't set up the vcenter bindings/maps here, because the first
         # batch of tests do not work with it. Sigh.
-        self.create_personality("vmhost", "vulcan2-10g-test",
+        self.create_personality("vmhost", "vulcan2-server-dev",
                                 grn="grn:/ms/ei/aquilon/aqd",
                                 required=["esx_management_server"],
                                 maps=vmhost_maps)
-        self.create_personality("esx_cluster", "vulcan2-10g-test",
+        self.create_personality("esx_cluster", "vulcan2-server-dev",
                                 grn="grn:/ms/ei/aquilon/aqd",
                                 maps=esx_cluster_maps)
         self.create_personality("metacluster", "vulcan2")
@@ -83,7 +83,7 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
                    "--buildstatus=build",
                    "--domain=unittest", "--down_hosts_threshold=0",
                    "--archetype=esx_cluster",
-                   "--personality=vulcan2-10g-test"]
+                   "--personality=vulcan2-server-dev"]
         self.noouttest(command)
 
     # see testaddutmc4
@@ -148,7 +148,7 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
                        "--machine", machine,
                        "--domain", "unittest", "--buildstatus", "build",
                        "--osname", "esxi", "--osversion", "4.0.0",
-                       "--archetype", "vmhost", "--personality", "vulcan2-10g-test"]
+                       "--archetype", "vmhost", "--personality", "vulcan2-server-dev"]
             self.noouttest(command)
         self.dsdb_verify()
 
@@ -468,7 +468,7 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
 #    metacluster aligned svc tests
     def test_150_addvcenterservices(self):
         command = ["add_required_service", "--service", "vcenter",
-                   "--archetype", "vmhost", "--personality", "vulcan2-10g-test"]
+                   "--archetype", "vmhost", "--personality", "vulcan2-server-dev"]
         self.noouttest(command)
 
         command = ["add_required_service", "--service", "vcenter",
@@ -528,7 +528,7 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
         self.noouttest(command)
 
         command = ["del_required_service", "--service", "vcenter",
-                   "--archetype", "vmhost", "--personality", "vulcan2-10g-test"]
+                   "--archetype", "vmhost", "--personality", "vulcan2-server-dev"]
         self.noouttest(command)
 
         command = ["unbind_cluster", "--cluster", "utmc8",
@@ -538,12 +538,12 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
     def test_154_unmapvcenterservices(self):
         command = ["unmap", "service", "--service", "vcenter",
                    "--instance", "ut", "--building", "ut",
-                   "--personality", "vulcan2-10g-test", "--archetype", "vmhost"]
+                   "--personality", "vulcan2-server-dev", "--archetype", "vmhost"]
         self.noouttest(command)
 
         command = ["unmap", "service", "--service", "vcenter",
                    "--instance", "np", "--building", "np",
-                   "--personality", "vulcan2-10g-test", "--archetype", "vmhost"]
+                   "--personality", "vulcan2-server-dev", "--archetype", "vmhost"]
         self.noouttest(command)
 
         command = ["make", "--hostname", "utpgh0.aqd-unittest.ms.com"]
@@ -733,8 +733,8 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
             "utmc8%s" % self.xml_suffix)))
 
     def test_800_cleanup(self):
-        self.drop_personality("vmhost", "vulcan2-10g-test")
-        self.drop_personality("esx_cluster", "vulcan2-10g-test")
+        self.drop_personality("vmhost", "vulcan2-server-dev")
+        self.drop_personality("esx_cluster", "vulcan2-server-dev")
         self.drop_personality("metacluster", "vulcan2")
 
 

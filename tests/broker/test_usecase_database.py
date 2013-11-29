@@ -32,7 +32,7 @@ class TestUsecaseDatabase(TestBrokerCommand):
     def test_100_standalone_single_dbserver(self):
         command = ["add_filesystem", "--filesystem=gnr.0", "--type=ext3",
                    "--mountpoint=/d/d1/utdb1",
-                   "--blockdevice=/dev/vx/dg.0/gnr.0",
+                   "--blockdevice=/dev/vx/dsk/dg.0/gnr.0",
                    "--bootmount",
                    "--dumpfreq=1", "--fsckpass=3", "--options=rw",
                    "--hostname=server1.aqd-unittest.ms.com"]
@@ -64,7 +64,7 @@ class TestUsecaseDatabase(TestBrokerCommand):
     def test_120_standalone_two_dbserver(self):
         command = ["add_filesystem", "--filesystem=gnr.1", "--type=ext3",
                    "--mountpoint=/d/d1/utdb2",
-                   "--blockdevice=/dev/vx/dg.0/gnr.1",
+                   "--blockdevice=/dev/vx/dsk/dg.0/gnr.1",
                    "--bootmount",
                    "--dumpfreq=1", "--fsckpass=3", "--options=rw",
                    "--hostname=server1.aqd-unittest.ms.com"]
@@ -131,7 +131,7 @@ class TestUsecaseDatabase(TestBrokerCommand):
     def test_205_add_fs(self):
         command = ["add_filesystem", "--filesystem=gnr.0", "--type=ext3",
                    "--mountpoint=/d/d1/nydb1",
-                   "--blockdevice=/dev/vx/dg.0/gnr.0",
+                   "--blockdevice=/dev/vx/dsk/dg.0/gnr.0",
                    "--nobootmount",
                    "--dumpfreq=1", "--fsckpass=3", "--options=rw",
                    "--cluster=nydb1"]

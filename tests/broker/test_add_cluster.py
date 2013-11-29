@@ -36,7 +36,6 @@ class TestAddCluster(PersonalityTestMixin, TestBrokerCommand):
         command = ["add_cluster", "--cluster=utvcs1",
                    "--building=ut",
                    "--domain=unittest", "--down_hosts_threshold=0",
-                   "--maint_threshold=1",
                    "--archetype=hacluster", "--personality=vcs-msvcs"]
         self.noouttest(command)
 
@@ -49,11 +48,11 @@ class TestAddCluster(PersonalityTestMixin, TestBrokerCommand):
         self.matchoutput(out, "Building: ut", command)
         self.matchoutput(out, "Max members: %s" % default_max, command)
         self.matchoutput(out, "Down Hosts Threshold: 0", command)
-        self.matchoutput(out, "Maintenance Threshold: 1", command)
         self.matchoutput(out, "Build Status: build", command)
         self.matchoutput(out, "Personality: vcs-msvcs Archetype: hacluster",
                          command)
         self.matchoutput(out, "Domain: unittest", command)
+        self.matchclean(out, "Maintenance Threshold", command)
         self.matchclean(out, "Comments", command)
 
     def test_11_verify_cat_utvcs1(self):
@@ -64,14 +63,11 @@ class TestAddCluster(PersonalityTestMixin, TestBrokerCommand):
 
         self.matchoutput(data, '"system/cluster/down_hosts_threshold" = 0;',
                          data_cmd)
-        self.matchoutput(data, '"system/cluster/down_maint_threshold" = 1;',
-                         data_cmd)
-        self.matchclean(data, '"system/cluster/down_hosts_as_percent"',
-                        data_cmd)
-        self.matchclean(data, '"system/cluster/down_maint_as_percent"',
-                        data_cmd)
-        self.matchclean(data, '"system/cluster/down_hosts_percent"', data_cmd)
-        self.matchclean(data, '"system/cluster/down_maint_percent"', data_cmd)
+        self.matchclean(data, "down_maint_threshold", data_cmd)
+        self.matchclean(data, "down_hosts_as_percent", data_cmd)
+        self.matchclean(data, "down_maint_as_percent", data_cmd)
+        self.matchclean(data, "down_hosts_percent", data_cmd)
+        self.matchclean(data, "down_maint_percent", data_cmd)
 
     def test_20_fail_add_existing(self):
         command = ["add_cluster", "--cluster=utvcs1",
@@ -94,7 +90,6 @@ class TestAddCluster(PersonalityTestMixin, TestBrokerCommand):
         command = ["add_cluster", "--cluster=utvcs2",
                    "--building=ut",
                    "--domain=nomanage", "--down_hosts_threshold=0",
-                   "--maint_threshold=1",
                    "--archetype=hacluster", "--personality=vcs-msvcs"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Adding clusters to domain nomanage "
@@ -184,6 +179,7 @@ class TestAddCluster(PersonalityTestMixin, TestBrokerCommand):
         command = ["add_cluster", "--cluster=utstorage1",
                    "--building=ut",
                    "--domain=unittest", "--down_hosts_threshold=0",
+                   "--maint_threshold=1",
                    "--archetype=storagecluster", "--personality=metrocluster"]
         self.noouttest(command)
 
@@ -193,6 +189,7 @@ class TestAddCluster(PersonalityTestMixin, TestBrokerCommand):
         self.matchoutput(out, "Storage Cluster: utstorage1", command)
         self.matchoutput(out, "Building: ut", command)
         self.matchoutput(out, "Down Hosts Threshold: 0", command)
+        self.matchoutput(out, "Maintenance Threshold: 1", command)
         self.matchoutput(out, "Build Status: build", command)
         self.matchoutput(out, "Cluster Personality: metrocluster Archetype: storagecluster",
                          command)
