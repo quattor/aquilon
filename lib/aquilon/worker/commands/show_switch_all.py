@@ -16,7 +16,8 @@
 # limitations under the License.
 """Contains the logic for `aq show switch --all`."""
 
-from sqlalchemy.orm import joinedload, subqueryload, contains_eager, undefer
+from sqlalchemy.orm import (subqueryload, joinedload, lazyload, contains_eager,
+                            undefer)
 
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.aqdb.model import NetworkDevice, DnsRecord, DnsDomain, Fqdn
@@ -29,6 +30,7 @@ class CommandShowSwitchAll(BrokerCommand):
 
         q = q.options(subqueryload('location'),
                       subqueryload('interfaces'),
+                      lazyload('interfaces.hardware_entity'),
                       joinedload('interfaces.assignments'),
                       joinedload('interfaces.assignments.dns_records'),
                       joinedload('interfaces.assignments.network'),

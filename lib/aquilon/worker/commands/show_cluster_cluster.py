@@ -41,6 +41,7 @@ class CommandShowClusterCluster(BrokerCommand):
                             lazyload('machine.host'))
 
         q = q.options(subqueryload('_hosts'),
+                      lazyload('_hosts.cluster'),
                       joinedload('_hosts.host'),
                       joinedload('_hosts.host.hardware_entity'),
                       subqueryload('_metacluster'),

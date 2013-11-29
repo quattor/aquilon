@@ -16,7 +16,7 @@
 # limitations under the License.
 """Contains the logic for `aq show dns_domain --all`."""
 
-from sqlalchemy.orm import subqueryload, joinedload, undefer
+from sqlalchemy.orm import subqueryload, joinedload, lazyload, undefer
 
 from aquilon.aqdb.model import DnsDomain
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
@@ -30,7 +30,9 @@ class CommandShowDnsDomainAll(BrokerCommand):
         q = session.query(DnsDomain)
         q = q.options(undefer('comments'),
                       subqueryload('dns_maps'),
+                      lazyload('dns_maps.dns_domain'),
                       subqueryload('_ns_records'),
+                      lazyload('_ns_records.dns_domain'),
                       joinedload('_ns_records.a_record.fqdn'),
                       joinedload('_ns_records.a_record.fqdn.dns_domain'))
         return q.all()
