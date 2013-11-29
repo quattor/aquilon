@@ -64,7 +64,6 @@ class ResourceHolder(Base):
         return value
 
 
-
 class HostResource(ResourceHolder):
     host_id = Column(Integer, ForeignKey('host.hardware_entity_id',
                                          name='%s_host_fk' % _RESHOLDER,

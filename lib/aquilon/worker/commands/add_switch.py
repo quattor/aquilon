@@ -18,7 +18,6 @@
 
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.types import NetworkDeviceType
 from aquilon.aqdb.model import NetworkDevice, Model
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
@@ -60,8 +59,8 @@ class CommandAddSwitch(BrokerCommand):
 
         # FIXME: What do the error messages for an invalid enum (switch_type)
         # look like?
-        dbnetdev = NetworkDevice(label=label, switch_type=type, 
-                                 location=dblocation, model=dbmodel, 
+        dbnetdev = NetworkDevice(label=label, switch_type=type,
+                                 location=dblocation, model=dbmodel,
                                  serial_no=serial, comments=comments)
         session.add(dbnetdev)
         dbnetdev.primary_name = dbdns_rec

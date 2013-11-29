@@ -35,7 +35,7 @@ class ObservedMac(Base):
     """ reports the observance of a mac address on a switch port. """
     __tablename__ = _TN
 
-    network_device_id = Column(Integer, 
+    network_device_id = Column(Integer,
                                ForeignKey('network_device.hardware_entity_id',
                                           ondelete='CASCADE',
                                           name='obs_mac_hw_fk'),
@@ -52,7 +52,7 @@ class ObservedMac(Base):
                        default=datetime.now, nullable=False)
 
     network_device = relation(NetworkDevice, innerjoin=True,
-                              backref=backref('observed_macs', 
+                              backref=backref('observed_macs',
                                               cascade='delete',
                                               order_by=[port]))
 

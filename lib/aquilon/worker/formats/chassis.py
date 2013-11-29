@@ -16,8 +16,6 @@
 # limitations under the License.
 """Chassis formatter."""
 
-from sqlalchemy.orm.session import object_session
-
 from aquilon.aqdb.model import Chassis
 from aquilon.worker.formats.formatters import ObjectFormatter
 

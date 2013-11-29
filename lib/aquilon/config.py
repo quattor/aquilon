@@ -31,17 +31,17 @@ def get_username():
 # All defaults should be in etc/aqd.conf.defaults.  This is only needed to
 # supply defaults that are determined by code at run time.
 global_defaults = {
-            # The user variable, since it can be overridden by a config file,
-            # is not meant in any way, shape, or form to be used for security.
-            # Having it be something that can be overridden by an env variable
-            # is just an extra layer of convenience.
-            "user": os.environ.get("USER") or get_username(),
-            # Only used by unit tests at the moment, but maybe useful for
-            # scripts that want to execute stand-alone.
-            "srcdir": os.path.realpath(os.path.join(os.path.dirname(__file__),
+    # The user variable, since it can be overridden by a config file,
+    # is not meant in any way, shape, or form to be used for security.
+    # Having it be something that can be overridden by an env variable
+    # is just an extra layer of convenience.
+    "user": os.environ.get("USER") or get_username(),
+    # Only used by unit tests at the moment, but maybe useful for
+    # scripts that want to execute stand-alone.
+    "srcdir": os.path.realpath(os.path.join(os.path.dirname(__file__),
                                                     "..", "..")),
-            "hostname": socket.getfqdn(),
-        }
+    "hostname": socket.getfqdn(),
+}
 
 
 class Config(SafeConfigParser):

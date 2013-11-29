@@ -48,7 +48,7 @@ class CommandDelAuxiliary(CommandDelInterfaceAddress):
 
         return super(CommandDelAuxiliary, self).render(session, logger,
                                                        machine=dbinterface.hardware_entity.label,
-                                                       chassis=None, switch=None, 
+                                                       chassis=None, switch=None,
                                                        interface=dbinterface.name,
                                                        fqdn=auxiliary,
                                                        ip=assignment.ip,

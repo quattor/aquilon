@@ -96,7 +96,6 @@ class CommandAddMachine(BrokerCommand):
                                    cpuname, cpuvendor, cpuspeed, cpucount,
                                    memory, serial, comments)
 
-
         if uri and not dbmodel.model_type.isVirtualAppliance():
             raise ArgumentError("URI can be specified only for virtual "
                                 "appliances and the model's type is %s." %

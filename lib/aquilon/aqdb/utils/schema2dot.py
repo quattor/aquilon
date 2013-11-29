@@ -152,6 +152,7 @@ def create_schema_graph(tables=None, metadata=None, show_datatypes=False,
             graph.add_edge(graph_edge)
     return graph
 
+
 def _render_table_record(table, show_datatypes=False):
     def format_col_type(col):
         try:

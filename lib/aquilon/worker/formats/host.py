@@ -47,6 +47,7 @@ class GrnHostList(list):
        (grn-only) data."""
     pass
 
+
 class GrnHostListFormatter(ListFormatter):
     def format_raw(self, shlist, indent=""):
         details = []

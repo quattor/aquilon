@@ -16,7 +16,6 @@
 # limitations under the License.
 """Contains the logic for `aq update machine`."""
 
-from aquilon.aqdb.types import VirtualMachineType
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import (Cpu, Chassis, ChassisSlot, Model, Cluster,
                                 Machine, BundleResource, VirtualNasDisk,

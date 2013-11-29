@@ -29,6 +29,7 @@ from aquilon.aqdb.column_types import AqStr, StringEnumColumn
 
 from aquilon.aqdb.types import ModelType, NicType
 
+
 class Model(Base):
     """ Vendor and Model are representations of the various manufacturers and
     the asset inventory of the kinds of machines we use in the plant """

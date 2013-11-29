@@ -23,9 +23,9 @@ from aquilon.exceptions_ import NotFoundException
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.formats.list import StringAttributeList
 from aquilon.aqdb.model import (Cluster, EsxCluster, MetaCluster, Archetype,
-                                Personality, Machine, NetworkDevice, 
-                                ClusterLifecycle,Service, ServiceInstance, 
-                                Share, ClusterResource, VirtualMachine, 
+                                Personality, Machine, NetworkDevice,
+                                ClusterLifecycle, Service, ServiceInstance,
+                                Share, ClusterResource, VirtualMachine,
                                 BundleResource, ResourceGroup)
 from aquilon.worker.dbwrappers.host import hostname_to_host
 from aquilon.worker.dbwrappers.branch import get_branch_and_author

@@ -22,7 +22,7 @@ from sqlalchemy import (Column, Integer, DateTime, Sequence, String,
 from sqlalchemy.orm import deferred
 
 from aquilon.aqdb.model import Base
-from aquilon.aqdb.column_types import AqStr, Enum
+from aquilon.aqdb.column_types import AqStr
 
 _TN = 'archetype'
 

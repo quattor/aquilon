@@ -19,7 +19,6 @@
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Personality
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.dbwrappers.grn import lookup_grn
 from aquilon.worker.dbwrappers.host import (hostname_to_host, hostlist_to_hosts,
                                             check_hostlist_size)
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
@@ -42,7 +41,6 @@ class CommandUnMapGrnClearAll(BrokerCommand):
         elif personality:
             objs = [Personality.get_unique(session, name=personality,
                                            archetype=archetype, compel=True)]
-
 
         plenaries = PlenaryCollection(logger=logger)
         for obj in objs:

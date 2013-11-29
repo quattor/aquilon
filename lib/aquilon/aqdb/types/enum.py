@@ -21,19 +21,20 @@ from aquilon.exceptions_ import ArgumentError
 
 _StringEnum_Classes = {}
 
+
 class StringEnum(object):
     def __new__(cls, value):
         if not isinstance(value, str):
-            raise TypeError, "String expected"
+            raise TypeError("String expected")
         if cls == StringEnum:
             if not value in _StringEnum_Classes:
-                raise ValueError, "Unknown StringEnum %s" % value
+                raise ValueError("Unknown StringEnum %s" % value)
             return _StringEnum_Classes[value]
         if not value in cls._StringEnum__lookup:
-            raise ValueError, "Unknown %s %s" % (cls._class_label(), value)
+            raise ValueError("Unknown %s %s" % (cls._class_label(), value))
         ivalue = cls._StringEnum__lookup[value]
         if ivalue._StringEnum__dynamic:
-            raise ValueError, "Undefined %s %s" % (cls._class_label(), value)
+            raise ValueError("Undefined %s %s" % (cls._class_label(), value))
         return ivalue
 
     def __str__(self):
@@ -44,7 +45,7 @@ class StringEnum(object):
 
     @classmethod
     def _class_label(cls):
-        return re.sub(r'([a-z])([A-Z])',r'\1 \2', cls.__name__).lower()
+        return re.sub(r'([a-z])([A-Z])', r'\1 \2', cls.__name__).lower()
 
     @classmethod
     def from_argument(cls, label, value):
@@ -62,11 +63,11 @@ class StringEnum(object):
     @classmethod
     def from_database(cls, value, permissive=False):
         if not isinstance(value, str):
-            raise TypeError, "String expected, not %s" % value.__class__
+            raise TypeError("String expected, not %s" % value.__class__)
         if value in cls._StringEnum__lookup:
             return cls._StringEnum__lookup[value]
         if not permissive:
-            raise ValueError, "Unknown %s %s" % (cls._class_label(), value)
+            raise ValueError("Unknown %s %s" % (cls._class_label(), value))
         ivalue = object.__new__(cls)
         ivalue._StringEnum__name = '__UNDEFINED_%s' % value
         ivalue._StringEnum__value = value
@@ -80,12 +81,13 @@ class StringEnum(object):
             return value._StringEnum__value
         if isinstance(value, str):
             if not value in cls._StringEnum__lookup:
-                raise ValueError, "Unknown %s %s" % (cls._class_label(), value)
+                raise ValueError("Unknown %s %s" % (cls._class_label(), value))
             ivalue = cls._StringEnum__lookup[value]
             if ivalue._StringEnum__dynamic:
-                raise ValueError, "Undefined %s %s" % (cls._class_label(), value)
+                raise ValueError("Undefined %s %s" % (cls._class_label(),
+                                                      value))
             return value
-        raise TypeError, "%s or String expected" % cls.__name__
+        raise TypeError("%s or String expected" % cls.__name__)
 
     class __metaclass__(type):
         def __new__(metacls, clsname, bases, attrs):
@@ -158,7 +160,7 @@ class StringEnum(object):
             # parents are we go.  This ensures the super types always
             # can instanciate us as a subtype
             for parent in parents:
-                plookup = getattr (parent, '_StringEnum__lookup')
+                plookup = getattr(parent, '_StringEnum__lookup')
                 plookup.update(lookup)
 
             # Return the newly created type

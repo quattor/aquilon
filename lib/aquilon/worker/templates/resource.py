@@ -19,6 +19,7 @@ import logging
 from operator import attrgetter
 import os.path
 
+from aquilon.exceptions_ import InternalError
 from aquilon.aqdb.model import (Application, Filesystem, Intervention,
                                 ResourceGroup, Hostlink, RebootSchedule,
                                 RebootIntervention, ServiceAddress,

@@ -17,14 +17,18 @@
 
 from aquilon.aqdb.types import StringEnum
 
+
 class ModelType(StringEnum):
     pass
+
 
 class HardwareEntityType(ModelType):
     pass
 
+
 class MachineType(HardwareEntityType):
     pass
+
 
 class PhysicalMachineType(MachineType):
     Blade = 'blade'
@@ -32,13 +36,16 @@ class PhysicalMachineType(MachineType):
     Workstation = 'workstation'
     AuroraNode = 'aurora_node'
 
+
 class VirtualMachineType(MachineType):
     VirtualMachine = 'virtual_machine'
     VirtualAppliance = 'virtual_appliance'
 
+
 class ChassisType(HardwareEntityType):
     Chassis = 'chassis'
     AuroraChassis = 'aurora_chassis'
+
 
 class NetworkDeviceType(HardwareEntityType):
     Switch = 'switch'
@@ -48,6 +55,7 @@ class NetworkDeviceType(HardwareEntityType):
     WirelessController = 'wireless-controller'
     LoadBalancer = 'load-balancer'
     NetworkAppliance = 'network-appliance'
+
 
 class NicType(ModelType):
     Nic = 'nic'

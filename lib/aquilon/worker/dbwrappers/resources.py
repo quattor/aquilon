@@ -23,7 +23,7 @@ from sqlalchemy.inspection import inspect
 from aquilon.exceptions_ import (IncompleteError, NotFoundException,
                                  ArgumentError)
 from aquilon.aqdb.model import (Cluster, ClusterResource, HostResource,
-                                Resource, ResourceGroup, BundleResource, Share,
+                                Resource, ResourceGroup, BundleResource,
                                 RebootIntervention)
 from aquilon.worker.templates import Plenary
 from aquilon.worker.dbwrappers.host import hostname_to_host

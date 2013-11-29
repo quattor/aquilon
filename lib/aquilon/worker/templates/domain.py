@@ -16,11 +16,9 @@
 # limitations under the License.
 """Any work by the broker to write out (or read in?) templates lives here."""
 
-
 import os
 from os import environ as os_environ
 import logging
-import re
 
 from aquilon.config import Config
 from aquilon.exceptions_ import ArgumentError, ProcessException, InternalError
@@ -28,7 +26,7 @@ from aquilon.aqdb.model import (Host, Cluster, Fqdn, DnsRecord, HardwareEntity,
                                 Machine)
 from aquilon.worker.logger import CLIENT_INFO
 from aquilon.notify.index import trigger_notifications
-from aquilon.worker.processes import run_command, run_git
+from aquilon.worker.processes import run_command
 from aquilon.worker.locks import lock_queue, CompileKey
 
 LOGGER = logging.getLogger(__name__)

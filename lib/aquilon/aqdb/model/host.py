@@ -165,6 +165,7 @@ class Host(Base):
 
         return eon_id_map
 
+
 class HostGrnMap(Base):
     __tablename__ = _HOSTGRN
 

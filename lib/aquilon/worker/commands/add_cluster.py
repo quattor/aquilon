@@ -102,8 +102,8 @@ class CommandAddCluster(BrokerCommand):
             kw["host_count"] = host_count
 
         if switch and hasattr(clus_type, 'network_device'):
-            kw['network_device'] = NetworkDevice.get_unique(session, 
-                                                            switch, 
+            kw['network_device'] = NetworkDevice.get_unique(session,
+                                                            switch,
                                                             compel=True)
 
         if maint_threshold is not None:

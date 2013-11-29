@@ -79,7 +79,7 @@ class ObservedVlan(Base):
     """ reports the observance of a vlan/network on a switch """
     __tablename__ = 'observed_vlan'
 
-    network_device_id = Column(Integer, 
+    network_device_id = Column(Integer,
                                ForeignKey('network_device.hardware_entity_id',
                                           ondelete='CASCADE',
                                           name='%s_hw_fk' % _ABV),
@@ -99,7 +99,7 @@ class ObservedVlan(Base):
 
     network_device = relation(NetworkDevice, innerjoin=True,
                               backref=backref('%ss' % _TN, cascade='delete',
-                                              passive_deletes=True, 
+                                              passive_deletes=True,
                                               order_by=[vlan_id]))
     network = relation(Network, innerjoin=True,
                        backref=backref('%ss' % _TN, cascade='delete',

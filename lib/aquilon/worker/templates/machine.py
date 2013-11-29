@@ -21,6 +21,7 @@ import logging
 
 from sqlalchemy.inspection import inspect
 
+from aquilon.exceptions_ import InternalError
 from aquilon.aqdb.model import Machine
 from aquilon.worker.locks import CompileKey, NoLockKey
 from aquilon.worker.templates import (Plenary, StructurePlenary,

@@ -16,7 +16,6 @@
 # limitations under the License.
 """Contains the logic for `aq cat --machine`."""
 
-from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Machine
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.templates import Plenary

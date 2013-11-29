@@ -26,7 +26,6 @@ from aquilon.worker.dbwrappers.host import (hostlist_to_hosts,
                                             check_hostlist_size,
                                             validate_branch_author)
 from aquilon.worker.templates import PlenaryCollection, TemplateDomain
-from aquilon.worker.locks import CompileKey
 from aquilon.worker.services import Chooser
 
 
