@@ -1,0 +1,21 @@
+ALTER TABLE switch RENAME TO network_device;
+
+ALTER TABLE esx_cluster DROP CONSTRAINT esx_cluster_switch_fk;
+ALTER TABLE observed_mac DROP CONSTRAINT obs_mac_hw_fk;
+ALTER TABLE observed_vlan DROP CONSTRAINT obs_vlan_hw_fk;
+ALTER TABLE network_device DROP CONSTRAINT switch_pk;
+ALTER TABLE network_device ADD CONSTRAINT network_device_pk PRIMARY KEY (hardware_entity_id);
+
+ALTER TABLE network_device DROP CONSTRAINT switch_hw_ent_fk;
+ALTER TABLE network_device ADD CONSTRAINT network_device_hw_ent_fk FOREIGN KEY (hardware_entity_id) REFERENCES hardware_entity (id) ON DELETE CASCADE;
+
+ALTER TABLE esx_cluster RENAME COLUMN switch_id TO network_device_id;
+ALTER TABLE esx_cluster ADD CONSTRAINT esx_cluster_network_device_fk FOREIGN KEY (network_device_id) REFERENCES network_device (hardware_entity_id);
+
+ALTER TABLE observed_mac RENAME COLUMN switch_id TO network_device_id;
+ALTER TABLE observed_mac ADD CONSTRAINT obs_mac_hw_fk FOREIGN KEY (network_device_id) REFERENCES network_device (hardware_entity_id) ON DELETE CASCADE;
+
+ALTER TABLE observed_vlan RENAME COLUMN switch_id TO network_device_id;
+ALTER TABLE observed_vlan ADD CONSTRAINT obs_vlan_hw_fk FOREIGN KEY (network_device_id) REFERENCES network_device (hardware_entity_id) ON DELETE CASCADE;
+
+ALTER INDEX esx_cluster_switch_idx RENAME TO esx_cluster_network_device_idx;

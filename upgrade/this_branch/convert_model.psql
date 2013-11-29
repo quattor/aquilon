@@ -1,0 +1,1 @@
+ALTER TABLE model RENAME COLUMN machine_type TO model_type;

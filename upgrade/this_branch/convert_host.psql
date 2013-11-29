@@ -1,0 +1,3 @@
+ALTER TABLE host RENAME COLUMN machine_id TO hardware_entity_id;
+ALTER TABLE host DROP CONSTRAINT host_machine_fk;
+ALTER TABLE host ADD CONSTRAINT host_hwent_fk FOREIGN KEY (hardware_entity_id) REFERENCES hardware_entity (id);
