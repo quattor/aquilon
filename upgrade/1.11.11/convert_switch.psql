@@ -1,4 +1,5 @@
 ALTER TABLE switch RENAME TO network_device;
+UPDATE hardware_entity SET hardware_type = 'network_device' WHERE hardware_type = 'switch';
 
 ALTER TABLE esx_cluster DROP CONSTRAINT esx_cluster_switch_fk;
 ALTER TABLE observed_mac DROP CONSTRAINT obs_mac_hw_fk;

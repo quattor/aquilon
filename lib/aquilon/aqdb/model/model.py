@@ -42,7 +42,7 @@ class Model(Base):
                                            name='model_vendor_fk'),
                        nullable=False)
 
-    model_type = Column(StringEnumColumn(ModelType, 16, True), nullable=False)
+    model_type = Column(StringEnumColumn(ModelType, 20, True), nullable=False)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))

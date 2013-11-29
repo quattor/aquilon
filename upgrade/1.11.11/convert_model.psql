@@ -1,1 +1,2 @@
 ALTER TABLE model RENAME COLUMN machine_type TO model_type;
+ALTER TABLE model ALTER COLUMN model_type TYPE VARCHAR(20);
