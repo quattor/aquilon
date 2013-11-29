@@ -79,7 +79,7 @@ class CommandSearchMachine(BrokerCommand):
                           subqueryload('chassis_slot.chassis'),
                           subqueryload('disks'),
                           subqueryload('host'),
-                          lazyload('host.machine'),
+                          lazyload('host.hardware_entity'),
                           subqueryload('host.services_used'),
                           subqueryload('host._cluster'),
                           lazyload('host._cluster.host'))
