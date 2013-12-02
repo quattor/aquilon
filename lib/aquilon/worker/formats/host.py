@@ -16,6 +16,8 @@
 # limitations under the License.
 """Host formatter."""
 
+from operator import attrgetter
+
 from aquilon.aqdb.model import Host
 from aquilon.worker.formats.formatters import ObjectFormatter
 from aquilon.worker.formats.list import ListFormatter
@@ -89,7 +91,8 @@ class GrnHostListFormatter(ListFormatter):
             msg.personality.host_environment = str(host.personality.host_environment)
             msg.personality.owner_eonid = host.personality.owner_eon_id
             ## eon id maps TBD need both effective and actual
-            for grn_rec in sorted(host.personality._grns, key=lambda x: x.target):
+            for grn_rec in sorted(host.personality._grns,
+                                  key=attrgetter("target")):
                 map = msg.personality.eonid_maps.add()
                 map.target = grn_rec.target
                 map.eonid = grn_rec.eon_id

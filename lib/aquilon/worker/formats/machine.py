@@ -109,7 +109,7 @@ class MachineFormatter(ObjectFormatter):
             elif hasattr(d, "filesystem") and d.filesystem:
                 extra = extra + " from " + d.filesystem.name
 
-            flag_list = [];
+            flag_list = []
             if d.bootable:
                 flag_list.append("boot")
             if hasattr(d, "snapshotable") and d.snapshotable:
@@ -158,7 +158,7 @@ class MachineFormatter(ObjectFormatter):
             if host.owner_grn:
                 details.append(indent + "  Owned by {0:c}: {0.grn}"
                                .format(host.owner_grn))
-            for grn_rec in sorted(host._grns, key=lambda x: x.target):
+            for grn_rec in sorted(host._grns, key=attrgetter("target")):
                 details.append(indent + "  Used by {0.grn:c}: {0.grn.grn} "
                                "[target: {0.target}]".format(grn_rec))
 
@@ -175,11 +175,11 @@ class MachineFormatter(ObjectFormatter):
                                .format(feature))
 
             for si in sorted(host.services_used,
-                             key=lambda x: (x.service.name, x.name)):
+                             key=attrgetter("service.name", "name")):
                 details.append(indent + "  Uses Service: %s Instance: %s"
                                % (si.service.name, si.name))
             for si in sorted(host.services_provided,
-                             key=lambda x: (x.service.name, x.name)):
+                             key=attrgetter("service.name", "name")):
                 details.append(indent + "  Provides Service: %s Instance: %s"
                                % (si.service.name, si.name))
             if host.comments:

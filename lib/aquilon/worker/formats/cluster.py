@@ -38,7 +38,7 @@ class ClusterFormatter(ObjectFormatter):
             skeleton.maint_threshold_is_percent = \
                 cluster.down_maint_percent
 
-        for host in sorted(cluster.hosts, key=lambda x: x.fqdn):
+        for host in sorted(cluster.hosts, key=attrgetter("fqdn")):
             self.add_host_data(skeleton.hosts.add(), host)
 
         if cluster.resholder and len(cluster.resholder.resources) > 0:
@@ -158,7 +158,7 @@ class ClusterFormatter(ObjectFormatter):
                            (dbsi.service.name, dbsi.name))
         for personality in cluster.allowed_personalities:
             details.append(indent + "  Allowed Personality: {0}".format(personality))
-        for member in sorted(cluster._hosts, key=lambda x: x.host.fqdn):
+        for member in sorted(cluster._hosts, key=attrgetter("host.fqdn")):
             details.append(indent + "  Member: %s [node_index: %d]" %
                            (member.host.fqdn, member.node_index))
         if cluster.comments:

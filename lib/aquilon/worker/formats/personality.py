@@ -16,6 +16,8 @@
 # limitations under the License.
 """ Personality formatter """
 
+from operator import attrgetter
+
 from aquilon.aqdb.model import Personality
 from aquilon.worker.formats.formatters import ObjectFormatter
 from aquilon.worker.formats.list import ListFormatter
@@ -48,7 +50,7 @@ class PersonalityFormatter(ObjectFormatter):
                        .format(personality.host_environment))
         details.append(indent + "  Owned by {0:c}: {0.grn}"
                        .format(personality.owner_grn))
-        for grn_rec in sorted(personality._grns, key=lambda x: x.target):
+        for grn_rec in sorted(personality._grns, key=attrgetter("target")):
             details.append(indent + "  Used by {0.grn:c}: {0.grn.grn} "
                            "[target: {0.target}]".format(grn_rec))
 
@@ -69,9 +71,9 @@ class PersonalityFormatter(ObjectFormatter):
                            .format(service))
 
         features = personality.features[:]
-        features.sort(key=lambda x: (x.feature.feature_type,
-                                     x.feature.post_personality,
-                                     x.feature.name))
+        features.sort(key=attrgetter("feature.feature_type",
+                                     "feature.post_personality",
+                                     "feature.name"))
 
         for link in features:
             if link.feature.post_personality:
@@ -116,9 +118,9 @@ class PersonalityFormatter(ObjectFormatter):
             skeleton.threshold = threshold
 
         features = personality.features[:]
-        features.sort(key=lambda x: (x.feature.feature_type,
-                                     x.feature.post_personality,
-                                     x.feature.name))
+        features.sort(key=attrgetter("feature.feature_type",
+                                     "feature.post_personality",
+                                     "feature.name"))
 
         for link in features:
             self.add_featurelink_data(skeleton.features.add(), link)
