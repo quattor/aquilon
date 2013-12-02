@@ -38,9 +38,7 @@ class PlenaryResource(StructurePlenary):
     def __init__(self, dbresource, logger=LOGGER):
         super(PlenaryResource, self).__init__(dbresource, logger=logger)
 
-        holder_object = dbresource.holder.holder_object
-        if isinstance(holder_object, ResourceGroup):
-            holder_object = holder_object.holder.holder_object
+        holder_object = dbresource.holder.toplevel_holder_object
         if isinstance(holder_object, Host):
             # Avoid circular dependency
             from aquilon.worker.templates import PlenaryToplevelHost

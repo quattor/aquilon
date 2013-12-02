@@ -17,8 +17,7 @@
 
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import (ServiceAddress, ResourceGroup,
-                                AddressAssignment, Host)
+from aquilon.aqdb.model import ServiceAddress, AddressAssignment, Host
 from aquilon.worker.broker import BrokerCommand, validate_basic
 from aquilon.worker.dbwrappers.dns import delete_dns_record
 from aquilon.worker.dbwrappers.resources import (del_resource,
@@ -28,13 +27,11 @@ from aquilon.worker.processes import DSDBRunner
 
 def del_srv_dsdb_callback(session, logger, holder, dbsrv_addr, oldinfo,
                           keep_dns):
-    real_holder = holder.holder_object
-    if isinstance(real_holder, ResourceGroup):
-        real_holder = real_holder.holder.holder_object
-
     dsdb_runner = DSDBRunner(logger=logger)
-    if isinstance(real_holder, Host):
-        dsdb_runner.update_host(real_holder.hardware_entity, oldinfo)
+
+    toplevel_holder = holder.toplevel_holder_object
+    if isinstance(toplevel_holder, Host):
+        dsdb_runner.update_host(toplevel_holder.hardware_entity, oldinfo)
         if keep_dns:
             dsdb_runner.add_host_details(dbsrv_addr.dns_record.fqdn,
                                          dbsrv_addr.dns_record.ip,

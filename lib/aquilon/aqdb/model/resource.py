@@ -56,6 +56,10 @@ class ResourceHolder(Base):
     def holder_object(self):  # pragma: no cover
         raise InternalError("Abstract base method called")
 
+    @property
+    def toplevel_holder_object(self):
+        return self.holder_object
+
     @validates('resources')
     def _validate_resources(self, key, value):
         return self.validate_resources(key, value)

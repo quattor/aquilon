@@ -103,3 +103,7 @@ class BundleResource(ResourceHolder):
     @property
     def holder_object(self):
         return self.resourcegroup
+
+    @property
+    def toplevel_holder_object(self):
+        return self.resourcegroup.holder.holder_object
