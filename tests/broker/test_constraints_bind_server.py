@@ -58,8 +58,10 @@ class TestBindServerConstraints(TestBrokerCommand):
     def testverifyunbindutsi1(self):
         command = "show service --service utsvc --instance utsi1"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Server: unittest02.one-nyp.ms.com", command)
-        self.matchclean(out, "Server: unittest00.one-nyp.ms.com", command)
+        self.matchoutput(out, "Server Binding: unittest02.one-nyp.ms.com",
+                         command)
+        self.matchclean(out, "Server Binding: unittest00.one-nyp.ms.com",
+                        command)
 
     def testverifycatutsi2(self):
         command = "cat --service utsvc --instance utsi2"
@@ -71,18 +73,41 @@ class TestBindServerConstraints(TestBrokerCommand):
                          command)
         self.matchoutput(out, '"instance" = "utsi2";', command)
         self.searchoutput(out,
-                          r'"servers" = list\(\s*"unittest00.one-nyp.ms.com"\s*\);',
+                          r'"servers" = list\(\s*'
+                          r'"unittest00.one-nyp.ms.com",\s*'
+                          r'"srv-alias.one-nyp.ms.com",\s*'
+                          r'"srv-alias2.one-nyp.ms.com",\s*'
+                          r'"zebra2.aqd-unittest.ms.com",\s*'
+                          r'"unittest00-e1.one-nyp.ms.com"\s*\);',
                           command)
 
     def testverifyutsi2(self):
         command = "show service --service utsvc --instance utsi2"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Server: unittest00.one-nyp.ms.com", command)
-        self.matchclean(out, "Server: unittest02.one-nyp.ms.com", command)
+        self.matchoutput(out, "Server Binding: unittest00.one-nyp.ms.com",
+                         command)
+        self.matchclean(out, "Server Binding: unittest02.one-nyp.ms.com",
+                        command)
 
     def testrejectdelserviceinstance(self):
         command = "del service --service utsvc --instance utsi2"
         self.badrequesttest(command.split(" "))
+
+    def testrejectdelserverauxiliary(self):
+        command = ["del_auxiliary", "--auxiliary", "unittest00-e1.one-nyp.ms.com"]
+        out = self.badrequesttest(command)
+        # TODO: the error message should be improved
+        self.matchoutput(out, "AddressAssignment instance still "
+                         "provides the following services, and cannot be "
+                         "deleted: utsvc/utsi2.", command)
+
+    def testrejectdelserviceaddress(self):
+        command = ["del", "service", "address", "--name", "zebra2",
+                   "--hostname", "unittest20.aqd-unittest.ms.com"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Service Address zebra2 still provides the "
+                         "following services, and cannot be deleted: "
+                         "utsvc/utsi2.", command)
 
 
 if __name__ == '__main__':

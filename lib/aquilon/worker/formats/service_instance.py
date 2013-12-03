@@ -17,9 +17,39 @@
 """ServiceInstance formatter."""
 
 from aquilon.worker.formats.formatters import ObjectFormatter
-from aquilon.aqdb.model import ServiceInstance
+from aquilon.aqdb.model import ServiceInstance, ServiceInstanceServer
 from aquilon.aqdb.data_sync.storage import (find_storage_data,
                                             cache_storage_data)
+
+
+class ServiceInstanceServerFormatter(ObjectFormatter):
+    def format_raw(self, srv, indent=""):
+        msg = str(srv.fqdn)
+        attrs = []
+
+        if srv.alias:
+            attrs.append("alias")
+        if srv.cluster:
+            attrs.append("cluster: %s" % srv.cluster.name)
+        if srv.host and srv.host.fqdn != srv.fqdn:
+            attrs.append("host: %s" % srv.host.fqdn)
+        if srv.service_address:
+            attrs.append("service_address: %s" % srv.service_address.name)
+
+        # If the service is bound to the host object only, then the actual
+        # implementation may either provide the service on all IP addresses the
+        # host has, or just on the primary IP address only. Since the broker has
+        # no way to know that, don't display any IP address in this case.
+        if srv.ip and (not srv.host or srv.service_address or
+                       srv.address_assignment):
+            attrs.append("IP: %s" % srv.ip)
+
+        if attrs:
+            msg += " [" + ", ".join(attrs) + "]"
+
+        return(indent + "Server Binding: %s" % msg)
+
+ObjectFormatter.handlers[ServiceInstanceServer] = ServiceInstanceServerFormatter()
 
 
 class ServiceInstanceFormatter(ObjectFormatter):
@@ -27,7 +57,7 @@ class ServiceInstanceFormatter(ObjectFormatter):
         details = [indent + "Service: %s Instance: %s" % (si.service.name,
                                                           si.name)]
         for srv in si.servers:
-            details.append(indent + "  Server: %s" % srv.fqdn)
+            details.append(self.redirect_raw(srv, indent + "  "))
         for map in si.service_map:
             details.append(indent + "  Service Map: {0}".format(map.mapped_to))
         for pmap in si.personality_service_map:

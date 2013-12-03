@@ -208,7 +208,8 @@ class CommandFlush(BrokerCommand):
                 logger.client_info("Flushing services.")
                 q = session.query(Service)
                 q = q.options(subqueryload("instances"),
-                              lazyload("instances.service"))
+                              lazyload("instances.service"),
+                              subqueryload("instances.servers"))
                 for dbservice in q:
                     try:
                         plenary_info = Plenary.get_plenary(dbservice,

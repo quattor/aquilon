@@ -19,6 +19,7 @@
 from aquilon.aqdb.model import DnsEnvironment, Alias
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.dns import delete_dns_record
+from aquilon.worker.dbwrappers.service_instance import check_no_provided_service
 from aquilon.worker.processes import DSDBRunner
 
 
@@ -32,6 +33,8 @@ class CommandDelAlias(BrokerCommand):
         dbdns_rec = Alias.get_unique(session, fqdn=fqdn,
                                      dns_environment=dbdns_env, compel=True)
         domain = dbdns_rec.fqdn.dns_domain.name
+
+        check_no_provided_service(dbdns_rec)
 
         old_target_fqdn = str(dbdns_rec.target)
         old_comments = dbdns_rec.comments

@@ -91,7 +91,8 @@ class Chooser(object):
         # Report as many errors as possible in one shot
         self.errors = []
 
-        # Cache the servers backing service instances
+        # Cache the servers backing service instances, used to determine
+        # affinity
         self.servers = set()
 
         # Set of service instances with a new client
@@ -280,6 +281,22 @@ class Chooser(object):
             self.staging_services[dbservice] = [instance]
         return
 
+    def append_server_object(self, container, srv):
+        """Append server objects to a container.
+
+        This is a helper used for implementing server affinity.
+
+        """
+        if srv.host:
+            container.add(srv.host)
+        if srv.cluster:
+            container.add(srv.cluster)
+
+        # If the service is not bound to a host or cluster, then we have
+        # no choice than to use the alias for providing server affinity
+        if srv.alias and not srv.host and not srv.cluster:
+            container.add(srv.alias)
+
     def count_servers(self, dbservice=None):
         """Get a count of the number of times a server backs
         service instances in use by this host.
@@ -298,7 +315,7 @@ class Chooser(object):
                 # Ignore any services where an instance has not been chosen.
                 continue
             for srv in instances[0].servers:
-                self.servers.add(srv.host)
+                self.append_server_object(self.servers, srv)
 
     def reduce_service_instances(self, dbservice):
         if len(self.staging_services[dbservice]) == 1:
@@ -335,7 +352,8 @@ class Chooser(object):
                               [srv.fqdn for srv in instance.servers])
             instance_servers = set()
             for srv in instance.servers:
-                instance_servers.add(srv.host)
+                self.append_server_object(instance_servers, srv)
+
             common_servers = self.servers & instance_servers
             if len(common_servers) > max_servers:
                 max_servers = len(common_servers)
@@ -411,25 +429,29 @@ class Chooser(object):
             if not instance.service.need_client_list:
                 continue
 
-            changed_servers.update(instance.servers)
+            for srv in instance.servers:
+                if srv.host:
+                    changed_servers.add(srv.host)
+                if srv.cluster:
+                    changed_servers.add(srv.cluster)
 
-            plenary = PlenaryServiceInstanceServer.get_plenary(instance,
-                                                               logger=self.logger)
+            plenary = PlenaryServiceInstanceServer.get_plenary(instance)
             self.plenaries.append(plenary)
 
-        for srv in changed_servers:
-            host = srv.host
-
+        for dbobj in changed_servers:
             # Skip servers that do not have a profile
-            if not host.personality.archetype.is_compileable:
+            if not dbobj.personality.archetype.is_compileable:
                 continue
 
             # Skip servers that are in a different domain/sandbox
-            if (host.branch != self.dbobj.branch or
-                host.sandbox_author_id != self.dbobj.sandbox_author_id):
+            if (dbobj.branch != self.dbobj.branch or
+                dbobj.sandbox_author_id != self.dbobj.sandbox_author_id):
                 continue
 
-            self.plenaries.append(Plenary.get_plenary(host))
+            self.plenaries.append(Plenary.get_plenary(dbobj))
+            if isinstance(dbobj, Cluster):
+                for dbhost in dbobj.hosts:
+                    self.plenaries.append(Plenary.get_plenary(dbhost))
 
     def flush_changes(self):
         self.session.flush()

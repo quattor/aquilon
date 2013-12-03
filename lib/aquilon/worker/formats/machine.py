@@ -184,6 +184,7 @@ class MachineFormatter(ObjectFormatter):
                 details.append(indent + "  Provides Service: %s Instance: %s"
                                % (srv.service_instance.service.name,
                                   srv.service_instance.name))
+                details.append(self.redirect_raw(srv, indent + "    "))
             if host.comments:
                 details.append(indent + "  Comments: %s" % host.comments)
         return "\n".join(details)

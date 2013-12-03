@@ -22,6 +22,7 @@ from aquilon.worker.broker import BrokerCommand, validate_basic
 from aquilon.worker.dbwrappers.dns import delete_dns_record
 from aquilon.worker.dbwrappers.resources import (del_resource,
                                                  get_resource_holder)
+from aquilon.worker.dbwrappers.service_instance import check_no_provided_service
 from aquilon.worker.processes import DSDBRunner
 
 
@@ -60,6 +61,8 @@ class CommandDelServiceAddress(BrokerCommand):
 
         dbsrv = ServiceAddress.get_unique(session, name=name, holder=holder,
                                           compel=True)
+
+        check_no_provided_service(dbsrv)
 
         if isinstance(holder.holder_object, Host):
             oldinfo = DSDBRunner.snapshot_hw(holder.holder_object.hardware_entity)

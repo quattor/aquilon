@@ -41,6 +41,20 @@ class CommandUpdateAlias(BrokerCommand):
             old_target = dbalias.target
             dbalias.target = create_target_if_needed(session, logger,
                                                      target, dbdns_env)
+
+            # TODO: at some day we should verify that the new target is also
+            # bound as a server, and modify the ServiceInstanceServer bindings
+            # accordingly
+            for srv in dbalias.services_provided:
+                if srv.host or srv.cluster:
+                    provider = srv.host or srv.cluster
+                    logger.client_info("Warning: {0} provides {1:l}, and is "
+                                       "bound to {2:l}. Updating the target of "
+                                       "the alias may leave that server "
+                                       "binding in an inconsistent state."
+                                       .format(dbalias, srv.service_instance,
+                                               provider))
+
             if dbalias.target != old_target:
                 delete_target_if_needed(session, old_target)
 

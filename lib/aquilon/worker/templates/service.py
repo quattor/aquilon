@@ -217,6 +217,10 @@ class PlenaryServiceInstanceServerDefault(SIHelperMixin, Plenary):
 
     def body(self, lines):
         path = PlenaryServiceInstanceServer.template_name(self.dbobj)
+        # TODO: we should export the FQDN, IP address, and service address name
+        # that provides the service
+        # TODO: make it possible to provide multiple instances of the same
+        # service
         pan_assign(lines, "/system/provides/%s" % self.dbobj.service,
                    StructureTemplate(path))
 

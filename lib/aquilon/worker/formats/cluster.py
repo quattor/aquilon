@@ -156,6 +156,13 @@ class ClusterFormatter(ObjectFormatter):
             details.append(indent +
                            "  Member Alignment: Service %s Instance %s" %
                            (dbsi.service.name, dbsi.name))
+        for srv in sorted(cluster.services_provided,
+                          key=attrgetter("service_instance.service.name",
+                                         "service_instance.name")):
+            details.append(indent + "  Provides Service: %s Instance: %s"
+                           % (srv.service_instance.service.name,
+                              srv.service_instance.name))
+            details.append(self.redirect_raw(srv, indent + "    "))
         for personality in cluster.allowed_personalities:
             details.append(indent + "  Allowed Personality: {0}".format(personality))
         for member in sorted(cluster._hosts, key=attrgetter("host.fqdn")):

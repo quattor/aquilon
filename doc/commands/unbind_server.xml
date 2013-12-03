@@ -1,0 +1,205 @@
+<?xml version="1.0"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V5.0//EN"
+"http://docbook.org/xml/5.0/dtd/docbook.dtd" [
+<!ENTITY aqd_version SYSTEM "../version.txt">
+]>
+<refentry xml:id="unbind_server"
+          xmlns="http://docbook.org/ns/docbook"
+	  xmlns:xi="http://www.w3.org/2001/XInclude">
+    <refmeta>
+        <refentrytitle>unbind_server</refentrytitle>
+        <manvolnum>1</manvolnum>
+        <refmiscinfo class="version">&aqd_version;</refmiscinfo>
+        <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
+    </refmeta>
+
+    <refnamediv>
+        <refname>unbind server</refname>
+        <refpurpose>
+	    Unbind a server from a service instance
+        </refpurpose>
+	<refclass>Aquilon</refclass>
+    </refnamediv>
+
+    <refsynopsisdiv>
+	<cmdsynopsis>
+	    <command>aq unbind server</command>
+	    <group>
+		<synopfragmentref linkend="global-options">Global options</synopfragmentref>
+	    </group>
+	    <arg choice="plain"><option>--service <replaceable>SERVICE</replaceable></option></arg>
+	    <group choice="req">
+		<arg choice="plain"><option>--instance <replaceable>INSTANCE</replaceable></option></arg>
+		<arg choice="plain"><option>--all</option></arg>
+	    </group>
+	    <arg choice="plain"><option>--hostname <replaceable>HOST</replaceable></option></arg>
+	    <arg choice="opt"><option>--ip <replaceable>IPADDR</replaceable></option></arg>
+	    <arg choice="opt">
+		<arg choice="plain"><option>--service_address <replaceable>NAME</replaceable></option></arg>
+		<arg choice="opt"><option>--resourcegroup <replaceable>GROUP</replaceable></option></arg>
+	    </arg>
+	    <xi:include href="../common/global_options.xml"/>
+	</cmdsynopsis>
+	<cmdsynopsis>
+	    <command>aq unbind server</command>
+	    <arg choice="plain"><option>--service <replaceable>SERVICE</replaceable></option></arg>
+	    <group choice="req">
+		<arg choice="plain"><option>--instance <replaceable>INSTANCE</replaceable></option></arg>
+		<arg choice="plain"><option>--all</option></arg>
+	    </group>
+	    <arg choice="plain"><option>--cluster <replaceable>CLUSTER</replaceable></option></arg>
+	    <arg choice="plain"><option>--service_address <replaceable>NAME</replaceable></option></arg>
+	    <arg choice="opt"><option>--resourcegroup <replaceable>GROUP</replaceable></option></arg>
+	</cmdsynopsis>
+	<cmdsynopsis>
+	    <command>aq unbind server</command>
+	    <arg choice="plain"><option>--service <replaceable>SERVICE</replaceable></option></arg>
+	    <group choice="req">
+		<arg choice="plain"><option>--instance <replaceable>INSTANCE</replaceable></option></arg>
+		<arg choice="plain"><option>--all</option></arg>
+	    </group>
+	    <arg choice="plain"><option>--alias <replaceable>ALIAS</replaceable></option></arg>
+	</cmdsynopsis>
+	<cmdsynopsis>
+	    <command>aq unbind server</command>
+	    <arg choice="plain"><option>--service <replaceable>SERVICE</replaceable></option></arg>
+	    <arg choice="plain"><option>--instance <replaceable>INSTANCE</replaceable></option></arg>
+	    <arg choice="plain"><option>--position <replaceable>POSITION</replaceable></option></arg>
+	</cmdsynopsis>
+    </refsynopsisdiv>
+
+    <refsect1>
+        <title>Description</title>
+	<para>
+	    The <command>aq unbind server</command> command deletes the binding of a server to a service instance. It
+	    should be called with the same argument as the original <command>aq bind server</command> was, with a few
+	    exceptions detailed below.
+	</para>
+    </refsect1>
+
+    <refsect1>
+        <title>Options</title>
+	<variablelist>
+	    <title>Command-specific options</title>
+	    <varlistentry>
+	        <term>
+		    <option>--service <replaceable>SERVICE</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			The name of the service to remove the service binding from. You have to
+			specify either <option>--service</option> or <option>--all</option> to
+			determine which service instances should be affected.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--instance <replaceable>INSTANCE</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			The name of the service instance to remove the service binding from.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--all</option>
+		</term>
+		<listitem>
+		    <para>
+			Remove the server from all instances of <replaceable>SERVICE</replaceable> where it
+			is bound. Instances that do not have this server will not be affected.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--hostname <replaceable>HOST</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			The name of the host providing the service.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--ip <replaceable>IPADDR</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Specifies the IP address where the service is bound to, if the host has multiple IP addresses.
+			Specifying the <option>--hostname</option> option is mandatory.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--cluster <replaceable>CLUSTER</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			The name of the cluster providing the service.  Specifying the <option>--service_address</option>
+			option is mandatory.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--service_address <replaceable>NAME</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Name of the service address providing the service. Specifying one of the <option>--hostname</option> or
+			<option>--cluster</option> options is mandatory.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--resourcegroup <replaceable>GROUP</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Name of the resource group where the service address belongs to. It is meaningful together
+			with the <option>--service_address</option> option only.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--alias <replaceable>ALIAS</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Name of the alias providing the service.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--position <replaceable>POSITION</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			The <option>--position</option> option can also be used to specify the server binding that
+			should be removed, instead of using the <option>--hostname</option>, <option>--cluster</option>
+			and <option>--alias</option> options. Numbering of the entries start from 0.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	</variablelist>
+	<xi:include href="../common/global_options_desc.xml"/>
+    </refsect1>
+
+    <refsect1>
+	<title>See also</title>
+	<para>
+	    <citerefentry><refentrytitle>bind_server</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+	</para>
+    </refsect1>
+</refentry>
+
+<!-- vim: set ai sw=4: -->

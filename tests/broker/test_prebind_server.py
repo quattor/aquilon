@@ -91,7 +91,7 @@ class TestPrebindServer(TestBrokerCommand):
                            "--instance", instance]
                 out = self.commandtest(command)
                 for server in servers:
-                    self.matchoutput(out, "Server: %s" % server, command)
+                    self.matchoutput(out, "Server Binding: %s" % server, command)
 
                 command = ["cat", "--service", service, "--instance", instance]
                 out = self.commandtest(command)

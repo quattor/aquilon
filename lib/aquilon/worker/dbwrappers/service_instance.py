@@ -16,6 +16,8 @@
 # limitations under the License.
 """Wrapper to make getting a service instance simpler."""
 
+from operator import attrgetter
+
 from sqlalchemy.orm.exc import NoResultFound
 
 from aquilon.exceptions_ import NotFoundException, ArgumentError
@@ -36,9 +38,14 @@ def get_service_instance(session, dbservice, instance):
 
 def check_no_provided_service(dbobject):
     if dbobject.services_provided:
-        msg = ", ".join(["%s/%s" % (srv.service_instance.service.name,
-                                    srv.service_instance.name)
-                         for srv in dbobject.services_provided])
+        # De-duplicate and sort the provided service instances
+        instances = set([srv.service_instance for srv in
+                         dbobject.services_provided])
+        instances = list(instances)
+        instances.sort(key=attrgetter("service.name", "name"))
+
+        msg = ", ".join(["%s/%s" % (si.service.name, si.name)
+                         for si in instances])
         raise ArgumentError("{0} still provides the following services, "
                             "and cannot be deleted: {1!s}."
                             .format(dbobject, msg))

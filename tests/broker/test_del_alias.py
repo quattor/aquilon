@@ -89,6 +89,10 @@ class TestDelAlias(TestBrokerCommand):
         self.noouttest(command)
         self.dsdb_verify(empty=True)
 
+    def test_330_del_srv_alases(self):
+        self.noouttest(["del_alias", "--fqdn", "srv-alias.one-nyp.ms.com"])
+        self.noouttest(["del_alias", "--fqdn", "srv-alias2.one-nyp.ms.com"])
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelAlias)

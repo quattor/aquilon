@@ -96,7 +96,15 @@ class CommandPXESwitchList(BrokerCommand):
                 if groupargs[-1] == command:
                     raise ArgumentError("Missing required target parameter.")
 
-                servers = [srv.fqdn for srv in si.servers]
+                servers = []
+                for srv in si.servers:
+                    # The primary name is the address to be used for delivering
+                    # configuration to a host, so we should use that even if the
+                    # service itself is bound to a different IP address
+                    if srv.host:
+                        servers.append(srv.host.fqdn)
+                    else:
+                        servers.append(srv.fqdn)
 
                 groupargs.append("--servers")
                 groupargs.append(" ".join(["%s@%s" % (user, s) for s in
