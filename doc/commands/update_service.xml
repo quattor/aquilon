@@ -1,0 +1,162 @@
+<?xml version="1.0"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V5.0//EN"
+"http://docbook.org/xml/5.0/dtd/docbook.dtd" [
+<!ENTITY aqd_version SYSTEM "../version.txt">
+]>
+<refentry xml:id="update_service"
+          xmlns="http://docbook.org/ns/docbook"
+	  xmlns:xi="http://www.w3.org/2001/XInclude">
+    <refmeta>
+        <refentrytitle>update_service</refentrytitle>
+        <manvolnum>1</manvolnum>
+        <refmiscinfo class="version">&aqd_version;</refmiscinfo>
+        <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
+    </refmeta>
+
+    <refnamediv>
+        <refname>update service</refname>
+        <refpurpose>
+	    Update parameters of a service or service instance
+        </refpurpose>
+	<refclass>Aquilon</refclass>
+    </refnamediv>
+
+    <refsynopsisdiv>
+	<cmdsynopsis>
+	    <command>aq update service</command>
+	    <group>
+		<synopfragmentref linkend="global-options">Global options</synopfragmentref>
+	    </group>
+	    <arg choice="plain"><option>--service <replaceable>SERVICE</replaceable></option></arg>
+	    <arg choice="opt"><option>--max_clients <replaceable>NUMBER</replaceable></option></arg>
+	    <arg choice="opt"><option>--default</option></arg>
+	    <group choice="opt">
+		<arg choice="plain"><option>--need_client_list</option></arg>
+		<arg choice="plain"><option>--noneed_client_list</option></arg>
+	    </group>
+	    <arg choice="opt"><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
+	    <xi:include href="../common/global_options.xml"/>
+	</cmdsynopsis>
+	<cmdsynopsis>
+	    <command>aq update service</command>
+	    <arg choice="plain"><option>--service <replaceable>SERVICE</replaceable></option></arg>
+	    <arg choice="plain"><option>--instance <replaceable>INSTANCE</replaceable></option></arg>
+	    <arg choice="opt"><option>--max_clients <replaceable>NUMBER</replaceable></option></arg>
+	    <arg choice="opt"><option>--default</option></arg>
+	    <arg choice="opt"><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
+	</cmdsynopsis>
+    </refsynopsisdiv>
+
+    <refsect1>
+        <title>Description</title>
+	<para>
+	    The <command>aq update service</command> command updates the parameters of a service or a service instance.
+	    If called without any options, the command will just refresh the plenary templates of the service instance
+	    named <replaceable>INSTANCE</replaceable>, or of all instances if no <option>--instance</option> option was
+	    specified.
+	</para>
+    </refsect1>
+
+    <refsect1>
+        <title>Options</title>
+	<variablelist>
+	    <title>Command-specific options</title>
+	    <varlistentry>
+	        <term>
+		    <option>--service <replaceable>SERVICE</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			The name of the service to update. If the <option>--instance</option> option is also specified,
+			then the parameters of the service instance named <replaceable>INSTANCE</replaceable> will be
+			updated. Otherwise, the global parameters of the service will be updated.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--instance <replaceable>INSTANCE</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Update the parameters of the service instance named <replaceable>INSTANCE</replaceable>.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--max_clients <replaceable>NUMBER</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Specify the maximum number of clients a service instance may have. If applied to a service
+			instance, then the value will override the default defined at the service level. If applied to
+			the service as a whole, all instances that do not have an override will pick up the new value.
+		    </para>
+		    <para>
+			Existing clients of a service instance are not immediately affected, even if there are more than
+			<replaceable>NUMBER</replaceable> already. However, if a service instance is over limit, and a
+			client of that instance is reconfigured using <command>aq make</command> or
+			<command>aq reconfigure</command>, then that client will be moved to a different instance.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--default</option>
+		</term>
+		<listitem>
+		    <para>
+			Reset the maximum number of clients to the default. If applied to the whole service, it will set
+			the global default to unlimited. If applied to a service instance, it will clear the previous
+			client limit override, and the service instance will revert to using the default value set
+			globally for the service.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--need_client_list</option>, <option>--noneed_client_list</option>
+		</term>
+		<listitem>
+		    <para>
+			Specify if servers of the service need to have the list of their clients in their profile. There
+			are many services like DNS, NTP etc. where the server does not really need to know anything
+			about its potential clients. Turning off the generation of the client list for such services
+			improves performance, and also makes the server profiles smaller.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--comments <replaceable>COMMENTS</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Update the comments of the service named <replaceable>SERVICE</replaceable>, or the service
+			instance named <replaceable>INSTANCE</replaceable> if the <option>--instance</option> option was
+			also specified.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	</variablelist>
+	<xi:include href="../common/global_options_desc.xml"/>
+    </refsect1>
+
+    <refsect1>
+	<title>See also</title>
+	<para>
+	    <citerefentry><refentrytitle>add_service</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>del_service</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>cat_service</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>map_service</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>unmap_service</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>bind_server</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>unbind_server</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>add_required_service</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>del_required_service</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+	</para>
+    </refsect1>
+</refentry>
+
+<!-- vim: set ai sw=4: -->
