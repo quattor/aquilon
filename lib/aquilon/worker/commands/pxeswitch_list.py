@@ -15,13 +15,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from __future__ import with_statement
-
 from tempfile import NamedTemporaryFile
+from collections import defaultdict
+from types import ListType
 
-from aquilon.exceptions_ import ArgumentError, NotFoundException
+from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.dbwrappers.host import (hostname_to_host,
+from aquilon.worker.dbwrappers.host import (hostlist_to_hosts,
                                             get_host_bound_service,
                                             check_hostlist_size)
 from aquilon.worker.processes import run_command
@@ -29,7 +29,7 @@ from aquilon.worker.logger import CLIENT_INFO
 from aquilon.aqdb.model import Service
 
 
-class CommandPxeswitchList(BrokerCommand):
+class CommandPXESwitchList(BrokerCommand):
 
     required_parameters = ["list"]
     _option_map = {'status': '--statuslist',
@@ -59,44 +59,30 @@ class CommandPxeswitchList(BrokerCommand):
         logdir = self.config.get("broker", "logdir")
         args.append("%s/aii-installfe.log" % logdir)
 
-        servers = dict()
-        groups = dict()
+        dbservice = Service.get_unique(session, "bootserver", compel=True)
+        dbhosts = hostlist_to_hosts(session, list)
+
+        hosts_per_instance = defaultdict(ListType)
         failed = []
-        for host in list:
-            try:
-                dbhost = hostname_to_host(session, host)
+        for dbhost in dbhosts:
+            if arguments.get("install", None) and (dbhost.status.name == "ready" or
+                                                   dbhost.status.name == "almostready"):
+                failed.append("{0}: You should change the build status "
+                              "before switching the PXE link to install."
+                              .format(dbhost))
 
-                if arguments.get("install", None) and (dbhost.status.name == "ready" or
-                                                       dbhost.status.name == "almostready"):
-                    failed.append("%s: You should change the build status "
-                                  "before switching the PXE link to install." %
-                                  host)
-
-                # Find what "bootserver" instance we're bound to
-                dbservice = Service.get_unique(session, "bootserver",
-                                               compel=True)
-                si = get_host_bound_service(dbhost, dbservice)
-                if not si:
-                    failed.append("%s: Host has no bootserver." % host)
-                else:
-                    if si.name in groups:
-                        groups[si.name].append(dbhost)
-                    else:
-                        # for that instance, find what servers are bound to it.
-                        servers[si.name] = [srv.fqdn for srv in
-                                            si.servers]
-                        groups[si.name] = [dbhost]
-
-            except NotFoundException, nfe:
-                failed.append("%s: %s" % (host, nfe))
-            except ArgumentError, ae:
-                failed.append("%s: %s" % (host, ae))
+            # Find what "bootserver" instance we're bound to
+            si = get_host_bound_service(dbhost, dbservice)
+            if not si:
+                failed.append("{0} has no bootserver.".format(dbhost))
+            else:
+                hosts_per_instance[si].append(dbhost)
 
         if failed:
             raise ArgumentError("Invalid hosts in list:\n%s" %
                                 "\n".join(failed))
 
-        for (group, hostlist) in groups.items():
+        for (si, hostlist) in hosts_per_instance.items():
             # create temporary file, point aii-installfe at that file.
             groupargs = args[:]
             with NamedTemporaryFile() as tmpfile:
@@ -110,9 +96,11 @@ class CommandPxeswitchList(BrokerCommand):
                 if groupargs[-1] == command:
                     raise ArgumentError("Missing required target parameter.")
 
+                servers = [srv.fqdn for srv in si.servers]
+
                 groupargs.append("--servers")
                 groupargs.append(" ".join(["%s@%s" % (user, s) for s in
-                                           servers[group]]))
+                                           servers]))
 
                 # it would be nice to parallelize this....
                 run_command(groupargs, logger=logger, loglevel=CLIENT_INFO)

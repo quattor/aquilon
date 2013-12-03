@@ -16,67 +16,14 @@
 # limitations under the License.
 """Contains the logic for `aq pxeswitch`."""
 
-
-from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.dbwrappers.host import (hostname_to_host,
-                                            get_host_bound_service)
-from aquilon.worker.processes import run_command
-from aquilon.worker.logger import CLIENT_INFO
-from aquilon.aqdb.model import Service
+from aquilon.worker.commands.pxeswitch_list import CommandPXESwitchList
 
 
-class CommandPxeswitch(BrokerCommand):
+class CommandPXESwitch(CommandPXESwitchList):
 
     required_parameters = ["hostname"]
-    _option_map = {'status': '--status',
-                   'configure': '--configure',
-                   'localboot': '--boot',
-                   'install': '--install',
-                   'rescue': '--rescue',
-                   'firmware': '--firmware',
-                   'blindbuild': '--livecd'}
     requires_readonly = True
 
-    def render(self, session, logger, hostname, **arguments):
-        # The default is now --configure, but that does not play nice with
-        # --status. Turn --configure off if --status is present
-        if arguments.get("status", False):
-            arguments["configure"] = None
-
-        dbhost = hostname_to_host(session, hostname)
-
-        if arguments.get("install", None) and (dbhost.status.name == "ready" or
-                                               dbhost.status.name == "almostready"):
-            raise ArgumentError("You should change the build status before "
-                                "switching the PXE link to install.")
-
-        # Find what "bootserver" instance we're bound to
-        dbservice = Service.get_unique(session, "bootserver", compel=True)
-        si = get_host_bound_service(dbhost, dbservice)
-        if not si:
-            raise ArgumentError("{0} has no bootserver.".format(dbhost))
-        # for that instance, find what servers are bound to it.
-        servers = [srv.fqdn for srv in si.servers]
-
-        command = self.config.get("broker", "installfe")
-        args = [command]
-
-        for (option, mapped) in self._option_map.items():
-            if arguments[option]:
-                args.append(mapped)
-                args.append(dbhost.fqdn)
-        if args[-1] == command:
-            raise ArgumentError("Missing required target parameter.")
-
-        args.append("--cfgfile")
-        args.append("/dev/null")
-        args.append("--servers")
-        user = self.config.get("broker", "installfe_user")
-        args.append(" ".join(["%s@%s" % (user, s) for s in servers]))
-        args.append("--sshdir")
-        args.append(self.config.get("broker", "installfe_sshdir"))
-        args.append("--logfile")
-        logdir = self.config.get("broker", "logdir")
-        args.append("%s/aii-installfe.log" % logdir)
-        run_command(args, logger=logger, loglevel=CLIENT_INFO)
+    def render(self, hostname, list, **arguments):
+        super(CommandPXESwitch, self).render(list=[hostname], **arguments)
