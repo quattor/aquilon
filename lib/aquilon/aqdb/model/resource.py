@@ -156,7 +156,7 @@ class Resource(Base):
         return value
 
     def __repr__(self):
-        return "<{0:c} Resource {0.name} of {1}>".format(self, self.holder)
+        return "<{0:c} Resource {0.name} of {1}>".format(self, self.holder.holder_object)
 
 resource = Resource.__table__  # pylint: disable=C0103
 resource.info['unique_fields'] = ['name', 'resource_type', 'holder']
