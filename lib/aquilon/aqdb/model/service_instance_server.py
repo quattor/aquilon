@@ -65,6 +65,10 @@ class ServiceInstanceServer(Base):
                                            name="%s_pk" % _TN),
                       Index("%s_host_idx" % _ABV, host_id))
 
+    @property
+    def fqdn(self):
+        return self.host.fqdn
+
 
 def _sis_host_creator(host):
     return ServiceInstanceServer(host=host)

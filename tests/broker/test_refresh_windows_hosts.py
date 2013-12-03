@@ -227,9 +227,10 @@ class TestRefreshWindowsHosts(TestBrokerCommand):
         self.matchclean(err, "unittest00.one-nyp.ms.com", command)
         self.matchclean(err, "unittest02.one-nyp.ms.com", command)
         self.matchoutput(err,
-                         "Skipping removal of host desktop3.msad.ms.com with "
-                         "dependencies: desktop3.msad.ms.com is bound as a "
-                         "server for service utsvc instance utsi1",
+                         "Skipping removal of host desktop3.msad.ms.com due to: "
+                         "Host desktop3.msad.ms.com still provides the "
+                         "following services, and cannot be deleted: "
+                         "utsvc/utsi1.",
                          command)
         self.matchoutput(err,
                          "Removed host entry for evm6 (desktop4.msad.ms.com)",

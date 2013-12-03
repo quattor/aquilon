@@ -31,16 +31,9 @@ class TestBindServerConstraints(TestBrokerCommand):
         command = "del host --hostname unittest00.one-nyp.ms.com"
         out = self.badrequesttest(command.split(" "))
         self.matchoutput(out,
-                         "Cannot delete host unittest00.one-nyp.ms.com due "
-                         "to the following dependencies:",
-                         command)
-        self.matchoutput(out,
-                         "unittest00.one-nyp.ms.com is bound as a server for "
-                         "service utsvc instance utsi1",
-                         command)
-        self.matchoutput(out,
-                         "unittest00.one-nyp.ms.com is bound as a server for "
-                         "service utsvc instance utsi2",
+                         "Host unittest00.one-nyp.ms.com still provides "
+                         "the following services, and cannot be deleted: "
+                         "utsvc/utsi1, utsvc/utsi2.",
                          command)
 
     # Test that unittest00 comes out of utsi1 but stays in utsi2

@@ -16,10 +16,10 @@
 # limitations under the License.
 """Contains the logic for `aq refresh windows hosts`."""
 
-
 import sqlite3
 
-from aquilon.exceptions_ import PartialError, InternalError, AquilonError
+from aquilon.exceptions_ import (PartialError, InternalError, AquilonError,
+                                 ArgumentError)
 from aquilon.aqdb.model import (Host, Interface, Machine, Domain, Archetype,
                                 Personality, DnsRecord, OperatingSystem,
                                 ReservedName, Fqdn)
@@ -27,7 +27,7 @@ from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.aqdb.model.hostlifecycle import Ready
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.dns import delete_dns_record
-from aquilon.worker.dbwrappers.host import get_host_dependencies
+from aquilon.worker.dbwrappers.service_instance import check_no_provided_service
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
 from aquilon.worker.locks import SyncKey
 
@@ -99,10 +99,11 @@ class CommandRefreshWindowsHosts(BrokerCommand):
                windows_hosts[dbhost.fqdn] in mac_addresses:
                 # All is well
                 continue
-            deps = get_host_dependencies(session, dbhost)
-            if deps:
-                msg = "Skipping removal of host %s with dependencies: %s" % \
-                    (dbhost.fqdn, ", ".join(deps))
+            try:
+                check_no_provided_service(dbhost)
+            except ArgumentError, err:
+                msg = "Skipping removal of host %s due to: %s" % \
+                    (dbhost.fqdn, err)
                 failed.append(msg)
                 logger.info(msg)
                 continue
