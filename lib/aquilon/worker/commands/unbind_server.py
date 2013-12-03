@@ -16,6 +16,7 @@
 # limitations under the License.
 """Contains the logic for `aq unbind server`."""
 
+from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Service, ServiceInstance
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.host import hostname_to_host
@@ -25,10 +26,10 @@ from aquilon.worker.commands.bind_server import find_server
 
 class CommandUnbindServer(BrokerCommand):
 
-    required_parameters = ["hostname", "service"]
+    required_parameters = ["service"]
 
-    def render(self, session, logger, hostname, service, instance, **arguments):
-        dbhost = hostname_to_host(session, hostname)
+    def render(self, session, logger, hostname, service, instance, position,
+               **arguments):
         dbservice = Service.get_unique(session, service, compel=True)
 
         if instance:
@@ -36,28 +37,43 @@ class CommandUnbindServer(BrokerCommand):
                                               name=instance, compel=True)
             dbinstances = [dbsi]
         else:
+            # --position for multiple service instances sounds dangerous, so
+            # disallow it until a real usecase emerges
+            if position:
+                raise ArgumentError("The --position option can only be "
+                                    "specified for one service instance.")
             q = session.query(ServiceInstance)
             q = q.filter_by(service=dbservice)
-            q = q.join('servers')
-            q = q.filter_by(host=dbhost)
             dbinstances = q.all()
 
         plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(Plenary.get_plenary(dbhost))
+
+        if position is not None:
+            dbhost = None
+        else:
+            dbhost = hostname_to_host(session, hostname)
+            plenaries.append(Plenary.get_plenary(dbhost))
 
         for dbinstance in dbinstances:
-            dbsrv = find_server(dbinstance, dbhost)
-            if not dbsrv:
-                continue
+            if position is not None:
+                if position < 0 or position >= len(dbinstance.servers):
+                    raise ArgumentError("Invalid server position.")
+
+                dbsrv = dbinstance.servers[position]
+                plenaries.append(Plenary.get_plenary(dbsrv.host))
+            else:
+                dbsrv = find_server(dbinstance, dbhost)
+                if not dbsrv:
+                    continue
 
             plenaries.append(Plenary.get_plenary(dbinstance))
+
+            session.expire(dbsrv.host, ['services_provided'])
             dbinstance.servers.remove(dbsrv)
-            session.expire(dbhost, ['services_provided'])
 
             if dbinstance.client_count > 0 and not dbinstance.servers:
-                logger.warning("WARNING: {0} was the last server "
-                               "bound to {1:l}, which still has clients."
-                               .format(dbhost, dbinstance))
+                logger.warning("Warning: {0} was left without servers, "
+                               "but it still has clients.".format(dbinstance))
 
         session.flush()
 

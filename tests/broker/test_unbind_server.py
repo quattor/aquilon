@@ -46,7 +46,6 @@ instance_servers = {
         "ut.b": ["server2.aqd-unittest.ms.com"],
     },
     "dns": {
-        "unittest": ["infra1.aqd-unittest.ms.com", "nyaqd1.ms.com"],
         "one-nyp": ["infra1.one-nyp.ms.com"],
     },
     "lemon": {
@@ -62,11 +61,11 @@ instance_servers = {
 
 
 class TestUnbindServer(TestBrokerCommand):
-    def check_last_server_msg(self, out, command, service, instance, host):
+    def check_last_server_msg(self, out, command, service, instance):
         self.matchoutput(out,
-                         "WARNING: Host %s was the last server bound to "
-                         "service instance %s/%s, which still has clients." %
-                         (host, service, instance),
+                         "Warning: Service Instance %s/%s was left "
+                         "without servers, but it still has clients." %
+                         (service, instance),
                          command)
 
     def test_100_check_initial_plenary(self):
@@ -82,8 +81,7 @@ class TestUnbindServer(TestBrokerCommand):
                    "--hostname", "unittest02.one-nyp.ms.com",
                    "--service", "utsvc", "--all"]
         err = self.statustest(command)
-        self.check_last_server_msg(err, command, "utsvc", "utsi1",
-                                   "unittest02.one-nyp.ms.com")
+        self.check_last_server_msg(err, command, "utsvc", "utsi1")
 
     def test_115_verify_cat_utsi1(self):
         command = "cat --service utsvc --instance utsi1"
@@ -112,8 +110,7 @@ class TestUnbindServer(TestBrokerCommand):
                    "--hostname", "unittest00.one-nyp.ms.com",
                    "--service", "utsvc", "--instance", "utsi2"]
         err = self.statustest(command)
-        self.check_last_server_msg(err, command, "utsvc", "utsi2",
-                                   "unittest00.one-nyp.ms.com")
+        self.check_last_server_msg(err, command, "utsvc", "utsi2")
 
     def test_125_verify_cat_utsi2(self):
         command = "cat --service utsvc --instance utsi2"
@@ -136,6 +133,45 @@ class TestUnbindServer(TestBrokerCommand):
         service = self.config.get("broker", "poll_helper_service")
         self.statustest(["unbind", "server", "--hostname", "nyaqd1.ms.com",
                          "--service", service, "--instance", "unittest"])
+
+    def test_140_verify_pre_unbind(self):
+        command = ["show_service", "--service", "dns", "--instance", "unittest"]
+        out = self.commandtest(command)
+        # We only care about the order of the servers here
+        self.searchoutput(out,
+                          "Server: infra1.aqd-unittest.ms.com\s*"
+                          "Server: nyaqd1.ms.com",
+                          command)
+
+    def test_141_unbind_by_position(self):
+        command = ["unbind_server", "--service", "dns",
+                   "--instance", "unittest", "--position", 1]
+        self.statustest(command)
+
+    def test_142_verify_unbind(self):
+        command = ["show_service", "--service", "dns", "--instance", "unittest"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Server: infra1.aqd-unittest.ms.com", command)
+        self.matchclean(out, "nyaqd1.ms.com", command)
+
+    def test_143_unbind_bad_position(self):
+        command = ["unbind_server", "--service", "dns",
+                   "--instance", "unittest", "--position", 1]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Invalid server position.", command)
+
+    def test_144_unbind_last_by_position(self):
+        command = ["unbind_server", "--service", "dns",
+                   "--instance", "unittest", "--position", 0]
+        err = self.statustest(command)
+        self.check_last_server_msg(err, command, "dns", "unittest")
+
+    def test_145_verify_unbind_last(self):
+        command = ["show_service", "--service", "dns", "--instance", "unittest"]
+        out = self.commandtest(command)
+        self.matchclean(out, "Server:", command)
+        self.matchclean(out, "infra1.aqd-unittest.ms.com", command)
+        self.matchclean(out, "nyaqd1.ms.com", command)
 
     def test_150_unbind_all(self):
         for service, instances in instance_servers.items():
