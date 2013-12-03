@@ -33,7 +33,8 @@ class HostFormatter(ObjectFormatter):
             srv_msg = skeleton.services_used.add()
             srv_msg.service = si.service.name
             srv_msg.instance = si.name
-        for si in host.services_provided:
+        for srv in host.services_provided:
+            si = srv.service_instance
             srv_msg = skeleton.services_provided.add()
             srv_msg.service = si.service.name
             srv_msg.instance = si.name

@@ -98,7 +98,8 @@ def get_host_dependencies(session, dbhost):
     If the host has no dependencies, then an empty list is returned
     """
     ret = []
-    for si in dbhost.services_provided:
+    for srv in dbhost.services_provided:
+        si = srv.service_instance
         ret.append("%s is bound as a server for service %s instance %s" %
                    (dbhost.fqdn, si.service.name, si.name))
     return ret

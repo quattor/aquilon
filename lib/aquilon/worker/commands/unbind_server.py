@@ -50,7 +50,7 @@ class CommandUnbindServer(BrokerCommand):
 
             plenaries.append(Plenary.get_plenary(dbinstance))
             dbinstance.server_hosts.remove(dbhost)
-            session.expire(dbhost, ['_services_provided'])
+            session.expire(dbhost, ['services_provided'])
 
             if dbinstance.client_count > 0 and not dbinstance.server_hosts:
                 logger.warning("WARNING: {0} was the last server "

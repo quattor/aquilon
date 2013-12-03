@@ -296,8 +296,9 @@ class PlenaryToplevelHost(ObjectPlenary):
             for si in self.dbobj.services_used:
                 keylist.append(PlenaryKey(exclusive=False, service_instance=si,
                                           logger=self.logger))
-            for si in self.dbobj.services_provided:
-                keylist.append(PlenaryKey(exclusive=False, service_instance=si,
+            for srv in self.dbobj.services_provided:
+                keylist.append(PlenaryKey(exclusive=False,
+                                          service_instance=srv.service_instance,
                                           logger=self.logger))
 
             if self.dbobj.cluster:
@@ -341,7 +342,8 @@ class PlenaryToplevelHost(ObjectPlenary):
                                   "{1!s}.".format(self.dbobj, missing))
 
         provides = []
-        for si in self.dbobj.services_provided:
+        for srv in self.dbobj.services_provided:
+            si = srv.service_instance
             provides.append(PlenaryServiceInstanceServerDefault.template_name(si))
 
         # Ensure used/provided services have a stable order

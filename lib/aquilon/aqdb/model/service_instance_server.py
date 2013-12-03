@@ -27,6 +27,7 @@ from sqlalchemy.ext.associationproxy import association_proxy
 from aquilon.aqdb.model import Base, Host, ServiceInstance
 
 _TN = 'service_instance_server'
+_ABV = 'sis'
 
 
 class ServiceInstanceServer(Base):
@@ -35,12 +36,12 @@ class ServiceInstanceServer(Base):
     __tablename__ = _TN
 
     service_instance_id = Column(Integer, ForeignKey('service_instance.id',
-                                                     name='sis_si_fk',
+                                                     name='%s_si_fk' % _ABV,
                                                      ondelete='CASCADE'),
                                  nullable=False)
 
     host_id = Column(Integer, ForeignKey('host.hardware_entity_id',
-                                         name='sis_host_fk',
+                                         name='%s_host_fk' % _ABV,
                                          ondelete='CASCADE'),
                      nullable=False)
 
@@ -57,24 +58,17 @@ class ServiceInstanceServer(Base):
                                                 order_by=[position]))
 
     host = relation(Host, innerjoin=True,
-                    backref=backref('_services_provided',
+                    backref=backref('services_provided',
                                     cascade="all, delete-orphan"))
 
     __table_args__ = (PrimaryKeyConstraint(service_instance_id, host_id,
                                            name="%s_pk" % _TN),
-                      Index("sis_host_idx", host_id))
+                      Index("%s_host_idx" % _ABV, host_id))
 
 
 def _sis_host_creator(host):
     return ServiceInstanceServer(host=host)
 
 
-def _sis_si_creator(service_instance):
-    return ServiceInstanceServer(service_instance=service_instance)
-
 ServiceInstance.server_hosts = association_proxy('servers', 'host',
                                                  creator=_sis_host_creator)
-
-Host.services_provided = association_proxy('_services_provided',
-                                           'service_instance',
-                                           creator=_sis_si_creator)

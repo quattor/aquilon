@@ -178,10 +178,12 @@ class MachineFormatter(ObjectFormatter):
                              key=attrgetter("service.name", "name")):
                 details.append(indent + "  Uses Service: %s Instance: %s"
                                % (si.service.name, si.name))
-            for si in sorted(host.services_provided,
-                             key=attrgetter("service.name", "name")):
+            for srv in sorted(host.services_provided,
+                              key=attrgetter("service_instance.service.name",
+                                             "service_instance.name")):
                 details.append(indent + "  Provides Service: %s Instance: %s"
-                               % (si.service.name, si.name))
+                               % (srv.service_instance.service.name,
+                                  srv.service_instance.name))
             if host.comments:
                 details.append(indent + "  Comments: %s" % host.comments)
         return "\n".join(details)

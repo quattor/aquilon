@@ -323,7 +323,7 @@ class CommandFlush(BrokerCommand):
                               joinedload("resholder"),
                               subqueryload("resholder.resources"),
                               subqueryload("services_used"),
-                              subqueryload("_services_provided"),
+                              subqueryload("services_provided"),
                               subqueryload("_cluster"),
                               lazyload("_cluster.host"),
                               lazyload("_cluster.cluster"),

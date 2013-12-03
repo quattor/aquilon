@@ -47,7 +47,7 @@ class CommandBindServer(BrokerCommand):
             dbinstance.server_hosts.insert(position, dbhost)
         else:
             dbinstance.server_hosts.append(dbhost)
-        session.expire(dbhost, ['_services_provided'])
+        session.expire(dbhost, ['services_provided'])
 
         session.flush()
 
