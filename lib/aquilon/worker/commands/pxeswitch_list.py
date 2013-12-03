@@ -83,8 +83,8 @@ class CommandPxeswitchList(BrokerCommand):
                         groups[si.name].append(dbhost)
                     else:
                         # for that instance, find what servers are bound to it.
-                        servers[si.name] = [host.fqdn for host in
-                                            si.server_hosts]
+                        servers[si.name] = [srv.fqdn for srv in
+                                            si.servers]
                         groups[si.name] = [dbhost]
 
             except NotFoundException, nfe:

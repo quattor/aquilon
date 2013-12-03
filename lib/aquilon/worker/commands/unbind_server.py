@@ -20,6 +20,7 @@ from aquilon.aqdb.model import Service, ServiceInstance
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.host import hostname_to_host
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
+from aquilon.worker.commands.bind_server import find_server
 
 
 class CommandUnbindServer(BrokerCommand):
@@ -45,14 +46,15 @@ class CommandUnbindServer(BrokerCommand):
         plenaries.append(Plenary.get_plenary(dbhost))
 
         for dbinstance in dbinstances:
-            if dbhost not in dbinstance.server_hosts:
+            dbsrv = find_server(dbinstance, dbhost)
+            if not dbsrv:
                 continue
 
             plenaries.append(Plenary.get_plenary(dbinstance))
-            dbinstance.server_hosts.remove(dbhost)
+            dbinstance.servers.remove(dbsrv)
             session.expire(dbhost, ['services_provided'])
 
-            if dbinstance.client_count > 0 and not dbinstance.server_hosts:
+            if dbinstance.client_count > 0 and not dbinstance.servers:
                 logger.warning("WARNING: {0} was the last server "
                                "bound to {1:l}, which still has clients."
                                .format(dbhost, dbinstance))

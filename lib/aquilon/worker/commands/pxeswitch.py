@@ -57,7 +57,7 @@ class CommandPxeswitch(BrokerCommand):
         if not si:
             raise ArgumentError("{0} has no bootserver.".format(dbhost))
         # for that instance, find what servers are bound to it.
-        servers = [host.fqdn for host in si.server_hosts]
+        servers = [srv.fqdn for srv in si.servers]
 
         command = self.config.get("broker", "installfe")
         args = [command]

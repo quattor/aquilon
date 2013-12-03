@@ -22,7 +22,6 @@ from sqlalchemy import (Column, Integer, String, DateTime, ForeignKey,
                         PrimaryKeyConstraint, Index)
 from sqlalchemy.orm import relation, deferred, backref
 from sqlalchemy.ext.orderinglist import ordering_list
-from sqlalchemy.ext.associationproxy import association_proxy
 
 from aquilon.aqdb.model import Base, Host, ServiceInstance
 
@@ -68,11 +67,3 @@ class ServiceInstanceServer(Base):
     @property
     def fqdn(self):
         return self.host.fqdn
-
-
-def _sis_host_creator(host):
-    return ServiceInstanceServer(host=host)
-
-
-ServiceInstance.server_hosts = association_proxy('servers', 'host',
-                                                 creator=_sis_host_creator)

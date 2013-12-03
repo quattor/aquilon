@@ -18,11 +18,19 @@
 
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import Service
+from aquilon.aqdb.model import Service, ServiceInstanceServer
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.host import hostname_to_host
 from aquilon.worker.dbwrappers.service_instance import get_service_instance
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
+
+
+def find_server(dbinstance, dbhost):
+    for srv in dbinstance.servers:
+        if srv.host == dbhost:
+            return srv
+
+    return None
 
 
 class CommandBindServer(BrokerCommand):
@@ -34,20 +42,24 @@ class CommandBindServer(BrokerCommand):
         dbhost = hostname_to_host(session, hostname)
         dbservice = Service.get_unique(session, service, compel=True)
         dbinstance = get_service_instance(session, dbservice, instance)
-        if dbhost in dbinstance.server_hosts:
-            raise ArgumentError("Server {0} is already bound to {1:l}."
-                                .format(hostname, dbinstance))
 
         plenaries = PlenaryCollection(logger=logger)
         plenaries.append(Plenary.get_plenary(dbinstance))
         plenaries.append(Plenary.get_plenary(dbhost))
 
-        # The ordering_list will manage the position for us
-        if position is not None:
-            dbinstance.server_hosts.insert(position, dbhost)
-        else:
-            dbinstance.server_hosts.append(dbhost)
-        session.expire(dbhost, ['services_provided'])
+        if find_server(dbinstance, dbhost):
+            raise ArgumentError("Server {0} is already bound to {1:l}."
+                                .format(hostname, dbinstance))
+
+        with session.no_autoflush:
+            dbsrv = ServiceInstanceServer(host=dbhost)
+
+            # The ordering_list will manage the position for us
+            if position is not None:
+                dbinstance.servers.insert(position, dbsrv)
+            else:
+                dbinstance.servers.append(dbsrv)
+            session.expire(dbhost, ['services_provided'])
 
         session.flush()
 
