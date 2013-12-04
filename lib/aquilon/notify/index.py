@@ -176,19 +176,18 @@ def build_index(config, session, logger=LOGGER):
         sock.bind((bind_address, port))
 
     if config.has_option("broker", "server_notifications"):
-        service_modules = {}
+        servers = set()
         for service in config.get("broker", "server_notifications").split():
             if service.strip():
                 try:
                     # service may be unknown
                     srvinfo = Service.get_unique(session, service, compel=True)
                     for instance in srvinfo.instances:
-                        for fqdn in instance.server_fqdns:
-                            service_modules[fqdn] = 1
+                        servers.update([srv.fqdn for srv in instance.servers])
                 except Exception, e:
                     logger.info("failed to lookup up server module %s: %s" %
                                 (service, e))
-        count = send_notification(CDB_NOTIF, service_modules.keys(), sock=sock,
+        count = send_notification(CDB_NOTIF, servers, sock=sock,
                                   logger=logger)
         logger.info("sent %d server notifications" % count)
 

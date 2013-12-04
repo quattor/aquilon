@@ -77,7 +77,16 @@ class TestBindServer(TestBrokerCommand):
                           r'"server1.aqd-unittest.ms.com",\s*'
                           r'"unittest00.one-nyp.ms.com"\s*\);',
                           command)
-        self.matchclean(out, "server_ips", command)
+        unittest02_ip = self.net["unknown0"].usable[0]
+        server1_ip = self.net["hp_eth0"].usable[1]
+        unittest00_ip = self.net["unknown0"].usable[2]
+        self.searchoutput(out,
+                          r'"server_ips" = list\(\s*'
+                          r'"%s",\s*'
+                          r'"%s",\s*'
+                          r'"%s"\s*\);' %
+                          (unittest02_ip, server1_ip, unittest00_ip),
+                          command)
 
     def test_300_show_utsi1(self):
         command = "show service --service utsvc --instance utsi1"
@@ -123,7 +132,11 @@ class TestBindServer(TestBrokerCommand):
                           r'"servers" = list\(\s*'
                           r'"unittest00.one-nyp.ms.com"\s*\);',
                           command)
-        self.matchclean(out, "server_ips", command)
+        unittest00_ip = self.net["unknown0"].usable[2]
+        self.searchoutput(out,
+                          r'"server_ips" = list\(\s*'
+                          r'"%s"\s*\);' % unittest00_ip,
+                          command)
 
     def test_300_show_utsi2(self):
         command = "show service --service utsvc --instance utsi2"

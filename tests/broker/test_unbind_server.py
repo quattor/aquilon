@@ -122,6 +122,7 @@ class TestUnbindServer(TestBrokerCommand):
                          command)
         self.matchoutput(out, '"instance" = "utsi2";', command)
         self.searchoutput(out, r'"servers" = list\(\s*\);', command)
+        self.searchoutput(out, r'"server_ips" = list\(\s*\);', command)
 
     def test_125_verify_show_utsi2(self):
         command = "show service --service utsvc --instance utsi2"

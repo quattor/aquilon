@@ -18,7 +18,6 @@
 
 from collections import defaultdict
 from datetime import datetime
-import socket
 from sys import maxint
 
 from sqlalchemy import (Column, Integer, Sequence, String, DateTime,
@@ -128,47 +127,6 @@ class ServiceInstance(Base):
         q = q.options(contains_eager('fqdn.dns_domain'))
         q = q.order_by(DnsDomain.name, Fqdn.name)
         return [str(sys.fqdn) for sys in q.all()]
-
-    @property
-    def server_fqdns(self):
-        from aquilon.aqdb.model import ServiceInstanceServer
-        session = object_session(self)
-        q = session.query(DnsRecord)
-        q = q.join(HardwareEntity, Host, ServiceInstanceServer)
-        q = q.filter_by(service_instance=self)
-        q = q.reset_joinpoint()
-        # Due to aliases we have to explicitely tell how do we link to Fqdn
-        q = q.join((Fqdn, DnsRecord.fqdn_id == Fqdn.id), DnsDomain)
-        q = q.options(contains_eager('fqdn'))
-        q = q.options(contains_eager('fqdn.dns_domain'))
-        q = q.order_by(ServiceInstanceServer.position)
-        return [str(sys.fqdn) for sys in q.all()]
-
-    @property
-    def server_ips(self):
-        from aquilon.aqdb.model import ServiceInstanceServer
-        session = object_session(self)
-        q = session.query(DnsRecord)
-        q = q.join(HardwareEntity, Host, ServiceInstanceServer)
-        q = q.filter_by(service_instance=self)
-        q = q.reset_joinpoint()
-        # Due to aliases we have to explicitely tell how do we link to Fqdn
-        q = q.join((Fqdn, DnsRecord.fqdn_id == Fqdn.id), DnsDomain)
-        q = q.options(contains_eager('fqdn'))
-        q = q.options(contains_eager('fqdn.dns_domain'))
-        q = q.order_by(DnsDomain.name, Fqdn.name)
-        ips = []
-        for dbdns_rec in q.all():
-            if hasattr(dbdns_rec, 'ip'):
-                ips.append(dbdns_rec.ip)
-                continue
-            try:
-                ips.append(socket.gethostbyname(str(dbdns_rec.fqdn)))
-            except socket.gaierror:  # pragma: no cover
-                # For now this fails silently.  It may be correct to raise
-                # an error here but the timing could be unpredictable.
-                pass
-        return ips
 
     @property
     def enforced_max_clients(self):

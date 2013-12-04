@@ -17,6 +17,7 @@
 """ Store the list of servers that backs a service instance."""
 
 from datetime import datetime
+import socket
 
 from sqlalchemy import (Column, Integer, String, DateTime, ForeignKey,
                         PrimaryKeyConstraint, Index)
@@ -66,4 +67,32 @@ class ServiceInstanceServer(Base):
 
     @property
     def fqdn(self):
+        """
+        Return the name of the service that should be used by clients.
+        """
         return self.host.fqdn
+
+    @property
+    def ip(self):
+        """
+        Return the IP address of the service that clients should use.
+
+        The return value may be None either if the IP address is not known.
+        """
+        def lookup_ip_if_needed(dbdns_rec):
+            # Provide fallback lookup for Aurora hosts when we have a dummy
+            # record only, but the service (e.g. DNS) really needs an IP
+            # address.
+            try:
+                return dbdns_rec.ip
+            except AttributeError:
+                try:
+                    return socket.gethostbyname(str(dbdns_rec.fqdn))
+                except socket.gaierror:  # pragma: no cover
+                    # For now this fails silently.  It may be correct to raise
+                    # an error here, but the timing could be unpredictable.
+                    pass
+                except:  # pragma: no cover
+                    raise
+            return None
+        return lookup_ip_if_needed(self.host.hardware_entity.primary_name)
