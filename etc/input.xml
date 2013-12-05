@@ -1740,14 +1740,13 @@
       service defaults to unlimited.
       <optgroup name="update_service_opts" mandatory="True" fields="all">
          <option name="service" type="string" mandatory="True">service name</option>
-         <optgroup name="update_service_count" mandatory="True" fields="any">
-            <option name="max_clients" type="int" conflicts="default">Maximum number of client bindings for an instance</option>
-            <option name="default" type="flag" conflicts="max_clients">Restore default setting</option>
-            <option name="need_client_list" type="boolean">Need client list in templates</option>
-         </optgroup>
       </optgroup>
       <optgroup name="optional_opts">
+         <option name="max_clients" type="int" conflicts="default">Maximum number of client bindings for an instance</option>
+         <option name="default" type="flag" conflicts="max_clients">Restore default setting</option>
+         <option name="need_client_list" type="boolean" conflicts="instance">Need client list in templates</option>
          <option name="instance" type="string">Instance name</option>
+         <option name="comments" type="string">Comments</option>
       </optgroup>
       <transport method="post" path="service/%(service)s" />
       <transport trigger="instance" method="post" path="service/%(service)s/instance/%(instance)s" />
@@ -1797,7 +1796,7 @@
 
    <command name="unbind_client">
       Unbind a service from a client.
-      <optgroup name="unbind_service_opts" mandatory="True" fields="all">
+      <optgroup name="unbind_client_opts" mandatory="True" fields="all">
          <option name="hostname" type="string">Host name</option>
          <option name="service" type="string">Service name</option>
       </optgroup>
@@ -1809,28 +1808,45 @@
       If the server is already bound as a provider of the service for a
       different instance, this fails.
       <optgroup name="bind_client_opts" mandatory="True" fields="all">
-         <option name="hostname" type="string">Server name</option>
          <option name="service" type="string">Service name</option>
          <option name="instance" type="string">Instance name</option>
+         <optgroup name="bind_server_target" mandatory="True" fields="any">
+            <option name="hostname" type="string" conflicts="cluster">Server name</option>
+            <option name="cluster" type="string" conflicts="hostname ip">Cluster name</option>
+            <option name="alias" type="string">Use this alias instead of the real server name when configuring clients</option>
+         </optgroup>
       </optgroup>
-      <optgroup name="bind_server_options" mandatory="False">
+      <optgroup name="bind_server_optional" mandatory="False">
+         <option name="ip" type="ipv4" conflicts="service_address cluster">IP address of the host that provides this service</option>
+         <option name="service_address" type="string" conflicts="ip">The service address of the host/cluster that provides this service</option>
+         <option name="resourcegroup" type="string">Resourcegroup containing the service address</option>
          <option name="position" type="int">Position in the list</option>
       </optgroup>
-      <transport method="post" path="host/%(hostname)s/server_of_service/%(service)s/bind" />
+      <transport method="post" path="service/%(service)s/instance/%(instance)s/bind" />
    </command>
 
    <command name="unbind_server">
       Unbind a server as a provider of the service (instance).
       <optgroup name="unbind_server_opts" mandatory="True" fields="all">
-         <option name="hostname" type="string">Host name</option>
          <option name="service" type="string">Service name</option>
+         <optgroup name="unbind_server_instance_opts" mandatory="True" fields="any">
+            <option name="instance" type="string">Instance name</option>
+            <option name="all" type="flag">Remove server from all instances of this service</option>
+         </optgroup>
+         <optgroup name="unbind_server_target" mandatory="True" fields="any">
+            <option name="position" type="int" conflicts="hostname cluster alias">Server definition at the given position</option>
+            <option name="hostname" type="string" conflicts="cluster position">Server name</option>
+            <option name="cluster" type="string" conflicts="hostname ip position">Cluster name</option>
+            <option name="alias" type="string" conflicts="position">Alias name</option>
+         </optgroup>
       </optgroup>
-      <optgroup name="unbind_server_optional_opts" mandatory="True" fields="any">
-         <option name="instance" type="string">Instance name</option>
-         <option name="all" type="flag">Remove server from all instances of this service</option>
+      <optgroup name="unbind_server_optional" mandatory="False">
+         <option name="ip" type="ipv4" conflicts="service_address cluster">IP address of the host that provides this service</option>
+         <option name="service_address" type="string" conflicts="ip">The service address of the host/cluster that provides this service</option>
+         <option name="resourcegroup" type="string">Resourcegroup containing the service address</option>
       </optgroup>
-      <transport method="delete" path="host/%(hostname)s/server_of_service/%(service)s" />
-      <transport trigger="instance" method="delete" path="host/%(hostname)s/server_of_service/%(service)s/instance/%(instance)s" />
+      <transport trigger="instance" method="delete" path="service/%(service)s/instance/%(instance)s/bind" />
+      <transport method="delete" path="service/%(service)s/bind" />
    </command>
 
    <command name="add_required_service">

@@ -28,7 +28,7 @@ class CommandUpdateServiceInstance(BrokerCommand):
     required_parameters = ["service", "instance"]
 
     def render(self, session, logger, service, instance, max_clients, default,
-               **arguments):
+               comments, **arguments):
         dbservice = Service.get_unique(session, name=service, compel=True)
         dbsi = ServiceInstance.get_unique(session, service=dbservice,
                                           name=instance, compel=True)
@@ -36,10 +36,10 @@ class CommandUpdateServiceInstance(BrokerCommand):
             dbsi.max_clients = None
         elif max_clients is not None:
             dbsi.max_clients = max_clients
-        else:
-            raise ArgumentError("Missing --max_clients or --default argument "
-                                "to update service %s instance %s." %
-                                (dbservice.name, dbsi.name))
+
+        if comments is not None:
+            dbsi.comments = comments
+
         session.flush()
 
         plenary = Plenary.get_plenary(dbsi, logger=logger)

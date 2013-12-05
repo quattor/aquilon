@@ -18,13 +18,12 @@
 
 from sqlalchemy.orm.attributes import set_committed_value
 
-from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.logger import CLIENT_INFO
 from aquilon.notify.index import trigger_notifications
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.dbwrappers.host import (hostname_to_host,
-                                            get_host_dependencies)
+from aquilon.worker.dbwrappers.host import hostname_to_host
 from aquilon.worker.dbwrappers.dns import delete_dns_record
+from aquilon.worker.dbwrappers.service_instance import check_no_provided_service
 from aquilon.worker.processes import DSDBRunner
 from aquilon.worker.templates import (Plenary, PlenaryCollection,
                                       PlenaryServiceInstanceServer)
@@ -41,12 +40,7 @@ class CommandDelHost(BrokerCommand):
 
         dbhost.lock_row()
 
-        deps = get_host_dependencies(session, dbhost)
-        if (len(deps) != 0):
-            deptext = "\n".join(["  %s" % d for d in deps])
-            raise ArgumentError("Cannot delete host %s due to the "
-                                "following dependencies:\n%s." %
-                                (hostname, deptext))
+        check_no_provided_service(dbhost)
 
         # Any service bindings that we need to clean up afterwards
         plenaries = PlenaryCollection(logger=logger)

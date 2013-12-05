@@ -146,9 +146,12 @@ class PlenaryServiceInstanceToplevel(SIHelperMixin, StructurePlenary):
                     PlenaryServiceToplevel.template_name(self.dbobj.service))
         lines.append("")
         pan_assign(lines, "instance", self.dbobj.name)
-        pan_assign(lines, "servers", self.dbobj.server_fqdns)
-        if self.dbobj.service.name == 'dns':
-            pan_assign(lines, "server_ips", self.dbobj.server_ips)
+
+        fqdns = [srv.fqdn for srv in self.dbobj.servers]
+        ips = [srv.ip for srv in self.dbobj.servers if srv.ip]
+
+        pan_assign(lines, "servers", fqdns)
+        pan_assign(lines, "server_ips", ips)
 
 
 class PlenaryServiceInstanceServer(SIHelperMixin, StructurePlenary):
@@ -214,6 +217,10 @@ class PlenaryServiceInstanceServerDefault(SIHelperMixin, Plenary):
 
     def body(self, lines):
         path = PlenaryServiceInstanceServer.template_name(self.dbobj)
+        # TODO: we should export the FQDN, IP address, and service address name
+        # that provides the service
+        # TODO: make it possible to provide multiple instances of the same
+        # service
         pan_assign(lines, "/system/provides/%s" % self.dbobj.service,
                    StructureTemplate(path))
 

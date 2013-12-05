@@ -1,0 +1,211 @@
+<?xml version="1.0"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V5.0//EN"
+"http://docbook.org/xml/5.0/dtd/docbook.dtd" [
+<!ENTITY aqd_version SYSTEM "../version.txt">
+]>
+<refentry xml:id="bind_server"
+          xmlns="http://docbook.org/ns/docbook"
+	  xmlns:xi="http://www.w3.org/2001/XInclude">
+    <refmeta>
+        <refentrytitle>bind_server</refentrytitle>
+        <manvolnum>1</manvolnum>
+        <refmiscinfo class="version">&aqd_version;</refmiscinfo>
+        <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
+    </refmeta>
+
+    <refnamediv>
+        <refname>bind server</refname>
+        <refpurpose>
+	    Bind a server to a service instance
+        </refpurpose>
+	<refclass>Aquilon</refclass>
+    </refnamediv>
+
+    <refsynopsisdiv>
+	<cmdsynopsis>
+	    <command>aq bind server</command>
+	    <group>
+		<synopfragmentref linkend="global-options">Global options</synopfragmentref>
+	    </group>
+	    <arg choice="plain"><option>--service <replaceable>SERVICE</replaceable></option></arg>
+	    <arg choice="plain"><option>--instance <replaceable>INSTANCE</replaceable></option></arg>
+	    <arg choice="plain"><option>--hostname <replaceable>HOST</replaceable></option></arg>
+	    <arg choice="opt"><option>--ip <replaceable>IPADDR</replaceable></option></arg>
+	    <arg choice="opt">
+		<arg choice="plain"><option>--service_address <replaceable>NAME</replaceable></option></arg>
+		<arg choice="opt"><option>--resourcegroup <replaceable>GROUP</replaceable></option></arg>
+	    </arg>
+	    <arg choice="opt"><option>--alias <replaceable>ALIAS</replaceable></option></arg>
+	    <arg choice="opt"><option>--position <replaceable>POSITION</replaceable></option></arg>
+	    <xi:include href="../common/global_options.xml"/>
+	</cmdsynopsis>
+	<cmdsynopsis>
+	    <command>aq bind server</command>
+	    <arg choice="plain"><option>--service <replaceable>SERVICE</replaceable></option></arg>
+	    <arg choice="plain"><option>--instance <replaceable>INSTANCE</replaceable></option></arg>
+	    <arg choice="plain"><option>--cluster <replaceable>CLUSTER</replaceable></option></arg>
+	    <arg choice="plain"><option>--service_address <replaceable>NAME</replaceable></option></arg>
+	    <arg choice="opt"><option>--resourcegroup <replaceable>GROUP</replaceable></option></arg>
+	    <arg choice="opt"><option>--alias <replaceable>ALIAS</replaceable></option></arg>
+	    <arg choice="opt"><option>--position <replaceable>POSITION</replaceable></option></arg>
+	</cmdsynopsis>
+	<cmdsynopsis>
+	    <command>aq bind server</command>
+	    <arg choice="plain"><option>--service <replaceable>SERVICE</replaceable></option></arg>
+	    <arg choice="plain"><option>--instance <replaceable>INSTANCE</replaceable></option></arg>
+	    <arg choice="plain"><option>--alias <replaceable>ALIAS</replaceable></option></arg>
+	    <arg choice="opt"><option>--position <replaceable>POSITION</replaceable></option></arg>
+	</cmdsynopsis>
+    </refsynopsisdiv>
+
+    <refsect1>
+        <title>Description</title>
+	<para>
+	    The <command>aq bind server</command> command binds a server providing some service to a specific service instance.
+	    A service may be provided by a host, a service address of a cluster, or an alias. If the service is provided by
+	    a host, it is possible to specify the IP address or the service address where the service is bound to. The difference
+	    between the two is that service addresses may float between interfaces (controlled by a software component running
+	    on the host), while plain IP addresses are always bound to a specific network interface.
+	</para>
+	<para>
+	    If the <option>--alias</option> option is provided in addition to <option>--host</option> or <option>--cluster</option>,
+	    then clients will use the specified <replaceable>ALIAS</replaceable> when they try to connect to the service, but the
+	    host/cluster providing the service is still aware of the server binding. If the <option>--alias</option> option is
+	    used alone (i.e. neither <option>--host</option> nor <option>--cluster</option> is specified), then the target host/cluster
+	    will not be aware of the service binding. This is useful if the configuration of the service itself happens outside of
+	    Aquilon/Quattor.
+	</para>
+    </refsect1>
+
+    <refsect1>
+        <title>Options</title>
+	<variablelist>
+	    <title>Command-specific options</title>
+	    <varlistentry>
+	        <term>
+		    <option>--service <replaceable>SERVICE</replaceable></option>,
+		    <option>--instance <replaceable>INSTANCE</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			The name of the service instance to bind to.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--hostname <replaceable>HOST</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			The name of the host providing the service. If no <option>--ip</option> or 
+			<option>--service_address</option> options are specified, then it's up to the
+			template code to decide if the service is provided on any IP address the host may have,
+			or just the primary IP address only. That distinction is meaningful for
+			clients not configured using Aquilon/Quattor; client configuration generated
+			by Aquilon will always use the server's primary IP address.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--ip <replaceable>IPADDR</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Specifies the IP address where the service is bound to, if the host has multiple IP addresses.
+			Specifying the <option>--hostname</option> option is mandatory.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--cluster <replaceable>CLUSTER</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			The service is provided by a cluster, which usually means there's some high availability or
+			load-balancing solution that manages the service. Specifying the <option>--service_address</option>
+			option is mandatory.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--service_address <replaceable>NAME</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Name of the service address providing the service. Specifying one of the <option>--hostname</option> or
+			<option>--cluster</option> options is mandatory. Binding a service to a service address usually means
+			there is some software component that handles failover and/or load balancing for the service.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--resourcegroup <replaceable>GROUP</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Name of the resource group where the service address belongs to. It is meaningful together
+			with the <option>--service_address</option> option only.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--position <replaceable>POSITION</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Insert the server definition at the given position, instead at the end of the list. This is
+			important if clients of the service care about the order of the servers. The numbering starts
+			from zero, i.e. <option>--position 0</option> will insert the new entry before any other
+			existing servers. Negative numbers are also allowed and count from the end of the existing
+			server list.
+		    </para>
+		    <para>
+			Omitting this option, or specifying a value larger than the number of existing servers, will cause
+			the new server to be added at the end of the list.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--alias <replaceable>ALIAS</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			If this option is specified alone, then the serivce will be provided by the given alias. Even if
+			the alias points to a host/cluster defined in Aquilon, that host/cluster will not be aware of
+			the binding, and will not automatically configure itself as a server. This is useful if the
+			actual service is maintained/configured outside of Aquilon/Quattor.
+		    </para>
+		    <para>
+			If this option is specified together with the <option>--hostname</option> or
+			<option>--cluster</option> options, then the host or cluster will be configured as usual for
+			providing the service, but clients will always use <replaceable>ALIAS</replaceable> when
+			configuring the service.
+		    </para>
+		    <para>
+			If the <option>--alias</option> option is specified, then the IP address of the service will not
+			be specified in the client templates, even if it is otherwise known to the broker. Make sure not
+			to use <option>--alias</option> for any services that need to use IP addresses instead of names
+			registered in the DNS. One such example is configuring the DNS resolver itself.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	</variablelist>
+	<xi:include href="../common/global_options_desc.xml"/>
+    </refsect1>
+
+    <refsect1>
+	<title>See also</title>
+	<para>
+	    <citerefentry><refentrytitle>unbind_server</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+	</para>
+    </refsect1>
+</refentry>
+
+<!-- vim: set ai sw=4: -->

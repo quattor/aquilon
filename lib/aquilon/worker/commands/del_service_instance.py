@@ -34,8 +34,8 @@ class CommandDelServiceInstance(BrokerCommand):
             raise ArgumentError("Service %s, instance %s still has clients and "
                                 "cannot be deleted." %
                                 (dbservice.name, dbsi.name))
-        if dbsi.server_hosts:
-            msg = ", ".join([host.fqdn for host in dbsi.server_hosts])
+        if dbsi.servers:
+            msg = ", ".join([srv.fqdn for srv in dbsi.servers])
             raise ArgumentError("Service %s, instance %s is still being "
                                 "provided by servers: %s." %
                                 (dbservice.name, dbsi.name, msg))

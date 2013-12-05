@@ -51,9 +51,9 @@ def determine_helper_hostname(session, logger, config, dbswitch):
         dbpersonality=None, dblocation=dbswitch.location,
         dbservices=[helper_service])
     for dbsi in mapped_instances.get(helper_service, []):
-        if dbsi.server_hosts:
+        if dbsi.servers:
             # Poor man's load balancing...
-            jump = choice(dbsi.server_hosts).fqdn
+            jump = choice(dbsi.servers).fqdn
             logger.client_info("Using jump host {0} from {1:l} to run discovery "
                                "for {2:l}.".format(jump, dbsi, dbswitch))
             return jump

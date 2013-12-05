@@ -99,7 +99,6 @@ from aquilon.aqdb.model.parameter import (Parameter, ParameterHolder,
 #SERVICE
 from aquilon.aqdb.model.service import Service
 from aquilon.aqdb.model.service_instance import ServiceInstance
-from aquilon.aqdb.model.service_instance_server import ServiceInstanceServer
 from aquilon.aqdb.model.service_map import ServiceMap
 from aquilon.aqdb.model.personality_service_map import PersonalityServiceMap
 
@@ -133,3 +132,5 @@ from aquilon.aqdb.model.service_address import ServiceAddress
 from aquilon.aqdb.model.share import Share
 from aquilon.aqdb.model.virtual_disk import (VirtualDisk, VirtualNasDisk,
                                              VirtualLocalDisk)
+
+from aquilon.aqdb.model.service_instance_server import ServiceInstanceServer

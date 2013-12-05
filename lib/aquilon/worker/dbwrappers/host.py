@@ -93,17 +93,6 @@ def get_host_bound_service(dbhost, dbservice):
     return None
 
 
-def get_host_dependencies(session, dbhost):
-    """ returns a list of strings describing how a host is being used.
-    If the host has no dependencies, then an empty list is returned
-    """
-    ret = []
-    for si in dbhost.services_provided:
-        ret.append("%s is bound as a server for service %s instance %s" %
-                   (dbhost.fqdn, si.service.name, si.name))
-    return ret
-
-
 def check_hostlist_size(command, config, hostlist):
 
     if not hostlist:

@@ -21,6 +21,7 @@ from aquilon.exceptions_ import ArgumentError, IncompleteError
 from aquilon.aqdb.model import (HardwareEntity, Interface, AddressAssignment,
                                 ARecord, NetworkEnvironment)
 from aquilon.worker.dbwrappers.dns import delete_dns_record
+from aquilon.worker.dbwrappers.service_instance import check_no_provided_service
 from aquilon.worker.processes import DSDBRunner
 from aquilon.worker.templates import Plenary
 from aquilon.utils import first_of
@@ -88,6 +89,8 @@ class CommandDelInterfaceAddress(BrokerCommand):
         if ip == dbhw_ent.primary_ip:
             raise ArgumentError("The primary IP address of a hardware entity "
                                 "cannot be removed.")
+
+        check_no_provided_service(addr)
 
         dbinterface.assignments.remove(addr)
 

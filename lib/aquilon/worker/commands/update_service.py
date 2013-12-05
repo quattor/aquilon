@@ -26,7 +26,7 @@ class CommandUpdateService(BrokerCommand):
     required_parameters = ["service"]
 
     def render(self, session, logger, service, max_clients, default,
-               need_client_list, **arguments):
+               need_client_list, comments, **arguments):
         dbservice = Service.get_unique(session, name=service, compel=True)
 
         if default:
@@ -36,6 +36,9 @@ class CommandUpdateService(BrokerCommand):
 
         if need_client_list is not None:
             dbservice.need_client_list = need_client_list
+
+        if comments is not None:
+            dbservice.comments = comments
 
         session.flush()
 

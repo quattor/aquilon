@@ -17,6 +17,7 @@
 """Contains the logic for `aq show bunker violations`."""
 
 from collections import defaultdict
+from operator import attrgetter
 
 from sqlalchemy.orm import (contains_eager, subqueryload, joinedload, defer,
                             aliased)
@@ -76,7 +77,7 @@ class CommandShowBunkerViolations(BrokerCommand):
 
         violation_ids = []
         updates = []
-        for rack in sorted(rack_bucket.keys(), key=lambda x: x.name):
+        for rack in sorted(rack_bucket.keys(), key=attrgetter("name")):
             buckets = rack_bucket[rack]
             if len(buckets) > 1:
                 violation_ids.append(rack.id)

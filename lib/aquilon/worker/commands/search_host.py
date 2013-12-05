@@ -217,15 +217,15 @@ class CommandSearchHost(BrokerCommand):
                                                   service=dbserver_service,
                                                   name=server_of_instance,
                                                   compel=True)
-                q = q.join('_services_provided')
+                q = q.join('services_provided')
                 q = q.filter_by(service_instance=dbsi)
                 q = q.reset_joinpoint()
             else:
-                q = q.join('_services_provided', 'service_instance')
+                q = q.join('services_provided', 'service_instance')
                 q = q.filter_by(service=dbserver_service)
                 q = q.reset_joinpoint()
         elif server_of_instance:
-            q = q.join('_services_provided', 'service_instance')
+            q = q.join('services_provided', 'service_instance')
             q = q.filter_by(name=server_of_instance)
             q = q.reset_joinpoint()
 

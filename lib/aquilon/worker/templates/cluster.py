@@ -25,6 +25,7 @@ from aquilon.aqdb.model import (Cluster, EsxCluster, ComputeCluster,
 from aquilon.worker.templates import (Plenary, ObjectPlenary, StructurePlenary,
                                       PlenaryCollection, PlenaryResource,
                                       PlenaryServiceInstanceClientDefault,
+                                      PlenaryServiceInstanceServerDefault,
                                       PlenaryPersonalityBase, add_location_info)
 from aquilon.worker.templates.panutils import (StructureTemplate, PanValue,
                                                pan_assign, pan_include,
@@ -150,6 +151,10 @@ class PlenaryClusterObject(ObjectPlenary):
             for si in self.dbobj.service_bindings:
                 keylist.append(PlenaryKey(exclusive=False, service_instance=si,
                                           logger=self.logger))
+            for srv in self.dbobj.services_provided:
+                keylist.append(PlenaryKey(exclusive=False,
+                                          service_instance=srv.service_instance,
+                                          logger=self.logger))
 
             if self.dbobj.metacluster:
                 keylist.append(PlenaryKey(exclusive=False,
@@ -174,6 +179,12 @@ class PlenaryClusterObject(ObjectPlenary):
         for servinst in sorted(self.dbobj.service_bindings,
                                key=attrgetter('service.name', 'name')):
             path = PlenaryServiceInstanceClientDefault.template_name(servinst)
+            pan_include(lines, path)
+
+        for srv in sorted(self.dbobj.services_provided,
+                          key=attrgetter("service_instance.service.name",
+                                         "service_instance.name")):
+            path = PlenaryServiceInstanceServerDefault.template_name(srv.service_instance)
             pan_include(lines, path)
 
         path = PlenaryPersonalityBase.template_name(self.dbobj.personality)

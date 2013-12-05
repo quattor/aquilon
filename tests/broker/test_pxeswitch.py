@@ -47,8 +47,8 @@ class TestPxeswitch(TestBrokerCommand):
         # version of aii-installfe that returned output closer to the real
         # one.
         (out, err) = self.successtest(command.split(" "))
-        self.matchoutput(err, "--install", command)
-        self.matchoutput(err, "--configure", command)
+        self.matchoutput(err, "--installlist", command)
+        self.matchoutput(err, "--configurelist", command)
         self.matchclean(err, "--status", command)
         self.matchclean(err, "--rescue", command)
         self.matchclean(err, "--boot", command)
@@ -65,7 +65,7 @@ class TestPxeswitch(TestBrokerCommand):
         command = ["pxeswitch", "--hostname", "unittest00.one-nyp.ms.com",
                    "--install", "--noconfigure"]
         (out, err) = self.successtest(command)
-        self.matchoutput(err, "--install", command)
+        self.matchoutput(err, "--installlist", command)
         self.matchclean(err, "--configure", command)
         self.matchclean(err, "--status", command)
         self.matchclean(err, "--rescue", command)
@@ -89,37 +89,37 @@ class TestPxeswitch(TestBrokerCommand):
     def testlocalbootunittest02(self):
         command = "pxeswitch --hostname unittest02.one-nyp.ms.com --localboot"
         (out, err) = self.successtest(command.split(" "))
-        self.matchoutput(err, "--configure", command)
-        self.matchoutput(err, "--boot", command)
+        self.matchoutput(err, "--configurelist", command)
+        self.matchoutput(err, "--bootlist", command)
 
     def teststatusunittest02(self):
         command = "pxeswitch --hostname unittest02.one-nyp.ms.com --status"
         (out, err) = self.successtest(command.split(" "))
         self.matchclean(err, "--configure", command)
-        self.matchoutput(err, "--status", command)
+        self.matchoutput(err, "--statuslist", command)
 
     def testfirmwareunittest02(self):
         command = "pxeswitch --hostname unittest02.one-nyp.ms.com --firmware"
         (out, err) = self.successtest(command.split(" "))
-        self.matchoutput(err, "--configure", command)
-        self.matchoutput(err, "--firmware", command)
+        self.matchoutput(err, "--configurelist", command)
+        self.matchoutput(err, "--firmwarelist", command)
 
     def testconfigureunittest02(self):
         command = "pxeswitch --hostname unittest02.one-nyp.ms.com"
         (out, err) = self.successtest(command.split(" "))
-        self.matchoutput(err, "--configure", command)
+        self.matchoutput(err, "--configurelist", command)
 
     def testblindbuildunittest02(self):
         command = "pxeswitch --hostname unittest02.one-nyp.ms.com --blindbuild"
         (out, err) = self.successtest(command.split(" "))
-        self.matchoutput(err, "--configure", command)
-        self.matchoutput(err, "--livecd", command)
+        self.matchoutput(err, "--configurelist", command)
+        self.matchoutput(err, "--livecdlist", command)
 
     def testrescueunittest02(self):
         command = "pxeswitch --hostname unittest02.one-nyp.ms.com --rescue"
         (out, err) = self.successtest(command.split(" "))
-        self.matchoutput(err, "--configure", command)
-        self.matchoutput(err, "--rescue", command)
+        self.matchoutput(err, "--configurelist", command)
+        self.matchoutput(err, "--rescuelist", command)
 
     def testconfigurelist(self):
         with NamedTemporaryFile() as f:
@@ -132,23 +132,31 @@ class TestPxeswitch(TestBrokerCommand):
             # We would like to test more of the output... we need something
             # special for aii-shellfe however...
 
-    def testconfigurelisterror(self):
+    def testconfigurelisterror1(self):
         with NamedTemporaryFile() as f:
             f.writelines(["host-does-not-exist.ms.com\n",
-                          "host.domain-does-not-exist.ms.com\n",
-                          "pissp1.ms.com\n"])
+                          "host.domain-does-not-exist.ms.com\n"])
             f.flush()
             command = "pxeswitch --list %s --configure" % f.name
             out = self.badrequesttest(command.split(" "))
             self.matchoutput(out, "Invalid hosts in list:", command)
-            self.matchoutput(out, "host-does-not-exist.ms.com: Host "
-                             "host-does-not-exist.ms.com not found.",
+            self.matchoutput(out, "host-does-not-exist.ms.com: DnsRecord "
+                             "host-does-not-exist.ms.com, DNS environment "
+                             "internal not found.",
                              command)
             self.matchoutput(out, "domain-does-not-exist.ms.com: DNS Domain "
                              "domain-does-not-exist.ms.com not found.",
                              command)
-            self.matchoutput(out, "pissp1.ms.com: Host has no bootserver.",
-                             command)
+
+    def testconfigurelisterror2(self):
+        with NamedTemporaryFile() as f:
+            f.writelines([self.aurora_without_node + ".ms.com\n"])
+            f.flush()
+            command = "pxeswitch --list %s --configure" % f.name
+            out = self.badrequesttest(command.split(" "))
+            self.matchoutput(out, "Invalid hosts in list:", command)
+            self.matchoutput(out, "Host %s.ms.com has no bootserver." %
+                             self.aurora_without_node, command)
 
     def testinstallisterror(self):
         with NamedTemporaryFile() as f:
@@ -217,8 +225,8 @@ class TestPxeswitch(TestBrokerCommand):
         command = ["pxeswitch", "--hostname=unittest00.one-nyp.ms.com",
                    "--configure", "--install"]
         (out, err) = self.successtest(command)
-        self.matchoutput(err, "--configure unittest00.one-nyp.ms.com", command)
-        self.matchoutput(err, "--install unittest00.one-nyp.ms.com", command)
+        self.matchoutput(err, "--configurelist", command)
+        self.matchoutput(err, "--installlist", command)
         self.matchclean(err, "--firmware", command)
 
     def testallowconfigureblindbuildlist(self):

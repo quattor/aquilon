@@ -20,10 +20,13 @@ from aquilon.aqdb.model import Cluster
 from aquilon.worker.logger import CLIENT_INFO
 from aquilon.notify.index import trigger_notifications
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.dbwrappers.service_instance import check_no_provided_service
 from aquilon.worker.templates import Plenary, PlenaryCollection
 
 
 def del_cluster(session, logger, dbcluster, config):
+    check_no_provided_service(dbcluster)
+
     if hasattr(dbcluster, 'members') and dbcluster.members:
         raise ArgumentError("%s is still in use by clusters: %s." %
                             (format(dbcluster),
@@ -32,11 +35,13 @@ def del_cluster(session, logger, dbcluster, config):
         hosts = ", ".join([h.fqdn for h in dbcluster.hosts])
         raise ArgumentError("%s is still in use by hosts: %s." %
                             (format(dbcluster), hosts))
+
     plenaries = PlenaryCollection(logger=logger)
     plenaries.append(Plenary.get_plenary(dbcluster))
     if dbcluster.resholder:
         for res in dbcluster.resholder.resources:
             plenaries.append(Plenary.get_plenary(res))
+
     session.delete(dbcluster)
 
     session.flush()

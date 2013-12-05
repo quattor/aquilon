@@ -55,12 +55,39 @@ class TestBindServer(TestBrokerCommand):
                         "--hostname", "unittest00.one-nyp.ms.com",
                         "--service", "utsvc", "--instance", "utsi2"])
 
+    def test_140_add_alias(self):
+        self.noouttest(["add_alias", "--fqdn", "srv-alias.one-nyp.ms.com",
+                        "--target", "unittest00.one-nyp.ms.com"])
+        self.noouttest(["add_alias", "--fqdn", "srv-alias2.one-nyp.ms.com",
+                        "--target", "unittest00.one-nyp.ms.com"])
+
+    def test_141_bind_aliased_server(self):
+        self.statustest(["bind_server", "--alias", "srv-alias.one-nyp.ms.com",
+                         "--hostname", "unittest00.one-nyp.ms.com",
+                         "--service", "utsvc", "--instance", "utsi2"])
+
+    def test_145_bind_alias_alone(self):
+        self.noouttest(["bind_server",
+                        "--alias", "srv-alias2.one-nyp.ms.com",
+                        "--service", "utsvc", "--instance", "utsi2"])
+
+    def test_150_bind_service_address(self):
+        self.noouttest(["bind_server",
+                        "--hostname", "unittest20.aqd-unittest.ms.com",
+                        "--service_address", "zebra2",
+                        "--service", "utsvc", "--instance", "utsi2"])
+
+    def test_160_bind_auxiliary(self):
+        ip = self.net["unknown0"].usable[3]
+        self.noouttest(["bind_server", "--ip", ip,
+                        "--hostname", "unittest00.one-nyp.ms.com",
+                        "--service", "utsvc", "--instance", "utsi2"])
+
     def test_200_bind_utsi2_unittest00_again(self):
         command = ["bind", "server", "--hostname", "unittest00.one-nyp.ms.com",
                    "--service", "utsvc", "--instance", "utsi2"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "Server unittest00.one-nyp.ms.com is already "
-                         "bound to service instance utsvc/utsi2.", command)
+        self.matchoutput(out, "The server binding already exists.", command)
 
     def test_300_cat_utsi1(self):
         command = "cat --service utsvc --instance utsi1"
@@ -77,16 +104,25 @@ class TestBindServer(TestBrokerCommand):
                           r'"server1.aqd-unittest.ms.com",\s*'
                           r'"unittest00.one-nyp.ms.com"\s*\);',
                           command)
-        self.matchclean(out, "server_ips", command)
+        unittest02_ip = self.net["unknown0"].usable[0]
+        server1_ip = self.net["hp_eth0"].usable[1]
+        unittest00_ip = self.net["unknown0"].usable[2]
+        self.searchoutput(out,
+                          r'"server_ips" = list\(\s*'
+                          r'"%s",\s*'
+                          r'"%s",\s*'
+                          r'"%s"\s*\);' %
+                          (unittest02_ip, server1_ip, unittest00_ip),
+                          command)
 
     def test_300_show_utsi1(self):
         command = "show service --service utsvc --instance utsi1"
         out = self.commandtest(command.split(" "))
         # Order is important
         self.searchoutput(out,
-                          r'Server: unittest02.one-nyp.ms.com\s*'
-                          r'Server: server1.aqd-unittest.ms.com\s*'
-                          r'Server: unittest00.one-nyp.ms.com\s*',
+                          r'Server Binding: unittest02.one-nyp.ms.com\n\s*'
+                          r'Server Binding: server1.aqd-unittest.ms.com\n\s*'
+                          r'Server Binding: unittest00.one-nyp.ms.com\n\s*',
                           command)
 
     def test_300_show_utsi1_proto(self):
@@ -121,26 +157,48 @@ class TestBindServer(TestBrokerCommand):
         self.matchoutput(out, '"instance" = "utsi2";', command)
         self.searchoutput(out,
                           r'"servers" = list\(\s*'
-                          r'"unittest00.one-nyp.ms.com"\s*\);',
+                          r'"unittest00.one-nyp.ms.com",\s*'
+                          r'"srv-alias.one-nyp.ms.com",\s*'
+                          r'"srv-alias2.one-nyp.ms.com",\s*'
+                          r'"zebra2.aqd-unittest.ms.com",\s*'
+                          r'"unittest00-e1.one-nyp.ms.com"\s*\);',
                           command)
-        self.matchclean(out, "server_ips", command)
+        unittest00_ip = self.net["unknown0"].usable[2]
+        unittest00_e1_ip = self.net["unknown0"].usable[3]
+        zebra2_ip = self.net["zebra_vip"].usable[1]
+        self.searchoutput(out,
+                          r'"server_ips" = list\(\s*'
+                          r'"%s",\s*'
+                          r'"%s",\s*'
+                          r'"%s"\s*\);' % (unittest00_ip, zebra2_ip,
+                                           unittest00_e1_ip),
+                          command)
 
     def test_300_show_utsi2(self):
         command = "show service --service utsvc --instance utsi2"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Server: unittest00.one-nyp.ms.com", command)
+        zebra2_ip = self.net["zebra_vip"].usable[1]
+        unittest00_e1_ip = self.net["unknown0"].usable[3]
+        self.searchoutput(out,
+                          r'Server Binding: unittest00.one-nyp.ms.com\n\s*'
+                          r'Server Binding: srv-alias.one-nyp.ms.com \[alias, host: unittest00.one-nyp.ms.com\]\n\s*'
+                          r'Server Binding: srv-alias2.one-nyp.ms.com \[alias\]\n\s*'
+                          r'Server Binding: zebra2.aqd-unittest.ms.com \[host: unittest20.aqd-unittest.ms.com, service_address: zebra2, IP: %s\]\n\s*'
+                          r'Server Binding: unittest00-e1.one-nyp.ms.com \[host: unittest00.one-nyp.ms.com, IP: %s\]\n\s*'
+                          % (zebra2_ip, unittest00_e1_ip),
+                          command)
 
     def test_300_show_service_server(self):
         command = "show service --server unittest00.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Server: unittest00.one-nyp.ms.com", command)
+        self.matchoutput(out, "Server Binding: unittest00.one-nyp.ms.com", command)
         self.matchoutput(out, "Service: utsvc Instance: utsi1", command)
         self.matchoutput(out, "Service: utsvc Instance: utsi2", command)
 
     def test_300_show_service_name_server(self):
         command = "show service --service utsvc --server unittest02.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Server: unittest02.one-nyp.ms.com", command)
+        self.matchoutput(out, "Server Binding: unittest02.one-nyp.ms.com", command)
         self.matchoutput(out, "Service: utsvc Instance: utsi1", command)
 
     def test_300_cat_unittest00(self):
@@ -156,23 +214,36 @@ class TestBindServer(TestBrokerCommand):
                          command)
 
     def test_300_show_unittest00(self):
+        unittest00_e1_ip = self.net["unknown0"].usable[3]
         command = "show host --hostname unittest00.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Primary Name: unittest00.one-nyp.ms.com",
                          command)
-        self.matchoutput(out,
-                         "Provides Service: utsvc Instance: utsi1",
-                         command)
-        self.matchoutput(out,
-                         "Provides Service: utsvc Instance: utsi2",
-                         command)
+        self.searchoutput(out,
+                          r'Provides Service: utsvc Instance: utsi1\s*'
+                          r'Server Binding: unittest00.one-nyp.ms.com',
+                          command)
+        self.searchoutput(out,
+                          r'Provides Service: utsvc Instance: utsi2\s*'
+                          r'Server Binding: unittest00.one-nyp.ms.com\n',
+                          command)
+        self.searchoutput(out,
+                          r'Provides Service: utsvc Instance: utsi2\s*'
+                          r'Server Binding: srv-alias.one-nyp.ms.com \[alias, host: unittest00.one-nyp.ms.com\]\n',
+                          command)
+        self.searchoutput(out,
+                          r'Provides Service: utsvc Instance: utsi2\s*'
+                          r'Server Binding: unittest00-e1.one-nyp.ms.com \[host: unittest00.one-nyp.ms.com, IP: %s\]\n\s*'
+                          % unittest00_e1_ip,
+                          command)
+        self.matchclean(out, "srv-alias2.one-nyp.ms.com", command)
 
     def test_300_show_unittest00_proto(self):
         command = "show host --hostname unittest00.one-nyp.ms.com --format proto"
         out = self.commandtest(command.split(" "))
         hostlist = self.parse_hostlist_msg(out, expect=1)
         host = hostlist.hosts[0]
-        self.failUnlessEqual(len(host.services_provided), 2)
+        self.failUnlessEqual(len(host.services_provided), 4)
         services = set()
         for svc_msg in host.services_provided:
             services.add("%s/%s" % (svc_msg.service, svc_msg.instance))
@@ -182,11 +253,34 @@ class TestBindServer(TestBrokerCommand):
                             "message. All bindings: %s" %
                             (binding, ",".join(list(services))))
 
+    def test_300_cat_unittest20(self):
+        command = ["cat", "--hostname", "unittest20.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out,
+                         'include { "service/utsvc/utsi2/server/config" };',
+                         command)
+
+    def test_300_show_unittest20(self):
+        zebra2_ip = self.net["zebra_vip"].usable[1]
+        command = ["show_host", "--hostname", "unittest20.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Provides Service: utsvc Instance: utsi2",
+                         command)
+        self.matchoutput(out, "Server Binding: zebra2.aqd-unittest.ms.com "
+                         "[host: unittest20.aqd-unittest.ms.com, "
+                         "service_address: zebra2, IP: %s]" % zebra2_ip,
+                         command)
+
+    def test_300_show_srv_alias(self):
+        command = ["show_alias", "--fqdn", "srv-alias.one-nyp.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Provides Service: utsvc Instance: utsi2",
+                         command)
+
     def test_800_cleanup(self):
-        self.statustest(["unbind", "server",
+        self.statustest(["unbind_server",
                          "--hostname", "server1.aqd-unittest.ms.com",
                          "--service", "utsvc", "--instance", "utsi1"])
-
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestBindServer)

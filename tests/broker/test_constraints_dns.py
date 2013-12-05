@@ -75,6 +75,14 @@ class TestDnsConstraints(TestBrokerCommand):
                          "deleted." % ip,
                          command)
 
+    def testdelserveralias(self):
+        command = ["del_alias", "--fqdn", "srv-alias2.one-nyp.ms.com"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Alias srv-alias2.one-nyp.ms.com still provides "
+                         "the following services, and cannot be deleted: "
+                         "utsvc/utsi2.",
+                         command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(

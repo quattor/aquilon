@@ -23,7 +23,7 @@ from aquilon.worker.commands.unbind_server import CommandUnbindServer
 
 class CommandUnbindServerInstance(CommandUnbindServer):
 
-    required_parameters = ["hostname", "service", "instance"]
+    required_parameters = ["service", "instance"]
 
     def render(self, *args, **arguments):
         # The superclass already contains the logic to handle this case.

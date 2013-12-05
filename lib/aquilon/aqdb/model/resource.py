@@ -56,6 +56,10 @@ class ResourceHolder(Base):
     def holder_object(self):  # pragma: no cover
         raise InternalError("Abstract base method called")
 
+    @property
+    def toplevel_holder_object(self):
+        return self.holder_object
+
     @validates('resources')
     def _validate_resources(self, key, value):
         return self.validate_resources(key, value)
@@ -152,7 +156,7 @@ class Resource(Base):
         return value
 
     def __repr__(self):
-        return "<{0:c} Resource {0.name} of {1}>".format(self, self.holder)
+        return "<{0:c} Resource {0.name} of {1}>".format(self, self.holder.holder_object)
 
 resource = Resource.__table__  # pylint: disable=C0103
 resource.info['unique_fields'] = ['name', 'resource_type', 'holder']

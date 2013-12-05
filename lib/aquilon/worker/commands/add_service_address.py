@@ -17,7 +17,7 @@
 
 
 from aquilon.exceptions_ import ArgumentError, UnimplementedError
-from aquilon.aqdb.model import ServiceAddress, Cluster, Host, ResourceGroup
+from aquilon.aqdb.model import ServiceAddress, Cluster, Host
 from aquilon.worker.broker import BrokerCommand, validate_basic
 from aquilon.worker.dbwrappers.interface import assign_address
 from aquilon.worker.dbwrappers.dns import grab_address
@@ -26,14 +26,14 @@ from aquilon.worker.dbwrappers.resources import (add_resource,
 from aquilon.worker.processes import DSDBRunner
 
 
-def add_srv_dsdb_callback(session, logger, dbsrv, real_holder=None,
+def add_srv_dsdb_callback(session, logger, dbsrv, toplevel_holder=None,
                           oldinfo=None, newly_created=None, comments=None):
     dsdb_runner = DSDBRunner(logger=logger)
 
     if not newly_created:
         dsdb_runner.delete_host_details(dbsrv.dns_record.fqdn, dbsrv.dns_record.ip)
-    if isinstance(real_holder, Host):
-        dsdb_runner.update_host(real_holder.hardware_entity, oldinfo)
+    if isinstance(toplevel_holder, Host):
+        dsdb_runner.update_host(toplevel_holder.hardware_entity, oldinfo)
     else:
         dsdb_runner.add_host_details(dbsrv.dns_record.fqdn,
                                      dbsrv.dns_record.ip, comments=comments)
@@ -66,13 +66,7 @@ class CommandAddServiceAddress(BrokerCommand):
 
         holder = get_resource_holder(session, hostname, cluster,
                                      resourcegroup, compel=False)
-
-        # Address assignments should be added based on the host/cluster, so we
-        # have to resolve resource groups first
-        if isinstance(holder.holder_object, ResourceGroup):
-            real_holder = holder.holder_object.holder.holder_object
-        else:
-            real_holder = holder.holder_object
+        toplevel_holder = holder.toplevel_holder_object
 
         ServiceAddress.get_unique(session, name=name, holder=holder,
                                   preclude=True)
@@ -83,10 +77,10 @@ class CommandAddServiceAddress(BrokerCommand):
         ip = dbdns_rec.ip
 
         if map_to_primary:
-            if not isinstance(real_holder, Host):
+            if not isinstance(toplevel_holder, Host):
                 raise ArgumentError("The --map_to_primary option works only "
                                     "for host-based service addresses.")
-            dbdns_rec.reverse_ptr = real_holder.hardware_entity.primary_name.fqdn
+            dbdns_rec.reverse_ptr = toplevel_holder.hardware_entity.primary_name.fqdn
 
         # Disable autoflush, since the ServiceAddress object won't be complete
         # until add_resource() is called
@@ -96,25 +90,25 @@ class CommandAddServiceAddress(BrokerCommand):
             holder.resources.append(dbsrv)
 
             oldinfo = None
-            if isinstance(real_holder, Cluster):
-                if not real_holder.hosts:
+            if isinstance(toplevel_holder, Cluster):
+                if not toplevel_holder.hosts:
                     # The interface names are only stored in the
                     # AddressAssignment objects, so we can't handle a cluster
                     # with no hosts and thus no interfaces
                     raise ArgumentError("Cannot assign a service address to a "
                                         "cluster that has no members.")
-                for host in real_holder.hosts:
+                for host in toplevel_holder.hosts:
                     apply_service_address(host, ifnames, dbsrv, logger)
-            elif isinstance(real_holder, Host):
-                oldinfo = DSDBRunner.snapshot_hw(real_holder.hardware_entity)
-                apply_service_address(real_holder, ifnames, dbsrv, logger)
+            elif isinstance(toplevel_holder, Host):
+                oldinfo = DSDBRunner.snapshot_hw(toplevel_holder.hardware_entity)
+                apply_service_address(toplevel_holder, ifnames, dbsrv, logger)
             else:  # pragma: no cover
                 raise UnimplementedError("{0} as a resource holder is not "
-                                         "implemented.".format(real_holder))
+                                         "implemented.".format(toplevel_holder))
 
         add_resource(session, logger, holder, dbsrv,
                      dsdb_callback=add_srv_dsdb_callback,
-                     real_holder=real_holder, oldinfo=oldinfo,
+                     toplevel_holder=toplevel_holder, oldinfo=oldinfo,
                      newly_created=newly_created, comments=comments)
 
         return

@@ -357,8 +357,11 @@ class ObjectFormatter(object):
 
     def add_service_instance_data(self, si_msg, service_instance):
         si_msg.name = str(service_instance.name)
-        for host in service_instance.server_hosts:
-            self.add_host_data(si_msg.servers.add(), host)
+        for srv in service_instance.servers:
+            if srv.host:
+                self.add_host_data(si_msg.servers.add(), srv.host)
+            # TODO: extra IP address/service address information
+            # TODO: cluster-provided services
         # TODO: make this conditional to avoid performance problems
         #for client in service_instance.clients:
         #    self.add_host_data(si_msg.clients.add(), client.host)
