@@ -95,6 +95,9 @@ class TestDelMachine(TestBrokerCommand):
     def testdelaurorawithoutrack(self):
         self.noouttest(["del_machine", "--machine", self.aurora_without_rack])
 
+    def testaddut3s01p2(self):
+        self.noouttest(["del", "machine", "--machine", "ut3s01p2"])
+
     def testverifyall(self):
         self.noouttest(["show_machine", "--all"])
 

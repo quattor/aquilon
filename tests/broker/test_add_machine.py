@@ -385,6 +385,15 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Rackmount: ut3s01p1b", command)
 
+    def testaddut3s01p2(self):
+        self.noouttest(["add", "machine", "--machine", "ut3s01p2",
+                        "--rack", "ut3", "--model", "poweredge_6650"])
+
+    def testverifyaddut3s01p2(self):
+        command = "show machine --machine ut3s01p2"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Rackmount: ut3s01p2", command)
+
     # When doing an end-to-end test, these entries should be
     # created as part of a sweep of a Verari rack
     # (ut01ga1s02.aqd-unittest.ms.com).
