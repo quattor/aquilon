@@ -30,7 +30,7 @@ from tempfile import mkstemp
 
 from ipaddr import IPv4Address, AddressValueError
 
-from aquilon.exceptions_ import ArgumentError, AquilonError
+from aquilon.exceptions_ import ArgumentError
 from aquilon.config import Config
 
 LOGGER = logging.getLogger(__name__)
@@ -309,14 +309,6 @@ def write_file(filename, content, mode=None, compress=None,
     finally:
         if os.path.exists(fpath):
             os.remove(fpath)
-
-
-def read_file(path, filename, logger=LOGGER):
-    fullfile = os.path.join(path, filename)
-    try:
-        return open(fullfile).read()
-    except OSError, e:
-        raise AquilonError("Could not read contents of %s: %s" % (fullfile, e))
 
 
 def remove_file(filename, cleanup_directory=False, logger=LOGGER):

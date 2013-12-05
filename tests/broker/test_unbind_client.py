@@ -54,8 +54,8 @@ class TestUnbindClient(TestBrokerCommand):
 
     def test_200_verify_bind_cat_unbuilt(self):
         command = ["cat", "--hostname=aquilon94.aqd-unittest.ms.com"]
-        out = self.internalerrortest(command)
-        self.matchoutput(out, "No such file or directory", command)
+        out = self.notfoundtest(command)
+        self.matchoutput(out, "not found", command)
 
     def test_300_unbind_unmapped(self):
         command = ["unbind_client", "--hostname=unittest02.one-nyp.ms.com",
@@ -90,8 +90,8 @@ class TestUnbindClient(TestBrokerCommand):
 
     def test_400_verify_unbind_cat_unbuilt(self):
         command = ["cat", "--hostname=aquilon94.aqd-unittest.ms.com"]
-        out = self.internalerrortest(command)
-        self.matchoutput(out, "No such file or directory", command)
+        out = self.notfoundtest(command)
+        self.matchoutput(out, "not found", command)
 
     def testrejectunbindrequired(self):
         command = "unbind client --hostname unittest02.one-nyp.ms.com --service afs"

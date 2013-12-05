@@ -17,6 +17,7 @@
 """Any work by the broker to write out (or read in?) templates lives here."""
 
 import os
+import errno
 import logging
 import threading
 import weakref
@@ -25,13 +26,13 @@ from mako.lookup import TemplateLookup
 
 from sqlalchemy.inspection import inspect
 
-from aquilon.exceptions_ import InternalError, IncompleteError
+from aquilon.exceptions_ import InternalError, IncompleteError, NotFoundException
 from aquilon.config import Config
 from aquilon.aqdb.model import Base
 from aquilon.worker.locks import lock_queue, CompileKey, NoLockKey
 from aquilon.worker.templates.panutils import pan_assign, pan_variable
 from aquilon.worker.formats.formatters import ObjectFormatter
-from aquilon.utils import write_file, read_file, remove_file
+from aquilon.utils import write_file, remove_file
 
 LOGGER = logging.getLogger(__name__)
 
@@ -231,7 +232,21 @@ class Plenary(object):
         return 1
 
     def read(self):
-        return read_file("", self.old_path, logger=self.logger)
+        int_error = lambda e: \
+            InternalError("Error reading plenary file %s: %s" %
+                          (self.template_name, e.strerror))
+        try:
+            return open(self.old_path).read()
+        except IOError, e:
+            # Unable to open the file
+            if e.errno == errno.ENOENT:
+                raise NotFoundException("Pleanary file %s not found" %
+                                        self.template_name)
+            else:
+                raise int_error(e)
+        except OSError, e:
+            # Read has failed, which shouldn't happen unless there is a problem
+            raise int_error(e)
 
     def remove(self, locked=False, remove_profile=False):
         """
@@ -276,7 +291,7 @@ class Plenary(object):
         try:
             self.old_content = self.read()
             self.old_mtime = os.stat(self.old_path).st_atime
-        except IOError:
+        except NotFoundException:
             self.old_content = None
         self.stashed = True
 
