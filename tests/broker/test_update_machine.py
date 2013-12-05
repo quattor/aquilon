@@ -504,6 +504,15 @@ class TestUpdateMachine(TestBrokerCommand):
 
         self.searchclean(out, r"URI: file:///somepath/to/ovf", command)
 
+    def testupdateut3s01p2(self):
+        self.noouttest(["update", "machine", "--machine", "ut3s01p2",
+                        "--model", "hs21-8853l5u", "--vendor", "ibm"])
+
+    def testverifyupdateut3s01p2(self):
+        command = "show machine --machine ut3s01p2"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Blade: ut3s01p2", command)
+
     # These tests would be nice, but twisted just ignores the permission
     # on the files since we're still the owner.  Which is good, but means
     # the recovery routines can't be easily tested.

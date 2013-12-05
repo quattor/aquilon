@@ -126,8 +126,8 @@ class CommandUpdateMachine(BrokerCommand):
             # location data to be available as appropriate, but really?
             # Failing seems reasonable.
             if dbmodel.model_type != dbmachine.model.model_type and \
-               (dbmodel.isVirtualMachineType() or
-                dbmachine.model.isVirtualMachineType()):
+               (dbmodel.model_type.isVirtualMachineType() or
+                dbmachine.model.model_type.isVirtualMachineType()):
                 raise ArgumentError("Cannot change machine from %s to %s." %
                                     (dbmachine.model.model_type,
                                      dbmodel.model_type))
