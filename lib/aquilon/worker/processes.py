@@ -447,23 +447,26 @@ class DSDBRunner(object):
 
     def update_host_details(self, fqdn, iface=None, new_ip=None, new_mac=None,
                             new_comments=None, old_ip=None, old_mac=None,
-                            old_comments=None):
+                            old_comments=None, primary=None):
         command = ["update_aqd_host", "-host_name", fqdn]
-        if iface:
-            iface = self.normalize_iface(iface)
-            command.extend(["-interface_name", iface])
-
+        need_iface = False
         rollback = command[:]
 
         if new_ip and new_ip != old_ip:
             command.extend(["-ip_address", new_ip])
             rollback.extend(["-ip_address", old_ip])
+            need_iface = True
         if new_mac and new_mac != old_mac:
             command.extend(["-ethernet_address", new_mac])
             rollback.extend(["-ethernet_address", old_mac])
+            need_iface = True
         if new_comments != old_comments:
             command.extend(["-comments", new_comments or ""])
             rollback.extend(["-comments", old_comments or ""])
+        if (need_iface or primary) and iface:
+            iface = self.normalize_iface(iface)
+            command.extend(["-interface_name", iface])
+            rollback.extend(["-interface_name", iface])
 
         self.add_action(command, rollback)
 
@@ -665,7 +668,8 @@ class DSDBRunner(object):
                                     'oldmac': attrs['mac'],
                                     'newmac': newattrs['mac'],
                                     'oldcomments': attrs['comments'],
-                                    'newcomments': newattrs['comments']})
+                                    'newcomments': newattrs['comments'],
+                                    'primary': attrs['primary']})
 
                 if attrs['fqdn'] != newattrs['fqdn'] or \
                    attrs['name'] != newattrs['name']:
@@ -697,7 +701,8 @@ class DSDBRunner(object):
                                      attrs['newip'], attrs['newmac'],
                                      attrs['newcomments'],
                                      attrs['oldip'], attrs['oldmac'],
-                                     attrs['oldcomments'])
+                                     attrs['oldcomments'],
+                                     attrs['primary'])
 
         for attrs in name_updates:
             self.update_host_iface_name(attrs['oldfqdn'], attrs['newfqdn'],
