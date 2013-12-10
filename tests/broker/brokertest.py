@@ -737,3 +737,15 @@ class TestBrokerCommand(unittest.TestCase):
         self.assertEqual(p.returncode, 0,
                          "Failed to restore admin privs '%s', '%s'." %
                          (out, err))
+
+    def assert_deprecation(self, depr_str, testfunc):
+         # Let's seek to the end of it, matching only against the relevant part.
+        logfile = open(self.config.get("broker", "logfile"), "r")
+        logfile.seek(0, 2)
+
+        testfunc()
+
+        depr_log = logfile.xreadlines()
+        self.assertTrue([elem for elem in depr_log if depr_str in elem])
+        logfile.close()
+
