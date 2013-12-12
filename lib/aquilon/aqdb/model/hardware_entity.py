@@ -75,7 +75,7 @@ class HardwareEntity(Base):
                       {'info': {'unique_fields': ['label']}},)
     __mapper_args__ = {'polymorphic_on': hardware_type}
 
-    _label_check = re.compile("^[a-z][a-z0-9]{,62}$")
+    _label_check = re.compile("^[a-z][a-z0-9\-_]{,62}$")
 
     @classmethod
     def check_label(cls, label):
