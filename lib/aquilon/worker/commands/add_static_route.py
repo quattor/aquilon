@@ -20,7 +20,7 @@ from ipaddr import IPv4Network
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.aqdb.model import NetworkEnvironment, StaticRoute
+from aquilon.aqdb.model import NetworkEnvironment, StaticRoute, Personality
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.worker.dbwrappers.network import get_network_byip
 
@@ -30,7 +30,8 @@ class CommandAddStaticRoute(BrokerCommand):
     required_parameters = ["ip"]
 
     def render(self, session, logger, gateway, networkip, ip, netmask,
-               prefixlen, network_environment, comments, **arguments):
+               prefixlen, network_environment, comments, personality,
+               archetype, **arguments):
         dbnet_env = NetworkEnvironment.get_unique_or_default(session,
                                                              network_environment)
 
@@ -65,10 +66,20 @@ class CommandAddStaticRoute(BrokerCommand):
         else:
             dest = IPv4Network("%s/%s" % (ip, prefixlen))
 
+        if personality:
+            dbpersonality = Personality.get_unique(session,
+                                                   name=personality,
+                                                   archetype=archetype,
+                                                   compel=True)
+        else:
+            dbpersonality = None
+
         # TODO: this will have to be changed if we want equal cost multipath
         # etc.
         for route in dbnetwork.static_routes:
             if dest.overlaps(route.destination):
+                if route.personality and route.personality != dbpersonality:
+                    continue
                 raise ArgumentError("{0} already has an overlapping route to "
                                     "{1} using gateway {2}."
                                     .format(dbnetwork, route.destination,
@@ -76,7 +87,7 @@ class CommandAddStaticRoute(BrokerCommand):
 
         route = StaticRoute(network=dbnetwork, dest_ip=dest.ip,
                             dest_cidr=dest.prefixlen, gateway_ip=gateway,
-                            comments=comments)
+                            personality=dbpersonality, comments=comments)
         session.add(route)
         session.flush()
 

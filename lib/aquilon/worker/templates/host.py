@@ -205,7 +205,7 @@ class PlenaryHostData(StructurePlenary):
                     else:
                         ifdesc["aliases"] = {addr.label: aliasdesc}
 
-                static_routes |= set(net.static_routes)
+                static_routes |= set(net.personality_static_routes(self.dbobj.personality))
 
             if static_routes:
                 if "route" not in ifdesc:

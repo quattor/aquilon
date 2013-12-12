@@ -22,7 +22,7 @@ from sqlalchemy.orm.exc import NoResultFound
 
 from aquilon.exceptions_ import NotFoundException
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.aqdb.model import NetworkEnvironment, StaticRoute
+from aquilon.aqdb.model import NetworkEnvironment, StaticRoute, Personality
 from aquilon.aqdb.model.network import get_net_id_from_ip
 
 
@@ -31,7 +31,7 @@ class CommandDelStaticRoute(BrokerCommand):
     required_parameters = ["gateway", "ip"]
 
     def render(self, session, gateway, ip, netmask, prefixlen,
-               network_environment, **arguments):
+               network_environment, archetype, personality, **arguments):
         dbnet_env = NetworkEnvironment.get_unique_or_default(session,
                                                              network_environment)
         dbnetwork = get_net_id_from_ip(session, gateway, dbnet_env)
@@ -41,11 +41,20 @@ class CommandDelStaticRoute(BrokerCommand):
         else:
             dest = IPv4Network("%s/%s" % (ip, prefixlen))
 
+        if personality:
+            dbpersonality = Personality.get_unique(session,
+                                                   name=personality,
+                                                   archetype=archetype,
+                                                   compel=True)
+        else:
+            dbpersonality = None
+
         q = session.query(StaticRoute)
         q = q.filter_by(network=dbnetwork)
         q = q.filter_by(gateway_ip=gateway)
         q = q.filter_by(dest_ip=dest.ip)
         q = q.filter_by(dest_cidr=dest.prefixlen)
+        q = q.filter_by(personality=dbpersonality)
 
         try:
             dbroute = q.one()

@@ -119,6 +119,8 @@ class NetworkFormatter(ObjectFormatter):
                             key=attrgetter('destination', 'gateway_ip')):
             details.append(indent + "  Static Route: %s gateway %s" %
                            (route.destination, route.gateway_ip))
+            if route.personality:
+                details.append(indent + "    Personality: {0}".format(route.personality))
             if route.comments:
                 details.append(indent + "    Comments: %s" % route.comments)
 

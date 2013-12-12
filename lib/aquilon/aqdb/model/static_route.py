@@ -43,6 +43,11 @@ class StaticRoute(Base):
                                             ondelete="CASCADE"),
                         nullable=False)
 
+    personality_id = Column(Integer, ForeignKey('personality.id',
+                                                name='%s_prsnlty_fk' % _TN,
+                                                ondelete='CASCADE'),
+                            nullable=True)
+
     # It is possible and useful to cover multiple real networks with one routing
     # entry, therefore the destination cannot be a simple pointer to the network
     # table
@@ -57,6 +62,8 @@ class StaticRoute(Base):
     network = relation(Network, innerjoin=True,
                        backref=backref("static_routes",
                                        cascade="all, delete-orphan"))
+
+    personality = relation('Personality')
 
     __table_args__ = (Index("%s_gw_network_ip_idx" % _TN, network_id,
                             gateway_ip),)

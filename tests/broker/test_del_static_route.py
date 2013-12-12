@@ -23,9 +23,10 @@ if __name__ == "__main__":
 
 import unittest2 as unittest
 from brokertest import TestBrokerCommand
+from machinetest import MachineTestMixin
 
 
-class TestDelStaticRoute(TestBrokerCommand):
+class TestDelStaticRoute(TestBrokerCommand, MachineTestMixin):
 
     def testdelroute1(self):
         gw = self.net["routing1"].usable[-1]
@@ -42,6 +43,13 @@ class TestDelStaticRoute(TestBrokerCommand):
                          "Static Route to 192.168.250.0/23 using gateway "
                          "%s not found." % gw,
                          command)
+
+    def testdelroute1_personality(self):
+        gw = self.net["routing1"].usable[-1]
+        command = ["del", "static", "route", "--gateway", gw,
+                   "--ip", "192.168.248.0", "--prefixlen", "24",
+                   "--personality", "inventory"]
+        self.noouttest(command)
 
     def testdelroute2(self):
         gw = self.net["routing2"].usable[-1]
@@ -96,6 +104,13 @@ class TestDelStaticRoute(TestBrokerCommand):
                           r'"network_type", "unknown"\s*\)' %
                           (net.broadcast, net.gateway, ip, net.netmask),
                           command)
+
+    def testdelunittest27(self):
+        eth0_ip = self.net["unknown0"].usable[37]
+        eth1_ip = self.net["routing1"].usable[1]
+        self.delete_host("unittest27.aqd-unittest.ms.com", eth0_ip, "ut3c5n9",
+                         interfaces=["eth0", "eth1"],
+                         eth1_ip=eth1_ip)
 
 
 if __name__ == '__main__':

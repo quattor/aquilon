@@ -23,15 +23,34 @@ if __name__ == "__main__":
 
 import unittest2 as unittest
 from brokertest import TestBrokerCommand
+from machinetest import MachineTestMixin
 
 
-class TestAddStaticRoute(TestBrokerCommand):
+class TestAddStaticRoute(TestBrokerCommand, MachineTestMixin):
+
+    def test_001_add_test_host(self):
+        eth0_ip = self.net["unknown0"].usable[37]
+        eth1_ip = self.net["routing1"].usable[1]
+        self.create_host("unittest27.aqd-unittest.ms.com", eth0_ip, "ut3c5n9",
+                         model="hs21-8853l5u", rack="ut3",
+                         interfaces=["eth0", "eth1"], zebra=False,
+                         eth0_mac=eth0_ip.mac,
+                         eth1_mac=eth1_ip.mac, eth1_ip=eth1_ip,
+                         eth1_fqdn = "unittest27-e1.aqd-unittest.ms.com",
+                         personality="inventory")
 
     def test_100_add_route1(self):
         gw = self.net["routing1"].usable[-1]
         command = ["add", "static", "route", "--gateway", gw,
                    "--ip", "192.168.250.0", "--prefixlen", "23",
                    "--comments", "Route comments"]
+        self.noouttest(command)
+
+    def test_100_add_route1_personality(self):
+        gw = self.net["routing1"].usable[-1]
+        command = ["add", "static", "route", "--gateway", gw,
+                   "--ip", "192.168.248.0", "--prefixlen", "24",
+                   "--personality", "inventory"]
         self.noouttest(command)
 
     def test_100_add_route2(self):
@@ -144,6 +163,59 @@ class TestAddStaticRoute(TestBrokerCommand):
                           '\)\s*\)' %
                           (eth1_net.broadcast, eth1_net.gateway, eth1_ip,
                            eth1_net.netmask, eth1_gw),
+                          command)
+
+    def test_220_verify_unittest27(self):
+        eth0_net = self.net["unknown0"]
+        eth0_ip = eth0_net.usable[37]
+        eth1_net = self.net["routing1"]
+        eth1_ip = eth1_net.usable[1]
+        eth1_gw = eth1_net.usable[-1]
+        command = ["cat", "--hostname", "unittest27.aqd-unittest.ms.com",
+                   "--data", "--generate"]
+        out = self.commandtest(command)
+        self.searchoutput(out,
+                          r'"eth0", nlist\(\s*'
+                          r'"bootproto", "static",\s*'
+                          r'"broadcast", "%s",\s*'
+                          r'"fqdn", "unittest27.aqd-unittest.ms.com",\s*'
+                          r'"gateway", "%s",\s*'
+                          r'"ip", "%s",\s*'
+                          r'"netmask", "%s",\s*'
+                          r'"network_environment", "internal",\s*'
+                          r'"network_type", "unknown",\s*'
+                          r'"route", list\(\s*'
+                          r'nlist\(\s*'
+                          r'"address", "250.250.0.0",\s*'
+                          r'"gateway", "%s",\s*'
+                          r'"netmask", "255.255.0.0"\s*\)\s*'
+                          r'\)\s*\)' %
+                          (eth0_net.broadcast, eth0_net.gateway, eth0_ip,
+                           eth0_net.netmask, eth0_net.gateway),
+                          command)
+        self.searchoutput(out,
+                          r'"eth1", nlist\(\s*'
+                          r'"bootproto", "static",\s*'
+                          r'"broadcast", "%s",\s*'
+                          r'"fqdn", "unittest27-e1.aqd-unittest.ms.com",\s*'
+                          r'"gateway", "%s",\s*'
+                          r'"ip", "%s",\s*'
+                          r'"netmask", "%s",\s*'
+                          r'"network_environment", "internal",\s*'
+                          r'"network_type", "unknown",\s*'
+                          r'"route", list\(\s*'
+                          r'nlist\(\s*'
+                          r'"address", "192.168.248.0",\s*'
+                          r'"gateway", "%s",\s*'
+                          r'"netmask", "255.255.255.0"\s*'
+                          r'\),\s*'
+                          r'nlist\(\s*'
+                          r'"address", "192.168.250.0",\s*'
+                          r'"gateway", "%s",\s*'
+                          r'"netmask", "255.255.254.0"\s*'
+                          r'\)\s*\)\s*\)' %
+                          (eth1_net.broadcast, eth1_net.gateway, eth1_ip,
+                           eth1_net.netmask, eth1_gw, eth1_gw),
                           command)
 
     def test_230_verify_show_unittest02(self):
