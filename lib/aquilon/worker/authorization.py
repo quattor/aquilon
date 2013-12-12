@@ -121,7 +121,7 @@ class AuthorizationBroker(object):
                               'add_manager', 'add_dynamic_range', 'add_disk',
                               'add_auxiliary',
                               'del_manager', 'del_auxiliary',
-                              'del_disk', 'del_disk_disk',
+                              'del_disk', 'del_disk_disk', 'update_disk',
                               'add_filesystem', 'del_filesystem',
                               'add_rack', 'add_rack_room', 'add_chassis',
                               'del_rack', 'del_chassis',
@@ -142,7 +142,8 @@ class AuthorizationBroker(object):
                               'pxeswitch',
                               'change_status',
                               'add_room', 'add_rack', 'add_rack_room',
-                              'add_disk', 'del_disk', 'del_disk_disk']:
+                              'add_disk', 'del_disk', 'del_disk_disk',
+                              'update_disk']:
                 self.raise_auth_error(principal, action, resource)
         if dbuser.role.name == 'resource_pool':
             if action not in ['add_address', 'del_address']:
@@ -152,7 +153,8 @@ class AuthorizationBroker(object):
                 self.raise_auth_error(principal, action, resource)
         if dbuser.role.name == 'hpevelo':
             if action not in ['reconfigure', 'pxeswitch', 'change_status',
-                              'add_disk', 'del_disk', 'del_disk_disk']:
+                              'add_disk', 'del_disk', 'del_disk_disk',
+                              'update_disk']:
                 self.raise_auth_error(principal, action, resource)
         if dbuser.role.name == 'location_admin':
             if action not in ['add_building', 'del_building',
@@ -242,6 +244,7 @@ class AuthorizationBroker(object):
                               'update_interface_machine',
                               'del_interface', 'del_interface_address',
                               'add_disk', 'del_disk', 'del_disk_disk',
+                              'update_disk',
                               'add_machine', 'del_machine',
                               'update_machine', 'update_machine_hostname',
                               'add_host', 'del_host',
@@ -282,7 +285,7 @@ class AuthorizationBroker(object):
                               'add_manager', 'add_dynamic_range', 'add_disk',
                               'add_auxiliary',
                               'del_manager', 'del_auxiliary',
-                              'del_disk', 'del_disk_disk',
+                              'del_disk', 'del_disk_disk', 'update_disk',
                               'add_service_instance',
                               'update_service_instance',
                               'del_service_instance',
