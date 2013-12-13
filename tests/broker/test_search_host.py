@@ -173,17 +173,6 @@ class TestSearchHost(TestBrokerCommand):
     MAC_DEPR_STR = "The --mac option is deprecated.  Please use search machine --mac instead."
     SERIAL_DEPR_STR = "The --serial option is deprecated.  Please use search machine --serial instead."
 
-    def assert_deprecation(self, depr_str, testfunc):
-         # Let's seek to the end of it, matching only against the relevant part.
-        logfile = open(self.config.get("broker", "logfile"), "r")
-        logfile.seek(0, 2)
-
-        testfunc()
-
-        depr_log = logfile.xreadlines()
-        self.assertTrue([elem for elem in depr_log if depr_str in elem])
-        logfile.close()
-
     def testmacavailable(self):
         def testfunc():
             command = "search host --mac %s" % self.net["unknown0"].usable[2].mac

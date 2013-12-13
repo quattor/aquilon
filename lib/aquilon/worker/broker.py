@@ -484,19 +484,26 @@ class BrokerCommand(object):
 
     @classmethod
     def deprecated_command(cls, msg, logger=None, user=None, **kwargs):
-        if not logger or not user:  # pragma: no cover
+        if not logger:  # pragma: no cover
             raise AquilonError("Too few arguments to deprecated_command")
 
         # cls.__name__ is good enough to mine the logs which deprecated commands
         # are still in use.
+
+        if not user:
+            user = "anonymous"
+
         logger.info("User %s invoked deprecated command %s" % (user,
                                                                cls.__name__))
         logger.client_info(msg)
 
     @classmethod
     def deprecated_option(cls, option, msg="", logger=None, user=None, **kwargs):
-        if not option or not logger or not user:  # pragma: no cover
+        if not option or not logger:  # pragma: no cover
             raise AquilonError("Too few arguments to deprecated_option")
+
+        if not user:
+            user = "anonymous"
 
         # cls.__name__ is good enough to mine the logs which deprecated options
         # are still in use.
