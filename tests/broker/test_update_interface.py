@@ -86,13 +86,39 @@ class TestUpdateInterface(TestBrokerCommand):
         self.notfoundtest(["update", "interface", "--interface", "eth2",
                            "--machine", "ut3c5n10", "--boot"])
 
-    def test_130_update_switch(self):
+    def test_130_update_switch1(self):
         mac = self.net["tor_net_8"].usable[0].mac
         self.dsdb_expect_update("ut3gd1r06.aqd-unittest.ms.com", "xge49",
                                 mac=mac, comments="Some interface comments")
         command = ["update_interface", "--interface=xge49",
                    "--comments=Some interface comments",
                    "--mac", mac, "--switch=ut3gd1r06.aqd-unittest.ms.com"]
+        self.noouttest(command)
+        self.dsdb_verify()
+
+    def test_130_update_switch2(self):
+        # This is the primary interface; in reality the update to DSDB
+        # should not incude the interface name.  Its this that causes
+        # comment propergation to DSDB to fail.
+        self.dsdb_expect_update("ut3gd1r06.aqd-unittest.ms.com",
+                                iface="xge49",
+                                comments="Some new interface comments")
+        command = ["update_interface", "--interface=xge49",
+                   "--comments=Some new interface comments",
+                   "--switch=ut3gd1r06.aqd-unittest.ms.com"]
+        self.noouttest(command)
+        self.dsdb_verify()
+
+    def test_130_update_switch3(self):
+        # This is not the primary interface, therefore updating the comments
+        # updates the interface not the device itself
+        self.dsdb_expect_update("ut3gd1r04-vlan110-hsrp.aqd-unittest.ms.com", "vlan110_hsrp",
+                                comments="Some new interface comments")
+        self.dsdb_expect_update("ut3gd1r04-vlan110.aqd-unittest.ms.com", "vlan110",
+                                comments="Some new interface comments")
+        command = ["update_interface", "--interface=vlan110",
+                   "--comments=Some new interface comments",
+                   "--switch=ut3gd1r04.aqd-unittest.ms.com"]
         self.noouttest(command)
         self.dsdb_verify()
 
@@ -394,7 +420,7 @@ class TestUpdateInterface(TestBrokerCommand):
                          "Interface: xge49 %s" %
                          self.net["tor_net_8"].usable[0].mac,
                          command)
-        self.matchoutput(out, "Comments: Some interface comments", command)
+        self.matchoutput(out, "Comments: Some new interface comments", command)
 
     def test_300_verify_cat_fliproute(self):
         command = ["cat", "--hostname", "unittest25.aqd-unittest.ms.com",
