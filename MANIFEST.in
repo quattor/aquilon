@@ -1,3 +1,4 @@
 recursive-include etc *
 include VERSION
 recursive-include upgrade *
+recursive-include doc *

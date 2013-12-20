@@ -101,7 +101,8 @@ setup(name="aquilon",
                    glob.glob("lib/aquilon/worker/formats/mako/raw/*mako") +
                    glob.glob("lib/aquilon/worker/templates/mako/raw/*mako")),
                   ("/usr/share/html",
-                   glob.glob("lib/aquilon/worker/formats/mako/raw/*mako"))] +
+                   glob.glob("lib/aquilon/worker/formats/mako/raw/*mako")),
+                  ("/usr/share/man/man1", glob.glob("doc/man/man1/*gz"))] +
       find_regular_files("upgrade"),
       scripts=all_scripts,
       url="http://quattor.org")
