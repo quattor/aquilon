@@ -1,10 +1,10 @@
-DOCBOOK_VERSION = 5.0
-DOCBOOK_XSL_VERSION = 1.77.1
-LIBXSLT_VERSION = 1.1.26-2.7.8-z1.2a
-LIBXML_VERSION = 2.7.8
+DOCBOOK_VERSION = $(shell rpm -q --qf %{VERSION} docbook5-schemas)
+DOCBOOK_XSL_VERSION = $(shell rpm -q --qf %{VERSION} docbook5-style-xsl)
+LIBXSLT_VERSION = $(shell rpm -q --qf %{VERSION} libxslt)
+LIBXML_VERSION = $(shell rpm -q --qf %{VERSION} libxml2)
 
 DOCBOOK = /usr/share/xml/docbook5
-DOCBOOK_XSL = /usr/share/sgml/docbook/xsl-ns-stylesheets-1.75.2/common
+DOCBOOK_XSL = /usr/share/sgml/docbook/xsl-ns-stylesheets-$(DOCBOOK_XSL_VERSION)/common
 XSLTPROC = /usr/bin/xsltproc
 XSLT_PARAMS = --xinclude --catalogs
 
@@ -30,7 +30,7 @@ HTML_OUTPUT = $(addprefix html/,$(notdir $(COMMAND_SOURCES:.xml=.html)))
 all: version.txt $(FORMATS)
 
 common/cluster_location_options.xml: generate_locations.xsl common/location_options.xml
-	$(XSLTPROC) --stringparam location_type cluster $^ > $@
+	$(XSLTPROC) --stringparam location_type cluster  $^ > $@
 
 common/member_location_options.xml: generate_locations.xsl common/location_options.xml
 	$(XSLTPROC) --stringparam location_type member $^ > $@
