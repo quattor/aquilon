@@ -197,19 +197,22 @@ class TestParameter(TestBrokerCommand):
         cmd = SHOW_CMD + ["--format=proto"]
         out = self.commandtest(cmd)
         p = self.parse_parameters_msg(out, 4)
-        params = p.parameters
 
-        self.failUnlessEqual(params[0].path, 'espinfo/function')
-        self.failUnlessEqual(params[0].value, 'production')
+        params = {}
+        for param in p.parameters:
+            params[param.path] = param.value
 
-        self.failUnlessEqual(params[1].path, 'espinfo/class')
-        self.failUnlessEqual(params[1].value, 'INFRASTRUCTURE')
+        self.failUnless('espinfo/function' in params)
+        self.failUnlessEqual(params['espinfo/function'], 'production')
 
-        self.failUnlessEqual(params[2].path, 'espinfo/users')
-        self.failUnlessEqual(params[2].value, 'someusers, otherusers')
+        self.failUnless('espinfo/class' in params)
+        self.failUnlessEqual(params['espinfo/class'], 'INFRASTRUCTURE')
 
-        self.failUnlessEqual(params[3].path, 'action')
-        self.failUnlessEqual(params[3].value, u'{"testaction": {"command": "/bin/testaction", "user": "user2"}, "testaction2": {"command": "/bin/testaction2", "user": "user1", "timeout": 100}}')
+        self.failUnless('espinfo/users' in params)
+        self.failUnlessEqual(params['espinfo/users'], 'someusers, otherusers')
+
+        self.failUnless('action' in params)
+        self.failUnlessEqual(params['action'], u'{"testaction": {"command": "/bin/testaction", "user": "user2"}, "testaction2": {"command": "/bin/testaction2", "user": "user1", "timeout": 100}}')
 
     def test_250_verify_actions(self):
         ACT_CAT_CMD = CAT_CMD + ["--param_tmpl=actions"]
