@@ -15,6 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from operator import attrgetter
 
 from aquilon.exceptions_ import NotFoundException
 from aquilon.aqdb.model import Feature
@@ -30,7 +31,8 @@ class CommandSearchParameterDefinitionFeature(BrokerCommand):
                                        compel=True)
         if dbfeature.paramdef_holder and \
            dbfeature.paramdef_holder.param_definitions:
-            return dbfeature.paramdef_holder.param_definitions
+            return sorted(dbfeature.paramdef_holder.param_definitions,
+                          key=attrgetter('template', 'path'))
 
         raise NotFoundException("No parameter definitions found for "
                                 "{0:l}.".format(dbfeature))
