@@ -85,7 +85,12 @@ AQUILON_PARAM_DEFS = {
         {
             "path": "monitoring/alert",
             "value_type": "json",
-            "description": "monitoring"
+            "description": "monitoring alert"
+        },
+        {
+            "path": "monitoring/metric",
+            "value_type": "json",
+            "description": "monitoring metric"
         },
     ],
     "espinfo": [

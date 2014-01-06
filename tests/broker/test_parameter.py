@@ -147,6 +147,28 @@ class TestParameter(TestBrokerCommand):
         self.matchoutput(err,
                          "Parameter %s does not match any parameter definitions" % path, command)
 
+    def test_190_add_metric(self):
+        value = """
+{
+    "_20003": {
+        "name": "SwapUsed",
+        "descr": "Swap space used [%]",
+        "smooth": {
+            "maxdiff": 3.0,
+            "typeString": false,
+            "maxtime": 3600
+        },
+        "latestonly": false,
+        "period": 300,
+        "active": false,
+        "class": "system.swapUsed"
+    }
+}
+"""
+        command = ADD_CMD + ["--path", "monitoring/metric",
+                             "--value", value]
+        self.noouttest(command)
+
     def test_200_add_path(self):
         path = "espinfo/function"
         value = "crash"
@@ -196,7 +218,7 @@ class TestParameter(TestBrokerCommand):
     def test_245_verify_path_proto(self):
         cmd = SHOW_CMD + ["--format=proto"]
         out = self.commandtest(cmd)
-        p = self.parse_parameters_msg(out, 4)
+        p = self.parse_parameters_msg(out, 5)
 
         params = {}
         for param in p.parameters:
@@ -213,6 +235,9 @@ class TestParameter(TestBrokerCommand):
 
         self.failUnless('action' in params)
         self.failUnlessEqual(params['action'], u'{"testaction": {"command": "/bin/testaction", "user": "user2"}, "testaction2": {"command": "/bin/testaction2", "user": "user1", "timeout": 100}}')
+
+        self.failUnless('monitoring/metric' in params)
+        self.failUnlessEqual(params['monitoring/metric'], u'{"_20003": {"name": "SwapUsed", "descr": "Swap space used [%]", "smooth": {"maxdiff": 3.0, "typeString": false, "maxtime": 3600}, "latestonly": false, "period": 300, "active": false, "class": "system.swapUsed"}}')
 
     def test_250_verify_actions(self):
         ACT_CAT_CMD = CAT_CMD + ["--param_tmpl=actions"]
@@ -235,6 +260,12 @@ class TestParameter(TestBrokerCommand):
                                r'"otherusers"\s*'
                                r'\);',
                           ESP_CAT_CMD)
+
+    def test_260_verify_monitoring(self):
+        command = CAT_CMD + ["--param_tmpl", "monitoring"]
+        out = self.commandtest(command)
+        # Check the formatting of the floating point value
+        self.searchoutput(out, r'"maxdiff", 3\.0+,', command)
 
     def test_300_validate(self):
         out = self.badrequesttest(VAL_CMD)
@@ -388,6 +419,15 @@ class TestParameter(TestBrokerCommand):
                           r'//action/testaction2/command\s*'
                           r'//action/testaction2/timeout\s*'
                           r'//action/testaction2/user\s*'
+                          r'//monitoring/metric/_20003/active\s*'
+                          r'//monitoring/metric/_20003/class\s*'
+                          r'//monitoring/metric/_20003/descr\s*'
+                          r'//monitoring/metric/_20003/latestonly\s*'
+                          r'//monitoring/metric/_20003/name\s*'
+                          r'//monitoring/metric/_20003/period\s*'
+                          r'//monitoring/metric/_20003/smooth/maxdiff\s*'
+                          r'//monitoring/metric/_20003/smooth/maxtime\s*'
+                          r'//monitoring/metric/_20003/smooth/typeString\s*'
                           r'matching Parameters with different values:\s*'
                           r'//espinfo/function value=production, othervalue=development\s*'
                           r'//espinfo/users value=someusers, otherusers, othervalue=IT / TECHNOLOGY',
