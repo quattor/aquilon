@@ -64,6 +64,9 @@ class CommandAddStaticRoute(BrokerCommand):
             dest = IPv4Network("%s/%s" % (ip, netmask))
         else:
             dest = IPv4Network("%s/%s" % (ip, prefixlen))
+        if dest.network != ip:
+            raise ArgumentError("%s is not a network address; "
+                                "did you mean %s." % (ip, dest.network))
 
         # TODO: this will have to be changed if we want equal cost multipath
         # etc.

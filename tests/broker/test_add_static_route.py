@@ -75,6 +75,16 @@ class TestAddStaticRoute(TestBrokerCommand):
                    "--ip", "250.250.0.0", "--prefixlen", "16"]
         self.noouttest(command)
 
+    def test_130_add_non_network_ip(self):
+        gw = self.net["unknown0"].gateway
+        command = ["add", "static", "route", "--gateway", gw,
+                   "--ip", "192.168.95.150", "--prefixlen", "24"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "192.168.95.150 is not a network address; "
+                         "did you mean 192.168.95.0.",
+                         command)
+
     def test_200_show_host(self):
         gw = self.net["routing1"].usable[-1]
         command = ["show", "host", "--hostname", "unittest26.aqd-unittest.ms.com"]
