@@ -15,6 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from operator import attrgetter
 
 from aquilon.exceptions_ import NotFoundException
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
@@ -29,7 +30,8 @@ class CommandSearchParameterDefinitionArchetype(BrokerCommand):
         dbarchetype = Archetype.get_unique(session, archetype, compel=True)
         if dbarchetype.paramdef_holder and \
            dbarchetype.paramdef_holder.param_definitions:
-            return dbarchetype.paramdef_holder.param_definitions
+            return sorted(dbarchetype.paramdef_holder.param_definitions,
+                          key=attrgetter('template', 'path'))
 
         raise NotFoundException("No parameter definitions found for "
                                 "archetype {0}.".format(archetype))

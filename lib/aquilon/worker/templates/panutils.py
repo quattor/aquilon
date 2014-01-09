@@ -42,6 +42,11 @@ def pan(obj, indent=0):
     elif isinstance(obj, int):
         accumulator.append("%d" % obj)
 
+    elif isinstance(obj, float):
+        # Pan requires a dot to be present in a double literal, so we need to
+        # use the alternate format specifier
+        accumulator.append("%#g" % obj)
+
     elif isinstance(obj, PanObject):
         accumulator.append(obj.format(indent))
 
