@@ -46,12 +46,17 @@ from aquilon.worker.processes import sync_domain
 # Things we don't need cluttering up the transaction details table
 _IGNORED_AUDIT_ARGS = ('requestid', 'bundle', 'debug')
 
-audit_id = 0
+__audit_id = 0
 """This will help with debugging active incoming requests.
 
    Eventually it will be replaced by a primary key in the audit log table.
 
    """
+
+def next_audit_id():
+    global __audit_id
+    __audit_id += 1
+    return __audit_id
 
 # Mapping of command exceptions to client return code.
 ERROR_TO_CODE = {NotFoundException: http.NOT_FOUND,
@@ -265,7 +270,11 @@ class BrokerCommand(object):
                     # This does a COMMIT, which in turn invalidates the session.
                     # We should therefore avoid looking up anything in the DB
                     # before this point which might be used later.
-                    self._record_xtn(session, logger.get_status())
+                    status = logger.get_status()
+                    start_xtn(session, status.requestid, status.user,
+                              status.command, self.requires_readonly,
+                              status.kwargs,
+                              self.parameters_by_type.get('list'))
 
                     dbuser = get_or_create_user_principal(session, principal,
                                                           commitoncreate=True)
@@ -342,11 +351,6 @@ class BrokerCommand(object):
             session.commit()
             session.execute(text("set transaction read only"))
 
-    def _add_audit_id(self, request):
-        global audit_id
-        audit_id += 1
-        request.aq_audit_id = audit_id
-
     def _audit(self, **kwargs):
         logger = kwargs.pop('logger')
         status = kwargs.pop('message_status')
@@ -385,7 +389,7 @@ class BrokerCommand(object):
     def add_logger(self, **command_kwargs):
         request = command_kwargs.get("request")
         command_kwargs["user"] = request.channel.getPrincipal()
-        self._add_audit_id(request)
+        request.aq_audit_id = next_audit_id()
         if self.command == "show_request":
             status = self.catalog.get_request_status(
                 auditid=command_kwargs.get("auditid", None),
@@ -412,25 +416,6 @@ class BrokerCommand(object):
                 logger.debug("Server finishing request.")
                 logger.remove_status_by_auditid(self.catalog)
             logger.close_handlers()
-
-    def _record_xtn(self, session, status):
-        details = dict()
-        for k, v in status.kwargs.items():
-            # Skip uber-redundant raw format parameter
-            if (k == 'format') and v == 'raw':
-                continue
-            # Sometimes we delete a value and the arg comes in as an empty
-            # string.  Denote this with a dash '-' to work around Oracle
-            # not being able to store the concept of a non-NULL empty string.
-            if v == '':
-                v = '-'
-            try:
-                details[k] = str(v).decode('ascii')
-            except UnicodeDecodeError:
-                details[k] = '<Non-ASCII value>'
-        start_xtn(session, status.requestid, status.user, status.command,
-                  self.requires_readonly, details,
-                  self.parameters_by_type.get('list'))
 
     @property
     def is_lock_free(self):

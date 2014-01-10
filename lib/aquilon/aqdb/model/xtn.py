@@ -138,7 +138,7 @@ if config.has_option('database', 'audit_schema'):  # pragma: no cover
     XtnDetail.__table__.schema = schema
 
 
-def start_xtn(session, xtn_id, username, command, is_readonly, details,
+def start_xtn(session, xtn_id, username, command, is_readonly, details_,
               options_to_split=None):
     """ Wrapper to log the start of a transaction (or running command).
 
@@ -151,6 +151,20 @@ def start_xtn(session, xtn_id, username, command, is_readonly, details,
     split on newlines.  Typically this is --list and/or --hostlist.
 
     """
+    details = dict()
+    for k, v in details_.items():
+        # Skip uber-redundant raw format parameter
+        if (k == 'format') and v == 'raw':
+            continue
+        # Sometimes we delete a value and the arg comes in as an empty
+        # string.  Denote this with a dash '-' to work around Oracle
+        # not being able to store the concept of a non-NULL empty string.
+        if v == '':
+            v = '-'
+        try:
+            details[k] = str(v).decode('ascii')
+        except UnicodeDecodeError:
+            details[k] = '<Non-ASCII value>'
 
     # TODO: (maybe) use sql inserts instead of objects to avoid added overhead?
     # We would be able to exploit executemany() for all the xtn_detail rows
