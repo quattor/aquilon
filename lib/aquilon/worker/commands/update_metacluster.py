@@ -17,7 +17,7 @@
 
 
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.aqdb.model import MetaCluster
+from aquilon.aqdb.model import MetaCluster, Personality
 from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.commands.update_cluster import update_cluster_location
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
@@ -27,11 +27,22 @@ class CommandUpdateMetaCluster(BrokerCommand):
 
     required_parameters = ["metacluster"]
 
-    def render(self, session, logger, metacluster, max_members,
+    def render(self, session, logger, metacluster, personality, max_members,
                fix_location, high_availability, comments, **arguments):
         dbmetacluster = MetaCluster.get_unique(session, metacluster,
                                                compel=True)
         cluster_updated = False
+
+        if personality:
+            archetype = dbmetacluster.personality.archetype.name
+            dbpersonality = Personality.get_unique(session, name=personality,
+                                                   archetype=archetype,
+                                                   compel=True)
+            if not dbpersonality.is_cluster:
+                raise ArgumentError("Personality {0} is not a cluster " +
+                                    "personality".format(dbpersonality))
+            dbmetacluster.personality = dbpersonality
+            cluster_updated = True
 
         if max_members is not None:
             current_members = len(dbmetacluster.members)

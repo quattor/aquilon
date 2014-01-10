@@ -23,9 +23,14 @@ if __name__ == "__main__":
 
 import unittest2 as unittest
 from brokertest import TestBrokerCommand
+from personalitytest import PersonalityTestMixin
 
 
-class TestUpdateCluster(TestBrokerCommand):
+class TestUpdateCluster(TestBrokerCommand,PersonalityTestMixin):
+
+    def test_000_add_personalities(self):
+        self.create_personality("gridcluster", "hadoop-test",
+                                grn="grn:/ms/ei/aquilon/aqd")
 
     def test_100_updatenoop(self):
         self.noouttest(["update_cluster", "--cluster=utgrid1",
@@ -81,6 +86,27 @@ class TestUpdateCluster(TestBrokerCommand):
         self.matchoutput(out, "Grid Cluster: utgrid1", command)
         self.matchoutput(out, "Down Hosts Threshold: 2", command)
         self.matchoutput(out, "Maintenance Threshold: 0 (0%)", command)
+
+    def test_400_updatepersonality(self):
+        # Change metacluster personality and revert it.
+        command = ["update_cluster", "--cluster", "utgrid1",
+                   "--personality", "hadoop-test"]
+        self.noouttest(command)
+
+        command = ["show", "cluster", "--cluster", "utgrid1"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Personality: hadoop-test", command)
+
+        command = ["update_cluster", "--cluster", "utgrid1",
+                   "--personality", "hadoop"]
+        self.noouttest(command)
+
+        command = ["show", "cluster", "--cluster", "utgrid1"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Personality: hadoop", command)
+
+    def test_800_cleanup(self):
+        self.drop_personality("gridcluster", "hadoop-test")
 
 
 if __name__ == '__main__':

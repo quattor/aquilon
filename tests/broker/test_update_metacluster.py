@@ -23,17 +23,21 @@ if __name__ == "__main__":
 
 import unittest2 as unittest
 from brokertest import TestBrokerCommand
+from personalitytest import PersonalityTestMixin
 
 
-class TestUpdateMetaCluster(TestBrokerCommand):
+class TestUpdateMetaCluster(TestBrokerCommand, PersonalityTestMixin):
 
-    def testupdatenoop(self):
+    def test_000_add_personalities(self):
+        self.create_personality("metacluster", "metacluster-test",
+                                grn="grn:/ms/ei/aquilon/aqd")
+    def test_100_updatenoop(self):
         default_max = self.config.get("archetype_metacluster",
                                       "max_members_default")
         self.noouttest(["update_metacluster", "--metacluster=utmc1",
                         "--max_members=%s" % default_max])
 
-    def testverifynoop(self):
+    def test_100_verifynoop(self):
         command = "show metacluster --metacluster utmc1"
         out = self.commandtest(command.split(" "))
         default_max = self.config.get("archetype_metacluster",
@@ -42,13 +46,13 @@ class TestUpdateMetaCluster(TestBrokerCommand):
         self.matchoutput(out, "Max members: %s" % default_max, command)
         self.matchclean(out, "Comments", command)
 
-    def testupdateutmc2(self):
+    def test_100_updateutmc2(self):
         command = ["update_metacluster", "--metacluster=utmc2",
                    "--max_members=98",
                    "--comments", "MetaCluster with a new comment"]
         self.noouttest(command)
 
-    def testverifyutmc2(self):
+    def test_100_verifyutmc2(self):
         command = "show metacluster --metacluster utmc2"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "MetaCluster: utmc2", command)
@@ -56,14 +60,14 @@ class TestUpdateMetaCluster(TestBrokerCommand):
         self.matchoutput(out, "Comments: MetaCluster with a new comment",
                          command)
 
-    def testfailmetaclustermissing(self):
+    def test_100_failmetaclustermissing(self):
         command = "update metacluster --metacluster metacluster-does-not-exist"
         out = self.notfoundtest(command.split(" "))
         self.matchoutput(out,
                          "Metacluster metacluster-does-not-exist not found",
                          command)
 
-    def testfailreducemaxmembers(self):
+    def test_100_failreducemaxmembers(self):
         command = ["update_metacluster", "--metacluster=utmc3",
                    "--max_members=-1"]
         out = self.badrequesttest(command)
@@ -72,7 +76,7 @@ class TestUpdateMetaCluster(TestBrokerCommand):
                          "which exceeds the requested limit -1.",
                          command)
 
-    def testfailhabuilding(self):
+    def test_100_failhabuilding(self):
         command = ["update_metacluster", "--metacluster", "utmc1",
                    "--high_availability"]
         out = self.badrequesttest(command)
@@ -81,12 +85,12 @@ class TestUpdateMetaCluster(TestBrokerCommand):
                          command)
         self.matchoutput(out, "but the limit is 0.", command)
 
-    def testha(self):
+    def test_100_ha(self):
         command = ["update_metacluster", "--metacluster", "utmc5",
                    "--high_availability"]
         self.noouttest(command)
 
-    def testfailhacapacity(self):
+    def test_100_failhacapacity(self):
         command = ["update_metacluster", "--metacluster", "utmc6",
                    "--high_availability"]
         out = self.badrequesttest(command)
@@ -94,14 +98,14 @@ class TestUpdateMetaCluster(TestBrokerCommand):
                          "Metacluster utmc6 is over capacity regarding memory",
                          command)
 
-    def testverifyutmc5(self):
+    def test_100_verifyutmc5(self):
         command = ["show", "metacluster", "--metacluster", "utmc5"]
         (out, err) = self.successtest(command)
         self.matchoutput(out, "Capacity limits: memory: 225590", command)
         self.matchoutput(out, "Resources used by VMs: memory: 106496", command)
         self.matchoutput(out, "High availability enabled: True", command)
 
-    def testverifyutmc6(self):
+    def test_100_verifyutmc6(self):
         command = ["show", "metacluster", "--metacluster", "utmc6"]
         (out, err) = self.successtest(command)
         self.matchoutput(out, "Capacity limits: memory: 451180", command)
@@ -110,7 +114,7 @@ class TestUpdateMetaCluster(TestBrokerCommand):
 
     # FIXME: Need tests for plenary templates
 
-    def testupdatelocation(self):
+    def test_100_updatelocation(self):
         # moving cluster from bu: ut to city ny, a parent of it.
         command = ["update_metacluster", "--metacluster", "utmc1",
                    "--city", "ny"]
@@ -129,7 +133,25 @@ class TestUpdateMetaCluster(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "Building: ut", command)
 
-    def testfailupdatelocation(self):
+    def test_100_updatepersonality(self):
+        # Change metacluster personality and revert it.
+        command = ["update_metacluster", "--metacluster", "utmc1",
+                   "--personality", "metacluster-test"]
+        self.noouttest(command)
+
+        command = ["show", "metacluster", "--metacluster", "utmc1"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Personality: metacluster-test", command)
+
+        command = ["update_metacluster", "--metacluster", "utmc1",
+                   "--personality", "metacluster"]
+        self.noouttest(command)
+
+        command = ["show", "metacluster", "--metacluster", "utmc1"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Personality: metacluster", command)
+
+    def test_100_failupdatelocation(self):
         command = ["update_metacluster", "--metacluster", "utmc1",
                    "--building", "cards"]
         out = self.badrequesttest(command)
@@ -138,6 +160,9 @@ class TestUpdateMetaCluster(TestBrokerCommand):
                          command)
         self.matchoutput(out, "ESX Cluster utecl2 has location Building ut.",
                          command)
+
+    def test_800_cleanup(self):
+        self.drop_personality("metacluster", "metacluster-test")
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUpdateMetaCluster)
