@@ -85,12 +85,17 @@ class CommandSearchAudit(BrokerCommand):
                 q = q.filter(XtnEnd.return_code == return_code)
                 q = q.reset_joinpoint()
 
+        # FIXME: Oracle ignores indexes if it has to perform unicode -> string
+        # conversion, see the discussion at:
+        # https://groups.google.com/d/topic/sqlalchemy/8Xn31vBfGKU/discussion
+        # We may need a more generic solution like a custom type decorator as
+        # suggested in the thread, but for now str() should be enough
         if keyword is not None or argument is not None:
             q = q.join(XtnDetail)
             if keyword is not None:
-                q = q.filter_by(value=keyword)
+                q = q.filter_by(value=str(keyword))
             if argument is not None:
-                q = q.filter_by(name=argument)
+                q = q.filter_by(name=str(argument))
             q = q.reset_joinpoint()
 
         # Set an order by when searching for the records, this controls
