@@ -76,7 +76,7 @@ class AuthorizationBroker(object):
                     "Must have the engineering, network_engineering or "
                     "aqd_admin role to %s." % action)
         if action in ['permission']:
-            if dbuser.role.name not in ['aqd_admin', 'gatekeeper']:
+            if dbuser.role.name not in ['aqd_admin', 'gatekeeper', 'secadmin']:
                 raise AuthorizationException(
                     "Must have the gatekeeper or aqd_admin role to %s." %
                     action)
