@@ -15,7 +15,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Module for testing the poll switch command."""
+"""Module for testing the poll network device command."""
 
 import re
 from time import sleep
@@ -29,7 +29,7 @@ import unittest2 as unittest
 from brokertest import TestBrokerCommand
 
 
-class TestPollSwitch(TestBrokerCommand):
+class TestPollNetworkDevice(TestBrokerCommand):
 
     # test_prebind_server runs too late...
     def testbindpollhelper(self):
@@ -45,7 +45,7 @@ class TestPollSwitch(TestBrokerCommand):
                         "--instance", "unittest", "--building", "ut"])
 
     def testpollnp06bals03(self):
-        command = ["poll", "switch", "--switch", "np06bals03.ms.com"]
+        command = ["poll", "network_device", "--network_device", "np06bals03.ms.com"]
         (out, err) = self.successtest(command)
         self.matchoutput(err, "No jump host for np06bals03.ms.com, running "
                          "discovery from %s." % socket.gethostname(), command)
@@ -56,19 +56,19 @@ class TestPollSwitch(TestBrokerCommand):
         # so sleep for 2 seconds here...
         sleep(2)
         # Issues deprecated warning.
-        self.successtest(["poll", "switch", "--rack", "np7", "--type", "tor"])
+        self.successtest(["poll", "network_device", "--rack", "np7", "--type", "tor"])
 
     def testrepollwithclear(self):
         # Forcing there to "normally" be a difference in last_seen and
         # creation_date to test that clear is working...
         sleep(2)
         # Issues deprecated warning.
-        self.successtest(["poll_switch", "--switch=np06fals01.ms.com",
+        self.successtest(["poll_network_device", "--network_device=np06fals01.ms.com",
                           "--clear"])
 
     # FIXME: Verify the poll and that last_seen != creation_date
     def testverifypollnp06bals03(self):
-        command = "show switch --switch np06bals03.ms.com"
+        command = "show network_device --network_device np06bals03.ms.com"
         out = self.commandtest(command.split(" "))
         r = re.compile(r'^\s*Created:\s*(.*?)\s*Last Seen:\s*(.*?)\s*$', re.M)
         m = self.searchoutput(out, r, command)
@@ -120,7 +120,7 @@ class TestPollSwitch(TestBrokerCommand):
         self.matchoutput(out, "Port 23: 00:30:48:66:3a:60", command)
 
     def testverifypollnp06fals01(self):
-        command = "show switch --switch np06fals01.ms.com"
+        command = "show network_device --network_device np06fals01.ms.com"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Port 49: 00:15:2c:1f:40:00", command)
         r = re.compile(r'^\s*Created:\s*(.*?)\s*Last Seen:\s*(.*?)\s*$', re.M)
@@ -132,7 +132,7 @@ class TestPollSwitch(TestBrokerCommand):
 
     def testpollut01ga2s01(self):
         # Issues deprecated warning.
-        command = ["poll", "switch", "--vlan", "--switch",
+        command = ["poll", "network_device", "--vlan", "--network_device",
                    "ut01ga2s01.aqd-unittest.ms.com"]
         (out, err) = self.successtest(command)
         net = self.net["vmotion_net"]
@@ -150,7 +150,7 @@ class TestPollSwitch(TestBrokerCommand):
                          command)
 
     def testverifypollut01ga2s01(self):
-        command = "show switch --switch ut01ga2s01.aqd-unittest.ms.com"
+        command = "show network_device --network_device ut01ga2s01.aqd-unittest.ms.com"
         out = self.commandtest(command.split(" "))
         for i in range(1, 13):
             self.matchoutput(out,
@@ -178,11 +178,11 @@ class TestPollSwitch(TestBrokerCommand):
                          command)
 
     def testpollut01ga2s02(self):
-        self.successtest(["poll", "switch", "--vlan",
-                          "--switch", "ut01ga2s02.aqd-unittest.ms.com"])
+        self.successtest(["poll", "network_device", "--vlan",
+                          "--network_device", "ut01ga2s02.aqd-unittest.ms.com"])
 
     def testverifypollut01ga2s02(self):
-        command = "show switch --switch ut01ga2s02.aqd-unittest.ms.com"
+        command = "show network_device --network_device ut01ga2s02.aqd-unittest.ms.com"
         out = self.commandtest(command.split(" "))
         for i in range(13, 25):
             self.matchoutput(out,
@@ -201,16 +201,16 @@ class TestPollSwitch(TestBrokerCommand):
         self.matchoutput(out, "VLAN 713: %s" % self.net["ut01ga2s02_v713"].ip, command)
 
     def testpollut01ga2s03(self):
-        self.successtest(["poll", "switch",
-                          "--switch", "ut01ga2s03.aqd-unittest.ms.com"])
+        self.successtest(["poll", "network_device",
+                          "--network_device", "ut01ga2s03.aqd-unittest.ms.com"])
 
     def testpollnp01ga2s03(self):
-        self.successtest(["poll", "switch",
-                          "--switch", "np01ga2s03.one-nyp.ms.com"])
+        self.successtest(["poll", "network_device",
+                          "--network_device", "np01ga2s03.one-nyp.ms.com"])
 
     def testpollbor(self):
-        command = ["poll", "switch", "--vlan",
-                   "--switch", "ut3gd1r01.aqd-unittest.ms.com"]
+        command = ["poll", "network_device", "--vlan",
+                   "--network_device", "ut3gd1r01.aqd-unittest.ms.com"]
         (out, err) = self.successtest(command)
         self.matchoutput(err,
                          "Skipping VLAN probing on switch "
@@ -221,7 +221,7 @@ class TestPollSwitch(TestBrokerCommand):
     def testpolltype(self):
         # We make use of poll_switch reporting the (lack of the) jump host for
         # every switch it touches
-        command = ["poll", "switch", "--rack", "ut3", "--type", "bor"]
+        command = ["poll", "network_device", "--rack", "ut3", "--type", "bor"]
         (out, err) = self.successtest(command)
         self.matchoutput(err, "ut3gd1r01.aqd-unittest.ms.com", command)
         # update_switch changes the type of ut3gd1r04 to 'bor'
@@ -231,8 +231,8 @@ class TestPollSwitch(TestBrokerCommand):
         self.matchclean(err, "ut3gd1r06.aqd-unittest.ms.com", command)
 
     def testtypemismatch(self):
-        command = ["poll", "switch", "--type", "tor",
-                   "--switch", "ut3gd1r01.aqd-unittest.ms.com"]
+        command = ["poll", "network_device", "--type", "tor",
+                   "--network_device", "ut3gd1r01.aqd-unittest.ms.com"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "Switch ut3gd1r01.aqd-unittest.ms.com is not "
@@ -240,12 +240,12 @@ class TestPollSwitch(TestBrokerCommand):
                          command)
 
     def testbadtype(self):
-        command = ["poll", "switch", "--type", "no-such-type",
-                   "--switch", "ut3gd1r01.aqd-unittest.ms.com"]
+        command = ["poll", "network_device", "--type", "no-such-type",
+                   "--network_device", "ut3gd1r01.aqd-unittest.ms.com"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Unknown switch type 'no-such-type'.", command)
 
 
 if __name__ == '__main__':
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestPollSwitch)
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestPollNetworkDevice)
     unittest.TextTestRunner(verbosity=2).run(suite)

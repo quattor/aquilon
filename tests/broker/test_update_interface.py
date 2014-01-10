@@ -92,7 +92,7 @@ class TestUpdateInterface(TestBrokerCommand):
                                 mac=mac, comments="Some interface comments")
         command = ["update_interface", "--interface=xge49",
                    "--comments=Some interface comments",
-                   "--mac", mac, "--switch=ut3gd1r06.aqd-unittest.ms.com"]
+                   "--mac", mac, "--network_device=ut3gd1r06.aqd-unittest.ms.com"]
         self.noouttest(command)
         self.dsdb_verify()
 
@@ -104,7 +104,7 @@ class TestUpdateInterface(TestBrokerCommand):
                                 comments="Some new interface comments")
         command = ["update_interface", "--interface=xge49",
                    "--comments=Some new interface comments",
-                   "--switch=ut3gd1r06.aqd-unittest.ms.com"]
+                   "--network_device=ut3gd1r06.aqd-unittest.ms.com"]
         self.noouttest(command)
         self.dsdb_verify()
 
@@ -117,7 +117,7 @@ class TestUpdateInterface(TestBrokerCommand):
                                 comments="Some new interface comments")
         command = ["update_interface", "--interface=vlan110",
                    "--comments=Some new interface comments",
-                   "--switch=ut3gd1r04.aqd-unittest.ms.com"]
+                   "--network_device=ut3gd1r04.aqd-unittest.ms.com"]
         self.noouttest(command)
         self.dsdb_verify()
 
@@ -157,7 +157,7 @@ class TestUpdateInterface(TestBrokerCommand):
                          command)
 
     def test_160_rename_switch_if(self):
-        command = ["update", "interface", "--switch", "ut3gd1r04",
+        command = ["update", "interface", "--network_device", "ut3gd1r04",
                    "--interface", "vlan110", "--rename_to", "vlan220"]
         self.dsdb_expect_rename("ut3gd1r04-vlan110.aqd-unittest.ms.com",
                                 "ut3gd1r04-vlan220.aqd-unittest.ms.com",
@@ -276,14 +276,14 @@ class TestUpdateInterface(TestBrokerCommand):
 
     def test_200_fail_switch_boot(self):
         command = ["update_interface", "--boot", "--interface=xge49",
-                   "--switch=ut3gd1r01.aqd-unittest.ms.com"]
+                   "--network_device=ut3gd1r01.aqd-unittest.ms.com"]
         out = self.unimplementederrortest(command)
         self.matchoutput(out, "cannot use the --boot option.", command)
 
     def testi_200_fail_no_interface(self):
         command = ["update_interface", "--interface=xge49",
                    "--comments=This should fail",
-                   "--switch=ut3gd1r01.aqd-unittest.ms.com"]
+                   "--network_device=ut3gd1r01.aqd-unittest.ms.com"]
         out = self.notfoundtest(command)
         self.matchoutput(out,
                          "Interface xge49, switch ut3gd1r01.aqd-unittest.ms.com "
@@ -291,7 +291,7 @@ class TestUpdateInterface(TestBrokerCommand):
                          command)
 
     def test_200_fail_switch_model(self):
-        command = ["update", "interface", "--switch", "ut3gd1r01",
+        command = ["update", "interface", "--network_device", "ut3gd1r01",
                    "--interface", "xge", "--model", "e1000"]
         out = self.unimplementederrortest(command)
         self.matchoutput(out, "update_interface --network_device cannot use the "
@@ -312,7 +312,7 @@ class TestUpdateInterface(TestBrokerCommand):
 
     def test_200_not_a_switch(self):
         command = ["update", "interface", "--interface", "eth0",
-                   "--switch", "ut3c5n10"]
+                   "--network_device", "ut3c5n10"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "but is not a switch", command)
 
@@ -411,8 +411,8 @@ class TestUpdateInterface(TestBrokerCommand):
                           command)
 
     def test_300_verify_switch(self):
-        command = ["show_switch",
-                   "--switch=ut3gd1r06.aqd-unittest.ms.com"]
+        command = ["show_network_device",
+                   "--network_device=ut3gd1r06.aqd-unittest.ms.com"]
         out = self.commandtest(command)
         self.matchoutput(out, "Switch: ut3gd1r06", command)
         self.matchoutput(out,
@@ -446,7 +446,7 @@ class TestUpdateInterface(TestBrokerCommand):
         self.matchoutput(out, "Comments: Chassis interface comments", command)
 
     def test_300_verify_rename(self):
-        command = ["show", "switch", "--switch", "ut3gd1r04"]
+        command = ["show", "network_device", "--network_device", "ut3gd1r04"]
         out = self.commandtest(command)
         self.searchoutput(out,
                           r"Interface: vlan220 \(no MAC addr\)$"

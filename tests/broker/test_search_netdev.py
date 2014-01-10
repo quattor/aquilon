@@ -15,7 +15,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Module for testing the search switch command."""
+"""Module for testing the search network device command."""
 
 if __name__ == "__main__":
     import utils
@@ -25,10 +25,10 @@ import unittest2 as unittest
 from brokertest import TestBrokerCommand
 
 
-class TestSearchSwitch(TestBrokerCommand):
+class TestSearchNetworkDevice(TestBrokerCommand):
 
     def testwithinterfacecsv(self):
-        command = ["search_switch", "--switch=ut3gd1r06.aqd-unittest.ms.com",
+        command = ["search_network_device", "--network_device=ut3gd1r06.aqd-unittest.ms.com",
                    "--format=csv"]
         out = self.commandtest(command)
         ip = self.net["tor_net_8"].usable[1]
@@ -38,7 +38,7 @@ class TestSearchSwitch(TestBrokerCommand):
                          command)
 
     def testwithoutinterfacecsv(self):
-        command = ["search_switch", "--switch=ut3gd1r01.aqd-unittest.ms.com",
+        command = ["search_network_device", "--network_device=ut3gd1r01.aqd-unittest.ms.com",
                    "--format=csv"]
         out = self.commandtest(command)
         ip = self.net["tor_net_12"].usable[0]
@@ -48,57 +48,57 @@ class TestSearchSwitch(TestBrokerCommand):
                          command)
 
     def testbuilding(self):
-        command = ["search_switch", "--building=ut"]
+        command = ["search_network_device", "--building=ut"]
         out = self.commandtest(command)
         self.matchoutput(out, "ut3gd1r05.aqd-unittest.ms.com", command)
         self.matchoutput(out, "ut3gd1r06.aqd-unittest.ms.com", command)
         self.matchclean(out, "Switch", command)
 
     def testbuildingexact(self):
-        command = ["search_switch", "--building=ut", "--exact_location"]
+        command = ["search_network_device", "--building=ut", "--exact_location"]
         self.noouttest(command)
 
     def testrack(self):
-        command = ["search_switch", "--rack=ut4"]
+        command = ["search_network_device", "--rack=ut4"]
         out = self.commandtest(command)
         self.matchoutput(out, "ut3gd1r05.aqd-unittest.ms.com", command)
         self.matchclean(out, "ut3gd1r06.aqd-unittest.ms.com", command)
 
     def testmodel(self):
-        command = ["search_switch", "--model=uttorswitch"]
+        command = ["search_network_device", "--model=uttorswitch"]
         out = self.commandtest(command)
         self.matchoutput(out, "ut3gd1r04.aqd-unittest.ms.com", command)
         self.matchoutput(out, "ut3gd1r05.aqd-unittest.ms.com", command)
         self.matchclean(out, "ut3gd1r06.aqd-unittest.ms.com", command)
 
     def testvendor(self):
-        command = ["search_switch", "--vendor=hp"]
+        command = ["search_network_device", "--vendor=hp"]
         out = self.commandtest(command)
         self.matchoutput(out, "ut3gd1r04.aqd-unittest.ms.com", command)
         self.matchoutput(out, "ut3gd1r05.aqd-unittest.ms.com", command)
         self.matchclean(out, "ut3gd1r06.aqd-unittest.ms.com", command)
 
     def testtype(self):
-        command = ["search_switch", "--type=bor"]
+        command = ["search_network_device", "--type=bor"]
         out = self.commandtest(command)
         self.matchoutput(out, "ut3gd1r04.aqd-unittest.ms.com", command)
         self.matchclean(out, "ut3gd1r05.aqd-unittest.ms.com", command)
         self.matchclean(out, "ut3gd1r06.aqd-unittest.ms.com", command)
 
     def testserial(self):
-        command = ["search_switch", "--serial=SNgd1r05_new"]
+        command = ["search_network_device", "--serial=SNgd1r05_new"]
         out = self.commandtest(command)
         self.matchoutput(out, "ut3gd1r05.aqd-unittest.ms.com", command)
         self.matchclean(out, "ut3gd1r04.aqd-unittest.ms.com", command)
 
     def testserialandfullinfo(self):
-        command = ["search_switch", "--serial=SNgd1r05_new", "--fullinfo"]
+        command = ["search_network_device", "--serial=SNgd1r05_new", "--fullinfo"]
         out = self.commandtest(command)
         self.matchoutput(out, "Switch: ut3gd1r05", command)
         self.matchclean(out, "ut3gd1r04", command)
 
     def testfullinfocsv(self):
-        command = ["search_switch", "--serial=SNgd1r05_new", "--fullinfo",
+        command = ["search_network_device", "--serial=SNgd1r05_new", "--fullinfo",
                    "--format=csv"]
         out = self.commandtest(command)
         ip = self.net["tor_net_7"].usable[0]
@@ -108,7 +108,7 @@ class TestSearchSwitch(TestBrokerCommand):
                          command)
 
     def testsearchswitchall(self):
-        command = ["search_switch", "--all", "--fullinfo"]
+        command = ["search_network_device", "--all", "--fullinfo"]
         out = self.commandtest(command)
         self.matchoutput(out, "Switch: ut3gd1r01", command)
         self.matchoutput(out,
@@ -127,7 +127,7 @@ class TestSearchSwitch(TestBrokerCommand):
         self.matchoutput(out, "Switch Type: tor", command)
 
     def testsearchswitchswitch(self):
-        command = ["search_switch", "--switch=ut3gd1r04.aqd-unittest.ms.com",
+        command = ["search_network_device", "--network_device=ut3gd1r04.aqd-unittest.ms.com",
                    "--fullinfo"]
         out = self.commandtest(command)
         self.matchoutput(out, "Switch: ut3gd1r04", command)
@@ -140,7 +140,7 @@ class TestSearchSwitch(TestBrokerCommand):
         self.matchoutput(out, "Vendor: hp Model: uttorswitch", command)
 
     def testsearchswitchallcsv(self):
-        command = ["search_switch", "--all", "--format=csv"]
+        command = ["search_network_device", "--all", "--format=csv"]
         out = self.commandtest(command)
         ip = self.net["tor_net_8"].usable[1]
         self.matchoutput(out,
@@ -155,13 +155,13 @@ class TestSearchSwitch(TestBrokerCommand):
 
     def testsearchswitchip(self):
         ip = self.net["tor_net_0"].usable[0]
-        command = ["search_switch", "--ip=%s" % ip]
+        command = ["search_network_device", "--ip=%s" % ip]
         out = self.commandtest(command)
         self.matchoutput(out, "ut01ga1s02.aqd-unittest.ms.com", command)
 
     def testsearchswitchipfullinfo(self):
         ip = self.net["tor_net_0"].usable[0]
-        command = ["search_switch", "--ip=%s" % ip, "--fullinfo"]
+        command = ["search_network_device", "--ip=%s" % ip, "--fullinfo"]
         out = self.commandtest(command)
         self.matchoutput(out, "Switch: ut01ga1s02", command)
         self.matchoutput(out,
@@ -172,7 +172,7 @@ class TestSearchSwitch(TestBrokerCommand):
 
     def testsearchswitchipcsv(self):
         ip = self.net["tor_net_0"].usable[0]
-        command = ["search_switch", "--ip=%s" % ip, "--format=csv"]
+        command = ["search_network_device", "--ip=%s" % ip, "--format=csv"]
         out = self.commandtest(command)
         self.matchoutput(out, "ut01ga1s02.aqd-unittest.ms.com,%s,tor,ut8"
                          ",ut,bnt,rs g8000,,xge49,%s" % (ip, ip.mac),
@@ -180,5 +180,5 @@ class TestSearchSwitch(TestBrokerCommand):
 
 
 if __name__ == '__main__':
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestSearchSwitch)
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestSearchNetworkDevice)
     unittest.TextTestRunner(verbosity=2).run(suite)

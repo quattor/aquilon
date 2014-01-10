@@ -29,6 +29,8 @@ class CommandSearchObservedMac(BrokerCommand):
     def render(self, session, logger, network_device, switch, port, mac,
                **arguments):
         if switch:
+            self.deprecated_option("switch", "Please use --network_device "
+                                   "instead.", logger=logger, **arguments)
             if not network_device:
                 network_device = switch
         q = session.query(ObservedMac)

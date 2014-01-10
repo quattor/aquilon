@@ -349,7 +349,7 @@ class TestAddInterfaceAddress(TestBrokerCommand):
                              "vlan110", primary="ut3gd1r04.aqd-unittest.ms.com",
                              comments="Some new switch comments")
         command = ["add", "interface", "address",
-                   "--switch", "ut3gd1r04.aqd-unittest.ms.com",
+                   "--network_device", "ut3gd1r04.aqd-unittest.ms.com",
                    "--interface", "vlan110", "--ip", ip]
         self.noouttest(command)
         self.dsdb_verify()
@@ -360,7 +360,7 @@ class TestAddInterfaceAddress(TestBrokerCommand):
                              "vlan110_hsrp", primary="ut3gd1r04.aqd-unittest.ms.com",
                              comments="Some new switch comments")
         command = ["add", "interface", "address",
-                   "--switch", "ut3gd1r04.aqd-unittest.ms.com",
+                   "--network_device", "ut3gd1r04.aqd-unittest.ms.com",
                    "--interface", "vlan110", "--label", "hsrp", "--ip", ip]
         self.noouttest(command)
         self.dsdb_verify()
@@ -372,13 +372,13 @@ class TestAddInterfaceAddress(TestBrokerCommand):
                              "loop0", primary="ut3gd1r04.aqd-unittest.ms.com",
                              comments="Some new switch comments")
         command = ["add", "interface", "address",
-                   "--switch", "ut3gd1r04.aqd-unittest.ms.com",
+                   "--network_device", "ut3gd1r04.aqd-unittest.ms.com",
                    "--interface", "loop0", "--ip", ip]
         self.noouttest(command)
         self.dsdb_verify()
 
     def testverifyut3gd1r04(self):
-        command = ["show", "switch", "--switch", "ut3gd1r04.aqd-unittest.ms.com"]
+        command = ["show", "network_device", "--network_device", "ut3gd1r04.aqd-unittest.ms.com"]
         out = self.commandtest(command)
         self.searchoutput(out,
                           r"Interface: vlan110 \(no MAC addr\)$"

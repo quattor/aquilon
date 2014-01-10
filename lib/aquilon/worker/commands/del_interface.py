@@ -39,6 +39,8 @@ class CommandDelInterface(BrokerCommand):
             raise ArgumentError("Please specify at least one of --chassis, "
                                 "--machine, --network_device or --mac.")
         if switch:
+            self.deprecated_option("switch", "Please use --network_device"
+                                   "instead.", logger=logger, **arguments)
             if not network_device:
                 network_device = switch
 

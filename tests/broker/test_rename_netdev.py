@@ -15,7 +15,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Module for testing the update switch command."""
+"""Module for testing the update network device command."""
 
 import os.path
 
@@ -25,10 +25,10 @@ if __name__ == "__main__":
 
 import unittest2 as unittest
 from brokertest import TestBrokerCommand
-from switchtest import VerifySwitchMixin
+from netdevtest import VerifyNetworkDeviceMixin
 
 
-class TestRenameSwitch(TestBrokerCommand, VerifySwitchMixin):
+class TestRenameNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
 
     def test_100_rename_ut3gd1r04(self):
         self.dsdb_expect_rename("ut3gd1r04-vlan110-hsrp.aqd-unittest.ms.com",
@@ -48,8 +48,8 @@ class TestRenameSwitch(TestBrokerCommand, VerifySwitchMixin):
         self.failUnless(os.path.exists(old_plenary),
                         "Plenary file '%s' does not exist" % old_plenary)
 
-        command = ["update", "switch",
-                   "--switch", "ut3gd1r04.aqd-unittest.ms.com",
+        command = ["update", "network_device",
+                   "--network_device", "ut3gd1r04.aqd-unittest.ms.com",
                    "--rename_to", "renametest"]
         self.noouttest(command)
 
@@ -61,7 +61,7 @@ class TestRenameSwitch(TestBrokerCommand, VerifySwitchMixin):
         self.dsdb_verify()
 
     def test_110_verify(self):
-        self.verifyswitch("renametest.aqd-unittest.ms.com", "hp", "uttorswitch",
+        self.verifynetdev("renametest.aqd-unittest.ms.com", "hp", "uttorswitch",
                           "ut3", "a", "3", switch_type='bor',
                           ip=self.net["verari_eth1"].usable[1],
                           mac=self.net["verari_eth1"].usable[0].mac,
@@ -78,14 +78,14 @@ class TestRenameSwitch(TestBrokerCommand, VerifySwitchMixin):
         self.dsdb_expect_rename("renametest.aqd-unittest.ms.com",
                                 "ut3gd1r04.aqd-unittest.ms.com")
 
-        command = ["update", "switch",
-                   "--switch", "renametest",
+        command = ["update", "network_device",
+                   "--network_device", "renametest",
                    "--rename_to", "ut3gd1r04.aqd-unittest.ms.com"]
         self.noouttest(command)
         self.dsdb_verify()
 
     def test_210_verify(self):
-        self.verifyswitch("ut3gd1r04.aqd-unittest.ms.com", "hp", "uttorswitch",
+        self.verifynetdev("ut3gd1r04.aqd-unittest.ms.com", "hp", "uttorswitch",
                           "ut3", "a", "3", switch_type='bor',
                           ip=self.net["verari_eth1"].usable[1],
                           mac=self.net["verari_eth1"].usable[0].mac,
@@ -93,5 +93,5 @@ class TestRenameSwitch(TestBrokerCommand, VerifySwitchMixin):
                           comments="Some new switch comments")
 
 if __name__ == '__main__':
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestRenameSwitch)
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestRenameNetworkDevice)
     unittest.TextTestRunner(verbosity=2).run(suite)

@@ -124,6 +124,8 @@ class CommandFlush(BrokerCommand):
                clusters, hosts, locations, resources, switches,
                network_devices, all, **arguments):
         if switches:
+            self.deprecated_option("switchs", "Please use --network_devices instead.",
+                                   logger=logger, **arguments)
             network_devices = True
 
         if all:

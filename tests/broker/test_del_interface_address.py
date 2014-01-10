@@ -140,7 +140,7 @@ class TestDelInterfaceAddress(TestBrokerCommand):
         ip = self.net["tor_net_12"].usable[1]
         self.dsdb_expect_delete(ip)
         command = ["del", "interface", "address",
-                   "--switch", "ut3gd1r04.aqd-unittest.ms.com",
+                   "--network_device", "ut3gd1r04.aqd-unittest.ms.com",
                    "--interface", "vlan220", "--ip", ip]
         self.noouttest(command)
         self.dsdb_verify()
@@ -149,7 +149,7 @@ class TestDelInterfaceAddress(TestBrokerCommand):
         ip = self.net["tor_net_12"].usable[2]
         self.dsdb_expect_delete(ip)
         command = ["del", "interface", "address",
-                   "--switch", "ut3gd1r04.aqd-unittest.ms.com",
+                   "--network_device", "ut3gd1r04.aqd-unittest.ms.com",
                    "--interface", "vlan220", "--label", "hsrp"]
         self.noouttest(command)
         self.dsdb_verify()
@@ -158,7 +158,7 @@ class TestDelInterfaceAddress(TestBrokerCommand):
         ip = self.net["autopg1"][0]
         self.dsdb_expect_delete(ip)
         command = ["del", "interface", "address",
-                   "--switch", "ut3gd1r04.aqd-unittest.ms.com",
+                   "--network_device", "ut3gd1r04.aqd-unittest.ms.com",
                    "--interface", "loop0", "--ip", ip]
         self.noouttest(command)
         self.dsdb_verify()

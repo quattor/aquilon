@@ -50,15 +50,15 @@ class TestVlan(TestBrokerCommand):
 
         self.dsdb_expect_add(SW_HOSTNAME, ip, "xge49",
                              ip.mac)
-        command = ["add", "switch", "--type", "tor",
-                   "--switch", SW_HOSTNAME, "--rack", "ut3",
+        command = ["add", "network_device", "--type", "tor",
+                   "--network_device", SW_HOSTNAME, "--rack", "ut3",
                    "--model", "rs g8000", "--interface", "xge49",
                    "--mac", ip.mac, "--ip", ip]
         self.ignoreoutputtest(command)
         self.dsdb_verify()
 
     def test_010_pollutpgsw(self):
-        command = ["poll", "switch", "--vlan", "--switch",
+        command = ["poll", "network_device", "--vlan", "--network_device",
                    SW_HOSTNAME]
         err = self.statustest(command)
 
@@ -81,7 +81,7 @@ class TestVlan(TestBrokerCommand):
         self.matchoutput(out, "Name: user_5", command)
 
     def test_012_pollutpgsw(self):
-        command = ["poll", "switch", "--vlan", "--switch",
+        command = ["poll", "network_device", "--vlan", "--network_device",
                    SW_HOSTNAME]
         err = self.statustest(command)
 
@@ -93,7 +93,7 @@ class TestVlan(TestBrokerCommand):
                         "add_vlan to add it.", command)
 
     def test_015_searchswbyvlan(self):
-        command = ["search_switch", "--vlan=714", "--format=csv"]
+        command = ["search_network_device", "--vlan=714", "--format=csv"]
         out = self.commandtest(command)
         ip = self.getswip()
         self.matchoutput(out,
@@ -119,7 +119,7 @@ class TestVlan(TestBrokerCommand):
     def test_030_delutpgsw(self):
         self.dsdb_expect_delete(self.getswip())
 
-        command = "del switch --switch %s" % SW_HOSTNAME
+        command = "del network_device --network_device %s" % SW_HOSTNAME
         self.noouttest(command.split(" "))
 
         plenary = os.path.join(self.config.get("broker", "plenarydir"),

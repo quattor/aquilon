@@ -26,5 +26,8 @@ class CommandPollNetworkDeviceSwitchSwitch(CommandPollNetworkDeviceNetworkDevice
     required_parameters = ["switch"]
 
     def render(self, switch, **arguments):
+        self.deprecated_command("Command poll_switch is deprecated. "
+                                "Please use poll_network_device instead.",
+                                **arguments)
         arguments['network_device'] = switch
         return CommandPollNetworkDeviceNetworkDevice.render(self, **arguments)

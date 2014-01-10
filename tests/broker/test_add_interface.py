@@ -422,7 +422,7 @@ class TestAddInterface(TestBrokerCommand):
     def testfailaddinterfaceut3dg1r01(self):
         command = ["add", "interface", "--interface", "xge49",
                    "--mac", self.net["tor_net_0"].usable[0].mac,
-                   "--switch", "ut3gd1r01.aqd-unittest.ms.com"]
+                   "--network_device", "ut3gd1r01.aqd-unittest.ms.com"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "MAC address %s is already in use: " %
@@ -432,7 +432,7 @@ class TestAddInterface(TestBrokerCommand):
     def testfailaddinterfaceud3dg1r01model(self):
         command = ["add", "interface", "--interface", "xge49",
                    "--model", "e1000",
-                   "--switch", "ut3gd1r01.aqd-unittest.ms.com"]
+                   "--network_device", "ut3gd1r01.aqd-unittest.ms.com"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Cannot use argument --model when adding an "
                          "interface to a network device.", command)
@@ -440,13 +440,13 @@ class TestAddInterface(TestBrokerCommand):
     def testfailaddinterfaceud3dg1r01type(self):
         command = ["add", "interface", "--interface", "xge49",
                    "--type", "vlan",
-                   "--switch", "ut3gd1r01.aqd-unittest.ms.com"]
+                   "--network_device", "ut3gd1r01.aqd-unittest.ms.com"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Interface type vlan is not allowed for "
                          "network devices.", command)
 
     def testverifyfailaddinterfaceut3dg1r01(self):
-        command = "show switch --switch ut3gd1r01.aqd-unittest.ms.com"
+        command = "show network_device --network_device ut3gd1r01.aqd-unittest.ms.com"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Switch: ut3gd1r01", command)
         self.matchoutput(out, "Primary Name: ut3gd1r01.aqd-unittest.ms.com",
@@ -455,24 +455,24 @@ class TestAddInterface(TestBrokerCommand):
 
     def testaddvirtualswitchinterface(self):
         command = ["add", "interface", "--interface", "vlan110",
-                   "--switch", "ut3gd1r04.aqd-unittest.ms.com"]
+                   "--network_device", "ut3gd1r04.aqd-unittest.ms.com"]
         self.noouttest(command)
 
     def testaddloopback(self):
         command = ["add", "interface", "--interface", "loop0",
-                   "--switch", "ut3gd1r04.aqd-unittest.ms.com"]
+                   "--network_device", "ut3gd1r04.aqd-unittest.ms.com"]
         self.noouttest(command)
 
     def testfailloopbackmac(self):
         command = ["add", "interface", "--interface", "loop1",
-                   "--switch", "ut3gd1r04.aqd-unittest.ms.com",
+                   "--network_device", "ut3gd1r04.aqd-unittest.ms.com",
                    "--mac", self.net["autopg1"][0].mac]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Loopback interfaces cannot have a MAC address.",
                          command)
 
     def testverifyut3gd1r04(self):
-        command = ["show", "switch", "--switch",
+        command = ["show", "network_device", "--network_device",
                    "ut3gd1r04.aqd-unittest.ms.com"]
         out = self.commandtest(command)
         self.matchoutput(out,

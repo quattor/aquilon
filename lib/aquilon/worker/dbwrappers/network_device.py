@@ -101,13 +101,13 @@ def discover_network_device(session, logger, config, dbnetdev, dryrun):
     def aqcmd(cmd, *args):
         """ Helper function to print an AQ command to be executed by the user """
         quoted_args = [quote(str(arg)) for arg in args]
-        results.append("aq %s --switch %s %s" % (cmd, dbnetdev.primary_name,
-                                                 " ".join(quoted_args)))
+        results.append("aq %s --network_device %s %s" %
+                        (cmd, dbnetdev.primary_name, " ".join(quoted_args)))
 
     def update_switch(dbmodel, serial_no, comments):
         """ Helper for updating core switch attributes, honouring dryrun """
         if dryrun:
-            args = ["update_switch"]
+            args = ["update_network_device"]
             if dbmodel and dbmodel != dbnetdev.model:
                 args.extend(["--model", dbmodel.name,
                              "--vendor", dbmodel.vendor.name])

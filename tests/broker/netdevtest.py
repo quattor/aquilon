@@ -14,29 +14,29 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-""" Helper classes for switch testing """
+""" Helper classes for network device testing """
 
 
-class VerifySwitchMixin(object):
+class VerifyNetworkDeviceMixin(object):
 
-    def verifyswitch(self, switch, vendor, model,
+    def verifynetdev(self, netdev, vendor, model,
                      rack, rackrow, rackcol,
                      serial=None, switch_type='tor', ip=None, mac=None,
                      interface=None, comments=None):
-        command = "show switch --switch %s" % switch
+        command = "show network device --network_device %s" % netdev
         out = self.commandtest(command.split(" "))
-        (short, dot, dns_domain) = switch.partition(".")
+        (short, dot, dns_domain) = netdev.partition(".")
         self.matchoutput(out, "Switch: %s" % short, command)
         if dns_domain:
             if ip:
                 # Check both the primary name...
-                self.matchoutput(out, "Primary Name: %s [%s]" % (switch, ip),
+                self.matchoutput(out, "Primary Name: %s [%s]" % (netdev, ip),
                                  command)
                 # ... and the AddressAssignment record
-                self.matchoutput(out, "Provides: %s [%s]" % (switch, ip),
+                self.matchoutput(out, "Provides: %s [%s]" % (netdev, ip),
                                  command)
             else:
-                self.matchoutput(out, "Primary Name: %s" % switch, command)
+                self.matchoutput(out, "Primary Name: %s" % netdev, command)
         self.matchoutput(out, "Switch Type: %s" % switch_type, command)
         self.matchoutput(out, "Rack: %s" % rack, command)
         self.matchoutput(out, "Row: %s" % rackrow, command)
@@ -61,7 +61,7 @@ class VerifySwitchMixin(object):
         else:
             # FIXME: eventually this should be part of the model
             interface = "xge"
-            self.searchoutput(out, "^    Comments: Created automatically ",
+            self.searchoutput(out, "^    Comments: Created automatically",
                               command)
         if mac:
             self.searchoutput(out, r"Interface: %s %s$" % (interface, mac),

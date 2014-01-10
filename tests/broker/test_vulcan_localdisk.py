@@ -91,7 +91,7 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, MachineTestMixin,
 
             self.dsdb_expect_add(self.switch[i], ip, "xge49",
                                  ip.mac)
-            command = ["add", "switch", "--switch", self.switch[i],
+            command = ["add", "network_device", "--network_device", self.switch[i],
                        "--rack", "ut12",
                        "--model", "rs g8000", "--interface", "xge49",
                        "--type", "tor", "--mac", ip.mac, "--ip", ip]
@@ -102,7 +102,7 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, MachineTestMixin,
     def test_025_pollutpgsw(self):
 
         for i in range(0, 2):
-            command = ["poll", "switch", "--vlan", "--switch",
+            command = ["poll", "network_device", "--vlan", "--network_device",
                        self.switch[i]]
             (out, err) = self.successtest(command)
 
@@ -115,7 +115,7 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, MachineTestMixin,
 
         # For Nexus switches we have if names, not snmp ids.
         # Checking only the first one
-        command = "show switch --switch %s" % self.switch[1]
+        command = "show network_device --network_device %s" % self.switch[1]
         out = self.commandtest(command.split(" "))
 
         macs = ["02:02:04:02:12:06", "02:02:04:02:12:07"]
@@ -380,7 +380,7 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, MachineTestMixin,
                             "Plenary file '%s' does not exist" % plenary)
 
             self.dsdb_expect_delete(ip)
-            command = "del switch --switch %s" % self.switch[i]
+            command = "del network_device --network_device %s" % self.switch[i]
             self.noouttest(command.split(" "))
 
             self.failIf(os.path.exists(plenary),

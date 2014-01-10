@@ -15,7 +15,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Module for testing constraints in commands involving switches."""
+"""Module for testing constraints in commands involving network devices."""
 
 if __name__ == "__main__":
     import utils
@@ -25,11 +25,11 @@ import unittest2 as unittest
 from brokertest import TestBrokerCommand
 
 
-class TestSwitchConstraints(TestBrokerCommand):
+class TestNetworkDeviceConstraints(TestBrokerCommand):
 
     def testdelmachineastor_switch(self):
         # Deprecated usage.
-        command = "del switch --switch ut3c5n10"
+        command = "del network_device --network_device ut3c5n10"
         self.badrequesttest(command.split(" "))
 
     def testverifydelmachineastor_switchfailed(self):
@@ -44,14 +44,14 @@ class TestSwitchConstraints(TestBrokerCommand):
 
     def testverifydeltor_switchasmachinefailed(self):
         # Deprecated usage.
-        command = "show switch --switch ut3gd1r01.aqd-unittest.ms.com"
+        command = "show network_device --network_device ut3gd1r01.aqd-unittest.ms.com"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Switch: ut3gd1r01", command)
 
     # Testing that del switch does not delete a blade....
     def testrejectut3c1n3(self):
         # Deprecated usage.
-        self.badrequesttest(["del", "switch", "--switch", "ut3c1n3"])
+        self.badrequesttest(["del", "network_device", "--network_device", "ut3c1n3"])
 
     def testverifyrejectut3c1n3(self):
         command = "show machine --machine ut3c1n3"
@@ -60,12 +60,12 @@ class TestSwitchConstraints(TestBrokerCommand):
 
     def testdelprimaryinterface(self):
         command = ["del", "interface", "--interface", "xge49",
-                   "--switch", "ut3gd1r04.aqd-unittest.ms.com"]
+                   "--network_device", "ut3gd1r04.aqd-unittest.ms.com"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "holds the primary address", command)
 
     def testprimaryalias(self):
-        command = ["add", "switch", "--switch", "alias2host.aqd-unittest.ms.com",
+        command = ["add", "network_device", "--network_device", "alias2host.aqd-unittest.ms.com",
                    "--type", "misc", "--rack", "ut3", "--model", "uttorswitch",
                    "--ip", self.net["unknown0"].usable[-1]]
         out = self.badrequesttest(command)
@@ -75,7 +75,7 @@ class TestSwitchConstraints(TestBrokerCommand):
     def testprimarybadip(self):
         good_ip = self.net["unknown0"].usable[13]
         bad_ip = self.net["unknown0"].usable[14]
-        command = ["add", "switch", "--switch", "arecord13.aqd-unittest.ms.com",
+        command = ["add", "network_device", "--network_device", "arecord13.aqd-unittest.ms.com",
                    "--type", "misc", "--rack", "ut3", "--model", "uttorswitch",
                    "--ip", bad_ip]
         out = self.badrequesttest(command)
@@ -86,5 +86,5 @@ class TestSwitchConstraints(TestBrokerCommand):
 
 
 if __name__ == '__main__':
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestSwitchConstraints)
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestNetworkDeviceConstraints)
     unittest.TextTestRunner(verbosity=2).run(suite)

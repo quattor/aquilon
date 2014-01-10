@@ -26,5 +26,7 @@ class CommandDelInterfaceAddressSwitch(CommandDelInterfaceAddressNetworkDevice):
     required_parameters = ['switch', 'interface']
 
     def render(self, switch, **arguments):
+        self.deprecated_option("switch", "Please use --network_device"
+                               "instead.", logger=logger, **arguments)
         arguments['network_device'] = switch
         return CommandDelInterfaceAddressNetworkDevice.render(self, **arguments)

@@ -24,4 +24,7 @@ from aquilon.worker.commands.show_network_device_all import CommandShowNetworkDe
 class CommandShowSwitchAll(CommandShowNetworkDeviceAll):
 
     def render(self, switch, **arguments):
+        self.deprecated_command("Command show_switch is deprecated. "
+                                "Please use show_network_device instead.",
+                                **arguments)
         return CommandShowNetworkDeviceAll.render(self, **arguments)

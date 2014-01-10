@@ -26,5 +26,8 @@ class CommandSearchSwitch(CommandSearchNetworkDevice):
     required_parameters = []
 
     def render(self, switch, **arguments):
+        self.deprecated_command("Command search_switch is deprecated. "
+                                "Please use search_network_device instead.",
+                                **arguments)
         arguments['network_device'] = switch
         return CommandSearchNetworkDevice.render(self, **arguments)

@@ -24,4 +24,7 @@ from aquilon.worker.commands.poll_network_device import CommandPollNetworkDevice
 class CommandPollSwitch(CommandPollNetworkDevice):
 
     def render(self, **arguments):
+        self.deprecated_command("Command poll_switch is deprecated. "
+                                "Please use poll_network_device instead.",
+                                **arguments)
         return CommandPollNetworkDevice.render(self, **arguments)

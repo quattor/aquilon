@@ -26,5 +26,7 @@ class CommandAddInterfaceSwitch(CommandAddInterfaceNetworkDevice):
     required_parameters = ["interface", "switch"]
 
     def render(self, switch, **arguments):
+        self.deprecated_option("switch", "Please use --network_device"
+                               "instead.", logger=logger, **arguments)
         arguments['network_device'] = switch
         return CommandAddInterfaceNetworkDevice.render(self, **arguments)

@@ -102,7 +102,7 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
 
             self.dsdb_expect_add(hostname, ip, "xge49",
                                  ip.mac)
-            command = ["add", "switch", "--switch", hostname, "--rack", "ut12",
+            command = ["add", "network_device", "--network_device", hostname, "--rack", "ut12",
                        "--model", "rs g8000", "--interface", "xge49",
                        "--type", "tor", "--mac", ip.mac, "--ip", ip]
             self.ignoreoutputtest(command)
@@ -113,7 +113,7 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
     def test_004_pollutpgsw(self):
         macs = ["02:02:04:02:12:05", "02:02:04:02:12:06"]
         for i in range(0, 2):
-            command = ["poll", "switch", "--vlan", "--switch",
+            command = ["poll", "network_device", "--vlan", "--network_device",
                        "utpgsw%d.aqd-unittest.ms.com" % i]
             (out, err) = self.successtest(command)
 
@@ -126,7 +126,7 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
                              command)
 
             # For Nexus switches we have if names, not snmp ids.
-            command = "show switch --switch utpgsw%d.aqd-unittest.ms.com" % i
+            command = "show network_device --network_device utpgsw%d.aqd-unittest.ms.com" % i
             out = self.commandtest(command.split(" "))
             self.matchoutput(out, "Port et1-1: %s" % macs[i], command)
 
@@ -355,7 +355,7 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
 
     def test_107_cat_switch(self):
         for i in range(0, 2):
-            command = ["cat", "--switch", "utpgsw%d" % i]
+            command = ["cat", "--network_device", "utpgsw%d" % i]
 
             out = self.commandtest(command)
             self.matchoutput(out, '"user-v710", nlist(', command)
@@ -704,7 +704,7 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
                             "Plenary file '%s' does not exist" % plenary)
 
             self.dsdb_expect_delete(ip)
-            command = "del switch --switch %s" % swname
+            command = "del network_device --network_device %s" % swname
             self.noouttest(command.split(" "))
 
             self.failIf(os.path.exists(plenary),

@@ -26,5 +26,8 @@ class CommandDelSwitch(CommandDelNetworkDevice):
     required_parameters = ["switch"]
 
     def render(self, switch, **arguments):
+        self.deprecated_command("Command del_switch is deprecated. "
+                                "Please use del_network_device instead.",
+                                **arguments)
         arguments['network_device'] = switch
         return CommandDelNetworkDevice.render(self, **arguments)
