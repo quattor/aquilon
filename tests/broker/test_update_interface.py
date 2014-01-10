@@ -294,7 +294,7 @@ class TestUpdateInterface(TestBrokerCommand):
         command = ["update", "interface", "--switch", "ut3gd1r01",
                    "--interface", "xge", "--model", "e1000"]
         out = self.unimplementederrortest(command)
-        self.matchoutput(out, "update_interface --switch cannot use the "
+        self.matchoutput(out, "update_interface --network_device cannot use the "
                          "--model option.", command)
 
     def test_200_fail_chassis_model(self):

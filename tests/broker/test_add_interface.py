@@ -435,7 +435,7 @@ class TestAddInterface(TestBrokerCommand):
                    "--switch", "ut3gd1r01.aqd-unittest.ms.com"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Cannot use argument --model when adding an "
-                         "interface to a switch.", command)
+                         "interface to a network device.", command)
 
     def testfailaddinterfaceud3dg1r01type(self):
         command = ["add", "interface", "--interface", "xge49",
@@ -443,7 +443,7 @@ class TestAddInterface(TestBrokerCommand):
                    "--switch", "ut3gd1r01.aqd-unittest.ms.com"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Interface type vlan is not allowed for "
-                         "switches.", command)
+                         "network devices.", command)
 
     def testverifyfailaddinterfaceut3dg1r01(self):
         command = "show switch --switch ut3gd1r01.aqd-unittest.ms.com"

@@ -31,7 +31,7 @@ class CommandDelInterfaceAddress(BrokerCommand):
 
     required_parameters = ['interface']
 
-    def render(self, session, logger, machine, chassis, switch, interface,
+    def render(self, session, logger, machine, chassis, network_device, interface,
                fqdn, ip, label, keep_dns, network_environment,
                **kwargs):
 
@@ -41,9 +41,9 @@ class CommandDelInterfaceAddress(BrokerCommand):
         elif chassis:
             hwtype = 'chassis'
             hwname = chassis
-        elif switch:
+        elif network_device:
             hwtype = 'network_device'
-            hwname = switch
+            hwname = network_device
 
         dbhw_ent = HardwareEntity.get_unique(session, hwname,
                                              hardware_type=hwtype, compel=True)

@@ -33,6 +33,7 @@
 	        <arg choice="plain"><option>--resources</option></arg>
 	        <arg choice="plain"><option>--locations</option></arg>
 	        <arg choice="plain"><option>--switches</option></arg>
+	        <arg choice="plain"><option>--network_devices</option></arg>
 	    </group>
 	    <group>
 		<synopfragmentref linkend="global-options">Global options</synopfragmentref>
@@ -146,10 +147,11 @@
 	    <varlistentry>
 	        <term>
 		    <option>--switches</option>
+		    <option>--network_devices</option>
 		</term>
 		<listitem>
 		    <para>
-			Refresh the switch plenaries.
+			Refresh the network device plenaries.
 		    </para>
 		</listitem>
 	    </varlistentry>

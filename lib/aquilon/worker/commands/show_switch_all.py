@@ -16,41 +16,12 @@
 # limitations under the License.
 """Contains the logic for `aq show switch --all`."""
 
-from sqlalchemy.orm import (subqueryload, joinedload, lazyload, contains_eager,
-                            undefer)
 
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.aqdb.model import NetworkDevice, DnsRecord, DnsDomain, Fqdn
+from aquilon.worker.commands.show_network_device_all import CommandShowNetworkDeviceAll
 
 
-class CommandShowSwitchAll(BrokerCommand):
+class CommandShowSwitchAll(CommandShowNetworkDeviceAll):
 
-    def render(self, session, **arguments):
-        q = session.query(NetworkDevice)
-
-        q = q.options(subqueryload('location'),
-                      subqueryload('interfaces'),
-                      lazyload('interfaces.hardware_entity'),
-                      joinedload('interfaces.assignments'),
-                      joinedload('interfaces.assignments.dns_records'),
-                      joinedload('interfaces.assignments.network'),
-                      subqueryload('observed_macs'),
-                      undefer('observed_macs.creation_date'),
-                      subqueryload('observed_vlans'),
-                      undefer('observed_vlans.creation_date'),
-                      joinedload('observed_vlans.network'),
-                      subqueryload('model'),
-                      # Switches don't have machine specs, but the formatter
-                      # checks for their existence anyway
-                      joinedload('model.machine_specs'))
-
-        # Prefer the primary name for ordering
-        q = q.outerjoin(DnsRecord, (Fqdn, DnsRecord.fqdn_id == Fqdn.id),
-                        DnsDomain)
-        q = q.options(contains_eager('primary_name'),
-                      contains_eager('primary_name.fqdn'),
-                      contains_eager('primary_name.fqdn.dns_domain'))
-        q = q.reset_joinpoint()
-        q = q.order_by(Fqdn.name, DnsDomain.name, NetworkDevice.label)
-
-        return q.all()
+    def render(self, switch, **arguments):
+        return CommandShowNetworkDeviceAll.render(self, **arguments)

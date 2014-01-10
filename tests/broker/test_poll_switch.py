@@ -214,7 +214,8 @@ class TestPollSwitch(TestBrokerCommand):
         (out, err) = self.successtest(command)
         self.matchoutput(err,
                          "Skipping VLAN probing on switch "
-                         "ut3gd1r01.aqd-unittest.ms.com, it's not a ToR switch.",
+                         "ut3gd1r01.aqd-unittest.ms.com, it's "
+                         "not a ToR network device.",
                          command)
 
     def testpolltype(self):

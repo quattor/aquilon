@@ -39,7 +39,7 @@ from aquilon.worker.dbwrappers.interface import (get_or_create_interface,
 from aquilon.utils import first_of
 
 
-def determine_helper_hostname(session, logger, config, dbswitch):
+def determine_helper_hostname(session, logger, config, dbnetdev):
     """Try to figure out a useful helper from the mappings.
     """
     helper_name = config.get("broker", "poll_helper_service")
@@ -48,18 +48,18 @@ def determine_helper_hostname(session, logger, config, dbswitch):
     helper_service = Service.get_unique(session, helper_name,
                                         compel=InternalError)
     mapped_instances = ServiceInstance.get_mapped_instance_cache(
-        dbpersonality=None, dblocation=dbswitch.location,
+        dbpersonality=None, dblocation=dbnetdev.location,
         dbservices=[helper_service])
     for dbsi in mapped_instances.get(helper_service, []):
         if dbsi.servers:
             # Poor man's load balancing...
             jump = choice(dbsi.servers).fqdn
             logger.client_info("Using jump host {0} from {1:l} to run discovery "
-                               "for {2:l}.".format(jump, dbsi, dbswitch))
+                               "for {2:l}.".format(jump, dbsi, dbnetdev))
             return jump
 
     logger.client_info("No jump host for %s, running discovery from %s." %
-                       (dbswitch, config.get("broker", "hostname")))
+                       (dbnetdev, config.get("broker", "hostname")))
     return None
 
 
@@ -73,7 +73,7 @@ def determine_helper_args(config):
     return ssh_args
 
 
-def discover_network_device(session, logger, config, dbswitch, dryrun):
+def discover_network_device(session, logger, config, dbnetdev, dryrun):
     """
     Perform switch discovery
 
@@ -101,28 +101,28 @@ def discover_network_device(session, logger, config, dbswitch, dryrun):
     def aqcmd(cmd, *args):
         """ Helper function to print an AQ command to be executed by the user """
         quoted_args = [quote(str(arg)) for arg in args]
-        results.append("aq %s --switch %s %s" % (cmd, dbswitch.primary_name,
+        results.append("aq %s --switch %s %s" % (cmd, dbnetdev.primary_name,
                                                  " ".join(quoted_args)))
 
     def update_switch(dbmodel, serial_no, comments):
         """ Helper for updating core switch attributes, honouring dryrun """
         if dryrun:
             args = ["update_switch"]
-            if dbmodel and dbmodel != dbswitch.model:
+            if dbmodel and dbmodel != dbnetdev.model:
                 args.extend(["--model", dbmodel.name,
                              "--vendor", dbmodel.vendor.name])
-            if serial_no and serial_no != dbswitch.serial_no:
+            if serial_no and serial_no != dbnetdev.serial_no:
                 args.extend(["--serial", serial_no])
-            if comments and comments != dbswitch.comments:
+            if comments and comments != dbnetdev.comments:
                 args.extend(["--comments", comments])
             aqcmd(*args)
         else:
             if dbmodel:
-                dbswitch.model = dbmodel
+                dbnetdev.model = dbmodel
             if serial_no:
-                dbswitch.serial_no = serial_no
+                dbnetdev.serial_no = serial_no
             if comments:
-                dbswitch.comments = comments
+                dbnetdev.comments = comments
 
     def del_address(iface, addr):
         """ Helper for deleting an IP address, honouring dryrun """
@@ -146,7 +146,7 @@ def discover_network_device(session, logger, config, dbswitch, dryrun):
         if dryrun:
             aqcmd("del_interface", "--interface", iface.name)
         else:
-            dbswitch.interfaces.remove(iface)
+            dbnetdev.interfaces.remove(iface)
 
     def do_rename_interface(iface, new_name):
         """ Helper for renaming an interface, honouring dryrun """
@@ -164,17 +164,17 @@ def discover_network_device(session, logger, config, dbswitch, dryrun):
             # nothing will use the returned value in dryrun mode
             return None
         else:
-            return get_or_create_interface(session, dbswitch, name=ifname,
+            return get_or_create_interface(session, dbnetdev, name=ifname,
                                            interface_type=iftype)
 
     def add_address(iface, ifname, ip, label, relaxed):
         """ Helper for adding an IP address, honouring dryrun """
         if label:
-            name = "%s-%s-%s" % (dbswitch.primary_name.fqdn.name, ifname,
+            name = "%s-%s-%s" % (dbnetdev.primary_name.fqdn.name, ifname,
                                  label)
         else:
-            name = "%s-%s" % (dbswitch.primary_name.fqdn.name, ifname)
-        fqdn = "%s.%s" % (name, dbswitch.primary_name.fqdn.dns_domain)
+            name = "%s-%s" % (dbnetdev.primary_name.fqdn.name, ifname)
+        fqdn = "%s.%s" % (name, dbnetdev.primary_name.fqdn.dns_domain)
 
         if dryrun:
             args = ["add_interface_address", "--interface", ifname, "--ip", ip]
@@ -216,14 +216,14 @@ def discover_network_device(session, logger, config, dbswitch, dryrun):
         else:
             logger.client_info("Warning: " + msg)
 
-    hostname = determine_helper_hostname(session, logger, config, dbswitch)
+    hostname = determine_helper_hostname(session, logger, config, dbnetdev)
     if hostname:
         args = determine_helper_args(config)
         args.append(hostname)
     else:
         args = []
 
-    args.extend([importer, str(dbswitch.primary_name)])
+    args.extend([importer, str(dbnetdev.primary_name)])
 
     try:
         out = run_command(args)
@@ -248,7 +248,7 @@ def discover_network_device(session, logger, config, dbswitch, dryrun):
     else:
         serial_no = None
 
-    comments = dbswitch.comments or ""
+    comments = dbnetdev.comments or ""
     if "tags" in data:
         # Remove previous occurances of the tags to ensure consistent casing and
         # ordering
@@ -265,7 +265,7 @@ def discover_network_device(session, logger, config, dbswitch, dryrun):
     # This is the easy part, so deal with it first
     update_switch(dbmodel, serial_no, comments)
 
-    primary_ip = dbswitch.primary_name.ip
+    primary_ip = dbnetdev.primary_name.ip
 
     # Build a lookup table of discovered IP addresses
     ip_to_iface = {}
@@ -288,7 +288,7 @@ def discover_network_device(session, logger, config, dbswitch, dryrun):
     # Some switches do not report their management IP address. In theory the
     # discovery script should fix that up, but better to be sure.
     if primary_ip not in ip_to_iface:
-        for iface in dbswitch.interfaces:
+        for iface in dbnetdev.interfaces:
             if primary_ip in iface.addresses:
                 ip_to_iface[primary_ip] = {"name": iface.name, "label": ""}
         warning("Primary IP is not present in discovery data, keeping existing "
@@ -301,7 +301,7 @@ def discover_network_device(session, logger, config, dbswitch, dryrun):
             dbnetwork.lock_row()
 
         # Lock the DNS domain, because we may want to add new entries
-        dbswitch.primary_name.fqdn.dns_domain.lock_row()
+        dbnetdev.primary_name.fqdn.dns_domain.lock_row()
 
     # Do a first pass over interfaces. We'll fill in a bunch of lookup tables to
     # help rename detection etc. later. The name_by_iface mapping is needed for
@@ -310,7 +310,7 @@ def discover_network_device(session, logger, config, dbswitch, dryrun):
     name_by_iface = {}
     addr_by_ip = {}
     ifaces_to_delete = []
-    for iface in dbswitch.interfaces[:]:
+    for iface in dbnetdev.interfaces[:]:
         delete_iface = False
 
         if iface in ifaces_to_delete:
@@ -331,7 +331,7 @@ def discover_network_device(session, logger, config, dbswitch, dryrun):
                 ip = iface.assignments[0].ip
                 if ip in ip_to_iface:
                     new_name = ip_to_iface[ip]["name"]
-                    iface2 = first_of(dbswitch.interfaces,
+                    iface2 = first_of(dbnetdev.interfaces,
                                       lambda i: i.name == new_name)
                     if iface2 and iface2.assignments:
                         # The target name already exists, it has other

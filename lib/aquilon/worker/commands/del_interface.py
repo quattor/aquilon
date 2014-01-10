@@ -32,17 +32,20 @@ class CommandDelInterface(BrokerCommand):
 
     required_parameters = []
 
-    def render(self, session, logger, interface, machine, switch, chassis, mac,
-               user, **arguments):
+    def render(self, session, logger, interface, machine, network_device,
+               switch, chassis, mac, user, **arguments):
 
-        if not (machine or switch or chassis or mac):
+        if not (machine or network_device or switch or chassis or mac):
             raise ArgumentError("Please specify at least one of --chassis, "
-                                "--machine, --switch or --mac.")
+                                "--machine, --network_device or --mac.")
+        if switch:
+            if not network_device:
+                network_device = switch
 
         if machine:
             dbhw_ent = Machine.get_unique(session, machine, compel=True)
-        elif switch:
-            dbhw_ent = NetworkDevice.get_unique(session, switch, compel=True)
+        elif network_device:
+            dbhw_ent = NetworkDevice.get_unique(session, network_device, compel=True)
         elif chassis:
             dbhw_ent = Chassis.get_unique(session, chassis, compel=True)
         else:

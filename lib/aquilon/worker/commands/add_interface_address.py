@@ -30,8 +30,8 @@ class CommandAddInterfaceAddress(BrokerCommand):
 
     required_parameters = ['interface']
 
-    def render(self, session, logger, machine, chassis, switch, fqdn, interface,
-               label, network_environment, map_to_primary, **kwargs):
+    def render(self, session, logger, machine, chassis, network_device, fqdn,
+               interface, label, network_environment, map_to_primary, **kwargs):
 
         if machine:
             hwtype = 'machine'
@@ -39,9 +39,9 @@ class CommandAddInterfaceAddress(BrokerCommand):
         elif chassis:
             hwtype = 'chassis'
             hwname = chassis
-        elif switch:
+        elif network_device:
             hwtype = 'network_device'
-            hwname = switch
+            hwname = network_device
 
         dbnet_env = NetworkEnvironment.get_unique_or_default(session,
                                                              network_environment)

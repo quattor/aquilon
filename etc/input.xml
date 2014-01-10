@@ -94,7 +94,8 @@
          <option name="services" type="flag">flush the service templates</option>
          <option name="resources" type="flag">flush the resource templates</option>
          <option name="locations" type="flag">flush templates related to locations. This is only cities for now.</option>
-         <option name="switches" type="flag">flush templates related to switches.</option>
+         <option name="network_devices" type="flag">flush templates related to network devices.</option>
+         <option name="switches" type="flag">[Deprecated] flush templates related to switches.</option>
          <option name="all" type="flag">flush all templates</option>
       </optgroup>
       <transport method="post" path="flush" />
@@ -491,14 +492,15 @@
    </command>
 
    <command name="search_observed_mac">
-      Search poll_switch results.
+      Search poll_network_device results.
 
       Supported options for --format: csv.
 
       The 'csv' format contains the following fields, in this order:
       Switch FQDN, port, MAC address, Last Observation Date
       <optgroup name="search_observed_mac_opts" mandatory="True" fields="any">
-         <option name="switch" type="string">FQDN of the switch</option>
+         <option name="network_device" type="string">FQDN of the network device</option>
+         <option name="switch" type="string">[Deprecated] FQDN of the switch</option>
          <option name="port" type="string">Port name on the switch</option>
          <option name="mac" type="mac">MAC address to search for</option>
       </optgroup>
@@ -1284,10 +1286,11 @@
          <option name="automac" type="flag" conflicts="mac">Automatically generate MAC for virtual hardware</option>
       </optgroup>
       <optgroup name="add_interface_hw" mandatory="True" fields="any">
-         <option name="machine" type="string" conflicts="hostname chassis switch">Machine (node) name</option>
-         <option name="hostname" type="string" conflicts="machine chassis switch">Hostname</option>
-         <option name="chassis" type="string" conflicts="machine hostname switch">Chassis name</option>
-         <option name="switch" type="string" conflicts="machine hostname chassis">Switch name</option>
+         <option name="machine" type="string" conflicts="hostname chassis network_device switch">Machine (node) name</option>
+         <option name="hostname" type="string" conflicts="machine chassis network_device switch">Hostname</option>
+         <option name="chassis" type="string" conflicts="machine hostname network_device switch">Chassis name</option>
+         <option name="network_device" type="string" conflicts="machine hostname chassis switch">Network device name</option>
+         <option name="switch" type="string" conflicts="machine hostname chassis network_device">[Deprecated] Switch name</option>
       </optgroup>
       <optgroup name="add_interface_optional" mandatory="False" fields="none">
          <option name="type" type="string">Interface type: public, management, oa, vlan</option>
@@ -1301,6 +1304,7 @@
       <transport trigger="hostname" method="put" path="host/%(hostname)s/interface/%(interface)s" />
       <transport trigger="chassis" method="put" path="chassis/%(chassis)s/interface/%(interface)s" />
       <transport trigger="switch" method="put" path="switch/%(switch)s/interface/%(interface)s" />
+      <transport trigger="network_device" method="put" path="network_device/%(network_device)s/interface/%(interface)s" />
    </command>
 
    <command name="add_network_environment">
@@ -1581,15 +1585,16 @@
       <p/>
       Note that updating the IP address is no longer supported. Use the add_interface_address and
       del_interface_address commands to manage auxiliary IP address allocations. Use the
-      update_switch, update_chassis and update_machine commands if you wish to change the primary IP address.
+      update_network_device, update_chassis and update_machine commands if you wish to change the primary IP address.
       <optgroup name="update_interface_opts" mandatory="True" fields="all">
          <option name="interface" type="string">Interface name</option>
       </optgroup>
       <optgroup name="update_interface_hw_opts" mandatory="True" fields="any">
-         <option name="machine" type="string" conflicts="hostname switch chassis">Machine name</option>
-         <option name="hostname" type="string" conflicts="machine switch chassis">Host name</option>
-         <option name="switch" type="string" conflicts="machine hostname chassis">Switch name</option>
-         <option name="chassis" type="string" conflicts="machine hostname switch">Chassis name</option>
+         <option name="machine" type="string" conflicts="hostname network_device switch chassis">Machine name</option>
+         <option name="hostname" type="string" conflicts="machine network_device switch chassis">Host name</option>
+         <option name="network_device" type="string" conflicts="machine hostname switch chassis">Network device name</option>
+         <option name="switch" type="string" conflicts="machine hostname network_device chassis">[Deprecated] Switch name</option>
+         <option name="chassis" type="string" conflicts="machine hostname network_device switch">Chassis name</option>
       </optgroup>
       <optgroup name="update_interface_optional" mandatory="False" fields="none">
          <option name="mac" type="mac">MAC address</option>
@@ -1606,6 +1611,7 @@
       </optgroup>
       <transport trigger="machine" method="post" path="machine/%(machine)s/interface/%(interface)s" />
       <transport trigger="hostname" method="post" path="host/%(hostname)s/interface/%(interface)s" />
+      <transport trigger="network_device" method="post" path="network_device/%(network_device)s/interface/%(interface)s" />
       <transport trigger="switch" method="post" path="switch/%(switch)s/interface/%(interface)s" />
       <transport trigger="chassis" method="post" path="chassis/%(chassis)s/interface/%(interface)s" />
    </command>
@@ -1623,10 +1629,12 @@
       <optgroup name="del_interface_opts" mandatory="True" fields="any">
          <option name="interface" type="string">Interface name</option>
          <option name="machine" type="string">Machine name</option>
-         <option name="switch" type="string">Switch name</option>
+         <option name="switch" type="string">[Deprecated] Switch name</option>
+         <option name="network_device" type="string">Network device name</option>
          <option name="chassis" type="string">Chassis name</option>
          <option name="mac" type="mac">MAC address</option>
       </optgroup>
+      <transport method="post" trigger="network_device" path="network_device/%(network_device)s/interface/command/del" />
       <transport method="post" trigger="switch" path="switch/%(switch)s/interface/command/del" />
       <transport method="post" path="interface/command/del" />
    </command>
@@ -1639,9 +1647,10 @@
       and an IP generation option, then a new DNS record will be created.
       <optgroup name="add_interface_address_req" mandatory="True" fields="all">
          <optgroup name="add_interface_address_hw_opts" mandatory="True" fields="any">
-            <option name="machine" type="string" conflicts="chassis switch">Machine name</option>
-            <option name="chassis" type="string" conflicts="machine switch">Chassis name</option>
-            <option name="switch" type="string" conflicts="machine chassis">Switch name</option>
+            <option name="machine" type="string" conflicts="chassis network_device switch">Machine name</option>
+            <option name="chassis" type="string" conflicts="machine network_device switch">Chassis name</option>
+            <option name="network_device" type="string" conflicts="machine chassis switch">Network device name</option>
+            <option name="switch" type="string" conflicts="machine chassis network_device">[Deprecated] Switch name</option>
          </optgroup>
          <option name="interface" type="string">Name of the interface.</option>
       </optgroup>
@@ -1658,6 +1667,7 @@
          <option name="ipfromsystem" type="string" conflicts="ip ipfromip autoip">choose IP address in subnet of system</option>
          <option name="autoip" type="flag" conflicts="ip ipfromip ipfromsystem">choose IP address based on MAC/switch</option>
       </optgroup>
+      <transport method="put" trigger="network_device" path="network_device/%(network_device)s/interface/%(interface)s/address"/>
       <transport method="put" trigger="switch" path="switch/%(switch)s/interface/%(interface)s/address"/>
       <transport method="put" path="interface_address"/>
    </command>
@@ -1665,9 +1675,10 @@
    <command name="del_interface_address">
       Delete an IP address from an interface.
       <optgroup name="del_interface_address_hw_opts" mandatory="True" fields="any">
-         <option name="machine" type="string" conflicts="chassis switch">Machine name</option>
-         <option name="chassis" type="string" conflicts="machine switch">Chassis name</option>
-         <option name="switch" type="string" conflicts="machine chassis">Switch name</option>
+         <option name="machine" type="string" conflicts="chassis network_device switch">Machine name</option>
+         <option name="chassis" type="string" conflicts="machine network_device switch">Chassis name</option>
+         <option name="network_device" type="string" conflicts="machine chassis switch">Network device name</option>
+         <option name="switch" type="string" conflicts="machine chassis network_device">[Deprecated] Switch name</option>
       </optgroup>
       <optgroup name="del_interface_address_req" mandatory="True" fields="all">
          <option name="interface" type="string">Name of the interface</option>
@@ -1681,6 +1692,7 @@
          <option name="ip" type="ipv4" conflicts="fqdn">IP address</option>
          <option name="label" type="string" conflicts="fqdn">Interface alias</option>
       </optgroup>
+      <transport method="delete" trigger="network_device" path="network_device/%(network_device)s/interface/%(interface)s/address"/>
       <transport method="delete" trigger="switch" path="switch/%(switch)s/interface/%(interface)s/address"/>
       <transport method="delete" path="interface_address"/>
    </command>
@@ -2361,25 +2373,26 @@
       that template generated on-demand in this way will be incomplete
       (especially if it cannot be compiled) and is purely provided for debugging.
       <optgroup name="cat_selector" mandatory="True" fields="any">
-         <option name="machine" type="string" conflicts="hostname cluster service instance default city switch personality">Name of the machine</option>
-         <option name="hostname" type="string" conflicts="machine cluster service instance default city switch personality">Name of the host</option>
-         <option name="cluster" type="string" conflicts="hostname machine service instance default city switch personality">Name of the cluster</option>
-         <option name="service" type="string" conflicts="hostname machine cluster city switch personality">Name of the service</option>
-         <option name="city" type="string" conflicts="hostname machine cluster service instance default switch personality">Name of the city</option>
-         <option name="switch" type="string" conflicts="hostname machine cluster service instance default personality">Name of the switch</option>
-	 <option name="personality" conflicts="hostname cluster service instance default city switch machine" type="string">Name of personality</option>
+         <option name="machine" type="string" conflicts="hostname cluster service instance default city network_device switch personality">Name of the machine</option>
+         <option name="hostname" type="string" conflicts="machine cluster service instance default city network_device switch personality">Name of the host</option>
+         <option name="cluster" type="string" conflicts="hostname machine service instance default city network_device switch personality">Name of the cluster</option>
+         <option name="service" type="string" conflicts="hostname machine cluster city network_device switch personality">Name of the service</option>
+         <option name="city" type="string" conflicts="hostname machine cluster service instance default network_device switch personality">Name of the city</option>
+         <option name="network_device" type="string" conflicts="hostname machine cluster service instance default switch personality">Name of the network device</option>
+         <option name="switch" type="string" conflicts="hostname machine cluster service network_device instance default personality">[Deprecated] Name of the switch</option>
+	 <option name="personality" conflicts="hostname cluster service instance default city network_device switch machine" type="string">Name of personality</option>
 	 <optgroup name="persopts" fields="any">
-		<option name="archetype" conflicts="hostname cluster service instance default city switch machine" type="string">Archetype</option>
-		<option name="pre_feature" conflicts="hostname cluster service instance default city switch machine post_feature param_tmpl" type="flag">Pre feature template</option>
-		<option name="post_feature" conflicts="hostname cluster service instance default city switch machine pre_feature param_tmpl" type="flag">Post feature template</option>
-		<option name="param_tmpl" conflicts="hostname cluster service instance default city switch machine post_feature pre_feature" type="string">param templates</option>
+		<option name="archetype" conflicts="hostname cluster service instance default city network_device switch machine" type="string">Archetype</option>
+		<option name="pre_feature" conflicts="hostname cluster service instance default city network_device switch machine post_feature param_tmpl" type="flag">Pre feature template</option>
+		<option name="post_feature" conflicts="hostname cluster service instance default city network_device switch machine pre_feature param_tmpl" type="flag">Post feature template</option>
+		<option name="param_tmpl" conflicts="hostname cluster service instance default city network_device switch machine post_feature pre_feature" type="string">param templates</option>
          </optgroup>
       </optgroup>
       <optgroup name="cat_options" mandatory="False" fields="any">
-         <option name="default" type="flag" conflicts="hostname machine cluster city switch">Show the default client config for the service/instance</option>
-         <option name="server" type="flag" conflicts="hostname machine cluster city switch">Show the server config for the service/instance</option>
-         <option name="data" type="flag" conflicts="machine service city switch">Show the data template for the host/cluster</option>
-         <option name="instance" type="string" conflicts="hostname machine cluster city switch">Name of the service instance</option>
+         <option name="default" type="flag" conflicts="hostname machine cluster city network_device switch">Show the default client config for the service/instance</option>
+         <option name="server" type="flag" conflicts="hostname machine cluster city network_device switch">Show the server config for the service/instance</option>
+         <option name="data" type="flag" conflicts="machine service city network_device switch">Show the data template for the host/cluster</option>
+         <option name="instance" type="string" conflicts="hostname machine cluster city network_device switch">Name of the service instance</option>
          <option name="generate" type="flag">Show the plenary template as it would be generated</option>
       </optgroup>
       <optgroup name="cat_resource_options" mandatory="False" fields="any">
@@ -2400,6 +2413,7 @@
       <transport trigger="service" method="get" path="service/%(service)s/plenary" />
       <transport trigger="instance" method="get" path="service/%(service)s/instance/%(instance)s/plenary" />
       <transport trigger="city" method="get" path="city/%(city)s/plenary" />
+      <transport trigger="network_device" method="get" path="network_device/%(network_device)s/plenary" />
       <transport trigger="switch" method="get" path="switch/%(switch)s/plenary" />
       <transport trigger="personality" method="get"  path="personality/personality/%(personality)s/plenary" />
    </command>
@@ -3347,8 +3361,28 @@
       <transport method="delete" path="machine/%(machine)s" />
    </command>
 
-   <command name="add_switch">
+   <command name="add_network_device">
       Create a new network switch.
+      <optgroup name="add_network_device_mandatory" mandatory="True" fields="all">
+         <option name="network_device" type="string">Network device fully qualified name</option>
+         <option name="model" type="string">Network device model</option>
+         <option name="rack" type="string">Rack name</option>
+         <option name="type" type="string">Network device type (tor, bor, agg)</option>
+         <option name="ip" type="ipv4">IP address</option>
+      </optgroup>
+      <optgroup name="add_network_device_optional" mandatory="False">
+	 <option name="interface" type="string">Interface name (like xge49)</option>
+	 <option name="mac" type="mac">MAC address of the interface</option>
+	 <option name="label" type="string">Hardware label. If not specified, chassis name minus the DNS domain is used.</option>
+	 <option name="vendor" type="string">Network device vendor. Needed if the model name is not unique</option>
+	 <option name="serial" type="string">Serial Number</option>
+	 <option name="comments" type="string">Comments</option>
+      </optgroup>
+      <transport method="put" path="network_device/%(network_device)s" />
+   </command>
+
+   <command name="add_switch">
+      DEPRECATED. Create a new network switch.
       <optgroup name="add_switch_mandatory" mandatory="True" fields="all">
          <option name="switch" type="string">Switch fully qualified name</option>
          <option name="model" type="string">Switch model</option>
@@ -3367,8 +3401,31 @@
       <transport method="put" path="switch/%(switch)s" />
    </command>
 
+   <command name="update_network_device">
+      Update network device information.  Requires the network device name.  All
+      other fields can be updated.
+      <optgroup name="add_network_device_mandatory" mandatory="True" fields="all">
+         <option name="network_device" type="string">Network device fully qualified name</option>
+      </optgroup>
+      <optgroup name="add_network_device_optional" mandatory="False">
+         <option name="model" type="string">Network device model</option>
+         <option name="rack" type="string">Rack name</option>
+         <option name="type" type="string">Network device type (tor, bor, agg)</option>
+         <option name="ip" type="ipv4">IP address</option>
+	 <option name="vendor" type="string">Network device vendor. Needed if the model name is not unique</option>
+	 <option name="serial" type="string">Serial Number</option>
+	 <option name="comments" type="string">Comments</option>
+     <option name="rename_to" type="string">New name of the network device</option>
+     <!-- TODO should be some json type with schema + validation -->
+     <option name="discovered_macs" type="json">mac/port mapping</option>
+     <option name="clear" type="flag">clear current mac/port mapping</option>
+	 <option name="discover" type="flag">Do automatic discovery</option>
+      </optgroup>
+      <transport method="post" path="network_device/%(network_device)s" />
+   </command>
+
    <command name="update_switch">
-      Update network switch information.  Requires the switch name.  All
+      DEPRECATED. Update network switch information.  Requires the switch name.  All
       other fields can be updated.
       <optgroup name="add_switch_mandatory" mandatory="True" fields="all">
          <option name="switch" type="string">Switch fully qualified name</option>
@@ -3390,8 +3447,30 @@
       <transport method="post" path="switch/%(switch)s" />
    </command>
 
+   <command name="show_network_device">
+      Show the configuration information for the specified network device.
+      <p/>
+      Supported options for --format: raw, csv.
+      <p/>
+      The 'csv' format contains the following fields, in this order:
+      FQDN, Type, Rack, Building, Vendor name, Model name, Serial number,
+      Interface name, Interface MAC address, Interface IP address.
+      <p/>
+      If the network device has multiple interfaces assigned, then there will be a
+      separate line for each.
+      <optgroup name="show_network_device_opts" mandatory="True" fields="any">
+         <option name="network_device" type="string">Network device fully qualified name</option>
+         <option name="all" type="flag">show all</option>
+      </optgroup>
+      <optgroup name="show_network_device_optional" mandatory="False" fields="any">
+         <option name="discover" type="flag" conflicts="all">Show differences to discovery data</option>
+      </optgroup>
+      <transport trigger="network_device" method="get" path="network_device/%(network_device)s" />
+      <transport trigger="all" method="get" path="network_device" />
+   </command>
+
    <command name="show_switch">
-      Show the configuration information for the specified switch.
+      DEPRECATED. Show the configuration information for the specified switch.
       <p/>
       Supported options for --format: raw, csv.
       <p/>
@@ -3412,8 +3491,50 @@
       <transport trigger="all" method="get" path="switch" />
    </command>
 
+   <command name="search_network_device">
+      Find network devices matching the given information.
+      <p/>
+      Note that location searches are inclusive.  That is, searching for a
+      building will include all racks, rooms, etc. inside the building.  The
+      --exact_location option can be used to override this behavior.
+      <p/>
+      Supported options for --format: raw, csv.
+      <p/>
+      The 'csv' format contains the following fields, in this order:
+      FQDN, Type, Rack, Building, Vendor name, Model name, Serial number,
+      Interface name, Interface MAC address, Interface IP address.
+      <p/>
+      If the network device has multiple interfaces assigned, then there will be a
+      separate line for each.
+      <optgroup name="search_network_device_opts" mandatory="True" fields="any">
+         <option name="network_device" type="string">Network device fully qualified name</option>
+         <option name="ip" type="ipv4">IP address</option>
+         <option name="vlan" type="int">Vlan ID</option>
+         <option name="type" type="string">Type (tor, bor, agg)</option>
+         <option name="model" type="string">Network device model</option>
+         <option name="vendor" type="string">Network device vendor </option>
+         <optgroup name="search_network_device_location_opts" fields="any">
+            <option name="organization" type="string">Organization</option>
+            <option name="hub" type="string">Hub</option>
+            <option name="continent" type="string">Continent</option>
+            <option name="country" type="string">Country</option>
+            <option name="city" type="string">City</option>
+            <option name="building" type="string">Building</option>
+            <option name="room" type="string">Room</option>
+            <option name="bunker" type="string">Bunker</option>
+            <option name="rack" type="string">Rack</option>
+            <option name="desk" type="string">Desk</option>
+         </optgroup>
+	 <option name="serial" type="string">serial number</option>
+         <option name="exact_location" type="flag">match the location exactly</option>
+         <option name="fullinfo" type="flag">show full information for the matching network devices</option>
+         <option name="all" type="flag">show all</option>
+      </optgroup>
+      <transport method="get" path="find/network_device" />
+   </command>
+
    <command name="search_switch">
-      Find switches matching the given information.
+      DEPRECATED. Find switches matching the given information.
       <p/>
       Note that location searches are inclusive.  That is, searching for a
       building will include all racks, rooms, etc. inside the building.  The
@@ -3454,16 +3575,39 @@
       <transport method="get" path="find/switch" />
    </command>
 
+   <command name="del_network_device">
+      Delete the specified network device.
+      <optgroup name="del_network_device_opts" mandatory="True" fields="all">
+         <option name="network_device" type="string">Network device name</option>
+      </optgroup>
+      <transport method="delete" path="network_device/%(network_device)s" />
+   </command>
+
    <command name="del_switch">
-      Delete the specified switch.
+      DEPRECATED. Delete the specified switch.
       <optgroup name="del_switch_opts" mandatory="True" fields="all">
          <option name="switch" type="string">switch name</option>
       </optgroup>
       <transport method="delete" path="switch/%(switch)s" />
    </command>
 
+   <command name="poll_network_device">
+      Poll network device for MAC information.
+      <optgroup name="poll_network_device_opts" mandatory="True" fields="any">
+         <option name="network_device" type="string" conflicts="rack">Network device name</option>
+         <option name="rack" type="string" conflicts="network_device">Rack name</option>
+      </optgroup>
+      <optgroup name="poll_network_device optional" mandatory="False" fields="any">
+         <option name="type" type="string">If polling a rack, poll only this type of network device</option>
+         <option name="clear" type="boolean">Clear any previously observed MACs before polling</option>
+         <option name="vlan" type="boolean">Additionally poll for vlan/subnet mappings</option>
+      </optgroup>
+      <transport trigger="network_device" method="post" path="network_device/%(network_device)s/command/poll" />
+      <transport method="post" path="poll/rack/%(rack)s" />
+   </command>
+
    <command name="poll_switch">
-      Poll switch for MAC information.
+      DEPRECATED. Poll switch for MAC information.
       <optgroup name="poll_switch_opts" mandatory="True" fields="any">
          <option name="switch" type="string" conflicts="rack">switch name</option>
          <option name="rack" type="string" conflicts="switch">Rack name</option>

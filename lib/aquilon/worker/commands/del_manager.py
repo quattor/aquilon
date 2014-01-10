@@ -46,7 +46,7 @@ class CommandDelManager(CommandDelInterfaceAddress):
 
         return super(CommandDelManager, self).render(session, logger,
                                                      machine=dbinterface.hardware_entity.label,
-                                                     chassis=None, switch=None,
+                                                     chassis=None, network_device=None,
                                                      interface=dbinterface.name,
                                                      fqdn=manager,
                                                      ip=assignment.ip,

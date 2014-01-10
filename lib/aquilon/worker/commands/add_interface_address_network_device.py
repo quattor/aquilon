@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2013  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,17 +14,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Contains the logic for `aq del_switch`."""
-
+"""Contains the logic for `aq add interface address --network_device`."""
 
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.commands.del_network_device import CommandDelNetworkDevice
+from aquilon.worker.commands.add_interface_address import CommandAddInterfaceAddress
 
 
-class CommandDelSwitch(CommandDelNetworkDevice):
+class CommandAddInterfaceAddressNetworkDevice(CommandAddInterfaceAddress):
 
-    required_parameters = ["switch"]
-
-    def render(self, switch, **arguments):
-        arguments['network_device'] = switch
-        return CommandDelNetworkDevice.render(self, **arguments)
+    required_parameters = ['network_device', 'interface']
