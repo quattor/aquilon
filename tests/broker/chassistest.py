@@ -20,7 +20,7 @@
 class VerifyChassisMixin(object):
 
     def verifychassis(self, chassis, vendor, model, rack, rackrow, rackcol,
-                      serial=None, ip=None, mac=None, interface=None,
+                      serial=None, ip=None, mac=None, interface='oa',
                       comments=None):
         command = "show chassis --chassis %s" % chassis
         out = self.commandtest(command.split(" "))
@@ -53,14 +53,6 @@ class VerifyChassisMixin(object):
         else:
             self.matchclean(out, "\n  Comments:", command)
 
-        if interface:
-            self.matchclean(out, "\n    Comments: Created automatically",
-                            command)
-        else:
-            # FIXME: eventually this should be part of the model
-            interface = "oa"
-            self.matchoutput(out, "\n    Comments: Created automatically "
-                             "by add_chassis", command)
         if mac:
             self.searchoutput(out, r"Interface: %s %s$" % (interface, mac),
                               command)

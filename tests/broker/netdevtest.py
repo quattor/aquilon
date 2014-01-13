@@ -22,7 +22,7 @@ class VerifyNetworkDeviceMixin(object):
     def verifynetdev(self, netdev, vendor, model,
                      rack, rackrow, rackcol,
                      serial=None, switch_type='tor', ip=None, mac=None,
-                     interface=None, comments=None):
+                     interface='xge', comments=None):
         command = "show network device --network_device %s" % netdev
         out = self.commandtest(command.split(" "))
         (short, dot, dns_domain) = netdev.partition(".")
@@ -55,14 +55,6 @@ class VerifyNetworkDeviceMixin(object):
         else:
             self.matchclean(out, "\n  Comments:", command)
 
-        if interface:
-            self.matchclean(out, "\n    Comments: Created automatically",
-                            command)
-        else:
-            # FIXME: eventually this should be part of the model
-            interface = "xge"
-            self.searchoutput(out, "^    Comments: Created automatically",
-                              command)
         if mac:
             self.searchoutput(out, r"Interface: %s %s$" % (interface, mac),
                               command)

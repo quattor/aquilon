@@ -368,25 +368,6 @@ def get_or_create_interface(session, dbhw_ent, name=None, mac=None,
                                                          dbinterface)))
 
     if name and not dbinterface:
-        # Special logic to allow "add_interface" to succeed if there is an
-        # auto-created interface already
-        if preclude and len(dbhw_ent.interfaces) == 1:
-            dbinterface = dbhw_ent.interfaces[0]
-            if dbinterface.mac is None and \
-               dbinterface.interface_type == interface_type and \
-               dbinterface.comments is not None and \
-               dbinterface.comments.startswith("Created automatically"):
-                dbinterface.name = name
-                dbinterface.mac = mac
-                if hasattr(dbinterface, "bootable") and bootable is not None:
-                    dbinterface.bootable = bootable
-                dbinterface.comments = comments
-                if hasattr(dbinterface, "port_group"):
-                    dbinterface.port_group = port_group
-                session.flush()
-                return dbinterface
-
-        dbinterface = None
         for iface in dbhw_ent.interfaces:
             if iface.name == name:
                 dbinterface = iface

@@ -519,9 +519,6 @@ class DSDBRunner(object):
 
         - If the interface has a comment, use that.
 
-          Exception: dummy interfaces created by add_switch/add_chassis; we
-          don't want to propagate the "Created automatically ..." comment
-
         - Otherwise take the comment from the hardware entity.
 
           Exception: management interfaces
@@ -579,8 +576,7 @@ class DSDBRunner(object):
                 continue
             else:
                 ifname = addr.logical_name
-                if addr.interface.comments and not \
-                   addr.interface.comments.startswith("Created automatically"):
+                if addr.interface.comments:
                     comments = addr.interface.comments
 
             if addr.interface.interface_type == "management":
