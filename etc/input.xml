@@ -3366,9 +3366,12 @@
       <optgroup name="add_network_device_mandatory" mandatory="True" fields="all">
          <option name="network_device" type="string">Network device fully qualified name</option>
          <option name="model" type="string">Network device model</option>
-         <option name="rack" type="string">Rack name</option>
          <option name="type" type="string">Network device type (tor, bor, agg)</option>
          <option name="ip" type="ipv4">IP address</option>
+      </optgroup>
+      <optgroup name="add_network_device_location" mandatory="True" fields="any">
+         <option name="rack" conflicts="building" type="string">Rack name</option>
+         <option name="building" conflicts="rack" type="string">Building name</option>
       </optgroup>
       <optgroup name="add_network_device_optional" mandatory="False">
 	 <option name="interface" type="string">Interface name (like xge49)</option>
@@ -3386,9 +3389,12 @@
       <optgroup name="add_switch_mandatory" mandatory="True" fields="all">
          <option name="switch" type="string">Switch fully qualified name</option>
          <option name="model" type="string">Switch model</option>
-         <option name="rack" type="string">Rack name</option>
          <option name="type" type="string">Switch type (tor, bor, agg)</option>
          <option name="ip" type="ipv4">IP address</option>
+      </optgroup>
+      <optgroup name="add_switch_location" mandatory="True" fields="any">
+         <option name="rack" conflicts="building" type="string">Rack name</option>
+         <option name="building" conflicts="rack" type="string">Building name</option>
       </optgroup>
       <optgroup name="add_switch_optional" mandatory="False">
 	 <option name="interface" type="string">Interface name (like xge49)</option>
@@ -3409,16 +3415,17 @@
       </optgroup>
       <optgroup name="add_network_device_optional" mandatory="False">
          <option name="model" type="string">Network device model</option>
-         <option name="rack" type="string">Rack name</option>
+         <option name="rack" conflicts="building" type="string">Rack name</option>
+         <option name="building" conflicts="rack" type="string">Building name</option>
          <option name="type" type="string">Network device type (tor, bor, agg)</option>
          <option name="ip" type="ipv4">IP address</option>
 	 <option name="vendor" type="string">Network device vendor. Needed if the model name is not unique</option>
 	 <option name="serial" type="string">Serial Number</option>
 	 <option name="comments" type="string">Comments</option>
-     <option name="rename_to" type="string">New name of the network device</option>
-     <!-- TODO should be some json type with schema + validation -->
-     <option name="discovered_macs" type="json">mac/port mapping</option>
-     <option name="clear" type="flag">clear current mac/port mapping</option>
+         <option name="rename_to" type="string">New name of the network device</option>
+         <!-- TODO should be some json type with schema + validation -->
+         <option name="discovered_macs" type="json">mac/port mapping</option>
+         <option name="clear" type="flag">clear current mac/port mapping</option>
 	 <option name="discover" type="flag">Do automatic discovery</option>
       </optgroup>
       <transport method="post" path="network_device/%(network_device)s" />
@@ -3432,7 +3439,8 @@
       </optgroup>
       <optgroup name="add_switch_optional" mandatory="False">
          <option name="model" type="string">Switch model</option>
-         <option name="rack" type="string">Rack name</option>
+         <option name="rack" conflicts="building" type="string">Rack name</option>
+         <option name="building" conflicts="rack" type="string">Building name</option>
          <option name="type" type="string">Switch type (tor, bor, agg)</option>
          <option name="ip" type="ipv4">IP address</option>
 	 <option name="vendor" type="string">Switch vendor. Needed if the model name is not unique</option>

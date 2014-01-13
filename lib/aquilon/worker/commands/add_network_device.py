@@ -31,9 +31,9 @@ from aquilon.worker.templates import Plenary
 
 class CommandAddNetworkDevice(BrokerCommand):
 
-    required_parameters = ["network_device", "model", "rack", "type", "ip"]
+    required_parameters = ["network_device", "model", "type", "ip"]
 
-    def render(self, session, logger, network_device, label, model, rack, type, ip,
+    def render(self, session, logger, network_device, label, model, type, ip,
                interface, mac, vendor, serial, comments, **arguments):
         dbmodel = Model.get_unique(session, name=model, vendor=vendor,
                                    compel=True)
@@ -42,7 +42,7 @@ class CommandAddNetworkDevice(BrokerCommand):
             raise ArgumentError("This command can only be used to "
                                 "add network devices.")
 
-        dblocation = get_location(session, rack=rack)
+        dblocation = get_location(session, compel=True, **arguments)
 
         dbdns_rec, newly_created = grab_address(session, network_device, ip,
                                                 allow_restricted_domain=True,

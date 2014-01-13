@@ -89,6 +89,14 @@ class TestAddNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
                           "--ip", ip, "--rack", "ut3", "--model", "temp_switch"])
         self.dsdb_verify()
 
+    def testaddut3gd1r08(self):
+        ip = self.net["tor_net_9"].usable[1]
+        self.dsdb_expect_add("ut3gd1r08.aqd-unittest.ms.com", ip, "xge")
+        self.successtest(["add", "network_device", "--type", "bor",
+                          "--network_device", "ut3gd1r08.aqd-unittest.ms.com",
+                          "--ip", ip, "--building", "ut", "--model", "temp_switch"])
+        self.dsdb_verify()
+
     def testaddnp06bals03(self):
         self.dsdb_expect_add("np06bals03.ms.com", "172.31.64.69",
                              "gigabitethernet0_1", "00:18:b1:89:86:00")

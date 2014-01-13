@@ -63,6 +63,12 @@ class TestDelNetworkDevice(TestBrokerCommand):
         self.successtest(command.split(" "))
         self.dsdb_verify()
 
+    def testdelut3gd1r08(self):
+        self.dsdb_expect_delete(self.net["tor_net_9"].usable[1])
+        command = "del network_device --network_device ut3gd1r08.aqd-unittest.ms.com"
+        self.successtest(command.split(" "))
+        self.dsdb_verify()
+
     def testdelnp06bals03(self):
         self.dsdb_expect_delete("172.31.64.69")
         command = "del network_device --network_device np06bals03.ms.com"

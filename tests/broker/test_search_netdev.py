@@ -56,6 +56,11 @@ class TestSearchNetworkDevice(TestBrokerCommand):
 
     def testbuildingexact(self):
         command = ["search_network_device", "--building=ut", "--exact_location"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "ut3gd1r08.aqd-unittest.ms.com", command)
+
+    def testcityexact(self):
+        command = ["search_network_device", "--city=ny", "--exact_location"]
         self.noouttest(command)
 
     def testrack(self):

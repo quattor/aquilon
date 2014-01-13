@@ -32,7 +32,7 @@ class NetworkDeviceInterfaceTupleFormatter(ObjectFormatter):
         details = [device.fqdn,
                    device.primary_ip,
                    device.switch_type,
-                   device.location.rack.name,
+                   device.location.rack.name if device.location.rack else None,
                    device.location.building.name,
                    device.model.vendor.name,
                    device.model.name,

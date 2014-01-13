@@ -37,7 +37,7 @@ class CommandUpdateNetworkDevice(BrokerCommand):
 
     required_parameters = ["network_device"]
 
-    def render(self, session, logger, network_device, model, rack, type, ip, vendor,
+    def render(self, session, logger, network_device, model, type, ip, vendor,
                serial, rename_to, discovered_macs, clear, discover, comments,
                **arguments):
         dbnetdev = NetworkDevice.get_unique(session, network_device, compel=True)
@@ -57,7 +57,7 @@ class CommandUpdateNetworkDevice(BrokerCommand):
                                        compel=True)
             dbnetdev.model = dbmodel
 
-        dblocation = get_location(session, rack=rack)
+        dblocation = get_location(session, **arguments)
         if dblocation:
             dbnetdev.location = dblocation
 
