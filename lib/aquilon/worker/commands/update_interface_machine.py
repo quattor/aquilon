@@ -99,17 +99,46 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
 
         if comments:
             dbinterface.comments = comments
+
         if boot:
-            # Should we also transfer the primary IP to the new boot interface?
-            # That could get tricky if the new interface already has an IP
-            # address...
+            # Figure out if the current bootble interface also has the
+            # default route set; the new bootable interface probably
+            # wants to have the same settings.  Note that if
+            # old_default_route is None there was no bootable interface.
+            old_default_route = None
+            for i in dbhw_ent.interfaces:
+                if i.bootable == True:
+                    old_default_route = i.default_route
+                    break
+
+            # Apply the bootable flag to the supplied interface, clearing
+            # it on all other interfaces.
             for i in dbhw_ent.interfaces:
                 if i == dbinterface:
                     i.bootable = True
-                    i.default_route = True
                 else:
                     i.bootable = False
-                    i.default_route = False
+
+            # If the user was not explicit about the default route flag
+            # (default_route is None); there was an existing bootable
+            # interface (old_default_route is not None); the new default
+            # route setting differs from the old - then produce a warning.
+            if (default_route is None and
+                old_default_route is not None and
+                dbinterface.default_route != old_default_route):
+                if old_default_route:
+                    logger.client_info("Warning: New boot interface {0} is no "
+                                       "longer provides the default route; it "
+                                       "did before!".format(dbinterface))
+                else:
+                    logger.client_info("Warning: New boot interface {0} now "
+                                       "provides the default route; it didn't "
+                                       "before!".format(dbinterface))
+
+            # Should we also transfer the primary IP to the new boot interface?
+            # That could get tricky if the new interface already has an IP
+            # address...
+
         if default_route is not None:
             dbinterface.default_route = default_route
             if not first_of(dbhw_ent.interfaces, lambda x: x.default_route):
