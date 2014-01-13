@@ -146,6 +146,19 @@ class TestAddResourceGroup(TestBrokerCommand):
                         ", ".join(["%s %s" % (res.type, res.name)
                                    for res in rg_msg.resourcegroup.resources]))
 
+    def test_140_add_empty(self):
+        # Add an empty resourcegroup, that won't have any resources in it
+        command = ["add_resourcegroup", "--resourcegroup", "empty",
+                   "--cluster", "utvcs1"]
+        self.successtest(command)
+
+    def test_141_del_empty(self):
+        # Test deleting a resourcegroup that never had any resources, so the
+        # BundleResource object is never created
+        command = ["del_resourcegroup", "--resourcegroup", "empty",
+                   "--cluster", "utvcs1"]
+        self.successtest(command)
+
     def test_200_add_bad_type(self):
         command = ["add_resourcegroup", "--resourcegroup=utvcs1as1",
                    "--cluster=utvcs1", "--required_type=non-existent-type"]

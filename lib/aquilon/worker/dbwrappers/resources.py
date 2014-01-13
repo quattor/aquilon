@@ -110,7 +110,7 @@ def del_resource(session, logger, dbresource, dsdb_callback=None, **arguments):
     holder_plenary = Plenary.get_plenary(holder.holder_object, logger=logger)
     remove_plenary = Plenary.get_plenary(dbresource, logger=logger)
 
-    if isinstance(dbresource, ResourceGroup):
+    if hasattr(dbresource, 'resholder') and dbresource.resholder:
         # We have to tell the ORM that these are going to be deleted, we can't
         # just rely on the DB-side cascading
         del dbresource.resholder.resources[:]
