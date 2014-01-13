@@ -1,0 +1,3 @@
+ALTER TABLE personality MODIFY name VARCHAR2(64 CHAR);
+
+QUIT;
