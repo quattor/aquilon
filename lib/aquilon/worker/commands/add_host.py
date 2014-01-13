@@ -70,7 +70,7 @@ class CommandAddHost(BrokerCommand):
 
         if not buildstatus:
             buildstatus = 'build'
-        dbstatus = HostLifecycle.get_unique(session, buildstatus, compel=True)
+        dbstatus = HostLifecycle.get_instance(session, buildstatus)
         dbmachine = Machine.get_unique(session, machine, compel=True)
         oldinfo = DSDBRunner.snapshot_hw(dbmachine)
 

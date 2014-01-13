@@ -89,12 +89,9 @@ class CommandUpdatePersonality(BrokerCommand):
 
         if host_environment is not None:
             if dbpersona.host_environment.name == 'legacy':
-                HostEnvironment.polymorphic_subclass(host_environment,
-                                                     "Unknown environment name")
-                Personality.validate_env_in_name(personality, host_environment)
-                dbpersona.host_environment = HostEnvironment.get_unique(session,
-                                                                        host_environment,
-                                                                        compel=True)
+                dbhost_env = HostEnvironment.get_instance(session, host_environment)
+                Personality.validate_env_in_name(personality, dbhost_env.name)
+                dbpersona.host_environment = dbhost_env
             else:
                 raise ArgumentError("The personality '{0!s}' already has env set to '{1!s}'"
                                     " and cannot be updated"

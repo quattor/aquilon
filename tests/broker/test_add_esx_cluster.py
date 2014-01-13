@@ -220,9 +220,9 @@ class TestAddESXCluster(PersonalityTestMixin, TestBrokerCommand):
                    "--metacluster=utmc1", "--building=ut",
                    "--archetype=esx_cluster",
                    "--personality=vulcan-1g-desktop-prod"]
-        out = self.notfoundtest(command)
+        out = self.badrequesttest(command)
         self.matchoutput(out,
-                         "state wanting not found",
+                         "Unknown cluster lifecycle 'wanting'",
                          command)
 
     def testfailinvalidname(self):

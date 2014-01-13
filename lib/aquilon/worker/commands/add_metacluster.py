@@ -55,8 +55,7 @@ class CommandAddMetaCluster(BrokerCommand):
 
         if not buildstatus:
             buildstatus = "build"
-        dbstatus = ClusterLifecycle.get_unique(session, buildstatus,
-                                               compel=True)
+        dbstatus = ClusterLifecycle.get_instance(session, buildstatus)
 
         # this should be reverted when virtbuild supports these options
         if not domain and not sandbox:

@@ -27,8 +27,7 @@ class CommandChangeClusterStatus(BrokerCommand):
 
     def render(self, session, logger, cluster, buildstatus, **arguments):
         dbcluster = Cluster.get_unique(session, cluster, compel=True)
-        dbstatus = ClusterLifecycle.get_unique(session, buildstatus,
-                                               compel=True)
+        dbstatus = ClusterLifecycle.get_instance(session, buildstatus)
 
         if not dbcluster.status.transition(dbcluster, dbstatus):
             return

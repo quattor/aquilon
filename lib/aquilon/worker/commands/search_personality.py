@@ -44,8 +44,8 @@ class CommandSearchPersonality(BrokerCommand):
             q = q.filter_by(config_override=True)
 
         if host_environment:
-            host_env = HostEnvironment.get_unique(session, host_environment, compel=True)
-            q = q.filter_by(host_environment=host_env)
+            dbhost_env = HostEnvironment.get_instance(session, host_environment)
+            q = q.filter_by(host_environment=dbhost_env)
 
         if grn or eon_id:
             dbgrn = lookup_grn(session, grn, eon_id, autoupdate=False)

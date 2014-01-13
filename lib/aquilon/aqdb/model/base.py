@@ -373,12 +373,19 @@ Base = declarative_base(cls=Base)
 
 class SingleInstanceMixin(object):
     @classmethod
-    def get_instance(cls, session):
+    def get_instance(cls, session, value=None):
         '''Return the one and only instance of the given class'''
 
         if "polymorphic_identity" not in cls.__mapper_args__:
-            raise InternalError("get_instance() must be called on a "
-                                "child class.")
+            if not value:
+                raise InternalError("get_instance(): value cannot be None when "
+                                    "called on the base class")
+            cls = cls.polymorphic_subclass(value, "Unknown %s" %
+                                           cls._get_class_label(True))
+        else:
+            if value:
+                raise InternalError("get_instance(): value must be None when "
+                                    "called on a child class.")
         return session.query(cls).one()
 
 

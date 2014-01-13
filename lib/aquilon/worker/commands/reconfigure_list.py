@@ -81,8 +81,7 @@ class CommandReconfigureList(BrokerCommand):
             dbos = None
 
         if buildstatus:
-            dbstatus = HostLifecycle.get_unique(session, buildstatus,
-                                                compel=True)
+            dbstatus = HostLifecycle.get_instance(session, buildstatus)
 
         if grn or eon_id:
             dbgrn = lookup_grn(session, grn, eon_id, logger=logger,

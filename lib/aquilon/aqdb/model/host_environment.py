@@ -29,6 +29,7 @@ _TN = 'host_environment'
 class HostEnvironment(SingleInstanceMixin, Base):
     """ Describes the state a host is within the provisioning lifecycle """
     __tablename__ = _TN
+    _class_label = 'Host Environment'
 
     id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
     name = Column(String(16), nullable=False)

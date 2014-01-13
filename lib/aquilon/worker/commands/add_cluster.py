@@ -47,8 +47,7 @@ class CommandAddCluster(BrokerCommand):
 
         if not buildstatus:
             buildstatus = "build"
-        dbstatus = ClusterLifecycle.get_unique(session, buildstatus,
-                                               compel=True)
+        dbstatus = ClusterLifecycle.get_instance(session, buildstatus)
 
         (dbbranch, dbauthor) = get_branch_and_author(session, logger,
                                                      domain=domain,
