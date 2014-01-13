@@ -468,6 +468,18 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
                           r"\[boot, snapshot\]$",
                           command)
 
+    def test_380_fail_update_disk(self):
+        command = ["update_disk", "--disk", "sda", "--machine", "utpgm0",
+                   "--share", "non_existent_share",
+                   "--resourcegroup", "utmc8as1"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out,
+                         "ESX Cluster utpgcl1 does not have share "
+                         "non_existent_share assigned to it in "
+                         "resourcegroup utmc8as1.",
+                         command)
+
+
 #    metacluster aligned svc tests
     def test_400_addvcenterservices(self):
         command = ["add_required_service", "--service", "vcenter",

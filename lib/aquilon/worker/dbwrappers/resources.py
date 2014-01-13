@@ -230,18 +230,18 @@ def find_resource(cls, dbobj, resourcegroup, resource, ignore=None,
     if hasattr(dbobj, 'metacluster') and dbobj.metacluster:
         try:
             return find_resource(cls, dbobj.metacluster, resourcegroup, resource,
-                              ignore=ignore, error=error)
+                                 ignore=ignore, error=error)
         except error:
             pass
 
     clslabel = cls._get_class_label().lower()
 
     if resourcegroup:
-        msg = "{0} does not have {1} {2!s} assigned to it in " + \
+        msg = "{0} does not have {1} {2!s} assigned to it in " \
               "resourcegroup {3}.".format(dbobj, clslabel,
                                           resource, resourcegroup)
     else:
-        msg = "{0} does not have {1} ""{2!s} assigned to it.".format(dbobj,
+        msg = "{0} does not have {1} {2!s} assigned to it.".format(dbobj,
                                                                      clslabel,
                                                                      resource)
 
