@@ -3660,6 +3660,7 @@
          <option name="metacluster" type="string">Name of the metacluster</option>
       </optgroup>
       <optgroup name="update_metacluster_options" mandatory="False">
+         <option name="personality" type="string">Personality Name</option>
          <option name="max_members" type="int">Maximum number of clusters that can be members of this metacluster</option>
          <option name="comments" type="string">Comments</option>
          <option name="high_availability" type="boolean">Turn on high availaibility mode</option>
