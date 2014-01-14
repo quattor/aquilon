@@ -95,6 +95,12 @@ class InterfaceFormatter(ObjectFormatter):
                            (names, addr.ip, tagstr))
             static_routes |= set(addr.network.personality_static_routes(personality))
 
+            for dns_record in addr.dns_records:
+                if dns_record.alias_cnt:
+                    details.append(indent + "  Aliases: %s" %
+                                   ", ".join(str(a.fqdn) for a in dns_record.all_aliases))
+
+
         for route in sorted(static_routes, key=attrgetter('destination',
                                                           'gateway_ip')):
             details.append(indent + "  Static Route: {0} gateway {1}"

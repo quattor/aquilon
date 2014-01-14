@@ -236,7 +236,10 @@ class TestBindServer(TestBrokerCommand):
                           r'Server Binding: unittest00-e1.one-nyp.ms.com \[host: unittest00.one-nyp.ms.com, IP: %s\]\n\s*'
                           % unittest00_e1_ip,
                           command)
-        self.matchclean(out, "srv-alias2.one-nyp.ms.com", command)
+	self.searchclean(out,
+                         r'Server Binding: srv-alias2.one-nyp.ms.com',
+                         command)
+        self.matchoutput(out, "Aliases: srv-alias.one-nyp.ms.com, srv-alias2.one-nyp.ms.com", command)
 
     def test_300_show_unittest00_proto(self):
         command = "show host --hostname unittest00.one-nyp.ms.com --format proto"

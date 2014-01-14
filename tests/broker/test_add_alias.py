@@ -174,6 +174,49 @@ class TestAddAlias(TestBrokerCommand):
                          "alias4alias.aqd-unittest.ms.com",
                          cmd)
 
+    def test_700_show_alias_host(self):
+        command = ["add", "alias", "--fqdn", "alias0.aqd-unittest.ms.com",
+                   "--target", "unittest20-e0.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+
+        command = ["add", "alias", "--fqdn", "alias01.aqd-unittest.ms.com",
+                   "--target", "alias0.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+
+        command = ["show", "host", "--hostname", "unittest20.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.searchoutput(out, r'Provides: unittest20-e0.aqd-unittest.ms.com \[4.2.12.5\]\s*'
+                               r'Aliases: alias0.aqd-unittest.ms.com, alias01.aqd-unittest.ms.com',
+                          command)
+
+        command = ["del", "alias", "--fqdn", "alias01.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+
+        command = ["del", "alias", "--fqdn", "alias0.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+
+    def test_710_show_alias_host(self):
+        command = ["add", "alias", "--fqdn", "alias1.aqd-unittest.ms.com",
+                   "--target", "unittest20-e1-1.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+
+        command = ["add", "alias", "--fqdn", "alias11.aqd-unittest.ms.com",
+                   "--target", "alias1.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+
+        command = ["show", "host", "--hostname", "unittest20.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.searchoutput(out, r'Provides: unittest20-e1-1.aqd-unittest.ms.com \[4.2.12.72\] \(label: e1\)\s*'
+                               r'Aliases: alias1.aqd-unittest.ms.com, alias11.aqd-unittest.ms.com',
+                          command)
+
+        command = ["del", "alias", "--fqdn", "alias11.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+
+        command = ["del", "alias", "--fqdn", "alias1.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddAlias)
