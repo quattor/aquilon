@@ -229,6 +229,15 @@ class Network(Base):
     def is_internal(self):
         return self.network_environment.is_default
 
+    def personality_static_routes(self, personality):
+        if personality:
+            return [route for route in self.static_routes \
+                    if route.personality == None or \
+                    route.personality == personality]
+        else:
+            return [route for route in self.static_routes \
+                    if route.personality == None]
+
     def __le__(self, other):
         if self.network_environment_id != other.network_environment_id:
             return NotImplemented

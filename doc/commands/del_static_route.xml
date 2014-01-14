@@ -33,6 +33,10 @@
 	        <arg choice="plain"><option>--netmask <replaceable>MASK</replaceable></option></arg>
 	        <arg choice="plain"><option>--prefixlen <replaceable>PREFIX</replaceable></option></arg>
 	    </group>
+	    <group choice="opt">
+		<arg choice="plain"><option>--personality <replaceable>PERS</replaceable></option></arg>
+		<arg choice="opt"><option>--archetype <replaceable>ARCH</replaceable></option></arg>
+	    </group>
 	    <arg choice="opt"><option>--network_environment <replaceable>NETENV</replaceable></option></arg>
 	    <xi:include href="../common/global_options.xml"/>
 	</cmdsynopsis>
@@ -100,6 +104,29 @@
 		    </para>
 		</listitem>
 	    </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--personality <replaceable>PERS</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Name of a personality. If specified only static routes will the supplied
+			personality will be deleted.
+                    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--archetype <replaceable>ARCH</replaceable></option>
+                </term>
+                <listitem>
+                    <para>
+                        Name of an archetype. If <option>--personality</option> is used, then
+                        this option is used as a qualifier to select the right archetype if
+                        the name of the personality is not unique.
+                    </para>
+                </listitem>
+            </varlistentry>
 	</variablelist>
 	<xi:include href="../common/global_options_desc.xml"/>
     </refsect1>

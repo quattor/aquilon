@@ -1543,6 +1543,8 @@
          </optgroup>
       </optgroup>
       <optgroup name="add_static_route_optional" mandatory="False" fields="any">
+         <option name="personality" type="string">personality name</option>
+	 <option name="archetype" type="string">archetype name</option>
          <option name="network_environment" type="string">Network environment (default: internal)</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
@@ -1554,12 +1556,14 @@
       <optgroup name="del_static_route_opts" mandatory="True" fields="all">
          <option name="gateway" type="ipv4">Address of the gateway</option>
          <option name="ip" type="ipv4">Address of the destination network range</option>
-         <optgroup name="add_static_route_netmask" mandatory="True" fields="any">
+         <optgroup name="del_static_route_netmask" mandatory="True" fields="any">
             <option name="netmask" type="string" conflicts="prefixlen">Netmask as dotted quad</option>
             <option name="prefixlen" type="int" conflicts="netmask">Network prefix length</option>
          </optgroup>
       </optgroup>
       <optgroup name="del_static_route_optional" mandatory="False" fields="any">
+         <option name="personality" type="string">personality name</option>
+	 <option name="archetype" type="string">archetype name</option>
          <option name="network_environment" type="string">Network environment (default: internal)</option>
       </optgroup>
       <transport method="delete" path="static_route" />

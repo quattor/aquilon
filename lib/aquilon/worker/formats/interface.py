@@ -30,6 +30,10 @@ class InterfaceFormatter(ObjectFormatter):
     def format_raw(self, interface, indent=""):
         details = ''
 
+        personality = None
+        if interface.hardware_entity.host:
+            personality = interface.hardware_entity.host.personality
+
         flags = []
         if interface.bootable:
             flags.append("boot")
@@ -89,12 +93,14 @@ class InterfaceFormatter(ObjectFormatter):
                 tagstr = ""
             details.append(indent + "  Provides: %s [%s]%s" %
                            (names, addr.ip, tagstr))
-            static_routes |= set(addr.network.static_routes)
+            static_routes |= set(addr.network.personality_static_routes(personality))
 
         for route in sorted(static_routes, key=attrgetter('destination',
                                                           'gateway_ip')):
             details.append(indent + "  Static Route: {0} gateway {1}"
                            .format(route.destination, route.gateway_ip))
+            if route.personality:
+                details.append(indent + "    Personality: {0}".format(route.personality))
             if route.comments:
                 details.append(indent + "    Comments: %s" % route.comments)
 
