@@ -201,8 +201,8 @@ class TestAddCluster(PersonalityTestMixin, TestBrokerCommand):
         #self.verify_cat_clusters("utstorage1", "storagecluster",
         #                         "metrocluster", "storage")
         command = ["cat", "--cluster", "utstorage1"]
-        err = self.internalerrortest(command)
-        self.matchoutput(err, "No such file or directory", command)
+        err = self.notfoundtest(command)
+        self.matchoutput(err, "not found", command)
 
     def test_53_verifyshowutstorage1proto(self):
         command = ["show_cluster", "--cluster=utstorage1", "--format=proto"]
@@ -243,8 +243,8 @@ class TestAddCluster(PersonalityTestMixin, TestBrokerCommand):
         #self.verify_cat_clusters("utstorage2", "storagecluster",
         #                         "metrocluster", "storage")
         command = ["cat", "--cluster", "utstorage2"]
-        err = self.internalerrortest(command)
-        self.matchoutput(err, "No such file or directory", command)
+        err = self.notfoundtest(command)
+        self.matchoutput(err, "not found", command)
 
     def verify_cat_clusters(self, name, archetype, persona, ctype):
         """ generic method to verify common attributes for cat on clusters """

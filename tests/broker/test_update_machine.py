@@ -161,8 +161,8 @@ class TestUpdateMachine(TestBrokerCommand):
         # There should be no host template present after the update_machine
         # command
         command = ["cat", "--hostname", "unittest01.one-nyp.ms.com"]
-        out = self.internalerrortest(command)
-        self.matchoutput(out, "No such file or directory", command)
+        out = self.notfoundtest(command)
+        self.matchoutput(out, "not found", command)
 
     def testclearchassis(self):
         command = ["update", "machine", "--machine", "ut9s03p1",
