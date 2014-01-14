@@ -153,8 +153,8 @@
 		</term>
 		<listitem>
 		    <para>
-                        Environment for hosts assigned to this personality.
-			Possible values:<literal>dev</literal>, <literal>qa</literal>, <literal>uat</literal>, <literal>prod</literal>, <literal>infra</literal>.
+			Environment for hosts assigned to this personality. Possible values:
+			<xi:include href="../common/host_environments_no_legacy.xml"/>.
 			Once the environment has been set to anything other that <literal>legacy</literal>, it
 			cannot be updated.
 		    </para>

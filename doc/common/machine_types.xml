@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<simplelist type="inline" xmlns="http://docbook.org/ns/docbook">
+    <member><literal>blade</literal></member>
+    <member><literal>rackmount</literal></member>
+    <member><literal>workstation</literal></member>
+    <member><literal>aurora_node</literal></member>
+    <member><literal>virtual_machine</literal></member>
+    <member><literal>virtual_appliance</literal></member>
+</simplelist>
+
+<!-- vim: set ai sw=4: -->

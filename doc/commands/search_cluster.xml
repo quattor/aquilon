@@ -72,9 +72,9 @@
                 <synopfragmentref linkend="member-location-options">member location options</synopfragmentref>
 		<arg choice="opt"><option>--member_exact_location</option></arg>
             </group>
-            <xi:include href="../common/global_options.xml"/>
             <xi:include href="../common/cluster_location_options.xml"/>
             <xi:include href="../common/member_location_options.xml"/>
+            <xi:include href="../common/global_options.xml"/>
         </cmdsynopsis>
     </refsynopsisdiv>
 

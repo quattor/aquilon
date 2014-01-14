@@ -88,10 +88,11 @@
 		<listitem>
 		    <para>
 			The name of the environment hosts for belonging to this personality. The valid
-			environments are: prod, uat, qa, dev, infra. For all purposes it is a required
-			field but archetypes can have a default env set which will be used during creating
-			personality. This can be set as default_environment key in the
-			<literal>archetype_&lt;archetype name&gt;</literal> section of the broker configuration.
+			environments are: <xi:include href="../common/host_environments_no_legacy.xml"/>.
+			For all purposes it is a required field, but archetypes can have a default
+			environment set which will be used when creating the personality. This can
+			be set as default_environment key in the
+			<literal>archetype_<replaceable>ARCHETYPE</replaceable></literal> section of the broker configuration.
 		    </para>
 		</listitem>
 	    </varlistentry>
