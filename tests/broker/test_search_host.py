@@ -45,7 +45,7 @@ class TestSearchHost(TestBrokerCommand):
         command = "search host --hostname unittest00.one-nyp.ms.com --fullinfo"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Primary Name: unittest00.one-nyp.ms.com", command)
-        self.matchoutput(out, "Blade: ut3c1n3", command)
+        self.matchoutput(out, "Machine: ut3c1n3", command)
 
     def testmachineavailable(self):
         command = "search host --machine ut3c1n3"

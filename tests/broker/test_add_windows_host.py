@@ -43,7 +43,8 @@ class TestAddWindowsHost(TestBrokerCommand):
                          "Primary Name: unittest01.one-nyp.ms.com [%s]" %
                          self.net["unknown0"].usable[10],
                          command)
-        self.matchoutput(out, "Blade: ut3c1n4", command)
+        self.matchoutput(out, "Machine: ut3c1n4", command)
+        self.matchoutput(out, "Model Type: blade", command)
         self.matchoutput(out, "Archetype: windows", command)
         self.matchoutput(out, "Personality: generic", command)
         self.matchoutput(out, "Domain: ny-prod", command)

@@ -257,7 +257,8 @@ class TestAddVirtualHardware(TestBrokerCommand):
         for i in range(1, 9):
             command = "show machine --machine evm%s" % i
             out = self.commandtest(command.split(" "))
-            self.matchoutput(out, "Virtual_machine: evm%s" % i, command)
+            self.matchoutput(out, "Machine: evm%s" % i, command)
+            self.matchoutput(out, "Model Type: virtual_machine", command)
             self.matchoutput(out, "Hosted by: ESX Cluster utecl1", command)
             self.matchoutput(out, "Building: ut", command)
             self.matchoutput(out, "Vendor: utvendor Model: utmedium", command)
@@ -400,7 +401,8 @@ class TestAddVirtualHardware(TestBrokerCommand):
     def test_552_verifyshowupdate(self):
         command = "show machine --machine evm1"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Virtual_machine: evm1", command)
+        self.matchoutput(out, "Machine: evm1", command)
+        self.matchoutput(out, "Model Type: virtual_machine", command)
         self.matchoutput(out, "Hosted by: ESX Cluster utecl1", command)
         self.matchoutput(out, "Building: ut", command)
         self.matchoutput(out, "Vendor: utvendor Model: utlarge", command)
@@ -443,7 +445,8 @@ class TestAddVirtualHardware(TestBrokerCommand):
 
         out = self.commandtest(command.split(" "))
 
-        self.searchoutput(out, r"^Virtual_machine: evm1", command)
+        self.searchoutput(out, r"^Machine: evm1", command)
+        self.searchoutput(out, r"^    Model Type: virtual_machine", command)
         self.searchoutput(out, r"^  Primary Name: aqddesk1.msad.ms.com",
                           command)
         self.searchoutput(out, r"^  Comments: Windows Virtual Desktop", command)

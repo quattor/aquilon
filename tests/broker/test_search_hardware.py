@@ -43,7 +43,7 @@ class TestSearchHardware(TestBrokerCommand):
     def testmodelavailablefull(self):
         command = "search hardware --model poweredge_6650 --fullinfo"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Rackmount: ut3s01p1", command)
+        self.matchoutput(out, "Machine: ut3s01p1", command)
 
     def testmodelvendorconflict(self):
         command = "search hardware --model vb1205xm --vendor dell"
@@ -136,9 +136,9 @@ class TestSearchHardware(TestBrokerCommand):
         # This is a good sampling, but not the full output
         self.matchoutput(out, "Switch: ut3gd1r01", command)
         self.matchoutput(out, "Chassis: ut3c1", command)
-        self.matchoutput(out, "Blade: ut3c5n10", command)
-        self.matchoutput(out, "Rackmount: ut3s01p1", command)
-        self.matchoutput(out, "Aurora_node: ny00l4as01", command)
+        self.matchoutput(out, "Machine: ut3c5n10", command)
+        self.matchoutput(out, "Machine: ut3s01p1", command)
+        self.matchoutput(out, "Machine: ny00l4as01", command)
 
     def testsearchinterfacemodel(self):
         command = ["search", "hardware", "--interface_model", "e1000"]

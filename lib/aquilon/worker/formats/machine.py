@@ -53,8 +53,7 @@ ObjectFormatter.handlers[MachineInterfacePair] = MachineInterfacePairFormatter()
 
 class MachineFormatter(ObjectFormatter):
     def format_raw(self, machine, indent=""):
-        details = [indent + "%s: %s" % (str(machine.model.model_type).capitalize(),
-                                        machine.label)]
+        details = [indent + "Machine: %s" % machine.label]
         if machine.primary_name:
             details.append(indent + "  Primary Name: "
                            "{0:a}".format(machine.primary_name))
@@ -97,6 +96,8 @@ class MachineFormatter(ObjectFormatter):
             details.append(indent + "  Slot: %d" % slot.slot_number)
         details.append(indent + "  {0:c}: {0.name} {1:c}: {1.name}".format(
             machine.model.vendor, machine.model))
+        details.append(indent + "    Model Type: %s" %
+                       str(machine.model.model_type))
         details.append(indent + "  Cpu: %s x %d" % (machine.cpu,
                                                     machine.cpu_quantity))
         details.append(indent + "  Memory: %d MB" % machine.memory)

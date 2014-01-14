@@ -340,7 +340,8 @@ class TestUpdateInterface(TestBrokerCommand):
     def test_300_verify_show_ut3c5n10_interfaces(self):
         command = "show host --hostname unittest02.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Blade: ut3c5n10", command)
+        self.matchoutput(out, "Machine: ut3c5n10", command)
+        self.matchoutput(out, "Model Type: blade", command)
         self.matchoutput(out, "Comments: Updated interface comments", command)
         self.searchoutput(out, r"Interface: eth0 %s$" %
                           self.net["unknown0"].usable[11].mac.lower(), command)

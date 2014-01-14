@@ -43,7 +43,8 @@ class TestAddAquilonHost(TestBrokerCommand):
                          "Primary Name: unittest00.one-nyp.ms.com [%s]" %
                          self.net["unknown0"].usable[2],
                          command)
-        self.matchoutput(out, "Blade: ut3c1n3", command)
+        self.matchoutput(out, "Machine: ut3c1n3", command)
+        self.matchoutput(out, "Model Type: blade", command)
         self.matchoutput(out, "Archetype: aquilon", command)
         self.matchoutput(out, "Personality: inventory", command)
         self.matchoutput(out, "Domain: unittest", command)
@@ -67,7 +68,8 @@ class TestAddAquilonHost(TestBrokerCommand):
                          "Primary Name: unittest12.aqd-unittest.ms.com [%s]" %
                          self.net["unknown0"].usable[7],
                          command)
-        self.matchoutput(out, "Rackmount: ut3s01p1a", command)
+        self.matchoutput(out, "Machine: ut3s01p1a", command)
+        self.matchoutput(out, "Model Type: rackmount", command)
         self.matchoutput(out, "Archetype: aquilon", command)
         self.matchoutput(out, "Personality: inventory", command)
         self.matchoutput(out, "Domain: unittest", command)
@@ -91,7 +93,8 @@ class TestAddAquilonHost(TestBrokerCommand):
                          "Primary Name: unittest13.aqd-unittest.ms.com [%s]" %
                          self.net["unknown0"].usable[8],
                          command)
-        self.matchoutput(out, "Rackmount: ut3s01p1b", command)
+        self.matchoutput(out, "Machine: ut3s01p1b", command)
+        self.matchoutput(out, "Model Type: rackmount", command)
         self.matchoutput(out, "Archetype: aquilon", command)
         self.matchoutput(out, "Personality: compileserver", command)
         self.matchoutput(out, "Domain: unittest", command)

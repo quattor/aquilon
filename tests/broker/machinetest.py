@@ -188,7 +188,8 @@ class MachineTestMixin(object):
 
         show_cmd, show_out = self.verify_show_machine(name, interfaces,
                                                       **kwargs)
-        self.matchoutput(show_out, "Blade: %s" % name.lower(), show_cmd)
+        self.matchoutput(show_out, "Machine: %s" % name.lower(), show_cmd)
+        self.matchoutput(show_out, "Model Type: blade", show_cmd)
         self.matchclean(show_out, "Primary Name:", show_cmd)
         return show_cmd, show_out
 
@@ -212,7 +213,8 @@ class MachineTestMixin(object):
 
         show_cmd, show_out = self.verify_show_machine(name, interfaces,
                                                       **kwargs)
-        self.matchoutput(show_out, "Blade: %s" % name.lower(), show_cmd)
+        self.matchoutput(show_out, "Machine: %s" % name.lower(), show_cmd)
+        self.matchoutput(show_out, "Model Type: blade", show_cmd)
         self.matchclean(show_out, "Primary Name:", show_cmd)
         return show_cmd, show_out
 

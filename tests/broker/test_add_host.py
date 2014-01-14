@@ -143,7 +143,8 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
                          "Primary Name: unittest02.one-nyp.ms.com [%s]" %
                          self.net["unknown0"].usable[0],
                          command)
-        self.matchoutput(out, "Blade: ut3c5n10", command)
+        self.matchoutput(out, "Machine: ut3c5n10", command)
+        self.matchoutput(out, "Model Type: blade", command)
         self.matchoutput(out, "Archetype: aquilon", command)
         self.matchoutput(out, "Personality: compileserver", command)
         self.matchoutput(out, "Domain: unittest", command)
