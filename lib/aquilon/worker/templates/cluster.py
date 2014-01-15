@@ -120,12 +120,13 @@ class PlenaryClusterData(StructurePlenary):
                        self.dbobj.metacluster.name)
         pan_assign(lines, "system/cluster/ratio", [self.dbobj.vm_count,
                                                    self.dbobj.host_count])
-        pan_assign(lines, "system/cluster/max_hosts",
-                   self.dbobj.max_hosts)
-        lines.append("")
-
-        lines.append("")
-        if isinstance(self.dbobj, EsxCluster) and self.dbobj.network_device:
+        # FIXME: This should move to the generic part because max_hosts makes
+        # sense for non-ESX clusters as well, but the current schema does not
+        # allow that
+        if self.dbobj.max_hosts is not None:
+            pan_assign(lines, "system/cluster/max_hosts",
+                       self.dbobj.max_hosts)
+        if self.dbobj.network_device:
             pan_assign(lines, "system/cluster/switch",
                        self.dbobj.network_device.primary_name)
 

@@ -112,9 +112,6 @@ class TestAddCluster(PersonalityTestMixin, TestBrokerCommand):
                    "--archetype=gridcluster", "--personality=hadoop"]
         self.noouttest(command)
 
-    def get_grid_max(self):
-        return self.config.getint("archetype_gridcluster", "max_members_default")
-
     def test_41_verify_utgrid1(self):
         command = "show cluster --cluster utgrid1"
         out = self.commandtest(command.split(" "))
@@ -127,7 +124,7 @@ class TestAddCluster(PersonalityTestMixin, TestBrokerCommand):
                          command)
         self.matchoutput(out, "Domain: unittest", command)
         self.matchclean(out, "Comments", command)
-        self.matchoutput(out, "Max members: %d" % self.get_grid_max(), command)
+        self.matchoutput(out, "Max members: unlimited", command)
 
     def test_42_verifycatutgrid1(self):
         obj_cmd, obj, data_cmd, data = self.verify_cat_clusters("utgrid1",
@@ -147,6 +144,7 @@ class TestAddCluster(PersonalityTestMixin, TestBrokerCommand):
                          data_cmd)
         self.matchoutput(data, '"system/cluster/down_maint_percent" = 6;',
                          data_cmd)
+        self.matchclean(data, '/system/cluster/max_hosts', data_cmd)
 
     def test_43_verifyshowutgrid1proto(self):
         command = ["show_cluster", "--cluster=utgrid1", "--format=proto"]
@@ -157,7 +155,6 @@ class TestAddCluster(PersonalityTestMixin, TestBrokerCommand):
         self.failUnlessEqual(cluster.personality.archetype.name, "gridcluster")
         self.failUnlessEqual(cluster.threshold, 5)
         self.failUnlessEqual(cluster.threshold_is_percent, True)
-        self.failUnlessEqual(cluster.max_members, self.get_grid_max())
 
     def test_44_verifyshowall(self):
         command = "show cluster --all"

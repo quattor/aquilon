@@ -106,7 +106,6 @@ class Cluster(Base):
     location_constraint_id = Column(ForeignKey('location.id',
                                                name='cluster_location_fk'))
 
-    #esx cluster __init__ method overrides this default
     max_hosts = Column(Integer, nullable=True)
     # N+M clusters are defined by setting down_hosts_threshold to M
     # Simple 2-node clusters would have down_hosts_threshold of 0
@@ -521,11 +520,6 @@ class EsxCluster(Cluster):
                                     "wanted {2}, but the limit is {3}."
                                     .format(self, name, value, capacity[name]))
         return
-
-    def __init__(self, **kw):
-        if 'max_hosts' not in kw:
-            kw['max_hosts'] = 8
-        super(EsxCluster, self).__init__(**kw)
 
 esx_cluster = EsxCluster.__table__  # pylint: disable=C0103
 esx_cluster.info['unique_fields'] = ['name']

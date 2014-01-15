@@ -1,0 +1,204 @@
+<?xml version="1.0"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V5.0//EN"
+"http://docbook.org/xml/5.0/dtd/docbook.dtd" [
+<!ENTITY aqd_version SYSTEM "../version.txt">
+]>
+<refentry xml:id="update_cluster"
+          xmlns="http://docbook.org/ns/docbook"
+	  xmlns:xi="http://www.w3.org/2001/XInclude">
+    <refmeta>
+        <refentrytitle>update_cluster</refentrytitle>
+        <manvolnum>1</manvolnum>
+        <refmiscinfo class="version">&aqd_version;</refmiscinfo>
+        <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
+    </refmeta>
+
+    <refnamediv>
+        <refname>update cluster</refname>
+        <refpurpose>
+	    Update parameters of a cluster
+        </refpurpose>
+	<refclass>Aquilon</refclass>
+    </refnamediv>
+
+    <refsynopsisdiv>
+	<cmdsynopsis>
+	    <command>aq update service</command>
+	    <group>
+		<synopfragmentref linkend="global-options">Global options</synopfragmentref>
+	    </group>
+	    <arg choice="plain"><option>--cluster <replaceable>CLUSTER</replaceable></option></arg>
+	    <arg choice="opt"><option>--personality <replaceable>PERSONALITY</replaceable></option></arg>
+	    <arg choice="opt"><option>--down_hosts_threshold <replaceable>THRESHOLD</replaceable></option></arg>
+	    <arg choice="opt"><option>--maint_threshold <replaceable>THRESHOLD</replaceable></option></arg>
+	    <arg choice="opt"><option>--max_members <replaceable>NUMBER</replaceable></option></arg>
+	    <arg choice="opt"><option>--vm_to_host_ratio <replaceable>RATIO</replaceable></option></arg>
+	    <arg choice="opt"><option>--switch <replaceable>SWITCH</replaceable></option></arg>
+	    <arg choice="opt"><option>--memory_capacity <replaceable>CAPACITY</replaceable></option></arg>
+	    <arg choice="opt"><option>--clear_overrides</option></arg>
+	    <arg choice="opt"><option>--fix_location</option></arg>
+	    <arg choice="opt"><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
+	    <xi:include href="../common/location_options.xml"/>
+	    <xi:include href="../common/global_options.xml"/>
+	</cmdsynopsis>
+    </refsynopsisdiv>
+
+    <refsect1>
+        <title>Description</title>
+	<para>
+	    The <command>aq update cluster</command> command updates the parameters of a cluster.
+	    If called without any options, the command will just refresh the plenary templates of the cluster.
+	</para>
+    </refsect1>
+
+    <refsect1>
+        <title>Options</title>
+	<variablelist>
+	    <title>Command-specific options</title>
+	    <varlistentry>
+	        <term>
+		    <option>--cluster <replaceable>CLUSTER</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			The name of the cluster to update.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--personality <replaceable>PERSONALITY</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Change the personality of the cluster to <replaceable>PERSONALITY</replaceable>. Changing the
+			archetype of a cluster is not supported.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--down_hosts_threshold <replaceable>THRESHOLD</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Number of hosts that can go down without impacting the availability of the cluster.
+			<replaceable>THRESHOLD</replaceable> can be either an absolute number, or a percentage if it ends with
+			the percent sign.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--maint_threshold <replaceable>THRESHOLD</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Number of hosts that can go down without triggering alerts during the cluster's maintenance window.
+			<replaceable>THRESHOLD</replaceable> can be either an absolute number, or a percentage if it ends with
+			the percent sign.
+		    </para>
+		    <para>
+			The maintenance threshold is expected to be higher than the normal down hosts threshold, however that
+			is not enforced.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--max_members <replaceable>NUMBER</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Maximum number of members the cluster may have. If <replaceable>NUMBER</replaceable> is
+			negative, then there will be no restrictions on the number of members.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--vm_to_host_ratio <replaceable>RATIO</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Ratio of the number of virtual machines allowed to be added to the cluster, versus the number of
+			members of the cluster. This option is valid only for ESX clusters.
+		    </para>
+		    <para>
+			When the ratio is verified, the number of hosts allowed to be down
+			(as specified with <option>--down_hosts_threshold</option>) is always extracted from the number
+			of members.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--switch <replaceable>SWITCH</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Update the switch associated with the cluster. This option is valid only for ESX clusters. The
+			switch is used to look up which networks are available for guests to use.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--memory_capacity <replaceable>CAPACITY</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Override the memory capacity of the cluster. The capacity is normally calculated from
+			the amount of memory of the members of the cluster, using the formula configured for the personality.
+			This option allows overriding that formula.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--clear_overrides</option>
+		</term>
+		<listitem>
+		    <para>
+			Clear any existing capacity overrides, and revert to using the memory capacity configured for
+			the personality when calculating the capacity of the cluster.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--fix_location</option>
+		</term>
+		<listitem>
+		    <para>
+			Re-calculate the cluster's location, based on the location of its members. The location of the
+			cluster will be set to the smallest entity that contains all the members.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--comments <replaceable>COMMENTS</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Update the comments of the cluster.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	</variablelist>
+	<xi:include href="../common/location_options_desc.xml"/>
+	<xi:include href="../common/global_options_desc.xml"/>
+    </refsect1>
+
+    <refsect1>
+	<title>See also</title>
+	<para>
+	    <citerefentry><refentrytitle>add_cluster</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>del_cluster</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>cat_cluster</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+	</para>
+    </refsect1>
+</refentry>
+
+<!-- vim: set ai sw=4: -->

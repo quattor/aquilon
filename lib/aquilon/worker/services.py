@@ -633,7 +633,8 @@ class ClusterChooser(Chooser):
             self.dbobj.personality.archetype in instance.service.archetypes:
             if self.dbobj.cluster_type == 'meta':
                 return 0
-            return self.dbobj.max_hosts
+            # max_hosts can be None, but we need to return a number
+            return self.dbobj.max_hosts or 0
         return 0
 
     def apply_changes(self):

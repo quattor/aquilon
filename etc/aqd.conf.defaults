@@ -203,7 +203,6 @@ max_members_default = 8
 vm_to_host_ratio = 16:1
 
 [archetype_gridcluster]
-max_members_default = 2000
 
 [archetype_hacluster]
 allow_cascaded_deco = False

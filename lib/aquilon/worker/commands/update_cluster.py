@@ -91,6 +91,9 @@ class CommandUpdateCluster(BrokerCommand):
             dbcluster.personality = dbpersonality
 
         if max_members is not None:
+            # Allow removing the restriction
+            if max_members < 0:
+                max_members = None
             dbcluster.max_hosts = max_members
 
         if comments is not None:
