@@ -224,7 +224,7 @@ class TestCluster(TestBrokerCommand):
         command = ["cluster", "--hostname=evh9.aqd-unittest.ms.com",
                    "--cluster=utstorage1"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "only hosts with archetype 'filer' can be added",
+        self.matchoutput(out, "Only hosts with archetype 'filer' can be added",
                          command)
 
         command = ["cluster", "--hostname=filer1.ms.com",

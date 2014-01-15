@@ -120,7 +120,6 @@ class CommandAddCluster(BrokerCommand):
                                                    metacluster,
                                                    compel=True)
 
-            dbmetacluster.validate_membership(dbcluster)
             dbmetacluster.members.append(dbcluster)
 
             plenaries.append(Plenary.get_plenary(dbmetacluster))

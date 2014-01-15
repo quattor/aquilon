@@ -23,7 +23,7 @@ from sqlalchemy import (Column, Integer, Boolean, String, DateTime, Sequence,
                         Index)
 
 from sqlalchemy.orm import (object_session, relation, backref, deferred,
-                            joinedload)
+                            joinedload, validates)
 from sqlalchemy.orm.attributes import set_committed_value
 from sqlalchemy.ext.associationproxy import association_proxy
 
@@ -198,13 +198,21 @@ class Cluster(Base):
                     mach.append(res.machine)
         return mach
 
-    def validate_membership(self, host, error=ArgumentError, **kwargs):
+    @validates('_hosts')
+    def validate_host_member(self, key, value):
+        session = object_session(self)
+        with session.no_autoflush:
+            self.validate_membership(value.host)
+        return value
+
+    def validate_membership(self, host):
         if host.hardware_entity.location != self.location_constraint and \
                 self.location_constraint not in \
                 host.hardware_entity.location.parents:
-            raise error("Host location {0} is not within cluster "
-                        "location {1}.".format(host.hardware_entity.location,
-                                               self.location_constraint))
+            raise ArgumentError("Host location {0} is not within cluster "
+                                "location {1}."
+                                .format(host.hardware_entity.location,
+                                        self.location_constraint))
 
         if host.branch != self.branch or \
                 host.sandbox_author != self.sandbox_author:
@@ -291,13 +299,13 @@ class StorageCluster(Cluster):
                                     ondelete='CASCADE'),
                 primary_key=True)
 
-    def validate_membership(self, host, error=ArgumentError, **kwargs):
-        super(StorageCluster, self).validate_membership(host=host, error=error,
-                                                        **kwargs)
+    def validate_membership(self, host):
+        super(StorageCluster, self).validate_membership(host)
+        # FIXME: this should be in the configuration, not in the code
         if host.archetype.name != "filer":
-            raise error("only hosts with archetype 'filer' can be added "
-                        "to a storage cluster. The host %s is of archetype %s"
-                        % (host.fqdn, host.archetype))
+            raise ArgumentError("Only hosts with archetype 'filer' can be "
+                                "added to a storage cluster. {0} is "
+                                "of {1:l}.".format(host, host.archetype))
 
 storage_cluster = StorageCluster.__table__  # pylint: disable=C0103
 storage_cluster.info['unique_fields'] = ['name']

@@ -24,7 +24,8 @@ from datetime import datetime
 from sqlalchemy import (Column, Integer, DateTime, Boolean, ForeignKey,
                         UniqueConstraint, PrimaryKeyConstraint)
 
-from sqlalchemy.orm import relation, backref, deferred
+from sqlalchemy.orm import (relation, backref, deferred, validates,
+                            object_session)
 from sqlalchemy.orm.attributes import instance_state
 from sqlalchemy.orm.interfaces import MapperExtension
 from sqlalchemy.ext.associationproxy import association_proxy
@@ -139,9 +140,14 @@ class MetaCluster(Cluster):
                                         .format(self, name, value, capacity[name]))
         return
 
-    # see cluster.validate_membership
-    def validate_membership(self, cluster, error=ArgumentError, **kwargs):
+    @validates('_clusters')
+    def validate_cluster_member(self, key, value):
+        session = object_session(self)
+        with session.no_autoflush:
+            self.validate_membership(value.cluster)
+        return value
 
+    def validate_membership(self, cluster):
         if (cluster.branch != self.branch or
             cluster.sandbox_author != self.sandbox_author):
             raise ArgumentError("{0} {1} {2} does not match {3:l} {4} "

@@ -39,7 +39,6 @@ class CommandRebindMetaCluster(BrokerCommand):
             old_metacluster.members.remove(dbcluster)
             session.expire(dbcluster, ['_metacluster'])
         if not dbcluster.metacluster:
-            dbmetacluster.validate_membership(dbcluster)
             dbmetacluster.members.append(dbcluster)
 
         session.flush()
