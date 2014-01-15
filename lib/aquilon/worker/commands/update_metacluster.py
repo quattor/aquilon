@@ -31,7 +31,6 @@ class CommandUpdateMetaCluster(BrokerCommand):
                fix_location, high_availability, comments, **arguments):
         dbmetacluster = MetaCluster.get_unique(session, metacluster,
                                                compel=True)
-        cluster_updated = False
 
         if personality:
             archetype = dbmetacluster.personality.archetype.name
@@ -52,30 +51,20 @@ class CommandUpdateMetaCluster(BrokerCommand):
                                     (format(dbmetacluster), current_members,
                                      max_members))
             dbmetacluster.max_clusters = max_members
-            cluster_updated = True
 
         if comments is not None:
             dbmetacluster.comments = comments
-            cluster_updated = True
 
         if high_availability is not None:
             dbmetacluster.high_availability = high_availability
-            cluster_updated = True
 
         # TODO update_cluster_location would update VMs. Metaclusters
         # will contain VMs in Vulcan2 model.
         plenaries = PlenaryCollection(logger=logger)
         plenaries.append(Plenary.get_plenary(dbmetacluster))
 
-        location_updated = update_cluster_location(session, logger,
-                                                   dbmetacluster, fix_location,
-                                                   plenaries, **arguments)
-
-        if location_updated:
-            cluster_updated = True
-
-        if not cluster_updated:
-            return
+        update_cluster_location(session, logger, dbmetacluster, fix_location,
+                                plenaries, **arguments)
 
         session.flush()
         dbmetacluster.validate()

@@ -40,8 +40,6 @@ class CommandUpdateCluster(BrokerCommand):
             raise ArgumentError("%s should not be a metacluster."
                                 % format(dbcluster))
 
-        cluster_updated = False
-
         plenaries = PlenaryCollection(logger=logger)
         plenaries.append(Plenary.get_plenary(dbcluster))
 
@@ -51,7 +49,6 @@ class CommandUpdateCluster(BrokerCommand):
             (perc, dht) = Cluster.parse_threshold(down_hosts_threshold)
             dbcluster.down_hosts_threshold = dht
             dbcluster.down_hosts_percent = perc
-            cluster_updated = True
 
         if dbcluster.cluster_type == "esx":
             if vm_count is not None or down_hosts_threshold is not None:
@@ -68,7 +65,6 @@ class CommandUpdateCluster(BrokerCommand):
 
                 dbcluster.vm_count = vm_count
                 dbcluster.host_count = host_count
-                cluster_updated = True
 
         if switch is not None:
             if switch:
@@ -78,24 +74,17 @@ class CommandUpdateCluster(BrokerCommand):
             else:
                 dbnetdev = None
             dbcluster.network_device = dbnetdev
-            cluster_updated = True
 
         if memory_capacity is not None:
             dbcluster.memory_capacity = memory_capacity
             dbcluster.validate()
-            cluster_updated = True
 
         if clear_overrides is not None:
             dbcluster.memory_capacity = None
             dbcluster.validate()
-            cluster_updated = True
 
-        location_updated = update_cluster_location(session, logger, dbcluster,
-                                                   fix_location, plenaries,
-                                                   **arguments)
-
-        if location_updated:
-            cluster_updated = True
+        update_cluster_location(session, logger, dbcluster, fix_location,
+                                plenaries, **arguments)
 
         if personality:
             archetype = dbcluster.personality.archetype.name
@@ -106,7 +95,6 @@ class CommandUpdateCluster(BrokerCommand):
                 raise ArgumentError("Personality {0} is not a cluster " +
                                     "personality".format(dbpersonality))
             dbcluster.personality = dbpersonality
-            cluster_updated = True
 
         if max_members is not None:
             current_members = len(dbcluster.hosts)
@@ -116,26 +104,19 @@ class CommandUpdateCluster(BrokerCommand):
                                     (format(dbcluster), current_members,
                                      max_members))
             dbcluster.max_hosts = max_members
-            cluster_updated = True
 
         if comments is not None:
             dbcluster.comments = comments
-            cluster_updated = True
 
         if down_hosts_threshold is not None:
             (dbcluster.down_hosts_percent,
              dbcluster.down_hosts_threshold) = \
                 Cluster.parse_threshold(down_hosts_threshold)
-            cluster_updated = True
 
         if maint_threshold is not None:
             (dbcluster.down_maint_percent,
              dbcluster.down_maint_threshold) = \
                 Cluster.parse_threshold(maint_threshold)
-            cluster_updated = True
-
-        if not cluster_updated:
-            return
 
         session.flush()
 
@@ -146,7 +127,6 @@ class CommandUpdateCluster(BrokerCommand):
 
 def update_cluster_location(session, logger, dbcluster,
                             fix_location, plenaries, **arguments):
-    location_updated = False
     dblocation = get_location(session, **arguments)
     if fix_location:
         dblocation = dbcluster.minimum_location
@@ -188,6 +168,5 @@ def update_cluster_location(session, logger, dbcluster,
                 dbmachine.location = dblocation
 
             dbcluster.location_constraint = dblocation
-            location_updated = True
 
-    return location_updated
+    return
