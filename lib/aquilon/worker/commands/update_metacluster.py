@@ -15,10 +15,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.aqdb.model import MetaCluster, Personality
 from aquilon.exceptions_ import ArgumentError
+from aquilon.aqdb.model import MetaCluster, Personality
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.commands.update_cluster import update_cluster_location
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
 
@@ -32,6 +31,9 @@ class CommandUpdateMetaCluster(BrokerCommand):
         dbmetacluster = MetaCluster.get_unique(session, metacluster,
                                                compel=True)
 
+        plenaries = PlenaryCollection(logger=logger)
+        plenaries.append(Plenary.get_plenary(dbmetacluster))
+
         if personality:
             archetype = dbmetacluster.personality.archetype.name
             dbpersonality = Personality.get_unique(session, name=personality,
@@ -41,15 +43,8 @@ class CommandUpdateMetaCluster(BrokerCommand):
                 raise ArgumentError("Personality {0} is not a cluster " +
                                     "personality".format(dbpersonality))
             dbmetacluster.personality = dbpersonality
-            cluster_updated = True
 
         if max_members is not None:
-            current_members = len(dbmetacluster.members)
-            if max_members < current_members:
-                raise ArgumentError("%s has %d clusters bound, which exceeds "
-                                    "the requested limit %d." %
-                                    (format(dbmetacluster), current_members,
-                                     max_members))
             dbmetacluster.max_clusters = max_members
 
         if comments is not None:
@@ -60,9 +55,6 @@ class CommandUpdateMetaCluster(BrokerCommand):
 
         # TODO update_cluster_location would update VMs. Metaclusters
         # will contain VMs in Vulcan2 model.
-        plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(Plenary.get_plenary(dbmetacluster))
-
         update_cluster_location(session, logger, dbmetacluster, fix_location,
                                 plenaries, **arguments)
 

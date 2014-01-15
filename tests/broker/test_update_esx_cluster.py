@@ -219,7 +219,7 @@ class TestUpdateESXCluster(TestBrokerCommand):
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "ESX Cluster utecl1 has 3 hosts bound, which exceeds "
-                         "the requested limit 0.",
+                         "the requested limit of 0.",
                          command)
 
     def test_400_failupdateratio(self):
