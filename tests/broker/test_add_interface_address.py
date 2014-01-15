@@ -382,7 +382,7 @@ class TestAddInterfaceAddress(TestBrokerCommand):
         out = self.commandtest(command)
         self.searchoutput(out,
                           r"Interface: vlan110 \(no MAC addr\)$"
-                          r"\s+Type: oa$"
+                          r"\s+Type: virtual$"
                           r"\s+Network Environment: internal$"
                           r"\s+Provides: ut3gd1r04-vlan110.aqd-unittest.ms.com \[%s\]$"
                           r"\s+Provides: ut3gd1r04-vlan110-hsrp.aqd-unittest.ms.com \[%s\] \(label: hsrp\)$"

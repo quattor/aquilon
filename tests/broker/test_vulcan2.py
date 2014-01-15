@@ -102,8 +102,10 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
 
             self.dsdb_expect_add(hostname, ip, "xge49",
                                  ip.mac)
-            command = ["add", "network_device", "--network_device", hostname, "--rack", "ut12",
+            command = ["add", "network_device",
+                       "--network_device", hostname, "--rack", "ut12",
                        "--model", "rs g8000", "--interface", "xge49",
+                       "--iftype", "physical",
                        "--type", "tor", "--mac", ip.mac, "--ip", ip]
             self.ignoreoutputtest(command)
         self.dsdb_verify()

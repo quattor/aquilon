@@ -420,7 +420,8 @@ class TestAddInterface(TestBrokerCommand):
                          "for chassis.", command)
 
     def testfailaddinterfaceut3dg1r01(self):
-        command = ["add", "interface", "--interface", "xge49",
+        command = ["add", "interface", "--interface", "xge1",
+                   "--iftype", "physical",
                    "--mac", self.net["tor_net_0"].usable[0].mac,
                    "--network_device", "ut3gd1r01.aqd-unittest.ms.com"]
         out = self.badrequesttest(command)
@@ -430,15 +431,15 @@ class TestAddInterface(TestBrokerCommand):
                          command)
 
     def testfailaddinterfaceud3dg1r01model(self):
-        command = ["add", "interface", "--interface", "xge49",
-                   "--model", "e1000",
+        command = ["add", "interface", "--interface", "xge1",
+                   "--iftype", "physical", "--model", "e1000",
                    "--network_device", "ut3gd1r01.aqd-unittest.ms.com"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Cannot use argument --model when adding an "
                          "interface to a network device.", command)
 
     def testfailaddinterfaceud3dg1r01type(self):
-        command = ["add", "interface", "--interface", "xge49",
+        command = ["add", "interface", "--interface", "xge1",
                    "--iftype", "vlan",
                    "--network_device", "ut3gd1r01.aqd-unittest.ms.com"]
         out = self.badrequesttest(command)
@@ -451,21 +452,24 @@ class TestAddInterface(TestBrokerCommand):
         self.matchoutput(out, "Switch: ut3gd1r01", command)
         self.matchoutput(out, "Primary Name: ut3gd1r01.aqd-unittest.ms.com",
                          command)
-        self.matchclean(out, "Interface: xge49", command)
+        self.matchclean(out, "Interface: xge1", command)
 
     def testaddvirtualswitchinterface(self):
         command = ["add", "interface", "--interface", "vlan110",
+                   "--iftype", "virtual",
                    "--network_device", "ut3gd1r04.aqd-unittest.ms.com"]
         self.noouttest(command)
 
     def testaddloopback(self):
         command = ["add", "interface", "--interface", "loop0",
+                   "--iftype", "loopback",
                    "--network_device", "ut3gd1r04.aqd-unittest.ms.com"]
         self.noouttest(command)
 
     def testfailloopbackmac(self):
         command = ["add", "interface", "--interface", "loop1",
                    "--network_device", "ut3gd1r04.aqd-unittest.ms.com",
+                   "--iftype", "loopback",
                    "--mac", self.net["autopg1"][0].mac]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Loopback interfaces cannot have a MAC address.",

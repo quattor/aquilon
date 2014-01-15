@@ -92,8 +92,8 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, MachineTestMixin,
             self.dsdb_expect_add(self.switch[i], ip, "xge49",
                                  ip.mac)
             command = ["add", "network_device", "--network_device", self.switch[i],
-                       "--rack", "ut12",
-                       "--model", "rs g8000", "--interface", "xge49",
+                       "--rack", "ut12", "--model", "rs g8000",
+                       "--interface", "xge49", "--iftype", "physical",
                        "--type", "tor", "--mac", ip.mac, "--ip", ip]
             (out, err) = self.successtest(command)
         self.dsdb_verify()

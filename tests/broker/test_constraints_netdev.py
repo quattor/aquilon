@@ -67,7 +67,8 @@ class TestNetworkDeviceConstraints(TestBrokerCommand):
     def testprimaryalias(self):
         command = ["add", "network_device", "--network_device", "alias2host.aqd-unittest.ms.com",
                    "--type", "misc", "--rack", "ut3", "--model", "uttorswitch",
-                   "--ip", self.net["unknown0"].usable[-1], "--interface", "xge"]
+                   "--ip", self.net["unknown0"].usable[-1],
+                   "--interface", "xge49", "--iftype", "physical"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Alias alias2host.aqd-unittest.ms.com cannot be "
                          "used for address assignment.", command)
@@ -77,7 +78,7 @@ class TestNetworkDeviceConstraints(TestBrokerCommand):
         bad_ip = self.net["unknown0"].usable[14]
         command = ["add", "network_device", "--network_device", "arecord13.aqd-unittest.ms.com",
                    "--type", "misc", "--rack", "ut3", "--model", "uttorswitch",
-                   "--ip", bad_ip, "--interface", "xge"]
+                   "--ip", bad_ip, "--interface", "xge49", "--iftype", "physical"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "IP address %s is already in use by DNS record "

@@ -342,6 +342,23 @@ class LoopbackInterface(Interface):
             raise ValueError("Loopback interfaces cannot have a MAC address.")
         return value
 
+
+class VirtualInterface(Interface):
+    """ Network device virtual interface """
+
+    _class_label = "Virtual Interface"
+
+    __mapper_args__ = {'polymorphic_identity': 'virtual'}
+
+
+class PhysicalInterface(Interface):
+    """ Network device physical interface """
+
+    _class_label = "Physical Interface"
+
+    __mapper_args__ = {'polymorphic_identity': 'physical'}
+
+
 interface = Interface.__table__  # pylint: disable=C0103
 interface.info['unique_fields'] = ['name', 'hardware_entity']
 interface.info['extra_search_fields'] = ['mac']

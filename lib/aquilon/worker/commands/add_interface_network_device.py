@@ -21,33 +21,23 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import NetworkDevice
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.interface import (get_or_create_interface,
-                                                 check_netdev_iftype,
-                                                 infer_netdev_iftype)
+                                                 check_netdev_iftype)
 from aquilon.worker.processes import DSDBRunner
 
 
 class CommandAddInterfaceNetworkDevice(BrokerCommand):
 
-    required_parameters = ["interface", "network_device"]
+    required_parameters = ["interface", "network_device", "iftype"]
     invalid_parameters = ["automac", "pg", "autopg", "model", "vendor"]
 
     def render(self, session, logger, interface, network_device,
-               mac, iftype, type, comments, **arguments):
+               mac, iftype, comments, **arguments):
         for arg in self.invalid_parameters:
             if arguments.get(arg) is not None:
                 raise ArgumentError("Cannot use argument --%s when adding an "
                                     "interface to a network device." % arg)
 
-        if type:
-            self.deprecated_option("type", "Please use --iftype"
-                                   "instead.", logger=logger, **arguments)
-            if not iftype:
-                iftype = type
-
-        if iftype is None:
-            iftype = infer_netdev_iftype(interface)
-        else:
-            check_netdev_iftype(iftype)
+        check_netdev_iftype(iftype)
 
         dbnetdev = NetworkDevice.get_unique(session, network_device, compel=True)
         oldinfo = DSDBRunner.snapshot_hw(dbnetdev)

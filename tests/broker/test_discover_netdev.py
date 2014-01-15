@@ -30,22 +30,24 @@ class TestDiscoverNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
 
     def test_100_add_swsync(self):
         ip = self.net["switch_sync"].usable[0]
-        self.dsdb_expect_add("swsync.aqd-unittest.ms.com", ip, "mgmt0")
+        self.dsdb_expect_add("swsync.aqd-unittest.ms.com", ip,
+                             interface="mgmt0", mac=ip.mac)
         self.noouttest(["add", "network_device", "--type", "misc",
                         "--network_device", "swsync.aqd-unittest.ms.com",
-                        "--interface", "mgmt0", "--ip", ip, "--rack", "ut3",
-                        "--model", "temp_switch"])
+                        "--interface", "mgmt0", "--iftype", "physical",
+                        "--ip", ip, "--mac", ip.mac,
+                        "--rack", "ut3", "--model", "temp_switch"])
         self.dsdb_verify()
 
     def test_110_add_swsync_ifaces(self):
         self.noouttest(["add", "interface", "--network_device", "swsync",
-                        "--interface", "vlan100"])
+                        "--interface", "vlan100", "--iftype", "virtual"])
         self.noouttest(["add", "interface", "--network_device", "swsync",
-                        "--interface", "vlan200"])
+                        "--interface", "vlan200", "--iftype", "virtual"])
         self.noouttest(["add", "interface", "--network_device", "swsync",
-                        "--interface", "vlan300"])
+                        "--interface", "vlan300", "--iftype", "virtual"])
         self.noouttest(["add", "interface", "--network_device", "swsync",
-                        "--interface", "vlan400"])
+                        "--interface", "vlan400", "--iftype", "virtual"])
 
     def test_120_add_swsync_addrs(self):
         ip1 = self.net["switch_sync"].usable[1]
@@ -105,7 +107,7 @@ class TestDiscoverNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
                          "--interface vlan100 --ip %s" % ip4, command)
         self.matchoutput(out, "aq add_interface "
                          "--network_device swsync.aqd-unittest.ms.com "
-                         "--interface vlan500 --type oa", command)
+                         "--interface vlan500 --iftype virtual", command)
         self.matchoutput(out, "aq add_interface_address "
                          "--network_device swsync.aqd-unittest.ms.com "
                          "--interface vlan500 --ip %s" % ip5, command)
@@ -155,38 +157,38 @@ class TestDiscoverNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
         out, command = self.verifynetdev("swsync.aqd-unittest.ms.com",
                                          "cisco", "ws-c2960-48tt-l", "ut3", "a",
                                          "3", switch_type="misc",
-                                         ip=self.net["switch_sync"].usable[0],
+                                         ip=ip, mac=ip.mac,
                                          interface="mgmt0",
                                          comments="T1 T2")
         # TODO: the interface type is not updated, it's not clear if it should
         self.searchoutput(out,
-                          r"Interface: mgmt0 \(no MAC addr\)\s*"
-                          r"Type: oa\s*"
+                          r"Interface: mgmt0 %s\s*"
+                          r"Type: physical\s*"
                           r"Network Environment: internal\s*"
                           r"Provides: swsync.aqd-unittest.ms.com \[%s\]"
-                          % ip, command)
+                          % (ip.mac, ip), command)
         self.searchoutput(out,
                           r"Interface: vlan100 \(no MAC addr\)\s*"
-                          r"Type: oa\s*"
+                          r"Type: virtual\s*"
                           r"Network Environment: internal\s*"
                           r"Provides: swsync-vlan100.aqd-unittest.ms.com \[%s\]\s*"
                           r"Provides: swsync-vlan100-hsrp.aqd-unittest.ms.com \[%s\] \(label: hsrp\)"
                           % (ip4, ip1), command)
         self.searchoutput(out,
                           r"Interface: vlan210 \(no MAC addr\)\s*"
-                          r"Type: oa\s*"
+                          r"Type: virtual\s*"
                           r"Network Environment: internal\s*"
                           r"Provides: swsync-nomatch.aqd-unittest.ms.com \[%s\]"
                           % ip2, command)
         self.searchoutput(out,
                           r"Interface: vlan310 \(no MAC addr\)\s*"
-                          r"Type: oa\s*"
+                          r"Type: virtual\s*"
                           r"Network Environment: internal\s*"
                           r"Provides: swsync-vlan310.aqd-unittest.ms.com \[%s\]"
                           % ip3, command)
         self.searchoutput(out,
                           r"Interface: vlan500 \(no MAC addr\)\s*"
-                          r"Type: oa\s*"
+                          r"Type: virtual\s*"
                           r"Network Environment: internal\s*"
                           r"Provides: swsync-vlan500.aqd-unittest.ms.com \[%s\]"
                           % ip5, command)
