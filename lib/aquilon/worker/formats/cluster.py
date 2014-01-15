@@ -56,7 +56,7 @@ class ClusterFormatter(ObjectFormatter):
             p.name = str(personality.name)
             p.archetype.name = str(personality.archetype.name)
 
-        if cluster.cluster_type == 'esx':
+        if isinstance(cluster, EsxCluster):
             skeleton.vm_to_host_ratio = cluster.vm_to_host_ratio
             skeleton.max_vm_count = cluster.max_vm_count
 
@@ -116,7 +116,7 @@ class ClusterFormatter(ObjectFormatter):
                                    key=attrgetter('resource_type', 'name')):
                 details.append(self.redirect_raw(resource, indent + "    "))
 
-        if cluster.cluster_type == 'esx':
+        if isinstance(cluster, EsxCluster):
             details.append(indent + "  Max vm_to_host_ratio: %s" %
                            cluster.vm_to_host_ratio)
             details.append(indent + "  Max virtual machine count: %s" %

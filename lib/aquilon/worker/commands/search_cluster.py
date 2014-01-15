@@ -53,8 +53,9 @@ class CommandSearchCluster(BrokerCommand):
                                    logger=logger, **arguments)
             share = esx_share
 
-        if cluster_type == 'esx':
-            cls = EsxCluster
+        if cluster_type:
+            cls = Cluster.polymorphic_subclass(cluster_type,
+                                               "Unknown cluster type")
         else:
             cls = Cluster
 
@@ -98,9 +99,6 @@ class CommandSearchCluster(BrokerCommand):
         if buildstatus:
             dbbuildstatus = ClusterLifecycle.get_instance(session, buildstatus)
             q = q.filter_by(status=dbbuildstatus)
-
-        if cluster_type:
-            q = q.filter_by(cluster_type=cluster_type)
 
         # Go through the arguments and make special dicts for each
         # specific set of location arguments that are stripped of the
@@ -249,10 +247,7 @@ class CommandSearchCluster(BrokerCommand):
             q = q.filter_by(archetype=dbma)
             q = q.reset_joinpoint()
 
-        if cluster_type == 'esx':
-            q = q.order_by(EsxCluster.name)
-        else:
-            q = q.order_by(Cluster.name)
+        q = q.order_by(cls.name)
 
         if fullinfo or style != "raw":
             return q.all()

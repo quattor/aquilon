@@ -631,7 +631,7 @@ class ClusterChooser(Chooser):
         """If this cluster is bound to a service, how many hosts bind?"""
         if self.dbobj.personality in instance.service.personalities or \
             self.dbobj.personality.archetype in instance.service.archetypes:
-            if self.dbobj.cluster_type == 'meta':
+            if isinstance(self.dbobj, MetaCluster):
                 return 0
             # max_hosts can be None, but we need to return a number
             return self.dbobj.max_hosts or 0
