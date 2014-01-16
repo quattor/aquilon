@@ -27,7 +27,7 @@ from aquilon.aqdb.model import (Host, Cluster, Archetype, Personality,
                                 DnsRecord, ARecord, Fqdn, DnsDomain, Interface,
                                 AddressAssignment, NetworkEnvironment, Network,
                                 MetaCluster, VirtualMachine, ClusterResource,
-                                HardwareEntity)
+                                HardwareEntity, HostEnvironment)
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.formats.list import StringAttributeList
@@ -43,8 +43,8 @@ class CommandSearchHost(BrokerCommand):
     required_parameters = []
 
     def render(self, session, logger, hostname, machine, archetype,
-               buildstatus, personality, osname, osversion, service, instance,
-               model, machine_type, vendor, serial, cluster,
+               buildstatus, personality, host_environment, osname, osversion,
+               service, instance, model, machine_type, vendor, serial, cluster,
                guest_on_cluster, guest_on_share, member_cluster_share,
                domain, sandbox, branch, sandbox_owner,
                dns_domain, shortname, mac, ip, networkip, network_environment,
@@ -156,43 +156,40 @@ class CommandSearchHost(BrokerCommand):
         if dbauthor:
             q = q.filter_by(sandbox_author=dbauthor)
 
+        # Just do the lookup here, filtering will happen later
         if archetype:
-            # Added to the searches as appropriate below.
             dbarchetype = Archetype.get_unique(session, archetype, compel=True)
-        if personality and archetype:
-            dbpersonality = Personality.get_unique(session,
-                                                   archetype=dbarchetype,
-                                                   name=personality,
-                                                   compel=True)
-            q = q.filter_by(personality=dbpersonality)
-        elif personality:
+        else:
+            dbarchetype = None
+
+        if archetype or personality or host_environment:
             PersAlias = aliased(Personality)
-            q = q.join(PersAlias).filter_by(name=personality)
-            q = q.reset_joinpoint()
-        elif archetype:
-            PersAlias = aliased(Personality)
-            q = q.join(PersAlias).filter_by(archetype=dbarchetype)
+            q = q.join(PersAlias)
+
+            if archetype:
+                q = q.filter_by(archetype=dbarchetype)
+            if personality:
+                subq = Personality.get_matching_query(session, name=personality,
+                                                      archetype=dbarchetype,
+                                                      compel=True)
+                q = q.filter(PersAlias.id.in_(subq))
+            if host_environment:
+                dbhost_env = HostEnvironment.get_instance(session,
+                                                          host_environment)
+                q = q.filter_by(host_environment=dbhost_env)
+
             q = q.reset_joinpoint()
 
         if buildstatus:
-            dbbuildstatus = HostLifecycle.get_unique(session, buildstatus,
-                                                     compel=True)
+            dbbuildstatus = HostLifecycle.get_instance(session, buildstatus)
             q = q.filter_by(status=dbbuildstatus)
 
-        if osname and osversion and archetype:
-            # archetype was already resolved above
-            dbos = OperatingSystem.get_unique(session, name=osname,
-                                              version=osversion,
-                                              archetype=dbarchetype,
-                                              compel=True)
-            q = q.filter_by(operating_system=dbos)
-        elif osname or osversion:
-            q = q.join('operating_system')
-            if osname:
-                q = q.filter_by(name=osname)
-            if osversion:
-                q = q.filter_by(version=osversion)
-            q = q.reset_joinpoint()
+        if osname or osversion:
+            subq = OperatingSystem.get_matching_query(session, name=osname,
+                                                      version=osversion,
+                                                      archetype=dbarchetype,
+                                                      compel=True)
+            q = q.filter(Host.operating_system_id.in_(subq))
 
         if service:
             dbservice = Service.get_unique(session, service, compel=True)

@@ -44,7 +44,7 @@ class Personality(Base):
     __tablename__ = _TN
 
     id = Column(Integer, Sequence('%s_seq' % _ABV), primary_key=True)
-    name = Column(AqStr(32), nullable=False)
+    name = Column(AqStr(64), nullable=False)
     archetype_id = Column(Integer, ForeignKey('archetype.id',
                                               name='%s_arch_fk' % _ABV),
                           nullable=False)

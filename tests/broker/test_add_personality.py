@@ -403,7 +403,7 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
                    "--host_environment", "badenv",
                    "--archetype", "aquilon", "--eon_id=2"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "Unknown environment name 'badenv'. The valid"
+        self.matchoutput(out, "Unknown host environment 'badenv'. The valid"
                               " values are: dev, infra, legacy, prod, qa, uat",
                          command)
 

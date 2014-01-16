@@ -21,9 +21,8 @@ import re
 from ConfigParser import NoSectionError, NoOptionError
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import (Archetype, Personality,
-                                Parameter, HostEnvironment,
-                                PersonalityServiceMap,
+from aquilon.aqdb.model import (Archetype, Personality, Parameter,
+                                HostEnvironment, PersonalityServiceMap,
                                 PersonalityParameter)
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.parameter import get_parameters
@@ -62,10 +61,8 @@ class CommandAddPersonality(BrokerCommand):
         if host_environment == 'legacy':
             raise ArgumentError("Legacy is not a valid environment for a new personality.")
 
-        HostEnvironment.polymorphic_subclass(host_environment,
-                                             "Unknown environment name")
-        Personality.validate_env_in_name(personality, host_environment)
-        host_env = HostEnvironment.get_unique(session, host_environment, compel=True)
+        dbhost_env = HostEnvironment.get_instance(session, host_environment)
+        Personality.validate_env_in_name(personality, dbhost_env.name)
 
         Personality.get_unique(session, archetype=dbarchetype, name=personality,
                                preclude=True)
@@ -75,7 +72,7 @@ class CommandAddPersonality(BrokerCommand):
 
         dbpersona = Personality(name=personality, archetype=dbarchetype,
                                 cluster_required=bool(cluster_required),
-                                host_environment=host_env, owner_grn=dbgrn,
+                                host_environment=dbhost_env, owner_grn=dbgrn,
                                 comments=comments,
                                 config_override=config_override)
         session.add(dbpersona)

@@ -47,6 +47,7 @@ class HostLifecycle(StateEngine, Base):
                    'decommissioned': ['rebuild', 'reinstall']}
 
     __tablename__ = _TN
+    _class_label = 'Host Lifecycle'
 
     id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
     name = Column(Enum(32, transitions.keys()), nullable=False)

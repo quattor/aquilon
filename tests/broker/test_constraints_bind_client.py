@@ -49,7 +49,7 @@ class TestBindClientConstraints(TestBrokerCommand):
         m = self.searchoutput(out, r'(\S+)', command)
         host = m.group(1)
         # Sanity check that the host is currently aligned.
-        command = ["search_host", "--host=%s" % host,
+        command = ["search_host", "--hostname=%s" % host,
                    "--service=esx_management_server",
                    "--instance=%s" % instance]
         out = self.commandtest(command)

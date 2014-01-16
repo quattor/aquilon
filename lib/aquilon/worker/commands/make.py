@@ -86,8 +86,7 @@ class CommandMake(BrokerCommand):
                                 osname)
 
         if buildstatus:
-            dbstatus = HostLifecycle.get_unique(session, buildstatus,
-                                                compel=True)
+            dbstatus = HostLifecycle.get_instance(session, buildstatus)
             dbhost.status.transition(dbhost, dbstatus)
 
         if grn or eon_id:

@@ -360,33 +360,34 @@
       building will include all racks, rooms, etc. inside the building.  The
       --exact_location option can be used to override this behavior.
       <optgroup name="search_host_opts" mandatory="True" fields="any">
-         <option name="hostname" type="string">fully qualified domain name</option>
-         <option name="machine" type="string">node name</option>
+         <option name="hostname" type="string">Fully qualified domain name</option>
+         <option name="machine" type="string">Node name</option>
          <option name="dns_domain" type="string">DNS domain</option>
          <option name="shortname" type="string">First segment of the fqdn</option>
-         <option name="archetype" type="string">archetype (aquilon, windows, aurora)</option>
-         <option name="buildstatus" type="string">buildstatus (blind, build, ready)</option>
+         <option name="archetype" type="string">Archetype name</option>
+         <option name="buildstatus" type="string">Build status</option>
          <option name="ip" type="ipv4">IP address</option>
          <option name="networkip" type="ipv4">Network IP address</option>
          <option name="network_environment" type="string">Network environment (default: internal)</option>
-         <option name="mac" type="mac">primary MAC address</option>
-         <option name="personality" type="string">personality</option>
-         <option name="osname" type="string">osname</option>
-         <option name="osversion" type="string">osversion</option>
-         <option name="service" type="string">client of service (single service only)</option>
-         <option name="instance" type="string">client of service instance (single instance only)</option>
-         <option name="model" type="string">machine model name</option>
-         <option name="machine_type" type="enum" enum="MachineType">machine type for the model (blade, virtual_machine, etc.)</option>
-         <option name="vendor" type="string">machine vendor name</option>
-         <option name="serial" type="string">machine serial number</option>
-         <option name="cluster" type="string">cluster or metacluster name</option>
-         <option name="guest_on_cluster" type="string">host is a virtual machine guest on this cluster</option>
-         <option name="guest_on_share" type="string">host is a virtual machine using this share</option>
-         <option name="member_cluster_share" type="string">host is a member of a cluster with machines using this nas_disk_share</option>
+         <option name="mac" type="mac">[Deprecated] MAC address</option>
+         <option name="personality" type="string">Personality</option>
+	 <option name="host_environment" type="string">Host environment</option>
+         <option name="osname" type="string">OS name</option>
+         <option name="osversion" type="string">OS version</option>
+         <option name="service" type="string">Client of service (single service only)</option>
+         <option name="instance" type="string">Client of service instance (single instance only)</option>
+         <option name="model" type="string">Machine model name</option>
+         <option name="machine_type" type="enum" enum="MachineType">Machine type for the model (blade, virtual_machine, etc.)</option>
+         <option name="vendor" type="string">Machine vendor name</option>
+         <option name="serial" type="string">Machine serial number</option>
+         <option name="cluster" type="string">Cluster or metacluster name</option>
+         <option name="guest_on_cluster" type="string">Host is a virtual machine guest on this cluster</option>
+         <option name="guest_on_share" type="string">Host is a virtual machine using this share</option>
+         <option name="member_cluster_share" type="string">Host is a member of a cluster with machines using this nas_disk_share</option>
          <optgroup name="search_host_branch" fields="any">
-            <option name="domain" type="string" conflicts="sandbox branch">template domain</option>
+            <option name="domain" type="string" conflicts="sandbox branch">Template domain</option>
             <option name="sandbox" type="string" conflicts="domain branch">Name of the sandbox (given as 'author/branch')</option>
-            <option name="branch" type="string" conflicts="domain sandbox">template branch (either a domain or a sandbox)</option>
+            <option name="branch" type="string" conflicts="domain sandbox">Template branch (either a domain or a sandbox)</option>
          </optgroup>
          <option name="sandbox_owner" type="string" conflicts="domain sandbox branch">Owner of the sandbox the host is in</option>
          <optgroup name="search_host_location_opts" fields="any">
@@ -402,12 +403,11 @@
 	    <option name="rack" type="string">Rack</option>
 	    <option name="desk" type="string">Desk</option>
          </optgroup>
-         <option name="server_of_service" type="string">server of service (single service only)</option>
-         <option name="server_of_instance" type="string">server of service instance (single instance only)</option>
-         <option name="exact_location" type="flag">match the location exactly</option>
-         <option name="grn" type="string">match by GRN</option>
-         <option name="eon_id" type="int">match by EON ID</option>
-         <option name="all" type="flag">list all systems</option>
+         <option name="server_of_service" type="string">Server of service (single service only)</option>
+         <option name="server_of_instance" type="string">Server of service instance (single instance only)</option>
+         <option name="exact_location" type="flag">Match the location exactly</option>
+         <option name="grn" type="string">Match by GRN</option>
+         <option name="eon_id" type="int">Match by EON ID</option>
       </optgroup>
       <optgroup name="search_host_prefs" mandatory="False">
          <option name="fullinfo" type="flag">show full information for the matching hosts</option>
@@ -2447,6 +2447,9 @@
          <option name="chassis" type="string" conflicts="all">Chassis name</option>
          <option name="all" type="flag" conflicts="chassis">Select all</option>
       </optgroup>
+      <optgroup name="show_chassis_prefs" mandatory="False">
+         <option name="fullinfo" type="flag">Show full information for the matching hardware</option>
+      </optgroup>
       <transport trigger="all" method="get" path="chassis" />
       <transport trigger="chassis" method="get" path="chassis/%(chassis)s" />
    </command>
@@ -3135,12 +3138,13 @@
       be shown using the --fullinfo option
       <p/>
          <optgroup name="search_personality_opts" mandatory="True" fields="any">
-            <option name="personality" type="string" conflicts="all">personality name (same name may be in multiple archetypes)</option>
-            <option name="archetype" type="string" conflicts="all">which archetype to use</option>
-            <option name="grn" type="string" conflicts="all">match by GRN</option>
-            <option name="eon_id" type="int" conflicts="all">match by EON ID</option>
-            <option name="config_override" type="boolean" conflicts="all">Include external personality config override template</option>
-            <option name="host_environment" type="string" conflicts="all">Environment for Hosts assigned to this personality [dev|qa|uat|prod|infra]</option>
+            <option name="personality" type="string" >personality name (same name may be in multiple archetypes)</option>
+            <option name="archetype" type="string" >which archetype to use</option>
+            <option name="grn" type="string" >match by GRN</option>
+            <option name="eon_id" type="int" >match by EON ID</option>
+            <option name="config_override" type="boolean" >Include external personality config override template</option>
+            <option name="host_environment" type="string" >Environment for Hosts assigned to this personality [dev|qa|uat|prod|infra]</option>
+            <option name="required_service" type="string">Show personalities requiring the given service</option>
             <option name="fullinfo" type="flag">show full information for the matching personalities</option>
       </optgroup>
       <transport method="get" path="find/personality" />

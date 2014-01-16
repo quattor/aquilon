@@ -1,0 +1,1 @@
+ALTER TABLE personality ALTER COLUMN name TYPE VARCHAR(64);
