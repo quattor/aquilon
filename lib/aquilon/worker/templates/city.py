@@ -26,10 +26,12 @@ LOGGER = logging.getLogger(__name__)
 
 
 class PlenaryCity(Plenary):
+    prefix = "site"
 
     @classmethod
     def template_name(cls, dbcity):
-        return "site/%s/%s/config" % (dbcity.hub.fullname.lower(), dbcity.name)
+        return "%s/%s/%s/config" % (cls.prefix, dbcity.hub.fullname.lower(),
+                                    dbcity.name)
 
     def body(self, lines):
         pan_variable(lines, "TIMEZONE", self.dbobj.timezone)

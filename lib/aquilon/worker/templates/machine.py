@@ -33,12 +33,13 @@ LOGGER = logging.getLogger(__name__)
 
 
 class PlenaryMachineInfo(StructurePlenary):
+    prefix = "machine"
 
     @classmethod
     def template_name(cls, dbmachine):
         loc = dbmachine.location
-        return "machine/%s/%s/%s/%s" % (loc.hub.fullname.lower(), loc.building,
-                                        loc.rack, dbmachine.label)
+        return "%s/%s/%s/%s/%s" % (cls.prefix, loc.hub.fullname.lower(),
+                                   loc.building, loc.rack, dbmachine.label)
 
     def get_key(self, exclusive=True):
         if not exclusive:

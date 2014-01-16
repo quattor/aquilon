@@ -53,6 +53,9 @@ class Plenary(object):
 
     """
 
+    prefix = None
+    """ Path prefix used to check conflicts with e.g. archetype names """
+
     config = Config()
     TEMPLATE_EXTENSION = config.get("panc", "template_extension")
 

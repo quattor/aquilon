@@ -172,10 +172,11 @@ class FeatureTemplate(TemplateFormatter):
 
 
 class PlenaryPersonalityBase(Plenary):
+    prefix = "personality"
 
     @classmethod
     def template_name(cls, dbpersonality):
-        return "personality/%s/config" % dbpersonality.name
+        return "%s/%s/config" % (cls.prefix, dbpersonality.name)
 
     @classmethod
     def loadpath(cls, dbpersonality):
@@ -238,10 +239,11 @@ class PlenaryPersonalityBase(Plenary):
 
 
 class PlenaryPersonalityPreFeature(Plenary):
+    prefix = "personality"
 
     @classmethod
     def template_name(cls, dbpersonality):
-        return "personality/%s/pre_feature" % dbpersonality
+        return "%s/%s/pre_feature" % (cls.prefix, dbpersonality)
 
     @classmethod
     def loadpath(cls, dbpersonality):
@@ -268,10 +270,11 @@ class PlenaryPersonalityPreFeature(Plenary):
 
 
 class PlenaryPersonalityPostFeature(Plenary):
+    prefix = "personality"
 
     @classmethod
     def template_name(cls, dbpersonality):
-        return "personality/%s/post_feature" % dbpersonality
+        return "%s/%s/post_feature" % (cls.prefix, dbpersonality)
 
     @classmethod
     def loadpath(cls, dbpersonality):
@@ -285,10 +288,11 @@ class PlenaryPersonalityPostFeature(Plenary):
 
 
 class PlenaryPersonalityParameter(StructurePlenary):
+    prefix = "personality"
 
     @classmethod
     def template_name(cls, ptmpl):
-        return "personality/%s/%s" % (ptmpl.personality.name, ptmpl.template)
+        return "%s/%s/%s" % (cls.prefix, ptmpl.personality.name, ptmpl.template)
 
     @classmethod
     def loadpath(cls, ptmpl):

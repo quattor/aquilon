@@ -34,6 +34,7 @@ LOGGER = logging.getLogger('aquilon.server.templates.resource')
 
 
 class PlenaryResource(StructurePlenary):
+    prefix = "resource"
 
     def __init__(self, dbresource, logger=LOGGER):
         super(PlenaryResource, self).__init__(dbresource, logger=logger)
@@ -65,7 +66,7 @@ class PlenaryResource(StructurePlenary):
     @classmethod
     def template_name(cls, dbresource):
         holder = dbresource.holder
-        components = ["resource"]
+        components = [cls.prefix]
 
         if isinstance(holder, BundleResource):
             parent_holder = holder.resourcegroup.holder

@@ -19,8 +19,9 @@ from sqlalchemy.inspection import inspect
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Archetype, Cluster
-from aquilon.worker.broker import BrokerCommand
 from aquilon.utils import validate_nlist_key
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.templates import Plenary
 
 
 class CommandAddArchetype(BrokerCommand):
@@ -31,8 +32,17 @@ class CommandAddArchetype(BrokerCommand):
                description, comments, **kwargs):
         validate_nlist_key('--archetype', archetype)
 
-        if archetype in ["hardware", "machine", "pan", "t",
-                         "service", "servicedata", "clusters"]:
+        def subclasses(cls):
+            for subcls in cls.__subclasses__():
+                for subsubcls in subclasses(subcls):
+                    yield subsubcls
+                yield subcls
+
+        reserved_names = set([cls.prefix for cls in subclasses(Plenary)])
+        # There are also some top-level directories in the template repository
+        reserved_names.update(["hardware", "pan", "t"])
+
+        if archetype in reserved_names:
             raise ArgumentError("Archetype name %s is reserved." % archetype)
 
         Archetype.get_unique(session, archetype, preclude=True)

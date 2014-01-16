@@ -56,10 +56,11 @@ Plenary.handlers[StorageCluster] = PlenaryCluster
 
 
 class PlenaryClusterData(StructurePlenary):
+    prefix = "clusterdata"
 
     @classmethod
     def template_name(cls, dbcluster):
-        return "clusterdata/" + dbcluster.name
+        return cls.prefix + "/" + dbcluster.name
 
     def body(self, lines):
         pan_assign(lines, "system/cluster/name", self.dbobj.name)
@@ -138,9 +139,11 @@ class PlenaryClusterObject(ObjectPlenary):
     are contained inside the cluster (via an include of the clusterdata plenary)
     """
 
+    prefix = "clusters"
+
     @classmethod
     def template_name(cls, dbcluster):
-        return "clusters/" + dbcluster.name
+        return cls.prefix + "/" + dbcluster.name
 
     def get_key(self, exclusive=True):
         keylist = [super(PlenaryClusterObject, self).get_key(exclusive=exclusive)]
@@ -199,6 +202,8 @@ class PlenaryClusterClient(Plenary):
     plenary template. This just names the cluster and nothing more.
     """
 
+    prefix = "cluster"
+
     def __init__(self, dbcluster, logger=LOGGER):
         super(PlenaryClusterClient, self).__init__(dbcluster, logger=logger)
 
@@ -206,7 +211,7 @@ class PlenaryClusterClient(Plenary):
 
     @classmethod
     def template_name(cls, dbcluster):
-        return "cluster/%s/client" % dbcluster.name
+        return "%s/%s/client" % (cls.prefix, dbcluster.name)
 
     def get_key(self, exclusive=True):
         return PlenaryKey(cluster_member=self.name, logger=self.logger,

@@ -48,10 +48,11 @@ class PlenaryMetaCluster(PlenaryCollection):
 
 
 class PlenaryMetaClusterData(StructurePlenary):
+    prefix = "clusterdata"
 
     @classmethod
     def template_name(cls, dbmetacluster):
-        return "clusterdata/" + dbmetacluster.name
+        return cls.prefix + "/" + dbmetacluster.name
 
     def body(self, lines):
         pan_assign(lines, "system/metacluster/name", self.dbobj.name)
@@ -84,10 +85,11 @@ class PlenaryMetaClusterData(StructurePlenary):
 
 
 class PlenaryMetaClusterObject(ObjectPlenary):
+    prefix = "clusters"
 
     @classmethod
     def template_name(cls, dbmetacluster):
-        return "clusters/" + dbmetacluster.name
+        return cls.prefix + "/" + dbmetacluster.name
 
     def get_key(self, exclusive=True):
         keylist = [super(PlenaryMetaClusterObject, self).get_key(exclusive=exclusive)]

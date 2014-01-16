@@ -56,9 +56,11 @@ class PlenaryServiceToplevel(StructurePlenary):
     to all instances.
     """
 
+    prefix = "servicedata"
+
     @classmethod
     def template_name(cls, dbservice):
-        return "servicedata/%s/config" % dbservice.name
+        return "%s/%s/config" % (cls.prefix, dbservice.name)
 
 
 class PlenaryServiceClientDefault(Plenary):
@@ -71,9 +73,11 @@ class PlenaryServiceClientDefault(Plenary):
     to all instances of the service.
     """
 
+    prefix = "service"
+
     @classmethod
     def template_name(cls, dbservice):
-        return "service/%s/client/config" % dbservice.name
+        return "%s/%s/client/config" % (cls.prefix, dbservice.name)
 
 
 class PlenaryServiceServerDefault(Plenary):
@@ -86,9 +90,11 @@ class PlenaryServiceServerDefault(Plenary):
     to all instances of the service.
     """
 
+    prefix = "service"
+
     @classmethod
     def template_name(cls, dbservice):
-        return "service/%s/server/config" % dbservice.name
+        return "%s/%s/server/config" % (cls.prefix, dbservice.name)
 
 
 class SIHelperMixin(object):
@@ -136,10 +142,12 @@ class PlenaryServiceInstanceToplevel(SIHelperMixin, StructurePlenary):
     servers and the instance name)
     """
 
+    prefix = "servicedata"
+
     @classmethod
     def template_name(cls, dbinstance):
-        return "servicedata/%s/%s/config" % (dbinstance.service.name,
-                                             dbinstance.name)
+        return "%s/%s/%s/config" % (cls.prefix, dbinstance.service.name,
+                                    dbinstance.name)
 
     def body(self, lines):
         pan_include(lines,
@@ -164,10 +172,12 @@ class PlenaryServiceInstanceServer(SIHelperMixin, StructurePlenary):
     of clients and the instance name)
     """
 
+    prefix = "servicedata"
+
     @classmethod
     def template_name(cls, dbinstance):
-        return "servicedata/%s/%s/srvconfig" % (dbinstance.service.name,
-                                                dbinstance.name)
+        return "%s/%s/%s/srvconfig" % (cls.prefix, dbinstance.service.name,
+                                       dbinstance.name)
 
     def body(self, lines):
         pan_assign(lines, "instance", self.dbobj.name)
@@ -186,10 +196,12 @@ class PlenaryServiceInstanceClientDefault(SIHelperMixin, Plenary):
     is specific to the instance.
     """
 
+    prefix = "service"
+
     @classmethod
     def template_name(cls, dbinstance):
-        return "service/%s/%s/client/config" % (dbinstance.service.name,
-                                                dbinstance.name)
+        return "%s/%s/%s/client/config" % (cls.prefix, dbinstance.service.name,
+                                           dbinstance.name)
 
     def body(self, lines):
         path = PlenaryServiceInstanceToplevel.template_name(self.dbobj)
@@ -210,10 +222,12 @@ class PlenaryServiceInstanceServerDefault(SIHelperMixin, Plenary):
     only and is specific to the service instance.
     """
 
+    prefix = "service"
+
     @classmethod
     def template_name(cls, dbinstance):
-        return "service/%s/%s/server/config" % (dbinstance.service.name,
-                                                dbinstance.name)
+        return "%s/%s/%s/server/config" % (cls.prefix, dbinstance.service.name,
+                                           dbinstance.name)
 
     def body(self, lines):
         path = PlenaryServiceInstanceServer.template_name(self.dbobj)
