@@ -1,0 +1,3 @@
+ALTER TABLE static_route ADD personality_id INTEGER;
+
+ALTER TABLE static_route ADD CONSTRAINT static_route_prsnlty_fk FOREIGN KEY (personality_id) REFERENCES personality (id) ON DELETE CASCADE;
