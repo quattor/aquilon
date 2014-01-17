@@ -15,7 +15,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Module for testing the poll switch command."""
+"""Module for testing the poll network device command."""
 
 import re
 import os
@@ -30,13 +30,13 @@ import unittest2 as unittest
 from brokertest import TestBrokerCommand
 
 
-# This suite replicates parts of test_poll_switch testing update_switch --discovered_macs.
-# when aq_poll_switch is removed, the remaining test methods should be moved
+# This suite replicates parts of test_poll_network_device testing update_network_device --discovered_macs.
+# when aq_poll_network_device is removed, the remaining test methods should be moved
 # here.
-class TestUpdateSwitchMac(TestBrokerCommand):
+class TestUpdateNetworkDeviceMac(TestBrokerCommand):
 
-    # Currently done by test_poll_switch, can't run it twice
-    # TODO when aq poll_switch removed, these methods should be moved here
+    # Currently done by test_poll_network_device, can't run it twice
+    # TODO when aq poll_network_device removed, these methods should be moved here
     # # test_prebind_server runs too late...
     # def testbindpollhelper(self):
 
@@ -50,7 +50,7 @@ class TestUpdateSwitchMac(TestBrokerCommand):
         return re.sub("\s+", " ", "".join(out))
 
     def testpollnp06bals03(self):
-        command = ["update", "switch", "--switch", "np06bals03.ms.com",
+        command = ["update", "network_device", "--network_device", "np06bals03.ms.com",
                    "--discovered_macs", self.getmacdata("np06bals03")]
         self.noouttest(command)
 
@@ -61,7 +61,7 @@ class TestUpdateSwitchMac(TestBrokerCommand):
         sleep(2)
         # Issues deprecated warning.
         for sw in ["np06bals03", "np06fals01"]:
-            command = ["update", "switch", "--switch", sw + ".ms.com",
+            command = ["update", "network_device", "--network_device", sw + ".ms.com",
                        "--discovered_macs", self.getmacdata(sw)]
             self.noouttest(command)
 
@@ -70,13 +70,13 @@ class TestUpdateSwitchMac(TestBrokerCommand):
         # creation_date to test that clear is working...
         sleep(2)
         # Issues deprecated warning.
-        command = ["update", "switch", "--switch", "np06fals01.ms.com",
+        command = ["update", "network_device", "--network_device", "np06fals01.ms.com",
                    "--discovered_macs", self.getmacdata("np06fals01"), "--clear"]
         self.noouttest(command)
 
     # FIXME: Verify the poll and that last_seen != creation_date
     def testverifypollnp06bals03(self):
-        command = "show switch --switch np06bals03.ms.com"
+        command = "show network_device --network_device np06bals03.ms.com"
         out = self.commandtest(command.split(" "))
         r = re.compile(r'^\s*Created:\s*(.*?)\s*Last Seen:\s*(.*?)\s*$', re.M)
         m = self.searchoutput(out, r, command)
@@ -128,7 +128,7 @@ class TestUpdateSwitchMac(TestBrokerCommand):
         self.matchoutput(out, "Port 23: 00:30:48:66:3a:60", command)
 
     def testverifypollnp06fals01(self):
-        command = "show switch --switch np06fals01.ms.com"
+        command = "show network_device --network_device np06fals01.ms.com"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Port 49: 00:15:2c:1f:40:00", command)
         r = re.compile(r'^\s*Created:\s*(.*?)\s*Last Seen:\s*(.*?)\s*$', re.M)
@@ -138,9 +138,9 @@ class TestUpdateSwitchMac(TestBrokerCommand):
                     "last seen '%s' in output:\n%s" %
                     (m.group(1), m.group(2), out))
 
-    # Currently done by test_poll_switch, update_switch does not implement
+    # Currently done by test_poll_network_device, update_network_device does not implement
     # --vlan yet.
-    # TODO when aq poll_switch removed, these methods should be moved here
+    # TODO when aq poll_network_device removed, these methods should be moved here
     # def testpollut01ga2s01(self):
 
     # def testverifypollut01ga2s01(self):
@@ -157,14 +157,14 @@ class TestUpdateSwitchMac(TestBrokerCommand):
 
     # def testpollbor(self):
 
-    # These should be removed when aq poll_switch is removed, we won't look for
-    # tor switches in update_switch
+    # These should be removed when aq poll_network_device is removed, we won't look for
+    # tor switches in update_network_device
     # def testpolltype(self):
 
     # def testtypemismatch(self):
 
     def testbadtype(self):
-        command = ["update", "switch", "--switch",
+        command = ["update", "network_device", "--network_device",
                    "ut3gd1r01.aqd-unittest.ms.com",
                    "--discovered_macs", self.getmacdata("ut3gd1r01.aqd-unittest.ms.com"),
                    "--type", "no-such-type"]
@@ -173,5 +173,5 @@ class TestUpdateSwitchMac(TestBrokerCommand):
 
 
 if __name__ == '__main__':
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestUpdateSwitchMac)
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestUpdateNetworkDeviceMac)
     unittest.TextTestRunner(verbosity=2).run(suite)

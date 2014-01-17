@@ -368,25 +368,6 @@ def get_or_create_interface(session, dbhw_ent, name=None, mac=None,
                                                          dbinterface)))
 
     if name and not dbinterface:
-        # Special logic to allow "add_interface" to succeed if there is an
-        # auto-created interface already
-        if preclude and len(dbhw_ent.interfaces) == 1:
-            dbinterface = dbhw_ent.interfaces[0]
-            if dbinterface.mac is None and \
-               dbinterface.interface_type == interface_type and \
-               dbinterface.comments is not None and \
-               dbinterface.comments.startswith("Created automatically"):
-                dbinterface.name = name
-                dbinterface.mac = mac
-                if hasattr(dbinterface, "bootable") and bootable is not None:
-                    dbinterface.bootable = bootable
-                dbinterface.comments = comments
-                if hasattr(dbinterface, "port_group"):
-                    dbinterface.port_group = port_group
-                session.flush()
-                return dbinterface
-
-        dbinterface = None
         for iface in dbhw_ent.interfaces:
             if iface.name == name:
                 dbinterface = iface
@@ -617,3 +598,16 @@ def rename_interface(session, dbinterface, rename_to):
             Fqdn.get_unique(session, name=new_name, dns_domain=dbdns_domain,
                             dns_environment=dbdns_env, preclude=True)
             dbfqdn.name = new_name
+
+def check_netdev_iftype(type):
+    valid_interface_types = ['oa', 'loopback']
+    if type not in valid_interface_types:
+        raise ArgumentError("Interface type %s is not allowed for "
+                            "network devices." % str(type))
+
+def infer_netdev_iftype(interface):
+    if interface.lower().startswith("lo"):
+        return 'loopback'
+    else:
+        return 'oa'
+

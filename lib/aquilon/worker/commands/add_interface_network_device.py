@@ -14,51 +14,53 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-""" Contains the logic for `aq add interface --chassis`.
-    Duplicates logic used in `aq add interface --tor_switch`."""
+""" Contains the logic for `aq add interface --network_device`."""
 
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import Chassis
+from aquilon.aqdb.model import NetworkDevice
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.dbwrappers.interface import get_or_create_interface
+from aquilon.worker.dbwrappers.interface import (get_or_create_interface,
+                                                 check_netdev_iftype,
+                                                 infer_netdev_iftype)
 from aquilon.worker.processes import DSDBRunner
 
 
-class CommandAddInterfaceChassis(BrokerCommand):
+class CommandAddInterfaceNetworkDevice(BrokerCommand):
 
-    required_parameters = ["interface", "chassis", "mac"]
+    required_parameters = ["interface", "network_device"]
     invalid_parameters = ["automac", "pg", "autopg", "model", "vendor"]
 
-    def render(self, session, logger, interface, chassis, mac, iftype, type,
-               comments, **arguments):
+    def render(self, session, logger, interface, network_device,
+               mac, iftype, type, comments, **arguments):
+        for arg in self.invalid_parameters:
+            if arguments.get(arg) is not None:
+                raise ArgumentError("Cannot use argument --%s when adding an "
+                                    "interface to a network device." % arg)
+
         if type:
             self.deprecated_option("type", "Please use --iftype"
                                    "instead.", logger=logger, **arguments)
             if not iftype:
                 iftype = type
 
-        if iftype and iftype != "oa":
-            raise ArgumentError("Only 'oa' is allowed as the interface type "
-                                "for chassis.")
+        if iftype is None:
+            iftype = infer_netdev_iftype(interface)
+        else:
+            check_netdev_iftype(iftype)
 
-        for arg in self.invalid_parameters:
-            if arguments.get(arg) is not None:
-                raise ArgumentError("Cannot use argument --%s when adding an "
-                                    "interface to a chassis." % arg)
+        dbnetdev = NetworkDevice.get_unique(session, network_device, compel=True)
+        oldinfo = DSDBRunner.snapshot_hw(dbnetdev)
 
-        dbchassis = Chassis.get_unique(session, chassis, compel=True)
-        oldinfo = DSDBRunner.snapshot_hw(dbchassis)
-
-        dbinterface = get_or_create_interface(session, dbchassis,
+        dbinterface = get_or_create_interface(session, dbnetdev,
                                               name=interface, mac=mac,
-                                              interface_type='oa',
+                                              interface_type=iftype,
                                               comments=comments, preclude=True)
 
         session.flush()
 
         dsdb_runner = DSDBRunner(logger=logger)
-        dsdb_runner.update_host(dbchassis, oldinfo)
-        dsdb_runner.commit_or_rollback("Could not update chassis in DSDB")
+        dsdb_runner.update_host(dbnetdev, oldinfo)
+        dsdb_runner.commit_or_rollback("Could not update network device in DSDB")
 
         return

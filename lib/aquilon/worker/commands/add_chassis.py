@@ -61,13 +61,9 @@ class CommandAddChassis(BrokerCommand):
         # FIXME: get default name from the model
         if not interface:
             interface = "oa"
-            ifcomments = "Created automatically by add_chassis"
-        else:
-            ifcomments = None
         dbinterface = get_or_create_interface(session, dbchassis,
                                               name=interface, mac=mac,
-                                              interface_type="oa",
-                                              comments=ifcomments)
+                                              interface_type="oa")
         if ip:
             dbnetwork = get_net_id_from_ip(session, ip)
             check_ip_restrictions(dbnetwork, ip)

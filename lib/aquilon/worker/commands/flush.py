@@ -121,8 +121,13 @@ class CommandFlush(BrokerCommand):
                                 slaves_by_id.get(iface_id, None))
 
     def render(self, session, logger, services, personalities, machines,
-               clusters, hosts, locations, resources, switches, all,
-               **arguments):
+               clusters, hosts, locations, resources, switches,
+               network_devices, all, **arguments):
+        if switches:
+            self.deprecated_option("switchs", "Please use --network_devices instead.",
+                                   logger=logger, **arguments)
+            network_devices = True
+
         if all:
             services = True
             personalities = True
@@ -131,7 +136,7 @@ class CommandFlush(BrokerCommand):
             hosts = True
             locations = True
             resources = True
-            switches = True
+            network_devices = True
 
         with CompileKey(logger=logger):
             logger.client_info("Loading data.")
@@ -398,8 +403,8 @@ class CommandFlush(BrokerCommand):
                     except Exception, e:
                         failed.append("{0} failed: {1}".format(dbresource, e))
 
-            if switches:
-                logger.client_info("Flushing switches.")
+            if network_devices:
+                logger.client_info("Flushing network devices.")
                 q = session.query(NetworkDevice)
                 q = q.options(subqueryload('observed_vlans'),
                               joinedload('observed_vlans.network'))

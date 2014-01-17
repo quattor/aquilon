@@ -17,20 +17,17 @@
 """Contains the logic for `aq poll switch --switch`."""
 
 
-from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.commands.poll_switch import CommandPollSwitch
-from aquilon.aqdb.model import NetworkDevice
+from aquilon.worker.commands.poll_network_device_network_device import CommandPollNetworkDeviceNetworkDevice
 
 
-class CommandPollSwitchSwitch(CommandPollSwitch):
+class CommandPollNetworkDeviceSwitchSwitch(CommandPollNetworkDeviceNetworkDevice):
 
     required_parameters = ["switch"]
 
-    def render(self, session, logger, switch, type, clear, vlan, **arguments):
-        NetworkDevice.check_type(type)
-        dbnetdev = NetworkDevice.get_unique(session, switch, compel=True)
-        if type is not None and dbnetdev.switch_type != type:
-            raise ArgumentError("{0} is not a {1} switch.".format(dbnetdev,
-                                                                  type))
-        return self.poll(session, logger, [dbnetdev], clear, vlan)
+    def render(self, switch, **arguments):
+        self.deprecated_command("Command poll_switch is deprecated. "
+                                "Please use poll_network_device instead.",
+                                **arguments)
+        arguments['network_device'] = switch
+        return CommandPollNetworkDeviceNetworkDevice.render(self, **arguments)

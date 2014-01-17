@@ -26,11 +26,16 @@ class CommandSearchObservedMac(BrokerCommand):
     required_parameters = []
     default_style = "csv"
 
-    def render(self, session, logger, switch, port, mac,
+    def render(self, session, logger, network_device, switch, port, mac,
                **arguments):
-        q = session.query(ObservedMac)
         if switch:
-            dbnetdev = NetworkDevice.get_unique(session, switch, compel=True)
+            self.deprecated_option("switch", "Please use --network_device "
+                                   "instead.", logger=logger, **arguments)
+            if not network_device:
+                network_device = switch
+        q = session.query(ObservedMac)
+        if network_device:
+            dbnetdev = NetworkDevice.get_unique(session, network_device, compel=True)
             q = q.filter_by(network_device=dbnetdev)
         if port is not None:
             q = q.filter_by(port=port)

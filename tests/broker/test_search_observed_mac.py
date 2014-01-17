@@ -29,7 +29,7 @@ class TestSearchObservedMac(TestBrokerCommand):
 
     def testswitch(self):
         command = ["search_observed_mac",
-                   "--switch=ut01ga2s01.aqd-unittest.ms.com"]
+                   "--network_device=ut01ga2s01.aqd-unittest.ms.com"]
         out = self.commandtest(command)
         self.matchoutput(out, "ut01ga2s01.aqd-unittest.ms.com,1,02:02:04:02:06:cb,", command)
         self.matchoutput(out, "ut01ga2s01.aqd-unittest.ms.com,2,02:02:04:02:06:cc,", command)
@@ -44,7 +44,7 @@ class TestSearchObservedMac(TestBrokerCommand):
 
     def testall(self):
         command = ["search_observed_mac", "--mac=02:02:04:02:06:cb",
-                   "--port=1", "--switch=ut01ga2s01.aqd-unittest.ms.com"]
+                   "--port=1", "--network_device=ut01ga2s01.aqd-unittest.ms.com"]
         out = self.commandtest(command)
         self.matchoutput(out, "ut01ga2s01.aqd-unittest.ms.com,1,02:02:04:02:06:cb,", command)
         self.matchclean(out, "02:02:04:02:06:cc", command)
@@ -52,7 +52,7 @@ class TestSearchObservedMac(TestBrokerCommand):
 
     def testallnegative(self):
         command = ["search_observed_mac", "--mac=02:02:04:02:06:cb",
-                   "--port=2", "--switch=ut01ga2s01.aqd-unittest.ms.com"]
+                   "--port=2", "--network_device=ut01ga2s01.aqd-unittest.ms.com"]
         self.noouttest(command)
 
 

@@ -15,7 +15,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Module for testing the show switch command."""
+"""Module for testing the show network device command."""
 
 if __name__ == "__main__":
     import utils
@@ -25,10 +25,10 @@ import unittest2 as unittest
 from brokertest import TestBrokerCommand
 
 
-class TestShowSwitch(TestBrokerCommand):
+class TestShowNetworkDevice(TestBrokerCommand):
 
     def testshowswitchall(self):
-        command = ["show_switch", "--all"]
+        command = ["show_network_device", "--all"]
         out = self.commandtest(command)
         self.matchoutput(out, "Switch: ut3gd1r01", command)
         self.matchoutput(out,
@@ -47,7 +47,7 @@ class TestShowSwitch(TestBrokerCommand):
         self.matchoutput(out, "Switch Type: tor", command)
 
     def testshowswitchswitch(self):
-        command = ["show_switch", "--switch=ut3gd1r04.aqd-unittest.ms.com"]
+        command = ["show_network_device", "--network_device=ut3gd1r04.aqd-unittest.ms.com"]
         out = self.commandtest(command)
         self.matchoutput(out, "Switch: ut3gd1r04", command)
         self.matchoutput(out,
@@ -60,13 +60,13 @@ class TestShowSwitch(TestBrokerCommand):
 
     def testshowswitchallcsv(self):
         # Verify both with and without an interface
-        command = ["show_switch", "--all", "--format=csv"]
+        command = ["show_network_device", "--all", "--format=csv"]
 
     def testshowswitchswitchcsv(self):
-        command = ["show_switch", "--switch=ut3gd1r04.aqd-unittest.ms.com",
+        command = ["show_network_device", "--network_device=ut3gd1r04.aqd-unittest.ms.com",
                    "--format=csv"]
 
 
 if __name__ == '__main__':
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestShowSwitch)
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestShowNetworkDevice)
     unittest.TextTestRunner(verbosity=2).run(suite)

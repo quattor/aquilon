@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012,2013  Contributor
+# Copyright (C) 2008,2009,2010,2011,2013  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,42 +17,16 @@
 """Contains the logic for `aq update interface --switch`."""
 
 
-from aquilon.exceptions_ import UnimplementedError
-from aquilon.aqdb.model import NetworkDevice, Interface
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.dbwrappers.interface import rename_interface
-from aquilon.worker.processes import DSDBRunner
+from aquilon.worker.commands.update_interface_network_device import CommandUpdateInterfaceNetworkDevice
 
 
-class CommandUpdateInterfaceSwitch(BrokerCommand):
+class CommandUpdateInterfaceSwitch(CommandUpdateInterfaceNetworkDevice):
 
     required_parameters = ["interface", "switch"]
-    invalid_parameters = ['autopg', 'pg', 'boot', 'model', 'vendor']
 
-    def render(self, session, logger, interface, switch, mac, comments,
-               rename_to, **arguments):
-        for arg in self.invalid_parameters:
-            if arguments.get(arg) is not None:
-                raise UnimplementedError("update_interface --switch cannot use "
-                                         "the --%s option." % arg)
-
-        dbnetdev = NetworkDevice.get_unique(session, switch, compel=True)
-        dbinterface = Interface.get_unique(session, hardware_entity=dbnetdev,
-                                           name=interface, compel=True)
-
-        oldinfo = DSDBRunner.snapshot_hw(dbnetdev)
-
-        if comments:
-            dbinterface.comments = comments
-        if mac:
-            dbinterface.mac = mac
-        if rename_to:
-            rename_interface(session, dbinterface, rename_to)
-
-        session.flush()
-
-        dsdb_runner = DSDBRunner(logger=logger)
-        dsdb_runner.update_host(dbnetdev, oldinfo)
-        dsdb_runner.commit_or_rollback("Could not update switch in DSDB")
-
-        return
+    def render(self, switch, **arguments):
+        self.deprecated_option("switch", "Please use --network_device"
+                               "instead.", logger=logger, **arguments)
+        arguments['network_device'] = switch
+        return CommandUpdateInterfaceNetworkDevice.render(self, **arguments)

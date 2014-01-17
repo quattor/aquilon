@@ -17,9 +17,17 @@
 """Contains the logic for `aq del interface --switch`."""
 
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.commands.del_interface import CommandDelInterface
+from aquilon.worker.commands.del_interface_network_device import CommandDelInterfaceNetworkDevice
 
 
-class CommandDelInterfaceSwitch(CommandDelInterface):
+class CommandDelInterfaceSwitch(CommandDelInterfaceNetworkDevice):
 
     required_parameters = ['switch']
+
+    def render(self, switch, **arguments):
+        self.deprecated_option("switch", "Please use --network_device"
+                               "instead.", logger=logger, **arguments)
+        arguments['network_device'] = switch
+        arguments['switch'] = None
+        return CommandDelInterfaceNetworkDevice.render(self, **arguments)
+

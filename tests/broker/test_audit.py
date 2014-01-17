@@ -308,13 +308,13 @@ class TestAudit(TestBrokerCommand):
 
     def test_500_by_return_code(self):
         """ test search by return code """
-        command = ["search_audit", "--command=add_switch", "--return_code=200"]
+        command = ["search_audit", "--command=add_network_device", "--return_code=200"]
         out = self.commandtest(command)
         self.searchoutput(out, self.user, command)
         for line in out.splitlines():
             m = self.searchoutput(line, AUDIT_RAW_RE, command)
             self.assertEqual(m.group('returncode'), '200')
-            self.assertEqual(m.group('command'), 'add_switch')
+            self.assertEqual(m.group('command'), 'add_network_device')
 
     def test_501_zero_return_code(self):
         """ test searching for unfinished commands """

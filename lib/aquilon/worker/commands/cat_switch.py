@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012,2013  Contributor
+# Copyright (C) 2008,2009,2010,2011,2013  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,20 +16,17 @@
 # limitations under the License.
 """Contains the logic for `aq cat --switch`."""
 
-from aquilon.aqdb.model import NetworkDevice
+
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.templates import Plenary
+from aquilon.worker.commands.cat_network_device import CommandCatNetworkDevice
 
 
-class CommandCatSwitch(BrokerCommand):
+class CommandCatSwitch(CommandCatNetworkDevice):
 
     required_parameters = ["switch"]
 
-    def render(self, generate, session, logger, switch, **kwargs):
-        dbnetdev = NetworkDevice.get_unique(session, switch, compel=True)
-        plenary_info = Plenary.get_plenary(dbnetdev, logger=logger)
-
-        if generate:
-            return plenary_info._generate_content()
-        else:
-            return plenary_info.read()
+    def render(self, switch, **arguments):
+        self.deprecated_option("switch", "Please use --network_device"
+                               "instead.", logger=logger, **arguments)
+        arguments['network_device'] = switch
+        return CommandCatNetworkDevice.render(self, **arguments)

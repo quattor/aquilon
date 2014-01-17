@@ -68,6 +68,7 @@
 	<cmdsynopsis>
 	    <command>aq cat</command>
 	    <arg choice="plain"><option>--switch <replaceable>SWITCH</replaceable></option></arg>
+	    <arg choice="plain"><option>--network_device <replaceable>NETDEV</replaceable></option></arg>
 	    <arg choice="opt"><option>--generate</option></arg>
 	</cmdsynopsis>
 	<cmdsynopsis>
@@ -192,14 +193,15 @@
 	    </varlistentry>
 	</variablelist>
 	<variablelist>
-	    <title>Looking at switch plenaries</title>
+	    <title>Looking at network device plenaries</title>
 	    <varlistentry>
 	        <term>
 		    <option>--switch <replaceable>SWITCH</replaceable></option>
+		    <option>--network_device <replaceable>NETDEV</replaceable></option>
 		</term>
 		<listitem>
 		    <para>
-			Display the plenary of the named switch.
+			Display the plenary of the named network device.
 		    </para>
 		</listitem>
 	    </varlistentry>

@@ -46,7 +46,7 @@ class TestDelInterface(TestBrokerCommand):
 
     def testnotaswitch(self):
         command = ["del", "interface", "--interface", "oa",
-                   "--switch", "ut3c5"]
+                   "--network_device", "ut3c5"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "but is not a switch", command)
 
@@ -69,11 +69,11 @@ class TestDelInterface(TestBrokerCommand):
 
     def testdelut3gd1r04vlan220(self):
         command = ["del", "interface", "--interface", "vlan220",
-                   "--switch", "ut3gd1r04.aqd-unittest.ms.com"]
+                   "--network_device", "ut3gd1r04.aqd-unittest.ms.com"]
         self.noouttest(command)
 
     def testverifydelut3gd1r04vlan220(self):
-        command = ["show", "switch", "--switch", "ut3gd1r04.aqd-unittest.ms.com"]
+        command = ["show", "network_device", "--network_device", "ut3gd1r04.aqd-unittest.ms.com"]
         out = self.commandtest(command)
         self.matchclean(out, "vlan220", command)
 

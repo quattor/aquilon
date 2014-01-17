@@ -31,6 +31,7 @@
 	        <arg choice="plain"><option>--machine <replaceable>MACHINE</replaceable></option></arg>
 	        <arg choice="plain"><option>--chassis <replaceable>CHASSIS</replaceable></option></arg>
 	        <arg choice="plain"><option>--switch <replaceable>SWITCH</replaceable></option></arg>
+	        <arg choice="plain"><option>--network_device <replaceable>NETDEV</replaceable></option></arg>
 	    </group>
 	    <arg choice="plain"><option>--interface <replaceable>IFACE</replaceable></option></arg>
 	    <arg choice="opt"><option>--fqdn <replaceable>FQDN</replaceable></option></arg>
@@ -56,7 +57,7 @@
 	</para>
 	<para>
 	    Note that you cannot add the primary IP address of a hardware entity using this command.
-	    Primary addresses are created by the <command>add switch</command>, <command>add
+	    Primary addresses are created by the <command>add network device</command>, <command>add
 		chassis</command>, and <command>add host</command> commands.
 	</para>
     </refsect1>
@@ -70,12 +71,13 @@
 		    <option>--machine <replaceable>MACHINE</replaceable></option>,
 		    <option>--chassis <replaceable>CHASSIS</replaceable></option>,
 		    <option>--switch <replaceable>SWITCH</replaceable></option>
+		    <option>--network_device <replaceable>NETDEV</replaceable></option>
 		</term>
 		<listitem>
 		    <para>
 		        Specify the hardware entity you wish to add the IP address to. You can use either
 			the hardware label or the primary name for <replaceable>MACHINE</replaceable>,
-			<replaceable>CHASISS</replaceable> and <replaceable>SWITCH</replaceable>.
+			<replaceable>CHASISS</replaceable> and <replaceable>NETDEV</replaceable>.
 		    </para>
 		</listitem>
 	    </varlistentry>
@@ -209,7 +211,7 @@ aq add interface address --machine foo.one-nyp.ms.com \
 	<example>
 	    <title>Let the broker auto-generate the DNS entry</title>
 	    <programlisting>
-aq add interface address --switch foo.one-nyp.ms.com \
+aq add interface address --network_device foo.one-nyp.ms.com \
 			 --interface vlan110 \
 			 --ip 10.10.1.1
 	    </programlisting>
@@ -224,8 +226,8 @@ aq add interface address --switch foo.one-nyp.ms.com \
 	<para>
 	    <citerefentry><refentrytitle>add_chassis</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
 	    <citerefentry><refentrytitle>add_host</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-	    <citerefentry><refentrytitle>add_switch</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-	    <citerefentry><refentrytitle>poll_switch</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>add_network_device</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>poll_network_device</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
 	    <citerefentry><refentrytitle>add_network_environment</refentrytitle><manvolnum>1</manvolnum></citerefentry>
 	</para>
     </refsect1>

@@ -24,7 +24,7 @@ from aquilon.aqdb.model import Location
 from aquilon.worker.broker import validate_basic
 
 
-def get_location(session, query_options=None, **kwargs):
+def get_location(session, query_options=None, compel=False, **kwargs):
     """Somewhat sophisticated getter for any of the location types."""
     cls = None
     name = None
@@ -45,7 +45,10 @@ def get_location(session, query_options=None, **kwargs):
         cls = mapper.class_
 
     if not cls:
-        return None
+        if compel:
+            raise ArgumentError("Please specify a location parameter.")
+        else:
+            return None
 
     try:
         q = session.query(cls)

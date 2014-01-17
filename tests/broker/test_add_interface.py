@@ -76,7 +76,7 @@ class TestAddInterface(TestBrokerCommand):
 
     def testfailbadvlanformat(self):
         command = ["add", "interface", "--interface", "eth1.foo",
-                   "--machine", "ut3c5n10", "--type", "vlan"]
+                   "--machine", "ut3c5n10", "--iftype", "vlan"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Invalid VLAN interface name 'eth1.foo'.",
                          command)
@@ -211,7 +211,7 @@ class TestAddInterface(TestBrokerCommand):
     def testaddut3c5n4br0(self):
         # Specify the interface type explicitely this time
         self.noouttest(["add", "interface", "--interface", "br0",
-                        "--type", "bridge", "--machine", "ut3c5n4"])
+                        "--iftype", "bridge", "--machine", "ut3c5n4"])
 
     def testenslaveut3c5n4eth0(self):
         self.noouttest(["update", "interface", "--machine", "ut3c5n4",
@@ -354,7 +354,7 @@ class TestAddInterface(TestBrokerCommand):
     def testaddinterfaceut3c5(self):
         ip = self.net["unknown0"].usable[6]
         self.dsdb_expect_update("ut3c5.aqd-unittest.ms.com", "oa", mac=ip.mac)
-        command = ["add", "interface", "--interface", "oa", "--mac", ip.mac,
+        command = ["update", "interface", "--interface", "oa", "--mac", ip.mac,
                    "--chassis", "ut3c5.aqd-unittest.ms.com"]
         self.noouttest(command)
         self.dsdb_verify()
@@ -413,7 +413,7 @@ class TestAddInterface(TestBrokerCommand):
     def testfailaddinterfaceut3c1type(self):
         command = ["add", "interface", "--interface", "oa2",
                    "--mac", self.net["unknown0"].usable[-1].mac,
-                   "--type", "vlan",
+                   "--iftype", "vlan",
                    "--chassis", "ut3c1.aqd-unittest.ms.com"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Only 'oa' is allowed as the interface type "
@@ -422,7 +422,7 @@ class TestAddInterface(TestBrokerCommand):
     def testfailaddinterfaceut3dg1r01(self):
         command = ["add", "interface", "--interface", "xge49",
                    "--mac", self.net["tor_net_0"].usable[0].mac,
-                   "--switch", "ut3gd1r01.aqd-unittest.ms.com"]
+                   "--network_device", "ut3gd1r01.aqd-unittest.ms.com"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "MAC address %s is already in use: " %
@@ -432,21 +432,21 @@ class TestAddInterface(TestBrokerCommand):
     def testfailaddinterfaceud3dg1r01model(self):
         command = ["add", "interface", "--interface", "xge49",
                    "--model", "e1000",
-                   "--switch", "ut3gd1r01.aqd-unittest.ms.com"]
+                   "--network_device", "ut3gd1r01.aqd-unittest.ms.com"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Cannot use argument --model when adding an "
-                         "interface to a switch.", command)
+                         "interface to a network device.", command)
 
     def testfailaddinterfaceud3dg1r01type(self):
         command = ["add", "interface", "--interface", "xge49",
-                   "--type", "vlan",
-                   "--switch", "ut3gd1r01.aqd-unittest.ms.com"]
+                   "--iftype", "vlan",
+                   "--network_device", "ut3gd1r01.aqd-unittest.ms.com"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Interface type vlan is not allowed for "
-                         "switches.", command)
+                         "network devices.", command)
 
     def testverifyfailaddinterfaceut3dg1r01(self):
-        command = "show switch --switch ut3gd1r01.aqd-unittest.ms.com"
+        command = "show network_device --network_device ut3gd1r01.aqd-unittest.ms.com"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Switch: ut3gd1r01", command)
         self.matchoutput(out, "Primary Name: ut3gd1r01.aqd-unittest.ms.com",
@@ -455,24 +455,24 @@ class TestAddInterface(TestBrokerCommand):
 
     def testaddvirtualswitchinterface(self):
         command = ["add", "interface", "--interface", "vlan110",
-                   "--switch", "ut3gd1r04.aqd-unittest.ms.com"]
+                   "--network_device", "ut3gd1r04.aqd-unittest.ms.com"]
         self.noouttest(command)
 
     def testaddloopback(self):
         command = ["add", "interface", "--interface", "loop0",
-                   "--switch", "ut3gd1r04.aqd-unittest.ms.com"]
+                   "--network_device", "ut3gd1r04.aqd-unittest.ms.com"]
         self.noouttest(command)
 
     def testfailloopbackmac(self):
         command = ["add", "interface", "--interface", "loop1",
-                   "--switch", "ut3gd1r04.aqd-unittest.ms.com",
+                   "--network_device", "ut3gd1r04.aqd-unittest.ms.com",
                    "--mac", self.net["autopg1"][0].mac]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Loopback interfaces cannot have a MAC address.",
                          command)
 
     def testverifyut3gd1r04(self):
-        command = ["show", "switch", "--switch",
+        command = ["show", "network_device", "--network_device",
                    "ut3gd1r04.aqd-unittest.ms.com"]
         out = self.commandtest(command)
         self.matchoutput(out,
@@ -567,7 +567,7 @@ class TestAddInterface(TestBrokerCommand):
         self.noouttest(["add", "interface", "--machine", "filer1",
                         "--interface", "e4b"])
         self.noouttest(["add", "interface", "--machine", "filer1",
-                        "--interface", "v0", "--type", "bonding"])
+                        "--interface", "v0", "--iftype", "bonding"])
         self.noouttest(["update", "interface", "--machine", "filer1",
                         "--master", "v0", "--interface", "e4a"])
         self.noouttest(["update", "interface", "--machine", "filer1",
@@ -577,13 +577,13 @@ class TestAddInterface(TestBrokerCommand):
 
     def testfailunknowntype(self):
         command = ["add", "interface", "--machine", "ut3c1n3",
-                   "--interface", "eth2", "--type", "no-such-type"]
+                   "--interface", "eth2", "--iftype", "no-such-type"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Invalid interface type 'no-such-type'.", command)
 
     def testfailbadtype(self):
         command = ["add", "interface", "--machine", "ut3c1n3",
-                   "--interface", "eth2", "--type", "oa"]
+                   "--interface", "eth2", "--iftype", "oa"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Interface type 'oa' is not valid for machines.",
                          command)

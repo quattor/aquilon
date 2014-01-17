@@ -85,13 +85,13 @@ from test_update_cluster import TestUpdateCluster
 from test_del_cluster import TestDelCluster
 from test_del_share import TestDelShare
 from test_early_constraints_cluster import TestClusterEarlyConstraints
-from test_add_switch import TestAddSwitch
-from test_update_switch import TestUpdateSwitch
-from test_rename_switch import TestRenameSwitch
-from test_discover_switch import TestDiscoverSwitch
+from test_add_netdev import TestAddNetworkDevice
+from test_update_netdev import TestUpdateNetworkDevice
+from test_rename_netdev import TestRenameNetworkDevice
+from test_discover_netdev import TestDiscoverNetworkDevice
 from test_vlan import TestVlan
-from test_poll_switch import TestPollSwitch
-from test_update_switch_mac import TestUpdateSwitchMac
+from test_poll_netdev import TestPollNetworkDevice
+from test_update_netdev_mac import TestUpdateNetworkDeviceMac
 from test_add_chassis import TestAddChassis
 from test_update_chassis import TestUpdateChassis
 from test_add_machine import TestAddMachine
@@ -157,7 +157,7 @@ from test_constraints_domain import TestDomainConstraints
 from test_constraints_vendor import TestVendorConstraints
 from test_constraints_machine import TestMachineConstraints
 from test_constraints_interface import TestInterfaceConstraints
-from test_constraints_switch import TestSwitchConstraints
+from test_constraints_netdev import TestNetworkDeviceConstraints
 from test_constraints_cluster import TestClusterConstraints
 from test_constraints_metacluster import TestMetaClusterConstraints
 from test_constraints_location import TestLocationConstraints
@@ -166,10 +166,10 @@ from test_constraints_network import TestNetworkConstraints
 from test_show_service_all import TestShowServiceAll
 from test_show_campus import TestShowCampus
 from test_show_fqdn import TestShowFqdn
-from test_show_switch import TestShowSwitch
+from test_show_netdev import TestShowNetworkDevice
 from test_show_machine import TestShowMachine
 from test_search_rack import TestSearchRack
-from test_search_switch import TestSearchSwitch
+from test_search_netdev import TestSearchNetworkDevice
 from test_search_hardware import TestSearchHardware
 from test_search_machine import TestSearchMachine
 from test_search_dns import TestSearchDns
@@ -227,7 +227,7 @@ from test_del_interface_address import TestDelInterfaceAddress
 from test_del_disk import TestDelDisk
 from test_del_machine import TestDelMachine
 from test_del_chassis import TestDelChassis
-from test_del_switch import TestDelSwitch
+from test_del_netdev import TestDelNetworkDevice
 from test_del_esx_cluster import TestDelESXCluster
 from test_del_metacluster import TestDelMetaCluster
 from test_del_router import TestDelRouter
@@ -307,19 +307,19 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestAddCluster,
                      TestAddShare,
                      TestClusterEarlyConstraints,
-                     TestAddSwitch, TestUpdateSwitch,
+                     TestAddNetworkDevice, TestUpdateNetworkDevice,
                      TestAddChassis, TestUpdateChassis,
                      TestAddMachine, TestAddDisk, TestAddInterface,
                      TestAddAddress,
                      TestAddRouter, TestAddDynamicRange,
                      TestAddAquilonHost, TestAddWindowsHost, TestAddAuroraHost,
-                     TestPollSwitch,
-                     TestUpdateSwitchMac,
+                     TestPollNetworkDevice,
+                     TestUpdateNetworkDeviceMac,
                      TestVlan,
                      TestAddHost,
                      TestAddAuxiliary, TestAddManager, TestAddInterfaceAddress,
                      TestAddServiceAddress,
-                     TestRenameSwitch, TestDiscoverSwitch,
+                     TestRenameNetworkDevice, TestDiscoverNetworkDevice,
                      TestAddAlias, TestAddSrvRecord,
                      TestMapService, TestBindClient, TestPrebindServer,
                      TestServiceConstraints,
@@ -351,7 +351,7 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestBindClientConstraints, TestBindServerConstraints,
                      TestArchetypeConstraints, TestPersonalityConstraints,
                      TestDomainConstraints, TestVendorConstraints,
-                     TestMachineConstraints, TestSwitchConstraints,
+                     TestMachineConstraints, TestNetworkDeviceConstraints,
                      TestInterfaceConstraints,
                      TestUpdatePersonality,
                      TestClusterConstraints, TestMetaClusterConstraints,
@@ -359,7 +359,7 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestDnsConstraints,
                      TestShowServiceAll, TestShowCampus, TestShowFqdn,
                      TestSearchRack,
-                     TestShowSwitch, TestSearchSwitch,
+                     TestShowNetworkDevice, TestSearchNetworkDevice,
                      TestSearchHardware, TestSearchMachine, TestShowMachine,
                      TestSearchDns, TestDumpDns,
                      TestSearchPersonality,
@@ -393,7 +393,7 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestDelAddress, TestDelNSRecord,
                      TestDelManager, TestDelAuxiliary, TestDelWindowsHost, TestDelHost,
                      TestDelInterface, TestDelDisk, TestDelMachine, TestDelChassis,
-                     TestDelSwitch,
+                     TestDelNetworkDevice,
                      TestDelShare,
                      TestDelCluster,
                      TestDelESXCluster, TestDelMetaCluster,

@@ -38,34 +38,40 @@ class CommandAddInterfaceMachine(BrokerCommand):
     required_parameters = ["interface", "machine"]
 
     def render(self, session, logger, interface, machine, mac, automac,
-               model, vendor, pg, autopg, type, comments, **arguments):
+               model, vendor, pg, autopg, iftype, type, comments, **arguments):
         dbmachine = Machine.get_unique(session, machine, compel=True)
         oldinfo = DSDBRunner.snapshot_hw(dbmachine)
         audit_results = []
 
-        if not type:
-            type = 'public'
+        if type:
+            self.deprecated_option("type", "Please use --iftype"
+                                   "instead.", logger=logger, **arguments)
+            if not iftype:
+                iftype = type
+
+        if not iftype:
+            iftype = 'public'
             management_types = ['bmc', 'ilo', 'ipmi']
             for mtype in management_types:
                 if interface.startswith(mtype):
-                    type = 'management'
+                    iftype = 'management'
                     break
 
             if interface.startswith("bond"):
-                type = 'bonding'
+                iftype = 'bonding'
             elif interface.startswith("br"):
-                type = 'bridge'
+                iftype = 'bridge'
 
             # Test it last, VLANs can be added on top of almost anything
             if '.' in interface:
-                type = 'vlan'
+                iftype = 'vlan'
 
-        if type == "oa" or type == "loopback":
+        if iftype == "oa" or iftype == "loopback":
             raise ArgumentError("Interface type '%s' is not valid for "
-                                "machines." % type)
+                                "machines." % iftype)
 
         bootable = None
-        if type == 'public':
+        if iftype == 'public':
             if interface == 'eth0':
                 bootable = True
             else:
@@ -85,7 +91,7 @@ class CommandAddInterfaceMachine(BrokerCommand):
             # - the old interface belongs to a machine
             # - the old interface is associated with a host
             # - that host was blindly created, and thus can be removed safely
-            if prev and type == 'management' and \
+            if prev and iftype == 'management' and \
                prev.hardware_entity.hardware_type == 'machine' and \
                prev.hardware_entity.host and \
                prev.hardware_entity.host.status.name == 'blind':
@@ -130,7 +136,7 @@ class CommandAddInterfaceMachine(BrokerCommand):
         dbinterface = get_or_create_interface(session, dbmachine,
                                               name=interface,
                                               vendor=vendor, model=model,
-                                              interface_type=type, mac=mac,
+                                              interface_type=iftype, mac=mac,
                                               bootable=bootable,
                                               port_group=port_group,
                                               comments=comments, preclude=True)
