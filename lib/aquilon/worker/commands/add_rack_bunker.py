@@ -14,20 +14,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Contains the logic for `aq add rack`."""
-
+"""Contains the logic for `aq add rack --bunker`."""
 
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.dbwrappers.rack import get_or_create_rack
+from aquilon.worker.commands.add_rack import CommandAddRack
 
 
-class CommandAddRackBunker(BrokerCommand):
+class CommandAddRackBunker(CommandAddRack):
 
     required_parameters = ["rackid", "bunker", "row", "column"]
-
-    def render(self, session, rackid, bunker, row, column, fullname,
-               comments, **arguments):
-        get_or_create_rack(session=session, rackid=rackid, rackrow=row,
-                           rackcolumn=column, bunker=bunker, fullname=fullname,
-                           comments=comments)
-        return

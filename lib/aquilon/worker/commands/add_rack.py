@@ -24,9 +24,10 @@ class CommandAddRack(BrokerCommand):
 
     required_parameters = ["rackid", "building", "row", "column"]
 
-    def render(self, session, rackid, building, row, column, fullname, comments,
+    def render(self, session, rackid, building, room, bunker, row, column, fullname, comments,
                **arguments):
         get_or_create_rack(session=session, rackid=rackid, rackrow=row,
-                           rackcolumn=column, building=building,
-                           fullname=fullname, comments=comments)
+                           rackcolumn=column, building=building, room=room,
+                           bunker=bunker, fullname=fullname, comments=comments,
+                           preclude=True)
         return

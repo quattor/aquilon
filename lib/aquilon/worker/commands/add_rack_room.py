@@ -17,16 +17,9 @@
 """Contains the logic for `aq add rack --room`."""
 
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.dbwrappers.rack import get_or_create_rack
+from aquilon.worker.commands.add_rack import CommandAddRack
 
 
-class CommandAddRackRoom(BrokerCommand):
+class CommandAddRackRoom(CommandAddRack):
 
     required_parameters = ["rackid", "room", "row", "column"]
-
-    def render(self, session, rackid, room, row, column, fullname,
-               comments, **arguments):
-        get_or_create_rack(session=session, rackid=rackid, rackrow=row,
-                           rackcolumn=column, room=room, fullname=fullname,
-                           comments=comments)
-        return

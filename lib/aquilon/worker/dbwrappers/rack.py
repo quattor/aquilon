@@ -16,7 +16,6 @@
 # limitations under the License.
 """Utility/creation wrapper to avoid duplicating code."""
 
-
 from sqlalchemy.orm.exc import NoResultFound
 
 from aquilon.exceptions_ import ArgumentError
@@ -25,9 +24,10 @@ from aquilon.worker.dbwrappers.location import get_location
 
 
 def get_or_create_rack(session, rackid, rackrow, rackcolumn, building=None,
-                       room=None, bunker=None, fullname=None, comments=None):
+                       room=None, bunker=None, fullname=None, comments=None,
+                       preclude=False):
     dblocation = get_location(session, building=building, room=room,
-                              bunker=bunker)
+                              bunker=bunker, compel=True)
     dbbuilding = dblocation.building
     if not dbbuilding:  # pragma: no cover
         raise ArgumentError("The rack must be inside a building.")
@@ -60,6 +60,8 @@ def get_or_create_rack(session, rackid, rackrow, rackcolumn, building=None,
             raise ArgumentError("Found rack with name %s, but the current "
                                 "column %s does not match given column %s." %
                                 (dbrack.name, dbrack.rack_column, rackcolumn))
+        if preclude:
+            raise ArgumentError("{0} already exists.".format(dbrack))
         return dbrack
     except NoResultFound:
         pass
