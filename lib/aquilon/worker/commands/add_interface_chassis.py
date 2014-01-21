@@ -33,7 +33,7 @@ class CommandAddInterfaceChassis(BrokerCommand):
     def render(self, session, logger, interface, chassis, mac, iftype, type,
                comments, **arguments):
         if type:
-            self.deprecated_option("type", "Please use --iftype"
+            self.deprecated_option("type", "Please use --iftype "
                                    "instead.", logger=logger, **arguments)
             if not iftype:
                 iftype = type
