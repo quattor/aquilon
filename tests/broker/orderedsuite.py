@@ -85,6 +85,7 @@ from test_update_cluster import TestUpdateCluster
 from test_del_cluster import TestDelCluster
 from test_del_share import TestDelShare
 from test_early_constraints_cluster import TestClusterEarlyConstraints
+from test_deprecated_switch import TestDeprecatedSwitch
 from test_add_netdev import TestAddNetworkDevice
 from test_update_netdev import TestUpdateNetworkDevice
 from test_rename_netdev import TestRenameNetworkDevice
@@ -307,6 +308,7 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestAddCluster,
                      TestAddShare,
                      TestClusterEarlyConstraints,
+                     TestDeprecatedSwitch,
                      TestAddNetworkDevice, TestUpdateNetworkDevice,
                      TestAddChassis, TestUpdateChassis,
                      TestAddMachine, TestAddDisk, TestAddInterface,
