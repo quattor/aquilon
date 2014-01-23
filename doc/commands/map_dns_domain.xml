@@ -3,18 +3,18 @@
 "http://docbook.org/xml/5.0/dtd/docbook.dtd" [
 <!ENTITY aqd_version SYSTEM "../version.txt">
 ]>
-<refentry xml:id="map_dns_domain"
+<refentry xml:id="aq_map_dns_domain"
           xmlns="http://docbook.org/ns/docbook"
 	  xmlns:xi="http://www.w3.org/2001/XInclude">
     <refmeta>
-        <refentrytitle>map_dns_domain</refentrytitle>
+        <refentrytitle>aq_map_dns_domain</refentrytitle>
         <manvolnum>1</manvolnum>
         <refmiscinfo class="version">&aqd_version;</refmiscinfo>
         <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
     </refmeta>
 
     <refnamediv>
-        <refname>map dns domain</refname>
+        <refname>aq map dns domain</refname>
         <refpurpose>
 	    Map a DNS domain to a location
         </refpurpose>
@@ -53,13 +53,13 @@
 	</para>
 	<para>
 	    The 
-	    <citerefentry><refentrytitle>show_dns_domain</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+	    <citerefentry><refentrytitle>aq_show_dns_domain</refentrytitle><manvolnum>1</manvolnum></citerefentry>
 	    command will show the locations a particular DNS domain is mapped to.
 	</para>
 	<para>
 	    Changes in the DNS search path due to changes in the domain mapping take effect only
 	    when the machine's plenary template is updated. Use the
-	    <citerefentry><refentrytitle>flush</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+	    <citerefentry><refentrytitle>aq_flush</refentrytitle><manvolnum>1</manvolnum></citerefentry>
 	    command to force an update of the machine templates.
 	</para>
 	<para>
@@ -133,10 +133,10 @@ aq map dns domain --dns_domain new-york.ms.com --city ny
     <refsect1>
 	<title>See also</title>
 	<para>
-	    <citerefentry><refentrytitle>unmap_dns_domain</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-	    <citerefentry><refentrytitle>search_dns_domain_map</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-	    <citerefentry><refentrytitle>show_dns_domain</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-	    <citerefentry><refentrytitle>flush</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+	    <citerefentry><refentrytitle>aq_unmap_dns_domain</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>aq_search_dns_domain_map</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>aq_show_dns_domain</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>aq_flush</refentrytitle><manvolnum>1</manvolnum></citerefentry>
 	</para>
     </refsect1>
 </refentry>

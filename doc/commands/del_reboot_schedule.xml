@@ -3,18 +3,18 @@
 "http://docbook.org/xml/5.0/dtd/docbook.dtd" [
 <!ENTITY aqd_version SYSTEM "../version.txt">
 ]>
-<refentry xml:id="del_reboot_schedule"
+<refentry xml:id="aq_del_reboot_schedule"
           xmlns="http://docbook.org/ns/docbook"
 	  xmlns:xi="http://www.w3.org/2001/XInclude">
     <refmeta>
-        <refentrytitle>del_reboot_schedule</refentrytitle>
+        <refentrytitle>aq_del_reboot_schedule</refentrytitle>
         <manvolnum>1</manvolnum>
         <refmiscinfo class="version">&aqd_version;</refmiscinfo>
         <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
     </refmeta>
 
     <refnamediv>
-        <refname>del reboot schedule</refname>
+        <refname>aq del reboot schedule</refname>
         <refpurpose>
 	    Removes a reboot schedule resource from a host or cluster
         </refpurpose>
@@ -98,7 +98,7 @@ aq del_reboot_schedule --hostname foo.example.com
     <refsect1>
 	<title>See also</title>
 	<para>
-	    <citerefentry><refentrytitle>add_reboot_schedule</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>aq_add_reboot_schedule</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
 	</para>
     </refsect1>
 </refentry>

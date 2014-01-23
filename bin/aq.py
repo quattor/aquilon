@@ -35,9 +35,6 @@ import csv
 from time import sleep
 from threading import Thread
 
-BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
-MANDIR = os.path.join(BINDIR, "..", "doc", "man")
-
 # -- begin path_setup --
 BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
 LIBDIR = os.path.join(BINDIR, "..", "lib")
@@ -306,7 +303,13 @@ def quoteOptions(options):
 if __name__ == "__main__":
     # Set up the search path for man pages. "man" does not like ".." in the
     # path, so we have to normalize it
-    os.environ["MANPATH"] = os.path.realpath(MANDIR)
+    BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
+    MANDIR = os.path.realpath(os.path.join(BINDIR, "..", "doc", "man"))
+    if os.path.exists(MANDIR):
+        if "MANPATH" in os.environ:
+            os.environ["MANPATH"] = MANDIR + ":" + os.environ["MANPATH"]
+        else:
+            os.environ["MANPATH"] = MANDIR
 
     parser = OptParser(lookup_file_path('input.xml'))
     try:

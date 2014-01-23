@@ -3,11 +3,11 @@
 "http://docbook.org/xml/5.0/dtd/docbook.dtd" [
 <!ENTITY aqd_version SYSTEM "../version.txt">
 ]>
-<refentry xml:id="add_hostlink"
+<refentry xml:id="aq_add_hostlink"
           xmlns="http://docbook.org/ns/docbook"
 	  xmlns:xi="http://www.w3.org/2001/XInclude">
     <refmeta>
-        <refentrytitle>add_hostlink</refentrytitle>
+        <refentrytitle>aq_add_hostlink</refentrytitle>
         <manvolnum>1</manvolnum>
         <refmiscinfo class="version">&aqd_version;</refmiscinfo>
         <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
@@ -21,7 +21,7 @@
       <author><orgname>Morgan Stanley</orgname></author>
     </info>-->
     <refnamediv>
-        <refname>add hostlink</refname>
+        <refname>aq add hostlink</refname>
         <refpurpose>
           Add a hostlink resource onto a host or cluster
         </refpurpose>
@@ -192,7 +192,7 @@ aq add hostlink --cluster ny01vv \
     <refsect1>
 	<title>See also</title>
 	<para>
-	    <citerefentry><refentrytitle>del_hostlink</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>aq_del_hostlink</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
 	</para>
     </refsect1>
 </refentry>

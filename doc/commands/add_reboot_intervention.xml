@@ -3,18 +3,18 @@
 "http://docbook.org/xml/5.0/dtd/docbook.dtd" [
 <!ENTITY aqd_version SYSTEM "../version.txt">
 ]>
-<refentry xml:id="add_reboot_intervention"
+<refentry xml:id="aq_add_reboot_intervention"
           xmlns="http://docbook.org/ns/docbook"
 	  xmlns:xi="http://www.w3.org/2001/XInclude">
     <refmeta>
-        <refentrytitle>add_reboot_intervention</refentrytitle>
+        <refentrytitle>aq_add_reboot_intervention</refentrytitle>
         <manvolnum>1</manvolnum>
         <refmiscinfo class="version">&aqd_version;</refmiscinfo>
         <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
     </refmeta>
 
     <refnamediv>
-        <refname>add reboot intervention</refname>
+        <refname>aq add reboot intervention</refname>
         <refpurpose>
 	    Add a reboot intervention resource onto a host or cluster.
         </refpurpose>
@@ -161,7 +161,7 @@ aq add reboot intervention --hostname foo.example.com \
     <refsect1>
 	<title>See also</title>
 	<para>
-	    <citerefentry><refentrytitle>del_reboot_intervention</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>aq_del_reboot_intervention</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
 	</para>
     </refsect1>
 </refentry>

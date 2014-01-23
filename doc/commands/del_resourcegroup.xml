@@ -3,18 +3,18 @@
 "http://docbook.org/xml/5.0/dtd/docbook.dtd" [
 <!ENTITY aqd_version SYSTEM "../version.txt">
 ]>
-<refentry xml:id="del_resourcegroup"
+<refentry xml:id="aq_del_resourcegroup"
           xmlns="http://docbook.org/ns/docbook"
 	  xmlns:xi="http://www.w3.org/2001/XInclude">
     <refmeta>
-        <refentrytitle>del_resourcegroup</refentrytitle>
+        <refentrytitle>aq_del_resourcegroup</refentrytitle>
         <manvolnum>1</manvolnum>
         <refmiscinfo class="version">&aqd_version;</refmiscinfo>
         <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
     </refmeta>
 
     <refnamediv>
-        <refname>del resourcegroup</refname>
+        <refname>aq del resourcegroup</refname>
         <refpurpose>
 	    Removes a resourcegroup.
         </refpurpose>
@@ -109,7 +109,7 @@ aq del_resourcegroup --cluster ny01vv --resourcegroup ny01vvas01
     <refsect1>
 	<title>See also</title>
 	<para>
-	    <citerefentry><refentrytitle>del_application</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+	    <citerefentry><refentrytitle>aq_del_application</refentrytitle><manvolnum>1</manvolnum></citerefentry>
 	</para>
     </refsect1>
 </refentry>

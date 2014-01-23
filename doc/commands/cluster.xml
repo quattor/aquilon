@@ -3,18 +3,18 @@
 "http://docbook.org/xml/5.0/dtd/docbook.dtd" [
 <!ENTITY aqd_version SYSTEM "../version.txt">
 ]>
-<refentry xml:id="cluster"
+<refentry xml:id="aq_cluster"
           xmlns="http://docbook.org/ns/docbook"
 	  xmlns:xi="http://www.w3.org/2001/XInclude">
     <refmeta>
-        <refentrytitle>cluster</refentrytitle>
+        <refentrytitle>aq_cluster</refentrytitle>
         <manvolnum>1</manvolnum>
         <refmiscinfo class="version">&aqd_version;</refmiscinfo>
         <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
     </refmeta>
 
     <refnamediv>
-        <refname>cluster</refname>
+        <refname>aq cluster</refname>
         <refpurpose>
 	    Add hosts to a cluster
         </refpurpose>
@@ -142,7 +142,7 @@ aq cluster --hostname foo.example.com --cluster grid1
     <refsect1>
 	<title>See also</title>
 	<para>
-	    <citerefentry><refentrytitle>uncluster</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>aq_uncluster</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
 	</para>
     </refsect1>
 </refentry>

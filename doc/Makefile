@@ -23,10 +23,10 @@ COMMAND_SOURCES = $(wildcard commands/*.xml)
 ALL_SOURCES = $(wildcard *.xml) $(COMMAND_SOURCES)
 GENERATED_XML = common/cluster_location_options.xml common/member_location_options.xml
 
-MAN_OUTPUT = $(addprefix man/man1/,$(notdir $(COMMAND_SOURCES:.xml=.1)))
+MAN_OUTPUT = $(addprefix man/man1/aq_,$(notdir $(COMMAND_SOURCES:.xml=.1)))
 
 # Eventually we'll want to add other items to HTML_OUTPUT...
-HTML_OUTPUT = $(addprefix html/,$(notdir $(COMMAND_SOURCES:.xml=.html)))
+HTML_OUTPUT = $(addprefix html/aq_,$(notdir $(COMMAND_SOURCES:.xml=.html)))
 
 all: version.txt $(FORMATS)
 
