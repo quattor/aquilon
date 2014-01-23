@@ -236,8 +236,8 @@ class AQDMaker(object):
                 args.append(config.get("broker", "kingdir"))
                 mon.addProcess("git-daemon", args)
             if config.getboolean("broker", "run_aqnotifyd"):
-                notifyd = os.path.join(config.get("broker", "srcdir"),
-                                       "sbin", "aq_notifyd")
+                notifyd = os.path.join(os.path.dirname(sys.argv[0]),
+                                       "aq_notifyd")
                 if not os.path.exists(notifyd):
                     notifyd = notifyd + ".py"
                 args = [notifyd, "--config", config.baseconfig]
