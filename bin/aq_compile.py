@@ -31,11 +31,13 @@ ms.version.addpkg('argparse', '1.2.1')
 
 import argparse
 
+# -- begin path_setup --
 BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
-SRCDIR = os.path.join(BINDIR, "..")
-LIBDIR = os.path.join(SRCDIR, "lib")
+LIBDIR = os.path.join(BINDIR, "..", "lib")
 
-sys.path.append(LIBDIR)
+if LIBDIR not in sys.path:
+    sys.path.append(LIBDIR)
+# -- end path_setup --
 
 from aquilon.config import Config, lookup_file_path
 

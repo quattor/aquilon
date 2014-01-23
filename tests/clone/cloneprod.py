@@ -39,8 +39,10 @@ import argparse
 import cx_Oracle
 
 BINDIR = os.path.dirname(os.path.realpath(__file__))
-SRCDIR = os.path.join(BINDIR, '..', '..')
-sys.path.append(os.path.join(SRCDIR, 'lib'))
+LIBDIR = os.path.join(BINDIR, '..', '..', 'lib')
+
+if LIBDIR not in sys.path:
+    sys.path.append(os.path.join(LIBDIR))
 
 from aquilon.config import Config
 

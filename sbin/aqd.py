@@ -19,8 +19,13 @@
 import sys
 import os
 
-sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                             "..", "lib"))
+# -- begin path_setup --
+BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
+LIBDIR = os.path.join(BINDIR, "..", "lib")
+
+if LIBDIR not in sys.path:
+    sys.path.append(LIBDIR)
+# -- end path_setup --
 
 import aquilon.worker.depends
 import aquilon.aqdb.depends

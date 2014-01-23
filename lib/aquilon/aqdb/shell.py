@@ -18,10 +18,13 @@
 import os
 import sys
 
-_DIR = os.path.dirname(os.path.realpath(__file__))
-_LIBDIR = os.path.join(_DIR, '..', '..')
-if _LIBDIR not in sys.path:
-    sys.path.insert(0, _LIBDIR)
+# -- begin path_setup --
+BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
+LIBDIR = os.path.join(BINDIR, '..', '..')
+
+if LIBDIR not in sys.path:
+    sys.path.append(LIBDIR)
+# -- end path_setup --
 
 import aquilon.aqdb.depends  # pylint: disable=W0611
 

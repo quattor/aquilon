@@ -36,11 +36,15 @@ from time import sleep
 from threading import Thread
 
 BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
-SRCDIR = os.path.join(BINDIR, "..")
-LIBDIR = os.path.join(SRCDIR, "lib")
-MANDIR = os.path.join(SRCDIR, "doc", "man")
+MANDIR = os.path.join(BINDIR, "..", "doc", "man")
 
-sys.path.append(LIBDIR)
+# -- begin path_setup --
+BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
+LIBDIR = os.path.join(BINDIR, "..", "lib")
+
+if LIBDIR not in sys.path:
+    sys.path.append(LIBDIR)
+# -- end path_setup --
 
 from aquilon.config import lookup_file_path
 from aquilon.exceptions_ import AquilonError

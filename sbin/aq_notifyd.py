@@ -25,14 +25,20 @@ from threading import Thread, Condition
 import signal
 import errno
 
-sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "lib"))
-
-import aquilon.aqdb.depends
-
 import ms.version
 ms.version.addpkg('argparse', '1.2.1')
 
 import argparse
+
+# -- begin path_setup --
+BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
+LIBDIR = os.path.join(BINDIR, "..", "lib")
+
+if LIBDIR not in sys.path:
+    sys.path.append(LIBDIR)
+# -- end path_setup --
+
+import aquilon.aqdb.depends
 
 from aquilon.config import Config
 from aquilon.exceptions_ import AquilonError
