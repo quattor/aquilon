@@ -41,7 +41,6 @@ from aquilon.config import Config  # pylint: disable=W0611
 
 # pylint: disable=W0614
 from aquilon.aqdb.model import *  # pylint: disable=W0401
-from aquilon.aqdb.dsdb import *  # pylint: disable=W0401
 from aquilon.aqdb.db_factory import DbFactory
 
 db = DbFactory()

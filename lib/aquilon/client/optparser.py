@@ -19,14 +19,6 @@
 
 import sys
 import os
-
-if __name__ == '__main__':
-    BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
-    sys.path.append(BINDIR)
-
-    import aquilon.client.depends
-
-
 from optparse import OptionParser, OptionValueError
 from lxml import etree
 from subprocess import Popen
@@ -601,16 +593,3 @@ class OptParser(object):
             self.parser.set_usage(e.help)
             self.parser.error(e.error)
         return cmd.name, transport, command_options, global_options
-
-
-if __name__ == '__main__':
-    BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
-    p = OptParser(os.path.join(BINDIR, '..', '..', '..', '..', 'etc', 'input.xml'))
-    try:
-        (command, transport, commandOptions, globalOptions) = p.parse(sys.argv[1:])
-    except ParsingError, e:
-        print "ERROR", e.error
-    else:
-        print "Command:", command
-        print "Command Options:", commandOptions
-        print "Global Options:", globalOptions

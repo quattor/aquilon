@@ -78,34 +78,6 @@ _long_nms['HOST_ENVIRONMENT_ID'] = 'HOST_ENV_ID'
 _long_nms['NETWORK_DEVICE_ID'] = 'NETDEV_ID'
 
 
-def rename_sys_pks(db, debug=False):
-    stmt = """
-    SELECT C.constraint_name  con,
-           C.table_name       tab,
-           C.search_condition cond
-      FROM user_constraints C
-     WHERE C.constraint_type = 'P'
-       AND C.constraint_name LIKE 'SYS_C00%' """
-
-    cons = db.safe_execute(stmt)
-
-    if cons:
-        for i in cons:
-            #print i
-            nm = '%s_pk' % i[1]
-            nm = nm.upper()
-            rename = 'ALTER TABLE "%s" RENAME CONSTRAINT "%s" to "%s"' % (
-                i[1], i[0], nm)
-            rename_idx = 'ALTER INDEX "%s" RENAME TO "%s"' % (i[0], nm)
-            if debug:
-                print rename
-                print rename_idx
-            db.safe_execute(rename)
-            db.safe_execute(rename_idx)
-    else:
-        print 'PKs are all properly named'
-
-
 def rename_non_null_check_constraints(db, debug=False, *args, **kw):
     stmt = """
     SELECT C.constraint_name  con,
