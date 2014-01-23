@@ -20,7 +20,7 @@ import sys
 
 # -- begin path_setup --
 BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
-LIBDIR = os.path.join(BINDIR, '..', '..')
+LIBDIR = os.path.join(BINDIR, "..", "lib")
 
 if LIBDIR not in sys.path:
     sys.path.append(LIBDIR)
@@ -82,13 +82,6 @@ def main():
     ipycfg.InteractiveShell.colors = 'Linux'
     ipshell = InteractiveShellEmbed(config=ipycfg, banner1=_banner)
     ipshell()
-
-
-def graph_schema(db=db, file_name="/tmp/aqdb_schema"):
-    """ Produces a png image of the schema. """
-    import aquilon.aqdb.utils.schema2dot as s2d
-    s2d.write_schema_png(db.meta, "%s.png" % file_name)
-    s2d.write_schema_dot(db.meta, "%s.dot" % file_name)
 
 
 if __name__ == '__main__':
