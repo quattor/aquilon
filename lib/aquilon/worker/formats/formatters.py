@@ -16,17 +16,14 @@
 # limitations under the License.
 """Base classes for formatting objects."""
 
-
-import os
 import csv
 import cStringIO
 import sys
 
-from mako.lookup import TemplateLookup
-
 from aquilon.config import Config
 from aquilon.exceptions_ import ProtocolError, InternalError
 from aquilon.aqdb.model import Host
+from aquilon.worker.processes import build_mako_lookup
 
 # Note: the built-in "excel" dialect uses '\r\n' for line ending and that breaks
 # the tests.
@@ -144,21 +141,17 @@ class ObjectFormatter(object):
 
     """
 
-    mako_dir = os.path.join(config.get("broker", "srcdir"), "lib",
-                            "aquilon", "worker", "formats", "mako")
     # Be careful about using the module_directory and cache!
     # Not using module_directory so that we don't have to worry about stale
     # files hanging around on upgrade.  Race conditions in writing the files
     # might also be an issue when we switch to multi-process.
     # Not using cache because it only has the lifetime of the template, and
     # because we do not have the beaker module installed.
-    lookup_raw = TemplateLookup(directories=[os.path.join(mako_dir, "raw")],
-                                imports=['from string import rstrip',
-                                         'from '
-                                         'aquilon.worker.formats.formatters '
-                                         'import shift'],
-                                default_filters=['unicode', 'rstrip'])
-    lookup_html = TemplateLookup(directories=[os.path.join(mako_dir, "html")])
+    lookup_raw = build_mako_lookup(config, "raw",
+                                   imports=['from string import rstrip',
+                                            'from aquilon.worker.formats.formatters import shift'],
+                                   default_filters=['unicode', 'rstrip'])
+    lookup_html = build_mako_lookup(config, "html")
 
     def format_raw(self, result, indent=""):
         if hasattr(self, "template_raw"):

@@ -22,18 +22,19 @@ the chain.
 
 """
 
-
 import os
 import re
 import logging
 from subprocess import Popen, PIPE
 from threading import Thread
 
+from mako.lookup import TemplateLookup
+
 from sqlalchemy.orm.session import object_session
 
 from aquilon.exceptions_ import (ProcessException, AquilonError, ArgumentError,
                                  InternalError)
-from aquilon.config import Config
+from aquilon.config import Config, running_from_source
 from aquilon.worker.locks import lock_queue, CompileKey
 
 LOGGER = logging.getLogger(__name__)
@@ -809,3 +810,22 @@ class DSDBRunner(object):
             command.extend(["-new_comments", comments or ""])
             rollback.extend(["-new_comments", old_comments or ""])
         self.add_action(command, rollback)
+
+
+def build_mako_lookup(config, kind, **kwargs):
+    # This duplicates the logic from lookup_file_path(), but we don't want to
+    # move the mako dependency to aquilon.config
+    srcdir = config.get("broker", "srcdir")
+    srcpath = os.path.join(srcdir, "etc", "mako", kind)
+
+    directories = []
+    if running_from_source():
+        # If we're running from the source, then ignore any installed files
+        directories.append(srcpath)
+    else:
+        directories.append(os.path.join("/etc", "aquilon", "mako", kind))
+        directories.append(os.path.join("/usr", "share", "aquilon", "mako", kind))
+        if os.path.exists(srcpath):
+            directories.append(srcpath)
+
+    return TemplateLookup(directories=directories, **kwargs)
