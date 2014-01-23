@@ -85,8 +85,7 @@ gethostbyname_orig = socket.gethostbyname
 socket.gethostbyname = fake_gethostbyname
 
 # worker/resources.py depends on it.
-sys.argv[0] = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                           "..", "..", "sbin", "twistd.py")
+sys.argv[0] = os.path.join(SBINDIR, "aqd.py")
 
 # start the broker
 import aqd
