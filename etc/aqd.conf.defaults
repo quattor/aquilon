@@ -31,34 +31,26 @@
 
 [DEFAULT]
 basedir = /var
-environment = prod
 # The broker does not rely on 'user' for anything security-related...
 # user = # config.py supplies os.environ.get("USER") as a default
 # srcdir = # config.py supplies a custom _get_srcdir() as a default
 # hostname = # config.py supplies socket.gethostname() as a default
 quattordir = %(basedir)s/quattor
 
-# database defaults cannot (yet) be in the general [database] section,
-# and must be here.
-logdir = %(quattordir)s/logs
-dbdir = %(quattordir)s/aquilondb
-dblogfile = %(dbdir)s/aqdb.log
-
 [database_oracle]
 server = LNTO_AQUILON_NY
 # Set the username to empty to use Kerberos
 #dbuser = %(user)s
 dbuser =
+#password_file =
 # Schema the xtn_log tables exist in, if separate from the rest of the tables.
 # There is no default - the value is only used if set.
 #audit_schema = %(user)
 dsn = oracle://%(dbuser)s:PASSWORD@%(server)s
-#password_base = /ms/dist/aquilon/PROJ/aqdbpasswd/incr
-#password_file = %(password_base)s/%(environment)s/%(dbuser)s
 module = orcl/client/11.2.0.1.0
 
 [database_sqlite]
-dbfile = %(dbdir)s/aquilon.db
+dbfile = %(quattordir)s/aquilondb/aquilon.db
 dsn = sqlite:///%(dbfile)s
 
 [database_postgresql]
@@ -66,6 +58,7 @@ dsn = sqlite:///%(dbfile)s
 server =
 dbuser = %(user)s
 dbname =
+#password_file =
 dsn = postgresql+psycopg2://%(dbuser)s:PASSWORD@%(server)s/%(dbname)s
 # Schema the xtn_log tables exist in, if separate from the rest of the tables.
 # There is no default - the value is only used if set.
@@ -117,7 +110,6 @@ rundir = %(quattordir)s/run
 sockdir = %(rundir)s/sockets
 logdir = %(quattordir)s/logs
 logfile = %(logdir)s/aqd.log
-http_access_log = %(logdir)s/aqd_access.log
 profilesdir = %(quattordir)s/web/htdocs/profiles
 plenarydir = %(cfgdir)s/plenary
 swrepdir = %(quattordir)s/swrep

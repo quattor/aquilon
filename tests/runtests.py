@@ -173,7 +173,9 @@ pid_file = os.path.join(config.get('broker', 'rundir'), 'aqd.pid')
 kill_from_pid_file(pid_file)
 
 # FIXME: Need to be careful about attempting to nuke templatesdir...
-dirs = [config.get("database", "dbdir"), config.get("unittest", "scratchdir")]
+dirs = [config.get("unittest", "scratchdir")]
+if config.has_option("database", "dbfile"):
+    dirs.append(os.path.dirname(config.get("database", "dbfile")))
 for label in ["quattordir", "templatesdir", "domainsdir", "rundir", "logdir",
               "profilesdir", "plenarydir", "cfgdir", "kingdir", "swrepdir"]:
     dirs.append(config.get("broker", label))
