@@ -47,22 +47,22 @@ from aquilon.config import Config, lookup_file_path
 def run_domain_compile(options, config):
     panc_env = os.environ.copy()
 
-    if config.has_option("broker", "ant_home"):
-        ant_home = config.get("broker", "ant_home")
+    if config.has_option("tool_locations", "ant_home"):
+        ant_home = config.get("tool_locations", "ant_home")
         panc_env["PATH"] = "%s/bin:%s" % (ant_home, panc_env.get("PATH", ""))
         # The ant wrapper is silly and it may pick up the wrong set of .jars if
         # ANT_HOME is not set
         panc_env["ANT_HOME"] = ant_home
 
-    if config.has_option("broker", "java_home"):
-        java_home = config.get("broker", "java_home")
+    if config.has_option("tool_locations", "java_home"):
+        java_home = config.get("tool_locations", "java_home")
         panc_env["PATH"] = "%s/bin:%s" % (java_home, panc_env.get("PATH", ""))
         panc_env["JAVA_HOME"] = java_home
 
     if config.has_option("broker", "ant_options"):
         panc_env["ANT_OPTS"] = config.get("broker", "ant_options")
 
-    args = ["ant", "--noconfig", "-f"]
+    args = [config.lookup_tool("ant"), "--noconfig", "-f"]
     args.append(lookup_file_path("build.xml"))
     args.append("-Dbasedir=%s" % options.basedir)
 

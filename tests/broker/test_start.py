@@ -94,9 +94,9 @@ class TestBrokerStart(unittest.TestCase):
                          "Failed to clear old template-king directory '%s'" %
                          dest)
         env = {}
-        env["PATH"] = "%s:%s" % (config.get("broker", "git_path"),
-                                 os.environ.get("PATH", ""))
-        p = Popen(("git", "clone", "--bare", source, dest),
+        env["PATH"] = os.environ.get("PATH", "")
+        git = config.lookup_tool("git")
+        p = Popen((git, "clone", "--bare", source, dest),
                   env=env, stdout=PIPE, stderr=PIPE)
         (out, err) = p.communicate()
         # Ignore out/err unless we get a non-zero return code, then log it.
@@ -112,7 +112,7 @@ class TestBrokerStart(unittest.TestCase):
 
         if new_prod:
             for domain in ['prod', 'ny-prod']:
-                p = Popen(("git", "push", ".", '+%s:%s' % (new_prod, domain)),
+                p = Popen((git, "push", ".", '+%s:%s' % (new_prod, domain)),
                           env=env, cwd=dest, stdout=PIPE, stderr=PIPE)
                 (out, err) = p.communicate()
                 # Ignore out/err unless we get a non-zero return code, then log it.
@@ -137,7 +137,7 @@ class TestBrokerStart(unittest.TestCase):
                              % (trash_branch, out, err))
 
         # Set the default branch
-        p = Popen(("git", "symbolic-ref", "HEAD", "refs/heads/prod"),
+        p = Popen((git, "symbolic-ref", "HEAD", "refs/heads/prod"),
                   env=env, cwd=dest, stdout=PIPE, stderr=PIPE)
         (out, err) = p.communicate()
         self.assertEqual(p.returncode, 0,
@@ -158,9 +158,9 @@ class TestBrokerStart(unittest.TestCase):
                          "Failed to clear old swrep directory '%s'" %
                          dest)
         env = {}
-        env["PATH"] = "%s:%s" % (config.get("broker", "git_path"),
-                                 os.environ.get("PATH", ""))
-        p = Popen(("git", "clone", source, dest),
+        env["PATH"] = os.environ.get("PATH", "")
+        git = config.lookup_tool("git")
+        p = Popen((git, "clone", source, dest),
                   env=env, stdout=PIPE, stderr=PIPE)
         (out, err) = p.communicate()
         # Ignore out/err unless we get a non-zero return code, then log it.
@@ -174,13 +174,13 @@ class TestBrokerStart(unittest.TestCase):
         config = Config()
         kingdir = config.get("broker", "kingdir")
         rundir = config.get("broker", "rundir")
+        git = config.lookup_tool("git")
         env = {}
-        env["PATH"] = "%s:%s" % (config.get("broker", "git_path"),
-                                 os.environ.get("PATH", ""))
+        env["PATH"] = os.environ.get("PATH", "")
 
         tempdir = mkdtemp(prefix="fixup", dir=rundir)
 
-        p = Popen(("git", "clone", "--shared", kingdir, "template-king",
+        p = Popen((git, "clone", "--shared", kingdir, "template-king",
                    "--branch", "prod"),
                   cwd=tempdir, env=env, stdout=PIPE, stderr=PIPE)
         out, err = p.communicate()
@@ -189,18 +189,18 @@ class TestBrokerStart(unittest.TestCase):
         repodir = os.path.join(tempdir, "template-king")
         makefile = os.path.join(repodir, "Makefile")
         if os.path.exists(os.path.join(repodir, "t", "Makefile")):
-            p = Popen(("git", "rm", "-f", os.path.join("t", "Makefile")),
+            p = Popen((git, "rm", "-f", os.path.join("t", "Makefile")),
                       cwd=repodir, env=env, stdout=PIPE, stderr=PIPE)
             out, err = p.communicate()
             self.assertEqual(p.returncode, 0, "Failed to remove t/Makefile")
 
-            p = Popen(("git", "commit", "-m", "Removed t/Makefile"),
+            p = Popen((git, "commit", "-m", "Removed t/Makefile"),
                       cwd=repodir, env=env, stdout=PIPE, stderr=PIPE)
             out, err = p.communicate()
             self.assertEqual(p.returncode, 0, "Failed to commit removal of t/Makefile")
 
             for branch in ['prod', 'ny-prod']:
-                p = Popen(("git", "push", "origin", "prod:%s" % branch),
+                p = Popen((git, "push", "origin", "prod:%s" % branch),
                           cwd=repodir, env=env, stdout=PIPE, stderr=PIPE)
                 out, err = p.communicate()
                 self.assertEqual(p.returncode, 0,

@@ -78,7 +78,7 @@ class AQBroker(object):
         Most of this was ripped straight from runtests.py.
         
         """
-        p = Popen(self.config.get("kerberos", "krb5_keytab"),
+        p = Popen(self.config.lookup_tool("krb5_keytab"),
                   stdout=1, stderr=2)
         if p.wait():
             raise ProcessException(code=p.returncode)
@@ -113,9 +113,9 @@ class AQBroker(object):
         template_source = "git://nyaqd1/quattor/template-king"
         template_dest = self.config.get("broker", "kingdir")
         env = {}
-        env["PATH"] = "%s:%s" % (self.config.get("broker", "git_path"),
-                                 os.environ.get("PATH", ""))
-        p = Popen(("git", "clone", "--bare", "--branch", "prod",
+        env["PATH"] = os.environ.get("PATH", "")
+        git = config.lookup_tool("git")
+        p = Popen((git, "clone", "--bare", "--branch", "prod",
                    template_source, template_dest),
                   env=env, stdout=1, stderr=2)
         if p.wait():

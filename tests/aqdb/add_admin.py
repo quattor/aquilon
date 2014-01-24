@@ -61,7 +61,7 @@ def parse_klist():
     """Run klist and return a (principal, realm) tuple."""
 
     config = Config()
-    klist = config.get('kerberos', 'klist')
+    klist = config.lookup_tool('klist')
     log.debug("Running %s", klist)
     p = Popen([klist], stdout=PIPE, stderr=2)
     out, err = p.communicate()

@@ -37,7 +37,7 @@ class TestRefreshWindowsHosts(TestBrokerCommand):
             self.fail("Please use a writeable location for "
                       "broker/windows_host_info in the regression "
                       "test configuration file.")
-        sqlite = self.config.get("unittest", "sqlite")
+        sqlite = self.config.lookup_tool("sqlite3")
         with open(sqlfile) as f:
             sql = f.read()
         if os.path.exists(dbfile):

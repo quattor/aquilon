@@ -151,12 +151,20 @@ class TemplateDomain(object):
             self.logger.client_info('No object profiles: nothing to do.')
             return
 
-        # The ant wrapper is silly and it may pick up the wrong set of .jars if
-        # ANT_HOME is not set
-        panc_env = {"PATH": "%s/bin:%s" % (config.get("broker", "java_home"),
-                                           os.environ.get("PATH", "")),
-                    "ANT_HOME": config.get("broker", "ant_home"),
-                    "JAVA_HOME": config.get("broker", "java_home")}
+        panc_env = {"PATH": os.environ.get("PATH", "")}
+
+        if config.has_option("tool_locations", "java_home"):
+            java_home = config.get("tool_locations", "java_home")
+            panc_env["PATH"] = "%s/bin:%s" % (java_home, panc_env["PATH"])
+            panc_env["JAVA_HOME"] = java_home
+
+        if config.has_option("tool_locations", "ant_home"):
+            ant_home = config.get("tool_locations", "ant_home")
+            panc_env["PATH"] = "%s/bin:%s" % (ant_home, panc_env["PATH"])
+            # The ant wrapper is silly and it may pick up the wrong set of .jars
+            # if ANT_HOME is not set
+            panc_env["ANT_HOME"] = ant_home
+
         if config.has_option("broker", "ant_options"):
             panc_env["ANT_OPTS"] = config.get("broker", "ant_options")
 
@@ -183,7 +191,7 @@ class TemplateDomain(object):
 
         formats.append("dep")
 
-        args = [config.get("broker", "ant")]
+        args = ["ant"]
         args.append("--noconfig")
         args.append("-f")
         args.append(lookup_file_path("build.xml"))
@@ -198,7 +206,7 @@ class TemplateDomain(object):
         args.append("-Dpanc.batch.size=%s" %
                     config.get("panc", "batch_size"))
         args.append("-Dant-contrib.jar=%s" %
-                    config.get("broker", "ant_contrib_jar"))
+                    config.get("tool_locations", "ant_contrib_jar"))
         if isinstance(self.domain, Sandbox):
             args.append("-Ddomain.templates=%s" % templatedir)
         if only:

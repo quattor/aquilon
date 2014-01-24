@@ -59,14 +59,10 @@ class CommandGet(BrokerCommand):
             except OSError as e:
                 raise ArgumentError("Failed to mkdir %s: %s" % (userdir, e))
 
-            args = [self.config.get("broker", "mean")]
-            args.append("chown")
-            args.append("-owner")
-            args.append("%s" % dbauthor.name)
-            args.append("-path")
-            args.append("%s" % userdir)
+            command = ["mean", "chown", "-owner", str(dbauthor.name),
+                       "-path", userdir]
             try:
-                run_command(args, logger=logger)
+                run_command(command, logger=logger)
             except ProcessException as e:
                 remove_dir(userdir)
                 raise e

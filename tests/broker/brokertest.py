@@ -61,7 +61,7 @@ class TestBrokerCommand(unittest.TestCase):
                 os.makedirs(dir)
 
         # Run klist and store the information
-        klist = cls.config.get('kerberos', 'klist')
+        klist = cls.config.lookup_tool('klist')
         p = Popen([klist], stdout=PIPE, stderr=2)
         out, err = p.communicate()
         m = re.search(r'^\s*(?:Default p|P)rincipal:\s*'
@@ -529,20 +529,33 @@ class TestBrokerCommand(unittest.TestCase):
     @classmethod
     def gitenv(cls, env=None):
         """Configure a known sanitised environment"""
-        git_path = cls.config.get("broker", "git_path")
         # The "publish" test abuses gitenv(), and it needs the Python interpreter
         # in the path, because it runs the template unit tests which in turn
         # call the aq command
-        python_path = os.path.dirname(sys.executable)
-        newenv = {}
-        newenv["USER"] = os.environ.get('USER', '')
+
         if env:
-            for (key, value) in env.iteritems():
-                newenv[key] = value
-        if "PATH" in newenv:
-            newenv["PATH"] = "%s:%s:%s" % (git_path, python_path, newenv["PATH"])
+            newenv = env.copy()
         else:
-            newenv["PATH"] = "%s:%s:%s" % (git_path, python_path, '/bin:/usr/bin')
+            newenv = {}
+
+        if "USER" not in newenv:
+            newenv["USER"] = os.environ.get('USER', '')
+
+        if "PATH" in newenv:
+            path = env["PATH"].split(":")
+        else:
+            # Some reasonable defaults...
+            path = ["/bin", "/usr/bin"]
+
+        # Path to the Python interpreter
+        path.insert(0, os.path.dirname(sys.executable))
+
+        # The aq command calls git, so it must be part of $PATH
+        git_path = cls.config.lookup_tool("git")
+        if git_path[0] == "/":
+            path.insert(0, os.path.dirname(git_path))
+
+        newenv["PATH"] = ":".join(path)
         return newenv
 
     def gitcommand_raw(self, command, **kwargs):
@@ -550,7 +563,7 @@ class TestBrokerCommand(unittest.TestCase):
             args = command[:]
         else:
             args = [command]
-        args.insert(0, "git")
+        args.insert(0, self.config.lookup_tool("git"))
         env = self.gitenv(kwargs.pop("env", None))
         p = Popen(args, stdout=PIPE, stderr=PIPE, env=env, **kwargs)
         return p
@@ -583,15 +596,11 @@ class TestBrokerCommand(unittest.TestCase):
         return
 
     def grepcommand(self, command, **kwargs):
-        if self.config.has_option("unittest", "grep"):
-            grep = self.config.get("unittest", "grep")
-        else:
-            grep = "/bin/grep"
         if isinstance(command, list):
             args = command[:]
         else:
             args = [command]
-        args.insert(0, grep)
+        args.insert(0, self.config.lookup_tool("grep"))
         p = Popen(args, stdout=PIPE, stderr=PIPE, **kwargs)
         (out, err) = p.communicate()
         # Ignore out/err unless we get a non-zero return code, then log it.
@@ -604,15 +613,11 @@ class TestBrokerCommand(unittest.TestCase):
                   % (command, out, err))
 
     def findcommand(self, command, **kwargs):
-        if self.config.has_option("unittest", "find"):
-            find = self.config.get("unittest", "find")
-        else:
-            find = "/usr/bin/find"
         if isinstance(command, list):
             args = command[:]
         else:
             args = [command]
-        args.insert(0, find)
+        args.insert(0, self.config.lookup_tool("find"))
         p = Popen(args, stdout=PIPE, stderr=PIPE, **kwargs)
         (out, err) = p.communicate()
         # Ignore out/err unless we get a non-zero return code, then log it.

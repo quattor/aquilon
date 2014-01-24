@@ -64,7 +64,7 @@ def determine_helper_hostname(session, logger, config, dbnetdev):
 
 
 def determine_helper_args(config):
-    ssh_command = config.get("broker", "poll_ssh").strip()
+    ssh_command = config.lookup_tool("ssh")
     if not ssh_command:  # pragma: no cover
         return []
     ssh_args = [ssh_command]
@@ -92,7 +92,7 @@ def discover_network_device(session, logger, config, dbnetdev, dryrun):
     normal and dryrun modes from the rest of the code.
     """
 
-    importer = config.get("broker", "switch_discover")
+    importer = config.lookup_tool("switch-discover")
 
     results = []
 

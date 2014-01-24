@@ -98,6 +98,12 @@ def run_command(args, env=None, path="/", logger=LOGGER, loglevel=logging.INFO,
     # the database.
     command_args = [str(arg) for arg in args]
 
+    # If the command was not given with an absolute path, then check if there's
+    # an override specified in the config file. If not, we'll rely on $PATH.
+    if command_args[0][0] != "/":
+        config = Config()
+        command_args[0] = config.lookup_tool(command_args[0])
+
     simple_command = " ".join(command_args)
     logger.info("run_command: %s (CWD: %s)", simple_command,
                 os.path.abspath(path))
@@ -149,8 +155,7 @@ def run_git(args, env=None, path=".",
         git_env = env.copy()
     else:
         git_env = {}
-    env_path = git_env.get("PATH", os.environ.get("PATH", ""))
-    git_env["PATH"] = "%s:%s" % (config.get("broker", "git_path"), env_path)
+    git_env["PATH"] = git_env.get("PATH", os.environ.get("PATH", ""))
 
     for name in ["git_author_name", "git_author_email",
                  "git_committer_name", "git_committer_email"]:
@@ -209,8 +214,7 @@ def sync_domain(dbdomain, logger=LOGGER, locked=False):
     config = Config()
     kingdir = config.get("broker", "kingdir")
     domaindir = os.path.join(config.get("broker", "domainsdir"), dbdomain.name)
-    git_env = {"PATH": "%s:%s" % (config.get("broker", "git_path"),
-                                  os.environ.get("PATH", ""))}
+    git_env = {"PATH": os.environ.get("PATH", "")}
     if dbdomain.tracked_branch:
         # Might need to revisit if using this helper from rollback...
         run_command(["git", "push", ".",
@@ -255,7 +259,6 @@ class DSDBRunner(object):
     def __init__(self, logger=LOGGER):
         config = Config()
         self.logger = logger
-        self.dsdb = config.get("broker", "dsdb")
         self.dsdb_use_testdb = config.getboolean("broker", "dsdb_use_testdb")
         self.location_sync = config.getboolean("broker", "dsdb_location_sync")
         self.actions = []
@@ -266,7 +269,7 @@ class DSDBRunner(object):
 
     def commit(self, verbose=False):
         for args, rollback, error_filter, ignore_msg in self.actions:
-            cmd = [self.dsdb]
+            cmd = ["dsdb"]
             cmd.extend(args)
 
             try:
@@ -287,7 +290,7 @@ class DSDBRunner(object):
         self.rollback_list.reverse()
         rollback_failures = []
         for args in self.rollback_list:
-            cmd = [self.dsdb]
+            cmd = ["dsdb"]
             cmd.extend(args)
             try:
                 self.logger.client_info("DSDB: %s" %
@@ -750,8 +753,7 @@ class DSDBRunner(object):
 
     def show_rack(self, rackname):
 
-        out = run_command([self.dsdb, "show_rack",
-                           "-rack_name", rackname],
+        out = run_command(["dsdb", "show_rack", "-rack_name", rackname],
                           env=self.getenv())
         rack_row = self.rack_row_re.search(out)
         rack_col = self.rack_col_re.search(out)
@@ -785,7 +787,7 @@ class DSDBRunner(object):
             fields["fqdn"] = hostname
             fields["dsdb_lookup"] = short
 
-        out = run_command([self.dsdb, "show_host",
+        out = run_command(["dsdb", "show_host",
                            "-host_name", fields["dsdb_lookup"]],
                           env=self.getenv())
         primary = self.primary_re.search(out)

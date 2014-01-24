@@ -201,7 +201,7 @@ class AQDMaker(object):
                 keytab = config.get("broker", "keytab")
                 knc_args = ["/usr/bin/env",
                             "KRB5_KTNAME=FILE:%s" % keytab,
-                            config.get("kerberos", "knc"), "-lS", sockname]
+                            config.lookup_tool("knc"), "-lS", sockname]
                 if bind_address:
                     knc_args.append("-a")
                     knc_args.append(bind_address)
@@ -212,10 +212,9 @@ class AQDMaker(object):
                 # instead of invoking git with a 'daemon' argument.  The latter
                 # will fork and exec git-daemon, resulting in a new pid that
                 # the process monitor won't know about!
-                gitpath = config.get("broker", "git_path")
-                gitdaemon = config.get("broker", "git_daemon")
+                gitdaemon = config.lookup_tool("git-daemon")
                 ospath = os.environ.get("PATH", "")
-                args = ["/usr/bin/env", "PATH=%s:%s" % (gitpath, ospath),
+                args = ["/usr/bin/env", "PATH=%s" % ospath,
                         gitdaemon, "--export-all", "--base-path=%s" %
                         config.get("broker", "git_daemon_basedir")]
                 if config.has_option("broker", "git_port"):
