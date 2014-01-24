@@ -46,7 +46,7 @@ ToDo:
 """
 
 import re
-import xml.etree.ElementTree as ET
+from xml.etree import ElementTree
 
 from twisted.web import server, resource, http
 from twisted.internet import defer, threads
@@ -54,7 +54,7 @@ from twisted.python import log
 
 from aquilon.config import lookup_file_path
 from aquilon.aqdb.types import StringEnum
-from aquilon.exceptions_ import ArgumentError
+from aquilon.exceptions_ import ArgumentError, ProtocolError
 from aquilon.worker.formats.formatters import ResponseFormatter
 from aquilon.worker.broker import BrokerCommand, ERROR_TO_CODE
 from aquilon.worker import commands
@@ -292,7 +292,7 @@ class RestServer(ResponsePage):
         ResponsePage.__init__(self, '', formatter)
         self.config = config
 
-        tree = ET.parse(lookup_file_path("input.xml"))
+        tree = ElementTree.parse(lookup_file_path("input.xml"))
 
         for command in tree.getiterator("command"):
             for transport in command.getiterator("transport"):

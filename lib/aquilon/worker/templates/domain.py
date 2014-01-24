@@ -17,7 +17,6 @@
 """Any work by the broker to write out (or read in?) templates lives here."""
 
 import os
-from os import environ as os_environ
 import logging
 
 from aquilon.config import Config, lookup_file_path
@@ -138,7 +137,7 @@ class TemplateDomain(object):
         # The ant wrapper is silly and it may pick up the wrong set of .jars if
         # ANT_HOME is not set
         panc_env = {"PATH": "%s/bin:%s" % (config.get("broker", "java_home"),
-                                           os_environ.get("PATH", "")),
+                                           os.environ.get("PATH", "")),
                     "ANT_HOME": config.get("broker", "ant_home"),
                     "JAVA_HOME": config.get("broker", "java_home")}
         if config.has_option("broker", "ant_options"):

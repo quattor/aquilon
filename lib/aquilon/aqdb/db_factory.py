@@ -30,11 +30,11 @@ from aquilon.exceptions_ import AquilonError
 from sqlalchemy import MetaData, create_engine, text, event
 from sqlalchemy.ext.compiler import compiles
 from sqlalchemy.orm import scoped_session, sessionmaker
-from sqlalchemy.exc import DBAPIError, DatabaseError as SaDBError
+from sqlalchemy.exc import DBAPIError, DatabaseError
 from sqlalchemy.schema import CreateIndex
 from sqlalchemy.dialects.oracle.base import OracleDDLCompiler
 
-import ms.modulecmd as modcmd
+import ms.modulecmd
 
 try:
     config = Config()
@@ -45,7 +45,7 @@ except Exception, e:
 assert config, 'No configuration in db_factory'
 
 if config.has_option("database", "module"):
-    modcmd.load(config.get("database", "module"))
+    ms.modulecmd.load(config.get("database", "module"))
 
 
 # Add support for Oracle-specific index extensions
@@ -220,7 +220,7 @@ class DbFactory(object):
                 connection = self.engine.connect()
                 connection.close()
                 return
-            except SaDBError, e:
+            except DatabaseError, e:
                 errs.append(e)
 
         if errs:
