@@ -24,28 +24,18 @@ from numbers import Number
 
 from aquilon.aqdb import depends
 from aquilon.config import Config
-from aquilon.utils import confirm, monkeypatch
+from aquilon.utils import monkeypatch
 from aquilon.exceptions_ import AquilonError
 
+from sqlalchemy.exc import DatabaseError
 from sqlalchemy import MetaData, create_engine, text, event
 from sqlalchemy.ext.compiler import compiles
+from sqlalchemy.inspection import inspect
 from sqlalchemy.orm import scoped_session, sessionmaker
-from sqlalchemy.exc import DBAPIError, DatabaseError
-from sqlalchemy.schema import CreateIndex
+from sqlalchemy.schema import CreateIndex, Sequence
 from sqlalchemy.dialects.oracle.base import OracleDDLCompiler
 
 import ms.modulecmd
-
-try:
-    config = Config()
-except Exception, e:
-    print >> sys.stderr, 'failed to read configuration: %s' % e
-    sys.exit(os.EX_CONFIG)
-
-assert config, 'No configuration in db_factory'
-
-if config.has_option("database", "module"):
-    ms.modulecmd.load(config.get("database", "module"))
 
 
 # Add support for Oracle-specific index extensions
@@ -130,11 +120,15 @@ class DbFactory(object):
 
         self.__started = True
 
+        config = Config()
+
+        if config.has_option("database", "module"):
+            ms.modulecmd.load(config.get("database", "module"))
+
         self.dsn = config.get('database', 'dsn')
 
         self.pool_options = {}
-        self.pool_options["pool_size"] = config.getint(
-            "database", "pool_size")
+        self.pool_options["pool_size"] = config.getint("database", "pool_size")
         self.pool_options["max_overflow"] = config.getint("database",
                                                           "pool_max_overflow")
         if len(config.get("database", "pool_timeout").strip()) > 0:
@@ -145,7 +139,7 @@ class DbFactory(object):
         log = logging.getLogger('aqdb.db_factory')
         log.info("Database engine using pool options %s" % self.pool_options)
 
-        passwds = self._get_password_list()
+        passwds = self._get_password_list(config)
 
         # ORACLE
         if self.dsn.startswith('oracle'):
@@ -228,7 +222,7 @@ class DbFactory(object):
         else:
             raise AquilonError('Failed to connect to %s')
 
-    def _get_password_list(self):
+    def _get_password_list(self, config):
         """
         Read a password file containing one password per line. The passwords
         will be tried in the order they appear in the file.
@@ -252,98 +246,47 @@ class DbFactory(object):
 
         return [passwd.strip() for passwd in passwds]
 
-    def safe_execute(self, stmt, **kw):
-        """ convenience wrapper """
-        try:
-            return self.engine.execute(text(stmt), **kw)
-        except DBAPIError, e:
-            print >> sys.stderr, e
-
-    def get_tables(self):
-        """ return a list of table names from the current databases public
-        schema """
-
-        if self.engine.dialect.name == 'oracle':
-            sql = 'select table_name from user_tables'
-            return [name for (name, ) in self.safe_execute(sql)]
-        elif self.engine.dialect.name == 'postgresql':
-            sql = "select table_name from information_schema.tables " \
-                "where table_schema='public'"
-            return [name for (name, ) in self.safe_execute(sql)]
-
     def get_sequences(self):
         """ return a list of the sequence names from the current databases
             public schema  """
 
+        query = None
         if self.engine.dialect.name == 'oracle':
-            sql = 'select sequence_name from user_sequences'
-            return [name for (name, ) in self.safe_execute(sql)]
+            query = text("SELECT sequence_name FROM user_sequences")
+            return [name for (name, ) in self.engine.execute(query)]
         elif self.engine.dialect.name == 'postgresql':
-            sql = "select sequence_name from information_schema.sequences " \
-                "where sequence_schema='public'"
-            return [name for (name, ) in self.safe_execute(sql)]
+            query = text("SELECT relname FROM pg_class WHERE relkind = 'S'")
+            return [name for (name, ) in self.engine.execute(query)]
 
-    def drop_all_tables_and_sequences(self, no_confirm=False):  # pragma: no cover
+    def drop_all_tables_and_sequences(self):  # pragma: no cover
         """ MetaData.drop_all() doesn't play nice with db's that have sequences.
-            you're alternative is to call this """
+            Your alternative is to call this """
+        config = Config()
         if self.engine.dialect.name == 'sqlite':
             dbfile = config.get("database", "dbfile")
             if os.path.exists(dbfile):
                 os.unlink(dbfile)
         elif self.engine.dialect.name == 'oracle':
-            if is_prod_ora_instance(self.dsn):
-                msg = 'drop_all_tables not permitted on the production database'
-                raise ValueError(msg)
+            for table in inspect(self.engine).get_table_names():
+                # We can't use bind variables with DDL
+                stmt = text('DROP TABLE "%s" CASCADE CONSTRAINTS' %
+                            self.engine.dialect.denormalize_name(table))
+                self.engine.execute(stmt)
+            for seq_name in self.get_sequences():
+                seq = Sequence(seq_name)
+                seq.drop(bind=self.engine)
 
-            # Don't show the password
-            dbname = re.sub(':.*@', '@', self.dsn)
-            msg = ("\nYou've asked to wipe out the \n%s\ndatabase.  Please confirm."
-                   % dbname)
-
-            if no_confirm or confirm(prompt=msg, resp=False):
-                for table in self.get_tables():
-                    self.safe_execute('DROP TABLE "%s" CASCADE CONSTRAINTS' % table)
-
-                for seq in self.get_sequences():
-                    self.safe_execute('DROP SEQUENCE "%s"' % seq)
-
-                self.safe_execute('PURGE RECYCLEBIN')
+            self.engine.execute(text("PURGE RECYCLEBIN"))
         elif self.engine.dialect.name == 'postgresql':
-            # Don't show the password
-            dbname = re.sub(':.*@', '@', self.dsn)
-            msg = ("\nYou've asked to wipe out the \n%s\ndatabase.  Please confirm."
-                   % dbname)
+            for table in inspect(self.engine).get_table_names():
+                # We can't use bind variables with DDL
+                stmt = text('DROP TABLE "%s" CASCADE' % table)
+                self.engine.execute(stmt, table=table)
+            for seq_name in self.get_sequences():
+                seq = Sequence(seq_name)
+                seq.drop(bind=self.engine)
 
-            if no_confirm or confirm(prompt=msg, resp=False):
-                for table in self.get_tables():
-                    self.safe_execute('DROP TABLE "%s" CASCADE' % table)
-
-                for seq in self.get_sequences():
-                    self.safe_execute('DROP SEQUENCE "%s" CASCADE' % seq)
-
-                # Should we issue VACUUM?
+            # Should we issue VACUUM?
         else:
-            raise ValueError('can not drop %s databases' %
+            raise ValueError('Can not drop %s databases' %
                              self.engine.dialect.name)
-
-
-def is_prod_ora_instance(dsn):  # pragma: no cover
-    prod_re = re.compile('@NYPO_AQUILON', re.IGNORECASE)
-    if prod_re.search(dsn):
-        return True
-    else:
-        return False
-
-
-def is_prod_user():  # pragma: no cover
-    if os.environ['USER'] == 'cdb':
-        return True
-    else:
-        return False
-
-
-def is_prod(dsn):  # pragma: no cover
-    if is_prod_ora_instance(dsn) and is_prod_user():
-        return True
-    else:
-        return False

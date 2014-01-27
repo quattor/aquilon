@@ -72,46 +72,6 @@ def monkeypatch(cls):
     return decorator
 
 
-def confirm(prompt=None, resp=False):  # pragma: no cover
-    """prompts for yes or no response from the user. Returns True for yes and
-    False for no.
-
-    'resp' should be set to the default value assumed by the caller when
-    user simply types ENTER.
-
-    >>> confirm(prompt='Create Directory?', resp=True)
-    Create Directory? [y]|n:
-    True
-    >>> confirm(prompt='Create Directory?', resp=False)
-    Create Directory? [n]|y:
-    False
-    >>> confirm(prompt='Create Directory?', resp=False)
-    Create Directory? [n]|y: y
-    True
-
-    """
-
-    if prompt is None:
-        prompt = 'Confirm'
-
-    if resp:
-        prompt = '%s [%s]|%s: ' % (prompt, 'y', 'n')
-    else:
-        prompt = '%s [%s]|%s: ' % (prompt, 'n', 'y')
-
-    while True:
-        ans = raw_input(prompt)
-        if not ans:
-            return resp
-        if ans not in ['y', 'Y', 'yes', 'n', 'N', 'no']:
-            print 'please enter y or n.'
-            continue
-        if ans == 'y' or ans == 'Y' or ans == 'yes':
-            return True
-        if ans == 'n' or ans == 'N' or ans == 'no':
-            return False
-
-
 def validate_nlist_key(label, value):
     if not nlist_key_re.match(value):
         raise ArgumentError("'%s' is not a valid value for %s." %
