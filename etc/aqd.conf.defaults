@@ -49,26 +49,6 @@ dbuser =
 dsn = oracle://%(dbuser)s:PASSWORD@%(server)s
 module = orcl/client/11.2.0.1.0
 
-[database_sqlite]
-dbfile = %(quattordir)s/aquilondb/aquilon.db
-dsn = sqlite:///%(dbfile)s
-
-[database_postgresql]
-# Leave the server name empty for unix socket on localhost
-server =
-dbuser = %(user)s
-dbname =
-#password_file =
-dsn = postgresql+psycopg2://%(dbuser)s:PASSWORD@%(server)s/%(dbname)s
-# Schema the xtn_log tables exist in, if separate from the rest of the tables.
-# There is no default - the value is only used if set.
-#audit_schema = %(user)
-
-[database]
-# Unfortunately, the code hack for this means any database defaults
-# needed as config variables must be in the general DEFAULT section.
-database_section = database_sqlite
-# The pool values do not currently apply to sqlite.
 # There are two pools - one for commands that use locks and one for
 # commands that don't.  These values apply to each pool.
 # The pool size needs to take into account both the number of
@@ -82,8 +62,44 @@ database_section = database_sqlite
 # as needed for a database connection from the pool.
 pool_size = 3
 pool_max_overflow = 0
-pool_timeout =
+#pool_timeout =
+#pool_recycle =
 
+[database_sqlite]
+dbfile = %(quattordir)s/aquilondb/aquilon.db
+dsn = sqlite:///%(dbfile)s
+# SQLite does not use connection pooling, so the pool_* options won't work
+# here.
+
+[database_postgresql]
+# Leave the server name empty for unix socket on localhost
+server =
+dbuser = %(user)s
+dbname =
+#password_file =
+dsn = postgresql+psycopg2://%(dbuser)s:PASSWORD@%(server)s/%(dbname)s
+# Schema the xtn_log tables exist in, if separate from the rest of the tables.
+# There is no default - the value is only used if set.
+#audit_schema = %(user)
+
+# There are two pools - one for commands that use locks and one for
+# commands that don't.  These values apply to each pool.
+# The pool size needs to take into account both the number of
+# active connections the database can handle and the number of
+# active commands the broker can handle in memory.  While the broker
+# is running as 32-bit we're deliberately leaving the pool size low.
+# With the pool size so low having overflow connections is # useless.
+# They would be continually active and just increasing load by opening
+# and closing connections.
+# Having timeout unset allows for incoming connections to wait as long
+# as needed for a database connection from the pool.
+pool_size = 3
+pool_max_overflow = 0
+#pool_timeout =
+#pool_recycle =
+
+[database]
+database_section = database_sqlite
 
 [broker]
 default_organization = ms

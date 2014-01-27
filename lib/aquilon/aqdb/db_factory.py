@@ -22,28 +22,30 @@ import sys
 import logging
 from numbers import Number
 
-from aquilon.aqdb import depends
+from aquilon.aqdb import depends  # pylint: disable=W0611
 from aquilon.config import Config
 from aquilon.utils import monkeypatch
 from aquilon.exceptions_ import AquilonError
 
 from sqlalchemy.exc import DatabaseError
-from sqlalchemy import MetaData, create_engine, text, event
+from sqlalchemy import create_engine, text, event
+from sqlalchemy.engine.url import make_url
 from sqlalchemy.ext.compiler import compiles
 from sqlalchemy.inspection import inspect
 from sqlalchemy.orm import scoped_session, sessionmaker
+from sqlalchemy.pool import Pool
 from sqlalchemy.schema import CreateIndex, Sequence
 from sqlalchemy.dialects.oracle.base import OracleDDLCompiler
 
 
 # Add support for Oracle-specific index extensions
 @compiles(CreateIndex, 'oracle')
-def visit_create_index(create, compiler, **kw):
+def visit_create_index(create, compiler, **kw):  # pylint: disable=W0613
     index = create.element
     compiler._verify_index_table(index)
     preparer = compiler.preparer
 
-    text = "CREATE "
+    text = "CREATE "  # pylint: disable=W0621
     if index.unique:
         text += "UNIQUE "
     if index.kwargs.get("oracle_bitmap", False):
@@ -67,8 +69,8 @@ def visit_create_index(create, compiler, **kw):
 
 # Add support for table compression
 @monkeypatch(OracleDDLCompiler)
-def post_create_table(self, table):
-    text = ""
+def post_create_table(self, table):  # pylint: disable=W0613
+    text = ""  # pylint: disable=W0621
     compress = table.kwargs.get("oracle_compress", False)
     if compress:
         if isinstance(compress, basestring):
@@ -79,22 +81,22 @@ def post_create_table(self, table):
     return text
 
 
-def sqlite_foreign_keys(dbapi_con, con_record):
+def sqlite_foreign_keys(dbapi_con, con_record):  # pylint: disable=W0613
     dbapi_con.execute('pragma foreign_keys=ON')
 
 
-def sqlite_no_fsync(dbapi_con, con_record):
+def sqlite_no_fsync(dbapi_con, con_record):  # pylint: disable=W0613
     dbapi_con.execute('pragma synchronous=OFF')
 
 
-def oracle_set_module(dbapi_con, con_record):
+def oracle_set_module(dbapi_con, con_record):  # pylint: disable=W0613
     # Store the program's name in v$session. Trying to set a value longer than
     # the allowed length will generate ORA-24960, so do an explicit truncation.
     prog = os.path.basename(sys.argv[0])
     dbapi_con.module = prog[:48]
 
 
-def oracle_reset_action(dbapi_con, con_record):
+def oracle_reset_action(dbapi_con, con_record):  # pylint: disable=W0613
     # Reset action and clientinfo in v$session. The DB connection may be closed
     # when this function is called, so be careful.
     if dbapi_con is None:
@@ -132,53 +134,45 @@ class DbFactory(object):
             except ModulecmdExecError, err:
                 log.error("Failed to load module %s: %s" % (module, err))
 
-        self.dsn = config.get('database', 'dsn')
+        pool_options = {}
 
-        self.pool_options = {}
-        self.pool_options["pool_size"] = config.getint("database", "pool_size")
-        self.pool_options["max_overflow"] = config.getint("database",
-                                                          "pool_max_overflow")
-        if len(config.get("database", "pool_timeout").strip()) > 0:
-            self.pool_options["pool_timeout"] = config.getint("database",
-                                                              "pool_timeout")
-        else:
-            self.pool_options["pool_timeout"] = None
-        log.info("Database engine using pool options %s" % self.pool_options)
+        for optname in ("pool_size", "pool_timeout", "pool_recycle"):
+            if config.has_option("database", optname):
+                pool_options[optname] = config.getint("database", optname)
+        # Sigh. max_overflow does not start with pool_*
+        if config.has_option("database", "pool_max_overflow"):
+            pool_options["max_overflow"] = config.getint("database",
+                                                         "pool_max_overflow")
+        log.info("Database engine using pool options %s" % pool_options)
 
-        passwds = self._get_password_list(config)
+        dsn = config.get('database', 'dsn')
+        dialect = make_url(dsn).get_dialect()
 
-        # ORACLE
-        if self.dsn.startswith('oracle'):
-            import cx_Oracle  # pylint: disable=W0612
-
-            self.login(passwds)
-
-        # POSTGRESQL
-        elif self.dsn.startswith('postgresql'):
-            import psycopg2  # pylint: disable=W0612
-
-            self.login(passwds)
-
-        # SQLITE
-        elif self.dsn.startswith('sqlite'):
-            self.engine = create_engine(self.dsn)
-            self.no_lock_engine = None
-            event.listen(self.engine, "connect", sqlite_foreign_keys)
+        if dialect.name == "oracle":
+            # Events should be registered before we try to open a real
+            # connection below, because the underlying DBAPI connection will not
+            # be closed
+            event.listen(Pool, "connect", oracle_set_module)
+            event.listen(Pool, "checkin", oracle_reset_action)
+            self.login(config, dsn, pool_options)
+        elif dialect.name == "postgresql":
+            self.login(config, dsn, pool_options)
+        elif dialect.name == "sqlite":
+            event.listen(Pool, "connect", sqlite_foreign_keys)
             if config.has_option("database", "disable_fsync") and \
                config.getboolean("database", "disable_fsync"):
-                event.listen(self.engine, "connect", sqlite_no_fsync)
+                event.listen(Pool, "connect", sqlite_no_fsync)
                 log = logging.getLogger(__name__)
                 log.info("SQLite is operating in unsafe mode!")
+
+            self.engine = create_engine(dsn)
+            self.no_lock_engine = None
             connection = self.engine.connect()
             connection.close()
         else:
-            msg = "Supported database datasources are postgresql, oracle and sqlite.\n"
-            msg += "yours is '%s' " % self.dsn
-            sys.stderr.write(msg)
-            sys.exit(9)
-
-        self.meta = MetaData(self.engine)
-        assert self.meta
+            raise AquilonError("Supported database datasources are postgresql, "
+                               "oracle and sqlite. You've asked for: %s" %
+                               dialect.name)
 
         self.Session = scoped_session(sessionmaker(bind=self.engine))
         assert self.Session
@@ -192,29 +186,26 @@ class DbFactory(object):
         else:
             self.NLSession = self.Session
 
-    def login(self, passwds):
-        errs = []
+    def login(self, config, raw_dsn, pool_options):
+        # Default: no password
+        passwords = [""]
         pswd_re = re.compile('PASSWORD')
-        dsn_copy = self.dsn
 
-        if not passwds:
-            raise AquilonError("At least one password must be specified, even "
-                               "if that's empty.")
+        if config.has_option("database", "password_file"):
+            passwd_file = config.get("database", "password_file")
+            if passwd_file:
+                with open(passwd_file) as f:
+                    passwords = [line.strip() for line in f.readlines()]
 
-        for p in passwds:
-            self.dsn = re.sub(pswd_re, p, dsn_copy)
-            self.engine = create_engine(self.dsn, **self.pool_options)
-            self.no_lock_engine = create_engine(self.dsn, **self.pool_options)
+                if not passwords:
+                    raise AquilonError("Password file %s is empty." %
+                                       passwd_file)
 
-            # Events should be registered before we try to open a real
-            # connection below, because the underlying DBAPI connection will not
-            # be closed
-            if self.engine.dialect.name == "oracle":
-                event.listen(self.engine, "connect", oracle_set_module)
-                event.listen(self.no_lock_engine, "connect", oracle_set_module)
-                event.listen(self.engine, "checkin", oracle_reset_action)
-                event.listen(self.no_lock_engine, "checkin",
-                             oracle_reset_action)
+        errs = []
+        for p in passwords:
+            dsn = re.sub(pswd_re, p, raw_dsn)
+            self.engine = create_engine(dsn, **pool_options)
+            self.no_lock_engine = create_engine(dsn, **pool_options)
 
             try:
                 connection = self.engine.connect()
@@ -226,31 +217,7 @@ class DbFactory(object):
         if errs:
             raise errs.pop()
         else:
-            raise AquilonError('Failed to connect to %s')
-
-    def _get_password_list(self, config):
-        """
-        Read a password file containing one password per line. The passwords
-        will be tried in the order they appear in the file.
-        """
-
-        # Default: no password
-        if not config.has_option("database", "password_file") or \
-           not config.get("database", "password_file").strip():
-            return [""]
-
-        passwd_file = config.get("database", "password_file")
-        if not os.path.exists(passwd_file):
-            raise AquilonError("The password file '%s' does not exist." %
-                               passwd_file)
-
-        passwds = ""
-        with open(passwd_file) as f:
-            passwds = f.readlines()
-            if not passwds:
-                raise AquilonError("Password file %s is empty." % passwd_file)
-
-        return [passwd.strip() for passwd in passwds]
+            raise AquilonError('Failed to connect to %s' % raw_dsn)
 
     def get_sequences(self):
         """ return a list of the sequence names from the current databases
