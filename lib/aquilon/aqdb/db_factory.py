@@ -35,8 +35,6 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.schema import CreateIndex, Sequence
 from sqlalchemy.dialects.oracle.base import OracleDDLCompiler
 
-import ms.modulecmd
-
 
 # Add support for Oracle-specific index extensions
 @compiles(CreateIndex, 'oracle')
@@ -121,9 +119,18 @@ class DbFactory(object):
         self.__started = True
 
         config = Config()
+        log = logging.getLogger(__name__)
 
         if config.has_option("database", "module"):
-            ms.modulecmd.load(config.get("database", "module"))
+            from ms.modulecmd import Modulecmd, ModulecmdExecError
+
+            module = config.get("database", "module")
+            cmd = Modulecmd()
+            try:
+                log.info("Loading module %s." % module)
+                cmd.load(module)
+            except ModulecmdExecError, err:
+                log.error("Failed to load module %s: %s" % (module, err))
 
         self.dsn = config.get('database', 'dsn')
 
@@ -136,7 +143,6 @@ class DbFactory(object):
                                                               "pool_timeout")
         else:
             self.pool_options["pool_timeout"] = None
-        log = logging.getLogger('aqdb.db_factory')
         log.info("Database engine using pool options %s" % self.pool_options)
 
         passwds = self._get_password_list(config)
@@ -161,7 +167,7 @@ class DbFactory(object):
             if config.has_option("database", "disable_fsync") and \
                config.getboolean("database", "disable_fsync"):
                 event.listen(self.engine, "connect", sqlite_no_fsync)
-                log = logging.getLogger('aqdb.db_factory')
+                log = logging.getLogger(__name__)
                 log.info("SQLite is operating in unsafe mode!")
             connection = self.engine.connect()
             connection.close()

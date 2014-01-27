@@ -135,7 +135,6 @@ installfe_user = %(user)s
 installfe_sshdir = /ms/dist/sec/PROJ/openssh/prod/bin
 server_notifications =
 client_notifications = yes
-CheckNet_module = /ms/dist/NetEng/modules/prod
 sharedata = /ms/dist/storage/etc/nasobjects.map
 default_domain_start = prod
 authorization_error = Please contact an administrator for access.
