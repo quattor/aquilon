@@ -18,6 +18,7 @@
 
 from sqlalchemy.orm import aliased, subqueryload, joinedload, lazyload
 
+from aquilon.exceptions_ import NotFoundException
 from aquilon.aqdb.model import (Machine, Cpu, Cluster, ClusterResource, Share,
                                 VirtualNasDisk, Disk, MetaCluster, DnsRecord)
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
@@ -60,14 +61,15 @@ class CommandSearchMachine(BrokerCommand):
                 q = q.filter_by(cluster=dbcluster)
             q = q.reset_joinpoint()
         if share:
-            #v2
-            v2shares = session.query(Share.id).filter_by(name=share).all()
-            if v2shares:
-                NasAlias = aliased(VirtualNasDisk)
-                q = q.join('disks', (NasAlias, NasAlias.id == Disk.id))
-                q = q.filter(
-                    NasAlias.share_id.in_(map(lambda s: s[0], v2shares)))
-                q = q.reset_joinpoint()
+            v2shares = session.query(Share.id).filter_by(name=share)
+            if not v2shares.count():
+                raise NotFoundException("No shares found with name {0}."
+                                        .format(share))
+
+            NasAlias = aliased(VirtualNasDisk)
+            q = q.join('disks', (NasAlias, NasAlias.id == Disk.id))
+            q = q.filter(NasAlias.share_id.in_(v2shares.subquery()))
+            q = q.reset_joinpoint()
 
         if fullinfo:
             q = q.options(joinedload('location'),

@@ -234,6 +234,7 @@ class CommandSearchHost(BrokerCommand):
             else:
                 q = q.filter_by(cluster=dbcluster)
             q = q.reset_joinpoint()
+
         if guest_on_cluster:
             # TODO: this does not handle metaclusters according to Wes
             dbcluster = Cluster.get_unique(session, guest_on_cluster,
@@ -242,33 +243,29 @@ class CommandSearchHost(BrokerCommand):
                        VirtualMachine, ClusterResource)
             q = q.filter_by(cluster=dbcluster)
             q = q.reset_joinpoint()
+
         if guest_on_share:
-            #v2
-            v2shares = session.query(Share.id).filter_by(name=guest_on_share).all()
-            if not v2shares:
+            v2shares = session.query(Share.id).filter_by(name=guest_on_share)
+            if not v2shares.count():
                 raise NotFoundException("No shares found with name {0}."
                                         .format(guest_on_share))
 
             NasAlias = aliased(VirtualNasDisk)
             q = q.join(Host.hardware_entity.of_type(Machine),
                        Disk, (NasAlias, NasAlias.id == Disk.id))
-            q = q.filter(
-                NasAlias.share_id.in_(map(lambda s: s[0], v2shares)))
+            q = q.filter(NasAlias.share_id.in_(v2shares.subquery()))
             q = q.reset_joinpoint()
 
         if member_cluster_share:
-            #v2
-            v2shares = session.query(Share.id).filter_by(name=member_cluster_share).all()
-            if not v2shares:
+            v2shares = session.query(Share.id).filter_by(name=member_cluster_share)
+            if not v2shares.count():
                 raise NotFoundException("No shares found with name {0}."
                                         .format(guest_on_share))
 
             NasAlias = aliased(VirtualNasDisk)
-
             q = q.join('_cluster', 'cluster', 'resholder', VirtualMachine,
                        'machine', 'disks', (NasAlias, NasAlias.id == Disk.id))
-            q = q.filter(
-                NasAlias.share_id.in_(map(lambda s: s[0], v2shares)))
+            q = q.filter(NasAlias.share_id.in_(v2shares.subquery()))
             q = q.reset_joinpoint()
 
         if grn or eon_id:
