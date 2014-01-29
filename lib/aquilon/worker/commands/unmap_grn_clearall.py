@@ -48,14 +48,14 @@ class CommandUnMapGrnClearAll(BrokerCommand):
             valid_targets = self.config.get("archetype_" + obj.archetype.name,
                                             target_type + "_grn_targets")
 
-            if target not in map(lambda s: s.strip(), valid_targets.split(",")):
+            if target not in [s.strip() for s in valid_targets.split(",")]:
                 raise ArgumentError("Invalid %s target %s for archetype %s, please "
                                     "choose from %s" % (target_type, target,
                                                         obj.archetype.name,
                                                         valid_targets))
 
             for grn_rec in obj._grns[:]:
-                if (target == grn_rec.target):
+                if target == grn_rec.target:
                     obj._grns.remove(grn_rec)
             plenaries.append(Plenary.get_plenary(obj))
 

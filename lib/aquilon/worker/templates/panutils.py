@@ -79,7 +79,7 @@ def pan(obj, indent=0):
     else:
         accumulator.append(pan(str(obj)))
 
-    if (len(accumulator) == 1):
+    if len(accumulator) == 1:
         return accumulator[0]
 
     return "\n".join(("%s" % x) for x in accumulator)

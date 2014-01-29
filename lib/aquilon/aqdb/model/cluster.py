@@ -165,7 +165,7 @@ class Cluster(Base):
     @staticmethod
     def parse_threshold(threshold):
         is_percent = False
-        percent = re.search('(\d+)(%)?', threshold)
+        percent = re.search(r'(\d+)(%)?', threshold)
         thresh_value = int(percent.group(1))
         if percent.group(2):
             is_percent = True

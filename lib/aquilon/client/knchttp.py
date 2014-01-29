@@ -25,9 +25,9 @@ from aquilon.client.chunked import ChunkedHTTPConnection
 
 class ProcessWrapper(object):
 
-    class _closedsocket:
+    class _closedsocket(object):
         def __getattr__(self, name):
-            raise error(9, 'Bad file descriptor')
+            raise OSError(9, 'Bad file descriptor')
 
     def __init__(self, process):
         self.process = process

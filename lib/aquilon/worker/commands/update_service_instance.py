@@ -16,8 +16,6 @@
 # limitations under the License.
 """Contains the logic for `aq update service --instance`."""
 
-
-from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.aqdb.model import Service, ServiceInstance
 from aquilon.worker.templates.base import Plenary

@@ -73,10 +73,10 @@ def get_or_create_user_principal(session, principal, createuser=True,
             raise ArgumentError("Could not find realm %s to create principal "
                                 "%s, use --createrealm to create a new record "
                                 "for the realm." % (realm, principal))
-        LOGGER.info("Realm %s did not exist, creating..." % realm)
+        LOGGER.info("Realm %s did not exist, creating...", realm)
         dbrealm = Realm(name=realm)
         session.add(dbrealm)
-        LOGGER.info("Creating user %s@%s..." % (user, realm))
+        LOGGER.info("Creating user %s@%s...", user, realm)
         dbuser = UserPrincipal(name=user, realm=dbrealm, role=dbnobody,
                                comments=comments)
         session.add(dbuser)
@@ -90,8 +90,8 @@ def get_or_create_user_principal(session, principal, createuser=True,
             raise ArgumentError("Could not find principal %s to permission, "
                                 "use --createuser to create a new record for "
                                 "the principal." % principal)
-        LOGGER.info("User %s did not exist in realm %s, creating..." %
-                    (user, realm))
+        LOGGER.info("User %s did not exist in realm %s, creating...",
+                    user, realm)
         dbuser = UserPrincipal(name=user, realm=dbrealm, role=dbnobody,
                                comments=comments)
         session.add(dbuser)

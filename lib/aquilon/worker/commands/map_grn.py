@@ -61,7 +61,7 @@ class CommandMapGrn(BrokerCommand):
             valid_targets = self.config.get("archetype_" + obj.archetype.name,
                                             target_type + "_grn_targets")
 
-            if target not in map(lambda s: s.strip(), valid_targets.split(",")):
+            if target not in [s.strip() for s in valid_targets.split(",")]:
                 raise ArgumentError("Invalid %s target %s for archetype %s, please "
                                     "choose from %s" % (target_type, target,
                                                         obj.archetype.name,

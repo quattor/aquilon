@@ -41,7 +41,7 @@ class CommandAddDomain(BrokerCommand):
         Branch.get_unique(session, domain, preclude=True)
 
         valid = re.compile('^[a-zA-Z0-9_.-]+$')
-        if (not valid.match(domain)):
+        if not valid.match(domain):
             raise ArgumentError("Domain name '%s' is not valid." % domain)
 
         # FIXME: Verify that track is a valid branch name?

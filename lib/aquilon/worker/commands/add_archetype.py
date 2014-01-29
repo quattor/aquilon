@@ -29,7 +29,7 @@ class CommandAddArchetype(BrokerCommand):
     def render(self, session, archetype, cluster_type, compilable,
                description, **kwargs):
         valid = re.compile('^[a-zA-Z0-9_-]+$')
-        if (not valid.match(archetype)):
+        if not valid.match(archetype):
             raise ArgumentError("Archetype name '%s' is not valid." % archetype)
         if archetype in ["hardware", "machine", "pan", "t",
                          "service", "servicedata", "clusters"]:

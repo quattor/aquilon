@@ -15,9 +15,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import ResourceGroup, BundleResource, Resource
+from aquilon.aqdb.model import ResourceGroup, Resource
 from aquilon.worker.broker import BrokerCommand, validate_basic
 from aquilon.worker.dbwrappers.resources import (add_resource,
                                                  get_resource_holder)

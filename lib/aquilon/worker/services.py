@@ -491,7 +491,7 @@ class HostChooser(Chooser):
         # all of them would be self. but that should be optimized
         # dbhost.hardware_entity.interfaces[x].assignments[y].network
 
-        """Stores interim service instance lists."""
+        # Stores interim service instance lists.
         q = self.session.query(Service)
         q = q.outerjoin(Service.archetypes)
         q = q.reset_joinpoint()
@@ -501,9 +501,8 @@ class HostChooser(Chooser):
         self.required_services = set(q.all())
 
         self.original_service_instances = {}
-        """Cache of any already bound services (keys) and the instance
-        that was bound (values).
-        """
+        # Cache of any already bound services (keys) and the instance
+        # that was bound (values).
         q = self.session.query(ServiceInstance)
         q = q.options(undefer('_client_count'))
         q = q.filter(ServiceInstance.clients.contains(dbhost))
@@ -614,16 +613,15 @@ class ClusterChooser(Chooser):
         self.required_services = set()
         # TODO Should be calculated from member host's network membership.
         self.network = None
-        """Stores interim service instance lists."""
+        # Stores interim service instance lists.
         for service in self.archetype.services:
             self.required_services.add(service)
         for service in self.personality.services:
             self.required_services.add(service)
 
         self.original_service_instances = {}
-        """Cache of any already bound services (keys) and the instance
-        that was bound (values).
-        """
+        # Cache of any already bound services (keys) and the instance
+        # that was bound (values).
         for si in dbcluster.service_bindings:
             self.original_service_instances[si.service] = si
             self.logger.debug("{0} original binding: {1:l}"

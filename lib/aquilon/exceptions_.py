@@ -15,8 +15,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Exceptions to be used by Aquilon"""
-"""The base exception class is AquilonError."""
-
 
 def deprecated(message):
     import warnings

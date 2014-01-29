@@ -16,11 +16,9 @@
 # limitations under the License.
 """Contains the logic for `aq del interface`."""
 
-
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Chassis, Machine, NetworkDevice, Interface
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.dbwrappers.interface import assign_address
 from aquilon.worker.templates import Plenary
 
 

@@ -51,8 +51,6 @@ class CommandAddMetaCluster(BrokerCommand):
             raise ArgumentError("%s is not a cluster personality." %
                                 personality)
 
-        ctype = "meta"  # dbpersonality.archetype.cluster_type
-
         if not buildstatus:
             buildstatus = "build"
         dbstatus = ClusterLifecycle.get_instance(session, buildstatus)
@@ -86,9 +84,6 @@ class CommandAddMetaCluster(BrokerCommand):
             raise ArgumentError("Metacluster name global is reserved.")
 
         MetaCluster.get_unique(session, metacluster, preclude=True)
-        clus_type = MetaCluster  # Cluster.__mapper__.polymorphic_map[ctype].class_
-
-        kw = {}
 
         dbcluster = MetaCluster(name=metacluster, location_constraint=dbloc,
                                 personality=dbpersonality,

@@ -50,10 +50,9 @@ class CommandAddInterfaceChassis(BrokerCommand):
         dbchassis = Chassis.get_unique(session, chassis, compel=True)
         oldinfo = DSDBRunner.snapshot_hw(dbchassis)
 
-        dbinterface = get_or_create_interface(session, dbchassis,
-                                              name=interface, mac=mac,
-                                              interface_type='oa',
-                                              comments=comments, preclude=True)
+        get_or_create_interface(session, dbchassis, name=interface, mac=mac,
+                                interface_type='oa', comments=comments,
+                                preclude=True)
 
         session.flush()
 

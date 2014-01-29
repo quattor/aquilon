@@ -29,7 +29,7 @@ class CommandAddOS(BrokerCommand):
     def render(self, session, osname, osversion, archetype, comments,
                **arguments):
         valid = re.compile('^[a-zA-Z0-9_.-]+$')
-        if (not valid.match(osname)):
+        if not valid.match(osname):
             raise ArgumentError("OS name '%s' is not valid." % osname)
         if not valid.match(osversion):
             raise ArgumentError("OS version '%s' is not valid." % osversion)

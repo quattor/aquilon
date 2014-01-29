@@ -46,7 +46,7 @@ class CommandAddSandbox(CommandGet):
         # See `git check-ref-format --help` for naming restrictions.
         # We want to layer a few extra restrictions on top of that...
         valid = re.compile('^[a-zA-Z0-9_.-]+$')
-        if (not valid.match(sandbox)):
+        if not valid.match(sandbox):
             raise ArgumentError("sandbox name '%s' is not valid" % sandbox)
 
         Branch.get_unique(session, sandbox, preclude=True)

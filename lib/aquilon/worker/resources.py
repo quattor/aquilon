@@ -53,7 +53,7 @@ import os
 import xml.etree.ElementTree as ET
 
 from twisted.web import server, resource, http
-from twisted.internet import defer, threads, reactor
+from twisted.internet import defer, threads
 from twisted.python import log
 
 from aquilon.aqdb.types import StringEnum

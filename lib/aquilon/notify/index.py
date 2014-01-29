@@ -104,8 +104,8 @@ def build_index(config, session, logger=LOGGER):
                 if obj not in old_object_index or old_object_index[obj] < mtime:
                     old_object_index[obj] = mtime
         except Exception, e:  # pragma: no cover
-            logger.info("Error processing %s, continuing: %s" %
-                        (index_path, e))
+            logger.info("Error processing %s, continuing: %s",
+                        index_path, e)
         finally:
             if source:
                 source.close()
@@ -162,8 +162,8 @@ def build_index(config, session, logger=LOGGER):
         compress = 'gzip'
     write_file(index_path, "\n".join(content), logger=logger, compress=compress)
 
-    logger.debug("Updated %s, %d objects modified" % (index_path,
-                                                      len(modified_index)))
+    logger.debug("Updated %s, %d objects modified", index_path,
+                 len(modified_index))
 
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
@@ -185,17 +185,17 @@ def build_index(config, session, logger=LOGGER):
                     for instance in srvinfo.instances:
                         servers.update([srv.fqdn for srv in instance.servers])
                 except Exception, e:
-                    logger.info("failed to lookup up server module %s: %s" %
-                                (service, e))
+                    logger.info("failed to lookup up server module %s: %s",
+                                service, e)
         count = send_notification(CDB_NOTIF, servers, sock=sock,
                                   logger=logger)
-        logger.info("sent %d server notifications" % count)
+        logger.info("sent %d server notifications", count)
 
     if (config.has_option("broker", "client_notifications")
         and config.getboolean("broker", "client_notifications")):  # pragma: no cover
         count = send_notification(CCM_NOTIF, modified_index.keys(), sock=sock,
                                   logger=logger)
-        logger.info("sent %d client notifications" % count)
+        logger.info("sent %d client notifications", count)
 
     sock.close()
 
@@ -235,7 +235,7 @@ def send_notification(ntype, modified, sock=None, logger=LOGGER):
             pass
 
         except Exception, e:
-            logger.info("Error notifying %s: %s" % (host, e))
+            logger.info("Error notifying %s: %s", host, e)
 
     return success
 
@@ -243,16 +243,16 @@ def send_notification(ntype, modified, sock=None, logger=LOGGER):
 def trigger_notifications(config, logger=LOGGER, loglevel=logging.INFO):
     sockname = os.path.join(config.get("broker", "sockdir"), "notifysock")
     sd = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-    logger.debug("Attempting connection to notification socket: %s" % sockname)
+    logger.debug("Attempting connection to notification socket: %s", sockname)
     try:
         sd.connect(sockname)
     except socket.error, err:
-        logger.error("Failed to connect to notification socket: %s" % err)
+        logger.error("Failed to connect to notification socket: %s", err)
 
     try:
         sd.send("update")
     except socket.error, err:
-        logger.error("Failed to send to notification socket: %s" % err)
+        logger.error("Failed to send to notification socket: %s", err)
 
     sd.close()
 
