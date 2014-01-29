@@ -106,6 +106,7 @@ class CommandUpdateBuilding(BrokerCommand):
                     dsdb_runner.commit_or_rollback()
                 except:
                     plenaries.restore_stash()
+                    raise
         else:
             dsdb_runner.commit_or_rollback()
 
