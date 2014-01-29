@@ -146,7 +146,8 @@ class ResponsePage(resource.Resource):
         # This is expanded to do argument checking, finish the request,
         # and do some error handling.
         d = self.check_arguments(request, handler.required_parameters,
-                                 handler.optional_parameters)
+                                 handler.optional_parameters,
+                                 handler.parameter_checks)
         style = getattr(self, "output_format", None)
         if style is None:
             style = getattr(request, "output_format", None)
@@ -170,7 +171,8 @@ class ResponsePage(resource.Resource):
         d = d.addErrback(self.wrapError, request)
         return server.NOT_DONE_YET
 
-    def check_arguments(self, request, required=[], optional=[]):
+    def check_arguments(self, request, required=None, optional=None,
+                        parameter_checks=None):
         """Check for the required and optional arguments.
 
         Returns a Deferred that will have a dictionary of the arguments
@@ -210,7 +212,14 @@ class ResponsePage(resource.Resource):
                 return defer.fail(ArgumentError(
                     "Internal Error: Expected list for %s, got '%s'"
                     % (arg, str(values))))
-            arguments[arg] = values[0]
+
+            value = values[0]
+            if arg in parameter_checks or {}:
+                try:
+                    value = parameter_checks[arg]("--" + arg, value)
+                except ArgumentError, err:
+                    return defer.fail(err)
+            arguments[arg] = value
         return defer.succeed(arguments)
 
     def format(self, result, request):
@@ -357,7 +366,6 @@ class RestServer(ResponsePage):
                         myinstance.optional_parameters.append(option_name)
                     if "type" in option.attrib:
                         paramtype = option.attrib["type"]
-                        myinstance.parameter_types[option_name] = paramtype
                         if paramtype == "int":
                             myinstance.parameter_checks[option_name] = force_int
                         elif paramtype == "float":
@@ -388,13 +396,6 @@ class RestServer(ResponsePage):
                     else:  # pragma: no cover
                         log.msg("Warning: argument type not known for %s.%s" %
                                 (myinstance.command, option_name))
-                    pbt = myinstance.parameters_by_type
-                    for option_name, paramtype \
-                            in myinstance.parameter_types.items():
-                        if paramtype in pbt:
-                            pbt[paramtype].append(option_name)
-                        else:
-                            pbt[paramtype] = [option_name]
 
                     for format in command.getiterator("format"):
                         if "name" not in format.attrib:

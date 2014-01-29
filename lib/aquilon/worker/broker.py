@@ -167,12 +167,6 @@ class BrokerCommand(object):
         # invoked.
         self.parameter_checks = {}
 
-        # The parameter types are filled in automatically based on input.xml.
-        self.parameter_types = {}
-        # This is the pivot of the above, filled in at the same time.  It is a
-        # dictionary of type names to lists of parameters.
-        self.parameters_by_type = {}
-
         self.action = self.__module__
         package_prefix = "aquilon.worker.commands."
         if self.action.startswith(package_prefix):
@@ -271,8 +265,7 @@ class BrokerCommand(object):
                     status = logger.get_status()
                     start_xtn(session, status.requestid, status.user,
                               status.command, self.requires_readonly,
-                              status.kwargs,
-                              self.parameters_by_type.get('list'))
+                              status.kwargs)
 
                     dbuser = get_or_create_user_principal(session, user,
                                                           commitoncreate=True)
@@ -289,10 +282,6 @@ class BrokerCommand(object):
                     raise UnimplementedError("Command %s not available on "
                                              "a %s broker." %
                                              (self.command, self.badmode))
-                for key in kwargs.keys():
-                    if key in self.parameter_checks:
-                        kwargs[key] = self.parameter_checks[key]("--" + key,
-                                                                 kwargs[key])
                 # Command is an instance method already having self...
                 retval = command(user=user, dbuser=dbuser, request=request,
                                  requestid=requestid, logger=logger,
@@ -362,8 +351,12 @@ class BrokerCommand(object):
             if value is None:
                 kwargs.pop(key)
                 continue
-            if len(str(value)) > 100:
-                kwargs[key] = value[0:96] + '...'
+            if isinstance(value, list):
+                value_str = " ".join([str(item) for item in value])
+            else:
+                value_str = str(value)
+            if len(value_str) > 100:
+                kwargs[key] = value_str[0:96] + '...'
         kwargs_str = str(kwargs)
         if len(kwargs_str) > 1024:
             kwargs_str = kwargs_str[0:1020] + '...'

@@ -139,8 +139,7 @@ if config.has_option('database', 'audit_schema'):  # pragma: no cover
     XtnDetail.__table__.schema = schema
 
 
-def start_xtn(session, xtn_id, username, command, is_readonly, details,
-              options_to_split=None):
+def start_xtn(session, xtn_id, username, command, is_readonly, details):
     """ Wrapper to log the start of a transaction (or running command).
 
     Takes a dictionary with the transaction parameters.  The keys are
@@ -179,11 +178,8 @@ def start_xtn(session, xtn_id, username, command, is_readonly, details,
         if value == '':
             value = '-'
 
-        if key in (options_to_split or {}):
-            for item in value.strip().split('\n'):
-                item = item.strip()
-                if not item:
-                    continue
+        if isinstance(value, list):
+            for item in value:
                 session.add(XtnDetail(xtn_id=xtn_id, name=key,
                                       value=sanitized_string(item)))
         else:
