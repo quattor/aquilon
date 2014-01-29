@@ -42,12 +42,14 @@ class TestAddOS(TestBrokerCommand):
     def testaddbadname(self):
         command = "add os --archetype aquilon --osname oops@! --osversion 1.0"
         out = self.badrequesttest(command.split(" "))
-        self.matchoutput(out, "OS name 'oops@!' is not valid", command)
+        self.matchoutput(out, "'oops@!' is not a valid value for --osname.",
+                         command)
 
     def testaddbadversion(self):
         command = "add os --archetype aquilon --osname newos --osversion oops@!"
         out = self.badrequesttest(command.split(" "))
-        self.matchoutput(out, "OS version 'oops@!' is not valid", command)
+        self.matchoutput(out, "'oops@!' is not a valid value for --osversion.",
+                         command)
 
     def testaddutos(self):
         command = "add os --archetype utarchetype1 --osname utos --osversion 1.0"

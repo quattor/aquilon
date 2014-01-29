@@ -35,7 +35,8 @@ class TestAddVendor(TestBrokerCommand):
     def testaddbadname(self):
         command = "add vendor --vendor oops@!"
         out = self.badrequesttest(command.split(" "))
-        self.matchoutput(out, "Vendor name 'oops@!' is not valid", command)
+        self.matchoutput(out, "'oops@!' is not a valid value for --vendor.",
+                         command)
 
     def testaddutvendor(self):
         command = ["add", "vendor", "--vendor", "utvendor",

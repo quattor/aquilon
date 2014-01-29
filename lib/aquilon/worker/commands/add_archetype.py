@@ -15,11 +15,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.aqdb.model import Archetype, Cluster
 from aquilon.exceptions_ import ArgumentError
-import re
+from aquilon.aqdb.model import Archetype, Cluster
+from aquilon.worker.broker import BrokerCommand, validate_nlist_key
 
 
 class CommandAddArchetype(BrokerCommand):
@@ -28,9 +26,7 @@ class CommandAddArchetype(BrokerCommand):
 
     def render(self, session, archetype, cluster_type, compilable,
                description, **kwargs):
-        valid = re.compile('^[a-zA-Z0-9_-]+$')
-        if not valid.match(archetype):
-            raise ArgumentError("Archetype name '%s' is not valid." % archetype)
+        validate_nlist_key('--archetype', archetype)
         if archetype in ["hardware", "machine", "pan", "t",
                          "service", "servicedata", "clusters"]:
             raise ArgumentError("Archetype name %s is reserved." % archetype)

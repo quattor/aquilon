@@ -16,14 +16,12 @@
 # limitations under the License.
 """Contains the logic for `aq add domain`."""
 
-
 import os
-import re
 
 from aquilon.exceptions_ import (AuthorizationException, ArgumentError,
                                  InternalError, ProcessException)
 from aquilon.aqdb.model import Domain, Branch
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand, validate_template_name
 from aquilon.worker.processes import run_git
 from aquilon.utils import remove_dir
 
@@ -38,14 +36,8 @@ class CommandAddDomain(BrokerCommand):
             raise AuthorizationException("Cannot create a domain without "
                                          "an authenticated connection.")
 
+        validate_template_name("--domain", domain)
         Branch.get_unique(session, domain, preclude=True)
-
-        valid = re.compile('^[a-zA-Z0-9_.-]+$')
-        if not valid.match(domain):
-            raise ArgumentError("Domain name '%s' is not valid." % domain)
-
-        # FIXME: Verify that track is a valid branch name?
-        # Or just let the branch command fail?
 
         compiler = self.config.get("panc", "pan_compiler")
         dbtracked = None

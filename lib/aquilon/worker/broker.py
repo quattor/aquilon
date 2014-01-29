@@ -50,6 +50,9 @@ _IGNORED_AUDIT_ARGS = ('requestid', 'bundle', 'debug')
 # without escaping.
 nlist_key_re = re.compile('^[a-zA-Z_][a-zA-Z0-9_.-]*$')
 
+# Regexp used to check if a value is suitable to be used as a template name
+template_name_re = re.compile(r'^[a-zA-Z0-9_.-]+$')
+
 __audit_id = 0
 """This will help with debugging active incoming requests.
 
@@ -520,5 +523,11 @@ class BrokerCommand(object):
 
 def validate_nlist_key(label, value):
     if not nlist_key_re.match(value):
-        raise ArgumentError("'%s' is not a valid value for %s" %
+        raise ArgumentError("'%s' is not a valid value for %s." %
+                            (value, label))
+
+
+def validate_template_name(label, value):
+    if not template_name_re.match(value):
+        raise ArgumentError("'%s' is not a valid value for %s." %
                             (value, label))

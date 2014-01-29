@@ -15,10 +15,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.aqdb.model import Vendor
-from aquilon.exceptions_ import ArgumentError
-import re
+from aquilon.worker.broker import BrokerCommand, validate_template_name
 
 
 class CommandAddVendor(BrokerCommand):
@@ -26,10 +24,7 @@ class CommandAddVendor(BrokerCommand):
     required_parameters = ["vendor"]
 
     def render(self, session, vendor, comments, **arguments):
-        valid = re.compile('^[a-zA-Z0-9_.-]+$')
-        if not valid.match(vendor):
-            raise ArgumentError("Vendor name '%s' is not valid." % vendor)
-
+        validate_template_name("--vendor", vendor)
         Vendor.get_unique(session, vendor, preclude=True)
 
         dbv = Vendor(name=vendor, comments=comments)

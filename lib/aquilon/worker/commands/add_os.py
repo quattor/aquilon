@@ -15,11 +15,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 from aquilon.aqdb.model import OperatingSystem, Archetype
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.exceptions_ import ArgumentError
-import re
+from aquilon.worker.broker import (BrokerCommand, validate_template_name,
+                                   validate_nlist_key)
 
 
 class CommandAddOS(BrokerCommand):
@@ -28,11 +26,8 @@ class CommandAddOS(BrokerCommand):
 
     def render(self, session, osname, osversion, archetype, comments,
                **arguments):
-        valid = re.compile('^[a-zA-Z0-9_.-]+$')
-        if not valid.match(osname):
-            raise ArgumentError("OS name '%s' is not valid." % osname)
-        if not valid.match(osversion):
-            raise ArgumentError("OS version '%s' is not valid." % osversion)
+        validate_nlist_key("--osname", osname)
+        validate_template_name("--osversion", osversion)
 
         dbarchetype = Archetype.get_unique(session, archetype, compel=True)
         OperatingSystem.get_unique(session, name=osname, version=osversion,
