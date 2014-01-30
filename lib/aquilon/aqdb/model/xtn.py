@@ -169,9 +169,18 @@ def start_xtn(session, xtn_id, username, command, is_readonly, details):
         if value is None:
             continue
 
+        # The --format command-line option is tricky, as the client does not
+        # pass it as a query parameter, but as a file extension. For historic
+        # reasons, the broker converts that information to an option named
+        # 'style'; convert it back to be compatible with the old reporting
+        # format.
+        if key == 'style':
+            key = 'format'
+
         # Skip uber-redundant raw format parameter
         if key == 'format' and value == 'raw':
             continue
+
         # Sometimes we delete a value and the arg comes in as an empty
         # string.  Denote this with a dash '-' to work around Oracle
         # not being able to store the concept of a non-NULL empty string.
