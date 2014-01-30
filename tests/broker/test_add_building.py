@@ -96,7 +96,7 @@ class TestAddBuilding(TestBrokerCommand):
         out = self.commandtest(command)
         self.searchoutput(out,
                           r"400 aq add_building .*"
-                          r"--address='<Non-ASCII value>'",
+                          r"--address='%E1%E9%ED%F3%FA'",
                           command)
         self.searchoutput(out, r"400 aq add_building .*--building='nonascii'",
                           command)
