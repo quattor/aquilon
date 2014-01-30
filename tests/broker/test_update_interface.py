@@ -91,7 +91,7 @@ class TestUpdateInterface(TestBrokerCommand):
     def test_121_verify_show_ut3c5n10_interfaces(self):
         command = "show host --hostname unittest02.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Blade: ut3c5n10", command)
+        self.matchoutput(out, "Machine: ut3c5n10", command)
         self.searchoutput(out, r"Interface: eth0 %s \[default_route\]$" %
                           self.net["unknown0"].usable[11].mac.lower(), command)
         self.searchoutput(out, r"Interface: eth1 %s \[boot\]" %
