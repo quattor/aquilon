@@ -35,7 +35,8 @@ class TestNetworkDeviceConstraints(TestBrokerCommand):
     def testverifydelmachineastor_switchfailed(self):
         command = "show machine --machine ut3c5n10"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Blade: ut3c5n10", command)
+        self.matchoutput(out, "Machine: ut3c5n10", command)
+        self.matchoutput(out, "Model Type: blade", command)
 
     # This test doesn't make sense right now.
     #def testdeltor_switchasmachine(self):
@@ -56,7 +57,8 @@ class TestNetworkDeviceConstraints(TestBrokerCommand):
     def testverifyrejectut3c1n3(self):
         command = "show machine --machine ut3c1n3"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Blade: ut3c1n3", command)
+        self.matchoutput(out, "Machine: ut3c1n3", command)
+        self.matchoutput(out, "Model Type: blade", command)
 
     def testdelprimaryinterface(self):
         command = ["del", "interface", "--interface", "xge49",

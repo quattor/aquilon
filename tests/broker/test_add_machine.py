@@ -47,7 +47,8 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
     def testverifyaddut3c5n10(self):
         command = "show machine --machine ut3c5n10"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Blade: ut3c5n10", command)
+        self.matchoutput(out, "Machine: ut3c5n10", command)
+        self.matchoutput(out, "Model Type: blade", command)
         self.matchoutput(out, "Rack: ut3", command)
         self.matchoutput(out, "Vendor: ibm Model: hs21-8853l5u", command)
         self.matchoutput(out, "Cpu: xeon_2660 x 2", command)
@@ -142,11 +143,13 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
     def testverifynormalization(self):
         command = "show machine --machine NP3c5N5"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Blade: np3c5n5", command)
+        self.matchoutput(out, "Machine: np3c5n5", command)
+        self.matchoutput(out, "Model Type: blade", command)
 
         command = "show machine --machine np3c5n5"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Blade: np3c5n5", command)
+        self.matchoutput(out, "Machine: np3c5n5", command)
+        self.matchoutput(out, "Model Type: blade", command)
 
     # Used for testing notifications
     def testaddut3c5n6(self):
@@ -180,17 +183,20 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
     def testshowslot(self):
         command = "show machine --slot 3"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Blade: ut3c1n3", command)
+        self.matchoutput(out, "Machine: ut3c1n3", command)
+        self.matchoutput(out, "Model Type: blade", command)
 
     def testshowchassisslot(self):
         command = "show machine --chassis ut3c1.aqd-unittest.ms.com --slot 3"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Blade: ut3c1n3", command)
+        self.matchoutput(out, "Machine: ut3c1n3", command)
+        self.matchoutput(out, "Model Type: blade", command)
 
     def testverifyaddut3c1n3(self):
         command = "show machine --machine ut3c1n3"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Blade: ut3c1n3", command)
+        self.matchoutput(out, "Machine: ut3c1n3", command)
+        self.matchoutput(out, "Model Type: blade", command)
         self.matchoutput(out, "Chassis: ut3c1.aqd-unittest.ms.com", command)
         self.matchoutput(out, "Slot: 3", command)
         self.matchoutput(out, "Vendor: ibm Model: hs21-8853l5u", command)
@@ -232,7 +238,8 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
     def testverifyaddut3c1n4(self):
         command = "show machine --machine ut3c1n4"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Blade: ut3c1n4", command)
+        self.matchoutput(out, "Machine: ut3c1n4", command)
+        self.matchoutput(out, "Model Type: blade", command)
         self.matchoutput(out, "Rack: ut3", command)
         self.matchoutput(out, "Vendor: ibm Model: hs21-8853l5u", command)
         self.matchoutput(out, "Cpu: xeon_2660 x 2", command)
@@ -265,7 +272,8 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
     def testverifyccissmachine(self):
         command = "show machine --machine ut3c1n8"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Rackmount: ut3c1n8", command)
+        self.matchoutput(out, "Machine: ut3c1n8", command)
+        self.matchoutput(out, "Model Type: rackmount", command)
         self.matchoutput(out, "Rack: ut3", command)
         self.matchoutput(out, "Vendor: hp Model: utccissmodel", command)
         self.matchoutput(out, "Cpu: xeon_2500 x 2", command)
@@ -374,7 +382,8 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
     def testverifyaddut3s01p1a(self):
         command = "show machine --machine ut3s01p1a"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Rackmount: ut3s01p1a", command)
+        self.matchoutput(out, "Machine: ut3s01p1a", command)
+        self.matchoutput(out, "Model Type: rackmount", command)
 
     def testaddut3s01p1b(self):
         self.noouttest(["add", "machine", "--machine", "ut3s01p1b",
@@ -383,7 +392,8 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
     def testverifyaddut3s01p1b(self):
         command = "show machine --machine ut3s01p1b"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Rackmount: ut3s01p1b", command)
+        self.matchoutput(out, "Machine: ut3s01p1b", command)
+        self.matchoutput(out, "Model Type: rackmount", command)
 
     def testaddut3s01p2(self):
         self.noouttest(["add", "machine", "--machine", "ut3s01p2",
@@ -392,7 +402,8 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
     def testverifyaddut3s01p2(self):
         command = "show machine --machine ut3s01p2"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Rackmount: ut3s01p2", command)
+        self.matchoutput(out, "Machine: ut3s01p2", command)
+        self.matchoutput(out, "Model Type: rackmount", command)
 
     # When doing an end-to-end test, these entries should be
     # created as part of a sweep of a Verari rack

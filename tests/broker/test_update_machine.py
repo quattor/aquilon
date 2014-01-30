@@ -34,7 +34,8 @@ class TestUpdateMachine(TestBrokerCommand):
     def testverifyupdateut3c1n3(self):
         command = "show machine --machine ut3c1n3"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Blade: ut3c1n3", command)
+        self.matchoutput(out, "Machine: ut3c1n3", command)
+        self.matchoutput(out, "Model Type: blade", command)
         self.matchoutput(out, "Chassis: ut3c1.aqd-unittest.ms.com", command)
         self.matchoutput(out, "Slot: 10", command)
         self.matchoutput(out, "Vendor: ibm Model: hs21-8853l5u", command)
@@ -69,17 +70,20 @@ class TestUpdateMachine(TestBrokerCommand):
     def testverifyshowslot(self):
         command = "show machine --slot 2"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Blade: ut3c5n10", command)
+        self.matchoutput(out, "Machine: ut3c5n10", command)
+        self.matchoutput(out, "Model Type: blade", command)
 
     def testverifyshowchassisslot(self):
         command = "show machine --chassis ut3c5.aqd-unittest.ms.com --slot 2"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Blade: ut3c5n10", command)
+        self.matchoutput(out, "Machine: ut3c5n10", command)
+        self.matchoutput(out, "Model Type: blade", command)
 
     def testverifyupdateut3c5n10(self):
         command = "show machine --machine ut3c5n10"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Blade: ut3c5n10", command)
+        self.matchoutput(out, "Machine: ut3c5n10", command)
+        self.matchoutput(out, "Model Type: blade", command)
         self.matchoutput(out, "Chassis: ut3c5.aqd-unittest.ms.com", command)
         self.matchoutput(out, "Slot: 2", command)
         self.matchoutput(out, "Vendor: ibm Model: hs21-8853l5u", command)
@@ -131,7 +135,8 @@ class TestUpdateMachine(TestBrokerCommand):
     def testverifyupdateut3c1n4(self):
         command = "show machine --machine ut3c1n4"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Blade: ut3c1n4", command)
+        self.matchoutput(out, "Machine: ut3c1n4", command)
+        self.matchoutput(out, "Model Type: blade", command)
         self.matchoutput(out, "Rack: ut4", command)
         self.matchoutput(out, "Vendor: ibm Model: hs21-8853l5u", command)
         self.matchoutput(out, "Cpu: xeon_3000 x 2", command)
@@ -175,7 +180,8 @@ class TestUpdateMachine(TestBrokerCommand):
     def testverifyclearchassis(self):
         command = ["show", "machine", "--machine", "ut9s03p1"]
         out = self.commandtest(command)
-        self.matchoutput(out, "Blade: ut9s03p1", command)
+        self.matchoutput(out, "Machine: ut9s03p1", command)
+        self.matchoutput(out, "Model Type: blade", command)
         self.matchclean(out, "Chassis: ", command)
 
     def testclearchassisplusnew(self):
@@ -190,7 +196,8 @@ class TestUpdateMachine(TestBrokerCommand):
     def testverifyclearchassisplusnew(self):
         command = ["show", "machine", "--machine", "ut9s03p2"]
         out = self.commandtest(command)
-        self.matchoutput(out, "Blade: ut9s03p2", command)
+        self.matchoutput(out, "Machine: ut9s03p2", command)
+        self.matchoutput(out, "Model Type: blade", command)
         self.matchoutput(out, "Chassis: ut9c1.aqd-unittest.ms.com", command)
         self.matchoutput(out, "Slot: 2", command)
 
@@ -205,7 +212,8 @@ class TestUpdateMachine(TestBrokerCommand):
     def testverifytruechassisupdate(self):
         command = ["show", "machine", "--machine", "ut9s03p3"]
         out = self.commandtest(command)
-        self.matchoutput(out, "Blade: ut9s03p3", command)
+        self.matchoutput(out, "Machine: ut9s03p3", command)
+        self.matchoutput(out, "Model Type: blade", command)
         self.matchoutput(out, "Chassis: ut9c1.aqd-unittest.ms.com", command)
         self.matchoutput(out, "Slot: 3", command)
 
@@ -217,7 +225,8 @@ class TestUpdateMachine(TestBrokerCommand):
     def testverifysimplechassisupdate(self):
         command = ["show", "machine", "--machine", "ut9s03p4"]
         out = self.commandtest(command)
-        self.matchoutput(out, "Blade: ut9s03p4", command)
+        self.matchoutput(out, "Machine: ut9s03p4", command)
+        self.matchoutput(out, "Model Type: blade", command)
         self.matchoutput(out, "Chassis: ut9c1.aqd-unittest.ms.com", command)
         self.matchoutput(out, "Slot: 4", command)
 
@@ -231,7 +240,8 @@ class TestUpdateMachine(TestBrokerCommand):
     def testverifysimplechassisupdatewithrack(self):
         command = ["show", "machine", "--machine", "ut9s03p5"]
         out = self.commandtest(command)
-        self.matchoutput(out, "Blade: ut9s03p5", command)
+        self.matchoutput(out, "Machine: ut9s03p5", command)
+        self.matchoutput(out, "Model Type: blade", command)
         self.matchoutput(out, "Chassis: ut9c1.aqd-unittest.ms.com", command)
         self.matchoutput(out, "Slot: 5", command)
 
@@ -248,7 +258,8 @@ class TestUpdateMachine(TestBrokerCommand):
     def testverifytruechassisupdatewithrack(self):
         command = ["show", "machine", "--machine", "ut9s03p6"]
         out = self.commandtest(command)
-        self.matchoutput(out, "Blade: ut9s03p6", command)
+        self.matchoutput(out, "Machine: ut9s03p6", command)
+        self.matchoutput(out, "Model Type: blade", command)
         self.matchoutput(out, "Chassis: ut9c1.aqd-unittest.ms.com", command)
         self.matchoutput(out, "Slot: 6", command)
 
@@ -262,7 +273,8 @@ class TestUpdateMachine(TestBrokerCommand):
     def testverifymissingslot(self):
         command = ["show", "machine", "--machine", "ut9s03p7"]
         out = self.commandtest(command)
-        self.matchoutput(out, "Blade: ut9s03p7", command)
+        self.matchoutput(out, "Machine: ut9s03p7", command)
+        self.matchoutput(out, "Model Type: blade", command)
         self.matchclean(out, "Chassis: ", command)
         self.matchclean(out, "Slot: ", command)
 
@@ -276,7 +288,8 @@ class TestUpdateMachine(TestBrokerCommand):
     def testverifymissingchassis(self):
         command = ["show", "machine", "--machine", "ut9s03p8"]
         out = self.commandtest(command)
-        self.matchoutput(out, "Blade: ut9s03p8", command)
+        self.matchoutput(out, "Machine: ut9s03p8", command)
+        self.matchoutput(out, "Model Type: blade", command)
         self.matchclean(out, "Chassis: ", command)
         self.matchclean(out, "Slot: ", command)
 
@@ -291,9 +304,11 @@ class TestUpdateMachine(TestBrokerCommand):
     def testverifydifferentrack(self):
         command = ["show", "machine", "--machine", "ut9s03p9"]
         out = self.commandtest(command)
-        self.matchoutput(out, "Blade: ut9s03p9", command)
+        self.matchoutput(out, "Machine: ut9s03p9", command)
+        self.matchoutput(out, "Model Type: blade", command)
         self.matchclean(out, "Chassis: ", command)
         self.matchclean(out, "Slot: ", command)
+        self.matchoutput(out, "Model Type: blade", command)
 
     def testreuseslot(self):
         command = ["update", "machine", "--machine", "ut9s03p10",
@@ -309,7 +324,8 @@ class TestUpdateMachine(TestBrokerCommand):
     def testverifyreuseslot(self):
         command = ["show", "machine", "--machine", "ut9s03p10"]
         out = self.commandtest(command)
-        self.matchoutput(out, "Blade: ut9s03p10", command)
+        self.matchoutput(out, "Machine: ut9s03p10", command)
+        self.matchoutput(out, "Model Type: blade", command)
         self.matchoutput(out, "Chassis: ut9c1.aqd-unittest.ms.com", command)
         self.matchoutput(out, "Slot: 10", command)
 
@@ -326,12 +342,14 @@ class TestUpdateMachine(TestBrokerCommand):
     def testverifytakenslot(self):
         command = ["show", "machine", "--machine", "ut9s03p11"]
         out = self.commandtest(command)
-        self.matchoutput(out, "Blade: ut9s03p11", command)
+        self.matchoutput(out, "Machine: ut9s03p11", command)
+        self.matchoutput(out, "Model Type: blade", command)
         self.matchoutput(out, "Chassis: ut9c1.aqd-unittest.ms.com", command)
         self.matchoutput(out, "Slot: 11", command)
         command = ["show", "machine", "--machine", "ut9s03p12"]
         out = self.commandtest(command)
-        self.matchoutput(out, "Blade: ut9s03p12", command)
+        self.matchoutput(out, "Machine: ut9s03p12", command)
+        self.matchoutput(out, "Model Type: blade", command)
         self.matchclean(out, "Chassis: ", command)
         self.matchclean(out, "Slot: ", command)
 
@@ -350,7 +368,8 @@ class TestUpdateMachine(TestBrokerCommand):
     def testverifymultislotclear(self):
         command = ["show", "machine", "--machine", "ut9s03p13"]
         out = self.commandtest(command)
-        self.matchoutput(out, "Blade: ut9s03p13", command)
+        self.matchoutput(out, "Machine: ut9s03p13", command)
+        self.matchoutput(out, "Model Type: blade", command)
         self.matchclean(out, "Chassis: ", command)
         self.matchclean(out, "Slot: ", command)
 
@@ -371,7 +390,8 @@ class TestUpdateMachine(TestBrokerCommand):
     def testverifymultislotadd(self):
         command = ["show", "machine", "--machine", "ut9s03p15"]
         out = self.commandtest(command)
-        self.matchoutput(out, "Blade: ut9s03p15", command)
+        self.matchoutput(out, "Machine: ut9s03p15", command)
+        self.matchoutput(out, "Model Type: blade", command)
         self.matchoutput(out, "Chassis: ut9c2.aqd-unittest.ms.com", command)
         self.matchoutput(out, "Slot: 1", command)
         self.matchoutput(out, "Slot: 2", command)
@@ -394,7 +414,8 @@ class TestUpdateMachine(TestBrokerCommand):
     def testverifymultislotupdatefail(self):
         command = ["show", "machine", "--machine", "ut9s03p19"]
         out = self.commandtest(command)
-        self.matchoutput(out, "Blade: ut9s03p19", command)
+        self.matchoutput(out, "Machine: ut9s03p19", command)
+        self.matchoutput(out, "Model Type: blade", command)
         self.matchoutput(out, "Chassis: ut9c2.aqd-unittest.ms.com", command)
         self.matchoutput(out, "Slot: 4", command)
         self.matchoutput(out, "Slot: 5", command)
@@ -511,7 +532,8 @@ class TestUpdateMachine(TestBrokerCommand):
     def testverifyupdateut3s01p2(self):
         command = "show machine --machine ut3s01p2"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Blade: ut3s01p2", command)
+        self.matchoutput(out, "Machine: ut3s01p2", command)
+        self.matchoutput(out, "Model Type: blade", command)
 
     # These tests would be nice, but twisted just ignores the permission
     # on the files since we're still the owner.  Which is good, but means

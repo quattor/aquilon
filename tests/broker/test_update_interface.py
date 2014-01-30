@@ -76,15 +76,38 @@ class TestUpdateInterface(TestBrokerCommand):
                         "--ip", newip])
         self.dsdb_verify()
 
-    def test_120_update_ut3c5n10_eth1(self):
-        self.noouttest(["update", "interface", "--interface", "eth1",
-                        "--hostname", "unittest02.one-nyp.ms.com",
-                        "--mac", self.net["unknown0"].usable[12].mac,
-                        "--boot", "--model", "e1000"])
-
     def test_120_update_ut3c5n10_eth2(self):
         self.notfoundtest(["update", "interface", "--interface", "eth2",
                            "--machine", "ut3c5n10", "--boot"])
+
+    def test_120_update_ut3c5n10_eth1(self):
+        command = ["update", "interface", "--interface", "eth1",
+                   "--hostname", "unittest02.one-nyp.ms.com",
+                   "--mac", self.net["unknown0"].usable[12].mac,
+                   "--boot", "--model", "e1000"]
+        (out, err) = self.successtest(command)
+        self.matchoutput(err, 'no longer provides the default route', command)
+
+    def test_121_verify_show_ut3c5n10_interfaces(self):
+        command = "show host --hostname unittest02.one-nyp.ms.com"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Blade: ut3c5n10", command)
+        self.searchoutput(out, r"Interface: eth0 %s \[default_route\]$" %
+                          self.net["unknown0"].usable[11].mac.lower(), command)
+        self.searchoutput(out, r"Interface: eth1 %s \[boot\]" %
+                          self.net["unknown0"].usable[12].mac.lower(), command)
+
+    def test_122_update_ut3c5n10_eth1(self):
+        command = ["update", "interface", "--interface", "eth1",
+                   "--hostname", "unittest02.one-nyp.ms.com",
+                   "--default_route"]
+        self.noouttest(command)
+
+    def test_123_update_ut3c5n10_eth0(self):
+        command = ["update", "interface", "--interface", "eth0",
+                   "--hostname", "unittest02.one-nyp.ms.com",
+                   "--nodefault_route"]
+        self.noouttest(command)
 
     def test_130_update_switch1(self):
         mac = self.net["tor_net_8"].usable[0].mac
@@ -340,7 +363,8 @@ class TestUpdateInterface(TestBrokerCommand):
     def test_300_verify_show_ut3c5n10_interfaces(self):
         command = "show host --hostname unittest02.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Blade: ut3c5n10", command)
+        self.matchoutput(out, "Machine: ut3c5n10", command)
+        self.matchoutput(out, "Model Type: blade", command)
         self.matchoutput(out, "Comments: Updated interface comments", command)
         self.searchoutput(out, r"Interface: eth0 %s$" %
                           self.net["unknown0"].usable[11].mac.lower(), command)

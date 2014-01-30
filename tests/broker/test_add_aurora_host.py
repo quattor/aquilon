@@ -39,7 +39,8 @@ class TestAddAuroraHost(TestBrokerCommand):
         command = "show host --hostname %s.ms.com" % self.aurora_with_node
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Primary Name: %s" % self.aurora_with_node, command)
-        self.matchoutput(out, "Aurora_node: %s" % self.aurora_with_node, command)
+        self.matchoutput(out, "Machine: %s" % self.aurora_with_node, command)
+        self.matchoutput(out, "Model Type: aurora_node", command)
         self.matchoutput(out, "Chassis: oy604c2.ms.com", command)
         self.matchoutput(out, "Slot: 6", command)
         self.matchoutput(out, "Archetype: aurora", command)
@@ -63,7 +64,8 @@ class TestAddAuroraHost(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Primary Name: %s" % self.aurora_without_node,
                          command)
-        self.matchoutput(out, "Aurora_node: ", command)
+        self.matchoutput(out, "Machine: ", command)
+        self.matchoutput(out, "Model Type: aurora_node", command)
         self.matchoutput(out, "Building: ", command)
         self.matchoutput(out, "Archetype: aurora", command)
         self.matchoutput(out, "Personality: generic", command)
@@ -102,13 +104,15 @@ class TestAddAuroraHost(TestBrokerCommand):
     def testverifyaddnyaqd1(self):
         command = "show host --hostname nyaqd1.ms.com"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Aurora_node: ny00l4as01", command)
+        self.matchoutput(out, "Machine: ny00l4as01", command)
+        self.matchoutput(out, "Model Type: aurora_node", command)
         self.matchoutput(out, "Primary Name: nyaqd1.ms.com", command)
 
     def testshowmachine(self):
         command = "show machine --model aurora_model"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Aurora_node: ny00l4as01", command)
+        self.matchoutput(out, "Machine: ny00l4as01", command)
+        self.matchoutput(out, "Model Type: aurora_node", command)
 
     def testcatmachine(self):
         command = "cat --machine %s" % self.aurora_without_node

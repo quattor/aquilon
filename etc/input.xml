@@ -3622,7 +3622,7 @@
          <option name="vlan" type="boolean">Additionally poll for vlan/subnet mappings</option>
       </optgroup>
       <transport trigger="network_device" method="post" path="network_device/%(network_device)s/command/poll" />
-      <transport method="post" path="poll/rack/%(rack)s" />
+      <transport method="post" path="location/rack/%(rack)s/command/poll" />
    </command>
 
    <command name="poll_switch">

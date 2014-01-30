@@ -79,7 +79,8 @@ class TestAddManager(TestBrokerCommand):
                           r"Interface: bmc %s$" %
                           self.net["unknown0"].usable[4].mac,
                           command)
-        self.matchoutput(out, "Blade: ut3c1n3", command)
+        self.matchoutput(out, "Machine: ut3c1n3", command)
+        self.matchoutput(out, "Model Type: blade", command)
 
     def testverifyunittest00(self):
         command = "show host --hostname unittest00.one-nyp.ms.com"
@@ -119,7 +120,8 @@ class TestAddManager(TestBrokerCommand):
                           r"Interface: ilo %s$" %
                           self.net["unknown0"].usable[9].mac,
                           command)
-        self.matchoutput(out, "Blade: ut3c5n10", command)
+        self.matchoutput(out, "Machine: ut3c5n10", command)
+        self.matchoutput(out, "Model Type: blade", command)
 
     def testverifyunittest02(self):
         command = "show host --hostname unittest02.one-nyp.ms.com"
@@ -188,7 +190,8 @@ class TestAddManager(TestBrokerCommand):
         self.notfoundtest(command.split(" "))
         command = "show machine --machine ut3s01p1"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Rackmount: ut3s01p1", command)
+        self.matchoutput(out, "Machine: ut3s01p1", command)
+        self.matchoutput(out, "Model Type: rackmount", command)
 
     def testverifyunittest12(self):
         command = "show host --hostname unittest12.aqd-unittest.ms.com"

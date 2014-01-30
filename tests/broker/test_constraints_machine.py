@@ -34,7 +34,8 @@ class TestMachineConstraints(TestBrokerCommand):
     def testverifydelmachinewithhostfailed(self):
         command = "show machine --machine ut3c5n10"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Blade: ut3c5n10", command)
+        self.matchoutput(out, "Machine: ut3c5n10", command)
+        self.matchoutput(out, "Model Type: blade", command)
 
     # Expected to fail without the --all flag...
     def testdelalldisks(self):

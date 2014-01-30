@@ -47,7 +47,8 @@ class TestAddAuxiliary(TestBrokerCommand):
                           r"Interface: eth1 %s$" %
                           self.net["unknown0"].usable[3].mac,
                           command)
-        self.matchoutput(out, "Blade: ut3c1n3", command)
+        self.matchoutput(out, "Machine: ut3c1n3", command)
+        self.matchoutput(out, "Model Type: blade", command)
 
     def testverifyauxiliaryall(self):
         command = ["show", "auxiliary", "--all"]
