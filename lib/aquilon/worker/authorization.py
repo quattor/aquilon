@@ -85,15 +85,16 @@ class AuthorizationBroker(object):
                 raise AuthorizationException(
                     "Must have the aqd_admin role to %s." % action)
         if dbuser.role.name == 'winops':
-            if action not in ['add_host', 'add_windows_host', 'make_cluster',
-                              'reconfigure', 'update_machine']:
+            if action not in ['add_host', 'add_host_prefix', 'add_windows_host',
+                              'make_cluster', 'reconfigure', 'update_machine']:
                 self.raise_auth_error(principal, action, resource)
         if dbuser.role.name == 'winops_server':
             # Only need add/update_cluster for hacluster VCenters
             if action not in ['add_windows_host', 'del_windows_host',
                               'add_aurora_host',
                               'add_alias', 'update_alias', 'del_alias',
-                              'add_machine', 'add_host',
+                              'add_machine',
+                              'add_host', 'add_host_prefix',
                               'add_interface_hostname',
                               'add_interface_machine',
                               'add_interface_address',
@@ -116,7 +117,7 @@ class AuthorizationBroker(object):
                               'del_interface', 'del_interface_address',
                               'add_alias', 'update_alias', 'del_alias',
                               'add_address', 'del_address',
-                              'add_host', 'del_host',
+                              'add_host', 'add_host_prefix', 'del_host',
                               'add_windows_host', 'del_windows_host',
                               'add_manager', 'add_dynamic_range', 'add_disk',
                               'add_auxiliary',
@@ -136,7 +137,7 @@ class AuthorizationBroker(object):
                               'add_interface_address',
                               'del_interface', 'del_interface_address',
                               'add_address', 'del_address',
-                              'add_host', 'del_host',
+                              'add_host', 'add_host_prefix', 'del_host',
                               'add_alias', 'del_alias',
                               'make', 'make_cluster',
                               'pxeswitch',
@@ -205,7 +206,8 @@ class AuthorizationBroker(object):
                               'update_router']:
                 self.raise_auth_error(principal, action, resource)
         if dbuser.role.name == 'edc':
-            if action not in ['add_rack', 'add_machine', 'add_host',
+            if action not in ['add_rack', 'add_machine',
+                              'add_host', 'add_host_prefix',
                               'add_interface_machine',
                               'add_interface_hostname',
                               'add_interface_address',
@@ -266,13 +268,13 @@ class AuthorizationBroker(object):
                               'update_disk',
                               'add_machine', 'del_machine',
                               'update_machine', 'update_machine_hostname',
-                              'add_host', 'del_host',
+                              'add_host', 'add_host_prefix', 'del_host',
                               'add_alias', 'add_manager',
                               'del_alias', 'del_manager']:
                 self.raise_auth_error(principal, action, resource)
 
         if dbuser.role.name == 'unixops_l2':
-            if action not in ['add_host', 'add_windows_host',
+            if action not in ['add_host', 'add_host_prefix', 'add_windows_host',
                               'del_host', 'del_windows_host',
                               'compile', 'compile_hostname',
                               'compile_cluster', 'compile_personality',
