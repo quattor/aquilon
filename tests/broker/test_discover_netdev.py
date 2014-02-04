@@ -116,7 +116,7 @@ class TestDiscoverNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
         ip4 = self.net["switch_sync"].usable[4]
         ip5 = self.net["switch_sync"].usable[5]
         self.dsdb_expect_update("swsync.aqd-unittest.ms.com",
-                                comments="T1 T2")
+                                "mgmt0", comments="T1 T2")
         self.dsdb_expect_update("swsync-vlan100.aqd-unittest.ms.com",
                                 "vlan100", ip4, comments="T1 T2")
         self.dsdb_expect_add("swsync-vlan100-hsrp.aqd-unittest.ms.com", ip1,
