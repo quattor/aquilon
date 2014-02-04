@@ -50,9 +50,8 @@ class TestMapGrn(VerifyGrnsMixin, PersonalityTestMixin, TestBrokerCommand):
         command = ["map", "grn", "--grn", "grn:/ms/ei/aquilon/aqd",
                    "--personality", "compileserver", "--target", "badtarget"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "Invalid personality target badtarget for "
-                              "archetype aquilon, please choose from "
-                              "esp,hlmplus", command)
+        self.matchoutput(out, "Invalid target badtarget for archetype aquilon, "
+                         "please choose from: esp, hlmplus, atarget.", command)
 
     def test_105_map_personality(self):
         command = ["map", "grn", "--grn", "grn:/ms/ei/aquilon/aqd",
@@ -82,7 +81,7 @@ class TestMapGrn(VerifyGrnsMixin, PersonalityTestMixin, TestBrokerCommand):
         command = ["map", "grn", "--grn", "grn:/ms/ei/aquilon/aqd",
                    "--hostname", "unittest12.aqd-unittest.ms.com",
                    "--target", "esp"]
-        self.noouttest(command)
+        self.statustest(command)
 
     def test_131_map_host_again(self):
         scratchfile = self.writescratch("hostlist",
@@ -90,7 +89,7 @@ class TestMapGrn(VerifyGrnsMixin, PersonalityTestMixin, TestBrokerCommand):
         command = ["map", "grn", "--grn", "grn:/ms/ei/aquilon/aqd",
                    "--list", scratchfile, "--target", "esp"]
         # TODO: should this throw an error?
-        self.noouttest(command)
+        self.statustest(command)
 
     def test_132_map_host_plus_pers(self):
         # The personality already includes the GRN
@@ -174,7 +173,7 @@ class TestMapGrn(VerifyGrnsMixin, PersonalityTestMixin, TestBrokerCommand):
         command = ["unmap", "grn", "--grn", "grn:/ms/ei/aquilon/aqd",
                    "--hostname", "unittest12.aqd-unittest.ms.com",
                    "--target", "esp"]
-        self.noouttest(command)
+        self.statustest(command)
 
     def test_320_unmap_unittest00(self):
         command = ["unmap", "grn", "--grn", "grn:/ms/ei/aquilon/aqd",
@@ -201,7 +200,7 @@ class TestMapGrn(VerifyGrnsMixin, PersonalityTestMixin, TestBrokerCommand):
         command = ["unmap", "grn", "--grn", "grn:/ms/ei/aquilon/aqd",
                    "--list", scratchfile, "--target", "esp"]
         # TODO: should this throw an error?
-        self.noouttest(command)
+        self.statustest(command)
 
     def test_330_delete_used_bypers(self):
         command = ["del", "grn", "--grn", "grn:/ms/windows/desktop"]
@@ -279,6 +278,14 @@ class TestMapGrn(VerifyGrnsMixin, PersonalityTestMixin, TestBrokerCommand):
                          "than {1:d}".format(len(hosts), hostlimit),
                          command)
 
+    def test_500_no_target_configured(self):
+        command = ["map_grn", "--grn", "grn:/ms/ei/aquilon/unittest",
+                   "--target", "esp",
+                   "--hostname", "%s.ms.com" % self.aurora_with_node]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Archetype aurora has no valid GRN targets "
+                         "configured.", command)
+
     def test_600_unmap_personality(self):
         for grn in self.grn_list:
             command = ["map", "grn", "--grn", grn,
@@ -301,7 +308,7 @@ class TestMapGrn(VerifyGrnsMixin, PersonalityTestMixin, TestBrokerCommand):
         for grn in self.grn_list:
             command = ["map", "grn", "--grn", grn,
                        "--hostname", "unittest12.aqd-unittest.ms.com", "--target", "esp"]
-            self.noouttest(command)
+            self.statustest(command)
 
         command = ["show_host", "--hostname", "unittest12.aqd-unittest.ms.com"]
         out = self.commandtest(command)
@@ -323,7 +330,7 @@ class TestMapGrn(VerifyGrnsMixin, PersonalityTestMixin, TestBrokerCommand):
         for grn in self.grn_list:
             command = ["map", "grn", "--grn", grn, "--list", scratchfile,
                        "--target", "esp"]
-            self.noouttest(command)
+            self.statustest(command)
 
         command = ["show_host",  "--hostname", "unittest12.aqd-unittest.ms.com"]
         out = self.commandtest(command)
