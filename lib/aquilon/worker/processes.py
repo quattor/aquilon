@@ -534,13 +534,11 @@ class DSDBRunner(object):
         # always the first one.
         zebra_ips = []
         for addr in dbhw_ent.all_addresses():
-            if not addr.network.is_internal:
-                continue
-            if not addr.service_address or \
-               addr.service_address.holder.holder_type != 'host' or \
-               addr.ip in zebra_ips:
-                continue
-            zebra_ips.append(addr.ip)
+            if addr.network.is_internal and \
+               addr.service_address and \
+               addr.service_address.holder.holder_type == 'host' and \
+               addr.ip not in zebra_ips:
+                    zebra_ips.append(addr.ip)
         zebra_ips.sort()
         if dbhw_ent.primary_ip and dbhw_ent.primary_ip in zebra_ips:
             zebra_ips.remove(dbhw_ent.primary_ip)
@@ -554,13 +552,13 @@ class DSDBRunner(object):
             # there are no FQDN's associated with this address.
             if not addr.network.is_internal:
                 continue
-            if addr.fqdns:
-                # In AQDB there may be multiple domain names associated with
-                # an address, in DSDB there can only be one.  Thus we pick
-                # the first address to propergate.
-                fqdn = str(addr.fqdns[0])
-            else:
+            if not addr.fqdns:
                 continue
+
+            # In AQDB there may be multiple domain names associated with
+            # an address, in DSDB there can only be one.  Thus we pick
+            # the first address to propergate.
+            fqdn = str(addr.fqdns[0])
 
             # By default we take the comments from the hardware_entity,
             # if an interface comment exists then this will be taken
@@ -674,43 +672,43 @@ class DSDBRunner(object):
             # If there is no new data then record a delete (note above).
             if not new_ifdata:
                 deletes.append(old_ifdata)
-            else:
-                if old_ifdata['ip'] != new_ifdata['ip'] or \
-                   old_ifdata['mac'] != new_ifdata['mac'] or \
-                   old_ifdata['comments'] != new_ifdata['comments']:
-                    addr_updates.append({'fqdn': old_ifdata['fqdn'],
-                                         'iface': old_ifdata['iface'],
-                                         'oldip': old_ifdata['ip'],
-                                         'newip': new_ifdata['ip'],
-                                         'oldmac': old_ifdata['mac'],
-                                         'newmac': new_ifdata['mac'],
-                                         'oldcomments': old_ifdata['comments'],
-                                         'newcomments': new_ifdata['comments']})
+                continue
 
-                if old_ifdata['fqdn'] != new_ifdata['fqdn'] or \
-                   old_ifdata['iface'] != new_ifdata['iface']:
-                    name_updates.append({"oldfqdn": old_ifdata['fqdn'],
-                                         "newfqdn": new_ifdata['fqdn'],
-                                         "oldiface": old_ifdata['iface'],
-                                         "newiface": new_ifdata['iface']})
+            if old_ifdata['ip'] != new_ifdata['ip'] or \
+               old_ifdata['mac'] != new_ifdata['mac'] or \
+               old_ifdata['comments'] != new_ifdata['comments']:
+                addr_updates.append({'fqdn': old_ifdata['fqdn'],
+                                     'iface': old_ifdata['iface'],
+                                     'oldip': old_ifdata['ip'],
+                                     'newip': new_ifdata['ip'],
+                                     'oldmac': old_ifdata['mac'],
+                                     'newmac': new_ifdata['mac'],
+                                     'oldcomments': old_ifdata['comments'],
+                                     'newcomments': new_ifdata['comments']})
 
-                # Delete the entries from new_hwdata.  We have recorded an
-                # update.  The contents of new_hwdata is used in the following
-                # loop to record additions.
-                del new_hwdata["by-fqdn"][new_ifdata["fqdn"]]
-                del new_hwdata["by-ip"][new_ifdata["ip"]]
+            if old_ifdata['fqdn'] != new_ifdata['fqdn'] or \
+               old_ifdata['iface'] != new_ifdata['iface']:
+                name_updates.append({"oldfqdn": old_ifdata['fqdn'],
+                                     "newfqdn": new_ifdata['fqdn'],
+                                     "oldiface": old_ifdata['iface'],
+                                     "newiface": new_ifdata['iface']})
+
+            # Delete the entries from new_hwdata.  We have recorded an
+            # update.  The contents of new_hwdata is used in the following
+            # loop to record additions.
+            del new_hwdata["by-fqdn"][new_ifdata["fqdn"]]
+            del new_hwdata["by-ip"][new_ifdata["ip"]]
 
         # For all of the recoreds remaining in new_hwdata (see above)
         # record an addtion opperation.
-        for fqdn, new_ifdata in new_hwdata["by-fqdn"].items():
-            adds.append(new_ifdata)
+        adds = new_hwdata["by-fqdn"].values()
 
         # Add the primary address first, and delete it last. The primary address
         # is identified by having an empty ['primary'] key (this is true for the
         # management address as well, but that does not matter).
-        adds.sort(lambda x, y: cmp(x['primary'] or "", y['primary'] or ""))
-        deletes.sort(lambda x, y: cmp(x['primary'] or "", y['primary'] or ""),
-                     reverse=True)
+        sort_by_primary = lambda x, y: cmp(x['primary'] or "", y['primary'] or "")
+        adds.sort(sort_by_primary)
+        deletes.sort(sort_by_primary, reverse=True)
 
         for attrs in deletes:
             self.delete_host_details(attrs['fqdn'], attrs['ip'],
