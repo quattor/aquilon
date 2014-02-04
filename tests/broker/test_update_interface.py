@@ -120,10 +120,11 @@ class TestUpdateInterface(TestBrokerCommand):
         self.dsdb_verify()
 
     def test_130_update_switch2(self):
-        # Although this includes the interface name, its the primary name
-        # of the device; therefore the DSDB update does not include the
-        # interface name.
+        # This is the primary interface; in reality the update to DSDB
+        # should not incude the interface name.  Its this that causes
+        # comment propergation to DSDB to fail.
         self.dsdb_expect_update("ut3gd1r06.aqd-unittest.ms.com",
+                                iface="xge49",
                                 comments="Some new interface comments")
         command = ["update_interface", "--interface=xge49",
                    "--comments=Some new interface comments",
