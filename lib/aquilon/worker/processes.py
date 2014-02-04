@@ -430,7 +430,7 @@ class DSDBRunner(object):
         self.add_action(command, rollback)
 
     def add_host_details(self, fqdn, ip, iface=None, mac=None, primary=None,
-                         comments=None):
+                         comments=None, **kwargs):
         command = ["add_host", "-host_name", fqdn,
                    "-ip_address", ip, "-status", "aq"]
         if iface:
@@ -447,7 +447,7 @@ class DSDBRunner(object):
 
     def update_host_details(self, fqdn, iface=None, new_ip=None, new_mac=None,
                             new_comments=None, old_ip=None, old_mac=None,
-                            old_comments=None):
+                            old_comments=None, **kwargs):
         command = ["update_aqd_host", "-host_name", fqdn]
         if iface:
             iface = self.normalize_iface(iface)
@@ -467,7 +467,8 @@ class DSDBRunner(object):
 
         self.add_action(command, rollback)
 
-    def update_host_iface_name(self, old_fqdn, new_fqdn, old_iface, new_iface):
+    def update_host_iface_name(self, old_fqdn, new_fqdn,
+                               old_iface, new_iface, **kwargs):
         old_iface = self.normalize_iface(old_iface)
         new_iface = self.normalize_iface(new_iface)
         command = ["update_aqd_host", "-host_name", old_fqdn]
@@ -486,7 +487,7 @@ class DSDBRunner(object):
         self.add_action(command, rollback)
 
     def delete_host_details(self, fqdn, ip, iface=None, mac=None, primary=None,
-                            comments=None):
+                            comments=None, **kwargs):
         command = ["delete_host", "-ip_address", ip]
         rollback = ["add_host", "-host_name", fqdn,
                     "-ip_address", ip, "-status", "aq"]
@@ -674,24 +675,21 @@ class DSDBRunner(object):
                 deletes.append(old_ifdata)
                 continue
 
+            # Create a dict with entries in old_ifdata prefiexd with 'old_'
+            # and entries in new_ifdata prefixed with 'new_'
+            kwargs = dict((p+k, v) \
+                          for (p, d) in [('old_',old_ifdata), \
+                                         ('new_',new_ifdata)] \
+                          for k, v in d.iteritems())
+
             if old_ifdata['ip'] != new_ifdata['ip'] or \
                old_ifdata['mac'] != new_ifdata['mac'] or \
                old_ifdata['comments'] != new_ifdata['comments']:
-                addr_updates.append({'fqdn': old_ifdata['fqdn'],
-                                     'iface': old_ifdata['iface'],
-                                     'oldip': old_ifdata['ip'],
-                                     'newip': new_ifdata['ip'],
-                                     'oldmac': old_ifdata['mac'],
-                                     'newmac': new_ifdata['mac'],
-                                     'oldcomments': old_ifdata['comments'],
-                                     'newcomments': new_ifdata['comments']})
+                addr_updates.append(kwargs)
 
             if old_ifdata['fqdn'] != new_ifdata['fqdn'] or \
                old_ifdata['iface'] != new_ifdata['iface']:
-                name_updates.append({"oldfqdn": old_ifdata['fqdn'],
-                                     "newfqdn": new_ifdata['fqdn'],
-                                     "oldiface": old_ifdata['iface'],
-                                     "newiface": new_ifdata['iface']})
+                name_updates.append(kwargs)
 
             # Delete the entries from new_hwdata.  We have recorded an
             # update.  The contents of new_hwdata is used in the following
@@ -711,25 +709,19 @@ class DSDBRunner(object):
         deletes.sort(sort_by_primary, reverse=True)
 
         for attrs in deletes:
-            self.delete_host_details(attrs['fqdn'], attrs['ip'],
-                                     attrs['iface'], attrs['mac'],
-                                     attrs['primary'], attrs['comments'])
+            self.delete_host_details(**attrs)
 
-        for attrs in addr_updates:
-            self.update_host_details(attrs['fqdn'], attrs['iface'],
-                                     attrs['newip'], attrs['newmac'],
-                                     attrs['newcomments'],
-                                     attrs['oldip'], attrs['oldmac'],
-                                     attrs['oldcomments'])
+        for kwargs in addr_updates:
+            # The old FQDN and interface name are the fixed point
+            self.update_host_details(fqdn=kwargs['old_fqdn'],
+                                     iface=kwargs['old_iface'],
+                                     **kwargs)
 
-        for attrs in name_updates:
-            self.update_host_iface_name(attrs['oldfqdn'], attrs['newfqdn'],
-                                        attrs['oldiface'], attrs['newiface'])
+        for kwargs in name_updates:
+            self.update_host_iface_name(**kwargs)
 
         for attrs in adds:
-            self.add_host_details(attrs['fqdn'], attrs['ip'],
-                                  attrs['iface'], attrs['mac'],
-                                  attrs['primary'], attrs['comments'])
+            self.add_host_details(**attrs)
 
     def add_dns_domain(self, dns_domain, comments):
         if not comments:
