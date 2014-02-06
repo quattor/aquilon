@@ -18,7 +18,7 @@
 
 
 from aquilon.aqdb.model import VlanInfo
-from aquilon.worker.broker import BrokerCommand, validate_basic  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand, validate_nlist_key  # pylint: disable=W0611
 
 
 class CommandAddVlan(BrokerCommand):
@@ -28,7 +28,7 @@ class CommandAddVlan(BrokerCommand):
 
     def render(self, session, logger, vlan, name, vlan_type, **kwargs):
 
-        validate_basic("name", name)
+        validate_nlist_key("name", name)
 
         VlanInfo.get_unique(session, vlan_id=vlan, preclude=True)
 

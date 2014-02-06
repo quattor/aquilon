@@ -17,7 +17,7 @@
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import ResourceGroup, Resource
-from aquilon.worker.broker import BrokerCommand, validate_basic
+from aquilon.worker.broker import BrokerCommand, validate_nlist_key
 from aquilon.worker.dbwrappers.resources import (add_resource,
                                                  get_resource_holder)
 
@@ -29,7 +29,7 @@ class CommandAddResourceGroup(BrokerCommand):
     def render(self, session, logger, resourcegroup, required_type,
                hostname, cluster, **arguments):
 
-        validate_basic("resourcegroup", resourcegroup)
+        validate_nlist_key("resourcegroup", resourcegroup)
 
         if required_type is not None:
             Resource.polymorphic_subclass(required_type,

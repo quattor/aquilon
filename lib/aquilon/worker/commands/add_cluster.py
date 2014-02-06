@@ -17,7 +17,7 @@
 
 
 from aquilon.exceptions_ import ArgumentError, AquilonError
-from aquilon.worker.broker import BrokerCommand, validate_basic
+from aquilon.worker.broker import BrokerCommand, validate_nlist_key
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.utils import force_ratio
@@ -35,7 +35,7 @@ class CommandAddCluster(BrokerCommand):
                buildstatus, comments, vm_to_host_ratio, switch, metacluster,
                **arguments):
 
-        validate_basic("cluster", cluster)
+        validate_nlist_key("cluster", cluster)
         dbpersonality = Personality.get_unique(session, name=personality,
                                                archetype=archetype, compel=True)
         if not dbpersonality.is_cluster:

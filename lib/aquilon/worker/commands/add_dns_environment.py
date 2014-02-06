@@ -16,7 +16,7 @@
 # limitations under the License.
 """ Provides adding dns_evironment functionality """
 
-from aquilon.worker.broker import BrokerCommand, validate_basic
+from aquilon.worker.broker import BrokerCommand, validate_nlist_key
 from aquilon.aqdb.model import DnsEnvironment
 
 
@@ -25,7 +25,7 @@ class CommandAddDnsEnvironment(BrokerCommand):
     required_parameters = ["dns_environment"]
 
     def render(self, session, dns_environment, comments, **arguments):
-        validate_basic("DNS environment", dns_environment)
+        validate_nlist_key("DNS environment", dns_environment)
         DnsEnvironment.get_unique(session, dns_environment, preclude=True)
 
         db_dnsenv = DnsEnvironment(name=dns_environment, comments=comments)

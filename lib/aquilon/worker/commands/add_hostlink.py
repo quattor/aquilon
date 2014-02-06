@@ -17,7 +17,7 @@
 
 
 from aquilon.aqdb.model import Hostlink
-from aquilon.worker.broker import BrokerCommand, validate_basic
+from aquilon.worker.broker import BrokerCommand, validate_nlist_key
 from aquilon.worker.dbwrappers.resources import (add_resource,
                                                  get_resource_holder)
 
@@ -30,7 +30,7 @@ class CommandAddHostlink(BrokerCommand):
                group, hostname, cluster, resourcegroup,
                comments, **arguments):
 
-        validate_basic("hostlink", hostlink)
+        validate_nlist_key("hostlink", hostlink)
         holder = get_resource_holder(session, hostname, cluster,
                                      resourcegroup, compel=False)
 

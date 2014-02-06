@@ -18,7 +18,7 @@
 
 from aquilon.exceptions_ import ArgumentError, UnimplementedError
 from aquilon.aqdb.model import ServiceAddress, Cluster, Host
-from aquilon.worker.broker import BrokerCommand, validate_basic
+from aquilon.worker.broker import BrokerCommand, validate_nlist_key
 from aquilon.worker.dbwrappers.interface import assign_address
 from aquilon.worker.dbwrappers.dns import grab_address
 from aquilon.worker.dbwrappers.resources import (add_resource,
@@ -49,7 +49,7 @@ class CommandAddServiceAddress(BrokerCommand):
                hostname, cluster, resourcegroup,
                network_environment, map_to_primary, comments, **arguments):
 
-        validate_basic("name", name)
+        validate_nlist_key("name", name)
 
         # TODO: generalize the error message - Layer-3 failover may be
         # implemented by other software, not just Zebra.

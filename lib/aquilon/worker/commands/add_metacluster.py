@@ -19,7 +19,7 @@
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import (MetaCluster, Personality, ClusterLifecycle,
                                 Location)
-from aquilon.worker.broker import BrokerCommand, validate_basic
+from aquilon.worker.broker import BrokerCommand, validate_nlist_key
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.templates import Plenary
@@ -36,7 +36,7 @@ class CommandAddMetaCluster(BrokerCommand):
                buildstatus, comments,
                **arguments):
 
-        validate_basic("metacluster", metacluster)
+        validate_nlist_key("metacluster", metacluster)
 
         # this should be reverted when virtbuild supports these options
         if not archetype:
