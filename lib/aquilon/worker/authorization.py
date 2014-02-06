@@ -127,6 +127,7 @@ class AuthorizationBroker(object):
                               'add_rack', 'add_rack_room', 'add_chassis',
                               'del_rack', 'del_chassis',
                               'map_grn', 'unmap_grn',
+                              'unmap_grn_clearall',
                               'change_status']:
                 self.raise_auth_error(principal, action, resource)
         if dbuser.role.name == 'spot_server':
@@ -334,6 +335,7 @@ class AuthorizationBroker(object):
                               'manage_hostname', 'manage_list',
                               'manage_cluster',
                               'map_grn', 'unmap_grn',
+                              'unmap_grn_clearall',
                               'make', 'make_cluster']:
                 self.raise_auth_error(principal, action, resource)
         if dbuser.role.name == 'alias_manager':

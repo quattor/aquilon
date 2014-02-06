@@ -49,7 +49,7 @@ class CommandSearchHost(BrokerCommand):
                domain, sandbox, branch, sandbox_owner,
                dns_domain, shortname, mac, ip, networkip, network_environment,
                exact_location, server_of_service, server_of_instance, grn,
-               eon_id, fullinfo, **arguments):
+               eon_id, fullinfo, style, **arguments):
         dbnet_env = NetworkEnvironment.get_unique_or_default(session,
                                                              network_environment)
 
@@ -284,6 +284,6 @@ class CommandSearchHost(BrokerCommand):
                              Host.personality_id.in_(persq.subquery())))
             q = q.reset_joinpoint()
 
-        if fullinfo:
+        if fullinfo or style != "raw":
             return q.all()
         return StringAttributeList(q.all(), "fqdn")

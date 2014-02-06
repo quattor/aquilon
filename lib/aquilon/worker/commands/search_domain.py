@@ -24,7 +24,8 @@ from aquilon.worker.formats.list import StringList
 
 class CommandSearchDomain(BrokerCommand):
 
-    def render(self, session, track, not_tracking, change_manager, fullinfo, **arguments):
+    def render(self, session, track, not_tracking, change_manager, fullinfo,
+               style, **arguments):
         q = search_branch_query(self.config, session, Domain, **arguments)
         if track:
             dbtracked = Branch.get_unique(session, track, compel=True)
@@ -37,7 +38,7 @@ class CommandSearchDomain(BrokerCommand):
         q = q.order_by(Domain.name)
         result = q.all()
 
-        if fullinfo:
+        if fullinfo or style != "raw":
             return result
         else:
             return StringList(result)

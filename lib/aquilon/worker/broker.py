@@ -44,7 +44,7 @@ from aquilon.worker.services import Chooser
 from aquilon.worker.processes import sync_domain
 
 # Things we don't need cluttering up the transaction details table
-_IGNORED_AUDIT_ARGS = ('requestid', 'bundle', 'debug')
+_IGNORED_AUDIT_ARGS = ('requestid', 'bundle', 'debug', 'session', 'dbuser')
 
 __audit_id = 0
 """This will help with debugging active incoming requests.
@@ -167,12 +167,6 @@ class BrokerCommand(object):
         # invoked.
         self.parameter_checks = {}
 
-        # The parameter types are filled in automatically based on input.xml.
-        self.parameter_types = {}
-        # This is the pivot of the above, filled in at the same time.  It is a
-        # dictionary of type names to lists of parameters.
-        self.parameters_by_type = {}
-
         self.action = self.__module__
         package_prefix = "aquilon.worker.commands."
         if self.action.startswith(package_prefix):
@@ -239,21 +233,19 @@ class BrokerCommand(object):
 
         """
 
-        def updated_render(self, *args, **kwargs):
-            principal = kwargs["user"]
-            request = kwargs["request"]
-            logger = kwargs["logger"]
+        def updated_render(self, user=None, request=None, requestid=None,
+                           logger=None, session=None, **kwargs):
             raising_exception = None
             rollback_failed = False
+            dbuser = None
             try:
                 if self.requires_transaction or self.requires_azcheck:
                     # Set up a session...
-                    if not "session" in kwargs:
+                    if not session:
                         if self.is_lock_free:
-                            kwargs["session"] = self.dbf.NLSession()
+                            session = self.dbf.NLSession()
                         else:
-                            kwargs["session"] = self.dbf.Session()
-                    session = kwargs["session"]
+                            session = self.dbf.Session()
 
                     if session.bind.dialect.name == "oracle":
                         # Make the name of the command and the request ID
@@ -265,7 +257,7 @@ class BrokerCommand(object):
                         dbapi_con.action = str(self.action)[:32]
                         # TODO: we should include the command number as well,
                         # since that is easier to find in the logs
-                        dbapi_con.clientinfo = str(kwargs["requestid"])[:64]
+                        dbapi_con.clientinfo = str(requestid)[:64]
 
                     # This does a COMMIT, which in turn invalidates the session.
                     # We should therefore avoid looking up anything in the DB
@@ -273,17 +265,14 @@ class BrokerCommand(object):
                     status = logger.get_status()
                     start_xtn(session, status.requestid, status.user,
                               status.command, self.requires_readonly,
-                              status.kwargs,
-                              self.parameters_by_type.get('list'))
+                              kwargs)
 
-                    dbuser = get_or_create_user_principal(session, principal,
+                    dbuser = get_or_create_user_principal(session, user,
                                                           commitoncreate=True)
-                    kwargs["dbuser"] = dbuser
 
                     if self.requires_azcheck:
-                        self.az.check(principal=principal, dbuser=dbuser,
-                                      action=self.action,
-                                      resource=request.path)
+                        self.az.check(principal=user, dbuser=dbuser,
+                                      action=self.action, resource=request.path)
 
                     if self.requires_readonly:
                         self._set_readonly(session)
@@ -293,23 +282,21 @@ class BrokerCommand(object):
                     raise UnimplementedError("Command %s not available on "
                                              "a %s broker." %
                                              (self.command, self.badmode))
-                for key in kwargs.keys():
-                    if key in self.parameter_checks:
-                        kwargs[key] = self.parameter_checks[key]("--" + key,
-                                                                 kwargs[key])
                 # Command is an instance method already having self...
-                retval = command(*args, **kwargs)
+                retval = command(user=user, dbuser=dbuser, request=request,
+                                 requestid=requestid, logger=logger,
+                                 session=session, **kwargs)
                 if self.requires_format:
                     style = kwargs.get("style", None)
                     retval = self.formatter.format(style, retval, request)
-                if "session" in kwargs:
+                if session:
                     session.commit()
                 return retval
             except Exception, e:
                 raising_exception = e
                 # Need to close after the rollback, or the next time session
                 # is accessed it tries to commit the transaction... (?)
-                if "session" in kwargs:
+                if session:
                     try:
                         session.rollback()
                     except:  # pragma: no cover
@@ -320,16 +307,14 @@ class BrokerCommand(object):
             finally:
                 # Obliterating the scoped_session - next call to session()
                 # will create a new one.
-                if "session" in kwargs:
-                    # Complete the transaction
-                    request = kwargs['request']
-                    # We really want to get rid of the session, even if
-                    # end_xtn() fails
+                if session:
+                    # Complete the transaction. We really want to get rid of the
+                    # session, even if end_xtn() fails
                     try:
                         if not rollback_failed:
                             # If session.rollback() failed for whatever reason,
                             # our best bet is to avoid touching the session
-                            end_xtn(session, kwargs['requestid'],
+                            end_xtn(session, requestid,
                                     get_code_for_error_class(
                                         raising_exception.__class__),
                                     getattr(request, '_audit_result', None))
@@ -338,7 +323,8 @@ class BrokerCommand(object):
                             self.dbf.NLSession.remove()
                         else:
                             self.dbf.Session.remove()
-                self._cleanup_logger(kwargs)
+                if logger:
+                    self._cleanup_logger(logger)
         updated_render.__name__ = command.__name__
         updated_render.__dict__ = command.__dict__
         updated_render.__doc__ = command.__doc__
@@ -351,16 +337,11 @@ class BrokerCommand(object):
             session.commit()
             session.execute(text("set transaction read only"))
 
-    def _audit(self, **kwargs):
-        logger = kwargs.pop('logger')
-        status = kwargs.pop('message_status')
-        session = kwargs.pop('session', None)
-        request = kwargs.pop('request')
-        user = kwargs.pop('user', None)
+    def _audit(self, message_status, logger=None, request=None, user=None,
+               **kwargs):
         # Log a dummy user with no realm for unauthenticated requests.
         if user is None or user == '':
             user = 'nobody'
-        dbuser = kwargs.pop('dbuser', None)
         kwargs['format'] = kwargs.pop('style', 'raw')
 
         for (key, value) in kwargs.items():
@@ -370,18 +351,22 @@ class BrokerCommand(object):
             if value is None:
                 kwargs.pop(key)
                 continue
-            if len(str(value)) > 100:
-                kwargs[key] = value[0:96] + '...'
+            if isinstance(value, list):
+                value_str = " ".join([str(item) for item in value])
+            else:
+                value_str = str(value)
+            if len(value_str) > 100:
+                kwargs[key] = value_str[0:96] + '...'
         kwargs_str = str(kwargs)
         if len(kwargs_str) > 1024:
             kwargs_str = kwargs_str[0:1020] + '...'
         logger.info("Incoming command #%d from user=%s aq %s "
                     "with arguments %s",
                     request.aq_audit_id, user, self.command, kwargs_str)
-        if status:
-            status.create_description(user=user, command=self.command,
-                                      id=request.aq_audit_id,
-                                      kwargs=kwargs)
+        if message_status:
+            message_status.create_description(user=user, command=self.command,
+                                              id=request.aq_audit_id,
+                                              kwargs=kwargs)
 
     # This is meant to be called before calling render() in order to
     # add a logger into the argument list.  It returns the arguments
@@ -402,20 +387,20 @@ class BrokerCommand(object):
             command_kwargs['requestid'] = status.requestid
         logger = RequestLogger(status=status, module_logger=self.module_logger)
         command_kwargs["logger"] = logger
+        # Sigh. command_kwargs might contain the key 'status', so we have to use
+        # another name.
         self._audit(message_status=status, **command_kwargs)
         return command_kwargs
 
-    def _cleanup_logger(self, command_kwargs):
-        logger = command_kwargs.get("logger", None)
-        if logger:
-            if self.command == "show_request":
-                # Clear the requestid dictionary.
-                logger.remove_status_by_requestid(self.catalog)
-            else:
-                # Clear the auditid dictionary.
-                logger.debug("Server finishing request.")
-                logger.remove_status_by_auditid(self.catalog)
-            logger.close_handlers()
+    def _cleanup_logger(self, logger):
+        if self.command == "show_request":
+            # Clear the requestid dictionary.
+            logger.remove_status_by_requestid(self.catalog)
+        else:
+            # Clear the auditid dictionary.
+            logger.debug("Server finishing request.")
+            logger.remove_status_by_auditid(self.catalog)
+        logger.close_handlers()
 
     @property
     def is_lock_free(self):

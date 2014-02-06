@@ -53,13 +53,13 @@ class ParamDefinitionFormatter(ObjectFormatter):
             skeleton.description = str(paramdef.description)
 
     def csv_fields(self, paramdef):
-        return [paramdef.holder.holder_name,
-                paramdef.path,
-                paramdef.value_type,
-                paramdef.default,
-                paramdef.description,
-                paramdef.template,
-                paramdef.required,
-                paramdef.rebuild_required]
+        yield (paramdef.holder.holder_name,
+               paramdef.path,
+               paramdef.value_type,
+               paramdef.default,
+               paramdef.description,
+               paramdef.template,
+               paramdef.required,
+               paramdef.rebuild_required)
 
 ObjectFormatter.handlers[ParamDefinition] = ParamDefinitionFormatter()

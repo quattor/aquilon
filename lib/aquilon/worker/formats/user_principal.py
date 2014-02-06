@@ -30,6 +30,6 @@ class UserPrincipalFormatter(ObjectFormatter):
         return "\n".join(details)
 
     def csv_fields(self, user_principal):
-        return (user_principal, user_principal.role.name)
+        yield (user_principal, user_principal.role.name)
 
 ObjectFormatter.handlers[UserPrincipal] = UserPrincipalFormatter()

@@ -27,7 +27,7 @@ class CommandSearchRack(BrokerCommand):
 
     required_parameters = []
 
-    def render(self, session, rack, row, column, fullinfo, **arguments):
+    def render(self, session, rack, row, column, fullinfo, style, **arguments):
 
         dbparent = get_location(session, **arguments)
         q = session.query(Rack)
@@ -44,6 +44,6 @@ class CommandSearchRack(BrokerCommand):
         if dbparent:
             q = q.filter(Location.parents.contains(dbparent))
 
-        if fullinfo:
+        if fullinfo or style != "raw":
             return q.all()
         return StringAttributeList(q.all(), "name")

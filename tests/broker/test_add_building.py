@@ -91,16 +91,6 @@ class TestAddBuilding(TestBrokerCommand):
         self.matchoutput(out, "Only ASCII characters are allowed for --address.",
                          command)
 
-    def testnonasciiaudit(self):
-        command = ["search", "audit", "--keyword", "nonascii"]
-        out = self.commandtest(command)
-        self.searchoutput(out,
-                          r"400 aq add_building .*"
-                          r"--address='<Non-ASCII value>'",
-                          command)
-        self.searchoutput(out, r"400 aq add_building .*--building='nonascii'",
-                          command)
-
     def test_addtu(self):
         self.dsdb_expect("add_building_aq -building_name tu -city ny "
                          "-building_addr 14 Test Lane")

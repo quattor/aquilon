@@ -35,8 +35,8 @@ class CommandSearchNetwork(BrokerCommand):
     required_parameters = []
 
     def render(self, session, network, network_environment, ip, type, side,
-               machine, fqdn, cluster, pg, has_dynamic_ranges, fullinfo,
-               exact_location, **arguments):
+               machine, fqdn, cluster, pg, has_dynamic_ranges, exact_location,
+               fullinfo, style, **arguments):
         """Return a network matching the parameters.
 
         Some of the search terms can only return a unique network.  For
@@ -120,7 +120,7 @@ class CommandSearchNetwork(BrokerCommand):
                                 from_obj=DynamicStub.__table__.join(ARecord.__table__))
                          .where(Network.id == DynamicStub.network_id))
         q = q.order_by(Network.ip)
-        if fullinfo:
+        if fullinfo or style != 'raw':
             q = q.options(undefer('comments'))
             return q.all()
         return StringAttributeList(q.all(),

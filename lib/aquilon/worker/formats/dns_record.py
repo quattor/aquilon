@@ -26,31 +26,31 @@ class DnsRecordFormatter(ObjectFormatter):
     template_raw = "dns_record.mako"
 
     def csv_fields(self, dns_record):
-        return (dns_record.fqdn, dns_record.fqdn.dns_environment.name, None)
+        yield (dns_record.fqdn, dns_record.fqdn.dns_environment.name, None)
 
 
 class ARecordFormatter(ObjectFormatter):
     template_raw = "a_record.mako"
 
     def csv_fields(self, dns_record):
-        return (dns_record.fqdn, dns_record.fqdn.dns_environment.name,
-                'A', dns_record.ip)
+        yield (dns_record.fqdn, dns_record.fqdn.dns_environment.name,
+               'A', dns_record.ip)
 
 
 class AliasFormatter(ObjectFormatter):
     template_raw = "alias.mako"
 
     def csv_fields(self, dns_record):
-        return (dns_record.fqdn, dns_record.fqdn.dns_environment.name,
-                'CNAME', dns_record.target)
+        yield (dns_record.fqdn, dns_record.fqdn.dns_environment.name,
+               'CNAME', dns_record.target)
 
 
 class SrvRecordFormatter(ObjectFormatter):
     template_raw = "srv_record.mako"
 
     def csv_fields(self, dns_record):
-        return (dns_record.fqdn, dns_record.fqdn.dns_environment.name,
-                'SRV', dns_record.priority, dns_record.weight,
+        yield (dns_record.fqdn, dns_record.fqdn.dns_environment.name,
+               'SRV', dns_record.priority, dns_record.weight,
                 dns_record.target, dns_record.port)
 
 # The DnsRecord entry should never get invoked, we always have a subclass.

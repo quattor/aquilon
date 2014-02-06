@@ -88,11 +88,15 @@ class RequestStatus(object):
         for (k, v) in kwargs.items():
             if k == 'format' and v == 'raw':
                 continue
-            if v == 'True':
+            if v is None:
+                continue
+
+            if v == True:
                 massaged.append(" --%s" % k)
-            elif v is None:
-                pass
             else:
+                # TODO: we could also convert v == False to "--no%s", except
+                # that's not always how the option is negated - the correct form
+                # should be extracted from input.xml.
                 massaged.append(" --%s=%s" % (k, v))
         description = '[%s] %s: aq %s%s' % (id, user, command,
                                             "".join(massaged))

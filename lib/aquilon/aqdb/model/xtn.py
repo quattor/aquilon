@@ -18,6 +18,7 @@
 import logging
 from datetime import datetime
 from dateutil.tz import tzutc
+import urllib
 
 from sqlalchemy import (Column, String, Integer, Boolean, ForeignKey,
                         PrimaryKeyConstraint, Index)
@@ -138,8 +139,7 @@ if config.has_option('database', 'audit_schema'):  # pragma: no cover
     XtnDetail.__table__.schema = schema
 
 
-def start_xtn(session, xtn_id, username, command, is_readonly, details_,
-              options_to_split=None):
+def start_xtn(session, xtn_id, username, command, is_readonly, details):
     """ Wrapper to log the start of a transaction (or running command).
 
     Takes a dictionary with the transaction parameters.  The keys are
@@ -151,20 +151,12 @@ def start_xtn(session, xtn_id, username, command, is_readonly, details_,
     split on newlines.  Typically this is --list and/or --hostlist.
 
     """
-    details = dict()
-    for k, v in details_.items():
-        # Skip uber-redundant raw format parameter
-        if (k == 'format') and v == 'raw':
-            continue
-        # Sometimes we delete a value and the arg comes in as an empty
-        # string.  Denote this with a dash '-' to work around Oracle
-        # not being able to store the concept of a non-NULL empty string.
-        if v == '':
-            v = '-'
+    # TODO: one day we should be able to handle non-ASCII characters..
+    def sanitized_string(value):
         try:
-            details[k] = str(v).decode('ascii')
+            return str(value).decode('ascii')
         except UnicodeDecodeError:
-            details[k] = '<Non-ASCII value>'
+            return urllib.quote(value)
 
     # TODO: (maybe) use sql inserts instead of objects to avoid added overhead?
     # We would be able to exploit executemany() for all the xtn_detail rows
@@ -172,22 +164,37 @@ def start_xtn(session, xtn_id, username, command, is_readonly, details_,
             is_readonly=is_readonly)
     session.add(x)
 
-    if options_to_split:
-        for option in options_to_split:
-            list_args = details.pop(option, None)
-            if not list_args:
-                continue
-            for item in list_args.strip().split('\n'):
-                item = item.strip()
-                if not item:
-                    continue
-                x = XtnDetail(xtn_id=xtn_id, name=option, value=item)
-                session.add(x)
+    for key, value in details.iteritems():
+        # Ignore optional parameters that were not specified
+        if value is None:
+            continue
 
-    if len(details.keys()) > 0:
-        for k, v in details.iteritems():
-            x = XtnDetail(xtn_id=xtn_id, name=k, value=v)
-            session.add(x)
+        # The --format command-line option is tricky, as the client does not
+        # pass it as a query parameter, but as a file extension. For historic
+        # reasons, the broker converts that information to an option named
+        # 'style'; convert it back to be compatible with the old reporting
+        # format.
+        if key == 'style':
+            key = 'format'
+
+        # Skip uber-redundant raw format parameter
+        if key == 'format' and value == 'raw':
+            continue
+
+        # Sometimes we delete a value and the arg comes in as an empty
+        # string.  Denote this with a dash '-' to work around Oracle
+        # not being able to store the concept of a non-NULL empty string.
+        if value == '':
+            value = '-'
+
+        if isinstance(value, list):
+            for item in value:
+                session.add(XtnDetail(xtn_id=xtn_id, name=key,
+                                      value=sanitized_string(item)))
+        else:
+            session.add(XtnDetail(xtn_id=xtn_id, name=key,
+                                  value=sanitized_string(value)))
+
     try:
         session.commit()
     except Exception, e:  # pragma: no cover

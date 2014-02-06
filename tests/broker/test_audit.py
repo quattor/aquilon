@@ -403,6 +403,27 @@ class TestAudit(TestBrokerCommand):
                 self.assertTrue(host in values,
                                 "missing '%s' from '%s'" % (host, values))
 
+    def test_910_long_list_arg(self):
+        # Generate a really big command and verify all arguments arrive in the
+        # audit log
+        hosts = ["list-test-%d.aqd-unittest.ms.com" % i
+                 for i in xrange(1000, 2000)]
+        scratchfile = self.writescratch("audit_hostlist", "\n".join(hosts))
+        cmd1 = ["reconfigure", "--list", scratchfile]
+        err = self.badrequesttest(cmd1)
+
+        cmd2 = ["search_audit", "--command", "reconfigure",
+                "--keyword", "list-test-1999.aqd-unittest.ms.com",
+                "--format", "proto"]
+        out = self.parse_audit_msg(self.commandtest(cmd2)).transactions[0]
+        values = [arg.value for arg in out.arguments]
+        self.assertEqual(len(values), len(hosts),
+                         "Expected %d arguments and got %d" %
+                         (len(hosts), len(values)))
+        for host in hosts:
+            self.assertTrue(host in values,
+                            "'%s' missing from '%s'" % (host, values))
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAudit)

@@ -131,14 +131,11 @@ class CommandSearchDns(BrokerCommand):
                                        dns_environment=dbdns_env, compel=True)
             q = q.filter(ARecord.reverse_ptr == dbtarget)
 
-        if fullinfo:
+        if fullinfo or style != "raw":
             q = q.options(undefer('comments'),
                           subqueryload('hardware_entity'),
                           lazyload('hardware_entity.primary_name'),
                           undefer('alias_cnt'))
             return q.all()
-        elif style == "raw":
-            return StringAttributeList(q.all(), 'fqdn')
         else:
-            # This is for the CSV formatter
-            return q.all()
+            return StringAttributeList(q.all(), 'fqdn')

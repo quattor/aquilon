@@ -24,12 +24,12 @@ from aquilon.worker.formats.list import StringList
 
 class CommandSearchSandbox(BrokerCommand):
 
-    def render(self, session, fullinfo, **arguments):
+    def render(self, session, fullinfo, style, **arguments):
         q = search_branch_query(self.config, session, Sandbox, **arguments)
         q = q.order_by(Sandbox.name)
         result = q.all()
 
-        if fullinfo:
+        if fullinfo or style != "raw":
             return result
         else:
             return StringList(result)

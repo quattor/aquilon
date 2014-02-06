@@ -32,7 +32,7 @@ class DnsMapFormatter(ObjectFormatter):
         return "\n".join(details)
 
     def csv_fields(self, dns_map):
-        return (dns_map.dns_domain.fqdn, dns_map.location.location_type,
-                dns_map.location.name, dns_map.comments)
+        yield (dns_map.dns_domain.fqdn, dns_map.location.location_type,
+               dns_map.location.name, dns_map.comments)
 
 ObjectFormatter.handlers[DnsMap] = DnsMapFormatter()

@@ -149,7 +149,7 @@ class SimplePersonalityListFormatter(ListFormatter):
         return str("\n".join([indent + "{0.archetype.name}/{0.name}".format(obj) for obj in result]))
 
     def csv_fields(self, obj):
-        return (obj.archetype.name, obj.name,)
+        yield (obj.archetype.name, obj.name,)
 
     def format_proto(self, tpl, container):
         for personality in tpl:

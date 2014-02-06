@@ -68,7 +68,7 @@ class TestUpdateNetworkEnvironment(TestBrokerCommand):
         command = ["search", "network", "environment",
                    "--building", "ut"]
         out = self.commandtest(command)
-        self.matchoutput(out, "Network Environment: utcolo", command)
+        self.matchoutput(out, "utcolo", command)
         self.matchclean(out, "excx", command)
         self.matchclean(out, "internal", command)
 

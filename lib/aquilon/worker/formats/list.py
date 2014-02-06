@@ -16,8 +16,6 @@
 # limitations under the License.
 """List formatter."""
 
-import csv
-import cStringIO
 from operator import attrgetter
 
 from sqlalchemy.orm.collections import InstrumentedList
@@ -32,35 +30,9 @@ class ListFormatter(ObjectFormatter):
             return ObjectFormatter.format_raw(self, result, indent)
         return "\n".join([self.redirect_raw(item, indent) for item in result])
 
-    def csv_fields(self, result):
-        # Delegate the field selection according to the result's class, but
-        # avoid calling ourselves recursively.
-        handler = ObjectFormatter.handlers.get(result.__class__,
-                                               ObjectFormatter.default_handler)
-        if handler.__class__ == self.__class__:
-            return super(ListFormatter, self).csv_fields(result)
-        return handler.csv_fields(result)
-
-    def csv_tolist(self, result):
-        # Delegate the conversion according to the result's class, but
-        # avoid calling ourselves recursively.
-        handler = ObjectFormatter.handlers.get(result.__class__,
-                                               ObjectFormatter.default_handler)
-        if handler.__class__ == self.__class__:
-            return super(ListFormatter, self).csv_tolist(result)
-        return handler.csv_tolist(result)
-
-    def format_csv(self, result):
-        # This is an optimization to use a single buffer/writer for all elements
-        # of the list instead of creating one for every element
-        strbuf = cStringIO.StringIO()
-        writer = csv.writer(strbuf, dialect='aquilon')
-        for obj in result:
-            for item in self.csv_tolist(obj):
-                fields = self.csv_fields(item)
-                if fields:
-                    writer.writerow(fields)
-        return strbuf.getvalue()
+    def format_csv(self, result, writer):
+        for item in result:
+            self.redirect_csv(item, writer)
 
     def format_html(self, result):
         if hasattr(self, "template_html"):
@@ -91,6 +63,10 @@ class StringListFormatter(ListFormatter):
     def format_raw(self, objects, indent=""):
         return "\n".join([indent + str(obj) for obj in objects])
 
+    def format_csv(self, objects, writer):
+        for obj in objects:
+            writer.writerow((str(obj),))
+
 ObjectFormatter.handlers[StringList] = StringListFormatter()
 
 
@@ -108,5 +84,9 @@ class StringAttributeListFormatter(ListFormatter):
 
     def format_raw(self, objects, indent=""):
         return "\n".join([indent + str(objects.getter(obj)) for obj in objects])
+
+    def format_csv(self, objects, writer):
+        for obj in objects:
+            writer.writerow((str(objects.getter(obj)),))
 
 ObjectFormatter.handlers[StringAttributeList] = StringAttributeListFormatter()
