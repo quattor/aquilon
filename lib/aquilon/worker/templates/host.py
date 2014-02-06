@@ -80,16 +80,6 @@ def is_default_route(dbinterface):
 
 
 class PlenaryHost(PlenaryCollection):
-    """
-    A facade for Toplevel and Namespaced Hosts (below).
-
-    This class creates either/both toplevel and namespaced host plenaries,
-    based on broker configuration:
-    namespaced_host_profiles (boolean):
-      if namespaced profiles should be generated
-    flat_host_profiles (boolean):
-      if host profiles should be put into a "flat" toplevel (non-namespaced)
-    """
     def __init__(self, dbhost, logger=LOGGER):
         super(PlenaryHost, self).__init__(logger=logger)
 
@@ -98,10 +88,7 @@ class PlenaryHost(PlenaryCollection):
                                 dbhost.__class__.name)
         self.dbobj = dbhost
         config = Config()
-        if config.getboolean("broker", "namespaced_host_profiles"):
-            self.plenaries.append(PlenaryNamespacedHost.get_plenary(dbhost))
-        if config.getboolean("broker", "flat_host_profiles"):
-            self.plenaries.append(PlenaryToplevelHost.get_plenary(dbhost))
+        self.plenaries.append(PlenaryHostObject.get_plenary(dbhost))
         self.plenaries.append(PlenaryHostData.get_plenary(dbhost))
 
     def write(self, locked=False):
@@ -279,7 +266,7 @@ class PlenaryHostData(StructurePlenary):
                            StructureTemplate(res_path))
 
 
-class PlenaryToplevelHost(ObjectPlenary):
+class PlenaryHostObject(ObjectPlenary):
     """
     A plenary template for a host, stored at the toplevel of the profiledir
     """
@@ -289,7 +276,7 @@ class PlenaryToplevelHost(ObjectPlenary):
         return str(dbhost.fqdn)
 
     def get_key(self, exclusive=True):
-        keylist = [super(PlenaryToplevelHost, self).get_key(exclusive=exclusive)]
+        keylist = [super(PlenaryHostObject, self).get_key(exclusive=exclusive)]
 
         if not inspect(self.dbobj).deleted:
             keylist.append(PlenaryKey(exclusive=False,
@@ -378,13 +365,3 @@ class PlenaryToplevelHost(ObjectPlenary):
             raise IncompleteError("{0} requires cluster membership, please "
                                   "run 'aq cluster'.".format(pers))
         pan_include(lines, "archetype/final")
-
-
-class PlenaryNamespacedHost(PlenaryToplevelHost):
-    """
-    A plenary template describing a host, namespaced by DNS domain
-    """
-
-    @classmethod
-    def template_name(cls, dbhost):
-        return "%s/%s" % (dbhost.fqdn.dns_domain.name, dbhost.fqdn)
