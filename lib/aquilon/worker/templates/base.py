@@ -432,12 +432,10 @@ class ObjectPlenary(Plenary):
             self.stash()
 
             # Only one or the other of .xml/.xml.gz should be there...
-            # it doesn't hurt to clean up both.
-            # .xml.dep is used up to and including panc 9.2
-            # .dep is used by panc 9.4 and higher
+            # It doesn't hurt to clean up both.
             basename = os.path.join(self.config.get("broker", "quattordir"),
                                     "build", self.old_branch, self.old_name)
-            for ext in (".xml", ".xml.gz", ".xml.dep", ".dep"):
+            for ext in (".xml", ".xml.gz", ".dep"):
                 remove_file(basename + ext, logger=self.logger)
             try:
                 os.removedirs(os.path.dirname(basename))
