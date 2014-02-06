@@ -582,7 +582,8 @@ class DSDBRunner(object):
                 continue
             else:
                 iface = addr.logical_name
-                if addr.interface.comments:
+                if addr.interface.comments and not \
+                   addr.interface.comments.startswith("Created automatically"):
                     comments = addr.interface.comments
 
             # Determine if we need to specify a primary name to DSDB.  By
