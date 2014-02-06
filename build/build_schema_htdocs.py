@@ -86,7 +86,7 @@ model_group = {
     'hardware'  : {
         'title'   : 'Hardware Information',
         'classes' : [ HardwareEntity, Model, Vendor, Machine,
-                      MachineSpecs, Cpu, Switch, Chassis, ChassisSlot ],
+                      MachineSpecs, Cpu, NetworkDevice, Chassis, ChassisSlot ],
     },
     'resource'  : {
         'title'   : 'Resources',
@@ -132,7 +132,7 @@ model_group = {
     'network'   : {
         'title'   : 'Network',
         'classes' : [ Network, NetworkEnvironment, RouterAddress, StaticRoute,
-                      Switch, VlanInfo, ObservedMac, ObservedVlan,
+                      NetworkDevice, VlanInfo, ObservedMac, ObservedVlan,
                       AddressAssignment, Interface, ServiceAddress ],
     },
     'xtn'       : {

@@ -110,6 +110,7 @@ install: remove_stale $(INSTALLFILES) install-doc
 	$(COMMON)/sbin/aqd --help >/dev/null
 	./build/gen_completion.py --outputdir="$(COMMON)/etc" --templatedir="./etc/templates" --all
 	./build/graph_schema.py --outputdir="$(COMMON)/doc"
+	./build/build_schema_htdocs.py --outputdir="$(COMMON)/doc/schema"
 
 .PHONY: install-doc
 install-doc:
