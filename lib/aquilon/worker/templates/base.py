@@ -26,7 +26,7 @@ from sqlalchemy.inspection import inspect
 
 from aquilon.exceptions_ import InternalError, IncompleteError, NotFoundException
 from aquilon.config import Config
-from aquilon.aqdb.model import Base
+from aquilon.aqdb.model import Base, Sandbox
 from aquilon.worker.locks import lock_queue, CompileKey, NoLockKey
 from aquilon.worker.processes import build_mako_lookup
 from aquilon.worker.formats.formatters import ObjectFormatter
@@ -410,7 +410,7 @@ class ObjectPlenary(Plenary):
                    self.dbobj.branch.name)
         pan_assign(lines, "/metadata/template/branch/type",
                    self.dbobj.branch.branch_type)
-        if self.dbobj.branch.branch_type == 'sandbox':
+        if isinstance(self.dbobj.branch, Sandbox):
             pan_assign(lines, "/metadata/template/branch/author",
                        self.dbobj.sandbox_author.name)
         lines.append("")

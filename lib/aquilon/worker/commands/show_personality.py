@@ -25,6 +25,7 @@ from aquilon.aqdb.model import Archetype, Personality
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.formats.personality import ThresholdedPersonality
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
+from aquilon.worker.templates.domain import template_branch_basedir
 
 
 class CommandShowPersonality(BrokerCommand):
@@ -74,12 +75,7 @@ class CommandShowPersonality(BrokerCommand):
                               r'\s*(\d+)\s*;\s*$', re.M)
 
     def get_threshold(self, dbpersonality, dbbranch, dbauthor):
-        if dbbranch.branch_type == 'sandbox':
-            domaindir = os.path.join(self.config.get("broker", "templatesdir"),
-                                     dbauthor.name, dbbranch.name)
-        else:
-            domaindir = os.path.join(self.config.get("broker", "domainsdir"),
-                                     dbbranch.name)
+        domaindir = template_branch_basedir(self.config, dbbranch, dbauthor)
         for ext in [".tpl", ".pan"]:
             template = os.path.join(domaindir, dbpersonality.archetype.name,
                                     "personality", dbpersonality.name,
