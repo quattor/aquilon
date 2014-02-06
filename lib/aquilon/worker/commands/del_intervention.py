@@ -15,9 +15,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 from aquilon.aqdb.model import Intervention
-from aquilon.worker.broker import BrokerCommand, validate_basic
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.resources import (del_resource,
                                                  get_resource_holder)
 
@@ -26,10 +25,8 @@ class CommandDelIntervention(BrokerCommand):
 
     required_parameters = ["intervention"]
 
-    def render(self, session, logger, hostname, cluster,
-               intervention, **arguments):
-
-        validate_basic("intervention", intervention)
+    def render(self, session, logger, hostname, cluster, intervention,
+               **arguments):
         holder = get_resource_holder(session, hostname, cluster)
         dbapp = Intervention.get_unique(session, name=intervention,
                                         holder=holder, compel=True)

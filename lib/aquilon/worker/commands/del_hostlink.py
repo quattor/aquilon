@@ -15,9 +15,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 from aquilon.aqdb.model import Hostlink
-from aquilon.worker.broker import BrokerCommand, validate_basic
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.resources import (del_resource,
                                                  get_resource_holder)
 
@@ -28,8 +27,6 @@ class CommandDelHostlink(BrokerCommand):
 
     def render(self, session, logger, hostname, cluster, resourcegroup,
                hostlink, **arguments):
-
-        validate_basic("hostlink", hostlink)
         holder = get_resource_holder(session, hostname, cluster, resourcegroup)
         dbhl = Hostlink.get_unique(session, name=hostlink, holder=holder,
                                    compel=True)

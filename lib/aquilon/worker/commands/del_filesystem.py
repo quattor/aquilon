@@ -15,9 +15,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 from aquilon.aqdb.model import Filesystem
-from aquilon.worker.broker import BrokerCommand, validate_basic
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.resources import (del_resource,
                                                  get_resource_holder)
 
@@ -26,10 +25,8 @@ class CommandDelFilesystem(BrokerCommand):
 
     required_parameters = ["filesystem"]
 
-    def render(self, session, logger, filesystem,
-               hostname, cluster, resourcegroup, **arguments):
-
-        validate_basic("filesystem", filesystem)
+    def render(self, session, logger, filesystem, hostname, cluster,
+               resourcegroup, **arguments):
         holder = get_resource_holder(session, hostname, cluster, resourcegroup)
         dbfs = Filesystem.get_unique(session, name=filesystem, holder=holder,
                                      compel=True)

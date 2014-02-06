@@ -15,10 +15,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import ResourceGroup, ServiceAddress
-from aquilon.worker.broker import BrokerCommand, validate_basic
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.resources import (del_resource,
                                                  get_resource_holder)
 
@@ -29,8 +28,6 @@ class CommandDelResourceGroup(BrokerCommand):
 
     def render(self, session, logger, resourcegroup, hostname, cluster,
                **arguments):
-
-        validate_basic("resourcegroup", resourcegroup)
         holder = get_resource_holder(session, hostname, cluster, compel=True)
         dbrg = ResourceGroup.get_unique(session, name=resourcegroup,
                                         holder=holder, compel=True)
