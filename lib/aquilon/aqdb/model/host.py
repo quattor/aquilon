@@ -160,7 +160,7 @@ class Host(Base):
             pers_eon_id_map[grn_rec.target].add(grn_rec.grn)
 
         for target in pers_eon_id_map:
-            if not (target in eon_id_map):
+            if target not in eon_id_map:
                 eon_id_map[target] = pers_eon_id_map[target]
 
         return eon_id_map

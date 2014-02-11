@@ -52,10 +52,9 @@ class CommandAddInterfaceNetworkDevice(BrokerCommand):
         dbnetdev = NetworkDevice.get_unique(session, network_device, compel=True)
         oldinfo = DSDBRunner.snapshot_hw(dbnetdev)
 
-        dbinterface = get_or_create_interface(session, dbnetdev,
-                                              name=interface, mac=mac,
-                                              interface_type=iftype,
-                                              comments=comments, preclude=True)
+        get_or_create_interface(session, dbnetdev, name=interface, mac=mac,
+                                interface_type=iftype, comments=comments,
+                                preclude=True)
 
         session.flush()
 

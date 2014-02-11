@@ -394,7 +394,7 @@ def discover_network_types(dbapi_con, connection_record):  # pylint: disable=W06
             continue
         name = section[8:]
         nettypes[name] = NetworkProperties(config, name)
-        LOGGER.info("Configured network type %s" % name)
+        LOGGER.info("Configured network type %s", name)
 
     Network.network_type_map = nettypes
     Network.default_network_props = nettypes[default_type]

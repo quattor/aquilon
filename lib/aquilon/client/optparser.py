@@ -85,10 +85,10 @@ def normalize_help(data):
         asciidata = data.encode()
     if len(asciidata) == 0:
         return ""
-    asciidata = re.sub('^\s*', '', asciidata)
-    asciidata = re.sub('[\s\r]*$', '', asciidata)
-    asciidata = re.sub('^\s+$', '', asciidata)
-    asciidata = re.sub('\s+', ' ', asciidata)
+    asciidata = re.sub(r'^\s*', '', asciidata)
+    asciidata = re.sub(r'[\s\r]*$', '', asciidata)
+    asciidata = re.sub(r'^\s+$', '', asciidata)
+    asciidata = re.sub(r'\s+', ' ', asciidata)
 
     asciidata = asciidata.replace('%prog', cmdName())
     return asciidata

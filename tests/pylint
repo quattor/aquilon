@@ -31,9 +31,9 @@ import depends
 
 # Any of the above may override the default location for ms.version...
 import ms.version
-ms.version.addpkg("pylint", "0.26.0")
-ms.version.addpkg("logilab.astng", "0.24.1")
-ms.version.addpkg("logilab.common", "0.58.3")
+ms.version.addpkg("pylint", "1.1.0")
+ms.version.addpkg("astroid", "1.0.1")
+ms.version.addpkg("logilab.common", "0.60.1")
 
 from pylint import lint
 

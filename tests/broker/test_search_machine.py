@@ -149,6 +149,12 @@ class TestSearchMachine(TestBrokerCommand):
         self.matchclean(out, "evm2", command)
         self.matchclean(out, "evm10", command)
 
+    def testsharebad(self):
+        command = ["search_machine", "--share", "no-such-share"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out, "No shares found with name no-such-share.",
+                         command)
+
     def testip(self):
         ip = self.net["unknown0"].usable[2]
         command = ["search_machine", "--ip=%s" % ip]

@@ -230,7 +230,6 @@ class QIPRefresh(object):
         if dbnetwork.name != qipinfo.name:
             self.logger.client_info("Setting network {0:a} name to {1}"
                                     .format(dbnetwork, qipinfo.name))
-            oldname = dbnetwork.name
             dbnetwork.name = qipinfo.name
         if dbnetwork.network_type != qipinfo.network_type:
             self.logger.client_info("Setting network {0:a} type to {1}"

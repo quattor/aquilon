@@ -90,18 +90,18 @@ class StringEnum(object):
         raise TypeError("%s or String expected" % cls.__name__)
 
     class __metaclass__(type):
-        def __new__(metacls, clsname, bases, attrs):
+        def __new__(mcs, clsname, bases, attrs):
             # We get called when StringEnum is created, in this case there
             # is nothing else for us to do, so we just create the class
             if clsname == 'StringEnum':
-                return type.__new__(metacls, clsname, bases, attrs)
+                return type.__new__(mcs, clsname, bases, attrs)
 
             # Prevent any additional information from being stored
             attrs['__slots__'] = ['_StringEnum__name', '_StringEnum__value',
                                   '_StringEnum__dynamic']
 
             # Construct the new class, we return this at the end
-            cls = type.__new__(metacls, clsname, bases, attrs)
+            cls = type.__new__(mcs, clsname, bases, attrs)
 
             # Record the fact we just created this subtype
             _StringEnum_Classes[clsname] = cls

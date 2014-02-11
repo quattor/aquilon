@@ -100,12 +100,12 @@ def run_command(args, env=None, path="/", logger=LOGGER, loglevel=logging.INFO,
     command_args = [str(arg) for arg in args]
 
     simple_command = " ".join(command_args)
-    logger.info("run_command: %s (CWD: %s)" % (simple_command,
-                                               os.path.abspath(path)))
+    logger.info("run_command: %s (CWD: %s)", simple_command,
+                os.path.abspath(path))
 
     if input:
         proc_stdin = PIPE
-        logger.info("command `%s` stdin: %s" % (simple_command, input))
+        logger.info("command `%s` stdin: %s", simple_command, input)
     else:
         proc_stdin = None
 
@@ -123,19 +123,19 @@ def run_command(args, env=None, path="/", logger=LOGGER, loglevel=logging.INFO,
     err_thread.join()
     p.wait()
     if p.returncode >= 0:
-        logger.info("command `%s` exited with return code %d" %
-                    (simple_command, p.returncode))
+        logger.info("command `%s` exited with return code %d", simple_command,
+                    p.returncode)
     else:  # pragma: no cover
-        logger.info("command `%s` exited with signal %d" %
-                    (simple_command, -p.returncode))
+        logger.info("command `%s` exited with signal %d", simple_command,
+                    -p.returncode)
     out = "".join(out_thread.buffer)
     if out:
         filter_msg = "filtered " if filterre else ""
-        logger.info("command `%s` %sstdout: %s" %
-                    (simple_command, filter_msg, out))
+        logger.info("command `%s` %sstdout: %s", simple_command,
+                    filter_msg, out)
     err = "".join(err_thread.buffer)
     if err:
-        logger.info("command `%s` stderr: %s" % (simple_command, err))
+        logger.info("command `%s` stderr: %s", simple_command, err)
 
     if p.returncode != 0:
         raise ProcessException(command=simple_command, out=out, err=err,
@@ -208,7 +208,6 @@ def sync_domain(dbdomain, logger=LOGGER, locked=False):
 
     """
     config = Config()
-    session = object_session(dbdomain)
     kingdir = config.get("broker", "kingdir")
     domaindir = os.path.join(config.get("broker", "domainsdir"), dbdomain.name)
     git_env = {"PATH": "%s:%s" % (config.get("broker", "git_path"),

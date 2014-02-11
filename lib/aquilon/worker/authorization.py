@@ -53,7 +53,7 @@ class AuthorizationBroker(object):
                     (action, resource))
         # Special-casing the aquilon hosts... this is a special user
         # that provides a bucket for all host-generated activity.
-        if self._check_aquilonhost(principal, dbuser, action, resource):
+        if self._check_aquilonhost(principal, dbuser, resource):
             return True
         if dbuser.role.name == 'nobody':
             self.raise_auth_error(principal, action, resource)
@@ -348,7 +348,7 @@ class AuthorizationBroker(object):
                 self.raise_auth_error(principal, action, resource)
         return True
 
-    def _check_aquilonhost(self, principal, dbuser, action, resource):
+    def _check_aquilonhost(self, principal, dbuser, resource):
         """ Return true if the incoming user is an aquilon host and this is
             one of the few things that a host is allowed to change on its
             own."""

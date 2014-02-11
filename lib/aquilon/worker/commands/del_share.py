@@ -15,9 +15,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 from aquilon.aqdb.model import Share
-from aquilon.worker.broker import BrokerCommand, validate_basic
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.resources import (del_resource,
                                                  get_resource_holder)
 
@@ -26,10 +25,8 @@ class CommandDelShare(BrokerCommand):
 
     required_parameters = ["share"]
 
-    def render(self, session, logger, share,
-               hostname, resourcegroup, cluster, **arguments):
-
-        validate_basic("share", share)
+    def render(self, session, logger, share, hostname, resourcegroup, cluster,
+               **arguments):
         holder = get_resource_holder(session, hostname, cluster, resourcegroup)
         dbshare = Share.get_unique(session, name=share, holder=holder,
                                    compel=True)

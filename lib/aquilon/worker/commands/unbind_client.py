@@ -32,7 +32,7 @@ class CommandUnbindClient(BrokerCommand):
 
     def render(self, session, logger, hostname, service, **arguments):
         dbhost = hostname_to_host(session, hostname)
-        for srv in (dbhost.archetype.services + dbhost.personality.services):
+        for srv in dbhost.archetype.services + dbhost.personality.services:
             if srv.name == service:
                 raise ArgumentError("Cannot unbind a required service. "
                                     "Perhaps you want to rebind?")

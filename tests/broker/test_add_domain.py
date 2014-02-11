@@ -139,6 +139,12 @@ class TestAddDomain(TestBrokerCommand):
         self.matchoutput(out, "deployable", command)
         self.matchclean(out, "utsandbox", command)
 
+    def test_300_bad_name(self):
+        command = ["add_domain", "--domain", "oops@!"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "'oops@!' is not a valid value for --domain.",
+                         command)
+
     def test_900_verifyall(self):
         command = ["show_domain", "--all"]
         out = self.commandtest(command)

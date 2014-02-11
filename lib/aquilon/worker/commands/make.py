@@ -106,7 +106,7 @@ class CommandMake(BrokerCommand):
 
     def compile(self, session, dbhost, logger, keepbindings):
         chooser = Chooser(dbhost, logger=logger,
-                          required_only=not(keepbindings))
+                          required_only=not keepbindings)
         chooser.set_required()
         chooser.flush_changes()
 

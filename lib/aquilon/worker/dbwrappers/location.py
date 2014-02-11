@@ -21,7 +21,7 @@ from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 
 from aquilon.exceptions_ import NotFoundException, ArgumentError
 from aquilon.aqdb.model import Location
-from aquilon.worker.broker import validate_basic
+from aquilon.utils import validate_nlist_key
 
 
 def get_location(session, query_options=None, compel=False, **kwargs):
@@ -66,7 +66,7 @@ def get_location(session, query_options=None, compel=False, **kwargs):
 
 
 def add_location(session, cls, name, parent, **kwargs):
-    validate_basic(cls.__name__, name)
+    validate_nlist_key(cls.__name__, name)
     cls.get_unique(session, name, preclude=True)
     dbloc = cls(name=name, parent=parent, **kwargs)
     session.add(dbloc)

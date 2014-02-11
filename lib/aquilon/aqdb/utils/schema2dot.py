@@ -14,7 +14,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import os
 import ms.version
 import ms.modulecmd
 
@@ -25,10 +24,7 @@ ms.version.addpkg('pyparsing', '1.5.5')  # pydot relies on pyparsing
 ms.version.addpkg('pydot', '1.0.2')
 import pydot
 
-from sqlalchemy.orm import class_mapper
 from sqlalchemy.orm.properties import PropertyLoader
-
-from aquilon.aqdb.model import Base
 
 
 def create_uml_graph(mappers,
@@ -173,7 +169,7 @@ def _render_table_record(table, show_datatypes=False):
     if len(cols) == 0:
         return "\"{%s}\"" % table.name.title()
     else:
-        return "\"{%s|%s\l}\"" % (table.name.title(), "\\l".join(cols))
+        return "\"{%s|%s\\l}\"" % (table.name.title(), "\\l".join(cols))
 
 
 def _mk_label(mapper, show_attributes=True, show_datatypes=True):
@@ -193,7 +189,7 @@ def _mk_label(mapper, show_attributes=True, show_datatypes=True):
 
     else:
         #WARNING: untested
-        attrs = [format_col(col) for col in sorted(
-            mapper.columns, key=lambda col:not col.primary_key)]
+        attrs = [format_col(col) for col in
+                 sorted(mapper.columns, key=lambda col: not col.primary_key)]
 
     return "\"{%s|%s}\"" % (mapper.class_.__name__, "\\l".join(attrs))

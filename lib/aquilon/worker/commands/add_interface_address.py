@@ -16,7 +16,8 @@
 # limitations under the License.
 """Contains the logic for `aq add interface address`."""
 
-from aquilon.worker.broker import BrokerCommand, validate_basic
+from aquilon.utils import validate_nlist_key
+from aquilon.worker.broker import BrokerCommand
 from aquilon.exceptions_ import ArgumentError, IncompleteError
 from aquilon.aqdb.model import HardwareEntity, NetworkEnvironment, Interface
 from aquilon.worker.dbwrappers.dns import grab_address
@@ -88,7 +89,7 @@ class CommandAddInterfaceAddress(BrokerCommand):
 
         # The label will be used as an nlist key
         if label:
-            validate_basic("label", label)
+            validate_nlist_key("label", label)
 
         # TODO: add allow_multi=True
         dbdns_rec, newly_created = grab_address(session, fqdn, ip, dbnet_env,

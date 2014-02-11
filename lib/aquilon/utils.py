@@ -35,13 +35,20 @@ from aquilon.config import Config
 
 LOGGER = logging.getLogger(__name__)
 
-ratio_re = re.compile('^\s*(?P<left>\d+)\s*(?:[:/]\s*(?P<right>\d+))?\s*$')
-yes_re = re.compile("^(true|yes|y|1|on|enabled)$", re.I)
-no_re = re.compile("^(false|no|n|0|off|disabled)$", re.I)
+ratio_re = re.compile(r'^\s*(?P<left>\d+)\s*(?:[:/]\s*(?P<right>\d+))?\s*$')
+yes_re = re.compile(r"^(true|yes|y|1|on|enabled)$", re.I)
+no_re = re.compile(r"^(false|no|n|0|off|disabled)$", re.I)
 _unpadded_re = re.compile(r'\b([0-9a-f])\b')
 _nocolons_re = re.compile(r'^([0-9a-f]{2}){6}$')
 _two_re = re.compile(r'[0-9a-f]{2}')
 _padded_re = re.compile(r'^([0-9a-f]{2}:){5}([0-9a-f]{2})$')
+
+# Regexp used to check if a value is suitable to be used as an nlist key,
+# without escaping.
+nlist_key_re = re.compile('^[a-zA-Z_][a-zA-Z0-9_.-]*$')
+
+# Regexp used to check if a value is suitable to be used as a template name
+template_name_re = re.compile(r'^[a-zA-Z0-9_.-]+$')
 
 
 def kill_from_pid_file(pid_file):  # pragma: no cover
@@ -102,6 +109,18 @@ def confirm(prompt=None, resp=False):  # pragma: no cover
             return True
         if ans == 'n' or ans == 'N' or ans == 'no':
             return False
+
+
+def validate_nlist_key(label, value):
+    if not nlist_key_re.match(value):
+        raise ArgumentError("'%s' is not a valid value for %s." %
+                            (value, label))
+
+
+def validate_template_name(label, value):
+    if not template_name_re.match(value):
+        raise ArgumentError("'%s' is not a valid value for %s." %
+                            (value, label))
 
 
 def force_ipv4(label, value):
@@ -197,8 +216,8 @@ def force_list(label, value):
     """
     if value is None:
         return None
-    lines = map(lambda x: force_ascii('line', x.strip()), value.splitlines())
-    return filter(lambda x: x and not x.startswith("#"), lines)
+    lines = [force_ascii(label, x.strip()) for x in value.splitlines()]
+    return [x for x in lines if x and not x.startswith("#")]
 
 
 def force_json_dict(label, value):
@@ -233,7 +252,7 @@ def remove_dir(dir, logger=LOGGER):
                 thisfile = os.path.join(root, name)
                 os.remove(thisfile)
             except OSError, e:
-                logger.info("Failed to remove '%s': %s" % (thisfile, e))
+                logger.info("Failed to remove '%s': %s", thisfile, e)
         for name in dirs:
             try:
                 thisdir = os.path.join(root, name)
@@ -244,12 +263,12 @@ def remove_dir(dir, logger=LOGGER):
                 # fails, report the original error.
                 try:
                     os.remove(thisdir)
-                except OSError, e1:
-                    logger.info("Failed to remove '%s': %s" % (thisdir, e))
+                except OSError:
+                    logger.info("Failed to remove '%s': %s", thisdir, e)
     try:
         os.rmdir(dir)
     except OSError, e:
-        logger.info("Failed to remove '%s': %s" % (dir, e))
+        logger.info("Failed to remove '%s': %s", dir, e)
     return
 
 
@@ -290,7 +309,7 @@ def write_file(filename, content, mode=None, compress=None,
     if mode is None:
         try:
             old_mode = os.stat(filename).st_mode
-        except OSError, e:
+        except OSError:
             old_mode = 0644
     dirname, basename = os.path.split(filename)
 
@@ -316,7 +335,7 @@ def remove_file(filename, cleanup_directory=False, logger=LOGGER):
         os.remove(filename)
     except OSError, e:
         if e.errno != errno.ENOENT:
-            logger.info("Could not remove file '%s': %s" % (filename, e))
+            logger.info("Could not remove file '%s': %s", filename, e)
     if cleanup_directory:
         try:
             os.removedirs(os.path.dirname(filename))

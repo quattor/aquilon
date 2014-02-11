@@ -36,7 +36,7 @@ class CommandMakeCluster(BrokerCommand):
                                                   dbcluster.personality.archetype))
 
         chooser = Chooser(dbcluster, logger=logger,
-                          required_only=not(keepbindings))
+                          required_only=not keepbindings)
         chooser.set_required()
         chooser.flush_changes()
         td = TemplateDomain(dbcluster.branch, dbcluster.sandbox_author,

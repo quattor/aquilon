@@ -21,7 +21,8 @@ from dateutil.parser import parse
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import RebootSchedule
-from aquilon.worker.broker import BrokerCommand, validate_basic
+from aquilon.utils import validate_nlist_key
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.resources import (add_resource,
                                                  get_resource_holder)
 
@@ -96,7 +97,7 @@ class CommandAddRebootSchedule(BrokerCommand):
     def render(self, session, logger, **arguments):
 
         reboot_schedule = "reboot_schedule"
-        validate_basic("reboot_schedule", reboot_schedule)
+        validate_nlist_key("reboot_schedule", reboot_schedule)
         arguments = self._validate_args(logger, **arguments)
 
         time = arguments["time"]

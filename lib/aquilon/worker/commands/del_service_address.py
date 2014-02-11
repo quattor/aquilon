@@ -15,10 +15,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import ServiceAddress, AddressAssignment, Host
-from aquilon.worker.broker import BrokerCommand, validate_basic
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.dns import delete_dns_record
 from aquilon.worker.dbwrappers.resources import (del_resource,
                                                  get_resource_holder)
@@ -49,9 +48,6 @@ class CommandDelServiceAddress(BrokerCommand):
 
     def render(self, session, logger, name, hostname, cluster, resourcegroup,
                keep_dns, **arguments):
-
-        validate_basic("name", name)
-
         if name == "hostname":
             raise ArgumentError("The primary address of the host cannot "
                                 "be deleted.")

@@ -16,15 +16,14 @@
 # limitations under the License.
 """Contains the logic for `aq add sandbox`."""
 
-
-import re
 import os
 
 from aquilon.exceptions_ import (AuthorizationException, ArgumentError)
+from aquilon.aqdb.model import Sandbox, Branch
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.commands.get import CommandGet
-from aquilon.aqdb.model import Sandbox, Branch
 from aquilon.worker.processes import run_git
+from aquilon.utils import validate_template_name
 
 
 class CommandAddSandbox(CommandGet):
@@ -45,9 +44,7 @@ class CommandAddSandbox(CommandGet):
 
         # See `git check-ref-format --help` for naming restrictions.
         # We want to layer a few extra restrictions on top of that...
-        valid = re.compile('^[a-zA-Z0-9_.-]+$')
-        if (not valid.match(sandbox)):
-            raise ArgumentError("sandbox name '%s' is not valid" % sandbox)
+        validate_template_name("--sandbox", sandbox)
 
         Branch.get_unique(session, sandbox, preclude=True)
 

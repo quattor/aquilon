@@ -17,7 +17,8 @@
 
 
 from aquilon.aqdb.model import Filesystem
-from aquilon.worker.broker import BrokerCommand, validate_basic
+from aquilon.utils import validate_nlist_key
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.resources import (add_resource,
                                                  get_resource_holder)
 
@@ -33,7 +34,7 @@ class CommandAddFilesystem(BrokerCommand):
                hostname, cluster, resourcegroup,
                comments, **arguments):
 
-        validate_basic("filesystem", filesystem)
+        validate_nlist_key("filesystem", filesystem)
         holder = get_resource_holder(session, hostname, cluster, resourcegroup,
                                      compel=False)
 

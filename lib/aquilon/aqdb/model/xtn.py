@@ -33,7 +33,7 @@ config = Config()
 log = logging.getLogger('aquilon.aqdb.model.xtn')
 
 
-def utcnow(context, tz=tzutc()):
+def utcnow(context, tz=tzutc()):  # pylint: disable=W0613
     return datetime.now(tz)
 
 

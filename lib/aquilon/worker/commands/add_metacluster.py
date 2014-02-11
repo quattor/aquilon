@@ -19,7 +19,8 @@
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import (MetaCluster, Personality, ClusterLifecycle,
                                 Location)
-from aquilon.worker.broker import BrokerCommand, validate_basic
+from aquilon.utils import validate_nlist_key
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.templates import Plenary
@@ -36,7 +37,7 @@ class CommandAddMetaCluster(BrokerCommand):
                buildstatus, comments,
                **arguments):
 
-        validate_basic("metacluster", metacluster)
+        validate_nlist_key("metacluster", metacluster)
 
         # this should be reverted when virtbuild supports these options
         if not archetype:
@@ -50,8 +51,6 @@ class CommandAddMetaCluster(BrokerCommand):
         if not dbpersonality.is_cluster:
             raise ArgumentError("%s is not a cluster personality." %
                                 personality)
-
-        ctype = "meta"  # dbpersonality.archetype.cluster_type
 
         if not buildstatus:
             buildstatus = "build"
@@ -86,9 +85,6 @@ class CommandAddMetaCluster(BrokerCommand):
             raise ArgumentError("Metacluster name global is reserved.")
 
         MetaCluster.get_unique(session, metacluster, preclude=True)
-        clus_type = MetaCluster  # Cluster.__mapper__.polymorphic_map[ctype].class_
-
-        kw = {}
 
         dbcluster = MetaCluster(name=metacluster, location_constraint=dbloc,
                                 personality=dbpersonality,

@@ -40,7 +40,8 @@ class TestAddArchetype(TestBrokerCommand):
     def testaddbadname(self):
         command = "add archetype --archetype oops@!"
         out = self.badrequesttest(command.split(" "))
-        self.matchoutput(out, "Archetype name 'oops@!' is not valid", command)
+        self.matchoutput(out, "'oops@!' is not a valid value for --archetype.",
+                         command)
 
     def testaddbadcluster(self):
         command = ["add_archetype", "--archetype", "bad-cluster",

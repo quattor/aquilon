@@ -155,8 +155,8 @@ class TestAddSandbox(TestBrokerCommand):
     def testfailinvalid(self):
         command = "add sandbox --sandbox bad:characters!"
         out = self.badrequesttest(command.split(" "))
-        self.matchoutput(out, "sandbox name 'bad:characters!' is not valid",
-                         command)
+        self.matchoutput(out, "'bad:characters!' is not a valid value for "
+                         "--sandbox.", command)
 
     def testslashinuserid(self):
         test_user = "user1" + '/' + "test"
