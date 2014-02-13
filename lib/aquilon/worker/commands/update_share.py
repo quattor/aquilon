@@ -18,7 +18,8 @@
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Share
-from aquilon.worker.broker import BrokerCommand, validate_basic
+from aquilon.utils import validate_nlist_key
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.resources import get_resource_holder
 from aquilon.worker.templates import Plenary, PlenaryCollection
 
@@ -30,7 +31,7 @@ class CommandUpdateShare(BrokerCommand):
     def render(self, session, logger, share, latency_threshold,
                comments, **arguments):
 
-        validate_basic("share", share)
+        validate_nlist_key("share", share)
 
         q = session.query(Share).filter_by(name=share)
 
