@@ -26,6 +26,10 @@ class ShareFormatter(ResourceFormatter):
     def extra_details(self, share, indent=""):
         details = []
 
+        if share.latency_threshold:
+            details.append(indent + "  Latency threshold: %d" %
+                           share.latency_threshold)
+
         details.append(indent + "  Server: %s" % share.server)
         details.append(indent + "  Mountpoint: %s" % share.mount)
         details.append(indent + "  Disk Count: %d" % share.disk_count)

@@ -88,6 +88,8 @@ class PlenaryResource(StructurePlenary):
     def body_share(self, lines):
         pan_assign(lines, "server", self.dbobj.server)
         pan_assign(lines, "mountpoint", self.dbobj.mount)
+        if self.dbobj.latency_threshold:
+            pan_assign(lines, "latency_threshold", self.dbobj.latency_threshold)
 
     def body_filesystem(self, lines):
         pan_assign(lines, "type", self.dbobj.fstype)

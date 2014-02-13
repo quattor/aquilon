@@ -440,10 +440,12 @@ class TestUpdateMachine(TestBrokerCommand):
     def testallowchangemetacluster_05(self):
         command = ["show_share", "--all"]
         out = self.commandtest(command)
-        # Initially the VM is on utecl1, test_share_1 is not used on utecl2
+        # Initially the VM is on utecl1, test_share_1 is not used on utecl13
         self.searchoutput(out,
                           r'Share: test_share_1\s*'
+                          r'Comments: updated comment\s*'
                           r'Bound to: ESX Cluster utecl1\s*'
+                          r'Latency threshold: 10\s*'
                           r'Server: lnn30f1\s*'
                           r'Mountpoint: /vol/lnn30f1v1/test_share_1\s*'
                           r'Disk Count: 1\s*'
@@ -451,7 +453,9 @@ class TestUpdateMachine(TestBrokerCommand):
                           command)
         self.searchoutput(out,
                           r'Share: test_share_1\s*'
-                          r'Bound to: ESX Cluster utecl2\s*'
+                          r'Comments: updated comment\s*'
+                          r'Bound to: ESX Cluster utecl13\s*'
+                          r'Latency threshold: 10\s*'
                           r'Server: lnn30f1\s*'
                           r'Mountpoint: /vol/lnn30f1v1/test_share_1\s*'
                           r'Disk Count: 0\s*'
@@ -471,7 +475,9 @@ class TestUpdateMachine(TestBrokerCommand):
         # utecl1
         self.searchoutput(out,
                           r'Share: test_share_1\s*'
+                          r'Comments: updated comment\s*'
                           r'Bound to: ESX Cluster utecl1\s*'
+                          r'Latency threshold: 10\s*'
                           r'Server: lnn30f1\s*'
                           r'Mountpoint: /vol/lnn30f1v1/test_share_1\s*'
                           r'Disk Count: 0\s*'
@@ -479,7 +485,9 @@ class TestUpdateMachine(TestBrokerCommand):
                           command)
         self.searchoutput(out,
                           r'Share: test_share_1\s*'
+                          r'Comments: updated comment\s*'
                           r'Bound to: ESX Cluster utecl13\s*'
+                          r'Latency threshold: 10\s*'
                           r'Server: lnn30f1\s*'
                           r'Mountpoint: /vol/lnn30f1v1/test_share_1\s*'
                           r'Disk Count: 1\s*'

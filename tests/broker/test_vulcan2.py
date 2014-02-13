@@ -318,6 +318,7 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
         out = self.commandtest(command)
         self.matchoutput(out, "Share: test_v2_share", command)
         self.matchoutput(out, "Bound to: Resource Group utmc8as1", command)
+        self.matchoutput(out, "Latency threshold: 20", command)
 
         command = ["add_share", "--resourcegroup=utmc8as2",
                    "--cluster=utmc8", "--share=test_v2_share"]
@@ -361,6 +362,7 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
         self.matchoutput(out, '"server" = "lnn30f1";', command)
         self.matchoutput(out, '"mountpoint" = "/vol/lnn30f1v1/test_v2_share";',
                          command)
+        self.matchoutput(out, '"latency_threshold" = 20;', command)
 
     # TODO renumber again
     def test_235_cat_switch(self):

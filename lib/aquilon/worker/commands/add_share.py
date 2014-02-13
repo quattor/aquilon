@@ -14,7 +14,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+"""Contains the logic for `aq add share`."""
 
 from aquilon.aqdb.model import Share
 from aquilon.utils import validate_nlist_key
@@ -27,8 +27,8 @@ class CommandAddShare(BrokerCommand):
 
     required_parameters = ["share"]
 
-    def render(self, session, logger, share,
-               comments, hostname, resourcegroup, cluster, **arguments):
+    def render(self, session, logger, share, comments, hostname,
+               resourcegroup, cluster, **arguments):
 
         validate_nlist_key("share", share)
         holder = get_resource_holder(session,

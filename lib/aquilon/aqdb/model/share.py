@@ -16,8 +16,9 @@
 # limitations under the License.
 
 from sqlalchemy import Integer, Column, ForeignKey
-from sqlalchemy.orm import reconstructor
+from sqlalchemy.orm import reconstructor, validates
 
+from aquilon.exceptions_ import AquilonError, ArgumentError
 from aquilon.aqdb.model import Resource
 from aquilon.aqdb.data_sync.storage import find_storage_data
 
@@ -33,6 +34,17 @@ class Share(Resource):
                                     name='%s_resource_fk' % (_TN),
                                     ondelete='CASCADE'),
                 primary_key=True)
+
+    # threshold for Storage I/O Control throttle in millisecs.
+    latency_threshold = Column(Integer, default=20)
+
+    @validates('latency_threshold')
+    def validate_latency_threshold(self, key, value):
+        if value:
+            value = int(value)
+            if value <= 0 :
+                raise ArgumentError("The %s must be greater then 0." % key)
+        return value
 
     def __init__(self, *args, **kwargs):
         super(Share, self).__init__(*args, **kwargs)
@@ -56,6 +68,7 @@ class Share(Resource):
 
     def populate_share_info(self, cache):
         self._share_info = find_storage_data(self, cache)
+
 
 share = Share.__table__
 share.info['unique_fields'] = ['name', 'holder']
