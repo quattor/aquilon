@@ -139,7 +139,7 @@ if config.has_option('database', 'audit_schema'):  # pragma: no cover
     XtnDetail.__table__.schema = schema
 
 
-def start_xtn(session, xtn_id, username, command, is_readonly, details):
+def start_xtn(session, xtn_id, username, command, is_readonly, details, ignore):
     """ Wrapper to log the start of a transaction (or running command).
 
     Takes a dictionary with the transaction parameters.  The keys are
@@ -165,6 +165,9 @@ def start_xtn(session, xtn_id, username, command, is_readonly, details):
     session.add(x)
 
     for key, value in details.iteritems():
+        if key in ignore:
+            continue
+
         # Ignore optional parameters that were not specified
         if value is None:
             continue

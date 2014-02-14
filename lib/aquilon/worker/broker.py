@@ -264,7 +264,7 @@ class BrokerCommand(object):
                     status = logger.get_status()
                     start_xtn(session, status.requestid, status.user,
                               status.command, self.requires_readonly,
-                              kwargs)
+                              kwargs, _IGNORED_AUDIT_ARGS)
 
                     dbuser = get_or_create_user_principal(session, user,
                                                           commitoncreate=True)
