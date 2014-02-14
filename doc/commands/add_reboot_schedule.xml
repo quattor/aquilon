@@ -100,7 +100,7 @@
 		<listitem>
 		    <para>
 			A comma separated list of weeks where valid values
-			are the numbers 1 through 5 and the string "all".
+			are the numbers 1 through 4 and the string "all".
 		    </para>
 		</listitem>
 	    </varlistentry>

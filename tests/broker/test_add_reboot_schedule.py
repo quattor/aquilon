@@ -129,6 +129,49 @@ class TestAddRebootSchedule(TestBrokerCommand):
                    "--hostname=server1.aqd-unittest.ms.com"]
         self.notfoundtest(command)
 
+    def test_210_add_schedule_fail(self):
+        command = ["add_reboot_schedule",
+                   "--week=all", "--day=Sun", "--time=200",
+                   "--hostname=server1.aqd-unittest.ms.com"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Key 'time' contains an invalid value.", command)
+
+    def test_220_add_schedule_fail(self):
+        command = ["add_reboot_schedule",
+                   "--week=all", "--day=Sun", "--time=25:00",
+                   "--hostname=server1.aqd-unittest.ms.com"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "the preferred time '25:00' could not be interpreted: hour must be in 0..23", command)
+
+    def test_230_add_schedule_fail(self):
+        command = ["add_reboot_schedule",
+                   "--week=all", "--day=Sun", "--time=08:61",
+                   "--hostname=server1.aqd-unittest.ms.com"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "the preferred time '08:61' could not be interpreted: minute must be in 0..59", command)
+
+
+    def test_240_add_schedule_fail(self):
+        command = ["add_reboot_schedule",
+                   "--week=1,3,5", "--day=Sun", "--time=08:00",
+                   "--hostname=server1.aqd-unittest.ms.com"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Key 'week' contains an invalid value. Valid values are (1|2|3|4).", command)
+
+    def test_250_add_schedule_fail(self):
+        command = ["add_reboot_schedule",
+                   "--week=5", "--day=Sun", "--time=08:00",
+                   "--hostname=server1.aqd-unittest.ms.com"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Key 'week' contains an invalid value. Valid values are (1|2|3|4).", command)
+
+    def test_260_add_schedule_fail(self):
+        command = ["add_reboot_schedule",
+                   "--week=all", "--day=foo", "--time=08:00",
+                   "--hostname=server1.aqd-unittest.ms.com"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Key 'day' contains an invalid value. Valid values are (Sun|Mon|Tue|Wed|Thu|Fri|Sat).", command)
+
     def test_300_del_reboot_schedule(self):
         plenary = self.plenary_name("resource", "host",
                                     "server1.aqd-unittest.ms.com",

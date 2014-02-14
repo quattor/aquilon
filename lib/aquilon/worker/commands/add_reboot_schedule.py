@@ -32,11 +32,11 @@ class CommandAddRebootSchedule(BrokerCommand):
     required_parameters = ["week", "day"]
 
     COMPONENTS = {
-        "week": ["1", "2", "3", "4", "5"],
+        "week": ["1", "2", "3", "4"],
         "day": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
     }
     REGEXP_VALIDATION = {
-        "time": re.compile(r"^(:?[0-9:]+|None)$"),
+        "time": re.compile(r"^(0?(\d+):0?(\d+)|None)$"),
         "week": re.compile(r'^(:?(:?'
                            + '|'.join(COMPONENTS["week"]) + ')(:?,(:?'
                            + '|'.join(COMPONENTS["week"]) + '))*|all)$'),
@@ -64,7 +64,10 @@ class CommandAddRebootSchedule(BrokerCommand):
             if key in arguments:
                 data = str(arguments.get(key))
                 if not validator.match(data):
-                    raise ArgumentError("key %s contains a bad value" % key)
+                    err = "Key '%s' contains an invalid value." % key
+                    if key in self.required_parameters:
+                        err += " Valid values are (%s)."  % '|'.join(self.COMPONENTS[key])
+                    raise ArgumentError( err)
 
                 if re.search(',', data):
                     dups = dict()
