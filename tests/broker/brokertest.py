@@ -27,9 +27,6 @@ from aquilon.worker import depends  # pylint: disable=W0611
 
 from networktest import DummyNetworks
 
-LOCK_RE = re.compile(r'^(acquired|releasing) exclusive\(.*\), shared\(.*\)\n',
-                     re.M)
-
 DSDB_EXPECT_SUCCESS_FILE = "expected_dsdb_cmds"
 DSDB_EXPECT_FAILURE_FILE = "fail_expected_dsdb_cmds"
 DSDB_EXPECT_FAILURE_ERROR = "fail_expected_dsdb_error"
@@ -184,7 +181,6 @@ class TestBrokerCommand(unittest.TestCase):
         # Lock messages are pretty common...
         err = err.replace('Client status messages disabled, '
                           'retries exceeded.\n', '')
-        err = LOCK_RE.sub('', err)
         return (p, out, err)
 
     def successtest(self, command, **kwargs):

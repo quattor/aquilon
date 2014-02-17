@@ -45,15 +45,13 @@ class LockQueue(object):
         self.queue = []
 
     def acquire(self, key):
-        key.transition("acquiring", debug=True)
+        key.transition("acquiring")
         with self.queue_condition:
             if key in self.queue:
                 raise InternalError("Duplicate attempt to aquire %s with the "
                                     "same key." % key)
             self.queue.append(key)
             while self.blocked(key):  # pragma: no cover
-                key.log("requesting %s with %s others waiting",
-                        key, key.blocker_count)
                 self.queue_condition.wait()
             key.transition("acquired")
 
@@ -64,25 +62,25 @@ class LockQueue(object):
         blockers and let it know if it is in line.
 
         """
-        key.reset_blockers()
-        is_blocked = False
+        blocker_count = 0
         for k in self.queue:
             if k == key:
-                return is_blocked
-            if k.blocks(key):
-                key.register_blocker(k)
-                is_blocked = True
+                break
+            blockers = k.blocks(key)
+            if blockers:
+                blocker_count += 1
+                key.log("Blocking on %s" % ", ".join(sorted(list(blockers))))
         # Can only get here if the key is not in the queue - seems
         # like a valid theoretical question to ask - in which case
         # the method is "would queued keys block this one?"
-        return is_blocked
+        return blocker_count > 0
 
     def release(self, key):
         key.transition("releasing")
         with self.queue_condition:
             self.queue.remove(key)
             self.queue_condition.notifyAll()
-        key.transition("released", debug=True)
+        key.transition("released")
 
 
 class LockKey(object):
@@ -98,7 +96,6 @@ class LockKey(object):
         self.exclusive = defaultdict(set)
         self.logger = logger
         self.loglevel = loglevel
-        self.blocker_count = None
         self.lock_queue = lock_queue
         self.state = None
 
@@ -129,7 +126,7 @@ class LockKey(object):
     def log(self, *args, **kwargs):
         self.logger.log(self.loglevel, *args, **kwargs)
 
-    def transition(self, state, debug=False):
+    def transition(self, state):
         # Sanity checking. Locks in the queue may be touched from other threads,
         # and if a key is a DB object, that may trigger trying to access the
         # underlying DB connection from the wrong thread, which in turn leads to
@@ -142,16 +139,7 @@ class LockKey(object):
                         raise ValueError("Lock key contains %r" % key)
 
         self.state = state
-        if debug:
-            self.logger.debug('%s %s', state, self)
-        else:
-            self.log('%s %s', state, self)
-
-    def reset_blockers(self):
-        self.blocker_count = 0
-
-    def register_blocker(self, key):
-        self.blocker_count += 1
+        self.logger.debug('%s %s', state, self)
 
     def blocks(self, key):
         """Determine if this key blocks another.
@@ -161,16 +149,22 @@ class LockKey(object):
             - our shared set intersects with their exclusive
         """
 
+        blockers = set()
+
         for name, items in self.exclusive.iteritems():
-            if (name in key.exclusive and items & key.exclusive[name]) or \
-               (name in key.shared and items & key.shared[name]):
-                return True
+            if name in key.exclusive:
+                blockers.update(["%s/%s" % (name, item)
+                                 for item in items & key.exclusive[name]])
+            if name in key.shared:
+                blockers.update(["%s/%s" % (name, item)
+                                 for item in items & key.shared[name]])
 
         for name, items in self.shared.iteritems():
             if name in key.exclusive and items & key.exclusive[name]:
-                return True
+                blockers.update(["%s/%s" % (name, item)
+                                 for item in items & key.exclusive[name]])
 
-        return False
+        return blockers
 
     @staticmethod
     def merge(keylist):
