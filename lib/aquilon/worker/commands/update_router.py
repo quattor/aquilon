@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2009,2010,2011,2012,2013  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013,2014  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,28 +16,14 @@
 # limitations under the License.
 """Contains the logic for `aq update router`."""
 
-from aquilon.exceptions_ import ArgumentError
+
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.aqdb.model import RouterAddress, Building, ARecord
+from aquilon.worker.commands.update_router_address import CommandUpdateRouterAddress
 
 
-class CommandUpdateRouter(BrokerCommand):
+class CommandUpdateRouter(CommandUpdateRouterAddress):
 
-    def render(self, session, fqdn, ip, building, comments, **arguments):
-        if fqdn:
-            dbdns_rec = ARecord.get_unique(session, fqdn, compel=True)
-            ip = dbdns_rec.ip
-        if not ip:
-            raise ArgumentError("Please specify either --ip or --fqdn.")
+    required_parameters = []
 
-        router = RouterAddress.get_unique(session, ip=ip, compel=True)
-
-        if building:
-            dbbuilding = Building.get_unique(session, name=building,
-                                             compel=True)
-            router.location = dbbuilding
-
-        if comments:
-            router.comments = comments
-
-        session.flush()
+    def render(self, **arguments):
+        return CommandUpdateRouterAddress.render(self, **arguments)

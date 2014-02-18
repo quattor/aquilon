@@ -1537,6 +1537,58 @@
       <transport method="post" path="router" />
    </command>
 
+   <command name="add_router_address">
+      Add a router address.
+      <optgroup name="add_router_address_mandatory" mandatory="True" fields="all">
+         <option name="fqdn" type="string">Name of the router</option>
+      </optgroup>
+      <optgroup name="add_router_address_optional" mandatory="False" fields="any">
+         <option name="network_environment" type="string">Network environment (default: internal)</option>
+         <option name="building" type="string">Building where the router is located</option>
+         <option name="ip" type="ipv4">IP address of the router</option>
+         <option name="comments" type="string">Comments</option>
+      </optgroup>
+      <transport method="post" path="router_address" />
+   </command>
+
+   <command name="del_router_address">
+      Delete a router address.
+      <optgroup name="del_router_address_opts" mandatory="True" fields="any">
+         <option name="fqdn" type="string" conflicts="ip">Name of the router</option>
+         <option name="ip" type="ipv4" conflicts="fqdn">IP address of the router</option>
+      </optgroup>
+      <optgroup name="del_router_address_optional" mandatory="False" fields="any">
+         <option name="network_environment" type="string">Network environment (default: internal)</option>
+      </optgroup>
+      <transport method="delete" path="router_address" />
+   </command>
+
+   <command name="show_router_address">
+      Display a router address.
+      <optgroup name="show_router_address_opts" mandatory="False" fields="any">
+         <option name="fqdn" type="string" conflicts="ip all">Name of the router</option>
+         <option name="ip" type="ipv4" conflicts="fqdn all">IP address of the router</option>
+         <option name="all" type="flag" conflicts="ip fqdn">Show all routers</option>
+      </optgroup>
+      <optgroup name="del_router_address_optional" mandatory="False" fields="any">
+         <option name="network_environment" type="string">Network environment (default: internal)</option>
+      </optgroup>
+      <transport method="get" path="router_address" />
+   </command>
+
+   <command name="update_router_address">
+      Update router information.
+      <optgroup name="update_router_address_opts" mandatory="True" fields="any">
+         <option name="fqdn" type="string" conflicts="ip all">Name of the router</option>
+         <option name="ip" type="ipv4" conflicts="fqdn all">IP address of the router</option>
+      </optgroup>
+      <optgroup name="update_router_address_settings" mandatory="False" fields="any">
+         <option name="building" type="string">Building where the router is located</option>
+         <option name="comments" type="string">Router comments</option>
+      </optgroup>
+      <transport method="put" path="router_address" />
+   </command>
+
    <command name="add_static_route">
       Add a static route.
       <optgroup name="add_static_route_mandatory" mandatory="True" fields="all">
