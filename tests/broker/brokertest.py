@@ -629,7 +629,7 @@ class TestBrokerCommand(unittest.TestCase):
                            new_iface=None, fail=False):
         command = ["update_aqd_host", "-host_name", fqdn]
         if new_fqdn:
-            command.extend(["-primary_host_name", new_fqdn])
+            command.extend(["-new_host_name", new_fqdn])
         if iface:
             command.extend(["-interface_name", iface])
         if new_iface:
