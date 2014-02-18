@@ -53,11 +53,11 @@ class TestSplitMergeNetwork(TestBrokerCommand):
         self.dsdb_verify()
 
     def test_120_add_routers(self):
-        self.noouttest(["add", "router", "--ip", "0.2.2.1",
+        self.noouttest(["add", "router", "address", "--ip", "0.2.2.1",
                         "--fqdn", "rtr1-merge1.aqd-unittest.ms.com"])
-        self.noouttest(["add", "router", "--ip", "0.2.2.193",
+        self.noouttest(["add", "router", "address", "--ip", "0.2.2.193",
                         "--fqdn", "rtr2-merge1.aqd-unittest.ms.com"])
-        self.noouttest(["add", "router", "--ip", "0.2.3.129",
+        self.noouttest(["add", "router", "address", "--ip", "0.2.3.129",
                         "--fqdn", "rtr1-merge2.aqd-unittest.ms.com"])
 
     def test_200_merge1(self):

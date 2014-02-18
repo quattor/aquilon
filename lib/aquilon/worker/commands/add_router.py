@@ -26,4 +26,7 @@ class CommandAddRouter(CommandAddRouterAddress):
     required_parameters = ["fqdn"]
 
     def render(self, **arguments):
+        self.deprecated_command("Command add_router is deprecated. "
+                                "Please use add_router_address instead.",
+                                **arguments)
         return CommandAddRouterAddress.render(self, **arguments)

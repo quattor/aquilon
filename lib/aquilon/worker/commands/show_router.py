@@ -26,4 +26,7 @@ class CommandShowRouter(CommandShowRouterAddress):
     required_parameters = []
 
     def render(self, **arguments):
+        self.deprecated_command("Command show_router is deprecated. "
+                                "Please use show_router_address instead.",
+                                **arguments)
         return CommandShowRouterAddress.render(self, **arguments)

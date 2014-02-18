@@ -26,4 +26,7 @@ class CommandDelRouter(CommandDelRouterAddress):
     required_parameters = []
 
     def render(self, **arguments):
+        self.deprecated_command("Command del_router is deprecated. "
+                                "Please use del_router_address instead.",
+                                **arguments)
         return CommandDelRouterAddress.render(self, **arguments)
