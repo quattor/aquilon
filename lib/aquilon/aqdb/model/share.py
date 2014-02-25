@@ -36,14 +36,14 @@ class Share(Resource):
                 primary_key=True)
 
     # threshold for Storage I/O Control throttle in millisecs.
-    latency_threshold = Column(Integer, default=20)
+    latency_threshold = Column(Integer)
 
     @validates('latency_threshold')
     def validate_latency_threshold(self, key, value):
         if value:
             value = int(value)
-            if value <= 0 :
-                raise ArgumentError("The %s must be greater then 0." % key)
+            if value != 0 and  value < 20 :
+                raise ArgumentError("The value of %s must be either zero, or at least 20." % key)
         return value
 
     def __init__(self, *args, **kwargs):

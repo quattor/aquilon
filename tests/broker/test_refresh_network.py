@@ -96,7 +96,7 @@ class TestRefreshNetwork(TestBrokerCommand):
         self.noouttest(["add", "network", "--network", "wrong-params",
                         "--ip", "172.31.29.0", "--netmask", "255.255.255.128",
                         "--side", "a", "--type", "transit", "--building", "ut"])
-        self.noouttest(["add", "router", "--ip", "172.31.29.3",
+        self.noouttest(["add", "router", "address", "--ip", "172.31.29.3",
                         "--fqdn", "extrartr.aqd-unittest.ms.com"])
 
     def test_135_syncagain(self):
@@ -134,7 +134,7 @@ class TestRefreshNetwork(TestBrokerCommand):
         command = ["add_network", "--network=0.1.1.0", "--ip=0.1.1.0",
                    "--prefixlen=24", "--building=np"]
         self.noouttest(command)
-        command = ["add", "router", "--ip", "0.1.1.1",
+        command = ["add", "router", "address", "--ip", "0.1.1.1",
                    "--fqdn", "dummydyn.aqd-unittest.ms.com"]
         self.noouttest(command)
 

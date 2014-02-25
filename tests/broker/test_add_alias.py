@@ -174,6 +174,73 @@ class TestAddAlias(TestBrokerCommand):
                          "alias4alias.aqd-unittest.ms.com",
                          cmd)
 
+    def test_700_show_alias_host(self):
+        command = ["add", "alias", "--fqdn", "alias0.aqd-unittest.ms.com",
+                   "--target", "unittest20-e0.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+
+        command = ["add", "alias", "--fqdn", "alias01.aqd-unittest.ms.com",
+                   "--target", "alias0.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+
+        command = ["show", "host", "--hostname", "unittest20.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.searchoutput(out, r'Provides: unittest20-e0.aqd-unittest.ms.com \[4.2.12.5\]\s*'
+                               r'Aliases: alias0.aqd-unittest.ms.com, alias01.aqd-unittest.ms.com',
+                          command)
+
+        command = ["show", "host", "--hostname", "unittest20.aqd-unittest.ms.com",
+                   "--format", "proto"]
+        out = self.commandtest(command)
+        hostlist = self.parse_hostlist_msg(out, expect=1)
+        host = hostlist.hosts[0]
+        self.failUnlessEqual(host.hostname, 'unittest20')
+        int = host.machine.interfaces[0]
+        self.failUnlessEqual(int.aliases[0], 'alias0.aqd-unittest.ms.com')
+        self.failUnlessEqual(int.aliases[1], 'alias01.aqd-unittest.ms.com')
+        self.failUnlessEqual(int.ip, '4.2.12.5')
+        self.failUnlessEqual(int.fqdn, 'unittest20-e0.aqd-unittest.ms.com')
+
+        command = ["del", "alias", "--fqdn", "alias01.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+
+        command = ["del", "alias", "--fqdn", "alias0.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+
+    def test_710_show_alias_host(self):
+        command = ["add", "alias", "--fqdn", "alias1.aqd-unittest.ms.com",
+                   "--target", "unittest20-e1-1.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+
+        command = ["add", "alias", "--fqdn", "alias11.aqd-unittest.ms.com",
+                   "--target", "alias1.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+
+        command = ["show", "host", "--hostname", "unittest20.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.searchoutput(out, r'Provides: unittest20-e1-1.aqd-unittest.ms.com \[4.2.12.72\] \(label: e1\)\s*'
+                               r'Aliases: alias1.aqd-unittest.ms.com, alias11.aqd-unittest.ms.com',
+                          command)
+
+        command = ["show", "host", "--hostname", "unittest20.aqd-unittest.ms.com",
+                   "--format", "proto"]
+        out = self.commandtest(command)
+        hostlist = self.parse_hostlist_msg(out, expect=1)
+        host = hostlist.hosts[0]
+        self.failUnlessEqual(host.hostname, 'unittest20')
+        int = host.machine.interfaces[5]
+        self.failUnlessEqual(int.aliases[0], 'alias1.aqd-unittest.ms.com')
+        self.failUnlessEqual(int.aliases[1], 'alias11.aqd-unittest.ms.com')
+        self.failUnlessEqual(int.ip, '4.2.12.72')
+        self.failUnlessEqual(int.fqdn, 'unittest20-e1-1.aqd-unittest.ms.com')
+
+        command = ["del", "alias", "--fqdn", "alias11.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+
+        command = ["del", "alias", "--fqdn", "alias1.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddAlias)

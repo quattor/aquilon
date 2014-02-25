@@ -81,7 +81,7 @@ class TestAddShare(TestBrokerCommand):
                          command)
         self.matchoutput(out, "Disk Count: 0", command)
         self.matchoutput(out, "Machine Count: 0", command)
-        self.matchoutput(out, "Latency threshold: 20", command)
+        self.matchclean(out, "Latency", command)
         self.matchclean(out, "Comments", command)
         self.matchclean(out, "Share: test_share_2", command)
 
@@ -93,24 +93,42 @@ class TestAddShare(TestBrokerCommand):
                               " and cannot be modified", command)
 
     def testupdatesharefail_2(self):
-        command = ["update_share", "--share=test_share_1", "--latency_threshold=-10",
+        command = ["update_share", "--share=test_share_1", "--latency_threshold=10",
                         "--comments=updated comment"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "The latency_threshold must be greater then 0", command)
-
-    def testupdatesharefail_3(self):
-        command = ["update_share", "--share=test_share_1", "--latency_threshold=0",
-                        "--comments=updated comment"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out, "The latency_threshold must be greater then 0", command)
+        self.matchoutput(out, 'The value of latency_threshold must be either zero, or at least 20.', command)
 
     def testupdateshare_1(self):
+        command = ["update_share", "--share=test_share_1", "--latency_threshold=0",
+                        "--comments=updated comment"]
+        out = self.commandtest(command)
+
+        command = ["show_share", "--share=test_share_1"]
+        out = self.commandtest(command)
+        self.matchclean(out, "Latency", command)
+
+        for cluster in ("utecl1", "utecl2", "utecl3", "utecl13"):
+            command = ["show_share", "--share=test_share_1", "--cluster=%s" % cluster]
+            out = self.commandtest(command)
+            self.matchclean(out, "Latency", command)
+
+            command = ["cat", "--share=test_share_1", "--cluster=%s" % cluster,
+                       "--generate"]
+            out = self.commandtest(command)
+            self.matchoutput(out, '"name" = "test_share_1";', command)
+            self.matchclean(out, 'latency_threshold', command)
+
+
+    def testupdateshare_2(self):
+        command = ["update_share", "--share=test_share_1", "--latency_threshold=20",
+                        "--comments=updated comment"]
+        out = self.commandtest(command)
         command = ["show_share", "--share=test_share_1"]
         out = self.commandtest(command)
         self.matchoutput(out, "Latency threshold: 20", command)
 
-    def testupdateshare_2(self):
-        self.noouttest(["update_share", "--share=test_share_1", "--latency_threshold=10",
+    def testupdateshare_3(self):
+        self.noouttest(["update_share", "--share=test_share_1", "--latency_threshold=30",
                         "--comments=updated comment"])
 
         for cluster in ("utecl1", "utecl2", "utecl3", "utecl13"):
@@ -119,13 +137,13 @@ class TestAddShare(TestBrokerCommand):
             self.matchoutput(out, "Share: test_share_1", command)
             self.matchoutput(out, "Bound to: ESX Cluster %s" % cluster, command)
             self.matchoutput(out, "Comments: updated comment", command)
-            self.matchoutput(out, "Latency threshold: 10", command)
+            self.matchoutput(out, "Latency threshold: 30", command)
 
             command = ["cat", "--share=test_share_1", "--cluster=%s" % cluster,
                        "--generate"]
             out = self.commandtest(command)
             self.matchoutput(out, '"name" = "test_share_1";', command)
-            self.matchoutput(out, '"latency_threshold" = 10;', command)
+            self.matchoutput(out, '"latency_threshold" = 30;', command)
 
     def testverifynotinnasobjects(self):
         command = ["show_share", "--cluster", "utecl1",

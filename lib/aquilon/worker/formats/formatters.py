@@ -257,6 +257,12 @@ class ObjectFormatter(object):
                     int_msg.mac = str(iface.mac)
                 int_msg.ip = str(addr.ip)
                 int_msg.bootable = iface.bootable
+                int_msg.fqdn = str(addr.fqdns[0])
+                for dns_record in addr.dns_records:
+                    if dns_record.alias_cnt:
+                        int_msg.aliases.extend(str(a.fqdn)
+                                for a in dns_record.all_aliases)
+
             # Add entries for interfaces that do not have any addresses
             if not has_addrs:
                 int_msg = host_msg.machine.interfaces.add()

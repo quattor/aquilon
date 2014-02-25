@@ -34,7 +34,7 @@ class RebootSchedule(Resource):
 
     # str representation of time '00:00'
     time = Column(String(5), nullable=True)
-    # str comma sep list of weeks 1-5
+    # str comma sep list of weeks 1-4
     week = Column(String(16), nullable=False)
     # str short day (long enough to accept a comma sep list, but for now we're
     # only accepting one).

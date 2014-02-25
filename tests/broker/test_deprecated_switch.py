@@ -64,7 +64,7 @@ class TestDeprecatedSwitch(TestBrokerCommand):
         self.dsdb_verify()
 
     def test_200_update_switch(self):
-        self.dsdb_expect_update(self.fqdn_pri, comments="LANWAN")
+        self.dsdb_expect_update(self.fqdn_pri, iface='xge48', comments="LANWAN")
         self.dsdb_expect_update(self.fqdn_vlan, iface='vlan980', comments="LANWAN")
         command = ["update", "switch",
                    "--switch", self.fqdn_pri,

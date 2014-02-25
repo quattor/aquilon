@@ -428,12 +428,12 @@ class DSDBRunner(object):
                     "-building_addr", old_addr]
         self.add_action(command, rollback)
 
-    def add_host_details(self, fqdn, ip, interface=None, mac=None, primary=None,
-                         comments=None):
+    def add_host_details(self, fqdn, ip, iface=None, mac=None, primary=None,
+                         comments=None, **kwargs):
         command = ["add_host", "-host_name", fqdn,
                    "-ip_address", ip, "-status", "aq"]
-        if interface:
-            command.extend(["-interface_name", self.normalize_iface(interface)])
+        if iface:
+            command.extend(["-interface_name", self.normalize_iface(iface)])
         if mac:
             command.extend(["-ethernet_address", mac])
         if primary and str(primary) != str(fqdn):
@@ -446,30 +446,28 @@ class DSDBRunner(object):
 
     def update_host_details(self, fqdn, iface=None, new_ip=None, new_mac=None,
                             new_comments=None, old_ip=None, old_mac=None,
-                            old_comments=None, primary=None):
+                            old_comments=None, **kwargs):
         command = ["update_aqd_host", "-host_name", fqdn]
-        need_iface = False
+        if iface:
+            iface = self.normalize_iface(iface)
+            command.extend(["-interface_name", iface])
+
         rollback = command[:]
 
         if new_ip and new_ip != old_ip:
             command.extend(["-ip_address", new_ip])
             rollback.extend(["-ip_address", old_ip])
-            need_iface = True
         if new_mac and new_mac != old_mac:
             command.extend(["-ethernet_address", new_mac])
             rollback.extend(["-ethernet_address", old_mac])
-            need_iface = True
         if new_comments != old_comments:
             command.extend(["-comments", new_comments or ""])
             rollback.extend(["-comments", old_comments or ""])
-        if (need_iface or primary) and iface:
-            iface = self.normalize_iface(iface)
-            command.extend(["-interface_name", iface])
-            rollback.extend(["-interface_name", iface])
 
         self.add_action(command, rollback)
 
-    def update_host_iface_name(self, old_fqdn, new_fqdn, old_iface, new_iface):
+    def update_host_iface_name(self, old_fqdn, new_fqdn,
+                               old_iface, new_iface, **kwargs):
         old_iface = self.normalize_iface(old_iface)
         new_iface = self.normalize_iface(new_iface)
         command = ["update_aqd_host", "-host_name", old_fqdn]
@@ -488,7 +486,7 @@ class DSDBRunner(object):
         self.add_action(command, rollback)
 
     def delete_host_details(self, fqdn, ip, iface=None, mac=None, primary=None,
-                            comments=None):
+                            comments=None, **kwargs):
         command = ["delete_host", "-ip_address", ip]
         rollback = ["add_host", "-host_name", fqdn,
                     "-ip_address", ip, "-status", "aq"]
@@ -524,7 +522,9 @@ class DSDBRunner(object):
         """
 
         real_primary = dbhw_ent.fqdn
-        status = {"by-ip": {}, "by-fqdn": {}, "primary": real_primary}
+        hwdata = {"by-ip": {},
+                  "by-fqdn": {},
+                  "primary": real_primary}
 
         # We need a stable index for generating virtual interface names for
         # DSDB. Sort the Zebra IPs and use the list index for this purpose.
@@ -534,52 +534,65 @@ class DSDBRunner(object):
         # always the first one.
         zebra_ips = []
         for addr in dbhw_ent.all_addresses():
-            if not addr.network.is_internal:
-                continue
-            if not addr.service_address or \
-               addr.service_address.holder.holder_type != 'host' or \
-               addr.ip in zebra_ips:
-                continue
-            zebra_ips.append(addr.ip)
+            if addr.network.is_internal and \
+               addr.service_address and \
+               addr.service_address.holder.holder_type == 'host' and \
+               addr.ip not in zebra_ips:
+                    zebra_ips.append(addr.ip)
         zebra_ips.sort()
         if dbhw_ent.primary_ip and dbhw_ent.primary_ip in zebra_ips:
             zebra_ips.remove(dbhw_ent.primary_ip)
             zebra_ips.insert(0, dbhw_ent.primary_ip)
 
+        # For each of the addresses held by this hardware_entity we need to
+        # create an entry in DSDB.  The following loop makes a snapshot of
+        # expected state of the information in DSDB.
         for addr in dbhw_ent.all_addresses():
+            # Do not propergate to DSDB if the network is not internal, or
+            # there are no FQDN's associated with this address.
             if not addr.network.is_internal:
                 continue
-            if addr.fqdns:
-                fqdn = str(addr.fqdns[0])
-            else:
+            if not addr.fqdns:
                 continue
 
+            # In AQDB there may be multiple domain names associated with
+            # an address, in DSDB there can only be one.  Thus we pick
+            # the first address to propergate.
+            fqdn = str(addr.fqdns[0])
+
+            # By default we take the comments from the hardware_entity,
+            # if an interface comment exists then this will be taken
+            # in preference.  Management interfaces are added as stand-alone
+            # entries, therefore we do not take the hardware_entity comment
+            # but allow the following code to take it from the interface.
             if addr.interface.interface_type != 'management':
-                # TODO: This works for switches, but for hosts we eventually
-                # want to propagate dbhwent.host.comments instead of
-                # dbhw_ent.comments. On the other hand we have plans to attach
-                # Host objects to switches; if we do that, then we may switch to
-                # using dbhwent.host.comments unconditionally.
                 comments = dbhw_ent.comments
             else:
-                # Do not propagate machine comments to managers
                 comments = None
 
-            # Zebra: in AQDB the address is assigned to multiple existing
-            # interfaces. In DSDB however, we need just a single virtual
-            # interface
+            # Determine the interface name and comments used by this address.
             if addr.ip in zebra_ips:
-                ifname = "le%d" % zebra_ips.index(addr.ip)
+                # Zebra: in AQDB the address is assigned to multiple existing
+                # interfaces. In DSDB however, we need just a single virtual
+                # interface
+                iface = "le%d" % zebra_ips.index(addr.ip)
             elif addr.service_address:
                 # Skip cluster-bound service addresses
                 continue
             else:
-                ifname = addr.logical_name
-                if addr.interface.comments:
+                iface = addr.logical_name
+                if addr.interface.comments and not \
+                   addr.interface.comments.startswith("Created automatically"):
                     comments = addr.interface.comments
 
+            # Determine if we need to specify a primary name to DSDB.  By
+            # doing so we are associating this record with another.
+            # Note, the existance of a primary hostname effects the order
+            # that entriers are processed in update_host()
             if addr.interface.interface_type == "management":
                 # Do not use -primary_host_name for the management address
+                # as we do not wish to associate them with the host currently
+                # on the machine (which may change).
                 primary = None
             elif addr.service_address:
                 # Do not use -primary_host_name for service addresses, because
@@ -587,30 +600,30 @@ class DSDBRunner(object):
                 primary = None
             elif fqdn == real_primary:
                 # Do not set the 'primary' key for the real primary name.
-                # update_host() uses this hint for issuing the operations in the
-                # correct order
                 primary = None
             else:
+                # In all other cases associate the record with the primary name.
                 primary = real_primary
-
-            statrec = {'name': ifname,
-                       'ip': addr.ip,
-                       'fqdn': fqdn,
-                       'primary': primary,
-                       'comments': comments}
 
             # Exclude the MAC address for aliases
             if addr.label:
-                statrec["mac"] = None
+                mac = None
             else:
-                statrec["mac"] = addr.interface.mac
+                mac = addr.interface.mac
 
-            status["by-ip"][statrec["ip"]] = statrec
-            status["by-fqdn"][statrec["fqdn"]] = statrec
+            ifdata = {'iface': iface,
+                      'ip': addr.ip,
+                      'mac': mac,
+                      'fqdn': fqdn,
+                      'primary': primary,
+                      'comments': comments}
 
-        return status
+            hwdata["by-ip"][ifdata["ip"]] = ifdata
+            hwdata["by-fqdn"][ifdata["fqdn"]] = ifdata
 
-    def update_host(self, dbhw_ent, oldinfo):
+        return hwdata
+
+    def update_host(self, dbhw_ent, old_hwdata):
         """Update a dsdb host entry.
 
         The calling code (the aq update_interface command) treats the
@@ -624,89 +637,91 @@ class DSDBRunner(object):
         Please note that in case of zebra interfaces adding a new ip address
         to the same interface may result in adding/removing DSDB entries.
         """
-        newinfo = self.snapshot_hw(dbhw_ent)
+        new_hwdata = self.snapshot_hw(dbhw_ent)
 
-        if not oldinfo:
-            oldinfo = {"by-ip": {}, "by-fqdn": {}, "primary": None}
+        if not old_hwdata:
+            old_hwdata = {"by-ip": {},
+                          "by-fqdn": {},
+                          "primary": None}
 
         deletes = []
         adds = []
         # Host/interface names cannot be updated simultaneously with IP/MAC
         # addresses or comments
-        updates = []
+        addr_updates = []
         name_updates = []
 
-        # Construct the list of operations
-        for key, attrs in oldinfo["by-fqdn"].items():
-            if key in newinfo["by-fqdn"]:
-                newattrs = newinfo["by-fqdn"][key]
-            elif attrs["ip"] in newinfo["by-ip"]:
-                newattrs = newinfo["by-ip"][attrs["ip"]]
+        # Run through all of the entries in the old snapshot and attempt
+        # to match them to their corrisponding new entry.
+        for fqdn, old_ifdata in old_hwdata["by-fqdn"].items():
+            # Locate the new information about this address by either
+            # its FQDN or IP address.
+            if fqdn in new_hwdata["by-fqdn"]:
+                new_ifdata = new_hwdata["by-fqdn"][fqdn]
+            elif old_ifdata["ip"] in new_hwdata["by-ip"]:
+                new_ifdata = new_hwdata["by-ip"][old_ifdata["ip"]]
             else:
-                newattrs = None
+                new_ifdata = None
 
             # If either the old or the new entry is bound to a primary name but
-            # the other is not, then we have to delete & re-add it.
-            if newattrs and bool(attrs["primary"]) != bool(newattrs["primary"]):
-                newattrs = None
+            # the other is not, then we have to delete & re-add it.  Note this
+            # will be re-added in the following loop as we did not delete the
+            # entry from new_hwdata.
+            if new_ifdata and bool(old_ifdata["primary"]) != bool(new_ifdata["primary"]):
+                new_ifdata = None
 
-            if not newattrs:
-                deletes.append(attrs)
-            else:
-                if attrs['ip'] != newattrs['ip'] or \
-                   attrs['mac'] != newattrs['mac'] or \
-                   attrs['comments'] != newattrs['comments']:
-                    updates.append({'fqdn': attrs['fqdn'],
-                                    'iface': attrs['name'],
-                                    'oldip': attrs['ip'],
-                                    'newip': newattrs['ip'],
-                                    'oldmac': attrs['mac'],
-                                    'newmac': newattrs['mac'],
-                                    'oldcomments': attrs['comments'],
-                                    'newcomments': newattrs['comments'],
-                                    'primary': attrs['primary']})
+            # If there is no new data then record a delete (note above).
+            if not new_ifdata:
+                deletes.append(old_ifdata)
+                continue
 
-                if attrs['fqdn'] != newattrs['fqdn'] or \
-                   attrs['name'] != newattrs['name']:
-                    name_updates.append({"oldfqdn": attrs['fqdn'],
-                                         "newfqdn": newattrs['fqdn'],
-                                         "oldiface": attrs['name'],
-                                         "newiface": newattrs['name']})
+            # Create a dict with entries in old_ifdata prefiexd with 'old_'
+            # and entries in new_ifdata prefixed with 'new_'
+            kwargs = dict((p+k, v) \
+                          for (p, d) in [('old_',old_ifdata), \
+                                         ('new_',new_ifdata)] \
+                          for k, v in d.iteritems())
 
-                del newinfo["by-fqdn"][newattrs["fqdn"]]
-                del newinfo["by-ip"][newattrs["ip"]]
+            if old_ifdata['ip'] != new_ifdata['ip'] or \
+               old_ifdata['mac'] != new_ifdata['mac'] or \
+               old_ifdata['comments'] != new_ifdata['comments']:
+                addr_updates.append(kwargs)
 
-        for key, attrs in newinfo["by-fqdn"].items():
-            adds.append(attrs)
+            if old_ifdata['fqdn'] != new_ifdata['fqdn'] or \
+               old_ifdata['iface'] != new_ifdata['iface']:
+                name_updates.append(kwargs)
+
+            # Delete the entries from new_hwdata.  We have recorded an
+            # update.  The contents of new_hwdata is used in the following
+            # loop to record additions.
+            del new_hwdata["by-fqdn"][new_ifdata["fqdn"]]
+            del new_hwdata["by-ip"][new_ifdata["ip"]]
+
+        # For all of the recoreds remaining in new_hwdata (see above)
+        # record an addtion opperation.
+        adds = new_hwdata["by-fqdn"].values()
 
         # Add the primary address first, and delete it last. The primary address
         # is identified by having an empty ['primary'] key (this is true for the
         # management address as well, but that does not matter).
-        adds.sort(lambda x, y: cmp(x['primary'] or "", y['primary'] or ""))
-        deletes.sort(lambda x, y: cmp(x['primary'] or "", y['primary'] or ""),
-                     reverse=True)
+        sort_by_primary = lambda x, y: cmp(x['primary'] or "", y['primary'] or "")
+        adds.sort(sort_by_primary)
+        deletes.sort(sort_by_primary, reverse=True)
 
         for attrs in deletes:
-            self.delete_host_details(attrs['fqdn'], attrs['ip'],
-                                     attrs['name'], attrs['mac'],
-                                     attrs['primary'], attrs['comments'])
+            self.delete_host_details(**attrs)
 
-        for attrs in updates:
-            self.update_host_details(attrs['fqdn'], attrs['iface'],
-                                     attrs['newip'], attrs['newmac'],
-                                     attrs['newcomments'],
-                                     attrs['oldip'], attrs['oldmac'],
-                                     attrs['oldcomments'],
-                                     attrs['primary'])
+        for kwargs in addr_updates:
+            # The old FQDN and interface name are the fixed point
+            self.update_host_details(fqdn=kwargs['old_fqdn'],
+                                     iface=kwargs['old_iface'],
+                                     **kwargs)
 
-        for attrs in name_updates:
-            self.update_host_iface_name(attrs['oldfqdn'], attrs['newfqdn'],
-                                        attrs['oldiface'], attrs['newiface'])
+        for kwargs in name_updates:
+            self.update_host_iface_name(**kwargs)
 
         for attrs in adds:
-            self.add_host_details(attrs['fqdn'], attrs['ip'],
-                                  attrs['name'], attrs['mac'],
-                                  attrs['primary'], attrs['comments'])
+            self.add_host_details(**attrs)
 
     def add_dns_domain(self, dns_domain, comments):
         if not comments:

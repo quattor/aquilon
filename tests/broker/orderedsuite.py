@@ -76,7 +76,8 @@ from test_add_model import TestAddModel
 from test_add_network import TestAddNetwork
 from test_add_network_environment import TestAddNetworkEnvironment
 from test_add_ns_record import TestAddNSRecord
-from test_add_router import TestAddRouter
+from test_deprecated_router import TestDeprecatedRouter
+from test_add_router_address import TestAddRouterAddress
 from test_add_metacluster import TestAddMetaCluster
 from test_add_esx_cluster import TestAddESXCluster
 from test_add_cluster import TestAddCluster
@@ -231,7 +232,7 @@ from test_del_chassis import TestDelChassis
 from test_del_netdev import TestDelNetworkDevice
 from test_del_esx_cluster import TestDelESXCluster
 from test_del_metacluster import TestDelMetaCluster
-from test_del_router import TestDelRouter
+from test_del_router_address import TestDelRouterAddress
 from test_del_network import TestDelNetwork
 from test_del_network_environment import TestDelNetworkEnvironment
 from test_del_model import TestDelModel
@@ -313,7 +314,8 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestAddChassis, TestUpdateChassis,
                      TestAddMachine, TestAddDisk, TestAddInterface,
                      TestAddAddress,
-                     TestAddRouter, TestAddDynamicRange,
+                     TestDeprecatedRouter,
+                     TestAddRouterAddress, TestAddDynamicRange,
                      TestAddAquilonHost, TestAddWindowsHost, TestAddAuroraHost,
                      TestPollNetworkDevice,
                      TestUpdateNetworkDeviceMac,
@@ -399,7 +401,7 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestDelShare,
                      TestDelCluster,
                      TestDelESXCluster, TestDelMetaCluster,
-                     TestDelRouter, TestDelNetwork, TestDelNetworkEnvironment,
+                     TestDelRouterAddress, TestDelNetwork, TestDelNetworkEnvironment,
                      TestDelModel, TestDelCpu, TestDelVendor,
                      TestDelFeature,
                      TestUnmapDnsDomain,

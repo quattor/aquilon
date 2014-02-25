@@ -15,7 +15,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Module for testing the add_router command."""
+"""Module for testing the add_router_address command."""
 
 if __name__ == "__main__":
     import utils
@@ -25,18 +25,18 @@ import unittest2 as unittest
 from brokertest import TestBrokerCommand
 
 
-class TestAddRouter(TestBrokerCommand):
+class TestAddRouterAddress(TestBrokerCommand):
 
     def testaddrouter(self):
         net = self.net["verari_eth1"]
-        command = ["add", "router", "--ip", net.gateway,
+        command = ["add", "router", "address", "--ip", net.gateway,
                    "--fqdn", "ut3gd1r04-v109-hsrp.aqd-unittest.ms.com",
                    "--building", "ut", "--comments", "Test router"]
         self.noouttest(command)
 
     def testaddrouteragain(self):
         net = self.net["verari_eth1"]
-        command = ["add", "router", "--ip", net.gateway,
+        command = ["add", "router", "address", "--ip", net.gateway,
                    "--fqdn", "ut3gd1r04-v110-hsrp.aqd-unittest.ms.com",
                    "--building", "ut"]
         out = self.badrequesttest(command)
@@ -46,7 +46,7 @@ class TestAddRouter(TestBrokerCommand):
     def testadddefaultrouter(self):
         net = self.net["routing3"]
         ip = net[3]
-        command = ["add", "router", "--ip", ip,
+        command = ["add", "router", "address", "--ip", ip,
                    "--fqdn", "ut3gd1r01-v111-hsrp.aqd-unittest.ms.com",
                    "--building", "ut", "--comments", "Test router"]
         self.noouttest(command)
@@ -54,7 +54,7 @@ class TestAddRouter(TestBrokerCommand):
     def testaddnormalhostasrouter(self):
         net = self.net["ut01ga2s01_v710"]
         ip = net.usable[0]
-        command = ["add", "router", "--ip", ip,
+        command = ["add", "router", "address", "--ip", ip,
                    "--fqdn", "not-a-router.aqd-unittest.ms.com",
                    "--building", "ut"]
         out = self.badrequesttest(command)
@@ -66,7 +66,7 @@ class TestAddRouter(TestBrokerCommand):
     def testaddreserved(self):
         net = self.net["tor_net_0"]
         ip = net.reserved[0]
-        command = ["add", "router", "--ip", ip,
+        command = ["add", "router", "address", "--ip", ip,
                    "--fqdn", "reserved-address.aqd-unittest.ms.com",
                    "--building", "ut"]
         out = self.badrequesttest(command)
@@ -81,20 +81,20 @@ class TestAddRouter(TestBrokerCommand):
             for rtr_idx in range(0, 2):
                 rtr = "ut3gd1r0%d-v%d-hsrp.aqd-unittest.ms.com" % (net_idx + 1,
                                                                    rtr_idx + 109)
-                command = ["add", "router", "--ip", net[rtr_idx + 1],
+                command = ["add", "router", "address", "--ip", net[rtr_idx + 1],
                            "--fqdn", rtr]
                 self.noouttest(command)
 
     def testaddvplsrouters(self):
         net = self.net["vpls"]
-        self.noouttest(["add", "router", "--ip", net[1], "--building", "ut",
+        self.noouttest(["add", "router", "address", "--ip", net[1], "--building", "ut",
                         "--fqdn", "utvplsgw.aqd-unittest.ms.com"])
-        self.noouttest(["add", "router", "--ip", net[2], "--building", "np",
+        self.noouttest(["add", "router", "address", "--ip", net[2], "--building", "np",
                         "--fqdn", "npvplsgw.aqd-unittest.ms.com"])
 
     def testshowrouter(self):
         net = self.net["verari_eth1"]
-        command = ["show", "router", "--ip", net.gateway]
+        command = ["show", "router", "address", "--ip", net.gateway]
         out = self.commandtest(command)
         self.matchoutput(out,
                          "Router: ut3gd1r04-v109-hsrp.aqd-unittest.ms.com [%s]"
@@ -112,13 +112,13 @@ class TestAddRouter(TestBrokerCommand):
 
     def testshowbadip(self):
         ip = self.net["tor_net_0"].gateway
-        command = ["show", "router", "--ip", ip]
+        command = ["show", "router", "address", "--ip", ip]
         out = self.notfoundtest(command)
         self.matchoutput(out, "Router with IP address %s not found." % ip,
                          command)
 
     def testshownotarouter(self):
-        command = ["show", "router",
+        command = ["show", "router", "address",
                    "--fqdn", "arecord13.aqd-unittest.ms.com"]
         out = self.notfoundtest(command)
         self.matchoutput(out,
@@ -126,7 +126,7 @@ class TestAddRouter(TestBrokerCommand):
                          command)
 
     def testshowrouterall(self):
-        command = ["show", "router", "--all"]
+        command = ["show", "router", "address", "--all"]
         out = self.commandtest(command)
         self.matchoutput(out, "Router: ut3gd1r01-v109-hsrp.aqd-unittest.ms.com", command)
         self.matchoutput(out, "Router: ut3gd1r01-v110-hsrp.aqd-unittest.ms.com", command)
@@ -141,20 +141,20 @@ class TestAddRouter(TestBrokerCommand):
         net = self.net["unknown0"].subnet()[0]
         # Test a different address assignment convention: router addresses are
         # at the end, not at the beginning
-        command = ["add", "router", "--ip", net[-2],
+        command = ["add", "router", "address", "--ip", net[-2],
                    "--fqdn", "gw1.excx.aqd-unittest.ms.com",
                    "--network_environment", "excx"]
         self.noouttest(command)
 
     def testaddutcolo(self):
         net = self.net["unknown1"]
-        command = ["add", "router", "--ip", net[2],
+        command = ["add", "router", "address", "--ip", net[2],
                    "--fqdn", "gw1.utcolo.aqd-unittest.ms.com",
                    "--network_environment", "utcolo"]
         self.noouttest(command)
 
     def testshowexcx(self):
-        command = ["show", "router", "--network_environment", "excx", "--all"]
+        command = ["show", "router", "address", "--network_environment", "excx", "--all"]
         out = self.commandtest(command)
         self.matchoutput(out, "Router: gw1.excx.aqd-unittest.ms.com", command)
         self.matchclean(out, "ut3gd1r01", command)

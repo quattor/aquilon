@@ -615,14 +615,14 @@ class TestBrokerCommand(unittest.TestCase):
     def dsdb_expect_update(self, fqdn, iface=None, ip=None, mac=None,
                            comments=None, fail=False):
         command = ["update_aqd_host", "-host_name", fqdn]
+        if iface:
+            command.extend(["-interface_name", iface])
         if ip:
             command.extend(["-ip_address", str(ip)])
         if mac:
             command.extend(["-ethernet_address", str(mac)])
         if comments:
             command.extend(["-comments", comments])
-        if iface:
-            command.extend(["-interface_name", iface])
         self.dsdb_expect(" ".join(command), fail=fail)
 
     def dsdb_expect_rename(self, fqdn, new_fqdn=None, iface=None,

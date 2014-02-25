@@ -67,9 +67,10 @@ class TestUpdateNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
         self.noouttest(command)
 
     def testupdatemisccomment(self):
-        # The interface name is commited from the DSDB update to ensure
-        # that the switch comments are propergated to DSDB correctly
+        # The following update should ommit the interface name
+        # when updating DSDB.
         self.dsdb_expect_update("ut3gd1r05.aqd-unittest.ms.com",
+                                iface="xge49",
                                 comments="LANWAN")
         command = ["update", "network_device",
                    "--network_device", "ut3gd1r05.aqd-unittest.ms.com",

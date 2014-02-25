@@ -15,7 +15,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Module for testing the del_router command."""
+"""Module for testing the del_router_address command."""
 
 if __name__ == "__main__":
     import utils
@@ -25,40 +25,40 @@ import unittest2 as unittest
 from brokertest import TestBrokerCommand
 
 
-class TestDelRouter(TestBrokerCommand):
+class TestDelRouterAddress(TestBrokerCommand):
 
     def testdelrouterbyip(self):
         net = self.net["verari_eth1"]
-        command = ["del", "router", "--ip", net.gateway]
+        command = ["del", "router", "address", "--ip", net.gateway]
         self.noouttest(command)
 
     def testdelrouterbyname(self):
-        command = ["del", "router",
+        command = ["del", "router", "address",
                    "--fqdn", "ut3gd1r01-v109-hsrp.aqd-unittest.ms.com"]
         self.noouttest(command)
 
     def testdelmissingrouter(self):
         net = self.net["unknown0"]
-        command = ["del", "router", "--ip", net.gateway]
+        command = ["del", "router", "address", "--ip", net.gateway]
         out = self.notfoundtest(command)
         self.matchoutput(out, "IP address %s is not a router on network %s." %
                          (net.gateway, net.name), command)
 
     def testverifyrouter(self):
-        command = ["show", "router", "--all"]
+        command = ["show", "router", "address", "--all"]
         out = self.commandtest(command)
         self.matchclean(out, str(self.net["tor_net_12"].gateway), command)
         self.matchclean(out, str(self.net["verari_eth1"].gateway), command)
 
     def testdelexcx(self):
         net = self.net["unknown0"].subnet()[0]
-        command = ["del", "router", "--ip", net[-2],
+        command = ["del", "router", "address", "--ip", net[-2],
                    "--network_environment", "excx"]
         self.noouttest(command)
 
     def testdelutcolo(self):
         net = self.net["unknown1"]
-        command = ["del", "router", "--ip", net[2],
+        command = ["del", "router", "address", "--ip", net[2],
                    "--network_environment", "utcolo"]
         self.noouttest(command)
 
