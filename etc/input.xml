@@ -2175,6 +2175,7 @@
          <option name="compilable" type="boolean">Can profiles be compiled?</option>
          <option name="description" type="string">A human-readable description of the archetype name</option>
          <option name="cluster_type" type="string">Only for cluster archetypes - what type of cluster is this?</option>
+         <option name="comments" type="string">Comments</option>
       </optgroup>
       <transport method="post" path="archetype/%(archetype)s" />
    </command>
@@ -2988,6 +2989,7 @@
          <option name="compilable" type="boolean" default='False'>Does this archetype produce profiles?</option>
          <option name="description" type="string">A human readable description of the archetype name</option>
          <option name="cluster_type" type="string">For cluster archetypes - what kind of cluster is this?</option>
+         <option name="comments" type="string">Comments</option>
       </optgroup>
       <transport method="put" path="archetype/%(archetype)s" />
   </command>

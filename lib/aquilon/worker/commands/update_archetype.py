@@ -15,10 +15,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from sqlalchemy.inspection import inspect
 
+from aquilon.aqdb.model import Archetype, Cluster, Host
 from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.aqdb.model import Archetype, Cluster, Host
 
 
 class CommandUpdateArchetype(BrokerCommand):
@@ -26,7 +27,7 @@ class CommandUpdateArchetype(BrokerCommand):
     required_parameters = ["archetype"]
 
     def render(self, session, archetype, compilable, cluster_type,
-               description, **kwargs):
+               description, comments, **kwargs):
         dbarchetype = Archetype.get_unique(session, archetype, compel=True)
 
         if compilable is not None:
@@ -35,18 +36,27 @@ class CommandUpdateArchetype(BrokerCommand):
         if description is not None:
             dbarchetype.outputdesc = description
 
+        if comments is not None:
+            dbarchetype.comments = comments
+
+        if cluster_type:
+            # Verify & normalize the value
+            cls = Cluster.polymorphic_subclass(cluster_type,
+                                               "Unknown cluster type")
+            cluster_type = inspect(cls).polymorphic_identity
+
         if cluster_type is not None and \
             dbarchetype.cluster_type != cluster_type:
+
             if dbarchetype.cluster_type is None:
-                q = session.query(Host)
+                q = session.query(Host.hardware_entity_id)
             else:
-                q = session.query(Cluster)
+                q = session.query(Cluster.id)
             q = q.join('personality').filter_by(archetype=dbarchetype)
             if q.count() > 0:
-                raise ArgumentError("The %s archetype is currently in use - "
-                                    "the cluster status cannot be "
-                                    "changed." %
-                                    dbarchetype.name)
+                raise ArgumentError("{0} is currently in use, the cluster "
+                                    "type cannot be changed."
+                                    .format(dbarchetype))
 
             if cluster_type == "":
                 dbarchetype.cluster_type = None

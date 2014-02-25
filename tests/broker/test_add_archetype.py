@@ -30,12 +30,12 @@ class TestAddArchetype(TestBrokerCommand):
     def testaddreservedname(self):
         command = "add archetype --archetype hardware"
         out = self.badrequesttest(command.split(" "))
-        self.matchoutput(out, "Archetype name hardware is reserved", command)
+        self.matchoutput(out, "Archetype name hardware is reserved.", command)
 
     def testaddexisting(self):
         command = "add archetype --archetype aquilon"
         out = self.badrequesttest(command.split(" "))
-        self.matchoutput(out, "Archetype aquilon already exists", command)
+        self.matchoutput(out, "Archetype aquilon already exists.", command)
 
     def testaddbadname(self):
         command = "add archetype --archetype oops@!"
@@ -76,17 +76,27 @@ class TestAddArchetype(TestBrokerCommand):
         self.noouttest(command.split(" "))
 
     def testaddutarchetype2(self):
-        command = "add archetype --archetype utarchetype2"
-        self.noouttest(command.split(" "))
+        command = ["add_archetype", "--archetype", "utarchetype2",
+                   "--comments", "Some arch comments"]
+        self.noouttest(command)
 
     def testaddutarchetype3(self):
         command = "add archetype --archetype utarchetype3"
         self.noouttest(command.split(" "))
 
-    def testverifyutarchetype(self):
+    def testverifyutarchetype1(self):
         command = "show archetype --archetype utarchetype1"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Archetype: utarchetype1", command)
+        self.matchclean(out, "compilable", command)
+        self.matchclean(out, "[", command)
+        self.matchclean(out, "Required Service", command)
+
+    def testverifyutarchetype2(self):
+        command = "show archetype --archetype utarchetype2"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Archetype: utarchetype2", command)
+        self.matchoutput(out, "Some arch comments", command)
         self.matchclean(out, "compilable", command)
         self.matchclean(out, "[", command)
         self.matchclean(out, "Required Service", command)
