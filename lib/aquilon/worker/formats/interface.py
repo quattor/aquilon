@@ -21,7 +21,8 @@ from operator import attrgetter
 from aquilon.aqdb.model import (Interface, PublicInterface, ManagementInterface,
                                 OnboardInterface, VlanInterface,
                                 BondingInterface, BridgeInterface,
-                                LoopbackInterface)
+                                LoopbackInterface, VirtualInterface,
+                                PhysicalInterface)
 from aquilon.worker.formats.formatters import ObjectFormatter
 from aquilon.worker.dbwrappers.feature import interface_features
 
@@ -133,3 +134,5 @@ ObjectFormatter.handlers[VlanInterface] = InterfaceFormatter()
 ObjectFormatter.handlers[BondingInterface] = InterfaceFormatter()
 ObjectFormatter.handlers[BridgeInterface] = InterfaceFormatter()
 ObjectFormatter.handlers[LoopbackInterface] = InterfaceFormatter()
+ObjectFormatter.handlers[VirtualInterface] = InterfaceFormatter()
+ObjectFormatter.handlers[PhysicalInterface] = InterfaceFormatter()

@@ -85,7 +85,8 @@ from aquilon.aqdb.model.vlan import ObservedVlan, VlanInfo
 from aquilon.aqdb.model.interface import (Interface, PublicInterface,
                                           ManagementInterface, OnboardInterface,
                                           VlanInterface, BondingInterface,
-                                          BridgeInterface, LoopbackInterface)
+                                          BridgeInterface, LoopbackInterface,
+                                          VirtualInterface, PhysicalInterface)
 from aquilon.aqdb.model.address_assignment import AddressAssignment
 
 #FEATURES

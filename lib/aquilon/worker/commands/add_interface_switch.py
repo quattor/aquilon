@@ -25,8 +25,20 @@ class CommandAddInterfaceSwitch(CommandAddInterfaceNetworkDevice):
 
     required_parameters = ["interface", "switch"]
 
-    def render(self, switch, **arguments):
+    def render(self, switch, type, iftype, **arguments):
         self.deprecated_option("switch", "Please use --network_device "
                                "instead.", **arguments)
+        if type:
+            self.deprecated_option("type", "Please use --iftype"
+                                   "instead.", **arguments)
+            iftype = type
+
+        if not iftype:
+            if arguments['interface'].lower().startswith("lo"):
+                iftype = 'loopback'
+            else:
+                iftype = 'oa'
+
         arguments['network_device'] = switch
-        return CommandAddInterfaceNetworkDevice.render(self, **arguments)
+        return CommandAddInterfaceNetworkDevice.render(self, iftype=iftype,
+                                                       **arguments)

@@ -23,11 +23,16 @@ from aquilon.worker.commands.add_network_device import CommandAddNetworkDevice
 
 class CommandAddSwitch(CommandAddNetworkDevice):
 
-    required_parameters = ["switch", "model", "rack", "type", "ip"]
+    required_parameters = ["switch", "model", "rack", "type", "ip", "interface"]
 
-    def render(self, switch, **arguments):
+    def render(self, switch, iftype, **arguments):
         self.deprecated_command("Command add_switch is deprecated. "
                                 "Please use add_network_device instead.",
                                 **arguments)
-        arguments['network_device'] = switch
-        return CommandAddNetworkDevice.render(self, **arguments)
+        if not iftype:
+            if arguments['interface'].lower().startswith("lo"):
+                iftype = 'loopback'
+            else:
+                iftype = 'oa'
+        return CommandAddNetworkDevice.render(self, network_device=switch,
+                                              iftype=iftype, **arguments)

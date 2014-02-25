@@ -159,7 +159,7 @@ def discover_network_device(session, logger, config, dbnetdev, dryrun):
     def add_interface(ifname, iftype):
         """ Helper for adding a new interface, honouring dryrun """
         if dryrun:
-            aqcmd("add_interface", "--interface", ifname, "--type", iftype)
+            aqcmd("add_interface", "--interface", ifname, "--iftype", iftype)
             # There's no Interface instace we could return here, but fortunately
             # nothing will use the returned value in dryrun mode
             return None

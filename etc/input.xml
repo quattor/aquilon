@@ -3431,15 +3431,15 @@
          <option name="network_device" type="string">Network device fully qualified name</option>
          <option name="model" type="string">Network device model</option>
          <option name="type" type="string">Network device type (tor, bor, agg)</option>
-         <option name="ip" type="ipv4">IP address</option>
 	 <option name="interface" type="string">Interface name (like xge49)</option>
+         <option name="iftype" type="string">Interface type</option>
+         <option name="ip" type="ipv4">IP address</option>
       </optgroup>
       <optgroup name="add_network_device_location" mandatory="True" fields="any">
          <option name="rack" conflicts="building" type="string">Rack name</option>
          <option name="building" conflicts="rack" type="string">Building name</option>
       </optgroup>
       <optgroup name="add_network_device_optional" mandatory="False">
-         <option name="iftype" type="string">Interface type (default: oa)</option>
 	 <option name="mac" type="mac">MAC address of the interface</option>
 	 <option name="label" type="string">Hardware label. If not specified, chassis name minus the DNS domain is used.</option>
 	 <option name="vendor" type="string">Network device vendor. Needed if the model name is not unique</option>

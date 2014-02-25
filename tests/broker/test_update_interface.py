@@ -274,7 +274,7 @@ class TestUpdateInterface(TestBrokerCommand):
                    "--machine", "ut3c5n10", "--mac", mac]
         out = self.badrequesttest(command)
         self.matchoutput(out,
-                         "MAC address %s is already in use by on-board admin "
+                         "MAC address %s is already in use by physical "
                          "interface xge49 of switch "
                          "ut3gd1r04.aqd-unittest.ms.com" % mac,
                          command)
@@ -304,19 +304,19 @@ class TestUpdateInterface(TestBrokerCommand):
         out = self.unimplementederrortest(command)
         self.matchoutput(out, "cannot use the --boot option.", command)
 
-    def testi_200_fail_no_interface(self):
-        command = ["update_interface", "--interface=xge49",
+    def test_200_fail_no_interface(self):
+        command = ["update_interface", "--interface=xge1",
                    "--comments=This should fail",
                    "--network_device=ut3gd1r01.aqd-unittest.ms.com"]
         out = self.notfoundtest(command)
         self.matchoutput(out,
-                         "Interface xge49, switch ut3gd1r01.aqd-unittest.ms.com "
+                         "Interface xge1, switch ut3gd1r01.aqd-unittest.ms.com "
                          "not found",
                          command)
 
     def test_200_fail_switch_model(self):
         command = ["update", "interface", "--network_device", "ut3gd1r01",
-                   "--interface", "xge", "--model", "e1000"]
+                   "--interface", "xge49", "--model", "e1000"]
         out = self.unimplementederrortest(command)
         self.matchoutput(out, "update_interface --network_device cannot use the "
                          "--model option.", command)
@@ -475,7 +475,7 @@ class TestUpdateInterface(TestBrokerCommand):
         out = self.commandtest(command)
         self.searchoutput(out,
                           r"Interface: vlan220 \(no MAC addr\)$"
-                          r"\s+Type: oa$"
+                          r"\s+Type: virtual$"
                           r"\s+Network Environment: internal$"
                           r"\s+Provides: ut3gd1r04-vlan220.aqd-unittest.ms.com \[%s\]$"
                           r"\s+Provides: ut3gd1r04-vlan220-hsrp.aqd-unittest.ms.com \[%s\] \(label: hsrp\)$"

@@ -4,32 +4,32 @@
             "ip": {
                 "4.2.20.5": ""
             },
-            "type": "loopback"
+            "type": "physical"
         },
         "vlan100": {
             "ip": {
                 "4.2.20.6": "hsrp",
                 "4.2.20.9": ""
             },
-            "type": "oa"
+            "type": "virtual"
         },
         "vlan210": {
             "ip": {
                 "4.2.20.7": ""
             },
-            "type": "oa"
+            "type": "virtual"
         },
         "vlan310": {
             "ip": {
                 "4.2.20.8": ""
             },
-            "type": "oa"
+            "type": "virtual"
         },
         "vlan500": {
             "ip": {
                 "4.2.20.10": ""
             },
-            "type": "oa"
+            "type": "virtual"
         }
     },
     "model": "ws-c2960-48tt-l",

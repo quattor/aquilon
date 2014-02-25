@@ -25,15 +25,15 @@ from aquilon.worker.dbwrappers.dns import grab_address
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.dbwrappers.interface import (get_or_create_interface,
                                                  assign_address,
-                                                 check_netdev_iftype,
-                                                 infer_netdev_iftype)
+                                                 check_netdev_iftype)
 from aquilon.worker.processes import DSDBRunner
 from aquilon.worker.templates import Plenary
 
 
 class CommandAddNetworkDevice(BrokerCommand):
 
-    required_parameters = ["network_device", "model", "type", "ip", "interface"]
+    required_parameters = ["network_device", "model", "type",
+                           "ip", "interface", "iftype"]
 
     def render(self, session, logger, network_device, label, model, type, ip,
                interface, iftype, mac, vendor, serial, comments, **arguments):
@@ -67,10 +67,7 @@ class CommandAddNetworkDevice(BrokerCommand):
         session.add(dbnetdev)
         dbnetdev.primary_name = dbdns_rec
 
-        if iftype is None:
-            iftype = infer_netdev_iftype(interface)
-        else:
-            check_netdev_iftype(iftype)
+        check_netdev_iftype(iftype)
 
         dbinterface = get_or_create_interface(session, dbnetdev,
                                               name=interface, mac=mac,

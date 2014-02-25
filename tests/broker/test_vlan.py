@@ -53,7 +53,7 @@ class TestVlan(TestBrokerCommand):
         command = ["add", "network_device", "--type", "tor",
                    "--network_device", SW_HOSTNAME, "--rack", "ut3",
                    "--model", "rs g8000", "--interface", "xge49",
-                   "--mac", ip.mac, "--ip", ip]
+                   "--iftype", "physical", "--mac", ip.mac, "--ip", ip]
         self.ignoreoutputtest(command)
         self.dsdb_verify()
 

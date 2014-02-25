@@ -54,8 +54,8 @@ class TestUpdateNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
                    "--network_device", "ut3gd1r04.aqd-unittest.ms.com"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
-                         "IP address %s is already in use by on-board admin "
-                         "interface xge of switch "
+                         "IP address %s is already in use by physical "
+                         "interface xge49 of switch "
                          "ut3gd1r01.aqd-unittest.ms.com." % ip,
                          command)
 
@@ -125,7 +125,7 @@ class TestUpdateNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
         self.verifynetdev("ut3gd1r07.aqd-unittest.ms.com", "generic",
                           "temp_switch", "ut3", "a", "3", switch_type='bor',
                           ip=self.net["tor_net_9"].usable[0],
-                          interface="xge")
+                          interface="xge49")
 
 
 if __name__ == '__main__':

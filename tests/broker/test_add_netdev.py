@@ -34,7 +34,7 @@ class TestAddNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
                    "--network_device", "ut3gd1r03.aqd-unittest.ms.com",
                    "--rack", "ut3", "--model", "hs21-8853l5u",
                    "--ip", self.net["tor_net_9"].usable[-1],
-                   "--interface", "xge"]
+                   "--interface", "xge49", "--iftype", "physical"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "This command can only be used "
                          "to add network devices.", command)
@@ -45,10 +45,11 @@ class TestAddNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
 
     def testaddut3gd1r01(self):
         ip = self.net["tor_net_12"].usable[0]
-        self.dsdb_expect_add("ut3gd1r01.aqd-unittest.ms.com", ip, "xge")
+        self.dsdb_expect_add("ut3gd1r01.aqd-unittest.ms.com", ip, "xge49")
         self.successtest(["add", "network_device", "--type", "bor",
                           "--network_device", "ut3gd1r01.aqd-unittest.ms.com",
-                          "--ip", ip, "--interface", "xge", "--rack", "ut3",
+                          "--ip", ip, "--interface", "xge49",
+                          "--iftype", "physical", "--rack", "ut3",
                           "--model", "uttorswitch", "--serial", "SNgd1r01"])
         self.dsdb_verify()
 
@@ -59,6 +60,7 @@ class TestAddNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
         self.successtest(["add", "network_device", "--type", "tor",
                           "--network_device", "ut3gd1r04.aqd-unittest.ms.com",
                           "--ip", ip, "--mac", ip.mac, "--interface", "xge49",
+                          "--iftype", "physical",
                           "--rack", "ut3", "--model", "temp_switch",
                           "--comments", "Some switch comments"])
         self.dsdb_verify()
@@ -69,6 +71,7 @@ class TestAddNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
         self.successtest(["add", "network_device", "--type", "tor",
                           "--network_device", "ut3gd1r05.aqd-unittest.ms.com",
                           "--ip", ip, "--interface", "xge49",
+                          "--iftype", "physical",
                           "--rack", "ut3", "--model", "temp_switch",
                           "--vendor", "generic"])
         self.dsdb_verify()
@@ -79,24 +82,27 @@ class TestAddNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
         self.successtest(["add", "network_device", "--type", "tor",
                           "--network_device", "ut3gd1r06.aqd-unittest.ms.com",
                           "--ip", ip, "--rack", "ut3", "--model", "temp_switch",
-                          "--vendor", "generic", "--interface", "xge49"])
+                          "--vendor", "generic", "--interface", "xge49",
+                          "--iftype", "physical"])
         self.dsdb_verify()
 
     def testaddut3gd1r07(self):
         ip = self.net["tor_net_9"].usable[0]
-        self.dsdb_expect_add("ut3gd1r07.aqd-unittest.ms.com", ip, "xge")
+        self.dsdb_expect_add("ut3gd1r07.aqd-unittest.ms.com", ip, "xge49")
         self.successtest(["add", "network_device", "--type", "bor",
                           "--network_device", "ut3gd1r07.aqd-unittest.ms.com",
-                          "--ip", ip, "--interface", "xge", "--rack", "ut3",
+                          "--ip", ip, "--interface", "xge49",
+                          "--iftype", "physical","--rack", "ut3",
                           "--model", "temp_switch"])
         self.dsdb_verify()
 
     def testaddut3gd1r08(self):
         ip = self.net["tor_net_9"].usable[1]
-        self.dsdb_expect_add("ut3gd1r08.aqd-unittest.ms.com", ip, "xge")
+        self.dsdb_expect_add("ut3gd1r08.aqd-unittest.ms.com", ip, "xge49")
         self.successtest(["add", "network_device", "--type", "bor",
                           "--network_device", "ut3gd1r08.aqd-unittest.ms.com",
-                          "--ip", ip, "--interface", "xge",
+                          "--ip", ip, "--interface", "xge49",
+                          "--iftype", "physical",
                           "--building", "ut", "--model", "temp_switch"])
         self.dsdb_verify()
 
@@ -107,6 +113,7 @@ class TestAddNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
                    "--network_device", "np06bals03.ms.com",
                    "--rack", "np7", "--model", "rs g8000",
                    "--interface", "gigabitethernet0/1",
+                   "--iftype", "physical",
                    "--mac", "0018b1898600", "--ip", "172.31.64.69"]
         err = self.statustest(command)
         self.dsdb_verify()
@@ -121,7 +128,7 @@ class TestAddNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
         command = ["add", "network_device", "--type", "tor",
                    "--network_device", "np06fals01.ms.com",
                    "--rack", "np7", "--model", "ws-c2960-48tt-l",
-                   "--interface", "xge49",
+                   "--interface", "xge49", "--iftype", "physical",
                    "--mac", "001cf699e5c1", "--ip", "172.31.88.5"]
         err = self.statustest(command)
         self.dsdb_verify()
@@ -138,7 +145,8 @@ class TestAddNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
         command = ["add", "network_device", "--type", "tor",
                    "--network_device", "ut01ga1s02.aqd-unittest.ms.com",
                    "--rack", "ut8", "--model", "rs g8000",
-                   "--interface", "xge49", "--mac", ip.mac, "--ip", ip]
+                   "--interface", "xge49", "--iftype", "physical",
+                   "--mac", ip.mac, "--ip", ip]
         (out, err) = self.successtest(command)
         self.dsdb_verify()
 
@@ -149,7 +157,8 @@ class TestAddNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
         command = ["add", "network_device", "--type", "tor",
                    "--network_device", "ut01ga1s03.aqd-unittest.ms.com",
                    "--rack", "ut9", "--model", "rs g8000",
-                   "--interface", "xge49", "--mac", ip.mac, "--ip", ip]
+                   "--interface", "xge49", "--iftype", "physical",
+                   "--mac", ip.mac, "--ip", ip]
         (out, err) = self.successtest(command)
         self.dsdb_verify()
 
@@ -160,7 +169,8 @@ class TestAddNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
         command = ["add", "network_device", "--type", "tor",
                    "--network_device", "ut01ga1s04.aqd-unittest.ms.com",
                    "--rack", "ut10", "--model", "rs g8000",
-                   "--interface", "xge49", "--mac", ip.mac, "--ip", ip]
+                   "--interface", "xge49", "--iftype", "physical",
+                   "--mac", ip.mac, "--ip", ip]
         (out, err) = self.successtest(command)
         self.dsdb_verify()
 
@@ -171,7 +181,8 @@ class TestAddNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
         command = ["add", "network_device", "--type", "tor",
                    "--network_device", "ut01ga2s01.aqd-unittest.ms.com",
                    "--rack", "ut11", "--model", "rs g8000",
-                   "--interface", "xge49", "--mac", ip.mac, "--ip", ip]
+                   "--interface", "xge49", "--iftype", "physical",
+                   "--mac", ip.mac, "--ip", ip]
         (out, err) = self.successtest(command)
         self.dsdb_verify()
 
@@ -182,7 +193,8 @@ class TestAddNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
         command = ["add", "network_device", "--type", "tor",
                    "--network_device", "ut01ga2s02.aqd-unittest.ms.com",
                    "--rack", "ut12", "--model", "rs g8000",
-                   "--interface", "xge49", "--mac", ip.mac, "--ip", ip]
+                   "--interface", "xge49", "--iftype", "physical",
+                   "--mac", ip.mac, "--ip", ip]
         (out, err) = self.successtest(command)
         self.dsdb_verify()
 
@@ -194,6 +206,7 @@ class TestAddNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
                    "--network_device", "ut01ga2s03.aqd-unittest.ms.com",
                    "--rack", "ut13",
                    "--model", "rs g8000", "--interface", "xge49",
+                   "--iftype", "physical",
                    "--mac", ip.mac, "--ip", ip]
         (out, err) = self.successtest(command)
         self.dsdb_verify()
@@ -205,14 +218,15 @@ class TestAddNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
                    "--network_device", "np01ga2s03.one-nyp.ms.com",
                    "--rack", "np13",
                    "--model", "rs g8000", "--interface", "xge49",
-                   "--mac", ip.mac, "--ip", ip]
+                   "--iftype", "physical", "--mac", ip.mac, "--ip", ip]
         (out, err) = self.successtest(command)
         self.dsdb_verify()
 
     def testrejectut3gd1r99(self):
         command = ["add", "network_device", "--network_device", "ut3gd1r99.aqd-unittest.ms.com",
                    "--type", "bor", "--ip", self.net["tor_net_9"].usable[0],
-                   "--interface", "xge", "--rack", "ut3", "--model", "temp_switch"]
+                   "--interface", "xge49", "--iftype", "physical",
+                   "--rack", "ut3", "--model", "temp_switch"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "IP address %s is already in use" %
@@ -223,7 +237,7 @@ class TestAddNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
         ip = self.net["tor_net_12"].usable[0]
         self.verifynetdev("ut3gd1r01.aqd-unittest.ms.com", "hp", "uttorswitch",
                           "ut3", "a", "3", "SNgd1r01", switch_type='bor', ip=ip,
-                          interface="xge")
+                          interface="xge49")
 
         command = ["show", "network_device", "--network_device",
                    "ut3gd1r01.aqd-unittest.ms.com", "--format", "csv"]
@@ -255,7 +269,7 @@ class TestAddNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
         self.verifynetdev("ut3gd1r07.aqd-unittest.ms.com", "generic",
                           "temp_switch", "ut3", "a", "3", switch_type='bor',
                           ip=self.net["tor_net_9"].usable[0],
-                          interface="xge")
+                          interface="xge49")
 
     def testverifynp06bals03(self):
         self.verifynetdev("np06bals03.ms.com",
@@ -293,7 +307,8 @@ class TestAddNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
     def testrejectbadlabelimplicit(self):
         command = ["add", "network_device", "--network_device", "not-alnum.aqd-unittest.ms.com",
                    "--type", "bor", "--ip", self.net["tor_net_9"].usable[-1],
-                   "--interface", "xge", "--rack", "ut3", "--model", "temp_switch"]
+                   "--interface", "xge49", "--iftype", "physical",
+                   "--rack", "ut3", "--model", "temp_switch"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Could not deduce a valid hardware label",
                          command)
@@ -302,7 +317,8 @@ class TestAddNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
         command = ["add", "network_device", "--network_device", "ut3gd1r99.aqd-unittest.ms.com",
                    "--label", "not-alnum",
                    "--type", "bor", "--ip", self.net["tor_net_9"].usable[-1],
-                   "--interface", "xge", "--rack", "ut3", "--model", "temp_switch"]
+                   "--interface", "xge49", "--iftype", "physical",
+                   "--rack", "ut3", "--model", "temp_switch"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Illegal hardware label format 'not-alnum'.",
                          command)
