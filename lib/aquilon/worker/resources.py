@@ -45,6 +45,8 @@ ToDo:
 
 """
 
+import os
+import sys
 import re
 import xml.etree.ElementTree as ET
 
@@ -278,6 +280,80 @@ class ResponsePage(resource.Resource):
 class RestServer(ResponsePage):
     """The root resource is used to define the site as a whole."""
 
+    def __init__(self, config):
+        formatter = ResponseFormatter()
+        ResponsePage.__init__(self, '', formatter)
+        self.config = config
+
+        cache_version(config)
+        log.msg("Starting aqd version %s" % config.get("broker", "version"))
+
+        def _logChildren(level, container):
+            for (key, child) in container.listStaticEntities():
+                log.msg("Resource at level %d for %s [key:%s]"
+                        % (level, child.path, key))
+                _logChildren(level + 1, child)
+            if getattr(container, "dynamic_child", None):
+                log.msg("Resource at level %d for %s [dynamic]"
+                        % (level, container.dynamic_child.path))
+                _logChildren(level + 1, container.dynamic_child)
+
+        #_logChildren(0, self)
+
+    def insert_instance(self, myinstance, rendermethod, path):
+        container = self
+        relative = ""
+        # Traverse down the resource tree, container will
+        # end up pointing to the correct spot.
+        # Create branches and leaves as necessary, continueing to
+        # traverse downward.
+        for component in path.split("/"):
+            relative = relative + "/" + component
+            #log.msg("Working with component '" + component + "' of '" + relative + "'.")
+            m = varmatch.match(component)
+            # Is this piece of the path dynamic?
+            if not m:
+                #log.msg("Component '" + component + "' is static.")
+                child = container.getStaticEntity(component)
+                if child is None:
+                    #log.msg("Creating new static component '" + component + "'.")
+                    child = ResponsePage(relative, self.formatter)
+                    container.putChild(component, child)
+                container = child
+            else:
+                #log.msg("Component '" + component + "' is dynamic.")
+                path_variable = m.group(1)
+                if container.dynamic_child is not None:
+                    #log.msg("Dynamic component '" + component + "' already exists.")
+                    current_variable = container.dynamic_child.\
+                            path_variable
+                    if current_variable != path_variable:
+                        log.msg("Warning: Could not use variable '"
+                                + path_variable + "', already have "
+                                + "dynamic variable '"
+                                + current_variable + "'.")
+                        # XXX: Raise an error if they don't match
+                        container = container.dynamic_child
+                    else:
+                        #log.msg("Dynamic component '" + component + "' had correct variable.")
+                        container = container.dynamic_child
+                else:
+                    #log.msg("Creating new dynamic component '" + component + "'.")
+                    child = ResponsePage(relative, self.formatter,
+                                         path_variable=path_variable)
+                    container.dynamic_child = child
+                    container = child
+
+        if container.handlers.get(rendermethod, None):
+            log.msg("Warning: Already have a %s here at %s..." %
+                    (rendermethod, container.path))
+        #log.msg("Setting 'command_" + fullcommand + "' as '" + rendermethod + "' for container '" + container.path + "'.")
+        container.handlers[rendermethod] = myinstance
+
+###############################################################################
+
+class CommandRegistry(object):
+
     _type_handler = {
         'int': force_int,
         'float': force_float,
@@ -291,12 +367,9 @@ class RestServer(ResponsePage):
         'list': force_list
     }
 
-    def __init__(self, config):
-        formatter = ResponseFormatter()
-        ResponsePage.__init__(self, '', formatter)
-        self.config = config
-
-        tree = ET.parse(lookup_file_path("input.xml"))
+    def __init__(self, config, server):
+        BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
+        tree = ET.parse(os.path.join(BINDIR, '..', 'etc', 'input.xml'))
 
         for command in tree.getiterator("command"):
             for transport in command.getiterator("transport"):
@@ -324,7 +397,7 @@ class RestServer(ResponsePage):
                 myinstance.command = name
                 rendermethod = method.upper()
 
-                self.insert_instance(myinstance, rendermethod, path, formatter)
+                server.insert_instance(myinstance, rendermethod, path)
 
                 # Since we are parsing input.xml anyway, record the possible
                 # parameters...
@@ -370,67 +443,3 @@ class RestServer(ResponsePage):
                                            style)
                             meth(format, myinstance.command)
 
-        cache_version(config)
-        log.msg("Starting aqd version %s" % config.get("broker", "version"))
-
-        def _logChildren(level, container):
-            for (key, child) in container.listStaticEntities():
-                log.msg("Resource at level %d for %s [key:%s]"
-                        % (level, child.path, key))
-                _logChildren(level + 1, child)
-            if getattr(container, "dynamic_child", None):
-                log.msg("Resource at level %d for %s [dynamic]"
-                        % (level, container.dynamic_child.path))
-                _logChildren(level + 1, container.dynamic_child)
-
-        #_logChildren(0, self)
-
-    def insert_instance(self, myinstance, rendermethod, path, formatter):
-        container = self
-        relative = ""
-        # Traverse down the resource tree, container will
-        # end up pointing to the correct spot.
-        # Create branches and leaves as necessary, continueing to
-        # traverse downward.
-        for component in path.split("/"):
-            relative = relative + "/" + component
-            #log.msg("Working with component '" + component + "' of '" + relative + "'.")
-            m = varmatch.match(component)
-            # Is this piece of the path dynamic?
-            if not m:
-                #log.msg("Component '" + component + "' is static.")
-                child = container.getStaticEntity(component)
-                if child is None:
-                    #log.msg("Creating new static component '" + component + "'.")
-                    child = ResponsePage(relative, formatter)
-                    container.putChild(component, child)
-                container = child
-            else:
-                #log.msg("Component '" + component + "' is dynamic.")
-                path_variable = m.group(1)
-                if container.dynamic_child is not None:
-                    #log.msg("Dynamic component '" + component + "' already exists.")
-                    current_variable = container.dynamic_child.\
-                            path_variable
-                    if current_variable != path_variable:
-                        log.msg("Warning: Could not use variable '"
-                                + path_variable + "', already have "
-                                + "dynamic variable '"
-                                + current_variable + "'.")
-                        # XXX: Raise an error if they don't match
-                        container = container.dynamic_child
-                    else:
-                        #log.msg("Dynamic component '" + component + "' had correct variable.")
-                        container = container.dynamic_child
-                else:
-                    #log.msg("Creating new dynamic component '" + component + "'.")
-                    child = ResponsePage(relative, formatter,
-                                         path_variable=path_variable)
-                    container.dynamic_child = child
-                    container = child
-
-        if container.handlers.get(rendermethod, None):
-            log.msg("Warning: Already have a %s here at %s..." %
-                    (rendermethod, container.path))
-        #log.msg("Setting 'command_" + fullcommand + "' as '" + rendermethod + "' for container '" + container.path + "'.")
-        container.handlers[rendermethod] = myinstance
