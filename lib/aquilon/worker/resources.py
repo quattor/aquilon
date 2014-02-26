@@ -372,32 +372,40 @@ class CommandRegistry(object):
         tree = ET.parse(os.path.join(BINDIR, '..', 'etc', 'input.xml'))
 
         for command in tree.getiterator("command"):
+            if 'name' not in command.attrib:
+                continue
+            name = command.attrib['name']
+
             for transport in command.getiterator("transport"):
-                if "name" not in command.attrib \
-                        or "method" not in transport.attrib \
-                        or "path" not in transport.attrib:
+                if ("method" not in transport.attrib or
+                    "path" not in transport.attrib):
                     continue
-                name = command.attrib["name"]
+
                 method = transport.attrib["method"]
                 path = transport.attrib["path"]
                 trigger = transport.attrib.get("trigger")
 
-                fullcommand = name
+                fullname = name
                 if trigger:
-                    fullcommand = fullcommand + "_" + trigger
-                mymodule = getattr(commands, fullcommand, None)
+                    fullname = fullname + "_" + trigger
+
+                # Locate the instance of the BrokerCommand
+                # See commands/__init__.py for more info here...
+                mymodule = getattr(commands, fullname, None)
                 if not mymodule:
                     log.msg("No module available in aquilon.worker.commands " +
-                            "for %s" % fullcommand)
-                # See commands/__init__.py for more info here...
+                            "for %s" % fullname)
+
                 myinstance = getattr(mymodule, "broker_command", None)
                 if not myinstance:
-                    log.msg("No class instance available for %s" % fullcommand)
+                    log.msg("No class instance available for %s" % fullname)
                     myinstance = BrokerCommand()
-                myinstance.command = name
-                rendermethod = method.upper()
 
-                server.insert_instance(myinstance, rendermethod, path)
+                # Save the shortname of the command
+                myinstance.command = name
+
+                # Insert the instance into the rest server
+                server.insert_instance(myinstance, method.upper(), path)
 
                 # Since we are parsing input.xml anyway, record the possible
                 # parameters...
