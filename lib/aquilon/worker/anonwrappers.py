@@ -19,17 +19,11 @@
 
 from twisted.web import server, http
 
-
-class AnonHTTPChannel(http.HTTPChannel):
-    """
-    This adds getPrincipal() to the base channel.  Since there is no
-    knc in use here, it just returns None.
-    """
+class AnonRequest(server.Request):
 
     def getPrincipal(self):
         """For any anonymous channel, always returns None."""
         return None
-
 
 class AnonSite(server.Site):
     """
@@ -37,7 +31,7 @@ class AnonSite(server.Site):
     provide a getPrincipal method.  Should be kept consistent with
     any other changes from kncwrappers.
     """
-    protocol = AnonHTTPChannel
+    requestFactory = AnonRequest
 
     # Overriding http.HTTPFactory's log() for consistency with KNCSite.
     # This is exactly the default server.Site.log() method for now.

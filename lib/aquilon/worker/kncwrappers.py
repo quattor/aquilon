@@ -24,16 +24,28 @@ from aquilon.utils import force_ascii, force_ipv4
 LOGGER = logging.getLogger(__name__)
 
 
+class KNCRequest(server.Request):
+
+    def getPrincipal(self):
+        return self.channel.kncinfo.get("CREDS")
+
+    def getClientIP(self):
+        """The Request object would normally supply this method.
+        However, the client IP is being obtained via knc.
+
+        """
+        return self.channel.kncinfo.get("REMOTE_IP")
+
+
 class KNCProtocolException(Exception):
     pass
 
 
 class KNCHTTPChannel(http.HTTPChannel):
     """
-    Normal usage for the server is to be given data over a
-    socket by knc.  The few lines of that data are extra info
-    about the connection.  This needs to be stripped
-    (and saved), which is all this does.
+    The KNC HTTP Channel is passed data over a socket by KNC.  The first
+    few lines of data contain extra information about the connection.
+    We take these data and stash them into the KNC Request.
     """
     __KNC_fields = {
         'CREDS': force_ascii,
@@ -90,21 +102,9 @@ class KNCHTTPChannel(http.HTTPChannel):
         else:
             http.HTTPChannel.lineReceived(self, line)
 
-    def getPrincipal(self):
-        return self.kncinfo.get("CREDS")
-
-    # FIXME: Generally, twisted methods would return an IPv4Address here.
-    def getClientIP(self):
-        """The Request object would normally supply this method.
-        However, the client IP is being obtained via knc.  Ideally this
-        subclass could just override the Request object creation and
-        give it this info, but that does not seem to be straightforward.
-
-        """
-        return self.kncinfo.get("REMOTE_IP")
-
 
 class KNCSite(server.Site):
+    requestFactory = KNCRequest
     protocol = KNCHTTPChannel
 
     # Overriding http.HTTPFactory's log() to use some knc info instead
@@ -116,10 +116,9 @@ class KNCSite(server.Site):
     def log(self, request):
         if hasattr(self, "logFile"):
             line = '%s - %s %s "%s" %d %s "%s" "%s"\n' % (
-                #request.getClientIP(),
-                request.channel.getClientIP(),
+                request.getClientIP(),
                 # request.getUser() or "-", # the remote user is almost never important
-                request.channel.getPrincipal(),
+                request.getPrincipal(),
                 self._logDateTime,
                 '%s %s %s' % (self._escape(request.method),
                               self._escape(request.uri),
