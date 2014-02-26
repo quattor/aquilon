@@ -24,7 +24,8 @@ from datetime import datetime
 from sqlalchemy import (Column, Integer, DateTime, Boolean, ForeignKey,
                         UniqueConstraint, PrimaryKeyConstraint)
 
-from sqlalchemy.orm import relation, backref, deferred
+from sqlalchemy.orm import (relation, backref, deferred, validates,
+                            object_session)
 from sqlalchemy.orm.attributes import instance_state
 from sqlalchemy.orm.interfaces import MapperExtension
 from sqlalchemy.ext.associationproxy import association_proxy
@@ -112,11 +113,17 @@ class MetaCluster(Cluster):
                     usage[name] = value
         return usage
 
-    def validate(self, error=ArgumentError):
+    def validate(self):
         """ Validate metacluster constraints """
         if len(self.members) > self.max_clusters:
-            raise error("{0} already has the maximum number of clusters "
-                        "({1}).".format(self, self.max_clusters))
+            raise ArgumentError("{0} has {1} clusters bound, which exceeds "
+                                "the requested limit of {2}."
+                                .format(self, len(self.members),
+                                        self.max_clusters))
+
+        if self.metacluster:
+            raise ArgumentError("Metaclusters can't contain other "
+                                "metaclusters.")
 
         # Small optimization: avoid enumerating all the clusters/VMs if high
         # availability is not enabled
@@ -128,14 +135,19 @@ class MetaCluster(Cluster):
                 if name not in capacity:
                     continue
                 if value > capacity[name]:
-                    raise error("{0} is over capacity regarding {1}: wanted {2}, "
-                                "but the limit is {3}.".format(self, name, value,
-                                                               capacity[name]))
+                    raise ArgumentError("{0} is over capacity regarding {1}: "
+                                        "wanted {2}, but the limit is {3}."
+                                        .format(self, name, value, capacity[name]))
         return
 
-    # see cluster.validate_membership
-    def validate_membership(self, cluster, error=ArgumentError, **kwargs):
+    @validates('_clusters')
+    def validate_cluster_member(self, key, value):
+        session = object_session(self)
+        with session.no_autoflush:
+            self.validate_membership(value.cluster)
+        return value
 
+    def validate_membership(self, cluster):
         if (cluster.branch != self.branch or
             cluster.sandbox_author != self.sandbox_author):
             raise ArgumentError("{0} {1} {2} does not match {3:l} {4} "

@@ -31,6 +31,11 @@ class TestAddRack(TestBrokerCommand):
         command = "add rack --rackid 3 --room utroom1 --row a --column 3"
         self.noouttest(command.split(" "))
 
+    def testaddut3again(self):
+        command = "add rack --rackid 3 --room utroom1 --row a --column 3"
+        out = self.badrequesttest(command.split(" "))
+        self.matchoutput(out, "Rack ut3 already exists.", command)
+
     def testverifyaddut3(self):
         command = "show rack --rack ut3"
         out = self.commandtest(command.split(" "))

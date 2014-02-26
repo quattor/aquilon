@@ -23,7 +23,7 @@ from sqlalchemy import (Column, Integer, Boolean, String, DateTime, Sequence,
                         Index)
 
 from sqlalchemy.orm import (object_session, relation, backref, deferred,
-                            joinedload)
+                            joinedload, validates)
 from sqlalchemy.orm.attributes import set_committed_value
 from sqlalchemy.ext.associationproxy import association_proxy
 
@@ -106,7 +106,6 @@ class Cluster(Base):
     location_constraint_id = Column(ForeignKey('location.id',
                                                name='cluster_location_fk'))
 
-    #esx cluster __init__ method overrides this default
     max_hosts = Column(Integer, nullable=True)
     # N+M clusters are defined by setting down_hosts_threshold to M
     # Simple 2-node clusters would have down_hosts_threshold of 0
@@ -198,13 +197,21 @@ class Cluster(Base):
                     mach.append(res.machine)
         return mach
 
-    def validate_membership(self, host, error=ArgumentError, **kwargs):
+    @validates('_hosts')
+    def validate_host_member(self, key, value):
+        session = object_session(self)
+        with session.no_autoflush:
+            self.validate_membership(value.host)
+        return value
+
+    def validate_membership(self, host):
         if host.hardware_entity.location != self.location_constraint and \
                 self.location_constraint not in \
                 host.hardware_entity.location.parents:
-            raise error("Host location {0} is not within cluster "
-                        "location {1}.".format(host.hardware_entity.location,
-                                               self.location_constraint))
+            raise ArgumentError("Host location {0} is not within cluster "
+                                "location {1}."
+                                .format(host.hardware_entity.location,
+                                        self.location_constraint))
 
         if host.branch != self.branch or \
                 host.sandbox_author != self.sandbox_author:
@@ -214,7 +221,7 @@ class Cluster(Base):
                                         self.branch.branch_type,
                                         self.authored_branch))
 
-    def validate(self, max_hosts=None, error=ArgumentError, **kwargs):
+    def validate(self):
         session = object_session(self)
         q = session.query(HostClusterMember)
         q = q.filter_by(cluster=self)
@@ -223,21 +230,10 @@ class Cluster(Base):
         members = q.all()
         set_committed_value(self, '_hosts', members)
 
-        if self.cluster_type != 'meta':
-            for i in ["down_hosts_threshold", "down_hosts_percent",
-                      "down_maint_percent", "personality_id"]:
-                if getattr(self, i, None) is None:
-                    raise error("Attribute %s must be set for a %s cluster." %
-                                (i, self.cluster_type))
-        else:
-            if self.metacluster:
-                raise error("Metaclusters can't contain other metaclusters.")
-
-        if max_hosts is None:
-            max_hosts = self.max_hosts
-        if len(self.hosts) > self.max_hosts:
-            raise error("{0} is over capacity of {1} hosts.".format(self,
-                                                                    max_hosts))
+        if self.max_hosts is not None and len(self.hosts) > self.max_hosts:
+            raise ArgumentError("{0} has {1} hosts bound, which exceeds the "
+                                "requested limit of {2}."
+                                .format(self, len(self.hosts), self.max_hosts))
         if self.metacluster:
             self.metacluster.validate()
 
@@ -302,13 +298,13 @@ class StorageCluster(Cluster):
                                     ondelete='CASCADE'),
                 primary_key=True)
 
-    def validate_membership(self, host, error=ArgumentError, **kwargs):
-        super(StorageCluster, self).validate_membership(host=host, error=error,
-                                                        **kwargs)
+    def validate_membership(self, host):
+        super(StorageCluster, self).validate_membership(host)
+        # FIXME: this should be in the configuration, not in the code
         if host.archetype.name != "filer":
-            raise error("only hosts with archetype 'filer' can be added "
-                        "to a storage cluster. The host %s is of archetype %s"
-                        % (host.fqdn, host.archetype))
+            raise ArgumentError("Only hosts with archetype 'filer' can be "
+                                "added to a storage cluster. {0} is "
+                                "of {1:l}.".format(host, host.archetype))
 
 storage_cluster = StorageCluster.__table__  # pylint: disable=C0103
 storage_cluster.info['unique_fields'] = ['name']
@@ -465,11 +461,8 @@ class EsxCluster(Cluster):
                     resmap[name] += value
         return resmap
 
-    def validate(self, vm_part=None, host_part=None, current_vm_count=None,
-                 current_host_count=None, down_hosts_threshold=None,
-                 down_hosts_percent=None,
-                 error=ArgumentError, **kwargs):
-        super(EsxCluster, self).validate(error=error, **kwargs)
+    def validate(self):
+        super(EsxCluster, self).validate()
 
         # Preload resources
         resource_by_id = {}
@@ -485,53 +478,36 @@ class EsxCluster(Cluster):
             for res in q:
                 resource_by_id[res.id] = res
 
-        if vm_part is None:
-            vm_part = self.vm_count
-        if host_part is None:
-            host_part = self.host_count
-        if current_vm_count is None:
-            current_vm_count = len(self.virtual_machines)
-
-        if current_host_count is None:
-            current_host_count = len(self.hosts)
-        if down_hosts_threshold is None:
-            down_hosts_threshold = self.down_hosts_threshold
-        if down_hosts_percent is None:
-            down_hosts_percent = self.down_hosts_percent
-
         # It doesn't matter how many vmhosts we have if there are no
         # virtual machines.
-        if current_vm_count <= 0:
+        if len(self.virtual_machines) <= 0:
             return
-
-        if host_part == 0:
-            raise error("Invalid ratio of {0}:{1} for {2:l}.".format(
-                        vm_part, host_part, self))
 
         # For calculations, assume that down_hosts_threshold vmhosts
         # are not available from the number currently configured.
-        if down_hosts_percent:
-            adjusted_host_count = current_host_count - \
-                int(down_hosts_threshold * current_host_count / 100)
-            dhtstr = "%d%%" % down_hosts_threshold
+        if self.down_hosts_percent:
+            adjusted_host_count = len(self.hosts) - \
+                int(self.down_hosts_threshold * len(self.hosts) / 100)
+            dhtstr = "%d%%" % self.down_hosts_threshold
         else:
-            adjusted_host_count = current_host_count - down_hosts_threshold
-            dhtstr = "%d" % down_hosts_threshold
+            adjusted_host_count = len(self.hosts) - self.down_hosts_threshold
+            dhtstr = "%d" % self.down_hosts_threshold
 
         if adjusted_host_count <= 0:
-            raise error("%s cannot support VMs with %s "
-                        "vmhosts and a down_hosts_threshold of %s" %
-                        (format(self), current_host_count, dhtstr))
+            raise ArgumentError("%s cannot support VMs with %s "
+                                "vmhosts and a down_hosts_threshold of %s" %
+                                (format(self), len(self.hosts), dhtstr))
 
         # The current ratio must be less than the requirement...
-        # cur_vm / cur_host <= vm_part / host_part
-        # cur_vm * host_part <= vm_part * cur_host
+        # cur_vm / cur_host <= self.vm_count / self.host_count
+        # cur_vm * self.host_count <= self.vm_count * cur_host
         # Apply a logical not to test for the error condition...
-        if current_vm_count * host_part > vm_part * adjusted_host_count:
-            raise error("%s VMs:%s hosts in %s violates "
-                        "ratio %s:%s with down_hosts_threshold %s" %
-                        (current_vm_count, current_host_count, format(self),
-                         vm_part, host_part, dhtstr))
+        if len(self.virtual_machines) * self.host_count > self.vm_count * adjusted_host_count:
+            raise ArgumentError("%s VMs:%s hosts in %s violates "
+                                "ratio %s:%s with down_hosts_threshold %s" %
+                                (len(self.virtual_machines), len(self.hosts),
+                                 format(self), self.vm_count, self.host_count,
+                                 dhtstr))
 
         capacity = self.get_total_capacity()
         usage = self.get_total_usage()
@@ -540,15 +516,10 @@ class EsxCluster(Cluster):
             if name not in capacity:
                 continue
             if value > capacity[name]:
-                raise error("{0} is over capacity regarding {1}: wanted {2}, "
-                            "but the limit is {3}.".format(self, name, value,
-                                                           capacity[name]))
+                raise ArgumentError("{0} is over capacity regarding {1}: "
+                                    "wanted {2}, but the limit is {3}."
+                                    .format(self, name, value, capacity[name]))
         return
-
-    def __init__(self, **kw):
-        if 'max_hosts' not in kw:
-            kw['max_hosts'] = 8
-        super(EsxCluster, self).__init__(**kw)
 
 esx_cluster = EsxCluster.__table__  # pylint: disable=C0103
 esx_cluster.info['unique_fields'] = ['name']

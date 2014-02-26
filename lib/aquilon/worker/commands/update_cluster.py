@@ -15,7 +15,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from aquilon.aqdb.model import Cluster, Personality, NetworkDevice
+from aquilon.aqdb.model import (Cluster, EsxCluster, MetaCluster, Personality,
+                                NetworkDevice)
 from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.location import get_location
@@ -27,6 +28,16 @@ class CommandUpdateCluster(BrokerCommand):
 
     required_parameters = ["cluster"]
 
+    def check_cluster_type(self, dbcluster, require=None, forbid=None):
+        if require and not isinstance(dbcluster, require):
+            raise ArgumentError("{0} should be a(n) {1!s}."
+                                .format(dbcluster,
+                                        require._get_class_label(tolower=True)))
+        if forbid and isinstance(dbcluster, forbid):
+            raise ArgumentError("{0} should not be a(n) {1!s}."
+                                .format(dbcluster,
+                                        forbid._get_class_label(tolower=True)))
+
     def render(self, session, logger, cluster, personality,
                max_members, fix_location, down_hosts_threshold,
                maint_threshold, comments,
@@ -36,41 +47,20 @@ class CommandUpdateCluster(BrokerCommand):
 
         dbcluster = Cluster.get_unique(session, cluster, compel=True)
 
-        if dbcluster.cluster_type == 'meta':
-            raise ArgumentError("%s should not be a metacluster."
-                                % format(dbcluster))
-
-        cluster_updated = False
+        self.check_cluster_type(dbcluster, forbid=MetaCluster)
 
         plenaries = PlenaryCollection(logger=logger)
         plenaries.append(Plenary.get_plenary(dbcluster))
 
-        (vm_count, host_count) = force_ratio("vm_to_host_ratio",
-                                             vm_to_host_ratio)
-        if down_hosts_threshold is not None:
-            (perc, dht) = Cluster.parse_threshold(down_hosts_threshold)
-            dbcluster.down_hosts_threshold = dht
-            dbcluster.down_hosts_percent = perc
-            cluster_updated = True
-
-        if dbcluster.cluster_type == "esx":
-            if vm_count is not None or down_hosts_threshold is not None:
-                if vm_count is None:
-                    vm_count = dbcluster.vm_count
-                    host_count = dbcluster.host_count
-
-                dht = dbcluster.down_hosts_threshold
-                perc = dbcluster.down_hosts_percent
-
-                dbcluster.validate(vm_part=vm_count, host_part=host_count,
-                                   down_hosts_threshold=dht,
-                                   down_hosts_percent=perc)
-
-                dbcluster.vm_count = vm_count
-                dbcluster.host_count = host_count
-                cluster_updated = True
+        if vm_to_host_ratio:
+            self.check_cluster_type(dbcluster, require=EsxCluster)
+            (vm_count, host_count) = force_ratio("vm_to_host_ratio",
+                                                 vm_to_host_ratio)
+            dbcluster.vm_count = vm_count
+            dbcluster.host_count = host_count
 
         if switch is not None:
+            self.check_cluster_type(dbcluster, require=EsxCluster)
             if switch:
                 # FIXME: Verify that any hosts are on the same network
                 dbnetdev = NetworkDevice.get_unique(session, switch, compel=True)
@@ -78,24 +68,17 @@ class CommandUpdateCluster(BrokerCommand):
             else:
                 dbnetdev = None
             dbcluster.network_device = dbnetdev
-            cluster_updated = True
 
         if memory_capacity is not None:
+            self.check_cluster_type(dbcluster, require=EsxCluster)
             dbcluster.memory_capacity = memory_capacity
-            dbcluster.validate()
-            cluster_updated = True
 
         if clear_overrides is not None:
+            self.check_cluster_type(dbcluster, require=EsxCluster)
             dbcluster.memory_capacity = None
-            dbcluster.validate()
-            cluster_updated = True
 
-        location_updated = update_cluster_location(session, logger, dbcluster,
-                                                   fix_location, plenaries,
-                                                   **arguments)
-
-        if location_updated:
-            cluster_updated = True
+        update_cluster_location(session, logger, dbcluster, fix_location,
+                                plenaries, **arguments)
 
         if personality:
             archetype = dbcluster.personality.archetype.name
@@ -106,38 +89,28 @@ class CommandUpdateCluster(BrokerCommand):
                 raise ArgumentError("Personality {0} is not a cluster " +
                                     "personality".format(dbpersonality))
             dbcluster.personality = dbpersonality
-            cluster_updated = True
 
         if max_members is not None:
-            current_members = len(dbcluster.hosts)
-            if max_members < current_members:
-                raise ArgumentError("%s has %d hosts bound, which exceeds "
-                                    "the requested limit %d." %
-                                    (format(dbcluster), current_members,
-                                     max_members))
+            # Allow removing the restriction
+            if max_members < 0:
+                max_members = None
             dbcluster.max_hosts = max_members
-            cluster_updated = True
 
         if comments is not None:
             dbcluster.comments = comments
-            cluster_updated = True
 
         if down_hosts_threshold is not None:
             (dbcluster.down_hosts_percent,
              dbcluster.down_hosts_threshold) = \
                 Cluster.parse_threshold(down_hosts_threshold)
-            cluster_updated = True
 
         if maint_threshold is not None:
             (dbcluster.down_maint_percent,
              dbcluster.down_maint_threshold) = \
                 Cluster.parse_threshold(maint_threshold)
-            cluster_updated = True
-
-        if not cluster_updated:
-            return
 
         session.flush()
+        dbcluster.validate()
 
         plenaries.write(locked=False)
 
@@ -146,7 +119,6 @@ class CommandUpdateCluster(BrokerCommand):
 
 def update_cluster_location(session, logger, dbcluster,
                             fix_location, plenaries, **arguments):
-    location_updated = False
     dblocation = get_location(session, **arguments)
     if fix_location:
         dblocation = dbcluster.minimum_location
@@ -158,7 +130,7 @@ def update_cluster_location(session, logger, dbcluster,
         if not dblocation.campus:
             errors.append("{0} is not within a campus.".format(dblocation))
 
-        if dbcluster.cluster_type != 'meta':
+        if not isinstance(dbcluster, MetaCluster):
             for host in dbcluster.hosts:
                 if host.hardware_entity.location != dblocation and \
                    dblocation not in host.hardware_entity.location.parents:
@@ -188,6 +160,5 @@ def update_cluster_location(session, logger, dbcluster,
                 dbmachine.location = dblocation
 
             dbcluster.location_constraint = dblocation
-            location_updated = True
 
-    return location_updated
+    return

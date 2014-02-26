@@ -20,7 +20,7 @@
 from sqlalchemy.sql.expression import asc, desc
 
 from aquilon.exceptions_ import ArgumentError, UnimplementedError
-from aquilon.aqdb.model import Interface, Machine, ARecord, Fqdn
+from aquilon.aqdb.model import Interface, Machine, ARecord, Fqdn, EsxCluster
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.dns import delete_dns_record
@@ -271,7 +271,8 @@ class CommandAddInterfaceMachine(BrokerCommand):
         if not dbmachine.vm_container:
             raise ArgumentError("Can only automatically generate MAC "
                                 "addresses for virtual hardware.")
-        if not dbmachine.cluster or dbmachine.cluster.cluster_type != 'esx':
+        if not dbmachine.cluster or not isinstance(dbmachine.cluster,
+                                                   EsxCluster):
             raise UnimplementedError("MAC address auto-generation has only "
                                      "been enabled for ESX Clusters.")
         # FIXME: These values should probably be configurable.

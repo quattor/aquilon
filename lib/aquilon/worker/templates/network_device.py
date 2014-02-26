@@ -33,9 +33,11 @@ class PlenaryNetworkDevice(StructurePlenary):
     A facade for the variety of PlenaryNetworkDevice subsidiary files
     """
 
+    prefix = "switchdata"
+
     @classmethod
     def template_name(cls, dbhost):
-        return "switchdata/" + str(dbhost.fqdn)
+        return cls.prefix + "/" + str(dbhost.fqdn)
 
     def get_key(self, exclusive=True):
         if inspect(self.dbobj).deleted:

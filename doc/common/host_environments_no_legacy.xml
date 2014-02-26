@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<simplelist type="inline" xmlns="http://docbook.org/ns/docbook">
+    <member><literal>dev</literal></member>
+    <member><literal>qa</literal></member>
+    <member><literal>uat</literal></member>
+    <member><literal>prod</literal></member>
+    <member><literal>infra</literal></member>
+    <!-- Note: legacy is omitted -->
+</simplelist>

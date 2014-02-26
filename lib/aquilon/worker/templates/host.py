@@ -122,9 +122,11 @@ Plenary.handlers[Host] = PlenaryHost
 
 
 class PlenaryHostData(StructurePlenary):
+    prefix = "hostdata"
+
     @classmethod
     def template_name(cls, dbhost):
-        return "hostdata/" + str(dbhost.fqdn)
+        return cls.prefix + "/" + str(dbhost.fqdn)
 
     def body(self, lines):
         interfaces = dict()

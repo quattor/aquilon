@@ -17,7 +17,7 @@
 
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import Cluster
+from aquilon.aqdb.model import Cluster, MetaCluster
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.commands.manage_hostname import validate_branch_commits
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
@@ -56,7 +56,7 @@ class CommandManageCluster(BrokerCommand):
         plenaries = PlenaryCollection(logger=logger)
 
         # manage at metacluster level
-        if dbcluster.cluster_type == 'meta':
+        if isinstance(dbcluster, MetaCluster):
             plenaries.append(Plenary.get_plenary(dbcluster))
             clusters = dbcluster.members
 

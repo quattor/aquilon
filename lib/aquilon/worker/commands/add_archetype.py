@@ -15,10 +15,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from sqlalchemy.inspection import inspect
+
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Archetype, Cluster
-from aquilon.worker.broker import BrokerCommand
 from aquilon.utils import validate_nlist_key
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.templates import Plenary
 
 
 class CommandAddArchetype(BrokerCommand):
@@ -26,10 +29,20 @@ class CommandAddArchetype(BrokerCommand):
     required_parameters = ["archetype"]
 
     def render(self, session, archetype, cluster_type, compilable,
-               description, **kwargs):
+               description, comments, **kwargs):
         validate_nlist_key('--archetype', archetype)
-        if archetype in ["hardware", "machine", "pan", "t",
-                         "service", "servicedata", "clusters"]:
+
+        def subclasses(cls):
+            for subcls in cls.__subclasses__():
+                for subsubcls in subclasses(subcls):
+                    yield subsubcls
+                yield subcls
+
+        reserved_names = set([cls.prefix for cls in subclasses(Plenary)])
+        # There are also some top-level directories in the template repository
+        reserved_names.update(["hardware", "pan", "t"])
+
+        if archetype in reserved_names:
             raise ArgumentError("Archetype name %s is reserved." % archetype)
 
         Archetype.get_unique(session, archetype, preclude=True)
@@ -37,10 +50,13 @@ class CommandAddArchetype(BrokerCommand):
         if description is None:
             description = archetype
         if cluster_type:
-            Cluster.polymorphic_subclass(cluster_type, "Unknown cluster type")
-        dbarch = Archetype(name=archetype,
-                           cluster_type=cluster_type,
-                           outputdesc=description,
+            cls = Cluster.polymorphic_subclass(cluster_type,
+                                               "Unknown cluster type")
+            # Normalization
+            cluster_type = inspect(cls).polymorphic_identity
+
+        dbarch = Archetype(name=archetype, cluster_type=cluster_type,
+                           outputdesc=description, comments=comments,
                            is_compileable=bool(compilable))
 
         session.add(dbarch)

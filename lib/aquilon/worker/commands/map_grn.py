@@ -22,7 +22,7 @@ from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.grn import lookup_grn
 from aquilon.worker.dbwrappers.host import (hostname_to_host, hostlist_to_hosts,
                                             check_hostlist_size)
-from aquilon.worker.templates import Plenary
+from aquilon.worker.templates import Plenary, PlenaryCollection
 
 
 class CommandMapGrn(BrokerCommand):
@@ -45,34 +45,41 @@ class CommandMapGrn(BrokerCommand):
         dbgrn = lookup_grn(session, grn, eon_id, logger=logger,
                            config=self.config)
 
-        target_type = "personality" if personality else "host"
+        plenaries = PlenaryCollection(logger=logger)
 
         if hostname:
             objs = [hostname_to_host(session, hostname)]
+            config_key = "host_grn_targets"
         elif list:
             check_hostlist_size(self.command, self.config, list)
             objs = hostlist_to_hosts(session, list)
+            config_key = "host_grn_targets"
         elif personality:
             objs = [Personality.get_unique(session, name=personality,
                                            archetype=archetype, compel=True)]
+            config_key = "personality_grn_targets"
 
         for obj in objs:
-            # INFO: Fails for archetypes other than 'aquilon', 'vmhost'
-            valid_targets = self.config.get("archetype_" + obj.archetype.name,
-                                            target_type + "_grn_targets")
+            section = "archetype_" + obj.archetype.name
 
-            if target not in [s.strip() for s in valid_targets.split(",")]:
-                raise ArgumentError("Invalid %s target %s for archetype %s, please "
-                                    "choose from %s" % (target_type, target,
-                                                        obj.archetype.name,
-                                                        valid_targets))
+            if self.config.has_option(section, config_key):
+                valid_targets = [s.strip() for s in
+                                 self.config.get(section, config_key).split(",")]
+            else:
+                raise ArgumentError("{0} has no valid GRN targets configured."
+                                    .format(obj.archetype))
 
+            if target not in valid_targets:
+                raise ArgumentError("Invalid target %s for archetype %s, please "
+                                    "choose from: %s." %
+                                    (target, obj.archetype.name,
+                                     ", ".join(valid_targets)))
+
+            plenaries.append(Plenary.get_plenary(obj))
             self._update_dbobj(obj, target, dbgrn)
 
         session.flush()
 
-        if personality:
-            plenary = Plenary.get_plenary(objs[0], logger=logger)
-            plenary.write()
+        plenaries.write()
 
         return

@@ -56,10 +56,11 @@ Plenary.handlers[StorageCluster] = PlenaryCluster
 
 
 class PlenaryClusterData(StructurePlenary):
+    prefix = "clusterdata"
 
     @classmethod
     def template_name(cls, dbcluster):
-        return "clusterdata/" + dbcluster.name
+        return cls.prefix + "/" + dbcluster.name
 
     def body(self, lines):
         pan_assign(lines, "system/cluster/name", self.dbobj.name)
@@ -120,12 +121,13 @@ class PlenaryClusterData(StructurePlenary):
                        self.dbobj.metacluster.name)
         pan_assign(lines, "system/cluster/ratio", [self.dbobj.vm_count,
                                                    self.dbobj.host_count])
-        pan_assign(lines, "system/cluster/max_hosts",
-                   self.dbobj.max_hosts)
-        lines.append("")
-
-        lines.append("")
-        if isinstance(self.dbobj, EsxCluster) and self.dbobj.network_device:
+        # FIXME: This should move to the generic part because max_hosts makes
+        # sense for non-ESX clusters as well, but the current schema does not
+        # allow that
+        if self.dbobj.max_hosts is not None:
+            pan_assign(lines, "system/cluster/max_hosts",
+                       self.dbobj.max_hosts)
+        if self.dbobj.network_device:
             pan_assign(lines, "system/cluster/switch",
                        self.dbobj.network_device.primary_name)
 
@@ -137,9 +139,11 @@ class PlenaryClusterObject(ObjectPlenary):
     are contained inside the cluster (via an include of the clusterdata plenary)
     """
 
+    prefix = "clusters"
+
     @classmethod
     def template_name(cls, dbcluster):
-        return "clusters/" + dbcluster.name
+        return cls.prefix + "/" + dbcluster.name
 
     def get_key(self, exclusive=True):
         keylist = [super(PlenaryClusterObject, self).get_key(exclusive=exclusive)]
@@ -198,6 +202,8 @@ class PlenaryClusterClient(Plenary):
     plenary template. This just names the cluster and nothing more.
     """
 
+    prefix = "cluster"
+
     def __init__(self, dbcluster, logger=LOGGER):
         super(PlenaryClusterClient, self).__init__(dbcluster, logger=logger)
 
@@ -205,7 +211,7 @@ class PlenaryClusterClient(Plenary):
 
     @classmethod
     def template_name(cls, dbcluster):
-        return "cluster/%s/client" % dbcluster.name
+        return "%s/%s/client" % (cls.prefix, dbcluster.name)
 
     def get_key(self, exclusive=True):
         return PlenaryKey(cluster_member=self.name, logger=self.logger,

@@ -242,8 +242,8 @@ class TestAddESXCluster(PersonalityTestMixin, TestBrokerCommand):
                    "--archetype=esx_cluster",
                    "--personality=vulcan-1g-desktop-prod"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "Metacluster utmc3 already has the maximum "
-                         "number of clusters (0).", command)
+        self.matchoutput(out, "Metacluster utmc3 has 1 clusters bound, which "
+                         "exceeds the requested limit of 0.", command)
 
     def testfaildifferentdomain(self):
         command = ["add_esx_cluster", "--cluster=newcluster",

@@ -2227,6 +2227,7 @@
          <option name="compilable" type="boolean">Can profiles be compiled?</option>
          <option name="description" type="string">A human-readable description of the archetype name</option>
          <option name="cluster_type" type="string">Only for cluster archetypes - what type of cluster is this?</option>
+         <option name="comments" type="string">Comments</option>
       </optgroup>
       <transport method="post" path="archetype/%(archetype)s" />
    </command>
@@ -3040,6 +3041,7 @@
          <option name="compilable" type="boolean" default='False'>Does this archetype produce profiles?</option>
          <option name="description" type="string">A human readable description of the archetype name</option>
          <option name="cluster_type" type="string">For cluster archetypes - what kind of cluster is this?</option>
+         <option name="comments" type="string">Comments</option>
       </optgroup>
       <transport method="put" path="archetype/%(archetype)s" />
   </command>
@@ -4060,7 +4062,7 @@
       <optgroup name="add_cluster_options" mandatory="False">
          <option name="metacluster" type="string">Name of the metacluster containing this cluster</option>
          <option name="maint_threshold" type="string">Down hosts threshold for maintenance windows</option>
-         <option name="max_members" type="int">Comments</option>
+         <option name="max_members" type="int">Max allowed host members</option>
          <option name="vm_to_host_ratio" type="string">Ratio of virtual machines to ESX servers</option>
          <option name="switch" type="string">switch in use by the cluster</option>
          <option name="buildstatus" type="string">Build status of the cluster (defaults to 'build')</option>

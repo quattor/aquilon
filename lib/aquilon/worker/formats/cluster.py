@@ -56,7 +56,7 @@ class ClusterFormatter(ObjectFormatter):
             p.name = str(personality.name)
             p.archetype.name = str(personality.archetype.name)
 
-        if cluster.cluster_type == 'esx':
+        if isinstance(cluster, EsxCluster):
             skeleton.vm_to_host_ratio = cluster.vm_to_host_ratio
             skeleton.max_vm_count = cluster.max_vm_count
 
@@ -77,7 +77,7 @@ class ClusterFormatter(ObjectFormatter):
                     u.name = name
                     u.value = value
 
-        if cluster.max_hosts:
+        if cluster.max_hosts is not None:
             skeleton.max_members = cluster.max_hosts
 
     def format_raw(self, cluster, indent=""):
@@ -87,7 +87,11 @@ class ClusterFormatter(ObjectFormatter):
                            "  {0:c}: {0.name}".format(cluster.metacluster))
         details.append(self.redirect_raw(cluster.location_constraint,
                                          indent + "  "))
-        details.append(indent + "  Max members: %s" % cluster.max_hosts)
+        if cluster.max_hosts is None:
+            details.append(indent + "  Max members: unlimited")
+        else:
+            details.append(indent + "  Max members: %s" % cluster.max_hosts)
+
         if cluster.down_hosts_percent:
             dht = int((cluster.down_hosts_threshold * len(cluster.hosts)) / 100)
             details.append(indent + "  Down Hosts Threshold: %s (%s%%)" %
@@ -112,7 +116,7 @@ class ClusterFormatter(ObjectFormatter):
                                    key=attrgetter('resource_type', 'name')):
                 details.append(self.redirect_raw(resource, indent + "    "))
 
-        if cluster.cluster_type == 'esx':
+        if isinstance(cluster, EsxCluster):
             details.append(indent + "  Max vm_to_host_ratio: %s" %
                            cluster.vm_to_host_ratio)
             details.append(indent + "  Max virtual machine count: %s" %

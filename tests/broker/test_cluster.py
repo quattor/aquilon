@@ -201,7 +201,8 @@ class TestCluster(TestBrokerCommand):
                    "--cluster", "utecl3"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
-                         "ESX Cluster utecl3 is over capacity of 0 hosts.",
+                         "ESX Cluster utecl3 has 1 hosts bound, which exceeds "
+                         "the requested limit of 0.",
                          command)
 
     def testfailunmadecluster(self):
@@ -223,7 +224,7 @@ class TestCluster(TestBrokerCommand):
         command = ["cluster", "--hostname=evh9.aqd-unittest.ms.com",
                    "--cluster=utstorage1"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "only hosts with archetype 'filer' can be added",
+        self.matchoutput(out, "Only hosts with archetype 'filer' can be added",
                          command)
 
         command = ["cluster", "--hostname=filer1.ms.com",
