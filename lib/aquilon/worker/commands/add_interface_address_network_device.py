@@ -23,3 +23,13 @@ from aquilon.worker.commands.add_interface_address import CommandAddInterfaceAdd
 class CommandAddInterfaceAddressNetworkDevice(CommandAddInterfaceAddress):
 
     required_parameters = ['network_device', 'interface']
+
+    def render(self, map_to_primary, **kwargs):
+
+        # Reverse PTR control. For network devices we should default to
+        # having the forward and reverse DNS names the same.
+        if map_to_primary is None:
+            map_to_primary = False
+        kwargs['map_to_primary'] = map_to_primary
+
+        return CommandAddInterfaceAddress.render(self, **kwargs)
