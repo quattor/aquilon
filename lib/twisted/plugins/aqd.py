@@ -34,7 +34,7 @@ from ms.modulecmd import Modulecmd, ModulecmdExecError
 from aquilon.config import Config
 from aquilon.twisted_patches import (GracefulProcessMonitor, integrate_logging)
 from aquilon.worker.knc_protocol import KNCSite
-from aquilon.worker.base_protocol import AnonymousSite
+from aquilon.worker.base_protocol import AQDSite
 
 # This gets imported dynamically to avoid loading libraries before the
 # config file has been parsed.
@@ -168,7 +168,7 @@ class AQDMaker(object):
         RestServer = getattr(resources, "RestServer")
 
         restServer = RestServer(config)
-        openSite = AnonymousSite(restServer)
+        openSite = AQDSite(restServer)
 
         # twisted is nicely changing the umask for us when the process is
         # set to daemonize.  This sets it back.

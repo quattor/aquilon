@@ -16,7 +16,8 @@
 # limitations under the License.
 """Wrappers for using knc with the stock twisted server implementations."""
 
-from twisted.web import server, http
+from twisted.web import http
+from aquilon.worker.base_protocol import AQDRequest, AQDSite
 
 import logging
 from aquilon.utils import force_ascii, force_ipv4
@@ -24,7 +25,7 @@ from aquilon.utils import force_ascii, force_ipv4
 LOGGER = logging.getLogger(__name__)
 
 
-class KNCRequest(server.Request):
+class KNCRequest(AQDRequest):
 
     def getPrincipal(self):
         return self.channel.kncinfo.get("CREDS")
@@ -32,7 +33,6 @@ class KNCRequest(server.Request):
     def getClientIP(self):
         """The Request object would normally supply this method.
         However, the client IP is being obtained via knc.
-
         """
         return self.channel.kncinfo.get("REMOTE_IP")
 
@@ -103,28 +103,6 @@ class KNCHTTPChannel(http.HTTPChannel):
             http.HTTPChannel.lineReceived(self, line)
 
 
-class KNCSite(server.Site):
+class KNCSite(AQDSite):
     requestFactory = KNCRequest
     protocol = KNCHTTPChannel
-
-    # Overriding http.HTTPFactory's log() to use some knc info instead
-    # of ignoring it (which is almost funny, as the line to print
-    # getUser() is commented out... could have just fiddled with that).
-    # Also made "IP address" return the value given from knc, instead
-    # of "None" (since, as far as the framework is concerned, the
-    # connection came in over a unix domain socket and not tcp/ip).
-    def log(self, request):
-        if hasattr(self, "logFile"):
-            line = '%s - %s %s "%s" %d %s "%s" "%s"\n' % (
-                request.getClientIP(),
-                # request.getUser() or "-", # the remote user is almost never important
-                request.getPrincipal(),
-                self._logDateTime,
-                '%s %s %s' % (self._escape(request.method),
-                              self._escape(request.uri),
-                              self._escape(request.clientproto)),
-                request.code,
-                request.sentLength or "-",
-                self._escape(request.getHeader("referer") or "-"),
-                self._escape(request.getHeader("user-agent") or "-"))
-            self.logFile.write(line)

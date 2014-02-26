@@ -16,31 +16,33 @@
 # limitations under the License.
 """Provide an anonymous access channel to the Site."""
 
-
 from twisted.web import server, http
 
-class AnonymousRequest(server.Request):
+
+class AQDRequest(server.Request):
+    """
+    Overrides the basic Request object to provide a getPrincipal method.
+    """
 
     def getPrincipal(self):
-        """For any anonymous channel, always returns None."""
+        """By default we return None."""
         return None
 
-class AnonymousSite(server.Site):
-    """
-    Overrides the basic HTTPChannel protocol with AnonHTTPChannel to
-    provide a getPrincipal method.  Should be kept consistent with
-    any other changes from kncwrappers.
-    """
-    requestFactory = AnonymousRequest
 
-    # Overriding http.HTTPFactory's log() for consistency with KNCSite.
-    # This is exactly the default server.Site.log() method for now.
+class AQDSite(server.Site):
+    """
+    Override server.Site to provide a better implemtation of log.
+    """
+    requestFactory = AQDRequest
+
+    # Overriding http.HTTPFactory's log() to log the username instead
+    # of ignoring it (which is almost funny, as the line to print
+    # getUser() is commented out... could have just fiddled with that).
     def log(self, request):
         if hasattr(self, "logFile"):
             line = '%s - %s %s "%s" %d %s "%s" "%s"\n' % (
                 request.getClientIP(),
-                # request.getUser() or "-", # the remote user is almost never important
-                "-",
+                request.getPrincipal() or "-",
                 self._logDateTime,
                 '%s %s %s' % (self._escape(request.method),
                               self._escape(request.uri),
