@@ -158,78 +158,45 @@ class ResponsePage(resource.Resource):
             # FIXME: This may be broken, if it is supposed to get a useful
             # message based on available render_ methods.
             raise server.UnsupportedMethod(getattr(self, 'allowedMethods', ()))
+
+        # Create a defered chain of actions (or continuation Mondad).  We add
+        # a list of the functions that should be called, and error handeling
+        # At the end of this block we will invoke the monad with the request
+        d = defer.Deferred()
+
         # Default render would just call the method here.
         # This is expanded to do argument checking, finish the request,
         # and do some error handling.
         arguments = self.extractArguments(request)
-        d = self.check_arguments(arguments, handler.required_parameters,
-                                 handler.optional_parameters,
-                                 handler.parameter_checks)
+        d.addCallback(handler.check_arguments)
+
+        # Retieve the instance from the handler
+        broker_command = handler.broker_command
+
         style = getattr(self, "output_format", None)
         if style is None:
             style = getattr(request, "output_format", None)
         if style is None:
-            style = getattr(handler, "default_style", "raw")
+            style = getattr(broker_command, "default_style", "raw")
+
         # The logger used to be set up after the session.  However,
         # this keeps a record of the request from forming immediately
         # if all the sqlalchmey session threads are in use.
         # This will be a problem if/when we want an auditid to come
         # from the database, but we can revisit at that point.
-        d = d.addCallback(lambda arguments: handler.add_logger(style=style,
-                                                               request=request,
-                                                               **arguments))
-        if handler.defer_to_thread:
+        d = d.addCallback(lambda arguments: broker_command.add_logger(style=style,
+                                                                request=request,
+                                                                **arguments))
+        if broker_command.defer_to_thread:
             d = d.addCallback(lambda arguments: threads.deferToThread(
-                handler.render, **arguments))
+                broker_command.render, **arguments))
         else:
-            d = d.addCallback(lambda arguments: handler.render(**arguments))
+            d = d.addCallback(lambda arguments: broker_command.render(**arguments))
         d = d.addCallback(self.finishRender, request)
         d = d.addErrback(self.wrapNonInternalError, request)
         d = d.addErrback(self.wrapError, request)
+        d.callback(arguments)
         return server.NOT_DONE_YET
-
-    def check_arguments(self, arguments, required=None, optional=None,
-                        parameter_checks=None):
-        """Check for the required and optional arguments.
-
-        Returns a Deferred that will have a dictionary of the arguments
-        found.  Any unsupplied optional arguments will have a value of
-        None.  If there are any problems, the Deferred will errback with
-        a failure.
-
-        As a hack, debug is always allowed as an argument.  Should
-        maybe have a flag on global options in input.xml for this.
-
-        As a separate hack, requestid is always allowed as an
-        argument.  This allows for status/update requests by the
-        client before the command returns.
-
-        """
-
-        required_map = {"debug": False, "requestid": False}
-        for arg in optional or []:
-            required_map[arg] = False
-        for arg in required or []:
-            required_map[arg] = True
-
-        result = {}
-        for (arg, req) in required_map.items():
-            #log.msg("Checking for arg %s with required=%s" % (arg, req))
-            if arg not in arguments:
-                if req:
-                    return defer.fail(ArgumentError(
-                        "Missing mandatory argument %s" % arg))
-                else:
-                    result[arg] = None
-                    continue
-            value = arguments[arg]
-            if arg in parameter_checks or {}:
-                try:
-                    value = parameter_checks[arg]("--" + arg, value)
-                except ArgumentError, err:
-                    return defer.fail(err)
-            result[arg] = value
-        return defer.succeed(result)
 
     def format(self, result, request):
         # This method is called to format error messages, and the only format
@@ -300,7 +267,7 @@ class RestServer(ResponsePage):
 
         #_logChildren(0, self)
 
-    def insert_instance(self, myinstance, rendermethod, path):
+    def insert_handler(self, handler, rendermethod, path):
         container = self
         relative = ""
         # Traverse down the resource tree, container will
@@ -348,11 +315,11 @@ class RestServer(ResponsePage):
             log.msg("Warning: Already have a %s here at %s..." %
                     (rendermethod, container.path))
         #log.msg("Setting 'command_" + fullcommand + "' as '" + rendermethod + "' for container '" + container.path + "'.")
-        container.handlers[rendermethod] = myinstance
+        container.handlers[rendermethod] = handler
 
 ###############################################################################
 
-class CommandRegistry(object):
+class CommandEntry(object):
 
     _type_handler = {
         'int': force_int,
@@ -367,7 +334,114 @@ class CommandRegistry(object):
         'list': force_list
     }
 
+    def __init__(self, fullname, method, path, name, trigger):
+        self.fullname = fullname
+        self.method = method
+        self.path = path
+        self.name = name
+        self.trigger = trigger
+
+        # Locate the instance of the BrokerCommand
+        # See commands/__init__.py for more info here...
+        broker_module = getattr(commands, fullname, None)
+        if not broker_module:
+            log.msg("No module available in aquilon.worker.commands " +
+                    "for %s" % fullname)
+        broker_command = getattr(broker_module, "broker_command", None)
+        if not broker_command:
+            log.msg("No class instance available for %s" % fullname)
+            broker_command = BrokerCommand()
+
+        # Save the broker command for later usage
+        self.broker_command = broker_command
+
+        # Update the shortname of the command
+        broker_command.command = name
+
+        # Fill in the required arguments from the instance of BrokerComamnd
+        # this will be extended when more options are found in add_option.
+        self.argument_requirments = {"debug": False, "requestid": False}
+        for arg in broker_command.optional_parameters or []:
+            self.argument_requirments[arg] = False
+        for arg in broker_command.required_parameters or []:
+            self.argument_requirments[arg] = True
+
+        # Checks for specific parameters, filled in by add_option
+        self.parameter_checks = {}
+
+    def add_option(self, option_name, paramtype, enumtype=None):
+        # If this argument was not specified directly by the instance of
+        # BrokerCommand then record it as optional (FIXME)
+        if option_name not in self.argument_requirments:
+            self.argument_requirments[option_name] = False
+
+        # Fill in the parameter checker for this option
+        if paramtype == 'enum':
+            if not enumtype:
+                log.msg("Warning: argument missing enum attribute for %s.%s" %
+                        (self.command, option_name))
+                return
+            try:
+                enum_class = StringEnum(enumtype)
+                self.parameter_checks[option_name] = enum_class.from_argument
+            except ValueError, e:
+                log.msg("Unknown Enum: %s" % e)
+                return
+        else:
+            if paramtype in self._type_handler:
+                self.parameter_checks[option_name] = self._type_handler[paramtype]
+            else:
+                log.msg("Warning: unknown option type %s for %s.%s" %
+                                        (paramtype, self.command, option_name))
+
+    def check_arguments(self, arguments):
+        """Check for the required and optional arguments.
+
+        Returns a dictionary of the arguments found.  Any unsupplied optional
+        arguments will have a value of None.  If there are any problems an
+        exception will be raised.
+
+        """
+        result = {}
+        for (arg, req) in self.argument_requirments.items():
+            #log.msg("Checking for arg %s with required=%s" % (arg, req))
+            if arg not in arguments:
+                if req:
+                    raise ArgumentError("Missing mandatory argument %s" % arg)
+                else:
+                    result[arg] = None
+                    continue
+            value = arguments[arg]
+            if arg in self.parameter_checks or {}:
+                    value = self.parameter_checks[arg]("--" + arg, value)
+            result[arg] = value
+        return result
+
+    def add_format(self, format, style):
+        if hasattr(self.broker_command.formatter, "config_" + style):
+            meth = getattr(self.broker_command.formatter, "config_" + style)
+            meth(format, self.broker_command.command)
+
+
+class CommandRegistry(object):
+
+    def new_entry(self, fullname, method, path, name, trigger):
+        if fullname in self._commands:
+            log.msg("Warning: Attempt to redefind command %s" % fullname)
+            return None
+        return CommandEntry(fullname, method, path, name, trigger)
+
+    def add_entry(self, entry):
+        self._commands[entry.fullname] = entry
+        # Insert the instance into the rest server
+        self.server.insert_handler(entry, entry.method.upper(), entry.path)
+
     def __init__(self, config, server):
+        self.server = server
+        self.config = config
+
+        self._commands = {}
+
         BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
         tree = ET.parse(os.path.join(BINDIR, '..', 'etc', 'input.xml'))
 
@@ -379,6 +453,8 @@ class CommandRegistry(object):
             for transport in command.getiterator("transport"):
                 if ("method" not in transport.attrib or
                     "path" not in transport.attrib):
+                    log.msg("Warning: incorrect transport specification "
+                            "for %s." % name)
                     continue
 
                 method = transport.attrib["method"]
@@ -389,65 +465,28 @@ class CommandRegistry(object):
                 if trigger:
                     fullname = fullname + "_" + trigger
 
-                # Locate the instance of the BrokerCommand
-                # See commands/__init__.py for more info here...
-                mymodule = getattr(commands, fullname, None)
-                if not mymodule:
-                    log.msg("No module available in aquilon.worker.commands " +
-                            "for %s" % fullname)
+                entry = self.new_entry(fullname, method, path, name, trigger)
+                if not entry:
+                    continue
 
-                myinstance = getattr(mymodule, "broker_command", None)
-                if not myinstance:
-                    log.msg("No class instance available for %s" % fullname)
-                    myinstance = BrokerCommand()
-
-                # Save the shortname of the command
-                myinstance.command = name
-
-                # Insert the instance into the rest server
-                server.insert_instance(myinstance, method.upper(), path)
-
-                # Since we are parsing input.xml anyway, record the possible
-                # parameters...
                 for option in command.getiterator("option"):
-                    if "name" not in option.attrib:
+                    if ('name' not in option.attrib or
+                        'type' not in option.attrib):
+                        log.msg("Warning: incorrect options specification "
+                                "for %s." % fullname)
                         continue
                     option_name = option.attrib["name"]
-                    if option_name not in myinstance.optional_parameters:
-                        myinstance.optional_parameters.append(option_name)
-                    if "type" in option.attrib:
-                        option_type = option.attrib["type"]
-                        if option_type == 'enum':
-                            if 'enum' not in option.attrib:
-                                log.msg("Warning: argument missing enum attribute for %s.%s" %
-                                        (myinstance.command, option_name))
-                                continue
-                            enum_type = option.attrib['enum']
-                            try:
-                                enum_class = StringEnum(enum_type)
-                                myinstance.parameter_checks[option_name] = enum_class.from_argument
-                            except ValueError, e:
-                                log.msg("Unknown Enum: %s" % e)
-                                continue
-                        else:
-                            if option_type not in self._type_handler:
-                                log.msg("Warning: unknown option type %s for %s.%s" %
-                                        (option_type, myinstance.command, option_name))
-                                continue
-                            myinstance.parameter_checks[option_name] = self._type_handler[option_type]
-                    else:  # pragma: no cover
-                        log.msg("Warning: argument type not known for %s.%s" %
-                                (myinstance.command, option_name))
+                    paramtype = option.attrib["type"]
+                    enumtype = option.attrib.get("enum")
+                    entry.add_option(option_name, paramtype, enumtype)
 
-                    for format in command.getiterator("format"):
-                        if "name" not in format.attrib:
-                            log.msg("Warning: incorrect format specification "
-                                    "for %s." % myinstance.command)
-                            continue
+                for format in command.getiterator("format"):
+                    if "name" not in format.attrib:
+                        log.msg("Warning: incorrect format specification "
+                                "for %s." % fullname)
+                        continue
+                    style = format.attrib["name"]
+                    entry.add_format(format, style)
 
-                        style = format.attrib["name"]
-                        if hasattr(myinstance.formatter, "config_" + style):
-                            meth = getattr(myinstance.formatter, "config_" +
-                                           style)
-                            meth(format, myinstance.command)
+                self.add_entry(entry)
 
