@@ -3,18 +3,18 @@
 "http://docbook.org/xml/5.0/dtd/docbook.dtd" [
 <!ENTITY aqd_version SYSTEM "../version.txt">
 ]>
-<refentry xml:id="update_personality"
+<refentry xml:id="aq_update_personality"
           xmlns="http://docbook.org/ns/docbook"
 	  xmlns:xi="http://www.w3.org/2001/XInclude">
     <refmeta>
-        <refentrytitle>update_personality</refentrytitle>
+        <refentrytitle>aq_update_personality</refentrytitle>
         <manvolnum>1</manvolnum>
         <refmiscinfo class="version">&aqd_version;</refmiscinfo>
         <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
     </refmeta>
 
     <refnamediv>
-        <refname>update personality</refname>
+        <refname>aq update personality</refname>
         <refpurpose>
 	    update certain personality options
         </refpurpose>
@@ -168,8 +168,8 @@
     <refsect1>
 	<title>See also</title>
 	<para>
-	    <citerefentry><refentrytitle>del_personality</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-	    <citerefentry><refentrytitle>add_personality</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>aq_del_personality</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>aq_add_personality</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
 	</para>
     </refsect1>
 </refentry>

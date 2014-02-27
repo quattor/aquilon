@@ -3,18 +3,18 @@
 "http://docbook.org/xml/5.0/dtd/docbook.dtd" [
 <!ENTITY aqd_version SYSTEM "../version.txt">
 ]>
-<refentry xml:id="show_active_commands"
+<refentry xml:id="aq_show_active_commands"
           xmlns="http://docbook.org/ns/docbook"
 	  xmlns:xi="http://www.w3.org/2001/XInclude">
     <refmeta>
-        <refentrytitle>show_active_commands</refentrytitle>
+        <refentrytitle>aq_show_active_commands</refentrytitle>
         <manvolnum>1</manvolnum>
         <refmiscinfo class="version">&aqd_version;</refmiscinfo>
         <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
     </refmeta>
 
     <refnamediv>
-        <refname>show_active_commands</refname>
+        <refname>aq show_active_commands</refname>
         <refpurpose>
 	    Show the commands under or waiting for execution
         </refpurpose>
@@ -57,8 +57,8 @@
     <refsect1>
 	<title>See also</title>
 	<para>
-	    <citerefentry><refentrytitle>status</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-	    <citerefentry><refentrytitle>show_active_locks</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+	    <citerefentry><refentrytitle>aq_status</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>aq_show_active_locks</refentrytitle><manvolnum>1</manvolnum></citerefentry>
 	</para>
     </refsect1>
 </refentry>

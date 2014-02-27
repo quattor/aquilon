@@ -19,9 +19,11 @@
 import os
 import sys
 
-basedir = os.path.dirname(__file__)
-srcdir = os.path.realpath(os.path.join(basedir, '..', 'lib'))
-sys.path.append(srcdir)
+BINDIR = os.path.dirname(__file__)
+LIBDIR = os.path.realpath(os.path.join(BINDIR, '..', 'lib'))
+
+if LIBDIR not in sys.path:
+    sys.path.append(LIBDIR)
 
 import aquilon.aqdb.depends
 import aquilon.worker.depends
@@ -37,5 +39,5 @@ ms.version.addpkg("logilab.common", "0.60.1")
 
 from pylint import lint
 
-pylintrc = os.path.join(basedir, "pylintrc")
+pylintrc = os.path.join(BINDIR, "pylintrc")
 lint.Run(["--rcfile", pylintrc] + sys.argv[1:])

@@ -3,18 +3,18 @@
 "http://docbook.org/xml/5.0/dtd/docbook.dtd" [
 <!ENTITY aqd_version SYSTEM "../version.txt">
 ]>
-<refentry xml:id="flush"
+<refentry xml:id="aq_flush"
           xmlns="http://docbook.org/ns/docbook"
 	  xmlns:xi="http://www.w3.org/2001/XInclude">
     <refmeta>
-        <refentrytitle>flush</refentrytitle>
+        <refentrytitle>aq_flush</refentrytitle>
         <manvolnum>1</manvolnum>
         <refmiscinfo class="version">&aqd_version;</refmiscinfo>
         <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
     </refmeta>
 
     <refnamediv>
-        <refname>flush</refname>
+        <refname>aq flush</refname>
         <refpurpose>
 	    Flush the plenary templates
         </refpurpose>

@@ -19,14 +19,6 @@
 
 import sys
 import os
-
-if __name__ == '__main__':
-    BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
-    sys.path.append(BINDIR)
-
-    import aquilon.client.depends
-
-
 from optparse import OptionParser, OptionValueError
 from lxml import etree
 from subprocess import Popen
@@ -104,15 +96,15 @@ class CustomParser(OptionParser):
     def print_help(self, file=None):
         # Check if the command has a man page
         use_man = False
+        reftitle = "aq_" + self.command.name
         with open("/dev/null", "w") as devnull:
-            p = Popen(["man", "-W", self.command.name], stdout=devnull,
-                      stderr=devnull)
+            p = Popen(["man", "-W", reftitle], stdout=devnull, stderr=devnull)
             p.communicate()
             if p.returncode == 0:
                 use_man = True
 
         if use_man:
-            p = Popen(["man", self.command.name])
+            p = Popen(["man", reftitle])
             p.communicate()
             exit(p.returncode)
         else:
@@ -601,16 +593,3 @@ class OptParser(object):
             self.parser.set_usage(e.help)
             self.parser.error(e.error)
         return cmd.name, transport, command_options, global_options
-
-
-if __name__ == '__main__':
-    BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
-    p = OptParser(os.path.join(BINDIR, '..', '..', '..', '..', 'etc', 'input.xml'))
-    try:
-        (command, transport, commandOptions, globalOptions) = p.parse(sys.argv[1:])
-    except ParsingError, e:
-        print "ERROR", e.error
-    else:
-        print "Command:", command
-        print "Command Options:", commandOptions
-        print "Global Options:", globalOptions

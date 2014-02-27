@@ -3,18 +3,18 @@
 "http://docbook.org/xml/5.0/dtd/docbook.dtd" [
 <!ENTITY aqd_version SYSTEM "../version.txt">
 ]>
-<refentry xml:id="add_interface_address"
+<refentry xml:id="aq_add_interface_address"
           xmlns="http://docbook.org/ns/docbook"
 	  xmlns:xi="http://www.w3.org/2001/XInclude">
     <refmeta>
-        <refentrytitle>add_interface_address</refentrytitle>
+        <refentrytitle>aq_add_interface_address</refentrytitle>
         <manvolnum>1</manvolnum>
         <refmiscinfo class="version">&aqd_version;</refmiscinfo>
         <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
     </refmeta>
 
     <refnamediv>
-        <refname>add interface address</refname>
+        <refname>aq add interface address</refname>
         <refpurpose>
 	    Assign an IP address to an interface
         </refpurpose>
@@ -224,11 +224,11 @@ aq add interface address --network_device foo.one-nyp.ms.com \
     <refsect1>
 	<title>See also</title>
 	<para>
-	    <citerefentry><refentrytitle>add_chassis</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-	    <citerefentry><refentrytitle>add_host</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-	    <citerefentry><refentrytitle>add_network_device</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-	    <citerefentry><refentrytitle>poll_network_device</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-	    <citerefentry><refentrytitle>add_network_environment</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+	    <citerefentry><refentrytitle>aq_add_chassis</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>aq_add_host</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>aq_add_network_device</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>aq_poll_network_device</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>aq_add_network_environment</refentrytitle><manvolnum>1</manvolnum></citerefentry>
 	</para>
     </refsect1>
 </refentry>

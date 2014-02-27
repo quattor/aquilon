@@ -31,15 +31,15 @@
 import sys
 import os
 
-_DIR = os.path.dirname(os.path.realpath(__file__))
-_LIBDIR = os.path.join(_DIR, "..", "lib")
-if _LIBDIR not in sys.path:
-    sys.path.insert(0, _LIBDIR)
+# -- begin path_setup --
+BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
+LIBDIR = os.path.join(BINDIR, "..", "lib")
+
+if LIBDIR not in sys.path:
+    sys.path.append(LIBDIR)
+# -- end path_setup --
 
 from aquilon.aqdb import depends
-
-import ms.version
-ms.version.addpkg('psycopg2', '2.5-9.2.4')
 
 import argparse
 

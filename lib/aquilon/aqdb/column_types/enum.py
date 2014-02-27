@@ -17,6 +17,7 @@
 """ A starting point for discriminator columns. A future version will
 dynamically pull all possible values at run-time with some clever caching.
 Borrowed from http://www.sqlalchemy.org/trac/wiki/UsageRecipes/Enum """
+
 import sqlalchemy
 from aquilon.exceptions_ import ArgumentError
 
@@ -63,28 +64,3 @@ class Enum(sqlalchemy.types.TypeDecorator):
             raise ArgumentError('"%s" not a valid value. Valid values are: %s'
                                 % (value, self.values))
         return value
-
-
-def test_enum():  # pragma: no cover
-    from sqlalchemy import (MetaData, Table, Column, Integer, insert)
-
-    t = Table('foo', MetaData('sqlite:///'),
-              Column('id', Integer, primary_key=True),
-              Column('e', Enum(16, ['foobar', 'baz', 'quux', None])))
-    t.create()
-
-    t.insert().execute(e='foobar')
-    t.insert().execute(e='baz')
-    t.insert().execute(e='quux')
-    t.insert().execute(e=None)
-
-    try:
-        t.insert().execute(e='lala')
-        assert False
-    except ValueError:
-        pass
-
-    print list(t.select().execute())
-
-if __name__ == '__main__':
-    test_enum()

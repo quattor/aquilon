@@ -35,13 +35,15 @@ import csv
 from time import sleep
 from threading import Thread
 
+# -- begin path_setup --
 BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
-SRCDIR = os.path.join(BINDIR, "..")
-LIBDIR = os.path.join(SRCDIR, "lib")
-MANDIR = os.path.join(SRCDIR, "doc", "man")
+LIBDIR = os.path.join(BINDIR, "..", "lib")
 
-sys.path.append(LIBDIR)
+if LIBDIR not in sys.path:
+    sys.path.append(LIBDIR)
+# -- end path_setup --
 
+from aquilon.config import lookup_file_path
 from aquilon.exceptions_ import AquilonError
 from aquilon.client import depends
 from aquilon.client.knchttp import KNCHTTPConnection
@@ -138,8 +140,7 @@ class CustomAction(object):
         if os.path.exists(os.path.join(testdir, 'Makefile')):
             p = Popen(['/usr/bin/make', '-C', testdir, 'test',
                        'AQCMD=%s' % os.path.realpath(sys.argv[0]),
-                       'AQBUILDXML=%s' % os.path.join(SRCDIR, "etc",
-                                                      "build.xml")],
+                       'AQBUILDXML=%s' % lookup_file_path("build.xml")],
                       cwd=testdir, env=self.env)
             p.wait()
             if p.returncode != 0:
@@ -302,9 +303,15 @@ def quoteOptions(options):
 if __name__ == "__main__":
     # Set up the search path for man pages. "man" does not like ".." in the
     # path, so we have to normalize it
-    os.environ["MANPATH"] = os.path.realpath(MANDIR)
+    BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
+    MANDIR = os.path.realpath(os.path.join(BINDIR, "..", "doc", "man"))
+    if os.path.exists(MANDIR):
+        if "MANPATH" in os.environ:
+            os.environ["MANPATH"] = MANDIR + ":" + os.environ["MANPATH"]
+        else:
+            os.environ["MANPATH"] = MANDIR
 
-    parser = OptParser(os.path.join(BINDIR, '..', 'etc', 'input.xml'))
+    parser = OptParser(lookup_file_path('input.xml'))
     try:
         (command, transport, commandOptions, globalOptions) = \
             parser.parse(sys.argv[1:])

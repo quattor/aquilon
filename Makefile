@@ -78,6 +78,16 @@ $(COMMON)/sbin/aq_notifyd: sbin/aq_notifyd.py
 	sed -e '1s,^#!$(PYTHON_DEFAULT)\(.*\),#!$(PYTHON_SERVER_PROD)\1,' <$< >$@
 	chmod $(PERMS) $@
 
+$(COMMON)/sbin/aqdb_shell: sbin/aqdb_shell.py
+	@mkdir -p `dirname $@`
+	sed -e '1s,^#!$(PYTHON_DEFAULT)\(.*\),#!$(PYTHON_SERVER_PROD)\1,' <$< >$@
+	chmod $(PERMS) $@
+
+$(COMMON)/sbin/aqdb_migrate: sbin/aqdb_migrate.py
+	@mkdir -p `dirname $@`
+	sed -e '1s,^#!$(PYTHON_DEFAULT)\(.*\),#!$(PYTHON_SERVER_PROD)\1,' <$< >$@
+	chmod $(PERMS) $@
+
 $(COMMON)/%.pyc: $(COMMON)/%.py
 	@echo "compiling $@"
 	@rm -f $@

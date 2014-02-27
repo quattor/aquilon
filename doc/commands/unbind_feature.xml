@@ -3,18 +3,18 @@
 "http://docbook.org/xml/5.0/dtd/docbook.dtd" [
 <!ENTITY aqd_version SYSTEM "../version.txt">
 ]>
-<refentry xml:id="unbind_feature"
+<refentry xml:id="aq_unbind_feature"
           xmlns="http://docbook.org/ns/docbook"
 	  xmlns:xi="http://www.w3.org/2001/XInclude">
     <refmeta>
-        <refentrytitle>unbind_feature</refentrytitle>
+        <refentrytitle>aq_unbind_feature</refentrytitle>
         <manvolnum>1</manvolnum>
         <refmiscinfo class="version">&aqd_version;</refmiscinfo>
         <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
     </refmeta>
 
     <refnamediv>
-        <refname>unbind feature</refname>
+        <refname>aq unbind feature</refname>
         <refpurpose>
 	    Remove the binding of a feature to a model/archetype/personality
         </refpurpose>
@@ -203,10 +203,10 @@ aq bind feature --feature foo --personality unixeng-test --interface bond1
     <refsect1>
 	<title>See also</title>
 	<para>
-	    <citerefentry><refentrytitle>bind_feature</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-	    <citerefentry><refentrytitle>show_feature</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-	    <citerefentry><refentrytitle>add_feature</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-	    <citerefentry><refentrytitle>del_feature</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+	    <citerefentry><refentrytitle>aq_bind_feature</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>aq_show_feature</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>aq_add_feature</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>aq_del_feature</refentrytitle><manvolnum>1</manvolnum></citerefentry>
 	</para>
     </refsect1>
 </refentry>

@@ -18,12 +18,17 @@
 
 import sys
 import os
+
+LIBDIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..")
+SBINDIR = os.path.join(LIBDIR, "..", "sbin")
+
+if LIBDIR not in sys.path:
+    sys.path.append(LIBDIR)
+
 # sbin/aqd.py, we'll start it after the patch is done
-sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                             "..", "..", "sbin"))
-# lib/aquilon/config.py
-sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                             "..", "..", "lib"))
+if SBINDIR not in sys.path:
+    sys.path.append(SBINDIR)
+
 
 from aquilon.config import Config
 from socket import gaierror
@@ -80,8 +85,7 @@ gethostbyname_orig = socket.gethostbyname
 socket.gethostbyname = fake_gethostbyname
 
 # worker/resources.py depends on it.
-sys.argv[0] = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                           "..", "..", "sbin", "twistd.py")
+sys.argv[0] = os.path.join(SBINDIR, "aqd.py")
 
 # start the broker
 import aqd

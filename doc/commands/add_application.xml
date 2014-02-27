@@ -3,18 +3,18 @@
 "http://docbook.org/xml/5.0/dtd/docbook.dtd" [
 <!ENTITY aqd_version SYSTEM "../version.txt">
 ]>
-<refentry xml:id="add_application"
+<refentry xml:id="aq_add_application"
           xmlns="http://docbook.org/ns/docbook"
 	  xmlns:xi="http://www.w3.org/2001/XInclude">
     <refmeta>
-        <refentrytitle>add_application</refentrytitle>
+        <refentrytitle>aq_add_application</refentrytitle>
         <manvolnum>1</manvolnum>
         <refmiscinfo class="version">&aqd_version;</refmiscinfo>
         <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
     </refmeta>
 
     <refnamediv>
-        <refname>add application</refname>
+        <refname>aq add application</refname>
         <refpurpose>
 	    Add an application resource onto a host or cluster
         </refpurpose>
@@ -158,7 +158,7 @@ aq add application --hostname foo.example.com \
     <refsect1>
 	<title>See also</title>
 	<para>
-	    <citerefentry><refentrytitle>del_application</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>aq_del_application</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
 	</para>
     </refsect1>
 </refentry>

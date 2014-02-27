@@ -3,18 +3,18 @@
 "http://docbook.org/xml/5.0/dtd/docbook.dtd" [
 <!ENTITY aqd_version SYSTEM "../version.txt">
 ]>
-<refentry xml:id="add_cluster"
+<refentry xml:id="aq_add_cluster"
           xmlns="http://docbook.org/ns/docbook"
 	  xmlns:xi="http://www.w3.org/2001/XInclude">
     <refmeta>
-        <refentrytitle>add_cluster</refentrytitle>
+        <refentrytitle>aq_add_cluster</refentrytitle>
         <manvolnum>1</manvolnum>
         <refmiscinfo class="version">&aqd_version;</refmiscinfo>
         <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
     </refmeta>
 
     <refnamediv>
-        <refname>add cluster</refname>
+        <refname>aq add cluster</refname>
         <refpurpose>
 	    Add a new cluster
         </refpurpose>
@@ -290,10 +290,10 @@ aq add cluster --cluster nyesx1 \
     <refsect1>
 	<title>See also</title>
 	<para>
-	    <citerefentry><refentrytitle>del_cluster</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-	    <citerefentry><refentrytitle>show_cluster</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-	    <citerefentry><refentrytitle>cluster</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-	    <citerefentry><refentrytitle>uncluster</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>aq_del_cluster</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>aq_show_cluster</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>aq_cluster</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>aq_uncluster</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
 	</para>
     </refsect1>
 </refentry>

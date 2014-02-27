@@ -3,18 +3,18 @@
 "http://docbook.org/xml/5.0/dtd/docbook.dtd" [
 <!ENTITY aqd_version SYSTEM "../version.txt">
 ]>
-<refentry xml:id="add_filesystem"
+<refentry xml:id="aq_add_filesystem"
           xmlns="http://docbook.org/ns/docbook"
 	  xmlns:xi="http://www.w3.org/2001/XInclude">
     <refmeta>
-        <refentrytitle>add_filesystem</refentrytitle>
+        <refentrytitle>aq_add_filesystem</refentrytitle>
         <manvolnum>1</manvolnum>
         <refmiscinfo class="version">&aqd_version;</refmiscinfo>
         <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
     </refmeta>
 
     <refnamediv>
-        <refname>add filesystem</refname>
+        <refname>aq add filesystem</refname>
         <refpurpose>
 	    Add a filesystem resource onto a host or cluster
         </refpurpose>
@@ -176,7 +176,7 @@
 		<listitem>
 		    <para>
 			The value for dump frequency, as per
-	    <citerefentry><refentrytitle>fstab</refentrytitle><manvolnum>5</manvolnum></citerefentry>.
+	    <citerefentry><refentrytitle>aq_fstab</refentrytitle><manvolnum>5</manvolnum></citerefentry>.
 			This defaults to 0.
 		    </para>
 		</listitem>
@@ -188,7 +188,7 @@
 		<listitem>
 		    <para>
 			The value for fsck pass, as per
-	    <citerefentry><refentrytitle>fstab</refentrytitle><manvolnum>5</manvolnum></citerefentry>.
+	    <citerefentry><refentrytitle>aq_fstab</refentrytitle><manvolnum>5</manvolnum></citerefentry>.
 			This defaults to 2.
 		    </para>
 		</listitem>
@@ -200,7 +200,7 @@
 		<listitem>
 		    <para>
 			The value for mount options, as per
-	    <citerefentry><refentrytitle>fstab</refentrytitle><manvolnum>5</manvolnum></citerefentry>.
+	    <citerefentry><refentrytitle>aq_fstab</refentrytitle><manvolnum>5</manvolnum></citerefentry>.
 			For
 			example, "rw,nosuid".
 		    </para>
@@ -268,7 +268,7 @@ aq add_filesystem --filesystem d1 --cluster grid1 --type ext3 \
     <refsect1>
 	<title>See also</title>
 	<para>
-	    <citerefentry><refentrytitle>del_filesystem</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>aq_del_filesystem</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
 	</para>
     </refsect1>
 </refentry>

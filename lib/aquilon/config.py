@@ -24,9 +24,50 @@ from ConfigParser import SafeConfigParser
 
 from aquilon.exceptions_ import AquilonError
 
+_SRCDIR = os.path.realpath(os.path.join(os.path.dirname(__file__),
+                                        "..", ".."))
+
 
 def get_username():
     return pwd.getpwuid(os.getuid()).pw_name
+
+
+def running_from_source():
+    """
+    Determine if we're running from the source tree.
+
+    Being able to run from the source tree makes development easier, but the
+    directory structure may differ from the installed system, and also some
+    settings should have different defaults. Use this function when such
+    decisions are needed to be made.
+    """
+
+    # Need a file that is guaranteed not to be installed - Makefile is a
+    # reasonable choice
+    return os.path.exists(os.path.join(_SRCDIR, "Makefile"))
+
+
+def lookup_file_path(name):
+    """
+    Return the full path of a data file.
+
+    If we're running from the source tree, then use the default files;
+    otherwise, use the system-wide ones.
+    """
+    if running_from_source():
+        return os.path.join(_SRCDIR, "etc", name)
+
+    paths_to_try = [os.path.join("/etc", "aquilon", name),
+                    os.path.join("/usr", "share", "aquilon", name),
+                    os.path.join(_SRCDIR, "etc", name)]
+    for path in paths_to_try:
+        if os.path.exists(path):
+            return path
+
+    # We know it does not exist, but returning the name may give the user a
+    # clue
+    return paths_to_try[0]
+
 
 # All defaults should be in etc/aqd.conf.defaults.  This is only needed to
 # supply defaults that are determined by code at run time.
@@ -38,8 +79,7 @@ global_defaults = {
     "user": os.environ.get("USER") or get_username(),
     # Only used by unit tests at the moment, but maybe useful for
     # scripts that want to execute stand-alone.
-    "srcdir": os.path.realpath(os.path.join(os.path.dirname(__file__),
-                                                    "..", "..")),
+    "srcdir": _SRCDIR,
     "hostname": socket.getfqdn(),
 }
 
@@ -55,8 +95,9 @@ class Config(SafeConfigParser):
         if getattr(self, "baseconfig", None):
             if not configfile or self.baseconfig == os.path.realpath(configfile):
                 return
-            raise AquilonError("Could not configure with %s, already configured with %s" %
-                (configfile, self.baseconfig))
+            raise AquilonError("Could not configure with %s, already "
+                               "configured with %s" %
+                               (configfile, self.baseconfig))
         # This is a small race condition here... baseconfig could be
         # checked here, pre-empted, checked again elsewhere, and also
         # get here.  If that ever happens, it is only a problem if one
@@ -67,8 +108,7 @@ class Config(SafeConfigParser):
             self.baseconfig = os.path.realpath(os.environ.get("AQDCONF",
                                                               "/etc/aqd.conf"))
         SafeConfigParser.__init__(self, defaults)
-        src_defaults = os.path.join(defaults["srcdir"], "etc",
-                                    "aqd.conf.defaults")
+        src_defaults = lookup_file_path("aqd.conf.defaults")
         read_files = self.read([src_defaults, self.baseconfig])
         for file in [src_defaults, self.baseconfig]:
             if file not in read_files:

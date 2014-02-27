@@ -29,7 +29,6 @@ import sys
 
 _DIR = os.path.dirname(os.path.realpath(__file__))
 _LIBDIR = os.path.join(_DIR, '..', 'lib')
-_ETCDIR = os.path.join(_DIR, '..', 'etc')
 sys.path.insert(0, _LIBDIR)
 
 import aquilon.aqdb.depends
@@ -51,9 +50,9 @@ if not os.path.exists(opts.dir):
 
 ###############################################################################
 
-from aquilon.config import Config
+from aquilon.config import Config, lookup_file_path
 
-config = Config(configfile=os.path.join(_ETCDIR, 'aqd.conf.mem'))
+config = Config(configfile=lookup_file_path('aqd.conf.mem'))
 
 ###############################################################################
 

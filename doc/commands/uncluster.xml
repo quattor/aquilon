@@ -3,18 +3,18 @@
 "http://docbook.org/xml/5.0/dtd/docbook.dtd" [
 <!ENTITY aqd_version SYSTEM "../version.txt">
 ]>
-<refentry xml:id="uncluster"
+<refentry xml:id="aq_uncluster"
           xmlns="http://docbook.org/ns/docbook"
 	  xmlns:xi="http://www.w3.org/2001/XInclude">
     <refmeta>
-        <refentrytitle>uncluster</refentrytitle>
+        <refentrytitle>aq_uncluster</refentrytitle>
         <manvolnum>1</manvolnum>
         <refmiscinfo class="version">&aqd_version;</refmiscinfo>
         <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
     </refmeta>
 
     <refnamediv>
-        <refname>uncluster</refname>
+        <refname>aq uncluster</refname>
         <refpurpose>
 	    Remove hosts from a cluster
         </refpurpose>
@@ -117,7 +117,7 @@ aq uncluster --hostname foo.example.com --cluster grid1
     <refsect1>
 	<title>See also</title>
 	<para>
-	    <citerefentry><refentrytitle>cluster</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>aq_cluster</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
 	</para>
     </refsect1>
 </refentry>

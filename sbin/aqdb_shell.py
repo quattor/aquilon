@@ -18,10 +18,13 @@
 import os
 import sys
 
-_DIR = os.path.dirname(os.path.realpath(__file__))
-_LIBDIR = os.path.join(_DIR, '..', '..')
-if _LIBDIR not in sys.path:
-    sys.path.insert(0, _LIBDIR)
+# -- begin path_setup --
+BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
+LIBDIR = os.path.join(BINDIR, "..", "lib")
+
+if LIBDIR not in sys.path:
+    sys.path.append(LIBDIR)
+# -- end path_setup --
 
 import aquilon.aqdb.depends  # pylint: disable=W0611
 
@@ -38,7 +41,6 @@ from aquilon.config import Config  # pylint: disable=W0611
 
 # pylint: disable=W0614
 from aquilon.aqdb.model import *  # pylint: disable=W0401
-from aquilon.aqdb.dsdb import *  # pylint: disable=W0401
 from aquilon.aqdb.db_factory import DbFactory
 
 db = DbFactory()
@@ -80,13 +82,6 @@ def main():
     ipycfg.InteractiveShell.colors = 'Linux'
     ipshell = InteractiveShellEmbed(config=ipycfg, banner1=_banner)
     ipshell()
-
-
-def graph_schema(db=db, file_name="/tmp/aqdb_schema"):
-    """ Produces a png image of the schema. """
-    import aquilon.aqdb.utils.schema2dot as s2d
-    s2d.write_schema_png(db.meta, "%s.png" % file_name)
-    s2d.write_schema_dot(db.meta, "%s.dot" % file_name)
 
 
 if __name__ == '__main__':

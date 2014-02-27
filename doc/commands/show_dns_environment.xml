@@ -3,18 +3,18 @@
 "http://docbook.org/xml/5.0/dtd/docbook.dtd" [
 <!ENTITY aqd_version SYSTEM "../version.txt">
 ]>
-<refentry xml:id="show_dns_environment"
+<refentry xml:id="aq_show_dns_environment"
           xmlns="http://docbook.org/ns/docbook"
 	  xmlns:xi="http://www.w3.org/2001/XInclude">
     <refmeta>
-        <refentrytitle>show_dns_environment</refentrytitle>
+        <refentrytitle>aq_show_dns_environment</refentrytitle>
         <manvolnum>1</manvolnum>
         <refmiscinfo class="version">&aqd_version;</refmiscinfo>
         <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
     </refmeta>
 
     <refnamediv>
-        <refname>show dns environment</refname>
+        <refname>aq show dns environment</refname>
         <refpurpose>
 	    Show the parameters of one or all DNS environments
         </refpurpose>
@@ -74,8 +74,8 @@
     <refsect1>
 	<title>See also</title>
 	<para>
-	    <citerefentry><refentrytitle>add_dns_environment</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-	    <citerefentry><refentrytitle>del_dns_environment</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+	    <citerefentry><refentrytitle>aq_add_dns_environment</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>aq_del_dns_environment</refentrytitle><manvolnum>1</manvolnum></citerefentry>
 	</para>
     </refsect1>
 </refentry>
