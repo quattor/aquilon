@@ -18,15 +18,33 @@
 
 from twisted.web import server, http
 
+_next_sequence_no = 0
+"""Next request sequence number, see _get_next_sequence_no()"""
+
+def _get_next_sequence_no():
+    """Return the next sequence number for an AQDRequest"""
+    global _next_sequence_no
+    num = _next_sequence_no
+    _next_sequence_no += 1
+    return num
+
 
 class AQDRequest(server.Request):
     """
     Overrides the basic Request object to provide a getPrincipal method.
     """
 
+    def __init__(self, *args, **kwargs):
+        self.__sequence_no = _get_next_sequence_no()
+        server.Request.__init__(self, *args, **kwargs)
+
     def getPrincipal(self):
         """By default we return None."""
         return None
+
+    @property
+    def sequence_no(self):
+        return self.__sequence_no
 
 
 class AQDSite(server.Site):

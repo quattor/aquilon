@@ -171,8 +171,6 @@ class ResponsePage(resource.Resource):
         # The logger used to be set up after the session.  However,
         # this keeps a record of the request from forming immediately
         # if all the sqlalchmey session threads are in use.
-        # This will be a problem if/when we want an auditid to come
-        # from the database, but we can revisit at that point.
         d = d.addCallback(lambda arguments: handler.add_logger(style=style,
                                                                request=request,
                                                                **arguments))
@@ -249,11 +247,9 @@ class ResponsePage(resource.Resource):
         # disconnecting.
         if not request._disconnected:
             request.finish()
-        if hasattr(request, 'aq_audit_id'):
-            if request._disconnected:
-                log.msg('Lost client for command #%d.' % request.aq_audit_id)
-            log.msg('Command #%d finished.' % request.aq_audit_id)
-            delattr(request, 'aq_audit_id')
+        else:
+            log.msg('Lost client for command #%d.' % request.sequence_no)
+        log.msg('Command #%d finished.' % request.sequence_no)
         return
 
     def wrapNonInternalError(self, failure, request):

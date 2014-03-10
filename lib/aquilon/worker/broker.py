@@ -45,18 +45,6 @@ from aquilon.worker.processes import sync_domain
 # Things we don't need cluttering up the transaction details table
 _IGNORED_AUDIT_ARGS = ('requestid', 'bundle', 'debug', 'session', 'dbuser')
 
-__audit_id = 0
-"""This will help with debugging active incoming requests.
-
-   Eventually it will be replaced by a primary key in the audit log table.
-
-   """
-
-def next_audit_id():
-    global __audit_id
-    __audit_id += 1
-    return __audit_id
-
 # Mapping of command exceptions to client return code.
 ERROR_TO_CODE = {NotFoundException: http.NOT_FOUND,
                  AuthorizationException: http.UNAUTHORIZED,
@@ -361,10 +349,10 @@ class BrokerCommand(object):
             kwargs_str = kwargs_str[0:1020] + '...'
         logger.info("Incoming command #%d from user=%s aq %s "
                     "with arguments %s",
-                    request.aq_audit_id, user, self.command, kwargs_str)
+                    request.sequence_no, user, self.command, kwargs_str)
         if message_status:
             message_status.create_description(user=user, command=self.command,
-                                              id=request.aq_audit_id,
+                                              id=request.sequence_no,
                                               kwargs=kwargs)
 
     # This is meant to be called before calling render() in order to
@@ -373,14 +361,13 @@ class BrokerCommand(object):
     def add_logger(self, **command_kwargs):
         request = command_kwargs.get("request")
         command_kwargs["user"] = request.getPrincipal()
-        request.aq_audit_id = next_audit_id()
         if self.command == "show_request":
             status = self.catalog.get_request_status(
                 auditid=command_kwargs.get("auditid", None),
                 requestid=command_kwargs.get("requestid", None))
         else:
             status = self.catalog.create_request_status(
-                auditid=request.aq_audit_id,
+                auditid=request.sequence_no,
                 requestid=command_kwargs.get("requestid", None))
             # If no requestid was given, the RequestStatus object created it.
             command_kwargs['requestid'] = status.requestid
