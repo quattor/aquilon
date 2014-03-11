@@ -52,6 +52,17 @@ class CommandAddHost(BrokerCommand):
                sandbox, osname, osversion, buildstatus, personality, comments,
                zebra_interfaces, grn, eon_id, skip_dsdb_check=False,
                **arguments):
+
+        # For aurora, check that DSDB has a record of the host.
+        dsdb_runner = DSDBRunner(logger=logger)
+        if archetype == 'aurora':
+            if not skip_dsdb_check:
+                try:
+                    dsdb_runner.show_host(hostname)
+                except ProcessException, e:
+                    raise ArgumentError("Could not find host in DSDB: "
+                                        "%s" % e)
+
         dbarchetype = Archetype.get_unique(session, archetype, compel=True)
         section = "archetype_" + dbarchetype.name
 
@@ -72,7 +83,12 @@ class CommandAddHost(BrokerCommand):
             buildstatus = 'build'
         dbstatus = HostLifecycle.get_instance(session, buildstatus)
         dbmachine = Machine.get_unique(session, machine, compel=True)
-        oldinfo = DSDBRunner.snapshot_hw(dbmachine)
+
+        # Create a snapshop of the machine before we create the host; but
+        # not for aurora nodes as we dont update DSDB
+        oldinfo = None
+        if dbarchetype.name != 'aurora':
+            oldinfo = DSDBRunner.snapshot_hw(dbmachine)
 
         if not personality:
             if self.config.has_option(section, "default_personality"):
@@ -183,23 +199,7 @@ class CommandAddHost(BrokerCommand):
         with plenaries.get_key():
             try:
                 plenaries.write(locked=True)
-
-                # XXX: This (and some of the code above) is horrible.  There
-                # should be a generic/configurable hook here that could kick
-                # in based on archetype and/or domain.
-                dsdb_runner = DSDBRunner(logger=logger)
-                if dbhost.archetype.name == 'aurora':
-                    # For aurora, check that DSDB has a record of the host.
-                    if not skip_dsdb_check:
-                        try:
-                            dsdb_runner.show_host(hostname)
-                        except ProcessException, e:
-                            raise ArgumentError("Could not find host in DSDB: "
-                                                "%s" % e)
-                elif not dbmachine.primary_ip:
-                    logger.info("No IP for %s, not adding to DSDB." %
-                                dbmachine.fqdn)
-                else:
+                if oldinfo:
                     dsdb_runner.update_host(dbmachine, oldinfo)
                     dsdb_runner.commit_or_rollback("Could not add host to DSDB")
             except:

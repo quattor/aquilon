@@ -49,7 +49,10 @@ class CommandDelHost(BrokerCommand):
 
         archetype = dbhost.archetype.name
         dbmachine = dbhost.hardware_entity
-        oldinfo = DSDBRunner.snapshot_hw(dbmachine)
+
+        oldinfo = None
+        if archetype != 'aurora':
+            oldinfo = DSDBRunner.snapshot_hw(dbmachine)
 
         ip = dbmachine.primary_ip
 
@@ -95,12 +98,12 @@ class CommandDelHost(BrokerCommand):
                 plenaries.write(locked=True)
                 remove_plenaries.remove(locked=True, remove_profile=True)
 
-                if archetype != 'aurora' and ip is not None:
+                if oldinfo:
                     dsdb_runner = DSDBRunner(logger=logger)
                     dsdb_runner.update_host(dbmachine, oldinfo)
                     dsdb_runner.commit_or_rollback("Could not remove host %s from "
                                                    "DSDB" % hostname)
-                if archetype == 'aurora':
+                else:
                     logger.client_info("WARNING: removing host %s from AQDB and "
                                        "*not* changing DSDB." % hostname)
             except:
