@@ -24,7 +24,6 @@ from sqlalchemy.orm import contains_eager, joinedload
 
 from aquilon.exceptions_ import ArgumentError, InternalError, NotFoundException
 from aquilon.aqdb.model import Role, Realm, UserPrincipal
-from aquilon.worker.dbwrappers.host import hostname_to_host
 
 
 LOGGER = logging.getLogger(__name__)
@@ -48,6 +47,7 @@ def get_or_create_user_principal(session, principal, createuser=True,
     if m:
         user = 'aquilonhost'
         # Verify that the host exists in AQDB
+        from aquilon.worker.dbwrappers.host import hostname_to_host
         hostname_to_host(session, m.group(1))
 
     # Short circuit the common case, and optimize it to eager load in
