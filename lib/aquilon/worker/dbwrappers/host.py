@@ -17,6 +17,7 @@
 """Wrappers to make getting and using hosts simpler."""
 
 from sqlalchemy.orm import joinedload
+from sqlalchemy.orm.attributes import set_committed_value
 
 from aquilon.exceptions_ import NotFoundException, ArgumentError
 from aquilon.aqdb.model import (HardwareEntity, DnsEnvironment, DnsDomain,
@@ -25,6 +26,8 @@ from aquilon.aqdb.model import (HardwareEntity, DnsEnvironment, DnsDomain,
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
 from aquilon.worker.dbwrappers.grn import lookup_grn
+from aquilon.worker.dbwrappers.service_instance import check_no_provided_service
+from aquilon.worker.templates import (Plenary, PlenaryServiceInstanceServer)
 from collections import defaultdict
 from types import ListType
 
@@ -113,6 +116,39 @@ def create_host(session, logger, config, dbhw, archetype, domain=None,
 
         ## Return created host
         return dbhost
+
+
+def remove_host(session, logger, dbhw, plenaries, remove_plenaries):
+        if not dbhw.host:
+            raise NotFoundException("Hardware entity %s has no host." % dbhw.label)
+        dbhost = dbhw.host
+
+        dbhost.lock_row()
+
+        remove_plenaries.append(Plenary.get_plenary(dbhost))
+
+        check_no_provided_service(dbhost)
+
+        for si in dbhost.services_used:
+            plenaries.append(PlenaryServiceInstanceServer.get_plenary(si))
+            logger.info("Before deleting {0:l}, removing binding to {1:l}"
+                        .format(dbhost, si))
+
+        del dbhost.services_used[:]
+
+        if dbhost.resholder:
+            for res in dbhost.resholder.resources:
+                remove_plenaries.append(Plenary.get_plenary(res))
+
+        if dbhost.cluster:
+            dbcluster = dbhost.cluster
+            dbcluster.hosts.remove(dbhost)
+            set_committed_value(dbhost, '_cluster', None)
+            dbcluster.validate()
+            plenaries.append(Plenary.get_plenary(dbcluster))
+
+        dbhw.host = None
+        session.delete(dbhost)
 
 
 def hostname_to_host(session, hostname):

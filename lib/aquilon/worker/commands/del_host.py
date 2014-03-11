@@ -16,17 +16,13 @@
 # limitations under the License.
 """Contains the logic for `aq del host`."""
 
-from sqlalchemy.orm.attributes import set_committed_value
-
 from aquilon.worker.logger import CLIENT_INFO
 from aquilon.notify.index import trigger_notifications
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.dbwrappers.host import hostname_to_host
+from aquilon.worker.dbwrappers.host import (hostname_to_host, remove_host)
 from aquilon.worker.dbwrappers.dns import delete_dns_record
-from aquilon.worker.dbwrappers.service_instance import check_no_provided_service
 from aquilon.worker.processes import DSDBRunner
-from aquilon.worker.templates import (Plenary, PlenaryCollection,
-                                      PlenaryServiceInstanceServer)
+from aquilon.worker.templates import (Plenary, PlenaryCollection)
 from aquilon.worker.locks import CompileKey
 
 
@@ -37,57 +33,31 @@ class CommandDelHost(BrokerCommand):
     def render(self, session, logger, hostname, **arguments):
         # Check dependencies, translate into user-friendly message
         dbhost = hostname_to_host(session, hostname)
-
-        dbhost.lock_row()
-
-        check_no_provided_service(dbhost)
+        dbmachine = dbhost.hardware_entity
 
         # Any service bindings that we need to clean up afterwards
         plenaries = PlenaryCollection(logger=logger)
         remove_plenaries = PlenaryCollection(logger=logger)
-        remove_plenaries.append(Plenary.get_plenary(dbhost))
-
-        archetype = dbhost.archetype.name
-        dbmachine = dbhost.hardware_entity
 
         oldinfo = None
-        if archetype != 'aurora':
+        if dbhost.archetype.name != 'aurora':
             oldinfo = DSDBRunner.snapshot_hw(dbmachine)
 
-        ip = dbmachine.primary_ip
+        remove_host(session, logger, dbmachine, plenaries, remove_plenaries)
 
-        for si in dbhost.services_used:
-            plenaries.append(PlenaryServiceInstanceServer.get_plenary(si))
-            logger.info("Before deleting {0:l}, removing binding to {1:l}"
-                        .format(dbhost, si))
-
-        del dbhost.services_used[:]
-
-        if dbhost.resholder:
-            for res in dbhost.resholder.resources:
-                remove_plenaries.append(Plenary.get_plenary(res))
+        if dbmachine.vm_container:
+            plenaries.append(Plenary.get_plenary(dbmachine.vm_container))
 
         # In case of Zebra, the IP may be configured on multiple interfaces
+        ip = dbmachine.primary_ip
         for iface in dbmachine.interfaces:
             if ip in iface.addresses:
                 iface.addresses.remove(ip)
 
-        if dbhost.cluster:
-            dbcluster = dbhost.cluster
-            dbcluster.hosts.remove(dbhost)
-            set_committed_value(dbhost, '_cluster', None)
-            dbcluster.validate()
-            plenaries.append(Plenary.get_plenary(dbcluster))
-
         dbdns_rec = dbmachine.primary_name
         dbmachine.primary_name = None
-        dbmachine.host = None
-        session.delete(dbhost)
         delete_dns_record(dbdns_rec)
         session.flush()
-
-        if dbmachine.vm_container:
-            plenaries.append(Plenary.get_plenary(dbmachine.vm_container))
 
         with CompileKey.merge([plenaries.get_key(),
                                remove_plenaries.get_key()]):
