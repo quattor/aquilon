@@ -274,6 +274,20 @@ class ResponsePage(resource.Resource):
 
 class RestServer(ResponsePage):
     """The root resource is used to define the site as a whole."""
+
+    _type_handler = {
+        'int': force_int,
+        'float': force_float,
+        'boolean': force_boolean,
+        'flag': force_boolean,
+        'ipv4': force_ipv4,
+        'mac': force_mac,
+        'json': force_json_dict,
+        'string': force_ascii,
+        'file': force_ascii,
+        'list': force_list
+    }
+
     def __init__(self, config):
         formatter = ResponseFormatter()
         ResponsePage.__init__(self, '', formatter)
@@ -318,34 +332,25 @@ class RestServer(ResponsePage):
                     if option_name not in myinstance.optional_parameters:
                         myinstance.optional_parameters.append(option_name)
                     if "type" in option.attrib:
-                        paramtype = option.attrib["type"]
-                        if paramtype == "int":
-                            myinstance.parameter_checks[option_name] = force_int
-                        elif paramtype == "float":
-                            myinstance.parameter_checks[option_name] = force_float
-                        elif paramtype == "boolean" or paramtype == "flag":
-                            myinstance.parameter_checks[option_name] = force_boolean
-                        elif paramtype == "ipv4":
-                            myinstance.parameter_checks[option_name] = force_ipv4
-                        elif paramtype == "mac":
-                            myinstance.parameter_checks[option_name] = force_mac
-                        elif paramtype == "json":
-                            myinstance.parameter_checks[option_name] = force_json_dict
-                        elif paramtype == "string" or paramtype == "file":
-                            # Current twisted can't handle unicode output, so
-                            # do not allow non-ASCII input either
-                            myinstance.parameter_checks[option_name] = force_ascii
-                        elif paramtype == "list":
-                            myinstance.parameter_checks[option_name] = force_list
-                        elif paramtype == "enum":
-                            enumtype = option.attrib["enum"]
+                        option_type = option.attrib["type"]
+                        if option_type == 'enum':
+                            if 'enum' not in option.attrib:
+                                log.msg("Warning: argument missing enum attribute for %s.%s" %
+                                        (myinstance.command, option_name))
+                                continue
+                            enum_type = option.attrib['enum']
                             try:
-                                enumclass = StringEnum(enumtype)
-                                myinstance.parameter_checks[option_name] = enumclass.from_argument
+                                enum_class = StringEnum(enum_type)
+                                myinstance.parameter_checks[option_name] = enum_class.from_argument
                             except ValueError, e:
                                 log.msg("Unknown Enum: %s" % e)
-                        else:  # pragma: no cover
-                            log.msg("Warning: unknown option type %s" % paramtype)
+                                continue
+                        else:
+                            if option_type not in self._type_handler:
+                                log.msg("Warning: unknown option type %s for %s.%s" %
+                                        (option_type, myinstance.command, option_name))
+                                continue
+                            myinstance.parameter_checks[option_name] = self._type_handler[option_type]
                     else:  # pragma: no cover
                         log.msg("Warning: argument type not known for %s.%s" %
                                 (myinstance.command, option_name))
