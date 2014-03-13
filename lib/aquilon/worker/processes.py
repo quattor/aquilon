@@ -475,9 +475,8 @@ class DSDBRunner(object):
         rollback = ["update_aqd_host", "-host_name", new_fqdn]
 
         if old_fqdn != new_fqdn:
-            # Yes, -primary_host_name sets the new host name...
-            command.extend(["-primary_host_name", new_fqdn])
-            rollback.extend(["-primary_host_name", old_fqdn])
+            command.extend(["-new_host_name", new_fqdn])
+            rollback.extend(["-new_host_name", old_fqdn])
         if old_iface and old_iface != new_iface:
             command.extend(["-interface_name", old_iface,
                             "-new_interface_name", new_iface])
