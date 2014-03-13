@@ -45,19 +45,16 @@ class CommandDelChassis(BrokerCommand):
                                 "it.".format(dbchassis, machine_count))
 
         # Order matters here
+        oldinfo = DSDBRunner.snapshot_hw(dbchassis)
         dbdns_rec = dbchassis.primary_name
-        ip = dbchassis.primary_ip
-        old_fqdn = str(dbchassis.primary_name.fqdn)
-        old_comments = dbchassis.primary_name.comments
         session.delete(dbchassis)
         if dbdns_rec:
             delete_dns_record(dbdns_rec)
 
         session.flush()
 
-        if ip:
-            dsdb_runner = DSDBRunner(logger=logger)
-            dsdb_runner.delete_host_details(old_fqdn, ip, comments=old_comments)
-            dsdb_runner.commit_or_rollback("Could not remove chassis from DSDB")
+        dsdb_runner = DSDBRunner(logger=logger)
+        dsdb_runner.update_host(None, oldinfo)
+        dsdb_runner.commit_or_rollback("Could not remove chassis from DSDB")
 
         return

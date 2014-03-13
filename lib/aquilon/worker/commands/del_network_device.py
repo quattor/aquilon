@@ -36,10 +36,8 @@ class CommandDelNetworkDevice(BrokerCommand):
 
         check_only_primary_ip(dbnetdev)
 
+        oldinfo = DSDBRunner.snapshot_hw(dbnetdev)
         dbdns_rec = dbnetdev.primary_name
-        ip = dbnetdev.primary_ip
-        old_fqdn = str(dbnetdev.primary_name.fqdn)
-        old_comments = dbnetdev.comments
         session.delete(dbnetdev)
         if dbdns_rec:
             delete_dns_record(dbdns_rec)
@@ -63,13 +61,10 @@ class CommandDelNetworkDevice(BrokerCommand):
                 plenaries.write(locked=True)
                 netdev_plenary.remove(locked=True)
 
-                if ip:
-                    dsdb_runner = DSDBRunner(logger=logger)
-                    # FIXME: restore interface name/MAC on rollback
-                    dsdb_runner.delete_host_details(old_fqdn, ip,
-                                                    comments=old_comments)
-                    dsdb_runner.commit_or_rollback("Could not remove network device "
-                                                   "from DSDB")
+                dsdb_runner = DSDBRunner(logger=logger)
+                dsdb_runner.update_host(None, oldinfo)
+                dsdb_runner.commit_or_rollback("Could not remove network device "
+                                               "from DSDB")
             except:
                 plenaries.restore_stash()
                 netdev_plenary.restore_stash()

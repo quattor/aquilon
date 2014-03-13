@@ -637,7 +637,12 @@ class DSDBRunner(object):
         Please note that in case of zebra interfaces adding a new ip address
         to the same interface may result in adding/removing DSDB entries.
         """
-        new_hwdata = self.snapshot_hw(dbhw_ent)
+        if dbhw_ent:
+            new_hwdata = self.snapshot_hw(dbhw_ent)
+        else:
+            new_hwdata = {"by-ip": {},
+                          "by-fqdn": {},
+                          "primary": None}
 
         if not old_hwdata:
             old_hwdata = {"by-ip": {},
