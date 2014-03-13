@@ -21,6 +21,7 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import NetworkDevice
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.dns import delete_dns_record
+from aquilon.worker.dbwrappers.hardware_entity import check_only_primary_ip
 from aquilon.worker.locks import CompileKey
 from aquilon.worker.processes import DSDBRunner
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
@@ -33,17 +34,7 @@ class CommandDelNetworkDevice(BrokerCommand):
     def render(self, session, logger, network_device, **arguments):
         dbnetdev = NetworkDevice.get_unique(session, network_device, compel=True)
 
-        # Check and complain if the network device has any other addresses than its
-        # primary address
-        addrs = []
-        for addr in dbnetdev.all_addresses():
-            if addr.ip == dbnetdev.primary_ip:
-                continue
-            addrs.append(str(addr.ip))
-        if addrs:
-            raise ArgumentError("{0} still provides the following addresses, "
-                                "delete them first: {1}.".format
-                                (dbnetdev, ", ".join(addrs)))
+        check_only_primary_ip(dbnetdev)
 
         dbdns_rec = dbnetdev.primary_name
         ip = dbnetdev.primary_ip

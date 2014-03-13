@@ -22,6 +22,7 @@ from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.aqdb.model import Chassis, ChassisSlot
 from aquilon.worker.processes import DSDBRunner
 from aquilon.worker.dbwrappers.dns import delete_dns_record
+from aquilon.worker.dbwrappers.hardware_entity import check_only_primary_ip
 
 
 class CommandDelChassis(BrokerCommand):
@@ -31,17 +32,7 @@ class CommandDelChassis(BrokerCommand):
     def render(self, session, logger, chassis, clear_slots, **arguments):
         dbchassis = Chassis.get_unique(session, chassis, compel=True)
 
-        # Check and complain if the chassis has any other addresses than its
-        # primary address
-        addrs = []
-        for addr in dbchassis.all_addresses():
-            if addr.ip == dbchassis.primary_ip:
-                continue
-            addrs.append(str(addr.ip))
-        if addrs:
-            raise ArgumentError("{0} still provides the following addresses, "
-                                "delete them first: {1}.".format
-                                (dbchassis, ", ".join(addrs)))
+        check_only_primary_ip(dbchassis)
 
         q = session.query(ChassisSlot)
         q = q.filter_by(chassis=dbchassis)

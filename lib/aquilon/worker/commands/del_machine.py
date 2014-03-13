@@ -21,6 +21,7 @@ from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.locks import CompileKey
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
 from aquilon.aqdb.model import Machine
+from aquilon.worker.dbwrappers.hardware_entity import check_only_primary_ip
 
 
 class CommandDelMachine(BrokerCommand):
@@ -42,14 +43,7 @@ class CommandDelMachine(BrokerCommand):
         if dbmachine.host:
             raise ArgumentError("{0} is still in use by {1:l} and cannot be "
                                 "deleted.".format(dbmachine, dbmachine.host))
-        addrs = []
-        for addr in dbmachine.all_addresses():
-            addrs.append("%s: %s" % (addr.logical_name, addr.ip))
-        if addrs:
-            addrmsg = ", ".join(addrs)
-            raise ArgumentError("{0} still provides the following addresses, "
-                                "delete them first: {1}.".format(dbmachine,
-                                                                 addrmsg))
+        check_only_primary_ip(dbmachine)
 
         session.delete(dbmachine)
         session.flush()

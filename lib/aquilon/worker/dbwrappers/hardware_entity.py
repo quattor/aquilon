@@ -187,3 +187,19 @@ def rename_hardware(session, dbhw_ent, rename_to):
                             dns_environment=dns_env, preclude=True)
             dbfqdn.dns_domain = new_domain
             dbfqdn.name = new_name
+
+
+def check_only_primary_ip(dbhw_ent):
+    """Check and complain if the hardware entity has any other addresses
+       assignments other than its primary address.
+    """
+    addrs = []
+    for addr in dbhw_ent.all_addresses():
+        if addr.ip == dbhw_ent.primary_ip:
+            continue
+        addrs.append(str(addr.ip))
+    if addrs:
+        raise ArgumentError("{0} still provides the following addresses, "
+                            "delete them first: {1}.".format
+                            (dbhw_ent, ", ".join(addrs)))
+
