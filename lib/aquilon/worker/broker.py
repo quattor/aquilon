@@ -372,7 +372,7 @@ class BrokerCommand(object):
     # that will be passed into render().
     def add_logger(self, **command_kwargs):
         request = command_kwargs.get("request")
-        command_kwargs["user"] = request.channel.getPrincipal()
+        command_kwargs["user"] = request.getPrincipal()
         request.aq_audit_id = next_audit_id()
         if self.command == "show_request":
             status = self.catalog.get_request_status(
