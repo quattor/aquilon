@@ -58,10 +58,16 @@ class CommandShowRequest(BrokerCommand):
     requires_format = False
     defer_to_thread = False
 
-    def render(self, requestid, request, logger, debug, **arguments):
-        status = logger.get_status()
+    required_parameters = ["requestid"]
+
+    def render(self, request, debug, requestid=None, auditid=None, **arguments):
+        status = self.catalog.get_request_status(auditid=auditid,
+                                                 requestid=requestid)
         if not status:
-            raise NotFoundException("Request ID %s not found." % requestid)
+            if requestid:
+                raise NotFoundException("Request ID %s not found." % requestid)
+            else:
+                raise NotFoundException("Audit ID %s not found." % auditid)
         if debug:
             loglevel = DEBUG
         else:
