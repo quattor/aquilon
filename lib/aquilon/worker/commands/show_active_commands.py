@@ -64,6 +64,4 @@ class CommandShowActiveCommands(BrokerCommand):
                         # the status description that's already been printed.
                         continue
                     retval.append('(%s) %s' % (auditid, message))
-            for description in status.subscriber_descriptions:
-                retval.append(description)
         return str("\n".join(retval))

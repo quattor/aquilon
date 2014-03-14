@@ -352,7 +352,6 @@ class BrokerCommand(object):
                     request.sequence_no, user, self.command, kwargs_str)
         if message_status:
             message_status.create_description(user=user, command=self.command,
-                                              id=request.sequence_no,
                                               kwargs=kwargs)
 
     # This is meant to be called before calling render() in order to
