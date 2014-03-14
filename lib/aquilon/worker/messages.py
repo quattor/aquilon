@@ -65,11 +65,11 @@ class RequestStatus(object):
 
     def __init__(self, auditid, requestid=None):
         """Should only be created by the StatusCatalog."""
-        self.auditid = str(auditid) if auditid is not None else None
+        self.auditid = auditid
         self.requestid = requestid
         self.user = ""
         self.command = ""
-        self.args = []
+        self.args = {}
         self.description = ""
         self.records = []
         self.debug_fifo = deque()
@@ -82,26 +82,43 @@ class RequestStatus(object):
         # Need to be careful to be as fine-grained as possible.
         self.lock = Lock()
 
-    def create_description(self, user, command, kwargs):
+    def create_description(self, user, command, kwargs, ignored):
+        # Log a dummy user with no realm for unauthenticated requests.
+        if user is None or user == '':
+            user = 'nobody'
+
         massaged = []
-        for (k, v) in kwargs.items():
-            if k == 'format' and v == 'raw':
+        for key, value in kwargs.iteritems():
+            # Skip ignored and empty arguments
+            if key in ignored:
                 continue
-            if v is None:
+            if value is None:
                 continue
 
-            if v == True:
-                massaged.append(" --%s" % k)
+            # Create a string value for each of the arguments
+            if isinstance(value, list):
+                value_str = ' '.join([str(item) for item in value])
             else:
-                # TODO: we could also convert v == False to "--no%s", except
-                # that's not always how the option is negated - the correct form
-                # should be extracted from input.xml.
-                massaged.append(" --%s=%s" % (k, v))
+                value_str = str(value)
+            # TODO: We should also handle booleans here; however, to do so
+            # correctly would require us to check input.xml for negated
+            # options.
+
+            # Clip the length of the string
+            if len(value_str) > 100:
+                value_str = value_str[0:96] + '...'
+
+            # Keep a copy of the arguments
+            self.args[key] = value_str
+
+            if key=='style' and value=='raw':
+                continue
+            massaged.append(" --%s=%s" % (key, value_str))
+
         description = '[%s] %s: aq %s%s' % (self.auditid, user, command,
                                             "".join(massaged))
         self.user = user
         self.command = command
-        self.kwargs = kwargs
         self.description = description
 
     def publish(self, record):

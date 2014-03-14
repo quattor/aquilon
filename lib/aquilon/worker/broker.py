@@ -324,42 +324,11 @@ class BrokerCommand(object):
             session.commit()
             session.execute(text("set transaction read only"))
 
-    def _audit(self, message_status, logger=None, request=None, user=None,
-               **kwargs):
-        # Log a dummy user with no realm for unauthenticated requests.
-        if user is None or user == '':
-            user = 'nobody'
-        kwargs['format'] = kwargs.pop('style', 'raw')
-
-        for (key, value) in kwargs.items():
-            if key in _IGNORED_AUDIT_ARGS:
-                kwargs.pop(key)
-                continue
-            if value is None:
-                kwargs.pop(key)
-                continue
-            if isinstance(value, list):
-                value_str = " ".join([str(item) for item in value])
-            else:
-                value_str = str(value)
-            if len(value_str) > 100:
-                kwargs[key] = value_str[0:96] + '...'
-        kwargs_str = str(kwargs)
-        if len(kwargs_str) > 1024:
-            kwargs_str = kwargs_str[0:1020] + '...'
-        logger.info("Incoming command #%d from user=%s aq %s "
-                    "with arguments %s",
-                    request.sequence_no, user, self.command, kwargs_str)
-        if message_status:
-            message_status.create_description(user=user, command=self.command,
-                                              kwargs=kwargs)
 
     # This is meant to be called before calling render() in order to
     # add a logger into the argument list.  It returns the arguments
     # that will be passed into render().
-    def add_logger(self, **command_kwargs):
-        request = command_kwargs.get("request")
-        command_kwargs["user"] = request.getPrincipal()
+    def add_logger(self, request, **command_kwargs):
         if self.command == "show_request":
             # For the show_request requestid is the UUID of the comamnd we
             # want intofmation for and not the UUID of this command.
@@ -372,11 +341,21 @@ class BrokerCommand(object):
                 requestid=command_kwargs.get("requestid", None))
             # If no requestid was given, the RequestStatus object created it.
             command_kwargs['requestid'] = status.requestid
+        user = request.getPrincipal()
+        status.create_description(user=user, command=self.command,
+                                  kwargs=command_kwargs,
+                                  ignored=_IGNORED_AUDIT_ARGS)
         logger = RequestLogger(status=status, module_logger=self.module_logger)
+        kwargs_str = str(status.args)
+        if len(kwargs_str) > 1024:
+            kwargs_str = kwargs_str[0:1020] + '...'
+        logger.info("Incoming command #%s from user=%s aq %s "
+                    "with arguments %s",
+                    status.auditid, status.user,
+                    status.command, kwargs_str)
         command_kwargs["logger"] = logger
-        # Sigh. command_kwargs might contain the key 'status', so we have to use
-        # another name.
-        self._audit(message_status=status, **command_kwargs)
+        command_kwargs["user"] = user
+        command_kwargs["request"] = request
         return command_kwargs
 
     def _cleanup_logger(self, logger):
