@@ -362,9 +362,11 @@ class BrokerCommand(object):
         request = command_kwargs.get("request")
         command_kwargs["user"] = request.getPrincipal()
         if self.command == "show_request":
-            status = self.catalog.get_request_status(
-                auditid=command_kwargs.get("auditid", None),
-                requestid=command_kwargs.get("requestid", None))
+            # For the show_request requestid is the UUID of the comamnd we
+            # want intofmation for and not the UUID of this command.
+            # Thus we do not pass it when creating a status object.
+            status = self.catalog.create_request_status(
+                auditid=request.sequence_no)
         else:
             status = self.catalog.create_request_status(
                 auditid=request.sequence_no,
@@ -379,13 +381,8 @@ class BrokerCommand(object):
         return command_kwargs
 
     def _cleanup_logger(self, logger):
-        if self.command == "show_request":
-            # Clear the requestid dictionary.
-            logger.remove_status_by_requestid(self.catalog)
-        else:
-            # Clear the auditid dictionary.
-            logger.debug("Server finishing request.")
-            logger.remove_status_by_auditid(self.catalog)
+        logger.debug("Server finishing request.")
+        logger.remove_request_status(self.catalog)
         logger.close_handlers()
 
     @property

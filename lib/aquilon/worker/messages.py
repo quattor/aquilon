@@ -182,27 +182,24 @@ class StatusCatalog(object):
 
     def create_request_status(self, auditid, requestid=None):
         """Create a new RequestStatus and store it."""
-        if auditid is not None:
-            auditid = str(auditid)
-            if not requestid:
-                requestid = uuid.uuid4()
-            status = RequestStatus(auditid, requestid)
-            self.status_by_requestid[requestid] = status
-            self.status_by_auditid[auditid] = status
-            return status
-        return None
+        auditid = str(auditid)
+        if not requestid:
+            requestid = uuid.uuid4()
+        status = RequestStatus(auditid, requestid)
+        self.status_by_requestid[requestid] = status
+        self.status_by_auditid[auditid] = status
+        return status
 
-    def remove_by_auditid(self, status):
-        """Mark the RequestStatus as finished and remove references to it."""
-        status.finish()
+    def _cleanup_request_status(self, status):
         self.status_by_auditid.pop(status.auditid, None)
-        # Clean up any unused requestid entries after one minute.
-        reactor.callLater(60, self.remove_by_requestid, status)
+        self.status_by_requestid.pop(status.requestid, None)
 
-    def remove_by_requestid(self, status):
-        """Mark the RequestStatus as no longer needed by the client."""
-        if status.requestid:
-            self.status_by_requestid.pop(status.requestid, None)
+    def remove_request_status(self, status):
+        """Mark the RequestStatus as finished and remove references to it."""
+        # Mark the request as finished now
+        status.finish()
+        # Retain the information about the request for one minute
+        reactor.callLater(60, self._cleanup_request_status, status)
 
 
 class StatusSubscriber(object):

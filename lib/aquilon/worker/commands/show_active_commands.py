@@ -49,6 +49,8 @@ class CommandShowActiveCommands(BrokerCommand):
             status = catalog.get_request_status(auditid=auditid)
             if not status:
                 continue
+            if status.is_finished:
+                continue
             retval.append(status.description)
             for record in status.records:
                 # While reading status.records directly, need to be careful

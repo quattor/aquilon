@@ -58,19 +58,9 @@ class RequestLogger(Logger):
             return handler.status
         return None
 
-    # These two methods could be refactored and made cleaner.  This works
-    # but mixes dependencies in an odd way.
-    def remove_status_by_auditid(self, catalog):
+    def remove_request_status(self, catalog):
         for handler in self.get_handlers_with_status():
-            catalog.remove_by_auditid(handler.status)
-            self.removeHandler(handler)
-            # We must call close() otherwise the handler will not be removed
-            # from logging._handlers and logging._handlerList
-            handler.close()
-
-    def remove_status_by_requestid(self, catalog):
-        for handler in self.get_handlers_with_status():
-            catalog.remove_by_requestid(handler.status)
+            catalog.remove_request_status(handler.status)
             self.removeHandler(handler)
             # We must call close() otherwise the handler will not be removed
             # from logging._handlers and logging._handlerList
