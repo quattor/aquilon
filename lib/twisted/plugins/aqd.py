@@ -168,8 +168,8 @@ class AQDMaker(object):
         RestServer = getattr(resources, "RestServer")
         restServer = RestServer(config)
 
-        CommandRegistry = getattr(resources, "CommandRegistry")
-        registry = CommandRegistry(config, restServer)
+        ResourcesCommandRegistry = getattr(resources, "ResourcesCommandRegistry")
+        registry = ResourcesCommandRegistry(restServer)
 
         openSite = AQDSite(restServer)
 

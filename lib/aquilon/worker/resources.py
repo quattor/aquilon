@@ -320,6 +320,98 @@ class RestServer(ResponsePage):
 ###############################################################################
 
 class CommandEntry(object):
+    """Representation of a single command in the registry.
+
+    For each transport defined for a command in input.xml a command entry
+    will be created.
+    """
+    def __init__(self, fullname, method, path, name, trigger):
+        self.fullname = fullname
+        self.method = method
+        self.path = path
+        self.name = name
+        self.trigger = trigger
+
+    def add_option(self, option_name, paramtype, enumtype=None):
+        """Add an option to a command.
+
+        This function is called for each option tag found within a
+        command defined in input.xml.  Note it will be repeated for
+        each transport.
+        """
+        pass
+
+    def add_format(self, format, style):
+        """Add a format to a command.
+
+        This function is called for each format tag found within a
+        command defined in inpux.xml.  Note it will be repeated for
+        each transport.
+        """
+        pass
+
+
+class CommandRegistry(object):
+
+    def new_entry(self, fullname, method, path, name, trigger):
+        """Create a new CommandEntry"""
+        return CommandEntry(fullname, method, path, name, trigger)
+
+    def add_entry(self, entry):
+        """Save the completed CommandEntry"""
+        pass
+
+    def __init__(self):
+        BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
+        tree = ET.parse(os.path.join(BINDIR, '..', 'etc', 'input.xml'))
+
+        for command in tree.getiterator("command"):
+            if 'name' not in command.attrib:
+                continue
+            name = command.attrib['name']
+
+            for transport in command.getiterator("transport"):
+                if ("method" not in transport.attrib or
+                    "path" not in transport.attrib):
+                    log.msg("Warning: incorrect transport specification "
+                            "for %s." % name)
+                    continue
+
+                method = transport.attrib["method"]
+                path = transport.attrib["path"]
+                trigger = transport.attrib.get("trigger")
+
+                fullname = name
+                if trigger:
+                    fullname = fullname + "_" + trigger
+
+                entry = self.new_entry(fullname, method, path, name, trigger)
+                if not entry:
+                    continue
+
+                for option in command.getiterator("option"):
+                    if ('name' not in option.attrib or
+                        'type' not in option.attrib):
+                        log.msg("Warning: incorrect options specification "
+                                "for %s." % fullname)
+                        continue
+                    option_name = option.attrib["name"]
+                    paramtype = option.attrib["type"]
+                    enumtype = option.attrib.get("enum")
+                    entry.add_option(option_name, paramtype, enumtype)
+
+                for format in command.getiterator("format"):
+                    if "name" not in format.attrib:
+                        log.msg("Warning: incorrect format specification "
+                                "for %s." % fullname)
+                        continue
+                    style = format.attrib["name"]
+                    entry.add_format(format, style)
+
+                self.add_entry(entry)
+
+
+class ResourcesCommandEntry(CommandEntry):
 
     _type_handler = {
         'int': force_int,
@@ -335,11 +427,7 @@ class CommandEntry(object):
     }
 
     def __init__(self, fullname, method, path, name, trigger):
-        self.fullname = fullname
-        self.method = method
-        self.path = path
-        self.name = name
-        self.trigger = trigger
+        super(ResourcesCommandEntry, self).__init__(fullname, method, path, name, trigger)
 
         # Locate the instance of the BrokerCommand
         # See commands/__init__.py for more info here...
@@ -423,70 +511,20 @@ class CommandEntry(object):
             meth(format, self.broker_command.command)
 
 
-class CommandRegistry(object):
+class ResourcesCommandRegistry(CommandRegistry):
+    def __init__(self, server):
+        # Save the additional instance of ResourceServer and call
+        # the base class to finish setting up.
+        self.server = server
+        super(ResourcesCommandRegistry, self).__init__()
 
     def new_entry(self, fullname, method, path, name, trigger):
-        if fullname in self._commands:
-            log.msg("Warning: Attempt to redefind command %s" % fullname)
-            return None
-        return CommandEntry(fullname, method, path, name, trigger)
+        # Create a new instance of ResourcesCommandEntry.  It's add_option
+        # and add_format methods will get called to populate the entry.
+        return ResourcesCommandEntry(fullname, method, path, name, trigger)
 
     def add_entry(self, entry):
-        self._commands[entry.fullname] = entry
-        # Insert the instance into the rest server
+        # Once the ResourcesCommandEntry has been populated this method
+        # is called.  We insert the entry into the ResourceServer to
+        # expose them.
         self.server.insert_handler(entry, entry.method.upper(), entry.path)
-
-    def __init__(self, config, server):
-        self.server = server
-        self.config = config
-
-        self._commands = {}
-
-        BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
-        tree = ET.parse(os.path.join(BINDIR, '..', 'etc', 'input.xml'))
-
-        for command in tree.getiterator("command"):
-            if 'name' not in command.attrib:
-                continue
-            name = command.attrib['name']
-
-            for transport in command.getiterator("transport"):
-                if ("method" not in transport.attrib or
-                    "path" not in transport.attrib):
-                    log.msg("Warning: incorrect transport specification "
-                            "for %s." % name)
-                    continue
-
-                method = transport.attrib["method"]
-                path = transport.attrib["path"]
-                trigger = transport.attrib.get("trigger")
-
-                fullname = name
-                if trigger:
-                    fullname = fullname + "_" + trigger
-
-                entry = self.new_entry(fullname, method, path, name, trigger)
-                if not entry:
-                    continue
-
-                for option in command.getiterator("option"):
-                    if ('name' not in option.attrib or
-                        'type' not in option.attrib):
-                        log.msg("Warning: incorrect options specification "
-                                "for %s." % fullname)
-                        continue
-                    option_name = option.attrib["name"]
-                    paramtype = option.attrib["type"]
-                    enumtype = option.attrib.get("enum")
-                    entry.add_option(option_name, paramtype, enumtype)
-
-                for format in command.getiterator("format"):
-                    if "name" not in format.attrib:
-                        log.msg("Warning: incorrect format specification "
-                                "for %s." % fullname)
-                        continue
-                    style = format.attrib["name"]
-                    entry.add_format(format, style)
-
-                self.add_entry(entry)
-
