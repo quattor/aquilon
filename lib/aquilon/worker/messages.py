@@ -23,6 +23,7 @@ from logging import DEBUG
 
 from twisted.internet import reactor
 
+from aquilon.exceptions_ import InternalError
 from aquilon.python_patches import load_uuid_quickly
 
 uuid = load_uuid_quickly()  # pylint: disable=C0103
@@ -63,10 +64,10 @@ class RequestStatus(object):
 
     """
 
-    def __init__(self, auditid, requestid=None):
+    def __init__(self, auditid):
         """Should only be created by the StatusCatalog."""
         self.auditid = auditid
-        self.requestid = requestid
+        self.requestid = None
         self.user = ""
         self.command = ""
         self.args = {}
@@ -193,19 +194,27 @@ class StatusCatalog(object):
             status = self.status_by_requestid.get(requestid)
         return status
 
-    def create_request_status(self, auditid, requestid=None):
+    def create_request_status(self, auditid):
         """Create a new RequestStatus and store it."""
         auditid = str(auditid)
-        if not requestid:
-            requestid = uuid.uuid4()
-        status = RequestStatus(auditid, requestid)
-        self.status_by_requestid[requestid] = status
+        status = RequestStatus(auditid)
         self.status_by_auditid[auditid] = status
         return status
 
+    def store_requestid(self, status, requestid=None):
+        if not requestid:
+            requestid = uuid.uuid4()
+        with status.lock:
+            if status.requestid:
+                raise InternalError('Request already has a UUID assigned')
+            status.requestid = requestid
+        self.status_by_requestid[requestid] = status
+        return requestid
+
     def _cleanup_request_status(self, status):
         self.status_by_auditid.pop(status.auditid, None)
-        self.status_by_requestid.pop(status.requestid, None)
+        if status.requestid:
+            self.status_by_requestid.pop(status.requestid, None)
 
     def remove_request_status(self, status):
         """Mark the RequestStatus as finished and remove references to it."""

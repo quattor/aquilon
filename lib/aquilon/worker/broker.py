@@ -329,18 +329,15 @@ class BrokerCommand(object):
     # add a logger into the argument list.  It returns the arguments
     # that will be passed into render().
     def add_logger(self, request, **command_kwargs):
-        if self.command == "show_request":
+        status = self.catalog.create_request_status(
+            auditid=request.sequence_no)
+        if self.command != "show_request":
             # For the show_request requestid is the UUID of the comamnd we
-            # want intofmation for and not the UUID of this command.
-            # Thus we do not pass it when creating a status object.
-            status = self.catalog.create_request_status(
-                auditid=request.sequence_no)
-        else:
-            status = self.catalog.create_request_status(
-                auditid=request.sequence_no,
-                requestid=command_kwargs.get("requestid", None))
-            # If no requestid was given, the RequestStatus object created it.
-            command_kwargs['requestid'] = status.requestid
+            # want intofmation for and not the UUID of this command.  As
+            # a result show_request commands do not have a requestid.
+            requestid = command_kwargs.get("requestid", None)
+            command_kwargs['requestid'] = \
+                self.catalog.store_requestid(status, requestid)
         user = request.getPrincipal()
         status.create_description(user=user, command=self.command,
                                   kwargs=command_kwargs,
