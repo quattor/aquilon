@@ -249,7 +249,7 @@ class BrokerCommand(object):
                     # This does a COMMIT, which in turn invalidates the session.
                     # We should therefore avoid looking up anything in the DB
                     # before this point which might be used later.
-                    status = logger.get_status()
+                    status = request.status
                     start_xtn(session, status.requestid, status.user,
                               status.command, self.requires_readonly,
                               kwargs, _IGNORED_AUDIT_ARGS)
@@ -329,27 +329,25 @@ class BrokerCommand(object):
     # add a logger into the argument list.  It returns the arguments
     # that will be passed into render().
     def add_logger(self, request, **command_kwargs):
-        status = self.catalog.create_request_status(
-            auditid=request.sequence_no)
         if self.command != "show_request":
             # For the show_request requestid is the UUID of the comamnd we
             # want intofmation for and not the UUID of this command.  As
             # a result show_request commands do not have a requestid.
             requestid = command_kwargs.get("requestid", None)
             command_kwargs['requestid'] = \
-                self.catalog.store_requestid(status, requestid)
+                self.catalog.store_requestid(request.status, requestid)
         user = request.getPrincipal()
-        status.create_description(user=user, command=self.command,
-                                  kwargs=command_kwargs,
-                                  ignored=_IGNORED_AUDIT_ARGS)
-        logger = RequestLogger(status=status, module_logger=self.module_logger)
-        kwargs_str = str(status.args)
+        request.status.create_description(user=user, command=self.command,
+                                          kwargs=command_kwargs,
+                                          ignored=_IGNORED_AUDIT_ARGS)
+        logger = RequestLogger(status=request.status, module_logger=self.module_logger)
+        kwargs_str = str(request.status.args)
         if len(kwargs_str) > 1024:
             kwargs_str = kwargs_str[0:1020] + '...'
         logger.info("Incoming command #%s from user=%s aq %s "
                     "with arguments %s",
-                    status.auditid, status.user,
-                    status.command, kwargs_str)
+                    request.status.auditid, request.status.user,
+                    request.status.command, kwargs_str)
         command_kwargs["logger"] = logger
         command_kwargs["user"] = user
         command_kwargs["request"] = request
@@ -357,7 +355,6 @@ class BrokerCommand(object):
 
     def _cleanup_logger(self, logger):
         logger.debug("Server finishing request.")
-        logger.remove_request_status(self.catalog)
         logger.close_handlers()
 
     @property

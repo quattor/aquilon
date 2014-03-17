@@ -17,6 +17,8 @@
 """Provide an anonymous access channel to the Site."""
 
 from twisted.web import server, http
+from aquilon.worker.messages import StatusCatalog
+
 
 _next_sequence_no = 0
 """Next request sequence number, see _get_next_sequence_no()"""
@@ -28,6 +30,8 @@ def _get_next_sequence_no():
     _next_sequence_no += 1
     return num
 
+catalog = StatusCatalog()
+
 
 class AQDRequest(server.Request):
     """
@@ -35,8 +39,12 @@ class AQDRequest(server.Request):
     """
 
     def __init__(self, *args, **kwargs):
-        self.__sequence_no = _get_next_sequence_no()
         server.Request.__init__(self, *args, **kwargs)
+        self.__sequence_no = _get_next_sequence_no()
+        self.__status = catalog.create_request_status(auditid=self.__sequence_no)
+        d = self.notifyFinish()
+        d.addCallback(lambda none: catalog.remove_request_status(self.__status))
+        d.addErrback(lambda reason: catalog.remove_request_status(self.__status))
 
     def getPrincipal(self):
         """By default we return None."""
@@ -45,6 +53,10 @@ class AQDRequest(server.Request):
     @property
     def sequence_no(self):
         return self.__sequence_no
+
+    @property
+    def status(self):
+        return self.__status
 
 
 class AQDSite(server.Site):

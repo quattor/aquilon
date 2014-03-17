@@ -58,14 +58,6 @@ class RequestLogger(Logger):
             return handler.status
         return None
 
-    def remove_request_status(self, catalog):
-        for handler in self.get_handlers_with_status():
-            catalog.remove_request_status(handler.status)
-            self.removeHandler(handler)
-            # We must call close() otherwise the handler will not be removed
-            # from logging._handlers and logging._handlerList
-            handler.close()
-
     def close_handlers(self):
         """This method must be called or the handlers will leak memory.
 
