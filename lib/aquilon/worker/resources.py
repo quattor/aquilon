@@ -39,8 +39,6 @@ match the available format functions.  A request for location.html,
 for example, will retrieve 'location' and format it with format_html().
 
 ToDo:
-    - Possibly massage the incoming data - simplify lists back to
-        single variables, handle put content, etc.
     - Add some sort of interface that can be implemented for
         objects to give hints on how they should be rendered.
     - Add other output formats (csv, xml, etc.).
@@ -122,6 +120,18 @@ class ResponsePage(resource.Resource):
         request.args[self.dynamic_child.path_variable] = [path]
         return self.dynamic_child
 
+    def extractArguments(self, request):
+        result = {}
+        for arg, values in request.args.iteritems():
+            if not isinstance(values, list):  # pragma: no cover
+                raise ProtocolError("Expected list for %s, got '%s'"
+                                    % (arg, str(values)))
+            if len(values) > 1:
+                raise ProtocolError("Too many values specified for %s"
+                                    % arg)
+            result[arg] = values[0]
+        return result
+
     def render(self, request):
         """This is based on the default implementation from
         resource.Resource that checks for the appropriate method to
@@ -149,7 +159,8 @@ class ResponsePage(resource.Resource):
         # Default render would just call the method here.
         # This is expanded to do argument checking, finish the request,
         # and do some error handling.
-        d = self.check_arguments(request, handler.required_parameters,
+        arguments = self.extractArguments(request)
+        d = self.check_arguments(arguments, handler.required_parameters,
                                  handler.optional_parameters,
                                  handler.parameter_checks)
         style = getattr(self, "output_format", None)
@@ -175,7 +186,7 @@ class ResponsePage(resource.Resource):
         d = d.addErrback(self.wrapError, request)
         return server.NOT_DONE_YET
 
-    def check_arguments(self, request, required=None, optional=None,
+    def check_arguments(self, arguments, required=None, optional=None,
                         parameter_checks=None):
         """Check for the required and optional arguments.
 
@@ -199,32 +210,24 @@ class ResponsePage(resource.Resource):
         for arg in required or []:
             required_map[arg] = True
 
-        arguments = {}
+        result = {}
         for (arg, req) in required_map.items():
             #log.msg("Checking for arg %s with required=%s" % (arg, req))
-            if arg not in request.args:
+            if arg not in arguments:
                 if req:
                     return defer.fail(ArgumentError(
                         "Missing mandatory argument %s" % arg))
                 else:
-                    arguments[arg] = None
+                    result[arg] = None
                     continue
-            values = request.args[arg]
-            if not isinstance(values, list):  # pragma: no cover
-                # FIXME: This should be something that raises a 500
-                # (Internal Server Error)... this is handled internally.
-                return defer.fail(ArgumentError(
-                    "Internal Error: Expected list for %s, got '%s'"
-                    % (arg, str(values))))
-
-            value = values[0]
+            value = arguments[arg]
             if arg in parameter_checks or {}:
                 try:
                     value = parameter_checks[arg]("--" + arg, value)
                 except ArgumentError, err:
                     return defer.fail(err)
-            arguments[arg] = value
-        return defer.succeed(arguments)
+            result[arg] = value
+        return defer.succeed(result)
 
     def format(self, result, request):
         # This method is called to format error messages, and the only format
