@@ -36,6 +36,7 @@ from aquilon.aqdb.model import (Service, Machine, Chassis, Host, Personality,
 from aquilon.aqdb.data_sync.storage import cache_storage_data
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.templates.base import Plenary
+from aquilon.worker.templates.switchdata import PlenarySwitchData
 from aquilon.worker.locks import CompileKey
 
 
@@ -410,7 +411,7 @@ class CommandFlush(BrokerCommand):
                               joinedload('observed_vlans.network'))
                 for dbnetdev in q:
                     try:
-                        plenary = Plenary.get_plenary(dbnetdev, logger=logger)
+                        plenary = PlenarySwitchData.get_plenary(dbnetdev, logger=logger)
                         written += plenary.write(locked=True)
                     except Exception, e:
                         failed.append("{0} failed: {1}".format(dbnetdev, e))

@@ -31,6 +31,7 @@ from aquilon.worker.dbwrappers.observed_mac import (
 from aquilon.worker.dbwrappers.network_device import discover_network_device
 from aquilon.worker.processes import DSDBRunner
 from aquilon.worker.templates.base import Plenary
+from aquilon.worker.templates.switchdata import PlenarySwitchData
 
 
 class CommandUpdateNetworkDevice(BrokerCommand):
@@ -43,7 +44,7 @@ class CommandUpdateNetworkDevice(BrokerCommand):
         dbnetdev = NetworkDevice.get_unique(session, network_device, compel=True)
 
         oldinfo = DSDBRunner.snapshot_hw(dbnetdev)
-        plenary = Plenary.get_plenary(dbnetdev, logger=logger)
+        plenary = PlenarySwitchData.get_plenary(dbnetdev, logger=logger)
 
         if discover:
             discover_network_device(session, logger, self.config,

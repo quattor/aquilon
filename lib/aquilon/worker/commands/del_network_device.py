@@ -24,6 +24,7 @@ from aquilon.worker.dbwrappers.dns import delete_dns_record
 from aquilon.worker.locks import CompileKey
 from aquilon.worker.processes import DSDBRunner
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
+from aquilon.worker.templates.switchdata import PlenarySwitchData
 
 
 class CommandDelNetworkDevice(BrokerCommand):
@@ -58,7 +59,7 @@ class CommandDelNetworkDevice(BrokerCommand):
         # Any network device ports hanging off this network device should be deleted with
         # the cascade delete of the network device.
 
-        netdev_plenary = Plenary.get_plenary(dbnetdev, logger=logger)
+        netdev_plenary = PlenarySwitchData.get_plenary(dbnetdev, logger=logger)
 
         # clusters connected to this network device
         plenaries = PlenaryCollection(logger=logger)

@@ -28,9 +28,9 @@ from aquilon.aqdb.model import NetworkDevice
 LOGGER = logging.getLogger(__name__)
 
 
-class PlenaryNetworkDevice(StructurePlenary):
+class PlenarySwitchData(StructurePlenary):
     """
-    A facade for the variety of PlenaryNetworkDevice subsidiary files
+    A facade for the variety of PlenarySwitchData subsidiary files
     """
 
     prefix = "switchdata"
@@ -43,8 +43,6 @@ class PlenaryNetworkDevice(StructurePlenary):
         if inspect(self.dbobj).deleted:
             return NoLockKey(logger=self.logger)
         else:
-            # TODO: this should become a CompileKey if we start generating
-            # profiles for switches (see also templates/cluster.py)
             return PlenaryKey(network_device=self.dbobj, logger=self.logger,
                               exclusive=exclusive)
 
@@ -63,5 +61,3 @@ class PlenaryNetworkDevice(StructurePlenary):
             vlans[ov.vlan.port_group] = vlan
 
         lines.append('"system/network/vlans" = %s;' % pan(vlans))
-
-Plenary.handlers[NetworkDevice] = PlenaryNetworkDevice

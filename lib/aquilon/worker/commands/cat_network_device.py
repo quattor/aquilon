@@ -19,6 +19,7 @@
 from aquilon.aqdb.model import NetworkDevice
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.templates import Plenary
+from aquilon.worker.templates.switchdata import PlenarySwitchData
 
 
 class CommandCatNetworkDevice(BrokerCommand):
@@ -27,7 +28,7 @@ class CommandCatNetworkDevice(BrokerCommand):
 
     def render(self, generate, session, logger, network_device, **kwargs):
         dbnetdev = NetworkDevice.get_unique(session, network_device, compel=True)
-        plenary_info = Plenary.get_plenary(dbnetdev, logger=logger)
+        plenary_info = PlenarySwitchData.get_plenary(dbnetdev, logger=logger)
 
         if generate:
             return plenary_info._generate_content()

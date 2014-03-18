@@ -28,6 +28,7 @@ from aquilon.worker.dbwrappers.interface import (get_or_create_interface,
                                                  check_netdev_iftype)
 from aquilon.worker.processes import DSDBRunner
 from aquilon.worker.templates import Plenary
+from aquilon.worker.templates.switchdata import PlenarySwitchData
 
 
 class CommandAddNetworkDevice(BrokerCommand):
@@ -78,7 +79,7 @@ class CommandAddNetworkDevice(BrokerCommand):
 
         session.flush()
 
-        plenary = Plenary.get_plenary(dbnetdev, logger=logger)
+        plenary = PlenarySwitchData.get_plenary(dbnetdev, logger=logger)
         with plenary.get_key():
             plenary.stash()
             try:

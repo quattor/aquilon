@@ -28,6 +28,7 @@ from aquilon.aqdb.model import (Host, Cluster, Service, ServiceInstance,
                                 MetaCluster, EsxCluster, Archetype, Personality)
 from aquilon.worker.templates import (Plenary, PlenaryCollection,
                                       PlenaryServiceInstanceServer)
+from aquilon.worker.templates.switchdata import PlenarySwitchData
 
 
 class Chooser(object):
@@ -671,7 +672,7 @@ class ClusterChooser(Chooser):
                     self.plenaries.append(Plenary.get_plenary(dbres))
 
             if isinstance(cluster, EsxCluster) and cluster.network_device:
-                self.plenaries.append(Plenary.get_plenary(cluster.network_device))
+                self.plenaries.append(PlenarySwitchData.get_plenary(cluster.network_device))
 
         add_cluster_dependencies(self.dbobj)
 
