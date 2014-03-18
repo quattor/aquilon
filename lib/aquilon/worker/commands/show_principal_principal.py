@@ -32,6 +32,6 @@ class CommandShowPrincipalPrincipal(BrokerCommand):
         try:
             options = [undefer("comments")]
             return get_or_create_user_principal(session, principal, False,
-                                                False, options)
+                                                False, query_options=options)
         except ArgumentError:
             raise NotFoundException("User principal %s not found." % principal)

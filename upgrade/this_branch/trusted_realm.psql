@@ -1,0 +1,3 @@
+ALTER TABLE realm ADD trusted BOOLEAN;
+UPDATE realm SET trusted = 't';
+ALTER TABLE realm ALTER trusted SET NOT NULL;

@@ -56,18 +56,35 @@ class TestGet(TestBrokerCommand):
 
     def testgetutsandbox(self):
         # This one was added with --noget
-        (out, err) = self.successtest(["get", "--sandbox", "utsandbox"])
+        user = self.config.get("unittest", "user")
+        realm = self.config.get("unittest", "realm")
+        (out, err) = self.successtest(["get", "--sandbox",
+                                       "%s@%s/utsandbox" % (user, realm)])
         self.failUnless(os.path.exists(os.path.join(self.sandboxdir,
                                                     "utsandbox")))
 
-    def testgetbaduser(self):
+    def testgetunauthorized(self):
         command = ["get",
-                   "--sandbox", "user-does-not-exist/badbranch"]
+                   "--sandbox", "cdb@example.realm/badbranch"]
         out = self.badrequesttest(command)
         user = self.config.get("unittest", "user")
+        realm = self.config.get("unittest", "realm")
         self.matchoutput(out,
-                         "User '%s' cannot add or get a sandbox on "
-                         "behalf of 'user-does-not-exist'." % user,
+                         "User '%s@%s' cannot add or get a sandbox on "
+                         "behalf of 'cdb@example.realm'." % (user, realm),
+                         command)
+
+    def testgetbaduser(self):
+        command = ["get", "--sandbox", "user-does-not-exist/badbranch"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out, "User 'user-does-not-exist' not found.", command)
+
+    def testgetbadrealm(self):
+        user = self.config.get("unittest", "user")
+        command = ["get", "--sandbox", "%s@realm-does-not-exist/badbranch" % user]
+        out = self.notfoundtest(command)
+        self.matchoutput(out,
+                         "User '%s@realm-does-not-exist' not found." % user,
                          command)
 
 

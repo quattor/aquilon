@@ -41,7 +41,7 @@
 # character. The rest of the name should be a valid Python identifier, although
 # this is not enforced yet.
 
-Realm(name="example.realm")
+Realm(name="example.realm", trusted=False)
 
 Role(name="nobody")
 Role(name="operations")

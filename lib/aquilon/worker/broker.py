@@ -267,7 +267,8 @@ class BrokerCommand(object):
                               kwargs, _IGNORED_AUDIT_ARGS)
 
                     dbuser = get_or_create_user_principal(session, user,
-                                                          commitoncreate=True)
+                                                          commitoncreate=True,
+                                                          logger=logger)
 
                     if self.requires_azcheck:
                         self.az.check(principal=user, dbuser=dbuser,
