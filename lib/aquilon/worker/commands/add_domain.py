@@ -37,6 +37,11 @@ class CommandAddDomain(BrokerCommand):
                                          "an authenticated connection.")
 
         validate_template_name("--domain", domain)
+        try:
+            run_git(["check-ref-format", "--branch", domain])
+        except ProcessException:
+            raise ArgumentError("'%s' is not a valid git branch name." % domain)
+
         Branch.get_unique(session, domain, preclude=True)
 
         compiler = self.config.get("panc", "pan_compiler")

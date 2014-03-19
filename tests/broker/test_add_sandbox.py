@@ -230,7 +230,7 @@ class TestAddSandbox(TestBrokerCommand):
         err = self.notfoundtest(command.split(" "))
         self.matchoutput(err, "User 'user1/test' not found.", command)
 
-    def testaddexistingpath(self):
+    def test_200_add_existing_path(self):
         sandboxdir = os.path.join(self.sandboxdir, "existingsand")
         os.makedirs(sandboxdir)
         command = ["add", "sandbox", "--sandbox", "existingsand"]
@@ -239,6 +239,11 @@ class TestAddSandbox(TestBrokerCommand):
                          "cannot create branch." % sandboxdir, command)
         os.removedirs(sandboxdir)
 
+    def test_200_bad_git_branchname(self):
+        command = ["add_sandbox", "--sandbox", "foobar."]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "'foobar.' is not a valid git branch name.",
+                         command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddSandbox)
