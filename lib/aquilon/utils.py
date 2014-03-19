@@ -243,7 +243,6 @@ def first_of(iterable, function):
             return item
     return None
 
-
 def remove_dir(dir, logger=LOGGER):
     """Remove a directory.  Could have been implemented as a call to rm -rf."""
     for root, dirs, files in os.walk(dir, topdown=False):
