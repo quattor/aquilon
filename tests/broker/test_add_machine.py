@@ -33,7 +33,7 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
         self.noouttest(["add", "machine", "--machine", "ut3c5n10",
                         "--rack", "ut3", "--model", "hs21-8853l5u",
                         "--cpucount", "2", "--cpuvendor", "intel",
-                        "--cpuname", "xeon", "--cpuspeed", "2660",
+                        "--cpuname", "xeon_2660", "--cpuspeed", "2660",
                         "--memory", "8192", "--serial", "99C5553",
                         "--comments", "Some machine comments"])
 
@@ -176,7 +176,7 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
         self.noouttest(["add", "machine", "--machine", "ut3c1n3",
                         "--chassis", "ut3c1.aqd-unittest.ms.com", "--slot", "3",
                         "--model", "hs21-8853l5u", "--cpucount", "2",
-                        "--cpuvendor", "intel", "--cpuname", "xeon",
+                        "--cpuvendor", "intel", "--cpuname", "xeon_2660",
                         "--cpuspeed", "2660",
                         "--memory", "8192", "--serial", "KPDZ406"])
 
@@ -325,7 +325,7 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
         self.badrequesttest(["add", "machine", "--machine", "ut3c1n5",
                              "--rack", "ut3", "--model", "hs21-8853l5u",
                              "--cpucount", "2", "--cpuvendor", "intel",
-                             "--cpuname", "xeon", "--cpuspeed", "2",
+                             "--cpuname", "xeon_2660", "--cpuspeed", "2",
                              "--memory", "8192", "--serial", "KPDZ406"])
 
     def testverifyrejectut3c1n5(self):
@@ -335,7 +335,7 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
     def testrejectmissingmemory(self):
         command = ["add", "machine", "--machine", "ut3c1n6",
                    "--rack", "ut3", "--model", "utblade", "--cpucount", "2",
-                   "--cpuvendor", "intel", "--cpuname", "xeon",
+                   "--cpuvendor", "intel", "--cpuname", "xeon_2500",
                    "--cpuspeed", "2500", "--serial", "AAAAAAA"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
