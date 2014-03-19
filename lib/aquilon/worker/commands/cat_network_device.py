@@ -26,9 +26,12 @@ class CommandCatNetworkDevice(BrokerCommand):
 
     required_parameters = ["network_device"]
 
-    def render(self, generate, session, logger, network_device, **kwargs):
+    def render(self, generate, session, logger, network_device, data, **kwargs):
         dbnetdev = NetworkDevice.get_unique(session, network_device, compel=True)
-        plenary_info = PlenarySwitchData.get_plenary(dbnetdev, logger=logger)
+        if data:
+            plenary_info = PlenarySwitchData.get_plenary(dbnetdev, logger=logger)
+        else:
+            plenary_info = Plenary.get_plenary(dbnetdev, logger=logger)
 
         if generate:
             return plenary_info._generate_content()

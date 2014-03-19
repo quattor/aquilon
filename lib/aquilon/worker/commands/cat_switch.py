@@ -27,6 +27,8 @@ class CommandCatSwitch(CommandCatNetworkDevice):
 
     def render(self, switch, **arguments):
         self.deprecated_option("switch", "Please use --network_device "
-                               "instead.", **arguments)
+                               "and --data instead.", **arguments)
         arguments['network_device'] = switch
+        # Keep the old behaviour of displaying the switch data
+        arguments['data'] = True
         return CommandCatNetworkDevice.render(self, **arguments)

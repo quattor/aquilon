@@ -30,7 +30,7 @@ from aquilon.worker.dbwrappers.observed_mac import (
     update_or_create_observed_mac)
 from aquilon.worker.dbwrappers.network_device import discover_network_device
 from aquilon.worker.processes import DSDBRunner
-from aquilon.worker.templates.base import Plenary
+from aquilon.worker.templates.base import (Plenary, PlenaryCollection)
 from aquilon.worker.templates.switchdata import PlenarySwitchData
 
 
@@ -44,7 +44,9 @@ class CommandUpdateNetworkDevice(BrokerCommand):
         dbnetdev = NetworkDevice.get_unique(session, network_device, compel=True)
 
         oldinfo = DSDBRunner.snapshot_hw(dbnetdev)
-        plenary = PlenarySwitchData.get_plenary(dbnetdev, logger=logger)
+        plenaries = PlenaryCollection(logger=logger)
+        plenaries.append(PlenarySwitchData.get_plenary(dbnetdev, logger=logger))
+        plenaries.append(Plenary.get_plenary(dbnetdev))
 
         if discover:
             discover_network_device(session, logger, self.config,
@@ -100,16 +102,16 @@ class CommandUpdateNetworkDevice(BrokerCommand):
 
         session.flush()
 
-        with plenary.get_key():
-            plenary.stash()
+        with plenaries.get_key():
+            plenaries.stash()
             try:
-                plenary.write(locked=True)
+                plenaries.write(locked=True)
 
                 dsdb_runner = DSDBRunner(logger=logger)
                 dsdb_runner.update_host(dbnetdev, oldinfo)
                 dsdb_runner.commit_or_rollback("Could not update network device in DSDB")
             except:
-                plenary.restore_stash()
+                plenaries.restore_stash()
                 raise
 
         return

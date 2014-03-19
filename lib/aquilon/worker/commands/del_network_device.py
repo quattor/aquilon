@@ -59,19 +59,24 @@ class CommandDelNetworkDevice(BrokerCommand):
         # Any network device ports hanging off this network device should be deleted with
         # the cascade delete of the network device.
 
-        netdev_plenary = PlenarySwitchData.get_plenary(dbnetdev, logger=logger)
-
-        # clusters connected to this network device
         plenaries = PlenaryCollection(logger=logger)
+        remove_plenaries = PlenaryCollection(logger=logger)
 
+        remove_plenaries.append(PlenarySwitchData.get_plenary(dbnetdev, logger=logger))
+        remove_plenaries.append(Plenary.get_plenary(dbnetdev, logger=logger))
+
+        # Update cluster plenaries connected to this network device
         for dbcluster in dbnetdev.esx_clusters:
             plenaries.append(Plenary.get_plenary(dbcluster))
 
-        with CompileKey.merge([netdev_plenary.get_key(), plenaries.get_key()]):
-            netdev_plenary.stash()
+        with CompileKey.merge([plenaries.get_key(),
+                               remove_plenaries.get_key()]):
+            plenaries.stash()
+            remove_plenaries.stash()
+
             try:
                 plenaries.write(locked=True)
-                netdev_plenary.remove(locked=True)
+                remove_plenaries.remove(locked=True)
 
                 if ip:
                     dsdb_runner = DSDBRunner(logger=logger)
@@ -82,6 +87,6 @@ class CommandDelNetworkDevice(BrokerCommand):
                                                    "from DSDB")
             except:
                 plenaries.restore_stash()
-                netdev_plenary.restore_stash()
+                remove_plenaries.restore_stash()
                 raise
         return

@@ -22,6 +22,7 @@ from aquilon.aqdb.model import NetworkDevice, Interface
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.interface import rename_interface
 from aquilon.worker.processes import DSDBRunner
+from aquilon.worker.templates import (Plenary, PlenaryCollection)
 
 
 class CommandUpdateInterfaceNetworkDevice(BrokerCommand):
@@ -51,8 +52,18 @@ class CommandUpdateInterfaceNetworkDevice(BrokerCommand):
 
         session.flush()
 
-        dsdb_runner = DSDBRunner(logger=logger)
-        dsdb_runner.update_host(dbnetdev, oldinfo)
-        dsdb_runner.commit_or_rollback("Could not update network device in DSDB")
+        plenaries = PlenaryCollection(logger=logger)
+        plenaries.append(Plenary.get_plenary(dbnetdev))
+
+        with plenaries.get_key():
+            plenaries.stash()
+            try:
+                plenaries.write(locked=True)
+                dsdb_runner = DSDBRunner(logger=logger)
+                dsdb_runner.update_host(dbnetdev, oldinfo)
+                dsdb_runner.commit_or_rollback("Could not update network device in DSDB")
+            except:
+                plenaries.restore_stash()
+                raise
 
         return

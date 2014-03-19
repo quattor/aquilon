@@ -118,6 +118,8 @@ class TestUpdateInterface(TestBrokerCommand):
                    "--mac", mac, "--network_device=ut3gd1r06.aqd-unittest.ms.com"]
         self.noouttest(command)
         self.dsdb_verify()
+        self.check_plenary_contents('network_device', 'americas', 'ut', 'ut3gd1r06',
+                                    contains=['xge49', str(mac)])
 
     def test_130_update_switch2(self):
         # This is the primary interface; in reality the update to DSDB
@@ -191,6 +193,8 @@ class TestUpdateInterface(TestBrokerCommand):
                                 "vlan110_hsrp", "vlan220_hsrp")
         self.noouttest(command)
         self.dsdb_verify()
+        self.check_plenary_contents('network_device', 'americas', 'ut', 'ut3gd1r04',
+                                    contains='vlan220', clean='vlan110')
 
     def test_170_add_service_addr(self):
         ip = self.net["zebra_vip"].usable[5]

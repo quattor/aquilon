@@ -38,6 +38,7 @@ class TestAddNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
         out = self.badrequesttest(command)
         self.matchoutput(out, "This command can only be used "
                          "to add network devices.", command)
+        self.check_plenary_nonexistant('network_device', 'americas', 'ut', 'ut3gd1r03')
 
     def testverifyrejectut3gd1r03(self):
         command = "show network_device --network_device ut3gd1r03.aqd-unittest.ms.com"
@@ -52,6 +53,7 @@ class TestAddNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
                           "--iftype", "physical", "--rack", "ut3",
                           "--model", "uttorswitch", "--serial", "SNgd1r01"])
         self.dsdb_verify()
+        self.check_plenary_exists('network_device', 'americas', 'ut', 'ut3gd1r01')
 
     def testaddut3gd1r04(self):
         ip = self.net["verari_eth1"].usable[0]
@@ -64,6 +66,7 @@ class TestAddNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
                           "--rack", "ut3", "--model", "temp_switch",
                           "--comments", "Some switch comments"])
         self.dsdb_verify()
+        self.check_plenary_exists('network_device', 'americas', 'ut', 'ut3gd1r04')
 
     def testaddut3gd1r05(self):
         ip = self.net["tor_net_7"].usable[0]
@@ -75,6 +78,7 @@ class TestAddNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
                           "--rack", "ut3", "--model", "temp_switch",
                           "--vendor", "generic"])
         self.dsdb_verify()
+        self.check_plenary_exists('network_device', 'americas', 'ut', 'ut3gd1r05')
 
     def testaddut3gd1r06(self):
         ip = self.net["tor_net_8"].usable[0]
@@ -85,6 +89,7 @@ class TestAddNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
                           "--vendor", "generic", "--interface", "xge49",
                           "--iftype", "physical"])
         self.dsdb_verify()
+        self.check_plenary_exists('network_device', 'americas', 'ut', 'ut3gd1r06')
 
     def testaddut3gd1r07(self):
         ip = self.net["tor_net_9"].usable[0]
@@ -95,6 +100,7 @@ class TestAddNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
                           "--iftype", "physical","--rack", "ut3",
                           "--model", "temp_switch"])
         self.dsdb_verify()
+        self.check_plenary_exists('network_device', 'americas', 'ut', 'ut3gd1r07')
 
     def testaddut3gd1r08(self):
         ip = self.net["tor_net_9"].usable[1]
@@ -105,6 +111,7 @@ class TestAddNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
                           "--iftype", "physical",
                           "--building", "ut", "--model", "temp_switch"])
         self.dsdb_verify()
+        self.check_plenary_exists('network_device', 'americas', 'ut', 'ut3gd1r08')
 
     def testaddnp06bals03(self):
         self.dsdb_expect_add("np06bals03.ms.com", "172.31.64.69",
@@ -121,6 +128,7 @@ class TestAddNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
                          "Moving rack np7 into bunker nyb10.np based on "
                          "network tagging.",
                          command)
+        self.check_plenary_exists('network_device', 'americas', 'np', 'np06bals03')
 
     def testaddnp06fals01(self):
         self.dsdb_expect_add("np06fals01.ms.com", "172.31.88.5", "xge49",
@@ -137,6 +145,7 @@ class TestAddNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
                          "nyb10.np, but network nyp_hpl_2960_verari_mnmt is "
                          "not bunkerized.",
                          command)
+        self.check_plenary_exists('network_device', 'americas', 'np', 'np06fals01')
 
     def testaddut01ga1s02(self):
         ip = self.net["tor_net_0"].usable[0]
@@ -149,6 +158,7 @@ class TestAddNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
                    "--mac", ip.mac, "--ip", ip]
         (out, err) = self.successtest(command)
         self.dsdb_verify()
+        self.check_plenary_exists('network_device', 'americas', 'ut', 'ut01ga1s02')
 
     def testaddut01ga1s03(self):
         ip = self.net["hp_eth0"].usable[0]
@@ -161,6 +171,7 @@ class TestAddNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
                    "--mac", ip.mac, "--ip", ip]
         (out, err) = self.successtest(command)
         self.dsdb_verify()
+        self.check_plenary_exists('network_device', 'americas', 'ut', 'ut01ga1s03')
 
     def testaddut01ga1s04(self):
         ip = self.net["verari_eth0"].usable[0]
@@ -173,6 +184,7 @@ class TestAddNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
                    "--mac", ip.mac, "--ip", ip]
         (out, err) = self.successtest(command)
         self.dsdb_verify()
+        self.check_plenary_exists('network_device', 'americas', 'ut', 'ut01ga1s04')
 
     def testaddut01ga2s01(self):
         ip = self.net["vmotion_net"].usable[0]
@@ -185,6 +197,7 @@ class TestAddNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
                    "--mac", ip.mac, "--ip", ip]
         (out, err) = self.successtest(command)
         self.dsdb_verify()
+        self.check_plenary_exists('network_device', 'americas', 'ut', 'ut01ga2s01')
 
     def testaddut01ga2s02(self):
         ip = self.net["vmotion_net"].usable[1]
@@ -197,6 +210,7 @@ class TestAddNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
                    "--mac", ip.mac, "--ip", ip]
         (out, err) = self.successtest(command)
         self.dsdb_verify()
+        self.check_plenary_exists('network_device', 'americas', 'ut', 'ut01ga2s02')
 
     def testaddut01ga2s03(self):
         ip = self.net["esx_bcp_ut"].usable[0]
@@ -210,6 +224,7 @@ class TestAddNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
                    "--mac", ip.mac, "--ip", ip]
         (out, err) = self.successtest(command)
         self.dsdb_verify()
+        self.check_plenary_exists('network_device', 'americas', 'ut', 'ut01ga2s03')
 
     def testaddnp01ga2s03(self):
         ip = self.net["esx_bcp_np"].usable[0]
@@ -221,6 +236,7 @@ class TestAddNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
                    "--iftype", "physical", "--mac", ip.mac, "--ip", ip]
         (out, err) = self.successtest(command)
         self.dsdb_verify()
+        self.check_plenary_exists('network_device', 'americas', 'np', 'np01ga2s03')
 
     def testrejectut3gd1r99(self):
         command = ["add", "network_device", "--network_device", "ut3gd1r99.aqd-unittest.ms.com",
@@ -232,6 +248,7 @@ class TestAddNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
                          "IP address %s is already in use" %
                          self.net["tor_net_9"].usable[0],
                          command)
+        self.check_plenary_nonexistant('network_device', 'americas', 'ut', 'ut3gd1r99')
 
     def testverifyaddut3gd1r01(self):
         ip = self.net["tor_net_12"].usable[0]
@@ -312,6 +329,7 @@ class TestAddNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
         out = self.badrequesttest(command)
         self.matchoutput(out, "Could not deduce a valid hardware label",
                          command)
+        self.check_plenary_nonexistant('network_device', 'americas', 'ut', 'not-alnum')
 
     def testrejectbadlabelexplicit(self):
         command = ["add", "network_device", "--network_device", "ut3gd1r99.aqd-unittest.ms.com",
@@ -322,6 +340,7 @@ class TestAddNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
         out = self.badrequesttest(command)
         self.matchoutput(out, "Illegal hardware label format 'not-alnum'.",
                          command)
+        self.check_plenary_nonexistant('network_device', 'americas', 'ut', 'not-alnum')
 
 
 if __name__ == '__main__':

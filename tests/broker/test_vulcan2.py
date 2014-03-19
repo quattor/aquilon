@@ -369,7 +369,7 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
     # TODO renumber again
     def test_235_cat_switch(self):
         for i in range(0, 2):
-            command = ["cat", "--network_device", "utpgsw%d" % i]
+            command = ["cat", "--network_device", "utpgsw%d" % i, "--data"]
 
             out = self.commandtest(command)
             self.matchoutput(out, '"user-v710", nlist(', command)

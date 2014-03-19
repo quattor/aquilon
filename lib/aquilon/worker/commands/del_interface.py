@@ -89,7 +89,7 @@ class CommandDelInterface(BrokerCommand):
         dbhw_ent.interfaces.remove(dbinterface)
         session.flush()
 
-        if dbhw_ent.hardware_type == 'machine':
+        if dbhw_ent.hardware_type != 'chassis':
             plenary_info = Plenary.get_plenary(dbhw_ent, logger=logger)
             plenary_info.write()
         return

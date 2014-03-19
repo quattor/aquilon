@@ -71,6 +71,8 @@ class TestDelInterface(TestBrokerCommand):
         command = ["del", "interface", "--interface", "vlan220",
                    "--network_device", "ut3gd1r04.aqd-unittest.ms.com"]
         self.noouttest(command)
+        self.check_plenary_contents('network_device', 'americas', 'ut', 'ut3gd1r04',
+                                    clean='vlan220')
 
     def testverifydelut3gd1r04vlan220(self):
         command = ["show", "network_device", "--network_device", "ut3gd1r04.aqd-unittest.ms.com"]

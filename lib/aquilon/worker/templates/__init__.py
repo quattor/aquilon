@@ -43,5 +43,5 @@ from aquilon.worker.templates.cluster import (PlenaryCluster,
 from aquilon.worker.templates.host import (PlenaryHost, PlenaryHostData,
                                            PlenaryToplevelHost,
                                            PlenaryNamespacedHost)
-
+from aquilon.worker.templates.network_device import PlenaryNetworkDeviceInfo
 from aquilon.worker.templates.domain import TemplateDomain

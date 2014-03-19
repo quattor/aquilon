@@ -27,7 +27,7 @@ from aquilon.worker.dbwrappers.interface import (get_or_create_interface,
                                                  assign_address,
                                                  check_netdev_iftype)
 from aquilon.worker.processes import DSDBRunner
-from aquilon.worker.templates import Plenary
+from aquilon.worker.templates import (Plenary, PlenaryCollection)
 from aquilon.worker.templates.switchdata import PlenarySwitchData
 
 
@@ -79,16 +79,19 @@ class CommandAddNetworkDevice(BrokerCommand):
 
         session.flush()
 
-        plenary = PlenarySwitchData.get_plenary(dbnetdev, logger=logger)
-        with plenary.get_key():
-            plenary.stash()
+        plenaries = PlenaryCollection(logger=logger)
+        plenaries.append(PlenarySwitchData.get_plenary(dbnetdev, logger=logger))
+        plenaries.append(Plenary.get_plenary(dbnetdev))
+
+        with plenaries.get_key():
+            plenaries.stash()
             try:
-                plenary.write(locked=True)
+                plenaries.write(locked=True)
                 dsdb_runner = DSDBRunner(logger=logger)
                 dsdb_runner.update_host(dbnetdev, None)
                 dsdb_runner.commit_or_rollback("Could not add network device to DSDB")
             except:
-                plenary.restore_stash()
+                plenaries.restore_stash()
                 raise
 
         return

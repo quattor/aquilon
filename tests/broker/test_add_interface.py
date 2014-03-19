@@ -434,6 +434,8 @@ class TestAddInterface(TestBrokerCommand):
                          "MAC address %s is already in use: " %
                          self.net["tor_net_0"].usable[0].mac,
                          command)
+        self.check_plenary_contents('network_device', 'americas', 'ut', 'ut3gd1r01',
+                                    clean='xge1')
 
     def testfailaddinterfaceud3dg1r01model(self):
         command = ["add", "interface", "--interface", "xge1",
@@ -442,6 +444,8 @@ class TestAddInterface(TestBrokerCommand):
         out = self.badrequesttest(command)
         self.matchoutput(out, "Cannot use argument --model when adding an "
                          "interface to a network device.", command)
+        self.check_plenary_contents('network_device', 'americas', 'ut', 'ut3gd1r01',
+                                    clean='xge1')
 
     def testfailaddinterfaceud3dg1r01type(self):
         command = ["add", "interface", "--interface", "xge1",
@@ -450,6 +454,8 @@ class TestAddInterface(TestBrokerCommand):
         out = self.badrequesttest(command)
         self.matchoutput(out, "Interface type vlan is not allowed for "
                          "network devices.", command)
+        self.check_plenary_contents('network_device', 'americas', 'ut', 'ut3gd1r01',
+                                    clean='xge1')
 
     def testverifyfailaddinterfaceut3dg1r01(self):
         command = "show network_device --network_device ut3gd1r01.aqd-unittest.ms.com"
@@ -464,12 +470,16 @@ class TestAddInterface(TestBrokerCommand):
                    "--iftype", "virtual",
                    "--network_device", "ut3gd1r04.aqd-unittest.ms.com"]
         self.noouttest(command)
+        self.check_plenary_contents('network_device', 'americas', 'ut', 'ut3gd1r04',
+                                    contains='vlan110')
 
     def testaddloopback(self):
         command = ["add", "interface", "--interface", "loop0",
                    "--iftype", "loopback",
                    "--network_device", "ut3gd1r04.aqd-unittest.ms.com"]
         self.noouttest(command)
+        self.check_plenary_contents('network_device', 'americas', 'ut', 'ut3gd1r04',
+                                    contains='loop0')
 
     def testfailloopbackmac(self):
         command = ["add", "interface", "--interface", "loop1",
@@ -479,6 +489,8 @@ class TestAddInterface(TestBrokerCommand):
         out = self.badrequesttest(command)
         self.matchoutput(out, "Loopback interfaces cannot have a MAC address.",
                          command)
+        self.check_plenary_contents('network_device', 'americas', 'ut', 'ut3gd1r04',
+                                    clean='loop1')
 
     def testverifyut3gd1r04(self):
         command = ["show", "network_device", "--network_device",

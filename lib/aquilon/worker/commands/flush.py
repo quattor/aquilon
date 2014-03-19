@@ -415,6 +415,11 @@ class CommandFlush(BrokerCommand):
                         written += plenary.write(locked=True)
                     except Exception, e:
                         failed.append("{0} failed: {1}".format(dbnetdev, e))
+                    try:
+                        plenary = Plenary.get_plenary(dbnetdev, logger=logger)
+                        written += plenary.write(locked=True)
+                    except Exception, e:
+                        failed.append("{0} failed: {1}".format(dbnetdev, e))
 
             # written + len(failed) isn't actually the total that should
             # have been done, but it's the easiest to implement for this
