@@ -616,18 +616,10 @@ class PlenaryCollection(object):
 
 
 class TemplateFormatter(ObjectFormatter):
-
-    def __init__(self):
-        super(TemplateFormatter, self).__init__()
-        self.mako_dir = os.path.join(self.config.get("broker", "srcdir"), "lib",
-                                     "aquilon", "worker", "templates", "mako")
-        self.lookup_raw = TemplateLookup(directories=[os.path.join(self.mako_dir, "raw"),
-                                                      "/usr/share/aquilon/mako/raw"],
-                                         imports=['from string import rstrip',
-                                                  'from '
-                                                  'aquilon.worker.formats.formatters '
-                                                  'import shift'],
-                                         default_filters=['unicode', 'rstrip'])
+    lookup_raw = build_mako_lookup(ObjectFormatter.config, "pan",
+                                   imports=['from string import rstrip',
+                                            'from aquilon.worker.formats.formatters import shift'],
+                                   default_filters=['unicode', 'rstrip'])
 
 
 def add_location_info(lines, dblocation, prefix=""):

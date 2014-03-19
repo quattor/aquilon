@@ -97,12 +97,10 @@ setup(name="aquilon",
                   ("/etc/init.d", ["etc/rc.d/init.d/aqd"]),
                   ("/etc/sysconfig", ["etc/sysconfig/aqd"]),
                   ("/etc/bash_completion.d", ["aq_bash_completion.sh"]),
-                  ("/usr/share/aquilon/mako/raw",
-                   glob.glob("lib/aquilon/worker/formats/mako/raw/*mako") +
-                   glob.glob("lib/aquilon/worker/templates/mako/raw/*mako")),
-                  ("/usr/share/html",
-                   glob.glob("lib/aquilon/worker/formats/mako/raw/*mako")),
-                  ("/usr/share/man/man1", glob.glob("doc/man/man1/*gz"))] +
-      find_regular_files("upgrade"),
+                  ("/usr/share/aquilon/mako/raw", glob.glob("etc/mako/raw/*")),
+                  ("/usr/share/aquilon/mako/pan", glob.glob("etc/mako/pan/*")),
+                  ("/usr/share/aquilon/mako/html", glob.glob("etc/mako/html/*")),
+                  ("/usr/share/man/man1", glob.glob("doc/man/man1/*gz"))
+                  ] + find_regular_files("upgrade"),
       scripts=all_scripts,
       url="http://quattor.org")

@@ -150,14 +150,11 @@ class ObjectFormatter(object):
     # might also be an issue when we switch to multi-process.
     # Not using cache because it only has the lifetime of the template, and
     # because we do not have the beaker module installed.
-    lookup_raw = TemplateLookup(directories=[os.path.join(mako_dir, "raw"),
-                                             "/usr/share/aquilon/mako/raw"],
-                                imports=['from string import rstrip',
-                                         'from '
-                                         'aquilon.worker.formats.formatters '
-                                         'import shift'],
-                                default_filters=['unicode', 'rstrip'])
-    lookup_html = TemplateLookup(directories=[os.path.join(mako_dir, "html")])
+    lookup_raw = build_mako_lookup(config, "raw",
+                                   imports=['from string import rstrip',
+                                            'from aquilon.worker.formats.formatters import shift'],
+                                   default_filters=['unicode', 'rstrip'])
+    lookup_html = build_mako_lookup(config, "html")
 
     def format_raw(self, result, indent=""):
         if hasattr(self, "template_raw"):

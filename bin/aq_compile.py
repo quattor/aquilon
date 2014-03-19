@@ -39,7 +39,8 @@ if LIBDIR not in sys.path:
     sys.path.append(LIBDIR)
 # -- end path_setup --
 
-from aquilon.config import Config, config_filename
+from aquilon.config import Config, lookup_file_path
+
 
 def run_domain_compile(options, config):
     panc_env = os.environ.copy()
@@ -60,7 +61,7 @@ def run_domain_compile(options, config):
         panc_env["ANT_OPTS"] = config.get("broker", "ant_options")
 
     args = ["ant", "--noconfig", "-f"]
-    args.append(config_filename("build.xml"))
+    args.append(lookup_file_path("build.xml"))
     args.append("-Dbasedir=%s" % options.basedir)
 
     if options.swrep:
@@ -106,7 +107,7 @@ def main():
     parser = argparse.ArgumentParser(description="Compile templates")
     parser.add_argument("-c", "--config", dest="config", action="store",
                         help="location of the config file",
-                        default=config_filename("aqd.conf.defaults"))
+                        default=lookup_file_path("aqd.conf.defaults"))
     parser.add_argument("--basedir", action="store", required=True,
                         help="base directory")
     parser.add_argument("--domain", action="store", required=True,

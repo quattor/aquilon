@@ -32,14 +32,29 @@ def get_username():
     return pwd.getpwuid(os.getuid()).pw_name
 
 
-def config_filename(name):
+def running_from_source():
     """
-    Return the full path of a configuration file.
+    Determine if we're running from the source tree.
+
+    Being able to run from the source tree makes development easier, but the
+    directory structure may differ from the installed system, and also some
+    settings should have different defaults. Use this function when such
+    decisions are needed to be made.
+    """
+
+    # Need a file that is guaranteed not to be installed - Makefile is a
+    # reasonable choice
+    return os.path.exists(os.path.join(_SRCDIR, "Makefile"))
+
+
+def lookup_file_path(name):
+    """
+    Return the full path of a data file.
 
     If we're running from the source tree, then use the default files;
     otherwise, use the system-wide ones.
     """
-    if os.path.exists(os.path.join(_SRCDIR, "etc", "aqd.conf.dev")):
+    if running_from_source():
         return os.path.join(_SRCDIR, "etc", name)
 
     paths_to_try = [os.path.join("/etc", "aquilon", name),
@@ -64,7 +79,7 @@ global_defaults = {
     "user": os.environ.get("USER") or get_username(),
     # Only used by unit tests at the moment, but maybe useful for
     # scripts that want to execute stand-alone.
-            "srcdir": _SRCDIR,
+    "srcdir": _SRCDIR,
     "hostname": socket.getfqdn(),
 }
 
@@ -93,7 +108,7 @@ class Config(SafeConfigParser):
             self.baseconfig = os.path.realpath(os.environ.get("AQDCONF",
                                                               "/etc/aqd.conf"))
         SafeConfigParser.__init__(self, defaults)
-        src_defaults = config_filename("aqd.conf.defaults")
+        src_defaults = lookup_file_path("aqd.conf.defaults")
         read_files = self.read([src_defaults, self.baseconfig])
         for file in [src_defaults, self.baseconfig]:
             if file not in read_files:

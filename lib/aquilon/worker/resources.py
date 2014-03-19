@@ -279,14 +279,7 @@ class RestServer(ResponsePage):
         ResponsePage.__init__(self, '', formatter)
         self.config = config
 
-        # Regular Expression for matching variables in a path definition.
-        # Currently only supports stuffing a single variable in a path
-        # component.
-        varmatch = re.compile(r'^%\((.*)\)s$')
-
-        BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
-        SRCDIR = os.path.realpath(os.path.join(BINDIR, ".."))
-        tree = ET.parse(config_filename("input.xml"))
+        tree = ET.parse(lookup_file_path("input.xml"))
 
         for command in tree.getiterator("command"):
             for transport in command.getiterator("transport"):

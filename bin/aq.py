@@ -50,7 +50,6 @@ from aquilon.client.knchttp import KNCHTTPConnection
 from aquilon.client.chunked import ChunkedHTTPConnection
 from aquilon.client.optparser import OptParser, ParsingError
 from aquilon.python_patches import load_uuid_quickly
-from aquilon.config import config_filename
 
 # Stolen from aquilon.worker.formats.fomatters
 csv.register_dialect('aquilon', delimiter=',', quoting=csv.QUOTE_MINIMAL,
@@ -141,7 +140,7 @@ class CustomAction(object):
         if os.path.exists(os.path.join(testdir, 'Makefile')):
             p = Popen(['/usr/bin/make', '-C', testdir, 'test',
                        'AQCMD=%s' % os.path.realpath(sys.argv[0]),
-                       'AQBUILDXML=%s' % config_filename("build.xml")],
+                       'AQBUILDXML=%s' % lookup_file_path("build.xml")],
                       cwd=testdir, env=self.env)
             p.wait()
             if p.returncode != 0:
@@ -312,7 +311,7 @@ if __name__ == "__main__":
         else:
             os.environ["MANPATH"] = MANDIR
 
-    parser = OptParser(config_filename('input.xml'))
+    parser = OptParser(lookup_file_path('input.xml'))
     try:
         (command, transport, commandOptions, globalOptions) = \
             parser.parse(sys.argv[1:])
