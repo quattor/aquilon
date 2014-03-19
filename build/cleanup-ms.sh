@@ -8,3 +8,5 @@ sed -i "s:/ms/dist/fsf/PROJ/docbook-xsl-ns/.*/common:$stylesheets:" \
     doc/style-man.xsl
 sed -i "s:/ms/dist/fsf/PROJ/docbook-xsl-ns/.*/common:$stylesheets:" \
     doc/style-html.xsl
+sed -i '/# -- begin path_setup/,/# -- end path_setup/d' \
+    bin/* sbin/*
