@@ -99,8 +99,8 @@ setup(name="aquilon",
                   ("/etc/bash_completion.d", ["aq_bash_completion.sh"]),
                   ("/usr/share/aquilon/mako/raw", glob.glob("etc/mako/raw/*")),
                   ("/usr/share/aquilon/mako/pan", glob.glob("etc/mako/pan/*")),
-                  ("/usr/share/aquilon/mako/html", glob.glob("etc/mako/html/*"),
-                  ("/usr/share/man/man1", glob.glob("doc/man/man1/*gz"))] +
+                  ("/usr/share/aquilon/mako/html", glob.glob("etc/mako/html/*")),
+                  ("/usr/share/man/man1", glob.glob("doc/man/man1/*gz"))],
       find_regular_files("upgrade"),
       scripts=all_scripts,
       url="http://quattor.org")
