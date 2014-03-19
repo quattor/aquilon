@@ -42,7 +42,7 @@ def config_filename(name):
     if os.path.exists(os.path.join(_SRCDIR, "etc", "aqd.conf.dev")):
         return os.path.join(_SRCDIR, "etc", name)
 
-    paths_to_try = [os.path.join("/etc", name),
+    paths_to_try = [os.path.join("/etc", "aquilon", name),
                     os.path.join("/usr", "share", "aquilon", "etc", name),
                     os.path.join(_SRCDIR, "etc", name)]
     for path in paths_to_try:
