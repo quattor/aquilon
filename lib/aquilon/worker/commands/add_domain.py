@@ -87,7 +87,7 @@ class CommandAddDomain(BrokerCommand):
         # If the branch command above fails the DB will roll back as normal.
         # If the command below fails we need to clean up from itself and above.
         try:
-            run_git(["clone", "--branch", dbdomain.name,
+            run_git(["clone", "--branch", dbdomain.name, "--",
                      kingdir, dbdomain.name],
                     path=domainsdir, logger=logger)
         except ProcessException, e:

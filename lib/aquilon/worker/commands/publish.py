@@ -62,7 +62,7 @@ class CommandPublish(BrokerCommand):
         tempdir = mkdtemp(prefix="publish_", suffix="_%s" % dbsandbox.name,
                           dir=rundir)
         try:
-            run_git(["clone", "--shared", "--branch", dbsandbox.name,
+            run_git(["clone", "--shared", "--branch", dbsandbox.name, "--",
                      kingdir, dbsandbox.name],
                     path=tempdir, logger=logger)
             temprepo = os.path.join(tempdir, dbsandbox.name)

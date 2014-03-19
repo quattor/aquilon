@@ -105,7 +105,7 @@ class CommandDeploy(BrokerCommand):
         tempdir = mkdtemp(prefix="deploy_", suffix="_%s" % dbsource.name,
                           dir=rundir)
         try:
-            run_git(["clone", "--shared", "--branch", dbtarget.name,
+            run_git(["clone", "--shared", "--branch", dbtarget.name, "--",
                      kingdir, dbtarget.name],
                     path=tempdir, logger=logger)
             temprepo = os.path.join(tempdir, dbtarget.name)
