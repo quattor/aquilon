@@ -3,18 +3,18 @@
 "http://docbook.org/xml/5.0/dtd/docbook.dtd" [
 <!ENTITY aqd_version SYSTEM "../version.txt">
 ]>
-<refentry xml:id="search_host"
+<refentry xml:id="aq_search_host"
           xmlns="http://docbook.org/ns/docbook"
           xmlns:xi="http://www.w3.org/2001/XInclude">
     <refmeta>
-        <refentrytitle>search_host</refentrytitle>
+        <refentrytitle>aq_search_host</refentrytitle>
         <manvolnum>1</manvolnum>
         <refmiscinfo class="version">&aqd_version;</refmiscinfo>
         <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
     </refmeta>
 
     <refnamediv>
-        <refname>search host</refname>
+        <refname>aq search host</refname>
         <refpurpose>
             Search for hosts matching some criteria
         </refpurpose>
