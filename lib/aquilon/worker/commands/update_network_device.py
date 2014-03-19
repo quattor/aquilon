@@ -54,8 +54,10 @@ class CommandUpdateNetworkDevice(BrokerCommand):
             model = dbnetdev.model.name
         if model:
             dbmodel = Model.get_unique(session, name=model, vendor=vendor,
-                                       model_type=NetworkDeviceType.Switch,
                                        compel=True)
+            if not dbmodel.model_type.isNetworkDeviceType():
+                raise ArgumentError("This command can only be used to "
+                                    "add network devices.")
             dbnetdev.model = dbmodel
 
         dblocation = get_location(session, **arguments)

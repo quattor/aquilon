@@ -33,8 +33,7 @@ class TestUpdateNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
                    "--network_device", "ut3gd1r01.aqd-unittest.ms.com"]
         out = self.notfoundtest(command)
         self.matchoutput(out,
-                         "Model uttorswitch, vendor generic, "
-                         "model_type switch not found.",
+                         "Model uttorswitch, vendor generic not found.",
                          command)
 
     def testupdateut3gd1r04(self):
