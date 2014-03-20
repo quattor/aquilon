@@ -18,9 +18,10 @@
 
 from aquilon.aqdb.model import NetworkDevice
 from aquilon.worker.formats.formatters import ObjectFormatter
+from aquilon.worker.formats.hardware_entity import HardwareEntityFormatter
 
 
-class NetworkDeviceFormatter(ObjectFormatter):
+class NetworkDeviceFormatter(HardwareEntityFormatter):
     def format_raw(self, device, indent=""):
         details = [indent + "%s: %s" % (str(device.model.model_type).capitalize(),
                                         device.label)]
@@ -45,6 +46,8 @@ class NetworkDeviceFormatter(ObjectFormatter):
             details.append(self.redirect_raw(i, indent + "  "))
         if device.comments:
             details.append(indent + "  Comments: %s" % device.comments)
+        if device.host:
+            details.append(self.redirect_raw_host_details(device.host))
         return "\n".join(details)
 
     def csv_fields(self, device):

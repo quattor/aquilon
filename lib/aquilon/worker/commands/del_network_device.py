@@ -21,6 +21,7 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import NetworkDevice
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.dns import delete_dns_record
+from aquilon.worker.dbwrappers.host import remove_host
 from aquilon.worker.locks import CompileKey
 from aquilon.worker.processes import DSDBRunner
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
@@ -46,6 +47,15 @@ class CommandDelNetworkDevice(BrokerCommand):
                                 "delete them first: {1}.".format
                                 (dbnetdev, ", ".join(addrs)))
 
+        plenaries = PlenaryCollection(logger=logger)
+        remove_plenaries = PlenaryCollection(logger=logger)
+
+        remove_host(session, logger, dbnetdev, plenaries, remove_plenaries)
+
+        # Update cluster plenaries connected to this network device
+        for dbcluster in dbnetdev.esx_clusters:
+            plenaries.append(Plenary.get_plenary(dbcluster))
+
         dbdns_rec = dbnetdev.primary_name
         ip = dbnetdev.primary_ip
         old_fqdn = str(dbnetdev.primary_name.fqdn)
@@ -58,9 +68,6 @@ class CommandDelNetworkDevice(BrokerCommand):
 
         # Any network device ports hanging off this network device should be deleted with
         # the cascade delete of the network device.
-
-        plenaries = PlenaryCollection(logger=logger)
-        remove_plenaries = PlenaryCollection(logger=logger)
 
         remove_plenaries.append(PlenarySwitchData.get_plenary(dbnetdev, logger=logger))
         remove_plenaries.append(Plenary.get_plenary(dbnetdev, logger=logger))

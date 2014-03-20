@@ -26,6 +26,7 @@ from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.dbwrappers.interface import (get_or_create_interface,
                                                  assign_address,
                                                  check_netdev_iftype)
+from aquilon.worker.dbwrappers.host import create_host
 from aquilon.worker.processes import DSDBRunner
 from aquilon.worker.templates import (Plenary, PlenaryCollection)
 from aquilon.worker.templates.switchdata import PlenarySwitchData
@@ -37,7 +38,8 @@ class CommandAddNetworkDevice(BrokerCommand):
                            "ip", "interface", "iftype"]
 
     def render(self, session, logger, network_device, label, model, type, ip,
-               interface, iftype, mac, vendor, serial, comments, **arguments):
+               interface, iftype, mac, vendor, serial, comments,
+               archetype, domain, sandbox, **arguments):
         dbmodel = Model.get_unique(session, name=model, vendor=vendor,
                                    compel=True)
 
@@ -77,11 +79,29 @@ class CommandAddNetworkDevice(BrokerCommand):
         # TODO: should we call check_ip_restrictions() here?
         assign_address(dbinterface, ip, dbnetwork, logger=logger)
 
+        if not archetype:
+            hw_section = 'hardware_network_device'
+            if not self.config.has_option(hw_section, 'default_archetype'):
+                raise ArgumentError("Cannot determin achetype for network devices")
+            archetype = self.config.get(hw_section, 'default_archetype')
+
+        if not domain and not sandbox:
+            arch_section = 'archetype_' + archetype
+            if self.config.has_option(arch_section, 'host_domain'):
+                domain = self.config.get(arch_section, 'host_domain')
+            else:
+                ArgumentError("Cannot determin default domain for network devices")
+
+        dbhost = create_host(session, logger, self.config, dbnetdev,
+                             archetype, domain=domain, sandbox=sandbox,
+                             **arguments)
+
         session.flush()
 
         plenaries = PlenaryCollection(logger=logger)
         plenaries.append(PlenarySwitchData.get_plenary(dbnetdev, logger=logger))
         plenaries.append(Plenary.get_plenary(dbnetdev))
+        plenaries.append(Plenary.get_plenary(dbhost))
 
         with plenaries.get_key():
             plenaries.stash()

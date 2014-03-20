@@ -8,3 +8,4 @@ id,parent_id,name,type,display_name,deleted,lifecycle,can_map_resources
 7,7,grn:/ms/windows,domain,Windows,0,Production,0
 8,7,grn:/ms/windows/desktop,domain,Windows,0,Production,1
 9,,,unknown,"Unknown entry",0,Evaluation,0
+10,10,grn:/ms/et/aquilon,domain,ET Aquilon,0,Production,1

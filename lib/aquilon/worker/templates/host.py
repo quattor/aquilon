@@ -226,7 +226,8 @@ class PlenaryHostData(StructurePlenary):
             interfaces[dbinterface.name] = ifdesc
 
         # Okay, here's the real content
-        path = PlenaryMachineInfo.template_name(self.dbobj.hardware_entity)
+        hwplenary = Plenary.get_plenary(self.dbobj.hardware_entity)
+        path = hwplenary.template_name(self.dbobj.hardware_entity)
         pan_assign(lines, "hardware", StructureTemplate(path))
 
         lines.append("")

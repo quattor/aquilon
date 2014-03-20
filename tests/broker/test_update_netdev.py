@@ -48,6 +48,9 @@ class TestUpdateNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
         self.dsdb_verify()
         self.check_plenary_contents('network_device', 'americas', 'ut', 'ut3gd1r04',
                                     contains='uttorswitch')
+        self.check_plenary_contents('hostdata', 'ut3gd1r04.aqd-unittest.ms.com',
+                                    contains=str(newip))
+
 
     def testupdatebadip(self):
         ip = self.net["tor_net_12"].usable[0]

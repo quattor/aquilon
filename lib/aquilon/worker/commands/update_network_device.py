@@ -47,6 +47,7 @@ class CommandUpdateNetworkDevice(BrokerCommand):
         plenaries = PlenaryCollection(logger=logger)
         plenaries.append(PlenarySwitchData.get_plenary(dbnetdev, logger=logger))
         plenaries.append(Plenary.get_plenary(dbnetdev))
+        plenaries.append(Plenary.get_plenary(dbnetdev.host))
 
         if discover:
             discover_network_device(session, logger, self.config,

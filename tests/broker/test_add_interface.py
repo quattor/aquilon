@@ -436,6 +436,8 @@ class TestAddInterface(TestBrokerCommand):
                          command)
         self.check_plenary_contents('network_device', 'americas', 'ut', 'ut3gd1r01',
                                     clean='xge1')
+        self.check_plenary_contents('hostdata', 'ut3gd1r01.aqd-unittest.ms.com',
+                                    clean='xge1')
 
     def testfailaddinterfaceud3dg1r01model(self):
         command = ["add", "interface", "--interface", "xge1",
@@ -446,6 +448,8 @@ class TestAddInterface(TestBrokerCommand):
                          "interface to a network device.", command)
         self.check_plenary_contents('network_device', 'americas', 'ut', 'ut3gd1r01',
                                     clean='xge1')
+        self.check_plenary_contents('hostdata', 'ut3gd1r01.aqd-unittest.ms.com',
+                                    clean='xge1')
 
     def testfailaddinterfaceud3dg1r01type(self):
         command = ["add", "interface", "--interface", "xge1",
@@ -455,6 +459,8 @@ class TestAddInterface(TestBrokerCommand):
         self.matchoutput(out, "Interface type vlan is not allowed for "
                          "network devices.", command)
         self.check_plenary_contents('network_device', 'americas', 'ut', 'ut3gd1r01',
+                                    clean='xge1')
+        self.check_plenary_contents('hostdata', 'ut3gd1r01.aqd-unittest.ms.com',
                                     clean='xge1')
 
     def testverifyfailaddinterfaceut3dg1r01(self):
@@ -472,6 +478,8 @@ class TestAddInterface(TestBrokerCommand):
         self.noouttest(command)
         self.check_plenary_contents('network_device', 'americas', 'ut', 'ut3gd1r04',
                                     contains='vlan110')
+        self.check_plenary_contents('hostdata', 'ut3gd1r04.aqd-unittest.ms.com',
+                                    contains='vlan110')
 
     def testaddloopback(self):
         command = ["add", "interface", "--interface", "loop0",
@@ -479,6 +487,8 @@ class TestAddInterface(TestBrokerCommand):
                    "--network_device", "ut3gd1r04.aqd-unittest.ms.com"]
         self.noouttest(command)
         self.check_plenary_contents('network_device', 'americas', 'ut', 'ut3gd1r04',
+                                    contains='loop0')
+        self.check_plenary_contents('hostdata', 'ut3gd1r04.aqd-unittest.ms.com',
                                     contains='loop0')
 
     def testfailloopbackmac(self):
@@ -490,6 +500,8 @@ class TestAddInterface(TestBrokerCommand):
         self.matchoutput(out, "Loopback interfaces cannot have a MAC address.",
                          command)
         self.check_plenary_contents('network_device', 'americas', 'ut', 'ut3gd1r04',
+                                    clean='loop1')
+        self.check_plenary_contents('hostdata', 'ut3gd1r04.aqd-unittest.ms.com',
                                     clean='loop1')
 
     def testverifyut3gd1r04(self):

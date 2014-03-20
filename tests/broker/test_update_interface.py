@@ -195,6 +195,8 @@ class TestUpdateInterface(TestBrokerCommand):
         self.dsdb_verify()
         self.check_plenary_contents('network_device', 'americas', 'ut', 'ut3gd1r04',
                                     contains='vlan220', clean='vlan110')
+        self.check_plenary_contents('hostdata', 'ut3gd1r04.aqd-unittest.ms.com',
+                                    contains='vlan220', clean='vlan110')
 
     def test_170_add_service_addr(self):
         ip = self.net["zebra_vip"].usable[5]

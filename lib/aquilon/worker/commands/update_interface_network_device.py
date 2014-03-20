@@ -54,6 +54,7 @@ class CommandUpdateInterfaceNetworkDevice(BrokerCommand):
 
         plenaries = PlenaryCollection(logger=logger)
         plenaries.append(Plenary.get_plenary(dbnetdev))
+        plenaries.append(Plenary.get_plenary(dbnetdev.host))
 
         with plenaries.get_key():
             plenaries.stash()
