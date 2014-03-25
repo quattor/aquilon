@@ -120,7 +120,9 @@ class XtnDetail(Base):
     xtn_id = Column(GUID(), ForeignKey(Xtn.xtn_id, name='xtn_dtl_xtn_fk'),
                     nullable=False)
     name = Column(String(255), nullable=False)
-    value = Column(String(255), default='True', nullable=False)
+    # Note: Oracle has limits on the maximum size of all columns in an index, so
+    # we cannot make this column too large.
+    value = Column(String(3000), nullable=False)
 
     __table_args__ = (PrimaryKeyConstraint(xtn_id, name, value,
                                            name="xtn_detail_pk"),
