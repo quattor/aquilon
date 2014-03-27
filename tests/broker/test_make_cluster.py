@@ -51,6 +51,14 @@ class TestMakeCluster(VerifyNotificationsMixin, TestBrokerCommand):
         self.failUnless(os.path.exists(
             self.build_profile_name("clusters", "utecl1", domain="unittest")))
 
+    def testverifycatsvcuta(self):
+        command = ["cat", "--service", "esx_management_server",
+                   "--instance", "np", "--server"]
+        out = self.commandtest(command)
+        self.searchoutput(out,
+                          r'"cluster_clients" = list\(\s*"npecl11",\s*"npecl12"\s*\);',
+                          command)
+
     def testverifycatutecl1(self):
         command = "cat --cluster=utecl1"
         out = self.commandtest(command.split(" "))

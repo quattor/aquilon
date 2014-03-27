@@ -183,6 +183,7 @@ class PlenaryServiceInstanceServer(SIHelperMixin, StructurePlenary):
         pan_assign(lines, "instance", self.dbobj.name)
         if self.dbobj.service.need_client_list:
             pan_assign(lines, "clients", self.dbobj.client_fqdns)
+            pan_assign(lines, "cluster_clients", self.dbobj.cluster_names)
 
 
 class PlenaryServiceInstanceClientDefault(SIHelperMixin, Plenary):
