@@ -76,6 +76,8 @@ _long_nms['SERVICE_ADDRESS'] = 'SRV_ADDR'
 _long_nms['REBUILD_REQUIRED'] = 'REBLD_REQ'
 _long_nms['HOST_ENVIRONMENT_ID'] = 'HOST_ENV_ID'
 _long_nms['NETWORK_DEVICE_ID'] = 'NETDEV_ID'
+_long_nms['PERSONALITY_ROOTUSER'] = 'PERS_ROOT_USER'
+_long_nms['PERSONALITY_ROOTNETGROUP'] = 'PERS_ROOT_NG'
 
 
 def rename_non_null_check_constraints(db, debug=False, *args, **kw):

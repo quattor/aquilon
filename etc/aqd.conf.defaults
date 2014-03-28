@@ -169,6 +169,7 @@ grn_to_eonid_map_location = /ms/dist/appmw/PROJ/eon-data/prod/common
 switch_discover = /ms/dist/aquilon/PROJ/switch-discover/prod/bin/switch-discover
 get_camtable = /ms/dist/aquilon/PROJ/switch-discover/prod/bin/get-camtable
 run_aqnotifyd = True
+user_list_location = /ms/dist/aurora/PROJ/dsdbfiles/incr/passwd.byname
 
 # Limit of hostlists
 default_max_list_size = 1000

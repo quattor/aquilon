@@ -5604,4 +5604,76 @@
       <transport method="get" path="bunker_violations" />
    </command>
 
+   <command name="show_user">
+      Show the user for a given username.
+      <optgroup name="show_user_opts" mandatory="True" fields="any">
+         <option name="username" type="string" conflicts="all">User to check</option>
+         <option name="all" type="flag">list all users</option>
+      </optgroup>
+      <transport trigger="all" method="get" path="users" />
+      <transport method="get" path="user/%(username)s" />
+   </command>
+
+   <command name="grant_root_access">
+      Grant root access to user/netgroup to a personality. The affected host(s) must be
+      recompiled for the changes to take effect.
+      <optgroup name="grant_root_access_opts" mandatory="true" fields="all">
+         <optgroup name="map_root_access_req" mandatory="true" fields="any">
+            <option name="username" type="string" conflicts="netgroup">User as string</option>
+            <option name="netgroup" type="string" conflicts="username">Netgroup as string from white listed netgroups</option>
+	 </optgroup>
+         <option name="personality" type="string">Personality</option>
+      </optgroup>
+      <optgroup name="map_root_access_optional" mandatory="false" fields="any">
+         <option name="archetype" type="string">Archetype of the personality</option>
+      </optgroup>
+      <transport method="post" path="root_access/command/map"/>
+   </command>
+
+   <command name="revoke_root_access">
+      Revoke root access from a user/netgroup from a personality. The affected host(s) must be
+      recompiled for the changes to take effect.
+      <optgroup name="unmap_root_access" mandatory="true" fields="all">
+         <optgroup name="unmap_root_access_opts" mandatory="true" fields="any">
+            <option name="username" type="string" conflicts="netgroup">User as string</option>
+            <option name="netgroup" type="string" conflicts="username">Netgroup as string from white listed netgroups</option>
+	 </optgroup>
+         <option name="personality" type="string">Personality</option>
+      </optgroup>
+      <optgroup name="unmap_root_access_optional" mandatory="false" fields="any">
+         <option name="archetype" type="string">Archetype of the personality</option>
+      </optgroup>
+      <transport method="post" path="root_access/command/unmap"/>
+   </command>
+
+   <command name="add_netgroup_whitelist">
+       Add netgroup to the whitelist of netgroups managed
+       <optgroup name="netgroup_whitelist_opts" mandatory="true" fields="all">
+	  <option name="netgroup" type="string" conflicts="username">Netgroup as string</option>
+       </optgroup>
+      <transport method="post" path="netgroup_whitelist/command/add"/>
+   </command>
+
+   <command name="del_netgroup_whitelist">
+       Del netgroup from the whitelist of netgroups managed
+       <optgroup name="netgroup_whitelist_opts" mandatory="true" fields="all">
+	  <option name="netgroup" type="string" conflicts="username">Netgroup as string</option>
+       </optgroup>
+      <transport method="post" path="netgroup_whitelist/command/del"/>
+   </command>
+
+   <command name="show_netgroup_whitelist">
+      Display whitelist of netgroups managed.
+      <optgroup name="options" mandatory="true" fields="any">
+         <option name="netgroup" type="string">Netgroup to display</option>
+         <option name="all" type="flag">Show all Netgroups</option>
+      </optgroup>
+      <transport method="get" path="netgroup_whitelist" />
+   </command>
+
+   <command name="refresh_user">
+      Refresh the User principals in AQD.
+      <transport method="post" path="user/command/refresh"/>
+   </command>
+
 </commandline>
