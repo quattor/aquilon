@@ -1,0 +1,3 @@
+ALTER TABLE disk ADD bus_address VARCHAR2(32 CHAR);
+ALTER TABLE interface ADD bus_address VARCHAR2(32 CHAR);
+QUIT;

@@ -83,6 +83,8 @@ class PlenaryMachineInfo(StructurePlenary):
                 params["wwn"] = disk.wwn
             if disk.address:
                 params["address"] = disk.address
+            if disk.bus_address:
+                params["bus"] = disk.bus_address
 
             if hasattr(disk, "snapshotable") and disk.snapshotable is not None:
                 params["snapshot"] = disk.snapshotable
@@ -129,6 +131,8 @@ class PlenaryMachineInfo(StructurePlenary):
                     ifinfo["port_group"] = interface.port_group
                 if interface.bootable:
                     ifinfo["boot"] = interface.bootable
+                if interface.bus_address:
+                    ifinfo["bus"] = interface.bus_address
                 interfaces[interface.name] = StructureTemplate(path, ifinfo)
             elif interface.interface_type == 'management':
                 has_addr = False

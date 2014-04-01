@@ -102,6 +102,9 @@ class MachineFormatter(ObjectFormatter):
             if d.wwn:
                 # TODO: it would be nice if we could look up the OUI somewhere
                 details.append(indent + "    WWN: %s" % d.wwn)
+            if d.bus_address:
+                details.append(indent + "    Controller Bus Address: %s" %
+                               d.bus_address)
             if d.comments:
                 details.append(indent + "    Comments: %s" % d.comments)
         for i in sorted(machine.interfaces, key=attrgetter('name')):

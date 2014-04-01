@@ -34,7 +34,7 @@ def search_hardware_entity_query(session, hardware_type=HardwareEntity,
                                  exact_location=False, ip=None,
                                  mac=None, pg=None, serial=None,
                                  interface_model=None, interface_vendor=None,
-                                 **kwargs):
+                                 interface_bus_address=None, **kwargs):
     q = session.query(hardware_type)
     if hardware_type is HardwareEntity:
         q = q.with_polymorphic('*')
@@ -54,12 +54,15 @@ def search_hardware_entity_query(session, hardware_type=HardwareEntity,
         subq = Model.get_matching_query(session, name=model, vendor=vendor,
                                         model_type=machine_type, compel=True)
         q = q.filter(HardwareEntity.model_id.in_(subq))
-    if ip or mac or pg or interface_vendor or interface_model:
+    if ip or mac or pg or interface_vendor or interface_model or \
+       interface_bus_address:
         q = q.join('interfaces')
         if mac:
             q = q.filter_by(mac=mac)
         if pg:
             q = q.filter_by(port_group=pg)
+        if interface_bus_address:
+            q = q.filter_by(bus_address=interface_bus_address)
         if interface_model or interface_vendor:
             subq = Model.get_matching_query(session, name=interface_model,
                                             vendor=interface_vendor,

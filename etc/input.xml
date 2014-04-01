@@ -190,6 +190,7 @@
          <option name="pg" type="string">port group of an attached interface</option>
          <option name="interface_model" type="string">Having an interface of the given model</option>
          <option name="interface_vendor" type="string">Having an interface of the given vendor</option>
+         <option name="interface_bus_address" type="string">Interface at the given bus address</option>
          <option name="serial" type="string">serial number</option>
          <optgroup name="search_hardware_location_opts" fields="any">
 	    <option name="organization" type="string">Organization</option>
@@ -238,12 +239,14 @@
          <option name="mac" type="mac">MAC address of an attached interface</option>
          <option name="interface_model" type="string">Having an interface of the given model</option>
          <option name="interface_vendor" type="string">Having an interface of the given vendor</option>
+         <option name="interface_bus_address" type="string">Interface at the given bus address</option>
          <option name="pg" type="string">port group of an attached interface</option>
          <option name="serial" type="string">serial number</option>
          <option name="disk_name" type="string">Disk name</option>
          <option name="disk_size" type="int">Disk size</option>
          <option name="disk_controller" type="string">Disk controller</option>
          <option name="disk_address" type="string">SCSI bus addresst</option>
+         <option name="disk_bus_address" type="string">Controller bus addresst</option>
          <option name="disk_wwn" type="string">Disk WWN</option>
          <option name="disk_share" type="string" conflicts="disk_filesystem">NAS share backing the virtual disk image</option>
          <option name="disk_filesystem" type="string" conflicts="disk_share">Filesystem name backing the virtual disk image</option>
@@ -818,6 +821,7 @@
          <option name="boot" type="boolean">Mark the disk as bootable</option>
          <option name="snapshot" type="boolean">Mark the disk as snapshotable</option>
          <option name="wwn" type="string">World Wide Name of the disk</option>
+         <option name="bus_address" type="string">Hardware bus address of the controller hosting the disk</option>
       </optgroup>
       <transport method="put" path="machine/%(machine)s/disk/%(disk)s" />
    </command>
@@ -860,6 +864,7 @@
          <option name="boot" type="boolean">Mark the disk as bootable</option>
          <option name="snapshot" type="boolean">Mark the disk as snapshotable</option>
          <option name="wwn" type="string">World Wide Name of the disk</option>
+         <option name="bus_address" type="string">Hardware bus address of the controller hosting the disk</option>
       </optgroup>
       <transport method="post" path="machine/%(machine)s/disk/%(disk)s" />
    </command>
@@ -1304,6 +1309,7 @@
          <option name="autopg" type="flag" conflicts="pg">choose portgroup based on switch</option>
          <option name="model" type="string">Interface model name. Default is 'generic_nic'.</option>
          <option name="vendor" type="string">Interface vendor name. Default is 'generic'.</option>
+         <option name="bus_address" type="string">Hardware bus address of the controller hosting the disk</option>
       </optgroup>
       <transport trigger="machine" method="put" path="machine/%(machine)s/interface/%(interface)s" />
       <transport trigger="hostname" method="put" path="host/%(hostname)s/interface/%(interface)s" />
@@ -1672,6 +1678,7 @@
          <option name="model" type="string">Interface model name</option>
          <option name="vendor" type="string">Interface vendor name</option>
          <option name="rename_to" type="string">New name of the interface</option>
+         <option name="bus_address" type="string">Hardware bus address of the controller hosting the disk</option>
       </optgroup>
       <transport trigger="machine" method="post" path="machine/%(machine)s/interface/%(interface)s" />
       <transport trigger="hostname" method="post" path="host/%(hostname)s/interface/%(interface)s" />

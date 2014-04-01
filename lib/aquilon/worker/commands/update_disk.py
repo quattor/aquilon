@@ -44,7 +44,7 @@ class CommandUpdateDisk(BrokerCommand):
 
     def render(self, session, logger, machine, disk, controller, share,
                filesystem, resourcegroup, address, comments, size, boot,
-               snapshot, rename_to, wwn, **kw):
+               snapshot, rename_to, wwn, bus_address, **kw):
         dbmachine = Machine.get_unique(session, machine, compel=True)
         dbdisk = Disk.get_unique(session, device_name=disk, machine=dbmachine,
                                  compel=True)
@@ -92,6 +92,9 @@ class CommandUpdateDisk(BrokerCommand):
 
         if address is not None:
             dbdisk.address = address
+
+        if bus_address is not None:
+            dbdisk.bus_address = bus_address
 
         if snapshot is not None:
             if not isinstance(dbdisk, VirtualDisk):

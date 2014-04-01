@@ -35,7 +35,7 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
 
     def render(self, session, logger, interface, machine, mac, model, vendor,
                boot, pg, autopg, comments, master, clear_master, default_route,
-               rename_to, **arguments):
+               rename_to, bus_address, **arguments):
         """This command expects to locate an interface based only on name
         and machine - all other fields, if specified, are meant as updates.
 
@@ -99,6 +99,9 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
 
         if comments:
             dbinterface.comments = comments
+
+        if bus_address is not None:
+            dbinterface.bus_address = bus_address
 
         if boot:
             # Figure out if the current bootble interface also has the

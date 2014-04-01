@@ -34,6 +34,7 @@
 	    <arg choice="opt"><option>--size <replaceable>SIZE</replaceable></option></arg>
 	    <arg choice="opt"><option>--address <replaceable>C:T:L</replaceable></option></arg>
 	    <arg choice="opt"><option>--wwn <replaceable>WWN</replaceable></option></arg>
+	    <arg choice="opt"><option>--bus_address <replaceable>URI</replaceable></option></arg>
 	    <group choice="opt">
 		<arg choice="plain"><option>--boot</option></arg>
 		<arg choice="plain"><option>--noboot</option></arg>
@@ -143,6 +144,18 @@
 	    </varlistentry>
 	    <varlistentry>
 	        <term>
+		    <option>--bus_address <replaceable>URI</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Change the hardware bus address of the controller that handles the disk.
+			See section <link linkend="sect1-bus-address" endterm="sect1-bus-address-title"/> for
+			the syntax of <replaceable>URI</replaceable>.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
 		    <option>--boot</option>, <option>--noboot</option>
 		</term>
 		<listitem>
@@ -202,6 +215,8 @@
 	</variablelist>
 	<xi:include href="../common/global_options_desc.xml"/>
     </refsect1>
+
+    <xi:include href="../common/sect1_bus_address.xml"/>
 
     <refsect1>
 	<title>See also</title>

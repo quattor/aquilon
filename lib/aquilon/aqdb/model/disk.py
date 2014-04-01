@@ -25,8 +25,8 @@ from sqlalchemy.orm import relation, backref, deferred, validates
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.utils import force_wwn
-from aquilon.aqdb.model import Base, Machine
 from aquilon.aqdb.column_types import AqStr, Enum
+from aquilon.aqdb.model import Base, Machine, DeviceLinkMixin
 
 # FIXME: this list should not be hardcoded here
 controller_types = ['cciss', 'ide', 'sas', 'sata', 'scsi', 'flash',
@@ -35,7 +35,7 @@ controller_types = ['cciss', 'ide', 'sas', 'sata', 'scsi', 'flash',
 _TN = 'disk'
 
 
-class Disk(Base):
+class Disk(DeviceLinkMixin, Base):
     """
         Base Class for polymorphic representation of disk or disk-like resources
     """

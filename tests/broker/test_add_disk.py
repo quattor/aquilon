@@ -36,7 +36,8 @@ class TestAddDisk(TestBrokerCommand):
     def test_110_add_ut3c1n3_disk(self):
         command = ["add", "disk", "--machine", "ut3c1n3", "--disk", "c0d0",
                    "--controller", "cciss", "--size", "34",
-                   "--wwn", "600508b112233445566778899aabbccd"]
+                   "--wwn", "600508b112233445566778899aabbccd",
+                   "--bus_address", "pci:0000:01:00.0"]
         self.noouttest(command)
 
     def test_200_bad_controller(self):
@@ -116,7 +117,8 @@ class TestAddDisk(TestBrokerCommand):
         self.matchoutput(out, "Disk: sda 68 GB scsi (local) [boot]", command)
         self.searchoutput(out,
                           r'Disk: c0d0 34 GB cciss \(local\)$'
-                          r'\s*WWN: 600508b112233445566778899aabbccd$',
+                          r'\s*WWN: 600508b112233445566778899aabbccd$'
+                          r'\s*Controller Bus Address: pci:0000:01:00.0',
                           command)
 
     def test_300_cat_ut3c1n3(self):
@@ -125,6 +127,7 @@ class TestAddDisk(TestBrokerCommand):
         self.searchoutput(out,
                           r'"harddisks/{cciss/c0d0}" = '
                           r'create\("hardware/harddisk/generic/cciss",\s*'
+                          r'"bus", "pci:0000:01:00.0",\s*'
                           r'"capacity", 34\*GB,\s*'
                           r'"interface", "cciss",\s*'
                           r'"wwn", "600508b112233445566778899aabbccd"\s*\);',

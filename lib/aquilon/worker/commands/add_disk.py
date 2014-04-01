@@ -32,7 +32,7 @@ class CommandAddDisk(BrokerCommand):
 
     def render(self, session, logger, machine, disk, controller, share,
                filesystem, resourcegroup, address, comments, size, boot,
-               snapshot, wwn, **kw):
+               snapshot, wwn, bus_address, **kw):
         if controller not in controller_types:
             raise ArgumentError("%s is not a valid controller type, use one "
                                 "of: %s." % (controller,
@@ -73,6 +73,7 @@ class CommandAddDisk(BrokerCommand):
             dbdisk = VirtualNasDisk(device_name=disk,
                                     controller_type=controller, bootable=boot,
                                     capacity=size, address=address, wwn=wwn,
+                                    bus_address=bus_address,
                                     snapshotable=snapshot, comments=comments)
 
             dbshare.disks.append(dbdisk)
@@ -89,6 +90,7 @@ class CommandAddDisk(BrokerCommand):
             dbdisk = VirtualLocalDisk(device_name=disk,
                                       controller_type=controller, bootable=boot,
                                       capacity=size, address=address, wwn=wwn,
+                                      bus_address=bus_address,
                                       snapshotable=snapshot,
                                       comments=comments)
             dbfs.disks.append(dbdisk)
@@ -96,7 +98,8 @@ class CommandAddDisk(BrokerCommand):
         else:
             dbdisk = LocalDisk(device_name=disk, controller_type=controller,
                                capacity=size, bootable=boot, wwn=wwn,
-                               address=address, comments=comments)
+                               address=address, bus_address=bus_address,
+                               comments=comments)
 
         dbmachine.disks.append(dbdisk)
 

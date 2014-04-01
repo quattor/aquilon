@@ -84,7 +84,8 @@ class TestUpdateInterface(TestBrokerCommand):
         command = ["update", "interface", "--interface", "eth1",
                    "--hostname", "unittest02.one-nyp.ms.com",
                    "--mac", self.net["unknown0"].usable[12].mac,
-                   "--boot", "--model", "e1000"]
+                   "--boot", "--model", "e1000",
+                   "--bus_address", "pci:0000:0b:00.1"]
         (out, err) = self.successtest(command)
         self.matchoutput(err, 'no longer provides the default route', command)
 
@@ -386,12 +387,14 @@ class TestUpdateInterface(TestBrokerCommand):
         self.searchoutput(out,
                           r'"cards/nic" = nlist\(\s*'
                           r'"eth0", create\("hardware/nic/generic/generic_nic",\s*'
+                          r'"bus", "pci:0000:0b:00.0",\s*'
                           r'"hwaddr", "%s"\s*\),'
                           % self.net["unknown0"].usable[11].mac,
                           command)
         self.searchoutput(out,
                           r'"eth1", create\("hardware/nic/intel/e1000",\s*'
                           r'"boot", true,\s*'
+                          r'"bus", "pci:0000:0b:00.1",\s*'
                           r'"hwaddr", "%s"\s*\)\s*\);'
                           % self.net["unknown0"].usable[12].mac,
                           command)

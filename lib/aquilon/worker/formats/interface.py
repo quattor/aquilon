@@ -60,6 +60,9 @@ class InterfaceFormatter(ObjectFormatter):
         if interface.model_allowed:
             details.append(indent + "  Vendor: %s Model: %s" %
                            (interface.model.vendor, interface.model))
+        if interface.bus_address:
+            details.append(indent + "  Controller Bus Address: %s" %
+                           interface.bus_address)
         if interface.port_group:
             details.append(indent + "  Port Group: %s" % interface.port_group)
 

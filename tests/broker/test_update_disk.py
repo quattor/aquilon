@@ -30,7 +30,8 @@ class TestUpdateDisk(TestBrokerCommand):
     def test_100_update_ut3c1n3_sda(self):
         command = ["update_disk", "--machine", "ut3c1n3", "--disk", "sda",
                    "--size", "50", "--comments", "Other disk comments",
-                   "--controller", "sata", "--address", "0:0:0:0"]
+                   "--controller", "sata", "--address", "0:0:0:0",
+                   "--bus_address", "pci:0000:02:00.0"]
         self.noouttest(command)
 
     def test_101_update_ut3c1n3_c0d0(self):
@@ -44,11 +45,13 @@ class TestUpdateDisk(TestBrokerCommand):
         self.searchoutput(out,
                           r'Disk: sda 50 GB sata \(local\)\s*'
                           r'Address: 0:0:0:0\s*'
+                          r'Controller Bus Address: pci:0000:02:00.0\s*'
                           r'Comments: Other disk comments$',
                           command)
         self.searchoutput(out,
                           r'Disk: c0d1 34 GB cciss \(local\) \[boot\]\s*'
-                          r'WWN: 600508b112233445566778899aabbccd$',
+                          r'WWN: 600508b112233445566778899aabbccd\s*'
+                          r'Controller Bus Address: pci:0000:01:00.0$',
                           command)
 
     def test_105_cat_ut3c1n3(self):
@@ -58,6 +61,7 @@ class TestUpdateDisk(TestBrokerCommand):
                           r'"harddisks/{cciss/c0d1}" = '
                           r'create\("hardware/harddisk/generic/cciss",\s*'
                           r'"boot", true,\s*'
+                          r'"bus", "pci:0000:01:00.0",\s*'
                           r'"capacity", 34\*GB,\s*'
                           r'"interface", "cciss",\s*'
                           r'"wwn", "600508b112233445566778899aabbccd"\s*\);',
@@ -66,6 +70,7 @@ class TestUpdateDisk(TestBrokerCommand):
                           r'"harddisks/{sda}" = '
                           r'create\("hardware/harddisk/generic/sata",\s*'
                           r'"address", "0:0:0:0",\s*'
+                          r'"bus", "pci:0000:02:00.0",\s*'
                           r'"capacity", 50\*GB,\s*'
                           r'"interface", "sata"\s*\);',
                           command)

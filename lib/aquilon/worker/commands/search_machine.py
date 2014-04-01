@@ -41,6 +41,7 @@ class CommandSearchMachine(BrokerCommand):
         'disk_controller': ('controller_type', None),
         'disk_wwn': ('wwn', force_wwn),
         'disk_address': ('address', None),
+        'disk_bus_address': ('bus_address', None),
     }
 
     def render(self, session, hostname, machine, cpuname, cpuvendor, cpuspeed,

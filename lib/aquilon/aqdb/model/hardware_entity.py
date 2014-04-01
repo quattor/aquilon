@@ -92,7 +92,7 @@ class HardwareEntity(Base):
                                 "the first character must be a letter." % label)
 
     @validates('label')
-    def validate_label(self, key, value):
+    def validate_label(self, key, value):  # pylint: disable=W0613
         self.check_label(value)
         return value
 
@@ -204,3 +204,29 @@ class HardwareEntity(Base):
 
 hardware_entity = HardwareEntity.__table__  # pylint: disable=C0103
 hardware_entity.info['unique_fields'] = ['label']
+
+
+class DeviceLinkMixin(object):
+    _bus_address_checks = {
+        # PCI: <domain>:<bus>:<device>.<function>
+        'pci': re.compile(r'^[0-9a-f]{4}:[0-9a-f]{2}:[01][0-9a-f]\.[0-7]$')
+    }
+
+    bus_address = Column(AqStr(32), nullable=True)
+
+    @validates('bus_address')
+    def validate_bus_address(self, key, value):  # pylint: disable=W0613
+        if value is None:
+            return value
+
+        if ":" not in value:
+            raise ValueError("Malformed bus URI specification.")
+
+        # Poor man's URI parser
+        scheme, rest = value.split(":", 1)
+        if scheme not in self._bus_address_checks:
+            raise ValueError("Unknown hardware bus type.")
+        if not self._bus_address_checks[scheme].match(rest):
+            raise ValueError("Invalid bus address.")
+
+        return value

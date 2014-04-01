@@ -33,6 +33,7 @@
 	    <arg choice="plain"><option>--size <replaceable>SIZE</replaceable></option></arg>
 	    <arg choice="opt"><option>--address <replaceable>[H:]C:T[:L]</replaceable></option></arg>
 	    <arg choice="opt"><option>--wwn <replaceable>WWN</replaceable></option></arg>
+	    <arg choice="opt"><option>--bus_address <replaceable>URI</replaceable></option></arg>
 	    <group choice="opt">
 		<arg choice="plain"><option>--boot</option></arg>
 		<arg choice="plain"><option>--noboot</option></arg>
@@ -124,8 +125,25 @@
 		</term>
 		<listitem>
 		    <para>
-			The SCSI address of the disk, used for virtual disks only. <replaceable>C</replaceable>
-			is the SCSI channel, <replaceable>T</replaceable> is the target.
+			The SCSI address of the disk. <replaceable>H</replaceable> is the host number (if the same controller
+			supports multiple hosts), <replaceable>C</replaceable>
+			is the channel, <replaceable>T</replaceable> is the target, and <replaceable>L</replaceable> is the LUN.
+		    </para>
+		    <para>
+			For virtual machines, only <replaceable>C:T</replaceable> is allowed, physical machines must specify all
+			four components.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--bus_address <replaceable>URI</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			The hardware bus address of the controller that handles the disk.
+			See section <link linkend="sect1-bus-address" endterm="sect1-bus-address-title"/> for
+			the syntax of <replaceable>URI</replaceable>.
 		    </para>
 		</listitem>
 	    </varlistentry>
@@ -191,6 +209,8 @@
 	</variablelist>
 	<xi:include href="../common/global_options_desc.xml"/>
     </refsect1>
+
+    <xi:include href="../common/sect1_bus_address.xml"/>
 
     <refsect1>
 	<title>See also</title>
