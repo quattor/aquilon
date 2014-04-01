@@ -1,0 +1,120 @@
+<?xml version="1.0"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V5.0//EN"
+"http://docbook.org/xml/5.0/dtd/docbook.dtd" [
+<!ENTITY aqd_version SYSTEM "../version.txt">
+]>
+<refentry xml:id="aq_del_disk"
+          xmlns="http://docbook.org/ns/docbook"
+	  xmlns:xi="http://www.w3.org/2001/XInclude">
+    <refmeta>
+        <refentrytitle>aq_del_disk</refentrytitle>
+        <manvolnum>1</manvolnum>
+        <refmiscinfo class="version">&aqd_version;</refmiscinfo>
+        <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
+    </refmeta>
+
+    <refnamediv>
+        <refname>aq del disk</refname>
+        <refpurpose>
+	    Delete disks from a machine
+        </refpurpose>
+	<refclass>Aquilon</refclass>
+    </refnamediv>
+
+    <refsynopsisdiv>
+	<cmdsynopsis>
+	    <command>aq del disk</command>
+	    <group>
+		<synopfragmentref linkend="global-options">Global options</synopfragmentref>
+	    </group>
+	    <arg choice="plain"><option>--machine <replaceable>MACHINE</replaceable></option></arg>
+	    <group choice="opt">
+		<arg choice="plain"><option>--disk <replaceable>DISK</replaceable></option></arg>
+		<arg choice="plain"><option>--controller <replaceable>CTRL</replaceable></option></arg>
+		<arg choice="plain"><option>--size <replaceable>SIZE</replaceable></option></arg>
+	    </group>
+	    <arg choice="opt"><option>--all</option></arg>
+	    <xi:include href="../common/global_options.xml"/>
+	</cmdsynopsis>
+    </refsynopsisdiv>
+
+    <refsect1>
+        <title>Description</title>
+	<para>
+	    The <command>aq del disk</command> command deletes one or more disks from a machine. If the
+	    selection <option>--disk</option>, <option>--controller</option>,
+	    <option>--size</option> options you specify matches just one disk, then
+	    that disk will be deleted. If there are more than one disks matching the criteria, then you also
+	    have to specify the <option>--all</option> option, to avoid deleting too many disks by mistake.
+	</para>
+    </refsect1>
+
+    <refsect1>
+        <title>Options</title>
+	<variablelist>
+	    <title>Command-specific options</title>
+	    <varlistentry>
+		<term>
+		    <option>--machine <replaceable>MACHINE</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			The name of the machine the disks should be deleted from.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--disk <replaceable>DISK</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Delete the named disk only.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--controller <replaceable>CTRL</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Delete any disks with the given controller type.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--size <replaceable>SIZE</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Delete any disks having the specified size.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--all</option>
+		</term>
+		<listitem>
+		    <para>
+			This option needs to be specified if you want to delete multiple disks.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	</variablelist>
+	<xi:include href="../common/global_options_desc.xml"/>
+    </refsect1>
+
+    <refsect1>
+	<title>See also</title>
+	<para>
+	    <citerefentry><refentrytitle>aq_add_disk</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>aq_update_disk</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>aq_add_machine</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+	</para>
+    </refsect1>
+</refentry>
+
+<!-- vim: set ai sw=4: -->

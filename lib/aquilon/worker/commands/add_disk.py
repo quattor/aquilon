@@ -17,7 +17,7 @@
 """Contains the logic for `aq add disk`."""
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import (Machine, LocalDisk, VirtualNasDisk,
+from aquilon.aqdb.model import (Machine, Disk, LocalDisk, VirtualNasDisk,
                                 VirtualLocalDisk, Share, Filesystem)
 from aquilon.aqdb.model.disk import controller_types
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
@@ -32,7 +32,7 @@ class CommandAddDisk(BrokerCommand):
 
     def render(self, session, logger, machine, disk, controller, share,
                filesystem, resourcegroup, address, comments, size, boot,
-               snapshot, **kw):
+               snapshot, wwn, **kw):
         if controller not in controller_types:
             raise ArgumentError("%s is not a valid controller type, use one "
                                 "of: %s." % (controller,
@@ -50,6 +50,13 @@ class CommandAddDisk(BrokerCommand):
                     raise ArgumentError("Machine %s already has a boot disk." %
                                         machine)
 
+        if wwn:
+            dbdisk = session.query(Disk).filter_by(wwn=wwn).first()
+            if dbdisk:
+                raise ArgumentError("WWN {0!s} is already in use by disk {1!s} "
+                                    "of {2:l}.".format(wwn, dbdisk,
+                                                       dbdisk.machine))
+
         if boot is None:
             # Backward compatibility: "sda"/"c0d0" is bootable, except if there
             # is already a boot disk
@@ -65,7 +72,7 @@ class CommandAddDisk(BrokerCommand):
                                  resourcegroup, share)
             dbdisk = VirtualNasDisk(device_name=disk,
                                     controller_type=controller, bootable=boot,
-                                    capacity=size, address=address,
+                                    capacity=size, address=address, wwn=wwn,
                                     snapshotable=snapshot, comments=comments)
 
             dbshare.disks.append(dbdisk)
@@ -81,14 +88,15 @@ class CommandAddDisk(BrokerCommand):
 
             dbdisk = VirtualLocalDisk(device_name=disk,
                                       controller_type=controller, bootable=boot,
-                                      capacity=size, address=address,
+                                      capacity=size, address=address, wwn=wwn,
                                       snapshotable=snapshot,
                                       comments=comments)
             dbfs.disks.append(dbdisk)
 
         else:
             dbdisk = LocalDisk(device_name=disk, controller_type=controller,
-                               capacity=size, bootable=boot, comments=comments)
+                               capacity=size, bootable=boot, wwn=wwn,
+                               comments=comments)
 
         dbmachine.disks.append(dbdisk)
 

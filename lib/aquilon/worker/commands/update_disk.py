@@ -20,6 +20,7 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import (Machine, Disk, VirtualDisk, VirtualNasDisk,
                                 VirtualLocalDisk, Filesystem, Share)
 from aquilon.aqdb.model.disk import controller_types
+from aquilon.utils import force_wwn
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.resources import find_resource
 from aquilon.worker.templates import Plenary, PlenaryCollection
@@ -43,7 +44,7 @@ class CommandUpdateDisk(BrokerCommand):
 
     def render(self, session, logger, machine, disk, controller, share,
                filesystem, resourcegroup, address, comments, size, boot,
-               snapshot, rename_to, **kw):
+               snapshot, rename_to, wwn, **kw):
         dbmachine = Machine.get_unique(session, machine, compel=True)
         dbdisk = Disk.get_unique(session, device_name=disk, machine=dbmachine,
                                  compel=True)
@@ -58,6 +59,16 @@ class CommandUpdateDisk(BrokerCommand):
 
         if comments is not None:
             dbdisk.comments = comments
+
+        if wwn is not None:
+            wwn = force_wwn("--wwn", wwn)
+            if wwn:
+                other = session.query(Disk).filter_by(wwn=wwn).first()
+                if other:
+                    raise ArgumentError("WWN {0!s} is already in use by disk "
+                                        "{1!s} of {2:l}."
+                                        .format(wwn, other, other.machine))
+            dbdisk.wwn = wwn
 
         if size is not None:
             dbdisk.capacity = size

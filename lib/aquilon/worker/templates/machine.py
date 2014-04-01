@@ -79,6 +79,8 @@ class PlenaryMachineInfo(StructurePlenary):
                       "interface": disk.controller_type}
             if disk.bootable:
                 params["boot"] = True
+            if disk.wwn:
+                params["wwn"] = disk.wwn
 
             if hasattr(disk, "snapshotable") and disk.snapshotable is not None:
                 params["snapshot"] = disk.snapshotable

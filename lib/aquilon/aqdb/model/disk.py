@@ -20,8 +20,9 @@ from datetime import datetime
 
 from sqlalchemy import (Column, Integer, DateTime, Sequence, String, Boolean,
                         ForeignKey, UniqueConstraint)
-from sqlalchemy.orm import relation, backref, deferred
+from sqlalchemy.orm import relation, backref, deferred, validates
 
+from aquilon.utils import force_wwn
 from aquilon.aqdb.model import Base, Machine
 from aquilon.aqdb.column_types import AqStr, Enum
 
@@ -45,8 +46,10 @@ class Disk(Base):
     device_name = Column(AqStr(128), nullable=False, default='sda')
     controller_type = Column(Enum(64, controller_types), nullable=False)
 
+    wwn = Column(AqStr(32), nullable=True)
+
     machine_id = Column(Integer, ForeignKey('machine.machine_id',
-                                            name='disk_machine_fk',
+                                            name='%s_machine_fk' % _TN,
                                             ondelete='CASCADE'),
                         nullable=False)
 
@@ -62,7 +65,8 @@ class Disk(Base):
                        backref=backref('disks', cascade='all'))
 
     __table_args__ = (UniqueConstraint(machine_id, device_name,
-                                       name='disk_mach_dev_name_uk'),)
+                                       name='%s_mach_dev_name_uk' % _TN),
+                      UniqueConstraint(wwn, name='%s_wwn_uk' % _TN))
     __mapper_args__ = {'polymorphic_on': disk_type,
                        'with_polymorphic': '*'}
 
@@ -71,6 +75,34 @@ class Disk(Base):
         return "<%s %s (%s) of machine %s, %d GB>" % \
             (self._get_class_label(), self.device_name, self.controller_type,
              self.machine.label, self.capacity)
+
+    @validates('wwn')
+    def validate_wwn(self, key, value):
+        return force_wwn(key, value)
+
+    # Currently this is for curiosity only. It would be more useful if we could
+    # look up the vendor name somewhere, based on the OUI.
+    def oui(self):  # pragma: no cover
+        if not self.wwn:
+            return None
+        # IEEE 803.2
+        if self.wwn[0] == '1' or self.wwn[0] == '2':
+            return self.wwn[4:10]
+        # IEEE registered name
+        if self.wwn[0] == '5' or self.wwn[0] == '6':
+            return self.wwn[1:7]
+        # Mapped EUI-64
+        if self.wwn[0] in set(['c', 'd', 'e', 'f']):
+            # The first byte contains bits 18-23 of the OUI, plus the NAA
+            oui_18_23 = int(self.wwn[0:2], 16)
+            # Mask the NAA
+            oui_18_23 = oui_18_23 & 63
+            # Bits 16-17 are assumed to be 0
+            oui_18_23 = oui_18_23 * 4
+            return "%02x" % oui_18_23 + self.wwn[2:6]
+
+        # Unknown WWN format
+        return None
 
 disk = Disk.__table__  # pylint: disable=C0103
 disk.info['unique_fields'] = ['machine', 'device_name']

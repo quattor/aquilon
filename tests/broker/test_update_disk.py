@@ -43,10 +43,11 @@ class TestUpdateDisk(TestBrokerCommand):
         out = self.commandtest(command)
         self.searchoutput(out,
                           r'Disk: sda 50 GB sata \(local\)\s*'
-                          r'Comments: Other disk comments',
+                          r'Comments: Other disk comments$',
                           command)
         self.searchoutput(out,
-                          r"Disk: c0d1 34 GB cciss \(local\) \[boot\]$",
+                          r'Disk: c0d1 34 GB cciss \(local\) \[boot\]\s*'
+                          r'WWN: 600508b112233445566778899aabbccd$',
                           command)
 
     def test_105_cat_ut3c1n3(self):
@@ -57,7 +58,8 @@ class TestUpdateDisk(TestBrokerCommand):
                           r'create\("hardware/harddisk/generic/cciss",\s*'
                           r'"boot", true,\s*'
                           r'"capacity", 34\*GB,\s*'
-                          r'"interface", "cciss"\s*\);',
+                          r'"interface", "cciss",\s*'
+                          r'"wwn", "600508b112233445566778899aabbccd"\s*\);',
                           command)
         self.searchoutput(out,
                           r'"harddisks/{sda}" = '
@@ -158,9 +160,57 @@ class TestUpdateDisk(TestBrokerCommand):
                           command)
         self.matchclean(out, "disk_update_test", command)
 
-    def test_119_cleanup_vm_terst(self):
+    def test_119_cleanup_vm_test(self):
         self.noouttest(["del_filesystem", "--cluster", "utecl5",
                         "--filesystem", "disk_update_test"])
+
+    def test_120_update_wwn_fail(self):
+        command = ["update_disk", "--machine", "ut3c5n10", "--disk", "sdb",
+                   "--wwn", "600508b112233445566778899aabbccd"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "WWN 600508b112233445566778899aabbccd is already "
+                         "in use by disk c0d1 of machine "
+                         "unittest00.one-nyp.ms.com.",
+                         command)
+
+    def test_121_clear_wwn(self):
+        command = ["update_disk", "--machine", "ut3c1n3", "--disk", "c0d1",
+                   "--wwn", ""]
+        self.noouttest(command)
+
+    def test_122_verify_no_wwn(self):
+        command = ["show_machine", "--machine", "ut3c1n3"]
+        out = self.commandtest(command)
+        self.matchclean(out, "WWN", command)
+
+        command = ["cat", "--machine", "ut3c1n3"]
+        out = self.commandtest(command)
+        self.matchclean(out, "wwn", command)
+
+    def test_123_update_wwn(self):
+        # Test the use of separators
+        command = ["update_disk", "--machine", "ut3c5n10", "--disk", "sdb",
+                   "--wwn", "60:05:08:b1:12:23:34:45-56:67:78:89:9a:ab:bc:cd"]
+        self.noouttest(command)
+
+    def test_124_verify_wwn_update(self):
+        command = ["show_machine", "--machine", "ut3c5n10"]
+        out = self.commandtest(command)
+        self.searchoutput(out,
+                          r'Disk: sdb.*$'
+                          r'\s*WWN: 600508b112233445566778899aabbccd$',
+                          command)
+
+        command = ["cat", "--machine", "ut3c5n10"]
+        out = self.commandtest(command)
+        self.searchoutput(out,
+                          r'"harddisks/{sdb}" = '
+                          r'create\("hardware/harddisk/generic/scsi",\s*'
+                          r'"capacity", 34\*GB,\s*'
+                          r'"interface", "scsi",\s*'
+                          r'"wwn", "600508b112233445566778899aabbccd"\s*\);',
+                          command)
 
     def test_300_rename_exists(self):
         command = ["update_disk", "--machine", "ut3c1n3", "--disk", "sda",
@@ -209,6 +259,24 @@ class TestUpdateDisk(TestBrokerCommand):
         self.matchoutput(out, "Disk sda of machine unittest00.one-nyp.ms.com "
                          "is not a virtual disk, changing the backend store is "
                          "not possible.", command)
+
+    def test_300_bad_wwn_syntax(self):
+        command = ["update_disk", "--machine", "ut3c1n3", "--disk", "sda",
+                   "--wwn", "not-a-wwn"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "The value of --wwn may contain hexadecimal "
+                         "characters only.",
+                         command)
+
+    def test_300_bad_wwn_length(self):
+        command = ["update_disk", "--machine", "ut3c1n3", "--disk", "sda",
+                   "--wwn", "00:11:22:33:44:55:66:77:88"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "The value of --wwn must contain either 16 or 32 "
+                         "hexadecimal digits.",
+                         command)
 
 
 if __name__ == '__main__':

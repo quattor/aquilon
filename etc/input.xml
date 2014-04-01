@@ -799,8 +799,8 @@
       <optgroup name="add_disk_opts" mandatory="True" fields="all">
          <option name="machine" type="string">Machine name</option>
          <option name="disk" type="string">Disk/device name</option>
-         <option name="controller" type="string" conflicts="type">Type of the controller/interface</option>
-         <option name="size" type="int" conflicts="capacity">Capacity of the disk (GB)</option>
+         <option name="controller" type="string">Type of the controller/interface</option>
+         <option name="size" type="int">Capacity of the disk (GB)</option>
       </optgroup>
       <optgroup name="nas_opts" fields="all">
          <optgroup name="share_opts" fields="any">
@@ -815,6 +815,7 @@
          <option name="comments" type="string">Comments</option>
          <option name="boot" type="boolean">Mark the disk as bootable</option>
          <option name="snapshot" type="boolean">Mark the disk as snapshotable</option>
+         <option name="wwn" type="string">World Wide Name of the disk</option>
       </optgroup>
       <transport method="put" path="machine/%(machine)s/disk/%(disk)s" />
    </command>
@@ -829,8 +830,8 @@
       </optgroup>
       <optgroup name="del_disk_optional_opts" mandatory="False">
          <option name="disk" type="string">device name of the disk (like sda)</option>
-         <option name="controller" type="string" conflicts="type">type of the disk</option>
-         <option name="size" type="int" conflicts="capacity">capacity of the disk (GB)</option>
+         <option name="controller" type="string">type of the disk</option>
+         <option name="size" type="int">capacity of the disk (GB)</option>
          <option name="all" type="flag">remove any matching disks</option>
       </optgroup>
       <transport trigger="disk" method="delete" path="machine/%(machine)s/disk/%(disk)s" />
@@ -856,6 +857,7 @@
          <option name="comments" type="string">Comments</option>
          <option name="boot" type="boolean">Mark the disk as bootable</option>
          <option name="snapshot" type="boolean">Mark the disk as snapshotable</option>
+         <option name="wwn" type="string">World Wide Name of the disk</option>
       </optgroup>
       <transport method="post" path="machine/%(machine)s/disk/%(disk)s" />
    </command>

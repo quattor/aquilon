@@ -97,6 +97,9 @@ class MachineFormatter(ObjectFormatter):
             details.append(indent + "  Disk: %s %d GB %s (%s)%s" %
                            (d.device_name, d.capacity, d.controller_type,
                             extra, flags))
+            if d.wwn:
+                # TODO: it would be nice if we could look up the OUI somewhere
+                details.append(indent + "    WWN: %s" % d.wwn)
             if d.comments:
                 details.append(indent + "    Comments: %s" % d.comments)
         for i in sorted(machine.interfaces, key=attrgetter('name')):
