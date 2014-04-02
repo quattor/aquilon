@@ -30,7 +30,7 @@ class TestUpdateDisk(TestBrokerCommand):
     def test_100_update_ut3c1n3_sda(self):
         command = ["update_disk", "--machine", "ut3c1n3", "--disk", "sda",
                    "--size", "50", "--comments", "Other disk comments",
-                   "--controller", "sata"]
+                   "--controller", "sata", "--address", "0:0:0:0"]
         self.noouttest(command)
 
     def test_101_update_ut3c1n3_c0d0(self):
@@ -43,6 +43,7 @@ class TestUpdateDisk(TestBrokerCommand):
         out = self.commandtest(command)
         self.searchoutput(out,
                           r'Disk: sda 50 GB sata \(local\)\s*'
+                          r'Address: 0:0:0:0\s*'
                           r'Comments: Other disk comments$',
                           command)
         self.searchoutput(out,
@@ -64,6 +65,7 @@ class TestUpdateDisk(TestBrokerCommand):
         self.searchoutput(out,
                           r'"harddisks/{sda}" = '
                           r'create\("hardware/harddisk/generic/sata",\s*'
+                          r'"address", "0:0:0:0",\s*'
                           r'"capacity", 50\*GB,\s*'
                           r'"interface", "sata"\s*\);',
                           command)
@@ -199,6 +201,7 @@ class TestUpdateDisk(TestBrokerCommand):
         out = self.commandtest(command)
         self.searchoutput(out,
                           r'Disk: sdb.*$'
+                          r'\s*Address: 0:0:1:0$'
                           r'\s*WWN: 600508b112233445566778899aabbccd$',
                           command)
 
@@ -207,6 +210,7 @@ class TestUpdateDisk(TestBrokerCommand):
         self.searchoutput(out,
                           r'"harddisks/{sdb}" = '
                           r'create\("hardware/harddisk/generic/scsi",\s*'
+                          r'"address", "0:0:1:0",\s*'
                           r'"capacity", 34\*GB,\s*'
                           r'"interface", "scsi",\s*'
                           r'"wwn", "600508b112233445566778899aabbccd"\s*\);',
@@ -234,15 +238,17 @@ class TestUpdateDisk(TestBrokerCommand):
                    "--address", "bad-address"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
-                         r"Disk address 'bad-address' is not valid, it must "
-                         r"match \d+:\d+ (e.g. 0:0).",
+                         r"Disk address 'bad-address' is not valid, "
+                         r"it must match \d+:\d+$.",
                          command)
 
     def test_300_address_localdisk(self):
         command = ["update_disk", "--machine", "ut3c1n3", "--disk", "sda",
                    "--address", "0:0"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "Bus address can only be set for virtual disks.",
+        self.matchoutput(out,
+                         r"Disk address '0:0' is not valid, "
+                         r"it must match (?:\d+:){3}\d+$.",
                          command)
 
     def test_300_snapshot_localdisk(self):

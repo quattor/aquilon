@@ -17,11 +17,13 @@
 """ Polymorphic representation of disks which may be local or san """
 
 from datetime import datetime
+import re
 
 from sqlalchemy import (Column, Integer, DateTime, Sequence, String, Boolean,
                         ForeignKey, UniqueConstraint)
 from sqlalchemy.orm import relation, backref, deferred, validates
 
+from aquilon.exceptions_ import ArgumentError
 from aquilon.utils import force_wwn
 from aquilon.aqdb.model import Base, Machine
 from aquilon.aqdb.column_types import AqStr, Enum
@@ -40,12 +42,15 @@ class Disk(Base):
     __tablename__ = _TN
     _instance_label = 'device_name'
 
+    _address_re = re.compile(r"(?:\d+:){3}\d+$")
+
     id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
     disk_type = Column(String(64), nullable=False)
     capacity = Column(Integer, nullable=False)
     device_name = Column(AqStr(128), nullable=False, default='sda')
     controller_type = Column(Enum(64, controller_types), nullable=False)
 
+    address = Column(AqStr(16), nullable=True)
     wwn = Column(AqStr(32), nullable=True)
 
     machine_id = Column(Integer, ForeignKey('machine.machine_id',
@@ -75,6 +80,15 @@ class Disk(Base):
         return "<%s %s (%s) of machine %s, %d GB>" % \
             (self._get_class_label(), self.device_name, self.controller_type,
              self.machine.label, self.capacity)
+
+    @validates('address')
+    def validate_address(self, key, value):  # pylint: disable=W0613
+        if not value:
+            return None
+        if not self._address_re.match(value):
+            raise ArgumentError("Disk address '%s' is not valid, it must "
+                                "match %s." % (value, self._address_re.pattern))
+        return value
 
     @validates('wwn')
     def validate_wwn(self, key, value):

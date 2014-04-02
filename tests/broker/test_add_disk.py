@@ -30,6 +30,7 @@ class TestAddDisk(TestBrokerCommand):
     def test_100_add_ut3c5n10_disk(self):
         self.noouttest(["add", "disk", "--machine", "ut3c5n10",
                         "--disk", "sdb", "--controller", "scsi",
+                        "--address", "0:0:1:0",
                         "--size", "34", "--comments", "Disk comments"])
 
     def test_110_add_ut3c1n3_disk(self):
@@ -71,12 +72,23 @@ class TestAddDisk(TestBrokerCommand):
                          "in use by disk c0d0 of machine ut3c1n3.",
                          command)
 
+    def test_200_bad_address(self):
+        command = ["add_disk", "--machine=ut3c5n10", "--disk=sdc",
+                   "--controller=scsi", "--size=34",
+                   "--address", "bad-address"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         r"Disk address 'bad-address' is not valid, it must "
+                         r"match (?:\d+:){3}\d+$.",
+                         command)
+
     def test_300_show_ut3c5n10(self):
         command = "show machine --machine ut3c5n10"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Disk: sda 68 GB scsi (local) [boot]", command)
         self.searchoutput(out,
                           r"Disk: sdb 34 GB scsi \(local\)\s*"
+                          r"Address: 0:0:1:0\s*"
                           r"Comments: Disk comments",
                           command)
 
@@ -93,6 +105,7 @@ class TestAddDisk(TestBrokerCommand):
         self.searchoutput(out,
                           r'"harddisks/{sdb}" = '
                           r'create\("hardware/harddisk/generic/scsi",\s*'
+                          r'"address", "0:0:1:0",\s*'
                           r'"capacity", 34\*GB,\s*'
                           r'"interface", "scsi"\s*\);',
                           command)

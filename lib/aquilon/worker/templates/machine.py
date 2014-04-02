@@ -81,6 +81,8 @@ class PlenaryMachineInfo(StructurePlenary):
                 params["boot"] = True
             if disk.wwn:
                 params["wwn"] = disk.wwn
+            if disk.address:
+                params["address"] = disk.address
 
             if hasattr(disk, "snapshotable") and disk.snapshotable is not None:
                 params["snapshot"] = disk.snapshotable

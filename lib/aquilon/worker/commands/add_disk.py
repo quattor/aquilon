@@ -96,7 +96,7 @@ class CommandAddDisk(BrokerCommand):
         else:
             dbdisk = LocalDisk(device_name=disk, controller_type=controller,
                                capacity=size, bootable=boot, wwn=wwn,
-                               comments=comments)
+                               address=address, comments=comments)
 
         dbmachine.disks.append(dbdisk)
 

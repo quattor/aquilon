@@ -31,7 +31,7 @@
 	    <arg choice="plain"><option>--disk <replaceable>DISK</replaceable></option></arg>
 	    <arg choice="plain"><option>--controller <replaceable>CTRL</replaceable></option></arg>
 	    <arg choice="plain"><option>--size <replaceable>SIZE</replaceable></option></arg>
-	    <arg choice="opt"><option>--address <replaceable>C:T</replaceable></option></arg>
+	    <arg choice="opt"><option>--address <replaceable>[H:]C:T[:L]</replaceable></option></arg>
 	    <arg choice="opt"><option>--wwn <replaceable>WWN</replaceable></option></arg>
 	    <group choice="opt">
 		<arg choice="plain"><option>--boot</option></arg>
@@ -120,7 +120,7 @@
 	    </varlistentry>
 	    <varlistentry>
 	        <term>
-		    <option>--address <replaceable>C:T</replaceable></option>
+		    <option>--address <replaceable>[H:]C:T[:L]</replaceable></option>
 		</term>
 		<listitem>
 		    <para>

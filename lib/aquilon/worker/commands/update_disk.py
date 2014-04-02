@@ -90,12 +90,7 @@ class CommandUpdateDisk(BrokerCommand):
                 if boot and disk.bootable:
                     disk.bootable = False
 
-        if address:
-            # TODO: do we really care? Bus address makes sense for physical
-            # disks as well, even if we cannot use that information today.
-            if not isinstance(dbdisk, VirtualDisk):
-                raise ArgumentError("Bus address can only be set for virtual "
-                                    "disks.")
+        if address is not None:
             dbdisk.address = address
 
         if snapshot is not None:

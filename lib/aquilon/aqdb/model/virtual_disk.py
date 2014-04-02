@@ -19,38 +19,24 @@
 import re
 
 from sqlalchemy import Column, Boolean, Integer, ForeignKey, Index
-from sqlalchemy.orm import relation, backref, column_property, validates
+from sqlalchemy.orm import relation, backref, column_property
 from sqlalchemy.sql import select, func
 
-from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.column_types import AqStr
 from aquilon.aqdb.model import Disk, Share, Filesystem
 
-address_re = re.compile(r"\d+:\d+$")
 _TN = 'disk'
 
 
 class VirtualDisk(Disk):
-    # We need to know the bus address of each disk.
-    # This isn't really nullable, but single-table inheritance means
-    # that the base class will end up with the column and the base class
-    # wants it to be nullable. We enforce this via __init__ instead.
-    address = Column(AqStr(128), nullable=True)
+    _address_re = re.compile(r"\d+:\d+$")
 
     snapshotable = Column(Boolean(name="%s_snapshotable_ck" % _TN),
                           nullable=True)
 
-    @validates('address')
-    def validate_address(self, key, value):  # pylint: disable=W0613
-        if not address_re.match(value):
-            raise ArgumentError(r"Disk address '%s' is not valid, it must "
-                                r"match \d+:\d+ (e.g. 0:0)." % value)
-        return value
-
-    def __init__(self, **kw):
-        if 'address' not in kw or kw['address'] is None:
+    def __init__(self, address=None, **kw):
+        if not address:
             raise ValueError("Address is mandatory for virtual disks.")
-        super(VirtualDisk, self).__init__(**kw)
+        super(VirtualDisk, self).__init__(address=address, **kw)
 
 
 class VirtualNasDisk(VirtualDisk):

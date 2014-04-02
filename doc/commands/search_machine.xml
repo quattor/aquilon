@@ -51,6 +51,7 @@
 		<arg choice="opt"><option>--disk_name <replaceable>NAME</replaceable></option></arg>
 		<arg choice="opt"><option>--disk_size <replaceable>NUMBER</replaceable></option></arg>
 		<arg choice="opt"><option>--disk_controller <replaceable>NAME</replaceable></option></arg>
+		<arg choice="opt"><option>--disk_address <replaceable>[H:]C:T[:L]</replaceable></option></arg>
 		<arg choice="opt"><option>--disk_wwn <replaceable>WWN</replaceable></option></arg>
 		<group choice="opt">
 		    <arg choice="plain"><option>--disk_share <replaceable>NAME</replaceable></option></arg>
@@ -345,6 +346,18 @@
 		    <para>
 			Look for machines having a disk with controller type <replaceable>NAME</replaceable>.
 			Valid values are: <xi:include href="../common/controller_types.xml"/>.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+		<term>
+		    <option>--disk_address <replaceable>[H:]C:T[:L]</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Look for machines having a disk at the specified SCSI address. For virtual
+			machines, only <replaceable>C:T</replaceable> should be specified. For
+			physical machines, all four components should be specified.
 		    </para>
 		</listitem>
 	    </varlistentry>

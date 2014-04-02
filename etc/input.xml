@@ -243,6 +243,7 @@
          <option name="disk_name" type="string">Disk name</option>
          <option name="disk_size" type="int">Disk size</option>
          <option name="disk_controller" type="string">Disk controller</option>
+         <option name="disk_address" type="string">SCSI bus addresst</option>
          <option name="disk_wwn" type="string">Disk WWN</option>
          <option name="disk_share" type="string" conflicts="disk_filesystem">NAS share backing the virtual disk image</option>
          <option name="disk_filesystem" type="string" conflicts="disk_share">Filesystem name backing the virtual disk image</option>
@@ -806,16 +807,13 @@
          <option name="controller" type="string">Type of the controller/interface</option>
          <option name="size" type="int">Capacity of the disk (GB)</option>
       </optgroup>
-      <optgroup name="nas_opts" fields="all">
-         <optgroup name="share_opts" fields="any">
-            <!-- TODO find out conflicts we might have -->
-            <option name="share" type="string">Share name</option>
-            <option name="filesystem" type="string">Filesystem name</option>
-            <option name="resourcegroup" type="string">Resourcegroup to add share</option>
-         </optgroup>
-         <option name="address" type="string">Bus address (e.g. 0:0)</option>
+      <optgroup name="add_disk_image_opts" fields="any">
+         <option name="share" type="string" conflicts="filesystem">Share name</option>
+         <option name="filesystem" type="string" conflicts="share">Filesystem name</option>
+         <option name="resourcegroup" type="string">Resourcegroup of the share or filesystem</option>
       </optgroup>
       <optgroup name="optional_opts">
+         <option name="address" type="string">SCSI bus address (e.g. 0:0)</option>
          <option name="comments" type="string">Comments</option>
          <option name="boot" type="boolean">Mark the disk as bootable</option>
          <option name="snapshot" type="boolean">Mark the disk as snapshotable</option>
@@ -855,7 +853,7 @@
             <option name="filesystem" type="string" conflicts="share">Filesystem backing the disk image</option>
             <option name="resourcegroup" type="string">Resourcegroup to add share</option>
          </optgroup>
-         <option name="address" type="string">Bus address (e.g. 0:0)</option>
+         <option name="address" type="string">SCSI bus address (e.g. 0:0)</option>
          <option name="controller" type="string" conflicts="type">Type of the controller/interface</option>
          <option name="size" type="int" conflicts="capacity">Capacity of the disk (GB)</option>
          <option name="comments" type="string">Comments</option>

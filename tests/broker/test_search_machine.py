@@ -182,6 +182,13 @@ class TestSearchMachine(TestBrokerCommand):
         self.matchclean(out, "ut3c5n10", command)
         self.matchclean(out, "evm", command)
 
+    def testdiskaddress(self):
+        command = ["search_machine", "--disk_address", "0:0:1:0"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "ut3c5n10", command)
+        self.matchclean(out, "ut3c1n3", command)
+        self.matchclean(out, "evm", command)
+
     def testip(self):
         ip = self.net["unknown0"].usable[2]
         command = ["search_machine", "--ip=%s" % ip]
