@@ -32,7 +32,7 @@ class Realm(Base):
 
     id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
     name = Column(String(32), nullable=False)
-    trusted = Column(Boolean('%s_trusted_ck' % _TN), nullable=False)
+    trusted = Column(Boolean(name='%s_trusted_ck' % _TN), nullable=False)
     creation_date = deferred(Column(DateTime, nullable=False,
                                     default=datetime.now))
     comments = deferred(Column(String(255), nullable=True))
