@@ -31,7 +31,8 @@ class CommandUpdateOS(BrokerCommand):
                                           version=osversion,
                                           archetype=dbarchetype, compel=True)
 
-        dbos.comments = comments
+        if comments is not None:
+            dbos.comments = comments
 
         session.flush()
 

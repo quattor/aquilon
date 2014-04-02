@@ -73,7 +73,7 @@ class CommandUpdateAddress(BrokerCommand):
             if old_reverse and old_reverse != dbdns_rec.reverse_ptr:
                 delete_target_if_needed(session, old_reverse)
 
-        if comments:
+        if comments is not None:
             dbdns_rec.comments = comments
 
         session.flush()

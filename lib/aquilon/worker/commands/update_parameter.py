@@ -29,7 +29,7 @@ class CommandUpdateParameter(CommandAddParameter):
 
         dbparameter = set_parameter(session, param_holder, feature, model, interface,
                                     path, value, compel=True)
-        if comments:
+        if comments is not None:
             dbparameter.comments = comments
 
         return dbparameter

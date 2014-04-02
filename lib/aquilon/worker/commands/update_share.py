@@ -43,7 +43,7 @@ class CommandUpdateShare(BrokerCommand):
             if latency_threshold:
                 dbshare.latency_threshold = latency_threshold
 
-            if comments:
+            if comments is not None:
                 dbshare.comments = comments
 
             plenaries.append(Plenary.get_plenary(dbshare))

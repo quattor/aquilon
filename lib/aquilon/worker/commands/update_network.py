@@ -55,10 +55,7 @@ class CommandUpdateNetwork(BrokerCommand):
             if dblocation:
                 dbnetwork.location = dblocation
             if comments is not None:
-                if comments.strip() == "":
-                    dbnetwork.comments = None
-                else:
-                    dbnetwork.comments = comments
+                dbnetwork.comments = comments
 
         session.flush()
         return
