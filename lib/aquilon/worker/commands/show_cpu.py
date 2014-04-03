@@ -27,7 +27,7 @@ class CommandShowCpu(BrokerCommand):
     def render(self, session, cpu, vendor, speed, **arguments):
         q = session.query(Cpu)
         if cpu:
-            q = q.filter(Cpu.name.like(cpu + '%'))
+            q = q.filter_by(name=cpu)
         if vendor:
             dbvendor = Vendor.get_unique(session, vendor, compel=True)
             q = q.filter_by(vendor=dbvendor)

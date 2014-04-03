@@ -41,7 +41,6 @@ from aquilon.worker.templates.cluster import (PlenaryCluster,
                                               PlenaryClusterObject,
                                               PlenaryClusterClient)
 from aquilon.worker.templates.host import (PlenaryHost, PlenaryHostData,
-                                           PlenaryToplevelHost,
-                                           PlenaryNamespacedHost)
+                                           PlenaryHostObject)
 
 from aquilon.worker.templates.domain import TemplateDomain

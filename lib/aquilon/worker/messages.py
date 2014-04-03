@@ -23,6 +23,7 @@ from logging import DEBUG
 
 from twisted.internet import reactor
 
+from aquilon.exceptions_ import InternalError
 from aquilon.python_patches import load_uuid_quickly
 
 uuid = load_uuid_quickly()  # pylint: disable=C0103
@@ -63,15 +64,14 @@ class RequestStatus(object):
 
     """
 
-    def __init__(self, auditid, requestid=None):
+    def __init__(self, auditid):
         """Should only be created by the StatusCatalog."""
-        self.auditid = str(auditid) if auditid is not None else None
-        self.requestid = requestid
+        self.auditid = auditid
+        self.requestid = None
         self.user = ""
         self.command = ""
-        self.args = []
+        self.args = {}
         self.description = ""
-        self.subscriber_descriptions = []
         self.records = []
         self.debug_fifo = deque()
         self.is_finished = False
@@ -83,29 +83,43 @@ class RequestStatus(object):
         # Need to be careful to be as fine-grained as possible.
         self.lock = Lock()
 
-    def create_description(self, user, command, id, kwargs):
+    def create_description(self, user, command, kwargs, ignored):
+        # Log a dummy user with no realm for unauthenticated requests.
+        if user is None or user == '':
+            user = 'nobody'
+
         massaged = []
-        for (k, v) in kwargs.items():
-            if k == 'format' and v == 'raw':
+        for key, value in kwargs.iteritems():
+            # Skip ignored and empty arguments
+            if key in ignored:
                 continue
-            if v is None:
+            if value is None:
                 continue
 
-            if v == True:
-                massaged.append(" --%s" % k)
+            # Create a string value for each of the arguments
+            if isinstance(value, list):
+                value_str = ' '.join([str(item) for item in value])
             else:
-                # TODO: we could also convert v == False to "--no%s", except
-                # that's not always how the option is negated - the correct form
-                # should be extracted from input.xml.
-                massaged.append(" --%s=%s" % (k, v))
-        description = '[%s] %s: aq %s%s' % (id, user, command,
+                value_str = str(value)
+            # TODO: We should also handle booleans here; however, to do so
+            # correctly would require us to check input.xml for negated
+            # options.
+
+            # Clip the length of the string
+            if len(value_str) > 100:
+                value_str = value_str[0:96] + '...'
+
+            # Keep a copy of the arguments
+            self.args[key] = value_str
+
+            if key=='style' and value=='raw':
+                continue
+            massaged.append(" --%s=%s" % (key, value_str))
+
+        description = '[%s] %s: aq %s%s' % (self.auditid, user, command,
                                             "".join(massaged))
-        if str(id) != self.auditid:
-            self.subscriber_descriptions.append(description)
-            return
         self.user = user
         self.command = command
-        self.kwargs = kwargs
         self.description = description
 
     def publish(self, record):
@@ -180,29 +194,34 @@ class StatusCatalog(object):
             status = self.status_by_requestid.get(requestid)
         return status
 
-    def create_request_status(self, auditid, requestid=None):
+    def create_request_status(self, auditid):
         """Create a new RequestStatus and store it."""
-        if auditid is not None:
-            auditid = str(auditid)
-            if not requestid:
-                requestid = uuid.uuid4()
-            status = RequestStatus(auditid, requestid)
-            self.status_by_requestid[requestid] = status
-            self.status_by_auditid[auditid] = status
-            return status
-        return None
+        auditid = str(auditid)
+        status = RequestStatus(auditid)
+        self.status_by_auditid[auditid] = status
+        return status
 
-    def remove_by_auditid(self, status):
-        """Mark the RequestStatus as finished and remove references to it."""
-        status.finish()
+    def store_requestid(self, status, requestid=None):
+        if not requestid:
+            requestid = uuid.uuid4()
+        with status.lock:
+            if status.requestid:
+                raise InternalError('Request already has a UUID assigned')
+            status.requestid = requestid
+        self.status_by_requestid[requestid] = status
+        return requestid
+
+    def _cleanup_request_status(self, status):
         self.status_by_auditid.pop(status.auditid, None)
-        # Clean up any unused requestid entries after one minute.
-        reactor.callLater(60, self.remove_by_requestid, status)
-
-    def remove_by_requestid(self, status):
-        """Mark the RequestStatus as no longer needed by the client."""
         if status.requestid:
             self.status_by_requestid.pop(status.requestid, None)
+
+    def remove_request_status(self, status):
+        """Mark the RequestStatus as finished and remove references to it."""
+        # Mark the request as finished now
+        status.finish()
+        # Retain the information about the request for one minute
+        reactor.callLater(60, self._cleanup_request_status, status)
 
 
 class StatusSubscriber(object):

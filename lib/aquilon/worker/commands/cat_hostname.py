@@ -19,7 +19,7 @@
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.host import hostname_to_host
 from aquilon.worker.dbwrappers.resources import get_resource
-from aquilon.worker.templates import (Plenary, PlenaryToplevelHost,
+from aquilon.worker.templates import (Plenary, PlenaryHostObject,
                                       PlenaryHostData)
 
 
@@ -36,7 +36,7 @@ class CommandCatHostname(BrokerCommand):
             if data:
                 cls = PlenaryHostData
             else:
-                cls = PlenaryToplevelHost
+                cls = PlenaryHostObject
 
             plenary_info = cls.get_plenary(dbhost, logger=logger)
 

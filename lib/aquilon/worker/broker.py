@@ -45,18 +45,6 @@ from aquilon.worker.processes import sync_domain
 # Things we don't need cluttering up the transaction details table
 _IGNORED_AUDIT_ARGS = ('requestid', 'bundle', 'debug', 'session', 'dbuser')
 
-__audit_id = 0
-"""This will help with debugging active incoming requests.
-
-   Eventually it will be replaced by a primary key in the audit log table.
-
-   """
-
-def next_audit_id():
-    global __audit_id
-    __audit_id += 1
-    return __audit_id
-
 # Mapping of command exceptions to client return code.
 ERROR_TO_CODE = {NotFoundException: http.NOT_FOUND,
                  AuthorizationException: http.UNAUTHORIZED,
@@ -261,7 +249,7 @@ class BrokerCommand(object):
                     # This does a COMMIT, which in turn invalidates the session.
                     # We should therefore avoid looking up anything in the DB
                     # before this point which might be used later.
-                    status = logger.get_status()
+                    status = request.status
                     start_xtn(session, status.requestid, status.user,
                               status.command, self.requires_readonly,
                               kwargs, _IGNORED_AUDIT_ARGS)
@@ -337,69 +325,37 @@ class BrokerCommand(object):
             session.commit()
             session.execute(text("set transaction read only"))
 
-    def _audit(self, message_status, logger=None, request=None, user=None,
-               **kwargs):
-        # Log a dummy user with no realm for unauthenticated requests.
-        if user is None or user == '':
-            user = 'nobody'
-        kwargs['format'] = kwargs.pop('style', 'raw')
-
-        for (key, value) in kwargs.items():
-            if key in _IGNORED_AUDIT_ARGS:
-                kwargs.pop(key)
-                continue
-            if value is None:
-                kwargs.pop(key)
-                continue
-            if isinstance(value, list):
-                value_str = " ".join([str(item) for item in value])
-            else:
-                value_str = str(value)
-            if len(value_str) > 100:
-                kwargs[key] = value_str[0:96] + '...'
-        kwargs_str = str(kwargs)
-        if len(kwargs_str) > 1024:
-            kwargs_str = kwargs_str[0:1020] + '...'
-        logger.info("Incoming command #%d from user=%s aq %s "
-                    "with arguments %s",
-                    request.aq_audit_id, user, self.command, kwargs_str)
-        if message_status:
-            message_status.create_description(user=user, command=self.command,
-                                              id=request.aq_audit_id,
-                                              kwargs=kwargs)
 
     # This is meant to be called before calling render() in order to
     # add a logger into the argument list.  It returns the arguments
     # that will be passed into render().
-    def add_logger(self, **command_kwargs):
-        request = command_kwargs.get("request")
-        command_kwargs["user"] = request.getPrincipal()
-        request.aq_audit_id = next_audit_id()
-        if self.command == "show_request":
-            status = self.catalog.get_request_status(
-                auditid=command_kwargs.get("auditid", None),
-                requestid=command_kwargs.get("requestid", None))
-        else:
-            status = self.catalog.create_request_status(
-                auditid=request.aq_audit_id,
-                requestid=command_kwargs.get("requestid", None))
-            # If no requestid was given, the RequestStatus object created it.
-            command_kwargs['requestid'] = status.requestid
-        logger = RequestLogger(status=status, module_logger=self.module_logger)
+    def add_logger(self, request, **command_kwargs):
+        if self.command != "show_request":
+            # For the show_request requestid is the UUID of the comamnd we
+            # want intofmation for and not the UUID of this command.  As
+            # a result show_request commands do not have a requestid.
+            requestid = command_kwargs.get("requestid", None)
+            command_kwargs['requestid'] = \
+                self.catalog.store_requestid(request.status, requestid)
+        user = request.getPrincipal()
+        request.status.create_description(user=user, command=self.command,
+                                          kwargs=command_kwargs,
+                                          ignored=_IGNORED_AUDIT_ARGS)
+        logger = RequestLogger(status=request.status, module_logger=self.module_logger)
+        kwargs_str = str(request.status.args)
+        if len(kwargs_str) > 1024:
+            kwargs_str = kwargs_str[0:1020] + '...'
+        logger.info("Incoming command #%s from user=%s aq %s "
+                    "with arguments %s",
+                    request.status.auditid, request.status.user,
+                    request.status.command, kwargs_str)
         command_kwargs["logger"] = logger
-        # Sigh. command_kwargs might contain the key 'status', so we have to use
-        # another name.
-        self._audit(message_status=status, **command_kwargs)
+        command_kwargs["user"] = user
+        command_kwargs["request"] = request
         return command_kwargs
 
     def _cleanup_logger(self, logger):
-        if self.command == "show_request":
-            # Clear the requestid dictionary.
-            logger.remove_status_by_requestid(self.catalog)
-        else:
-            # Clear the auditid dictionary.
-            logger.debug("Server finishing request.")
-            logger.remove_status_by_auditid(self.catalog)
+        logger.debug("Server finishing request.")
         logger.close_handlers()
 
     @property

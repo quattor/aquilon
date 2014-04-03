@@ -24,11 +24,4 @@ from aquilon.worker.commands.show_request import CommandShowRequest
 
 class CommandShowRequestAuditID(CommandShowRequest):
 
-    def render(self, auditid, request, logger, **arguments):
-        status = logger.get_status()
-        if not status:
-            raise NotFoundException("Audit ID %s not found." % auditid)
-        arguments.pop("requestid")
-        return CommandShowRequest.render(self, requestid=status.requestid,
-                                         request=request, logger=logger,
-                                         **arguments)
+    required_parameters = ["auditid"]

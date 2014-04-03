@@ -37,7 +37,7 @@ def create_machine(session, machine, dblocation, dbmodel, cpuname=None,
         # Was there enough on the command line to specify one?
         q = session.query(Cpu)
         if cpuname:
-            q = q.filter(Cpu.name.like(cpuname.lower() + '%'))
+            q = q.filter_by(name=cpuname)
         if cpuspeed is not None:
             q = q.filter_by(speed=cpuspeed)
         if cpuvendor:

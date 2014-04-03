@@ -147,8 +147,6 @@ CheckNet_module = /ms/dist/NetEng/modules/prod
 sharedata = /ms/dist/storage/etc/nasobjects.map
 default_domain_start = prod
 authorization_error = Please contact an administrator for access.
-namespaced_host_profiles = False
-flat_host_profiles = True
 windows_host_info = /ms/dist/aquilon/PROJ/datawarehouse/dumpv3/machines.db
 # See comments in aquilon.worker.resources.set_thread_pool_size
 twisted_thread_pool_size = 100
