@@ -158,26 +158,6 @@ class TestSearchESXCluster(TestBrokerCommand):
         command = "search esx cluster --personality personality-does-not-exist"
         self.noouttest(command.split(" "))
 
-    def testall(self):
-        command = "search esx cluster --all"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "utecl1", command)
-        self.matchoutput(out, "utecl2", command)
-        self.matchoutput(out, "utecl3", command)
-        self.matchoutput(out, "utecl4", command)
-
-    def testallfull(self):
-        command = "search esx cluster --all --fullinfo"
-        out = self.commandtest(command.split(" "))
-        # This is a good sampling, but not the full output
-        self.matchoutput(out, "ESX Cluster: utecl1", command)
-        self.matchoutput(out, "ESX Cluster: utecl2", command)
-        self.matchoutput(out, "ESX Cluster: utecl3", command)
-        self.matchoutput(out, "ESX Cluster: utecl4", command)
-        self.matchoutput(out, "Metacluster: utmc1", command)
-        self.matchoutput(out, "Metacluster: utmc2", command)
-        self.matchoutput(out, "Building: ut", command)
-
     def testserviceavailable(self):
         command = "search esx cluster --service esx_management_server"
         out = self.commandtest(command.split(" "))

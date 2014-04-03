@@ -254,7 +254,6 @@
 	    <option name="desk" type="string">Desk</option>
          </optgroup>
          <option name="exact_location" type="flag">match the location exactly</option>
-         <option name="all" type="flag">list all hardware</option>
       </optgroup>
       <optgroup name="search_system_prefs" mandatory="False">
          <option name="fullinfo" type="flag">show full information for the machine</option>
@@ -274,7 +273,6 @@
          <option name="ip" type="ipv4">IP address</option>
          <option name="networkip" type="ipv4">Network IP address</option>
          <option name="mac" type="mac">primary MAC address</option>
-         <option name="all" type="flag">list all systems</option>
       </optgroup>
       <optgroup name="search_system_prefs" mandatory="False">
          <option name="fullinfo" type="flag">show full information for the matching systems</option>
@@ -343,7 +341,6 @@
             <option name="member_desk" type="string">member Desk</option>
          </optgroup>
          <option name="member_exact_location" type="flag">match the member location exactly</option>
-         <option name="all" type="flag">list all systems</option>
       </optgroup>
       <optgroup name="search_cluster_prefs" mandatory="False">
          <option name="fullinfo" type="flag">show full information for the matching hosts</option>
@@ -480,7 +477,6 @@
 	    <option name="vmhost_desk" type="string">vmhost Desk</option>
          </optgroup>
          <option name="vmhost_exact_location" type="flag">match the vmhost location exactly</option>
-         <option name="all" type="flag">list all ESX clusters</option>
       </optgroup>
       <optgroup name="search_cluster_prefs" mandatory="False">
          <option name="fullinfo" type="flag">show full information for the matching clusters</option>
@@ -686,6 +682,7 @@
       Network name, IP, Netmask, Sysloc, Country code, Side, Type, Comments.
       <optgroup name="search_network_Input" mandatory="True" fields="any">
          <option name="network" type="string">Network name</option>
+         <option name="network_environment" type="string">Network environment (default: internal)</option>
          <option name="ip" type="ipv4">IP address of the network or contained in the network</option>
          <option name="type" type="string">Network type</option>
          <option name="side" type="string">Network side</option>
@@ -695,7 +692,6 @@
          <option name="pg" type="string">Networks assigned to the given portgroup</option>
          <option name="has_dynamic_ranges" type="flag">Matches networks containing dynamic DHCP ranges</option>
          <option name="exact_location" type="flag">match the location exactly</option>
-         <option name="all" type="flag">All</option>
          <optgroup name="search_network_location_opts" fields="any">
             <option name="organization" type="string">Organization</option>
             <option name="hub" type="string">Hub</option>
@@ -711,7 +707,6 @@
          </optgroup>
       </optgroup>
       <optgroup name="search_network_prefs" mandatory="False">
-         <option name="network_environment" type="string">Network environment (default: internal)</option>
          <option name="fullinfo" type="flag">show full information for the matching networks</option>
       </optgroup>
       <transport method="get" path="find/network" />

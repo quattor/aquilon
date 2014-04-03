@@ -173,7 +173,7 @@ class TestSearchClusterESX(TestBrokerCommand):
 #        self.noouttest(command)
 
     def testall(self):
-        command = "search cluster --cluster_type esx --all"
+        command = "search cluster --cluster_type esx"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "utecl1", command)
         self.matchoutput(out, "utecl2", command)
@@ -181,7 +181,7 @@ class TestSearchClusterESX(TestBrokerCommand):
         self.matchoutput(out, "utecl4", command)
 
     def testallfull(self):
-        command = "search cluster --cluster_type esx --all --fullinfo"
+        command = "search cluster --cluster_type esx --fullinfo"
         out = self.commandtest(command.split(" "))
         # This is a good sampling, but not the full output
         self.matchoutput(out, "ESX Cluster: utecl1", command)
