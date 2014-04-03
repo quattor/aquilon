@@ -229,7 +229,8 @@
          <option name="cpuspeed" type="int">cpu speed</option>
          <option name="cpucount" type="int">cpu count</option>
          <option name="memory" type="int">memory in MB</option>
-         <option name="cluster" type="string">cluster or metacluster name</option>
+         <option name="cluster" type="string" conflicts="vmhost">Cluster name hosting the VM</option>
+         <option name="vmhost" type="string" conflicts="cluster">Hypervisor host name</option>
          <option name="model" type="string">model name</option>
          <option name="machine_type" type="enum" enum="MachineType">machine type for the model (blade, virtual_machine, etc.)</option>
          <option name="vendor" type="string">vendor name</option>
@@ -239,7 +240,13 @@
          <option name="interface_vendor" type="string">Having an interface of the given vendor</option>
          <option name="pg" type="string">port group of an attached interface</option>
          <option name="serial" type="string">serial number</option>
-         <option name="share" type="string">nas_disk_share in use by a virtual machine</option>
+         <option name="disk_name" type="string">Disk name</option>
+         <option name="disk_size" type="int">Disk size</option>
+         <option name="disk_controller" type="string">Disk controller</option>
+         <option name="disk_wwn" type="string">Disk WWN</option>
+         <option name="disk_share" type="string" conflicts="disk_filesystem">NAS share backing the virtual disk image</option>
+         <option name="disk_filesystem" type="string" conflicts="disk_share">Filesystem name backing the virtual disk image</option>
+         <option name="share" type="string">DEPRECATED. Share in use by a virtual machine</option>
          <optgroup name="search_machine_location_opts" fields="any">
 	    <option name="organization" type="string">Organization</option>
 	    <option name="hub" type="string">Hub</option>
@@ -254,6 +261,8 @@
 	    <option name="desk" type="string">Desk</option>
          </optgroup>
          <option name="exact_location" type="flag">match the location exactly</option>
+         <option name="chassis" type="string">Chassis name</option>
+         <option name="slot" type="int">Chassis slot number</option>
       </optgroup>
       <optgroup name="search_system_prefs" mandatory="False">
          <option name="fullinfo" type="flag">show full information for the machine</option>

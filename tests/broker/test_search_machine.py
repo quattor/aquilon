@@ -63,7 +63,6 @@ class TestSearchMachine(TestBrokerCommand):
         self.matchclean(out, "ut", command)
 
     def testhost(self):
-        hostname = self.config.get("unittest", "hostname")
         command = "search machine --hostname ut3c5n10.aqd-unittest.ms.com"
         out = self.notfoundtest(command.split(" "))
         self.matchoutput(out, "DnsRecord ut3c5n10.aqd-unittest.ms.com, "
@@ -78,9 +77,9 @@ class TestSearchMachine(TestBrokerCommand):
     def testhost_not_found(self):
         hostname = 'not_there.msad.ms.com'
         command = "search machine --hostname %s" % hostname
-        out = self.notfoundtest(command.split(" "))
+        self.notfoundtest(command.split(" "))
         command = "search machine --hostname %s --fullinfo" % hostname
-        out = self.notfoundtest(command.split(" "))
+        self.notfoundtest(command.split(" "))
 
     def testmemory(self):
         command = "search machine --memory 8192"
@@ -142,8 +141,15 @@ class TestSearchMachine(TestBrokerCommand):
         self.matchclean(out, "ut9s03p1", command)
         self.matchclean(out, "ut3c5n10", command)
 
-    def testshare(self):
+    def testsharedeprecated(self):
         command = ["search_machine", "--share=test_share_1"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "evm1", command)
+        self.matchclean(out, "evm2", command)
+        self.matchclean(out, "evm10", command)
+
+    def testdiskshare(self):
+        command = ["search_machine", "--disk_share=test_share_1"]
         out = self.commandtest(command)
         self.matchoutput(out, "evm1", command)
         self.matchclean(out, "evm2", command)
@@ -154,6 +160,27 @@ class TestSearchMachine(TestBrokerCommand):
         out = self.notfoundtest(command)
         self.matchoutput(out, "No shares found with name no-such-share.",
                          command)
+
+    def testdiskname(self):
+        command = ["search_machine", "--disk_name", "c0d0"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "ut3c1n3", command)
+        self.matchclean(out, "ut3c5n10", command)
+        self.matchclean(out, "evm", command)
+
+    def testdiskctrl(self):
+        command = ["search_machine", "--disk_name", "c0d0",
+                   "--disk_controller", "scsi"]
+        self.noouttest(command)
+
+    def testdiskwwn(self):
+        # Add some separators and uppercase letters to the mix
+        command = ["search_machine", "--disk_wwn",
+                   "60:05:08:b112233445566778899aabbCCD"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "ut3c1n3", command)
+        self.matchclean(out, "ut3c5n10", command)
+        self.matchclean(out, "evm", command)
 
     def testip(self):
         ip = self.net["unknown0"].usable[2]

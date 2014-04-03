@@ -212,13 +212,22 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, MachineTestMixin,
         out = self.commandtest(command)
         self.matchclean(out, "snapshot", command)
 
+    def test_145_search_machine_filesystem(self):
+        command = ["search_machine", "--disk_filesystem", "utfs1"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "utpgm0", command)
+        self.matchoutput(out, "utpgm1", command)
+        self.matchoutput(out, "utpgm2", command)
+        self.matchclean(out, "evm", command)
+        self.matchclean(out, "ut3", command)
+        self.matchclean(out, "ut5", command)
+
     def test_150_verifyutfs1(self):
         command = ["show_filesystem", "--filesystem=utfs1"]
         out = self.commandtest(command)
         self.matchoutput(out, "Filesystem: utfs1", command)
         self.matchoutput(out, "Bound to: Host %s" % self.vmhost[0], command)
         self.matchoutput(out, "Virtual Disk Count: 3", command)
-
 
     def test_155_catutpgm0(self):
         command = ["cat", "--machine", "utpgm0"]
@@ -227,7 +236,6 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, MachineTestMixin,
         self.matchoutput(out, '"filesystemname", "utfs1",', command)
         self.matchoutput(out, '"mountpoint", "/mnt",', command)
         self.matchoutput(out, '"path", "utpgm0/sda.vmdk"', command)
-
 
     def test_160_addinterfaces(self):
         # TODO: fixed mac addresses grabbed from test_vulcan2 until automac\pg
@@ -240,7 +248,7 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, MachineTestMixin,
 
     def test_170_add_vm_hosts(self):
         ip = self.net["utpgsw0-v710"].usable[0]
-        self.dsdb_expect_add("utpgm0.aqd-unittest.ms.com", ip, "eth0", "00:50:56:01:20:00" )
+        self.dsdb_expect_add("utpgm0.aqd-unittest.ms.com", ip, "eth0", "00:50:56:01:20:00")
         command = ["add", "host", "--hostname", "utpgm0.aqd-unittest.ms.com",
                    "--ip", ip,
                    "--machine", "utpgm0",
@@ -249,7 +257,6 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, MachineTestMixin,
                    "--personality", "virteng-perf-test"]
         self.noouttest(command)
         self.dsdb_verify()
-
 
     def test_175_make_vm_host(self):
         basetime = datetime.now()
@@ -300,7 +307,6 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, MachineTestMixin,
             out = self.commandtest(command)
             self.matchoutput(out, "Rack: ut13", command)
 
-
     # Move uptpgm back and forth utpg0 / utlccl2
     def test_240_fail_move_vm_disks(self):
         command = ["update_machine", "--machine", "utpgm0",
@@ -327,6 +333,13 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, MachineTestMixin,
         out = self.commandtest(command)
         self.matchoutput(out, "Hosted by: ESX Cluster utlccl1", command)
 
+    def test_265_search_machine_vmhost(self):
+        command = ["search_machine", "--vmhost", self.vmhost[0]]
+        out = self.commandtest(command)
+        self.matchoutput(out, "utpgm1", command)
+        self.matchoutput(out, "utpgm2", command)
+        self.matchclean(out, "utpgm0", command)
+
     def test_270_move_vm_to_vmhost(self):
         self.noouttest(["update", "machine", "--machine", "utpgm0",
                         "--vmhost", self.vmhost[0]])
@@ -335,7 +348,6 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, MachineTestMixin,
         out = self.commandtest(command)
         self.matchoutput(out, "Hosted by: Host utpgh0.aqd-unittest.ms.com",
                          command)
-
 
     # deleting fs before depending disk would drop them as well
     def test_295_delvmfs(self):

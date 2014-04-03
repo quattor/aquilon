@@ -187,7 +187,7 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
         self.matchoutput(out, "Model Type: blade", command)
 
     def testshowchassisslot(self):
-        command = "show machine --chassis ut3c1.aqd-unittest.ms.com --slot 3"
+        command = "search machine --chassis ut3c1.aqd-unittest.ms.com --slot 3 --fullinfo"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Machine: ut3c1n3", command)
         self.matchoutput(out, "Model Type: blade", command)
