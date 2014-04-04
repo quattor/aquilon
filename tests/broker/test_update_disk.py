@@ -103,8 +103,8 @@ class TestUpdateDisk(TestBrokerCommand):
         command = ["show", "machine", "--machine", "evm10"]
         out = self.commandtest(command)
         self.matchoutput(out,
-                         "Disk: sda 45 GB scsi (virtual_localdisk from "
-                         "disk_update_test) [boot, snapshot]",
+                         "Disk: sda 45 GB scsi (virtual_disk stored on "
+                         "filesystem disk_update_test) [boot, snapshot]",
                          command)
         self.matchclean(out, "utecl5_share", command)
 
@@ -145,8 +145,8 @@ class TestUpdateDisk(TestBrokerCommand):
         command = ["show", "machine", "--machine", "evm10"]
         out = self.commandtest(command)
         self.matchoutput(out,
-                         "Disk: sda 45 GB scsi (virtual_disk from "
-                         "utecl5_share) [boot]",
+                         "Disk: sda 45 GB scsi (virtual_disk stored on "
+                         "share utecl5_share) [boot]",
                          command)
         self.matchclean(out, "disk_update_test", command)
 

@@ -47,7 +47,7 @@ class ServiceInstanceServerFormatter(ObjectFormatter):
         if attrs:
             msg += " [" + ", ".join(attrs) + "]"
 
-        return(indent + "Server Binding: %s" % msg)
+        return indent + "Server Binding: %s" % msg
 
 ObjectFormatter.handlers[ServiceInstanceServer] = ServiceInstanceServerFormatter()
 
@@ -110,8 +110,8 @@ class ServiceShareListFormatter(ObjectFormatter):
                                            "machines": 0,
                                            "server": share_info.server,
                                            "mount": share_info.mount}
-            sharedata[dbshare.name]["disks"] += dbshare.disk_count
-            sharedata[dbshare.name]["machines"] += dbshare.machine_count
+            sharedata[dbshare.name]["disks"] += dbshare.virtual_disk_count
+            sharedata[dbshare.name]["machines"] += dbshare.virtual_machine_count
 
         details = []
 

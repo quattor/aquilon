@@ -32,8 +32,8 @@ class ShareFormatter(ResourceFormatter):
 
         details.append(indent + "  Server: %s" % share.server)
         details.append(indent + "  Mountpoint: %s" % share.mount)
-        details.append(indent + "  Disk Count: %d" % share.disk_count)
-        details.append(indent + "  Machine Count: %d" % share.machine_count)
+        details.append(indent + "  Disk Count: %d" % share.virtual_disk_count)
+        details.append(indent + "  Machine Count: %d" % share.virtual_machine_count)
 
         return details
 
@@ -44,7 +44,7 @@ class ShareFormatter(ResourceFormatter):
             skeleton.share.server = share.server
         if share.mount:
             skeleton.share.mount = share.mount
-        skeleton.share.disk_count = share.disk_count
-        skeleton.share.machine_count = share.machine_count
+        skeleton.share.disk_count = share.virtual_disk_count
+        skeleton.share.machine_count = share.virtual_machine_count
 
 ObjectFormatter.handlers[Share] = ShareFormatter()

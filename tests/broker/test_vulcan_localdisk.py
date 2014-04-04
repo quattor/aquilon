@@ -172,7 +172,8 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, MachineTestMixin,
 
         out = self.notfoundtest(command)
         self.matchoutput(out,
-                         "Not Found: Filesystem utfs1n, hostresource instance not found.",
+                         "Host utpgh0.aqd-unittest.ms.com does not have "
+                         "filesystem utfs1n assigned to it.",
                          command)
 
     def test_125_addvmfs(self):
@@ -205,7 +206,7 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, MachineTestMixin,
             command = ["show", "machine", "--machine", machine]
             out = self.commandtest(command)
 
-            self.searchoutput(out, r"Disk: sda 34 GB scsi \(virtual_localdisk from utfs1\) \[boot\]$",
+            self.searchoutput(out, r"Disk: sda 34 GB scsi \(virtual_disk stored on filesystem utfs1\) \[boot\]$",
                               command)
 
         command = ["cat", "--machine", "utpgm0", "--generate"]

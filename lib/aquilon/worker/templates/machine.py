@@ -22,7 +22,8 @@ import logging
 from sqlalchemy.inspection import inspect
 
 from aquilon.exceptions_ import InternalError
-from aquilon.aqdb.model import Machine
+from aquilon.aqdb.model import (Machine, LocalDisk, VirtualDisk, Share,
+                                Filesystem)
 from aquilon.worker.locks import CompileKey, NoLockKey
 from aquilon.worker.templates import (Plenary, StructurePlenary,
                                       add_location_info)
@@ -89,30 +90,25 @@ class PlenaryMachineInfo(StructurePlenary):
             if hasattr(disk, "snapshotable") and disk.snapshotable is not None:
                 params["snapshot"] = disk.snapshotable
 
-            if disk.disk_type == 'local':
+            if isinstance(disk, LocalDisk):
                 tpl = StructureTemplate("hardware/harddisk/generic/%s" %
                                         disk.controller_type, params)
 
                 if disk.controller_type == 'cciss':
                     devname = "cciss/" + devname
-            elif disk.disk_type == 'virtual_disk':
-                share = disk.share
+            elif isinstance(disk, VirtualDisk):
+                dbres = disk.backing_store
 
                 params["path"] = "%s/%s.vmdk" % (self.dbobj.label, disk.device_name)
                 params["address"] = disk.address
-                params["sharename"] = share.name
-                params["server"] = share.server
-                params["mountpoint"] = share.mount
 
-                tpl = params
-
-            elif disk.disk_type == 'virtual_localdisk':
-                filesystem = disk.filesystem
-
-                params["path"] = "%s/%s.vmdk" % (self.dbobj.label, disk.device_name)
-                params["address"] = disk.address
-                params["filesystemname"] = filesystem.name
-                params["mountpoint"] = filesystem.mountpoint
+                if isinstance(dbres, Share):
+                    params["sharename"] = dbres.name
+                    params["server"] = dbres.server
+                    params["mountpoint"] = dbres.mount
+                elif isinstance(dbres, Filesystem):
+                    params["filesystemname"] = dbres.name
+                    params["mountpoint"] = dbres.mountpoint
 
                 tpl = params
 

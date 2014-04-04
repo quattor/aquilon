@@ -20,9 +20,9 @@ from sqlalchemy.orm import subqueryload, joinedload, lazyload
 
 from aquilon.exceptions_ import NotFoundException
 from aquilon.aqdb.model import (Machine, Cpu, Cluster, ClusterResource,
-                                HostResource, Share, Filesystem, Disk,
-                                VirtualNasDisk, VirtualLocalDisk, MetaCluster,
-                                DnsRecord, Chassis, ChassisSlot)
+                                HostResource, Resource, Share, Filesystem, Disk,
+                                VirtualDisk, MetaCluster, DnsRecord, Chassis,
+                                ChassisSlot)
 from aquilon.utils import force_wwn
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.hardware_entity import (
@@ -101,22 +101,22 @@ class CommandSearchMachine(BrokerCommand):
                 if not v2shares.count():
                     raise NotFoundException("No shares found with name {0}."
                                             .format(share))
-                q = q.join(Machine.disks.of_type(VirtualNasDisk))
+                q = q.join(Machine.disks.of_type(VirtualDisk))
             elif disk_filesystem:
                 # If --cluster was also given, then we could verify if the named
                 # filesystem is attached to the cluster - potentially inside a
                 # resourcegroup. It's not clear if that would worth the effort.
-                q = q.join(Machine.disks.of_type(VirtualLocalDisk))
+                q = q.join(Machine.disks.of_type(VirtualDisk))
             else:
                 q = q.join(Disk)
 
             if disk_options:
                 q = q.filter_by(**disk_options)
             if disk_share:
-                q = q.join(Share)
+                q = q.join(Resource, Share)
                 q = q.filter_by(name=disk_share)
             elif disk_filesystem:
-                q = q.join(Filesystem)
+                q = q.join(Resource, Filesystem)
                 q = q.filter_by(name=disk_filesystem)
 
             q = q.reset_joinpoint()
