@@ -236,14 +236,14 @@ class Plenary(object):
     def read(self):
         int_error = lambda e: \
             InternalError("Error reading plenary file %s: %s" %
-                          (self.template_name, e.strerror))
+                          (self.old_path, e.strerror))
         try:
             return open(self.old_path).read()
         except IOError, e:
             # Unable to open the file
             if e.errno == errno.ENOENT:
                 raise NotFoundException("Pleanary file %s not found" %
-                                        self.template_name)
+                                        self.old_path)
             else:
                 raise int_error(e)
         except OSError, e:
