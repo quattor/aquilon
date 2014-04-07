@@ -76,7 +76,6 @@ class Plenary(object):
         self.old_path = self.full_path(dbobj)
         self.new_path = None
         self.old_content = None
-        self.old_mtime = None
         self.stashed = False
         self.removed = False
         self.changed = False
@@ -292,7 +291,6 @@ class Plenary(object):
 
         try:
             self.old_content = self.read()
-            self.old_mtime = os.stat(self.old_path).st_atime
         except NotFoundException:
             self.old_content = None
         self.stashed = True
@@ -324,8 +322,11 @@ class Plenary(object):
         else:
             write_file(self.old_path, self.old_content, create_directory=True,
                        logger=self.logger)
-            atime = os.stat(self.old_path).st_atime
-            os.utime(self.old_path, (atime, self.old_mtime))
+            # Do not try to restore the timestamp of the plenary. If the
+            # rollback is due to just a couple of profiles failing from a large
+            # batch, we want the next domain compile to recompile the hosts that
+            # did not fail here. Otherwise, the domain compile would push out
+            # the state that got reverted in the DB.
 
     @classmethod
     def get_plenary(cls, dbobj, logger=LOGGER):
