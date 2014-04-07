@@ -3412,21 +3412,11 @@
       If the machine has multiple interfaces, then there will be a separate
       line for each.
       <optgroup name="show_machine_opts" mandatory="True" fields="any">
-         <option name="machine" type="string">machine name</option>
+         <option name="machine" type="string" conflicts="all">machine name</option>
 	 <option name="all" type="flag" conflicts="machine">all</option>
-         <optgroup name="show_machine_location_opts" mandatory="False">
-            <option name="chassis" type="string">Chassis name</option>
-	    <option name="slot" type="int">Chassis Slot</option>
-            <option name="rack" type="string">Rack name</option>
-            <option name="desk" type="string">Desk name</option>
-         </optgroup>
-         <option name="model" type="string">machine model</option>
-         <option name="vendor" type="string">machine vendor</option>
-         <option name="machine_type" type="enum" enum="MachineType">machine type</option>
       </optgroup>
       <transport trigger="all" method="get" path="machine" />
       <transport trigger="machine" method="get" path="machine/%(machine)s" />
-      <transport method="post" path="machine" />
    </command>
 
    <command name="del_machine">

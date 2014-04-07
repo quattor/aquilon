@@ -68,7 +68,7 @@ class TestUpdateMachine(TestBrokerCommand):
                         "--chassis", "ut3c5.aqd-unittest.ms.com", "--slot", "2"])
 
     def testverifyshowslot(self):
-        command = "show machine --slot 2"
+        command = "search machine --slot 2 --fullinfo"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Machine: ut3c5n10", command)
         self.matchoutput(out, "Model Type: blade", command)

@@ -109,7 +109,7 @@ class TestAddAuroraHost(TestBrokerCommand):
         self.matchoutput(out, "Primary Name: nyaqd1.ms.com", command)
 
     def testshowmachine(self):
-        command = "show machine --model aurora_model"
+        command = "search machine --model aurora_model --fullinfo"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Machine: ny00l4as01", command)
         self.matchoutput(out, "Model Type: aurora_node", command)
