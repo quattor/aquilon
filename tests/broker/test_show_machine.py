@@ -60,6 +60,35 @@ class TestShowMachine(TestBrokerCommand):
         out = self.badrequesttest(command.split(" "))
         self.matchoutput(out, "Illegal hardware label", command)
 
+    def testshowproto(self):
+        command = ["show_machine", "--machine", "ut3c1n3", "--format", "proto"]
+        out = self.commandtest(command)
+        machinelist = self.parse_machine_msg(out, expect=1)
+        machine = machinelist.machines[0]
+        self.assertEqual(machine.name, "ut3c1n3")
+        self.assertEqual(machine.host, "unittest00.one-nyp.ms.com")
+        self.assertEqual(machine.location.name, "ut3")
+        self.assertEqual(machine.model.name, "hs21-8853l5u")
+        self.assertEqual(machine.model.vendor, "ibm")
+        self.assertEqual(machine.cpu, "xeon_2660")
+        self.assertEqual(machine.cpu_count, 2)
+        self.assertEqual(machine.memory, 8192)
+        self.assertEqual(machine.serial_no, "KPDZ406")
+        self.assertEqual(len(machine.interfaces), 3)
+        self.assertEqual(len(machine.disks), 2)
+        self.assertEqual(machine.disks[0].device_name, "c0d0")
+        self.assertEqual(machine.disks[0].disk_type, "cciss")
+        self.assertEqual(machine.disks[0].capacity, 34)
+        self.assertEqual(machine.disks[0].address, "")
+        self.assertEqual(machine.disks[0].bus_address, "pci:0000:01:00.0")
+        self.assertEqual(machine.disks[0].wwn,
+                         "600508b112233445566778899aabbccd")
+        self.assertEqual(machine.disks[1].device_name, "sda")
+        self.assertEqual(machine.disks[1].disk_type, "scsi")
+        self.assertEqual(machine.disks[1].capacity, 68)
+        self.assertEqual(machine.disks[1].address, "")
+        self.assertEqual(machine.disks[1].bus_address, "")
+        self.assertEqual(machine.disks[1].wwn, "")
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestShowMachine)

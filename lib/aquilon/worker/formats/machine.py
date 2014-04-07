@@ -167,4 +167,10 @@ class MachineFormatter(HardwareEntityFormatter):
                 details.extend([None, None, None])
             yield details
 
+    def format_proto(self, machine, container):
+        skeleton = container.machines.add()
+        self.add_hardware_data(skeleton, machine)
+        if machine.host:
+            skeleton.host = str(machine.primary_name)
+
 ObjectFormatter.handlers[Machine] = MachineFormatter()

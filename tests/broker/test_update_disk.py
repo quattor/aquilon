@@ -54,6 +54,24 @@ class TestUpdateDisk(TestBrokerCommand):
                           r'Controller Bus Address: pci:0000:01:00.0$',
                           command)
 
+    def test_105_show_ut3c1n3_proto(self):
+        command = ["show_machine", "--machine", "ut3c1n3", "--format", "proto"]
+        out = self.commandtest(command)
+        machinelist = self.parse_machine_msg(out, expect=1)
+        machine = machinelist.machines[0]
+        self.assertEqual(machine.name, "ut3c1n3")
+        self.assertEqual(len(machine.disks), 2)
+        self.assertEqual(machine.disks[0].device_name, "c0d1")
+        self.assertEqual(machine.disks[0].capacity, 34)
+        self.assertEqual(machine.disks[0].disk_type, "cciss")
+        self.assertEqual(machine.disks[0].wwn, "600508b112233445566778899aabbccd")
+        self.assertEqual(machine.disks[0].bus_address, "pci:0000:01:00.0")
+        self.assertEqual(machine.disks[1].device_name, "sda")
+        self.assertEqual(machine.disks[1].capacity, 50)
+        self.assertEqual(machine.disks[1].disk_type, "sata")
+        self.assertEqual(machine.disks[1].address, "0:0:0:0")
+        self.assertEqual(machine.disks[1].bus_address, "pci:0000:02:00.0")
+
     def test_105_cat_ut3c1n3(self):
         command = "cat --machine ut3c1n3"
         out = self.commandtest(command.split(" "))

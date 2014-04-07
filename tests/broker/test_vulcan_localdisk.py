@@ -213,6 +213,23 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, MachineTestMixin,
         out = self.commandtest(command)
         self.matchclean(out, "snapshot", command)
 
+    def test_141_verify_proto(self):
+        command = ["show_machine", "--machine", "utpgm0", "--format", "proto"]
+        out = self.commandtest(command)
+        machinelist = self.parse_machine_msg(out, expect=1)
+        machine = machinelist.machines[0]
+        self.assertEqual(machine.name, "utpgm0")
+        self.assertEqual(len(machine.disks), 1)
+        self.assertEqual(machine.disks[0].device_name, "sda")
+        self.assertEqual(machine.disks[0].disk_type, "scsi")
+        self.assertEqual(machine.disks[0].capacity, 34)
+        self.assertEqual(machine.disks[0].address, "0:0")
+        self.assertEqual(machine.disks[0].bus_address, "")
+        self.assertEqual(machine.disks[0].wwn, "")
+        self.assertEqual(machine.disks[0].snapshotable, False)
+        self.assertEqual(machine.disks[0].backing_store.name, "utfs1")
+        self.assertEqual(machine.disks[0].backing_store.type, "filesystem")
+
     def test_145_search_machine_filesystem(self):
         command = ["search_machine", "--disk_filesystem", "utfs1"]
         out = self.commandtest(command)

@@ -23,7 +23,7 @@ from operator import attrgetter
 
 from aquilon.config import Config
 from aquilon.exceptions_ import ProtocolError, InternalError
-from aquilon.aqdb.model import Host
+from aquilon.aqdb.model import Host, Machine, VirtualDisk
 from aquilon.worker.processes import build_mako_lookup
 
 # Note: the built-in "excel" dialect uses '\r\n' for line ending and that breaks
@@ -229,16 +229,41 @@ class ObjectFormatter(object):
                 p.location_type = str(parent.location_type)
         hw_msg.model.name = str(hwent.model.name)
         hw_msg.model.vendor = str(hwent.model.vendor.name)
+        if hwent.serial_no:
+            hw_msg.serial_no = str(hwent.serial_no)
 
-        if hwent.hardware_type == 'machine':
+        if isinstance(hwent, Machine):
             hw_msg.cpu = str(hwent.cpu.name)
+            hw_msg.cpu_count = hwent.cpu_quantity
             hw_msg.memory = hwent.memory
+            if hwent.uri:
+                hw_msg.uri = hwent.uri
 
             for disk in sorted(hwent.disks, key=attrgetter('device_name')):
                 disk_msg = hw_msg.disks.add()
                 disk_msg.device_name = str(disk.device_name)
                 disk_msg.capacity = disk.capacity
                 disk_msg.disk_type = str(disk.controller_type)
+                if disk.wwn:
+                    disk_msg.wwn = str(disk.wwn)
+                if disk.address:
+                    disk_msg.address = str(disk.address)
+                if disk.bus_address:
+                    disk_msg.bus_address = str(disk.bus_address)
+                if isinstance(disk, VirtualDisk):
+                    if disk.snapshotable is not None:
+                        disk_msg.snapshotable = disk.snapshotable
+                    self.add_resource_data(disk_msg.backing_store,
+                                           disk.backing_store)
+
+        def add_iface_data(int_msg, iface):
+            if iface.mac:
+                int_msg.mac = iface.mac
+            if iface.bus_address:
+                int_msg.bus_address = str(iface.bus_address)
+            int_msg.bootable = iface.bootable
+            int_msg.model.name = str(iface.model.name)
+            int_msg.model.vendor = str(iface.model.vendor.name)
 
         for iface in sorted(hwent.interfaces, key=attrgetter('name')):
             has_addrs = False
@@ -246,10 +271,8 @@ class ObjectFormatter(object):
                 has_addrs = True
                 int_msg = hw_msg.interfaces.add()
                 int_msg.device = str(addr.logical_name)
-                if iface.mac:
-                    int_msg.mac = str(iface.mac)
+                add_iface_data(int_msg, iface)
                 int_msg.ip = str(addr.ip)
-                int_msg.bootable = iface.bootable
                 int_msg.fqdn = str(addr.fqdns[0])
                 for dns_record in addr.dns_records:
                     if dns_record.alias_cnt:
@@ -260,8 +283,7 @@ class ObjectFormatter(object):
             if not has_addrs:
                 int_msg = hw_msg.interfaces.add()
                 int_msg.device = str(iface.name)
-                if iface.mac:
-                    int_msg.mac = str(iface.mac)
+                add_iface_data(int_msg, iface)
 
     def add_archetype_data(self, msg, archetype):
         msg.name = str(archetype.name)

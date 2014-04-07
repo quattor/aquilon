@@ -268,6 +268,9 @@
          <option name="chassis" type="string">Chassis name</option>
          <option name="slot" type="int">Chassis slot number</option>
       </optgroup>
+      <format name="proto">
+         <message_class name="MachineList" module="aqdsystems_pb2"/>
+      </format>
       <optgroup name="search_system_prefs" mandatory="False">
          <option name="fullinfo" type="flag">show full information for the machine</option>
       </optgroup>
@@ -3413,6 +3416,9 @@
          <option name="machine" type="string" conflicts="all">machine name</option>
 	 <option name="all" type="flag" conflicts="machine">all</option>
       </optgroup>
+      <format name="proto">
+         <message_class name="MachineList" module="aqdsystems_pb2"/>
+      </format>
       <transport trigger="all" method="get" path="machine" />
       <transport trigger="machine" method="get" path="machine/%(machine)s" />
    </command>

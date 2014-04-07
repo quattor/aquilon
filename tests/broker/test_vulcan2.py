@@ -413,6 +413,22 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
                           r"\(virtual_disk stored on share test_v2_share\) "
                           r"\[boot, snapshot\]$", command)
 
+        command = ["show_machine", "--machine", "utpgm0", "--format", "proto"]
+        out = self.commandtest(command)
+        machinelist = self.parse_machine_msg(out, expect=1)
+        machine = machinelist.machines[0]
+        self.assertEqual(machine.name, "utpgm0")
+        self.assertEqual(len(machine.disks), 1)
+        self.assertEqual(machine.disks[0].device_name, "sda")
+        self.assertEqual(machine.disks[0].disk_type, "scsi")
+        self.assertEqual(machine.disks[0].capacity, 34)
+        self.assertEqual(machine.disks[0].address, "0:0")
+        self.assertEqual(machine.disks[0].bus_address, "")
+        self.assertEqual(machine.disks[0].wwn, "")
+        self.assertEqual(machine.disks[0].snapshotable, True)
+        self.assertEqual(machine.disks[0].backing_store.name, "test_v2_share")
+        self.assertEqual(machine.disks[0].backing_store.type, "share")
+
         command = ["show_share", "--resourcegroup=utmc8as1",
                    "--cluster=utmc8", "--share=test_v2_share"]
         out = self.commandtest(command)

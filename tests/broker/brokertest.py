@@ -140,7 +140,7 @@ class TestBrokerCommand(unittest.TestCase):
                             "profiles", *template)
         return base + self.template_extension
 
-    msversion_dev_re = re.compile('WARNING:msversion:Loading \S* from dev\n')
+    msversion_dev_re = re.compile(r'WARNING:msversion:Loading \S* from dev\n')
 
     def runcommand(self, command, auth=True, **kwargs):
         aq = os.path.join(self.config.get("broker", "srcdir"), "bin", "aq.py")
@@ -407,6 +407,11 @@ class TestBrokerCommand(unittest.TestCase):
                                     'hosts',
                                     msg, expect)
 
+    def parse_machine_msg(self, msg, expect=None):
+        return self.parse_proto_msg(aqdsystems_pb2.MachineList,
+                                    'machines',
+                                    msg, expect)
+
     def parse_clusters_msg(self, msg, expect=None):
         return self.parse_proto_msg(aqdsystems_pb2.ClusterList,
                                     'clusters',
@@ -512,7 +517,7 @@ class TestBrokerCommand(unittest.TestCase):
 
     def check_git_merge_health(self, repo):
         command = "merge HEAD"
-        out = self.gitcommand(command.split(" "), cwd=repo)
+        self.gitcommand(command.split(" "), cwd=repo)
         return
 
     def grepcommand(self, command, **kwargs):
@@ -525,7 +530,6 @@ class TestBrokerCommand(unittest.TestCase):
         else:
             args = [command]
         args.insert(0, grep)
-        env = {}
         p = Popen(args, stdout=PIPE, stderr=PIPE, **kwargs)
         (out, err) = p.communicate()
         # Ignore out/err unless we get a non-zero return code, then log it.
@@ -547,7 +551,6 @@ class TestBrokerCommand(unittest.TestCase):
         else:
             args = [command]
         args.insert(0, find)
-        env = {}
         p = Popen(args, stdout=PIPE, stderr=PIPE, **kwargs)
         (out, err) = p.communicate()
         # Ignore out/err unless we get a non-zero return code, then log it.
@@ -656,8 +659,6 @@ class TestBrokerCommand(unittest.TestCase):
         self.dsdb_expect(" ".join(command), fail=fail, errstr=errstr)
 
     def dsdb_verify(self, empty=False):
-        fail_expected_name = os.path.join(self.dsdb_coverage_dir,
-                                          DSDB_EXPECT_FAILURE_FILE)
         issued_name = os.path.join(self.dsdb_coverage_dir, DSDB_ISSUED_CMDS_FILE)
 
         expected = {}
@@ -744,4 +745,3 @@ class TestBrokerCommand(unittest.TestCase):
         depr_log = logfile.xreadlines()
         self.assertTrue([elem for elem in depr_log if depr_str in elem])
         logfile.close()
-
