@@ -258,7 +258,7 @@ class TestMake(TestBrokerCommand):
                                     self.net["zebra_eth1"][2]),
                           command)
         self.searchoutput(out,
-                          r'"eth0", nlist\(\s*'
+                          r'"system/network/interfaces/eth0" = nlist\(\s*'
                           r'"bootproto", "static",\s*'
                           r'"broadcast", "%s",\s*'
                           r'"fqdn", "unittest20-e0.aqd-unittest.ms.com",\s*'
@@ -266,11 +266,11 @@ class TestMake(TestBrokerCommand):
                           r'"ip", "%s",\s*'
                           r'"netmask", "%s",\s*'
                           r'"network_environment", "internal",\s*'
-                          r'"network_type", "unknown"\s*\)\s*' %
+                          r'"network_type", "unknown"\s*\);' %
                           (eth0_broadcast, eth0_gateway, eth0_ip, eth0_netmask),
                           command)
         self.searchoutput(out,
-                          r'"eth1", nlist\(\s*'
+                          r'"system/network/interfaces/eth1" = nlist\(\s*'
                           r'"aliases", nlist\(\s*'
                           r'"e1", nlist\(\s*'
                           r'"broadcast", "%s",\s*'
@@ -284,7 +284,7 @@ class TestMake(TestBrokerCommand):
                           r'"ip", "%s",\s*'
                           r'"netmask", "%s",\s*'
                           r'"network_environment", "internal",\s*'
-                          r'"network_type", "unknown"\s*\)\s*' %
+                          r'"network_type", "unknown"\s*\);' %
                           (eth1_broadcast, eth1_1_ip, eth1_netmask,
                            eth1_broadcast, eth1_gateway, eth1_ip, eth1_netmask),
                           command)
@@ -364,7 +364,7 @@ class TestMake(TestBrokerCommand):
         ip = net.usable[1]
         router = net[1]
         self.searchoutput(out,
-                          r'"eth0", nlist\(\s*'
+                          r'"system/network/interfaces/eth0" = nlist\(\s*'
                           r'"bootproto", "static",\s*'
                           r'"broadcast", "%s",\s*'
                           r'"fqdn", "unittest23.aqd-unittest.ms.com",\s*'
@@ -372,7 +372,7 @@ class TestMake(TestBrokerCommand):
                           r'"ip", "%s",\s*'
                           r'"netmask", "%s",\s*'
                           r'"network_environment", "internal",\s*'
-                          r'"network_type", "vpls"\s*\)\s*' %
+                          r'"network_type", "vpls"\s*\);' %
                           (net.broadcast, router, ip, net.netmask),
                           command)
         self.matchoutput(out, '"system/network/default_gateway" = \"%s\";' %
@@ -396,7 +396,7 @@ class TestMake(TestBrokerCommand):
         ip = net.usable[2]
         router = net[2]
         self.searchoutput(out,
-                          r'"eth0", nlist\(\s*'
+                          r'"system/network/interfaces/eth0" = nlist\(\s*'
                           r'"bootproto", "static",\s*'
                           r'"broadcast", "%s",\s*'
                           r'"fqdn", "unittest24.aqd-unittest.ms.com",\s*'
@@ -404,7 +404,7 @@ class TestMake(TestBrokerCommand):
                           r'"ip", "%s",\s*'
                           r'"netmask", "%s",\s*'
                           r'"network_environment", "internal",\s*'
-                          r'"network_type", "vpls"\s*\)\s*' %
+                          r'"network_type", "vpls"\s*\);' %
                           (net.broadcast, router, ip, net.netmask),
                           command)
         self.matchoutput(out, '"system/network/default_gateway" = \"%s\";' %
@@ -428,7 +428,7 @@ class TestMake(TestBrokerCommand):
         ip = net[4]
         router = net[2]
         self.searchoutput(out,
-                          r'"eth1", nlist\(\s*'
+                          r'"system/network/interfaces/eth1" = nlist\(\s*'
                           r'"bootproto", "static",\s*'
                           r'"broadcast", "%s",\s*'
                           r'"fqdn", "unittest25-e1.utcolo.aqd-unittest.ms.com",\s*'
@@ -436,7 +436,7 @@ class TestMake(TestBrokerCommand):
                           r'"ip", "%s",\s*'
                           r'"netmask", "%s",\s*'
                           r'"network_environment", "utcolo",\s*'
-                          r'"network_type", "unknown"\s*\)\s*' %
+                          r'"network_type", "unknown"\s*\);' %
                           (net.broadcast, router, ip, net.netmask),
                           command)
         self.matchoutput(out, '"system/network/default_gateway" = "%s";' %

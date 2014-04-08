@@ -290,10 +290,10 @@ class TestAddVirtualHardware(TestBrokerCommand):
                               r'create\("hardware/cpu/intel/xeon_5150"\)\s*\);',
                               command)
             self.searchoutput(out,
-                              r'"cards/nic" = nlist\(\s*'
-                              r'"eth0", create\("hardware/nic/utvirt/default",\s*'
+                              r'"cards/nic/eth0" = '
+                              r'create\("hardware/nic/utvirt/default",\s*'
                               r'"boot", true,\s*'
-                              r'"hwaddr", "00:50:56:01:20:%02x"\s*\)\s*\);'
+                              r'"hwaddr", "00:50:56:01:20:%02x"\s*\);'
                               % (i - 1),
                               command)
 
@@ -392,10 +392,10 @@ class TestAddVirtualHardware(TestBrokerCommand):
         # Updating the model of the machine changes the NIC model from
         # utvirt/default to generic/generic_nic
         self.searchoutput(out,
-                          r'"cards/nic" = nlist\(\s*'
-                          r'"eth0", create\("hardware/nic/generic/generic_nic",\s*'
+                          r'"cards/nic/eth0" = '
+                          r'create\("hardware/nic/generic/generic_nic",\s*'
                           r'"boot", true,\s*'
-                          r'"hwaddr", "00:50:56:01:20:00"\s*\)\s*\);',
+                          r'"hwaddr", "00:50:56:01:20:00"\s*\);',
                           command)
 
     def test_552_verifyshowupdate(self):
