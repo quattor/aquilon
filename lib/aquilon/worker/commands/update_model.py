@@ -91,7 +91,7 @@ class CommandUpdateModel(BrokerCommand):
             raise UnimplementedError("Cannot (yet) change a model's "
                                      "machine type.")
 
-        if comments:
+        if comments is not None:
             dbmodel.comments = comments
             # The comments also do not affect the templates.
 

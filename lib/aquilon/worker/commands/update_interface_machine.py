@@ -97,7 +97,7 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
                 raise ArgumentError("{0} is not a slave.".format(dbinterface))
             dbinterface.master = None
 
-        if comments:
+        if comments is not None:
             dbinterface.comments = comments
 
         if boot:

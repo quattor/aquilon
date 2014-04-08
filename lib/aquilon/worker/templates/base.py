@@ -26,7 +26,7 @@ from sqlalchemy.inspection import inspect
 
 from aquilon.exceptions_ import InternalError, IncompleteError, NotFoundException
 from aquilon.config import Config
-from aquilon.aqdb.model import Base
+from aquilon.aqdb.model import Base, Sandbox
 from aquilon.worker.locks import lock_queue, CompileKey, NoLockKey
 from aquilon.worker.processes import build_mako_lookup
 from aquilon.worker.formats.formatters import ObjectFormatter
@@ -235,14 +235,14 @@ class Plenary(object):
     def read(self):
         int_error = lambda e: \
             InternalError("Error reading plenary file %s: %s" %
-                          (self.template_name, e.strerror))
+                          (self.old_path, e.strerror))
         try:
             return open(self.old_path).read()
         except IOError, e:
             # Unable to open the file
             if e.errno == errno.ENOENT:
                 raise NotFoundException("Pleanary file %s not found" %
-                                        self.template_name)
+                                        self.old_path)
             else:
                 raise int_error(e)
         except OSError, e:
@@ -411,7 +411,7 @@ class ObjectPlenary(Plenary):
                    self.dbobj.branch.name)
         pan_assign(lines, "/metadata/template/branch/type",
                    self.dbobj.branch.branch_type)
-        if self.dbobj.branch.branch_type == 'sandbox':
+        if isinstance(self.dbobj.branch, Sandbox):
             pan_assign(lines, "/metadata/template/branch/author",
                        self.dbobj.sandbox_author.name)
         lines.append("")
@@ -433,12 +433,10 @@ class ObjectPlenary(Plenary):
             self.stash()
 
             # Only one or the other of .xml/.xml.gz should be there...
-            # it doesn't hurt to clean up both.
-            # .xml.dep is used up to and including panc 9.2
-            # .dep is used by panc 9.4 and higher
+            # It doesn't hurt to clean up both.
             basename = os.path.join(self.config.get("broker", "quattordir"),
                                     "build", self.old_branch, self.old_name)
-            for ext in (".xml", ".xml.gz", ".xml.dep", ".dep"):
+            for ext in (".xml", ".xml.gz", ".dep"):
                 remove_file(basename + ext, logger=self.logger)
             try:
                 os.removedirs(os.path.dirname(basename))

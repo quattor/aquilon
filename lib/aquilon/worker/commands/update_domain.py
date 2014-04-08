@@ -36,7 +36,7 @@ class CommandUpdateDomain(BrokerCommand):
             raise AuthorizationException("Only the owner or an AQD admin can "
                                          "update a domain.")
 
-        if comments:
+        if comments is not None:
             dbdomain.comments = comments
         if compiler_version:
             dbdomain.compiler = expand_compiler(self.config, compiler_version)

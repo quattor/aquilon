@@ -86,7 +86,7 @@
 		<var name="delete.dep.includes" value="" />
 		<for list="${object.profile}" delimiter=" " param="profile">
 			<sequential>
-				<var name="delete.dep.includes" value="${compiled.includes} @{profile}.dep @{profile}.xml.dep" />
+				<var name="delete.dep.includes" value="${compiled.includes} @{profile}.dep" />
 			</sequential>
 		</for>
 		<delete failonerror="false">
@@ -97,7 +97,6 @@
 	<!-- See comment above delete.object.dep. -->
 	<target name="delete.domain.deps" description="remove domain dep files" if="clean.dep.files">
 		<delete failonerror="false">
-			<fileset dir="${compiled.profiles}" includes="*.xml.dep" />
 			<fileset dir="${compiled.profiles}" includes="*.dep" />
 		</delete>
 	</target>

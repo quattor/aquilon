@@ -151,11 +151,8 @@ class ClusterFormatter(ObjectFormatter):
             details.append(indent + "  Resources used by VMs: %s" % usagestr)
         details.append(self.redirect_raw(cluster.status, indent + "  "))
         details.append(self.redirect_raw(cluster.personality, indent + "  "))
-        if cluster.branch.branch_type == 'domain':
-            details.append(indent + "  Domain: %s" % cluster.branch.name)
-        else:
-            details.append(indent + "  Sandbox: %s/%s" %
-                           (cluster.sandbox_author.name, cluster.branch.name))
+        details.append(indent + "  {0:c}: {1}"
+                       .format(cluster.branch, cluster.authored_branch))
         for dbsi in cluster.service_bindings:
             details.append(indent +
                            "  Member Alignment: Service %s Instance %s" %

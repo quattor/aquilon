@@ -563,6 +563,13 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
         self.matchoutput(out, "filer1.ms.com", command)
         self.matchoutput(out, "f5test.aqd-unittest.ms.com", command)
 
+    # TODO: better place for this test?
+    def testcatfail(self):
+        command = ["cat", "--hostname", "unittest02.one-nyp.ms.com"]
+        out = self.notfoundtest(command)
+        profile = self.build_profile_name("unittest02.one-nyp.ms.com",
+                                          domain="unittest")
+        self.matchoutput(out, "Pleanary file %s not found" % profile, command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddHost)

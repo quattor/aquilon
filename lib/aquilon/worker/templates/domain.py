@@ -23,13 +23,24 @@ import logging
 from aquilon.config import Config, lookup_file_path
 from aquilon.exceptions_ import ArgumentError, ProcessException, InternalError
 from aquilon.aqdb.model import (Host, Cluster, Fqdn, DnsRecord, HardwareEntity,
-                                Machine)
+                                Machine, Sandbox, Domain)
 from aquilon.worker.logger import CLIENT_INFO
 from aquilon.notify.index import trigger_notifications
 from aquilon.worker.processes import run_command
 from aquilon.worker.locks import lock_queue, CompileKey
 
 LOGGER = logging.getLogger(__name__)
+
+
+def template_branch_basedir(config, dbbranch, dbauthor=None):
+    if isinstance(dbbranch, Sandbox):
+        if not dbauthor:
+            raise InternalError("Missing required author to compile "
+                                "{0:l}." % dbbranch)
+        return os.path.join(config.get("broker", "templatesdir"),
+                            dbauthor.name, dbbranch.name)
+    else:
+        return os.path.join(config.get("broker", "domainsdir"), dbbranch.name)
 
 
 class TemplateDomain(object):
@@ -46,7 +57,7 @@ class TemplateDomain(object):
         config = Config()
         dirs = []
 
-        if self.domain.branch_type == 'domain':
+        if isinstance(self.domain, Domain):
             dirs.append(os.path.join(config.get("broker", "domainsdir"),
                                      self.domain.name))
 
@@ -81,15 +92,10 @@ class TemplateDomain(object):
 
         config = Config()
 
-        if self.domain.branch_type == 'sandbox':
-            if not self.author:
-                raise InternalError("Missing required author to compile "
-                                    "sandbox %s" % self.domain.name)
-            sandboxdir = os.path.join(config.get("broker", "templatesdir"),
-                                      self.author.name, self.domain.name)
-            if not os.path.exists(sandboxdir):
-                raise ArgumentError("Sandbox directory '%s' does not exist." %
-                                    sandboxdir)
+        templatedir = template_branch_basedir(config, self.domain, self.author)
+        if not os.path.exists(templatedir):
+            raise ArgumentError("Template directory '%s' does not exist." %
+                                templatedir)
 
         self.logger.info("preparing domain %s for compile" % self.domain.name)
 
@@ -170,8 +176,8 @@ class TemplateDomain(object):
                     config.get("panc", "batch_size"))
         args.append("-Dant-contrib.jar=%s" %
                     config.get("broker", "ant_contrib_jar"))
-        if self.domain.branch_type == 'sandbox':
-            args.append("-Ddomain.templates=%s" % sandboxdir)
+        if isinstance(self.domain, Sandbox):
+            args.append("-Ddomain.templates=%s" % templatedir)
         if only:
             # Use -Dforce.build=true?
             # TODO: pass the list in a temp file

@@ -37,7 +37,7 @@ class CommandUpdateRouterAddress(BrokerCommand):
                                              compel=True)
             router.location = dbbuilding
 
-        if comments:
+        if comments is not None:
             router.comments = comments
 
         session.flush()

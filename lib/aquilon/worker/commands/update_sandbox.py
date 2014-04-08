@@ -36,7 +36,7 @@ class CommandUpdateSandbox(BrokerCommand):
             raise AuthorizationException("Only the owner or an AQD admin can "
                                          "update a sandbox.")
 
-        if comments:
+        if comments is not None:
             dbsandbox.comments = comments
         if compiler_version:
             dbsandbox.compiler = expand_compiler(self.config, compiler_version)

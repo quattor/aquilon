@@ -16,12 +16,10 @@
 # limitations under the License.
 """Branch formatter."""
 
-
-import os
-
 from aquilon.config import Config
-from aquilon.worker.formats.formatters import ObjectFormatter
 from aquilon.aqdb.model import Domain, Sandbox
+from aquilon.worker.formats.formatters import ObjectFormatter
+from aquilon.worker.templates.domain import template_branch_basedir
 
 
 class DomainFormatter(ObjectFormatter):
@@ -50,10 +48,8 @@ ObjectFormatter.handlers[Domain] = DomainFormatter()
 class AuthoredSandbox(object):
     def __init__(self, dbsandbox, dbauthor):
         self.dbsandbox = dbsandbox
-        self.dbauthor = dbauthor
         config = Config()
-        templatesdir = config.get('broker', 'templatesdir')
-        self.path = os.path.join(templatesdir, dbauthor.name, dbsandbox.name)
+        self.path = template_branch_basedir(config, dbsandbox, dbauthor)
 
     def __getattr__(self, attr):
         return getattr(self.dbsandbox, attr)

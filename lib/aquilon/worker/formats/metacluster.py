@@ -47,11 +47,8 @@ class MetaClusterFormatter(ObjectFormatter):
         details.append(indent + "  Resources used by VMs: %s" % usagestr)
         details.append(self.redirect_raw(metacluster.status, indent + "  "))
         details.append(self.redirect_raw(metacluster.personality, indent + "  "))
-        if metacluster.branch.branch_type == 'domain':
-            details.append(indent + "  Domain: %s" % metacluster.branch.name)
-        else:
-            details.append(indent + "  Sandbox: %s/%s" %
-                           (metacluster.sandbox_author.name, metacluster.branch.name))
+        details.append(indent + "  {0:c}: {1}"
+                       .format(metacluster.branch, metacluster.authored_branch))
         for dbsi in metacluster.service_bindings:
             details.append(indent +
                            "  Member Alignment: Service %s Instance %s" %

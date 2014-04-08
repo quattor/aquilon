@@ -48,7 +48,7 @@ class CommandUpdParameterDefintionArchetype(BrokerCommand):
             db_paramdef.required = required
         if rebuild_required is not None:
             db_paramdef.rebuild_required = rebuild_required
-        if description:
+        if description is not None:
             db_paramdef.description = description
 
         session.flush()

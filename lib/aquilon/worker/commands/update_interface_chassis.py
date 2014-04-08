@@ -42,9 +42,9 @@ class CommandUpdateInterfaceChassis(BrokerCommand):
 
         oldinfo = DSDBRunner.snapshot_hw(dbchassis)
 
-        if comments:
+        if comments is not None:
             dbinterface.comments = comments
-        if mac:
+        if mac is not None:
             dbinterface.mac = mac
         if rename_to:
             rename_interface(session, dbinterface, rename_to)

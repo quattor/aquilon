@@ -20,7 +20,6 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Share
 from aquilon.utils import validate_nlist_key
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.dbwrappers.resources import get_resource_holder
 from aquilon.worker.templates import Plenary, PlenaryCollection
 
 
@@ -44,10 +43,10 @@ class CommandUpdateShare(BrokerCommand):
             if latency_threshold:
                 dbshare.latency_threshold = latency_threshold
 
-            if comments:
+            if comments is not None:
                 dbshare.comments = comments
 
-                plenaries.append(Plenary.get_plenary(dbshare))
+            plenaries.append(Plenary.get_plenary(dbshare))
 
         session.flush()
         plenaries.write()

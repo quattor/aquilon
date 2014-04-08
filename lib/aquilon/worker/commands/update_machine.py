@@ -150,7 +150,7 @@ class CommandUpdateMachine(BrokerCommand):
             dbmachine.cpu_quantity = cpucount
         if memory is not None:
             dbmachine.memory = memory
-        if serial:
+        if serial is not None:
             dbmachine.serial_no = serial
 
         if ip:
