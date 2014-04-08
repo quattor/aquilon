@@ -88,6 +88,11 @@ $(COMMON)/sbin/aqdb_migrate: sbin/aqdb_migrate.py
 	sed -e '1s,^#!$(PYTHON_DEFAULT)\(.*\),#!$(PYTHON_SERVER_PROD)\1,' <$< >$@
 	chmod $(PERMS) $@
 
+$(COMMON)/sbin/aqd_consistency_check: sbin/aqd_consistency_check.py
+	@mkdir -p `dirname $@`
+	sed -e '1s,^#!$(PYTHON_DEFAULT)\(.*\),#!$(PYTHON_SERVER_PROD)\1,' <$< >$@
+	chmod $(PERMS) $@
+
 $(COMMON)/%.pyc: $(COMMON)/%.py
 	@echo "compiling $@"
 	@rm -f $@

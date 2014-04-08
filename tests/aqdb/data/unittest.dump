@@ -74,6 +74,14 @@ Domain(name="ny-prod", owner=UserPrincipal(name="cdb"),
        tracked_branch=Domain(name="prod"),
        compiler="/ms/dist/elfms/PROJ/panc/prod/lib/panc.jar",
        comments="Production source domain.")
+Domain(name="break-consistency-domain", owner=UserPrincipal(name="cdb"),
+       compiler="/ms/dist/elfms/PROJ/panc/prod/lib/panc.jar",
+       comments="Cause consistency checker to fail.")
+
+Sandbox(name="break-consistency-sandbox", owner=UserPrincipal(name="cdb"),
+	compiler="/ms/dist/elfms/PROJ/panc/prod/lib/panc.jar",
+        comments="Cause consistency checker to fail.",
+	base_commit='0000000000')
 
 Archetype(name="aquilon", is_compileable=True)
 Archetype(name="aurora", is_compileable=True)

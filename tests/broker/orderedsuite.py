@@ -271,6 +271,7 @@ from test_parameter_definition import TestParameterDefinition
 from test_parameter_definition_feature import TestParameterDefinitionFeature
 from test_documentation import TestDocumentation
 from test_setup_params import TestSetupParams
+from test_consistency import TestConsistency
 
 
 class BrokerTestSuite(unittest.TestSuite):
@@ -413,7 +414,8 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestDelDnsEnvironment, TestDelDnsDomain,
                      TestClientFailure, TestAudit, TestShowActiveCommands,
                      TestDocumentation,
-                     TestBrokerStop]:
+                     TestBrokerStop,
+                     TestConsistency]:
             self.addTest(unittest.TestLoader().loadTestsFromTestCase(test))
 
 
