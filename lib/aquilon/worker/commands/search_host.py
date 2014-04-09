@@ -23,6 +23,7 @@ from aquilon.exceptions_ import NotFoundException
 from aquilon.aqdb.model import (Host, Cluster, Archetype, Personality,
                                 PersonalityGrnMap, HostGrnMap, HostLifecycle,
                                 OperatingSystem, Service, ServiceInstance,
+                                ServiceInstanceServer,
                                 Share, VirtualNasDisk, Disk, Machine, Model,
                                 DnsRecord, ARecord, Fqdn, DnsDomain, Interface,
                                 AddressAssignment, NetworkEnvironment, Network,
@@ -191,39 +192,22 @@ class CommandSearchHost(BrokerCommand):
                                                       compel=True)
             q = q.filter(Host.operating_system_id.in_(subq))
 
-        if service:
-            dbservice = Service.get_unique(session, service, compel=True)
-            if instance:
-                dbsi = ServiceInstance.get_unique(session, service=dbservice,
-                                                  name=instance, compel=True)
-                q = q.filter(Host.services_used.contains(dbsi))
-            else:
-                q = q.join('services_used')
-                q = q.filter_by(service=dbservice)
-                q = q.reset_joinpoint()
-        elif instance:
-            q = q.join('services_used')
-            q = q.filter_by(name=instance)
+        if service or instance:
+            subq = ServiceInstance.get_matching_query(session, name=instance,
+                                                      service=service,
+                                                      compel=True)
+            SIAlias = aliased(ServiceInstance)
+            q = q.join(SIAlias, Host.services_used)
+            q = q.filter(SIAlias.id.in_(subq))
             q = q.reset_joinpoint()
 
-        if server_of_service:
-            dbserver_service = Service.get_unique(session, server_of_service,
-                                                  compel=True)
-            if server_of_instance:
-                dbsi = ServiceInstance.get_unique(session,
-                                                  service=dbserver_service,
-                                                  name=server_of_instance,
-                                                  compel=True)
-                q = q.join('services_provided')
-                q = q.filter_by(service_instance=dbsi)
-                q = q.reset_joinpoint()
-            else:
-                q = q.join('services_provided', 'service_instance')
-                q = q.filter_by(service=dbserver_service)
-                q = q.reset_joinpoint()
-        elif server_of_instance:
-            q = q.join('services_provided', 'service_instance')
-            q = q.filter_by(name=server_of_instance)
+        if server_of_service or server_of_instance:
+            subq = ServiceInstance.get_matching_query(session,
+                                                      name=server_of_instance,
+                                                      service=server_of_service,
+                                                      compel=True)
+            q = q.join(Host.services_provided)
+            q = q.filter(ServiceInstanceServer.service_instance_id.in_(subq))
             q = q.reset_joinpoint()
 
         if cluster:
