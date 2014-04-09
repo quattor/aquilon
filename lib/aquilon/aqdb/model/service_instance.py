@@ -129,6 +129,15 @@ class ServiceInstance(Base):
         return [str(sys.fqdn) for sys in q.all()]
 
     @property
+    def cluster_names(self):
+        """Returns all clusters involved, including metaclusters."""
+        from aquilon.aqdb.model import Cluster
+        session = object_session(self)
+        q = session.query(Cluster.name)
+        q = q.filter(Cluster.service_bindings.contains(self))
+        return [name for record in q.all() for name in record]
+
+    @property
     def enforced_max_clients(self):
         if self.max_clients is not None:
             return self.max_clients
