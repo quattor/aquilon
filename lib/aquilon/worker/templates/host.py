@@ -217,13 +217,18 @@ class PlenaryHostData(StructurePlenary):
 
         lines.append("")
         pan_assign(lines, "system/network/interfaces", interfaces)
-        pan_assign(lines, "system/network/primary_ip",
-                   self.dbobj.hardware_entity.primary_ip)
+
+        if self.dbobj.hardware_entity.primary_ip:
+            pan_assign(lines, "system/network/primary_ip",
+                       self.dbobj.hardware_entity.primary_ip)
+
         if default_gateway:
             pan_assign(lines, "system/network/default_gateway",
                        default_gateway)
+
         if routers:
             pan_assign(lines, "system/network/routers", routers)
+
         lines.append("")
 
         pan_assign(lines, "system/build", self.dbobj.status.name)
