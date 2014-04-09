@@ -26,13 +26,20 @@ from sqlalchemy.ext.associationproxy import association_proxy
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.column_types.aqstr import AqStr
-from aquilon.aqdb.model import Base, Archetype, Grn, HostEnvironment
+from aquilon.aqdb.model import (Base, Archetype, Grn, HostEnvironment,
+                                User, NetGroupWhiteList)
 
 _ABV = 'prsnlty'
 _TN = 'personality'
 
 _PGN = 'personality_grn_map'
 _PGNABV = 'pers_grn_map'
+
+_PRU = 'personality_rootuser'
+_PRUABV = 'pers_rootuser'
+
+_PRNG = 'personality_rootnetgroup'
+_PRNGABV = 'pers_rootng'
 
 
 def _pgm_creator(tuple):
@@ -127,3 +134,53 @@ class PersonalityGrnMap(Base):
     @property
     def mapped_object(self):
         return self.personality
+
+
+class __PersonalityRootUser(Base):
+    __tablename__ = _PRU
+
+    personality_id = Column(Integer, ForeignKey('%s.id' % _TN,
+                                                ondelete='CASCADE',
+                                                name='%s_pers_fk' % _PRUABV),
+                            primary_key=True)
+
+    user_id = Column(Integer, ForeignKey('userinfo.id',
+                                         ondelete='CASCADE',
+                                         name='%s_user_fk' % _PRUABV),
+                     primary_key=True)
+
+    creation_date = deferred(Column(DateTime, default=datetime.now,
+                                    nullable=False))
+
+    personality = relation(Personality)
+    user = relation(User)
+
+pru = __PersonalityRootUser.__table__  # pylint: disable=C0103
+pru.primary_key.name = '%s_pk' % _PRU
+
+Personality.root_users = relation(User, secondary=__PersonalityRootUser.__table__)
+
+
+class __PersonalityRootNetGroup(Base):
+    __tablename__ = _PRNG
+
+    personality_id = Column(Integer, ForeignKey('%s.id' % _TN,
+                                                ondelete='CASCADE',
+                                                name='%s_pers_fk' % _PRNGABV),
+                            primary_key=True)
+
+    netgroup_id = Column(Integer, ForeignKey('netgroup_whitelist.id',
+                                             ondelete='CASCADE',
+                                             name='%s_group_fk' % _PRNGABV),
+                         primary_key=True)
+
+    creation_date = deferred(Column(DateTime, default=datetime.now,
+                                    nullable=False))
+
+    personality = relation(Personality)
+    netgroup = relation(NetGroupWhiteList)
+
+prng = __PersonalityRootNetGroup.__table__  # pylint: disable=C0103
+prng.primary_key.name = '%s_pk' % _PRNG
+
+Personality.root_netgroups = relation(NetGroupWhiteList, secondary=__PersonalityRootNetGroup.__table__)

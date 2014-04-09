@@ -151,7 +151,10 @@ class AuthorizationBroker(object):
             if action not in ['add_address', 'del_address']:
                 self.raise_auth_error(principal, action, resource)
         if dbuser.role.name == 'secadmin':
-            if action not in ['permission']:
+            if action not in ['permission',
+                              'grant_root_access', 'revoke_root_access',
+                              'add_netgroup_whitelist',
+                              'del_netgroup_whitelist']:
                 self.raise_auth_error(principal, action, resource)
         if dbuser.role.name == 'hpevelo':
             if action not in ['reconfigure', 'pxeswitch', 'change_status',

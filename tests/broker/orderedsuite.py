@@ -272,6 +272,8 @@ from test_parameter_definition_feature import TestParameterDefinitionFeature
 from test_documentation import TestDocumentation
 from test_setup_params import TestSetupParams
 from test_consistency import TestConsistency
+from test_root_access import TestRootAccess
+from test_refresh_user import TestRefreshUser
 
 
 class BrokerTestSuite(unittest.TestSuite):
@@ -298,6 +300,7 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestAddArchetype, TestAddOS,
                      TestParameterDefinition, TestSetupParams,
                      TestAddService, TestAddPersonality, TestAddRequiredService,
+                     TestRefreshUser, TestRootAccess,
                      TestOrganization, TestHub, TestContinent, TestCountry,
                      TestAddCampus, TestAddCity,
                      TestAddBuilding, TestAddRoom, TestAddBunker,

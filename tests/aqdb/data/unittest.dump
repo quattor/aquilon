@@ -193,3 +193,6 @@ VlanInfo(vlan_id=711, port_group="user-v711", vlan_type="user")
 VlanInfo(vlan_id=712, port_group="user-v712", vlan_type="user")
 VlanInfo(vlan_id=713, port_group="user-v713", vlan_type="user")
 VlanInfo(vlan_id=999, port_group="unused-v999", vlan_type="user")
+
+User(name="testuser3", uid=2361, gid=654, full_name="test user", home_dir="/tmp")
+User(name="testuser4", uid=2361, gid=654, full_name="test user", home_dir="/tmp")

@@ -70,6 +70,12 @@ class PersonalityFormatter(ObjectFormatter):
             details.append(indent + "  Required Service: {0.name}"
                            .format(service))
 
+        for usr in personality.root_users:
+            details.append(indent + "  Root Access User: %s" % usr)
+
+        for ng in personality.root_netgroups:
+            details.append(indent + "  Root Access Netgroup: %s" % ng)
+
         features = personality.features[:]
         features.sort(key=attrgetter("feature.feature_type",
                                      "feature.post_personality",
