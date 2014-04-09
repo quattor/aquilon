@@ -125,16 +125,20 @@ class CommandDelInterfaceAddress(BrokerCommand):
                         plenary_info.restore_stash()
 
                     dsdb_runner = DSDBRunner(logger=logger)
-                    dsdb_runner.update_host(dbhw_ent, oldinfo)
+                    if dbhost.archetype.name == 'aurora':
+                        logger.client_info("WARNING: removing IP %s from AQDB and "
+                                           "*not* changing DSDB." % ip)
+                    else:
+                        dsdb_runner.update_host(dbhw_ent, oldinfo)
 
-                    if not other_uses and keep_dns:
-                        q = session.query(ARecord)
-                        q = q.filter_by(network=dbnetwork)
-                        q = q.filter_by(ip=ip)
-                        dbdns_rec = q.first()
-                        dsdb_runner.add_host_details(dbdns_rec.fqdn, ip)
+                        if not other_uses and keep_dns:
+                            q = session.query(ARecord)
+                            q = q.filter_by(network=dbnetwork)
+                            q = q.filter_by(ip=ip)
+                            dbdns_rec = q.first()
+                            dsdb_runner.add_host_details(dbdns_rec.fqdn, ip)
 
-                    dsdb_runner.commit_or_rollback("Could not add host to DSDB")
+                        dsdb_runner.commit_or_rollback("Could not add host to DSDB")
                 except:
                     plenary_info.restore_stash()
                     raise

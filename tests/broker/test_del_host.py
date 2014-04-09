@@ -116,13 +116,14 @@ class TestDelHost(VerifyNotificationsMixin, MachineTestMixin,
     def test_150_del_aurora_default_os(self):
         command = "del host --hostname test-aurora-default-os.ms.com --quiet"
         self.noouttest(command.split(" "))
+        self.dsdb_verify(empty=True)
 
     def test_151_verify_del_aurora_default_os(self):
         command = "show host --hostname test-aurora-default-os.ms.com"
         self.notfoundtest(command.split(" "))
 
     def test_155_del_windows_default_os(self):
-        ip = self.net["utpgsw0-v710"].usable[-2]
+        ip = self.net["tor_net_0"].usable[5]
         self.dsdb_expect_delete(ip)
         command = "del host --hostname test-windows-default-os.msad.ms.com --quiet"
         self.noouttest(command.split(" "))

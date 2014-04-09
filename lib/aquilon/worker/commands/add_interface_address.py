@@ -17,9 +17,9 @@
 """Contains the logic for `aq add interface address`."""
 
 from aquilon.utils import validate_nlist_key
-from aquilon.worker.broker import BrokerCommand
-from aquilon.exceptions_ import ArgumentError, IncompleteError
+from aquilon.exceptions_ import ArgumentError, IncompleteError, ProcessException
 from aquilon.aqdb.model import HardwareEntity, NetworkEnvironment, Interface
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.dns import grab_address
 from aquilon.worker.dbwrappers.interface import (generate_ip,
                                                  assign_address)
@@ -155,10 +155,17 @@ class CommandAddInterfaceAddress(BrokerCommand):
                         plenary_info.restore_stash()
 
                     dsdb_runner = DSDBRunner(logger=logger)
-                    if delete_old_dsdb_entry:
-                        dsdb_runner.delete_host_details(dbdns_rec.fqdn, ip)
-                    dsdb_runner.update_host(dbhw_ent, oldinfo)
-                    dsdb_runner.commit_or_rollback("Could not add host to DSDB")
+                    if dbhost.archetype.name == 'aurora':
+                        try:
+                            dsdb_runner.show_host(dbdns_rec.fqdn.name)
+                        except ProcessException, e:
+                            raise ArgumentError("Could not find host in DSDB: "
+                                                "%s" % e)
+                    else:
+                        if delete_old_dsdb_entry:
+                            dsdb_runner.delete_host_details(dbdns_rec.fqdn, ip)
+                        dsdb_runner.update_host(dbhw_ent, oldinfo)
+                        dsdb_runner.commit_or_rollback("Could not add host to DSDB")
                 except:
                     plenary_info.restore_stash()
                     raise

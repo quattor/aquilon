@@ -169,6 +169,14 @@ class TestDelInterfaceAddress(TestBrokerCommand):
         self.check_plenary_contents('hostdata', 'ut3gd1r04.aqd-unittest.ms.com',
                                     clean=str(ip))
 
+    def testdelauroraextraip(self):
+        ip = self.net["tor_net_0"].usable[6]
+        command = ["del_interface_address", "--interface", "eth0", "--ip", ip,
+                   "--machine", "test-aurora-default-os.ms.com"]
+        out = self.statustest(command)
+        self.matchoutput(out, "WARNING: removing IP %s from AQDB and *not* "
+                         "changing DSDB." % ip, command)
+        self.dsdb_verify(empty=True)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelInterfaceAddress)

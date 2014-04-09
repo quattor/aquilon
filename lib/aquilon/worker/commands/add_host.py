@@ -60,6 +60,15 @@ class CommandAddHost(BrokerCommand):
             raise ArgumentError("{0:c} {0.label} is already allocated to "
                                 "{1:l}.".format(dbmachine, dbmachine.host))
 
+        # IP addresses defined before the host is added have been entered to
+        # DSDB with the type 'aquilon', and that's not going to work well for
+        # Aurora hosts.
+        if dbarchetype.name == 'aurora':
+            if list(dbmachine.all_addresses()):
+                raise ArgumentError("Having IP addresses assigned before "
+                                    "the host object is created is not "
+                                    "supported for Aurora hosts.")
+
         dsdb_runner = DSDBRunner(logger=logger)
         if dbarchetype.name == 'aurora':
             # For aurora, check that DSDB has a record of the host.
