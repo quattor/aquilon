@@ -28,7 +28,8 @@ from aquilon.worker.processes import DSDBRunner
 class CommandAddInterfaceNetworkDevice(BrokerCommand):
 
     required_parameters = ["interface", "network_device", "iftype"]
-    invalid_parameters = ["automac", "pg", "autopg", "model", "vendor"]
+    invalid_parameters = ["automac", "pg", "autopg", "model", "vendor",
+                          "bus_address"]
 
     def render(self, session, logger, interface, network_device,
                mac, iftype, comments, **arguments):

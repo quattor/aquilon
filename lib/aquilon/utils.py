@@ -42,6 +42,7 @@ _unpadded_re = re.compile(r'\b([0-9a-f])\b')
 _nocolons_re = re.compile(r'^([0-9a-f]{2}){6}$')
 _two_re = re.compile(r'[0-9a-f]{2}')
 _padded_re = re.compile(r'^([0-9a-f]{2}:){5}([0-9a-f]{2})$')
+_hex_re = re.compile(r'[0-9a-f]+$')
 
 # Regexp used to check if a value is suitable to be used as an nlist key,
 # without escaping.
@@ -196,6 +197,25 @@ def force_mac(label, value):
         return value
     raise ArgumentError("Expected a MAC address like 00:1a:2b:3c:0d:55, "
                         "001a2b3c0d55 or 0:1a:2b:3c:d:55 for %s." % label)
+
+
+def force_wwn(label, value):
+    # See http://standards.ieee.org/develop/regauth/tut/fibre.pdf for a more
+    # detailed description for the WWN format. We do not want to be very
+    # strict here, to accomodate possibly broken devices out there.
+    if not value:
+        return None
+
+    # Strip separators if present
+    value = str(value).strip().lower().translate(None, ':-')
+
+    if not _hex_re.match(value):
+        raise ArgumentError("The value of %s may contain hexadecimal "
+                            "characters only." % label)
+    if len(value) != 16 and len(value) != 32:
+        raise ArgumentError("The value of %s must contain either 16 or 32 "
+                            "hexadecimal digits." % label)
+    return value
 
 
 def force_ascii(label, value):

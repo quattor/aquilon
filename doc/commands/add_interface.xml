@@ -1,0 +1,300 @@
+<?xml version="1.0"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V5.0//EN"
+"http://docbook.org/xml/5.0/dtd/docbook.dtd" [
+<!ENTITY aqd_version SYSTEM "../version.txt">
+]>
+<refentry xml:id="aq_add_interface"
+          xmlns="http://docbook.org/ns/docbook"
+	  xmlns:xi="http://www.w3.org/2001/XInclude">
+    <refmeta>
+        <refentrytitle>aq_add_interface</refentrytitle>
+        <manvolnum>1</manvolnum>
+        <refmiscinfo class="version">&aqd_version;</refmiscinfo>
+        <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
+    </refmeta>
+
+    <refnamediv>
+        <refname>aq add interface</refname>
+        <refpurpose>
+	    Add a network interface to a hardware entity
+        </refpurpose>
+	<refclass>Aquilon</refclass>
+    </refnamediv>
+
+    <refsynopsisdiv>
+	<cmdsynopsis>
+	    <command>aq add interface</command>
+	    <group>
+		<synopfragmentref linkend="global-options">Global options</synopfragmentref>
+	    </group>
+	    <group choice="req">
+		<arg choice="plain"><option>--machine <replaceable>MACHINE</replaceable></option></arg>
+		<arg choice="plain"><option>--hostname <replaceable>HOST</replaceable></option></arg>
+	    </group>
+	    <arg choice="plain"><option>--interface <replaceable>IFACE</replaceable></option></arg>
+	    <group choice="opt">
+		<arg choice="plain"><option>--mac <replaceable>MAC</replaceable></option></arg>
+		<arg choice="plain"><option>--automac</option></arg>
+	    </group>
+	    <group choice="opt">
+		<arg choice="plain"><option>--iftype <replaceable>TYPE</replaceable></option></arg>
+		<arg choice="plain"><option>--type <replaceable>TYPE</replaceable></option></arg>
+	    </group>
+	    <group choice="opt">
+		<arg choice="plain"><option>--pg <replaceable>PG</replaceable></option></arg>
+		<arg choice="plain"><option>--autopg</option></arg>
+	    </group>
+	    <group choice="opt">
+		<arg choice="plain"><option>--model <replaceable>MODEL</replaceable></option></arg>
+		<arg choice="opt"><option>--vendor <replaceable>VENDOR</replaceable></option></arg>
+	    </group>
+	    <arg choice="opt"><option>--bus_address <replaceable>URI</replaceable></option></arg>
+	    <arg choice="opt"><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
+	    <xi:include href="../common/global_options.xml"/>
+	</cmdsynopsis>
+	<cmdsynopsis>
+	    <command>aq add interface</command>
+	    <arg choice="plain"><option>--chassis <replaceable>CHASSIS</replaceable></option></arg>
+	    <arg choice="plain"><option>--interface <replaceable>IFACE</replaceable></option></arg>
+	    <arg choice="plain"><option>--mac <replaceable>MAC</replaceable></option></arg>
+	    <group choice="opt">
+		<arg choice="plain"><option>--iftype <replaceable>TYPE</replaceable></option></arg>
+		<arg choice="plain"><option>--type <replaceable>TYPE</replaceable></option></arg>
+	    </group>
+	    <arg choice="opt"><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
+	</cmdsynopsis>
+	<cmdsynopsis>
+	    <command>aq add interface</command>
+	    <group choice="req">
+		<arg choice="plain"><option>--network_device <replaceable>NETDEV</replaceable></option></arg>
+		<arg choice="plain"><option>--switch <replaceable>NETDEV</replaceable></option></arg>
+	    </group>
+	    <arg choice="plain"><option>--interface <replaceable>IFACE</replaceable></option></arg>
+	    <arg choice="opt"><option>--mac <replaceable>MAC</replaceable></option></arg>
+	    <group choice="opt">
+		<arg choice="plain"><option>--iftype <replaceable>TYPE</replaceable></option></arg>
+		<arg choice="plain"><option>--type <replaceable>TYPE</replaceable></option></arg>
+	    </group>
+	    <arg choice="opt"><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
+	</cmdsynopsis>
+    </refsynopsisdiv>
+
+    <refsect1>
+        <title>Description</title>
+	<para>
+	    The <command>aq add interface</command> command adds a network interface to an existing
+	    hardware entity.
+	</para>
+    </refsect1>
+
+    <refsect1>
+        <title>Options</title>
+	<variablelist>
+	    <title>Command-specific options</title>
+	    <varlistentry>
+		<term>
+		    <option>--machine <replaceable>MACHINE</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			The name of the machine the interface should be added to.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+		<term>
+		    <option>--hostname <replaceable>HOST</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			The name of the host the interface should be added to.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+		<term>
+		    <option>--chassis <replaceable>CHASSIS</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			The name of the chassis the interface should be added to.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+		<term>
+		    <option>--network_device <replaceable>NETDEV</replaceable></option>,
+		    <option>--switch <replaceable>NETDEV</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			The name of the network device the interface should be added to. The
+			<option>--switch</option> form is deprecated.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+		<term>
+		    <option>--interface <replaceable>IFACE</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			The name of the interface to add.
+		    </para>
+		    <para>
+			If the interface is a tagged VLAN on top of a physical interface, then
+			<replaceable>IFACE</replaceable> must have the form of <replaceable>PHYS</replaceable>.<replaceable>VLAN</replaceable>,
+			where <replaceable>PHYS</replaceable> is the name of the physical interface (which must already exist), and
+			<replaceable>VLAN</replaceable> is the VLAN tag.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--mac <replaceable>MAC</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			The MAC (EUI-48) address of the interface. The address may be specified with or
+			without separating colons.
+		    </para>
+		    <para>
+			No MAC address must be specified for <literal>bridge</literal>, <literal>loopback</literal>, and
+			<literal>vlan</literal> interfaces.
+		    </para>
+		    <para>
+			Specifying the MAC address for <literal>bonding</literal> interfaces is optional. If no MAC address
+			is specified, then the bonding interface will take over the MAC address of one of the physical
+			interfaces.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--automac</option>
+		</term>
+		<listitem>
+		    <para>
+			Generate a MAC address for the interface. This option is valid only for virtual machines.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--iftype <replaceable>TYPE</replaceable></option>,
+		    <option>--type <replaceable>TYPE</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			The type of the interface. The <option>--type</option> form is deprecated. This option is
+			mandatory for network devices. For other kind of hardware, there are some heuristics to guess
+			the type from the name of the interface.
+		    </para>
+		    <para>
+			Valid interface types for machines are:
+			<simplelist type="inline">
+			    <member><literal>public</literal></member>
+			    <member><literal>management</literal></member>
+			    <member><literal>bonding</literal></member>
+			    <member><literal>bridge</literal></member>
+			    <member><literal>vlan</literal></member>
+			</simplelist>.
+			The <literal>management</literal> type is special, because it defines the interface of the
+			on-board management console, instead of an interface of the machine itself.
+		    </para>
+		    <para>
+			Valid interface types for chassis are:
+			<simplelist type="inline">
+			    <member><literal>oa</literal></member>
+			</simplelist>.
+		    </para>
+		    <para>
+			Valid interface types for network devices are:
+			<simplelist type="inline">
+			    <member><literal>oa</literal></member>
+			    <member><literal>loopback</literal></member>
+			    <member><literal>physical</literal></member>
+			    <member><literal>virtual</literal></member>
+			</simplelist>.
+			Use of the <literal>oa</literal> interface type is now deprecated for network devices.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--pg <replaceable>PG</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			The port group where the interface should be added to. This option is valid only
+			for virtual machines.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--autopg</option>
+		</term>
+		<listitem>
+		    <para>
+			Select a port group automatically. This option is valid only for virtual machines. For this
+			option to work, the virtual machine needs to be hosted by a cluster that has a switch assigned,
+			and the <command>aq poll network device --vlan</command> option must be executed to detect
+			the available port groups before adding the interface to the virtual machine.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--model <replaceable>MODEL</replaceable></option>,
+		    <option>--vendor <replaceable>VENDOR</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			The model and vendor of the network interface. If these options are not specified,
+			and the interface is being added to a machine, then the default model and vendor are
+			looked up from the model of the machine.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--bus_address <replaceable>URI</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			The hardware bus address of the network interface.
+			See section <link linkend="sect1-bus-address" endterm="sect1-bus-address-title"/> for
+			the syntax of <replaceable>URI</replaceable>.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--comments <replaceable>COMMENTS</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Free form comments for this interface.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	</variablelist>
+	<xi:include href="../common/global_options_desc.xml"/>
+    </refsect1>
+
+    <xi:include href="../common/sect1_bus_address.xml"/>
+
+    <refsect1>
+	<title>See also</title>
+	<para>
+	    <citerefentry><refentrytitle>aq_del_interface</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>aq_update_interface</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>aq_add_interface_address</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>aq_del_interface_address</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>aq_poll_network_device</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+	</para>
+    </refsect1>
+</refentry>
+
+<!-- vim: set ai sw=4: -->

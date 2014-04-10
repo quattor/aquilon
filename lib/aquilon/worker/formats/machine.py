@@ -18,7 +18,7 @@
 
 from operator import attrgetter
 
-from aquilon.aqdb.model import Machine, Location
+from aquilon.aqdb.model import Machine, Location, VirtualDisk
 from aquilon.worker.formats.formatters import ObjectFormatter
 from aquilon.worker.dbwrappers.feature import (model_features,
                                                personality_features)
@@ -77,11 +77,9 @@ class MachineFormatter(ObjectFormatter):
         if machine.serial_no:
             details.append(indent + "  Serial: %s" % machine.serial_no)
         for d in sorted(machine.disks, key=attrgetter('device_name')):
-            extra = d.disk_type
-            if hasattr(d, "share") and d.share:
-                extra = extra + " from " + d.share.name
-            elif hasattr(d, "filesystem") and d.filesystem:
-                extra = extra + " from " + d.filesystem.name
+            extra = [d.disk_type]
+            if isinstance(d, VirtualDisk):
+                extra.append("stored on {0:l}".format(d.backing_store))
 
             flag_list = []
             if d.bootable:
@@ -96,7 +94,15 @@ class MachineFormatter(ObjectFormatter):
 
             details.append(indent + "  Disk: %s %d GB %s (%s)%s" %
                            (d.device_name, d.capacity, d.controller_type,
-                            extra, flags))
+                            " ".join(extra), flags))
+            if d.address:
+                details.append(indent + "    Address: %s" % d.address)
+            if d.wwn:
+                # TODO: it would be nice if we could look up the OUI somewhere
+                details.append(indent + "    WWN: %s" % d.wwn)
+            if d.bus_address:
+                details.append(indent + "    Controller Bus Address: %s" %
+                               d.bus_address)
             if d.comments:
                 details.append(indent + "    Comments: %s" % d.comments)
         for i in sorted(machine.interfaces, key=attrgetter('name')):

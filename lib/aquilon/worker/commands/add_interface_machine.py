@@ -37,8 +37,9 @@ class CommandAddInterfaceMachine(BrokerCommand):
 
     required_parameters = ["interface", "machine"]
 
-    def render(self, session, logger, interface, machine, mac, automac,
-               model, vendor, pg, autopg, iftype, type, comments, **arguments):
+    def render(self, session, logger, interface, machine, mac, automac, model,
+               vendor, pg, autopg, iftype, type, bus_address, comments,
+               **arguments):
         dbmachine = Machine.get_unique(session, machine, compel=True)
         oldinfo = DSDBRunner.snapshot_hw(dbmachine)
         audit_results = []
@@ -139,6 +140,7 @@ class CommandAddInterfaceMachine(BrokerCommand):
                                               interface_type=iftype, mac=mac,
                                               bootable=bootable,
                                               port_group=port_group,
+                                              bus_address=bus_address,
                                               comments=comments, preclude=True)
 
         # So far, we're *only* creating a manager if we happen to be

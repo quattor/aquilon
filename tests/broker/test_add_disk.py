@@ -30,11 +30,14 @@ class TestAddDisk(TestBrokerCommand):
     def test_100_add_ut3c5n10_disk(self):
         self.noouttest(["add", "disk", "--machine", "ut3c5n10",
                         "--disk", "sdb", "--controller", "scsi",
+                        "--address", "0:0:1:0",
                         "--size", "34", "--comments", "Disk comments"])
 
     def test_110_add_ut3c1n3_disk(self):
         command = ["add", "disk", "--machine", "ut3c1n3", "--disk", "c0d0",
-                   "--controller", "cciss", "--size", "34"]
+                   "--controller", "cciss", "--size", "34",
+                   "--wwn", "600508b112233445566778899aabbccd",
+                   "--bus_address", "pci:0000:01:00.0"]
         self.noouttest(command)
 
     def test_200_bad_controller(self):
@@ -60,12 +63,33 @@ class TestAddDisk(TestBrokerCommand):
         self.matchoutput(out, "Machine ut3c5n10 already has a boot disk.",
                          command)
 
+    def test_200_duplicate_wwn(self):
+        command = ["add", "disk", "--machine", "ut3c5n10", "--disk", "sdc",
+                   "--controller", "scsi", "--size", "34",
+                   "--wwn", "600508b112233445566778899aabbccd"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "WWN 600508b112233445566778899aabbccd is already "
+                         "in use by disk c0d0 of machine ut3c1n3.",
+                         command)
+
+    def test_200_bad_address(self):
+        command = ["add_disk", "--machine=ut3c5n10", "--disk=sdc",
+                   "--controller=scsi", "--size=34",
+                   "--address", "bad-address"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         r"Disk address 'bad-address' is not valid, it must "
+                         r"match (?:\d+:){3}\d+$.",
+                         command)
+
     def test_300_show_ut3c5n10(self):
         command = "show machine --machine ut3c5n10"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Disk: sda 68 GB scsi (local) [boot]", command)
         self.searchoutput(out,
                           r"Disk: sdb 34 GB scsi \(local\)\s*"
+                          r"Address: 0:0:1:0\s*"
                           r"Comments: Disk comments",
                           command)
 
@@ -82,6 +106,7 @@ class TestAddDisk(TestBrokerCommand):
         self.searchoutput(out,
                           r'"harddisks/{sdb}" = '
                           r'create\("hardware/harddisk/generic/scsi",\s*'
+                          r'"address", "0:0:1:0",\s*'
                           r'"capacity", 34\*GB,\s*'
                           r'"interface", "scsi"\s*\);',
                           command)
@@ -90,7 +115,11 @@ class TestAddDisk(TestBrokerCommand):
         command = "show machine --machine ut3c1n3"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Disk: sda 68 GB scsi (local) [boot]", command)
-        self.searchoutput(out, r"Disk: c0d0 34 GB cciss \(local\)$", command)
+        self.searchoutput(out,
+                          r'Disk: c0d0 34 GB cciss \(local\)$'
+                          r'\s*WWN: 600508b112233445566778899aabbccd$'
+                          r'\s*Controller Bus Address: pci:0000:01:00.0',
+                          command)
 
     def test_300_cat_ut3c1n3(self):
         command = "cat --machine ut3c1n3"
@@ -98,8 +127,10 @@ class TestAddDisk(TestBrokerCommand):
         self.searchoutput(out,
                           r'"harddisks/{cciss/c0d0}" = '
                           r'create\("hardware/harddisk/generic/cciss",\s*'
+                          r'"bus", "pci:0000:01:00.0",\s*'
                           r'"capacity", 34\*GB,\s*'
-                          r'"interface", "cciss"\s*\);',
+                          r'"interface", "cciss",\s*'
+                          r'"wwn", "600508b112233445566778899aabbccd"\s*\);',
                           command)
         self.searchoutput(out,
                           r'"harddisks/{sda}" = '
@@ -108,7 +139,6 @@ class TestAddDisk(TestBrokerCommand):
                           r'"capacity", 68\*GB,\s*'
                           r'"interface", "scsi"\s*\);',
                           command)
-
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddDisk)

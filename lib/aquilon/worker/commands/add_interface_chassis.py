@@ -28,7 +28,8 @@ from aquilon.worker.processes import DSDBRunner
 class CommandAddInterfaceChassis(BrokerCommand):
 
     required_parameters = ["interface", "chassis", "mac"]
-    invalid_parameters = ["automac", "pg", "autopg", "model", "vendor"]
+    invalid_parameters = ["automac", "pg", "autopg", "model", "vendor",
+                          "bus_address"]
 
     def render(self, session, logger, interface, chassis, mac, iftype, type,
                comments, **arguments):

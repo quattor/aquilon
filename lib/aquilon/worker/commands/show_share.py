@@ -33,8 +33,8 @@ class CommandShowShare(BrokerCommand):
         if share:
             q = q.filter_by(name=share)
 
-        q = q.options(undefer(Share.disk_count),
-                      undefer(Share.machine_count))
+        q = q.options(undefer(Share.virtual_disk_count),
+                      undefer(Share.virtual_machine_count))
 
         if hostname or cluster or resourcegroup:
             who = get_resource_holder(session, hostname, cluster, resourcegroup)

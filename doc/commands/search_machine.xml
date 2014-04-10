@@ -1,0 +1,432 @@
+<?xml version="1.0"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V5.0//EN"
+"http://docbook.org/xml/5.0/dtd/docbook.dtd" [
+<!ENTITY aqd_version SYSTEM "../version.txt">
+]>
+<refentry xml:id="aq_search_machine"
+          xmlns="http://docbook.org/ns/docbook"
+          xmlns:xi="http://www.w3.org/2001/XInclude">
+    <refmeta>
+        <refentrytitle>aq_search_machine</refentrytitle>
+        <manvolnum>1</manvolnum>
+        <refmiscinfo class="version">&aqd_version;</refmiscinfo>
+        <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
+    </refmeta>
+
+    <refnamediv>
+        <refname>aq search machine</refname>
+        <refpurpose>
+            Search for machines matching some criteria
+        </refpurpose>
+        <refclass>Aquilon</refclass>
+    </refnamediv>
+
+    <refsynopsisdiv>
+        <cmdsynopsis>
+            <command>aq search machine</command>
+            <group>
+                <synopfragmentref linkend="global-options">Global options</synopfragmentref>
+            </group>
+            <group choice="req">
+		<arg choice="opt"><option>--hostname <replaceable>FQDN</replaceable></option></arg>
+		<arg choice="opt"><option>--machine <replaceable>LABEL</replaceable></option></arg>
+		<arg choice="opt"><option>--cpuname <replaceable>NAME</replaceable></option></arg>
+		<arg choice="opt"><option>--cpuvendor <replaceable>NAME</replaceable></option></arg>
+		<arg choice="opt"><option>--cpuspeed <replaceable>NUMBER</replaceable></option></arg>
+		<arg choice="opt"><option>--cpucount <replaceable>NUMBER</replaceable></option></arg>
+		<arg choice="opt"><option>--memory <replaceable>NUMBER</replaceable></option></arg>
+		<arg choice="opt"><option>--cluster <replaceable>NAME</replaceable></option></arg>
+		<arg choice="opt"><option>--vmhost <replaceable>FQFDN</replaceable></option></arg>
+		<arg choice="opt"><option>--model <replaceable>NAME</replaceable></option></arg>
+		<arg choice="opt"><option>--machine_type <replaceable>TYPE</replaceable></option></arg>
+		<arg choice="opt"><option>--vendor <replaceable>NAME</replaceable></option></arg>
+		<arg choice="opt"><option>--ip <replaceable>IP</replaceable></option></arg>
+		<arg choice="opt"><option>--mac <replaceable>MAC</replaceable></option></arg>
+		<arg choice="opt"><option>--interface_model <replaceable>NAME</replaceable></option></arg>
+		<arg choice="opt"><option>--interface_vendor <replaceable>NAME</replaceable></option></arg>
+		<arg choice="opt"><option>--interface_bus_address <replaceable>URI</replaceable></option></arg>
+		<arg choice="opt"><option>--pg <replaceable>PG</replaceable></option></arg>
+		<arg choice="opt"><option>--serial <replaceable>SERIAL</replaceable></option></arg>
+		<arg choice="opt"><option>--chassis <replaceable>FQDN</replaceable></option></arg>
+		<arg choice="opt"><option>--slot <replaceable>NUMBER</replaceable></option></arg>
+		<arg choice="opt"><option>--disk_name <replaceable>NAME</replaceable></option></arg>
+		<arg choice="opt"><option>--disk_size <replaceable>NUMBER</replaceable></option></arg>
+		<arg choice="opt"><option>--disk_controller <replaceable>NAME</replaceable></option></arg>
+		<arg choice="opt"><option>--disk_address <replaceable>[H:]C:T[:L]</replaceable></option></arg>
+		<arg choice="opt"><option>--disk_bus_address <replaceable>URI</replaceable></option></arg>
+		<arg choice="opt"><option>--disk_wwn <replaceable>WWN</replaceable></option></arg>
+		<group choice="opt">
+		    <arg choice="plain"><option>--disk_share <replaceable>NAME</replaceable></option></arg>
+		    <arg choice="plain"><option>--share <replaceable>NAME</replaceable></option></arg>
+		</group>
+		<arg choice="opt"><option>--disk_filesystem <replaceable>NAME</replaceable></option></arg>
+            </group>
+	    <arg choice="opt"><option>--fullinfo</option></arg>
+	    <group>
+		<synopfragmentref linkend="location-options">Location options</synopfragmentref>
+		<arg choice="opt"><option>--exact_location</option></arg>
+	    </group>
+            <xi:include href="../common/location_options.xml"/>
+            <xi:include href="../common/global_options.xml"/>
+        </cmdsynopsis>
+    </refsynopsisdiv>
+
+    <refsect1>
+        <title>Description</title>
+        <para>
+	    The <command>aq search machine</command> command searches for machines
+	    matching the specified criteria.
+        </para>
+    </refsect1>
+
+    <refsect1>
+        <title>Options</title>
+        <variablelist>
+	    <title>Command-specific options</title>
+	    <varlistentry>
+		<term>
+		    <option>--hostname <replaceable>FQDN</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Return only the machine bound to the named host.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+		<term>
+		    <option>--machine <replaceable>LABEL</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Return only the named machine. This option is useful when combined with other options,
+			to quickly test if the machine matches the additional criteria or not.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+		<term>
+		    <option>--model <replaceable>NAME</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Look for machines having hardware model <replaceable>NAME</replaceable>.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+		<term>
+		    <option>--machine_type <replaceable>TYPE</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Look for machines having the machine type <replaceable>TYPE</replaceable>. Valid values for
+			<replaceable>TYPE</replaceable> are: <xi:include href="../common/machine_types.xml"/>.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+		<term>
+		    <option>--vendor <replaceable>NAME</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Look for hosts using a machine from the vendor <replaceable>NAME</replaceable>.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+		<term>
+		    <option>--serial <replaceable>SERIAL</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Look for hosts using a machine with the serial number <replaceable>SERIAL</replaceable>.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+		<term>
+		    <option>--cluster <replaceable>NAME</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Look for virtual machines hosted by cluster <replaceable>NAME</replaceable>.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+		<term>
+		    <option>--vmhost <replaceable>FQDN</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Look for virtual machines hosted by hypervisor host <replaceable>FQDN</replaceable>.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+		<term>
+		    <option>--cpuname <replaceable>NAME</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Look for machines having a CPU model named <replaceable>NAME</replaceable>.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+		<term>
+		    <option>--cpuvendor <replaceable>NAME</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Look for machines having a CPU from vendor <replaceable>NAME</replaceable>.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+		<term>
+		    <option>--cpuspeed <replaceable>NUMBER</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Look for machines having a CPU running at frequency <replaceable>NUMBER</replaceable>.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+		<term>
+		    <option>--cpucount <replaceable>NUMBER</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Look for machines having the specified number of CPU sockets populated.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+		<term>
+		    <option>--memory <replaceable>NUMBER</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Look for machines having the specified amount of memory installed.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+		<term>
+		    <option>--chassis <replaceable>FQDN</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Look for machines inside the specified chassis.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+		<term>
+		    <option>--slot <replaceable>NUMBER</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Look for machines located at the specified chassis slot.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+		<term>
+		    <option>--fullinfo</option>
+		</term>
+		<listitem>
+		    <para>
+			Return the full description of the host if the raw output format is used, rather than
+			just the host name. Note that using this option can be expensive if the number of matched
+			hosts is big.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+		<term>
+		    <option>--exact_location</option>
+		</term>
+		<listitem>
+		    <para>
+			Require an exact match for the location. Default is to match sub-locations as well.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	</variablelist>
+        <variablelist>
+	    <title>Options related to network interfaces</title>
+	    <para>
+		Options in this section are cumulative in the sense that the same interface must match
+		all criteria.
+	    </para>
+	    <varlistentry>
+		<term>
+		    <option>--ip <replaceable>IP</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Look for machines that have IP address <replaceable>IP</replaceable> configured on any interfaces.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+		<term>
+		    <option>--mac <replaceable>MAC</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Look for machines having a network interface with MAC address <replaceable>MAC</replaceable>.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+		<term>
+		    <option>--pg <replaceable>PG</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Look for virtual machines having a network interface bound to port group <replaceable>PG</replaceable>.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+		<term>
+		    <option>--interface_model <replaceable>NAME</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Look for machines having a network interface of model <replaceable>NAME</replaceable>.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+		<term>
+		    <option>--interface_vendor <replaceable>NAME</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Look for machines having a network interface from the vendor <replaceable>NAME</replaceable>.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+		<term>
+		    <option>--interface_bus_address <replaceable>URI</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Look for machines having a network interface with the specified bus address.
+			See section <link linkend="sect1-bus-address" endterm="sect1-bus-address-title"/> for
+			the syntax of <replaceable>URI</replaceable>.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	</variablelist>
+        <variablelist>
+	    <title>Options related to disks</title>
+	    <para>
+		Options in this sections are cumulative in the sense that the same disk must match all the criteria.
+	    </para>
+	    <varlistentry>
+		<term>
+		    <option>--disk_name <replaceable>NAME</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Look for machines having a disk named <replaceable>NAME</replaceable>.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+		<term>
+		    <option>--disk_size <replaceable>NUMBER</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Look for machines having a disk with size <replaceable>NUMBER</replaceable>.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+		<term>
+		    <option>--disk_controller <replaceable>NAME</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Look for machines having a disk with controller type <replaceable>NAME</replaceable>.
+			Valid values are: <xi:include href="../common/controller_types.xml"/>.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+		<term>
+		    <option>--disk_address <replaceable>[H:]C:T[:L]</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Look for machines having a disk at the specified SCSI address. For virtual
+			machines, only <replaceable>C:T</replaceable> should be specified. For
+			physical machines, all four components should be specified.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+		<term>
+		    <option>--disk_bus_address <replaceable>URI</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Look for machines having a disk which is managed by a controller at
+			the specified bus address.
+			See section <link linkend="sect1-bus-address" endterm="sect1-bus-address-title"/> for
+			the syntax of <replaceable>URI</replaceable>.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+		<term>
+		    <option>--disk_wwn <replaceable>WWN</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Look for the machine having the disk identified by <replaceable>WWN</replaceable>.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+		<term>
+		    <option>--disk_share <replaceable>NAME</replaceable></option>,
+		    <option>--share <replaceable>NAME</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Look for virtual machines having disk images bound to share <replaceable>NAME</replaceable>.
+			The <option>--share</option> form is deprecated.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+		<term>
+		    <option>--disk_filesystem <replaceable>NAME</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Look for virtual machines having disk images bound to a filesystem resource called <replaceable>NAME</replaceable>.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	</variablelist>
+	<xi:include href="../common/location_options_desc.xml"/>
+	<xi:include href="../common/global_options_desc.xml"/>
+    </refsect1>
+
+    <xi:include href="../common/sect1_bus_address.xml"/>
+
+</refentry>
+
+<!-- vim: set ai sw=4: -->

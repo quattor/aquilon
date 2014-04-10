@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<simplelist type="inline" xmlns="http://docbook.org/ns/docbook">
+    <member><literal>ide</literal></member>
+    <member><literal>sata</literal></member>
+    <member><literal>sas</literal></member>
+    <member><literal>scsi</literal></member>
+    <member><literal>cciss</literal></member>
+    <member><literal>flash</literal></member>
+    <member><literal>fibrechannel</literal></member>
+</simplelist>
+
+<!-- vim: set ai sw=4: -->

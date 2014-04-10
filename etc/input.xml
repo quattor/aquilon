@@ -190,6 +190,7 @@
          <option name="pg" type="string">port group of an attached interface</option>
          <option name="interface_model" type="string">Having an interface of the given model</option>
          <option name="interface_vendor" type="string">Having an interface of the given vendor</option>
+         <option name="interface_bus_address" type="string">Interface at the given bus address</option>
          <option name="serial" type="string">serial number</option>
          <optgroup name="search_hardware_location_opts" fields="any">
 	    <option name="organization" type="string">Organization</option>
@@ -229,7 +230,8 @@
          <option name="cpuspeed" type="int">cpu speed</option>
          <option name="cpucount" type="int">cpu count</option>
          <option name="memory" type="int">memory in MB</option>
-         <option name="cluster" type="string">cluster or metacluster name</option>
+         <option name="cluster" type="string" conflicts="vmhost">Cluster name hosting the VM</option>
+         <option name="vmhost" type="string" conflicts="cluster">Hypervisor host name</option>
          <option name="model" type="string">model name</option>
          <option name="machine_type" type="enum" enum="MachineType">machine type for the model (blade, virtual_machine, etc.)</option>
          <option name="vendor" type="string">vendor name</option>
@@ -237,9 +239,18 @@
          <option name="mac" type="mac">MAC address of an attached interface</option>
          <option name="interface_model" type="string">Having an interface of the given model</option>
          <option name="interface_vendor" type="string">Having an interface of the given vendor</option>
+         <option name="interface_bus_address" type="string">Interface at the given bus address</option>
          <option name="pg" type="string">port group of an attached interface</option>
          <option name="serial" type="string">serial number</option>
-         <option name="share" type="string">nas_disk_share in use by a virtual machine</option>
+         <option name="disk_name" type="string">Disk name</option>
+         <option name="disk_size" type="int">Disk size</option>
+         <option name="disk_controller" type="string">Disk controller</option>
+         <option name="disk_address" type="string">SCSI bus addresst</option>
+         <option name="disk_bus_address" type="string">Controller bus addresst</option>
+         <option name="disk_wwn" type="string">Disk WWN</option>
+         <option name="disk_share" type="string" conflicts="disk_filesystem">NAS share backing the virtual disk image</option>
+         <option name="disk_filesystem" type="string" conflicts="disk_share">Filesystem name backing the virtual disk image</option>
+         <option name="share" type="string">DEPRECATED. Share in use by a virtual machine</option>
          <optgroup name="search_machine_location_opts" fields="any">
 	    <option name="organization" type="string">Organization</option>
 	    <option name="hub" type="string">Hub</option>
@@ -254,7 +265,8 @@
 	    <option name="desk" type="string">Desk</option>
          </optgroup>
          <option name="exact_location" type="flag">match the location exactly</option>
-         <option name="all" type="flag">list all hardware</option>
+         <option name="chassis" type="string">Chassis name</option>
+         <option name="slot" type="int">Chassis slot number</option>
       </optgroup>
       <optgroup name="search_system_prefs" mandatory="False">
          <option name="fullinfo" type="flag">show full information for the machine</option>
@@ -274,7 +286,6 @@
          <option name="ip" type="ipv4">IP address</option>
          <option name="networkip" type="ipv4">Network IP address</option>
          <option name="mac" type="mac">primary MAC address</option>
-         <option name="all" type="flag">list all systems</option>
       </optgroup>
       <optgroup name="search_system_prefs" mandatory="False">
          <option name="fullinfo" type="flag">show full information for the matching systems</option>
@@ -343,7 +354,6 @@
             <option name="member_desk" type="string">member Desk</option>
          </optgroup>
          <option name="member_exact_location" type="flag">match the member location exactly</option>
-         <option name="all" type="flag">list all systems</option>
       </optgroup>
       <optgroup name="search_cluster_prefs" mandatory="False">
          <option name="fullinfo" type="flag">show full information for the matching hosts</option>
@@ -480,7 +490,6 @@
 	    <option name="vmhost_desk" type="string">vmhost Desk</option>
          </optgroup>
          <option name="vmhost_exact_location" type="flag">match the vmhost location exactly</option>
-         <option name="all" type="flag">list all ESX clusters</option>
       </optgroup>
       <optgroup name="search_cluster_prefs" mandatory="False">
          <option name="fullinfo" type="flag">show full information for the matching clusters</option>
@@ -686,6 +695,7 @@
       Network name, IP, Netmask, Sysloc, Country code, Side, Type, Comments.
       <optgroup name="search_network_Input" mandatory="True" fields="any">
          <option name="network" type="string">Network name</option>
+         <option name="network_environment" type="string">Network environment (default: internal)</option>
          <option name="ip" type="ipv4">IP address of the network or contained in the network</option>
          <option name="type" type="string">Network type</option>
          <option name="side" type="string">Network side</option>
@@ -695,7 +705,6 @@
          <option name="pg" type="string">Networks assigned to the given portgroup</option>
          <option name="has_dynamic_ranges" type="flag">Matches networks containing dynamic DHCP ranges</option>
          <option name="exact_location" type="flag">match the location exactly</option>
-         <option name="all" type="flag">All</option>
          <optgroup name="search_network_location_opts" fields="any">
             <option name="organization" type="string">Organization</option>
             <option name="hub" type="string">Hub</option>
@@ -711,7 +720,6 @@
          </optgroup>
       </optgroup>
       <optgroup name="search_network_prefs" mandatory="False">
-         <option name="network_environment" type="string">Network environment (default: internal)</option>
          <option name="fullinfo" type="flag">show full information for the matching networks</option>
       </optgroup>
       <transport method="get" path="find/network" />
@@ -799,22 +807,21 @@
       <optgroup name="add_disk_opts" mandatory="True" fields="all">
          <option name="machine" type="string">Machine name</option>
          <option name="disk" type="string">Disk/device name</option>
-         <option name="controller" type="string" conflicts="type">Type of the controller/interface</option>
-         <option name="size" type="int" conflicts="capacity">Capacity of the disk (GB)</option>
+         <option name="controller" type="string">Type of the controller/interface</option>
+         <option name="size" type="int">Capacity of the disk (GB)</option>
       </optgroup>
-      <optgroup name="nas_opts" fields="all">
-         <optgroup name="share_opts" fields="any">
-            <!-- TODO find out conflicts we might have -->
-            <option name="share" type="string">Share name</option>
-            <option name="filesystem" type="string">Filesystem name</option>
-            <option name="resourcegroup" type="string">Resourcegroup to add share</option>
-         </optgroup>
-         <option name="address" type="string">Bus address (e.g. 0:0)</option>
+      <optgroup name="add_disk_image_opts" fields="any">
+         <option name="share" type="string" conflicts="filesystem">Share name</option>
+         <option name="filesystem" type="string" conflicts="share">Filesystem name</option>
+         <option name="resourcegroup" type="string">Resourcegroup of the share or filesystem</option>
       </optgroup>
       <optgroup name="optional_opts">
+         <option name="address" type="string">SCSI bus address (e.g. 0:0)</option>
          <option name="comments" type="string">Comments</option>
          <option name="boot" type="boolean">Mark the disk as bootable</option>
          <option name="snapshot" type="boolean">Mark the disk as snapshotable</option>
+         <option name="wwn" type="string">World Wide Name of the disk</option>
+         <option name="bus_address" type="string">Hardware bus address of the controller hosting the disk</option>
       </optgroup>
       <transport method="put" path="machine/%(machine)s/disk/%(disk)s" />
    </command>
@@ -829,8 +836,8 @@
       </optgroup>
       <optgroup name="del_disk_optional_opts" mandatory="False">
          <option name="disk" type="string">device name of the disk (like sda)</option>
-         <option name="controller" type="string" conflicts="type">type of the disk</option>
-         <option name="size" type="int" conflicts="capacity">capacity of the disk (GB)</option>
+         <option name="controller" type="string">type of the disk</option>
+         <option name="size" type="int">capacity of the disk (GB)</option>
          <option name="all" type="flag">remove any matching disks</option>
       </optgroup>
       <transport trigger="disk" method="delete" path="machine/%(machine)s/disk/%(disk)s" />
@@ -850,12 +857,14 @@
             <option name="filesystem" type="string" conflicts="share">Filesystem backing the disk image</option>
             <option name="resourcegroup" type="string">Resourcegroup to add share</option>
          </optgroup>
-         <option name="address" type="string">Bus address (e.g. 0:0)</option>
+         <option name="address" type="string">SCSI bus address (e.g. 0:0)</option>
          <option name="controller" type="string" conflicts="type">Type of the controller/interface</option>
          <option name="size" type="int" conflicts="capacity">Capacity of the disk (GB)</option>
          <option name="comments" type="string">Comments</option>
          <option name="boot" type="boolean">Mark the disk as bootable</option>
          <option name="snapshot" type="boolean">Mark the disk as snapshotable</option>
+         <option name="wwn" type="string">World Wide Name of the disk</option>
+         <option name="bus_address" type="string">Hardware bus address of the controller hosting the disk</option>
       </optgroup>
       <transport method="post" path="machine/%(machine)s/disk/%(disk)s" />
    </command>
@@ -1300,6 +1309,7 @@
          <option name="autopg" type="flag" conflicts="pg">choose portgroup based on switch</option>
          <option name="model" type="string">Interface model name. Default is 'generic_nic'.</option>
          <option name="vendor" type="string">Interface vendor name. Default is 'generic'.</option>
+         <option name="bus_address" type="string">Hardware bus address of the controller hosting the disk</option>
       </optgroup>
       <transport trigger="machine" method="put" path="machine/%(machine)s/interface/%(interface)s" />
       <transport trigger="hostname" method="put" path="host/%(hostname)s/interface/%(interface)s" />
@@ -1668,6 +1678,7 @@
          <option name="model" type="string">Interface model name</option>
          <option name="vendor" type="string">Interface vendor name</option>
          <option name="rename_to" type="string">New name of the interface</option>
+         <option name="bus_address" type="string">Hardware bus address of the controller hosting the disk</option>
       </optgroup>
       <transport trigger="machine" method="post" path="machine/%(machine)s/interface/%(interface)s" />
       <transport trigger="hostname" method="post" path="host/%(hostname)s/interface/%(interface)s" />
@@ -3401,21 +3412,11 @@
       If the machine has multiple interfaces, then there will be a separate
       line for each.
       <optgroup name="show_machine_opts" mandatory="True" fields="any">
-         <option name="machine" type="string">machine name</option>
+         <option name="machine" type="string" conflicts="all">machine name</option>
 	 <option name="all" type="flag" conflicts="machine">all</option>
-         <optgroup name="show_machine_location_opts" mandatory="False">
-            <option name="chassis" type="string">Chassis name</option>
-	    <option name="slot" type="int">Chassis Slot</option>
-            <option name="rack" type="string">Rack name</option>
-            <option name="desk" type="string">Desk name</option>
-         </optgroup>
-         <option name="model" type="string">machine model</option>
-         <option name="vendor" type="string">machine vendor</option>
-         <option name="machine_type" type="enum" enum="MachineType">machine type</option>
       </optgroup>
       <transport trigger="all" method="get" path="machine" />
       <transport trigger="machine" method="get" path="machine/%(machine)s" />
-      <transport method="post" path="machine" />
    </command>
 
    <command name="del_machine">

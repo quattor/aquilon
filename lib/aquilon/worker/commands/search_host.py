@@ -23,7 +23,7 @@ from aquilon.exceptions_ import NotFoundException
 from aquilon.aqdb.model import (Host, Cluster, Archetype, Personality,
                                 PersonalityGrnMap, HostGrnMap, HostLifecycle,
                                 OperatingSystem, Service, ServiceInstance,
-                                Share, VirtualNasDisk, Disk, Machine, Model,
+                                Share, VirtualDisk, Machine, Model,
                                 DnsRecord, ARecord, Fqdn, DnsDomain, Interface,
                                 AddressAssignment, NetworkEnvironment, Network,
                                 MetaCluster, VirtualMachine, ClusterResource,
@@ -250,10 +250,9 @@ class CommandSearchHost(BrokerCommand):
                 raise NotFoundException("No shares found with name {0}."
                                         .format(guest_on_share))
 
-            NasAlias = aliased(VirtualNasDisk)
             q = q.join(Host.hardware_entity.of_type(Machine),
-                       Disk, (NasAlias, NasAlias.id == Disk.id))
-            q = q.filter(NasAlias.share_id.in_(v2shares.subquery()))
+                       Machine.disks.of_type(VirtualDisk))
+            q = q.filter(VirtualDisk.backing_store_id.in_(v2shares.subquery()))
             q = q.reset_joinpoint()
 
         if member_cluster_share:
@@ -262,10 +261,9 @@ class CommandSearchHost(BrokerCommand):
                 raise NotFoundException("No shares found with name {0}."
                                         .format(guest_on_share))
 
-            NasAlias = aliased(VirtualNasDisk)
             q = q.join('_cluster', 'cluster', 'resholder', VirtualMachine,
-                       'machine', 'disks', (NasAlias, NasAlias.id == Disk.id))
-            q = q.filter(NasAlias.share_id.in_(v2shares.subquery()))
+                       'machine', Machine.disks.of_type(VirtualDisk))
+            q = q.filter(VirtualDisk.backing_store_id.in_(v2shares.subquery()))
             q = q.reset_joinpoint()
 
         if grn or eon_id:

@@ -118,21 +118,21 @@ class TestDelNetwork(TestBrokerCommand):
 
     def testverifyexcx(self):
         net = self.net["unknown0"].subnet()[0]
-        command = ["search", "network", "--all", "--network_environment", "excx"]
+        command = ["search", "network", "--network_environment", "excx"]
         out = self.commandtest(command)
         self.matchclean(out, "excx-net", command)
         self.matchclean(out, str(net.ip), command)
 
     def testverifynetsvcmap(self):
         net = self.net["netsvcmap"]
-        command = ["search", "network", "--all"]
+        command = ["show", "network", "--all"]
         out = self.commandtest(command)
         self.matchclean(out, "netsvcmap", command)
         self.matchclean(out, str(net.ip), command)
 
     def testverifyutcolo(self):
         net = self.net["unknown1"]
-        command = ["search", "network", "--all", "--network_environment", "utcolo"]
+        command = ["search", "network", "--network_environment", "utcolo"]
         out = self.commandtest(command)
         self.matchclean(out, "utcolo-net", command)
         self.matchclean(out, str(net.ip), command)

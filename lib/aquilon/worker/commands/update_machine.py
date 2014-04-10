@@ -18,8 +18,7 @@
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import (Cpu, Chassis, ChassisSlot, Model, Cluster,
-                                Machine, BundleResource, VirtualNasDisk,
-                                VirtualLocalDisk, Filesystem, Share)
+                                Machine, BundleResource)
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.hardware_entity import update_primary_ip
 from aquilon.worker.dbwrappers.location import get_location
@@ -192,33 +191,16 @@ class CommandUpdateMachine(BrokerCommand):
             dbmachine.vm_container.holder = resholder
 
             for dbdisk in dbmachine.disks:
-                if isinstance(dbdisk, VirtualNasDisk):
-                    old_share = dbdisk.share
-                    if isinstance(old_share.holder, BundleResource):
-                        resourcegroup = old_share.holder.resourcegroup.name
-                    else:
-                        resourcegroup = None
+                old_bstore = dbdisk.backing_store
+                if isinstance(old_bstore.holder, BundleResource):
+                    resourcegroup = old_bstore.holder.resourcegroup.name
+                else:
+                    resourcegroup = None
 
-                    new_share = find_resource(Share, new_holder, resourcegroup, old_share.name,
+                new_bstore = find_resource(old_bstore.__class__, new_holder,
+                                           resourcegroup, old_bstore.name,
                                            error=ArgumentError)
-
-                    # If the shares are registered at the metacluster level and both
-                    # clusters are in the same metacluster, then there will be no
-                    # real change here
-                    if new_share != old_share:
-                        old_share.disks.remove(dbdisk)
-                        new_share.disks.append(dbdisk)
-
-                if isinstance(dbdisk, VirtualLocalDisk):
-                    old_filesystem = dbdisk.filesystem
-
-                    new_filesystem = find_resource(Filesystem, new_holder, None,
-                                                   old_filesystem.name,
-                                                   error=ArgumentError)
-
-                    if new_filesystem != old_filesystem:
-                        old_filesystem.disks.remove(dbdisk)
-                        new_filesystem.disks.append(dbdisk)
+                dbdisk.backing_store = new_bstore
 
             if isinstance(new_holder, Cluster):
                 dbmachine.location = new_holder.location_constraint

@@ -325,7 +325,7 @@ def _type_msg(interface_type, bootable):
 
 
 def get_or_create_interface(session, dbhw_ent, name=None, mac=None,
-                            model=None, vendor=None,
+                            model=None, vendor=None, bus_address=None,
                             interface_type='public', bootable=None,
                             preclude=False, port_group=None, comments=None):
     """
@@ -458,7 +458,8 @@ def get_or_create_interface(session, dbhw_ent, name=None, mac=None,
 
     try:
         dbinterface = cls(name=name, mac=mac, comments=comments, model=dbmodel,
-                          default_route=default_route, **extra_args)
+                          bus_address=bus_address, default_route=default_route,
+                          **extra_args)
     except ValueError, err:
         raise ArgumentError(err)
 

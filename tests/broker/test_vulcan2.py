@@ -410,7 +410,7 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
         command = "show machine --machine utpgm0"
         out = self.commandtest(command.split(" "))
         self.searchoutput(out, r"Disk: sda 34 GB scsi "
-                          r"\(virtual_disk from test_v2_share\) "
+                          r"\(virtual_disk stored on share test_v2_share\) "
                           r"\[boot, snapshot\]$", command)
 
         command = ["show_share", "--resourcegroup=utmc8as1",
@@ -451,7 +451,7 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
         self.matchoutput(out, "Hosted by: ESX Cluster utpgcl0", command)
         self.searchoutput(out,
                           r"Disk: sda 34 GB scsi "
-                          r"\(virtual_disk from test_v2_share\) "
+                          r"\(virtual_disk stored on share test_v2_share\) "
                           r"\[boot, snapshot\]$",
                           command)
 
@@ -468,7 +468,7 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
         self.matchoutput(out, "Hosted by: ESX Cluster utpgcl1", command)
         self.searchoutput(out,
                           r"Disk: sda 34 GB scsi "
-                          r"\(virtual_disk from test_v2_share\) "
+                          r"\(virtual_disk stored on share test_v2_share\) "
                           r"\[boot, snapshot\]$",
                           command)
 

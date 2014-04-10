@@ -19,89 +19,64 @@
 import re
 
 from sqlalchemy import Column, Boolean, Integer, ForeignKey, Index
-from sqlalchemy.orm import relation, backref, column_property, validates
+from sqlalchemy.orm import relation, column_property, validates
 from sqlalchemy.sql import select, func
 
-from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.column_types import AqStr
-from aquilon.aqdb.model import Disk, Share, Filesystem
+from aquilon.aqdb.model import Disk, Resource, Share, Filesystem
 
-address_re = re.compile(r"\d+:\d+$")
 _TN = 'disk'
 
 
 class VirtualDisk(Disk):
-    # We need to know the bus address of each disk.
-    # This isn't really nullable, but single-table inheritance means
-    # that the base class will end up with the column and the base class
-    # wants it to be nullable. We enforce this via __init__ instead.
-    address = Column(AqStr(128), nullable=True)
+    _address_re = re.compile(r"\d+:\d+$")
 
     snapshotable = Column(Boolean(name="%s_snapshotable_ck" % _TN),
                           nullable=True)
 
-    @validates('address')
-    def validate_address(self, key, value):  # pylint: disable=W0613
-        if not address_re.match(value):
-            raise ArgumentError(r"Disk address '%s' is not valid, it must "
-                                r"match \d+:\d+ (e.g. 0:0)." % value)
-        return value
+    backing_store_id = Column(Integer, ForeignKey('resource.id',
+                                                  name='%s_backing_store_fk' % _TN),
+                              nullable=True)
 
-    def __init__(self, **kw):
-        if 'address' not in kw or kw['address'] is None:
-            raise ValueError("Address is mandatory for virtual disks.")
-        super(VirtualDisk, self).__init__(**kw)
+    backing_store = relation(Resource)
 
-
-class VirtualNasDisk(VirtualDisk):
-    share_id = Column(Integer, ForeignKey('share.id', name='%s_share_fk' % _TN,
-                                          ondelete='CASCADE'),
-                      nullable=True)
-
-    share = relation(Share, innerjoin=True,
-                     backref=backref('disks', cascade='all'))
-
-    __extra_table_args__ = (Index('%s_share_idx' % _TN, share_id),)
     __mapper_args__ = {'polymorphic_identity': 'virtual_disk'}
+    __extra_table_args__ = (Index('%s_backing_store_idx' % _TN, backing_store_id),)
+
+    def __init__(self, address=None, backing_store=None, **kw):
+        if not address:
+            raise ValueError("Address is mandatory for virtual disks.")
+        if not backing_store:
+            raise ValueError("Backing store is mandatory for virtual disks.")
+        super(VirtualDisk, self).__init__(address=address,
+                                          backing_store=backing_store, **kw)
 
     def __repr__(self):
-        return "<%s %s (%s) of machine %s, %d GB, provided by %s>" % \
+        return "<%s %s (%s) of machine %s, %d GB, stored on %s of %s>" % \
             (self._get_class_label(), self.device_name,
              self.controller_type, self.machine.label, self.capacity,
-             (self.share.name if self.share else "no_share"))
+             format(self.backing_store),
+             format(self.backing_store.holder.toplevel_holder_object))
+
+    @validates("backing_store")
+    def validate_backing_store(self, key, value):  # pylint: disable=W0613
+        if not isinstance(value, Share) and \
+           not isinstance(value, Filesystem):
+            raise ValueError("The backing store must be a Share or Filesystem.")
+        return value
 
 # The formatter code is interested in the count of disks/machines, and it is
 # cheaper to query the DB than to load all entities into memory
-Share.disk_count = column_property(
+Share.virtual_disk_count = column_property(
     select([func.count()],
-           VirtualNasDisk.share_id == Share.id)
-    .label("disk_count"), deferred=True)
+           VirtualDisk.backing_store_id == Share.id)
+    .label("virtual_disk_count"), deferred=True)
 
-Share.machine_count = column_property(
-    select([func.count(func.distinct(VirtualNasDisk.machine_id))],
-           VirtualNasDisk.share_id == Share.id)
-    .label("machine_count"), deferred=True)
-
-
-class VirtualLocalDisk(VirtualDisk):
-    filesystem_id = Column(Integer, ForeignKey('filesystem.id',
-                                               name='%s_filesystem_fk' % _TN,
-                                               ondelete='CASCADE'),
-                           nullable=True)
-
-    filesystem = relation(Filesystem, innerjoin=True,
-                          backref=backref('disks', cascade='all'))
-
-    __extra_table_args__ = (Index('%s_filesystem_idx' % _TN, filesystem_id),)
-    __mapper_args__ = {'polymorphic_identity': 'virtual_localdisk'}
-
-    def __repr__(self):
-        return "<%s %s (%s) of machine %s, %d GB, provided by %s>" % \
-            (self._get_class_label(), self.device_name,
-             self.controller_type, self.machine.label, self.capacity,
-             (self.filesystem.name if self.filesystem else "no_filesystem"))
+Share.virtual_machine_count = column_property(
+    select([func.count(func.distinct(VirtualDisk.machine_id))],
+           VirtualDisk.backing_store_id == Share.id)
+    .label("virtual_machine_count"), deferred=True)
 
 Filesystem.virtual_disk_count = column_property(
     select([func.count()],
-           VirtualLocalDisk.filesystem_id == Filesystem.id)
+           VirtualDisk.backing_store_id == Filesystem.id)
     .label("virtual_disk_count"), deferred=True)

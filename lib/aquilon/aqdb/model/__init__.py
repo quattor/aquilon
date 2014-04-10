@@ -69,7 +69,7 @@ from aquilon.aqdb.model.operating_system import OperatingSystem
 #HARDWARE
 from aquilon.aqdb.model.vendor import Vendor
 from aquilon.aqdb.model.model import Model
-from aquilon.aqdb.model.hardware_entity import HardwareEntity
+from aquilon.aqdb.model.hardware_entity import HardwareEntity, DeviceLinkMixin
 from aquilon.aqdb.model.cpu import Cpu
 from aquilon.aqdb.model.machine import Machine
 from aquilon.aqdb.model.hostlifecycle import HostLifecycle
@@ -133,7 +133,6 @@ from aquilon.aqdb.model.reboot_schedule import (RebootSchedule,
 from aquilon.aqdb.model.virtual_machine import VirtualMachine
 from aquilon.aqdb.model.service_address import ServiceAddress
 from aquilon.aqdb.model.share import Share
-from aquilon.aqdb.model.virtual_disk import (VirtualDisk, VirtualNasDisk,
-                                             VirtualLocalDisk)
+from aquilon.aqdb.model.virtual_disk import VirtualDisk
 
 from aquilon.aqdb.model.service_instance_server import ServiceInstanceServer

@@ -1,0 +1,289 @@
+<?xml version="1.0"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V5.0//EN"
+"http://docbook.org/xml/5.0/dtd/docbook.dtd" [
+<!ENTITY aqd_version SYSTEM "../version.txt">
+]>
+<refentry xml:id="aq_update_interface"
+          xmlns="http://docbook.org/ns/docbook"
+	  xmlns:xi="http://www.w3.org/2001/XInclude">
+    <refmeta>
+        <refentrytitle>aq_update_interface</refentrytitle>
+        <manvolnum>1</manvolnum>
+        <refmiscinfo class="version">&aqd_version;</refmiscinfo>
+        <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
+    </refmeta>
+
+    <refnamediv>
+        <refname>aq update interface</refname>
+        <refpurpose>
+	    Update the parameters of a network interface
+        </refpurpose>
+	<refclass>Aquilon</refclass>
+    </refnamediv>
+
+    <refsynopsisdiv>
+	<cmdsynopsis>
+	    <command>aq update interface</command>
+	    <group>
+		<synopfragmentref linkend="global-options">Global options</synopfragmentref>
+	    </group>
+	    <group choice="req">
+		<arg choice="plain"><option>--machine <replaceable>MACHINE</replaceable></option></arg>
+		<arg choice="plain"><option>--hostname <replaceable>HOST</replaceable></option></arg>
+	    </group>
+	    <arg choice="plain"><option>--interface <replaceable>IFACE</replaceable></option></arg>
+	    <arg choice="opt"><option>--rename_to <replaceable>NEW_IFACE</replaceable></option></arg>
+	    <arg choice="opt"><option>--mac <replaceable>MAC</replaceable></option></arg>
+	    <arg choice="opt"><option>--boot</option></arg>
+	    <group choice="opt">
+		<arg choice="plain"><option>--default_route</option></arg>
+		<arg choice="plain"><option>--nodefault_route</option></arg>
+	    </group>
+	    <group choice="opt">
+		<arg choice="plain"><option>--pg <replaceable>PG</replaceable></option></arg>
+		<arg choice="plain"><option>--autopg</option></arg>
+	    </group>
+	    <group choice="opt">
+		<arg choice="plain"><option>--model <replaceable>MODEL</replaceable></option></arg>
+		<arg choice="opt"><option>--vendor <replaceable>VENDOR</replaceable></option></arg>
+	    </group>
+	    <arg choice="opt"><option>--bus_address <replaceable>URI</replaceable></option></arg>
+	    <group choice="opt">
+		<arg choice="plain"><option>--master <replaceable>IFACE</replaceable></option></arg>
+		<arg choice="plain"><option>--clear_master</option></arg>
+	    </group>
+	    <arg choice="opt"><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
+	    <xi:include href="../common/global_options.xml"/>
+	</cmdsynopsis>
+	<cmdsynopsis>
+	    <command>aq update interface</command>
+	    <arg choice="plain"><option>--chassis <replaceable>CHASSIS</replaceable></option></arg>
+	    <arg choice="plain"><option>--interface <replaceable>IFACE</replaceable></option></arg>
+	    <arg choice="opt"><option>--rename_to <replaceable>NEW_IFACE</replaceable></option></arg>
+	    <arg choice="opt"><option>--mac <replaceable>MAC</replaceable></option></arg>
+	    <arg choice="opt"><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
+	</cmdsynopsis>
+	<cmdsynopsis>
+	    <command>aq add interface</command>
+	    <group choice="req">
+		<arg choice="plain"><option>--network_device <replaceable>NETDEV</replaceable></option></arg>
+		<arg choice="plain"><option>--switch <replaceable>NETDEV</replaceable></option></arg>
+	    </group>
+	    <arg choice="plain"><option>--interface <replaceable>IFACE</replaceable></option></arg>
+	    <arg choice="opt"><option>--mac <replaceable>MAC</replaceable></option></arg>
+	    <arg choice="opt"><option>--rename_to <replaceable>NEW_IFACE</replaceable></option></arg>
+	    <arg choice="opt"><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
+	</cmdsynopsis>
+    </refsynopsisdiv>
+
+    <refsect1>
+        <title>Description</title>
+	<para>
+	    The <command>aq update interface</command> command updates the parameters of a network interface.
+	</para>
+    </refsect1>
+
+    <refsect1>
+        <title>Options</title>
+	<variablelist>
+	    <title>Command-specific options</title>
+	    <varlistentry>
+		<term>
+		    <option>--machine <replaceable>MACHINE</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			The name of the machine that holds the interface.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+		<term>
+		    <option>--hostname <replaceable>HOST</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			The name of the host that holds the interface.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+		<term>
+		    <option>--chassis <replaceable>CHASSIS</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			The name of the chassis that holds the interface.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+		<term>
+		    <option>--network_device <replaceable>NETDEV</replaceable></option>,
+		    <option>--switch <replaceable>NETDEV</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			The name of the network device that holds the interface.
+			The <option>--switch</option> form is deprecated.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+		<term>
+		    <option>--interface <replaceable>IFACE</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			The name of the interface to update.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+		<term>
+		    <option>--rename_to <replaceable>NEW_IFACE</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Rename the interface <replaceable>IFACE</replaceable> to <replaceable>NEW_IFACE</replaceable>.
+			The hardware entity must not have an interface named <replaceable>NEW_IFACE</replaceable>.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--mac <replaceable>MAC</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Change the MAC (EUI-48) address of the interface. The address may be
+			specified with or without separating colons.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--pg <replaceable>PG</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Change the port group of the virtual interface. This option is valid only
+			for virtual machines.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--autopg</option>
+		</term>
+		<listitem>
+		    <para>
+			Select a new port group automatically. This option is valid only for virtual machines. For this
+			option to work, the virtual machine needs to be hosted by a cluster that has a switch assigned,
+			and the <command>aq poll network device --vlan</command> option must be executed to detect
+			the available port groups before adding the interface to the virtual machine.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--model <replaceable>MODEL</replaceable></option>,
+		    <option>--vendor <replaceable>VENDOR</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Change the model and vendor of the network interface.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--bus_address <replaceable>URI</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Change the hardware bus address of the network interface.
+			See section <link linkend="sect1-bus-address" endterm="sect1-bus-address-title"/> for
+			the syntax of <replaceable>URI</replaceable>.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--boot</option>
+		</term>
+		<listitem>
+		    <para>
+			Select the boot interface of the machine. The boot interface will be used to install the
+			machine from the network (PXE boot). There can only be at most one boot interface; setting
+			this flag on one interface removes the flag from the previous boot interface (if there were one).
+		    </para>
+		    <para>
+			Usually, the boot interface also provides the default route (see the <option>--default_route</option> option),
+			but there can be exceptions (e.g. if the default route points to an external
+			network). The broker will issue a warning if the boot and default route
+			interfaces do not line up.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--default_route</option>, <option>--nodefault_route</option>
+		</term>
+		<listitem>
+		    <para>
+			Select if this interface provides the default route or not. There may be more than one interfaces
+			configured to provide the default route, but that usually requires special software to be installed
+			that can configure multipath default routes.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--master <replaceable>MASTER_IFACE</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Enslave the interface. The <replaceable>MASTER_IFACE</replaceable> must be either a
+			bonding or a bridge interface.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--clear_master</option>
+		</term>
+		<listitem>
+		    <para>
+			Remove the interface from any bonding or bridge interface it was previously a slave of.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--comments <replaceable>COMMENTS</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Free form comments for this interface.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	</variablelist>
+	<xi:include href="../common/global_options_desc.xml"/>
+    </refsect1>
+
+    <xi:include href="../common/sect1_bus_address.xml"/>
+
+    <refsect1>
+	<title>See also</title>
+	<para>
+	    <citerefentry><refentrytitle>aq_add_interface</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>aq_del_interface</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>aq_add_interface_address</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>aq_del_interface_address</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+	</para>
+    </refsect1>
+</refentry>
+
+<!-- vim: set ai sw=4: -->

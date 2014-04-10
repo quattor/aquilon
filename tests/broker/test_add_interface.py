@@ -38,7 +38,8 @@ class TestAddInterface(TestBrokerCommand):
     def testaddut3c5n10eth0_good_mac(self):
         self.noouttest(["add", "interface", "--interface", "eth0",
                         "--machine", "ut3c5n10",
-                        "--mac", self.net["unknown0"].usable[0].mac.upper()])
+                        "--mac", self.net["unknown0"].usable[0].mac.upper(),
+                        "--bus_address", "pci:0000:0b:00.0"])
 
     def testaddut3c5n10eth1(self):
         self.noouttest(["add", "interface", "--interface", "eth1",
@@ -126,7 +127,8 @@ class TestAddInterface(TestBrokerCommand):
         self.searchoutput(out,
                           r"Interface: eth0 %s \[boot, default_route\]"
                           r"\s+Type: public"
-                          r"\s+Vendor: generic Model: generic_nic" %
+                          r"\s+Vendor: generic Model: generic_nic"
+                          r"\s+Controller Bus Address: pci:0000:0b:00.0" %
                           self.net["unknown0"].usable[0].mac.lower(),
                           command)
         self.searchoutput(out,
@@ -149,6 +151,7 @@ class TestAddInterface(TestBrokerCommand):
                           r'"cards/nic" = nlist\(\s*'
                           r'"eth0", create\("hardware/nic/generic/generic_nic",\s*'
                           r'"boot", true,\s*'
+                          r'"bus", "pci:0000:0b:00.0",\s*'
                           r'"hwaddr", "%s"\s*\),'
                           % self.net["unknown0"].usable[0].mac,
                           command)

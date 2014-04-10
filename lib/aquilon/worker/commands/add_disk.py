@@ -17,8 +17,8 @@
 """Contains the logic for `aq add disk`."""
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import (Machine, LocalDisk, VirtualNasDisk,
-                                VirtualLocalDisk, Share, Filesystem)
+from aquilon.aqdb.model import (Machine, Disk, LocalDisk, VirtualDisk, Share,
+                                Filesystem)
 from aquilon.aqdb.model.disk import controller_types
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.resources import find_resource
@@ -32,7 +32,7 @@ class CommandAddDisk(BrokerCommand):
 
     def render(self, session, logger, machine, disk, controller, share,
                filesystem, resourcegroup, address, comments, size, boot,
-               snapshot, **kw):
+               snapshot, wwn, bus_address, **kw):
         if controller not in controller_types:
             raise ArgumentError("%s is not a valid controller type, use one "
                                 "of: %s." % (controller,
@@ -50,45 +50,43 @@ class CommandAddDisk(BrokerCommand):
                     raise ArgumentError("Machine %s already has a boot disk." %
                                         machine)
 
+        if wwn:
+            dbdisk = session.query(Disk).filter_by(wwn=wwn).first()
+            if dbdisk:
+                raise ArgumentError("WWN {0!s} is already in use by disk {1!s} "
+                                    "of {2:l}.".format(wwn, dbdisk,
+                                                       dbdisk.machine))
+
         if boot is None:
             # Backward compatibility: "sda"/"c0d0" is bootable, except if there
             # is already a boot disk
             boot = (disk == "sda" or disk == "c0d0")
 
-        if share:
+        cls = LocalDisk
+        extra_params = {}
+        if share or filesystem:
             if not dbmachine.vm_container:
                 raise ArgumentError("{0} is not a virtual machine, it is not "
                                     "possible to define a virtual disk."
                                     .format(dbmachine))
 
-            dbshare = find_resource(Share, dbmachine.vm_container.holder.holder_object,
-                                 resourcegroup, share)
-            dbdisk = VirtualNasDisk(device_name=disk,
-                                    controller_type=controller, bootable=boot,
-                                    capacity=size, address=address,
-                                    snapshotable=snapshot, comments=comments)
+            if share:
+                res_cls = Share
+                res_name = share
+            else:
+                res_cls = Filesystem
+                res_name = filesystem
 
-            dbshare.disks.append(dbdisk)
-        elif filesystem:
-            if not dbmachine.vm_container:
-                raise ArgumentError("{0} is not a virtual machine, it is not "
-                                    "possible to define a virtual disk."
-                                    .format(dbmachine))
+            dbres = find_resource(res_cls,
+                                  dbmachine.vm_container.holder.holder_object,
+                                  resourcegroup, res_name)
+            extra_params["backing_store"] = dbres
+            extra_params["snapshotable"] = snapshot
+            cls = VirtualDisk
 
-            dbfs = Filesystem.get_unique(session, name=filesystem,
-                                         holder=dbmachine.vm_container.holder,
-                                         compel=True)
-
-            dbdisk = VirtualLocalDisk(device_name=disk,
-                                      controller_type=controller, bootable=boot,
-                                      capacity=size, address=address,
-                                      snapshotable=snapshot,
-                                      comments=comments)
-            dbfs.disks.append(dbdisk)
-
-        else:
-            dbdisk = LocalDisk(device_name=disk, controller_type=controller,
-                               capacity=size, bootable=boot, comments=comments)
+        dbdisk = cls(device_name=disk, controller_type=controller,
+                     capacity=size, bootable=boot, wwn=wwn, address=address,
+                     bus_address=bus_address, comments=comments, **extra_params)
 
         dbmachine.disks.append(dbdisk)
 

@@ -37,8 +37,8 @@ class CommandShowNASDiskShareAll(BrokerCommand):
         if share:
             q = q.filter_by(name=share)
         q = q.join(ClusterResource, EsxCluster)
-        q = q.options(undefer(Share.disk_count))
-        q = q.options(undefer(Share.machine_count))
+        q = q.options(undefer(Share.virtual_disk_count))
+        q = q.options(undefer(Share.virtual_machine_count))
         result = q.all()
         if share and not result:
             raise NotFoundException("Share %s does not exist." % share)

@@ -17,24 +17,12 @@
 """Contains the logic for `aq update disk`."""
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import (Machine, Disk, VirtualDisk, VirtualNasDisk,
-                                VirtualLocalDisk, Filesystem, Share)
+from aquilon.aqdb.model import Machine, Disk, VirtualDisk, Filesystem, Share
 from aquilon.aqdb.model.disk import controller_types
+from aquilon.utils import force_wwn
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.resources import find_resource
 from aquilon.worker.templates import Plenary, PlenaryCollection
-
-
-def copy_virt_disk(session, cls, orig):
-    # Pass machine_id, not machine - passing machine would pull the object into
-    # the session, which we do not want yet
-    new_disk = cls(capacity=orig.capacity, device_name=orig.device_name,
-                   controller_type=orig.controller_type, address=orig.address,
-                   machine_id=orig.machine_id, bootable=orig.bootable,
-                   comments=orig.comments, snapshotable=orig.snapshotable)
-
-    assert new_disk not in session
-    return new_disk
 
 
 class CommandUpdateDisk(BrokerCommand):
@@ -43,7 +31,7 @@ class CommandUpdateDisk(BrokerCommand):
 
     def render(self, session, logger, machine, disk, controller, share,
                filesystem, resourcegroup, address, comments, size, boot,
-               snapshot, rename_to, **kw):
+               snapshot, rename_to, wwn, bus_address, **kw):
         dbmachine = Machine.get_unique(session, machine, compel=True)
         dbdisk = Disk.get_unique(session, device_name=disk, machine=dbmachine,
                                  compel=True)
@@ -58,6 +46,16 @@ class CommandUpdateDisk(BrokerCommand):
 
         if comments is not None:
             dbdisk.comments = comments
+
+        if wwn is not None:
+            wwn = force_wwn("--wwn", wwn)
+            if wwn:
+                other = session.query(Disk).filter_by(wwn=wwn).first()
+                if other:
+                    raise ArgumentError("WWN {0!s} is already in use by disk "
+                                        "{1!s} of {2:l}."
+                                        .format(wwn, other, other.machine))
+            dbdisk.wwn = wwn
 
         if size is not None:
             dbdisk.capacity = size
@@ -79,13 +77,11 @@ class CommandUpdateDisk(BrokerCommand):
                 if boot and disk.bootable:
                     disk.bootable = False
 
-        if address:
-            # TODO: do we really care? Bus address makes sense for physical
-            # disks as well, even if we cannot use that information today.
-            if not isinstance(dbdisk, VirtualDisk):
-                raise ArgumentError("Bus address can only be set for virtual "
-                                    "disks.")
+        if address is not None:
             dbdisk.address = address
+
+        if bus_address is not None:
+            dbdisk.bus_address = bus_address
 
         if snapshot is not None:
             if not isinstance(dbdisk, VirtualDisk):
@@ -94,42 +90,21 @@ class CommandUpdateDisk(BrokerCommand):
             dbdisk.snapshotable = snapshot
 
         if share or filesystem:
-            if isinstance(dbdisk, VirtualNasDisk):
-                old_share = dbdisk.share
-                old_share.disks.remove(dbdisk)
-            elif isinstance(dbdisk, VirtualLocalDisk):
-                old_fs = dbdisk.filesystem
-                old_fs.disks.remove(dbdisk)
-            else:
+            if not isinstance(dbdisk, VirtualDisk):
                 raise ArgumentError("Disk {0!s} of {1:l} is not a virtual "
                                     "disk, changing the backend store is not "
                                     "possible.".format(dbdisk, dbmachine))
 
             if share:
-                if not isinstance(dbdisk, VirtualNasDisk):
-                    new_dbdisk = copy_virt_disk(session, VirtualNasDisk, dbdisk)
-                    session.delete(dbdisk)
-                    session.flush()
-                    session.add(new_dbdisk)
-                    dbdisk = new_dbdisk
+                dbres = find_resource(Share,
+                                      dbmachine.vm_container.holder.holder_object,
+                                      resourcegroup, share)
+            elif filesystem:
+                dbres = find_resource(Filesystem,
+                                      dbmachine.vm_container.holder.holder_object,
+                                      resourcegroup, filesystem)
 
-                new_share = find_resource(Share,
-                                          dbmachine.vm_container.holder.holder_object,
-                                          resourcegroup, share)
-                new_share.disks.append(dbdisk)
-
-            if filesystem:
-                if not isinstance(dbdisk, VirtualLocalDisk):
-                    new_dbdisk = copy_virt_disk(session, VirtualLocalDisk, dbdisk)
-                    session.delete(dbdisk)
-                    session.flush()
-                    session.add(new_dbdisk)
-                    dbdisk = new_dbdisk
-
-                new_fs = find_resource(Filesystem,
-                                       dbmachine.vm_container.holder.holder_object,
-                                       resourcegroup, filesystem)
-                new_fs.disks.append(dbdisk)
+            dbdisk.backing_store = dbres
 
         session.flush()
 

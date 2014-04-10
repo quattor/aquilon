@@ -1,0 +1,231 @@
+<?xml version="1.0"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V5.0//EN"
+"http://docbook.org/xml/5.0/dtd/docbook.dtd" [
+<!ENTITY aqd_version SYSTEM "../version.txt">
+]>
+<refentry xml:id="aq_update_disk"
+          xmlns="http://docbook.org/ns/docbook"
+	  xmlns:xi="http://www.w3.org/2001/XInclude">
+    <refmeta>
+        <refentrytitle>aq_update_disk</refentrytitle>
+        <manvolnum>1</manvolnum>
+        <refmiscinfo class="version">&aqd_version;</refmiscinfo>
+        <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
+    </refmeta>
+
+    <refnamediv>
+        <refname>aq update disk</refname>
+        <refpurpose>
+	    Update the parameters of a disk
+        </refpurpose>
+	<refclass>Aquilon</refclass>
+    </refnamediv>
+
+    <refsynopsisdiv>
+	<cmdsynopsis>
+	    <command>aq update disk</command>
+	    <group>
+		<synopfragmentref linkend="global-options">Global options</synopfragmentref>
+	    </group>
+	    <arg choice="plain"><option>--machine <replaceable>MACHINE</replaceable></option></arg>
+	    <arg choice="plain"><option>--disk <replaceable>DISK</replaceable></option></arg>
+	    <arg choice="opt"><option>--rename_to <replaceable>NEW_DISK</replaceable></option></arg>
+	    <arg choice="opt"><option>--controller <replaceable>CTRL</replaceable></option></arg>
+	    <arg choice="opt"><option>--size <replaceable>SIZE</replaceable></option></arg>
+	    <arg choice="opt"><option>--address <replaceable>C:T:L</replaceable></option></arg>
+	    <arg choice="opt"><option>--wwn <replaceable>WWN</replaceable></option></arg>
+	    <arg choice="opt"><option>--bus_address <replaceable>URI</replaceable></option></arg>
+	    <group choice="opt">
+		<arg choice="plain"><option>--boot</option></arg>
+		<arg choice="plain"><option>--noboot</option></arg>
+	    </group>
+	    <group choice="opt">
+		<arg choice="plain"><option>--snapshot</option></arg>
+		<arg choice="plain"><option>--nosnapshot</option></arg>
+	    </group>
+	    <group choice="opt">
+		<group choice="req">
+		    <arg choice="opt"><option>--share <replaceable>SHARE</replaceable></option></arg>
+		    <arg choice="opt"><option>--filesystem <replaceable>FS</replaceable></option></arg>
+		</group>
+		<arg choice="opt"><option>--resourcegroup <replaceable>RG</replaceable></option></arg>
+	    </group>
+	    <arg choice="opt"><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
+	    <xi:include href="../common/global_options.xml"/>
+	</cmdsynopsis>
+    </refsynopsisdiv>
+
+    <refsect1>
+        <title>Description</title>
+	<para>
+	    The <command>aq update disk</command> command updates the parameters of an existing disk.
+	</para>
+    </refsect1>
+
+    <refsect1>
+        <title>Options</title>
+	<variablelist>
+	    <title>Command-specific options</title>
+	    <varlistentry>
+		<term>
+		    <option>--machine <replaceable>MACHINE</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			The name of the machine the disk is bound to.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--disk <replaceable>DISK</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			The name of the disk, as seen by the operating system.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--rename_to <replaceable>NEW_DISK</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Change the name of the disk from <replaceable>DISK</replaceable> to <replaceable>NEW_DISK</replaceable>.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--controller <replaceable>CTRL</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Update the type of the controller the disk uses. Valid values are:
+			<xi:include href="../common/controller_types.xml"/>.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--size <replaceable>SIZE</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Change the size of the disk, measured in GiB.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--wwn <replaceable>WWN</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Change the World Wide Name (also known as World Wide Number, or World Wide ID) of the disk.
+			Using an empty string for <replaceable>WWN</replaceable> will clear the field.
+			<replaceable>WWN</replaceable> may optionally contain colons or dashes as separator
+			characters; such separators will be ignored.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--address <replaceable>C:T:L</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Change the SCSI address of the disk, used for virtual disks only. <replaceable>C</replaceable>
+			is the SCSI channel, <replaceable>T</replaceable> is the target, and
+			<replaceable>L</replaceable> is the LUN number where the disk should be registered at.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--bus_address <replaceable>URI</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Change the hardware bus address of the controller that handles the disk.
+			See section <link linkend="sect1-bus-address" endterm="sect1-bus-address-title"/> for
+			the syntax of <replaceable>URI</replaceable>.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--boot</option>, <option>--noboot</option>
+		</term>
+		<listitem>
+		    <para>
+			Specify if this is the boot disk or not. The boot disk is where the operating system will be
+			installed. There must be exactly one boot disk defined, otherwise the host cannot be built.
+			If the <option>--boot</option> option is given, and there was a different boot disk specified
+			before, then that disk will loose the boot disk status. If the <option>--noboot</option> option
+			is given, and this was the boot disk, then no new boot disk will be selected automatically, and
+			it will not be possible to build the host until a new boot disk is selected.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--snapshot</option>, <option>--nosnapshot</option>
+		</term>
+		<listitem>
+		    <para>
+			Specify if snapshotting should be configured for the disk or not. This flag
+			is used only for virtual disk images.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--share <replaceable>SHARE</replaceable></option>,
+		    <option>--filesystem <replaceable>FS</replaceable></option>,
+		    <option>--resourcegroup <replaceable>RG</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Specify the backing store of a virtual disk image. Using <replaceable>SHARE</replaceable> (possibly together with
+			<replaceable>RG</replaceable>) will place the disk image on the named NAS share bound to the hypervisor or cluster.
+			Using <replaceable>FS</replaceable> (again, possibly together with <replaceable>RG</replaceable>) will place the disk
+			image on the named local file system on the hypervisor or cluster.
+		    </para>
+		    <para>
+			If the virtual machine is bound to a single hypervisor host, then the share/filesystem resource must be bound to that
+			hypervisor. If the virtual machine is bound to a cluster, then the share/filesystem should be bound to either the cluster,
+			or the metacluster if the cluster is part of one. In either case, if <replaceable>RG</replaceable> is specified, then
+			the share/filesystem must be part of the named resource group. If <replaceable>RG</replaceable> is not specified, then
+			the share/filesystem must not be part of any resource group.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--comments <replaceable>COMMENTS</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Update the comments for this disk.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	</variablelist>
+	<xi:include href="../common/global_options_desc.xml"/>
+    </refsect1>
+
+    <xi:include href="../common/sect1_bus_address.xml"/>
+
+    <refsect1>
+	<title>See also</title>
+	<para>
+	    <citerefentry><refentrytitle>aq_add_disk</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>aq_del_disk</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>aq_add_machine</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+	</para>
+    </refsect1>
+</refentry>
+
+<!-- vim: set ai sw=4: -->

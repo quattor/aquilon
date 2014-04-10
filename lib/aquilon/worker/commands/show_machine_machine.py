@@ -16,12 +16,39 @@
 # limitations under the License.
 """Contains the logic for `aq show machine --machine`."""
 
+from sqlalchemy.orm import joinedload, lazyload, subqueryload, undefer
 
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.commands.show_machine import CommandShowMachine
+from aquilon.aqdb.column_types import AqStr
+from aquilon.aqdb.model import Machine
 
 
-class CommandShowMachineMachine(CommandShowMachine):
-    """The base class already has the necessary logic to handle this."""
+class CommandShowMachineMachine(BrokerCommand):
 
     required_parameters = ["machine"]
+
+    def render(self, session, machine, **arguments):
+        machine = AqStr.normalize(machine)
+        Machine.check_label(machine)
+
+        options = [joinedload('location'),
+                   subqueryload('location.parents'),
+                   joinedload('model'),
+                   joinedload('model.vendor'),
+                   subqueryload('interfaces'),
+                   lazyload('interfaces.hardware_entity'),
+                   joinedload('interfaces.assignments'),
+                   joinedload('interfaces.assignments.network'),
+                   joinedload('interfaces.assignments.dns_records'),
+                   joinedload('interfaces.model'),
+                   joinedload('interfaces.model.vendor'),
+                   joinedload('cpu'),
+                   joinedload('chassis_slot'),
+                   joinedload('chassis_slot.chassis'),
+                   subqueryload('disks'),
+                   undefer('disks.comments'),
+                   joinedload('host'),
+                   lazyload('host.hardware_entity')]
+        dbmachine = Machine.get_unique(session, machine, compel=True,
+                                       query_options=options)
+        return dbmachine

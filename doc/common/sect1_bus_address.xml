@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<refsect1 xmlns="http://docbook.org/ns/docbook" xml:id="sect1-bus-address">
+    <title xml:id="sect1-bus-address-title">Controller Bus Addresses</title>
+    <para>
+	Controller bus addresses are specified as an URI, where the URI scheme defines the type of the bus.
+	Currently, only the PCI bus is supported. The address syntax for PCI devices is:
+	<literal>pci:</literal><replaceable>DDDD</replaceable>:<replaceable>BB</replaceable>:<replaceable>SS</replaceable>.<replaceable>F</replaceable>,
+	where <replaceable>DDDD</replaceable> is the PCI domain, <replaceable>BB</replaceable> is the PCI bus number inside the domain,
+	<replaceable>SS</replaceable> is the slot in the domain, and <replaceable>F</replaceable> is the function.
+    </para>
+    <para>
+	Example: <literal>pci:0000:05:01.0</literal>.
+    </para>
+</refsect1>
+<!-- vim: set ai sw=4: -->

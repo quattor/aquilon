@@ -32,15 +32,15 @@ from sqlalchemy.sql import desc, case, and_, or_
 
 from aquilon.exceptions_ import InternalError
 from aquilon.aqdb.column_types import AqMac, AqStr
-from aquilon.aqdb.model import Base, HardwareEntity, ObservedMac, Model
-
+from aquilon.aqdb.model import (Base, HardwareEntity, DeviceLinkMixin,
+                                ObservedMac, Model)
 from aquilon.aqdb.model.vlan import MAX_VLANS
 
 _TN = "interface"
 _ABV = "iface"
 
 
-class Interface(Base):
+class Interface(DeviceLinkMixin, Base):
     """ Interface: Representation of network interfaces for our network
 
         This table stores collections of machines, names, mac addresses,

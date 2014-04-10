@@ -61,7 +61,6 @@
                 <arg choice="opt"><option>--esx_switch <replaceable>ESX_SWITCH</replaceable></option></arg>
             </group>
             <group choice="opt">
-                <arg choice="opt"><option>--all</option></arg>
                 <arg choice="opt"><option>--fullinfo</option></arg>
             </group>
             <group>
@@ -252,11 +251,6 @@
         <varlistentry>
             <term><option>--esx_switch <replaceable>ESX_SWITCH</replaceable></option></term>
             <listitem><para>Select clusters bound to the given switch.</para></listitem>
-        </varlistentry>
-
-        <varlistentry>
-            <term><option>--all</option></term>
-            <listitem><para>List all clusters.</para></listitem>
         </varlistentry>
 
         <varlistentry>
