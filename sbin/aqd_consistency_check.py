@@ -21,6 +21,7 @@ import sys
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "lib"))
 
 import aquilon.aqdb.depends
+import aquilon.worker.depends
 from aquilon.consistency.checks import consistency_check_classes
 
 
