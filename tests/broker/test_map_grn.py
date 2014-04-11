@@ -121,9 +121,6 @@ class TestMapGrn(VerifyGrnsMixin, PersonalityTestMixin, TestBrokerCommand):
                    "--hostname", "unittest20.aqd-unittest.ms.com"]
         out = self.notfoundtest(command)
         self.matchoutput(out, "EON ID 987654321 not found.", command)
-        # The EON ID is not in the CDB file, so the CSV file should not be
-        # parsed
-        self.matchclean(out, "acquiring", command)
 
     def test_160_map_missing_grn(self):
         command = ["map", "grn", "--grn", "grn:/ms/no-such-grn",
@@ -131,9 +128,6 @@ class TestMapGrn(VerifyGrnsMixin, PersonalityTestMixin, TestBrokerCommand):
                    "--target", "esp"]
         out = self.notfoundtest(command)
         self.matchoutput(out, "GRN grn:/ms/no-such-grn not found.", command)
-        # The GRN is not in the CDB file, so the CSV file should not be
-        # parsed
-        self.matchclean(out, "acquiring", command)
 
     def test_200_verify_unittest00(self):
         command = ["cat", "--hostname", "unittest00.one-nyp.ms.com", "--data",

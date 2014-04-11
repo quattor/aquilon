@@ -211,8 +211,9 @@ class TemplateDomain(object):
                 run_command(args, env=panc_env, logger=self.logger,
                             path=config.get("broker", "quattordir"),
                             loglevel=CLIENT_INFO)
-            except ProcessException, e:
-                raise ArgumentError("\n%s%s" % (e.out, e.err))
+            except ProcessException:
+                raise ArgumentError("Compilation failed, see the compiler "
+                                    "messages for details.")
         finally:
             if not locked:
                 lock_queue.release(key)

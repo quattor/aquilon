@@ -36,7 +36,7 @@ class NoLockKey(LockKey):
     def __init__(self, logger=LOGGER, loglevel=CLIENT_INFO):
         super(NoLockKey, self).__init__(logger=logger, loglevel=loglevel,
                                         lock_queue=lock_queue)
-        self.transition("initialized", debug=True)
+        self.transition("initialized")
 
 
 # The concept of a "compile" lock somewhat oversimplifies.
@@ -82,7 +82,7 @@ class CompileKey(LockKey):
         else:
             self.exclusive["misc"].add("compile")
 
-        self.transition("initialized", debug=True)
+        self.transition("initialized")
 
 
 class PlenaryKey(LockKey):
@@ -119,7 +119,7 @@ class PlenaryKey(LockKey):
         # is used by e.g. the flush command.
         self.shared["misc"].add("compile")
 
-        self.transition("initialized", debug=True)
+        self.transition("initialized")
 
 
 class SyncKey(LockKey):
@@ -134,4 +134,4 @@ class SyncKey(LockKey):
                                       lock_queue=lock_queue)
 
         self.exclusive["sync"].add(data)
-        self.transition("initialized", debug=True)
+        self.transition("initialized")
