@@ -1,0 +1,39 @@
+CREATE TABLE userinfo
+(  id INTEGER NOT NULL,
+   name VARCHAR(32) NOT NULL,
+   uid INTEGER NOT NULL,
+   gid INTEGER NOT NULL,
+   full_name VARCHAR(64) NOT NULL,
+   home_dir VARCHAR(64) NOT NULL,
+   creation_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+   CONSTRAINT userinfo_pk PRIMARY KEY (id),
+   CONSTRAINT userinfo_user_uk UNIQUE (name)
+);
+
+CREATE TABLE netgroup_whitelist
+(  id INTEGER NOT NULL,
+   name VARCHAR(64) NOT NULL,
+   CONSTRAINT netgroup_whitelist_pk PRIMARY KEY (id),
+   CONSTRAINT netgroup_whitelist_uk UNIQUE (name)
+);
+
+CREATE TABLE personality_rootuser
+(  personality_id INTEGER NOT NULL,
+   user_id INTEGER NOT NULL,
+   creation_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+   CONSTRAINT personality_rootuser_pk PRIMARY KEY (personality_id, user_id),
+   CONSTRAINT pers_rootuser_pers_fk FOREIGN KEY (personality_id) REFERENCES personality (id) ON DELETE CASCADE,
+   CONSTRAINT pers_rootuser_user_fk FOREIGN KEY (user_id) REFERENCES userinfo (id) ON DELETE CASCADE
+);
+
+CREATE TABLE PERSONALITY_ROOTNETGROUP
+(  personality_id INTEGER NOT NULL,
+   netgroup_id INTEGER NOT NULL,
+   creation_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+   CONSTRAINT personality_rootnetgroup_pk PRIMARY KEY (personality_id, netgroup_id),
+   CONSTRAINT pers_rootng_pers_fk FOREIGN KEY (personality_id) REFERENCES personality (id) ON DELETE CASCADE,
+   CONSTRAINT pers_rootng_group_fk FOREIGN KEY (netgroup_id) REFERENCES netgroup_whitelist (id) ON DELETE CASCADE
+);
+
+CREATE SEQUENCE userinfo_id_seq;
+CREATE SEQUENCE netgroup_whitelist_id_seq;
