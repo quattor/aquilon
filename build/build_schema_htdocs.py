@@ -65,8 +65,10 @@ from aquilon.aqdb.utils import schema2dot
 
 from aquilon.aqdb.model.location import LocationLink
 from aquilon.aqdb.model.service import (ServiceListItem,
-                                       PersonalityServiceListItem)
+                                        PersonalityServiceListItem)
 from aquilon.aqdb.model.service_instance import BuildItem
+from aquilon.aqdb.model.personality import (__PersonalityRootUser,
+                                            __PersonalityRootNetGroup)
 from aquilon.aqdb.model.cluster import (ClusterServiceBinding,
                                         HostClusterMember,
                                         ClusterAllowedPersonality)
@@ -101,7 +103,8 @@ model_group = {
     'personality' : {
         'title'   : 'Personalities',
         'classes' : [ Personality, Archetype, HostEnvironment, Grn,
-                      ParameterHolder, Parameter, PersonalityGrnMap ],
+                      ParameterHolder, Parameter, PersonalityGrnMap,
+                      __PersonalityRootUser, __PersonalityRootNetGroup ],
     },
     'feature'   : {
         'title'   : 'Features',
@@ -144,7 +147,7 @@ model_group = {
     },
     'users'     : {
         'title'   : 'Users',
-        'classes' : [ UserPrincipal, Realm, Role ],
+        'classes' : [ UserPrincipal, Realm, Role, User, NetGroupWhiteList ],
     },
     'storage'   : {
         'title'   : 'Storage',
