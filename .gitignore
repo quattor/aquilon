@@ -1,3 +1,7 @@
 *.pyc
 dropin.cache
 .coverage
+dist
+build/bdist.*
+VERSION
+MANIFEST
