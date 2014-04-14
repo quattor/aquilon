@@ -18,10 +18,11 @@
 
 import logging
 
+from sqlalchemy.exc import DatabaseError
 from sqlalchemy.orm import contains_eager
 from sqlalchemy.util import KeyedTuple
 
-from aquilon.exceptions_ import ArgumentError
+from aquilon.exceptions_ import ArgumentError, PartialError
 from aquilon.aqdb.model import User, Personality
 from aquilon.worker.templates import Plenary, PlenaryCollection
 
@@ -32,25 +33,53 @@ class UserSync(object):
     # Labels for the passwd entries - the order must match the file format
     labels = ("name", "passwd", "uid", "gid", "full_name", "home_dir", "shell")
 
-    def __init__(self, config, session, logger=LOGGER):
+    def __init__(self, config, session, logger=LOGGER, incremental=False):
         self.session = session
         self.logger = logger
         self.plenaries = PlenaryCollection(logger=logger)
+        self.incremental = incremental
+        self.success = []
+        self.errors = []
 
         if not config.get("broker", "user_list_location"):
             raise ArgumentError("User synchronization is disabled.")
+
         self.fname = config.get("broker", "user_list_location")
 
+    def commit_if_needed(self, msg):
+        if self.incremental:
+            try:
+                self.session.commit()
+                self.logger.debug(msg)
+                self.success.append(msg)
+                return 1
+            except DatabaseError, err:
+                # err.message contains the name of the failed constraint, that's
+                # enough to figure out what went wrong
+                self.logger.info("Failed: %s (%s)" % (msg, err.message.strip()))
+                self.errors.append("%s (%s)" % (msg, err.message.strip()))
+                self.session.rollback()
+                return 0
+            except Exception, err:
+                # General error, better print all the info we have
+                self.logger.info("Failed: %s (%s)" % (msg, err))
+                self.errors.append("%s (%s)" % (msg, err))
+                self.session.rollback()
+                return 0
+        else:
+            self.logger.debug(msg)
+            return 1
+
     def add_new(self, details):
-        self.logger.debug("Adding user %s (uid: %s, gid: %s)" %
-                     (details.name, details.uid, details.gid))
         dbuser = User(name=details.name, uid=details.uid, gid=details.gid,
                       full_name=details.full_name, home_dir=details.home_dir)
         self.session.add(dbuser)
-        return 1
+
+        return self.commit_if_needed("Adding user %s (uid: %s, gid: %s)" %
+                                     (details.name, details.uid, details.gid))
 
     def check_update_existing(self, dbuser, details):
-        changed = False
+        update_msg = []
         for attr, type_ in (("uid", int),
                             ("gid", int),
                             ("full_name", str),
@@ -60,13 +89,12 @@ class UserSync(object):
             old = getattr(dbuser, attr)
             new = type_(getattr(details, attr))
             if old != new:
-                self.logger.debug("Updating user %s (set %s to %s, was %s)" %
-                             (dbuser.name, attr, new, old))
+                update_msg.append("%s = %s, was %s" % (attr, new, old))
                 setattr(dbuser, attr, new)
-                changed = True
 
-        if changed:
-            return 1
+        if update_msg:
+            return self.commit_if_needed("Updating user %s (%s)" %
+                                         (dbuser.name, "; ".join(update_msg)))
         else:
             return 0
 
@@ -94,11 +122,10 @@ class UserSync(object):
         self.plenaries.extend([Plenary.get_plenary(p) for p in personalities])
 
         for dbuser in userlist:
-            self.logger.debug("Deleting user %s (uid: %s, gid: %s)" %
-                         (dbuser.name, dbuser.uid, dbuser.gid))
             self.session.delete(dbuser)
-            deleted += 1
-
+            deleted += self.commit_if_needed("Deleting user %s (uid: %s, gid: %s)" %
+                                             (dbuser.name, dbuser.uid,
+                                              dbuser.gid))
         return deleted
 
     def refresh_user(self):
@@ -127,7 +154,11 @@ class UserSync(object):
         self.session.flush()
 
         self.plenaries.write()
-        self.logger.client_info("Added %d, deleted %d, updated %d users." %
-                           (added, deleted, updated))
+
+        if self.errors:
+            raise PartialError(success=self.success, failed=self.errors)
+        else:
+            self.logger.client_info("Added %d, deleted %d, updated %d users." %
+                                    (added, deleted, updated))
 
         return

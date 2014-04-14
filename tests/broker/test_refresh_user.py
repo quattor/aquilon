@@ -103,7 +103,7 @@ class TestRefreshUser(TestBrokerCommand):
         self.matchclean(out, "testuser4", command)
 
     def test_300_refresh_again(self):
-        command = ["refresh", "user"]
+        command = ["refresh", "user", "--incremental"]
         (out, err) = self.successtest(command)
         self.matchoutput(err, "Added 0, deleted 0, updated 0 users.", command)
 

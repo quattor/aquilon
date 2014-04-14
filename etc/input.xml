@@ -5675,6 +5675,9 @@
    <command name="refresh_user">
       Refresh the User principals in AQD.
       <transport method="post" path="user/command/refresh"/>
+      <optgroup name="refresh_user_optional" mandatory="False">
+         <option name="incremental" type="boolean">Commit every change as it is decided</option>
+      </optgroup>
    </command>
 
 </commandline>
