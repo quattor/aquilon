@@ -28,27 +28,103 @@ from brokertest import TestBrokerCommand
 
 class TestRefreshUser(TestBrokerCommand):
 
+    def test_100_verify_testuser3(self):
+        command = ["show_user", "--username", "testuser3"]
+        out = self.commandtest(command)
+        self.searchoutput(out, r'User: testuser3$', command)
+        self.searchoutput(out, r'Uid: 2361$', command)
+        self.searchoutput(out, r'Gid: 654$', command)
+        self.searchoutput(out, r'Full Name: test user$', command)
+        self.searchoutput(out, r'Home Dir: /tmp$', command)
+
+    def test_100_verify_testuser4(self):
+        command = ["show_user", "--username", "testuser4"]
+        out = self.commandtest(command)
+        self.searchoutput(out, r'User: testuser4$', command)
+        self.searchoutput(out, r'Uid: 2362$', command)
+        self.searchoutput(out, r'Gid: 654$', command)
+        self.searchoutput(out, r'Full Name: test user$', command)
+        self.searchoutput(out, r'Home Dir: /tmp$', command)
+
+    def test_110_grant_testuser4_root(self):
+        command = ["grant_root_access", "--user", "testuser4",
+                   "--personality", "compileserver"]
+        self.successtest(command)
+
+    def test_111_verify_testuser4_root(self):
+        command = ["show_personality", "--personality", "compileserver"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Root Access User: testuser4", command)
+
+        command = ["cat", "--personality", "compileserver",
+                   "--archetype", "aquilon"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "testuser4", command)
+
     def test_200_refresh(self):
         command = ["refresh", "user"]
-        (out, err) = self.successtest(command)
-        self.matchoutput(err, "Added 2, deleted 1, update 1 Users.", command)
+        err = self.statustest(command)
+        self.matchoutput(err, "Added 2, deleted 1, updated 1 users.", command)
 
-    def test_210_verifyuser(self):
+    def test_210_verify_all(self):
         command = ["show_user", "--all"]
-        (out, err) = self.successtest(command)
+        out = self.commandtest(command)
         self.matchoutput(out, "testuser1", command)
         self.matchoutput(out, "testuser2", command)
-        self.matchoutput(out, "test user 3", command)
+        self.matchoutput(out, "testuser3", command)
+        self.matchclean(out, "testuser4", command)
 
-    def test_220_verifyuser(self):
+    def test_210_verify_testuser1(self):
         command = ["show_user", "--username", "testuser1"]
-        (out, err) = self.successtest(command)
-        self.searchoutput(out, r'User: testuser1', command)
-        self.searchoutput(out, r'Uid: 1234', command)
-        self.searchoutput(out, r'Gid: 423', command)
-        self.searchoutput(out, r'Full Name: test user 1', command)
-        self.searchoutput(out, r'Home Dir: \/tmp', command)
+        out = self.commandtest(command)
+        self.searchoutput(out, r'User: testuser1$', command)
+        self.searchoutput(out, r'Uid: 1234$', command)
+        self.searchoutput(out, r'Gid: 423$', command)
+        self.searchoutput(out, r'Full Name: test user 1$', command)
+        self.searchoutput(out, r'Home Dir: /tmp$', command)
 
-if __name__=='__main__':
+    def test_210_verify_testuser3(self):
+        command = ["show_user", "--username", "testuser3"]
+        out = self.commandtest(command)
+        self.searchoutput(out, r'User: testuser3$', command)
+        self.searchoutput(out, r'Uid: 1236$', command)
+        self.searchoutput(out, r'Gid: 655$', command)
+        self.searchoutput(out, r'Full Name: test user 3$', command)
+        self.searchoutput(out, r'Home Dir: /tmp/foo$', command)
+
+    def test_220_verify_testuser4_root_gone(self):
+        command = ["show_personality", "--personality", "compileserver"]
+        out = self.commandtest(command)
+        self.matchclean(out, "testuser4", command)
+
+        command = ["cat", "--personality", "compileserver",
+                   "--archetype", "aquilon"]
+        out = self.commandtest(command)
+        self.matchclean(out, "testuser4", command)
+
+    def test_300_refresh_again(self):
+        command = ["refresh", "user"]
+        (out, err) = self.successtest(command)
+        self.matchoutput(err, "Added 0, deleted 0, updated 0 users.", command)
+
+    def test_310_verify_testuser1_again(self):
+        command = ["show_user", "--username", "testuser1"]
+        out = self.commandtest(command)
+        self.searchoutput(out, r'User: testuser1$', command)
+        self.searchoutput(out, r'Uid: 1234$', command)
+        self.searchoutput(out, r'Gid: 423$', command)
+        self.searchoutput(out, r'Full Name: test user 1$', command)
+        self.searchoutput(out, r'Home Dir: /tmp$', command)
+
+    def test_310_verify_testuser3_again(self):
+        command = ["show_user", "--username", "testuser3"]
+        out = self.commandtest(command)
+        self.searchoutput(out, r'User: testuser3$', command)
+        self.searchoutput(out, r'Uid: 1236$', command)
+        self.searchoutput(out, r'Gid: 655$', command)
+        self.searchoutput(out, r'Full Name: test user 3$', command)
+        self.searchoutput(out, r'Home Dir: /tmp/foo$', command)
+
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestRefreshUser)
     unittest.TextTestRunner(verbosity=2).run(suite)

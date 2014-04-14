@@ -18,7 +18,7 @@
 
 from datetime import datetime
 
-from sqlalchemy import (Column, Integer, String, Sequence, Boolean, UniqueConstraint,
+from sqlalchemy import (Column, Integer, String, Sequence, UniqueConstraint,
                         DateTime)
 from sqlalchemy.orm import deferred
 
@@ -32,6 +32,8 @@ class User(Base):
     __tablename__ = _TN
     _class_label = 'User'
 
+    # Use a synthetic primary key, in case we will need to support multiple user
+    # environments in the future
     id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
 
     # user names are case sensitive, so no AqStr here
@@ -45,7 +47,8 @@ class User(Base):
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
 
-    __table_args__ = (UniqueConstraint(name, name='%s_user_uk' % _TN),)
+    __table_args__ = (UniqueConstraint(name, name='%s_user_uk' % _TN),
+                      UniqueConstraint(uid, name='%s_uid_uk' % _TN))
 
 usr = User.__table__  # pylint: disable=C0103
 usr.info['unique_fields'] = ['name']
