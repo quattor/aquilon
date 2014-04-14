@@ -41,53 +41,37 @@ class UserSync(object):
             raise ArgumentError("User synchronization is disabled.")
         self.fname = config.get("broker", "user_list_location")
 
-    def refresh_user(self):
-        q = self.session.query(User)
-        users = {}
-        for dbuser in q.all():
-            users[dbuser.name] = dbuser
+    def add_new(self, details):
+        self.logger.debug("Adding user %s (uid: %s, gid: %s)" %
+                     (details.name, details.uid, details.gid))
+        dbuser = User(name=details.name, uid=details.uid, gid=details.gid,
+                      full_name=details.full_name, home_dir=details.home_dir)
+        self.session.add(dbuser)
+        return 1
 
-        added = 0
+    def check_update_existing(self, dbuser, details):
+        changed = False
+        for attr, type_ in (("uid", int),
+                            ("gid", int),
+                            ("full_name", str),
+                            ("home_dir", str)):
+            # Type conversion is important, otherwise numeric uid in the DB
+            # would not match string uid from input
+            old = getattr(dbuser, attr)
+            new = type_(getattr(details, attr))
+            if old != new:
+                self.logger.debug("Updating user %s (set %s to %s, was %s)" %
+                             (dbuser.name, attr, new, old))
+                setattr(dbuser, attr, new)
+                changed = True
+
+        if changed:
+            return 1
+        else:
+            return 0
+
+    def delete_gone(self, userlist):
         deleted = 0
-        updated = 0
-        for line in open(self.fname):
-            user_name, rest = line.split('\t')
-            if user_name.startswith("YP_"):
-                continue
-            details = KeyedTuple(rest.split(':'), labels=self.labels)
-
-            if  details.name not in users:
-                self.logger.debug("Adding user %s (uid: %s, gid: %s)" %
-                             (details.name, details.uid, details.gid))
-                dbuser = User(name=details.name, uid=details.uid,
-                              gid=details.gid, full_name=details.full_name,
-                              home_dir=details.home_dir)
-                self.session.add(dbuser)
-                added += 1
-                continue
-
-            # Already exists
-            dbuser = users[details.name]
-            del users[details.name]
-
-            changed = False
-            for attr, type_ in (("uid", int),
-                                ("gid", int),
-                                ("full_name", str),
-                                ("home_dir", str)):
-                # Type conversion is important, otherwise numeric uid in the DB
-                # would not match string uid from input
-                old = getattr(dbuser, attr)
-                new = type_(getattr(details, attr))
-                if old != new:
-                    self.logger.debug("Updating user %s (set %s to %s, was %s)" %
-                                 (dbuser.name, attr, new, old))
-                    setattr(dbuser, attr, new)
-                    changed = True
-
-            if changed:
-                updated += 1
-
         personalities = set()
 
         def chunk(list_, size):
@@ -96,7 +80,7 @@ class UserSync(object):
 
         # Oracle has limits on the size of the IN clause, so we'll need to split the
         # list to smaller chunks
-        for userchunk in chunk(users.values(), 1000):
+        for userchunk in chunk(userlist, 1000):
             userset = set(userchunk)
             q = self.session.query(Personality)
             q = q.join(Personality.root_users)
@@ -109,11 +93,36 @@ class UserSync(object):
 
         self.plenaries.extend([Plenary.get_plenary(p) for p in personalities])
 
-        for dbuser in users.values():
+        for dbuser in userlist:
             self.logger.debug("Deleting user %s (uid: %s, gid: %s)" %
                          (dbuser.name, dbuser.uid, dbuser.gid))
             self.session.delete(dbuser)
             deleted += 1
+
+        return deleted
+
+    def refresh_user(self):
+        q = self.session.query(User)
+        users = {}
+        for dbuser in q.all():
+            users[dbuser.name] = dbuser
+
+        added = 0
+        updated = 0
+        for line in open(self.fname):
+            user_name, rest = line.split('\t')
+            if user_name.startswith("YP_"):
+                continue
+            details = KeyedTuple(rest.split(':'), labels=self.labels)
+
+            if details.name not in users:
+                added += self.add_new(details)
+            else:
+                dbuser = users[details.name]
+                del users[details.name]
+                updated += self.check_update_existing(dbuser, details)
+
+        deleted = self.delete_gone(users.values())
 
         self.session.flush()
 
