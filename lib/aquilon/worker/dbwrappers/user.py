@@ -28,93 +28,97 @@ from aquilon.worker.templates import Plenary, PlenaryCollection
 LOGGER = logging.getLogger(__name__)
 
 
-def refresh_user(config, session, logger=LOGGER):
-    if not config.get("broker", "user_list_location"):
-        raise ArgumentError("User synchronization is disabled.")
-
-    q = session.query(User)
-    users = {}
-    for dbuser in q.all():
-        users[dbuser.name] = dbuser
-
-    fname = config.get("broker", "user_list_location")
-
+class UserSync(object):
     # Labels for the passwd entries - the order must match the file format
     labels = ("name", "passwd", "uid", "gid", "full_name", "home_dir", "shell")
 
-    added = 0
-    deleted = 0
-    updated = 0
-    for line in open(fname):
-        user_name, rest = line.split('\t')
-        if user_name.startswith("YP_"):
-            continue
-        details = KeyedTuple(rest.split(':'), labels=labels)
+    def __init__(self, config, session, logger=LOGGER):
+        self.session = session
+        self.logger = logger
+        self.plenaries = PlenaryCollection(logger=logger)
 
-        if  details.name not in users:
-            logger.debug("Adding user %s (uid: %s, gid: %s)" %
-                         (details.name, details.uid, details.gid))
-            dbuser = User(name=details.name, uid=details.uid,
-                          gid=details.gid, full_name=details.full_name,
-                          home_dir=details.home_dir)
-            session.add(dbuser)
-            added += 1
-            continue
+        if not config.get("broker", "user_list_location"):
+            raise ArgumentError("User synchronization is disabled.")
+        self.fname = config.get("broker", "user_list_location")
 
-        # Already exists
-        dbuser = users[details.name]
-        del users[details.name]
+    def refresh_user(self):
+        q = self.session.query(User)
+        users = {}
+        for dbuser in q.all():
+            users[dbuser.name] = dbuser
 
-        changed = False
-        for attr, type_ in (("uid", int),
-                            ("gid", int),
-                            ("full_name", str),
-                            ("home_dir", str)):
-            # Type conversion is important, otherwise numeric uid in the DB
-            # would not match string uid from input
-            old = getattr(dbuser, attr)
-            new = type_(getattr(details, attr))
-            if old != new:
-                logger.debug("Updating user %s (set %s to %s, was %s)" %
-                             (dbuser.name, attr, new, old))
-                setattr(dbuser, attr, new)
-                changed = True
+        added = 0
+        deleted = 0
+        updated = 0
+        for line in open(self.fname):
+            user_name, rest = line.split('\t')
+            if user_name.startswith("YP_"):
+                continue
+            details = KeyedTuple(rest.split(':'), labels=self.labels)
 
-        if changed:
-            updated += 1
+            if  details.name not in users:
+                self.logger.debug("Adding user %s (uid: %s, gid: %s)" %
+                             (details.name, details.uid, details.gid))
+                dbuser = User(name=details.name, uid=details.uid,
+                              gid=details.gid, full_name=details.full_name,
+                              home_dir=details.home_dir)
+                self.session.add(dbuser)
+                added += 1
+                continue
 
-    plenaries = PlenaryCollection(logger=logger)
-    personalities = set()
+            # Already exists
+            dbuser = users[details.name]
+            del users[details.name]
 
-    def chunk(list_, size):
-        for i in xrange(0, len(list_), size):
-            yield list_[i:i+size]
+            changed = False
+            for attr, type_ in (("uid", int),
+                                ("gid", int),
+                                ("full_name", str),
+                                ("home_dir", str)):
+                # Type conversion is important, otherwise numeric uid in the DB
+                # would not match string uid from input
+                old = getattr(dbuser, attr)
+                new = type_(getattr(details, attr))
+                if old != new:
+                    self.logger.debug("Updating user %s (set %s to %s, was %s)" %
+                                 (dbuser.name, attr, new, old))
+                    setattr(dbuser, attr, new)
+                    changed = True
 
-    # Oracle has limits on the size of the IN clause, so we'll need to split the
-    # list to smaller chunks
-    for userchunk in chunk(users.values(), 1000):
-        userset = set(userchunk)
-        q = session.query(Personality)
-        q = q.join(Personality.root_users)
-        q = q.options(contains_eager('root_users'))
-        q = q.filter(User.id.in_([dbuser.id for dbuser in userchunk]))
-        for p in q:
-            for dbuser in userset & set(p.root_users):
-                p.root_users.remove(dbuser)
-            personalities.add(p)
+            if changed:
+                updated += 1
 
-    plenaries.extend([Plenary.get_plenary(p) for p in personalities])
+        personalities = set()
 
-    for dbuser in users.values():
-        logger.debug("Deleting user %s (uid: %s, gid: %s)" %
-                     (dbuser.name, dbuser.uid, dbuser.gid))
-        session.delete(dbuser)
-        deleted += 1
+        def chunk(list_, size):
+            for i in xrange(0, len(list_), size):
+                yield list_[i:i+size]
 
-    session.flush()
+        # Oracle has limits on the size of the IN clause, so we'll need to split the
+        # list to smaller chunks
+        for userchunk in chunk(users.values(), 1000):
+            userset = set(userchunk)
+            q = self.session.query(Personality)
+            q = q.join(Personality.root_users)
+            q = q.options(contains_eager('root_users'))
+            q = q.filter(User.id.in_([dbuser.id for dbuser in userchunk]))
+            for p in q:
+                for dbuser in userset & set(p.root_users):
+                    p.root_users.remove(dbuser)
+                personalities.add(p)
 
-    plenaries.write()
-    logger.client_info("Added %d, deleted %d, updated %d users." %
-                       (added, deleted, updated))
+        self.plenaries.extend([Plenary.get_plenary(p) for p in personalities])
 
-    return
+        for dbuser in users.values():
+            self.logger.debug("Deleting user %s (uid: %s, gid: %s)" %
+                         (dbuser.name, dbuser.uid, dbuser.gid))
+            self.session.delete(dbuser)
+            deleted += 1
+
+        self.session.flush()
+
+        self.plenaries.write()
+        self.logger.client_info("Added %d, deleted %d, updated %d users." %
+                           (added, deleted, updated))
+
+        return

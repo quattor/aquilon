@@ -17,7 +17,7 @@
 """ Contains the logic of "aq refresh user_principal" """
 
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.dbwrappers.user import refresh_user
+from aquilon.worker.dbwrappers.user import UserSync
 from aquilon.worker.locks import SyncKey
 
 
@@ -25,6 +25,7 @@ class CommandRefreshUser(BrokerCommand):
 
     def render(self, session, logger, **arguments):
         with SyncKey(data="user", logger=logger):
-            refresh_user(self.config, session, logger)
+            sync = UserSync(self.config, session, logger)
+            sync.refresh_user()
 
         return
