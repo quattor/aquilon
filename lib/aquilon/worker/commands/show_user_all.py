@@ -16,9 +16,9 @@
 # limitations under the License.
 """Contains the logic for `aq show user --all`."""
 
-
 from aquilon.aqdb.model import User
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.formats.list import StringAttributeList
 
 
 class CommandShowUserAll(BrokerCommand):
@@ -27,4 +27,5 @@ class CommandShowUserAll(BrokerCommand):
 
     def render(self, session, **arguments):
         q = session.query(User.name)
-        return q.all()
+        q = q.order_by(User.name)
+        return StringAttributeList(q.all(), 'name')
