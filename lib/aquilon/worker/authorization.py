@@ -86,7 +86,10 @@ class AuthorizationBroker(object):
                     "Must have the aqd_admin role to %s." % action)
         if dbuser.role.name == 'winops':
             if action not in ['add_host', 'add_host_prefix', 'add_windows_host',
-                              'make_cluster', 'reconfigure', 'update_machine']:
+                              'make_cluster',
+                              'reconfigure', 'reconfigure_list',
+                              'reconfigure_membersof',
+                              'update_machine']:
                 self.raise_auth_error(principal, action, resource)
         if dbuser.role.name == 'winops_server':
             # Only need add/update_cluster for hacluster VCenters
@@ -99,7 +102,8 @@ class AuthorizationBroker(object):
                               'add_interface_machine',
                               'add_interface_address',
                               'add_address', 'del_address',
-                              'reconfigure',
+                              'reconfigure', 'reconfigure_list',
+                              'reconfigure_membersof',
                               'add_cluster', 'make_cluster', 'update_cluster',
                               'change_status', 'change_status_cluster',
                               'add_service_instance', 'map_service',
@@ -157,7 +161,9 @@ class AuthorizationBroker(object):
                               'del_netgroup_whitelist']:
                 self.raise_auth_error(principal, action, resource)
         if dbuser.role.name == 'hpevelo':
-            if action not in ['reconfigure', 'pxeswitch', 'change_status',
+            if action not in ['reconfigure', 'reconfigure_list',
+                              'reconfigure_membersof',
+                              'pxeswitch', 'change_status',
                               'add_disk', 'del_disk', 'del_disk_disk',
                               'update_disk']:
                 self.raise_auth_error(principal, action, resource)
@@ -233,11 +239,14 @@ class AuthorizationBroker(object):
                 self.raise_auth_error(principal, action, resource)
         if dbuser.role.name == 'template_admin':
             if action not in ['add_sandbox', 'del_sandbox',
-                              'manage', 'publish', 'reconfigure']:
+                              'manage', 'publish',
+                              'reconfigure', 'reconfigure_list',
+                              'reconfigure_membersof']:
                 self.raise_auth_error(principal, action, resource)
 
         if dbuser.role.name == 'laf':
-            if action not in ['reconfigure',
+            if action not in ['reconfigure', 'reconfigure_list',
+                              'reconfigure_membersof',
                               'add_reboot_intervention',
                               'compile_hostname', 'compile_personality',
                               'add_reboot_schedule',
@@ -260,7 +269,7 @@ class AuthorizationBroker(object):
                               'compile', 'compile_hostname',
                               'change_status', 'make',
                               'reconfigure',
-                              'reconfigure_list',
+                              'reconfigure_list', 'reconfigure_membersof',
                               'reconfigure_hostlist',
                               'add_interface_machine',
                               'add_interface_hostname',
@@ -282,8 +291,9 @@ class AuthorizationBroker(object):
                               'del_host', 'del_windows_host',
                               'compile', 'compile_hostname',
                               'compile_cluster', 'compile_personality',
-                              'reconfigure', 'change_status',
+                              'reconfigure', 'reconfigure_membersof',
                               'reconfigure_list', 'reconfigure_hostlist',
+                              'change_status',
                               'pxeswitch', 'pxeswitch_list',
                               'add_interface_chassis',
                               'add_interface_hostname',
