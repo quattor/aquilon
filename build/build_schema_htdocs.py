@@ -161,7 +161,7 @@ db = DbFactory()
 Base.metadata.bind = db.engine
 orm.configure_mappers()
 Base.metadata.create_all()
-db.meta.reflect()
+Base.metadata.reflect()
 
 
 def table_coverage_check():
@@ -175,7 +175,7 @@ def table_coverage_check():
         for cls in model_group[group]['classes']:
             tbl = cls.__tablename__
             seen[tbl] = 1
-    for tbl in db.meta.tables.keys():
+    for tbl in Base.metadata.tables.keys():
         if tbl in seen:
             del seen[tbl]
         else:
@@ -185,8 +185,8 @@ def table_coverage_check():
 
 
 def write_schema_group_png(group):
-    tables = list((db.meta.tables[cls.__tablename__]
-                for cls in model_group[group]['classes']))
+    tables = list((Base.metadata.tables[cls.__tablename__]
+                   for cls in model_group[group]['classes']))
     pngfile = os.path.join(opts.dir, "%s.%s.png" % (opts.prefix, group))
     schema2dot.create_schema_graph(tables=tables).write_png(pngfile)
 

@@ -14,13 +14,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-""" functions for managing Oracle constraints """
+""" Functions for managing Oracle constraints """
 
+from __future__ import print_function
 import re
 
-#TODO:
-    #double check we're not touching FKs... looked like we might be
-    #refactor to do ALL constraint types with name like 'SYS_C00%'
+from sqlalchemy.sql import text
 
 _long_nms = {}
 _long_nms['CHASSIS_MANAGER'] = 'CHAS_MGR'
@@ -80,55 +79,39 @@ _long_nms['PERSONALITY_ROOTUSER'] = 'PERS_ROOT_USER'
 _long_nms['PERSONALITY_ROOTNETGROUP'] = 'PERS_ROOT_NG'
 
 
-def rename_non_null_check_constraints(db, debug=False, *args, **kw):
-    stmt = """
+def rename_non_null_check_constraints(db):
+    stmt = text("""
     SELECT C.constraint_name  con,
            C.table_name       tab,
            C.search_condition cond
       FROM user_constraints C
      WHERE C.constraint_type = 'C'
-       AND C.constraint_name LIKE 'SYS_C00%' """
+       AND C.constraint_name LIKE 'SYS_C00%' """)
 
-    cons = db.safe_execute(stmt)
+    result = db.engine.execute(stmt)
 
     rename = []
     pat = re.compile('\"(.*)\"')
 
-    for i in cons:
-        if i[2].endswith('IS NOT NULL'):
-            col = pat.match(i[2]).group().strip('"')
-            #replace the column name if its long
-            if col in _long_nms.keys():
+    for (constraint, table, condition) in result:
+        if condition.endswith('IS NOT NULL'):
+            col = pat.match(condition).group().strip('"')
+
+            # Replace the column name if its long
+            if col in _long_nms:
                 col = _long_nms[col]
-            #replace table name if its long
-            if i[1] in _long_nms.keys():
-                nm = '%s_%s_NN' % (_long_nms[i[1]], col)
+
+            # Replace table name if its long
+            if table in _long_nms:
+                new_name = '%s_%s_NN' % (_long_nms[table], col)
             else:
-                nm = '%s_%s_NN' % (i[1], col)
+                new_name = '%s_%s_NN' % (table, col)
 
-            rename = 'ALTER TABLE "%s" RENAME CONSTRAINT "%s" TO "%s"' % (
-                i[1], i[0], nm)
-
-            if len(nm) > 30:
-                print '%s\n would fail, new name longer than 32 characters' % (
-                    rename)
+            if len(new_name) > 30:
+                print("Renaming %s to %s would fail, new name longer than 32 "
+                      "characters" % (constraint, new_name))
                 continue
-            else:
-                #TODO: use an integer value or the logger
-                if(debug):
-                    print str(rename)
 
-                db.safe_execute(rename)
-
-"""
-LNPO_AQUILON_NY> select distinct constraint_type from user_constraints;
-
-CONSTRAINT_TYPE
----------------
-R (references AKA foreign key)
-U (unique)
-P (primary key)
-C (check constraint (like non null))
-"""
-
-#
+            rename = text('ALTER TABLE "%s" RENAME CONSTRAINT "%s" TO "%s"' %
+                          (table, constraint, new_name))
+            db.engine.execute(rename)

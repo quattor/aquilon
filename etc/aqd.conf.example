@@ -5,13 +5,9 @@
 [DEFAULT]
 basedir = /var
 quattordir = %(basedir)s/quattor
-logdir = %(quattordir)s/logs
-dbdir = %(quattordir)s/aquilondb
-dblogfile = %(logdir)s/aqdb.log
 
 [database_oracle]
 dbuser = cdb
-environment = prod
 server = NYPO_AQUILON
 
 [database]
@@ -22,3 +18,4 @@ umask = 0022
 server_notifications = cdb2sql bootserver
 client_notifications = yes
 templatesdir = /v/campus/ny/appl/aquilon/aqd/data/templates
+logdir = %(quattordir)s/logs

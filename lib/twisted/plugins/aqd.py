@@ -29,7 +29,6 @@ from twisted.plugin import IPlugin
 from twisted.application import strports
 from twisted.application.service import IServiceMaker, MultiService
 from twisted.internet import reactor
-from ms.modulecmd import Modulecmd, ModulecmdExecError
 
 from aquilon.config import Config
 from aquilon.twisted_patches import (GracefulProcessMonitor, integrate_logging)
@@ -50,18 +49,9 @@ class Options(usage.Options):
                      ["coveragerc", None, None, "Coverage test config file."]]
 
 
-def log_module_load(cmd, mod):
-    """Wrapper for logging Modulecmd actions and errors."""
-    try:
-        log.msg("Loading module %s." % mod)
-        cmd.load(mod)
-        log.msg("Module %s loaded successfully." % mod)
-    except ModulecmdExecError, e:
-        log.msg("Failed loading module %s, return code %d and stderr '%s'." %
-                (mod, e.exitcode, e.stderr))
-
 def set_umask(config):
     os.umask(int(config.get("broker", "umask"), 8))
+
 
 def set_thread_pool_size(config):
     # This is a somewhat made up number.  The default is ten.
@@ -76,6 +66,7 @@ def set_thread_pool_size(config):
     pool_size = config.get("broker", "twisted_thread_pool_size")
     reactor.suggestThreadPoolSize(int(pool_size))
 
+
 def make_required_dirs(config):
     for d in ["basedir", "profilesdir", "plenarydir", "rundir"]:
         dir = config.get("broker", d)
@@ -85,6 +76,7 @@ def make_required_dirs(config):
             os.makedirs(dir)
         except OSError, e:
             log.msg("Could not create directory '%s': %s" % (dir, e))
+
 
 class AQDMaker(object):
     implements(IServiceMaker, IPlugin)
@@ -137,12 +129,6 @@ class AQDMaker(object):
         # Make sure the coverage report gets generated.
         if coverage_dir:
             reactor.addSystemEventTrigger('after', 'shutdown', stop_coverage)
-
-        # Set up the environment...
-        m = Modulecmd()
-        log_module_load(m, config.get("broker", "CheckNet_module"))
-        if config.has_option("database", "module"):
-            log_module_load(m, config.get("database", "module"))
 
         # Set this up before the aqdb libs get imported...
         integrate_logging(config)

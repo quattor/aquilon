@@ -158,12 +158,6 @@ if prod_python and sys.executable.find(prod_python) < 0:
     print "\n"
     force_yes("Running with %s but prod is %s" % (sys.executable, prod_python))
 
-production_database = "NYPO_AQUILON"
-if (config.get("database", "dsn").startswith("oracle") and
-        config.get("database", "server") == production_database):
-    force_yes("About to run against the production database %s" %
-            production_database)
-
 # Execute this every run... the man page says that it should do the right
 # thing in terms of not contacting the kdc very often.
 p = Popen(config.get("kerberos", "krb5_keytab"), stdout=1, stderr=2)
@@ -173,7 +167,9 @@ pid_file = os.path.join(config.get('broker', 'rundir'), 'aqd.pid')
 kill_from_pid_file(pid_file)
 
 # FIXME: Need to be careful about attempting to nuke templatesdir...
-dirs = [config.get("database", "dbdir"), config.get("unittest", "scratchdir")]
+dirs = [config.get("unittest", "scratchdir")]
+if config.has_option("database", "dbfile"):
+    dirs.append(os.path.dirname(config.get("database", "dbfile")))
 for label in ["quattordir", "templatesdir", "domainsdir", "rundir", "logdir",
               "profilesdir", "plenarydir", "cfgdir", "kingdir", "swrepdir"]:
     dirs.append(config.get("broker", label))

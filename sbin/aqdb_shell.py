@@ -32,8 +32,6 @@ import argparse
 
 from ipaddr import IPv4Address, IPv4Network  # pylint: disable=W0611
 
-import ms.modulecmd
-
 from IPython.config.loader import Config as IPyConfig
 from IPython.frontend.terminal.embed import InteractiveShellEmbed
 

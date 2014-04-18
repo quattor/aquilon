@@ -9,8 +9,6 @@
 
 [DEFAULT]
 basedir = /var/tmp/%(user)s
-dbdir = %(basedir)s/aquilondb
-dblogfile = %(dbdir)s/aqdb.log
 
 [database]
 database_section = database_sqlite

@@ -129,7 +129,7 @@ class Cloner(object):
                                          'upgrade', '1.7.6',
                                          'add_transaction_tables.sql')
 
-        self.dbdir = self.config.get('database', 'dbdir')
+        self.dbdir = os.path.dirname(self.config.get('database', 'dbfile'))
         self.dumpfile = os.path.join(self.dbdir, 'clone.dmp')
 
         self.source_dir = 'nyaqd1:/var/quattor/'

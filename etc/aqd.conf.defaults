@@ -31,51 +31,24 @@
 
 [DEFAULT]
 basedir = /var
-environment = prod
 # The broker does not rely on 'user' for anything security-related...
 # user = # config.py supplies os.environ.get("USER") as a default
 # srcdir = # config.py supplies a custom _get_srcdir() as a default
 # hostname = # config.py supplies socket.gethostname() as a default
 quattordir = %(basedir)s/quattor
 
-# database defaults cannot (yet) be in the general [database] section,
-# and must be here.
-logdir = %(quattordir)s/logs
-dbdir = %(quattordir)s/aquilondb
-dblogfile = %(dbdir)s/aqdb.log
-
 [database_oracle]
 server = LNTO_AQUILON_NY
 # Set the username to empty to use Kerberos
 #dbuser = %(user)s
 dbuser =
+#password_file =
 # Schema the xtn_log tables exist in, if separate from the rest of the tables.
 # There is no default - the value is only used if set.
 #audit_schema = %(user)
 dsn = oracle://%(dbuser)s:PASSWORD@%(server)s
-#password_base = /ms/dist/aquilon/PROJ/aqdbpasswd/incr
-#password_file = %(password_base)s/%(environment)s/%(dbuser)s
 module = orcl/client/11.2.0.1.0
 
-[database_sqlite]
-dbfile = %(dbdir)s/aquilon.db
-dsn = sqlite:///%(dbfile)s
-
-[database_postgresql]
-# Leave the server name empty for unix socket on localhost
-server =
-dbuser = %(user)s
-dbname =
-dsn = postgresql+psycopg2://%(dbuser)s:PASSWORD@%(server)s/%(dbname)s
-# Schema the xtn_log tables exist in, if separate from the rest of the tables.
-# There is no default - the value is only used if set.
-#audit_schema = %(user)
-
-[database]
-# Unfortunately, the code hack for this means any database defaults
-# needed as config variables must be in the general DEFAULT section.
-database_section = database_sqlite
-# The pool values do not currently apply to sqlite.
 # There are two pools - one for commands that use locks and one for
 # commands that don't.  These values apply to each pool.
 # The pool size needs to take into account both the number of
@@ -89,8 +62,44 @@ database_section = database_sqlite
 # as needed for a database connection from the pool.
 pool_size = 3
 pool_max_overflow = 0
-pool_timeout =
+#pool_timeout =
+#pool_recycle =
 
+[database_sqlite]
+dbfile = %(quattordir)s/aquilondb/aquilon.db
+dsn = sqlite:///%(dbfile)s
+# SQLite does not use connection pooling, so the pool_* options won't work
+# here.
+
+[database_postgresql]
+# Leave the server name empty for unix socket on localhost
+server =
+dbuser = %(user)s
+dbname =
+#password_file =
+dsn = postgresql+psycopg2://%(dbuser)s:PASSWORD@%(server)s/%(dbname)s
+# Schema the xtn_log tables exist in, if separate from the rest of the tables.
+# There is no default - the value is only used if set.
+#audit_schema = %(user)
+
+# There are two pools - one for commands that use locks and one for
+# commands that don't.  These values apply to each pool.
+# The pool size needs to take into account both the number of
+# active connections the database can handle and the number of
+# active commands the broker can handle in memory.  While the broker
+# is running as 32-bit we're deliberately leaving the pool size low.
+# With the pool size so low having overflow connections is # useless.
+# They would be continually active and just increasing load by opening
+# and closing connections.
+# Having timeout unset allows for incoming connections to wait as long
+# as needed for a database connection from the pool.
+pool_size = 3
+pool_max_overflow = 0
+#pool_timeout =
+#pool_recycle =
+
+[database]
+database_section = database_sqlite
 
 [broker]
 default_organization = ms
@@ -117,7 +126,6 @@ rundir = %(quattordir)s/run
 sockdir = %(rundir)s/sockets
 logdir = %(quattordir)s/logs
 logfile = %(logdir)s/aqd.log
-http_access_log = %(logdir)s/aqd_access.log
 profilesdir = %(quattordir)s/web/htdocs/profiles
 plenarydir = %(cfgdir)s/plenary
 swrepdir = %(quattordir)s/swrep
@@ -143,7 +151,6 @@ installfe_user = %(user)s
 installfe_sshdir = /ms/dist/sec/PROJ/openssh/prod/bin
 server_notifications =
 client_notifications = yes
-CheckNet_module = /ms/dist/NetEng/modules/prod
 sharedata = /ms/dist/storage/etc/nasobjects.map
 default_domain_start = prod
 authorization_error = Please contact an administrator for access.

@@ -91,7 +91,9 @@ class AQBroker(object):
             except OSError, e:
                 print >>sys.stderr, "Could not create %s: %s" % (dir, e)
         
-        dirs = [self.config.get("database", "dbdir")]
+        dirs = []
+        if self.config.has_option("database", "dbfile"):
+            dirs.append(os.path.dirname(self.config.get("database", "dbfile")))
         for label in ["domainsdir", "kingdir", "rundir", "profilesdir",
                       "plenarydir", "logdir"]:
             dirs.append(self.config.get("broker", label))

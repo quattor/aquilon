@@ -90,11 +90,11 @@ def main(*args, **kw):
     Base.metadata.bind = db.engine
 
     if opts.verbose:
-        db.meta.bind.echo = True
+        db.engine.echo = True
 
     if opts.delete_db == True:
         log.debug('Dropping database')
-        db.drop_all_tables_and_sequences(no_confirm=True)
+        db.drop_all_tables_and_sequences()
 
     if opts.populate:
         s = db.Session()

@@ -22,7 +22,7 @@ import socket
 import logging
 import gzip
 
-import xml.etree.ElementTree as ET
+from xml.etree import ElementTree
 
 from aquilon.aqdb.model import Service
 from aquilon.utils import write_file
@@ -82,7 +82,7 @@ def build_index(config, session, logger=LOGGER):
                 source = gzip.open(index_path)
             else:
                 source = open(index_path)
-            tree = ET.parse(source)
+            tree = ElementTree.parse(source)
             for profile in tree.getiterator("profile"):
                 if not profile.text or "mtime" not in profile.attrib:
                     continue

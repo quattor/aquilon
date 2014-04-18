@@ -72,8 +72,6 @@ class UpdaterThread(Thread):
         super(UpdaterThread, self).__init__()
 
     def run(self):
-        global do_exit
-
         while True:
             self.cond.acquire()
             if not self.update_queued:
@@ -97,7 +95,7 @@ class UpdaterThread(Thread):
 
 
 def run_loop(config, logger, db):
-    global do_exit, worker_thread, worker_notify
+    global worker_thread, worker_notify
 
     listener = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
     sockname = os.path.join(config.get("broker", "sockdir"), "notifysock")
@@ -177,12 +175,6 @@ def main():
 
     config = Config(configfile=opts.config)
 
-    # These modules must be imported after the configuration has been
-    # initialized
-    from aquilon.aqdb.db_factory import DbFactory
-
-    db = DbFactory()
-
     if opts.debug:
         level = logging.DEBUG
         logging.basicConfig(level=level, stream=sys.stderr,
@@ -208,6 +200,12 @@ def main():
         logging.getLogger(logname).setLevel(logging._levelNames[level])
 
     logger = logging.getLogger("aq_notifyd")
+
+    # These modules must be imported after the configuration has been
+    # initialized
+    from aquilon.aqdb.db_factory import DbFactory
+
+    db = DbFactory()
 
     if opts.one_shot:
         update_index_and_notify(config, logger, db)

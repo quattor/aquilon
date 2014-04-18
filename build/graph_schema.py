@@ -52,6 +52,6 @@ ms.modulecmd.load("fsf/graphviz/2.28.0")
 from aquilon.aqdb.utils import schema2dot
 
 
-dot = schema2dot.create_schema_graph(metadata=db.meta)
+dot = schema2dot.create_schema_graph(metadata=Base.metadata)
 dot.write(os.path.join(opts.dir, "%s.dot" % opts.prefix))
 dot.write_png(os.path.join(opts.dir, "%s.png" % opts.prefix))

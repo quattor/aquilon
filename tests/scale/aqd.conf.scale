@@ -9,8 +9,6 @@
 [DEFAULT]
 basedir = /var/tmp/%(user)s/scale
 environment = dev
-dbdir = %(basedir)s/aquilondb
-dblogfile = %(dbdir)s/aqdb.log
 
 [database_oracle]
 dbuser = aqdqa
@@ -31,7 +29,6 @@ client_notifications = no
 dsdb = %(srcdir)s/tests/scale/fake_dsdb.sh
 installfe = /bin/echo
 #sharedata = %(srcdir)s/tests/testnasobjects.map
-#windows_host_info = %(dbdir)s/machines.db
 #vlan2net = %(srcdir)s/tests/fakebin/fake_vlan2net
 mean = %(srcdir)s/tests/fakebin/fake_mean
 
