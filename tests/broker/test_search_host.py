@@ -289,8 +289,12 @@ class TestSearchHost(TestBrokerCommand):
         self.matchclean(out, "unittest02.one-nyp.ms.com", command)
 
     def testinstanceunavailable(self):
-        command = "search host --instance service-instance-does-not-exist"
-        self.noouttest(command.split(" "))
+        command = ["search_host", "--instance", "service-instance-does-not-exist"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out,
+                         "Service Instance service-instance-does-not-exist "
+                         "not found.",
+                         command)
 
     def testserverofservice00(self):
         """search host by server of service provided """
@@ -355,13 +359,23 @@ class TestSearchHost(TestBrokerCommand):
                          "service foo not found",
                          command)
 
-    def testserverofinstanceunavailable(self):
-        """search host for a undefined instance """
-        command = "search host --server_of_instance " \
-                  "service-instance-does-not-exist"
-        self.noouttest(command.split(" "))
-
     def testserverofservice04(self):
+        # Mix server and client side service criteria
+        command = "search host --server_of_service foo --instance utsi1"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "unittest00.one-nyp.ms.com", command)
+        self.matchclean(out, "unittest02.one-nyp.ms.com", command)
+
+    def testserverofinstanceunavailable(self):
+        command = ["search_host", "--server_of_instance",
+                   "service-instance-does-not-exist"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out,
+                         "Service Instance service-instance-does-not-exist "
+                         "not found.",
+                         command)
+
+    def testserverofservice05(self):
         """search host for a defined service but no servers assigned"""
         self.noouttest(["unbind", "server",
                         "--hostname", "unittest01.one-nyp.ms.com",
@@ -372,7 +386,7 @@ class TestSearchHost(TestBrokerCommand):
 
         self.noouttest(["search", "host", "--server_of_instance", "fooinst2"])
 
-    def testserverofservice05(self):
+    def testserverofservice06(self):
         """search host for a defined service but no servers assigned """
         self.noouttest(["unbind", "server",
                         "--hostname", "unittest00.one-nyp.ms.com",
