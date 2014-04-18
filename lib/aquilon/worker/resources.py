@@ -156,76 +156,46 @@ class ResponsePage(resource.Resource):
             # FIXME: This may be broken, if it is supposed to get a useful
             # message based on available render_ methods.
             raise server.UnsupportedMethod(getattr(self, 'allowedMethods', ()))
+
+        # Create a defered chain of actions (or continuation Mondad).  We add
+        # a list of the functions that should be called, and error handeling
+        # At the end of this block we will invoke the monad with the request
+        d = defer.Deferred()
+
         # Default render would just call the method here.
         # This is expanded to do argument checking, finish the request,
         # and do some error handling.
         arguments = self.extractArguments(request)
-        d = self.check_arguments(arguments, handler.required_parameters,
-                                 handler.optional_parameters,
-                                 handler.parameter_checks)
+        d.addCallback(handler.check_arguments)
+
+        # Retieve the instance from the handler
+        broker_command = handler.broker_command
+
         style = getattr(self, "output_format", None)
         if style is None:
             style = getattr(request, "output_format", None)
         if style is None:
-            style = getattr(handler, "default_style", "raw")
+            style = getattr(broker_command, "default_style", "raw")
+
         # The logger used to be set up after the session.  However,
         # this keeps a record of the request from forming immediately
         # if all the sqlalchmey session threads are in use.
-        d = d.addCallback(lambda arguments: handler.add_logger(style=style,
-                                                               request=request,
-                                                               **arguments))
-        if handler.defer_to_thread:
+        # This will be a problem if/when we want an auditid to come
+        # from the database, but we can revisit at that point.
+        d = d.addCallback(lambda arguments:
+                          broker_command.add_logger(style=style,
+                                                    request=request,
+                                                    **arguments))
+        if broker_command.defer_to_thread:
             d = d.addCallback(lambda arguments: threads.deferToThread(
-                handler.render, **arguments))
+                broker_command.render, **arguments))
         else:
-            d = d.addCallback(lambda arguments: handler.render(**arguments))
+            d = d.addCallback(lambda arguments: broker_command.render(**arguments))
         d = d.addCallback(self.finishRender, request)
         d = d.addErrback(self.wrapNonInternalError, request)
         d = d.addErrback(self.wrapError, request)
+        d.callback(arguments)
         return server.NOT_DONE_YET
-
-    def check_arguments(self, arguments, required=None, optional=None,
-                        parameter_checks=None):
-        """Check for the required and optional arguments.
-
-        Returns a Deferred that will have a dictionary of the arguments
-        found.  Any unsupplied optional arguments will have a value of
-        None.  If there are any problems, the Deferred will errback with
-        a failure.
-
-        As a hack, debug is always allowed as an argument.  Should
-        maybe have a flag on global options in input.xml for this.
-
-        As a separate hack, requestid is always allowed as an
-        argument.  This allows for status/update requests by the
-        client before the command returns.
-
-        """
-
-        required_map = {"debug": False, "requestid": False}
-        for arg in optional or []:
-            required_map[arg] = False
-        for arg in required or []:
-            required_map[arg] = True
-
-        result = {}
-        for (arg, req) in required_map.items():
-            #log.msg("Checking for arg %s with required=%s" % (arg, req))
-            if arg not in arguments:
-                if req:
-                    return defer.fail(ArgumentError(
-                        "Missing mandatory argument %s" % arg))
-                else:
-                    result[arg] = None
-                    continue
-            value = arguments[arg]
-            if arg in parameter_checks or {}:
-                try:
-                    value = parameter_checks[arg]("--" + arg, value)
-                except ArgumentError, err:
-                    return defer.fail(err)
-            result[arg] = value
-        return defer.succeed(result)
 
     def format(self, result, request):
         # This method is called to format error messages, and the only format
@@ -274,97 +244,10 @@ class ResponsePage(resource.Resource):
 class RestServer(ResponsePage):
     """The root resource is used to define the site as a whole."""
 
-    _type_handler = {
-        'int': force_int,
-        'float': force_float,
-        'boolean': force_boolean,
-        'flag': force_boolean,
-        'ipv4': force_ipv4,
-        'mac': force_mac,
-        'json': force_json_dict,
-        'string': force_ascii,
-        'file': force_ascii,
-        'list': force_list
-    }
-
     def __init__(self, config):
         formatter = ResponseFormatter()
         ResponsePage.__init__(self, '', formatter)
         self.config = config
-
-        tree = ET.parse(lookup_file_path("input.xml"))
-
-        for command in tree.getiterator("command"):
-            for transport in command.getiterator("transport"):
-                if "name" not in command.attrib \
-                        or "method" not in transport.attrib \
-                        or "path" not in transport.attrib:
-                    continue
-                name = command.attrib["name"]
-                method = transport.attrib["method"]
-                path = transport.attrib["path"]
-                trigger = transport.attrib.get("trigger")
-
-                fullcommand = name
-                if trigger:
-                    fullcommand = fullcommand + "_" + trigger
-                mymodule = getattr(commands, fullcommand, None)
-                if not mymodule:
-                    log.msg("No module available in aquilon.worker.commands " +
-                            "for %s" % fullcommand)
-                # See commands/__init__.py for more info here...
-                myinstance = getattr(mymodule, "broker_command", None)
-                if not myinstance:
-                    log.msg("No class instance available for %s" % fullcommand)
-                    myinstance = BrokerCommand()
-                myinstance.command = name
-                rendermethod = method.upper()
-
-                self.insert_instance(myinstance, rendermethod, path, formatter)
-
-                # Since we are parsing input.xml anyway, record the possible
-                # parameters...
-                for option in command.getiterator("option"):
-                    if "name" not in option.attrib:
-                        continue
-                    option_name = option.attrib["name"]
-                    if option_name not in myinstance.optional_parameters:
-                        myinstance.optional_parameters.append(option_name)
-                    if "type" in option.attrib:
-                        option_type = option.attrib["type"]
-                        if option_type == 'enum':
-                            if 'enum' not in option.attrib:
-                                log.msg("Warning: argument missing enum attribute for %s.%s" %
-                                        (myinstance.command, option_name))
-                                continue
-                            enum_type = option.attrib['enum']
-                            try:
-                                enum_class = StringEnum(enum_type)
-                                myinstance.parameter_checks[option_name] = enum_class.from_argument
-                            except ValueError, e:
-                                log.msg("Unknown Enum: %s" % e)
-                                continue
-                        else:
-                            if option_type not in self._type_handler:
-                                log.msg("Warning: unknown option type %s for %s.%s" %
-                                        (option_type, myinstance.command, option_name))
-                                continue
-                            myinstance.parameter_checks[option_name] = self._type_handler[option_type]
-                    else:  # pragma: no cover
-                        log.msg("Warning: argument type not known for %s.%s" %
-                                (myinstance.command, option_name))
-
-                    for format in command.getiterator("format"):
-                        if "name" not in format.attrib:
-                            log.msg("Warning: incorrect format specification "
-                                    "for %s." % myinstance.command)
-                            continue
-
-                        style = format.attrib["name"]
-                        if hasattr(myinstance.formatter, "config_" + style):
-                            meth = getattr(myinstance.formatter, "config_" +
-                                           style)
-                            meth(format, myinstance.command)
 
         cache_version(config)
         log.msg("Starting aqd version %s" % config.get("broker", "version"))
@@ -381,7 +264,7 @@ class RestServer(ResponsePage):
 
         #_logChildren(0, self)
 
-    def insert_instance(self, myinstance, rendermethod, path, formatter):
+    def insert_handler(self, handler, rendermethod, path):
         container = self
         relative = ""
         # Traverse down the resource tree, container will
@@ -398,7 +281,7 @@ class RestServer(ResponsePage):
                 child = container.getStaticEntity(component)
                 if child is None:
                     #log.msg("Creating new static component '" + component + "'.")
-                    child = ResponsePage(relative, formatter)
+                    child = ResponsePage(relative, self.formatter)
                     container.putChild(component, child)
                 container = child
             else:
@@ -420,7 +303,7 @@ class RestServer(ResponsePage):
                         container = container.dynamic_child
                 else:
                     #log.msg("Creating new dynamic component '" + component + "'.")
-                    child = ResponsePage(relative, formatter,
+                    child = ResponsePage(relative, self.formatter,
                                          path_variable=path_variable)
                     container.dynamic_child = child
                     container = child
@@ -429,4 +312,215 @@ class RestServer(ResponsePage):
             log.msg("Warning: Already have a %s here at %s..." %
                     (rendermethod, container.path))
         #log.msg("Setting 'command_" + fullcommand + "' as '" + rendermethod + "' for container '" + container.path + "'.")
-        container.handlers[rendermethod] = myinstance
+        container.handlers[rendermethod] = handler
+
+###############################################################################
+
+class CommandEntry(object):
+    """Representation of a single command in the registry.
+
+    For each transport defined for a command in input.xml a command entry
+    will be created.
+    """
+    def __init__(self, fullname, method, path, name, trigger):
+        self.fullname = fullname
+        self.method = method
+        self.path = path
+        self.name = name
+        self.trigger = trigger
+
+    def add_option(self, option_name, paramtype, enumtype=None):
+        """Add an option to a command.
+
+        This function is called for each option tag found within a
+        command defined in input.xml.  Note it will be repeated for
+        each transport.
+        """
+        pass
+
+    def add_format(self, format, style):
+        """Add a format to a command.
+
+        This function is called for each format tag found within a
+        command defined in inpux.xml.  Note it will be repeated for
+        each transport.
+        """
+        pass
+
+
+class CommandRegistry(object):
+
+    def new_entry(self, fullname, method, path, name, trigger):
+        """Create a new CommandEntry"""
+        return CommandEntry(fullname, method, path, name, trigger)
+
+    def add_entry(self, entry):
+        """Save the completed CommandEntry"""
+        pass
+
+    def __init__(self):
+        tree = ET.parse(lookup_file_path("input.xml"))
+
+        for command in tree.getiterator("command"):
+            if 'name' not in command.attrib:
+                continue
+            name = command.attrib['name']
+
+            for transport in command.getiterator("transport"):
+                if ("method" not in transport.attrib or
+                    "path" not in transport.attrib):
+                    log.msg("Warning: incorrect transport specification "
+                            "for %s." % name)
+                    continue
+
+                method = transport.attrib["method"]
+                path = transport.attrib["path"]
+                trigger = transport.attrib.get("trigger")
+
+                fullname = name
+                if trigger:
+                    fullname = fullname + "_" + trigger
+
+                entry = self.new_entry(fullname, method, path, name, trigger)
+                if not entry:
+                    continue
+
+                for option in command.getiterator("option"):
+                    if ('name' not in option.attrib or
+                        'type' not in option.attrib):
+                        log.msg("Warning: incorrect options specification "
+                                "for %s." % fullname)
+                        continue
+                    option_name = option.attrib["name"]
+                    paramtype = option.attrib["type"]
+                    enumtype = option.attrib.get("enum")
+                    entry.add_option(option_name, paramtype, enumtype)
+
+                for format in command.getiterator("format"):
+                    if "name" not in format.attrib:
+                        log.msg("Warning: incorrect format specification "
+                                "for %s." % fullname)
+                        continue
+                    style = format.attrib["name"]
+                    entry.add_format(format, style)
+
+                self.add_entry(entry)
+
+
+class ResourcesCommandEntry(CommandEntry):
+
+    _type_handler = {
+        'int': force_int,
+        'float': force_float,
+        'boolean': force_boolean,
+        'flag': force_boolean,
+        'ipv4': force_ipv4,
+        'mac': force_mac,
+        'json': force_json_dict,
+        'string': force_ascii,
+        'file': force_ascii,
+        'list': force_list
+    }
+
+    def __init__(self, fullname, method, path, name, trigger):
+        super(ResourcesCommandEntry, self).__init__(fullname, method, path, name, trigger)
+
+        # Locate the instance of the BrokerCommand
+        # See commands/__init__.py for more info here...
+        broker_module = getattr(commands, fullname, None)
+        if not broker_module:
+            log.msg("No module available in aquilon.worker.commands " +
+                    "for %s" % fullname)
+        broker_command = getattr(broker_module, "broker_command", None)
+        if not broker_command:
+            log.msg("No class instance available for %s" % fullname)
+            broker_command = BrokerCommand()
+
+        # Save the broker command for later usage
+        self.broker_command = broker_command
+
+        # Update the shortname of the command
+        broker_command.command = name
+
+        # Fill in the required arguments from the instance of BrokerComamnd
+        # this will be extended when more options are found in add_option.
+        self.argument_requirments = {"debug": False, "requestid": False}
+        for arg in broker_command.optional_parameters or []:
+            self.argument_requirments[arg] = False
+        for arg in broker_command.required_parameters or []:
+            self.argument_requirments[arg] = True
+
+        # Checks for specific parameters, filled in by add_option
+        self.parameter_checks = {}
+
+    def add_option(self, option_name, paramtype, enumtype=None):
+        # If this argument was not specified directly by the instance of
+        # BrokerCommand then record it as optional (FIXME)
+        if option_name not in self.argument_requirments:
+            self.argument_requirments[option_name] = False
+
+        # Fill in the parameter checker for this option
+        if paramtype == 'enum':
+            if not enumtype:
+                log.msg("Warning: argument missing enum attribute for %s.%s" %
+                        (self.command, option_name))
+                return
+            try:
+                enum_class = StringEnum(enumtype)
+                self.parameter_checks[option_name] = enum_class.from_argument
+            except ValueError, e:
+                log.msg("Unknown Enum: %s" % e)
+                return
+        else:
+            if paramtype in self._type_handler:
+                self.parameter_checks[option_name] = self._type_handler[paramtype]
+            else:
+                log.msg("Warning: unknown option type %s for %s.%s" %
+                                        (paramtype, self.command, option_name))
+
+    def check_arguments(self, arguments):
+        """Check for the required and optional arguments.
+
+        Returns a dictionary of the arguments found.  Any unsupplied optional
+        arguments will have a value of None.  If there are any problems an
+        exception will be raised.
+
+        """
+        result = {}
+        for (arg, req) in self.argument_requirments.items():
+            #log.msg("Checking for arg %s with required=%s" % (arg, req))
+            if arg not in arguments:
+                if req:
+                    raise ArgumentError("Missing mandatory argument %s" % arg)
+                else:
+                    result[arg] = None
+                    continue
+            value = arguments[arg]
+            if arg in self.parameter_checks or {}:
+                value = self.parameter_checks[arg]("--" + arg, value)
+            result[arg] = value
+        return result
+
+    def add_format(self, format, style):
+        if hasattr(self.broker_command.formatter, "config_" + style):
+            meth = getattr(self.broker_command.formatter, "config_" + style)
+            meth(format, self.broker_command.command)
+
+
+class ResourcesCommandRegistry(CommandRegistry):
+    def __init__(self, server):
+        # Save the additional instance of ResourceServer and call
+        # the base class to finish setting up.
+        self.server = server
+        super(ResourcesCommandRegistry, self).__init__()
+
+    def new_entry(self, fullname, method, path, name, trigger):
+        # Create a new instance of ResourcesCommandEntry.  It's add_option
+        # and add_format methods will get called to populate the entry.
+        return ResourcesCommandEntry(fullname, method, path, name, trigger)
+
+    def add_entry(self, entry):
+        # Once the ResourcesCommandEntry has been populated this method
+        # is called.  We insert the entry into the ResourceServer to
+        # expose them.
+        self.server.insert_handler(entry, entry.method.upper(), entry.path)

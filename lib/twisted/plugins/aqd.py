@@ -166,8 +166,11 @@ class AQDMaker(object):
         resources = __import__("aquilon.worker.resources", globals(), locals(),
                                ["RestServer"], -1)
         RestServer = getattr(resources, "RestServer")
-
         restServer = RestServer(config)
+
+        ResourcesCommandRegistry = getattr(resources, "ResourcesCommandRegistry")
+        registry = ResourcesCommandRegistry(restServer)
+
         openSite = AQDSite(restServer)
 
         # twisted is nicely changing the umask for us when the process is

@@ -149,11 +149,6 @@ class BrokerCommand(object):
         self.required_parameters = self.required_parameters[:]
         self.optional_parameters = self.optional_parameters[:]
 
-        # Parameter checks are filled in automatically based on input.xml. This
-        # lets us do some rudimentary checks before the actual command is
-        # invoked.
-        self.parameter_checks = {}
-
         self.action = self.__module__
         package_prefix = "aquilon.worker.commands."
         if self.action.startswith(package_prefix):
