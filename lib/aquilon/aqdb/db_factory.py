@@ -138,7 +138,12 @@ class DbFactory(object):
 
         for optname in ("pool_size", "pool_timeout", "pool_recycle"):
             if config.has_option("database", optname):
-                pool_options[optname] = config.getint("database", optname)
+                if len(config.get("database", optname).strip()) > 0:
+                    pool_options[optname] = config.getint("database", optname)
+                else:
+                    # pool_timeout can be set to None
+                    pool_options[optname] = None
+
         # Sigh. max_overflow does not start with pool_*
         if config.has_option("database", "pool_max_overflow"):
             pool_options["max_overflow"] = config.getint("database",
