@@ -18,20 +18,15 @@
 
 from aquilon.aqdb.model import NetworkDevice
 from aquilon.worker.formats.formatters import ObjectFormatter
+from aquilon.worker.formats.hardware_entity import HardwareEntityFormatter
 
 
-class NetworkDeviceFormatter(ObjectFormatter):
-    def format_raw(self, device, indent=""):
-        details = [indent + "%s: %s" % (str(device.model.model_type).capitalize(),
-                                        device.label)]
-        if device.primary_name:
-            details.append(indent + "  Primary Name: "
-                           "{0:a}".format(device.primary_name))
+class NetworkDeviceFormatter(HardwareEntityFormatter):
+    def header_raw(self, device, details, indent=""):
         details.append(indent + "  Switch Type: %s" % device.switch_type)
-        details.append(self.redirect_raw(device.location, indent + "  "))
-        details.append(self.redirect_raw(device.model, indent + "  "))
-        if device.serial_no:
-            details.append(indent + "  Serial: %s" % device.serial_no)
+
+    def format_raw(self, device, indent=""):
+        details = [super(NetworkDeviceFormatter, self).format_raw(device, indent)]
         for om in device.observed_macs:
             details.append(indent + "  Port %s: %s" %
                            (om.port, om.mac_address))
@@ -41,10 +36,6 @@ class NetworkDeviceFormatter(ObjectFormatter):
             details.append(indent + "  VLAN %d: %s" %
                            (ov.vlan_id, ov.network.ip))
             details.append(indent + "    Created: %s" % ov.creation_date)
-        for i in device.interfaces:
-            details.append(self.redirect_raw(i, indent + "  "))
-        if device.comments:
-            details.append(indent + "  Comments: %s" % device.comments)
         return "\n".join(details)
 
     def csv_fields(self, device):
