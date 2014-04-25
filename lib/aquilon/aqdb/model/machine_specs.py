@@ -34,10 +34,6 @@ class MachineSpecs(Base):
     """ Captures the configuration hardware components for a given model """
     #TODO: Maybe this entire table is in fact a part of the model "subtype"
 
-    _def_cpu_cnt = {'workstation': 1, 'blade': 2, 'rackmount': 4}
-    _def_nic_cnt = {'workstation': 1, 'blade': 2, 'rackmount': 2}
-    _def_memory = {'workstation': 2048, 'blade': 8192, 'rackmount': 16384}
-
     __tablename__ = 'machine_specs'
 
     id = Column(Integer, Sequence('mach_specs_id_seq'), primary_key=True)
