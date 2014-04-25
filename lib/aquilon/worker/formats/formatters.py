@@ -19,6 +19,7 @@
 import csv
 import cStringIO
 import sys
+from operator import attrgetter
 
 from aquilon.config import Config
 from aquilon.exceptions_ import ProtocolError, InternalError
@@ -233,13 +234,13 @@ class ObjectFormatter(object):
             hw_msg.cpu = str(hwent.cpu.name)
             hw_msg.memory = hwent.memory
 
-            for disk in hwent.disks:
+            for disk in sorted(hwent.disks, key=attrgetter('device_name')):
                 disk_msg = hw_msg.disks.add()
                 disk_msg.device_name = str(disk.device_name)
                 disk_msg.capacity = disk.capacity
                 disk_msg.disk_type = str(disk.controller_type)
 
-        for iface in hwent.interfaces:
+        for iface in sorted(hwent.interfaces, key=attrgetter('name')):
             has_addrs = False
             for addr in iface.assignments:
                 has_addrs = True
