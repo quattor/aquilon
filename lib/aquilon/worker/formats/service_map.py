@@ -41,5 +41,4 @@ class PersonalityServiceMapFormatter(ServiceMapFormatter):
                    sm.service.name, sm.service_instance.name,
                    format(sm.mapped_to))
 
-ObjectFormatter.handlers[PersonalityServiceMap] = \
-        PersonalityServiceMapFormatter()
+ObjectFormatter.handlers[PersonalityServiceMap] = PersonalityServiceMapFormatter()

@@ -87,20 +87,20 @@ class TestAddShare(TestBrokerCommand):
 
     def testupdatesharefail_1(self):
         command = ["update_share", "--share=doesnotexist", "--latency_threshold=10",
-                        "--comments=updated comment"]
+                   "--comments=updated comment"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Share doesnotexist is not used on any resource"
-                              " and cannot be modified", command)
+                         " and cannot be modified", command)
 
     def testupdatesharefail_2(self):
         command = ["update_share", "--share=test_share_1", "--latency_threshold=10",
-                        "--comments=updated comment"]
+                   "--comments=updated comment"]
         out = self.badrequesttest(command)
         self.matchoutput(out, 'The value of latency_threshold must be either zero, or at least 20.', command)
 
     def testupdateshare_1(self):
         command = ["update_share", "--share=test_share_1", "--latency_threshold=0",
-                        "--comments=updated comment"]
+                   "--comments=updated comment"]
         out = self.commandtest(command)
 
         command = ["show_share", "--share=test_share_1"]
@@ -118,10 +118,9 @@ class TestAddShare(TestBrokerCommand):
             self.matchoutput(out, '"name" = "test_share_1";', command)
             self.matchclean(out, 'latency_threshold', command)
 
-
     def testupdateshare_2(self):
         command = ["update_share", "--share=test_share_1", "--latency_threshold=20",
-                        "--comments=updated comment"]
+                   "--comments=updated comment"]
         out = self.commandtest(command)
         command = ["show_share", "--share=test_share_1"]
         out = self.commandtest(command)

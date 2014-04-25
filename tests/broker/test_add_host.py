@@ -80,9 +80,9 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
                          model="hs21-8853l5u", rack="ut3",
                          interfaces=["eth0", "eth1"], zebra=True,
                          eth0_mac=eth0_ip.mac, eth0_ip=eth0_ip,
-                         eth0_fqdn = "infra1-e0.aqd-unittest.ms.com",
+                         eth0_fqdn="infra1-e0.aqd-unittest.ms.com",
                          eth1_mac=eth1_ip.mac, eth1_ip=eth1_ip,
-                         eth1_fqdn = "infra1-e1.aqd-unittest.ms.com",
+                         eth1_fqdn="infra1-e1.aqd-unittest.ms.com",
                          personality="infra")
 
     def testaddnpinfra(self):
@@ -93,9 +93,9 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
                          model="hs21-8853l5u", rack="np3",
                          interfaces=["eth0", "eth1"], zebra=True,
                          eth0_mac=eth0_ip.mac, eth0_ip=eth0_ip,
-                         eth0_fqdn = "infra1-e0.one-nyp.ms.com",
+                         eth0_fqdn="infra1-e0.one-nyp.ms.com",
                          eth1_mac=eth1_ip.mac, eth1_ip=eth1_ip,
-                         eth1_fqdn = "infra1-e1.one-nyp.ms.com",
+                         eth1_fqdn="infra1-e1.one-nyp.ms.com",
                          personality="infra")
 
     def testaddjackhost(self):

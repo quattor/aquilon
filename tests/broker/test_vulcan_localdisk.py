@@ -125,7 +125,7 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, MachineTestMixin,
     def test_030_addswitch(self):
         for i in range(0, 2):
             self.successtest(["update_esx_cluster",
-                              "--cluster=%s" %self.cluster[i],
+                              "--cluster=%s" % self.cluster[i],
                               "--switch=%s" % self.switch[i]])
 
     def test_050_add_vmhost(self):
@@ -383,7 +383,6 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, MachineTestMixin,
 
         for i in range(0, 2):
             self.noouttest(["del", "machine", "--machine", self.machine[i]])
-
 
     def test_308_delutpgsw(self):
         for i in range(0, 2):

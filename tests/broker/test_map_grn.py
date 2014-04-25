@@ -136,7 +136,7 @@ class TestMapGrn(VerifyGrnsMixin, PersonalityTestMixin, TestBrokerCommand):
         # The GRN is mapped to both the host and the personality; verify it is
         # not duplicated. Should print out both the host mapped
         # personality mapped grns
-        self.check_grns(out, [self.grn_list[0]], {"esp" : [self.grn_list[0]]}, command)
+        self.check_grns(out, [self.grn_list[0]], {"esp": [self.grn_list[0]]}, command)
 
     def test_210_verify_unittest20(self):
         command = ["cat", "--hostname", "unittest20.aqd-unittest.ms.com",
@@ -222,7 +222,7 @@ class TestMapGrn(VerifyGrnsMixin, PersonalityTestMixin, TestBrokerCommand):
         command = ["cat", "--hostname", "unittest00.one-nyp.ms.com", "--data",
                    "--generate"]
         out = self.commandtest(command)
-        self.check_grns(out, [self.grn_list[1]], {"esp" : [self.grn_list[1]]}, command)
+        self.check_grns(out, [self.grn_list[1]], {"esp": [self.grn_list[1]]}, command)
 
     def test_410_verify_unittest20(self):
         command = ["cat", "--hostname", "unittest20.aqd-unittest.ms.com",
@@ -283,7 +283,7 @@ class TestMapGrn(VerifyGrnsMixin, PersonalityTestMixin, TestBrokerCommand):
     def test_600_unmap_personality(self):
         for grn in self.grn_list:
             command = ["map", "grn", "--grn", grn,
-                   "--personality", "compileserver", "--target", "esp"]
+                       "--personality", "compileserver", "--target", "esp"]
             self.successtest(command)
 
         command = ["cat", "--archetype", "aquilon", "--personality", "compileserver"]
@@ -326,7 +326,7 @@ class TestMapGrn(VerifyGrnsMixin, PersonalityTestMixin, TestBrokerCommand):
                        "--target", "esp"]
             self.statustest(command)
 
-        command = ["show_host",  "--hostname", "unittest12.aqd-unittest.ms.com"]
+        command = ["show_host", "--hostname", "unittest12.aqd-unittest.ms.com"]
         out = self.commandtest(command)
         self.matchoutput(out, "Used by GRN: grn:/ms/ei/aquilon/unittest [target: esp]", command)
         self.matchoutput(out, "Used by GRN: grn:/ms/ei/aquilon/aqd [target: esp]", command)

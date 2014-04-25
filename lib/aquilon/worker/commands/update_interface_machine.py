@@ -110,7 +110,7 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
             # old_default_route is None there was no bootable interface.
             old_default_route = None
             for i in dbhw_ent.interfaces:
-                if i.bootable == True:
+                if i.bootable:
                     old_default_route = i.default_route
                     break
 

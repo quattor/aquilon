@@ -83,6 +83,6 @@ class RemoteSandbox(object):
 class RemoteSandboxFormatter(ObjectFormatter):
     def csv_fields(self, remote_sandbox):
         yield (remote_sandbox.template_king_url, remote_sandbox.sandbox_name,
-                remote_sandbox.user_base)
+               remote_sandbox.user_base)
 
 ObjectFormatter.handlers[RemoteSandbox] = RemoteSandboxFormatter()

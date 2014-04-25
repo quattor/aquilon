@@ -112,7 +112,7 @@ class RequestStatus(object):
             # Keep a copy of the arguments
             self.args[key] = value_str
 
-            if key=='style' and value=='raw':
+            if key == 'style' and value == 'raw':
                 continue
             massaged.append(" --%s=%s" % (key, value_str))
 

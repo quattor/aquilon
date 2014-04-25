@@ -167,7 +167,6 @@ class TestAddModel(TestBrokerCommand):
         out = self.badrequesttest(command)
         self.matchoutput(out, "Invalid disk type 'bad-disk-type'.", command)
 
-
     VENDOR_DEPR_STR = "User anonymous used deprecated option vendor alone of command CommandShowModel"
     TYPE_DEPR_STR = "User anonymous used deprecated option type of command CommandShowModel"
 

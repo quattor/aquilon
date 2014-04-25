@@ -253,8 +253,8 @@ class ObjectFormatter(object):
                 int_msg.fqdn = str(addr.fqdns[0])
                 for dns_record in addr.dns_records:
                     if dns_record.alias_cnt:
-                        int_msg.aliases.extend(str(a.fqdn)
-                                for a in dns_record.all_aliases)
+                        int_msg.aliases.extend(str(a.fqdn) for a in
+                                               dns_record.all_aliases)
 
             # Add entries for interfaces that do not have any addresses
             if not has_addrs:

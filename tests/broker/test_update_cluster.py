@@ -26,7 +26,7 @@ from brokertest import TestBrokerCommand
 from personalitytest import PersonalityTestMixin
 
 
-class TestUpdateCluster(TestBrokerCommand,PersonalityTestMixin):
+class TestUpdateCluster(TestBrokerCommand, PersonalityTestMixin):
 
     def test_000_add_personalities(self):
         self.create_personality("gridcluster", "hadoop-test",

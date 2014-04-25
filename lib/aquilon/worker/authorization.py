@@ -48,9 +48,9 @@ class AuthorizationBroker(object):
            or action == 'dump_dns':
             return True
         if dbuser is None:
-            raise AuthorizationException(
-                "Unauthorized anonymous access attempt to %s on %s" %
-                    (action, resource))
+            raise AuthorizationException("Unauthorized anonymous access "
+                                         "attempt to %s on %s" %
+                                         (action, resource))
         # Special-casing the aquilon hosts... this is a special user
         # that provides a bucket for all host-generated activity.
         if self._check_aquilonhost(principal, dbuser, resource):

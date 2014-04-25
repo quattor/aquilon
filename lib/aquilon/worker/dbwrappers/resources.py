@@ -186,7 +186,7 @@ def walk_resources(dbobj):
 
 
 def find_resource(cls, dbobj, resourcegroup, resource, ignore=None,
-               error=NotFoundException):
+                  error=NotFoundException):
     """
     Find a suitable share or filesystem resource.
 
@@ -242,7 +242,7 @@ def find_resource(cls, dbobj, resourcegroup, resource, ignore=None,
                                           resource, resourcegroup)
     else:
         msg = "{0} does not have {1} {2!s} assigned to it.".format(dbobj,
-                                                                     clslabel,
-                                                                     resource)
+                                                                   clslabel,
+                                                                   resource)
 
     raise error(msg)

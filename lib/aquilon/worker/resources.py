@@ -289,8 +289,7 @@ class RestServer(ResponsePage):
                 path_variable = m.group(1)
                 if container.dynamic_child is not None:
                     #log.msg("Dynamic component '" + component + "' already exists.")
-                    current_variable = container.dynamic_child.\
-                            path_variable
+                    current_variable = container.dynamic_child.path_variable
                     if current_variable != path_variable:
                         log.msg("Warning: Could not use variable '"
                                 + path_variable + "', already have "
@@ -315,6 +314,7 @@ class RestServer(ResponsePage):
         container.handlers[rendermethod] = handler
 
 ###############################################################################
+
 
 class CommandEntry(object):
     """Representation of a single command in the registry.
@@ -476,7 +476,7 @@ class ResourcesCommandEntry(CommandEntry):
                 self.parameter_checks[option_name] = self._type_handler[paramtype]
             else:
                 log.msg("Warning: unknown option type %s for %s.%s" %
-                                        (paramtype, self.command, option_name))
+                        (paramtype, self.command, option_name))
 
     def check_arguments(self, arguments):
         """Check for the required and optional arguments.

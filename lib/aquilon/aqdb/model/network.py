@@ -231,11 +231,11 @@ class Network(Base):
 
     def personality_static_routes(self, personality):
         if personality:
-            return [route for route in self.static_routes \
-                    if route.personality == None or \
+            return [route for route in self.static_routes
+                    if route.personality == None or
                     route.personality == personality]
         else:
-            return [route for route in self.static_routes \
+            return [route for route in self.static_routes
                     if route.personality == None]
 
     def __le__(self, other):

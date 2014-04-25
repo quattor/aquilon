@@ -23,6 +23,7 @@ from aquilon.worker.messages import StatusCatalog
 _next_sequence_no = 0
 """Next request sequence number, see _get_next_sequence_no()"""
 
+
 def _get_next_sequence_no():
     """Return the next sequence number for an AQDRequest"""
     global _next_sequence_no

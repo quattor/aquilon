@@ -664,7 +664,7 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
         scratchfile = self.writescratch("grnlist", "\n".join(hosts))
         command = ["reconfigure", "--list", scratchfile,
                    "--grn=grn:/ms/ei/aquilon/aqd"]
-        out = self.successtest (command)
+        out = self.successtest(command)
 
         for h in hosts:
             command = "show host --hostname %s" % h
@@ -681,7 +681,7 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
 
         scratchfile = self.writescratch("grnlist", "\n".join(hosts))
         command = ["reconfigure", "--list", scratchfile, "--cleargrn"]
-        out = self.successtest (command)
+        out = self.successtest(command)
 
         for h in hosts:
             command = "show host --hostname %s" % h
@@ -696,7 +696,7 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
         self.matchoutput(out, "Owned by GRN: grn:/ms/ei/aquilon/aqd", command)
 
         command = ["reconfigure", "--hostname", h, "--cleargrn"]
-        out = self.successtest (command)
+        out = self.successtest(command)
 
         command = "show host --hostname %s" % h
         out = self.commandtest(command.split(" "))

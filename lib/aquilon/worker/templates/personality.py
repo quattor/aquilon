@@ -225,7 +225,6 @@ class PlenaryPersonalityBase(Plenary):
         if ng_list:
             pan_assign(lines, "/system/root_netgroups", ng_list)
 
-
         ## include pre features
         path = PlenaryPersonalityPreFeature.template_name(self.dbobj)
         pan_include_if_exists(lines, path)

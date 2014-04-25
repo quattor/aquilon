@@ -483,7 +483,6 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
                          "resourcegroup utmc8as1.",
                          command)
 
-
 #    metacluster aligned svc tests
     def test_400_addvcenterservices(self):
         command = ["add_required_service", "--service", "vcenter",

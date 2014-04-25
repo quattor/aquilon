@@ -30,4 +30,3 @@ class CommandDelInterfaceSwitch(CommandDelInterfaceNetworkDevice):
         arguments['network_device'] = switch
         arguments['switch'] = None
         return CommandDelInterfaceNetworkDevice.render(self, **arguments)
-

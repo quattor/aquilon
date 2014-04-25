@@ -240,8 +240,6 @@ class TestAddAlias(TestBrokerCommand):
         command = ["del", "alias", "--fqdn", "alias1.aqd-unittest.ms.com"]
         out = self.commandtest(command)
 
-
-
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddAlias)
     unittest.TextTestRunner(verbosity=2).run(suite)
