@@ -114,16 +114,23 @@ class TestPublishSandbox(TestBrokerCommand):
                                       "HEAD"], cwd=utsandboxdir)
         self.ignoreoutputtest(["add", "sandbox", "--sandbox", "rebasetest",
                                "--start", "utsandbox"])
-
-        # Skip the last commit
         sandboxdir = os.path.join(self.sandboxdir, "rebasetest")
-        self.gitcommand(["reset", "--hard", "HEAD^"], cwd=sandboxdir)
 
         # Add some new content
         with open(os.path.join(sandboxdir, "TEST"), "w") as f:
             f.writelines(["Added test file"])
         self.gitcommand(["add", "TEST"], cwd=sandboxdir)
         self.gitcommand(["commit", "-m", "Added test file"], cwd=sandboxdir)
+
+        # First publish - no problem, it's a fast-forward
+        self.successtest(["publish", "--sandbox", "rebasetest"],
+                         env=self.gitenv(), cwd=sandboxdir)
+
+        # Rewrite the last commit
+        with open(os.path.join(sandboxdir, "TEST"), "w") as f:
+            f.writelines(["Changed test file"])
+        self.gitcommand(["add", "TEST"], cwd=sandboxdir)
+        self.gitcommand(["commit", "--amend", "--no-edit"], cwd=sandboxdir)
 
         # Try to publish it
         command = ["publish", "--sandbox", "rebasetest"]
@@ -135,6 +142,26 @@ class TestPublishSandbox(TestBrokerCommand):
         # Publish with rebasing enabled
         command.append("--rebase")
         self.ignoreoutputtest(command, env=self.gitenv(), cwd=sandboxdir)
+
+    def testrebasetoomuch(self):
+        utsandboxdir = os.path.join(self.sandboxdir, "utsandbox")
+        prod_head, err = self.gitcommand(["rev-parse", "origin/prod"],
+                                         cwd=utsandboxdir)
+        self.ignoreoutputtest(["add", "sandbox", "--sandbox", "rebasetest2",
+                               "--start", "utsandbox"])
+        sandboxdir = os.path.join(self.sandboxdir, "rebasetest2")
+
+        # Rewrite history going beyond the starting point of the sandbox
+        self.gitcommand(["filter-branch", "--msg-filter", "tr a-z A-Z", "--force",
+                         prod_head.strip() + "^..HEAD"], cwd=sandboxdir)
+
+        # Try to publish it
+        command = ["publish", "--sandbox", "rebasetest2", "--rebase"]
+        out = self.badrequesttest(command, env=self.gitenv(), cwd=sandboxdir,
+                                  ignoreout=True)
+
+        self.matchoutput(out, "The published branch no longer contains",
+                         command)
 
 
 if __name__ == '__main__':
