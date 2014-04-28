@@ -28,8 +28,7 @@ class ClusterFormatter(ObjectFormatter):
         skeleton.name = str(cluster.name)
         skeleton.status = str(cluster.status)
         self.add_personality_data(skeleton.personality, cluster.personality)
-        skeleton.domain.name = str(cluster.branch.name)
-        skeleton.domain.owner = str(cluster.branch.owner.name)
+        self.add_branch_data(skeleton.domain, cluster.branch)
 
         skeleton.threshold = cluster.down_hosts_threshold
         skeleton.threshold_is_percent = cluster.down_hosts_percent

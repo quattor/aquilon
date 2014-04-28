@@ -95,6 +95,15 @@ class TestAddSandbox(TestBrokerCommand):
         self.matchoutput(out, "Base Commit: %s" % head, command)
         self.matchclean(out, "Path", command)
 
+    def test_115_verify_utsandbox_proto(self):
+        command = ["show_sandbox", "--sandbox", "utsandbox", "--format", "proto"]
+        out = self.commandtest(command)
+        domainlist = self.parse_domain_msg(out, expect=1)
+        domain = domainlist.domains[0]
+        self.assertEqual(domain.name, "utsandbox")
+        self.assertEqual(domain.owner, self.config.get("unittest", "user"))
+        self.assertEqual(domain.type, domain.SANDBOX)
+
     def test_115_verify_utsandbox_realm(self):
         user = self.config.get("unittest", "user")
         realm = self.config.get("unittest", "realm")

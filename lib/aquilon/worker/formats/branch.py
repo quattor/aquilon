@@ -42,6 +42,10 @@ class DomainFormatter(ObjectFormatter):
             details.append(indent + "  Comments: %s" % domain.comments)
         return "\n".join(details)
 
+    def format_proto(self, domain, container):
+        skeleton = container.domains.add()
+        self.add_branch_data(skeleton, domain)
+
 ObjectFormatter.handlers[Domain] = DomainFormatter()
 
 
@@ -68,6 +72,10 @@ class SandboxFormatter(ObjectFormatter):
         if sandbox.comments:
             details.append(indent + "  Comments: %s" % sandbox.comments)
         return "\n".join(details)
+
+    def format_proto(self, domain, container):
+        skeleton = container.domains.add()
+        self.add_branch_data(skeleton, domain)
 
 ObjectFormatter.handlers[Sandbox] = SandboxFormatter()
 ObjectFormatter.handlers[AuthoredSandbox] = SandboxFormatter()

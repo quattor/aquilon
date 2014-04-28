@@ -469,6 +469,11 @@ class TestBrokerCommand(unittest.TestCase):
         return self.parse_proto_msg(aqdparameters_pb2.ParameterList,
                                     'parameters', msg, expect)
 
+    def parse_domain_msg(self, msg, expect=None):
+        return self.parse_proto_msg(aqdsystems_pb2.DomainList,
+                                    'domains',
+                                    msg, expect)
+
     @classmethod
     def gitenv(cls, env=None):
         """Configure a known sanitised environment"""
