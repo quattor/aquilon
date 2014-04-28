@@ -437,6 +437,11 @@ class TestBrokerCommand(unittest.TestCase):
                                     'servicemaps',
                                     msg, expect)
 
+    def parse_archetype_msg(self, msg, expect=None):
+        return self.parse_proto_msg(aqdsystems_pb2.ArchetypeList,
+                                    'archetypes',
+                                    msg, expect)
+
     def parse_personality_msg(self, msg, expect=None):
         return self.parse_proto_msg(aqdsystems_pb2.PersonalityList,
                                     'personalities',

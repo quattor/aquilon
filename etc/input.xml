@@ -1962,6 +1962,9 @@
       </optgroup>
       <transport trigger="archetype" method="get" path="archetype/%(archetype)s" />
       <transport trigger="all" method="get" path="archetype" />
+      <format name="proto">
+         <message_class name="ArchetypeList" module="aqdsystems_pb2"/>
+      </format>
    </command>
 
    <command name="del_required_service">

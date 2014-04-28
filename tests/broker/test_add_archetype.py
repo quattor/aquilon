@@ -56,10 +56,20 @@ class TestAddArchetype(TestBrokerCommand):
         command = ["add_archetype", "--archetype=gridcluster", "--cluster=compute",
                    "--compilable", "--description=Grid"]
         self.noouttest(command)
+
         command = "show archetype --archetype gridcluster"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Cluster Archetype: gridcluster", command)
         self.matchoutput(out, "compilable", command)
+
+        command = ["show_archetype", "--archetype", "gridcluster",
+                   "--format", "proto"]
+        out = self.commandtest(command)
+        archlist = self.parse_archetype_msg(out, expect=1)
+        arch = archlist.archetypes[0]
+        self.assertEqual(arch.name, "gridcluster")
+        self.assertEqual(arch.compileable, True)
+        self.assertEqual(arch.cluster_type, "compute")
 
     def testaddhaarchetype(self):
         command = ["add_archetype", "--archetype=hacluster",
@@ -104,6 +114,15 @@ class TestAddArchetype(TestBrokerCommand):
     def testaddutappliance1(self):
         command = "add archetype --archetype utappliance --nocompilable"
         self.noouttest(command.split(" "))
+
+    def testverifyutappliance1(self):
+        command = ["show_archetype", "--archetype", "utappliance",
+                   "--format", "proto"]
+        out = self.commandtest(command)
+        archlist = self.parse_archetype_msg(out, expect=1)
+        arch = archlist.archetypes[0]
+        self.assertEqual(arch.name, "utappliance")
+        self.assertEqual(arch.compileable, False)
 
     def testverifyutarchetypeall(self):
         command = "show archetype --all"

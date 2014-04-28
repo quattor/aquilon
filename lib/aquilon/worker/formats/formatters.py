@@ -287,6 +287,8 @@ class ObjectFormatter(object):
 
     def add_archetype_data(self, msg, archetype):
         msg.name = str(archetype.name)
+        msg.compileable = archetype.is_compileable
+        msg.cluster_type = str(archetype.cluster_type)
         for service in archetype.services:
             si = msg.required_services.add()
             si.service = service.name

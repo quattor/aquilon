@@ -75,6 +75,7 @@ typemap = {
     "host": aqdsystems_pb2.HostList(),
     "machine": aqdsystems_pb2.MachineList(),
     "cluster": aqdsystems_pb2.ClusterList(),
+    "archetype": aqdsystems_pb2.ArchetypeList(),
     "personality": aqdsystems_pb2.PersonalityList(),
     "operating_system": aqdsystems_pb2.OperatingSystemList(),
     "network": aqdnetworks_pb2.NetworkList(),
