@@ -59,24 +59,51 @@ class TestSearchModel(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Vendor: hp Model: uttorswitch", command)
 
-    def test_200_verifyaddutchassis(self):
+    def test_200_verify_utchassis(self):
         command = "show model --model utchassis"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Vendor: aurora_vendor Model: utchassis", command)
         self.matchoutput(out, "Type: chassis", command)
 
-    def test_200_verifyaddutblade(self):
+    def test_200_verify_utchassis_proto(self):
+        command = "show model --model utchassis --format proto"
+        out = self.commandtest(command.split(" "))
+        modellist = self.parse_model_msg(out, expect=1)
+        model = modellist.models[0]
+        self.assertEqual(model.name, "utchassis")
+        self.assertEqual(model.vendor, "aurora_vendor")
+        self.assertEqual(model.model_type, "chassis")
+
+    def test_200_verify_utblade(self):
         command = "show model --model utblade"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Vendor: aurora_vendor Model: utblade", command)
         self.matchoutput(out, "Type: blade", command)
 
-    def test_200_verifyaddutmedium(self):
+    def test_200_verify_utblade_proto(self):
+        command = "show model --model utblade --format proto"
+        out = self.commandtest(command.split(" "))
+        modellist = self.parse_model_msg(out, expect=1)
+        model = modellist.models[0]
+        self.assertEqual(model.name, "utblade")
+        self.assertEqual(model.vendor, "aurora_vendor")
+        self.assertEqual(model.model_type, "blade")
+
+    def test_200_verify_utmedium(self):
         command = "show model --model utmedium"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Vendor: utvendor Model: utmedium", command)
         self.matchoutput(out, "Type: virtual_machine", command)
         self.matchoutput(out, "NIC Vendor: utvirt Model: default", command)
+
+    def test_200_verify_utmedium_proto(self):
+        command = "show model --model utmedium --format proto"
+        out = self.commandtest(command.split(" "))
+        modellist = self.parse_model_msg(out, expect=1)
+        model = modellist.models[0]
+        self.assertEqual(model.name, "utmedium")
+        self.assertEqual(model.vendor, "utvendor")
+        self.assertEqual(model.model_type, "virtual_machine")
 
     def test_200_verifyaddutccissmodel(self):
         command = "show model --model utccissmodel"

@@ -1215,6 +1215,9 @@
       <transport method="get" trigger="all" path="hardware/model" />
       <!-- TODO: fix the URLs once the search-like functionality is removed -->
       <transport method="get" path="find/hardware/show_model" />
+      <format name="proto">
+         <message_class name="ModelList" module="aqdsystems_pb2"/>
+      </format>
    </command>
 
    <command name="search_model">
@@ -1238,6 +1241,9 @@
          <option name="fullinfo" type="flag">Show full information for the matching models</option>
       </optgroup>
       <transport method="get" path="find/hardware/model" />
+      <format name="proto">
+         <message_class name="ModelList" module="aqdsystems_pb2"/>
+      </format>
    </command>
 
    <command name="update_model">

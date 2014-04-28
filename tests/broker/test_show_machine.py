@@ -70,6 +70,7 @@ class TestShowMachine(TestBrokerCommand):
         self.assertEqual(machine.location.name, "ut3")
         self.assertEqual(machine.model.name, "hs21-8853l5u")
         self.assertEqual(machine.model.vendor, "ibm")
+        self.assertEqual(machine.model.model_type, "blade")
         self.assertEqual(machine.cpu, "xeon_2660")
         self.assertEqual(machine.cpu_count, 2)
         self.assertEqual(machine.memory, 8192)

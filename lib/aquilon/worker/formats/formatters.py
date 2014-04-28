@@ -218,6 +218,11 @@ class ObjectFormatter(object):
                                                ObjectFormatter.default_handler)
         handler.format_proto(result, container)
 
+    def add_model_data(self, model_msg, model):
+        model_msg.name = str(model.name)
+        model_msg.vendor = str(model.vendor.name)
+        model_msg.model_type = str(model.model_type)
+
     def add_hardware_data(self, hw_msg, hwent):
         hw_msg.name = str(hwent.label)
         if hwent.location:
@@ -227,10 +232,10 @@ class ObjectFormatter(object):
                 p = hw_msg.location.parents.add()
                 p.name = str(parent.name)
                 p.location_type = str(parent.location_type)
-        hw_msg.model.name = str(hwent.model.name)
-        hw_msg.model.vendor = str(hwent.model.vendor.name)
         if hwent.serial_no:
             hw_msg.serial_no = str(hwent.serial_no)
+
+        self.add_model_data(hw_msg.model, hwent.model)
 
         if isinstance(hwent, Machine):
             hw_msg.cpu = str(hwent.cpu.name)
@@ -262,8 +267,7 @@ class ObjectFormatter(object):
             if iface.bus_address:
                 int_msg.bus_address = str(iface.bus_address)
             int_msg.bootable = iface.bootable
-            int_msg.model.name = str(iface.model.name)
-            int_msg.model.vendor = str(iface.model.vendor.name)
+            self.add_model_data(int_msg.model, iface.model)
 
         for iface in sorted(hwent.interfaces, key=attrgetter('name')):
             has_addrs = False
@@ -403,8 +407,7 @@ class ObjectFormatter(object):
         feat_msg.type = str(featlink.feature.feature_type)
         feat_msg.post_personality = featlink.feature.post_personality
         if featlink.model:
-            feat_msg.model.name = str(featlink.model.name)
-            feat_msg.model.vendor = str(featlink.model.vendor)
+            self.add_model_data(feat_msg.model, featlink.model)
         if featlink.interface_name:
             feat_msg.interface_name = str(featlink.interface_name)
 
