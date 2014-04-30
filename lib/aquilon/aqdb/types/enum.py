@@ -135,11 +135,12 @@ class StringEnum(object):
             # Process all of the attributes of the class that is being
             # constructed, building the class as we go
             for name, value in attrs.iteritems():
+                # Skip any reserved names
+                if name.startswith('_'):
+                    continue
+
                 # String attibutes create a static instance of this class
                 if isinstance(value, str):
-                    # Skip any reserved names
-                    if value.startswith('_'):
-                        continue
                     # Create a new object storing the name and value
                     ivalue = object.__new__(cls)
                     ivalue._StringEnum__name = name
