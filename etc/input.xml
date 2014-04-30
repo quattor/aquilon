@@ -3417,6 +3417,7 @@
          <option name="vmhost" type="string">Host name hosting the VM</option>
          <option name="ip" type="ipv4">New primary IP address</option>
          <option name="uri" type="string">URI to point to a template describing the virtual appliance</option>
+         <option name="remap_disk" type="string">Vitual disk backend remapping definitions</option>
       </optgroup>
       <transport method="post" trigger="hostname" path="host/%(hostname)s/command/update_hardware" />
       <transport method="post" path="machine/%(machine)s/command/update" />

@@ -138,7 +138,7 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, MachineTestMixin,
                          "filesystem utfs1n assigned to it.",
                          command)
 
-    def test_125_addvmfs(self):
+    def test_125_add_utfs1(self):
         command = ["add_filesystem", "--filesystem=utfs1", "--type=ext3",
                    "--mountpoint=/mnt", "--blockdevice=/dev/foo/bar",
                    "--bootmount",
@@ -152,6 +152,23 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, MachineTestMixin,
                    "--hostname=%s" % self.vmhost[0]]
         out = self.commandtest(command)
         self.matchoutput(out, '"name" = "utfs1";', command)
+
+    def test_126_add_utrg2(self):
+        self.noouttest(["add_resourcegroup", "--resourcegroup", "utrg2",
+                        "--hostname", self.vmhost[1]])
+
+    def test_127_add_utfs2(self):
+        self.noouttest(["add_filesystem", "--filesystem", "utfs2",
+                        "--type", "ext3", "--mountpoint", "/mnt",
+                        "--blockdevice", "/dev/foo/bar",
+                        "--bootmount",
+                        "--hostname", self.vmhost[1],
+                        "--resourcegroup", "utrg2"])
+
+    def test_128_add_utshare2(self):
+        self.noouttest(["add_share", "--share", "test_v2_share",
+                        "--hostname", self.vmhost[1],
+                        "--resourcegroup", "utrg2"])
 
     def test_130_addutpgm0disk(self):
         for i in range(0, 3):
@@ -292,11 +309,52 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, MachineTestMixin,
         command = ["update_machine", "--machine", "utpgm0",
                    "--cluster", "utlccl1"]
         out = self.badrequesttest(command)
-    # TODO to be replaced with some other error message.
         self.matchoutput(out,
                          "ESX Cluster utlccl1 does not have filesystem utfs1 "
                          "assigned to it.",
                          command)
+
+    def test_241_remap_disk(self):
+        command = ["update_machine", "--machine", "utpgm0",
+                   "--vmhost", self.vmhost[1],
+                   "--remap_disk", "filesystem/utfs1:filesystem/utrg2/utfs2"]
+        self.noouttest(command)
+
+        command = ["show_machine", "--machine", "utpgm0"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Hosted by: Host %s" % self.vmhost[1], command)
+        self.matchoutput(out, "stored on filesystem utfs2", command)
+
+    def test_242_move_back(self):
+        command = ["update_machine", "--machine", "utpgm0",
+                   "--vmhost", self.vmhost[0],
+                   "--remap_disk", "filesystem/utrg2/utfs2:filesystem/utfs1"]
+        self.noouttest(command)
+
+        command = ["show_machine", "--machine", "utpgm0"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Hosted by: Host %s" % self.vmhost[0], command)
+
+    def test_243_convert_to_share(self):
+        command = ["update_machine", "--machine", "utpgm0",
+                   "--vmhost", self.vmhost[1],
+                   "--remap_disk", "filesystem/utfs1:share/utrg2/test_v2_share"]
+        self.noouttest(command)
+
+        command = ["show_machine", "--machine", "utpgm0"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Hosted by: Host %s" % self.vmhost[1], command)
+        self.matchoutput(out, "stored on share test_v2_share", command)
+
+    def test_244_move_back(self):
+        command = ["update_machine", "--machine", "utpgm0",
+                   "--vmhost", self.vmhost[0],
+                   "--remap_disk", "share/utrg2/test_v2_share:filesystem/utfs1"]
+        self.noouttest(command)
+
+        command = ["show_machine", "--machine", "utpgm0"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Hosted by: Host %s" % self.vmhost[0], command)
 
     # deletes
 

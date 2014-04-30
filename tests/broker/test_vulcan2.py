@@ -73,7 +73,7 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
     def test_010_addutmc8(self):
         command = ["add_metacluster", "--metacluster=utmc8",
                    "--personality=vulcan2", "--archetype=metacluster",
-                   "--domain=unittest", "--building=ut", "--domain=unittest",
+                   "--domain=unittest", "--building=ut",
                    "--comments=autopg_v2_tests"]
         self.noouttest(command)
 
@@ -88,7 +88,6 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
 
     # see testaddutmc4
     def test_020_addutpgcl(self):
-        # Allocate utecl5 - utecl10 for utmc4 (autopg testing)
         for i in range(0, 2):
             self.add_utcluster("utpgcl%d" % i, "utmc8")
 
@@ -328,7 +327,7 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
         command = ["add_share", "--resourcegroup=utmc8as2",
                    "--share=test_v2_share"]
         err = self.badrequesttest(command)
-        self.matchoutput(err, "Bad Request: Share test_v2_share, "
+        self.matchoutput(err, "Share test_v2_share, "
                          "bundleresource instance already exists.", command)
 
     def test_220_cat_resourcegroup(self):
@@ -448,7 +447,7 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
                    "--comments=testing",
                    "--resourcegroup=utmc8as1"]
         err = self.badrequesttest(command)
-        self.matchoutput(err, "Bad Request: Resource's filesystem type "
+        self.matchoutput(err, "Resource's filesystem type "
                          "differs from the requested share",
                          command)
 
