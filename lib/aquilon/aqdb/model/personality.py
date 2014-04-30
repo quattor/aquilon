@@ -152,9 +152,6 @@ class __PersonalityRootUser(Base):
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
 
-    personality = relation(Personality)
-    user = relation(User)
-
 pru = __PersonalityRootUser.__table__  # pylint: disable=C0103
 pru.primary_key.name = '%s_pk' % _PRU
 
@@ -177,10 +174,8 @@ class __PersonalityRootNetGroup(Base):
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
 
-    personality = relation(Personality)
-    netgroup = relation(NetGroupWhiteList)
-
 prng = __PersonalityRootNetGroup.__table__  # pylint: disable=C0103
 prng.primary_key.name = '%s_pk' % _PRNG
 
-Personality.root_netgroups = relation(NetGroupWhiteList, secondary=__PersonalityRootNetGroup.__table__)
+Personality.root_netgroups = relation(NetGroupWhiteList,
+                                      secondary=__PersonalityRootNetGroup.__table__)

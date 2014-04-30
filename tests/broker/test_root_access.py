@@ -95,11 +95,11 @@ class TestRootAccess(TestBrokerCommand):
         out = self.commandtest(command)
         self.searchoutput(out, r'"/system/root_users" = list\(\s*'
                                r'"testuser1",\s*'
-                               r'"testuser2"',
+                               r'"testuser2"\s*\);',
                           command)
         self.searchoutput(out, r'"/system/root_netgroups" = list\(\s*'
                                r'"netgroup1",\s*'
-                               r'"netgroup2"',
+                               r'"netgroup2"\s*\);',
                           command)
 
     def test_310_unmap_personality_user(self):
@@ -139,10 +139,10 @@ class TestRootAccess(TestBrokerCommand):
         command =["cat", "--archetype=aquilon", "--personality=compileserver"]
         out = self.commandtest(command)
         self.searchoutput(out, r'"/system/root_users" = list\(\s*'
-                               r'"testuser2"',
+                               r'"testuser2"\s*\);',
                           command)
         self.searchoutput(out, r'"/system/root_netgroups" = list\(\s*'
-                               r'"netgroup2"',
+                               r'"netgroup2"\s*\);',
                           command)
 
     def test_370_unmap_personality_user(self):
