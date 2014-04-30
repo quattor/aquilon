@@ -21,8 +21,10 @@ import os.path
 from sqlalchemy.orm import contains_eager, subqueryload
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import FeatureLink, Personality, PersonalityStage
-from aquilon.worker.templates import Plenary, PlenaryPersonality
+from aquilon.aqdb.model import (FeatureLink, Personality, PersonalityStage,
+                                HardwareFeature, HostFeature, HardwareEntity,
+                                Interface, Host)
+from aquilon.worker.templates import Plenary, PlenaryHost, PlenaryPersonality
 from aquilon.worker.templates.domain import template_branch_basedir
 
 
@@ -76,16 +78,50 @@ def check_feature_template(config, dbarchetype, dbfeature, dbdomain):
                         "for {2:l}.".format(dbfeature, dbdomain, dbarchetype))
 
 
-def get_affected_plenaries(session, plenaries, personality_stage=None,
-                           archetype=None, model=None, interface_name=None):
-    if personality_stage:
-        plenaries.append(Plenary.get_plenary(personality_stage))
+def get_affected_plenaries(session, dbfeature, plenaries,
+                           personality_stage=None, archetype=None, model=None,
+                           interface_name=None):
+    if isinstance(dbfeature, HostFeature):
+        if personality_stage:
+            plenaries.append(Plenary.get_plenary(personality_stage))
+        else:
+            q = session.query(PersonalityStage)
+            q = q.join(Personality)
+            q = q.filter_by(archetype=archetype)
+            q = q.options(contains_eager('personality'),
+                          subqueryload('personality.root_users'),
+                          subqueryload('personality.root_netgroups'))
+            q = q.options(PlenaryPersonality.query_options(load_personality=False))
+            plenaries.extend(Plenary.get_plenary(dbobj) for dbobj in q)
     else:
-        q = session.query(PersonalityStage)
-        q = q.join(Personality)
-        q = q.filter_by(archetype=archetype)
-        q = q.options(contains_eager('personality'),
-                      subqueryload('personality.root_users'),
-                      subqueryload('personality.root_netgroups'))
-        q = q.options(PlenaryPersonality.query_options(load_personality=False))
+        q = session.query(Host)
+        if personality_stage:
+            q = q.filter_by(personality_stage=personality_stage)
+        else:
+            q = q.join(PersonalityStage, Personality)
+            q = q.options(contains_eager('personality_stage'),
+                          contains_eager('personality_stage.personality'))
+            q = q.filter_by(archetype=archetype)
+
+        q = q.reset_joinpoint()
+        q = q.join(HardwareEntity)
+        q = q.options(contains_eager('hardware_entity'))
+
+        if isinstance(dbfeature, HardwareFeature):
+            q = q.filter_by(model=model)
+        else:
+            q = q.join(Interface)
+            # No contains_eager() due to the filtering
+            if model:
+                q = q.filter(Interface.model == model)
+            if interface_name:
+                q = q.filter(Interface.name == interface_name)
+
+        q = q.reset_joinpoint()
+
+        # Do an explicit inner join - using joinedload() would result in an
+        # outer join
+        q = q.join(HardwareEntity.primary_name)
+        q = q.options(contains_eager('hardware_entity.primary_name'))
+        q = q.options(PlenaryHost.query_options())
         plenaries.extend(Plenary.get_plenary(dbobj) for dbobj in q)

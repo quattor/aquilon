@@ -24,9 +24,10 @@ from sqlalchemy.inspection import inspect
 from sqlalchemy.orm import joinedload, subqueryload
 
 from aquilon.aqdb.model import PersonalityStage, PersonalityParameter
+from aquilon.aqdb.model.feature import host_features
 from aquilon.worker.locks import NoLockKey, PlenaryKey
 from aquilon.worker.templates.base import (Plenary, StructurePlenary,
-                                           TemplateFormatter, PlenaryCollection)
+                                           PlenaryCollection)
 from aquilon.worker.templates.panutils import (pan_include, pan_variable,
                                                pan_assign, pan_append,
                                                pan_include_if_exists)
@@ -56,18 +57,23 @@ def get_parameters_by_feature(dbstage, dbfeature):
     return ret
 
 
-def helper_feature_template(dbstage, featuretemplate, dbfeaturelink, lines):
-    dbfeature = dbfeaturelink.feature
-    param_def_holder = dbfeature.param_def_holder
+def helper_feature_template(dbstage, dbfeature, lines):
+    # Only features which are
+    # - bound to the personality directly rather than to the archetype,
+    # - and have parameter definitions
+    # are interesting when generating parameters
+    param_features = set(link.feature for link in dbstage.features
+                         if link.feature.param_def_holder)
 
-    if param_def_holder:
+    if dbfeature in param_features:
         base_path = "/system/" + dbfeature.cfg_path
         params = get_parameters_by_feature(dbstage, dbfeature)
 
         for key in sorted(params.keys()):
             pan_assign(lines, base_path + "/" + key, params[key])
 
-    lines.append(featuretemplate.format_raw(dbfeaturelink))
+    pan_include(lines, dbfeature.cfg_path + "/config")
+    pan_append(lines, "/metadata/features", dbfeature.cfg_path + "/config")
 
 
 def staged_path(prefix, dbstage, suffix):
@@ -124,10 +130,6 @@ class PlenaryPersonality(PlenaryCollection):
                           joinedload(prefix + 'features.model')]
 
 Plenary.handlers[PersonalityStage] = PlenaryPersonality
-
-
-class FeatureTemplate(TemplateFormatter):
-    template_raw = "feature.mako"
 
 
 class PlenaryPersonalityBase(Plenary):
@@ -205,24 +207,9 @@ class PlenaryPersonalityPreFeature(Plenary):
         return dbstage.personality.archetype.name
 
     def body(self, lines):
-        feat_tmpl = FeatureTemplate()
-        model_feat = []
-        interface_feat = []
-        pre_feat = []
-        for link in self.dbobj.archetype.features + self.dbobj.features:
-            if link.model:
-                model_feat.append(link)
-                continue
-            if link.interface_name:
-                interface_feat.append(link)
-                continue
-            if not link.feature.post_personality:
-                pre_feat.append(link)
-
-        # hardware features should precede host features
-        for link in sorted(model_feat + interface_feat + pre_feat,
-                           key=attrgetter("feature.name")):
-            helper_feature_template(self.dbobj, feat_tmpl, link, lines)
+        pre, _ = host_features(self.dbobj)
+        for dbfeature in sorted(pre, key=attrgetter("name")):
+            helper_feature_template(self.dbobj, dbfeature, lines)
 
     def get_key(self, exclusive=True):
         if self.is_deleted():
@@ -244,11 +231,9 @@ class PlenaryPersonalityPostFeature(Plenary):
         return dbstage.personality.archetype.name
 
     def body(self, lines):
-        feat_tmpl = FeatureTemplate()
-        for link in sorted(self.dbobj.archetype.features + self.dbobj.features,
-                           key=attrgetter("feature.name")):
-            if link.feature.post_personality:
-                helper_feature_template(self.dbobj, feat_tmpl, link, lines)
+        _, post = host_features(self.dbobj)
+        for dbfeature in sorted(post, key=attrgetter("name")):
+            helper_feature_template(self.dbobj, dbfeature, lines)
 
     def get_key(self, exclusive=True):
         if self.is_deleted():

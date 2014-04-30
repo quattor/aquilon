@@ -19,9 +19,10 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import (Personality, PersonalityParameter,
                                 ParamDefinition, Feature)
 from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.dbwrappers.change_management import validate_prod_personality
+from aquilon.worker.dbwrappers.feature import get_affected_plenaries
 from aquilon.worker.dbwrappers.parameter import (set_parameter,
                                                  lookup_paramdef)
-from aquilon.worker.dbwrappers.change_management import validate_prod_personality
 from aquilon.worker.templates import Plenary, PlenaryCollection
 
 
@@ -55,6 +56,8 @@ class CommandAddParameter(BrokerCommand):
 
         path = ParamDefinition.normalize_path(path, strict=self.strict_path)
 
+        plenaries = PlenaryCollection(logger=logger)
+
         if feature:
             dbfeature = Feature.get_unique(session, name=feature, feature_type=type,
                                            compel=True)
@@ -62,8 +65,17 @@ class CommandAddParameter(BrokerCommand):
                 raise ArgumentError("{0} is not bound to {1:l}."
                                     .format(dbfeature, dbstage))
             holder_object = dbfeature
+
+            for link in dbstage.archetype.features + dbstage.features:
+                if link.feature != dbfeature:
+                    continue
+
+                get_affected_plenaries(session, dbfeature, plenaries,
+                                       link.personality_stage, link.archetype,
+                                       link.model, link.interface_name)
         else:
             holder_object = dbpersonality.archetype
+            plenaries.append(Plenary.get_plenary(dbstage))
 
         db_paramdef, rel_path = lookup_paramdef(holder_object, path, False)
 
@@ -71,8 +83,6 @@ class CommandAddParameter(BrokerCommand):
 
         session.flush()
 
-        plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(Plenary.get_plenary(dbstage))
         plenaries.write()
 
         return

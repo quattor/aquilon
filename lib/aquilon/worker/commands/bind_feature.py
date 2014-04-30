@@ -111,8 +111,9 @@ class CommandBindFeature(BrokerCommand):
             validate_prod_archetype(dbarchetype, user, justification, reason)
 
         # Step 4: do it
-        get_affected_plenaries(session, plenaries, **params)
+        get_affected_plenaries(session, dbfeature, plenaries, **params)
         self.do_link(session, logger, dbfeature, params)
+
         session.flush()
 
         plenaries.write(verbose=True)

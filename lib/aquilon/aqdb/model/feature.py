@@ -16,7 +16,10 @@
 # limitations under the License.
 """ Control of features """
 
+from collections import defaultdict
 from datetime import datetime
+
+from six import iteritems
 
 from sqlalchemy import (Column, Integer, DateTime, Sequence, String, Boolean,
                         ForeignKey, UniqueConstraint)
@@ -308,3 +311,30 @@ def interface_features(dbstage, dbinterface):
         features.add(link.feature)
 
     return frozenset(features)
+
+
+def nonhost_features(dbstage, dbhw_ent):
+    # A slightly optimized version to collect all hardware and interface
+    # features while enumerating the links just once
+    hw_features = set()
+    iface_features = defaultdict(set)
+
+    for link in dbstage.features + dbstage.archetype.features:
+        if isinstance(link.feature, HardwareFeature):
+            if link.model == dbhw_ent.model:
+                hw_features.add(link.feature)
+        elif isinstance(link.feature, InterfaceFeature):
+            for dbinterface in dbhw_ent.interfaces:
+                if link.model and link.model != dbinterface.model:
+                    continue
+                if link.interface_name and link.interface_name != dbinterface.name:
+                    continue
+                iface_features[dbinterface].add(link.feature)
+
+        else:
+            pass
+
+    for key, value in iteritems(iface_features):
+        iface_features[key] = frozenset(value)
+
+    return frozenset(hw_features), iface_features

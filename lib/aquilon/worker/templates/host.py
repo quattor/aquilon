@@ -17,8 +17,9 @@
 """Any work by the broker to write out (or read in?) templates lives here."""
 
 import logging
+from itertools import chain
 from operator import attrgetter
-from six import iteritems
+from six import iteritems, itervalues
 
 from sqlalchemy.inspection import inspect
 from sqlalchemy.orm import joinedload, lazyload, subqueryload
@@ -26,15 +27,19 @@ from sqlalchemy.orm import joinedload, lazyload, subqueryload
 from aquilon.exceptions_ import InternalError, IncompleteError
 from aquilon.aqdb.model import (Host, VlanInterface, BondingInterface,
                                 BridgeInterface)
+from aquilon.aqdb.model.feature import nonhost_features
 from aquilon.worker.locks import CompileKey, PlenaryKey
 from aquilon.worker.templates import (Plenary, ObjectPlenary, StructurePlenary,
                                       PlenaryCollection, PlenaryClusterClient,
                                       PlenaryResource, PlenaryPersonalityBase,
                                       PlenaryServiceInstanceClientDefault,
                                       PlenaryServiceInstanceServerDefault)
+from aquilon.worker.templates.personality import get_parameters_by_feature
 from aquilon.worker.templates.panutils import (StructureTemplate, PanValue,
                                                pan_assign, pan_append,
-                                               pan_include)
+                                               pan_include,
+                                               pan_include_if_exists,
+                                               pan_variable)
 from aquilon.utils import nlist_key_re
 
 LOGGER = logging.getLogger(__name__)
@@ -122,6 +127,7 @@ class PlenaryHostData(StructurePlenary):
         return cls.prefix + "/" + str(dbhost.fqdn)
 
     def body(self, lines):
+        dbstage = self.dbobj.personality_stage
         dbhw_ent = self.dbobj.hardware_entity
         interfaces = dict()
         routers = {}
@@ -280,6 +286,26 @@ class PlenaryHostData(StructurePlenary):
                 pan_append(lines, "system/resources/" + resource.resource_type,
                            StructureTemplate(res_path))
 
+        # Process feature parameters
+        hw_features, iface_features = nonhost_features(dbstage, dbhw_ent)
+
+        # Only features which are
+        # - bound to the personality directly rather than to the archetype,
+        # - and have parameter definitions
+        # are interesting when generating parameters
+        param_features = set(link.feature for link in dbstage.features
+                             if link.feature.param_def_holder)
+
+        for dbfeature in sorted(frozenset()
+                                .union(hw_features)
+                                .union(chain.from_iterable(itervalues(iface_features)))
+                                .intersection(param_features),
+                                key=attrgetter('feature_type', 'name')):
+            base_path = "system/" + dbfeature.cfg_path
+            params = get_parameters_by_feature(dbstage, dbfeature)
+            for path in sorted(params):
+                pan_assign(lines, base_path + "/" + path, params[path])
+
 
 class PlenaryHostObject(ObjectPlenary):
     """
@@ -317,6 +343,7 @@ class PlenaryHostObject(ObjectPlenary):
 
     def body(self, lines):
         dbstage = self.dbobj.personality_stage
+        dbhw_ent = self.dbobj.hardware_entity
 
         # FIXME: Enforce that one of the interfaces is marked boot?
         for dbinterface in self.dbobj.hardware_entity.interfaces:
@@ -357,6 +384,27 @@ class PlenaryHostObject(ObjectPlenary):
 
         opsys = self.dbobj.operating_system
         pan_include(lines, "os/%s/%s/config" % (opsys.name, opsys.version))
+
+        hw_features, iface_features = nonhost_features(dbstage, dbhw_ent)
+
+        for dbfeature in sorted(hw_features, key=attrgetter('name')):
+            path = "%s/config" % dbfeature.cfg_path
+            pan_include_if_exists(lines, path)
+            # FIXME: Hardware features use a legacy naming convention
+            # without the final "/config"
+            pan_include_if_exists(lines, dbfeature.cfg_path)
+            pan_append(lines, "/metadata/features", path)
+            lines.append("")
+
+        for dbinterface in sorted(iface_features.keys(),
+                                  key=attrgetter('name')):
+            pan_variable(lines, "CURRENT_INTERFACE", dbinterface)
+            for dbfeature in sorted(iface_features[dbinterface],
+                                    key=attrgetter('name')):
+                path = "%s/config" % dbfeature.cfg_path
+                pan_include(lines, path)
+                pan_append(lines, "/metadata/features", path)
+            lines.append("")
 
         pan_include(lines, services)
         pan_include(lines, provides)

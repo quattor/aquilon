@@ -28,9 +28,9 @@ from broker.brokertest import TestBrokerCommand
 class TestDelParameterFeature(TestBrokerCommand):
 
     def test_100_del_hw_params(self):
-        self.noouttest(["del_parameter", "--personality", "compileserver",
-                        "--archetype", "aquilon", "--feature", "bios_setup",
-                        "--path", "testdefault"])
+        self.statustest(["del_parameter", "--personality", "compileserver",
+                         "--archetype", "aquilon", "--feature", "bios_setup",
+                         "--path", "testdefault"])
 
     def test_105_show_hw_param_gone(self):
         command = ["show_parameter", "--personality", "compileserver",
@@ -42,8 +42,7 @@ class TestDelParameterFeature(TestBrokerCommand):
                           command)
 
     def test_105_cat_hw_param_gone(self):
-        command = ["cat", "--personality", "compileserver", "--archetype", "aquilon",
-                   "--pre_feature"]
+        command = ["cat", "--hostname", "unittest02.one-nyp.ms.com", "--data"]
         out = self.commandtest(command)
         self.matchclean(out, "bios_setup/testdefault", command)
 
@@ -53,12 +52,11 @@ class TestDelParameterFeature(TestBrokerCommand):
                         "--path", "testlist"])
 
     def test_115_cat_iface_param_gone(self):
-        command = ["cat", "--personality", "compileserver", "--archetype", "aquilon",
-                   "--pre_feature"]
+        command = ["cat", "--hostname", "unittest21.aqd-unittest.ms.com", "--data"]
         out = self.commandtest(command)
         # The default value should be there
         self.searchoutput(out,
-                          r'"/system/features/interface/src_route/testlist" = list\(\s*"val1",\s*"val2"\s*\);\s*',
+                          r'"system/features/interface/src_route/testlist" = list\(\s*"val1",\s*"val2"\s*\);\s*',
                           command)
 
     def test_120_del_host_params(self):
