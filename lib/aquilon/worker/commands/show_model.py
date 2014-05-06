@@ -16,34 +16,11 @@
 # limitations under the License.
 """Contains the logic for `aq show model`."""
 
-
-from sqlalchemy.orm import joinedload, contains_eager
-
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.aqdb.model import Model, Vendor
 
 
 class CommandShowModel(BrokerCommand):
-    """ This is more like a 'search' command than a 'show' command, and
-        will probably be converted at some time in the future."""
-
     def render(self, session, model, vendor, type, **arguments):
-        q = session.query(Model)
-        q = q.join(Vendor)
-        q = q.options(contains_eager('vendor'))
-        q = q.options(joinedload('machine_specs'))
-        q = q.options(joinedload('machine_specs.cpu'))
-        if model is not None:
-            q = q.filter(Model.name.like(model + '%'))
-        if vendor is not None:
-            if not model:
-                self.deprecated_option("vendor alone", "Please use the "
-                                       "search_model command instead.",
-                                       **arguments)
-            q = q.filter(Vendor.name.like(vendor + '%'))
-        if type is not None:
-            self.deprecated_option("type", "Please use the search_model "
-                                   "command instead.", **arguments)
-            q = q.filter(Model.model_type == type)
-        q = q.order_by(Vendor.name, Model.name)
-        return q.all()
+        return Model.get_unique(session, name=model, vendor=vendor,
+                                model_type=type, compel=True)

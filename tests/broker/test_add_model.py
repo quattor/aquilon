@@ -119,25 +119,25 @@ class TestAddModel(TestBrokerCommand):
                    "--diskcontroller=sata", "--disksize=0", "--nics=0"]
         self.noouttest(command)
 
-    def test_200_show_type_switch(self):
-        command = "show model --type switch"
+    def test_200_search_type_switch(self):
+        command = "search model --machine_type switch"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Vendor: hp Model: uttorswitch", command)
+        self.matchoutput(out, "hp/uttorswitch", command)
 
-    def test_200_show_type_blade(self):
-        command = "show model --type blade"
+    def test_200_search_type_blade(self):
+        command = "search model --machine_type blade"
         out = self.commandtest(command.split(" "))
-        self.matchclean(out, "Vendor: hp Model: uttorswitch", command)
+        self.matchclean(out, "uttorswitch", command)
 
-    def test_200_show_vendor_hp(self):
-        command = "show model --vendor hp"
+    def test_200_search_vendor_hp(self):
+        command = "search model --vendor hp"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Vendor: hp Model: uttorswitch", command)
+        self.matchoutput(out, "hp/uttorswitch", command)
 
-    def test_200_show_vendor_ibm(self):
-        command = "show model --vendor ibm"
+    def test_200_search_vendor_ibm(self):
+        command = "search model --vendor ibm"
         out = self.commandtest(command.split(" "))
-        self.matchclean(out, "Vendor: hp Model: uttorswitch", command)
+        self.matchclean(out, "uttorswitch", command)
 
     def test_200_show_all(self):
         command = "show model --all"
@@ -166,24 +166,6 @@ class TestAddModel(TestBrokerCommand):
                    "--diskcontroller=sata", "--disksize=15", "--nics=1"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Invalid disk type 'bad-disk-type'.", command)
-
-
-    VENDOR_DEPR_STR = "User anonymous used deprecated option vendor alone of command CommandShowModel"
-    TYPE_DEPR_STR = "User anonymous used deprecated option type of command CommandShowModel"
-
-    def test_400_show_model_noauth_type(self):
-        def testfunc():
-            command = "show model --type blade"
-            out = self.commandtest(command.split(" "), auth=False)
-
-        self.assert_deprecation(TestAddModel.TYPE_DEPR_STR, testfunc)
-
-    def test_400_show_model_noauth_vendor(self):
-        def testfunc():
-            command = "show model --vendor hp"
-            out = self.commandtest(command.split(" "), auth=False)
-
-        self.assert_deprecation(TestAddModel.VENDOR_DEPR_STR, testfunc)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddModel)
