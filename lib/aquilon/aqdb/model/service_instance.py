@@ -88,7 +88,7 @@ class ServiceInstance(Base):
         q = session.query(Cluster.name, Cluster.max_hosts)
         # Force orm to look for mc - service relation
         q = q.join(McAlias, Cluster.metacluster)
-        q = q.filter(McAlias.service_bindings.contains(self))
+        q = q.filter(McAlias.services_used.contains(self))
         q = q.filter(McAlias.personality_id.in_(personality_ids))
 
         for name, max_host in q.all():
@@ -97,7 +97,7 @@ class ServiceInstance(Base):
         # Esx et al.
         q = session.query(Cluster.name, Cluster.max_hosts)
         q = q.filter(Cluster.cluster_type != 'meta')
-        q = q.filter(Cluster.service_bindings.contains(self))
+        q = q.filter(Cluster.services_used.contains(self))
         q = q.filter(Cluster.personality_id.in_(personality_ids))
 
         for name, max_host in q.all():
@@ -133,7 +133,7 @@ class ServiceInstance(Base):
         from aquilon.aqdb.model import Cluster
         session = object_session(self)
         q = session.query(Cluster.name)
-        q = q.filter(Cluster.service_bindings.contains(self))
+        q = q.filter(Cluster.services_used.contains(self))
         return [name for record in q.all() for name in record]
 
     @property

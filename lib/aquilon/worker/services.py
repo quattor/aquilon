@@ -508,7 +508,7 @@ class HostChooser(Chooser):
         if dbhost.cluster:
             # Note that cluster services are currently ignored unless
             # they are otherwise required by the archetype/personality.
-            for si in dbhost.cluster.service_bindings:
+            for si in dbhost.cluster.services_used:
                 self.cluster_aligned_services[si.service] = si
             for service in dbhost.cluster.required_services:
                 if service not in self.cluster_aligned_services:
@@ -524,7 +524,7 @@ class HostChooser(Chooser):
 
             if dbhost.cluster.metacluster:
                 mc = dbhost.cluster.metacluster
-                for si in mc.service_bindings:
+                for si in mc.services_used:
                     if si.service in self.cluster_aligned_services:
                         cas = self.cluster_aligned_services[si.service]
                         if not cas:
@@ -611,7 +611,7 @@ class ClusterChooser(Chooser):
         self.original_service_instances = {}
         # Cache of any already bound services (keys) and the instance
         # that was bound (values).
-        for si in dbcluster.service_bindings:
+        for si in dbcluster.services_used:
             self.original_service_instances[si.service] = si
             self.logger.debug("{0} original binding: {1:l}"
                               .format(dbcluster, si))
@@ -631,15 +631,15 @@ class ClusterChooser(Chooser):
         for instance in self.instances_unbound:
             self.logger.client_info("{0} removing binding for {1:l}"
                                     .format(self.dbobj, instance))
-            if instance in self.dbobj.service_bindings:
-                self.dbobj.service_bindings.remove(instance)
+            if instance in self.dbobj.services_used:
+                self.dbobj.services_used.remove(instance)
             else:
                 self.error("Internal Error: Could not unbind {0:l}"
                            .format(instance))
         for instance in self.instances_bound:
             self.logger.client_info("{0} adding binding for {1:l}"
                                     .format(self.dbobj, instance))
-            self.dbobj.service_bindings.append(instance)
+            self.dbobj.services_used.append(instance)
             self.flush_changes()
             for h in self.dbobj.hosts:
                 host_chooser = Chooser(h, logger=self.logger,

@@ -102,7 +102,7 @@ class PlenaryMetaClusterObject(ObjectPlenary):
             keylist.append(PlenaryKey(exclusive=False,
                                       personality=self.dbobj.personality,
                                       logger=self.logger))
-            for si in self.dbobj.service_bindings:
+            for si in self.dbobj.services_used:
                 keylist.append(PlenaryKey(exclusive=False, service_instance=si,
                                           logger=self.logger))
             if self.dbobj.virtual_switch:
@@ -118,7 +118,7 @@ class PlenaryMetaClusterObject(ObjectPlenary):
                                      {"metadata": PanValue("/metadata")}))
         pan_include(lines, "archetype/base")
 
-        for servinst in sorted(self.dbobj.service_bindings):
+        for servinst in sorted(self.dbobj.services_used):
             path = PlenaryServiceInstanceClientDefault.template_name(servinst)
             pan_include(lines, path)
 

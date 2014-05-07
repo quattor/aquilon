@@ -168,13 +168,13 @@ class CommandSearchCluster(BrokerCommand):
                 dbsi = ServiceInstance.get_unique(session, name=instance,
                                                   service=dbservice,
                                                   compel=True)
-                q = q.filter(Cluster.service_bindings.contains(dbsi))
+                q = q.filter(Cluster.services_used.contains(dbsi))
             else:
-                q = q.join('service_bindings')
+                q = q.join('services_used')
                 q = q.filter_by(service=dbservice)
                 q = q.reset_joinpoint()
         elif instance:
-            q = q.join('service_bindings')
+            q = q.join('services_used')
             q = q.filter_by(name=instance)
             q = q.reset_joinpoint()
 

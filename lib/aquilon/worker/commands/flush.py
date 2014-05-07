@@ -361,7 +361,7 @@ class CommandFlush(BrokerCommand):
                               subqueryload('metacluster'),
                               joinedload('resholder'),
                               subqueryload('resholder.resources'),
-                              subqueryload('service_bindings'),
+                              subqueryload('services_used'),
                               subqueryload('allowed_personalities'))
                 cnt = q.count()
                 idx = 0

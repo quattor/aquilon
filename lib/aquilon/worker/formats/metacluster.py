@@ -54,7 +54,7 @@ class MetaClusterFormatter(ObjectFormatter):
             details.append(indent + "  {0:c}: {0!s}"
                            .format(metacluster.virtual_switch))
 
-        for dbsi in metacluster.service_bindings:
+        for dbsi in metacluster.services_used:
             details.append(indent +
                            "  Member Alignment: Service %s Instance %s" %
                            (dbsi.service.name, dbsi.name))

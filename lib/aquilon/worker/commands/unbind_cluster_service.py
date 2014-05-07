@@ -29,7 +29,7 @@ class CommandUnbindClusterService(BrokerCommand):
     def render(self, session, logger, cluster, service, **arguments):
         dbservice = Service.get_unique(session, service, compel=True)
         dbcluster = Cluster.get_unique(session, cluster, compel=True)
-        dbinstance = first_of(dbcluster.service_bindings,
+        dbinstance = first_of(dbcluster.services_used,
                               lambda x: x.service == dbservice)
         if not dbinstance:
             raise NotFoundException("{0} is not bound to {1:l}."
@@ -38,7 +38,7 @@ class CommandUnbindClusterService(BrokerCommand):
             raise ArgumentError("Cannot remove cluster service instance "
                                 "binding for %s cluster aligned service %s." %
                                 (dbcluster.cluster_type, dbservice.name))
-        dbcluster.service_bindings.remove(dbinstance)
+        dbcluster.services_used.remove(dbinstance)
 
         session.flush()
 

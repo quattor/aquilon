@@ -564,6 +564,6 @@ class __ClusterServiceBinding(Base):
     __table_args__ = (PrimaryKeyConstraint(cluster_id, service_instance_id),
                       Index('%s_si_idx' % _CSBABV, service_instance_id))
 
-Cluster.service_bindings = relation(ServiceInstance,
-                                    secondary=__ClusterServiceBinding.__table__,
-                                    backref=backref("cluster_clients"))
+Cluster.services_used = relation(ServiceInstance,
+                                 secondary=__ClusterServiceBinding.__table__,
+                                 backref=backref("cluster_clients"))
