@@ -546,7 +546,8 @@ class HostChooser(Chooser):
     def choose_cluster_aligned(self, dbservice):
         if dbservice not in self.cluster_aligned_services:
             return
-        if not self.cluster_aligned_services[dbservice]:
+        cas = self.cluster_aligned_services[dbservice]
+        if not cas:
             self.error("No instance set for %s aligned service %s."
                        "  Please run `make cluster --cluster %s` to resolve.",
                        format(self.dbobj.cluster),
@@ -555,19 +556,14 @@ class HostChooser(Chooser):
             return
         # This check is necessary to prevent bind_client from overriding
         # the cluster's binding.  The error message will be misleading...
-        if self.cluster_aligned_services[dbservice] not in \
-           self.staging_services[dbservice]:
+        if cas not in self.staging_services[dbservice]:
             self.error("{0} is set to use {1:l}, but that instance is not in a "
-                       "service map for {2}.".format(self.dbobj.cluster,
-                                                     self.cluster_aligned_services[dbservice],
+                       "service map for {2}.".format(self.dbobj.cluster, cas,
                                                      self.dbobj.fqdn))
             return
         self.logger.debug("Chose service %s instance %s because it is cluster "
-                          "aligned.",
-                          dbservice.name,
-                          self.cluster_aligned_services[dbservice].name)
-        self.staging_services[dbservice] = [
-            self.cluster_aligned_services[dbservice]]
+                          "aligned.", dbservice.name, cas.name)
+        self.staging_services[dbservice] = [cas]
         return
 
     def apply_changes(self):
