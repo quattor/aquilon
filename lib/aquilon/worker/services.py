@@ -46,8 +46,7 @@ class Chooser(object):
 
         return chooser
 
-    abstract_fields = ["location", "required_services", "network",
-                       "original_service_instances"]
+    abstract_fields = ["location", "required_services", "network"]
 
     def __init__(self, dbobj, logger, required_only=False):
         """Initialize the chooser.
@@ -105,6 +104,14 @@ class Chooser(object):
 
         # Keep stashed plenaries for rollback purposes
         self.plenaries = PlenaryCollection(logger=self.logger)
+
+        self.original_service_instances = {}
+
+        # Cache of any already bound services (keys) and the instance
+        # that was bound (values).
+        for si in dbobj.services_used:
+            self.original_service_instances[si.service] = si
+            self.logger.debug("{0} original binding: {1}".format(dbobj, si))
 
     def apply_changes(self):
         raise InternalError("This method must be overridden")
@@ -499,11 +506,6 @@ class HostChooser(Chooser):
                          Personality.id == self.personality.id))
         self.required_services = set(q.all())
 
-        self.original_service_instances = {}
-        for si in dbhost.services_used:
-            self.original_service_instances[si.service] = si
-            self.logger.debug("{0} original binding: {1}"
-                              .format(self.dbobj, si))
         self.cluster_aligned_services = {}
         if dbhost.cluster:
             # Note that cluster services are currently ignored unless
@@ -607,14 +609,6 @@ class ClusterChooser(Chooser):
             self.required_services.add(service)
         for service in self.personality.services:
             self.required_services.add(service)
-
-        self.original_service_instances = {}
-        # Cache of any already bound services (keys) and the instance
-        # that was bound (values).
-        for si in dbcluster.services_used:
-            self.original_service_instances[si.service] = si
-            self.logger.debug("{0} original binding: {1:l}"
-                              .format(dbcluster, si))
 
     def get_footprint(self, instance):
         """If this cluster is bound to a service, how many hosts bind?"""
