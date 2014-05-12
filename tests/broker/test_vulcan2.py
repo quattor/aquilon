@@ -187,14 +187,46 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
 
     # Autopg test
     def test_130_addinterfaces(self):
-        # These ones fit the 2 address net
-        for i in range(0, 2):
-            machine = "utpgm%d" % i
-            self.noouttest(["add", "interface", "--machine", machine,
-                            "--interface", "eth0", "--automac", "--autopg"])
+        self.noouttest(["add", "interface", "--machine", "utpgm0",
+                        "--interface", "eth0", "--automac", "--autopg"])
+
+        # Consume available IP addresses
+        self.dsdb_expect_add("utpgm0-ip1.aqd-unittest.ms.com",
+                             self.net["autopg1"].usable[0], "eth0_ip1")
+        self.dsdb_expect_add("utpgm0-ip2.aqd-unittest.ms.com",
+                             self.net["autopg1"].usable[1], "eth0_ip2")
+        self.noouttest(["add_interface_address", "--machine", "utpgm0",
+                        "--interface", "eth0", "--label", "ip1", "--autoip",
+                        "--fqdn", "utpgm0-ip1.aqd-unittest.ms.com"])
+        self.noouttest(["add_interface_address", "--machine", "utpgm0",
+                        "--interface", "eth0", "--label", "ip2", "--autoip",
+                        "--fqdn", "utpgm0-ip2.aqd-unittest.ms.com"])
+        self.dsdb_verify()
+
+        # All IPs gone, this should fail
+        command = ["add", "interface", "--machine", "utpgm1",
+                   "--interface", "eth0", "--automac", "--autopg"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "No available user port groups on switch "
+                         "utpgsw0.aqd-unittest.ms.com",
+                         command)
+
+        # Free up the IP addresses
+        self.dsdb_expect_delete(self.net["autopg1"].usable[0])
+        self.dsdb_expect_delete(self.net["autopg1"].usable[1])
+        self.noouttest(["del_interface_address", "--machine", "utpgm0",
+                        "--interface", "eth0", "--label", "ip1"])
+        self.noouttest(["del_interface_address", "--machine", "utpgm0",
+                        "--interface", "eth0", "--label", "ip2"])
+        self.dsdb_verify()
+
+        # Now it should succeed
+        self.noouttest(["add", "interface", "--machine", "utpgm1",
+                        "--interface", "eth0", "--automac", "--autopg"])
 
         # The third one shall fail
-        command = ["add", "interface", "--machine", "utpgm%d" % 2,
+        command = ["add", "interface", "--machine", "utpgm2",
                    "--interface", "eth0", "--automac", "--autopg"]
         out = self.badrequesttest(command)
         self.matchoutput(out,

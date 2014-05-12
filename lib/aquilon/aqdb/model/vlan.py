@@ -20,8 +20,8 @@ from datetime import datetime
 
 from sqlalchemy import (Column, Integer, DateTime, ForeignKey, CheckConstraint,
                         UniqueConstraint, PrimaryKeyConstraint, Index)
-from sqlalchemy.orm import relation, backref, deferred, object_session
-from sqlalchemy.sql import func, and_
+from sqlalchemy.orm import relation, backref, deferred
+from sqlalchemy.sql import and_
 
 from aquilon.exceptions_ import NotFoundException, InternalError
 from aquilon.aqdb.column_types import AqStr, Enum
@@ -130,28 +130,6 @@ class ObservedVlan(Base):
         if self.vlan:
             return self.vlan.vlan_type
         return None
-
-    @property
-    def guest_count(self):
-        from aquilon.aqdb.model import (EsxCluster, Cluster, ClusterResource,
-                                        Resource, VirtualMachine, Machine,
-                                        HardwareEntity, Interface)
-        session = object_session(self)
-        q = session.query(func.count())
-        q = q.filter(and_(
-            # Select VMs on clusters that belong to the given switch
-            EsxCluster.network_device_id == self.network_device_id,
-            Cluster.id == EsxCluster.esx_cluster_id,
-            ClusterResource.cluster_id == Cluster.id,
-            Resource.holder_id == ClusterResource.id,
-            VirtualMachine.resource_id == Resource.id,
-            Machine.machine_id == VirtualMachine.machine_id,
-            # Select interfaces with the right port group
-            HardwareEntity.id == Machine.machine_id,
-            Interface.hardware_entity_id == HardwareEntity.id,
-            Interface.port_group == VlanInfo.port_group,
-            VlanInfo.vlan_id == self.vlan_id))
-        return q.scalar()
 
     @classmethod
     def get_network(cls, session, network_device, vlan_id, compel=NotFoundException):

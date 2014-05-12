@@ -307,7 +307,7 @@ def choose_port_group(logger, dbmachine):
         if vlan.vlan_type != 'user':
             continue
         net = vlan.network
-        free_capacity = net.available_ip_count - net.vlans_guest_count
+        free_capacity = net.available_ip_count - net.guest_count
         if free_capacity > 0 and selected_capacity < free_capacity:
             selected_vlan = vlan
             selected_capacity = free_capacity

@@ -16,6 +16,7 @@
 # limitations under the License.
 """ The module governing tables and objects that represent IP networks in
     Aquilon. """
+
 from datetime import datetime
 from ipaddr import (IPv4Address, IPv4Network, AddressValueError,
                     NetmaskValueError)
@@ -24,9 +25,10 @@ import logging
 from sqlalchemy import (Column, Integer, Sequence, String, DateTime, ForeignKey,
                         UniqueConstraint, CheckConstraint, Index, desc, event)
 from sqlalchemy.ext.associationproxy import association_proxy
-from sqlalchemy.orm import relation, deferred, reconstructor, validates
+from sqlalchemy.orm import (relation, deferred, reconstructor, validates,
+                            object_session)
 from sqlalchemy.pool import Pool
-from sqlalchemy.sql import and_
+from sqlalchemy.sql import and_, not_, func, literal_column
 
 from aquilon.exceptions_ import NotFoundException, InternalError
 from aquilon.aqdb.model import Base, Location, NetworkEnvironment
@@ -326,12 +328,69 @@ class Network(Base):
         return msg
 
     @property
-    def vlans_guest_count(self):
-        return sum([vlan.guest_count for vlan in self.observed_vlans])
+    def is_at_guest_capacity(self):
+        return self.guest_count >= self.available_ip_count
 
     @property
-    def is_at_guest_capacity(self):
-        return self.vlans_guest_count >= self.available_ip_count
+    def guests(self):
+        from aquilon.aqdb.model import (Interface, VlanInfo, VirtualMachine,
+                                        Resource, ClusterResource, EsxCluster,
+                                        ObservedVlan)
+        session = object_session(self)
+        q = session.query(Interface)
+        q = q.filter(Interface.port_group == VlanInfo.port_group,
+                     Interface.hardware_entity_id == VirtualMachine.machine_id,
+                     VirtualMachine.resource_id == Resource.id,
+                     Resource.holder_id == ClusterResource.id,
+                     ClusterResource.cluster_id == EsxCluster.esx_cluster_id,
+                     EsxCluster.network_device_id == ObservedVlan.network_device_id,
+                     ObservedVlan.vlan_id == VlanInfo.vlan_id,
+                     ObservedVlan.network_id == self.id)
+        return q.all()
+
+    @property
+    def guest_count(self):
+        # Avoid circular deps by doing the imports here
+        from aquilon.aqdb.model import (Interface, AddressAssignment, VlanInfo,
+                                        VirtualMachine, Resource,
+                                        ClusterResource, EsxCluster)
+        session = object_session(self)
+
+        # First case: count all existing IP addresses allocated in the usable
+        # range, no matter what uses them
+        q = session.query(func.count(literal_column('*')).label("addr_count"))
+        q = q.select_from(Interface)
+        q = q.join(AddressAssignment)
+        q = q.filter(AddressAssignment.network_id == self.id,
+                     AddressAssignment.ip >= self.first_usable_host,
+                     AddressAssignment.ip < self.broadcast)
+        cnt = q.scalar()
+
+        # Second case: count all interfaces that
+        # - do not have an address assigned on this network (VIPs don't count)
+        # - belong to a cluster where this network is visible
+        # - have a matching portgroup
+        q1 = session.query(AddressAssignment)
+        q1 = q1.filter(AddressAssignment.network_id == self.id,
+                       AddressAssignment.interface_id == Interface.id)
+
+        q = session.query(func.count(Interface.id.distinct()).label("iface_count"))
+        q = q.select_from(Interface)
+        q = q.filter(not_(q1.exists()))
+
+        q = q.filter(Interface.port_group == VlanInfo.port_group,
+                     Interface.hardware_entity_id == VirtualMachine.machine_id,
+                     VirtualMachine.resource_id == Resource.id,
+                     Resource.holder_id == ClusterResource.id,
+                     ClusterResource.cluster_id == EsxCluster.esx_cluster_id)
+
+        # Doing this in Python appears faster than doing everyting in SQL
+        for ov in self.observed_vlans:
+            q2 = q.filter(VlanInfo.vlan_id == ov.vlan_id,
+                          EsxCluster.network_device_id == ov.network_device_id)
+            cnt = cnt + q2.scalar()
+
+        return cnt
 
 network = Network.__table__  # pylint: disable=C0103
 network.info['unique_fields'] = ['network_environment', 'ip']
