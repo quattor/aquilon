@@ -21,8 +21,8 @@ from sqlalchemy.orm.attributes import set_committed_value
 
 from aquilon.exceptions_ import NotFoundException, ArgumentError
 from aquilon.aqdb.model import (HardwareEntity, DnsEnvironment, DnsDomain,
-                                DnsRecord, Host, OperatingSystem, Archetype,
-                                HostLifecycle, Personality)
+                                DnsRecord, Host, OperatingSystem, HostLifecycle,
+                                Personality)
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
 from aquilon.worker.dbwrappers.grn import lookup_grn
@@ -32,13 +32,10 @@ from collections import defaultdict
 from types import ListType
 
 
-def create_host(session, logger, config, dbhw, archetype, domain=None,
+def create_host(session, logger, config, dbhw, dbarchetype, domain=None,
                 sandbox=None, buildstatus=None, personality=None,
                 osname=None, osversion=None, grn=None, eon_id=None,
                 comments=None, **kwargs):
-    ## Archetype
-    dbarchetype = Archetype.get_unique(session, archetype, compel=True)
-
     # Section in the config used to determin defaults for this archetype
     section = "archetype_" + dbarchetype.name
 
@@ -57,7 +54,6 @@ def create_host(session, logger, config, dbhw, archetype, domain=None,
         raise ArgumentError("Adding hosts to {0:l} is not allowed."
                             .format(dbbranch))
 
-    ## Lifecycle
     # Build Status: defaults to build.
     if not buildstatus:
         buildstatus = 'build'
@@ -108,46 +104,44 @@ def create_host(session, logger, config, dbhw, archetype, domain=None,
     session.add(dbhost)
 
     ## Append GRNs
-    if dbgrn and config.has_option("archetype_" + archetype, "default_grn_target"):
+    if dbgrn and config.has_option(section, "default_grn_target"):
         dbhost.grns.append((dbhost, dbgrn,
-                            config.get("archetype_" + archetype,
-                                            "default_grn_target")))
+                            config.get(section, "default_grn_target")))
 
-    ## Return created host
     return dbhost
 
 
 def remove_host(session, logger, dbhw, plenaries, remove_plenaries):
-        if not dbhw.host:
-            raise NotFoundException("Hardware entity %s has no host." % dbhw.label)
-        dbhost = dbhw.host
+    if not dbhw.host:
+        raise NotFoundException("Hardware entity %s has no host." % dbhw.label)
+    dbhost = dbhw.host
 
-        dbhost.lock_row()
+    dbhost.lock_row()
 
-        remove_plenaries.append(Plenary.get_plenary(dbhost))
+    remove_plenaries.append(Plenary.get_plenary(dbhost))
 
-        check_no_provided_service(dbhost)
+    check_no_provided_service(dbhost)
 
-        for si in dbhost.services_used:
-            plenaries.append(PlenaryServiceInstanceServer.get_plenary(si))
-            logger.info("Before deleting {0:l}, removing binding to {1:l}"
-                        .format(dbhost, si))
+    for si in dbhost.services_used:
+        plenaries.append(PlenaryServiceInstanceServer.get_plenary(si))
+        logger.info("Before deleting {0:l}, removing binding to {1:l}"
+                    .format(dbhost, si))
 
-        del dbhost.services_used[:]
+    del dbhost.services_used[:]
 
-        if dbhost.resholder:
-            for res in dbhost.resholder.resources:
-                remove_plenaries.append(Plenary.get_plenary(res))
+    if dbhost.resholder:
+        for res in dbhost.resholder.resources:
+            remove_plenaries.append(Plenary.get_plenary(res))
 
-        if dbhost.cluster:
-            dbcluster = dbhost.cluster
-            dbcluster.hosts.remove(dbhost)
-            set_committed_value(dbhost, '_cluster', None)
-            dbcluster.validate()
-            plenaries.append(Plenary.get_plenary(dbcluster))
+    if dbhost.cluster:
+        dbcluster = dbhost.cluster
+        dbcluster.hosts.remove(dbhost)
+        set_committed_value(dbhost, '_cluster', None)
+        dbcluster.validate()
+        plenaries.append(Plenary.get_plenary(dbcluster))
 
-        dbhw.host = None
-        session.delete(dbhost)
+    dbhw.host = None
+    session.delete(dbhost)
 
 
 def hostname_to_host(session, hostname):

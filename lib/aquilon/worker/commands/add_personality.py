@@ -48,10 +48,11 @@ class CommandAddPersonality(BrokerCommand):
                                 "personality.")
 
         dbarchetype = Archetype.get_unique(session, archetype, compel=True)
+        section = "archetype_" + dbarchetype.name
 
         if not host_environment:
             try:
-                host_environment = self.config.get("archetype_" + archetype,
+                host_environment = self.config.get(section,
                                                    "default_environment")
             except (NoSectionError, NoOptionError):
                 raise ArgumentError("Default environment is not configured "
@@ -77,9 +78,9 @@ class CommandAddPersonality(BrokerCommand):
                                 config_override=config_override)
         session.add(dbpersona)
 
-        if self.config.has_option("archetype_" + archetype, "default_grn_target"):
+        if self.config.has_option(section, "default_grn_target"):
             dbpersona.grns.append((dbpersona, dbgrn,
-                                   self.config.get("archetype_" + archetype,
+                                   self.config.get(section,
                                                    "default_grn_target")))
 
         if copy_from:

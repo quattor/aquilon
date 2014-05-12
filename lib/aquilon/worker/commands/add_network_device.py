@@ -18,7 +18,7 @@
 
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import NetworkDevice, Model
+from aquilon.aqdb.model import NetworkDevice, Model, Archetype
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.dns import grab_address
@@ -85,15 +85,17 @@ class CommandAddNetworkDevice(BrokerCommand):
                 raise ArgumentError("Cannot determin achetype for network devices")
             archetype = self.config.get(hw_section, 'default_archetype')
 
+        dbarchetype = Archetype.get_unique(session, archetype, compel=True)
+
         if not domain and not sandbox:
-            arch_section = 'archetype_' + archetype
+            arch_section = 'archetype_' + dbarchetype.name
             if self.config.has_option(arch_section, 'host_domain'):
                 domain = self.config.get(arch_section, 'host_domain')
             else:
                 ArgumentError("Cannot determin default domain for network devices")
 
         dbhost = create_host(session, logger, self.config, dbnetdev,
-                             archetype, domain=domain, sandbox=sandbox,
+                             dbarchetype, domain=domain, sandbox=sandbox,
                              **arguments)
 
         session.flush()
