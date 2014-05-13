@@ -48,6 +48,9 @@ class ListFormatter(ObjectFormatter):
         for item in result:
             self.redirect_proto(item, container)
 
+    def format_json(self, result):
+        return "[" + ", ".join(['"%s"' % item for item in result]) + "]"
+
 ObjectFormatter.handlers[list] = ListFormatter()
 ObjectFormatter.handlers[Query] = ListFormatter()
 ObjectFormatter.handlers[InstrumentedList] = ListFormatter()

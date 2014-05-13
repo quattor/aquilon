@@ -26,6 +26,8 @@ from aquilon.exceptions_ import ProtocolError, InternalError
 from aquilon.aqdb.model import Host, Machine, VirtualDisk, Domain, Sandbox
 from aquilon.worker.processes import build_mako_lookup
 
+import traceback
+
 # Note: the built-in "excel" dialect uses '\r\n' for line ending and that breaks
 # the tests.
 csv.register_dialect('aquilon', delimiter=',', quoting=csv.QUOTE_MINIMAL,
@@ -38,7 +40,7 @@ class ResponseFormatter(object):
         handlers and wrapped appropriately.
 
     """
-    formats = ["raw", "csv", "html", "proto", "djb"]
+    formats = ["raw", "csv", "html", "proto", "djb", "json"]
 
     loaded_protocols = {}
 
@@ -123,6 +125,9 @@ class ResponseFormatter(object):
         """ % (title, msg)
         return str(retval)
 
+    def format_json(self, result, request):
+        return ObjectFormatter.redirect_json(result)
+
 
 class ObjectFormatter(object):
     """This class and its subclasses are meant to do the real work of
@@ -188,6 +193,10 @@ class ObjectFormatter(object):
             return template.render(record=result, formatter=self)
         return "<pre>%s</pre>" % result
 
+    def format_json(self, result):
+        #return repr(traceback.extract_stack())
+        return '["%s"]' % result
+
     @staticmethod
     def redirect_raw(result, indent=""):
         handler = ObjectFormatter.handlers.get(result.__class__,
@@ -217,6 +226,12 @@ class ObjectFormatter(object):
         handler = ObjectFormatter.handlers.get(result.__class__,
                                                ObjectFormatter.default_handler)
         handler.format_proto(result, container)
+
+    @staticmethod
+    def redirect_json(result):
+        handler = ObjectFormatter.handlers.get(result.__class__,
+                                               ObjectFormatter.default_handler)
+        return handler.format_json(result)
 
     def add_model_data(self, model_msg, model):
         model_msg.name = str(model.name)
