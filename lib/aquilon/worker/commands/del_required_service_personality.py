@@ -19,22 +19,17 @@
 
 from aquilon.exceptions_ import NotFoundException
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.aqdb.model import Personality, Service
+from aquilon.worker.commands.add_required_service_personality import CommandAddRequiredServicePersonality
 
 
-class CommandDelRequiredServicePersonality(BrokerCommand):
+class CommandDelRequiredServicePersonality(CommandAddRequiredServicePersonality):
 
     required_parameters = ["service", "archetype", "personality"]
 
-    def render(self, session, service, archetype, personality, **arguments):
-        dbpersonality = Personality.get_unique(session, name=personality,
-                                               archetype=archetype, compel=True)
-        dbservice = Service.get_unique(session, service, compel=True)
+    def _update_dbobj(self, archetype, dbpersonality, dbservice):
         try:
             dbservice.personalities.remove(dbpersonality)
         except ValueError:
             raise NotFoundException("Service %s required for archetype "
                                     "%s, personality %s not found." %
-                                    (service, archetype, personality))
-        session.flush()
-        return
+                                    (dbservice.name, archetype, dbpersonality.name))
