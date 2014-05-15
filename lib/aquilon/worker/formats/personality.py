@@ -142,10 +142,9 @@ class PersonalityFormatter(ObjectFormatter):
         skeleton.config_override = personality.config_override
         skeleton.cluster_required = personality.cluster_required
 
-
     def format_json(self, personality):
         result = {
-            "name" : personality.name,
+            "Name" : personality.name,
             "Comments" : personality.comments
         }
 
@@ -159,7 +158,6 @@ class PersonalityFormatter(ObjectFormatter):
             result.update({"Features" : featurelist})
 
         return json.dumps(result)
-
 
 
 ObjectFormatter.handlers[Personality] = PersonalityFormatter()

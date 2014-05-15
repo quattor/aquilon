@@ -20,6 +20,7 @@ from aquilon.worker.formats.formatters import ObjectFormatter
 from aquilon.aqdb.model import (Feature, HostFeature, HardwareFeature,
                                 InterfaceFeature)
 
+import json
 
 class FeatureFormatter(ObjectFormatter):
 
@@ -48,6 +49,15 @@ class FeatureFormatter(ObjectFormatter):
             details.append(indent + "  Comments: %s" % feature.comments)
 
         return "\n".join(details)
+
+
+    def format_json(self, feature):
+        result = {
+            feature.__class__.__name__ : feature.name,
+            "Comments" : feature.comments
+        }
+
+        return json.dumps(result)
 
 ObjectFormatter.handlers[Feature] = FeatureFormatter()
 ObjectFormatter.handlers[HostFeature] = FeatureFormatter()
