@@ -23,6 +23,7 @@ from sqlalchemy.orm.query import Query
 
 from aquilon.worker.formats.formatters import ObjectFormatter
 
+import json
 
 class ListFormatter(ObjectFormatter):
     def format_raw(self, result, indent=""):
@@ -49,7 +50,12 @@ class ListFormatter(ObjectFormatter):
             self.redirect_proto(item, container)
 
     def format_json(self, result):
-        return "[" + ", ".join(['"%s"' % item for item in result]) + "]"
+        handler = ObjectFormatter.handlers.get(result[0].__class__,
+                                               ObjectFormatter.default_handler)
+        itemlist = []
+        for item in result:
+            itemlist.append(json.loads(handler.format_json(item)))
+        return json.dumps(itemlist)
 
 ObjectFormatter.handlers[list] = ListFormatter()
 ObjectFormatter.handlers[Query] = ListFormatter()

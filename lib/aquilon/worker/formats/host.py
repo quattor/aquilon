@@ -24,6 +24,7 @@ from aquilon.worker.formats.list import ListFormatter
 from aquilon.worker.dbwrappers.feature import (model_features,
                                                personality_features)
 
+import json
 
 class HostFormatter(ObjectFormatter):
     def format_proto(self, host, container):
@@ -106,6 +107,31 @@ class HostFormatter(ObjectFormatter):
             details.append(indent + "  Comments: %s" % host.comments)
 
         return "\n".join(details)
+
+    def format_json(self, host):
+        result = {
+            "FQDN" : host.fqdn,
+            "Comments" : host.comments
+        }
+
+        personalityhandler = ObjectFormatter.handlers.get(host.personality.__class__, ObjectFormatter.default_handler)
+        personality = json.loads(personalityhandler.format_json(host.personality))
+        result.update(personality)
+
+        branchhandler = ObjectFormatter.handlers.get(host.branch.__class__, ObjectFormatter.default_handler)
+        branch = json.loads(branchhandler.format_json(host.branch))
+        result.update(branch)
+
+        operating_systemhandler = ObjectFormatter.handlers.get(host.operating_system.__class__, ObjectFormatter.default_handler)
+        operating_system = json.loads(operating_systemhandler.format_json(host.operating_system))
+        result.update(operating_system)
+
+        sandbox_authorhandler = ObjectFormatter.handlers.get(host.sandbox_author.__class__, ObjectFormatter.default_handler)
+        sandbox_author = json.loads(sandbox_authorhandler.format_json(host.sandbox_author))
+        result.update(sandbox_author)
+
+        return json.dumps(result)
+
 
 ObjectFormatter.handlers[Host] = HostFormatter()
 

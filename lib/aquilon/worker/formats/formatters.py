@@ -26,7 +26,7 @@ from aquilon.exceptions_ import ProtocolError, InternalError
 from aquilon.aqdb.model import Host, Machine, VirtualDisk, Domain, Sandbox
 from aquilon.worker.processes import build_mako_lookup
 
-import traceback
+import json
 
 # Note: the built-in "excel" dialect uses '\r\n' for line ending and that breaks
 # the tests.
@@ -194,8 +194,7 @@ class ObjectFormatter(object):
         return "<pre>%s</pre>" % result
 
     def format_json(self, result):
-        #return repr(traceback.extract_stack())
-        return '["%s"]' % result
+        return json.dumps({result.__class__.__name__ : str(result)})
 
     @staticmethod
     def redirect_raw(result, indent=""):
