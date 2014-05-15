@@ -91,15 +91,15 @@ class TestRootAccess(TestBrokerCommand):
         self.matchoutput(out, "Root Access Netgroup: netgroup1", command)
         self.matchoutput(out, "Root Access Netgroup: netgroup2", command)
 
-        command =["cat", "--archetype=aquilon", "--personality=compileserver"]
+        command = ["cat", "--archetype=aquilon", "--personality=compileserver"]
         out = self.commandtest(command)
         self.searchoutput(out, r'"/system/root_users" = list\(\s*'
                                r'"testuser1",\s*'
-                               r'"testuser2"',
+                               r'"testuser2"\s*\);',
                           command)
         self.searchoutput(out, r'"/system/root_netgroups" = list\(\s*'
                                r'"netgroup1",\s*'
-                               r'"netgroup2"',
+                               r'"netgroup2"\s*\);',
                           command)
 
     def test_310_unmap_personality_user(self):
@@ -136,13 +136,13 @@ class TestRootAccess(TestBrokerCommand):
         self.matchoutput(out, "Root Access User: testuser2", command)
         self.matchoutput(out, "Netgroup: netgroup2", command)
 
-        command =["cat", "--archetype=aquilon", "--personality=compileserver"]
+        command = ["cat", "--archetype=aquilon", "--personality=compileserver"]
         out = self.commandtest(command)
         self.searchoutput(out, r'"/system/root_users" = list\(\s*'
-                               r'"testuser2"',
+                               r'"testuser2"\s*\);',
                           command)
         self.searchoutput(out, r'"/system/root_netgroups" = list\(\s*'
-                               r'"netgroup2"',
+                               r'"netgroup2"\s*\);',
                           command)
 
     def test_370_unmap_personality_user(self):
@@ -162,7 +162,7 @@ class TestRootAccess(TestBrokerCommand):
         self.matchclean(out, "netgroup1", command)
         self.matchclean(out, "netgroup2", command)
 
-        command =["cat", "--archetype=aquilon", "--personality=compileserver"]
+        command = ["cat", "--archetype=aquilon", "--personality=compileserver"]
         out = self.commandtest(command)
         self.matchclean(out, "testuser1", command)
         self.matchclean(out, "testuser2", command)
@@ -172,7 +172,6 @@ class TestRootAccess(TestBrokerCommand):
     def test_410_del_netgroup(self):
         command = ["del", "netgroup_whitelist", "--netgroup", "netgroup1"]
         self.noouttest(command)
-
 
     def test_420_verify_del_netgroup(self):
         command = ["show", "netgroup_whitelist", "--all"]
@@ -185,8 +184,6 @@ class TestRootAccess(TestBrokerCommand):
         out = self.notfoundtest(command)
         self.matchoutput(out, "NetGroupWhiteList notfound not found", command)
 
-
-if __name__=='__main__':
+if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestRootAccess)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

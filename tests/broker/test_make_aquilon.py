@@ -63,7 +63,7 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
         # The .dep file should not get copied into the web directory
         profilesdir = self.config.get("broker", "profilesdir")
         self.failIf(os.path.exists(os.path.join(profilesdir,
-            "unittest02.one-nyp.ms.com.dep")))
+                                                "unittest02.one-nyp.ms.com.dep")))
 
         servicedir = os.path.join(self.config.get("broker", "plenarydir"),
                                   "servicedata")

@@ -55,8 +55,8 @@ class CommandAddStaticRoute(BrokerCommand):
                 # No routers are defined, so take an educated guess
                 gateway = dbnetwork.network[dbnetwork.default_gateway_offset]
                 logger.client_info("Gateway %s taken from default offset %d "
-                                   "for network %s." % (gateway,
-                                    dbnetwork.default_gateway_offset,
+                                   "for network %s." %
+                                   (gateway, dbnetwork.default_gateway_offset,
                                     dbnetwork.network))
         else:
             raise ArgumentError("Please either --gateway or --networkip")

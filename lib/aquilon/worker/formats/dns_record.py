@@ -51,7 +51,7 @@ class SrvRecordFormatter(ObjectFormatter):
     def csv_fields(self, dns_record):
         yield (dns_record.fqdn, dns_record.fqdn.dns_environment.name,
                'SRV', dns_record.priority, dns_record.weight,
-                dns_record.target, dns_record.port)
+               dns_record.target, dns_record.port)
 
 # The DnsRecord entry should never get invoked, we always have a subclass.
 ObjectFormatter.handlers[DnsRecord] = DnsRecordFormatter()

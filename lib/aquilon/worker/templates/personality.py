@@ -216,13 +216,14 @@ class PlenaryPersonalityBase(Plenary):
                    self.dbobj.owner_eon_id)
 
         user_list = [dbusr.name for dbusr in self.dbobj.root_users]
+        user_list.sort()
         if user_list:
             pan_assign(lines, "/system/root_users", user_list)
 
         ng_list = ["%s" % ng for ng in self.dbobj.root_netgroups]
+        ng_list.sort()
         if ng_list:
             pan_assign(lines, "/system/root_netgroups", ng_list)
-
 
         ## include pre features
         path = PlenaryPersonalityPreFeature.template_name(self.dbobj)

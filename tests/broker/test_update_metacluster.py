@@ -31,6 +31,7 @@ class TestUpdateMetaCluster(TestBrokerCommand, PersonalityTestMixin):
     def test_000_add_personalities(self):
         self.create_personality("metacluster", "metacluster-test",
                                 grn="grn:/ms/ei/aquilon/aqd")
+
     def test_100_updatenoop(self):
         default_max = self.config.get("archetype_metacluster",
                                       "max_members_default")

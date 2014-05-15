@@ -534,7 +534,7 @@ class HostChooser(Chooser):
                 for si in mc.service_bindings:
                     if si.service in self.cluster_aligned_services:
                         cas = self.cluster_aligned_services[si.service]
-                        if cas == None:
+                        if not cas:
                             # Error out later.
                             continue
 

@@ -357,15 +357,14 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
         command = "show machine --machine ut3c1n7"
         out = self.notfoundtest(command.split(" "))
 
-
     def testrejectmachineuri(self):
         command = ["add", "machine", "--machine", "ut3c1n10",
-                        "--rack", "ut3", "--model", "hs21-8853l5u",
-                        "--uri", "file:///somepath/to/ovf"]
+                   "--rack", "ut3", "--model", "hs21-8853l5u",
+                   "--uri", "file:///somepath/to/ovf"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "URI can be specified only for virtual "
-                                "appliances and the model's type is blade",
-                                command)
+                         "appliances and the model's type is blade",
+                         command)
 
     def testverifyrejectmachineuri(self):
         command = "show machine --machine ut3c1n10"
@@ -410,7 +409,7 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
     # (ut01ga1s02.aqd-unittest.ms.com).
     def testaddverariut8(self):
         net = self.net["tor_net_0"]
-        for port in range (1, 6):
+        for port in range(1, 6):
             machine = "ut8s02p%d" % port
             self.create_machine(machine, "vb1205xm", rack="ut8",
                                 eth0_mac=net.usable[port].mac)

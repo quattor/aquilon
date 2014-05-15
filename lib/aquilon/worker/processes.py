@@ -55,7 +55,7 @@ class StreamLoggerThread(Thread):
         while True:
             data = self.stream.readline()
             if data == '' and (self.stream.closed or
-                               self.process.poll() != None):
+                               self.process.poll() is not None):
                 break
             if data != '':
                 if self.filterre and not self.filterre.search(data):
@@ -682,9 +682,9 @@ class DSDBRunner(object):
 
             # Create a dict with entries in old_ifdata prefiexd with 'old_'
             # and entries in new_ifdata prefixed with 'new_'
-            kwargs = dict((p+k, v) \
-                          for (p, d) in [('old_',old_ifdata), \
-                                         ('new_',new_ifdata)] \
+            kwargs = dict((p + k, v)
+                          for (p, d) in [('old_', old_ifdata),
+                                         ('new_', new_ifdata)]
                           for k, v in d.iteritems())
 
             if old_ifdata['ip'] != new_ifdata['ip'] or \

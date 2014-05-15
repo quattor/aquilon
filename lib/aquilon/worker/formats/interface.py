@@ -104,7 +104,6 @@ class InterfaceFormatter(ObjectFormatter):
                     details.append(indent + "  Aliases: %s" %
                                    ", ".join(str(a.fqdn) for a in dns_record.all_aliases))
 
-
         for route in sorted(static_routes, key=attrgetter('destination',
                                                           'gateway_ip')):
             details.append(indent + "  Static Route: {0} gateway {1}"

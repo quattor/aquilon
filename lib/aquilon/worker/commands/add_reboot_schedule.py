@@ -66,8 +66,8 @@ class CommandAddRebootSchedule(BrokerCommand):
                 if not validator.match(data):
                     err = "Key '%s' contains an invalid value." % key
                     if key in self.required_parameters:
-                        err += " Valid values are (%s)."  % '|'.join(self.COMPONENTS[key])
-                    raise ArgumentError( err)
+                        err += " Valid values are (%s)." % '|'.join(self.COMPONENTS[key])
+                    raise ArgumentError(err)
 
                 if re.search(',', data):
                     dups = dict()

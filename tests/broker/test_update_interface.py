@@ -98,6 +98,55 @@ class TestUpdateInterface(TestBrokerCommand):
         self.searchoutput(out, r"Interface: eth1 %s \[boot\]" %
                           self.net["unknown0"].usable[12].mac.lower(), command)
 
+    def test_121_verify_show_ut3c5n10_interfaces_proto(self):
+        command = ["show_machine", "--machine", "ut3c5n10", "--format", "proto"]
+        out = self.commandtest(command)
+        machinelist = self.parse_machine_msg(out, expect=1)
+        machine = machinelist.machines[0]
+        self.assertEqual(machine.name, "ut3c5n10")
+        self.assertEqual(len(machine.interfaces), 4)
+        self.assertEqual(machine.interfaces[0].device, "eth0")
+        self.assertEqual(machine.interfaces[0].mac,
+                         self.net["unknown0"].usable[11].mac.lower())
+        self.assertEqual(machine.interfaces[0].ip,
+                         str(self.net["unknown0"].usable[11]))
+        self.assertEqual(machine.interfaces[0].fqdn, "unittest02.one-nyp.ms.com")
+        self.assertEqual(machine.interfaces[0].bootable, False)
+        self.assertEqual(machine.interfaces[0].model.name, "generic_nic")
+        self.assertEqual(machine.interfaces[0].model.vendor, "generic")
+        self.assertEqual(machine.interfaces[0].model.model_type, "nic")
+        self.assertEqual(machine.interfaces[0].bus_address, "pci:0000:0b:00.0")
+        self.assertEqual(machine.interfaces[1].device, "eth1")
+        self.assertEqual(machine.interfaces[1].mac,
+                         self.net["unknown0"].usable[12].mac.lower())
+        self.assertEqual(machine.interfaces[1].ip, "")
+        self.assertEqual(machine.interfaces[1].fqdn, "")
+        self.assertEqual(machine.interfaces[1].bootable, True)
+        self.assertEqual(machine.interfaces[1].model.name, "e1000")
+        self.assertEqual(machine.interfaces[1].model.vendor, "intel")
+        self.assertEqual(machine.interfaces[1].model.model_type, "nic")
+        self.assertEqual(machine.interfaces[1].bus_address, "pci:0000:0b:00.1")
+        self.assertEqual(machine.interfaces[2].device, "eth1.2")
+        self.assertEqual(machine.interfaces[2].mac, "")
+        self.assertEqual(machine.interfaces[2].ip, "")
+        self.assertEqual(machine.interfaces[2].fqdn, "")
+        self.assertEqual(machine.interfaces[2].bootable, False)
+        self.assertEqual(machine.interfaces[2].model.name, "generic_nic")
+        self.assertEqual(machine.interfaces[2].model.vendor, "generic")
+        self.assertEqual(machine.interfaces[2].model.model_type, "nic")
+        self.assertEqual(machine.interfaces[2].bus_address, "")
+        self.assertEqual(machine.interfaces[3].device, "ilo")
+        self.assertEqual(machine.interfaces[3].mac,
+                         self.net["unknown0"].usable[9].mac)
+        self.assertEqual(machine.interfaces[3].ip,
+                         str(self.net["unknown0"].usable[9]))
+        self.assertEqual(machine.interfaces[3].fqdn, "unittest02rsa.one-nyp.ms.com")
+        self.assertEqual(machine.interfaces[3].bootable, False)
+        self.assertEqual(machine.interfaces[3].model.name, "generic_nic")
+        self.assertEqual(machine.interfaces[3].model.vendor, "generic")
+        self.assertEqual(machine.interfaces[3].model.model_type, "nic")
+        self.assertEqual(machine.interfaces[3].bus_address, "")
+
     def test_122_update_ut3c5n10_eth1(self):
         command = ["update", "interface", "--interface", "eth1",
                    "--hostname", "unittest02.one-nyp.ms.com",
@@ -402,7 +451,6 @@ class TestUpdateInterface(TestBrokerCommand):
     def test_300_verify_cat_unittest02_interfaces(self):
         net = self.net["unknown0"]
         eth0ip = net.usable[11]
-        eth1ip = net.usable[12]
         route_gateway = net.gateway
         # Use --generate as update_interface does not update the on-disk
         # templates

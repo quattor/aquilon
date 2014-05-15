@@ -33,4 +33,3 @@ class CommandShowUser(BrokerCommand):
         if not result:
             raise NotFoundException("User %s not found." % username)
         return result
-

@@ -227,7 +227,7 @@ class TestUpdatePersonality(VerifyGrnsMixin, TestBrokerCommand):
         command = ["cat", "--hostname", "unittest20.aqd-unittest.ms.com", "--data"]
         out = self.commandtest(command)
         self.searchclean(out, r'"system/owner_eon_id" = %d;' %
-                          self.grns["grn:/ms/ei/aquilon/ut2"], command)
+                         self.grns["grn:/ms/ei/aquilon/ut2"], command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUpdatePersonality)

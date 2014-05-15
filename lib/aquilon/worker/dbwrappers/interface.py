@@ -600,6 +600,7 @@ def rename_interface(session, dbinterface, rename_to):
                             dns_environment=dbdns_env, preclude=True)
             dbfqdn.name = new_name
 
+
 def check_netdev_iftype(type):
     valid_interface_types = ['oa', 'loopback', 'physical', 'virtual']
     if type not in valid_interface_types:

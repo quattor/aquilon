@@ -104,7 +104,7 @@ class UserSync(object):
 
         def chunk(list_, size):
             for i in xrange(0, len(list_), size):
-                yield list_[i:i+size]
+                yield list_[i:i + size]
 
         # Oracle has limits on the size of the IN clause, so we'll need to split the
         # list to smaller chunks

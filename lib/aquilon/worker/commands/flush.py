@@ -256,7 +256,9 @@ class CommandFlush(BrokerCommand):
                 q = q.options(subqueryload('_grns'),
                               subqueryload('features'),
                               joinedload('paramholder'),
-                              subqueryload('paramholder.parameters'))
+                              subqueryload('paramholder.parameters'),
+                              subqueryload('root_users'),
+                              subqueryload('root_netgroups'))
                 for persona in q:
                     try:
                         plenary_info = Plenary.get_plenary(persona,

@@ -19,10 +19,11 @@
 import csv
 import cStringIO
 import sys
+from operator import attrgetter
 
 from aquilon.config import Config
 from aquilon.exceptions_ import ProtocolError, InternalError
-from aquilon.aqdb.model import Host
+from aquilon.aqdb.model import Host, Machine, VirtualDisk, Domain, Sandbox
 from aquilon.worker.processes import build_mako_lookup
 
 # Note: the built-in "excel" dialect uses '\r\n' for line ending and that breaks
@@ -217,54 +218,81 @@ class ObjectFormatter(object):
                                                ObjectFormatter.default_handler)
         handler.format_proto(result, container)
 
-    def add_hardware_data(self, host_msg, hwent):
-        host_msg.machine.name = str(hwent.label)
+    def add_model_data(self, model_msg, model):
+        model_msg.name = str(model.name)
+        model_msg.vendor = str(model.vendor.name)
+        model_msg.model_type = str(model.model_type)
+
+    def add_hardware_data(self, hw_msg, hwent):
+        hw_msg.name = str(hwent.label)
         if hwent.location:
-            host_msg.sysloc = str(hwent.location.sysloc())
-            host_msg.machine.location.name = str(hwent.location.name)
-            host_msg.machine.location.location_type = str(hwent.location.location_type)
+            hw_msg.location.name = str(hwent.location.name)
+            hw_msg.location.location_type = str(hwent.location.location_type)
             for parent in hwent.location.parents:
-                p = host_msg.machine.location.parents.add()
+                p = hw_msg.location.parents.add()
                 p.name = str(parent.name)
                 p.location_type = str(parent.location_type)
-        host_msg.machine.model.name = str(hwent.model.name)
-        host_msg.machine.model.vendor = str(hwent.model.vendor.name)
+        if hwent.serial_no:
+            hw_msg.serial_no = str(hwent.serial_no)
 
-        if hwent.hardware_type == 'machine':
-            host_msg.machine.cpu = str(hwent.cpu.name)
-            host_msg.machine.memory = hwent.memory
+        self.add_model_data(hw_msg.model, hwent.model)
 
-            for disk in hwent.disks:
-                disk_msg = host_msg.machine.disks.add()
+        if isinstance(hwent, Machine):
+            hw_msg.cpu = str(hwent.cpu.name)
+            hw_msg.cpu_count = hwent.cpu_quantity
+            hw_msg.memory = hwent.memory
+            if hwent.uri:
+                hw_msg.uri = hwent.uri
+
+            for disk in sorted(hwent.disks, key=attrgetter('device_name')):
+                disk_msg = hw_msg.disks.add()
                 disk_msg.device_name = str(disk.device_name)
                 disk_msg.capacity = disk.capacity
                 disk_msg.disk_type = str(disk.controller_type)
+                if disk.wwn:
+                    disk_msg.wwn = str(disk.wwn)
+                if disk.address:
+                    disk_msg.address = str(disk.address)
+                if disk.bus_address:
+                    disk_msg.bus_address = str(disk.bus_address)
+                if isinstance(disk, VirtualDisk):
+                    if disk.snapshotable is not None:
+                        disk_msg.snapshotable = disk.snapshotable
+                    self.add_resource_data(disk_msg.backing_store,
+                                           disk.backing_store)
 
-        for iface in hwent.interfaces:
+        def add_iface_data(int_msg, iface):
+            if iface.mac:
+                int_msg.mac = iface.mac
+            if iface.bus_address:
+                int_msg.bus_address = str(iface.bus_address)
+            int_msg.bootable = iface.bootable
+            self.add_model_data(int_msg.model, iface.model)
+
+        for iface in sorted(hwent.interfaces, key=attrgetter('name')):
             has_addrs = False
             for addr in iface.assignments:
                 has_addrs = True
-                int_msg = host_msg.machine.interfaces.add()
+                int_msg = hw_msg.interfaces.add()
                 int_msg.device = str(addr.logical_name)
-                if iface.mac:
-                    int_msg.mac = str(iface.mac)
+                add_iface_data(int_msg, iface)
                 int_msg.ip = str(addr.ip)
-                int_msg.bootable = iface.bootable
                 int_msg.fqdn = str(addr.fqdns[0])
                 for dns_record in addr.dns_records:
                     if dns_record.alias_cnt:
-                        int_msg.aliases.extend(str(a.fqdn)
-                                for a in dns_record.all_aliases)
+                        int_msg.aliases.extend(str(a.fqdn) for a in
+                                               dns_record.all_aliases)
 
             # Add entries for interfaces that do not have any addresses
             if not has_addrs:
-                int_msg = host_msg.machine.interfaces.add()
+                int_msg = hw_msg.interfaces.add()
                 int_msg.device = str(iface.name)
-                if iface.mac:
-                    int_msg.mac = str(iface.mac)
+                add_iface_data(int_msg, iface)
 
     def add_archetype_data(self, msg, archetype):
         msg.name = str(archetype.name)
+        msg.compileable = archetype.is_compileable
+        msg.cluster_type = str(archetype.cluster_type)
         for service in archetype.services:
             si = msg.required_services.add()
             si.service = service.name
@@ -284,6 +312,18 @@ class ObjectFormatter(object):
         # We don't need the services here, so don't call add_archetype_data()
         msg.archetype.name = str(operating_system.archetype.name)
 
+    def add_branch_data(self, msg, branch):
+        msg.name = str(branch.name)
+        msg.owner = str(branch.owner.name)
+
+        if isinstance(branch, Domain):
+            msg.type = msg.DOMAIN
+            msg.allow_manage = branch.allow_manage
+            if branch.tracked_branch:
+                msg.tracked_branch = str(branch.tracked_branch.name)
+        elif isinstance(branch, Sandbox):
+            msg.type = msg.SANDBOX
+
     def add_host_data(self, host_msg, host):
         """ Return a host message.
 
@@ -293,12 +333,14 @@ class ObjectFormatter(object):
             raise InternalError("add_host_data was called with {0} instead of "
                                 "a Host.".format(host))
         host_msg.type = "host"  # FIXME: is hardcoding this ok?
-        host_msg.hostname = str(host.hardware_entity.primary_name.fqdn.name)
-        host_msg.fqdn = str(host.hardware_entity.primary_name.fqdn)
-        host_msg.dns_domain = str(host.hardware_entity.primary_name.fqdn.dns_domain.name)
-        if host.hardware_entity.primary_ip:
-            host_msg.ip = str(host.hardware_entity.primary_ip)
-        for iface in host.hardware_entity.interfaces:
+        dbhw_ent = host.hardware_entity
+        host_msg.hostname = str(dbhw_ent.primary_name.fqdn.name)
+        host_msg.fqdn = str(dbhw_ent.primary_name.fqdn)
+        host_msg.dns_domain = str(dbhw_ent.primary_name.fqdn.dns_domain.name)
+        host_msg.sysloc = str(dbhw_ent.location.sysloc())
+        if dbhw_ent.primary_ip:
+            host_msg.ip = str(dbhw_ent.primary_ip)
+        for iface in dbhw_ent.interfaces:
             if iface.interface_type != 'public' or not iface.bootable:
                 continue
             host_msg.mac = str(iface.mac)
@@ -307,15 +349,13 @@ class ObjectFormatter(object):
             for resource in host.resholder.resources:
                 self.redirect_proto(resource, host_msg)
 
-        # FIXME: Add branch type and sandbox author to protobufs.
-        host_msg.domain.name = str(host.branch.name)
-        host_msg.domain.owner = str(host.branch.owner.name)
         host_msg.status = str(host.status.name)
         host_msg.owner_eonid = host.effective_owner_grn.eon_id
+        self.add_branch_data(host_msg.domain, host.branch)
         self.add_personality_data(host_msg.personality, host.personality)
         self.add_archetype_data(host_msg.archetype, host.archetype)
         self.add_os_data(host_msg.operating_system, host.operating_system)
-        self.add_hardware_data(host_msg, host.hardware_entity)
+        self.add_hardware_data(host_msg.machine, dbhw_ent)
 
     def add_dns_domain_data(self, dns_domain_msg, dns_domain):
         dns_domain_msg.name = str(dns_domain.name)
@@ -367,8 +407,7 @@ class ObjectFormatter(object):
         feat_msg.type = str(featlink.feature.feature_type)
         feat_msg.post_personality = featlink.feature.post_personality
         if featlink.model:
-            feat_msg.model.name = str(featlink.model.name)
-            feat_msg.model.vendor = str(featlink.model.vendor)
+            self.add_model_data(feat_msg.model, featlink.model)
         if featlink.interface_name:
             feat_msg.interface_name = str(featlink.interface_name)
 

@@ -34,7 +34,7 @@ for checker_class in consistency_check_classes:
 
 if not success_flag:
     print "There were failuers"
-    exit (1)
+    exit(1)
 
 print "All tests passed successfully"
-exit (0)
+exit(0)

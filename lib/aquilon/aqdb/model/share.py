@@ -42,7 +42,7 @@ class Share(Resource):
     def validate_latency_threshold(self, key, value):
         if value:
             value = int(value)
-            if value != 0 and  value < 20 :
+            if value != 0 and value < 20:
                 raise ArgumentError("The value of %s must be either zero, or at least 20." % key)
         return value
 

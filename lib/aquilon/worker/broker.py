@@ -320,7 +320,6 @@ class BrokerCommand(object):
             session.commit()
             session.execute(text("set transaction read only"))
 
-
     # This is meant to be called before calling render() in order to
     # add a logger into the argument list.  It returns the arguments
     # that will be passed into render().

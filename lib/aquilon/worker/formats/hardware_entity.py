@@ -16,22 +16,48 @@
 # limitations under the License.
 """HardwareEntity formatter."""
 
-from aquilon.aqdb.model import HardwareEntity
+from operator import attrgetter
+
+from aquilon.aqdb.model import HardwareEntity, Location
 from aquilon.worker.formats.formatters import ObjectFormatter
 
 
-# Should never get invoked...
 class HardwareEntityFormatter(ObjectFormatter):
+    def header_raw(self, hwe, details, indent=""):
+        pass
+
     def format_raw(self, hwe, indent=""):
-        details = [indent + "%s: %s" % (hwe.hardware_type, hwe.label)]
-        details.append(self.redirect_raw(hwe.location, indent + "  "))
-        details.append(self.redirect_raw(hwe.model, indent + "  "))
+        details = [indent + "{0:c}: {0.label}".format(hwe)]
+
+        if hwe.primary_name:
+            details.append(indent + "  Primary Name: "
+                           "{0:a}".format(hwe.primary_name))
+
+        self.header_raw(hwe, details, indent)
+
+        for location_type in sorted(Location.__mapper__.polymorphic_map.keys()):
+            if getattr(hwe.location, location_type, None) is not None:
+                loc = getattr(hwe.location, location_type)
+                details.append(indent + "  {0:c}: {0.name}".format(loc))
+                if location_type == 'rack':
+                    details.append(indent + "    Row: %s" %
+                                   hwe.location.rack.rack_row)
+                    details.append(indent + "    Column: %s" %
+                                   hwe.location.rack.rack_column)
+
+        details.append(indent + "  {0:c}: {0.name} {1:c}: {1.name}"
+                       .format(hwe.model.vendor, hwe.model))
+        details.append(indent + "    Model Type: %s" %
+                       str(hwe.model.model_type))
+
         if hwe.serial_no:
             details.append(indent + "  Serial: %s" % hwe.serial_no)
-        for i in hwe.interfaces:
-            details.append(self.redirect_raw(i, indent + "  "))
         if hwe.comments:
             details.append(indent + "  Comments: %s" % hwe.comments)
+
+        for i in sorted(hwe.interfaces, key=attrgetter('name')):
+            details.append(self.redirect_raw(i, indent + "  "))
+
         return "\n".join(details)
 
 ObjectFormatter.handlers[HardwareEntity] = HardwareEntityFormatter()

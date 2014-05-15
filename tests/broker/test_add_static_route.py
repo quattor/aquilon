@@ -36,7 +36,7 @@ class TestAddStaticRoute(TestBrokerCommand, MachineTestMixin):
                          interfaces=["eth0", "eth1"], zebra=False,
                          eth0_mac=eth0_ip.mac,
                          eth1_mac=eth1_ip.mac, eth1_ip=eth1_ip,
-                         eth1_fqdn = "unittest27-e1.aqd-unittest.ms.com",
+                         eth1_fqdn="unittest27-e1.aqd-unittest.ms.com",
                          personality="inventory")
 
     def test_100_add_route1(self):

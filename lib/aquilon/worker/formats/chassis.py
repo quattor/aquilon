@@ -18,30 +18,20 @@
 
 from aquilon.aqdb.model import Chassis
 from aquilon.worker.formats.formatters import ObjectFormatter
+from aquilon.worker.formats.hardware_entity import HardwareEntityFormatter
 
 
-class ChassisFormatter(ObjectFormatter):
+class ChassisFormatter(HardwareEntityFormatter):
     def format_raw(self, chassis, indent=""):
-        details = [indent + "%s: %s" % (str(chassis.model.model_type).capitalize(),
-                                        chassis.label)]
-        if chassis.primary_name:
-            details.append(indent + "  Primary Name: "
-                           "{0:a}".format(chassis.primary_name))
-        details.append(self.redirect_raw(chassis.location, indent + "  "))
-        details.append(self.redirect_raw(chassis.model, indent + "  "))
-        if chassis.serial_no:
-            details.append(indent + "  Serial: %s" %
-                           chassis.serial_no)
+        details = [super(ChassisFormatter, self).format_raw(chassis, indent)]
+
         for slot in chassis.slots:
             if slot.machine:
                 details.append(indent + "  Slot #%d: %s" % (slot.slot_number,
                                                             slot.machine.label))
             else:
                 details.append(indent + "  Slot #%d Unknown" % slot.slot_number)
-        for i in chassis.interfaces:
-            details.append(self.redirect_raw(i, indent + "  "))
-        if chassis.comments:
-            details.append(indent + "  Comments: %s" % chassis.comments)
+
         return "\n".join(details)
 
 ObjectFormatter.handlers[Chassis] = ChassisFormatter()

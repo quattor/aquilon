@@ -125,7 +125,7 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, MachineTestMixin,
     def test_030_addswitch(self):
         for i in range(0, 2):
             self.successtest(["update_esx_cluster",
-                              "--cluster=%s" %self.cluster[i],
+                              "--cluster=%s" % self.cluster[i],
                               "--switch=%s" % self.switch[i]])
 
     def test_050_add_vmhost(self):
@@ -212,6 +212,23 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, MachineTestMixin,
         command = ["cat", "--machine", "utpgm0", "--generate"]
         out = self.commandtest(command)
         self.matchclean(out, "snapshot", command)
+
+    def test_141_verify_proto(self):
+        command = ["show_machine", "--machine", "utpgm0", "--format", "proto"]
+        out = self.commandtest(command)
+        machinelist = self.parse_machine_msg(out, expect=1)
+        machine = machinelist.machines[0]
+        self.assertEqual(machine.name, "utpgm0")
+        self.assertEqual(len(machine.disks), 1)
+        self.assertEqual(machine.disks[0].device_name, "sda")
+        self.assertEqual(machine.disks[0].disk_type, "scsi")
+        self.assertEqual(machine.disks[0].capacity, 34)
+        self.assertEqual(machine.disks[0].address, "0:0")
+        self.assertEqual(machine.disks[0].bus_address, "")
+        self.assertEqual(machine.disks[0].wwn, "")
+        self.assertEqual(machine.disks[0].snapshotable, False)
+        self.assertEqual(machine.disks[0].backing_store.name, "utfs1")
+        self.assertEqual(machine.disks[0].backing_store.type, "filesystem")
 
     def test_145_search_machine_filesystem(self):
         command = ["search_machine", "--disk_filesystem", "utfs1"]
@@ -383,7 +400,6 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, MachineTestMixin,
 
         for i in range(0, 2):
             self.noouttest(["del", "machine", "--machine", self.machine[i]])
-
 
     def test_308_delutpgsw(self):
         for i in range(0, 2):

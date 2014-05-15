@@ -150,7 +150,6 @@ class TestAddRebootSchedule(TestBrokerCommand):
         out = self.badrequesttest(command)
         self.matchoutput(out, "the preferred time '08:61' could not be interpreted: minute must be in 0..59", command)
 
-
     def test_240_add_schedule_fail(self):
         command = ["add_reboot_schedule",
                    "--week=1,3,5", "--day=Sun", "--time=08:00",

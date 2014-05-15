@@ -24,4 +24,8 @@ from aquilon.aqdb.model import Archetype
 class ArchetypeFormatter(ObjectFormatter):
     template_raw = "archetype.mako"
 
+    def format_proto(self, archetype, container):
+        skeleton = container.archetypes.add()
+        self.add_archetype_data(skeleton, archetype)
+
 ObjectFormatter.handlers[Archetype] = ArchetypeFormatter()

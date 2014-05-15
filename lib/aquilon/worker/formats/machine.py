@@ -18,18 +18,15 @@
 
 from operator import attrgetter
 
-from aquilon.aqdb.model import Machine, Location, VirtualDisk
+from aquilon.aqdb.model import Machine, VirtualDisk
 from aquilon.worker.formats.formatters import ObjectFormatter
+from aquilon.worker.formats.hardware_entity import HardwareEntityFormatter
 from aquilon.worker.dbwrappers.feature import (model_features,
                                                personality_features)
 
 
-class MachineFormatter(ObjectFormatter):
-    def format_raw(self, machine, indent=""):
-        details = [indent + "Machine: %s" % machine.label]
-        if machine.primary_name:
-            details.append(indent + "  Primary Name: "
-                           "{0:a}".format(machine.primary_name))
+class MachineFormatter(HardwareEntityFormatter):
+    def header_raw(self, machine, details, indent=""):
         if machine.vm_container:
             details.append(indent + "  Hosted by: {0}"
                            .format(machine.vm_container.holder.holder_object))
@@ -52,30 +49,15 @@ class MachineFormatter(ObjectFormatter):
             details.append(indent + "  Auxiliary: %s [%s]" %
                            (", ".join(aux[0]), aux[1]))
 
-        # This is a bit of a hack.  Delegating out to the standard location
-        # formatter now spews too much information about chassis.  Maybe
-        # that will change when chassis has a corresponding hardware type.
-        for location_type in Location.__mapper__.polymorphic_map.keys():
-            if getattr(machine.location, location_type, None) is not None:
-                loc = getattr(machine.location, location_type)
-                details.append(indent + "  {0:c}: {0.name}".format(loc))
-                if location_type == 'rack':
-                    details.append(indent + "    Row: %s" %
-                                   machine.location.rack.rack_row)
-                    details.append(indent + "    Column: %s" %
-                                   machine.location.rack.rack_column)
+    def format_raw(self, machine, indent=""):
+        details = [super(MachineFormatter, self).format_raw(machine, indent)]
+
         for slot in machine.chassis_slot:
             details.append(indent + "  {0:c}: {0!s}".format(slot.chassis))
             details.append(indent + "  Slot: %d" % slot.slot_number)
-        details.append(indent + "  {0:c}: {0.name} {1:c}: {1.name}".format(
-            machine.model.vendor, machine.model))
-        details.append(indent + "    Model Type: %s" %
-                       str(machine.model.model_type))
         details.append(indent + "  Cpu: %s x %d" % (machine.cpu,
                                                     machine.cpu_quantity))
         details.append(indent + "  Memory: %d MB" % machine.memory)
-        if machine.serial_no:
-            details.append(indent + "  Serial: %s" % machine.serial_no)
         for d in sorted(machine.disks, key=attrgetter('device_name')):
             extra = [d.disk_type]
             if isinstance(d, VirtualDisk):
@@ -105,10 +87,6 @@ class MachineFormatter(ObjectFormatter):
                                d.bus_address)
             if d.comments:
                 details.append(indent + "    Comments: %s" % d.comments)
-        for i in sorted(machine.interfaces, key=attrgetter('name')):
-            details.append(self.redirect_raw(i, indent + "  "))
-        if machine.comments:
-            details.append(indent + "  Comments: %s" % machine.comments)
 
         if machine.uri:
             details.append(indent + "  URI: %s" % machine.uri)
@@ -188,5 +166,11 @@ class MachineFormatter(ObjectFormatter):
             else:
                 details.extend([None, None, None])
             yield details
+
+    def format_proto(self, machine, container):
+        skeleton = container.machines.add()
+        self.add_hardware_data(skeleton, machine)
+        if machine.host:
+            skeleton.host = str(machine.primary_name)
 
 ObjectFormatter.handlers[Machine] = MachineFormatter()

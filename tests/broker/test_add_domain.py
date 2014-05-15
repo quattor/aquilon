@@ -91,6 +91,17 @@ class TestAddDomain(TestBrokerCommand):
                          command)
         self.matchoutput(out, "May Contain Hosts/Clusters: False", command)
 
+    def test_200_verify_unittest_proto(self):
+        command = ["show_domain", "--domain=unittest", "--format", "proto"]
+        out = self.commandtest(command)
+        domainlist = self.parse_domain_msg(out, expect=1)
+        domain = domainlist.domains[0]
+        self.assertEqual(domain.name, "unittest")
+        self.assertEqual(domain.owner, self.config.get("unittest", "user"))
+        self.assertEqual(domain.tracked_branch, "utsandbox")
+        self.assertEqual(domain.type, domain.DOMAIN)
+        self.assertEqual(domain.allow_manage, False)
+
     def test_200_verifyutprod(self):
         command = ["show_domain", "--domain=ut-prod"]
         out = self.commandtest(command)

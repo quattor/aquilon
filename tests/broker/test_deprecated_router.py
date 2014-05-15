@@ -61,8 +61,6 @@ class TestDeprecatedRouter(TestBrokerCommand):
         (out, err) = self.successtest(command)
         self.matchoutput(err, "Command del_router is deprecated.", command)
 
-
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDeprecatedRouter)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

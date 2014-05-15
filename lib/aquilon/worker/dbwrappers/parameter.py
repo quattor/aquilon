@@ -164,7 +164,7 @@ def validate_value(label, value_type, value):
     elif value_type == 'json':
         retval = force_json_dict(label, value)
 
-    if retval == None:
+    if retval is None:
         raise ArgumentError("Value %s for path %s has to be of type %s." %
                             (value, label, value_type))
 

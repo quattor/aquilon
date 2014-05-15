@@ -60,7 +60,7 @@ class TestConsistency(TestBrokerCommand):
         self.matchoutput(out, "Sandbox break-consistency-sandbox found in database "
                          "and not template-king", command)
         self.matchclean(out, "Domain prod found in database "
-                         "and not template-king", command)
+                        "and not template-king", command)
 
         # "Branch XXXX found in template-king and not database"
         # There will be a whole pile of these errors because we cloned
@@ -79,7 +79,7 @@ class TestConsistency(TestBrokerCommand):
         self.matchoutput(out, "Sandbox break-consistency-sandbox found in database "
                          "but not on filesystem", command)
         self.matchclean(out, "Sandbox managetest1 found in database "
-                         "but not on filesystem", command)
+                        "but not on filesystem", command)
 
         ########## Database (domains) == Filesystem (domains)
 
@@ -91,7 +91,7 @@ class TestConsistency(TestBrokerCommand):
         self.matchoutput(out, "Domain break-consistency-domain found in database "
                          "but not on filesystem", command)
         self.matchclean(out, "Domain prod found in database "
-                         "but not on filesystem", command)
+                        "but not on filesystem", command)
 
         # "Domain XXXX found on filesystem (%s) but not in database"
         # We created a dummy path at the beginning of this test, as a result

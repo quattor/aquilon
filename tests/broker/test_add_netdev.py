@@ -92,7 +92,7 @@ class TestAddNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
         self.successtest(["add", "network_device", "--type", "bor",
                           "--network_device", "ut3gd1r07.aqd-unittest.ms.com",
                           "--ip", ip, "--interface", "xge49",
-                          "--iftype", "physical","--rack", "ut3",
+                          "--iftype", "physical", "--rack", "ut3",
                           "--model", "temp_switch"])
         self.dsdb_verify()
 

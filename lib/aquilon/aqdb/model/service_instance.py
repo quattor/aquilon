@@ -242,5 +242,5 @@ ServiceInstance.clients = relation(Host, secondary=BuildItem.__table__,
 # Make this a column property so it can be undeferred on bulk loads
 ServiceInstance._client_count = column_property(
     select([func.count()],
-            BuildItem.service_instance_id == ServiceInstance.id)
+           BuildItem.service_instance_id == ServiceInstance.id)
     .label("_client_count"), deferred=True)

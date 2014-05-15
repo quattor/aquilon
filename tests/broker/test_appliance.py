@@ -31,8 +31,8 @@ from machinetest import MachineTestMixin
 from personalitytest import PersonalityTestMixin
 
 
-class TestAppliance(VerifyNotificationsMixin, MachineTestMixin, PersonalityTestMixin,
-                          TestBrokerCommand):
+class TestAppliance(VerifyNotificationsMixin, MachineTestMixin,
+                    PersonalityTestMixin, TestBrokerCommand):
 
     cluster = "utecl10"
     vapp = "utvapp0"
