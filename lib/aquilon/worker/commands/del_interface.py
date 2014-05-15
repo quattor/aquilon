@@ -19,7 +19,7 @@
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Chassis, Machine, NetworkDevice, Interface
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.templates import Plenary
+from aquilon.worker.templates import (Plenary, PlenaryCollection)
 
 
 class CommandDelInterface(BrokerCommand):
@@ -89,7 +89,10 @@ class CommandDelInterface(BrokerCommand):
         dbhw_ent.interfaces.remove(dbinterface)
         session.flush()
 
-        if dbhw_ent.hardware_type == 'machine':
-            plenary_info = Plenary.get_plenary(dbhw_ent, logger=logger)
-            plenary_info.write()
+        if dbhw_ent.hardware_type != 'chassis':
+            plenaries = PlenaryCollection(logger=logger)
+            plenaries.append(Plenary.get_plenary(dbhw_ent))
+            if dbhw_ent.host:
+                plenaries.append(Plenary.get_plenary(dbhw_ent.host))
+            plenaries.write()
         return

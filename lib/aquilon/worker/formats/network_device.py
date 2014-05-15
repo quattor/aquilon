@@ -36,6 +36,10 @@ class NetworkDeviceFormatter(HardwareEntityFormatter):
             details.append(indent + "  VLAN %d: %s" %
                            (ov.vlan_id, ov.network.ip))
             details.append(indent + "    Created: %s" % ov.creation_date)
+
+        if device.host:
+            details.append(self.redirect_raw_host_details(device.host))
+
         return "\n".join(details)
 
     def csv_fields(self, device):

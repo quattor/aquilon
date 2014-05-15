@@ -203,10 +203,10 @@ class TestUpdateModel(TestBrokerCommand):
         command = ["cat", "--machine", "evm1"]
         out = self.commandtest(command)
         self.searchoutput(out,
-                          r'"cards/nic" = nlist\(\s*'
-                          r'"eth0", create\("hardware/nic/generic/generic_nic",\s*'
+                          r'"cards/nic/eth0" = '
+                          r'create\("hardware/nic/generic/generic_nic",\s*'
                           r'"boot", true,\s*'
-                          r'"hwaddr", "00:50:56:01:20:00"\s*\)\s*\);',
+                          r'"hwaddr", "00:50:56:01:20:00"\s*\);',
                           command)
 
     def test_342_update_nic(self):
@@ -223,10 +223,10 @@ class TestUpdateModel(TestBrokerCommand):
         command = ["cat", "--machine", "evm1"]
         out = self.commandtest(command)
         self.searchoutput(out,
-                          r'"cards/nic" = nlist\(\s*'
-                          r'"eth0", create\("hardware/nic/utvirt/default",\s*'
+                          r'"cards/nic/eth0" = '
+                          r'create\("hardware/nic/utvirt/default",\s*'
                           r'"boot", true,\s*'
-                          r'"hwaddr", "00:50:56:01:20:00"\s*\)\s*\);',
+                          r'"hwaddr", "00:50:56:01:20:00"\s*\);',
                           command)
 
     def test_344_change_evm1_back(self):

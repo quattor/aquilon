@@ -40,23 +40,21 @@ class TestRenameNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
         self.dsdb_expect_rename("ut3gd1r04.aqd-unittest.ms.com",
                                 "renametest.aqd-unittest.ms.com")
 
-        old_plenary = self.plenary_name("switchdata",
-                                        "ut3gd1r04.aqd-unittest.ms.com")
-        new_plenary = self.plenary_name("switchdata",
-                                        "renametest.aqd-unittest.ms.com")
-
-        self.failUnless(os.path.exists(old_plenary),
-                        "Plenary file '%s' does not exist" % old_plenary)
+        self.check_plenary_exists("switchdata", "ut3gd1r04.aqd-unittest.ms.com")
+        self.check_plenary_exists('network_device', 'americas', 'ut', 'ut3gd1r04')
+        self.check_plenary_exists('hostdata', 'ut3gd1r04.aqd-unittest.ms.com')
 
         command = ["update", "network_device",
                    "--network_device", "ut3gd1r04.aqd-unittest.ms.com",
                    "--rename_to", "renametest"]
         self.noouttest(command)
 
-        self.failIf(os.path.exists(old_plenary),
-                    "Plenary file '%s' still exists" % old_plenary)
-        self.failUnless(os.path.exists(new_plenary),
-                        "Plenary file '%s' does not exist" % new_plenary)
+        self.check_plenary_nonexistant("switchdata", "ut3gd1r04.aqd-unittest.ms.com")
+        self.check_plenary_nonexistant('network_device', 'americas', 'ut', 'ut3gd1r04')
+        self.check_plenary_nonexistant('hostdata', 'ut3gd1r04.aqd-unittest.ms.com')
+        self.check_plenary_exists("switchdata", "renametest.aqd-unittest.ms.com")
+        self.check_plenary_exists('network_device', 'americas', 'ut', 'renametest')
+        self.check_plenary_exists('hostdata', 'renametest.aqd-unittest.ms.com')
 
         self.dsdb_verify()
 

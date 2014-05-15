@@ -60,4 +60,13 @@ class HardwareEntityFormatter(ObjectFormatter):
 
         return "\n".join(details)
 
+    @staticmethod
+    def redirect_raw_host_details(result, indent=""):
+        # A given hardware entity formatter may call this method, if/when it
+        # has an associated host object, to include the details of the host.
+        handler = ObjectFormatter.handlers.get(result.__class__,
+                                               ObjectFormatter.default_handler)
+        return handler.format_raw_host_details(result, indent)
+
+
 ObjectFormatter.handlers[HardwareEntity] = HardwareEntityFormatter()

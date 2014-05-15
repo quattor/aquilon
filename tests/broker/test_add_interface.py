@@ -148,16 +148,17 @@ class TestAddInterface(TestBrokerCommand):
         command = "cat --machine ut3c5n10"
         out = self.commandtest(command.split(" "))
         self.searchoutput(out,
-                          r'"cards/nic" = nlist\(\s*'
-                          r'"eth0", create\("hardware/nic/generic/generic_nic",\s*'
+                          r'"cards/nic/eth0" = '
+                          r'create\("hardware/nic/generic/generic_nic",\s*'
                           r'"boot", true,\s*'
                           r'"bus", "pci:0000:0b:00.0",\s*'
-                          r'"hwaddr", "%s"\s*\),'
+                          r'"hwaddr", "%s"\s*\);'
                           % self.net["unknown0"].usable[0].mac,
                           command)
         self.searchoutput(out,
-                          r'"eth1", create\("hardware/nic/generic/generic_nic",\s*'
-                          r'"hwaddr", "%s"\s*\)\s*\);'
+                          r'"cards/nic/eth1" = '
+                          r'create\("hardware/nic/generic/generic_nic",\s*'
+                          r'"hwaddr", "%s"\s*\);'
                           % self.net["unknown0"].usable[1].mac,
                           command)
 
@@ -165,12 +166,13 @@ class TestAddInterface(TestBrokerCommand):
         command = "cat --machine ut3c5n2"
         out = self.commandtest(command.split(" "))
         self.searchoutput(out,
-                          r'"cards/nic" = nlist\(\s*'
-                          r'"eth0", create\("hardware/nic/intel/e1000",\s*'
+                          r'"cards/nic/eth0" = '
+                          r'create\("hardware/nic/intel/e1000",\s*'
                           r'"boot", true,\s*'
-                          r'"hwaddr", "%s"\s*\),\s*'
-                          r'"eth1", create\("hardware/nic/intel/e1000",\s*'
-                          r'"hwaddr", "%s"\s*\)\s*\);'
+                          r'"hwaddr", "%s"\s*\);\s*'
+                          r'"cards/nic/eth1" = '
+                          r'create\("hardware/nic/intel/e1000",\s*'
+                          r'"hwaddr", "%s"\s*\);'
                           % (self.net["zebra_eth0"].usable[0].mac,
                              self.net["zebra_eth1"].usable[0].mac),
                           command)
@@ -201,12 +203,13 @@ class TestAddInterface(TestBrokerCommand):
         command = "cat --machine ut3c5n3"
         out = self.commandtest(command.split(" "))
         self.searchoutput(out,
-                          r'"cards/nic" = nlist\(\s*'
-                          r'"eth0", create\("hardware/nic/generic/generic_nic",\s*'
+                          r'"cards/nic/eth0" = '
+                          r'create\("hardware/nic/generic/generic_nic",\s*'
                           r'"boot", true,\s*'
-                          r'"hwaddr", "%s"\s*\),\s*'
-                          r'"eth1", create\("hardware/nic/generic/generic_nic",\s*'
-                          r'"hwaddr", "%s"\s*\)\s*\);'
+                          r'"hwaddr", "%s"\s*\);\s*'
+                          r'"cards/nic/eth1" = '
+                          r'create\("hardware/nic/generic/generic_nic",\s*'
+                          r'"hwaddr", "%s"\s*\);'
                           % (self.net["zebra_eth0"].usable[1].mac,
                              self.net["zebra_eth1"].usable[1].mac),
                           command)
@@ -237,12 +240,13 @@ class TestAddInterface(TestBrokerCommand):
         command = "cat --machine ut3c5n4"
         out = self.commandtest(command.split(" "))
         self.searchoutput(out,
-                          r'"cards/nic" = nlist\(\s*'
-                          r'"eth0", create\("hardware/nic/generic/generic_nic",\s*'
+                          r'"cards/nic/eth0" = '
+                          r'create\("hardware/nic/generic/generic_nic",\s*'
                           r'"boot", true,\s*'
-                          r'"hwaddr", "%s"\s*\),\s*'
-                          r'"eth1", create\("hardware/nic/generic/generic_nic",\s*'
-                          r'"hwaddr", "%s"\s*\)\s*\);'
+                          r'"hwaddr", "%s"\s*\);\s*'
+                          r'"cards/nic/eth1" = '
+                          r'create\("hardware/nic/generic/generic_nic",\s*'
+                          r'"hwaddr", "%s"\s*\);'
                           % (self.net["zebra_eth0"].usable[2].mac,
                              self.net["zebra_eth1"].usable[2].mac),
                           command)
@@ -287,15 +291,16 @@ class TestAddInterface(TestBrokerCommand):
         command = "cat --machine ut3c1n3"
         out = self.commandtest(command.split(" "))
         self.searchoutput(out,
-                          r'"cards/nic" = nlist\(\s*'
-                          r'"eth0", create\("hardware/nic/generic/generic_nic",\s*'
+                          r'"cards/nic/eth0" = '
+                          r'create\("hardware/nic/generic/generic_nic",\s*'
                           r'"boot", true,\s*'
-                          r'"hwaddr", "%s"\s*\),'
+                          r'"hwaddr", "%s"\s*\);'
                           % self.net["unknown0"].usable[2].mac,
                           command)
         self.searchoutput(out,
-                          r'"eth1", create\("hardware/nic/generic/generic_nic",\s*'
-                          r'"hwaddr", "%s"\s*\)\s*\);'
+                          r'"cards/nic/eth1" = '
+                          r'create\("hardware/nic/generic/generic_nic",\s*'
+                          r'"hwaddr", "%s"\s*\);'
                           % self.net["unknown0"].usable[3].mac,
                           command)
         self.searchoutput(out,
@@ -347,10 +352,10 @@ class TestAddInterface(TestBrokerCommand):
         command = "cat --machine ut3c1n4"
         out = self.commandtest(command.split(" "))
         self.searchoutput(out,
-                          r'"cards/nic" = nlist\(\s*'
-                          r'"eth0", create\("hardware/nic/generic/generic_nic",\s*'
+                          r'"cards/nic/eth0" = '
+                          r'create\("hardware/nic/generic/generic_nic",\s*'
                           r'"boot", true,\s*'
-                          r'"hwaddr", "%s"\s*\)\s*\);'
+                          r'"hwaddr", "%s"\s*\);'
                           % self.net["unknown0"].usable[5].mac,
                           command)
 
@@ -432,6 +437,10 @@ class TestAddInterface(TestBrokerCommand):
                          "MAC address %s is already in use: " %
                          self.net["tor_net_0"].usable[0].mac,
                          command)
+        self.check_plenary_contents('network_device', 'americas', 'ut', 'ut3gd1r01',
+                                    clean='xge1')
+        self.check_plenary_contents('hostdata', 'ut3gd1r01.aqd-unittest.ms.com',
+                                    clean='xge1')
 
     def testfailaddinterfaceud3dg1r01model(self):
         command = ["add", "interface", "--interface", "xge1",
@@ -440,6 +449,10 @@ class TestAddInterface(TestBrokerCommand):
         out = self.badrequesttest(command)
         self.matchoutput(out, "Cannot use argument --model when adding an "
                          "interface to a network device.", command)
+        self.check_plenary_contents('network_device', 'americas', 'ut', 'ut3gd1r01',
+                                    clean='xge1')
+        self.check_plenary_contents('hostdata', 'ut3gd1r01.aqd-unittest.ms.com',
+                                    clean='xge1')
 
     def testfailaddinterfaceud3dg1r01type(self):
         command = ["add", "interface", "--interface", "xge1",
@@ -448,6 +461,10 @@ class TestAddInterface(TestBrokerCommand):
         out = self.badrequesttest(command)
         self.matchoutput(out, "Interface type vlan is not allowed for "
                          "network devices.", command)
+        self.check_plenary_contents('network_device', 'americas', 'ut', 'ut3gd1r01',
+                                    clean='xge1')
+        self.check_plenary_contents('hostdata', 'ut3gd1r01.aqd-unittest.ms.com',
+                                    clean='xge1')
 
     def testverifyfailaddinterfaceut3dg1r01(self):
         command = "show network_device --network_device ut3gd1r01.aqd-unittest.ms.com"
@@ -462,12 +479,20 @@ class TestAddInterface(TestBrokerCommand):
                    "--iftype", "virtual",
                    "--network_device", "ut3gd1r04.aqd-unittest.ms.com"]
         self.noouttest(command)
+        self.check_plenary_contents('network_device', 'americas', 'ut', 'ut3gd1r04',
+                                    contains='vlan110')
+        self.check_plenary_contents('hostdata', 'ut3gd1r04.aqd-unittest.ms.com',
+                                    contains='vlan110')
 
     def testaddloopback(self):
         command = ["add", "interface", "--interface", "loop0",
                    "--iftype", "loopback",
                    "--network_device", "ut3gd1r04.aqd-unittest.ms.com"]
         self.noouttest(command)
+        self.check_plenary_contents('network_device', 'americas', 'ut', 'ut3gd1r04',
+                                    contains='loop0')
+        self.check_plenary_contents('hostdata', 'ut3gd1r04.aqd-unittest.ms.com',
+                                    contains='loop0')
 
     def testfailloopbackmac(self):
         command = ["add", "interface", "--interface", "loop1",
@@ -477,6 +502,10 @@ class TestAddInterface(TestBrokerCommand):
         out = self.badrequesttest(command)
         self.matchoutput(out, "Loopback interfaces cannot have a MAC address.",
                          command)
+        self.check_plenary_contents('network_device', 'americas', 'ut', 'ut3gd1r04',
+                                    clean='loop1')
+        self.check_plenary_contents('hostdata', 'ut3gd1r04.aqd-unittest.ms.com',
+                                    clean='loop1')
 
     def testverifyut3gd1r04(self):
         command = ["show", "network_device", "--network_device",
@@ -533,16 +562,17 @@ class TestAddInterface(TestBrokerCommand):
         command = "cat --machine ut11s01p1"
         out = self.commandtest(command.split(" "))
         self.searchoutput(out,
-                          r'"cards/nic" = nlist\(\s*'
-                          r'"eth0", create\("hardware/nic/generic/generic_nic",\s*'
+                          r'"cards/nic/eth0" = '
+                          r'create\("hardware/nic/generic/generic_nic",\s*'
                           r'"boot", true,\s*'
-                          r'"hwaddr", "%s"\s*\),'
+                          r'"hwaddr", "%s"\s*\);'
                           % self.net["vmotion_net"].usable[2].mac,
                           command)
         self.searchoutput(out,
-                          r'"eth1", create\("hardware/nic/generic/generic_nic",\s*'
+                          r'"cards/nic/eth1" = '
+                          r'create\("hardware/nic/generic/generic_nic",\s*'
                           r'"hwaddr", "%s",\s*'
-                          r'"port_group", "storage-v701"\s*\)\s*\);'
+                          r'"port_group", "storage-v701"\s*\);'
                           % self.net["vm_storage_net"].usable[0].mac,
                           command)
 

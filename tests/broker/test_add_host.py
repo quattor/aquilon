@@ -460,11 +460,11 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
             else:
                 self.fail("Unrecognized interface '%s'" % i.device)
 
-    def testaddhostnousefularchetype(self):
+    def testaddbadhostnousefularchetype(self):
+        ip = self.net["vm_storage_net"].usable[25]
         command = ["add", "host", "--archetype", "filer",
-                   "--hostname", "unittest01.one-nyp.ms.com",
-                   "--ip", self.net["unknown0"].usable[10],
-                   "--domain", "unittest", "--machine", "ut3c1n4"]
+                   "--hostname", "filer1.ms.com", "--ip", ip,
+                   "--domain", "unittest", "--machine", "filer1"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Can not determine a sensible default OS", command)
 

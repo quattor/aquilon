@@ -93,7 +93,7 @@ class TestDelStaticRoute(TestBrokerCommand, MachineTestMixin):
                    "--data", "--generate"]
         out = self.commandtest(command)
         self.searchoutput(out,
-                          r'"eth1", nlist\(\s*'
+                          r'"system/network/interfaces/eth1" = nlist\(\s*'
                           r'"bootproto", "static",\s*'
                           r'"broadcast", "%s",\s*'
                           r'"fqdn", "unittest26-e1.aqd-unittest.ms.com",\s*'

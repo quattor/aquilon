@@ -168,6 +168,8 @@ class TestUpdateInterface(TestBrokerCommand):
                    "--mac", mac, "--network_device=ut3gd1r06.aqd-unittest.ms.com"]
         self.noouttest(command)
         self.dsdb_verify()
+        self.check_plenary_contents('network_device', 'americas', 'ut', 'ut3gd1r06',
+                                    contains=['xge49', str(mac)])
 
     def test_130_update_switch2(self):
         # This is the primary interface; in reality the update to DSDB
@@ -241,6 +243,10 @@ class TestUpdateInterface(TestBrokerCommand):
                                 "vlan110_hsrp", "vlan220_hsrp")
         self.noouttest(command)
         self.dsdb_verify()
+        self.check_plenary_contents('network_device', 'americas', 'ut', 'ut3gd1r04',
+                                    contains='vlan220', clean='vlan110')
+        self.check_plenary_contents('hostdata', 'ut3gd1r04.aqd-unittest.ms.com',
+                                    contains='vlan220', clean='vlan110')
 
     def test_170_add_service_addr(self):
         ip = self.net["zebra_vip"].usable[5]
@@ -257,16 +263,15 @@ class TestUpdateInterface(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchclean(out, "eth1", command)
         self.searchoutput(out,
-                          r'"system/network/interfaces" = nlist\(\s*'
-                          r'"eth0", nlist\(',
+                          r'"system/network/interfaces/eth0" = nlist\(\s*',
                           command)
 
         command = ["cat", "--machine", "evm20"]
         out = self.commandtest(command)
         self.matchclean(out, "eth1", command)
         self.searchoutput(out,
-                          r'"cards/nic" = nlist\(\s*'
-                          r'"eth0", create\("hardware/nic/utvirt/default",\s*',
+                          r'"cards/nic/eth0" = '
+                          r'create\("hardware/nic/utvirt/default",\s*',
                           command)
 
         command = ["cat", "--hostname", "ivirt11.aqd-unittest.ms.com",
@@ -289,16 +294,15 @@ class TestUpdateInterface(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchclean(out, "eth0", command)
         self.searchoutput(out,
-                          r'"system/network/interfaces" = nlist\(\s*'
-                          r'"eth1", nlist\(',
+                          r'"system/network/interfaces/eth1" = nlist\(\s*',
                           command)
 
         command = ["cat", "--machine", "evm20"]
         out = self.commandtest(command)
         self.matchclean(out, "eth0", command)
         self.searchoutput(out,
-                          r'"cards/nic" = nlist\(\s*'
-                          r'"eth1", create\("hardware/nic/utvirt/default",\s*',
+                          r'"cards/nic/eth1" = '
+                          r'create\("hardware/nic/utvirt/default",\s*',
                           command)
 
         command = ["cat", "--hostname", "ivirt11.aqd-unittest.ms.com",
@@ -434,17 +438,17 @@ class TestUpdateInterface(TestBrokerCommand):
         command = "cat --machine ut3c5n10"
         out = self.commandtest(command.split(" "))
         self.searchoutput(out,
-                          r'"cards/nic" = nlist\(\s*'
-                          r'"eth0", create\("hardware/nic/generic/generic_nic",\s*'
+                          r'"cards/nic/eth0" = '
+                          r'create\("hardware/nic/generic/generic_nic",\s*'
                           r'"bus", "pci:0000:0b:00.0",\s*'
-                          r'"hwaddr", "%s"\s*\),'
+                          r'"hwaddr", "%s"\s*\);'
                           % self.net["unknown0"].usable[11].mac,
                           command)
         self.searchoutput(out,
-                          r'"eth1", create\("hardware/nic/intel/e1000",\s*'
+                          r'"cards/nic/eth1" = create\("hardware/nic/intel/e1000",\s*'
                           r'"boot", true,\s*'
                           r'"bus", "pci:0000:0b:00.1",\s*'
-                          r'"hwaddr", "%s"\s*\)\s*\);'
+                          r'"hwaddr", "%s"\s*\);'
                           % self.net["unknown0"].usable[12].mac,
                           command)
 
@@ -459,7 +463,7 @@ class TestUpdateInterface(TestBrokerCommand):
         # After flipping the boot flag, the static route should now appear on
         # eth0
         self.searchoutput(out,
-                          r'"eth0", nlist\(\s*'
+                          r'"system/network/interfaces/eth0" = nlist\(\s*'
                           r'"bootproto", "static",\s*'
                           r'"broadcast", "%s",\s*'
                           r'"fqdn", "unittest02.one-nyp.ms.com",\s*'
@@ -477,10 +481,11 @@ class TestUpdateInterface(TestBrokerCommand):
                           (net.broadcast, net.gateway,
                            eth0ip, net.netmask, route_gateway),
                           command)
-        self.searchoutput(out, r'"eth1", nlist\(\s*"bootproto", "none"\s*\)',
+        self.searchoutput(out, r'"system/network/interfaces/eth1" = nlist\(\s*'
+                               r'"bootproto", "none"\s*\)',
                           command)
         self.searchoutput(out,
-                          r'"eth1\.2", nlist\(\s*'
+                          r'"system/network/interfaces/eth1\.2" = nlist\(\s*'
                           r'"bootproto", "none",\s*'
                           r'"physdev", "eth1",\s*'
                           r'"vlan", true\s*\)',

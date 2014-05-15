@@ -85,7 +85,7 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
                          '"hardware" = create("machine/americas/ut/ut3/ut3c5n10");',
                          command)
         self.searchoutput(out,
-                          r'"eth0", nlist\(\s*'
+                          r'"system/network/interfaces/eth0" = nlist\(\s*'
                           r'"bootproto", "static",\s*'
                           r'"broadcast", "%s",\s*'
                           r'"fqdn", "unittest02.one-nyp.ms.com",\s*'
@@ -169,7 +169,7 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
                          '"hardware" = create("machine/americas/ut/ut3/ut3c1n3");',
                          command)
         self.searchoutput(out,
-                          r'"eth0", nlist\(\s*'
+                          r'"system/network/interfaces/eth0" = nlist\(\s*'
                           r'"bootproto", "static",\s*'
                           r'"broadcast", "%s",\s*'
                           r'"fqdn", "unittest00.one-nyp.ms.com",\s*'
@@ -191,7 +191,7 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
                            self.net["unknown0"].gateway),
                           command)
         self.searchoutput(out,
-                          r'"eth1", nlist\(\s*'
+                          r'"system/network/interfaces/eth1" = nlist\(\s*'
                           r'"bootproto", "static",\s*'
                           r'"broadcast", "%s",\s*'
                           r'"fqdn", "unittest00-e1.one-nyp.ms.com",\s*'

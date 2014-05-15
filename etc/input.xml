@@ -2485,7 +2485,7 @@
       <optgroup name="cat_options" mandatory="False" fields="any">
          <option name="default" type="flag" conflicts="hostname machine cluster city network_device switch">Show the default client config for the service/instance</option>
          <option name="server" type="flag" conflicts="hostname machine cluster city network_device switch">Show the server config for the service/instance</option>
-         <option name="data" type="flag" conflicts="machine service city network_device switch">Show the data template for the host/cluster</option>
+         <option name="data" type="flag" conflicts="machine service city switch">Show the data template for the host/cluster</option>
          <option name="instance" type="string" conflicts="hostname machine cluster city network_device switch">Name of the service instance</option>
          <option name="generate" type="flag">Show the plenary template as it would be generated</option>
       </optgroup>
@@ -3473,6 +3473,19 @@
 	 <option name="vendor" type="string">Network device vendor. Needed if the model name is not unique</option>
 	 <option name="serial" type="string">Serial Number</option>
 	 <option name="comments" type="string">Comments</option>
+      </optgroup>
+      <optgroup name="add_network_device_host_branch" mandatory="False" fields="any">
+         <option name="archetype" type="string">Archetype name</option>
+         <option name="domain" type="string" conflicts="sandbox">Template (not DNS) domain</option>
+         <option name="sandbox" type="string" conflicts="domain">Name of the sandbox (given as 'author/branch')</option>
+      </optgroup>
+      <optgroup name="add_network_device_host_options">
+         <option name="osname" type="string">Operating system (e.g. ios)</option>
+         <option name="osversion" type="string">Operating system version</option>
+         <option name="buildstatus" type="string">Build Status: defaults to build.  'blind' and 'ready' also valid.</option>
+         <option name="personality" type="string">Personality name: defaults to 'generic'.</option>
+         <option name="grn" type="string" conflicts="eon_id">GRN as string</option>
+         <option name="eon_id" type="int" conflicts="grn">Numeric EON ID</option>
       </optgroup>
       <transport method="put" path="network_device/%(network_device)s" />
    </command>

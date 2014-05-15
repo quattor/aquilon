@@ -200,7 +200,7 @@ class TestSearchHost(TestBrokerCommand):
         self.matchclean(out, "unittest02rsa.one-nyp.ms.com", command)
         self.matchoutput(out, self.aurora_with_node, command)
         self.matchoutput(out, self.aurora_without_node, command)
-        self.matchclean(out, "ut3gd1r01.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "ut3gd1r01.aqd-unittest.ms.com", command)
         self.matchclean(out, "ut3c1.aqd-unittest.ms.com", command)
 
     def testpersonalityavailable(self):

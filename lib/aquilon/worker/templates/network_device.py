@@ -15,29 +15,29 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import re
 import logging
 
 from sqlalchemy.inspection import inspect
 
 from aquilon.worker.locks import NoLockKey, PlenaryKey
-from aquilon.worker.templates import Plenary, StructurePlenary
-from aquilon.worker.templates.panutils import pan
+from aquilon.worker.templates import (Plenary, StructurePlenary,
+                                      add_location_info)
+from aquilon.worker.templates.panutils import pan, pan_assign, pan_include
 from aquilon.aqdb.model import NetworkDevice
+from aquilon.utils import nlist_key_re
 
 
 LOGGER = logging.getLogger(__name__)
 
 
-class PlenaryNetworkDevice(StructurePlenary):
-    """
-    A facade for the variety of PlenaryNetworkDevice subsidiary files
-    """
-
-    prefix = "switchdata"
+class PlenaryNetworkDeviceInfo(StructurePlenary):
 
     @classmethod
-    def template_name(cls, dbhost):
-        return cls.prefix + "/" + str(dbhost.fqdn)
+    def template_name(cls, dbmachine):
+        loc = dbmachine.location
+        return "network_device/%s/%s/%s" % (loc.hub.fullname.lower(),
+                                            loc.building, dbmachine.label)
 
     def get_key(self, exclusive=True):
         if inspect(self.dbobj).deleted:
@@ -49,19 +49,40 @@ class PlenaryNetworkDevice(StructurePlenary):
                               exclusive=exclusive)
 
     def body(self, lines):
+        pan_assign(lines, "nodename", self.dbobj.label)
+        if self.dbobj.serial_no:
+            pan_assign(lines, "serialnumber", self.dbobj.serial_no)
+        lines.append("")
 
-        vlans = {}
-        for ov in self.dbobj.observed_vlans:
-            vlan = {}
+        pan_assign(lines, "model_type", self.dbobj.model.model_type)
+        pan_include(lines, "hardware/network_device/%s/%s" %
+                    (self.dbobj.model.vendor.name, self.dbobj.model.name))
+        lines.append("")
 
-            vlan["vlanid"] = pan(ov.vlan.vlan_id)
-            vlan["network_ip"] = ov.network.ip
-            vlan["netmask"] = ov.network.netmask
-            vlan["network_type"] = ov.network.network_type
-            vlan["network_environment"] = ov.network.network_environment.name
+        add_location_info(lines, self.dbobj.location)
+        lines.append("")
 
-            vlans[ov.vlan.port_group] = vlan
+        interfaces = {}
+        for interface in self.dbobj.interfaces:
+            ifinfo = {}
+            ifinfo["type"] = interface.interface_type
+            if interface.mac:
+                ifinfo["hwaddr"] = interface.mac
+            interfaces[interface.name] = ifinfo
+        for name in sorted(interfaces.keys()):
+            # This is ugly. We can't blindly escape, because that would affect
+            # e.g. VLAN interfaces. Calling unescape() for a non-escaped VLAN
+            # interface name is safe though, so we can hopefully get rid of this
+            # once the templates are changed to call unescape().
+            if nlist_key_re.match(name):
+                pan_assign(lines, "cards/nic/%s" % name,
+                           interfaces[name])
+            else:
+                pan_assign(lines, "cards/nic/{%s}" % name,
+                           interfaces[name])
+        lines.append("")
 
-        lines.append('"system/network/vlans" = %s;' % pan(vlans))
 
-Plenary.handlers[NetworkDevice] = PlenaryNetworkDevice
+Plenary.handlers[NetworkDevice] = PlenaryNetworkDeviceInfo
+
+

@@ -137,7 +137,7 @@ class TestAddStaticRoute(TestBrokerCommand, MachineTestMixin):
                    "--data", "--generate"]
         out = self.commandtest(command)
         self.searchoutput(out,
-                          r'"eth0", nlist\(\s*'
+                          r'"system/network/interfaces/eth0" = nlist\(\s*'
                           r'"bootproto", "static",\s*'
                           r'"broadcast", "%s",\s*'
                           r'"fqdn", "unittest26.aqd-unittest.ms.com",\s*'
@@ -156,7 +156,7 @@ class TestAddStaticRoute(TestBrokerCommand, MachineTestMixin):
                            eth0_net.netmask, eth0_net.gateway),
                           command)
         self.searchoutput(out,
-                          r'"eth1", nlist\(\s*'
+                          r'"system/network/interfaces/eth1" = nlist\(\s*'
                           r'"bootproto", "static",\s*'
                           r'"broadcast", "%s",\s*'
                           r'"fqdn", "unittest26-e1.aqd-unittest.ms.com",\s*'
@@ -185,7 +185,7 @@ class TestAddStaticRoute(TestBrokerCommand, MachineTestMixin):
                    "--data", "--generate"]
         out = self.commandtest(command)
         self.searchoutput(out,
-                          r'"eth0", nlist\(\s*'
+                          r'"system/network/interfaces/eth0" = nlist\(\s*'
                           r'"bootproto", "static",\s*'
                           r'"broadcast", "%s",\s*'
                           r'"fqdn", "unittest27.aqd-unittest.ms.com",\s*'
@@ -204,7 +204,7 @@ class TestAddStaticRoute(TestBrokerCommand, MachineTestMixin):
                            eth0_net.netmask, eth0_net.gateway),
                           command)
         self.searchoutput(out,
-                          r'"eth1", nlist\(\s*'
+                          r'"system/network/interfaces/eth1" = nlist\(\s*'
                           r'"bootproto", "static",\s*'
                           r'"broadcast", "%s",\s*'
                           r'"fqdn", "unittest27-e1.aqd-unittest.ms.com",\s*'
@@ -241,7 +241,7 @@ class TestAddStaticRoute(TestBrokerCommand, MachineTestMixin):
                    "--generate"]
         out = self.commandtest(command)
         self.searchoutput(out,
-                          r'"eth0", nlist\(\s*'
+                          r'"system/network/interfaces/eth0" = nlist\(\s*'
                           r'"bootproto", "static",\s*'
                           r'"broadcast", "%s",\s*'
                           r'"fqdn", "unittest02.one-nyp.ms.com",\s*'

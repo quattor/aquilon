@@ -89,6 +89,7 @@ Archetype(name="filer", is_compileable=True)
 Archetype(name="storagecluster", cluster_type="storage", outputdesc="Storage")
 Archetype(name="vmhost", is_compileable=True)
 Archetype(name="esx_cluster", is_compileable=True, cluster_type="esx", outputdesc="ESX")
+Archetype(name="telco", is_compileable=True)
 
 Archetype(name="windows")
 Archetype(name="f5")
@@ -110,6 +111,7 @@ OperatingSystem(archetype=@vmhost, name="esxi", version="4.0.0")
 OperatingSystem(archetype=@vmhost, name="esxi", version="4.1.0-u1")
 OperatingSystem(archetype=Archetype(name="filer"), name="ontap", version="7.3.3p1")
 OperatingSystem(archetype=Archetype(name="f5"), name="f5", version="generic")
+OperatingSystem(archetype=Archetype(name="telco"), name="generic", version="generic")
 
 # Vulcan2.0
 Archetype(name="metacluster", is_compileable=True, cluster_type="meta", outputdesc="ESX")

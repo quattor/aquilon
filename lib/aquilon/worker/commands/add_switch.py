@@ -35,4 +35,6 @@ class CommandAddSwitch(CommandAddNetworkDevice):
             else:
                 iftype = 'oa'
         return CommandAddNetworkDevice.render(self, network_device=switch,
-                                              iftype=iftype, **arguments)
+                                              iftype=iftype, archetype=None,
+                                              domain=None, sandbox=None,
+                                              **arguments)

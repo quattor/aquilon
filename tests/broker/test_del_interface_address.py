@@ -144,6 +144,8 @@ class TestDelInterfaceAddress(TestBrokerCommand):
                    "--interface", "vlan220", "--ip", ip]
         self.noouttest(command)
         self.dsdb_verify()
+        self.check_plenary_contents('hostdata', 'ut3gd1r04.aqd-unittest.ms.com',
+                                    clean=str(ip))
 
     def testdelut3gd1r04vlan220hsrp(self):
         ip = self.net["tor_net_12"].usable[2]
@@ -153,6 +155,8 @@ class TestDelInterfaceAddress(TestBrokerCommand):
                    "--interface", "vlan220", "--label", "hsrp"]
         self.noouttest(command)
         self.dsdb_verify()
+        self.check_plenary_contents('hostdata', 'ut3gd1r04.aqd-unittest.ms.com',
+                                    clean=str(ip))
 
     def testdelut3gd1r04loop0(self):
         ip = self.net["autopg1"][0]
@@ -162,6 +166,8 @@ class TestDelInterfaceAddress(TestBrokerCommand):
                    "--interface", "loop0", "--ip", ip]
         self.noouttest(command)
         self.dsdb_verify()
+        self.check_plenary_contents('hostdata', 'ut3gd1r04.aqd-unittest.ms.com',
+                                    clean=str(ip))
 
 
 if __name__ == '__main__':

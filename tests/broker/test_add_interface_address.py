@@ -353,6 +353,8 @@ class TestAddInterfaceAddress(TestBrokerCommand):
                    "--interface", "vlan110", "--ip", ip]
         self.noouttest(command)
         self.dsdb_verify()
+        self.check_plenary_contents('hostdata', 'ut3gd1r04.aqd-unittest.ms.com',
+                                    contains=str(ip))
 
     def testaddut3gd1r04vlan110hsrp(self):
         ip = self.net["tor_net_12"].usable[2]
@@ -364,6 +366,8 @@ class TestAddInterfaceAddress(TestBrokerCommand):
                    "--interface", "vlan110", "--label", "hsrp", "--ip", ip]
         self.noouttest(command)
         self.dsdb_verify()
+        self.check_plenary_contents('hostdata', 'ut3gd1r04.aqd-unittest.ms.com',
+                                    contains=str(ip))
 
     def testaddut3gd1r04loop0(self):
         # Use the network address
@@ -376,6 +380,8 @@ class TestAddInterfaceAddress(TestBrokerCommand):
                    "--interface", "loop0", "--ip", ip]
         self.noouttest(command)
         self.dsdb_verify()
+        self.check_plenary_contents('hostdata', 'ut3gd1r04.aqd-unittest.ms.com',
+                                    contains=str(ip))
 
     def testverifyut3gd1r04(self):
         command = ["show", "network_device", "--network_device", "ut3gd1r04.aqd-unittest.ms.com"]

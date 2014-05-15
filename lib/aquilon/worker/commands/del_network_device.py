@@ -22,9 +22,11 @@ from aquilon.aqdb.model import NetworkDevice
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.dns import delete_dns_record
 from aquilon.worker.dbwrappers.hardware_entity import check_only_primary_ip
+from aquilon.worker.dbwrappers.host import remove_host
 from aquilon.worker.locks import CompileKey
 from aquilon.worker.processes import DSDBRunner
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
+from aquilon.worker.templates.switchdata import PlenarySwitchData
 
 
 class CommandDelNetworkDevice(BrokerCommand):
@@ -37,6 +39,16 @@ class CommandDelNetworkDevice(BrokerCommand):
         check_only_primary_ip(dbnetdev)
 
         oldinfo = DSDBRunner.snapshot_hw(dbnetdev)
+
+        plenaries = PlenaryCollection(logger=logger)
+        remove_plenaries = PlenaryCollection(logger=logger)
+
+        remove_host(session, logger, dbnetdev, plenaries, remove_plenaries)
+
+        # Update cluster plenaries connected to this network device
+        for dbcluster in dbnetdev.esx_clusters:
+            plenaries.append(Plenary.get_plenary(dbcluster))
+
         dbdns_rec = dbnetdev.primary_name
         session.delete(dbnetdev)
         if dbdns_rec:
@@ -47,19 +59,21 @@ class CommandDelNetworkDevice(BrokerCommand):
         # Any network device ports hanging off this network device should be deleted with
         # the cascade delete of the network device.
 
-        netdev_plenary = Plenary.get_plenary(dbnetdev, logger=logger)
+        remove_plenaries.append(PlenarySwitchData.get_plenary(dbnetdev, logger=logger))
+        remove_plenaries.append(Plenary.get_plenary(dbnetdev, logger=logger))
 
-        # clusters connected to this network device
-        plenaries = PlenaryCollection(logger=logger)
-
+        # Update cluster plenaries connected to this network device
         for dbcluster in dbnetdev.esx_clusters:
             plenaries.append(Plenary.get_plenary(dbcluster))
 
-        with CompileKey.merge([netdev_plenary.get_key(), plenaries.get_key()]):
-            netdev_plenary.stash()
+        with CompileKey.merge([plenaries.get_key(),
+                               remove_plenaries.get_key()]):
+            plenaries.stash()
+            remove_plenaries.stash()
+
             try:
                 plenaries.write(locked=True)
-                netdev_plenary.remove(locked=True)
+                remove_plenaries.remove(locked=True)
 
                 dsdb_runner = DSDBRunner(logger=logger)
                 dsdb_runner.update_host(None, oldinfo)
@@ -67,6 +81,6 @@ class CommandDelNetworkDevice(BrokerCommand):
                                                "from DSDB")
             except:
                 plenaries.restore_stash()
-                netdev_plenary.restore_stash()
+                remove_plenaries.restore_stash()
                 raise
         return

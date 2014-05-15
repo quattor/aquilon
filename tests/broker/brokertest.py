@@ -117,6 +117,41 @@ class TestBrokerCommand(unittest.TestCase):
         dir = self.config.get("broker", "plenarydir")
         return os.path.join(dir, *template) + self.template_extension
 
+    def check_plenary_exists(self, *path):
+        plenary = self.plenary_name(*path)
+        self.failUnless(os.path.exists(plenary),
+                        "Plenary '%s' does not exist." % plenary)
+
+    def check_plenary_nonexistant(self, *path):
+        plenary = self.plenary_name(*path)
+        self.failIf(os.path.exists(plenary),
+                    "Plenary '%s' was not expected to exist." % plenary)
+
+    def check_plenary_contents(self, *path, **kwargs):
+        # Passing lists as a keyword arg triggrest a type error
+        contains = kwargs.pop('contains', None)
+        clean = kwargs.pop('clean', None)
+        if not contains and not clean:
+            self.assert_(0, "check_plenary_contents called without "
+                            "contains or clean")
+
+        self.check_plenary_exists(*path)
+        plenary = self.plenary_name(*path)
+        with open(plenary) as f:
+            contents = f.read()
+
+        if isinstance(contains, list):
+            for item in contains:
+                self.matchoutput(contents, item, "read %s" % plenary)
+        elif contains:
+            self.matchoutput(contents, contains, "read %s" % plenary)
+
+        if isinstance(clean, list):
+            for item in clean:
+                self.matchoutput(contents, item, "read %s" % plenary)
+        elif clean:
+            self.matchclean(contents, clean, "read %s" % plenary)
+
     def find_template(self, *template, **args):
         """ Figure out the extension of an existing template """
         if args.get("sandbox", None):

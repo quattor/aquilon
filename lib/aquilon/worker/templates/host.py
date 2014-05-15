@@ -35,6 +35,7 @@ from aquilon.worker.templates import (Plenary, ObjectPlenary, StructurePlenary,
 from aquilon.worker.templates.panutils import (StructureTemplate, PanValue,
                                                pan_assign, pan_append,
                                                pan_include)
+from aquilon.utils import nlist_key_re
 
 LOGGER = logging.getLogger(__name__)
 
@@ -212,11 +213,22 @@ class PlenaryHostData(StructurePlenary):
             interfaces[dbinterface.name] = ifdesc
 
         # Okay, here's the real content
-        path = PlenaryMachineInfo.template_name(self.dbobj.hardware_entity)
+        hwplenary = Plenary.get_plenary(self.dbobj.hardware_entity)
+        path = hwplenary.template_name(self.dbobj.hardware_entity)
         pan_assign(lines, "hardware", StructureTemplate(path))
 
         lines.append("")
-        pan_assign(lines, "system/network/interfaces", interfaces)
+        for name in sorted(interfaces.keys()):
+            # This is ugly. We can't blindly escape, because that would affect
+            # e.g. VLAN interfaces. Calling unescape() for a non-escaped VLAN
+            # interface name is safe though, so we can hopefully get rid of this
+            # once the templates are changed to call unescape().
+            if nlist_key_re.match(name):
+                pan_assign(lines, "system/network/interfaces/%s" % name,
+                           interfaces[name])
+            else:
+                pan_assign(lines, "system/network/interfaces/{%s}" % name,
+                           interfaces[name])
 
         if self.dbobj.hardware_entity.primary_ip:
             pan_assign(lines, "system/network/primary_ip",

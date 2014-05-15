@@ -29,6 +29,7 @@ from aquilon.worker.templates import (Plenary, StructurePlenary,
                                       add_location_info)
 from aquilon.worker.templates.panutils import (StructureTemplate, pan_assign,
                                                pan_include, PanMetric)
+from aquilon.utils import nlist_key_re
 
 LOGGER = logging.getLogger(__name__)
 
@@ -184,8 +185,15 @@ class PlenaryMachineInfo(StructurePlenary):
         pan_assign(lines, "cpu", cpus)
         for name in sorted(disks.keys()):
             pan_assign(lines, "harddisks/{%s}" % name, disks[name])
-        if interfaces:
-            pan_assign(lines, "cards/nic", interfaces)
+        for name in sorted(interfaces.keys()):
+            # This is ugly. We can't blindly escape, because that would affect
+            # e.g. VLAN interfaces. Calling unescape() for a non-escaped VLAN
+            # interface name is safe though, so we can hopefully get rid of this
+            # once the templates are changed to call unescape().
+            if nlist_key_re.match(name):
+                pan_assign(lines, "cards/nic/%s" % name, interfaces[name])
+            else:
+                pan_assign(lines, "cards/nic/{%s}" % name, interfaces[name])
 
         # /hardware/console/preferred must be set, so we can't assign to
         # "/console" directly

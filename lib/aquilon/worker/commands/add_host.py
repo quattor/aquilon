@@ -18,14 +18,11 @@
 
 
 from aquilon.exceptions_ import ArgumentError, ProcessException
-from aquilon.aqdb.model import (Host, OperatingSystem, Archetype,
-                                HostLifecycle, Machine, Personality,
-                                ServiceAddress, HostResource)
+from aquilon.aqdb.model import (Machine, ServiceAddress, HostResource)
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.dbwrappers.branch import get_branch_and_author
 from aquilon.worker.dbwrappers.dns import grab_address
-from aquilon.worker.dbwrappers.grn import lookup_grn
 from aquilon.worker.dbwrappers.interface import generate_ip, assign_address
+from aquilon.worker.dbwrappers.host import create_host
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
 from aquilon.worker.processes import DSDBRunner
 
@@ -48,59 +45,12 @@ class CommandAddHost(BrokerCommand):
 
     required_parameters = ["hostname", "machine", "archetype"]
 
-    def render(self, session, logger, hostname, machine, archetype, domain,
-               sandbox, osname, osversion, buildstatus, personality, comments,
-               zebra_interfaces, grn, eon_id, skip_dsdb_check=False,
-               **arguments):
-        dbarchetype = Archetype.get_unique(session, archetype, compel=True)
-        section = "archetype_" + dbarchetype.name
+    def render(self, session, logger, hostname, machine, archetype,
+               zebra_interfaces, skip_dsdb_check=False, **arguments):
 
-        # This is for the various add_*_host commands
-        if not domain and not sandbox:
-            domain = self.config.get(section, "host_domain")
-
-        (dbbranch, dbauthor) = get_branch_and_author(session, logger,
-                                                     domain=domain,
-                                                     sandbox=sandbox,
-                                                     compel=True)
-
-        if hasattr(dbbranch, "allow_manage") and not dbbranch.allow_manage:
-            raise ArgumentError("Adding hosts to {0:l} is not allowed."
-                                .format(dbbranch))
-
-        if not buildstatus:
-            buildstatus = 'build'
-        dbstatus = HostLifecycle.get_instance(session, buildstatus)
         dbmachine = Machine.get_unique(session, machine, compel=True)
-        oldinfo = DSDBRunner.snapshot_hw(dbmachine)
 
-        if not personality:
-            if self.config.has_option(section, "default_personality"):
-                personality = self.config.get(section, "default_personality")
-            else:
-                personality = 'generic'
-        dbpersonality = Personality.get_unique(session, name=personality,
-                                               archetype=dbarchetype, compel=True)
-
-        if not osname:
-            if self.config.has_option(section, "default_osname"):
-                osname = self.config.get(section, "default_osname")
-        if not osversion:
-            if self.config.has_option(section, "default_osversion"):
-                osversion = self.config.get(section, "default_osversion")
-
-        if not osname or not osversion:
-            raise ArgumentError("Can not determine a sensible default OS "
-                                "for archetype %s. Please use the "
-                                "--osname and --osversion parameters." %
-                                (dbarchetype.name))
-
-        dbos = OperatingSystem.get_unique(session, name=osname,
-                                          version=osversion,
-                                          archetype=dbarchetype, compel=True)
-
-        if (dbmachine.model.model_type.isAuroraNode() and
-                dbpersonality.archetype.name != 'aurora'):
+        if (dbmachine.model.model_type.isAuroraNode() and archetype != 'aurora'):
             raise ArgumentError("Machines of type aurora_node can only be "
                                 "added with archetype aurora.")
 
@@ -108,21 +58,24 @@ class CommandAddHost(BrokerCommand):
             raise ArgumentError("{0:c} {0.label} is already allocated to "
                                 "{1:l}.".format(dbmachine, dbmachine.host))
 
-        dbgrn = None
-        if grn or eon_id:
-            dbgrn = lookup_grn(session, grn, eon_id, logger=logger,
-                               config=self.config)
+        dsdb_runner = DSDBRunner(logger=logger)
+        if archetype == 'aurora':
+            # For aurora, check that DSDB has a record of the host.
+            if not skip_dsdb_check:
+                try:
+                    dsdb_runner.show_host(hostname)
+                except ProcessException, e:
+                    raise ArgumentError("Could not find host in DSDB: "
+                                        "%s" % e)
+            # As the host already exists in DSDB we don't need a snapshot
+            oldinfo = None
+        else:
+            # Create a snapshop of the machine before we create the host; but
+            # not for aurora nodes as we dont update DSDB
+            oldinfo = DSDBRunner.snapshot_hw(dbmachine)
 
-        dbhost = Host(hardware_entity=dbmachine, branch=dbbranch,
-                      owner_grn=dbgrn, sandbox_author=dbauthor,
-                      personality=dbpersonality, status=dbstatus,
-                      operating_system=dbos, comments=comments)
-        session.add(dbhost)
-
-        if dbgrn and self.config.has_option("archetype_" + archetype, "default_grn_target"):
-            dbhost.grns.append((dbhost, dbgrn,
-                                self.config.get("archetype_" + archetype,
-                                                "default_grn_target")))
+        dbhost = create_host(session, logger, self.config, dbmachine,
+                             archetype, **arguments)
 
         if zebra_interfaces:
             # --autoip does not make sense for Zebra (at least not the way it's
@@ -183,23 +136,7 @@ class CommandAddHost(BrokerCommand):
         with plenaries.get_key():
             try:
                 plenaries.write(locked=True)
-
-                # XXX: This (and some of the code above) is horrible.  There
-                # should be a generic/configurable hook here that could kick
-                # in based on archetype and/or domain.
-                dsdb_runner = DSDBRunner(logger=logger)
-                if dbhost.archetype.name == 'aurora':
-                    # For aurora, check that DSDB has a record of the host.
-                    if not skip_dsdb_check:
-                        try:
-                            dsdb_runner.show_host(hostname)
-                        except ProcessException, e:
-                            raise ArgumentError("Could not find host in DSDB: "
-                                                "%s" % e)
-                elif not dbmachine.primary_ip:
-                    logger.info("No IP for %s, not adding to DSDB." %
-                                dbmachine.fqdn)
-                else:
+                if oldinfo:
                     dsdb_runner.update_host(dbmachine, oldinfo)
                     dsdb_runner.commit_or_rollback("Could not add host to DSDB")
             except:

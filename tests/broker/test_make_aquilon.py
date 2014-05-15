@@ -79,7 +79,7 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
                          '"hardware" = create("machine/americas/ut/ut3/ut3c5n10");',
                          command)
         self.searchoutput(out,
-                          r'"eth0", nlist\(\s*'
+                          r'"system/network/interfaces/eth0" = nlist\(\s*'
                           r'"bootproto", "static",\s*'
                           r'"broadcast", "%s",\s*'
                           r'"fqdn", "unittest02.one-nyp.ms.com",\s*'
@@ -87,21 +87,21 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
                           r'"ip", "%s",\s*'
                           r'"netmask", "%s",\s*'
                           r'"network_environment", "internal",\s*'
-                          r'"network_type", "unknown"\s*\)\s*' %
+                          r'"network_type", "unknown"\s*\);' %
                           (self.net["unknown0"].broadcast,
                            self.net["unknown0"].gateway,
                            self.net["unknown0"].usable[0],
                            self.net["unknown0"].netmask),
                           command)
         self.searchoutput(out,
-                          r'"eth1", nlist\(\s*'
-                          r'"bootproto", "none"\s*\)',
+                          r'"system/network/interfaces/eth1" = nlist\(\s*'
+                          r'"bootproto", "none"\s*\);',
                           command)
         self.searchoutput(out,
-                          r'"eth1\.2", nlist\(\s*'
+                          r'"system/network/interfaces/eth1\.2" = nlist\(\s*'
                           r'"bootproto", "none",\s*'
                           r'"physdev", "eth1",\s*'
-                          r'"vlan", true\s*\)',
+                          r'"vlan", true\s*\);',
                           command)
         self.matchoutput(out, '"system/network/default_gateway" = "%s";' %
                          self.net["unknown0"].gateway, command)
@@ -237,7 +237,7 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
                          '"hardware" = create("machine/americas/ut/ut3/ut3c1n3");',
                          command)
         self.searchoutput(out,
-                          r'"eth0", nlist\(\s*'
+                          r'"system/network/interfaces/eth0" = nlist\(\s*'
                           r'"bootproto", "static",\s*'
                           r'"broadcast", "%s",\s*'
                           r'"fqdn", "unittest00.one-nyp.ms.com",\s*'
@@ -245,14 +245,14 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
                           r'"ip", "%s",\s*'
                           r'"netmask", "%s",\s*'
                           r'"network_environment", "internal",\s*'
-                          r'"network_type", "unknown"\s*\),\s*' %
+                          r'"network_type", "unknown"\s*\);' %
                           (self.net["unknown0"].broadcast,
                            self.net["unknown0"].gateway,
                            self.net["unknown0"].usable[2],
                            self.net["unknown0"].netmask),
                           command)
         self.searchoutput(out,
-                          r'"eth1", nlist\(\s*'
+                          r'"system/network/interfaces/eth1" = nlist\(\s*'
                           r'"bootproto", "static",\s*'
                           r'"broadcast", "%s",\s*'
                           r'"fqdn", "unittest00-e1.one-nyp.ms.com",\s*'

@@ -21,10 +21,10 @@ from operator import attrgetter
 from aquilon.aqdb.model import Host
 from aquilon.worker.formats.formatters import ObjectFormatter
 from aquilon.worker.formats.list import ListFormatter
+from aquilon.worker.dbwrappers.feature import (model_features,
+                                               personality_features)
 
 
-# TODO: this formatter is kept only for the protobuf stuff, otherwise
-# MachineFormatter does everything
 class HostFormatter(ObjectFormatter):
     def format_proto(self, host, container):
         skeleton = container.hosts.add()
@@ -40,7 +40,72 @@ class HostFormatter(ObjectFormatter):
             srv_msg.instance = si.name
 
     def format_raw(self, host, indent=""):
+        # The 'aq show host' command returns a host object; however, we
+        # want to display the information about the hardware entity
+        # (machine or network_device) first, so we redirect.  The
+        # formatters should subclass HardwareEntityFormatter, then call
+        # redirect_raw_host_details to display the actual host details.
         return self.redirect_raw(host.hardware_entity, indent)
+
+    def format_raw_host_details(self, host, indent=""):
+        # Subclasses of HardwareEntityFormatter that have an associated
+        # host object can call redirect_raw_host_details, which will in
+        # turn invoke this method.
+        details = []
+        if host.cluster:
+            details.append(indent + "  Member of {0:c}: {0.name}"
+                           .format(host.cluster))
+        if host.resholder and host.resholder.resources:
+            details.append(indent + "  Resources:")
+            for resource in sorted(host.resholder.resources,
+                                   key=attrgetter('resource_type', 'name')):
+                details.append(self.redirect_raw(resource, indent + "    "))
+
+        # TODO: supress features when redirecting personality/archetype
+        details.append(self.redirect_raw(host.personality, indent + "  "))
+        details.append(self.redirect_raw(host.archetype, indent + "  "))
+
+        details.append(self.redirect_raw(host.operating_system, indent + "  "))
+        details.append(indent + "  {0:c}: {1}"
+                       .format(host.branch, host.authored_branch))
+        details.append(self.redirect_raw(host.status, indent + "  "))
+        details.append(indent +
+                       "  Advertise Status: %s" % host.advertise_status)
+
+        if host.owner_grn:
+            details.append(indent + "  Owned by {0:c}: {0.grn}"
+                           .format(host.owner_grn))
+        for grn_rec in sorted(host._grns, key=attrgetter("target")):
+            details.append(indent + "  Used by {0.grn:c}: {0.grn.grn} "
+                           "[target: {0.target}]".format(grn_rec))
+
+        for feature in model_features(host.hardware_entity.model,
+                                      host.personality.archetype,
+                                      host.personality):
+            details.append(indent + "  {0:c}: {0.name}".format(feature))
+        (pre, post) = personality_features(host.personality)
+        for feature in pre:
+            details.append(indent + "  {0:c}: {0.name} [pre_personality]"
+                           .format(feature))
+        for feature in post:
+            details.append(indent + "  {0:c}: {0.name} [post_personality]"
+                           .format(feature))
+
+        for si in sorted(host.services_used,
+                         key=attrgetter("service.name", "name")):
+            details.append(indent + "  Uses Service: %s Instance: %s"
+                           % (si.service.name, si.name))
+        for srv in sorted(host.services_provided,
+                          key=attrgetter("service_instance.service.name",
+                                         "service_instance.name")):
+            details.append(indent + "  Provides Service: %s Instance: %s"
+                           % (srv.service_instance.service.name,
+                              srv.service_instance.name))
+            details.append(self.redirect_raw(srv, indent + "    "))
+        if host.comments:
+            details.append(indent + "  Comments: %s" % host.comments)
+
+        return "\n".join(details)
 
 ObjectFormatter.handlers[Host] = HostFormatter()
 

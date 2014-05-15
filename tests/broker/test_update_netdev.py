@@ -33,8 +33,7 @@ class TestUpdateNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
                    "--network_device", "ut3gd1r01.aqd-unittest.ms.com"]
         out = self.notfoundtest(command)
         self.matchoutput(out,
-                         "Model uttorswitch, vendor generic, "
-                         "model_type switch not found.",
+                         "Model uttorswitch, vendor generic not found.",
                          command)
 
     def testupdateut3gd1r04(self):
@@ -47,6 +46,11 @@ class TestUpdateNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
                    "--comments", "Some new switch comments"]
         self.noouttest(command)
         self.dsdb_verify()
+        self.check_plenary_contents('network_device', 'americas', 'ut', 'ut3gd1r04',
+                                    contains='uttorswitch')
+        self.check_plenary_contents('hostdata', 'ut3gd1r04.aqd-unittest.ms.com',
+                                    contains=str(newip))
+
 
     def testupdatebadip(self):
         ip = self.net["tor_net_12"].usable[0]
@@ -65,6 +69,8 @@ class TestUpdateNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
                    "--rack", "ut4", "--model", "uttorswitch",
                    "--vendor", "hp", "--serial", "SNgd1r05_new"]
         self.noouttest(command)
+        self.check_plenary_contents('network_device', 'americas', 'ut', 'ut3gd1r05',
+                                    contains=['hp', 'SNgd1r05_new', 'uttorswitch'])
 
     def testupdatemisccomment(self):
         # The following update should ommit the interface name
@@ -90,6 +96,8 @@ class TestUpdateNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
                                        switch_type='tor',
                                        ip=ip, mac=mac, interface="xge49")
         self.dsdb_verify()
+        self.check_plenary_contents('network_device', 'americas', 'ut', 'ut3gd1r06',
+                                    contains=str(mac))
 
     def testupdatewithinterface(self):
         newip = self.net["tor_net_8"].usable[1]

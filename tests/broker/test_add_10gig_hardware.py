@@ -239,11 +239,11 @@ class TestAdd10GigHardware(TestBrokerCommand):
                               r'create\("hardware/cpu/intel/xeon_5150"\)\s*\);',
                               command)
             self.searchoutput(out,
-                              r'"cards/nic" = nlist\(\s*'
-                              r'"eth0", create\("hardware/nic/utvirt/default",\s*'
+                              r'"cards/nic/eth0" = '
+                              r'create\("hardware/nic/utvirt/default",\s*'
                               r'"boot", true,\s*'
                               r'"hwaddr", "00:50:56:[0-9a-f:]{8}",\s*'
-                              r'"port_group", "%s"\s*\)\s*\);'
+                              r'"port_group", "%s"\s*\);'
                               % port_group,
                               command)
 
