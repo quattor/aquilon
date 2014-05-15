@@ -51,8 +51,8 @@ config = Config()
 def main():
     print "Using database:", db.dsn
 
-    archetype='telco'
-    domain='telco'
+    archetype='netinfra'
+    domain='netinfra'
     grn='grn:/ms/ei/network/tools/NetManSystems'
 
     buildstatus='build'

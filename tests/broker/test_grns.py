@@ -55,13 +55,13 @@ class TestGrns(VerifyGrnsMixin, TestBrokerCommand):
         self.matchoutput(out, "EON ID: 123456789", command)
         self.matchoutput(out, "Disabled: False", command)
 
-    def test_120_add_telco(self):
+    def test_120_add_netinfra(self):
         self.assert_("grn:/ms/et/aquilon" in self.grns)
         self.assert_(10 in self.eon_ids)
         command = ["add", "grn", "--grn", "/ms/et/aquilon", "--eon_id", "10"]
         self.noouttest(command)
 
-    def test_121_verify_telco(self):
+    def test_121_verify_netinfra(self):
         command = ["show", "grn", "--eon_id", "10"]
         out = self.commandtest(command)
         self.matchoutput(out, "GRN: /ms/et/aquilon", command)

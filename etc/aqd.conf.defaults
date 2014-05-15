@@ -194,7 +194,7 @@ unmap_grn_max_list_size =
 default_network_type = unknown
 
 [hardware_network_device]
-default_archetype = telco
+default_archetype = netinfra
 
 [archetype_aquilon]
 default_personality = inventory
@@ -234,11 +234,11 @@ host_domain = ny-prod
 default_osname = windows
 default_osversion = generic
 
-[archetype_telco]
+[archetype_netinfra]
 default_personality = generic
 default_osname = generic
 default_osversion = generic
-host_domain = telco
+host_domain = netinfra
 
 [network_unknown]
 # Default offset of the gateway's IP address, if there are no explicit router

@@ -46,7 +46,6 @@ Role(name="nobody")
 Role(name="operations")
 Role(name="engineering")
 Role(name="aqd_admin")
-Role(name="telco_eng")
 Role(name="unixops_l2")
 Role(name="winops")
 

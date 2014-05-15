@@ -54,11 +54,11 @@ class TestAddDomain(TestBrokerCommand):
         self.failUnless(os.path.exists(os.path.join(
             self.config.get("broker", "domainsdir"), "unittest")))
 
-    def test_100_addtelco(self):
-        command = ["add_domain", "--domain=telco", "--track=prod"]
+    def test_100_add_netinfra(self):
+        command = ["add_domain", "--domain=netinfra", "--track=prod"]
         self.successtest(command)
         self.failUnless(os.path.exists(os.path.join(
-            self.config.get("broker", "domainsdir"), "telco")))
+            self.config.get("broker", "domainsdir"), "netinfra")))
 
     def test_100_addutprod(self):
         command = ["add_domain", "--domain=ut-prod", "--track=prod"]

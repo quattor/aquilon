@@ -1,8 +1,8 @@
 
 AQ=aq
-ARCHETYPE=telco
+ARCHETYPE=netinfra
 GRN="grn:/ms/ei/network/tools/NetManSystems"
-DOMAIN=telco
+DOMAIN=netinfra
 
 $AQ add archetype --archetype $ARCHETYPE \
 	--nocompilable --description 'ET Devices'
