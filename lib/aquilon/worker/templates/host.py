@@ -167,9 +167,11 @@ class PlenaryHostData(StructurePlenary):
                         gateway = local_rtrs[0]
                         if is_default_route(dbinterface):
                             routers[dbinterface.name] = local_rtrs
-                    else:
+                    elif net.network.numhosts >= 4:
                         # No routers defided, fall back to the default
                         gateway = net.network[net.default_gateway_offset]
+                    else:
+                        gateway = None
 
                     # TODO: generate appropriate routing policy if there are
                     # multiple interfaces marked as default_route
@@ -179,7 +181,8 @@ class PlenaryHostData(StructurePlenary):
                     ifdesc["ip"] = addr.ip
                     ifdesc["netmask"] = net.netmask
                     ifdesc["broadcast"] = net.broadcast
-                    ifdesc["gateway"] = gateway
+                    if gateway:
+                        ifdesc["gateway"] = gateway
                     ifdesc["network_type"] = net.network_type
                     ifdesc["network_environment"] = net.network_environment.name
                     if addr.dns_records:
