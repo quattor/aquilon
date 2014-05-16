@@ -24,10 +24,19 @@ from aquilon.utils import force_int
 int_re = re.compile(r'^(\d+)')
 
 
-def search_next(session, cls, attr, value, start, pack, **filters):
+def search_next(session, cls, attr, value, start, pack, locked=False,
+                **filters):
     q = session.query(cls).filter(attr.startswith(value))
     if filters:
         q = q.filter_by(**filters)
+
+    # Doing the locking here is not the most efficient as we're potentially
+    # locking a lot of rows - but if there's no better object to lock, then we
+    # don't have much choice. Also, locking here won't help if no machine with
+    # the given prefix exists yet, as there are no rows to lock.
+    if locked:
+        q = q.with_lockmode("update")
+
     if start:
         start = force_int("start", start)
     else:
