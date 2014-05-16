@@ -49,7 +49,7 @@ logger = RequestLogger(module_logger=module_logger)
 config = Config()
 
 def main():
-    print "Using database:", db.dsn
+    print "Using database:", str(db.engine.url)
 
     archetype='netinfra'
     domain='netinfra'
