@@ -74,8 +74,8 @@ class CommandAddHost(BrokerCommand):
             # not for aurora nodes as we dont update DSDB
             oldinfo = DSDBRunner.snapshot_hw(dbmachine)
 
-        dbhost = create_host(session, logger, self.config, dbmachine,
-                             archetype, **arguments)
+        create_host(session, logger, self.config, dbmachine, archetype,
+                    **arguments)
 
         if zebra_interfaces:
             # --autoip does not make sense for Zebra (at least not the way it's

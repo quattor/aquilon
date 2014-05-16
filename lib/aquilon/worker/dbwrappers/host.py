@@ -36,86 +36,85 @@ def create_host(session, logger, config, dbhw, archetype, domain=None,
                 sandbox=None, buildstatus=None, personality=None,
                 osname=None, osversion=None, grn=None, eon_id=None,
                 comments=None, **kwargs):
+    ## Archetype
+    dbarchetype = Archetype.get_unique(session, archetype, compel=True)
 
-        ## Archetype
-        dbarchetype = Archetype.get_unique(session, archetype, compel=True)
+    # Section in the config used to determin defaults for this archetype
+    section = "archetype_" + dbarchetype.name
 
-        # Section in the config used to determin defaults for this archetype
-        section = "archetype_" + dbarchetype.name
+    ## branch/sandbox_author
+    # Pick a default domain if not specified or impled by the sandbox
+    if not domain and not sandbox:
+        domain = config.get(section, "host_domain")
 
-        ## branch/sandbox_author
-        # Pick a default domain if not specified or impled by the sandbox
-        if not domain and not sandbox:
-            domain = config.get(section, "host_domain")
+    (dbbranch, dbauthor) = get_branch_and_author(session, logger,
+                                                 domain=domain,
+                                                 sandbox=sandbox,
+                                                 compel=True)
 
-        (dbbranch, dbauthor) = get_branch_and_author(session, logger,
-                                                     domain=domain,
-                                                     sandbox=sandbox,
-                                                     compel=True)
+    # Check if the branch allows hosts to be managed
+    if hasattr(dbbranch, "allow_manage") and not dbbranch.allow_manage:
+        raise ArgumentError("Adding hosts to {0:l} is not allowed."
+                            .format(dbbranch))
 
-        # Check if the branch allows hosts to be managed
-        if hasattr(dbbranch, "allow_manage") and not dbbranch.allow_manage:
-            raise ArgumentError("Adding hosts to {0:l} is not allowed."
-                                .format(dbbranch))
+    ## Lifecycle
+    # Build Status: defaults to build.
+    if not buildstatus:
+        buildstatus = 'build'
 
-        ## Lifecycle
-        # Build Status: defaults to build.
-        if not buildstatus:
-            buildstatus = 'build'
+    dbstatus = HostLifecycle.get_instance(session, buildstatus)
 
-        dbstatus = HostLifecycle.get_instance(session, buildstatus)
+    ## Personality
+    if not personality:
+        if config.has_option(section, "default_personality"):
+            personality = config.get(section, "default_personality")
+        else:
+            personality = 'generic'
 
-        ## Personality
-        if not personality:
-            if config.has_option(section, "default_personality"):
-                personality = config.get(section, "default_personality")
-            else:
-                personality = 'generic'
+    dbpersonality = Personality.get_unique(session, name=personality,
+                                           archetype=dbarchetype,
+                                           compel=True)
 
-        dbpersonality = Personality.get_unique(session, name=personality,
-                                               archetype=dbarchetype,
-                                               compel=True)
+    ## Operating system
+    if not osname:
+        if config.has_option(section, "default_osname"):
+            osname = config.get(section, "default_osname")
 
-        ## Operating system
-        if not osname:
-            if config.has_option(section, "default_osname"):
-                osname = config.get(section, "default_osname")
+    if not osversion:
+        if config.has_option(section, "default_osversion"):
+            osversion = config.get(section, "default_osversion")
 
-        if not osversion:
-            if config.has_option(section, "default_osversion"):
-                osversion = config.get(section, "default_osversion")
+    if not osname or not osversion:
+        raise ArgumentError("Can not determine a sensible default OS "
+                            "for archetype %s. Please use the "
+                            "--osname and --osversion parameters." %
+                            (dbarchetype.name))
 
-        if not osname or not osversion:
-            raise ArgumentError("Can not determine a sensible default OS "
-                                "for archetype %s. Please use the "
-                                "--osname and --osversion parameters." %
-                                (dbarchetype.name))
+    dbos = OperatingSystem.get_unique(session, name=osname,
+                                      version=osversion,
+                                      archetype=dbarchetype, compel=True)
 
-        dbos = OperatingSystem.get_unique(session, name=osname,
-                                          version=osversion,
-                                          archetype=dbarchetype, compel=True)
+    ## Lookup GRN's
+    dbgrn = None
+    if grn or eon_id:
+        dbgrn = lookup_grn(session, grn, eon_id, logger=logger,
+                           config=config)
 
-        ## Lookup GRN's
-        dbgrn = None
-        if grn or eon_id:
-            dbgrn = lookup_grn(session, grn, eon_id, logger=logger,
-                               config=config)
+    ## Create Host
+    dbhost = Host(hardware_entity=dbhw, branch=dbbranch,
+                  owner_grn=dbgrn, sandbox_author=dbauthor,
+                  personality=dbpersonality, status=dbstatus,
+                  operating_system=dbos, comments=comments)
+    session.add(dbhost)
 
-        ## Create Host
-        dbhost = Host(hardware_entity=dbhw, branch=dbbranch,
-                      owner_grn=dbgrn, sandbox_author=dbauthor,
-                      personality=dbpersonality, status=dbstatus,
-                      operating_system=dbos, comments=comments)
-        session.add(dbhost)
+    ## Append GRNs
+    if dbgrn and config.has_option("archetype_" + archetype, "default_grn_target"):
+        dbhost.grns.append((dbhost, dbgrn,
+                            config.get("archetype_" + archetype,
+                                            "default_grn_target")))
 
-        ## Append GRNs
-        if dbgrn and config.has_option("archetype_" + archetype, "default_grn_target"):
-            dbhost.grns.append((dbhost, dbgrn,
-                                config.get("archetype_" + archetype,
-                                                "default_grn_target")))
-
-        ## Return created host
-        return dbhost
+    ## Return created host
+    return dbhost
 
 
 def remove_host(session, logger, dbhw, plenaries, remove_plenaries):

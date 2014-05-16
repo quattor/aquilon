@@ -46,8 +46,8 @@ class BranchChecker(ConsistencyChecker):
                 db_sandboxs.add(branch.name)
                 branch_type[branch.name] = 'Sandbox'
             else:
-                self.failure (1, "Branch type", "%s is unknonwn for %s."
-                              % (branch.branch_type, branch.name))
+                self.failure(1, "Branch type", "%s is unknonwn for %s."
+                             % (branch.branch_type, branch.name))
                 continue
             db_branches.add(branch.name)
 
@@ -65,10 +65,10 @@ class BranchChecker(ConsistencyChecker):
         for (root, dirs, files) in os.walk(templatesdir):
             if root is templatesdir:
                 if files:
-                    self.failure (1, "Template dir", "%s contains files" % root)
+                    self.failure(1, "Template dir", "%s contains files" % root)
             else:
                 if files:
-                    self.failure (1, "Template dir", "%s contains files" % root)
+                    self.failure(1, "Template dir", "%s contains files" % root)
                 user = os.path.split(root)[-1]
                 for dir in dirs:
                     fs_sandboxs.add(dir)
@@ -81,7 +81,7 @@ class BranchChecker(ConsistencyChecker):
         domainsdir = self.config.get("broker", "domainsdir")
         for (root, dirs, files) in os.walk(domainsdir):
             if files:
-                self.failure (1, "Domains dir", "%s contains files" % root)
+                self.failure(1, "Domains dir", "%s contains files" % root)
             for dir in dirs:
                 fs_domains.add(dir)
                 fsinfo[dir] = os.path.join(root, dir)
@@ -111,7 +111,7 @@ class BranchChecker(ConsistencyChecker):
         # Branches in the database and not in the fileing system
         for branch in db_sandboxs.difference(fs_sandboxs):
             self.failure(branch, "Sandbox %s" % branch,
-                             "found in database but not on filesystem")
+                         "found in database but not on filesystem")
 
         # Note to future self:
         #   The following check is techncally not needed as we do not delete
@@ -133,12 +133,10 @@ class BranchChecker(ConsistencyChecker):
         # Branches in the database and not in the fileing system
         for branch in db_domains.difference(fs_domains):
             self.failure(branch, "Domain %s" % branch,
-                             "found in database but not on filesystem")
+                         "found in database but not on filesystem")
 
         # Branchs on fileing system but not in the database
         for branch in fs_domains.difference(db_domains):
             self.failure(branch, "Domain %s" % branch,
                          "found on filesystem (%s) but not in database" %
                          fsinfo[branch])
-
-

@@ -15,7 +15,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import re
 import logging
 
 from sqlalchemy.inspection import inspect
@@ -23,7 +22,7 @@ from sqlalchemy.inspection import inspect
 from aquilon.worker.locks import NoLockKey, PlenaryKey
 from aquilon.worker.templates import (Plenary, StructurePlenary,
                                       add_location_info)
-from aquilon.worker.templates.panutils import pan, pan_assign, pan_include
+from aquilon.worker.templates.panutils import pan_assign, pan_include
 from aquilon.aqdb.model import NetworkDevice
 from aquilon.utils import nlist_key_re
 
@@ -82,7 +81,4 @@ class PlenaryNetworkDeviceInfo(StructurePlenary):
                            interfaces[name])
         lines.append("")
 
-
 Plenary.handlers[NetworkDevice] = PlenaryNetworkDeviceInfo
-
-

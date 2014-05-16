@@ -21,15 +21,13 @@ from operator import attrgetter
 
 from sqlalchemy.inspection import inspect
 
-from aquilon.config import Config
 from aquilon.exceptions_ import IncompleteError, InternalError
 from aquilon.aqdb.model import (Host, VlanInterface, BondingInterface,
                                 BridgeInterface)
 from aquilon.worker.locks import CompileKey, PlenaryKey
 from aquilon.worker.templates import (Plenary, ObjectPlenary, StructurePlenary,
                                       PlenaryCollection, PlenaryClusterClient,
-                                      PlenaryMachineInfo, PlenaryResource,
-                                      PlenaryPersonalityBase,
+                                      PlenaryResource, PlenaryPersonalityBase,
                                       PlenaryServiceInstanceClientDefault,
                                       PlenaryServiceInstanceServerDefault)
 from aquilon.worker.templates.panutils import (StructureTemplate, PanValue,
@@ -88,7 +86,6 @@ class PlenaryHost(PlenaryCollection):
             raise InternalError("PlenaryHost called with %s instead of Host" %
                                 dbhost.__class__.name)
         self.dbobj = dbhost
-        config = Config()
         self.plenaries.append(PlenaryHostObject.get_plenary(dbhost))
         self.plenaries.append(PlenaryHostData.get_plenary(dbhost))
 

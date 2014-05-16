@@ -20,9 +20,8 @@ import logging
 from sqlalchemy.inspection import inspect
 
 from aquilon.worker.locks import NoLockKey, PlenaryKey
-from aquilon.worker.templates import Plenary, StructurePlenary
+from aquilon.worker.templates import StructurePlenary
 from aquilon.worker.templates.panutils import pan
-from aquilon.aqdb.model import NetworkDevice
 
 
 LOGGER = logging.getLogger(__name__)

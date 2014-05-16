@@ -19,7 +19,6 @@
 
 from datetime import datetime
 
-from aquilon.aqdb.types import NetworkDeviceType
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Model, NetworkDevice, ObservedMac
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
