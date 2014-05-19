@@ -55,19 +55,6 @@ class TestGrns(VerifyGrnsMixin, TestBrokerCommand):
         self.matchoutput(out, "EON ID: 123456789", command)
         self.matchoutput(out, "Disabled: False", command)
 
-    def test_120_add_netinfra(self):
-        self.assert_("grn:/ms/et/aquilon" in self.grns)
-        self.assert_(10 in self.eon_ids)
-        command = ["add", "grn", "--grn", "/ms/et/aquilon", "--eon_id", "10"]
-        self.noouttest(command)
-
-    def test_121_verify_netinfra(self):
-        command = ["show", "grn", "--eon_id", "10"]
-        out = self.commandtest(command)
-        self.matchoutput(out, "GRN: /ms/et/aquilon", command)
-        self.matchoutput(out, "EON ID: 10", command)
-        self.matchoutput(out, "Disabled: False", command)
-
     def test_150_update(self):
         command = ["update", "grn", "--grn", "grn:/ms/test1", "--nodisabled",
                    "--rename_to", "grn:/ms/test3"]
@@ -83,7 +70,7 @@ class TestGrns(VerifyGrnsMixin, TestBrokerCommand):
     def test_200_refresh(self):
         command = ["refresh", "grns"]
         (out, err) = self.successtest(command)
-        self.matchoutput(err, "Added 7, updated 2, deleted 1 GRNs.", command)
+        self.matchoutput(err, "Added 8, updated 1, deleted 1 GRNs.", command)
 
     def test_210_verify_test1_renamed(self):
         command = ["show", "grn", "--eon_id", "1"]
