@@ -120,17 +120,19 @@ class TestAddNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
                           "temp_switch", "ut3", "a", "3", switch_type='bor',
                           ip=ip, interface="xge49")
 
-    def test_125_add_ut3gd1r08(self):
+    def test_125_add_switch_in_building(self):
+        # Located in a building, not in a rack
         ip = self.net["tor_net_9"].usable[1]
-        self.dsdb_expect_add("ut3gd1r08.aqd-unittest.ms.com", ip, "xge49")
+        self.dsdb_expect_add("switchinbuilding.aqd-unittest.ms.com", ip, "xge49")
         self.successtest(["add", "network_device", "--type", "bor",
-                          "--network_device", "ut3gd1r08.aqd-unittest.ms.com",
+                          "--network_device", "switchinbuilding.aqd-unittest.ms.com",
                           "--ip", ip, "--interface", "xge49",
                           "--iftype", "physical",
                           "--building", "ut", "--model", "temp_switch"])
         self.dsdb_verify()
-        self.check_plenary_exists('network_device', 'americas', 'ut', 'ut3gd1r08')
-        self.check_plenary_exists('hostdata', 'ut3gd1r08.aqd-unittest.ms.com')
+        self.check_plenary_exists('network_device', 'americas', 'ut',
+                                  'switchinbuilding')
+        self.check_plenary_exists('hostdata', 'switchinbuilding.aqd-unittest.ms.com')
 
     def test_130_add_np06bals03(self):
         self.dsdb_expect_add("np06bals03.ms.com", "172.31.64.69",
@@ -289,7 +291,7 @@ class TestAddNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
         self.check_plenary_exists('hostdata', 'np01ga2s03.one-nyp.ms.com')
 
     def test_200_reject_ip_in_use(self):
-        command = ["add", "network_device", "--network_device", "ut3gd1r99.aqd-unittest.ms.com",
+        command = ["add", "network_device", "--network_device", "ipinuse.aqd-unittest.ms.com",
                    "--type", "bor", "--ip", self.net["tor_net_9"].usable[0],
                    "--interface", "xge49", "--iftype", "physical",
                    "--rack", "ut3", "--model", "temp_switch"]
@@ -298,8 +300,9 @@ class TestAddNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
                          "IP address %s is already in use" %
                          self.net["tor_net_9"].usable[0],
                          command)
-        self.check_plenary_nonexistant('network_device', 'americas', 'ut', 'ut3gd1r99')
-        self.check_plenary_nonexistant('hostdata', 'ut3gd1r99.aqd-unittest.ms.com')
+        self.check_plenary_nonexistant('network_device', 'americas', 'ut',
+                                       'ipinuse')
+        self.check_plenary_nonexistant('hostdata', 'ipinuse.aqd-unittest.ms.com')
 
     def test_200_reject_bad_label_implicit(self):
         command = ["add", "network_device", "--network_device", "not-alnum.aqd-unittest.ms.com",
@@ -313,7 +316,7 @@ class TestAddNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
         self.check_plenary_nonexistant('hostdata', 'not-alnum.aqd-unittest.ms.com')
 
     def test_200_reject_bad_label_explicit(self):
-        command = ["add", "network_device", "--network_device", "ut3gd1r99.aqd-unittest.ms.com",
+        command = ["add", "network_device", "--network_device", "notalnum.aqd-unittest.ms.com",
                    "--label", "not-alnum",
                    "--type", "bor", "--ip", self.net["tor_net_9"].usable[-1],
                    "--interface", "xge49", "--iftype", "physical",
@@ -322,23 +325,25 @@ class TestAddNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
         self.matchoutput(out, "Illegal hardware label format 'not-alnum'.",
                          command)
         self.check_plenary_nonexistant('network_device', 'americas', 'ut', 'not-alnum')
-        self.check_plenary_nonexistant('hostdata', 'ut3gd1r99.aqd-unittest.ms.com')
+        self.check_plenary_nonexistant('hostdata', 'notalnum.aqd-unittest.ms.com')
 
     # Testing that add network device does not allow a blade....
     def test_200_reject_bad_model(self):
         command = ["add", "network_device", "--type", "tor",
-                   "--network_device", "ut3gd1r03.aqd-unittest.ms.com",
+                   "--network_device", "badmodel.aqd-unittest.ms.com",
                    "--rack", "ut3", "--model", "hs21-8853l5u",
                    "--ip", self.net["tor_net_9"].usable[-1],
                    "--interface", "xge49", "--iftype", "physical"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "This command can only be used "
                          "to add network devices.", command)
-        self.check_plenary_nonexistant('network_device', 'americas', 'ut', 'ut3gd1r03')
-        self.check_plenary_nonexistant('hostdata', 'ut3gd1r03.aqd-unittest.ms.com')
+        self.check_plenary_nonexistant('network_device', 'americas', 'ut',
+                                       'badmodel')
+        self.check_plenary_nonexistant('hostdata',
+                                       'badmodel.aqd-unittest.ms.com')
 
     def test_205_verify_reject_bad_model(self):
-        command = "show network_device --network_device ut3gd1r03.aqd-unittest.ms.com"
+        command = "show network_device --network_device badmodel.aqd-unittest.ms.com"
         out = self.notfoundtest(command.split(" "))
 
 if __name__ == '__main__':

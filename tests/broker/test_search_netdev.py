@@ -52,12 +52,14 @@ class TestSearchNetworkDevice(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "ut3gd1r05.aqd-unittest.ms.com", command)
         self.matchoutput(out, "ut3gd1r06.aqd-unittest.ms.com", command)
-        self.matchclean(out, "Switch", command)
+        self.matchoutput(out, "switchinbuilding.aqd-unittest.ms.com", command)
 
     def testbuildingexact(self):
         command = ["search_network_device", "--building=ut", "--exact_location"]
         out = self.commandtest(command)
-        self.matchoutput(out, "ut3gd1r08.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "switchinbuilding.aqd-unittest.ms.com", command)
+        self.matchclean(out, "ut3gd1r05", command)
+        self.matchclean(out, "ut3gd1r06", command)
 
     def testcityexact(self):
         command = ["search_network_device", "--city=ny", "--exact_location"]

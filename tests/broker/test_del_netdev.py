@@ -73,13 +73,15 @@ class TestDelNetworkDevice(TestBrokerCommand):
         self.check_plenary_nonexistant('network_device', 'americas', 'ut', 'ut3gd1r07')
         self.check_plenary_nonexistant('hostdata', 'ut3gd1r07.aqd-unittest.ms.com')
 
-    def test_125_del_ut3gd1r08(self):
+    def test_125_del_switch_in_building(self):
         self.dsdb_expect_delete(self.net["tor_net_9"].usable[1])
-        command = "del network_device --network_device ut3gd1r08.aqd-unittest.ms.com"
+        command = "del network_device --network_device switchinbuilding.aqd-unittest.ms.com"
         self.successtest(command.split(" "))
         self.dsdb_verify()
-        self.check_plenary_nonexistant('network_device', 'americas', 'ut', 'ut3gd1r08')
-        self.check_plenary_nonexistant('hostdata', 'ut3gd1r08.aqd-unittest.ms.com')
+        self.check_plenary_nonexistant('network_device', 'americas', 'ut',
+                                       'switchinbuilding')
+        self.check_plenary_nonexistant('hostdata',
+                                       'switchinbuilding.aqd-unittest.ms.com')
 
     def test_130_del_np06bals03(self):
         self.dsdb_expect_delete("172.31.64.69")
