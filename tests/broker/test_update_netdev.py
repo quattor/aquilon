@@ -73,8 +73,6 @@ class TestUpdateNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
                                     contains=['hp', 'SNgd1r05_new', 'uttorswitch'])
 
     def testupdatemisccomment(self):
-        # The following update should ommit the interface name
-        # when updating DSDB.
         self.dsdb_expect_update("ut3gd1r05.aqd-unittest.ms.com",
                                 iface="xge49",
                                 comments="LANWAN")
@@ -128,13 +126,6 @@ class TestUpdateNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
                           ip=self.net["tor_net_8"].usable[1],
                           mac=self.net["tor_net_8"].usable[1].mac,
                           interface="xge49")
-
-    def testverifydsdbrollback(self):
-        self.verifynetdev("ut3gd1r07.aqd-unittest.ms.com", "generic",
-                          "temp_switch", "ut3", "a", "3", switch_type='bor',
-                          ip=self.net["tor_net_9"].usable[0],
-                          interface="xge49")
-
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUpdateNetworkDevice)
