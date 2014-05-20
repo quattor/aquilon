@@ -127,6 +127,12 @@ class TestDelDynamicRange(TestBrokerCommand):
         command = "search_dns --record_type=dynamic_stub"
         self.noouttest(command.split(" "))
 
+    def test_800_cleanup_networks(self):
+        self.net.dispose_network(self, "dyndhcp0")
+        self.net.dispose_network(self, "dyndhcp1")
+        self.net.dispose_network(self, "dyndhcp2")
+        self.net.dispose_network(self, "dyndhcp3")
+
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelDynamicRange)
     unittest.TextTestRunner(verbosity=2).run(suite)

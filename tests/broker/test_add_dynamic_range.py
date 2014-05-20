@@ -27,6 +27,15 @@ from brokertest import TestBrokerCommand
 
 
 class TestAddDynamicRange(TestBrokerCommand):
+    def test_000_add_networks(self):
+        self.net.allocate_network(self, "dyndhcp0", 25, "tor_net2",
+                                  "building", "ut")
+        self.net.allocate_network(self, "dyndhcp1", 25, "tor_net2",
+                                  "building", "ut")
+        self.net.allocate_network(self, "dyndhcp2", 28, "unknown",
+                                  "building", "ut")
+        self.net.allocate_network(self, "dyndhcp3", 28, "unknown",
+                                  "building", "ut")
 
     def test_100_add_range(self):
         messages = []
@@ -151,15 +160,15 @@ class TestAddDynamicRange(TestBrokerCommand):
         self.noouttest(command)
 
     def test_130_dsdb_rollback(self):
-        for ip in range(int(self.net["vmotion_net"].usable[2]),
-                        int(self.net["vmotion_net"].usable[4]) + 1):
+        for ip in range(int(self.net["dyndhcp2"].usable[2]),
+                        int(self.net["dyndhcp2"].usable[4]) + 1):
             self.dsdb_expect_add(self.dynname(IPv4Address(ip)), IPv4Address(ip))
             self.dsdb_expect_delete(IPv4Address(ip))
-        bad_ip = self.net["vmotion_net"].usable[5]
+        bad_ip = self.net["dyndhcp2"].usable[5]
         self.dsdb_expect_add(self.dynname(bad_ip), bad_ip, fail=True)
         command = ["add_dynamic_range",
-                   "--startip", self.net["vmotion_net"].usable[2],
-                   "--endip", self.net["vmotion_net"].usable[5],
+                   "--startip", self.net["dyndhcp2"].usable[2],
+                   "--endip", self.net["dyndhcp2"].usable[5],
                    "--dns_domain", "aqd-unittest.ms.com"]
         out = self.badrequesttest(command)
         self.dsdb_verify()
