@@ -28,15 +28,7 @@ from netdevtest import VerifyNetworkDeviceMixin
 
 class TestUpdateNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
 
-    def testfailnomodel(self):
-        command = ["update", "network_device", "--vendor", "generic",
-                   "--network_device", "ut3gd1r01.aqd-unittest.ms.com"]
-        out = self.notfoundtest(command)
-        self.matchoutput(out,
-                         "Model uttorswitch, vendor generic not found.",
-                         command)
-
-    def testupdateut3gd1r04(self):
+    def test_100_update_ut3gd1r04(self):
         newip = self.net["verari_eth1"].usable[1]
         self.dsdb_expect_update("ut3gd1r04.aqd-unittest.ms.com", "xge49", newip,
                                 comments="Some new switch comments")
@@ -51,19 +43,15 @@ class TestUpdateNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
         self.check_plenary_contents('hostdata', 'ut3gd1r04.aqd-unittest.ms.com',
                                     contains=str(newip))
 
+    def test_105_verify_ut3gd1r04(self):
+        self.verifynetdev("ut3gd1r04.aqd-unittest.ms.com", "hp", "uttorswitch",
+                          "ut3", "a", "3", switch_type='bor',
+                          ip=self.net["verari_eth1"].usable[1],
+                          mac=self.net["verari_eth1"].usable[0].mac,
+                          interface="xge49",
+                          comments="Some new switch comments")
 
-    def testupdatebadip(self):
-        ip = self.net["tor_net_12"].usable[0]
-        command = ["update", "network_device", "--ip", ip,
-                   "--network_device", "ut3gd1r04.aqd-unittest.ms.com"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out,
-                         "IP address %s is already in use by physical "
-                         "interface xge49 of switch "
-                         "ut3gd1r01.aqd-unittest.ms.com." % ip,
-                         command)
-
-    def testupdatemisc(self):
+    def test_110_update_ut3gd1r05(self):
         command = ["update", "network_device",
                    "--network_device", "ut3gd1r05.aqd-unittest.ms.com",
                    "--rack", "ut4", "--model", "uttorswitch",
@@ -72,7 +60,7 @@ class TestUpdateNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
         self.check_plenary_contents('network_device', 'americas', 'ut', 'ut3gd1r05',
                                     contains=['hp', 'SNgd1r05_new', 'uttorswitch'])
 
-    def testupdatemisccomment(self):
+    def test_112_update_ut3gd1r05_comment(self):
         self.dsdb_expect_update("ut3gd1r05.aqd-unittest.ms.com",
                                 iface="xge49",
                                 comments="LANWAN")
@@ -82,7 +70,13 @@ class TestUpdateNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
         self.noouttest(command)
         self.dsdb_verify()
 
-    def testaddinterface(self):
+    def test_115_verify_ut3gd1r05(self):
+        self.verifynetdev("ut3gd1r05.aqd-unittest.ms.com", "hp", "uttorswitch",
+                          "ut4", "a", "4", "SNgd1r05_new", switch_type='tor',
+                          ip=self.net["tor_net_7"].usable[0], interface="xge49",
+                          comments="LANWAN")
+
+    def test_120_add_interface(self):
         ip = self.net["tor_net_8"].usable[0]
         mac = self.net["tor_net_8"].usable[1].mac
         self.dsdb_expect_update("ut3gd1r06.aqd-unittest.ms.com", "xge49", mac=mac)
@@ -97,7 +91,7 @@ class TestUpdateNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
         self.check_plenary_contents('network_device', 'americas', 'ut', 'ut3gd1r06',
                                     contains=str(mac))
 
-    def testupdatewithinterface(self):
+    def test_122_update_with_interface(self):
         newip = self.net["tor_net_8"].usable[1]
         self.dsdb_expect_update("ut3gd1r06.aqd-unittest.ms.com", "xge49", newip)
         command = ["update", "network_device",
@@ -106,26 +100,31 @@ class TestUpdateNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
         self.noouttest(command)
         self.dsdb_verify()
 
-    def testverifyupdatewithoutinterface(self):
-        self.verifynetdev("ut3gd1r04.aqd-unittest.ms.com", "hp", "uttorswitch",
-                          "ut3", "a", "3", switch_type='bor',
-                          ip=self.net["verari_eth1"].usable[1],
-                          mac=self.net["verari_eth1"].usable[0].mac,
-                          interface="xge49",
-                          comments="Some new switch comments")
-
-    def testverifyupdatemisc(self):
-        self.verifynetdev("ut3gd1r05.aqd-unittest.ms.com", "hp", "uttorswitch",
-                          "ut4", "a", "4", "SNgd1r05_new", switch_type='tor',
-                          ip=self.net["tor_net_7"].usable[0], interface="xge49",
-                          comments="LANWAN")
-
-    def testverifyupdatewithinterface(self):
+    def test_125_verify_ut3gd1r06(self):
         self.verifynetdev("ut3gd1r06.aqd-unittest.ms.com", "generic",
                           "temp_switch", "ut3", "a", "3", switch_type='tor',
                           ip=self.net["tor_net_8"].usable[1],
                           mac=self.net["tor_net_8"].usable[1].mac,
                           interface="xge49")
+
+    def test_200_update_bad_ip(self):
+        ip = self.net["tor_net_12"].usable[0]
+        command = ["update", "network_device", "--ip", ip,
+                   "--network_device", "ut3gd1r04.aqd-unittest.ms.com"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "IP address %s is already in use by physical "
+                         "interface xge49 of switch "
+                         "ut3gd1r01.aqd-unittest.ms.com." % ip,
+                         command)
+
+    def test_200_fail_no_model(self):
+        command = ["update", "network_device", "--vendor", "generic",
+                   "--network_device", "ut3gd1r01.aqd-unittest.ms.com"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out,
+                         "Model uttorswitch, vendor generic not found.",
+                         command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUpdateNetworkDevice)
