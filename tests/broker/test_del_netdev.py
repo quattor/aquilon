@@ -162,21 +162,21 @@ class TestDelNetworkDevice(TestBrokerCommand):
         self.check_plenary_nonexistant('network_device', 'americas', 'ut', 'ut01ga2s02')
         self.check_plenary_nonexistant('hostdata', 'ut01ga2s02.aqd-unittest.ms.com')
 
-    def test_170_del_ut01ga2s03(self):
+    def test_170_del_ut01ga2s05(self):
         self.dsdb_expect_delete(self.net["esx_bcp_ut"].usable[0])
-        command = "del network_device --network_device ut01ga2s03.aqd-unittest.ms.com"
+        command = "del network_device --network_device ut01ga2s05.aqd-unittest.ms.com"
         self.noouttest(command.split(" "))
         self.dsdb_verify()
-        self.check_plenary_nonexistant('network_device', 'americas', 'ut', 'ut01ga2s03')
-        self.check_plenary_nonexistant('hostdata', 'ut01ga2s03.aqd-unittest.ms.com')
+        self.check_plenary_nonexistant('network_device', 'americas', 'ut', 'ut01ga2s05')
+        self.check_plenary_nonexistant('hostdata', 'ut01ga2s05.aqd-unittest.ms.com')
 
-    def test_175_del_np01ga2s03(self):
+    def test_175_del_np01ga2s05(self):
         self.dsdb_expect_delete(self.net["esx_bcp_np"].usable[0])
-        command = "del network_device --network_device np01ga2s03.one-nyp.ms.com"
+        command = "del network_device --network_device np01ga2s05.one-nyp.ms.com"
         self.noouttest(command.split(" "))
         self.dsdb_verify()
-        self.check_plenary_nonexistant('network_device', 'americas', 'ut', 'np01ga2s03')
-        self.check_plenary_nonexistant('hostdata', 'np01ga2s03.one-nyp.ms.com')
+        self.check_plenary_nonexistant('network_device', 'americas', 'ut', 'np01ga2s05')
+        self.check_plenary_nonexistant('hostdata', 'np01ga2s05.one-nyp.ms.com')
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelNetworkDevice)

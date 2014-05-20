@@ -80,9 +80,9 @@ class TestAdd10GigHardware(TestBrokerCommand):
                             "--switch=ut01ga2s02.aqd-unittest.ms.com"])
         for i in range(11, 13):
             self.noouttest(["update_esx_cluster", "--cluster=utecl%d" % i,
-                            "--switch=ut01ga2s03.aqd-unittest.ms.com"])
+                            "--switch=ut01ga2s05.aqd-unittest.ms.com"])
             self.noouttest(["update_esx_cluster", "--cluster=npecl%d" % i,
-                            "--switch=np01ga2s03.one-nyp.ms.com"])
+                            "--switch=np01ga2s05.one-nyp.ms.com"])
 
     def test_095_unused_pg(self):
         # If

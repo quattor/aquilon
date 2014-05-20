@@ -151,9 +151,9 @@ class TestUpdateNetworkDeviceMac(TestBrokerCommand):
 
     # def testverifypollut01ga2s02(self):
 
-    # def testpollut01ga2s03(self):
+    # def testpollut01ga2s05(self):
 
-    # def testpollnp01ga2s03(self):
+    # def testpollnp01ga2s05(self):
 
     # def testpollbor(self):
 
