@@ -50,7 +50,8 @@ class TestDelNetworkDevice(TestBrokerCommand):
         self.check_plenary_nonexistant('hostdata', 'ut3gd1r04.aqd-unittest.ms.com')
 
     def test_110_del_ut3gd1r05(self):
-        self.dsdb_expect_delete(self.net["tor_net_7"].usable[0])
+        ip = self.net["ut_net_mgmt"].usable[0]
+        self.dsdb_expect_delete(ip)
         command = "del network_device --network_device ut3gd1r05.aqd-unittest.ms.com"
         self.successtest(command.split(" "))
         self.dsdb_verify()
@@ -58,7 +59,7 @@ class TestDelNetworkDevice(TestBrokerCommand):
         self.check_plenary_nonexistant('hostdata', 'ut3gd1r05.aqd-unittest.ms.com')
 
     def test_115_del_ut3gd1r06(self):
-        self.dsdb_expect_delete(self.net["tor_net_8"].usable[1])
+        self.dsdb_expect_delete(self.net["ut_net_mgmt"].usable[4])
         command = "del network_device --network_device ut3gd1r06.aqd-unittest.ms.com"
         self.successtest(command.split(" "))
         self.dsdb_verify()
@@ -66,7 +67,8 @@ class TestDelNetworkDevice(TestBrokerCommand):
         self.check_plenary_nonexistant('hostdata', 'ut3gd1r06.aqd-unittest.ms.com')
 
     def test_120_del_ut3gd1r07(self):
-        self.dsdb_expect_delete(self.net["tor_net_9"].usable[0])
+        ip = self.net["ut_net_mgmt"].usable[2]
+        self.dsdb_expect_delete(ip)
         command = "del network_device --network_device ut3gd1r07.aqd-unittest.ms.com"
         self.successtest(command.split(" "))
         self.dsdb_verify()
@@ -74,7 +76,8 @@ class TestDelNetworkDevice(TestBrokerCommand):
         self.check_plenary_nonexistant('hostdata', 'ut3gd1r07.aqd-unittest.ms.com')
 
     def test_125_del_switch_in_building(self):
-        self.dsdb_expect_delete(self.net["tor_net_9"].usable[1])
+        ip = self.net["ut_net_mgmt"].usable[3]
+        self.dsdb_expect_delete(ip)
         command = "del network_device --network_device switchinbuilding.aqd-unittest.ms.com"
         self.successtest(command.split(" "))
         self.dsdb_verify()

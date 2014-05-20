@@ -27,7 +27,6 @@ from netdevtest import VerifyNetworkDeviceMixin
 
 
 class TestAddNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
-
     def test_100_add_ut3gd1r01(self):
         ip = self.net["tor_net_12"].usable[0]
         self.dsdb_expect_add("ut3gd1r01.aqd-unittest.ms.com", ip, "xge49")
@@ -72,7 +71,7 @@ class TestAddNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
                           comments="Some switch comments")
 
     def test_110_add_ut3gd1r05(self):
-        ip = self.net["tor_net_7"].usable[0]
+        ip = self.net["ut_net_mgmt"].usable[0]
         self.dsdb_expect_add("ut3gd1r05.aqd-unittest.ms.com", ip, "xge49")
         self.successtest(["add", "network_device", "--type", "tor",
                           "--network_device", "ut3gd1r05.aqd-unittest.ms.com",
@@ -89,7 +88,7 @@ class TestAddNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
                           ip=ip, interface="xge49")
 
     def test_115_add_ut3gd1r06(self):
-        ip = self.net["tor_net_8"].usable[0]
+        ip = self.net["ut_net_mgmt"].usable[1]
         self.dsdb_expect_add("ut3gd1r06.aqd-unittest.ms.com", ip, "xge49")
         self.successtest(["add", "network_device", "--type", "tor",
                           "--network_device", "ut3gd1r06.aqd-unittest.ms.com",
@@ -105,7 +104,7 @@ class TestAddNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
                           ip=ip, interface="xge49")
 
     def test_120_add_ut3gd1r07(self):
-        ip = self.net["tor_net_9"].usable[0]
+        ip = self.net["ut_net_mgmt"].usable[2]
         self.dsdb_expect_add("ut3gd1r07.aqd-unittest.ms.com", ip, "xge49")
         self.successtest(["add", "network_device", "--type", "bor",
                           "--network_device", "ut3gd1r07.aqd-unittest.ms.com",
@@ -122,7 +121,7 @@ class TestAddNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
 
     def test_125_add_switch_in_building(self):
         # Located in a building, not in a rack
-        ip = self.net["tor_net_9"].usable[1]
+        ip = self.net["ut_net_mgmt"].usable[3]
         self.dsdb_expect_add("switchinbuilding.aqd-unittest.ms.com", ip, "xge49")
         self.successtest(["add", "network_device", "--type", "bor",
                           "--network_device", "switchinbuilding.aqd-unittest.ms.com",
@@ -291,22 +290,23 @@ class TestAddNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
         self.check_plenary_exists('hostdata', 'np01ga2s03.one-nyp.ms.com')
 
     def test_200_reject_ip_in_use(self):
+        ip = self.net["ut_net_mgmt"].usable[0]
         command = ["add", "network_device", "--network_device", "ipinuse.aqd-unittest.ms.com",
-                   "--type", "bor", "--ip", self.net["tor_net_9"].usable[0],
+                   "--type", "bor", "--ip", ip,
                    "--interface", "xge49", "--iftype", "physical",
                    "--rack", "ut3", "--model", "temp_switch"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
-                         "IP address %s is already in use" %
-                         self.net["tor_net_9"].usable[0],
+                         "IP address %s is already in use" % ip,
                          command)
         self.check_plenary_nonexistant('network_device', 'americas', 'ut',
                                        'ipinuse')
         self.check_plenary_nonexistant('hostdata', 'ipinuse.aqd-unittest.ms.com')
 
     def test_200_reject_bad_label_implicit(self):
+        ip = self.net["ut_net_mgmt"].usable[-1]
         command = ["add", "network_device", "--network_device", "not-alnum.aqd-unittest.ms.com",
-                   "--type", "bor", "--ip", self.net["tor_net_9"].usable[-1],
+                   "--type", "bor", "--ip", ip,
                    "--interface", "xge49", "--iftype", "physical",
                    "--rack", "ut3", "--model", "temp_switch"]
         out = self.badrequesttest(command)
@@ -316,9 +316,9 @@ class TestAddNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
         self.check_plenary_nonexistant('hostdata', 'not-alnum.aqd-unittest.ms.com')
 
     def test_200_reject_bad_label_explicit(self):
+        ip = self.net["ut_net_mgmt"].usable[-1]
         command = ["add", "network_device", "--network_device", "notalnum.aqd-unittest.ms.com",
-                   "--label", "not-alnum",
-                   "--type", "bor", "--ip", self.net["tor_net_9"].usable[-1],
+                   "--label", "not-alnum", "--type", "bor", "--ip", ip,
                    "--interface", "xge49", "--iftype", "physical",
                    "--rack", "ut3", "--model", "temp_switch"]
         out = self.badrequesttest(command)
@@ -329,11 +329,11 @@ class TestAddNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
 
     # Testing that add network device does not allow a blade....
     def test_200_reject_bad_model(self):
+        ip = self.net["ut_net_mgmt"].usable[-1]
         command = ["add", "network_device", "--type", "tor",
                    "--network_device", "badmodel.aqd-unittest.ms.com",
                    "--rack", "ut3", "--model", "hs21-8853l5u",
-                   "--ip", self.net["tor_net_9"].usable[-1],
-                   "--interface", "xge49", "--iftype", "physical"]
+                   "--ip", ip, "--interface", "xge49", "--iftype", "physical"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "This command can only be used "
                          "to add network devices.", command)

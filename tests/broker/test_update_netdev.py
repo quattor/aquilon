@@ -73,12 +73,12 @@ class TestUpdateNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
     def test_115_verify_ut3gd1r05(self):
         self.verifynetdev("ut3gd1r05.aqd-unittest.ms.com", "hp", "uttorswitch",
                           "ut4", "a", "4", "SNgd1r05_new", switch_type='tor',
-                          ip=self.net["tor_net_7"].usable[0], interface="xge49",
+                          ip=self.net["ut_net_mgmt"].usable[0], interface="xge49",
                           comments="LANWAN")
 
     def test_120_add_interface(self):
-        ip = self.net["tor_net_8"].usable[0]
-        mac = self.net["tor_net_8"].usable[1].mac
+        ip = self.net["ut_net_mgmt"].usable[1]
+        mac = self.net["ut_net_mgmt"].usable[4].mac
         self.dsdb_expect_update("ut3gd1r06.aqd-unittest.ms.com", "xge49", mac=mac)
         command = ["update_interface", "--network_device=ut3gd1r06.aqd-unittest.ms.com",
                    "--interface=xge49", "--mac", mac]
@@ -92,7 +92,7 @@ class TestUpdateNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
                                     contains=str(mac))
 
     def test_122_update_with_interface(self):
-        newip = self.net["tor_net_8"].usable[1]
+        newip = self.net["ut_net_mgmt"].usable[4]
         self.dsdb_expect_update("ut3gd1r06.aqd-unittest.ms.com", "xge49", newip)
         command = ["update", "network_device",
                    "--network_device", "ut3gd1r06.aqd-unittest.ms.com",
@@ -103,8 +103,8 @@ class TestUpdateNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
     def test_125_verify_ut3gd1r06(self):
         self.verifynetdev("ut3gd1r06.aqd-unittest.ms.com", "generic",
                           "temp_switch", "ut3", "a", "3", switch_type='tor',
-                          ip=self.net["tor_net_8"].usable[1],
-                          mac=self.net["tor_net_8"].usable[1].mac,
+                          ip=self.net["ut_net_mgmt"].usable[4],
+                          mac=self.net["ut_net_mgmt"].usable[4].mac,
                           interface="xge49")
 
     def test_200_update_bad_ip(self):
