@@ -23,7 +23,6 @@ if __name__ == "__main__":
 
 import unittest2 as unittest
 from brokertest import TestBrokerCommand
-from test_add_dynamic_range import dynname
 
 
 class TestAddInterfaceAddress(TestBrokerCommand):
@@ -173,17 +172,17 @@ class TestAddInterfaceAddress(TestBrokerCommand):
                    "--fqdn", "dyndhcp.aqd-unittest.ms.com", "--ip", ip]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Address %s [%s] is reserved for dynamic DHCP." %
-                         (dynname(ip), ip), command)
+                         (self.dynname(ip), ip), command)
 
     def testrejectdyndnsfqdn(self):
         # The FQDN exists and is used for dynamic DHCP
         ip = self.net["dyndhcp0"].usable[2]
         command = ["add", "interface", "address", "--machine", "ut3c5n2",
                    "--interface", "eth1", "--label", "e3",
-                   "--fqdn", dynname(ip)]
+                   "--fqdn", self.dynname(ip)]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Address %s [%s] is reserved for dynamic DHCP." %
-                         (dynname(ip), ip), command)
+                         (self.dynname(ip), ip), command)
 
     def testrejectreserved(self):
         # Address in the reserved range

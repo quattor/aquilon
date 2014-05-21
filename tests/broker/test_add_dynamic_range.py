@@ -26,10 +26,6 @@ from ipaddr import IPv4Address
 from brokertest import TestBrokerCommand
 
 
-def dynname(ip, domain="aqd-unittest.ms.com"):
-    return "dynamic-%s.%s" % (str(ip).replace(".", "-"), domain)
-
-
 class TestAddDynamicRange(TestBrokerCommand):
 
     def test_100_add_range(self):
@@ -37,7 +33,7 @@ class TestAddDynamicRange(TestBrokerCommand):
         for ip in range(int(self.net["dyndhcp0"].usable[2]),
                         int(self.net["dyndhcp0"].usable[-3]) + 1):
             address = IPv4Address(ip)
-            hostname = dynname(address)
+            hostname = self.dynname(address)
             self.dsdb_expect_add(hostname, address)
             messages.append("DSDB: add_host -host_name %s -ip_address %s "
                             "-status aq" % (hostname, address))
@@ -61,10 +57,10 @@ class TestAddDynamicRange(TestBrokerCommand):
         for i in range(int(start), int(end) + 1):
             checked = True
             ip = IPv4Address(i)
-            self.matchoutput(out, dynname(ip), command)
-            subcommand = ["search_dns", "--ip", ip, "--fqdn", dynname(ip)]
+            self.matchoutput(out, self.dynname(ip), command)
+            subcommand = ["search_dns", "--ip", ip, "--fqdn", self.dynname(ip)]
             subout = self.commandtest(subcommand)
-            self.matchoutput(subout, dynname(ip), command)
+            self.matchoutput(subout, self.dynname(ip), command)
         self.failUnless(checked, "Problem with test algorithm or data.")
 
     def test_105_show_range(self):
@@ -81,7 +77,7 @@ class TestAddDynamicRange(TestBrokerCommand):
         net = self.net["dyndhcp0"]
         start = net.usable[2]
         end = net.usable[-3]
-        command = ["show", "dynamic", "range", "--fqdn", dynname(end)]
+        command = ["show", "dynamic", "range", "--fqdn", self.dynname(end)]
         out = self.commandtest(command)
         self.matchoutput(out, "Dynamic Range: %s - %s" % (start, end), command)
         self.matchoutput(out, "Network: %s [%s]" % (net.name, net),
@@ -104,13 +100,13 @@ class TestAddDynamicRange(TestBrokerCommand):
         end = self.net["dyndhcp0"].usable[-3]
         for i in range(int(start), int(end) + 1):
             ip = IPv4Address(i)
-            self.failUnless(dynname(ip) in hosts, "%s is missing from network"
-                            "protobuf output" % dynname(ip))
+            self.failUnless(self.dynname(ip) in hosts, "%s is missing from network"
+                            "protobuf output" % self.dynname(ip))
 
     def test_110_add_end_in_grange(self):
         # Set up a network that has its final IP address taken.
         ip = self.net["dyndhcp1"].usable[-1]
-        hostname = dynname(ip)
+        hostname = self.dynname(ip)
         self.dsdb_expect_add(hostname, ip)
         command = ["add_dynamic_range", "--startip", ip, "--endip", ip,
                    "--dns_domain=aqd-unittest.ms.com"]
@@ -126,7 +122,7 @@ class TestAddDynamicRange(TestBrokerCommand):
         for ip in range(int(self.net["dyndhcp3"].usable[0]),
                         int(self.net["dyndhcp3"].usable[-1]) + 1):
             address = IPv4Address(ip)
-            hostname = dynname(address)
+            hostname = self.dynname(address)
             self.dsdb_expect_add(hostname, address)
             messages.append("DSDB: add_host -host_name %s -ip_address %s "
                             "-status aq" % (hostname, address))
@@ -157,10 +153,10 @@ class TestAddDynamicRange(TestBrokerCommand):
     def test_130_dsdb_rollback(self):
         for ip in range(int(self.net["vmotion_net"].usable[2]),
                         int(self.net["vmotion_net"].usable[4]) + 1):
-            self.dsdb_expect_add(dynname(IPv4Address(ip)), IPv4Address(ip))
+            self.dsdb_expect_add(self.dynname(IPv4Address(ip)), IPv4Address(ip))
             self.dsdb_expect_delete(IPv4Address(ip))
         bad_ip = self.net["vmotion_net"].usable[5]
-        self.dsdb_expect_add(dynname(bad_ip), bad_ip, fail=True)
+        self.dsdb_expect_add(self.dynname(bad_ip), bad_ip, fail=True)
         command = ["add_dynamic_range",
                    "--startip", self.net["vmotion_net"].usable[2],
                    "--endip", self.net["vmotion_net"].usable[5],
@@ -207,10 +203,10 @@ class TestAddDynamicRange(TestBrokerCommand):
         out = self.badrequesttest(command)
         self.matchoutput(out, "the following DNS records already exist", command)
         self.matchoutput(out, "%s [%s]" %
-                         (dynname(self.net["dyndhcp0"].usable[2]),
+                         (self.dynname(self.net["dyndhcp0"].usable[2]),
                           self.net["dyndhcp0"].usable[2]), command)
         self.matchoutput(out, "%s [%s]" %
-                         (dynname(self.net["dyndhcp0"].usable[3]),
+                         (self.dynname(self.net["dyndhcp0"].usable[3]),
                           self.net["dyndhcp0"].usable[3]), command)
 
     def test_200_fail_add_restricted(self):

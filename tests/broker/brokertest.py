@@ -795,3 +795,7 @@ class TestBrokerCommand(unittest.TestCase):
         depr_log = logfile.xreadlines()
         self.assertTrue([elem for elem in depr_log if depr_str in elem])
         logfile.close()
+
+    @staticmethod
+    def dynname(ip, domain="aqd-unittest.ms.com"):
+        return "dynamic-%s.%s" % (str(ip).replace(".", "-"), domain)
