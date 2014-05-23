@@ -120,7 +120,8 @@ class HostFormatter(ObjectFormatter):
 
         branchhandler = ObjectFormatter.handlers.get(host.branch.__class__, ObjectFormatter.default_handler)
         branch = json.loads(branchhandler.format_json(host.branch))
-        result.update(branch)
+        key, value = branch.popitem()
+        result.update({"Branch" : value})
 
         operating_systemhandler = ObjectFormatter.handlers.get(host.operating_system.__class__, ObjectFormatter.default_handler)
         operating_system = json.loads(operating_systemhandler.format_json(host.operating_system))

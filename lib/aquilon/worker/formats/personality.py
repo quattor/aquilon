@@ -144,9 +144,14 @@ class PersonalityFormatter(ObjectFormatter):
 
     def format_json(self, personality):
         result = {
-            "Name" : personality.name,
+            personality.__class__.__name__ : personality.name,
             "Comments" : personality.comments
         }
+
+        environmenthandler = ObjectFormatter.handlers.get(personality.host_environment.__class__, ObjectFormatter.default_handler)
+        environment = json.loads(environmenthandler.format_json(personality.host_environment))
+        key, value = environment.popitem()
+        result.update({"Environment" : value})
 
         featurelist = []
         features = personality.features[:]
