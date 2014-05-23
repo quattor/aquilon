@@ -32,10 +32,10 @@ LIBDIR = os.path.join(BINDIR, "..", "lib")
 if LIBDIR not in sys.path:
     sys.path.append(LIBDIR)
 
-if not os.environ.get("AQDCONF"):
-    os.environ["AQDCONF"] = os.path.join(SRCDIR, "etc", "aqd.conf.defaults")
+from aquilon.config import Config, lookup_file_path
 
-from aquilon.config import Config
+if not os.environ.get("AQDCONF"):
+    os.environ["AQDCONF"] = lookup_file_path("aqd.conf.defaults")
 
 config = Config()
 sys.path.append(config.get("protocols", "directory"))

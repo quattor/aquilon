@@ -129,7 +129,7 @@ class CommandAddInterfaceMachine(BrokerCommand):
         if pg is not None:
             port_group = verify_port_group(dbmachine, pg)
         elif autopg:
-            port_group = choose_port_group(session, logger, dbmachine)
+            port_group = choose_port_group(logger, dbmachine)
             audit_results.append(('pg', port_group))
         else:
             port_group = None

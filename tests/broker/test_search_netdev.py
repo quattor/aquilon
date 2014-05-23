@@ -31,7 +31,7 @@ class TestSearchNetworkDevice(TestBrokerCommand):
         command = ["search_network_device", "--network_device=ut3gd1r06.aqd-unittest.ms.com",
                    "--format=csv"]
         out = self.commandtest(command)
-        ip = self.net["tor_net_8"].usable[1]
+        ip = self.net["ut_net_mgmt"].usable[4]
         self.matchoutput(out,
                          "ut3gd1r06.aqd-unittest.ms.com,%s,tor,ut3,ut,"
                          "generic,temp_switch,,xge49,%s" % (ip, ip.mac),
@@ -52,12 +52,14 @@ class TestSearchNetworkDevice(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "ut3gd1r05.aqd-unittest.ms.com", command)
         self.matchoutput(out, "ut3gd1r06.aqd-unittest.ms.com", command)
-        self.matchclean(out, "Switch", command)
+        self.matchoutput(out, "switchinbuilding.aqd-unittest.ms.com", command)
 
     def testbuildingexact(self):
         command = ["search_network_device", "--building=ut", "--exact_location"]
         out = self.commandtest(command)
-        self.matchoutput(out, "ut3gd1r08.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "switchinbuilding.aqd-unittest.ms.com", command)
+        self.matchclean(out, "ut3gd1r05", command)
+        self.matchclean(out, "ut3gd1r06", command)
 
     def testcityexact(self):
         command = ["search_network_device", "--city=ny", "--exact_location"]
@@ -106,7 +108,7 @@ class TestSearchNetworkDevice(TestBrokerCommand):
         command = ["search_network_device", "--serial=SNgd1r05_new", "--fullinfo",
                    "--format=csv"]
         out = self.commandtest(command)
-        ip = self.net["tor_net_7"].usable[0]
+        ip = self.net["ut_net_mgmt"].usable[0]
         self.matchoutput(out,
                          "ut3gd1r05.aqd-unittest.ms.com,%s,tor,ut4,ut,"
                          "hp,uttorswitch,SNgd1r05_new,," % ip,
@@ -147,7 +149,7 @@ class TestSearchNetworkDevice(TestBrokerCommand):
     def testsearchswitchallcsv(self):
         command = ["search_network_device", "--all", "--format=csv"]
         out = self.commandtest(command)
-        ip = self.net["tor_net_8"].usable[1]
+        ip = self.net["ut_net_mgmt"].usable[4]
         self.matchoutput(out,
                          "ut3gd1r06.aqd-unittest.ms.com,%s,tor,ut3,ut,"
                          "generic,temp_switch,,xge49,%s" % (ip, ip.mac),

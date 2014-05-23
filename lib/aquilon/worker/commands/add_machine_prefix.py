@@ -30,8 +30,11 @@ class CommandAddMachinePrefix(CommandAddMachine):
 
     def render(self, session, logger, prefix, **args):
         prefix = AqStr.normalize(prefix)
+        # We don't have a good high-level object to lock here to prevent
+        # concurrent allocations, so we'll lock all existing Machine objects
+        # matching the prefix
         result = search_next(session=session, cls=Machine, attr=Machine.label,
-                             value=prefix, start=None, pack=None)
+                             value=prefix, start=None, pack=None, locked=True)
         machine = '%s%d' % (prefix, result)
         args['machine'] = machine
         CommandAddMachine.render(self, session, logger, **args)

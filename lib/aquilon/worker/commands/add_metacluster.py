@@ -49,13 +49,15 @@ class CommandAddMetaCluster(BrokerCommand):
             raise ArgumentError("%s is not a cluster personality." %
                                 personality)
 
+        section = "archetype_" + dbpersonality.archetype.name
+
         if not buildstatus:
             buildstatus = "build"
         dbstatus = ClusterLifecycle.get_instance(session, buildstatus)
 
         # this should be reverted when virtbuild supports these options
         if not domain and not sandbox:
-            domain = self.config.get("archetype_metacluster", "host_domain")
+            domain = self.config.get(section, "host_domain")
 
         (dbbranch, dbauthor) = get_branch_and_author(session, logger,
                                                      domain=domain,
@@ -67,16 +69,15 @@ class CommandAddMetaCluster(BrokerCommand):
         # this should be reverted when virtbuild supports this option
         if not dbloc:
             dbloc = Location.get_unique(session,
-                                        name=self.config.get("archetype_metacluster",
+                                        name=self.config.get(section,
                                                              "location_name"),
-                                        location_type=self.config.get("archetype_metacluster",
+                                        location_type=self.config.get(section,
                                                                       "location_type"))
         elif not dbloc.campus:
             raise ArgumentError("{0} is not within a campus.".format(dbloc))
 
         if max_members is None:
-            max_members = self.config.getint("archetype_metacluster",
-                                             "max_members_default")
+            max_members = self.config.getint(section, "max_members_default")
 
         if metacluster.strip().lower() == 'global':
             raise ArgumentError("Metacluster name global is reserved.")

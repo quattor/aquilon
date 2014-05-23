@@ -18,7 +18,8 @@
 
 
 from aquilon.exceptions_ import ArgumentError, ProcessException
-from aquilon.aqdb.model import (Machine, ServiceAddress, HostResource)
+from aquilon.aqdb.model import (Machine, ServiceAddress, HostResource,
+                                Archetype)
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.dns import grab_address
 from aquilon.worker.dbwrappers.interface import generate_ip, assign_address
@@ -47,10 +48,11 @@ class CommandAddHost(BrokerCommand):
 
     def render(self, session, logger, hostname, machine, archetype,
                zebra_interfaces, skip_dsdb_check=False, **arguments):
-
+        dbarchetype = Archetype.get_unique(session, archetype, compel=True)
         dbmachine = Machine.get_unique(session, machine, compel=True)
 
-        if (dbmachine.model.model_type.isAuroraNode() and archetype != 'aurora'):
+        if (dbmachine.model.model_type.isAuroraNode() and
+            dbarchetype.name != 'aurora'):
             raise ArgumentError("Machines of type aurora_node can only be "
                                 "added with archetype aurora.")
 
@@ -59,7 +61,7 @@ class CommandAddHost(BrokerCommand):
                                 "{1:l}.".format(dbmachine, dbmachine.host))
 
         dsdb_runner = DSDBRunner(logger=logger)
-        if archetype == 'aurora':
+        if dbarchetype.name == 'aurora':
             # For aurora, check that DSDB has a record of the host.
             if not skip_dsdb_check:
                 try:
@@ -74,7 +76,7 @@ class CommandAddHost(BrokerCommand):
             # not for aurora nodes as we dont update DSDB
             oldinfo = DSDBRunner.snapshot_hw(dbmachine)
 
-        create_host(session, logger, self.config, dbmachine, archetype,
+        create_host(session, logger, self.config, dbmachine, dbarchetype,
                     **arguments)
 
         if zebra_interfaces:

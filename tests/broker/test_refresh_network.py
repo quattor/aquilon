@@ -32,10 +32,6 @@ from ipaddr import IPv4Address, IPv4Network
 from brokertest import TestBrokerCommand
 
 
-def dynname(ip, domain="aqd-unittest.ms.com"):
-    return "dynamic-%s.%s" % (str(ip).replace(".", "-"), domain)
-
-
 class TestRefreshNetwork(TestBrokerCommand):
 
     # NOTE: The --all switch is not tested here because it would
@@ -221,7 +217,7 @@ class TestRefreshNetwork(TestBrokerCommand):
     def test_300_adddynamicrange(self):
         for ip in range(int(IPv4Address("0.1.1.4")),
                         int(IPv4Address("0.1.1.8")) + 1):
-            self.dsdb_expect_add(dynname(IPv4Address(ip)), IPv4Address(ip))
+            self.dsdb_expect_add(self.dynname(IPv4Address(ip)), IPv4Address(ip))
         command = ["add_dynamic_range", "--startip=0.1.1.4", "--endip=0.1.1.8",
                    "--dns_domain=aqd-unittest.ms.com"]
         self.successtest(command)

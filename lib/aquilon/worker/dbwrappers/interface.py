@@ -21,6 +21,7 @@ To an extent, this has become a dumping ground for any common ip methods.
 """
 
 from ipaddr import IPv4Address
+from operator import attrgetter
 import re
 
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
@@ -30,8 +31,8 @@ from sqlalchemy.orm import object_session
 from aquilon.aqdb.types import NicType
 from aquilon.exceptions_ import ArgumentError, InternalError
 from aquilon.aqdb.model import (Interface, ObservedMac, Fqdn, ARecord, VlanInfo,
-                                ObservedVlan, Network, AddressAssignment, Model,
-                                Bunker, Location, HardwareEntity)
+                                ObservedVlan, AddressAssignment, Model, Bunker,
+                                Location, HardwareEntity)
 from aquilon.aqdb.model.network import get_net_id_from_ip
 
 
@@ -265,6 +266,10 @@ def verify_port_group(dbmachine, port_group):
         except MultipleResultsFound:  # pragma: no cover
             raise InternalError("Too many subnets found for VLAN {0} "
                                 "on {1:l}.".format(dbvi.vlan_id, dbnetdev))
+
+        # Protect against concurrent allocations
+        dbobserved_vlan.network.lock_row()
+
         if dbobserved_vlan.network.is_at_guest_capacity:
             raise ArgumentError("Port group {0} is full for "
                                 "{1:l}.".format(dbvi.port_group,
@@ -280,40 +285,38 @@ def verify_port_group(dbmachine, port_group):
     return dbvi.port_group
 
 
-def choose_port_group(session, logger, dbmachine):
+def choose_port_group(logger, dbmachine):
     if not dbmachine.model.model_type.isVirtualMachineType():
         raise ArgumentError("Can only automatically generate "
                             "portgroup entry for virtual hardware.")
-    if not dbmachine.cluster.network_device:
+    dbnetdev = dbmachine.cluster.network_device
+    if not dbnetdev:
         raise ArgumentError("Cannot automatically allocate port group: no "
                             "switch record for {0}.".format(dbmachine.cluster))
 
     selected_vlan = None
+    selected_capacity = 0
 
-    dbnetdev = dbmachine.cluster.network_device
+    # Protect agains concurrent --autopg invocations.
+    for dbnet in sorted([vlan.network for vlan in dbnetdev.observed_vlans],
+                        key=attrgetter('id')):
+        dbnet.lock_row()
 
-    # filter for user vlans only
-    networks = session.query(Network).\
-        join("observed_vlans", "vlan").\
-        filter(VlanInfo.vlan_type == "user").\
-        filter(ObservedVlan.network_device == dbnetdev).\
-        order_by(VlanInfo.vlan_id).all()
-
-    # then filter by capacity
-    networks = [nw for nw in networks if not nw.is_at_guest_capacity]
-
-    for dbobserved_vlan in [vlan for n in networks for vlan in n.observed_vlans
-                            if vlan.vlan_type == "user"]:
-        if not selected_vlan or \
-           selected_vlan.guest_count > dbobserved_vlan.guest_count:
-            selected_vlan = dbobserved_vlan
+    for vlan in sorted(dbnetdev.observed_vlans, key=attrgetter('vlan_id')):
+        if vlan.vlan_type != 'user':
+            continue
+        net = vlan.network
+        free_capacity = net.available_ip_count - net.vlans_guest_count
+        if free_capacity > 0 and selected_capacity < free_capacity:
+            selected_vlan = vlan
+            selected_capacity = free_capacity
 
     if selected_vlan:
         logger.info("Selected port group {0} for {1:l} (based on {2:l})"
                     .format(selected_vlan.port_group, dbmachine, dbnetdev))
         return selected_vlan.port_group
-    raise ArgumentError("No available user port groups on "
-                        "{0:l}.".format(dbmachine.cluster.network_device))
+    raise ArgumentError("No available user port groups on {0:l}."
+                        .format(dbnetdev))
 
 
 def _type_msg(interface_type, bootable):

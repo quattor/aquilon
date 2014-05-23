@@ -98,15 +98,15 @@ class TestUpdateAddress(TestBrokerCommand):
         self.dsdb_verify()
 
     def test_130_update_dyndhcp_noop(self):
-        command = ["update", "address",
-                   "--fqdn", "dynamic-4-2-4-20.aqd-unittest.ms.com",
-                   "--reverse_ptr", "dynamic-4-2-4-20.aqd-unittest.ms.com"]
+        ip = self.net["dyndhcp0"].usable[12]
+        command = ["update", "address", "--fqdn", self.dynname(ip),
+                   "--reverse_ptr", self.dynname(ip)]
         self.noouttest(command)
         self.dsdb_verify(empty=True)
 
     def test_135_verify_dyndhcp(self):
-        command = ["show", "fqdn", "--fqdn",
-                   "dynamic-4-2-4-20.aqd-unittest.ms.com"]
+        ip = self.net["dyndhcp0"].usable[12]
+        command = ["show", "fqdn", "--fqdn", self.dynname(ip)]
         out = self.commandtest(command)
         self.matchclean(out, "Reverse", command)
 
@@ -139,8 +139,8 @@ class TestUpdateAddress(TestBrokerCommand):
         self.matchoutput(out, "reverse2.restrict.aqd-unittest.ms.com", command)
 
     def test_200_update_dyndhcp(self):
-        command = ["update", "address",
-                   "--fqdn", "dynamic-4-2-4-20.aqd-unittest.ms.com",
+        ip = self.net["dyndhcp0"].usable[12]
+        command = ["update", "address", "--fqdn", self.dynname(ip),
                    "--reverse_ptr", "unittest20.aqd-unittest.ms.com"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "The reverse PTR record cannot be set for DNS "

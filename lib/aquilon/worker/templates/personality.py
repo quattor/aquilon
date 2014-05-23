@@ -198,12 +198,10 @@ class PlenaryPersonalityBase(Plenary):
             for eon_id in eon_id_list:
                 pan_append(lines, "/system/eon_id_maps/%s" % target, eon_id)
 
-        archetype = self.dbobj.archetype.name
+        section = "archetype_" + self.dbobj.archetype.name
         # backward compat for esp reporting
-        if self.config.has_option("archetype_" + archetype,
-                                  "default_grn_target"):
-            default_grn_target = self.config.get("archetype_" + archetype,
-                                                 "default_grn_target")
+        if self.config.has_option(section, "default_grn_target"):
+            default_grn_target = self.config.get(section, "default_grn_target")
 
             eon_id_set = eon_id_map[default_grn_target]
 

@@ -27,7 +27,8 @@ SUBNET_RANGE = {
     24: IPv4Network('10.24.0.0/16'),
     25: IPv4Network('10.25.0.0/16'),
     26: IPv4Network('10.26.0.0/16'),
-    27: IPv4Network('10.27.0.0/16')}
+    27: IPv4Network('10.27.0.0/16'),
+    28: IPv4Network('10.28.0.0/16')}
 
 
 class DummyIP(IPv4Address):
