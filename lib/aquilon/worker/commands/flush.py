@@ -33,7 +33,7 @@ from aquilon.aqdb.model import (Service, Machine, Chassis, Host, Personality,
                                 ManagementInterface, AddressAssignment,
                                 ServiceInstance, NetworkDevice, ParamDefHolder,
                                 Feature)
-from aquilon.aqdb.data_sync.storage import cache_storage_data
+from aquilon.aqdb.data_sync.storage import StormapParser
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.templates.base import Plenary
 from aquilon.worker.templates.switchdata import PlenarySwitchData
@@ -43,12 +43,12 @@ from aquilon.worker.locks import CompileKey
 class CommandFlush(BrokerCommand):
 
     def preload_virt_disk_info(self, session, cache):
-        share_info = cache_storage_data()
+        parser = StormapParser()
 
         q = session.query(Share)
         q = q.options(joinedload('holder'))
         for res in q:
-            res.populate_share_info(share_info)
+            res.populate_share_info(parser)
             cache[res.id] = res
 
         q = session.query(Filesystem)

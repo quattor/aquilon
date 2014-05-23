@@ -18,8 +18,7 @@
 
 from aquilon.worker.formats.formatters import ObjectFormatter
 from aquilon.aqdb.model import ServiceInstance, ServiceInstanceServer
-from aquilon.aqdb.data_sync.storage import (find_storage_data,
-                                            cache_storage_data)
+from aquilon.aqdb.data_sync.storage import StormapParser
 
 
 class ServiceInstanceServerFormatter(ObjectFormatter):
@@ -100,11 +99,11 @@ class ServiceShareList(list):
 class ServiceShareListFormatter(ObjectFormatter):
     def format_raw(self, shares, indent=""):
         sharedata = {}
-        storage_cache = cache_storage_data()
+        parser = StormapParser()
 
         for dbshare in shares:
             if dbshare.name not in sharedata:
-                share_info = find_storage_data(dbshare, storage_cache)
+                share_info = parser.lookup(dbshare.name)
 
                 sharedata[dbshare.name] = {"disks": 0,
                                            "machines": 0,
