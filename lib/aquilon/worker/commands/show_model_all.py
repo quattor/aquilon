@@ -16,7 +16,6 @@
 # limitations under the License.
 """Contains the logic for `aq show model --all`."""
 
-
 from sqlalchemy.orm import joinedload, contains_eager
 
 from aquilon.worker.broker import BrokerCommand

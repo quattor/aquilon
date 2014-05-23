@@ -30,9 +30,9 @@ class CommandSearchModel(BrokerCommand):
         q = session.query(Model)
 
         if model:
-            q = q.filter(Model.name.like(model + '%'))
+            q = q.filter_by(name=model)
         if vendor:
-            dbvendor = Vendor.get_unique(session, vendor)
+            dbvendor = Vendor.get_unique(session, vendor, compel=True)
             q = q.filter_by(vendor=dbvendor)
         if machine_type:
             q = q.filter_by(model_type=machine_type)

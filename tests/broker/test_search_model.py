@@ -136,17 +136,6 @@ class TestSearchModel(TestBrokerCommand):
         self.matchoutput(out, "Disk: c0d0 466 GB cciss (local)",
                          command)
 
-    def test_200_search_prefix(self):
-        command = ["search_model", "--model", "ut"]
-        out = self.commandtest(command)
-        self.matchoutput(out, "utlarge", command)
-        self.matchoutput(out, "utmedium", command)
-        self.matchoutput(out, "utchassis", command)
-        self.matchoutput(out, "utblade", command)
-        self.matchoutput(out, "uttorswitch", command)
-        self.matchclean(out, "generic", command)
-        self.matchclean(out, "aurora_model", command)
-
     def test_200_search_cpu_vendor_speed(self):
         command = ["search_model", "--cpuvendor", "intel", "--cpuspeed", "2660"]
         out = self.commandtest(command)
