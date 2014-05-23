@@ -5686,7 +5686,7 @@
    </command>
 
    <command name="add_netgroup_whitelist">
-       Add netgroup to the whitelist of netgroups managed
+       Aquilon does not manage netgroup details but this command can be used to register that a netgroup may be supplied as an argument to the --netgroup option for applicable aquilon commands.
        <optgroup name="netgroup_whitelist_opts" mandatory="true" fields="all">
 	  <option name="netgroup" type="string" conflicts="username">Netgroup as string</option>
        </optgroup>
@@ -5694,7 +5694,7 @@
    </command>
 
    <command name="del_netgroup_whitelist">
-       Del netgroup from the whitelist of netgroups managed
+       Aquilon does not manage netgroup details but this command can be used to remove a netgroup from the list of those available to be used in conjunction with certain aquilon commands."
        <optgroup name="netgroup_whitelist_opts" mandatory="true" fields="all">
 	  <option name="netgroup" type="string" conflicts="username">Netgroup as string</option>
        </optgroup>

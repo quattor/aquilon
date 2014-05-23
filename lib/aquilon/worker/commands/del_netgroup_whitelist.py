@@ -16,6 +16,7 @@
 # limitations under the License.
 """Contains the logic for `aq del netgroup whitelist`."""
 
+from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import NetGroupWhiteList, Personality
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.templates import Plenary, PlenaryCollection
@@ -33,12 +34,12 @@ class CommandDelNetgroupWhitelist(BrokerCommand):
         plenaries = PlenaryCollection(logger=logger)
 
         q = session.query(Personality)
-        q = q.options(joinedload('root_netgroups'), subqueryload('root_netgroups'))
+        q = q.filter(Personality.root_netgroups.contains(dbng))
+        pers = q.all()
 
-        for p in q.all():
-            if dbng in p.root_netgroups:
-                p.root_netgroups.remove(dbng)
-                plenaries.extend(Plenary.get_plenary(p))
+        if pers:
+           raise ArgumentError("Netgroup {0} used by following and cannot be deleted : ".
+                               format(netgroup) + ", ".join(["{0}".format(p) for p in pers]))
 
         session.delete(dbng)
         session.flush()
