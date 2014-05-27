@@ -20,6 +20,7 @@ from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.aqdb.model import Personality
 from aquilon.worker.dbwrappers.parameter import (get_parameter_holder,
                                                  set_parameter)
+from aquilon.worker.dbwrappers.personality import validate_personality_justification
 from aquilon.worker.templates import Plenary
 
 
@@ -37,15 +38,17 @@ class CommandAddParameter(BrokerCommand):
         return dbparameter
 
     def render(self, session, logger, archetype, personality, feature, model,
-               interface, path, value=None, comments=None, **arguments):
+               interface, path, user, value=None, comments=None, justification=None, **arguments):
 
         param_holder = get_parameter_holder(session, archetype, personality,
                                             auto_include=True)
 
-        if isinstance(param_holder.holder_object, Personality) and \
-           not param_holder.holder_object.archetype.is_compileable:
-            raise ArgumentError("{0} is not compileable."
-                                .format(param_holder.holder_object.archetype))
+        if isinstance(param_holder.holder_object, Personality):
+            if not param_holder.holder_object.archetype.is_compileable:
+                raise ArgumentError("{0} is not compileable."
+                                    .format(param_holder.holder_object.archetype))
+            validate_personality_justification(param_holder.personality,
+                                               user, justification)
 
         dbparameter = self.process_parameter(session, param_holder, feature, model, interface,
                                              path, value, comments)

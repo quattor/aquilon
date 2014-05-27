@@ -20,6 +20,8 @@
 from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.aqdb.model import Personality, Service
+from aquilon.worker.dbwrappers.personality import validate_personality_justification
+
 
 
 class CommandAddRequiredServicePersonality(BrokerCommand):
@@ -34,9 +36,11 @@ class CommandAddRequiredServicePersonality(BrokerCommand):
                                                        archetype))
         dbservice.personalities.append(dbpersonality)
 
-    def render(self, session, service, archetype, personality, **arguments):
+    def render(self, session, service, archetype, personality, justification,
+               user, **arguments):
         dbpersonality = Personality.get_unique(session, name=personality,
                                                archetype=archetype, compel=True)
+        validate_personality_justification(dbpersonality, user, justification)
         dbservice = Service.get_unique(session, service, compel=True)
 
         self._update_dbobj(archetype, dbpersonality, dbservice)

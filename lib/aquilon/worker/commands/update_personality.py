@@ -25,6 +25,7 @@ from aquilon.aqdb.model.cluster import restricted_builtins
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.grn import lookup_grn
 from aquilon.worker.templates import Plenary, PlenaryCollection
+from aquilon.worker.dbwrappers.personality import validate_personality_justification
 
 
 class CommandUpdatePersonality(BrokerCommand):
@@ -33,9 +34,11 @@ class CommandUpdatePersonality(BrokerCommand):
 
     def render(self, session, logger, personality, archetype, vmhost_capacity_function,
                vmhost_overcommit_memory, cluster_required, config_override,
-               host_environment, grn, eon_id, leave_existing, **arguments):
+               host_environment, grn, eon_id, leave_existing, justification, user, **arguments):
         dbpersona = Personality.get_unique(session, name=personality,
                                            archetype=archetype, compel=True)
+
+        validate_personality_justification(dbpersona, user, justification)
 
         if vmhost_capacity_function is not None or \
                 vmhost_overcommit_memory is not None:

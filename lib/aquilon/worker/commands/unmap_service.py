@@ -22,6 +22,7 @@ from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.aqdb.model import (ServiceMap, PersonalityServiceMap, Service,
                                 ServiceInstance, Archetype, Personality,
                                 NetworkEnvironment)
+from aquilon.worker.dbwrappers.personality import validate_personality_justification
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.dbwrappers.network import get_network_byip
 
@@ -31,7 +32,7 @@ class CommandUnmapService(BrokerCommand):
     required_parameters = ["service", "instance"]
 
     def render(self, session, service, instance, archetype, personality,
-               networkip, **arguments):
+               networkip, justification, user, **arguments):
         dbservice = Service.get_unique(session, service, compel=True)
         dbinstance = ServiceInstance.get_unique(session, service=dbservice,
                                                 name=instance, compel=True)
@@ -54,6 +55,7 @@ class CommandUnmapService(BrokerCommand):
                                                    archetype=dbarchetype,
                                                    name=personality,
                                                    compel=True)
+            validate_personality_justification(dbpersonality, user, justification)
             q = session.query(PersonalityServiceMap)
             q = q.filter_by(personality=dbpersonality)
         else:

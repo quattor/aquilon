@@ -22,6 +22,7 @@ from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.grn import lookup_grn
 from aquilon.worker.dbwrappers.host import (hostname_to_host, hostlist_to_hosts,
                                             check_hostlist_size)
+from aquilon.worker.dbwrappers.personality import validate_personality_justification
 from aquilon.worker.templates import Plenary, PlenaryCollection
 
 
@@ -41,7 +42,7 @@ class CommandMapGrn(BrokerCommand):
         obj.grns.append((obj, grn, target))
 
     def render(self, session, logger, target, grn, eon_id, hostname, list, personality,
-               archetype, **arguments):
+               archetype, justification, user, **arguments):
         dbgrn = lookup_grn(session, grn, eon_id, logger=logger,
                            config=self.config)
 
@@ -58,7 +59,7 @@ class CommandMapGrn(BrokerCommand):
             objs = [Personality.get_unique(session, name=personality,
                                            archetype=archetype, compel=True)]
             config_key = "personality_grn_targets"
-
+            validate_personality_justification(objs[0], user, justification)
         for obj in objs:
             section = "archetype_" + obj.archetype.name
 
