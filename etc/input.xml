@@ -5673,6 +5673,7 @@
             <option name="netgroup" type="string" conflicts="username">Netgroup as string from white listed netgroups</option>
 	 </optgroup>
          <option name="personality" type="string">Personality</option>
+         <option name="justification" type="string">Extra authorization tokens (e.g. TCM number) to validate the request</option>
       </optgroup>
       <optgroup name="root_access_optional" mandatory="false" fields="any">
          <option name="archetype" type="string">Archetype of the personality</option>
@@ -5689,6 +5690,7 @@
             <option name="netgroup" type="string" conflicts="username">Netgroup as string from white listed netgroups</option>
 	 </optgroup>
          <option name="personality" type="string">Personality</option>
+         <option name="justification" type="string">Extra authorization tokens (e.g. TCM number) to validate the request</option>
       </optgroup>
       <optgroup name="root_access_optional" mandatory="false" fields="any">
          <option name="archetype" type="string">Archetype of the personality</option>

@@ -19,9 +19,12 @@
 from aquilon.aqdb.model import Personality, User, NetGroupWhiteList
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.templates.personality import PlenaryPersonality
+from aquilon.worker.commands.deploy import validate_justification
 
 
 class CommandGrantRootAccess(BrokerCommand):
+
+    required_parameters = ['personality', 'justification']
 
     def _update_dbobj(self, obj, dbuser=None, dbnetgroup=None):
         if dbuser and dbuser not in obj.root_users:
@@ -31,10 +34,12 @@ class CommandGrantRootAccess(BrokerCommand):
             obj.root_netgroups.append(dbnetgroup)
 
     def render(self, session, logger, username, netgroup, personality,
-               archetype, **arguments):
+               archetype, justification, user, **arguments):
 
+	validate_justification(user, justification)
         dbobj = Personality.get_unique(session, name=personality,
                                        archetype=archetype, compel=True)
+
         if username:
             dbuser = User.get_unique(session, name=username,
                                      compel=True)
