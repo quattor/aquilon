@@ -72,6 +72,20 @@ class TestMapGrn(VerifyGrnsMixin, PersonalityTestMixin, TestBrokerCommand):
         self.check_personality_grns(out, self.grn_maps["esp"], self.grn_maps,
                                     command)
 
+        command = ["show_personality", "--archetype=aquilon",
+                   "--personality=compileserver", "--format=proto"]
+        out = self.commandtest(command)
+        pl = self.parse_personality_msg(out, 1)
+        personality = pl.personalities[0]
+        self.failUnlessEqual(personality.archetype.name, "aquilon")
+        self.failUnlessEqual(personality.name, "compileserver")
+        self.assertEqual(personality.eonid_maps[0].target, 'atarget')
+        self.assertEqual(personality.eonid_maps[0].eonid, 6)
+        self.assertEqual(personality.eonid_maps[1].target, 'esp')
+        self.assertEqual(personality.eonid_maps[1].eonid, 2)
+        self.assertEqual(personality.eonid_maps[2].target, 'esp')
+        self.assertEqual(personality.eonid_maps[2].eonid, 3)
+
     def test_120_verify_host(self):
         command = ["show_host", "--hostname", "unittest20.aqd-unittest.ms.com"]
         out = self.commandtest(command)
