@@ -167,23 +167,6 @@ class TestAddModel(TestBrokerCommand):
         out = self.badrequesttest(command)
         self.matchoutput(out, "Invalid disk type 'bad-disk-type'.", command)
 
-    VENDOR_DEPR_STR = "User anonymous used deprecated option vendor alone of command CommandShowModel"
-    TYPE_DEPR_STR = "User anonymous used deprecated option type of command CommandShowModel"
-
-    def test_400_show_model_noauth_type(self):
-        def testfunc():
-            command = "show model --type blade"
-            out = self.commandtest(command.split(" "), auth=False)
-
-        self.assert_deprecation(TestAddModel.TYPE_DEPR_STR, testfunc)
-
-    def test_400_show_model_noauth_vendor(self):
-        def testfunc():
-            command = "show model --vendor hp"
-            out = self.commandtest(command.split(" "), auth=False)
-
-        self.assert_deprecation(TestAddModel.VENDOR_DEPR_STR, testfunc)
-
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddModel)
