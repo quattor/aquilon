@@ -19,7 +19,8 @@ from sqlalchemy.orm import contains_eager
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.aqdb.model import ARecord, DnsEnvironment, NetworkEnvironment
+from aquilon.aqdb.model import (ARecord, DynamicStub, DnsEnvironment,
+                                NetworkEnvironment)
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.worker.processes import DSDBRunner
@@ -85,6 +86,11 @@ class CommandDelAddressDNSEnvironment(BrokerCommand):
             # TODO: print the holder object
             raise ArgumentError("DNS Record {0:a} is used as a service "
                                 "address, therefore it cannot be deleted."
+                                .format(dbaddress))
+
+        if isinstance(dbaddress, DynamicStub):
+            raise ArgumentError("DNS Record {0:a} is reserved for dynamic "
+                                "DHCP, use del_dynamic_range to delete it."
                                 .format(dbaddress))
 
         # Do not allow deleting the DNS record if the IP address is still in
