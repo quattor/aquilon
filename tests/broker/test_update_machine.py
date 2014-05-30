@@ -543,6 +543,15 @@ class TestUpdateMachine(TestBrokerCommand):
         self.matchoutput(out, "Machine: ut3s01p2", command)
         self.matchoutput(out, "Model Type: blade", command)
 
+    def testfailstealip(self):
+        ip = self.net["unknown0"].usable[2]
+        command = ["update_machine", "--machine", "ut3c1n3", "--ip", ip]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "IP address %s is already in use by public interface "
+                         "eth0 of machine unittest00.one-nyp.ms.com" % ip,
+                         command)
+
     # These tests would be nice, but twisted just ignores the permission
     # on the files since we're still the owner.  Which is good, but means
     # the recovery routines can't be easily tested.
