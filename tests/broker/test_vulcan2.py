@@ -92,46 +92,6 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
         for i in range(0, 2):
             self.add_utcluster("utpgcl%d" % i, "utmc8")
 
-    # see     def testaddut01ga2s02(self):
-    def test_030_addutpgsw(self):
-        # Deprecated.
-
-        for i in range(0, 2):
-            ip = self.net["autopg1"].usable[i]
-            hostname = "utpgsw%d.aqd-unittest.ms.com" % i
-
-            self.dsdb_expect_add(hostname, ip, "xge49",
-                                 ip.mac)
-            command = ["add", "network_device",
-                       "--network_device", hostname, "--rack", "ut12",
-                       "--model", "rs g8000", "--interface", "xge49",
-                       "--iftype", "physical",
-                       "--type", "tor", "--mac", ip.mac, "--ip", ip]
-            self.ignoreoutputtest(command)
-        self.dsdb_verify()
-
-    # see     def testverifypollut01ga2s01(self):
-    # see fakevlan2net
-    def test_040_pollutpgsw(self):
-        macs = ["02:02:04:02:12:05", "02:02:04:02:12:06"]
-        for i in range(0, 2):
-            command = ["poll", "network_device", "--vlan", "--network_device",
-                       "utpgsw%d.aqd-unittest.ms.com" % i]
-            (out, err) = self.successtest(command)
-
-            service = self.config.get("broker", "poll_helper_service")
-            self.matchoutput(err,
-                             "Using jump host nyaqd1.ms.com from service "
-                             "instance %s/unittest to run discovery "
-                             "for switch utpgsw%d.aqd-unittest.ms.com" %
-                             (service, i),
-                             command)
-
-            # For Nexus switches we have if names, not snmp ids.
-            command = "show network_device --network_device utpgsw%d.aqd-unittest.ms.com" % i
-            out = self.commandtest(command.split(" "))
-            self.matchoutput(out, "Port et1-1: %s" % macs[i], command)
-
     # for each cluster's hosts
     def test_060_add10gigracks(self):
         for i in range(0, 2):
@@ -728,23 +688,6 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
         for port in range(0, 2):
             self.noouttest(["del", "machine", "--machine",
                             "utpgs01p%d" % port])
-
-    def test_740_delutpgsw(self):
-        for i in range(0, 2):
-            ip = self.net["autopg1"].usable[i]
-            swname = "utpgsw%d.aqd-unittest.ms.com" % i
-            plenary = self.plenary_name("switchdata", swname)
-            self.failUnless(os.path.exists(plenary),
-                            "Plenary file '%s' does not exist" % plenary)
-
-            self.dsdb_expect_delete(ip)
-            command = "del network_device --network_device %s" % swname
-            self.noouttest(command.split(" "))
-
-            self.failIf(os.path.exists(plenary),
-                        "Plenary file '%s' still exists" % plenary)
-
-        self.dsdb_verify()
 
     def test_750_delutpgcl(self):
         command = ["del_metacluster", "--metacluster=utmc8"]

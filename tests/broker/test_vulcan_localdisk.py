@@ -84,44 +84,6 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, MachineTestMixin,
                        "--personality=vulcan-local-disk"]
             self.noouttest(command)
 
-    # reusing vulcan2 subnets here.
-    def test_020_addutpgsw(self):
-        for i in range(0, 2):
-            ip = self.net["autopg1"].usable[i]
-
-            self.dsdb_expect_add(self.switch[i], ip, "xge49",
-                                 ip.mac)
-            command = ["add", "network_device", "--network_device", self.switch[i],
-                       "--rack", "ut12", "--model", "rs g8000",
-                       "--interface", "xge49", "--iftype", "physical",
-                       "--type", "tor", "--mac", ip.mac, "--ip", ip]
-            (out, err) = self.successtest(command)
-        self.dsdb_verify()
-
-    # see fakevlan2net
-    def test_025_pollutpgsw(self):
-
-        for i in range(0, 2):
-            command = ["poll", "network_device", "--vlan", "--network_device",
-                       self.switch[i]]
-            (out, err) = self.successtest(command)
-
-            service = self.config.get("broker", "poll_helper_service")
-            self.matchoutput(err,
-                             "Using jump host nyaqd1.ms.com from service "
-                             "instance %s/unittest to run discovery "
-                             "for switch %s" % (service, self.switch[i]),
-                             command)
-
-        # For Nexus switches we have if names, not snmp ids.
-        # Checking only the first one
-        command = "show network_device --network_device %s" % self.switch[1]
-        out = self.commandtest(command.split(" "))
-
-        macs = ["02:02:04:02:12:06", "02:02:04:02:12:07"]
-        for i in range(0, 2):
-            self.matchoutput(out, "Port et1-%d: %s" % (i + 1, macs[i]), command)
-
     def test_030_addswitch(self):
         for i in range(0, 2):
             self.successtest(["update_esx_cluster",
@@ -400,22 +362,6 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, MachineTestMixin,
 
         for i in range(0, 2):
             self.noouttest(["del", "machine", "--machine", self.machine[i]])
-
-    def test_308_delutpgsw(self):
-        for i in range(0, 2):
-            ip = self.net["autopg1"].usable[i]
-            plenary = self.plenary_name("switchdata", self.switch[i])
-            self.failUnless(os.path.exists(plenary),
-                            "Plenary file '%s' does not exist" % plenary)
-
-            self.dsdb_expect_delete(ip)
-            command = "del network_device --network_device %s" % self.switch[i]
-            self.noouttest(command.split(" "))
-
-            self.failIf(os.path.exists(plenary),
-                        "Plenary file '%s' still exists" % plenary)
-
-        self.dsdb_verify()
 
     def test_330_delutlccl1(self):
         for i in range(0, 2):

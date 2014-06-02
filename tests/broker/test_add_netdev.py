@@ -188,7 +188,7 @@ class TestAddNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
                    "--rack", "ut8", "--model", "rs g8000",
                    "--interface", "xge49", "--iftype", "physical",
                    "--mac", ip.mac, "--ip", ip]
-        (out, err) = self.successtest(command)
+        self.successtest(command)
         self.dsdb_verify()
         self.check_plenary_exists('network_device', 'americas', 'ut', 'ut01ga1s02')
         self.check_plenary_exists('hostdata', 'ut01ga1s02.aqd-unittest.ms.com')
@@ -206,7 +206,7 @@ class TestAddNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
                    "--rack", "ut9", "--model", "rs g8000",
                    "--interface", "xge49", "--iftype", "physical",
                    "--mac", ip.mac, "--ip", ip]
-        (out, err) = self.successtest(command)
+        self.successtest(command)
         self.dsdb_verify()
         self.check_plenary_exists('network_device', 'americas', 'ut', 'ut01ga1s03')
         self.check_plenary_exists('hostdata', 'ut01ga1s03.aqd-unittest.ms.com')
@@ -224,7 +224,7 @@ class TestAddNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
                    "--rack", "ut10", "--model", "rs g8000",
                    "--interface", "xge49", "--iftype", "physical",
                    "--mac", ip.mac, "--ip", ip]
-        (out, err) = self.successtest(command)
+        self.successtest(command)
         self.dsdb_verify()
         self.check_plenary_exists('network_device', 'americas', 'ut', 'ut01ga1s04')
         self.check_plenary_exists('hostdata', 'ut01ga1s04.aqd-unittest.ms.com')
@@ -242,7 +242,7 @@ class TestAddNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
                    "--rack", "ut11", "--model", "rs g8000",
                    "--interface", "xge49", "--iftype", "physical",
                    "--mac", ip.mac, "--ip", ip]
-        (out, err) = self.successtest(command)
+        self.successtest(command)
         self.dsdb_verify()
         self.check_plenary_exists('network_device', 'americas', 'ut', 'ut01ga2s01')
         self.check_plenary_exists('hostdata', 'ut01ga2s01.aqd-unittest.ms.com')
@@ -256,7 +256,7 @@ class TestAddNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
                    "--rack", "ut12", "--model", "rs g8000",
                    "--interface", "xge49", "--iftype", "physical",
                    "--mac", ip.mac, "--ip", ip]
-        (out, err) = self.successtest(command)
+        self.successtest(command)
         self.dsdb_verify()
         self.check_plenary_exists('network_device', 'americas', 'ut', 'ut01ga2s02')
         self.check_plenary_exists('hostdata', 'ut01ga2s02.aqd-unittest.ms.com')
@@ -270,7 +270,7 @@ class TestAddNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
                    "--rack", "ut12", "--model", "rs g8000",
                    "--interface", "xge49", "--iftype", "physical",
                    "--mac", ip.mac, "--ip", ip]
-        (out, err) = self.successtest(command)
+        self.successtest(command)
         self.dsdb_verify()
 
     def test_162_add_ut01ga2s04(self):
@@ -282,7 +282,7 @@ class TestAddNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
                    "--rack", "ut12", "--model", "rs g8000",
                    "--interface", "xge49", "--iftype", "physical",
                    "--mac", ip.mac, "--ip", ip]
-        (out, err) = self.successtest(command)
+        self.successtest(command)
         self.dsdb_verify()
 
     def test_170_add_ut01ga2s05(self):
@@ -295,7 +295,7 @@ class TestAddNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
                    "--model", "rs g8000", "--interface", "xge49",
                    "--iftype", "physical",
                    "--mac", ip.mac, "--ip", ip]
-        (out, err) = self.successtest(command)
+        self.successtest(command)
         self.dsdb_verify()
         self.check_plenary_exists('network_device', 'americas', 'ut', 'ut01ga2s05')
         self.check_plenary_exists('hostdata', 'ut01ga2s05.aqd-unittest.ms.com')
@@ -308,10 +308,32 @@ class TestAddNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
                    "--rack", "np13",
                    "--model", "rs g8000", "--interface", "xge49",
                    "--iftype", "physical", "--mac", ip.mac, "--ip", ip]
-        (out, err) = self.successtest(command)
+        self.successtest(command)
         self.dsdb_verify()
         self.check_plenary_exists('network_device', 'americas', 'np', 'np01ga2s05')
         self.check_plenary_exists('hostdata', 'np01ga2s05.one-nyp.ms.com')
+
+    def test_175_add_utpgsw0(self):
+        ip = self.net["ut_net_mgmt"].usable[7]
+        self.dsdb_expect_add("utpgsw0.aqd-unittest.ms.com", ip, "xge49", ip.mac)
+        command = ["add", "network_device", "--type", "tor",
+                   "--network_device", "utpgsw0.aqd-unittest.ms.com",
+                   "--rack", "ut12", "--model", "rs g8000",
+                   "--interface", "xge49", "--iftype", "physical",
+                   "--mac", ip.mac, "--ip", ip]
+        self.successtest(command)
+        self.dsdb_verify()
+
+    def test_175_add_utpgsw1(self):
+        ip = self.net["ut_net_mgmt"].usable[8]
+        self.dsdb_expect_add("utpgsw1.aqd-unittest.ms.com", ip, "xge49", ip.mac)
+        command = ["add", "network_device", "--type", "tor",
+                   "--network_device", "utpgsw1.aqd-unittest.ms.com",
+                   "--rack", "ut12", "--model", "rs g8000",
+                   "--interface", "xge49", "--iftype", "physical",
+                   "--mac", ip.mac, "--ip", ip]
+        self.successtest(command)
+        self.dsdb_verify()
 
     def test_200_reject_ip_in_use(self):
         ip = self.net["ut_net_mgmt"].usable[0]

@@ -17,6 +17,8 @@
 # limitations under the License.
 """Module for testing the del network device command."""
 
+import os
+
 if __name__ == "__main__":
     import utils
     utils.import_depends()
@@ -189,6 +191,30 @@ class TestDelNetworkDevice(TestBrokerCommand):
         self.dsdb_verify()
         self.check_plenary_nonexistant('network_device', 'americas', 'ut', 'np01ga2s05')
         self.check_plenary_nonexistant('hostdata', 'np01ga2s05.one-nyp.ms.com')
+
+    def test_180_del_utpgsw0(self):
+        ip = self.net["ut_net_mgmt"].usable[7]
+        self.dsdb_expect_delete(ip)
+        plenary = self.plenary_name("switchdata", "utpgsw0.aqd-unittest.ms.com")
+        self.failUnless(os.path.exists(plenary),
+                        "Plenary file '%s' does not exist" % plenary)
+        self.noouttest(["del_network_device", "--network_device",
+                        "utpgsw0.aqd-unittest.ms.com"])
+        self.failIf(os.path.exists(plenary),
+                    "Plenary file '%s' still exists" % plenary)
+        self.dsdb_verify()
+
+    def test_181_del_utpgsw1(self):
+        ip = self.net["ut_net_mgmt"].usable[8]
+        self.dsdb_expect_delete(ip)
+        plenary = self.plenary_name("switchdata", "utpgsw1.aqd-unittest.ms.com")
+        self.failUnless(os.path.exists(plenary),
+                        "Plenary file '%s' does not exist" % plenary)
+        self.noouttest(["del_network_device", "--network_device",
+                        "utpgsw1.aqd-unittest.ms.com"])
+        self.failIf(os.path.exists(plenary),
+                    "Plenary file '%s' still exists" % plenary)
+        self.dsdb_verify()
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelNetworkDevice)

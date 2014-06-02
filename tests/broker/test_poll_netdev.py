@@ -220,6 +220,39 @@ class TestPollNetworkDevice(TestBrokerCommand):
         self.successtest(["poll", "network_device",
                           "--network_device", "np01ga2s05.one-nyp.ms.com"])
 
+    def testpollutpgsw0(self):
+        command = ["poll", "network_device", "--vlan",
+                   "--network_device", "utpgsw0.aqd-unittest.ms.com"]
+        self.successtest(command)
+
+        command = ["show_network_device",
+                   "--network_device", "utpgsw0.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        # FIXME: we're testing here that non-numeric port names are accepted,
+        # but the MAC address being used is not really valid and may be
+        # misleading
+        self.matchoutput(out,
+                         "Port et1-1: %s" % self.net["autopg1"][5].mac,
+                         command)
+
+    def testpollutpgsw1(self):
+        command = ["poll", "network_device", "--vlan",
+                   "--network_device", "utpgsw1.aqd-unittest.ms.com"]
+        self.successtest(command)
+
+        command = ["show_network_device",
+                   "--network_device", "utpgsw1.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        # FIXME: we're testing here that non-numeric port names are accepted,
+        # but the MAC addresses being used are not really valid and may be
+        # misleading
+        self.matchoutput(out,
+                         "Port et1-1: %s" % self.net["autopg1"][6].mac,
+                         command)
+        self.matchoutput(out,
+                         "Port et1-2: %s" % self.net["autopg1"][7].mac,
+                         command)
+
     def testpollbor(self):
         command = ["poll", "network_device", "--vlan",
                    "--network_device", "ut3gd1r01.aqd-unittest.ms.com"]
