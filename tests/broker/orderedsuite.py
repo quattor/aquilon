@@ -88,10 +88,10 @@ from test_del_share import TestDelShare
 from test_early_constraints_cluster import TestClusterEarlyConstraints
 from test_deprecated_switch import TestDeprecatedSwitch
 from test_add_netdev import TestAddNetworkDevice
+from test_add_vlan import TestAddVlan
 from test_update_netdev import TestUpdateNetworkDevice
 from test_rename_netdev import TestRenameNetworkDevice
 from test_discover_netdev import TestDiscoverNetworkDevice
-from test_vlan import TestVlan
 from test_poll_netdev import TestPollNetworkDevice
 from test_update_netdev_mac import TestUpdateNetworkDeviceMac
 from test_add_chassis import TestAddChassis
@@ -230,6 +230,7 @@ from test_del_disk import TestDelDisk
 from test_del_machine import TestDelMachine
 from test_del_chassis import TestDelChassis
 from test_del_netdev import TestDelNetworkDevice
+from test_del_vlan import TestDelVlan
 from test_del_esx_cluster import TestDelESXCluster
 from test_del_metacluster import TestDelMetaCluster
 from test_del_router_address import TestDelRouterAddress
@@ -314,6 +315,7 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestAddShare,
                      TestClusterEarlyConstraints,
                      TestDeprecatedSwitch,
+                     TestAddVlan,
                      TestAddNetworkDevice, TestUpdateNetworkDevice,
                      TestAddChassis, TestUpdateChassis,
                      TestAddMachine, TestAddDisk, TestAddInterface,
@@ -323,7 +325,6 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestAddAquilonHost, TestAddWindowsHost, TestAddAuroraHost,
                      TestPollNetworkDevice,
                      TestUpdateNetworkDeviceMac,
-                     TestVlan,
                      TestAddHost,
                      TestAddAuxiliary, TestAddManager, TestAddInterfaceAddress,
                      TestAddServiceAddress,
@@ -401,7 +402,7 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestDelAddress, TestDelNSRecord,
                      TestDelManager, TestDelAuxiliary, TestDelWindowsHost, TestDelHost,
                      TestDelInterface, TestDelDisk, TestDelMachine, TestDelChassis,
-                     TestDelNetworkDevice,
+                     TestDelNetworkDevice, TestDelVlan,
                      TestDelShare,
                      TestDelCluster,
                      TestDelESXCluster, TestDelMetaCluster,
