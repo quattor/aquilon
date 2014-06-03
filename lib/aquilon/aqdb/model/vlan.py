@@ -52,18 +52,18 @@ class VlanInfo(Base):
                                       name='%s_vlan_id_ck' % _VTN))
 
     @classmethod
-    def get_vlan_id(cls, session, port_group, compel=InternalError):
+    def get_by_pg(cls, session, port_group, compel=InternalError):
         info = session.query(cls).filter_by(port_group=port_group).first()
         if not info and compel:
-            raise compel("No VLAN found for port group %s" % port_group)
-        return info.vlan_id
+            raise compel("No VLAN found for port group %s." % port_group)
+        return info
 
     @classmethod
-    def get_port_group(cls, session, vlan_id, compel=InternalError):
+    def get_by_vlan(cls, session, vlan_id, compel=InternalError):
         info = session.query(cls).filter_by(vlan_id=vlan_id).first()
         if not info and compel:
-            raise compel("No port group found for VLAN id %s" % vlan_id)
-        return info.port_group
+            raise compel("No port group found for VLAN id %s." % vlan_id)
+        return info
 
     def __repr__(self):
         return '<%s vlan_id=%s port_group=%s vlan_type=%s>' % (

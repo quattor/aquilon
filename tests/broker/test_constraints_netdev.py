@@ -90,7 +90,7 @@ class TestNetworkDeviceConstraints(TestBrokerCommand):
     def testdelvlaninuse(self):
         command = ["del_vlan", "--vlan", "710"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "VlanInfo 710 is still in use and cannot be "
+        self.matchoutput(out, "VLAN 710 is still in use and cannot be "
                          "deleted.", command)
 
 if __name__ == '__main__':

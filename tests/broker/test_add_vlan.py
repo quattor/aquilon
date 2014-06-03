@@ -53,7 +53,7 @@ class TestAddVlan(TestBrokerCommand):
 
             command = ["show_vlan", "--vlan", vlan_id]
             out = self.commandtest(command)
-            self.matchoutput(out, "Vlan: %s" % vlan_id, command)
+            self.matchoutput(out, "VLAN: %s" % vlan_id, command)
             self.matchoutput(out, "Name: %s" % params["name"], command)
             self.matchoutput(out, "Type: %s" % params["type"], command)
 

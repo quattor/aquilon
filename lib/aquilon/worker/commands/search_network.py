@@ -66,7 +66,7 @@ class CommandSearchNetwork(BrokerCommand):
                 # If this is a VM on a cluster, consult the VLANs.  There
                 # could be functionality here for real hardware to consult
                 # interface port groups... there's no real use case yet.
-                vlans = [VlanInfo.get_vlan_id(session, i.port_group)
+                vlans = [VlanInfo.get_by_pg(session, i.port_group).vlan_id
                          for i in dbmachine.interfaces if i.port_group]
                 if vlans:
                     q = q.join('observed_vlans')
@@ -104,7 +104,7 @@ class CommandSearchNetwork(BrokerCommand):
                                                       "network")]
                 q = q.filter(Network.id.in_(net_ids))
         if pg:
-            vlan = VlanInfo.get_vlan_id(session, pg, compel=ArgumentError)
+            vlan = VlanInfo.get_by_pg(session, pg, compel=ArgumentError).vlan_id
             q = q.join('observed_vlans')
             q = q.filter_by(vlan_id=vlan)
             q = q.reset_joinpoint()

@@ -137,8 +137,8 @@ class TestPollNetworkDevice(TestBrokerCommand):
         (out, err) = self.successtest(command)
         net = self.net["vmotion_net"]
         self.matchoutput(err,
-                         "vlan 5 is not "
-                         "defined in AQ. Please use add_vlan to add it.",
+                         "Switch ut01ga2s01.aqd-unittest.ms.com: VLAN 5 is not "
+                         "defined in AQDB. Please use add_vlan to add it.",
                          command)
         self.matchoutput(err,
                          "Switch ut01ga2s01.aqd-unittest.ms.com: skipping VLAN "

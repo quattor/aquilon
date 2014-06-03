@@ -32,6 +32,11 @@ class TestDelVlan(TestBrokerCommand):
             self.noouttest(["del_vlan", "--vlan", vlan_id])
             self.notfoundtest(["show_vlan", "--vlan", vlan_id])
 
+    def test_200_delete_unknown(self):
+        command = ["del_vlan", "--vlan", "998"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "No port group found for VLAN id 998.", command)
+
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelVlan)
     unittest.TextTestRunner(verbosity=2).run(suite)

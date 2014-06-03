@@ -118,8 +118,8 @@ def generate_ip(session, logger, dbinterface, ip=None, ipfromip=None,
                                     "address to an interface with a port group "
                                     "since {0} is not associated with a "
                                     "switch.".format(dbcluster))
-            vlan_id = VlanInfo.get_vlan_id(session, dbinterface.port_group)
-            dbnetwork = ObservedVlan.get_network(session, vlan_id=vlan_id,
+            vinfo = VlanInfo.get_by_pg(session, dbinterface.port_group)
+            dbnetwork = ObservedVlan.get_network(session, vlan_id=vinfo.vlan_id,
                                                  network_device=dbcluster.network_device,
                                                  compel=ArgumentError)
         elif dbinterface.mac:
@@ -248,7 +248,8 @@ def verify_port_group(dbmachine, port_group):
     if not port_group:
         return None
     session = object_session(dbmachine)
-    dbvi = VlanInfo.get_unique(session, port_group=port_group, compel=True)
+    dbvi = VlanInfo.get_by_pg(session, port_group=port_group,
+                              compel=ArgumentError)
     if dbmachine.model.model_type.isVirtualMachineType():
         dbnetdev = dbmachine.cluster.network_device
         if not dbnetdev:
