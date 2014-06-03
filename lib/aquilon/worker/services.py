@@ -112,7 +112,14 @@ class Chooser(object):
         self.required_services = dbobj.required_services
 
     def apply_changes(self):
-        raise InternalError("This method must be overridden")
+        for instance in self.instances_unbound:
+            self.logger.client_info("{0} removing binding for {1:l}"
+                                    .format(self.dbobj, instance))
+            self.dbobj.services_used.remove(instance)
+        for instance in self.instances_bound:
+            self.logger.client_info("{0} adding binding for {1:l}"
+                                    .format(self.dbobj, instance))
+            self.dbobj.services_used.append(instance)
 
     def verify_init(self):
         """This is more of a verify-and-finalize method..."""
@@ -559,17 +566,6 @@ class HostChooser(Chooser):
         self.staging_services[dbservice] = [cas]
         return
 
-    def apply_changes(self):
-        """Update the host object with pending changes."""
-        for instance in self.instances_bound:
-            self.logger.client_info("{0} adding binding for {1:l}"
-                                    .format(self.dbobj, instance))
-            self.dbobj.services_used.append(instance)
-        for instance in self.instances_unbound:
-            self.logger.client_info("{0} removing binding for {1:l}"
-                                    .format(self.dbobj, instance))
-            self.dbobj.services_used.remove(instance)
-
     def prestash_primary(self):
         self.plenaries.append(Plenary.get_plenary(self.dbobj))
 
@@ -605,26 +601,13 @@ class ClusterChooser(Chooser):
         return 0
 
     def apply_changes(self):
-        """Update the cluster object with pending changes."""
-        for instance in self.instances_unbound:
-            self.logger.client_info("{0} removing binding for {1:l}"
-                                    .format(self.dbobj, instance))
-            if instance in self.dbobj.services_used:
-                self.dbobj.services_used.remove(instance)
-            else:
-                self.error("Internal Error: Could not unbind {0:l}"
-                           .format(instance))
+        super(ClusterChooser, self).apply_changes()
+
         for instance in self.instances_bound:
-            self.logger.client_info("{0} adding binding for {1:l}"
-                                    .format(self.dbobj, instance))
-            self.dbobj.services_used.append(instance)
-            self.flush_changes()
             for h in self.dbobj.hosts:
                 host_chooser = Chooser(h, logger=self.logger,
                                        required_only=False)
                 host_chooser.set_single(instance.service, instance, force=True)
-                host_chooser.flush_changes()
-                # Note, host plenary will be written later.
 
     def prestash_primary(self):
         for dbobj in self.dbobj.all_objects():
