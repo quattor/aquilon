@@ -1,0 +1,3 @@
+ALTER TABLE branch ADD formats VARCHAR2(16);
+
+QUIT;

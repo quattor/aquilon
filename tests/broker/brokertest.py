@@ -68,14 +68,12 @@ class TestBrokerCommand(unittest.TestCase):
             compress_suffix = ".gz"
         else:
             compress_suffix = ""
-        if cls.config.getboolean("panc", "xml_profiles"):
-            cls.xml_suffix = ".xml" + compress_suffix
-        else:
-            cls.xml_suffix = None
-        if cls.config.getboolean("panc", "json_profiles"):
-            cls.json_suffix = ".json" + compress_suffix
-        else:
-            cls.json_suffix = None
+
+        cls.xml_suffix = ".xml" + compress_suffix
+        cls.xml_default = cls.config.getboolean("panc", "xml_profiles")
+
+        cls.json_suffix = ".json" + compress_suffix
+        cls.json_default = cls.config.getboolean("panc", "json_profiles")
 
         # Need to import protocol buffers after we have the config
         # object all squared away and we can set the sys.path
@@ -745,8 +743,10 @@ class TestBrokerCommand(unittest.TestCase):
                       "\n@@@\n%s\n@@@\n" % "\n".join(errors))
 
     def verify_buildfiles(self, domain, object,
-                          want_exist=True, command='manage'):
+                          want_exist=True, command='manage',
+                          xml=None, json=None):
         buildfiles = []
+        exemptfiles = []
 
         qdir = self.config.get('broker', 'quattordir')
         domaindir = os.path.join(qdir, 'build', domain)
@@ -754,10 +754,20 @@ class TestBrokerCommand(unittest.TestCase):
         buildfiles.append(os.path.join(domaindir, object + '.dep'))
         buildfiles.append(self.build_profile_name(object, domain=domain))
 
-        if self.xml_suffix:
+        if xml is None:
+            xml = self.xml_default
+        if json is None:
+            json = self.json_default
+
+        if xml:
             buildfiles.append(os.path.join(domaindir, object + self.xml_suffix))
-        if self.json_suffix:
+        else:
+            exemptfiles.append(os.path.join(domaindir, object + self.xml_suffix))
+
+        if json:
             buildfiles.append(os.path.join(domaindir, object + self.json_suffix))
+        else:
+            exemptfiles.append(os.path.join(domaindir, object + self.json_suffix))
 
         for f in buildfiles:
             if want_exist:
@@ -768,6 +778,11 @@ class TestBrokerCommand(unittest.TestCase):
                 self.failIf(os.path.exists(f),
                             "Not expecting %s to exist after running %s." %
                             (f, command))
+
+        for f in exemptfiles:
+            self.failIf(os.path.exists(f),
+                        "Not expecting %s to exist after running %s." %
+                        (f, command))
 
     def demote_current_user(self, role="nobody"):
         principal = self.config.get('unittest', 'principal')

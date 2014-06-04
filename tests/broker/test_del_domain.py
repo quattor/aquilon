@@ -29,36 +29,37 @@ from brokertest import TestBrokerCommand
 
 class TestDelDomain(TestBrokerCommand):
 
-    def test_delutprod(self):
+    def test_100_del_utprod(self):
         command = ["del_domain", "--domain=ut-prod"]
         self.successtest(command)
         self.failIf(os.path.exists(os.path.join(
             self.config.get("broker", "domainsdir"), "ut-prod")))
 
-    def test_verifydelutprod(self):
+    def test_101_verify_utprod(self):
         command = ["show_domain", "--domain=ut-prod"]
         self.notfoundtest(command)
 
-    def test_delunittest(self):
+    def test_110_del_unittest(self):
         command = ["del_domain", "--domain=unittest"]
         self.successtest(command)
         self.failIf(os.path.exists(os.path.join(
             self.config.get("broker", "domainsdir"), "unittest")))
 
-    def test_verifydelutqa(self):
+    def test_111_verify_unittest(self):
         command = ["show_domain", "--domain=unittest"]
         self.notfoundtest(command)
 
-    def test_deldeployable(self):
+    def test_120_del_deployable(self):
         command = ["del_domain", "--domain=deployable"]
         self.successtest(command)
         self.failIf(os.path.exists(os.path.join(
             self.config.get("broker", "domainsdir"), "deployable")))
 
-    def test_verifydeldeployable(self):
-        command = ["show_domain", "--domain=deployable"]
-        self.notfoundtest(command)
+    def test_130_del_unittest_xml(self):
+        self.noouttest(["del_domain", "--domain", "unittest-xml"])
 
+    def test_135_del_unittest_json(self):
+        self.noouttest(["del_domain", "--domain", "unittest-json"])
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelDomain)

@@ -205,6 +205,19 @@ class TestManage(TestBrokerCommand):
                              "Not all utecl1 cluster members (%s) are in "
                              "sandbox utsandbox (%s)." % (members, aligned))
 
+    def testmanagexml(self):
+        self.noouttest(["manage", "--domain", "unittest-xml", "--force",
+                        "--hostname", "unittest20.aqd-unittest.ms.com"])
+        self.successtest(["compile", "--hostname", "unittest20.aqd-unittest.ms.com"])
+        self.verify_buildfiles("unittest-xml", "unittest20.aqd-unittest.ms.com",
+                               xml=True, json=False)
+
+    def testmanagejson(self):
+        self.noouttest(["manage", "--domain", "unittest-json", "--force",
+                        "--hostname", "unittest20.aqd-unittest.ms.com"])
+        self.successtest(["compile", "--hostname", "unittest20.aqd-unittest.ms.com"])
+        self.verify_buildfiles("unittest-json", "unittest20.aqd-unittest.ms.com",
+                               xml=False, json=True)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestManage)

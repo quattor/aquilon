@@ -80,10 +80,16 @@ def run_domain_compile(options, config):
 
     formats = []
     suffixes = []
-    if config.getboolean("panc", "xml_profiles"):
+
+    if options.xml_output is None:
+        options.xml_output = config.getboolean("panc", "xml_profiles")
+    if options.json_output is None:
+        options.json_output = config.getboolean("panc", "json_profiles")
+
+    if options.xml_output:
         formats.append("pan" + compress_suffix)
         suffixes.append(".xml" + compress_suffix)
-    if config.getboolean("panc", "json_profiles"):
+    if options.json_output:
         formats.append("json" + compress_suffix)
         suffixes.append(".json" + compress_suffix)
 
@@ -114,6 +120,16 @@ def main():
                         help="domain name to compile")
     parser.add_argument("--compress_output", action="store_true",
                         help="compress the generated profiles")
+    parser.add_argument("--xml_output", action="store_true",
+                        help="generate XML profiles")
+    parser.add_argument("--no_xml_output", dest="xml_output",
+                        action="store_false",
+                        help="suppress XML profiles")
+    parser.add_argument("--json_output", action="store_true",
+                        help="generate JSON profiles")
+    parser.add_argument("--no_json_output", dest="json_output",
+                        action="store_false",
+                        help="suppress JSON profiles")
     parser.add_argument("--panc_jar", action="store",
                         help="location of panc.jar")
     parser.add_argument("--templates", action="store", required=True,

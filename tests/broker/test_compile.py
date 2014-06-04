@@ -53,15 +53,15 @@ class TestCompile(VerifyNotificationsMixin, TestBrokerCommand):
         else:
             source = open(index)
         # TODO: hardcode XML profiles for now
-        profile_suffix = self.xml_suffix
         tree = ET.parse(source)
         mtimes = dict()
         for profile in tree.getiterator('profile'):
             if profile.text and "mtime" in profile.attrib:
                 obj = profile.text.strip()
-                if obj and obj.endswith(profile_suffix):
-                    mtimes[obj[:-len(profile_suffix)]] = \
-                        int(profile.attrib['mtime'])
+                for suffix in [self.xml_suffix, self.json_suffix]:
+                    if obj and obj.endswith(suffix):
+                        mtimes[obj[:-len(suffix)]] = \
+                            int(profile.attrib['mtime'])
         return mtimes
 
     def test_000_precompile(self):

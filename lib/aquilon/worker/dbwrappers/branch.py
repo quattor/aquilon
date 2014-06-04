@@ -22,7 +22,8 @@ import re
 from sqlalchemy.orm.session import object_session
 
 from aquilon.exceptions_ import ArgumentError, ProcessException
-from aquilon.aqdb.model import Domain, Sandbox, Branch
+from aquilon.aqdb.model import (Domain, Sandbox, Branch, Host, Cluster,
+                                Archetype, Personality)
 from aquilon.worker.dbwrappers.user_principal import get_user_principal
 from aquilon.worker.processes import run_git
 from aquilon.worker.locks import CompileKey
@@ -59,11 +60,19 @@ def get_branch_dependencies(dbbranch):
     If there are no dependencies then an empty list is returned.
 
     """
+    session = object_session(dbbranch)
     ret = []
-    if dbbranch.hosts:
+
+    q = session.query(Host.hardware_entity_id)
+    q = q.filter_by(branch=dbbranch)
+    if q.count():
         ret.append("Hosts are still attached to {0:l}.".format(dbbranch))
-    if dbbranch.clusters:
+
+    q = session.query(Cluster.id)
+    q = q.filter_by(branch=dbbranch)
+    if q.count():
         ret.append("Clusters are still attached to {0:l}.".format(dbbranch))
+
     if dbbranch.trackers:
         ret.append("%s is tracked by %s." %
                    (format(dbbranch), [str(t.name) for t in dbbranch.trackers]))
@@ -120,3 +129,19 @@ def expand_compiler(config, compiler_version):
     if not os.path.exists(compiler):
         raise ArgumentError("Compiler not found at '%s'" % compiler)
     return compiler
+
+
+def has_compileable_objects(dbbranch):
+    session = object_session(dbbranch)
+
+    q1 = session.query(Cluster.id)
+    q1 = q1.filter_by(branch=dbbranch)
+    q1 = q1.join(Personality, Archetype)
+    q1 = q1.filter_by(is_compileable=True)
+
+    q2 = session.query(Host.hardware_entity_id)
+    q2 = q2.filter_by(branch=dbbranch)
+    q2 = q2.join(Personality, Archetype)
+    q2 = q2.filter_by(is_compileable=True)
+
+    return q1.count() or q2.count()

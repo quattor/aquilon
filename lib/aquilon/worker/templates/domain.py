@@ -158,13 +158,20 @@ class TemplateDomain(object):
         else:
             compress_suffix = ""
 
-        formats = []
+        if self.domain.formats:
+            formats = [format + compress_suffix for format in
+                       self.domain.formats.split(",")]
+        else:
+            formats = []
+            if config.getboolean('panc', 'xml_profiles'):
+                formats.append("pan" + compress_suffix)
+            if config.getboolean('panc', 'json_profiles'):
+                formats.append("json" + compress_suffix)
+
         suffixes = []
-        if config.getboolean('panc', 'xml_profiles'):
-            formats.append("pan" + compress_suffix)
+        if "pan" + compress_suffix in formats:
             suffixes.append(".xml" + compress_suffix)
-        if config.getboolean('panc', 'json_profiles'):
-            formats.append("json" + compress_suffix)
+        if "json" + compress_suffix in formats:
             suffixes.append(".json" + compress_suffix)
 
         formats.append("dep")

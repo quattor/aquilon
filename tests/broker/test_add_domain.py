@@ -82,6 +82,14 @@ class TestAddDomain(TestBrokerCommand):
         command = ["add_domain", "--domain", "nomanage"]
         self.successtest(command)
 
+    def test_100_add_unittest_xml(self):
+        self.successtest(["add_domain", "--domain", "unittest-xml",
+                          "--track", "utsandbox"])
+
+    def test_100_add_unittest_json(self):
+        self.successtest(["add_domain", "--domain", "unittest-json",
+                          "--track", "utsandbox"])
+
     def test_200_verifyunittest(self):
         command = ["show_domain", "--domain=unittest"]
         out = self.commandtest(command)

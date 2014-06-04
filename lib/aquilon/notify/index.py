@@ -61,11 +61,7 @@ def build_index(config, session, logger=LOGGER):
     else:
         compress_suffix = ""
 
-    suffixes = []
-    if config.getboolean('panc', 'xml_profiles'):
-        suffixes.append(".xml" + compress_suffix)
-    if config.getboolean('panc', 'json_profiles'):
-        suffixes.append(".json" + compress_suffix)
+    suffixes = [".xml" + compress_suffix, ".json" + compress_suffix]
 
     # The profile should be .xml, unless webserver trickery is going to
     # redirect all requests for .xml files to be .xml.gz requests. :)

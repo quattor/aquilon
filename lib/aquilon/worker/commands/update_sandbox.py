@@ -17,10 +17,11 @@
 """Contains the logic for `aq update sandbox`."""
 
 
-from aquilon.exceptions_ import AuthorizationException
+from aquilon.exceptions_ import AuthorizationException, ArgumentError
 from aquilon.aqdb.model import Sandbox
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.dbwrappers.branch import expand_compiler
+from aquilon.worker.dbwrappers.branch import (expand_compiler,
+                                              has_compileable_objects)
 
 
 class CommandUpdateSandbox(BrokerCommand):
@@ -28,7 +29,7 @@ class CommandUpdateSandbox(BrokerCommand):
     required_parameters = ["sandbox"]
 
     def render(self, session, dbuser, sandbox, comments, compiler_version,
-               autosync, **arguments):
+               autosync, profile_formats, **arguments):
         dbsandbox = Sandbox.get_unique(session, sandbox, compel=True)
 
         # FIXME: proper authorization
@@ -42,6 +43,16 @@ class CommandUpdateSandbox(BrokerCommand):
             dbsandbox.compiler = expand_compiler(self.config, compiler_version)
         if autosync is not None:
             dbsandbox.autosync = autosync
+
+        if profile_formats is not None:
+            # We don't want to deal with cleaning up existing profiles if the
+            # formats change, so we don't allow changing the format if there are
+            # compileable objects
+            if has_compileable_objects(dbsandbox):
+                raise ArgumentError("{0} has compileable objects, the profile "
+                                    "format cannot be changed."
+                                    .format(dbsandbox))
+            dbsandbox.formats = profile_formats
 
         session.flush()
         return

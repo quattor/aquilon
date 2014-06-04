@@ -20,8 +20,9 @@ from datetime import datetime
 
 from sqlalchemy import (Integer, Boolean, DateTime, Sequence, String,
                         Column, ForeignKey, UniqueConstraint, Index)
-from sqlalchemy.orm import relation, deferred, backref
+from sqlalchemy.orm import relation, deferred, backref, validates
 
+from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Base, UserPrincipal
 from aquilon.aqdb.column_types.aqstr import AqStr
 
@@ -56,6 +57,8 @@ class Branch(Base):
                                           name='%s_user_princ_fk' % _TN),
                       nullable=False)
 
+    formats = Column(AqStr(16), nullable=True)
+
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
 
@@ -65,6 +68,16 @@ class Branch(Base):
 
     __mapper_args__ = {'polymorphic_on': branch_type}
     __table_args__ = (UniqueConstraint(name, name='%s_uk' % _TN),)
+
+    @validates("formats")
+    def _validate_formats(self, key, value):
+        if not value:
+            return None
+        formats = value.strip().lower().split(",")
+        for format in formats:
+            if format not in ["pan", "json"]:
+                raise ArgumentError("Unknown format: %s" % format)
+        return ",".join(formats)
 
 branch = Branch.__table__  # pylint: disable=C0103
 branch.info['unique_fields'] = ['name']

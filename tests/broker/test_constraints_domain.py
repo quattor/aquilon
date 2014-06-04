@@ -52,6 +52,19 @@ class TestDomainConstraints(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Domain: ny-prod", command)
 
+    def testupdatedomainformat(self):
+        command = ["update_domain", "--domain", "unittest",
+                   "--profile_formats", "json"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Domain unittest has compileable objects, "
+                         "the profile format cannot be changed.", command)
+
+    def testupdatesandboxformat(self):
+        command = ["update_sandbox", "--sandbox", "utsandbox",
+                   "--profile_formats", "json"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Sandbox utsandbox has compileable objects, "
+                         "the profile format cannot be changed.", command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDomainConstraints)
