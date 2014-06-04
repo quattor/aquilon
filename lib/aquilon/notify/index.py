@@ -114,9 +114,10 @@ def build_index(config, session, logger=LOGGER):
     # have changed since the last index. The values are unused.
     modified_index = {}
 
-    content = []
-    content.append("<?xml version='1.0' encoding='utf-8'?>")
-    content.append("<profiles>")
+    # objects stores the (mtime, suffix) pairs we discovered. Its purpose is
+    # de-duplicating if there are multiple suffixes (say, both .json and .xml)
+    # for the same object - we want to advertise only the newest.
+    objects = {}
 
     for root, _dirs, files in os.walk(profilesdir):
         for profile in files:
@@ -128,10 +129,12 @@ def build_index(config, session, logger=LOGGER):
                     continue
 
                 obj = os.path.join(root, profile[:-len(suffix)])
+
                 # Remove the common prefix: our profilesdir, so that the
                 # remaining object name is relative to that root (+1 in order
                 # to remove the slash separator)
                 obj = obj[len(profilesdir) + 1:]
+
                 # This operation is not done with a lock, and it's possible
                 # that the file has been removed since calling os.walk().
                 # If that's the case, no need to add it to the modified_index.
@@ -152,9 +155,15 @@ def build_index(config, session, logger=LOGGER):
                 else:
                     advertise_suffix = suffix
 
-                content.append("<profile mtime='%d'>%s%s</profile>" %
-                               (mtime, obj, advertise_suffix))
+                if obj not in objects or objects[obj][0] < mtime:
+                    objects[obj] = (mtime, advertise_suffix)
 
+    content = []
+    content.append("<?xml version='1.0' encoding='utf-8'?>")
+    content.append("<profiles>")
+    for obj, (mtime, advertise_suffix) in objects.items():
+        content.append("<profile mtime='%d'>%s%s</profile>" %
+                       (mtime, obj, advertise_suffix))
     content.append("</profiles>")
 
     compress = None
