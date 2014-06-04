@@ -21,8 +21,9 @@ import logging
 
 from aquilon.config import Config, lookup_file_path
 from aquilon.exceptions_ import ArgumentError, ProcessException, InternalError
-from aquilon.aqdb.model import (Host, Cluster, Fqdn, DnsRecord, HardwareEntity,
-                                Machine, Sandbox, Domain)
+from aquilon.aqdb.model import (Host, Cluster, Fqdn, DnsDomain, DnsRecord,
+                                HardwareEntity, Sandbox, Domain, Archetype,
+                                Personality)
 from aquilon.worker.logger import CLIENT_INFO
 from aquilon.notify.index import trigger_notifications
 from aquilon.worker.processes import run_command
@@ -113,18 +114,26 @@ class TemplateDomain(object):
         if only:
             nothing_to_do = False
         else:
-            hostnames = session.query(Fqdn)
-            hostnames = hostnames.join(DnsRecord, HardwareEntity, Machine, Host)
+            hostnames = session.query(Fqdn.name.concat(".")
+                                      .concat(DnsDomain.name).label('hostname'))
+            hostnames = hostnames.select_from(Fqdn)
+            hostnames = hostnames.join(DnsDomain)
+            hostnames = hostnames.join(DnsRecord, HardwareEntity, Host)
             hostnames = hostnames.filter_by(branch=self.domain,
                                             sandbox_author=self.author)
+            hostnames = hostnames.join(Personality, Archetype)
+            hostnames = hostnames.filter_by(is_compileable=True)
 
             clusternames = session.query(Cluster.name)
             clusternames = clusternames.filter_by(branch=self.domain,
                                                   sandbox_author=self.author)
+            clusternames = clusternames.join(Personality, Archetype)
+            clusternames = clusternames.filter_by(is_compileable=True)
+
             if self.author:
                 # Need to restrict to the subset of the sandbox managed
                 # by this author.
-                only = [str(fqdn) for fqdn in hostnames]
+                only = [row.hostname for row in hostnames]
                 only.extend(["cluster/%s" % c.name for c in clusternames])
                 nothing_to_do = not bool(only)
             else:
