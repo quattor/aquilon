@@ -314,7 +314,7 @@ class ObjectFormatter(object):
 
     def add_branch_data(self, msg, branch):
         msg.name = str(branch.name)
-        msg.owner = str(branch.owner.name)
+        msg.owner = str(branch.owner)
 
         if isinstance(branch, Domain):
             msg.type = msg.DOMAIN

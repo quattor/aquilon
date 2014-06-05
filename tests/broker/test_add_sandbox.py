@@ -90,6 +90,7 @@ class TestAddSandbox(TestBrokerCommand):
         command = "show sandbox --sandbox utsandbox"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Sandbox: utsandbox", command)
+        self.matchoutput(out, "Owner: %s@%s" % (self.user, self.realm), command)
         self.matchoutput(out, "Comments: Sandbox used for aqd unit tests",
                          command)
         self.matchoutput(out, "Base Commit: %s" % head, command)
@@ -101,7 +102,7 @@ class TestAddSandbox(TestBrokerCommand):
         domainlist = self.parse_domain_msg(out, expect=1)
         domain = domainlist.domains[0]
         self.assertEqual(domain.name, "utsandbox")
-        self.assertEqual(domain.owner, self.user)
+        self.assertEqual(domain.owner, "%s@%s" % (self.user, self.realm))
         self.assertEqual(domain.type, domain.SANDBOX)
 
     def test_115_verify_utsandbox_realm(self):
