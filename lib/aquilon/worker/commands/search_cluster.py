@@ -26,7 +26,7 @@ from aquilon.aqdb.model import (Cluster, EsxCluster, MetaCluster, Archetype,
                                 Personality, Machine, NetworkDevice,
                                 ClusterLifecycle, Service, ServiceInstance,
                                 Share, ClusterResource, VirtualMachine,
-                                BundleResource, ResourceGroup)
+                                BundleResource, ResourceGroup, User)
 from aquilon.worker.dbwrappers.host import hostname_to_host
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
 from aquilon.worker.dbwrappers.location import get_location
@@ -37,9 +37,8 @@ class CommandSearchCluster(BrokerCommand):
     required_parameters = []
 
     def render(self, session, logger,
-               # search_cluster
                archetype, cluster_type, personality,
-               domain, sandbox, branch, buildstatus,
+               domain, sandbox, branch, sandbox_author, buildstatus,
                allowed_archetype, allowed_personality,
                down_hosts_threshold, down_maint_threshold, max_members,
                member_archetype, member_hostname, member_personality,
@@ -72,6 +71,9 @@ class CommandSearchCluster(BrokerCommand):
         dbbranch, dbauthor = get_branch_and_author(session, domain=domain,
                                                    sandbox=sandbox,
                                                    branch=branch)
+        if sandbox_author:
+            dbauthor = User.get_unique(session, sandbox_author, compel=True)
+
         if dbbranch:
             q = q.filter_by(branch=dbbranch)
         if dbauthor:

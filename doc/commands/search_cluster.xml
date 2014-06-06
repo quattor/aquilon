@@ -43,9 +43,10 @@
 	    </group>
 
 	    <group choice="opt">
-		<arg choice="opt"><option>--domain <replaceable>DOMAIN</replaceable></option></arg>
-		<arg choice="opt"><option>--sandbox <replaceable>SANDBOX</replaceable></option></arg>
-		<arg choice="opt"><option>--branch <replaceable>BRANCH</replaceable></option></arg>
+		<arg choice="plain"><option>--domain <replaceable>DOMAIN</replaceable></option></arg>
+		<arg choice="plain"><option>--sandbox <replaceable>USER</replaceable>/<replaceable>SANDBOX</replaceable></option></arg>
+		<arg choice="plain"><option>--branch <replaceable>BRANCH</replaceable></option></arg>
+		<arg choice="plain"><option>--sandbox_author <replaceable>USER</replaceable></option></arg>
 	    </group>
 
 	    <group choice="opt">
@@ -191,12 +192,24 @@
 	    <varlistentry>
 		<term>
 		    <option>--domain <replaceable>DOMAIN</replaceable></option>
-		    <option>--sandbox <replaceable>SANDBOX</replaceable></option>
+		    <option>--sandbox <replaceable>USER</replaceable>/<replaceable>SANDBOX</replaceable></option>,
 		    <option>--branch <replaceable>BRANCH</replaceable></option>
 		</term>
 		<listitem>
 		    <para>
-			Sandbox/branch specific filters. Sandbox expected as 'author/branch'.
+			Look for clusters that are in the given template branch (domain or sandbox). The <option>--branch</option>
+			variant matches both domains and sandboxes.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+		<term>
+		    <option>--sandbox_author <replaceable>USER</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Look for clusters that are in any sandbox authored by (the checked out copy of the branch is
+			owned by) <replaceable>USER</replaceable>.
 		    </para>
 		</listitem>
 	    </varlistentry>

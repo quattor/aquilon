@@ -313,9 +313,10 @@
          <option name="member_hostname" type="string">member_hostname</option>
          <option name="member_personality" type="string">member_personality</option>
          <optgroup name="search_cluster_branch" fields="any">
-            <option name="domain" type="string" conflicts="sandbox branch">template domain</option>
-            <option name="sandbox" type="string" conflicts="domain branch">Name of the sandbox (given as 'author/branch')</option>
-            <option name="branch" type="string" conflicts="domain sandbox">template branch (either a domain or a sandbox)</option>
+            <option name="domain" type="string" conflicts="sandbox branch sandbox_author">template domain</option>
+            <option name="sandbox" type="string" conflicts="domain branch sandbox_author">Name of the sandbox (given as 'author/branch')</option>
+            <option name="branch" type="string" conflicts="domain sandbox sandbox_author">template branch (either a domain or a sandbox)</option>
+            <option name="sandbox_author" type="string" conflicts="domain sandbox branch">Author of the sandbox the cluster is in</option>
          </optgroup>
          <optgroup name="search_esx_opts" fields="any">
            <option name="cluster" type="string">cluster name</option>
@@ -399,11 +400,11 @@
          <option name="guest_on_share" type="string">Host is a virtual machine using this share</option>
          <option name="member_cluster_share" type="string">Host is a member of a cluster with machines using this nas_disk_share</option>
          <optgroup name="search_host_branch" fields="any">
-            <option name="domain" type="string" conflicts="sandbox branch">Template domain</option>
-            <option name="sandbox" type="string" conflicts="domain branch">Name of the sandbox (given as 'author/branch')</option>
-            <option name="branch" type="string" conflicts="domain sandbox">Template branch (either a domain or a sandbox)</option>
+            <option name="domain" type="string" conflicts="sandbox branch sandbox_author">Template domain</option>
+            <option name="sandbox" type="string" conflicts="domain branch sandbox_author">Name of the sandbox (given as 'author/branch')</option>
+            <option name="branch" type="string" conflicts="domain sandbox sandbox_author">Template branch (either a domain or a sandbox)</option>
+            <option name="sandbox_author" type="string" conflicts="domain sandbox branch">Author of the sandbox the host is in</option>
          </optgroup>
-         <option name="sandbox_owner" type="string" conflicts="domain sandbox branch">Owner of the sandbox the host is in</option>
          <optgroup name="search_host_location_opts" fields="any">
 	    <option name="organization" type="string">Organization</option>
 	    <option name="hub" type="string">Hub</option>

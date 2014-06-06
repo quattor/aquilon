@@ -22,34 +22,56 @@ import re
 from sqlalchemy.orm.session import object_session
 
 from aquilon.exceptions_ import ArgumentError, ProcessException
+from aquilon.aqdb.column_types import AqStr
 from aquilon.aqdb.model import (Domain, Sandbox, Branch, Host, Cluster,
-                                Archetype, Personality)
+                                Archetype, Personality, User)
+from aquilon.utils import remove_dir
 from aquilon.worker.dbwrappers.user_principal import get_user_principal
 from aquilon.worker.processes import run_git
 from aquilon.worker.locks import CompileKey
 from aquilon.worker.templates.domain import TemplateDomain
-from aquilon.utils import remove_dir
 
 VERSION_RE = re.compile(r'^[-_.a-zA-Z0-9]*$')
+
+
+def parse_sandbox(session, sandbox, default_author=None):
+    if "/" in sandbox:
+        author, branch = sandbox.split("/", 1)
+        dbauthor = User.get_unique(session, author, compel=True)
+    else:
+        branch = sandbox
+        if default_author:
+            dbauthor = User.get_unique(session, default_author, compel=True)
+        else:
+            dbauthor = None
+
+    # This function may be called when the branch does not exist (yet) in the
+    # DB, so we need to do the normalization manually
+    branch = AqStr.normalize(branch)
+
+    return (branch, dbauthor)
 
 
 def get_branch_and_author(session, domain=None, sandbox=None, branch=None,
                           compel=False):
     dbbranch = None
     dbauthor = None
+
     if domain:
         dbbranch = Domain.get_unique(session, domain, compel=True)
     elif branch:
         dbbranch = Branch.get_unique(session, branch, compel=True)
     elif sandbox:
-        (author, slash, name) = sandbox.partition('/')
-        if not slash:
+        try:
+            author, name = sandbox.split("/", 1)
+        except ValueError:
             raise ArgumentError("Expected sandbox as 'author/branch', author "
                                 "name and branch name separated by a slash.")
         dbbranch = Sandbox.get_unique(session, name, compel=True)
-        dbauthor = get_user_principal(session, author)
+        dbauthor = User.get_unique(session, author, compel=True)
     elif compel:
         raise ArgumentError("Please specify either sandbox or domain.")
+
     return (dbbranch, dbauthor)
 
 

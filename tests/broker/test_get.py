@@ -55,31 +55,23 @@ class TestGet(TestBrokerCommand):
 
     def testgetutsandbox(self):
         # This one was added with --noget
-        (out, err) = self.successtest(["get", "--sandbox",
-                                       "%s@%s/utsandbox" % (self.user, self.realm)])
+        self.successtest(["get", "--sandbox", "utsandbox"])
         self.failUnless(os.path.exists(os.path.join(self.sandboxdir,
                                                     "utsandbox")))
 
     def testgetunauthorized(self):
         command = ["get",
-                   "--sandbox", "cdb@example.realm/badbranch"]
+                   "--sandbox", "testuser3/badbranch"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
-                         "User '%s@%s' cannot add or get a sandbox on "
-                         "behalf of 'cdb@example.realm'." % (self.user, self.realm),
+                         "Principal %s@%s cannot add or get a sandbox on "
+                         "behalf of 'testuser3'." % (self.user, self.realm),
                          command)
 
     def testgetbaduser(self):
         command = ["get", "--sandbox", "user-does-not-exist/badbranch"]
         out = self.notfoundtest(command)
-        self.matchoutput(out, "User 'user-does-not-exist' not found.", command)
-
-    def testgetbadrealm(self):
-        command = ["get", "--sandbox", "%s@realm-does-not-exist/badbranch" % self.user]
-        out = self.notfoundtest(command)
-        self.matchoutput(out,
-                         "User '%s@realm-does-not-exist' not found." % self.user,
-                         command)
+        self.matchoutput(out, "User user-does-not-exist not found.", command)
 
 
 if __name__ == '__main__':

@@ -19,8 +19,9 @@
 from sqlalchemy.orm import joinedload, undefer
 
 from aquilon.exceptions_ import ArgumentError
+from aquilon.aqdb.model import Sandbox
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.dbwrappers.sandbox import get_sandbox
+from aquilon.worker.dbwrappers.branch import parse_sandbox
 from aquilon.worker.formats.branch import AuthoredSandbox
 
 
@@ -28,10 +29,11 @@ class CommandShowSandboxSandbox(BrokerCommand):
 
     required_parameters = ["sandbox"]
 
-    def render(self, session, logger, sandbox, pathonly, **arguments):
-        (dbsandbox, dbauthor) = get_sandbox(session, logger, sandbox,
-                                            query_options=[undefer('comments'),
-                                                           joinedload('owner')])
+    def render(self, session, sandbox, pathonly, **arguments):
+        branch, dbauthor = parse_sandbox(session, sandbox)
+        dbsandbox = Sandbox.get_unique(session, branch, compel=True,
+                                       query_options=[undefer('comments'),
+                                                      joinedload('owner')])
         if dbauthor:
             dbsandbox = AuthoredSandbox(dbsandbox, dbauthor)
 

@@ -98,7 +98,7 @@ class TestSearchHost(TestBrokerCommand):
         self.matchclean(out, "unittest00.one-nyp.ms.com", command)
 
     def testsandboxowner(self):
-        command = ["search_host", "--sandbox_owner=%s" % self.user]
+        command = ["search_host", "--sandbox_author=%s" % self.user]
         out = self.commandtest(command)
         self.matchoutput(out, "server1.aqd-unittest.ms.com", command)
         self.matchclean(out, "unittest00.one-nyp.ms.com", command)

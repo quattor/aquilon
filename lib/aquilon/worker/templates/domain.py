@@ -49,6 +49,13 @@ class TemplateDomain(object):
     def __init__(self, domain, author=None, logger=LOGGER):
         super(TemplateDomain, self).__init__()
 
+        if isinstance(domain, Sandbox) and not author:
+            raise AquilonError("No author information provided for {0:l}. If "
+                               "the sandbox belonged to an user that got "
+                               "deleted, then all hosts/clusters must be "
+                               "moved to a sandbox owned by an existing user."
+                               .format(domain))
+
         self.domain = domain
         self.author = author
         self.logger = logger

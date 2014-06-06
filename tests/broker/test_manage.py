@@ -17,6 +17,8 @@
 # limitations under the License.
 """Module for testing the manage command."""
 
+import os
+
 if __name__ == "__main__":
     import utils
     utils.import_depends()
@@ -174,6 +176,49 @@ class TestManage(TestBrokerCommand):
         self.successtest(["compile", "--hostname", "unittest20.aqd-unittest.ms.com"])
         self.verify_buildfiles("unittest-json", "unittest20.aqd-unittest.ms.com",
                                xml=False, json=True)
+
+    def test_160_add_othersandbox(self):
+        # We can't run "aq get" in the name of otheruser, so we have to create
+        # the sandbox manually
+        kingdir = self.config.get("broker", "kingdir")
+        self.gitcommand(["branch", "othersandbox", "unittest"], cwd=kingdir)
+        dst_dir = os.path.join(self.sandboxdir, "othersandbox")
+        self.gitcommand(["clone", kingdir, dst_dir, "--branch", "othersandbox"])
+
+    def test_161_manage_host(self):
+        self.noouttest(["manage", "--hostname", "unittest02.one-nyp.ms.com",
+                        "--sandbox", "otheruser/othersandbox", "--force"])
+
+    def test_162_del_otheruser(self):
+        self.noouttest(["del_user", "--username", "otheruser"])
+
+    def test_163_verify_host(self):
+        command = ["show_host", "--hostname", "unittest02.one-nyp.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Sandbox: othersandbox [orphaned]", command)
+
+    def test_164_try_compile(self):
+        command = ["compile", "--hostname", "unittest02.one-nyp.ms.com"]
+        out = self.internalerrortest(command)
+        self.matchoutput(out,
+                         "No author information provided for sandbox "
+                         "othersandbox. If the sandbox belonged to an user "
+                         "that got deleted, then all hosts/clusters must be "
+                         "moved to a sandbox owned by an existing user.",
+                         command)
+
+    def test_165_update_personality(self):
+        # Any command is good that tries to re-write the host plenary without
+        # compiling it
+        command = ["rebind_client", "--service", "aqd", "--instance", "ny-prod",
+                   "--hostname", "unittest02.one-nyp.ms.com"]
+        out = self.statustest(command)
+        self.matchoutput(out, "Warning: Host unittest02.one-nyp.ms.com "
+                         "is missing sandbox author information.", command)
+
+    def test_169_manage_back(self):
+        self.noouttest(["manage", "--hostname", "unittest02.one-nyp.ms.com",
+                        "--sandbox", "%s/changetest1" % self.user, "--force"])
 
     def test_200_fail_nomanage(self):
         command = ["manage", "--hostname", "unittest02.one-nyp.ms.com",

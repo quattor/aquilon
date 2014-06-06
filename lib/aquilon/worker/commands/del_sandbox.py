@@ -18,10 +18,10 @@
 
 import os
 
-from aquilon.exceptions_ import NotFoundException, AuthorizationException
+from aquilon.exceptions_ import AuthorizationException
+from aquilon.aqdb.model import Sandbox
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.dbwrappers.sandbox import get_sandbox
-from aquilon.worker.dbwrappers.branch import remove_branch
+from aquilon.worker.dbwrappers.branch import parse_sandbox, remove_branch
 
 
 class CommandDelSandbox(BrokerCommand):
@@ -33,22 +33,24 @@ class CommandDelSandbox(BrokerCommand):
             raise AuthorizationException("{0} is not trusted to handle "
                                          "sandboxes.".format(dbuser.realm))
 
-        dbauthor = None
-        try:
-            (dbsandbox, dbauthor) = get_sandbox(session, logger, sandbox)
-        except NotFoundException:
-            self.cleanup_notify(logger, sandbox, dbauthor, dbuser)
-            raise NotFoundException("Sandbox %s not found." % sandbox)
+        branch, dbauthor = parse_sandbox(session, sandbox,
+                                         default_author=dbuser.name)
 
-        remove_branch(self.config, logger, dbsandbox, dbauthor)
-        self.cleanup_notify(logger, dbsandbox.name, dbauthor, dbuser)
-        return
-
-    def cleanup_notify(self, logger, sandbox, dbauthor, dbuser):
-        if not dbauthor:
-            dbauthor = dbuser
+        # We want to print the warning even if the sandbox object no longer
+        # exists
         templatesdir = self.config.get("broker", "templatesdir")
-        sandboxdir = os.path.join(templatesdir, dbauthor.name, sandbox)
+        sandboxdir = os.path.join(templatesdir, dbauthor.name, branch)
         if os.path.exists(sandboxdir):
             logger.client_info("If you no longer need the working copy of the "
                                "sandbox, please `rm -rf %s`", sandboxdir)
+
+        dbsandbox = Sandbox.get_unique(session, branch, compel=True)
+
+        # FIXME: proper authorization
+        if dbsandbox.owner != dbuser and dbuser.role.name != 'aqd_admin':
+            raise AuthorizationException("Only the owner or an AQD admin can "
+                                         "delete a sandbox.")
+
+        remove_branch(self.config, logger, dbsandbox, dbauthor)
+
+        return

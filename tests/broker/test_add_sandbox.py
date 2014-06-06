@@ -105,11 +105,6 @@ class TestAddSandbox(TestBrokerCommand):
         self.assertEqual(domain.owner, "%s@%s" % (self.user, self.realm))
         self.assertEqual(domain.type, domain.SANDBOX)
 
-    def test_115_verify_utsandbox_realm(self):
-        command = "show sandbox --sandbox %s@%s/utsandbox" % (self.user, self.realm)
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Sandbox: utsandbox", command)
-
     def test_115_verify_utsandbox_path(self):
         command = "show sandbox --sandbox %s/utsandbox --pathonly" % self.user
         out = self.commandtest(command.split(" "))
@@ -205,11 +200,11 @@ class TestAddSandbox(TestBrokerCommand):
 
     def test_200_add_baduser(self):
         command = ["add", "sandbox",
-                   "--sandbox", "cdb@example.realm/badbranch"]
+                   "--sandbox", "testuser3/badbranch"]
         err = self.badrequesttest(command)
         self.matchoutput(err,
-                         "User '%s@%s' cannot add or get a sandbox on "
-                         "behalf of 'cdb@example.realm'." % (self.user, self.realm),
+                         "Principal %s@%s cannot add or get a sandbox on "
+                         "behalf of 'testuser3'." % (self.user, self.realm),
                          command)
 
     def test_200_fail_invalid(self):
@@ -217,11 +212,6 @@ class TestAddSandbox(TestBrokerCommand):
         out = self.badrequesttest(command.split(" "))
         self.matchoutput(out, "'bad:characters!' is not a valid value for "
                          "--sandbox.", command)
-
-    def test_200_slash_in_userid(self):
-        command = "add sandbox --sandbox user1/test/nevermade"
-        err = self.notfoundtest(command.split(" "))
-        self.matchoutput(err, "User 'user1/test' not found.", command)
 
     def test_200_add_existing_path(self):
         sandboxdir = os.path.join(self.sandboxdir, "existingsand")

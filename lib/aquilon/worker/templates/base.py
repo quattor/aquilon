@@ -416,6 +416,9 @@ class ObjectPlenary(Plenary):
         pan_assign(lines, "/metadata/template/branch/type",
                    self.dbobj.branch.branch_type)
         if isinstance(self.dbobj.branch, Sandbox):
+            if not self.dbobj.sandbox_author:
+                raise IncompleteError("{0} is missing sandbox author "
+                                      "information.".format(self.dbobj))
             pan_assign(lines, "/metadata/template/branch/author",
                        self.dbobj.sandbox_author.name)
         lines.append("")

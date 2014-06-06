@@ -41,7 +41,7 @@ class CommandAddSandbox(CommandGet):
             raise AuthorizationException("Cannot create a sandbox without an "
                                          "authenticated connection.")
 
-        sandbox = self.force_my_sandbox(session, dbuser, sandbox)
+        sandbox, dbauthor = self.force_my_sandbox(session, dbuser, sandbox)
 
         # See `git check-ref-format --help` for naming restrictions.
         # We want to layer a few extra restrictions on top of that...
@@ -58,7 +58,7 @@ class CommandAddSandbox(CommandGet):
         # and added to the database - however CommandGet will fail roleing
         # back the database leaving the branch created in git
         templatesdir = self.config.get("broker", "templatesdir")
-        sandboxdir = os.path.join(templatesdir, dbuser.name, sandbox)
+        sandboxdir = os.path.join(templatesdir, dbauthor.name, sandbox)
         if os.path.exists(sandboxdir):
             raise ArgumentError("Sandbox directory %s already exists; "
                                 "cannot create branch." %
