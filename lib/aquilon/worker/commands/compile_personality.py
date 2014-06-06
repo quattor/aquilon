@@ -34,10 +34,9 @@ class CommandCompilePersonality(BrokerCommand):
         dbdomain = None
         dbauthor = None
         if domain or sandbox:
-            (dbdomain, dbauthor) = get_branch_and_author(session, logger,
-                                                         domain=domain,
-                                                         sandbox=sandbox,
-                                                         compel=True)
+            dbdomain, dbauthor = get_branch_and_author(session, domain=domain,
+                                                       sandbox=sandbox,
+                                                       compel=True)
 
         dbpersonality = Personality.get_unique(session, name=personality,
                                                archetype=archetype, compel=True)

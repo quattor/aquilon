@@ -34,9 +34,8 @@ class CommandShowPersonality(BrokerCommand):
 
     def render(self, session, logger,
                personality, archetype, domain, sandbox, **arguments):
-        (dbbranch, dbauthor) = get_branch_and_author(session, logger,
-                                                     domain=domain,
-                                                     sandbox=sandbox)
+        dbbranch, dbauthor = get_branch_and_author(session, domain=domain,
+                                                   sandbox=sandbox)
         if archetype and personality:
             dbpersonality = Personality.get_unique(session, name=personality,
                                                    archetype=archetype,

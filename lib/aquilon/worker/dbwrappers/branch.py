@@ -33,8 +33,7 @@ from aquilon.utils import remove_dir
 VERSION_RE = re.compile(r'^[-_.a-zA-Z0-9]*$')
 
 
-def get_branch_and_author(session, logger,
-                          domain=None, sandbox=None, branch=None,
+def get_branch_and_author(session, domain=None, sandbox=None, branch=None,
                           compel=False):
     dbbranch = None
     dbauthor = None
