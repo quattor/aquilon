@@ -5671,16 +5671,6 @@
       <transport method="get" path="bunker_violations" />
    </command>
 
-   <command name="show_user">
-      Show the user for a given username.
-      <optgroup name="show_user_opts" mandatory="True" fields="any">
-         <option name="username" type="string" conflicts="all">User to check</option>
-         <option name="all" type="flag">list all users</option>
-      </optgroup>
-      <transport trigger="all" method="get" path="users" />
-      <transport method="get" path="user/%(username)s" />
-   </command>
-
    <command name="grant_root_access">
       Grant root access to user/netgroup to a personality. The affected host(s) must be
       recompiled for the changes to take effect.
@@ -5722,7 +5712,7 @@
        <optgroup name="netgroup_whitelist_opts" mandatory="true" fields="all">
 	  <option name="netgroup" type="string" conflicts="username">Netgroup as string</option>
        </optgroup>
-      <transport method="post" path="netgroup_whitelist/command/add"/>
+      <transport method="put" path="netgroup_whitelist/%(netgroup)s"/>
    </command>
 
    <command name="del_netgroup_whitelist">
@@ -5730,7 +5720,7 @@
        <optgroup name="netgroup_whitelist_opts" mandatory="true" fields="all">
 	  <option name="netgroup" type="string" conflicts="username">Netgroup as string</option>
        </optgroup>
-      <transport method="post" path="netgroup_whitelist/command/del"/>
+      <transport method="delete" path="netgroup_whitelist/%(netgroup)s"/>
    </command>
 
    <command name="show_netgroup_whitelist">
@@ -5739,15 +5729,26 @@
          <option name="netgroup" type="string">Netgroup to display</option>
          <option name="all" type="flag">Show all Netgroups</option>
       </optgroup>
-      <transport method="get" path="netgroup_whitelist" />
+      <transport trigger="netgroup" method="get" path="netgroup_whitelist/%(netgroup)s"/>
+      <transport trigger="all" method="get" path="netgroup_whitelist" />
+   </command>
+
+   <command name="show_user">
+      Show the user for a given username.
+      <optgroup name="show_user_opts" mandatory="True" fields="any">
+         <option name="username" type="string" conflicts="all">User to check</option>
+         <option name="all" type="flag">list all users</option>
+      </optgroup>
+      <transport trigger="username" method="get" path="user/%(username)s" />
+      <transport trigger="all" method="get" path="user" />
    </command>
 
    <command name="refresh_user">
       Refresh the User principals in AQD.
-      <transport method="post" path="user/command/refresh"/>
       <optgroup name="refresh_user_optional" mandatory="False">
          <option name="incremental" type="boolean">Commit every change as it is decided</option>
       </optgroup>
+      <transport method="post" path="user/command/refresh"/>
    </command>
 
 </commandline>
