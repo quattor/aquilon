@@ -5733,6 +5733,43 @@
       <transport trigger="all" method="get" path="netgroup_whitelist" />
    </command>
 
+   <command name="add_user">
+      Add a new user.
+      <optgroup name="add_user_options" mandatory="True" fields="all">
+	 <option name="username" type="string">User name</option>
+	 <optgroup name="add_user_uid" mandatory="True" fields="any">
+	    <option name="uid" type="int">Numeric user ID</option>
+	    <option name="autouid" type="flag">Allocate an UID automatically</option>
+	 </optgroup>
+	 <option name="gid" type="int">Numeric primary group ID</option>
+	 <option name="full_name" type="string">Full name of the user</option>
+	 <option name="home_directory" type="string">Home directory of the user</option>
+      </optgroup>
+      <transport method="put" path="user/%(username)s"/>
+   </command>
+
+   <command name="del_user">
+      Delete a user.
+      <optgroup name="del_user_options" mandatory="True" fields="all">
+	 <option name="username" type="string">User name</option>
+      </optgroup>
+      <transport method="delete" path="user/%(username)s"/>
+   </command>
+
+   <command name="update_user">
+      Update parameters of a user.
+      <optgroup name="update_user_options" mandatory="True" fields="all">
+	 <option name="username" type="string">User name</option>
+      </optgroup>
+      <optgroup name="update_user_optional" mandatory="False">
+	 <option name="uid" type="int">Numeric user ID</option>
+	 <option name="gid" type="int">Numeric primary group ID</option>
+	 <option name="full_name" type="string">Full name of the user</option>
+	 <option name="home_directory" type="string">Home directory of the user</option>
+      </optgroup>
+      <transport method="post" path="user/%(username)s"/>
+   </command>
+
    <command name="show_user">
       Show the user for a given username.
       <optgroup name="show_user_opts" mandatory="True" fields="any">

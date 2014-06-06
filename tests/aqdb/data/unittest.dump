@@ -186,6 +186,3 @@ MachineSpecs(model=Model(name="f5_model"),
              cpu=Cpu(name="f5_cpu"), cpu_quantity=0, memory=0,
              controller_type="scsi", disk_type="local", disk_capacity=0,
 	     nic_count=0, nic_model=@generic_nic)
-
-User(name="testuser3", uid=2361, gid=654, full_name="test user", home_dir="/tmp")
-User(name="testuser4", uid=2362, gid=654, full_name="test user", home_dir="/tmp")
