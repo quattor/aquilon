@@ -198,7 +198,7 @@ class Cluster(Base):
         return mach
 
     @validates('_hosts')
-    def validate_host_member(self, key, value):
+    def validate_host_member(self, key, value):  # pylint: disable=W0613
         session = object_session(self)
         with session.no_autoflush:
             self.validate_membership(value.host)
@@ -256,9 +256,8 @@ class Cluster(Base):
             clsname = self.title + " Cluster"
 
         if lowercase:
-            parts = clsname.split()
-            clsname = ' '.join(map(
-                lambda x: x if x[:-1].isupper() else x.lower(), parts))
+            clsname = " ".join([x if x[:-1].isupper() else x.lower()
+                                for x in clsname.split()])
         if class_only:
             return clsname.__format__(passthrough)
         val = "%s %s" % (clsname, instance)

@@ -17,10 +17,11 @@
 # limitations under the License.
 """Module for testing the poll network device command."""
 
+import json
 import re
 import os
+from collections import defaultdict
 from time import sleep
-import socket
 
 if __name__ == "__main__":
     import utils
@@ -47,7 +48,7 @@ class TestUpdateNetworkDeviceMac(TestBrokerCommand):
         dir = os.path.dirname(os.path.realpath(__file__))
         out = open(os.path.join(dir, "..", "fakebin", "macdata.d", switchfile),
                    'r').read()
-        return re.sub("\s+", " ", "".join(out))
+        return re.sub(r"\s+", " ", "".join(out))
 
     def testpollnp06bals03(self):
         command = ["update", "network_device", "--network_device", "np06bals03.ms.com",
@@ -78,60 +79,35 @@ class TestUpdateNetworkDeviceMac(TestBrokerCommand):
     def testverifypollnp06bals03(self):
         command = "show network_device --network_device np06bals03.ms.com"
         out = self.commandtest(command.split(" "))
-        r = re.compile(r'^\s*Created:\s*(.*?)\s*Last Seen:\s*(.*?)\s*$', re.M)
+        r = re.compile(r'created:\s*(.*?),\s*last seen:\s*(.*?)\s*$', re.M)
         m = self.searchoutput(out, r, command)
         self.failIf(m.group(1) == m.group(2),
                     "Expected creation date '%s' to be different from "
                     "last seen '%s' in output:\n%s" %
                     (m.group(1), m.group(2), out))
-        self.matchoutput(out, "Port 17: 00:30:48:66:3a:62", command)
-        self.matchoutput(out, "Port 2: 00:1f:29:c4:39:ba", command)
-        self.matchoutput(out, "Port 22: 00:30:48:66:38:e6", command)
-        self.matchoutput(out, "Port 4: 00:1f:29:c4:29:ca", command)
-        self.matchoutput(out, "Port 5: 00:1f:29:68:53:ca", command)
-        self.matchoutput(out, "Port 27: 00:30:48:66:3a:28", command)
-        self.matchoutput(out, "Port 20: 00:30:48:66:38:da", command)
-        self.matchoutput(out, "Port 39: 00:30:48:98:4d:a3", command)
-        self.matchoutput(out, "Port 24: 00:30:48:66:3a:2a", command)
-        self.matchoutput(out, "Port 14: 00:1f:29:c4:39:12", command)
-        self.matchoutput(out, "Port 3: 00:1f:29:c4:09:ee", command)
-        self.matchoutput(out, "Port 49: 00:1a:6c:9e:e3:1e", command)
-        self.matchoutput(out, "Port 21: 00:30:48:66:3a:2e", command)
-        self.matchoutput(out, "Port 11: 00:1f:29:68:93:e0", command)
-        self.matchoutput(out, "Port 31: 00:30:48:98:4d:0a", command)
-        self.matchoutput(out, "Port 7: 00:1f:29:c4:19:d0", command)
-        self.matchoutput(out, "Port 8: 00:1f:29:c4:59:b0", command)
-        self.matchoutput(out, "Port 12: 00:1f:29:c4:19:f2", command)
-        self.matchoutput(out, "Port 50: 00:1d:71:73:55:40", command)
-        self.matchoutput(out, "Port 40: 00:30:48:98:4d:cc", command)
-        self.matchoutput(out, "Port 34: 00:30:48:98:4d:83", command)
-        self.matchoutput(out, "Port 50: 00:1a:6c:9e:de:8e", command)
-        self.matchoutput(out, "Port 29: 00:30:48:98:4d:5b", command)
-        self.matchoutput(out, "Port 10: 00:1f:29:c4:39:14", command)
-        self.matchoutput(out, "Port 37: 00:30:48:98:4d:96", command)
-        self.matchoutput(out, "Port 49: 00:1d:71:73:53:80", command)
-        self.matchoutput(out, "Port 33: 00:30:48:98:4d:97", command)
-        self.matchoutput(out, "Port 36: 00:30:48:98:4d:98", command)
-        self.matchoutput(out, "Port 49: 00:00:0c:07:ac:01", command)
-        self.matchoutput(out, "Port 9: 00:1f:29:c4:29:6a", command)
-        self.matchoutput(out, "Port 35: 00:30:48:98:4d:8a", command)
-        self.matchoutput(out, "Port 50: 00:00:0c:07:ac:02", command)
-        self.matchoutput(out, "Port 32: 00:30:48:98:4d:8b", command)
-        self.matchoutput(out, "Port 28: 00:30:48:66:3a:22", command)
-        self.matchoutput(out, "Port 18: 00:30:48:66:3a:36", command)
-        self.matchoutput(out, "Port 19: 00:30:48:66:3a:46", command)
-        self.matchoutput(out, "Port 16: 00:1f:29:68:83:4c", command)
-        self.matchoutput(out, "Port 25: 00:30:48:66:3a:38", command)
-        self.matchoutput(out, "Port 15: 00:1f:29:c4:59:fe", command)
-        self.matchoutput(out, "Port 30: 00:30:48:98:4d:c6", command)
-        self.matchoutput(out, "Port 6: 00:1f:29:68:63:ec", command)
-        self.matchoutput(out, "Port 23: 00:30:48:66:3a:60", command)
+
+        colon_re = re.compile(r"([0-9a-f]{2})(?=.)")
+
+        port_to_mac = defaultdict(list)
+        for mac, port in json.loads(self.getmacdata("np06bals03")):
+            # We have to add the separator colons
+            port_to_mac[port].append(colon_re.sub(r"\1:", mac.lower()))
+
+        for port, addrs in port_to_mac.items():
+            pattern = r"Port: %s\n" % port
+            pattern = pattern + "".join(r"\s+MAC: %s,.*\n" % mac
+                                        for mac in sorted(addrs))
+            self.searchoutput(out, pattern, command)
+
+        for port in range(1, 50):
+            if str(port) not in port_to_mac:
+                self.searchclean(out, r"Port: %s\n" % port, command)
 
     def testverifypollnp06fals01(self):
         command = "show network_device --network_device np06fals01.ms.com"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Port 49: 00:15:2c:1f:40:00", command)
-        r = re.compile(r'^\s*Created:\s*(.*?)\s*Last Seen:\s*(.*?)\s*$', re.M)
+        self.searchoutput(out, r"Port: 49\s*MAC: 00:15:2c:1f:40:00,", command)
+        r = re.compile(r'created:\s*(.*?),\s*last seen:\s*(.*?)\s*$', re.M)
         m = self.searchoutput(out, r, command)
         self.failIf(m.group(1) != m.group(2),
                     "Expected creation date '%s' to be the same as "

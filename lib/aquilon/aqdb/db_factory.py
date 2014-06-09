@@ -112,6 +112,23 @@ class DbFactory(object):
     __shared_state = {}
     __started = False  # at the class definition, that is
 
+    def create_engine(self, config, dsn, **pool_options):
+        engine = create_engine(dsn, **pool_options)
+
+        if engine.dialect.name == "oracle":
+            event.listen(engine, "connect", oracle_set_module)
+            event.listen(engine, "checkin", oracle_reset_action)
+        elif engine.dialect.name == "sqlite":
+            event.listen(engine, "connect", sqlite_foreign_keys)
+            if config.has_option("database", "disable_fsync") and \
+               config.getboolean("database", "disable_fsync"):
+                event.listen(engine, "connect", sqlite_no_fsync)
+                log = logging.getLogger(__name__)
+                log.info("SQLite is operating in unsafe mode!")
+        elif engine.dialect.name == "postgresql":
+            pass
+        return engine
+
     def __init__(self, *args, **kw):
         self.__dict__ = self.__shared_state
 
@@ -154,23 +171,11 @@ class DbFactory(object):
         dialect = make_url(dsn).get_dialect()
 
         if dialect.name == "oracle":
-            # Events should be registered before we try to open a real
-            # connection below, because the underlying DBAPI connection will not
-            # be closed
-            event.listen(Pool, "connect", oracle_set_module)
-            event.listen(Pool, "checkin", oracle_reset_action)
             self.login(config, dsn, pool_options)
         elif dialect.name == "postgresql":
             self.login(config, dsn, pool_options)
         elif dialect.name == "sqlite":
-            event.listen(Pool, "connect", sqlite_foreign_keys)
-            if config.has_option("database", "disable_fsync") and \
-               config.getboolean("database", "disable_fsync"):
-                event.listen(Pool, "connect", sqlite_no_fsync)
-                log = logging.getLogger(__name__)
-                log.info("SQLite is operating in unsafe mode!")
-
-            self.engine = create_engine(dsn)
+            self.engine = self.create_engine(config, dsn)
             self.no_lock_engine = None
             connection = self.engine.connect()
             connection.close()
@@ -209,8 +214,9 @@ class DbFactory(object):
         errs = []
         for p in passwords:
             dsn = re.sub(pswd_re, p, raw_dsn)
-            self.engine = create_engine(dsn, **pool_options)
-            self.no_lock_engine = create_engine(dsn, **pool_options)
+            self.engine = self.create_engine(config, dsn, **pool_options)
+            self.no_lock_engine = self.create_engine(config, dsn,
+                                                     **pool_options)
 
             try:
                 connection = self.engine.connect()

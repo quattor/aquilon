@@ -28,8 +28,9 @@
 #    ./aqdb_migrate sqlite:////path/aquilon.db
 #    ./aqdb_migrate postgresql://<username>@/
 
-import sys
 import os
+import signal
+import sys
 
 # -- begin path_setup --
 BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
@@ -51,6 +52,8 @@ from sqlalchemy.sql import text
 from aquilon.aqdb.db_factory import DbFactory
 from aquilon.aqdb.model import Base
 
+signalled = 0
+
 
 def dummy_mapper(table):
     Base = declarative_base()
@@ -59,6 +62,11 @@ def dummy_mapper(table):
         __table__ = table
 
     return DummyMapper
+
+
+def signal_handler(signum, frame):
+    global signalled
+    signalled = 1
 
 
 if __name__ == '__main__':
@@ -112,6 +120,8 @@ if __name__ == '__main__':
         # it does allow disabling foreign keys entirely
         dest_session.execute(text('PRAGMA foreign_keys = 0;'))
 
+    signal.signal(signal.SIGALRM, signal_handler)
+
     for table in Base.metadata.sorted_tables:
         total = src_session.execute(table.count()).scalar()
         print 'Processing %s (%d rows)' % (table, total),
@@ -121,11 +131,13 @@ if __name__ == '__main__':
         columns = table.columns.keys()
 
         NewRecord = dummy_mapper(table)
+        signal.setitimer(signal.ITIMER_REAL, 5, 5)
         for record in src_session.execute(table.select()):
             cnt = cnt + 1
-            if not cnt % 15000:
+            if signalled:
                 print "... %d" % cnt,
                 sys.stdout.flush()
+                signalled = 0
 
             data = dict(
                 [(str(column), getattr(record, column)) for column in columns]
@@ -135,6 +147,7 @@ if __name__ == '__main__':
             #dest_session.merge(NewRecord(**data))
             dest_session.execute(table.insert().values(**data))
 
+        signal.setitimer(signal.ITIMER_REAL, 0)
         dest_session.flush()
         print
 
