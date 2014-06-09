@@ -18,7 +18,7 @@
 
 from aquilon.exceptions_ import ArgumentError, AquilonError
 from aquilon.aqdb.model import (HardwareEntity, Model, ReservedName,
-                                AddressAssignment, Fqdn, Interface)
+                                AddressAssignment, ARecord, Fqdn, Interface)
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.worker.dbwrappers.dns import convert_reserved_to_arecord
@@ -91,12 +91,21 @@ def update_primary_ip(session, logger, dbhw_ent, ip):
 
     # The primary address must be unique
     q = session.query(AddressAssignment)
-    q = q.filter_by(network=dbnetwork)
-    q = q.filter_by(ip=ip)
+    q = q.filter_by(network=dbnetwork, ip=ip)
     addr = q.first()
     if addr:
         raise ArgumentError("IP address {0} is already in use by {1:l}."
                             .format(ip, addr.interface))
+
+    # We can't steal the IP address from an existing DNS entry
+    q = session.query(ARecord)
+    q = q.filter_by(network=dbnetwork, ip=ip)
+    q = q.join(ARecord.fqdn)
+    q = q.filter_by(dns_environment=dbhw_ent.primary_name.fqdn.dns_environment)
+    existing = q.first()
+    if existing:
+        raise ArgumentError("IP address {0!s} is already used by "
+                            "{1:l}." .format(ip, existing))
 
     # Convert ReservedName to ARecord if needed
     if isinstance(dbhw_ent.primary_name, ReservedName):

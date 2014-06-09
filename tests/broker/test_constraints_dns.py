@@ -84,6 +84,16 @@ class TestDnsConstraints(TestBrokerCommand):
                          "utsvc/utsi2.",
                          command)
 
+    def testdeldynamic(self):
+        ip = self.net["dyndhcp0"].usable[2]
+        fqdn = self.dynname(ip)
+        command = ["del_address", "--ip", ip]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "DNS Record %s [%s] is reserved for dynamic DHCP, "
+                         "use del_dynamic_range to delete it." % (fqdn, ip),
+                         command)
+
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(
         TestDnsConstraints)
