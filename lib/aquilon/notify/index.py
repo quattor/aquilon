@@ -25,7 +25,7 @@ import gzip
 from xml.etree import ElementTree
 
 from aquilon.aqdb.model import Service
-from aquilon.utils import write_file
+from aquilon.utils import write_file, remove_file
 
 LOGGER = logging.getLogger(__name__)
 
@@ -119,6 +119,9 @@ def build_index(config, session, logger=LOGGER):
     # for the same object - we want to advertise only the newest.
     objects = {}
 
+    # Old profiles that should be cleaned up, if the profile extension changes
+    cleanup = []
+
     for root, _dirs, files in os.walk(profilesdir):
         for profile in files:
             if profile == profile_index:
@@ -142,8 +145,16 @@ def build_index(config, session, logger=LOGGER):
                     mtime = os.path.getmtime(os.path.join(root, profile))
                 except OSError, e:
                     continue
-                if obj in old_object_index and mtime > old_object_index[obj]:
-                    modified_index[obj] = mtime
+
+                if obj in old_object_index:
+                    if mtime > old_object_index[obj]:
+                        modified_index[obj] = mtime
+
+                    # Note this test means stale profiles will be cleaned up the
+                    # second time the index is rebuilt: the first time the
+                    # profile's mtime will still match the old index
+                    if mtime < old_object_index[obj]:
+                        cleanup.append(os.path.join(root, profile))
 
                 # The index generally just lists whatever is produced.  However,
                 # the webserver may be configured to transparently serve up
@@ -173,6 +184,10 @@ def build_index(config, session, logger=LOGGER):
 
     logger.debug("Updated %s, %d objects modified", index_path,
                  len(modified_index))
+
+    for filename in cleanup:
+        logger.debug("Cleaning up %s" % filename)
+        remove_file(filename, logger=logger)
 
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
