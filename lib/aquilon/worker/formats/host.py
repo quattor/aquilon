@@ -75,7 +75,7 @@ class HostFormatter(ObjectFormatter):
         if host.owner_grn:
             details.append(indent + "  Owned by {0:c}: {0.grn}"
                            .format(host.owner_grn))
-        for grn_rec in sorted(host._grns, key=attrgetter("target")):
+        for grn_rec in sorted(host._grns, key=attrgetter("target", "eon_id")):
             details.append(indent + "  Used by {0.grn:c}: {0.grn.grn} "
                            "[target: {0.target}]".format(grn_rec))
 
@@ -157,7 +157,7 @@ class GrnHostListFormatter(ListFormatter):
             msg.personality.owner_eonid = host.personality.owner_eon_id
             ## eon id maps TBD need both effective and actual
             for grn_rec in sorted(host.personality._grns,
-                                  key=attrgetter("target")):
+                                  key=attrgetter("target", "eon_id")):
                 map = msg.personality.eonid_maps.add()
                 map.target = grn_rec.target
                 map.eonid = grn_rec.eon_id
