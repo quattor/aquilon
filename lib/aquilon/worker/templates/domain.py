@@ -18,6 +18,7 @@
 
 import os
 import logging
+import time
 
 from aquilon.config import Config, lookup_file_path
 from aquilon.exceptions_ import ArgumentError, ProcessException, InternalError
@@ -207,12 +208,26 @@ class TemplateDomain(object):
                 lock_queue.acquire(key)
             self.logger.info("starting compile")
             try:
+                start_time = time.time()
                 run_command(args, env=panc_env, logger=self.logger,
                             path=config.get("broker", "quattordir"),
                             loglevel=CLIENT_INFO)
+                end_time = time.time()
             except ProcessException:
                 raise ArgumentError("Compilation failed, see the compiler "
                                     "messages for details.")
+
+            # Ugly hack. The File.lastModified() method is supposed to have
+            # millisecond granularity, but the actual implementation in Java 7
+            # has 1 second granularity only. So if the compilation finishes in
+            # less than a second, and something modifies the data within that
+            # second, the panc dependency tracker will be unable to notice that
+            # the object is out of date and needs to be recompiled. Sleeping a
+            # bit works around the issue by making sure further modifications
+            # to the source templates will have a different second value than
+            # anything this compilation used.
+            if long(start_time) == long(end_time):
+                time.sleep(1)
         finally:
             if not locked:
                 lock_queue.release(key)
