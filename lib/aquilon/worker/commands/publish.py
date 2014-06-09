@@ -16,8 +16,8 @@
 # limitations under the License.
 """Contains the logic for `aq publish`."""
 
-
 import os
+import re
 from tempfile import mkstemp, mkdtemp
 from base64 import b64decode
 
@@ -73,6 +73,27 @@ class CommandPublish(BrokerCommand):
             if rebase:
                 command.append("--force")
             run_git(command, path=temprepo, logger=logger, loglevel=CLIENT_INFO)
+
+            # Using --force above allows rewriting any history, even before the
+            # start of the sandbox. We don't want to allow that, so verify that
+            # the starting point of the sandbox is still part of its history.
+            if rebase:
+                filterre = re.compile('^' + dbsandbox.base_commit + '$')
+                try:
+                    found = run_git(['rev-list', dbsandbox.name],
+                                    filterre=filterre, path=temprepo,
+                                    logger=logger)
+                except ProcessException, pe:
+                    if pe.code != 128:
+                        raise
+                    else:
+                        found = False
+
+                if not found:
+                    raise ArgumentError("The published branch no longer "
+                                        "contains commit %s it was branched "
+                                        "from." % dbsandbox.base_commit)
+
             # FIXME: Run tests before pushing back to template-king
             if rebase:
                 target_ref = "+" + dbsandbox.name
