@@ -20,13 +20,14 @@ import sys
 from inspect import isclass
 
 from sqlalchemy.sql import text
+from sqlalchemy.exc import DatabaseError
 from twisted.web import http
 from twisted.python import log
 
 from aquilon.config import Config
 from aquilon.exceptions_ import (ArgumentError, AuthorizationException,
                                  NotFoundException, UnimplementedError,
-                                 PartialError, AquilonError)
+                                 PartialError, AquilonError, TransientError)
 from aquilon.worker.authorization import AuthorizationBroker
 from aquilon.worker.messages import StatusCatalog
 from aquilon.worker.logger import RequestLogger
@@ -50,7 +51,8 @@ ERROR_TO_CODE = {NotFoundException: http.NOT_FOUND,
                  AuthorizationException: http.UNAUTHORIZED,
                  ArgumentError: http.BAD_REQUEST,
                  UnimplementedError: http.NOT_IMPLEMENTED,
-                 PartialError: http.MULTI_STATUS}
+                 PartialError: http.MULTI_STATUS,
+                 TransientError: http.SERVICE_UNAVAILABLE}
 
 
 def get_code_for_error_class(e):
@@ -229,12 +231,18 @@ class BrokerCommand(object):
                         else:
                             session = self.dbf.Session()
 
+                    # Force connecting to the DB
+                    try:
+                        conn = session.connection()
+                    except DatabaseError, err:
+                        raise TransientError("Failed to connect to the "
+                                             "database: %s" % err)
+
                     if session.bind.dialect.name == "oracle":
                         # Make the name of the command and the request ID
                         # available in v$session. Trying to set a value longer
                         # than the allowed length will generate ORA-24960, so
                         # do an explicit truncation.
-                        conn = session.connection()
                         dbapi_con = conn.connection.connection
                         dbapi_con.action = str(self.action)[:32]
                         # TODO: we should include the command number as well,

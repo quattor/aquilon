@@ -145,3 +145,9 @@ class InternalError(AquilonError):
     These should only be raised from "can't happen" code and are
     preferred over assertion errors.
     """
+
+
+class TransientError(AquilonError):
+    """
+    Raised when there's a transient failure, e.g. database is not available.
+    """
