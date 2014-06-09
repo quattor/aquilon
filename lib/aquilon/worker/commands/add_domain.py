@@ -37,6 +37,11 @@ class CommandAddDomain(BrokerCommand):
                                          "an authenticated connection.")
 
         validate_template_name("--domain", domain)
+        try:
+            run_git(["check-ref-format", "--branch", domain])
+        except ProcessException:
+            raise ArgumentError("'%s' is not a valid git branch name." % domain)
+
         Branch.get_unique(session, domain, preclude=True)
 
         compiler = self.config.get("panc", "pan_compiler")
@@ -82,7 +87,7 @@ class CommandAddDomain(BrokerCommand):
         # If the branch command above fails the DB will roll back as normal.
         # If the command below fails we need to clean up from itself and above.
         try:
-            run_git(["clone", "--branch", dbdomain.name,
+            run_git(["clone", "--branch", dbdomain.name, "--",
                      kingdir, dbdomain.name],
                     path=domainsdir, logger=logger)
         except ProcessException, e:

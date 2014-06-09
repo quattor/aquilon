@@ -156,6 +156,12 @@ class TestAddDomain(TestBrokerCommand):
         self.matchoutput(out, "'oops@!' is not a valid value for --domain.",
                          command)
 
+    def test_300_bad_git_branchname(self):
+        command = ["add_domain", "--domain", "foobar."]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "'foobar.' is not a valid git branch name.",
+                         command)
+
     def test_900_verifyall(self):
         command = ["show_domain", "--all"]
         out = self.commandtest(command)

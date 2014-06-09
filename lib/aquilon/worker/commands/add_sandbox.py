@@ -18,7 +18,8 @@
 
 import os
 
-from aquilon.exceptions_ import (AuthorizationException, ArgumentError)
+from aquilon.exceptions_ import (AuthorizationException, ArgumentError,
+                                 ProcessException)
 from aquilon.aqdb.model import Sandbox, Branch
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.commands.get import CommandGet
@@ -45,6 +46,10 @@ class CommandAddSandbox(CommandGet):
         # See `git check-ref-format --help` for naming restrictions.
         # We want to layer a few extra restrictions on top of that...
         validate_template_name("--sandbox", sandbox)
+        try:
+            run_git(["check-ref-format", "--branch", sandbox])
+        except ProcessException:
+            raise ArgumentError("'%s' is not a valid git branch name." % sandbox)
 
         Branch.get_unique(session, sandbox, preclude=True)
 
