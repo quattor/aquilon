@@ -283,25 +283,29 @@ class CommandAddInterfaceMachine(BrokerCommand):
         mac_end_esx = mac_prefix_esx + ":3f:ff:ff"
         mac_start = MACAddress(mac_start_esx)
         mac_end = MACAddress(mac_end_esx)
+
         q = session.query(Interface.mac)
         q = q.filter(Interface.mac.between(str(mac_start), str(mac_end)))
-        # This query (with a different order_by) is used below.
-        mac = q.order_by(desc(Interface.mac)).first()
-        if not mac:
+        q = q.with_lockmode("update")
+        q = q.order_by(Interface.mac)
+
+        existing_macs = [MACAddress(row.mac) for row in q]
+        if not existing_macs:
             return str(mac_start)
-        highest_mac = MACAddress(mac[0])
+        highest_mac = existing_macs[-1]
         if highest_mac < mac_start:
             return str(mac_start)
         if highest_mac < mac_end:
             return str(highest_mac.next())
+
         potential_hole = mac_start
-        for mac in q.order_by(asc(Interface.mac)).all():
-            current_mac = MACAddress(mac[0])
+        for current_mac in existing_macs:
             if current_mac < mac_start:
                 continue
             if potential_hole < current_mac:
                 return str(potential_hole)
             potential_hole = current_mac.next()
+
         raise ArgumentError("All MAC addresses between %s and %s inclusive "
                             "are currently in use." % (mac_start, mac_end))
 
