@@ -16,29 +16,32 @@
 # limitations under the License.
 """ This module implements the AqMac column_type. """
 
+import operator
+
+from sqlalchemy.types import BigInteger, TypeDecorator
 import sqlalchemy
+from aquilon.aqdb.types import MACAddress
 
-from aquilon.utils import force_mac
 
+class AqMac(TypeDecorator):
+    """ A type that stores MAC address as integers. """
 
-class AqMac(sqlalchemy.types.TypeDecorator):
-    """ A type that decorates MAC address.
+    impl = BigInteger
 
-        It normalizes case to lower, strips leading and trailing whitespace,
-        adds colons, and adds padding zeroes.
+    def process_bind_param(self, value, engine):  # pylint: disable=W0613
+        if value is None:
+            return None
+        if isinstance(value, MACAddress):
+            return value.value
+        raise TypeError("Unknown input type for MAC column: %r" % value)
 
-        It should always be initialized as AqMac(17).  This accounts for
-        six groups of two characters and five colon separators.
+    def process_result_value(self, value, engine):  # pylint: disable=W0613
+        if value is None:
+            return None
+        return MACAddress(value=value)
 
-        """
-
-    impl = sqlalchemy.types.String
-
-    def process_bind_param(self, value, engine):
-        return force_mac("MAC address", value)
-
-    def process_result_value(self, value, engine):
-        return value
-
-    def copy(self):
-        return AqMac(self.impl.length)
+    def coerce_compared_value(self, op, value):
+        # This allows session.query(mac + 1) to work
+        if op == operator.add or op == operator.sub:
+            return BigInteger()
+        return super(AqMac, self).coerce_compared_value(op, value)

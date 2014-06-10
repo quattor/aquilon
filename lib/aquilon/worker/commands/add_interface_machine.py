@@ -17,6 +17,7 @@
 """Contains the logic for `aq add interface --machine`."""
 
 from aquilon.exceptions_ import ArgumentError, UnimplementedError
+from aquilon.aqdb.types import MACAddress
 from aquilon.aqdb.model import Interface, Machine, ARecord, Fqdn, EsxCluster
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.dns import delete_dns_record
@@ -271,7 +272,8 @@ class CommandAddInterfaceMachine(BrokerCommand):
         mac_end = MACAddress(mac_end_esx)
 
         q = session.query(Interface.mac)
-        q = q.filter(Interface.mac.between(str(mac_start), str(mac_end)))
+        q = q.filter(Interface.mac.between(mac_start, mac_end))
+        q = q.with_lockmode("update")
         q = q.order_by(Interface.mac)
 
         # Prevent concurrent --automac invocations. We need a separate query for
@@ -281,49 +283,20 @@ class CommandAddInterfaceMachine(BrokerCommand):
 
         existing_macs = [MACAddress(row.mac) for row in q]
         if not existing_macs:
-            return str(mac_start)
+            return mac_start
         highest_mac = existing_macs[-1]
         if highest_mac < mac_start:
-            return str(mac_start)
+            return mac_start
         if highest_mac < mac_end:
-            return str(highest_mac.next())
+            return highest_mac + 1
 
         potential_hole = mac_start
         for current_mac in existing_macs:
             if current_mac < mac_start:
                 continue
             if potential_hole < current_mac:
-                return str(potential_hole)
-            potential_hole = current_mac.next()
+                return potential_hole
+            potential_hole = current_mac + 1
 
         raise ArgumentError("All MAC addresses between %s and %s inclusive "
                             "are currently in use." % (mac_start, mac_end))
-
-
-class MACAddress(object):
-    def __init__(self, address=None, value=None):
-        if address is not None:
-            if value is None:
-                value = long(address.replace(':', ''), 16)
-        elif value is None:
-            raise ValueError("Must specify either address or value.")
-        self.value = value
-
-        # Force __str__() to generate it so we don't depend on the input
-        # formatting
-        self.address = None
-
-    def __cmp__(self, other):
-        return cmp(self.value, other.value)
-
-    def next(self):
-        next_value = self.value + 1
-        return MACAddress(value=next_value)
-
-    def __str__(self):
-        if not self.address:
-            addr = "%012x" % self.value
-            addr = ":".join(["".join(t) for t in zip(addr[0:len(addr):2],
-                                                     addr[1:len(addr):2])])
-            self.address = addr
-        return self.address

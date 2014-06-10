@@ -1,0 +1,28 @@
+ALTER TABLE interface ADD new_mac bigint;
+
+CREATE OR REPLACE FUNCTION _hex_to_int(hexval varchar) RETURNS bigint AS $$
+	DECLARE
+		result bigint;
+	BEGIN
+		EXECUTE 'SELECT x''' || hexval || '''::bigint' INTO result;  RETURN result;
+	END;
+$$ LANGUAGE 'plpgsql' IMMUTABLE STRICT;
+
+UPDATE interface SET new_mac = _hex_to_int(replace(mac, ':', '')) WHERE mac IS NOT NULL;
+
+ALTER TABLE interface DROP CONSTRAINT iface_mac_addr_uk;
+ALTER TABLE interface ADD CONSTRAINT iface_mac_addr_uk UNIQUE (new_mac);
+ALTER TABLE interface DROP COLUMN mac;
+ALTER TABLE interface RENAME COLUMN new_mac TO mac;
+
+ALTER TABLE observed_mac ADD new_mac_address bigint;
+
+UPDATE observed_mac SET new_mac_address = _hex_to_int(replace(mac_address, ':', ''));
+
+ALTER TABLE observed_mac ALTER new_mac_address SET NOT NULL;
+ALTER TABLE observed_mac DROP CONSTRAINT observed_mac_pk;
+ALTER TABLE observed_mac ADD CONSTRAINT observed_mac_pk PRIMARY KEY (network_device_id, port, new_mac_address);
+ALTER TABLE observed_mac DROP COLUMN mac_address;
+ALTER TABLE observed_mac RENAME COLUMN new_mac_address TO mac_address;
+
+DROP FUNCTION _hex_to_int(varchar);

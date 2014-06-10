@@ -235,7 +235,7 @@ class NetworkFormatter(ObjectFormatter):
                 host_msg.ip = str(addr.ip)
 
                 if mac:
-                    host_msg.mac = mac
+                    host_msg.mac = str(mac)
 
                 host_msg.machine.name = str(hwent.label)
 

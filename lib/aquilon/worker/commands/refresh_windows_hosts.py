@@ -20,12 +20,13 @@ import sqlite3
 
 from aquilon.exceptions_ import (PartialError, InternalError, AquilonError,
                                  ArgumentError)
+from aquilon.aqdb.types import MACAddress
 from aquilon.aqdb.model import (Host, Interface, Machine, Domain, Archetype,
                                 Personality, DnsRecord, OperatingSystem,
                                 ReservedName, Fqdn)
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.aqdb.model.hostlifecycle import Ready
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.dns import delete_dns_record
 from aquilon.worker.dbwrappers.service_instance import check_no_provided_service
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
@@ -81,9 +82,10 @@ class CommandRefreshWindowsHosts(BrokerCommand):
                 host = host.strip().lower()
             else:
                 continue
-            mac = row["ether"]
-            if mac:
-                mac = mac.strip().lower()
+            if row["ether"]:
+                mac = MACAddress(row["ether"])
+            else:
+                mac = None
             windows_hosts[host] = mac
             interfaces[mac] = host
 

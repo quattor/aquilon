@@ -263,7 +263,7 @@ class ObjectFormatter(object):
 
         def add_iface_data(int_msg, iface):
             if iface.mac:
-                int_msg.mac = iface.mac
+                int_msg.mac = str(iface.mac)
             if iface.bus_address:
                 int_msg.bus_address = str(iface.bus_address)
             int_msg.bootable = iface.bootable

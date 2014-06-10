@@ -16,7 +16,6 @@
 # limitations under the License.
 """Contains the logic for `aq poll network_device`."""
 
-
 from csv import DictReader, Error as CSVError
 from json import JSONDecoder
 from StringIO import StringIO
@@ -24,6 +23,10 @@ from datetime import datetime
 
 from aquilon.exceptions_ import (AquilonError, ArgumentError, InternalError,
                                  NotFoundException, ProcessException)
+from aquilon.utils import force_ipv4
+from aquilon.aqdb.types import MACAddress
+from aquilon.aqdb.model import (NetworkDevice, ObservedMac, ObservedVlan,
+                                Network, NetworkEnvironment, VlanInfo)
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.dbwrappers.observed_mac import (
@@ -31,9 +34,6 @@ from aquilon.worker.dbwrappers.observed_mac import (
 from aquilon.worker.dbwrappers.network_device import (determine_helper_hostname,
                                                       determine_helper_args)
 from aquilon.worker.processes import run_command
-from aquilon.aqdb.model import (NetworkDevice, ObservedMac, ObservedVlan,
-                                Network, NetworkEnvironment, VlanInfo)
-from aquilon.utils import force_ipv4
 
 
 class CommandPollNetworkDevice(BrokerCommand):
@@ -109,7 +109,8 @@ class CommandPollNetworkDevice(BrokerCommand):
 
         macports = JSONDecoder().decode(out)
         for (mac, port) in macports:
-            update_or_create_observed_mac(session, netdev, port, mac, now)
+            update_or_create_observed_mac(session, netdev, port,
+                                          MACAddress(mac), now)
 
     def clear(self, session, netdev):
         session.query(ObservedMac).filter_by(network_device=netdev).delete()
