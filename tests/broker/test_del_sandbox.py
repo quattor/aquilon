@@ -57,9 +57,7 @@ class TestDelSandbox(TestBrokerCommand):
         err = self.notfoundtest(command.split(" "))
         sandboxdir = os.path.join(self.sandboxdir, "changetest2")
         self.matchoutput(err, "please `rm -rf %s`" % sandboxdir, command)
-        self.matchoutput(err,
-                         "No aqdb record for sandbox changetest2 was found",
-                         command)
+        self.matchoutput(err, "Sandbox changetest2 not found.", command)
 
     def test_132_verify_changetest2(self):
         command = "show sandbox --sandbox changetest2"
@@ -82,8 +80,7 @@ class TestDelSandbox(TestBrokerCommand):
         err = self.notfoundtest(command.split(" "))
         self.matchclean(err, "please `rm -rf", command)
         self.matchoutput(err,
-                         "No aqdb record for sandbox "
-                         "sandbox-does-not-exist was found",
+                         "Sandbox sandbox-does-not-exist not found.",
                          command)
 
 if __name__ == '__main__':

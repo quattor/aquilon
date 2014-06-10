@@ -78,7 +78,7 @@ def get_branch_dependencies(dbbranch):
     return ret
 
 
-def remove_branch(config, logger, dbbranch):
+def remove_branch(config, logger, dbbranch, dbauthor=None):
     session = object_session(dbbranch)
     deps = get_branch_dependencies(dbbranch)
     if deps:
@@ -86,7 +86,7 @@ def remove_branch(config, logger, dbbranch):
 
     session.delete(dbbranch)
 
-    domain = TemplateDomain(dbbranch, logger=logger)
+    domain = TemplateDomain(dbbranch, dbauthor, logger=logger)
     # Can this fail?  Is recovery needed?
     with CompileKey(domain=dbbranch.name, logger=logger):
         for dir in domain.directories():

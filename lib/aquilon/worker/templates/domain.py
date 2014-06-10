@@ -21,7 +21,7 @@ import logging
 import time
 
 from aquilon.config import Config, lookup_file_path
-from aquilon.exceptions_ import ArgumentError, ProcessException, InternalError
+from aquilon.exceptions_ import ArgumentError, ProcessException, AquilonError
 from aquilon.aqdb.model import (Host, Cluster, Fqdn, DnsDomain, DnsRecord,
                                 HardwareEntity, Sandbox, Domain, Archetype,
                                 Personality)
@@ -36,8 +36,8 @@ LOGGER = logging.getLogger(__name__)
 def template_branch_basedir(config, dbbranch, dbauthor=None):
     if isinstance(dbbranch, Sandbox):
         if not dbauthor:
-            raise InternalError("Missing required author to compile "
-                                "{0:l}." % dbbranch)
+            raise AquilonError("Missing required author to compile "
+                               "{0:l}.".format(dbbranch))
         return os.path.join(config.get("broker", "templatesdir"),
                             dbauthor.name, dbbranch.name)
     else:

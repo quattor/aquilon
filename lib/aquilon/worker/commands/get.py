@@ -16,14 +16,13 @@
 # limitations under the License.
 """Contains the logic for `aq get`."""
 
-
 import os
 
 from aquilon.exceptions_ import (ArgumentError, ProcessException,
                                  AuthorizationException)
 from aquilon.aqdb.model import Sandbox
 from aquilon.aqdb.column_types import AqStr
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.user_principal import get_user_principal
 from aquilon.worker.processes import run_command
 from aquilon.worker.formats.branch import RemoteSandbox
@@ -39,12 +38,12 @@ class CommandGet(BrokerCommand):
 
     # If updating this argument list also update CommandAddSandbox.
     def render(self, session, logger, dbuser, sandbox, **arguments):
-        sandbox = self.force_my_sandbox(session, dbuser, sandbox)
-        dbsandbox = Sandbox.get_unique(session, sandbox, compel=True)
-
         if not dbuser:
             raise AuthorizationException("Cannot get a sandbox without"
                                          " an authenticated connection.")
+
+        sandbox = self.force_my_sandbox(session, dbuser, sandbox)
+        dbsandbox = Sandbox.get_unique(session, sandbox, compel=True)
 
         userdir = os.path.join(self.config.get("broker", "templatesdir"),
                                dbuser.name)
@@ -56,10 +55,10 @@ class CommandGet(BrokerCommand):
 
         if not os.path.exists(userdir):
             try:
-                logger.client_info("creating %s" % userdir)
+                logger.client_info("Creating %s" % userdir)
                 os.makedirs(userdir, mode=0775)
             except OSError, e:
-                raise ArgumentError("failed to mkdir %s: %s" % (userdir, e))
+                raise ArgumentError("Failed to mkdir %s: %s" % (userdir, e))
 
             args = [self.config.get("broker", "mean")]
             args.append("chown")
@@ -77,14 +76,14 @@ class CommandGet(BrokerCommand):
                              dbsandbox.name, userdir)
 
     def force_my_sandbox(self, session, dbuser, sandbox):
+        if not dbuser.realm.trusted:
+            raise AuthorizationException("{0} is not trusted to handle "
+                                         "sandboxes.".format(dbuser.realm))
+
         # The principal name may also contain '/'
         sbx_split = sandbox.split('/')
         sandbox = AqStr.normalize(sbx_split[-1])
         author = '/'.join(sbx_split[:-1])
-
-        if not dbuser.realm.trusted:
-            raise AuthorizationException("{0} is not trusted to handle "
-                                         "sandboxes.".format(dbuser.realm))
 
         # User used the name/branch syntax - that's fine.  They can't
         # do anything on behalf of anyone else, though, so error if the

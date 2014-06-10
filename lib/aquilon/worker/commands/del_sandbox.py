@@ -16,11 +16,10 @@
 # limitations under the License.
 """Contains the logic for `aq del sandbox`."""
 
-
 import os
 
-from aquilon.exceptions_ import NotFoundException
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.exceptions_ import NotFoundException, AuthorizationException
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.sandbox import get_sandbox
 from aquilon.worker.dbwrappers.branch import remove_branch
 
@@ -30,15 +29,18 @@ class CommandDelSandbox(BrokerCommand):
     required_parameters = ["sandbox"]
 
     def render(self, session, logger, dbuser, sandbox, **arguments):
+        if not dbuser.realm.trusted:
+            raise AuthorizationException("{0} is not trusted to handle "
+                                         "sandboxes.".format(dbuser.realm))
+
         dbauthor = None
         try:
             (dbsandbox, dbauthor) = get_sandbox(session, logger, sandbox)
         except NotFoundException:
             self.cleanup_notify(logger, sandbox, dbauthor, dbuser)
-            raise NotFoundException("No aqdb record for sandbox %s was found."
-                                    % sandbox)
+            raise NotFoundException("Sandbox %s not found." % sandbox)
 
-        remove_branch(self.config, logger, dbsandbox)
+        remove_branch(self.config, logger, dbsandbox, dbauthor)
         self.cleanup_notify(logger, dbsandbox.name, dbauthor, dbuser)
         return
 
@@ -49,4 +51,4 @@ class CommandDelSandbox(BrokerCommand):
         sandboxdir = os.path.join(templatesdir, dbauthor.name, sandbox)
         if os.path.exists(sandboxdir):
             logger.client_info("If you no longer need the working copy of the "
-                               "sandbox please `rm -rf %s`", sandboxdir)
+                               "sandbox, please `rm -rf %s`", sandboxdir)

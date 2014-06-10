@@ -83,8 +83,8 @@ class TestAddSandbox(TestBrokerCommand):
 
     def test_115_verify_utsandbox(self):
         kingdir = self.config.get("broker", "kingdir")
-        (out, err) = self.gitcommand(["show-ref", "--hash", "refs/heads/prod"],
-                                     cwd=kingdir)
+        out, err = self.gitcommand(["show-ref", "--hash", "refs/heads/prod"],
+                                   cwd=kingdir)
         head = out.strip()
 
         command = "show sandbox --sandbox utsandbox"
@@ -121,13 +121,13 @@ class TestAddSandbox(TestBrokerCommand):
         out = self.badrequesttest(command.split(" "))
         self.matchoutput(out,
                          "Must specify sandbox as author/branch "
-                         "when using --pathonly",
+                         "when using --pathonly.",
                          command)
 
     def test_120_add_changetest1(self):
         command = ["add", "sandbox", "--sandbox", "%s/changetest1" % self.user]
-        (out, err) = self.successtest(command)
-        self.matchoutput(err, "creating %s" % self.sandboxdir, command)
+        out, err = self.successtest(command)
+        self.matchoutput(err, "Creating %s" % self.sandboxdir, command)
         sandboxdir = os.path.join(self.sandboxdir, "changetest1")
         self.matchoutput(out, "Created sandbox: %s" % sandboxdir, command)
         self.failUnless(os.path.exists(sandboxdir),
@@ -178,7 +178,7 @@ class TestAddSandbox(TestBrokerCommand):
     def test_160_verify_lower_branchname(self):
         command = ['branch', '-r']
         sandboxdir = os.path.join(self.sandboxdir, "camelcasetest1")
-        (out, err) = self.gitcommand(command, cwd=sandboxdir)
+        out, err = self.gitcommand(command, cwd=sandboxdir)
         self.matchoutput(out, "origin/camelcasetest1", command)
 
     def test_160_verify_show_mixedcase(self):
