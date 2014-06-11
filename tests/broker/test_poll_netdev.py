@@ -120,6 +120,10 @@ class TestPollNetworkDevice(TestBrokerCommand):
         err = self.statustest(command)
         net = self.net["vmotion_net"]
         self.matchoutput(err,
+                         "Switch ut01ga2s01.aqd-unittest.ms.com: VLAN 5 is not "
+                         "defined in AQDB. Please use add_vlan to add it.",
+                         command)
+        self.matchoutput(err,
                          "Switch ut01ga2s01.aqd-unittest.ms.com: skipping VLAN "
                          "714, because network bitmask value 24 differs from "
                          "prefixlen 26 of network %s." % net.name,
@@ -198,6 +202,39 @@ class TestPollNetworkDevice(TestBrokerCommand):
     def testpollnp01ga2s05(self):
         self.successtest(["poll", "network_device",
                           "--network_device", "np01ga2s05.one-nyp.ms.com"])
+
+    def testpollutpgsw0(self):
+        command = ["poll", "network_device", "--vlan",
+                   "--network_device", "utpgsw0.aqd-unittest.ms.com"]
+        self.successtest(command)
+
+        command = ["show_network_device",
+                   "--network_device", "utpgsw0.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        # FIXME: we're testing here that non-numeric port names are accepted,
+        # but the MAC address being used is not really valid and may be
+        # misleading
+        self.searchoutput(out,
+                          r"Port: et1-1\s*MAC: %s," % self.net["autopg1"][5].mac,
+                          command)
+
+    def testpollutpgsw1(self):
+        command = ["poll", "network_device", "--vlan",
+                   "--network_device", "utpgsw1.aqd-unittest.ms.com"]
+        self.successtest(command)
+
+        command = ["show_network_device",
+                   "--network_device", "utpgsw1.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        # FIXME: we're testing here that non-numeric port names are accepted,
+        # but the MAC addresses being used are not really valid and may be
+        # misleading
+        self.searchoutput(out,
+                          r"Port: et1-1\s*MAC: %s," % self.net["autopg1"][6].mac,
+                          command)
+        self.searchoutput(out,
+                          r"Port: et1-2\s*MAC: %s," % self.net["autopg1"][7].mac,
+                          command)
 
     def testpollbor(self):
         command = ["poll", "network_device", "--vlan",

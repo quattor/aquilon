@@ -18,7 +18,7 @@
 from sqlalchemy.orm import undefer
 
 from aquilon.aqdb.model import Share
-from aquilon.aqdb.data_sync.storage import cache_storage_data
+from aquilon.aqdb.data_sync.storage import StormapParser
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.resources import get_resource_holder
 
@@ -42,8 +42,8 @@ class CommandShowShare(BrokerCommand):
 
         shares = q.all()
 
-        share_info = cache_storage_data()
+        parser = StormapParser()
         for dbshare in shares:
-            dbshare.populate_share_info(share_info)
+            dbshare.populate_share_info(parser)
 
         return shares

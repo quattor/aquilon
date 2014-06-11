@@ -1,0 +1,5 @@
+Fake NAS maps
+-------------
+
+To change the maps, edit testnasobjects.map, and then run convert.pl from this
+directory to re-generate the CDB form.

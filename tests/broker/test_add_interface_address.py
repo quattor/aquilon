@@ -402,6 +402,27 @@ class TestAddInterfaceAddress(TestBrokerCommand):
                           % self.net["autopg1"][0],
                           command)
 
+    def testaddauroraextraip(self):
+        # For Aurora hosts, we need to add the extra IP after the host object
+        # has been created
+        ip = self.net["tor_net_0"].usable[6]
+        self.dsdb_expect("show_host -host_name test-aurora-default-os-v0")
+        self.noouttest(["add_interface_address", "--machine", "ut8s02p4",
+                        "--interface", "eth0", "--label", "v0", "--ip", ip,
+                        "--fqdn", "test-aurora-default-os-v0.ms.com"])
+        self.dsdb_verify()
+
+    def testverifyauroraextraip(self):
+        ip1 = self.net["tor_net_0"].usable[4]
+        ip2 = self.net["tor_net_0"].usable[6]
+        command = ["show_host", "--hostname", "test-aurora-default-os.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out,
+                         "Primary Name: test-aurora-default-os.ms.com [%s]" % ip1,
+                         command)
+        self.matchoutput(out,
+                         "Provides: test-aurora-default-os-v0.ms.com [%s]" % ip2,
+                         command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddInterfaceAddress)

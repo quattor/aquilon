@@ -625,6 +625,12 @@ class TestAddInterface(TestBrokerCommand):
         self.matchoutput(out, "Interface type 'oa' is not valid for machines.",
                          command)
 
+    def testfailbadpg(self):
+        command = ["add", "interface", "--machine", "ut3c1n3",
+                   "--interface", "eth2", "--pg", "no-such-pg"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "No VLAN found for port group no-such-pg.",
+                         command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddInterface)

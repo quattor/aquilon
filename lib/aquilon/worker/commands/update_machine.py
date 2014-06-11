@@ -16,9 +16,12 @@
 # limitations under the License.
 """Contains the logic for `aq update machine`."""
 
+import re
+
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import (Cpu, Chassis, ChassisSlot, Model, Cluster,
-                                Machine, BundleResource)
+                                Machine, Resource, BundleResource, Share,
+                                Filesystem)
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.hardware_entity import update_primary_ip
 from aquilon.worker.dbwrappers.location import get_location
@@ -27,6 +30,36 @@ from aquilon.worker.dbwrappers.resources import (find_resource,
 from aquilon.worker.templates import (Plenary, PlenaryCollection,
                                       PlenaryHostData)
 from aquilon.worker.processes import DSDBRunner
+
+_disk_map_re = re.compile(r'^([^/]+)/(?:([^/]+)/)?([^/]+):([^/]+)/(?:([^/]+)/)?([^/]+)$')
+
+
+def parse_remap_disk(old_vmholder, new_vmholder, remap_disk):
+    result = {}
+    if not remap_disk:
+        return result
+
+    maps = remap_disk.split(",")
+
+    for map in maps:
+        res = _disk_map_re.match(map)
+        if not res:
+            raise ArgumentError("Invalid disk backend remapping "
+                                "specification: '%s'" % map)
+        src_type, src_rg, src_name, dst_type, dst_rg, dst_name = res.groups()
+        src_cls = Resource.polymorphic_subclass(src_type,
+                                                "Invalid resource type")
+        dst_cls = Resource.polymorphic_subclass(dst_type,
+                                                "Invalid resource type")
+        if dst_cls not in (Share, Filesystem):
+            raise ArgumentError("%s is not a valid virtual disk backend "
+                                "resource type." % dst_type)
+
+        src_backend = find_resource(src_cls, old_vmholder, src_rg, src_name)
+        dst_backend = find_resource(dst_cls, new_vmholder, dst_rg, dst_name)
+        result[src_backend] = dst_backend
+
+    return result
 
 
 class CommandUpdateMachine(BrokerCommand):
@@ -49,7 +82,7 @@ class CommandUpdateMachine(BrokerCommand):
                chassis, slot, clearchassis, multislot,
                vmhost, cluster, allow_metacluster_change,
                cpuname, cpuvendor, cpuspeed, cpucount, memory, ip, uri,
-               **arguments):
+               remap_disk, **arguments):
         dbmachine = Machine.get_unique(session, machine, compel=True)
         oldinfo = DSDBRunner.snapshot_hw(dbmachine)
 
@@ -190,6 +223,8 @@ class CommandUpdateMachine(BrokerCommand):
 
             dbmachine.vm_container.holder = resholder
 
+            disk_mapping = parse_remap_disk(old_holder, new_holder, remap_disk)
+
             for dbdisk in dbmachine.disks:
                 old_bstore = dbdisk.backing_store
                 if isinstance(old_bstore.holder, BundleResource):
@@ -197,9 +232,12 @@ class CommandUpdateMachine(BrokerCommand):
                 else:
                     resourcegroup = None
 
-                new_bstore = find_resource(old_bstore.__class__, new_holder,
-                                           resourcegroup, old_bstore.name,
-                                           error=ArgumentError)
+                if old_bstore in disk_mapping:
+                    new_bstore = disk_mapping[old_bstore]
+                else:
+                    new_bstore = find_resource(old_bstore.__class__, new_holder,
+                                               resourcegroup, old_bstore.name,
+                                               error=ArgumentError)
                 dbdisk.backing_store = new_bstore
 
             if isinstance(new_holder, Cluster):

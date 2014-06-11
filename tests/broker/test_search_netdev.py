@@ -185,6 +185,24 @@ class TestSearchNetworkDevice(TestBrokerCommand):
                          ",ut,bnt,rs g8000,,xge49,%s" % (ip, ip.mac),
                          command)
 
+    def testsearchvlan(self):
+        command = ["search_network_device", "--vlan", "701"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "ut01ga2s01.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "ut01ga2s02.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "ut01ga2s03.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "ut01ga2s04.aqd-unittest.ms.com", command)
+
+        # No such VLAN on these
+        self.matchclean(out, "utpgsw0.aqd-unittest.ms.com", command)
+        self.matchclean(out, "utpgsw1.aqd-unittest.ms.com", command)
+
+        # Not a ToR switch
+        self.matchclean(out, "ut3gd1r01.aqd-unittest.ms.com", command)
+
+        # No VLAN polling was done
+        self.matchclean(out, "np01ga2s05.one-nyp.ms.com", command)
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestSearchNetworkDevice)

@@ -216,7 +216,7 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
         self.matchoutput(out, "Personality: inventory", command)
 
     def test_140_add_aurora_default_os(self):
-        ip = self.net["utpgsw0-v710"].usable[-1]
+        ip = self.net["tor_net_0"].usable[4]
         self.dsdb_expect("show_host -host_name test-aurora-default-os")
         self.noouttest(["add", "host", "--archetype", "aurora",
                         "--hostname", "test-aurora-default-os.ms.com",
@@ -238,7 +238,7 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
                           command)
 
     def test_145_add_windows_default_os(self):
-        ip = self.net["utpgsw0-v710"].usable[-2]
+        ip = self.net["tor_net_0"].usable[5]
         self.dsdb_expect_add("test-windows-default-os.msad.ms.com", ip,
                              "eth0", self.net["tor_net_0"].usable[5].mac)
         self.noouttest(["add", "host", "--archetype", "windows",

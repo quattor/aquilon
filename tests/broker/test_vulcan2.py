@@ -73,7 +73,7 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
     def test_010_addutmc8(self):
         command = ["add_metacluster", "--metacluster=utmc8",
                    "--personality=vulcan2", "--archetype=metacluster",
-                   "--domain=unittest", "--building=ut", "--domain=unittest",
+                   "--domain=unittest", "--building=ut",
                    "--comments=autopg_v2_tests"]
         self.noouttest(command)
 
@@ -88,49 +88,8 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
 
     # see testaddutmc4
     def test_020_addutpgcl(self):
-        # Allocate utecl5 - utecl10 for utmc4 (autopg testing)
         for i in range(0, 2):
             self.add_utcluster("utpgcl%d" % i, "utmc8")
-
-    # see     def testaddut01ga2s02(self):
-    def test_030_addutpgsw(self):
-        # Deprecated.
-
-        for i in range(0, 2):
-            ip = self.net["autopg1"].usable[i]
-            hostname = "utpgsw%d.aqd-unittest.ms.com" % i
-
-            self.dsdb_expect_add(hostname, ip, "xge49",
-                                 ip.mac)
-            command = ["add", "network_device",
-                       "--network_device", hostname, "--rack", "ut12",
-                       "--model", "rs g8000", "--interface", "xge49",
-                       "--iftype", "physical",
-                       "--type", "tor", "--mac", ip.mac, "--ip", ip]
-            self.ignoreoutputtest(command)
-        self.dsdb_verify()
-
-    # see     def testverifypollut01ga2s01(self):
-    # see fakevlan2net
-    def test_040_pollutpgsw(self):
-        macs = ["02:02:04:02:12:05", "02:02:04:02:12:06"]
-        for i in range(0, 2):
-            command = ["poll", "network_device", "--vlan", "--network_device",
-                       "utpgsw%d.aqd-unittest.ms.com" % i]
-            (out, err) = self.successtest(command)
-
-            service = self.config.get("broker", "poll_helper_service")
-            self.matchoutput(err,
-                             "Using jump host nyaqd1.ms.com from service "
-                             "instance %s/unittest to run discovery "
-                             "for switch utpgsw%d.aqd-unittest.ms.com" %
-                             (service, i),
-                             command)
-
-            # For Nexus switches we have if names, not snmp ids.
-            command = "show network_device --network_device utpgsw%d.aqd-unittest.ms.com" % i
-            out = self.commandtest(command.split(" "))
-            self.searchoutput(out, r"Port: et1-1\s*MAC: %s," % macs[i], command)
 
     # for each cluster's hosts
     def test_060_add10gigracks(self):
@@ -227,14 +186,46 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
 
     # Autopg test
     def test_130_addinterfaces(self):
-        # These ones fit the 2 address net
-        for i in range(0, 2):
-            machine = "utpgm%d" % i
-            self.noouttest(["add", "interface", "--machine", machine,
-                            "--interface", "eth0", "--automac", "--autopg"])
+        self.noouttest(["add", "interface", "--machine", "utpgm0",
+                        "--interface", "eth0", "--automac", "--autopg"])
+
+        # Consume available IP addresses
+        self.dsdb_expect_add("utpgm0-ip1.aqd-unittest.ms.com",
+                             self.net["autopg1"].usable[0], "eth0_ip1")
+        self.dsdb_expect_add("utpgm0-ip2.aqd-unittest.ms.com",
+                             self.net["autopg1"].usable[1], "eth0_ip2")
+        self.noouttest(["add_interface_address", "--machine", "utpgm0",
+                        "--interface", "eth0", "--label", "ip1", "--autoip",
+                        "--fqdn", "utpgm0-ip1.aqd-unittest.ms.com"])
+        self.noouttest(["add_interface_address", "--machine", "utpgm0",
+                        "--interface", "eth0", "--label", "ip2", "--autoip",
+                        "--fqdn", "utpgm0-ip2.aqd-unittest.ms.com"])
+        self.dsdb_verify()
+
+        # All IPs gone, this should fail
+        command = ["add", "interface", "--machine", "utpgm1",
+                   "--interface", "eth0", "--automac", "--autopg"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "No available user port groups on switch "
+                         "utpgsw0.aqd-unittest.ms.com",
+                         command)
+
+        # Free up the IP addresses
+        self.dsdb_expect_delete(self.net["autopg1"].usable[0])
+        self.dsdb_expect_delete(self.net["autopg1"].usable[1])
+        self.noouttest(["del_interface_address", "--machine", "utpgm0",
+                        "--interface", "eth0", "--label", "ip1"])
+        self.noouttest(["del_interface_address", "--machine", "utpgm0",
+                        "--interface", "eth0", "--label", "ip2"])
+        self.dsdb_verify()
+
+        # Now it should succeed
+        self.noouttest(["add", "interface", "--machine", "utpgm1",
+                        "--interface", "eth0", "--automac", "--autopg"])
 
         # The third one shall fail
-        command = ["add", "interface", "--machine", "utpgm%d" % 2,
+        command = ["add", "interface", "--machine", "utpgm2",
                    "--interface", "eth0", "--automac", "--autopg"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
@@ -336,7 +327,7 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
         command = ["add_share", "--resourcegroup=utmc8as2",
                    "--share=test_v2_share"]
         err = self.badrequesttest(command)
-        self.matchoutput(err, "Bad Request: Share test_v2_share, "
+        self.matchoutput(err, "Share test_v2_share, "
                          "bundleresource instance already exists.", command)
 
     def test_220_cat_resourcegroup(self):
@@ -456,7 +447,7 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
                    "--comments=testing",
                    "--resourcegroup=utmc8as1"]
         err = self.badrequesttest(command)
-        self.matchoutput(err, "Bad Request: Resource's filesystem type "
+        self.matchoutput(err, "Resource's filesystem type "
                          "differs from the requested share",
                          command)
 
@@ -728,23 +719,6 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
         for port in range(0, 2):
             self.noouttest(["del", "machine", "--machine",
                             "utpgs01p%d" % port])
-
-    def test_740_delutpgsw(self):
-        for i in range(0, 2):
-            ip = self.net["autopg1"].usable[i]
-            swname = "utpgsw%d.aqd-unittest.ms.com" % i
-            plenary = self.plenary_name("switchdata", swname)
-            self.failUnless(os.path.exists(plenary),
-                            "Plenary file '%s' does not exist" % plenary)
-
-            self.dsdb_expect_delete(ip)
-            command = "del network_device --network_device %s" % swname
-            self.noouttest(command.split(" "))
-
-            self.failIf(os.path.exists(plenary),
-                        "Plenary file '%s' still exists" % plenary)
-
-        self.dsdb_verify()
 
     def test_750_delutpgcl(self):
         command = ["del_metacluster", "--metacluster=utmc8"]

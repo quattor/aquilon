@@ -17,76 +17,102 @@
 """ Routines to query information about NAS shares """
 
 from collections import namedtuple
+from operator import itemgetter
+import re
+
+import cdb
 
 from aquilon.config import Config
 
-
+DataBlock = namedtuple('DataBlock', ['start_index', 'columns'])
 ShareInfo = namedtuple('ShareInfo', ['server', 'mount'])
 
 
-# Utility functions for service / resource based disk mounts
-# This should come from some external API...?
-def cache_storage_data(only=None):
+class StormapParser(object):
     """
-    Scan a storeng-style data file, checking each line as we go
+    Scan a storeng-style CDB data file.
 
-    Storeng-style data files are blocks of data. Each block starts
-    with a comment describing the fields for all subsequent lines. A
-    block can start at any time. Fields are separated by '|'.
-    This function will invoke the function after parsing every data
-    line. The function will be called with a dict of the fields. If the
-    function returns True, then we stop scanning the file, else we continue
-    on until there is nothing left to parse.
+    Storeng-style data files are blocks of data. Each block has a header
+    describing the fields for all subsequent lines. A block can start at any
+    time. Fields are separated by '|'.
 
-    dbshare can be a Share
+    The CDB file contains one row per line of the original text dump, where the
+    key is the line number and the value is the line contents. The cdb file also
+    contains a number of indexes to make lookups faster. There is metadata
+    describing the number of maps, the columns in any given map, and the line
+    number range for that map.
     """
 
-    config = Config()
-    sharedata = {}
-    found_header = False
-    header_idx = {}
-    with open(config.get("broker", "sharedata")) as datafile:
-        for line in datafile:
-            if line[0] == '#':
-                # A header line
-                found_header = True
-                hdr = line[1:].rstrip().split('|')
+    row_key_re = re.compile(r"D:(\d+)$")
 
-                header_idx = {}
-                for idx, name in enumerate(hdr):
-                    header_idx[name] = idx
+    def __init__(self):
+        config = Config()
+        self.header_defs = []
 
-                # Silently discard lines that don't have all the required info
-                for k in ["objtype", "pshare", "server", "dg"]:
-                    if k not in header_idx:
-                        found_header = False
-            elif not found_header:
-                # We haven't found the right header line
+        # TODO: This code can be used to parse other data files with the same
+        # format. To do that, we'll need to pass the file name as an argument to
+        # __init__(), and the index type as an argument to lookup().
+        self.cdb_file = cdb.init(config.get("broker", "sharedata"))
+        num_headers = self.cdb_file["M:HEADER_COUNT"]
+        if num_headers is None:
+            return
+
+        for header_num in range(0, int(num_headers)):
+            # Index of the first item the header refers to
+            start_index = int(self.cdb_file["HEADER_ROW_INDEX:%d" % header_num])
+            # Definitions for the fields in the given segment
+            header = self.cdb_file["HEADER_ROW_COLUMN_NAMES:%d" % header_num]
+            if not header:
                 continue
-            else:
-                fields = line.rstrip().split('|')
-                if len(fields) != len(header_idx):  # Silently ignore invalid lines
-                    continue
-                if fields[header_idx["objtype"]] != "pshare":
-                    continue
 
-                sharedata[fields[header_idx["pshare"]]] = ShareInfo(
-                    server=fields[header_idx["server"]],
-                    mount="/vol/%s/%s" % (fields[header_idx["dg"]],
-                                          fields[header_idx["pshare"]])
-                )
+            columns = dict((name, idx) for idx, name in
+                           enumerate(header.split('|')))
+            self.header_defs.append(DataBlock(start_index=start_index,
+                                              columns=columns))
 
-                # Take a shortcut if we need just a single entry
-                if only and only == fields[header_idx["pshare"]]:
-                    break
+        # Guard element - if a row index is out of range, this will catch it
+        self.header_defs.append(DataBlock(start_index=int(self.cdb_file["M:ROW_COUNT"]),
+                                          columns={}))
 
-        return sharedata
+        # We need to sort the definitions to be able to find the range a given
+        # line falls into. The trick here is that we know that the items we're
+        # currently interested in should be part of the last range, so sorting
+        # in descending order will make lookups faster.
+        self.header_defs.sort(key=itemgetter(0), reverse=True)
 
+    def lookup(self, name):
+        try:
+            # Look up the name in the index...
+            row_key = self.cdb_file["I:pshare:" + str(name)]
+            # ... and the row containing the data
+            row = self.cdb_file[row_key]
+        except KeyError:
+            return ShareInfo(server=None, mount=None)
 
-def find_storage_data(dbshare, cache=None):
-    if not cache:
-        cache = cache_storage_data(only=dbshare.name)
-    if dbshare.name in cache:
-        return cache[dbshare.name]
-    else:
-        return ShareInfo(server=None, mount=None)
+        # The key has the line number embedded, which we need to extract to be
+        # able to figure out which header defines the structure of this row
+        m = self.row_key_re.match(row_key)
+        if not m:
+            return ShareInfo(server=None, mount=None)
+        row_index = int(m.group(1))
+
+        # See the comment above about the ordering of self.header_defs - we're
+        # depending on that here. The number of headers is expected to be small
+        # enough, so linear search is more than adequate.
+        headers = {}
+        for start_index, headers in self.header_defs:
+            if start_index <= row_index:
+                break
+
+        fields = row.split("|")
+
+        # Final sanity checks
+        if (not headers or len(fields) < len(headers) or
+            "server" not in headers or
+            "dg" not in headers or
+            "pshare" not in headers):
+            return ShareInfo(server=None, mount=None)
+
+        return ShareInfo(server=fields[headers["server"]],
+                         mount="/vol/%s/%s" % (fields[headers["dg"]],
+                                               fields[headers["pshare"]]))

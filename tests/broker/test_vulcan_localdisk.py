@@ -84,46 +84,6 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, MachineTestMixin,
                        "--personality=vulcan-local-disk"]
             self.noouttest(command)
 
-    # reusing vulcan2 subnets here.
-    def test_020_addutpgsw(self):
-        for i in range(0, 2):
-            ip = self.net["autopg1"].usable[i]
-
-            self.dsdb_expect_add(self.switch[i], ip, "xge49",
-                                 ip.mac)
-            command = ["add", "network_device", "--network_device", self.switch[i],
-                       "--rack", "ut12", "--model", "rs g8000",
-                       "--interface", "xge49", "--iftype", "physical",
-                       "--type", "tor", "--mac", ip.mac, "--ip", ip]
-            (out, err) = self.successtest(command)
-        self.dsdb_verify()
-
-    # see fakevlan2net
-    def test_025_pollutpgsw(self):
-
-        for i in range(0, 2):
-            command = ["poll", "network_device", "--vlan", "--network_device",
-                       self.switch[i]]
-            (out, err) = self.successtest(command)
-
-            service = self.config.get("broker", "poll_helper_service")
-            self.matchoutput(err,
-                             "Using jump host nyaqd1.ms.com from service "
-                             "instance %s/unittest to run discovery "
-                             "for switch %s" % (service, self.switch[i]),
-                             command)
-
-        # For Nexus switches we have if names, not snmp ids.
-        # Checking only the first one
-        command = "show network_device --network_device %s" % self.switch[1]
-        out = self.commandtest(command.split(" "))
-
-        macs = ["02:02:04:02:12:06", "02:02:04:02:12:07"]
-        for i in range(0, 2):
-            self.searchoutput(out,
-                              r"Port: et1-%d\s*MAC: %s," % (i + 1, macs[i]),
-                              command)
-
     def test_030_addswitch(self):
         for i in range(0, 2):
             self.successtest(["update_esx_cluster",
@@ -178,7 +138,7 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, MachineTestMixin,
                          "filesystem utfs1n assigned to it.",
                          command)
 
-    def test_125_addvmfs(self):
+    def test_125_add_utfs1(self):
         command = ["add_filesystem", "--filesystem=utfs1", "--type=ext3",
                    "--mountpoint=/mnt", "--blockdevice=/dev/foo/bar",
                    "--bootmount",
@@ -192,6 +152,23 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, MachineTestMixin,
                    "--hostname=%s" % self.vmhost[0]]
         out = self.commandtest(command)
         self.matchoutput(out, '"name" = "utfs1";', command)
+
+    def test_126_add_utrg2(self):
+        self.noouttest(["add_resourcegroup", "--resourcegroup", "utrg2",
+                        "--hostname", self.vmhost[1]])
+
+    def test_127_add_utfs2(self):
+        self.noouttest(["add_filesystem", "--filesystem", "utfs2",
+                        "--type", "ext3", "--mountpoint", "/mnt",
+                        "--blockdevice", "/dev/foo/bar",
+                        "--bootmount",
+                        "--hostname", self.vmhost[1],
+                        "--resourcegroup", "utrg2"])
+
+    def test_128_add_utshare2(self):
+        self.noouttest(["add_share", "--share", "test_v2_share",
+                        "--hostname", self.vmhost[1],
+                        "--resourcegroup", "utrg2"])
 
     def test_130_addutpgm0disk(self):
         for i in range(0, 3):
@@ -332,11 +309,52 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, MachineTestMixin,
         command = ["update_machine", "--machine", "utpgm0",
                    "--cluster", "utlccl1"]
         out = self.badrequesttest(command)
-    # TODO to be replaced with some other error message.
         self.matchoutput(out,
                          "ESX Cluster utlccl1 does not have filesystem utfs1 "
                          "assigned to it.",
                          command)
+
+    def test_241_remap_disk(self):
+        command = ["update_machine", "--machine", "utpgm0",
+                   "--vmhost", self.vmhost[1],
+                   "--remap_disk", "filesystem/utfs1:filesystem/utrg2/utfs2"]
+        self.noouttest(command)
+
+        command = ["show_machine", "--machine", "utpgm0"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Hosted by: Host %s" % self.vmhost[1], command)
+        self.matchoutput(out, "stored on filesystem utfs2", command)
+
+    def test_242_move_back(self):
+        command = ["update_machine", "--machine", "utpgm0",
+                   "--vmhost", self.vmhost[0],
+                   "--remap_disk", "filesystem/utrg2/utfs2:filesystem/utfs1"]
+        self.noouttest(command)
+
+        command = ["show_machine", "--machine", "utpgm0"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Hosted by: Host %s" % self.vmhost[0], command)
+
+    def test_243_convert_to_share(self):
+        command = ["update_machine", "--machine", "utpgm0",
+                   "--vmhost", self.vmhost[1],
+                   "--remap_disk", "filesystem/utfs1:share/utrg2/test_v2_share"]
+        self.noouttest(command)
+
+        command = ["show_machine", "--machine", "utpgm0"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Hosted by: Host %s" % self.vmhost[1], command)
+        self.matchoutput(out, "stored on share test_v2_share", command)
+
+    def test_244_move_back(self):
+        command = ["update_machine", "--machine", "utpgm0",
+                   "--vmhost", self.vmhost[0],
+                   "--remap_disk", "share/utrg2/test_v2_share:filesystem/utfs1"]
+        self.noouttest(command)
+
+        command = ["show_machine", "--machine", "utpgm0"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Hosted by: Host %s" % self.vmhost[0], command)
 
     # deletes
 
@@ -402,22 +420,6 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, MachineTestMixin,
 
         for i in range(0, 2):
             self.noouttest(["del", "machine", "--machine", self.machine[i]])
-
-    def test_308_delutpgsw(self):
-        for i in range(0, 2):
-            ip = self.net["autopg1"].usable[i]
-            plenary = self.plenary_name("switchdata", self.switch[i])
-            self.failUnless(os.path.exists(plenary),
-                            "Plenary file '%s' does not exist" % plenary)
-
-            self.dsdb_expect_delete(ip)
-            command = "del network_device --network_device %s" % self.switch[i]
-            self.noouttest(command.split(" "))
-
-            self.failIf(os.path.exists(plenary),
-                        "Plenary file '%s' still exists" % plenary)
-
-        self.dsdb_verify()
 
     def test_330_delutlccl1(self):
         for i in range(0, 2):

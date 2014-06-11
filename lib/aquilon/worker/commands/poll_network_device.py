@@ -179,9 +179,9 @@ class CommandPollNetworkDevice(BrokerCommand):
                 vlan_info = VlanInfo.get_unique(session, vlan_id=vlan_int,
                                                 compel=False)
                 if not vlan_info:
-                    logger.client_info("vlan {0} is not defined in AQ. Please "
-                                       "use add_vlan to add it."
-                                       .format(vlan_int))
+                    logger.client_info("{0}: VLAN {1} is not defined in AQDB. "
+                                       "Please use add_vlan to add it."
+                                       .format(netdev, vlan_int))
                     continue
 
                 if vlan_info.vlan_type == "unknown":

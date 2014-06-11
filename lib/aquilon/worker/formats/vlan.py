@@ -23,7 +23,7 @@ from aquilon.aqdb.model import VlanInfo
 
 class VlanInfoFormatter(ObjectFormatter):
     def format_raw(self, vlan, indent=""):
-        details = [indent + "Vlan: %s" % vlan.vlan_id]
+        details = [indent + "VLAN: %s" % vlan.vlan_id]
         details.append(indent + "  Name: %s" % vlan.port_group)
         details.append(indent + "  Type: %s" % vlan.vlan_type)
 

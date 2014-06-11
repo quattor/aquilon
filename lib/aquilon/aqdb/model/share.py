@@ -18,9 +18,9 @@
 from sqlalchemy import Integer, Column, ForeignKey
 from sqlalchemy.orm import reconstructor, validates
 
-from aquilon.exceptions_ import AquilonError, ArgumentError
+from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Resource
-from aquilon.aqdb.data_sync.storage import find_storage_data
+from aquilon.aqdb.data_sync.storage import StormapParser
 
 _TN = 'share'
 
@@ -57,17 +57,19 @@ class Share(Resource):
     @property
     def mount(self):
         if not self._share_info:
-            self._share_info = find_storage_data(self)
+            parser = StormapParser()
+            self._share_info = parser.lookup(self.name)
         return self._share_info.mount
 
     @property
     def server(self):
         if not self._share_info:
-            self._share_info = find_storage_data(self)
+            parser = StormapParser()
+            self._share_info = parser.lookup(self.name)
         return self._share_info.server
 
-    def populate_share_info(self, cache):
-        self._share_info = find_storage_data(self, cache)
+    def populate_share_info(self, parser):
+        self._share_info = parser.lookup(self.name)
 
 
 share = Share.__table__

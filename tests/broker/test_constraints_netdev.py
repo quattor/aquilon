@@ -87,6 +87,11 @@ class TestNetworkDeviceConstraints(TestBrokerCommand):
                          "arecord14.aqd-unittest.ms.com." % bad_ip,
                          command)
 
+    def testdelvlaninuse(self):
+        command = ["del_vlan", "--vlan", "710"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "VLAN 710 is still in use and cannot be "
+                         "deleted.", command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestNetworkDeviceConstraints)
