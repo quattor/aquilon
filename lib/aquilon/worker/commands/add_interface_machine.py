@@ -16,8 +16,12 @@
 # limitations under the License.
 """Contains the logic for `aq add interface --machine`."""
 
+from sqlalchemy.orm import aliased
+from sqlalchemy.sql.expression import desc, type_coerce
+
 from aquilon.exceptions_ import ArgumentError, UnimplementedError
 from aquilon.aqdb.types import MACAddress
+from aquilon.aqdb.column_types import AqMac
 from aquilon.aqdb.model import Interface, Machine, ARecord, Fqdn, EsxCluster
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.dns import delete_dns_record
@@ -273,30 +277,34 @@ class CommandAddInterfaceMachine(BrokerCommand):
 
         q = session.query(Interface.mac)
         q = q.filter(Interface.mac.between(mac_start, mac_end))
-        q = q.with_lockmode("update")
-        q = q.order_by(Interface.mac)
+        q = q.order_by(desc(Interface.mac))
 
         # Prevent concurrent --automac invocations. We need a separate query for
         # the FOR UPDATE, because a blocked query won't see the value inserted
         # by the blocking query.
         session.execute(q.with_lockmode("update"))
 
-        existing_macs = [MACAddress(row.mac) for row in q]
-        if not existing_macs:
+        row = q.first()
+        if not row:
             return mac_start
-        highest_mac = existing_macs[-1]
+        highest_mac = row.mac
         if highest_mac < mac_start:
             return mac_start
         if highest_mac < mac_end:
             return highest_mac + 1
 
-        potential_hole = mac_start
-        for current_mac in existing_macs:
-            if current_mac < mac_start:
-                continue
-            if potential_hole < current_mac:
-                return potential_hole
-            potential_hole = current_mac + 1
+        Iface2 = aliased(Interface)
+        q1 = session.query(Iface2.mac)
+        q1 = q1.filter(Iface2.mac == Interface.mac + 1)
+
+        q2 = session.query(type_coerce(Interface.mac + 1, AqMac()).label("mac"))
+        q2 = q2.filter(Interface.mac.between(mac_start, mac_end - 1))
+        q2 = q2.filter(~q1.exists())
+        q2 = q2.order_by(Interface.mac)
+
+        hole = q2.first()
+        if hole:
+            return hole.mac
 
         raise ArgumentError("All MAC addresses between %s and %s inclusive "
                             "are currently in use." % (mac_start, mac_end))
