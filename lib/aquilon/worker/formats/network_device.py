@@ -36,8 +36,11 @@ class NetworkDeviceFormatter(HardwareEntityFormatter):
             ports[om.port].append(om)
 
         for port in sorted(ports.keys()):
-            # Show most recent data first
+            # Show most recent data first, otherwise sort by MAC address. sort()
+            # is stable so we can call it multiple times
+            ports[port].sort(key=attrgetter('mac_address'))
             ports[port].sort(key=attrgetter('last_seen'), reverse=True)
+
             details.append(indent + "  Port: %s" % port)
             for om in ports[port]:
                 details.append(indent + "    MAC: %s, created: %s, last seen: %s" %

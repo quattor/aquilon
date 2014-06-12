@@ -54,7 +54,6 @@ class ObservedMac(Base):
 
     network_device = relation(NetworkDevice, innerjoin=True,
                               backref=backref('observed_macs',
-                                              cascade='delete',
-                                              order_by=[port]))
+                                              cascade='delete'))
 
     __table_args__ = (PrimaryKeyConstraint(network_device_id, port, mac_address),)
