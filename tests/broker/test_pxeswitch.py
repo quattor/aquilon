@@ -242,7 +242,6 @@ class TestPxeswitch(TestBrokerCommand):
             self.matchclean(err, "--firmware", command)
 
     def testfailoverpxeswitchlimitlist(self):
-        user = self.config.get("unittest", "user")
         hostlimit = self.config.getint("broker", "pxeswitch_max_list_size")
         hosts = []
         for i in range(1, 20):

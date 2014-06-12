@@ -33,44 +33,44 @@ class TestAddSandbox(TestBrokerCommand):
         # When the broker auto-creates a realm, it should be untrusted by
         # default
         command = ["show", "realm", "--realm",
-                   self.config.get("unittest", "realm")]
+                   self.realm]
         out = self.commandtest(command)
         self.matchoutput(out, "Realm: %s" %
-                         self.config.get("unittest", "realm"), command)
+                         self.realm, command)
         self.matchoutput(out, "Trusted: False", command)
 
     def test_101_add_untrusted(self):
         command = ["add", "sandbox", "--sandbox", "untrusted"]
         out = self.unauthorizedtest(command, auth=True, msgcheck=False)
         self.matchoutput(out, "Realm %s is not trusted to handle sandboxes."
-                         % self.config.get("unittest", "realm"),
+                         % self.realm,
                          command)
 
     def test_102_make_trusted(self):
         command = ["update", "realm", "--trusted",
-                   "--realm", self.config.get("unittest", "realm")]
+                   "--realm", self.realm]
         self.noouttest(command)
 
     def test_103_verify_trust(self):
         command = ["show", "realm", "--realm",
-                   self.config.get("unittest", "realm")]
+                   self.realm]
         out = self.commandtest(command)
         self.matchoutput(out, "Realm: %s" %
-                         self.config.get("unittest", "realm"), command)
+                         self.realm, command)
         self.matchoutput(out, "Trusted: True", command)
 
     def test_103_flip_untrusted(self):
         command = ["update", "realm", "--untrusted",
-                   "--realm", self.config.get("unittest", "realm")]
+                   "--realm", self.realm]
         self.noouttest(command)
 
         command = ["show", "realm", "--realm",
-                   self.config.get("unittest", "realm")]
+                   self.realm]
         out = self.commandtest(command)
         self.matchoutput(out, "Trusted: False", command)
 
         command = ["update", "realm", "--trusted",
-                   "--realm", self.config.get("unittest", "realm")]
+                   "--realm", self.realm]
         self.noouttest(command)
 
     def test_110_addutsandbox(self):
@@ -101,19 +101,16 @@ class TestAddSandbox(TestBrokerCommand):
         domainlist = self.parse_domain_msg(out, expect=1)
         domain = domainlist.domains[0]
         self.assertEqual(domain.name, "utsandbox")
-        self.assertEqual(domain.owner, self.config.get("unittest", "user"))
+        self.assertEqual(domain.owner, self.user)
         self.assertEqual(domain.type, domain.SANDBOX)
 
     def test_115_verify_utsandbox_realm(self):
-        user = self.config.get("unittest", "user")
-        realm = self.config.get("unittest", "realm")
-        command = "show sandbox --sandbox %s@%s/utsandbox" % (user, realm)
+        command = "show sandbox --sandbox %s@%s/utsandbox" % (self.user, self.realm)
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Sandbox: utsandbox", command)
 
     def test_115_verify_utsandbox_path(self):
-        user = self.config.get("unittest", "user")
-        command = "show sandbox --sandbox %s/utsandbox --pathonly" % user
+        command = "show sandbox --sandbox %s/utsandbox --pathonly" % self.user
         out = self.commandtest(command.split(" "))
         sandboxdir = os.path.join(self.sandboxdir, "utsandbox")
         self.matchoutput(out, sandboxdir, command)
@@ -127,8 +124,7 @@ class TestAddSandbox(TestBrokerCommand):
                          command)
 
     def test_120_add_changetest1(self):
-        user = self.config.get("unittest", "user")
-        command = ["add", "sandbox", "--sandbox", "%s/changetest1" % user]
+        command = ["add", "sandbox", "--sandbox", "%s/changetest1" % self.user]
         (out, err) = self.successtest(command)
         self.matchoutput(err, "creating %s" % self.sandboxdir, command)
         sandboxdir = os.path.join(self.sandboxdir, "changetest1")
@@ -137,9 +133,8 @@ class TestAddSandbox(TestBrokerCommand):
                         "Expected directory '%s' to exist" % sandboxdir)
 
     def test_125_verify_changetest1(self):
-        user = self.config.get("unittest", "user")
         sandboxdir = os.path.join(self.sandboxdir, "changetest1")
-        command = "show sandbox --sandbox %s/changetest1" % user
+        command = "show sandbox --sandbox %s/changetest1" % self.user
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Sandbox: changetest1", command)
         self.matchoutput(out, "Path: %s" % sandboxdir, command)
@@ -203,8 +198,7 @@ class TestAddSandbox(TestBrokerCommand):
         self.matchoutput(out, "Sandbox: changetest2", command)
 
     def test_170_verify_search(self):
-        user = self.config.get("unittest", "user")
-        command = ["search", "sandbox", "--owner", user]
+        command = ["search", "sandbox", "--owner", self.user]
         out = self.commandtest(command)
         self.matchoutput(out, "utsandbox", command)
 
@@ -212,11 +206,9 @@ class TestAddSandbox(TestBrokerCommand):
         command = ["add", "sandbox",
                    "--sandbox", "cdb@example.realm/badbranch"]
         err = self.badrequesttest(command)
-        user = self.config.get("unittest", "user")
-        realm = self.config.get("unittest", "realm")
         self.matchoutput(err,
                          "User '%s@%s' cannot add or get a sandbox on "
-                         "behalf of 'cdb@example.realm'." % (user, realm),
+                         "behalf of 'cdb@example.realm'." % (self.user, self.realm),
                          command)
 
     def test_200_fail_invalid(self):

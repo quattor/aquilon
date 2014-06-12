@@ -585,7 +585,6 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
         self.matchclean(out, "aquilon91.aqd-unittest.ms.com:", command)
 
     def testfailoverlistlimit(self):
-        user = self.config.get("unittest", "user")
         hostlimit = self.config.getint("broker", "reconfigure_max_list_size")
         hosts = []
         for i in range(1, 20):

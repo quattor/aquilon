@@ -74,8 +74,8 @@ class TestCluster(TestBrokerCommand):
         for i in range(1, 5):
             host = "evh%s.aqd-unittest.ms.com" % i
             self.searchoutput(cat_cluster_out,
-                              '"system/cluster/members" = list\([^\)]*'
-                              '"%s"[^\)]*\);' % host,
+                              r'"system/cluster/members" = list\([^\)]*'
+                              r'"%s"[^\)]*\);' % host,
                               cat_cluster_command)
 
             # Also verify that the host plenary was written correctly.
@@ -127,11 +127,10 @@ class TestCluster(TestBrokerCommand):
                    "--personality=vulcan-1g-desktop-prod",
                    "--hostname=aquilon61.aqd-unittest.ms.com"]
         out = self.badrequesttest(command)
-        user = self.config.get("unittest", "user")
         self.matchoutput(out,
                          "Host aquilon61.aqd-unittest.ms.com sandbox "
                          "%s/utsandbox does not match ESX cluster utecl1 "
-                         "domain unittest" % user,
+                         "domain unittest" % self.user,
                          command)
 
         # Ah yes, we need it to be in the same sandbox
@@ -177,10 +176,9 @@ class TestCluster(TestBrokerCommand):
                    "--cluster=utecl2", "--personality=generic"]
         out = self.successtest(command)
 
-        user = self.config.get("unittest", "user")
         # using --force to bypass normal checks due to git status
         # containing uncommitted files
-        command = ["manage", "--sandbox=%s/utsandbox" % user,
+        command = ["manage", "--sandbox=%s/utsandbox" % self.user,
                    "--hostname=aquilon61.aqd-unittest.ms.com", "--force"]
         out = self.commandtest(command)
 

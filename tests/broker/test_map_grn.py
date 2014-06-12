@@ -257,7 +257,6 @@ class TestMapGrn(VerifyGrnsMixin, PersonalityTestMixin, TestBrokerCommand):
                         command)
 
     def test_500_fail_map_overlimitlist(self):
-        user = self.config.get("unittest", "user")
         hostlimit = self.config.getint("broker", "map_grn_max_list_size")
         hosts = []
         for i in range(1, 20):
@@ -272,7 +271,6 @@ class TestMapGrn(VerifyGrnsMixin, PersonalityTestMixin, TestBrokerCommand):
                          command)
 
     def test_500_fail_unmap_overlimitlist(self):
-        user = self.config.get("unittest", "user")
         hostlimit = self.config.getint("broker", "unmap_grn_max_list_size")
         hosts = []
         for i in range(1, 20):

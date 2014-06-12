@@ -47,9 +47,8 @@ class TestDeployDomain(TestBrokerCommand):
         self.matchoutput(out, "Request ID:", command)
         self.matchoutput(out, "Comments: Test comment", command)
 
-        author_name = self.config.get("broker", "user")
         author_email = self.config.get("broker", "git_author_email")
-        self.matchoutput(out, "Author: %s <%s>" % (author_name, author_email),
+        self.matchoutput(out, "Author: %s <%s>" % (self.user, author_email),
                          command)
 
     def test_120_deployfail(self):
