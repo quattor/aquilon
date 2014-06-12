@@ -379,14 +379,6 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
         self.matchclean(err, "removing binding", command)
         self.matchclean(err, "adding binding", command)
 
-    def verifykeepbindings(self):
-        for service in ["chooser1", "chooser2", "chooser3"]:
-            command = ["search_host", "--service", service,
-                       "--hostname", "aquilon86.aqd-unittest.ms.com",
-                       "--archetype", "aquilon", "--personality", "inventory"]
-            out = self.commandtest(command)
-            self.matchoutput(out, "aquilon86.aqd-unittest.ms.com")
-
     def testremovebindings(self):
         command = ["reconfigure",
                    "--hostname", "aquilon87.aqd-unittest.ms.com",
