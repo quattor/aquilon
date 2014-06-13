@@ -21,7 +21,8 @@ import re
 
 from sqlalchemy.orm.session import object_session
 
-from aquilon.exceptions_ import ArgumentError, ProcessException
+from aquilon.exceptions_ import (ArgumentError, AuthorizationException,
+                                 ProcessException)
 from aquilon.aqdb.column_types import AqStr
 from aquilon.aqdb.model import (Domain, Sandbox, Branch, Host, Cluster,
                                 Archetype, Personality, User)
@@ -73,6 +74,26 @@ def get_branch_and_author(session, domain=None, sandbox=None, branch=None,
         raise ArgumentError("Please specify either sandbox or domain.")
 
     return (dbbranch, dbauthor)
+
+
+def force_my_sandbox(session, dbuser, sandbox):
+    if not dbuser.realm.trusted:
+        raise AuthorizationException("{0} is not trusted to handle "
+                                     "sandboxes.".format(dbuser.realm))
+
+    sandbox, dbauthor = parse_sandbox(session, sandbox,
+                                      default_author=dbuser.name)
+    sandbox = AqStr.normalize(sandbox)
+
+    # User used the name/branch syntax - that's fine.  They can't
+    # do anything on behalf of anyone else, though, so error if the
+    # user given is anyone else.
+    if dbauthor.name != dbuser.name:
+        raise ArgumentError("Principal {0!s} cannot add or get a sandbox "
+                            "on behalf of '{1!s}'."
+                            .format(dbuser, dbauthor))
+
+    return (sandbox, dbauthor)
 
 
 def get_branch_dependencies(dbbranch):

@@ -21,10 +21,9 @@ import os
 from aquilon.exceptions_ import (ArgumentError, ProcessException,
                                  AuthorizationException)
 from aquilon.aqdb.model import Sandbox
-from aquilon.aqdb.column_types import AqStr
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.processes import run_command
-from aquilon.worker.dbwrappers.branch import parse_sandbox
+from aquilon.worker.dbwrappers.branch import force_my_sandbox
 from aquilon.worker.formats.branch import RemoteSandbox
 from aquilon.utils import remove_dir
 
@@ -42,7 +41,7 @@ class CommandGet(BrokerCommand):
             raise AuthorizationException("Cannot get a sandbox without"
                                          " an authenticated connection.")
 
-        sandbox, dbauthor = self.force_my_sandbox(session, dbuser, sandbox)
+        sandbox, dbauthor = force_my_sandbox(session, dbuser, sandbox)
         dbsandbox = Sandbox.get_unique(session, sandbox, compel=True)
 
         userdir = os.path.join(self.config.get("broker", "templatesdir"),
@@ -75,21 +74,3 @@ class CommandGet(BrokerCommand):
         return RemoteSandbox(self.config.get("broker", "git_templates_url"),
                              dbsandbox.name, userdir)
 
-    def force_my_sandbox(self, session, dbuser, sandbox):
-        if not dbuser.realm.trusted:
-            raise AuthorizationException("{0} is not trusted to handle "
-                                         "sandboxes.".format(dbuser.realm))
-
-        sandbox, dbauthor = parse_sandbox(session, sandbox,
-                                          default_author=dbuser.name)
-        sandbox = AqStr.normalize(sandbox)
-
-        # User used the name/branch syntax - that's fine.  They can't
-        # do anything on behalf of anyone else, though, so error if the
-        # user given is anyone else.
-        if dbauthor.name != dbuser.name:
-            raise ArgumentError("Principal {0!s} cannot add or get a sandbox "
-                                "on behalf of '{1!s}'."
-                                .format(dbuser, dbauthor))
-
-        return (sandbox, dbauthor)

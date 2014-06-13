@@ -24,6 +24,7 @@ from base64 import b64decode
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.exceptions_ import ProcessException, ArgumentError
 from aquilon.aqdb.model import Sandbox
+from aquilon.worker.dbwrappers.branch import force_my_sandbox
 from aquilon.worker.processes import run_git, sync_domain
 from aquilon.worker.logger import CLIENT_INFO
 from aquilon.utils import write_file, remove_file, remove_dir
@@ -33,14 +34,16 @@ class CommandPublish(BrokerCommand):
 
     required_parameters = ["bundle"]
 
-    def render(self, session, logger, branch, sandbox, bundle, sync, rebase,
-               **arguments):
-        # Most of the logic here is duplicated in deploy
-        if branch:
-            sandbox = branch
-        dbsandbox = Sandbox.get_unique(session, sandbox, compel=True)
+    def render(self, session, logger, dbuser, branch, sandbox, bundle, sync,
+               rebase, **arguments):
+        if sandbox:
+            # pylint: disable=W0612
+            sandbox, dbauthor = force_my_sandbox(session, dbuser, sandbox)
+            dbsandbox = Sandbox.get_unique(session, sandbox, compel=True)
+        elif branch:
+            dbsandbox = Sandbox.get_unique(session, branch, compel=True)
 
-        (handle, filename) = mkstemp()
+        handle, filename = mkstemp()  # pylint: disable=W0612
         contents = b64decode(bundle)
         write_file(filename, contents, logger=logger)
 
@@ -56,6 +59,7 @@ class CommandPublish(BrokerCommand):
             raise ArgumentError("{0} has trackers, rebasing is not allowed."
                                 .format(dbsandbox))
 
+        # Most of the logic here is duplicated in deploy
         kingdir = self.config.get("broker", "kingdir")
         rundir = self.config.get("broker", "rundir")
 
