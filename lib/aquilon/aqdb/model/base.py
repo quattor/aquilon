@@ -317,7 +317,48 @@ class Base(object):
             q = q.filter(col == getattr(self, col.key))
 
         q = q.with_lockmode("update")
-        return q.one()
+        session.execute(q)
+
+    @staticmethod
+    def lock_rows(objects):
+        """
+        Lock multiple objects of the same class.
+
+        The function works by issuing a SELECT ... FOR UPDATE query.
+        """
+        if not objects:
+            return
+
+        # This odd construct works for any iterable type, including set
+        for any_obj in objects:
+            break
+
+        session = object_session(any_obj)
+        if not session:  # pragma: no cover
+            raise InternalError("lock_rows() called on a detached object %r" %
+                                any_obj)
+
+        mapper = inspect(any_obj).mapper
+
+        pk = mapper.primary_key
+        if len(pk) != 1:  # pragma: no cover
+            raise InternalError("lock_rows() does not work with composite "
+                                "primary keys")
+
+        # This allows mixing single-table inheritance classes
+        for obj in objects:
+            if inspect(obj).mapper.primary_key != pk:  # pragma: no cover
+                raise InternalError("lock_rows() does work with objects from "
+                                    "multiple tables")
+
+        col = pk[0]
+        values = [getattr(obj, col.key) for obj in objects]
+
+        q = session.query(col)
+        q = q.filter(col.in_(values))
+        q = q.order_by(col)
+        q = q.with_lockmode("update")
+        session.execute(q)
 
     @classmethod
     def polymorphic_subclass(cls, value, msg, error=ArgumentError):

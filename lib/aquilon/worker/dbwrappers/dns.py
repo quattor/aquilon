@@ -23,9 +23,10 @@ from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.sql import or_, and_
 
 from aquilon.exceptions_ import ArgumentError, AquilonError, NotFoundException
-from aquilon.aqdb.model import (Fqdn, DnsRecord, ARecord, DynamicStub, Alias,
-                                ReservedName, SrvRecord, DnsEnvironment,
-                                AddressAssignment, NetworkEnvironment)
+from aquilon.aqdb.model import (Fqdn, DnsDomain, DnsRecord, ARecord,
+                                DynamicStub, Alias, ReservedName, SrvRecord,
+                                DnsEnvironment, AddressAssignment,
+                                NetworkEnvironment)
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.worker.dbwrappers.interface import check_ip_restrictions
@@ -61,9 +62,7 @@ def delete_dns_record(dbdns_rec):
         if tgt.dns_domain in dns_domains:
             continue
         dns_domains.append(tgt.dns_domain)
-    dns_domains.sort()  # poor man's deadlock avoidance
-    for dbdns_domain in dns_domains:
-        dbdns_domain.lock_row()
+    DnsDomain.lock_rows(dns_domains)
 
     # Delete the DNS record
     session.delete(dbdns_rec)
