@@ -15,9 +15,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from functools import partial
+
 from aquilon.exceptions_ import ArgumentError
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.aqdb.model.network import Network, NetworkEnvironment
+from aquilon.aqdb.model import DnsDomain, Network, NetworkEnvironment
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.dns import delete_dns_record
 
 
@@ -33,9 +35,15 @@ class CommandDelNetwork(BrokerCommand):
         dbnetwork = Network.get_unique(session, network_environment=dbnet_env,
                                        ip=ip, compel=True)
 
+        # Lock order: DNS domain(s), network
+        DnsDomain.lock_rows(set([rec.fqdn.dns_domain
+                                 for rtr in dbnetwork.routers
+                                 for rec in rtr.dns_records]))
+        dbnetwork.lock_row()
+
         # Delete the routers so they don't trigger the checks below
         for dbrouter in dbnetwork.routers:
-            map(delete_dns_record, dbrouter.dns_records)
+            map(partial(delete_dns_record, locked=True), dbrouter.dns_records)
         dbnetwork.routers = []
         session.flush()
 

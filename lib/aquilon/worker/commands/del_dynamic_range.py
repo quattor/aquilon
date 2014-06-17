@@ -17,8 +17,8 @@
 
 from sqlalchemy.orm import joinedload
 
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.aqdb.model import ARecord, NetworkEnvironment
+from aquilon.worker.broker import BrokerCommand
+from aquilon.aqdb.model import DnsDomain, Fqdn, ARecord, NetworkEnvironment
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.processes import DSDBRunner
@@ -38,6 +38,13 @@ class CommandDelDynamicRange(BrokerCommand):
                                 "on the same subnet." %
                                 (startip, startnet.ip, endip, endnet.ip))
 
+        # Lock order: DNS domain(s), network
+        q = session.query(DnsDomain.id)
+        q = q.join(Fqdn, ARecord)
+        q = q.filter_by(network=startnet)
+        q = q.order_by(DnsDomain.id)
+        q = q.with_lockmode('update')
+        session.execute(q)
         startnet.lock_row()
 
         q = session.query(ARecord)
@@ -66,7 +73,7 @@ class CommandDelDynamicRange(BrokerCommand):
         dsdb_runner = DSDBRunner(logger=logger)
         for stub in dbstubs:
             dsdb_runner.delete_host_details(str(stub.fqdn), stub.ip)
-            delete_dns_record(stub)
+            delete_dns_record(stub, locked=True)
         session.flush()
 
         # This may take some time if the range is big, so be verbose
