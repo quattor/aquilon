@@ -16,9 +16,6 @@
 # limitations under the License.
 """Contains the logic for `aq add interface --machine`."""
 
-
-from sqlalchemy.sql.expression import asc, desc
-
 from aquilon.exceptions_ import ArgumentError, UnimplementedError
 from aquilon.aqdb.model import Interface, Machine, ARecord, Fqdn, EsxCluster
 from aquilon.aqdb.model.network import get_net_id_from_ip
@@ -286,8 +283,12 @@ class CommandAddInterfaceMachine(BrokerCommand):
 
         q = session.query(Interface.mac)
         q = q.filter(Interface.mac.between(str(mac_start), str(mac_end)))
-        q = q.with_lockmode("update")
         q = q.order_by(Interface.mac)
+
+        # Prevent concurrent --automac invocations. We need a separate query for
+        # the FOR UPDATE, because a blocked query won't see the value inserted
+        # by the blocking query.
+        session.execute(q.with_lockmode("update"))
 
         existing_macs = [MACAddress(row.mac) for row in q]
         if not existing_macs:

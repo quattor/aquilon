@@ -35,7 +35,9 @@ def search_next(session, cls, attr, value, start, pack, locked=False,
     # don't have much choice. Also, locking here won't help if no machine with
     # the given prefix exists yet, as there are no rows to lock.
     if locked:
-        q = q.with_lockmode("update")
+        # The FOR UPDATE query needs to be executed separately, otherwise it
+        # won't see allocations done in a different session
+        session.execute(q.with_lockmode("update"))
 
     if start:
         start = force_int("start", start)
