@@ -172,6 +172,12 @@ class TestAddDomain(TestBrokerCommand):
         self.matchoutput(out, "'foobar.' is not a valid git branch name.",
                          command)
 
+    def test_300_track_tracker(self):
+        command = ["add_domain", "--domain=doubletracker", "--track=ut-prod"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Cannot nest tracking.  Try tracking "
+                         "domain prod directly.", command)
+
     def test_900_verifyall(self):
         command = ["show_domain", "--all"]
         out = self.commandtest(command)
@@ -180,7 +186,6 @@ class TestAddDomain(TestBrokerCommand):
         self.matchoutput(out, "Domain: unittest", command)
         self.matchoutput(out, "Domain: deployable", command)
         self.matchclean(out, "Sandbox: utsandbox", command)
-
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddDomain)
