@@ -95,6 +95,11 @@ def add_branch(session, config, dbuser, cls_, branch, **arguments):
     compiler = config.get("panc", "pan_compiler")
     dbbranch = cls_(name=branch, owner=dbuser, compiler=compiler, **arguments)
 
+    if config.has_option("broker", "trash_branch"):
+        trash_branch = config.get("broker", "trash_branch")
+        if dbbranch.name == trash_branch:
+            raise ArgumentError("The branch name %s is reserved." % branch)
+
     session.add(dbbranch)
     return dbbranch
 

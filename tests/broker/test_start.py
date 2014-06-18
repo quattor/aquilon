@@ -123,6 +123,19 @@ class TestBrokerStart(unittest.TestCase):
                                  "\nSTDERR:\n@@@\n'%s'\n@@@\n"
                                  % (domain, new_prod, out, err))
 
+        if config.has_option("broker", "trash_branch"):
+            trash_branch = config.get("broker", "trash_branch")
+            p = Popen(("git", "branch", trash_branch, "prod"),
+                      env=env, cwd=dest, stdout=PIPE, stderr=PIPE)
+            (out, err) = p.communicate()
+            # Ignore out/err unless we get a non-zero return code, then log it.
+            self.assertEqual(p.returncode, 0,
+                             "Non-zero return code while creating trash "
+                             "branch '%s':"
+                             "\nSTDOUT:\n@@@\n'%s'\n@@@\n"
+                             "\nSTDERR:\n@@@\n'%s'\n@@@\n"
+                             % (trash_branch, out, err))
+
         # Set the default branch
         p = Popen(("git", "symbolic-ref", "HEAD", "refs/heads/prod"),
                   env=env, cwd=dest, stdout=PIPE, stderr=PIPE)

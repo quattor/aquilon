@@ -40,6 +40,7 @@ class DomainFormatter(ObjectFormatter):
                        domain.allow_manage)
         if domain.formats:
             details.append(indent + "  Profile Formats: %s" % domain.formats)
+        details.append(indent + "  Archived: %s" % domain.archived)
         if domain.comments:
             details.append(indent + "  Comments: %s" % domain.comments)
         return "\n".join(details)

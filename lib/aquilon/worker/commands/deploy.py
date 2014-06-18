@@ -16,7 +16,6 @@
 # limitations under the License.
 """Contains the logic for `aq deploy`."""
 
-
 import os
 import re
 from tempfile import mkdtemp
@@ -91,6 +90,10 @@ class CommandDeploy(BrokerCommand):
                     "{0} is under change management control.  Please specify "
                     "--justification.".format(dbtarget))
             validate_justification(user, justification, reason)
+
+        if dbtarget.archived:
+            raise ArgumentError("{0} is archived and cannot be changed."
+                                .format(dbtarget))
 
         if isinstance(dbsource, Sandbox):
             domainsdir = self.config.get('broker', 'domainsdir')

@@ -356,7 +356,8 @@ class TestMergeConflicts(TestBrokerCommand):
         self.notfoundtest(command.split(" "))
 
     def test_024_delchangetarget(self):
-        command = "del domain --domain changetarget"
+        self.noouttest(["update_domain", "--domain=changetarget", "--archived"])
+        command = "del domain --domain changetarget --justification=tcm=123456"
         self.successtest(command.split(" "))
         self.failIf(os.path.exists(os.path.join(
             self.config.get("broker", "domainsdir"), "changetest")))

@@ -30,7 +30,7 @@ class CommandUpdateDomain(BrokerCommand):
 
     def render(self, session, dbuser, domain, comments, compiler_version,
                autosync, change_manager, allow_manage, profile_formats,
-               **arguments):
+               archived, **arguments):
         dbdomain = Domain.get_unique(session, domain, compel=True)
 
         # FIXME: proper authorization
@@ -40,16 +40,31 @@ class CommandUpdateDomain(BrokerCommand):
 
         if comments is not None:
             dbdomain.comments = comments
+
         if compiler_version:
             dbdomain.compiler = expand_compiler(self.config, compiler_version)
+
         if autosync is not None:
             dbdomain.autosync = autosync
+
         if change_manager is not None:
             if dbdomain.tracked_branch:
                 raise ArgumentError("Cannot enforce a change manager for "
                                     "tracking domains.")
             dbdomain.requires_change_manager = change_manager
+
+        if archived is not None:
+            if archived:
+                if dbdomain.tracked_branch:
+                    raise ArgumentError("{0} is a tracking domain and cannot "
+                                        "be archived.".format(dbdomain))
+                dbdomain.allow_manage = False
+            dbdomain.archived = archived
+
         if allow_manage is not None:
+            if allow_manage and dbdomain.archived:
+                raise ArgumentError("{0} is archived, cannot allow managing "
+                                    "hosts to it.".format(dbdomain))
             dbdomain.allow_manage = allow_manage
 
         if profile_formats is not None:

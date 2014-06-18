@@ -49,11 +49,37 @@ class TestDelDomain(TestBrokerCommand):
         command = ["show_domain", "--domain=unittest"]
         self.notfoundtest(command)
 
-    def test_120_del_deployable(self):
+    def test_120_del_deployable_unarchived(self):
         command = ["del_domain", "--domain=deployable"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Domain deployable is not archived, it cannot "
+                         "be deleted.", command)
+
+    def test_121_archive_deployable(self):
+        self.noouttest(["update_domain", "--domain", "deployable",
+                        "--archived"])
+
+    def test_122_del_archived_no_justification(self):
+        command = ["del_domain", "--domain=deployable"]
+        out = self.unauthorizedtest(command, auth=True, msgcheck=False)
+        self.matchoutput(out, "Deleting a domain may lose history, so "
+                         "--justification is required.", command)
+
+    def test_123_del_deployable_archived(self):
+        command = ["del_domain", "--domain=deployable",
+                   "--justification=tcm=123456"]
         self.successtest(command)
         self.failIf(os.path.exists(os.path.join(
             self.config.get("broker", "domainsdir"), "deployable")))
+
+    def test_124_verify_trash(self):
+        trash_branch = self.config.get("broker", "trash_branch")
+        kingdir = self.config.get("broker", "kingdir")
+        command = ["log", "--no-color", "-n", "1", trash_branch]
+        out, err = self.gitcommand(command, cwd=kingdir)
+
+        self.matchoutput(out, "Delete archived branch deployable", command)
+        self.matchoutput(out, "Justification: tcm=123456", command)
 
     def test_130_del_unittest_xml(self):
         self.noouttest(["del_domain", "--domain", "unittest-xml"])

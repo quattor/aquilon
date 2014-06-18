@@ -72,6 +72,33 @@ class TestUpdateBranch(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "May Contain Hosts/Clusters: False", command)
 
+    def test_140_archive(self):
+        command = ["update_domain", "--domain", "deployable", "--archived"]
+        self.noouttest(command)
+
+    def test_141_verify_archive(self):
+        command = ["show_domain", "--domain", "deployable"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Archived: True", command)
+        self.matchoutput(out, "May Contain Hosts/Clusters: False", command)
+
+    def test_142_manage_archived(self):
+        command = ["update_domain", "--domain", "deployable", "--allow_manage"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Domain deployable is archived, cannot allow "
+                         "managing hosts to it.", command)
+
+    def test_148_unarchive(self):
+        command = ["update_domain", "--domain", "deployable", "--noarchived",
+                   "--allow_manage"]
+        self.noouttest(command)
+
+    def test_149_verify_unarchive(self):
+        command = ["show_domain", "--domain", "deployable"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Archived: False", command)
+        self.matchoutput(out, "May Contain Hosts/Clusters: True", command)
+
     def test_200_bad_compiler_version_characters(self):
         command = ["update_sandbox", "--sandbox=changetest1",
                    "--compiler_version=version!with@bad#characters"]
@@ -102,6 +129,12 @@ class TestUpdateBranch(TestBrokerCommand):
                          "Cannot enforce a change manager for tracking "
                          "domains.",
                          command)
+
+    def test_200_archive_tracking(self):
+        command = ["update_domain", "--domain", "unittest", "--archived"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Domain unittest is a tracking domain and "
+                         "cannot be archived.", command)
 
     def test_300_verify_search_chm(self):
         command = ["search", "domain", "--change_manager"]

@@ -37,7 +37,7 @@ class TestAddDomain(TestBrokerCommand):
 
     def test_000_fixnyprod(self):
         kingdir = self.config.get("broker", "kingdir")
-        (out, err) = self.gitcommand(["branch"], cwd=kingdir)
+        out, err = self.gitcommand(["branch"], cwd=kingdir)
         if out.find("ny-prod") < 0:
             self.gitcommand(["branch", "--track", "ny-prod", "prod"],
                             cwd=kingdir)
@@ -62,6 +62,7 @@ class TestAddDomain(TestBrokerCommand):
         self.matchoutput(out, "Comments: aqd unit test tracking domain",
                          command)
         self.matchoutput(out, "May Contain Hosts/Clusters: False", command)
+        self.matchoutput(out, "Archived: False", command)
 
     def test_115_verify_unittest_proto(self):
         command = ["show_domain", "--domain=unittest", "--format", "proto"]
