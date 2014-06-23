@@ -19,8 +19,6 @@
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import NetGroupWhiteList, Personality
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.templates import Plenary, PlenaryCollection
-from sqlalchemy.orm import subqueryload, joinedload
 
 
 class CommandDelNetgroupWhitelist(BrokerCommand):
@@ -30,8 +28,6 @@ class CommandDelNetgroupWhitelist(BrokerCommand):
     def render(self, session, logger, netgroup, **arguments):
         dbng = NetGroupWhiteList.get_unique(session, name=netgroup,
                                             compel=True)
-
-        plenaries = PlenaryCollection(logger=logger)
 
         q = session.query(Personality)
         q = q.filter(Personality.root_netgroups.contains(dbng))
@@ -43,5 +39,3 @@ class CommandDelNetgroupWhitelist(BrokerCommand):
 
         session.delete(dbng)
         session.flush()
-
-        plenaries.write()

@@ -17,7 +17,7 @@
 """Contains the logic for `aq show model`."""
 
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.aqdb.model import Model, Vendor
+from aquilon.aqdb.model import Model
 
 
 class CommandShowModel(BrokerCommand):

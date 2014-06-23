@@ -30,8 +30,6 @@ from threading import Thread
 
 from mako.lookup import TemplateLookup
 
-from sqlalchemy.orm.session import object_session
-
 from aquilon.exceptions_ import (ProcessException, AquilonError, ArgumentError,
                                  InternalError)
 from aquilon.config import Config, running_from_source

@@ -16,7 +16,7 @@
 # limitations under the License.
 """Provide an anonymous access channel to the Site."""
 
-from twisted.web import server, http
+from twisted.web import server
 from aquilon.worker.messages import StatusCatalog
 
 

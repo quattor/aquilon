@@ -15,11 +15,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """ Enumerates whitelisted netgroups """
-from datetime import datetime
 
-from sqlalchemy import (Column, Integer, String, DateTime, Sequence,
-                        UniqueConstraint)
-from sqlalchemy.orm import deferred
+from sqlalchemy import Column, Integer, Sequence, UniqueConstraint
 
 from aquilon.aqdb.model import Base
 from aquilon.aqdb.column_types.aqstr import AqStr

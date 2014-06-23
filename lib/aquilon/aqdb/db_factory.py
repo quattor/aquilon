@@ -33,7 +33,6 @@ from sqlalchemy.engine.url import make_url
 from sqlalchemy.ext.compiler import compiles
 from sqlalchemy.inspection import inspect
 from sqlalchemy.orm import scoped_session, sessionmaker
-from sqlalchemy.pool import Pool
 from sqlalchemy.schema import CreateIndex, Sequence
 from sqlalchemy.dialects.oracle.base import OracleDDLCompiler
 

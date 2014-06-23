@@ -15,10 +15,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
-from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand
-from aquilon.aqdb.model import Realm, Cluster, Host
+from aquilon.aqdb.model import Realm
 
 
 class CommandUpdateRealm(BrokerCommand):

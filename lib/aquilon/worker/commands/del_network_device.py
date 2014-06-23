@@ -16,8 +16,6 @@
 # limitations under the License.
 """Contains the logic for `aq del network_device`."""
 
-
-from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import NetworkDevice
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.dns import delete_dns_record

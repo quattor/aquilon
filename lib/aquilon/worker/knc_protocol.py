@@ -17,6 +17,8 @@
 """Wrappers for using knc with the stock twisted server implementations."""
 
 from twisted.web import http
+
+from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.base_protocol import AQDRequest, AQDSite
 
 import logging
