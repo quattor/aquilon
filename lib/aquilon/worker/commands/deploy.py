@@ -31,18 +31,22 @@ from aquilon.utils import remove_dir
 
 TCM_RE = re.compile(r"^tcm=([0-9]+)$", re.IGNORECASE)
 SN_RE = re.compile(r"^sn=([a-z]+[0-9]+)$", re.IGNORECASE)
-
+EMERG_RE = re.compile("emergency")
 
 # TODO: move this to an external class
-def validate_justification(principal, justification):
+def validate_justification(principal, justification, reason):
     result = None
-    for valid_re in [TCM_RE, SN_RE]:
+    for valid_re in [TCM_RE, SN_RE, EMERG_RE]:
         result = valid_re.search(justification)
         if result:
             break
     if not result:
         raise ArgumentError("Failed to parse the justification: expected "
                             "tcm=NNNNNNNNN or sn=XXXNNNNN.")
+    if justification == 'emergency' and not reason:
+            raise AuthorizationException(
+                  "Justification of 'emergency' requires --reason to be specified.")
+
     # TODO: EDM validation
     #edm_validate(result.group(0))
 
@@ -52,7 +56,7 @@ class CommandDeploy(BrokerCommand):
     required_parameters = ["source", "target"]
 
     def render(self, session, logger, source, target, sync, dryrun,
-               comments, justification, user, requestid, **arguments):
+               comments, justification, user, requestid, reason, **arguments):
         # Most of the logic here is duplicated in publish
         dbsource = Branch.get_unique(session, source, compel=True)
 
@@ -86,7 +90,7 @@ class CommandDeploy(BrokerCommand):
                 raise AuthorizationException(
                     "{0} is under change management control.  Please specify "
                     "--justification.".format(dbtarget))
-            validate_justification(user, justification)
+            validate_justification(user, justification, reason)
 
         if isinstance(dbsource, Sandbox):
             domainsdir = self.config.get('broker', 'domainsdir')

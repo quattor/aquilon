@@ -42,7 +42,7 @@ class CommandMapGrn(BrokerCommand):
         obj.grns.append((obj, grn, target))
 
     def render(self, session, logger, target, grn, eon_id, hostname, list, personality,
-               archetype, justification, user, **arguments):
+               archetype, justification, reason, user, **arguments):
         dbgrn = lookup_grn(session, grn, eon_id, logger=logger,
                            config=self.config)
 
@@ -59,7 +59,8 @@ class CommandMapGrn(BrokerCommand):
             objs = [Personality.get_unique(session, name=personality,
                                            archetype=archetype, compel=True)]
             config_key = "personality_grn_targets"
-            validate_personality_justification(objs[0], user, justification)
+            validate_personality_justification(objs[0], user,
+                                               justification, reason)
         for obj in objs:
             section = "archetype_" + obj.archetype.name
 

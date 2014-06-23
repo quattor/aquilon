@@ -33,11 +33,12 @@ def is_prod_personality_used(dbpersona):
 
      return False
 
-def validate_personality_justification(dbpersona, user, justification):
+def validate_personality_justification(dbpersona, user, justification, reason):
      if is_prod_personality_used(dbpersona):
          if not justification:
              raise AuthorizationException(
                    "{0} is marked production and is under "
                    "change management control. Please specify "
-                   "--justification.".format(dbpersona))
-         validate_justification(user, justification)
+                   "--justification or --justification='emergency' and reason.".format(dbpersona))
+
+         validate_justification(user, justification, reason)

@@ -37,6 +37,7 @@
 		<arg choice="plain"><option>--personality <replaceable>PERS</replaceable></option></arg>
 		<arg choice="opt"><option>--archetype <replaceable>ARCH</replaceable></option></arg>
 	        <arg choice="opt"><option>--justification <replaceable>REASON</replaceable></option></arg>
+		<arg choice="opt"><option>--reason <replaceable>REASON</replaceable></option></arg>
 	    </group>
 	    <arg choice="opt"><option>--network_environment <replaceable>NETENV</replaceable></option></arg>
 	    <xi:include href="../common/global_options.xml"/>
@@ -135,14 +136,24 @@
 		<listitem>
 		    <para>
 			Specifies the justification of the change. This option is required if the scope of the
-			operation exceeds a personality (i.e. if you're modifying archetype bindings).
+			operation exceeds a personality (i.e. if you're modifying archetype bindings) or modifies
+			a personality with production hosts.
 		    </para>
 		    <para>
 			The syntax of <replaceable>REASON</replaceable> is
 			<replaceable>MANAGER</replaceable>=<replaceable>TICKET</replaceable>, where
 			<replaceable>MANAGER</replaceable> is the change manager like <literal>tcm</literal>
 			for TCM2, and <replaceable>TICKET</replaceable> is the ticket number (the TCM number
-			when using TCM2).
+			when using TCM2) or the string "emergency" with --reason specified.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--reason <replaceable>REASON</replaceable></option>
+		</term>
+		<listitem>
+		    <para>This string option needs to be specified  to explain why the --justification=emergency was used.
 		    </para>
 		</listitem>
 	    </varlistentry>

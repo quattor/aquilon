@@ -31,7 +31,7 @@ class CommandMapService(BrokerCommand):
     required_parameters = ["service", "instance"]
 
     def render(self, session, service, instance, archetype, personality,
-               networkip, justification, user, **kwargs):
+               networkip, justification, reason, user, **kwargs):
 
         dbservice = Service.get_unique(session, service, compel=True)
         dblocation = get_location(session, **kwargs)
@@ -53,7 +53,8 @@ class CommandMapService(BrokerCommand):
             dbpersona = Personality.get_unique(session, name=personality,
                                                archetype=archetype, compel=True)
 
-            validate_personality_justification(dbpersona, user, justification)
+            validate_personality_justification(dbpersona, user,
+                                               justification, reason)
             map_class = PersonalityServiceMap
             query = session.query(map_class).filter_by(personality=dbpersona)
 

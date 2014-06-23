@@ -34,11 +34,13 @@ class CommandUpdatePersonality(BrokerCommand):
 
     def render(self, session, logger, personality, archetype, vmhost_capacity_function,
                vmhost_overcommit_memory, cluster_required, config_override,
-               host_environment, grn, eon_id, leave_existing, justification, user, **arguments):
+               host_environment, grn, eon_id, leave_existing,
+               justification, reason, user, **arguments):
         dbpersona = Personality.get_unique(session, name=personality,
                                            archetype=archetype, compel=True)
 
-        validate_personality_justification(dbpersona, user, justification)
+        validate_personality_justification(dbpersona, user,
+                                           justification, reason)
 
         if vmhost_capacity_function is not None or \
                 vmhost_overcommit_memory is not None:

@@ -32,7 +32,7 @@ class CommandUnmapService(BrokerCommand):
     required_parameters = ["service", "instance"]
 
     def render(self, session, service, instance, archetype, personality,
-               networkip, justification, user, **arguments):
+               networkip, justification, reason, user, **arguments):
         dbservice = Service.get_unique(session, service, compel=True)
         dbinstance = ServiceInstance.get_unique(session, service=dbservice,
                                                 name=instance, compel=True)
@@ -55,7 +55,8 @@ class CommandUnmapService(BrokerCommand):
                                                    archetype=dbarchetype,
                                                    name=personality,
                                                    compel=True)
-            validate_personality_justification(dbpersonality, user, justification)
+            validate_personality_justification(dbpersonality, user,
+                                               justification, reason)
             q = session.query(PersonalityServiceMap)
             q = q.filter_by(personality=dbpersonality)
         else:

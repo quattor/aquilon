@@ -30,7 +30,7 @@ class CommandBindFeature(BrokerCommand):
     required_parameters = ['feature']
 
     def render(self, session, logger, feature, archetype, personality, model,
-               vendor, interface, justification, user, **arguments):
+               vendor, interface, justification, reason, user, **arguments):
 
         # Binding a feature to a named interface makes sense in the scope of a
         # personality, but not for a whole archetype.
@@ -93,14 +93,14 @@ class CommandBindFeature(BrokerCommand):
         cnt = q.count()
         # TODO: should the limit be configurable?
         if personality:
-            validate_personality_justification(dbpersonality,
-                                              user, justification)
+            validate_personality_justification(dbpersonality, user,
+                                               justification, reason)
         elif cnt > 0:
             if not justification:
                 raise AuthorizationException("Changing feature bindings for "
                                              "more than just a personality "
                                              "requires --justification.")
-            validate_justification(user, justification)
+            validate_justification(user, justification, reason)
 
         self.do_link(session, logger, dbfeature, params)
         session.flush()

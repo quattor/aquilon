@@ -38,7 +38,8 @@ class CommandAddParameter(BrokerCommand):
         return dbparameter
 
     def render(self, session, logger, archetype, personality, feature, model,
-               interface, path, user, value=None, comments=None, justification=None, **arguments):
+               interface, path, user, value=None, comments=None,
+               justification=None, reason=None, **arguments):
 
         param_holder = get_parameter_holder(session, archetype, personality,
                                             auto_include=True)
@@ -48,7 +49,7 @@ class CommandAddParameter(BrokerCommand):
                 raise ArgumentError("{0} is not compileable."
                                     .format(param_holder.holder_object.archetype))
             validate_personality_justification(param_holder.personality,
-                                               user, justification)
+                                               user, justification, reason)
 
         dbparameter = self.process_parameter(session, param_holder, feature, model, interface,
                                              path, value, comments)

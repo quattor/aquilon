@@ -29,16 +29,19 @@ from broker.brokertest import TestBrokerCommand
 from broker.personalitytest import PersonalityTestMixin
 
 GRN = "grn:/ms/ei/aquilon/aqd"
-
+PPROD = "justify-prod"
+QPROD = "justify-qa"
+AUTHERR = "Personality aquilon/%s is marked production and is under change management control. Please specify --justification or --justification='emergency' and reason."
+AUTHERR2 = "Justification of 'emergency' requires --reason to be specified."
 
 class TestJustification(PersonalityTestMixin,
                          TestBrokerCommand):
     def test_100_setup(self):
         personalities = {
-            'justify-qa': {'grn': GRN,
-                             'environment': 'qa'},
-            'justify-prod': {'grn': GRN,
-                             'environment': 'prod'},
+            QPROD: {'grn': GRN,
+                    'environment': 'qa'},
+            PPROD: {'grn': GRN,
+                    'environment': 'prod'},
         }
         for personality, kwargs in personalities.items():
             self.create_personality("aquilon", personality, **kwargs)
@@ -47,388 +50,538 @@ class TestJustification(PersonalityTestMixin,
                    "--type", "host", "--comment", "Test comment"]
         self.noouttest(command)
 
-    def test_200_reconfigure_personality(self):
+    def test_110_host_setup(self):
         h = "aquilon91.aqd-unittest.ms.com"
-        p = "justify-prod"
 
         command = ["reconfigure", "--hostname", h,
                    "--archetype", "aquilon",
-                   "--personality", p]
+                   "--personality", PPROD]
         out = self.successtest (command)
 
+    def test_200_update_personality(self):
         command = ["update_personality",
                    "--archetype", "aquilon",
-                   "--personality", p]
+                   "--personality", PPROD]
         out = self.unauthorizedtest(command, auth=True, msgcheck=False)
-        self.matchoutput(out, "Personality aquilon/%s is marked production "
-                              "and is under change management control. Please specify --justification." % p,
-                         command)
+        self.matchoutput(out,  AUTHERR % PPROD, command )
 
         command = ["update_personality",
                    "--archetype", "aquilon",
-                   "--personality", p,
+                   "--personality", PPROD,
                    "--justification", "tcm=12345678"]
         out = self.successtest (command)
 
     def test_210_add_parameter(self):
-        p = "justify-prod"
-
         command = ["add_parameter",
                    "--archetype", "aquilon",
-                   "--personality", p,
+                   "--personality", PPROD,
                    "--path", "access/users",
                    "--value", "test"]
         out = self.unauthorizedtest(command, auth=True, msgcheck=False)
-        self.matchoutput(out, "Personality aquilon/%s is marked production "
-                              "and is under change management control. Please specify --justification." % p,
-                         command)
+        self.matchoutput(out,  AUTHERR % PPROD, command )
 
         command = ["add_parameter",
                    "--archetype", "aquilon",
-                   "--personality", p,
+                   "--personality", PPROD,
                    "--path", "access/users",
                    "--value", "test",
                    "--justification", "tcm=12345678"]
         out = self.successtest (command)
 
     def test_215_update_parameter(self):
-        p = "justify-prod"
-
         command = ["update_parameter",
                    "--archetype", "aquilon",
-                   "--personality", p,
+                   "--personality", PPROD,
                    "--path", "access/users",
                    "--value", "test"]
         out = self.unauthorizedtest(command, auth=True, msgcheck=False)
-        self.matchoutput(out, "Personality aquilon/%s is marked production "
-                              "and is under change management control. Please specify --justification." % p,
-                         command)
+        self.matchoutput(out,  AUTHERR % PPROD, command )
 
         command = ["update_parameter",
                    "--archetype", "aquilon",
-                   "--personality", p,
+                   "--personality", PPROD,
                    "--path", "access/users",
                    "--value", "test",
                    "--justification", "tcm=12345678"]
         out = self.successtest (command)
 
     def test_220_del_parameter(self):
-        p = "justify-prod"
-
         command = ["del_parameter",
                    "--archetype", "aquilon",
-                   "--personality", p,
+                   "--personality", PPROD,
                    "--path", "access/users"]
         out = self.unauthorizedtest(command, auth=True, msgcheck=False)
-        self.matchoutput(out, "Personality aquilon/%s is marked production "
-                              "and is under change management control. Please specify --justification." % p,
-                         command)
+        self.matchoutput(out,  AUTHERR % PPROD, command )
 
         command = ["del_parameter",
                    "--archetype", "aquilon",
-                   "--personality", p,
+                   "--personality", PPROD,
                    "--path", "access/users",
                    "--justification", "tcm=12345678"]
         out = self.successtest (command)
 
     def test_230_map_grn(self):
-        p = "justify-prod"
-
         command = ["map_grn",
                    "--archetype", "aquilon",
-                   "--personality", p,
+                   "--personality", PPROD,
                    "--grn", GRN,
                    "--target", "esp"]
         out = self.unauthorizedtest(command, auth=True, msgcheck=False)
-        self.matchoutput(out, "Personality aquilon/%s is marked production "
-                              "and is under change management control. Please specify --justification." % p,
-                         command)
+        self.matchoutput(out,  AUTHERR % PPROD, command )
 
         command = ["map_grn",
                    "--archetype", "aquilon",
-                   "--personality", p,
+                   "--personality", PPROD,
                    "--grn", GRN,
                    "--target", "esp",
                    "--justification", "tcm=12345678"]
         out = self.successtest (command)
 
     def test_240_unmap_grn(self):
-        p = "justify-prod"
-
         command = ["unmap_grn",
                    "--archetype", "aquilon",
-                   "--personality", p,
+                   "--personality", PPROD,
                    "--grn", GRN,
                    "--target", "esp"]
         out = self.unauthorizedtest(command, auth=True, msgcheck=False)
-        self.matchoutput(out, "Personality aquilon/%s is marked production "
-                              "and is under change management control. Please specify --justification." % p,
-                         command)
+        self.matchoutput(out,  AUTHERR % PPROD, command )
 
         command = ["unmap_grn",
                    "--archetype", "aquilon",
-                   "--personality", p,
+                   "--personality", PPROD,
                    "--grn", GRN,
                    "--target", "esp",
                    "--justification", "tcm=12345678"]
         out = self.successtest (command)
 
     def test_270_add_required_svc(self):
-        p = "justify-prod"
-
         command = ["add_required_service", "--service=chooser1",
-                   "--archetype=aquilon", "--personality", p]
+                   "--archetype=aquilon", "--personality", PPROD]
         out = self.unauthorizedtest(command, auth=True, msgcheck=False)
-        self.matchoutput(out, "Personality aquilon/%s is marked production "
-                              "and is under change management control. Please specify --justification." % p,
-                         command)
+        self.matchoutput(out,  AUTHERR % PPROD, command )
 
         command = ["add_required_service", "--service=chooser1",
-                   "--archetype=aquilon", "--personality", p,
+                   "--archetype=aquilon", "--personality", PPROD,
                    "--justification", "tcm=12345678"]
         out = self.successtest (command)
 
     def test_280_del_required_svc(self):
-        p = "justify-prod"
-
         command = ["del_required_service", "--service=chooser1",
-                   "--archetype=aquilon", "--personality", p]
+                   "--archetype=aquilon", "--personality", PPROD]
         out = self.unauthorizedtest(command, auth=True, msgcheck=False)
-        self.matchoutput(out, "Personality aquilon/%s is marked production "
-                              "and is under change management control. Please specify --justification." % p,
-                         command)
+        self.matchoutput(out,  AUTHERR % PPROD, command )
 
         command = ["del_required_service", "--service=chooser1",
-                   "--archetype=aquilon", "--personality", p,
+                   "--archetype=aquilon", "--personality", PPROD,
                    "--justification", "tcm=12345678"]
         out = self.successtest (command)
 
     def test_290_add_static_route(self):
-        p = "justify-prod"
-
         gw = self.net["routing1"].usable[-1]
         command = ["add", "static", "route", "--gateway", gw,
                    "--ip", "192.168.248.0", "--prefixlen", "24",
-                   "--personality", p]
+                   "--personality", PPROD]
         out = self.unauthorizedtest(command, auth=True, msgcheck=False)
-        self.matchoutput(out, "Personality aquilon/%s is marked production "
-                              "and is under change management control. Please specify --justification." % p,
-                         command)
+        self.matchoutput(out,  AUTHERR % PPROD, command )
 
         command = ["add", "static", "route", "--gateway", gw,
                    "--ip", "192.168.248.0", "--prefixlen", "24",
-                   "--personality", p,
+                   "--personality", PPROD,
                    "--justification", "tcm=12345678"]
         out = self.successtest (command)
 
     def test_300_del_static_route(self):
-        p = "justify-prod"
-
         gw = self.net["routing1"].usable[-1]
         command = ["del", "static", "route", "--gateway", gw,
                    "--ip", "192.168.248.0", "--prefixlen", "24",
-                   "--personality", p]
+                   "--personality", PPROD]
         out = self.unauthorizedtest(command, auth=True, msgcheck=False)
-        self.matchoutput(out, "Personality aquilon/%s is marked production "
-                              "and is under change management control. Please specify --justification." % p,
-                         command)
+        self.matchoutput(out,  AUTHERR % PPROD, command )
 
         command = ["del", "static", "route", "--gateway", gw,
                    "--ip", "192.168.248.0", "--prefixlen", "24",
-                   "--personality", p,
+                   "--personality", PPROD,
                    "--justification", "tcm=12345678"]
         out = self.successtest (command)
 
     def test_310_map_service(self):
-        p = "justify-prod"
-
         command = ["map", "service", "--organization", "ms",
                    "--service", "utsvc", "--instance", "utsi2",
-                   "--archetype", "aquilon", "--personality", p]
+                   "--archetype", "aquilon", "--personality", PPROD]
         out = self.unauthorizedtest(command, auth=True, msgcheck=False)
-        self.matchoutput(out, "Personality aquilon/%s is marked production "
-                              "and is under change management control. Please specify --justification." % p,
-                         command)
+        self.matchoutput(out,  AUTHERR % PPROD, command )
 
         command = ["map", "service", "--organization", "ms",
                    "--service", "utsvc", "--instance", "utsi2",
-                   "--archetype", "aquilon", "--personality", p,
+                   "--archetype", "aquilon", "--personality", PPROD,
                    "--justification", "tcm=12345678"]
         out = self.successtest (command)
 
     def test_320_unmap_service(self):
-        p = "justify-prod"
-
         command = ["unmap", "service", "--organization", "ms",
                    "--service", "utsvc", "--instance", "utsi2",
-                   "--archetype", "aquilon", "--personality", p]
+                   "--archetype", "aquilon", "--personality", PPROD]
         out = self.unauthorizedtest(command, auth=True, msgcheck=False)
-        self.matchoutput(out, "Personality aquilon/%s is marked production "
-                              "and is under change management control. Please specify --justification." % p,
-                         command)
+        self.matchoutput(out,  AUTHERR % PPROD, command )
 
         command = ["unmap", "service", "--organization", "ms",
                    "--service", "utsvc", "--instance", "utsi2",
-                   "--archetype", "aquilon", "--personality", p,
+                   "--archetype", "aquilon", "--personality", PPROD,
                    "--justification", "tcm=12345678"]
         out = self.successtest (command)
 
     def test_330_bind_feature(self):
-        p = "justify-prod"
-
         command = ["bind", "feature", "--feature", "testfeature",
-                   "--archetype", "aquilon", "--personality", p]
+                   "--archetype", "aquilon", "--personality", PPROD]
         out = self.unauthorizedtest(command, auth=True, msgcheck=False)
-        self.matchoutput(out, "Personality aquilon/%s is marked production "
-                              "and is under change management control. Please specify --justification." % p,
-                         command)
+        self.matchoutput(out,  AUTHERR % PPROD, command )
 
         command = ["bind", "feature", "--feature", "testfeature",
-                   "--archetype", "aquilon", "--personality", p,
+                   "--archetype", "aquilon", "--personality", PPROD,
                    "--justification", "tcm=12345678"]
         out = self.successtest (command)
 
     def test_340_unbind_feature(self):
-        p = "justify-prod"
-
         command = ["unbind", "feature", "--feature", "testfeature",
-                   "--archetype", "aquilon", "--personality", p]
+                   "--archetype", "aquilon", "--personality", PPROD]
         out = self.unauthorizedtest(command, auth=True, msgcheck=False)
-        self.matchoutput(out, "Personality aquilon/%s is marked production "
-                              "and is under change management control. Please specify --justification." % p,
-                         command)
+        self.matchoutput(out,  AUTHERR % PPROD, command )
 
         command = ["unbind", "feature", "--feature", "testfeature",
-                   "--archetype", "aquilon", "--personality", p,
+                   "--archetype", "aquilon", "--personality", PPROD,
                    "--justification", "tcm=12345678"]
         out = self.successtest (command)
 
-    def test_400_reconfigure_personality(self):
+    def test_400_host_setup(self):
         h = "aquilon91.aqd-unittest.ms.com"
-        p = "justify-qa"
 
         command = ["reconfigure", "--hostname", h,
                    "--archetype", "aquilon",
-                   "--personality", p]
+                   "--personality", QPROD]
         out = self.successtest (command)
 
+    def test_405_update_personality(self):
         command = ["update_personality",
                    "--archetype", "aquilon",
-                   "--personality", p]
+                   "--personality", QPROD]
         out = self.successtest(command)
 
     def test_410_add_parameter(self):
-        p = "justify-qa"
-
         command = ["add_parameter",
                    "--archetype", "aquilon",
-                   "--personality", p,
+                   "--personality", QPROD,
                    "--path", "access/users",
                    "--value", "test"]
         out = self.successtest (command)
 
     def test_415_update_parameter(self):
-        p = "justify-qa"
-
         command = ["update_parameter",
                    "--archetype", "aquilon",
-                   "--personality", p,
+                   "--personality", QPROD,
                    "--path", "access/users",
                    "--value", "test"]
         out = self.successtest (command)
 
     def test_420_del_parameter(self):
-        p = "justify-qa"
-
         command = ["del_parameter",
                    "--archetype", "aquilon",
-                   "--personality", p,
+                   "--personality", QPROD,
                    "--path", "access/users"]
         out = self.successtest (command)
 
     def test_430_map_grn(self):
-        p = "justify-qa"
-
         command = ["map_grn",
                    "--archetype", "aquilon",
-                   "--personality", p,
+                   "--personality", QPROD,
                    "--grn", GRN,
                    "--target", "esp"]
         out = self.successtest (command)
 
     def test_440_unmap_grn(self):
-        p = "justify-qa"
-
         command = ["unmap_grn",
                    "--archetype", "aquilon",
-                   "--personality", p,
+                   "--personality", QPROD,
                    "--grn", GRN,
                    "--target", "esp"]
         out = self.successtest (command)
 
     def test_470_add_required_svc(self):
-        p = "justify-qa"
-
         command = ["add_required_service", "--service=chooser1",
-                   "--archetype=aquilon", "--personality", p]
+                   "--archetype=aquilon", "--personality", QPROD]
         out = self.successtest (command)
 
     def test_480_del_required_svc(self):
-        p = "justify-qa"
-
         command = ["del_required_service", "--service=chooser1",
-                   "--archetype=aquilon", "--personality", p]
+                   "--archetype=aquilon", "--personality", QPROD]
         out = self.successtest (command)
 
     def test_490_add_static_route(self):
-        p = "justify-qa"
-
         gw = self.net["routing1"].usable[-1]
         command = ["add", "static", "route", "--gateway", gw,
                    "--ip", "192.168.248.0", "--prefixlen", "24",
-                   "--personality", p]
+                   "--personality", QPROD]
         out = self.successtest (command)
 
     def test_500_del_static_route(self):
-        p = "justify-qa"
-
         gw = self.net["routing1"].usable[-1]
         command = ["del", "static", "route", "--gateway", gw,
                    "--ip", "192.168.248.0", "--prefixlen", "24",
-                   "--personality", p]
+                   "--personality", QPROD]
         out = self.successtest (command)
 
     def test_510_map_service(self):
-        p = "justify-prod"
-
         command = ["map", "service", "--organization", "ms",
                    "--service", "utsvc", "--instance", "utsi2",
-                   "--archetype", "aquilon", "--personality", p]
+                   "--archetype", "aquilon", "--personality", QPROD]
         out = self.successtest (command)
 
     def test_520_unmap_service(self):
-        p = "justify-prod"
-
         command = ["unmap", "service", "--organization", "ms",
                    "--service", "utsvc", "--instance", "utsi2",
-                   "--archetype", "aquilon", "--personality", p]
+                   "--archetype", "aquilon", "--personality", QPROD]
         out = self.successtest (command)
 
     def test_530_bind_feature(self):
-        p = "justify-qa"
-
         command = ["bind", "feature", "--feature", "testfeature",
-                   "--archetype", "aquilon", "--personality", p]
+                   "--archetype", "aquilon", "--personality", QPROD]
         out = self.successtest (command)
 
     def test_540_unbind_feature(self):
-        p = "justify-qa"
-
         command = ["unbind", "feature", "--feature", "testfeature",
-                   "--archetype", "aquilon", "--personality", p]
+                   "--archetype", "aquilon", "--personality", QPROD]
         out = self.successtest (command)
 
-    def test_600_cleanup(self):
+    def test_600_host_setup(self):
+        h = "aquilon91.aqd-unittest.ms.com"
+
+        command = ["reconfigure", "--hostname", h,
+                   "--archetype", "aquilon",
+                   "--personality", PPROD]
+        out = self.successtest (command)
+
+    def test_600_update_personality_reason(self):
+        command = ["update_personality",
+                   "--archetype", "aquilon",
+                   "--personality", PPROD,
+                   "--justification", "emergency"]
+        out = self.unauthorizedtest(command, auth=True, msgcheck=False)
+        self.matchoutput(out,  AUTHERR2, command )
+
+        command = ["update_personality",
+                   "--archetype", "aquilon",
+                   "--personality", PPROD,
+                   "--justification", "emergency",
+                   "--reason", "reason flag check"]
+        out = self.successtest (command)
+
+    def test_610_add_parameter_reason(self):
+        command = ["add_parameter",
+                   "--archetype", "aquilon",
+                   "--personality", PPROD,
+                   "--path", "access/netgroup",
+                   "--value", "test",
+                   "--justification", "emergency"]
+        out = self.unauthorizedtest(command, auth=True, msgcheck=False)
+        self.matchoutput(out,  AUTHERR2, command )
+         
+        command = ["add_parameter",
+                   "--archetype", "aquilon",
+                   "--personality", PPROD,
+                   "--path", "access/netgroup",
+                   "--value", "test",
+                   "--justification", "emergency",
+                   "--reason", "reason flag check"]
+        out = self.successtest (command)
+
+    def test_620_update_parameter_reason(self):
+        command = ["update_parameter",
+                   "--archetype", "aquilon",
+                   "--personality", PPROD,
+                   "--path", "access/netgroup",
+                   "--value", "test",
+                   "--justification", "emergency"]
+        out = self.unauthorizedtest(command, auth=True, msgcheck=False)
+        self.matchoutput(out,  AUTHERR2, command )
+
+        command = ["update_parameter",
+                   "--archetype", "aquilon",
+                   "--personality", PPROD,
+                   "--path", "access/netgroup",
+                   "--value", "test",
+                   "--justification", "emergency",
+                   "--reason", "reason flag check"]
+        out = self.successtest (command)
+
+    def test_630_del_parameter_reason(self):
+        command = ["del_parameter",
+                   "--archetype", "aquilon",
+                   "--personality", PPROD,
+                   "--path", "access/netgroup",
+                   "--justification", "emergency"]
+        out = self.unauthorizedtest(command, auth=True, msgcheck=False)
+        self.matchoutput(out,  AUTHERR2, command )
+
+        command = ["del_parameter",
+                   "--archetype", "aquilon",
+                   "--personality", PPROD,
+                   "--path", "access/netgroup",
+                   "--justification", "emergency",
+                   "--reason", "reason flag check"]
+        out = self.successtest (command)
+
+    def test_640_map_grn_reason(self):
+        command = ["map_grn",
+                   "--archetype", "aquilon",
+                   "--personality", PPROD,
+                   "--grn", GRN,
+                   "--target", "esp",
+                   "--justification", "emergency"]
+        out = self.unauthorizedtest(command, auth=True, msgcheck=False)
+        self.matchoutput(out,  AUTHERR2, command )
+
+        command = ["map_grn",
+                   "--archetype", "aquilon",
+                   "--personality", PPROD,
+                   "--grn", GRN,
+                   "--target", "esp",
+                   "--justification", "emergency",
+                   "--reason", "reason flag check"]
+        out = self.successtest (command)
+
+    def test_650_map_grn_reason(self):
+        command = ["unmap_grn",
+                   "--archetype", "aquilon",
+                   "--personality", PPROD,
+                   "--grn", GRN,
+                   "--target", "esp",
+                   "--justification", "emergency"]
+        out = self.unauthorizedtest(command, auth=True, msgcheck=False)
+        self.matchoutput(out,  AUTHERR2, command )
+
+        command = ["unmap_grn",
+                   "--archetype", "aquilon",
+                   "--personality", PPROD,
+                   "--grn", GRN,
+                   "--target", "esp",
+                   "--justification", "emergency",
+                   "--reason", "reason flag check"]
+        out = self.successtest (command)
+
+    def test_660_add_required_svc_reason(self):
+        command = ["add_required_service", "--service=chooser1",
+                   "--archetype=aquilon", "--personality", PPROD,
+                   "--justification", "emergency"]
+        out = self.unauthorizedtest(command, auth=True, msgcheck=False)
+        self.matchoutput(out,  AUTHERR2, command )
+
+        command = ["add_required_service", "--service=chooser1",
+                   "--archetype=aquilon", "--personality", PPROD,
+                   "--justification", "emergency",
+                   "--reason", "reason flag check"]
+        out = self.successtest (command)
+
+    def test_670_del_required_svc_reason(self):
+        command = ["del_required_service", "--service=chooser1",
+                   "--archetype=aquilon", "--personality", PPROD,
+                   "--justification", "emergency"]
+        out = self.unauthorizedtest(command, auth=True, msgcheck=False)
+        self.matchoutput(out,  AUTHERR2, command )
+
+        command = ["del_required_service", "--service=chooser1",
+                   "--archetype=aquilon", "--personality", PPROD,
+                   "--justification", "emergency",
+                   "--reason", "reason flag check"]
+        out = self.successtest (command)
+
+    def test_680_add_static_route_reason(self):
+        gw = self.net["routing1"].usable[-1]
+        command = ["add", "static", "route", "--gateway", gw,
+                   "--ip", "192.168.248.0", "--prefixlen", "24",
+                   "--personality", PPROD,
+                   "--justification", "emergency"]
+        out = self.unauthorizedtest(command, auth=True, msgcheck=False)
+        self.matchoutput(out,  AUTHERR2, command )
+
+        command = ["add", "static", "route", "--gateway", gw,
+                   "--ip", "192.168.248.0", "--prefixlen", "24",
+                   "--personality", PPROD,
+                   "--justification", "emergency",
+                   "--reason", "reason flag check"]
+        out = self.successtest (command)
+
+    def test_690_del_static_route_reason(self):
+        gw = self.net["routing1"].usable[-1]
+        command = ["del", "static", "route", "--gateway", gw,
+                   "--ip", "192.168.248.0", "--prefixlen", "24",
+                   "--personality", PPROD,
+                   "--justification", "emergency"]
+        out = self.unauthorizedtest(command, auth=True, msgcheck=False)
+        self.matchoutput(out,  AUTHERR2, command )
+
+        command = ["del", "static", "route", "--gateway", gw,
+                   "--ip", "192.168.248.0", "--prefixlen", "24",
+                   "--personality", PPROD,
+                   "--justification", "emergency",
+                   "--reason", "reason flag check"]
+        out = self.successtest (command)
+
+    def test_700_add_service_reason(self):
+        command = ["map", "service", "--organization", "ms",
+                   "--service", "utsvc", "--instance", "utsi2",
+                   "--archetype", "aquilon", "--personality", PPROD,
+                   "--justification", "emergency"]
+        out = self.unauthorizedtest(command, auth=True, msgcheck=False)
+        self.matchoutput(out,  AUTHERR2, command )
+
+        command = ["map", "service", "--organization", "ms",
+                   "--service", "utsvc", "--instance", "utsi2",
+                   "--archetype", "aquilon", "--personality", PPROD,
+                   "--justification", "emergency",
+                   "--reason", "reason flag check"]
+        out = self.successtest (command)
+
+    def test_710_del_service_reason(self):
+        command = ["unmap", "service", "--organization", "ms",
+                   "--service", "utsvc", "--instance", "utsi2",
+                   "--archetype", "aquilon", "--personality", PPROD,
+                   "--justification", "emergency"]
+        out = self.unauthorizedtest(command, auth=True, msgcheck=False)
+        self.matchoutput(out,  AUTHERR2, command )
+
+        command = ["unmap", "service", "--organization", "ms",
+                   "--service", "utsvc", "--instance", "utsi2",
+                   "--archetype", "aquilon", "--personality", PPROD,
+                   "--justification", "emergency",
+                   "--reason", "reason flag check"]
+        out = self.successtest (command)
+
+    def test_720_add_feature_reason(self):
+        command = ["bind", "feature", "--feature", "testfeature",
+                   "--archetype", "aquilon", "--personality", PPROD,
+                   "--justification", "emergency"]
+        out = self.unauthorizedtest(command, auth=True, msgcheck=False)
+        self.matchoutput(out,  AUTHERR2, command )
+
+        command = ["bind", "feature", "--feature", "testfeature",
+                   "--archetype", "aquilon", "--personality", PPROD,
+                   "--justification", "emergency",
+                   "--reason", "reason flag check"]
+        out = self.successtest (command)
+
+    def test_730_del_feature_reason(self):
+        command = ["unbind", "feature", "--feature", "testfeature",
+                   "--archetype", "aquilon", "--personality", PPROD,
+                   "--justification", "emergency"]
+        out = self.unauthorizedtest(command, auth=True, msgcheck=False)
+        self.matchoutput(out,  AUTHERR2, command )
+
+        command = ["unbind", "feature", "--feature", "testfeature",
+                   "--archetype", "aquilon", "--personality", PPROD,
+                   "--justification", "emergency",
+                   "--reason", "reason flag check"]
+        out = self.successtest (command)
+
+    def test_800_cleanup(self):
         h = "aquilon91.aqd-unittest.ms.com"
         p = "unixeng-test"
 
