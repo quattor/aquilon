@@ -75,4 +75,4 @@ nsrecord.info['unique_fields'] = ['a_record', 'dns_domain']
 # Association proxies from/to NSRecord:
 # DnsDomain.servers = association_proxy('_name_servers', 'a_record')
 
-#TODO: proxy all IP addresses through to DnsDomains when System is removed
+# TODO: proxy all IP addresses through to DnsDomains when System is removed

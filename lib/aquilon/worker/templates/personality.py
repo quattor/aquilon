@@ -113,14 +113,14 @@ def get_parameters_by_tmpl(dbpersonality):
                 value = validate_value("default for path=%s" % param_def.path,
                                        param_def.value_type, param_def.default)
             if value is not None:
-                ## coerce string list to list
+                # coerce string list to list
                 if param_def.value_type == 'list':
                     value = string_to_list(value)
 
                 get_path_under_top(param_def.path, value,
                                    ret[param_def.template])
 
-        ## if all parameters are not defined still generate empty template
+        # if all parameters are not defined still generate empty template
         if param_def.template not in ret:
             ret[param_def.template] = defaultdict()
     return ret
@@ -150,7 +150,7 @@ class PlenaryPersonality(PlenaryCollection):
         self.plenaries.append(PlenaryPersonalityPreFeature.get_plenary(dbpersonality))
         self.plenaries.append(PlenaryPersonalityPostFeature.get_plenary(dbpersonality))
 
-        ## mulitple structure templates for parameters
+        # mulitple structure templates for parameters
         for path, values in get_parameters_by_tmpl(dbpersonality).items():
             ptmpl = ParameterTemplate(dbpersonality, path, values)
             self.plenaries.append(PlenaryPersonalityParameter.get_plenary(ptmpl))
@@ -185,7 +185,7 @@ class PlenaryPersonalityBase(Plenary):
     def body(self, lines):
         pan_variable(lines, "PERSONALITY", self.dbobj.name)
 
-        ## process grns
+        # process grns
         eon_id_map = defaultdict(set)
 
         # own == pers level
@@ -223,25 +223,25 @@ class PlenaryPersonalityBase(Plenary):
         if ng_list:
             pan_assign(lines, "/system/root_netgroups", ng_list)
 
-        ## include pre features
+        # include pre features
         path = PlenaryPersonalityPreFeature.template_name(self.dbobj)
         pan_include_if_exists(lines, path)
 
-        ## process parameter templates
+        # process parameter templates
         pan_include_if_exists(lines, "personality/config")
         pan_assign(lines, "/system/personality/name", self.dbobj.name)
         if self.dbobj.host_environment.name != 'legacy':
             pan_assign(lines, "/system/personality/host_environment",
                        self.dbobj.host_environment, True)
 
-        ## TODO : This is just to satisfy quattor schema
-        ## needs to be removed as soon as the schema allows this
+        # TODO: This is just to satisfy quattor schema
+        # needs to be removed as soon as the schema allows this
         pan_assign(lines, "/system/personality/systemgrn", [])
 
         if self.dbobj.config_override:
             pan_include(lines, "features/personality/config_override/config")
 
-        ## include post features
+        # include post features
         path = PlenaryPersonalityPostFeature.template_name(self.dbobj)
         pan_include_if_exists(lines, path)
 
@@ -272,7 +272,7 @@ class PlenaryPersonalityPreFeature(Plenary):
             if not link.feature.post_personality:
                 pre_feat.append(link)
 
-        ## hardware features should precede host features
+        # hardware features should precede host features
         for link in model_feat + interface_feat + pre_feat:
             helper_feature_template(feat_tmpl, link, lines)
 

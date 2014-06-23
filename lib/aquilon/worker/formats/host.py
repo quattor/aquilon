@@ -150,12 +150,13 @@ class GrnHostListFormatter(ListFormatter):
             self.add_branch_data(msg.domain, host.branch)
             msg.status = str(host.status.name)
             msg.owner_eonid = host.effective_owner_grn.eon_id
-            ##personality
+
             msg.personality.archetype.name = str(host.archetype)
             msg.personality.name = str(host.personality)
             msg.personality.host_environment = str(host.personality.host_environment)
             msg.personality.owner_eonid = host.personality.owner_eon_id
-            ## eon id maps TBD need both effective and actual
+
+            # eon id maps TBD need both effective and actual
             for grn_rec in sorted(host.personality._grns,
                                   key=attrgetter("target", "eon_id")):
                 map = msg.personality.eonid_maps.add()

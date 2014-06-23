@@ -19,6 +19,7 @@
 from aquilon.config import Config
 from aquilon.aqdb.db_factory import DbFactory
 
+
 class ConsistencyChecker(object):
     """Consistency Checker Base Class"""
     def __init__(self):
@@ -60,4 +61,3 @@ class ConsistencyChecker(object):
         if self._failures:
             return False
         return True
-

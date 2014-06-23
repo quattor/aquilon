@@ -528,7 +528,7 @@ class HostChooser(Chooser):
                 # flexibility for multiple services to be aligned for
                 # a cluster type without being forced on all the
                 # personalities.
-                #self.required_services.add(item.service)
+                # self.required_services.add(item.service)
 
             if dbhost.cluster.metacluster:
                 mc = dbhost.cluster.metacluster

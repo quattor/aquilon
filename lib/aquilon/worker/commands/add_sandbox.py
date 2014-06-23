@@ -89,7 +89,7 @@ class CommandAddSandbox(CommandGet):
         # git branch will be created but the database changes roled back.
         session.commit()
 
-        if get == False:
+        if get is False:
             # The client knows to interpret an empty response as no action.
             return []
 

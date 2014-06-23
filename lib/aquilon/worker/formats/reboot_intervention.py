@@ -35,8 +35,8 @@ class RebootInterventionFormatter(ResourceFormatter):
         # XXX: The protocol does not have an rsdata field, and even if it
         # did, why would reboot intervention fill it in?  Could use ivdata,
         # not sure if we want a separate rivdata.
-        #skeleton.rsdata.start_date = rs.start_date
-        #skeleton.rsdata.expiry_date = str(rs.expiry_date)
-        #skeleton.rsdata.justification = str(rs.justification)
+        # skeleton.rsdata.start_date = rs.start_date
+        # skeleton.rsdata.expiry_date = str(rs.expiry_date)
+        # skeleton.rsdata.justification = str(rs.justification)
 
 ObjectFormatter.handlers[RebootIntervention] = RebootInterventionFormatter()

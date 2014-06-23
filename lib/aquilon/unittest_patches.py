@@ -72,7 +72,7 @@ def fake_gethostbyname(hostname):
                     host_ip = m.group(2)
                     break
 
-        if host_ip == None:
+        if not host_ip:
             raise gaierror(-2, "Name or service not known")
 
         return host_ip

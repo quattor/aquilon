@@ -41,10 +41,10 @@ def create_uml_graph(mappers,
     for mapper in mappers:
         graph.add_node(
             pydot.Node(mapper.class_.__name__,
-                       #shape="plaintext",
+                       # shape="plaintext",
                        shape="record",
                        label=_mk_label(mapper, show_attributes, show_datatypes),
-                       #label = mapper.class_.__name__,
+                       # label = mapper.class_.__name__,
                        fontname=font, fontsize="8.0"))
 
         if mapper.inherits:
@@ -124,7 +124,7 @@ def create_schema_graph(tables=None, metadata=None, show_datatypes=False,
                       concentrate=concentrate, rankdir=rankdir, font=font,
                       fontsize="7.0")
 
-    #Grossly inefficient. We can do this once for the whole graph
+    # Grossly inefficient. We can do this once for the whole graph
     for table in tables:
         graph.add_node(pydot.Node(str(table.name), shape="record",
                                   label=_render_table_record(table,
@@ -188,7 +188,7 @@ def _mk_label(mapper, show_attributes=True, show_datatypes=True):
         attrs.append(desc)
 
     else:
-        #WARNING: untested
+        # WARNING: untested
         attrs = [format_col(col) for col in
                  sorted(mapper.columns, key=lambda col: not col.primary_key)]
 

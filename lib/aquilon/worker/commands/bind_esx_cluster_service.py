@@ -15,15 +15,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.commands.bind_cluster_service import CommandBindClusterService
 
 
 class CommandBindESXClusterService(CommandBindClusterService):
-
-    #required_parameters = ["cluster", "service", "instance"]
-
     def render(self, session, **arguments):
-
         return CommandBindClusterService.render(self, session, **arguments)

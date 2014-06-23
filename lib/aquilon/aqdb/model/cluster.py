@@ -89,7 +89,7 @@ class Cluster(Base):
     cluster_type = Column(AqStr(16), nullable=False)
     name = Column(AqStr(64), nullable=False)
 
-    #Lack of cascaded deletion is intentional on personality
+    # Lack of cascaded deletion is intentional on personality
     personality_id = Column(Integer, ForeignKey('personality.id',
                                                 name='cluster_prsnlty_fk'),
                             nullable=False)
@@ -322,7 +322,6 @@ class EsxCluster(Cluster):
     esx_cluster_id = Column(Integer, ForeignKey('%s.id' % _TN,
                                                 name='%s_cluster_fk' % _ETN,
                                                 ondelete='CASCADE'),
-                            #if the cluster record is deleted so is esx_cluster
                             primary_key=True)
 
     vm_count = Column(Integer, default=16, nullable=True)
@@ -531,13 +530,11 @@ class HostClusterMember(Base):
     cluster_id = Column(Integer, ForeignKey('%s.id' % _TN,
                                             name='hst_clstr_mmbr_clstr_fk',
                                             ondelete='CASCADE'),
-                        #if the cluster is deleted, so is membership
                         nullable=False)
 
     host_id = Column(Integer, ForeignKey('host.hardware_entity_id',
                                          name='hst_clstr_mmbr_hst_fk',
                                          ondelete='CASCADE'),
-                     #if the host is deleted, so is the membership
                      nullable=False)
 
     node_index = Column(Integer, nullable=False)

@@ -26,7 +26,6 @@ from aquilon.worker.formats.list import StringAttributeList
 class CommandShowMetaClusterAll(BrokerCommand):
 
     def render(self, session, metacluster, **arguments):
-        #all
         if not metacluster:
             q = session.query(MetaCluster.name).order_by(MetaCluster.name)
             return StringAttributeList(q.all(), "name")

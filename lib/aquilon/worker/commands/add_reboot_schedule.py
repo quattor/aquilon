@@ -40,7 +40,7 @@ class CommandAddRebootSchedule(BrokerCommand):
         "week": re.compile(r'^(:?(:?'
                            + '|'.join(COMPONENTS["week"]) + ')(:?,(:?'
                            + '|'.join(COMPONENTS["week"]) + '))*|all)$'),
-        #"day": re.compile(r'^(:?'
+        # "day": re.compile(r'^(:?'
         #                   + '|'.join(COMPONENTS["day"]) + ')(:?,(:?'
         #                   + '|'.join(COMPONENTS["day"]) + '))*$')
         "day": re.compile(r'^(:?'

@@ -16,9 +16,6 @@
 # limitations under the License.
 """Classes and Tables relating to network interfaces"""
 
-#Note: any changes to this class definition and it's constraints
-#should always be reviewed by DHCP Eng.
-
 from datetime import datetime
 from collections import deque
 import re

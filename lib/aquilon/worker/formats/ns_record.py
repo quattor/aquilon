@@ -16,7 +16,6 @@
 # limitations under the License.
 """ Formatting for all sorts of DNS Records """
 
-#import aquilon.worker.depends
 from aquilon.aqdb.model import NsRecord
 from aquilon.worker.formats.list import ListFormatter
 from aquilon.worker.formats.formatters import ObjectFormatter
@@ -42,8 +41,8 @@ class SimpleNSRecordList(list):
 
 class SimpleNSRecordListFormatter(ListFormatter):
     def format_raw(self, snsrlist, indent=""):
-        #return [self.redirect_raw(ns) for ns in snsrlist]
-        #return str("\n".join(
+        # return [self.redirect_raw(ns) for ns in snsrlist]
+        # return str("\n".join(
         #    [indent + ns.dns_domain.name + ": " + ns.a_record.fqdn for ns in snsrlist]))
 
         return str("\n".join(

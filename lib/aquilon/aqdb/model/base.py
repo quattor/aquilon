@@ -408,7 +408,6 @@ class Base(object):
         if not cls.__table__.primary_key.name:
             cls.__table__.primary_key.name = '%s_pk' % cls.__table__.name
 
-#Base = declarative_base(metaclass=VersionedMeta, cls=Base)
 Base = declarative_base(cls=Base)
 
 
@@ -450,9 +449,9 @@ def __get__(self, obj, class_):
 
     if self.scalar:
         # Original line from 0.5.8
-        #proxy = self._new(self._lazy_collection(weakref.ref(obj)))
-        #setattr(obj, self.key, (id(obj), proxy))
-        #return proxy
+        # proxy = self._new(self._lazy_collection(weakref.ref(obj)))
+        # setattr(obj, self.key, (id(obj), proxy))
+        # return proxy
 
         target = getattr(obj, self.target_collection)
         if target is None:

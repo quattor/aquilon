@@ -120,7 +120,7 @@ class BranchChecker(ConsistencyChecker):
         #   decide to have a change of heart about this practice.
         #
         # Branchs on fileing system but not in the database
-        #for branch in fs_sandboxs.difference(db_sandboxs):
+        # for branch in fs_sandboxs.difference(db_sandboxs):
         #    self.failure(branch, "Sandbox %s" % branch,
         #                 "found on filesystem (%s) but not in database"
         #                 % fsinfo[branch])

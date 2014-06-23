@@ -119,7 +119,7 @@ class CommandAddInterfaceMachine(BrokerCommand):
             mac = self.generate_mac(session, dbmachine)
             audit_results.append(('mac', mac))
         else:
-            #Ignore now that Mac Address can be null
+            # Ignore now that MAC address can be NULL
             pass
 
         if pg is not None:

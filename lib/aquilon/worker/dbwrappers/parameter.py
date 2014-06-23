@@ -77,7 +77,7 @@ def set_parameter(session, param_holder, feature, model, interface_name,
 
     dbparameter = Parameter.get_unique(session, holder=param_holder,
                                        compel=compel)
-    ## create dbparameter if doesnt exist
+    # create dbparameter if doesnt exist
     if not dbparameter:
         if compel:
             raise NotFoundException("No parameter of path=%s defined." % path)
@@ -187,7 +187,7 @@ def validate_parameter(session, path, value, param_holder, featurelink=None):
 
     retval = None
 
-    ## check if default specified on parameter definition
+    # check if default specified on parameter definition
     if not value:
         if match.default:
             value = match.default
@@ -246,10 +246,10 @@ def get_paramdef_for_parameter(session, path, param_holder, dbfeaturelink=None):
     else:
         param_definitions = []
 
-    ## the specified path of the parameter should either be an actual match
-    ## or match input specified regexp.
-    ## The regexp is done only after all actual paths dont find a match
-    ## e.g action/\w+/user will never be an actual match
+    # the specified path of the parameter should either be an actual match
+    # or match input specified regexp.
+    # The regexp is done only after all actual paths dont find a match
+    # e.g action/\w+/user will never be an actual match
     for paramdef in param_definitions:
         if path == paramdef.path:
             match = paramdef
@@ -266,8 +266,8 @@ def validate_required_parameter(param_definitions, parameters, dbfeaturelink=Non
     errors = []
     formatter = ParamDefinitionFormatter()
     for param_def in param_definitions:
-        ## ignore not required fields or fields
-        ## which have defaults specified
+        # ignore not required fields or fields
+        # which have defaults specified
         if (not param_def.required) or param_def.default:
             continue
 
@@ -279,7 +279,7 @@ def validate_required_parameter(param_definitions, parameters, dbfeaturelink=Non
                 value = param.get_path(param_def.path, compel=False)
             if value:
                 break
-            ## ignore if value is specified
+            # ignore if value is specified
         if value is None:
             errors.append(formatter.format_raw(param_def))
 
@@ -336,14 +336,14 @@ def validate_personality_config(session, archetype, personality):
     dbarchetype = dbpersonality.archetype
 
     error = []
-    ## validate parameters
+    # validate parameters
     param_definitions = []
     parameters = get_parameters(session, personality=dbpersonality)
     if dbarchetype.paramdef_holder:
         param_definitions = dbarchetype.paramdef_holder.param_definitions
         error += validate_required_parameter(param_definitions, parameters)
 
-    ## features  for personalities
+    # features for personalities
     for link in dbarchetype.features + dbpersonality.features:
         param_definitions = []
         if link.feature.paramdef_holder:

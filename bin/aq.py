@@ -250,7 +250,7 @@ class StatusThread(Thread):
         # original request before we send the status request.
         while self.waiting_for_request:
             sleep(.1)
-        #print >>sys.stderr, "Attempting status connection..."
+        # print >>sys.stderr, "Attempting status connection..."
         # Ideally we would always make a noauth connection here, but we
         # only know the port that's been specified for this command -
         # so it's either the auth port or it's not.

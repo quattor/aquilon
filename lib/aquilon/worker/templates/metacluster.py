@@ -62,8 +62,8 @@ class PlenaryMetaClusterData(StructurePlenary):
         add_location_info(lines, dbloc, prefix="system/metacluster/")
         pan_assign(lines, "system/metacluster/sysloc/location", dbloc.sysloc())
         if dbloc.campus:
-            ## maintaining this so templates dont break
-            ## during transtion period.. should be DEPRECATED
+            # maintaining this so templates dont break
+            # during transtion period.. should be DEPRECATED
             pan_assign(lines, "system/metacluster/campus", dbloc.campus.name)
 
         lines.append("")
@@ -110,7 +110,6 @@ class PlenaryMetaClusterObject(ObjectPlenary):
                                      {"metadata": PanValue("/metadata")}))
         pan_include(lines, "archetype/base")
 
-        #for esx_management_server
         for servinst in sorted(self.dbobj.service_bindings):
             path = PlenaryServiceInstanceClientDefault.template_name(servinst)
             pan_include(lines, path)

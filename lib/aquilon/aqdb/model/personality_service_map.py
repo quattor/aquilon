@@ -70,19 +70,13 @@ class PersonalityServiceMap(Base):
     personality = relation(Personality, innerjoin=True)
     network = relation(Network)
 
-    #TODO: reconsider the surrogate primary key?
+    # TODO: reconsider the surrogate primary key?
     __table_args__ = (UniqueConstraint(personality_id, service_instance_id,
                                        location_id, network_id,
                                        name='%s_loc_net_ins_uk' % _ABV),
                       Index("%s_location_idx" % _ABV, location_id),
                       Index("%s_si_idx" % _ABV, service_instance_id),
                       Index("%s_network_idx" % _ABV, network_id))
-
-    #Archetype probably shouldn't be exposed at this table/object: This isn't
-    #intended for use with Archetype, but I'm not 100% sure yet
-    #def _archetype(self):
-    #    return self.personality.archetype
-    #archetype = property(_archetype)
 
     @property
     def service(self):

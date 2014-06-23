@@ -20,7 +20,7 @@ import os
 import sys
 
 # This is done by the wrapper script.
-#import aquilon.worker.depends
+# import aquilon.worker.depends
 
 import coverage
 from zope.interface import implements
@@ -37,7 +37,7 @@ from aquilon.worker.base_protocol import AQDSite
 
 # This gets imported dynamically to avoid loading libraries before the
 # config file has been parsed.
-#from aquilon.worker.resources import RestServer
+# from aquilon.worker.resources import RestServer
 
 
 class Options(usage.Options):

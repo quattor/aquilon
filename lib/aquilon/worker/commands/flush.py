@@ -358,7 +358,7 @@ class CommandFlush(BrokerCommand):
                         written += plenary_host.write(locked=True)
                     except IncompleteError, e:
                         pass
-                        #logger.client_info("Not flushing host: %s" % e)
+                        # logger.client_info("Not flushing host: %s" % e)
                     except Exception, e:
                         failed.append("{0} in {1:l} failed: {2}".format(h, h.branch, e))
 

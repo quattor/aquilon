@@ -44,7 +44,7 @@ class CommandUpdatePersonality(BrokerCommand):
 
         if vmhost_capacity_function is not None or \
                 vmhost_overcommit_memory is not None:
-            if not "esx" in dbpersona.cluster_infos:
+            if "esx" not in dbpersona.cluster_infos:
                 dbpersona.cluster_infos["esx"] = PersonalityESXClusterInfo()
 
         if vmhost_capacity_function:

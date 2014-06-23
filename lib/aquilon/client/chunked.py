@@ -40,7 +40,7 @@ class ChunkedHTTPResponse(httplib.HTTPResponse):
             chunk_left = int(line, 16)
             if chunk_left == 0:
                 # read and discard trailer up to the CRLF terminator
-                ### note: we shouldn't have any trailers!
+                # note: we shouldn't have any trailers!
                 while True:
                     line = self.fp.readline()
                     if not line:

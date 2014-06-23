@@ -189,13 +189,11 @@ class MetaClusterMember(Base):
     metacluster_id = Column(Integer, ForeignKey('metacluster.id',
                                                 name='%s_meta_fk' % _MCM,
                                                 ondelete='CASCADE'),
-                            #if a metacluser is delete so is the association
                             nullable=False)
 
     cluster_id = Column(Integer, ForeignKey('clstr.id',
                                             name='%s_clstr_fk' % _MCM,
                                             ondelete='CASCADE'),
-                        #if a cluster is deleted, so is the association
                         nullable=False)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,

@@ -48,7 +48,7 @@ def validate_justification(principal, justification, reason):
                   "Justification of 'emergency' requires --reason to be specified.")
 
     # TODO: EDM validation
-    #edm_validate(result.group(0))
+    # edm_validate(result.group(0))
 
 
 class CommandDeploy(BrokerCommand):
@@ -69,8 +69,8 @@ class CommandDeploy(BrokerCommand):
             # but only do so if all the relevant autosync flags are
             # positive.
             logger.warning("Deploying to tracked branch %s and then will "
-                           "auto-sync %s" % (
-                           dbtarget.tracked_branch.name, dbtarget.name))
+                           "auto-sync %s" % (dbtarget.tracked_branch.name,
+                                             dbtarget.name))
             dbtarget = dbtarget.tracked_branch
         elif dbtarget.tracked_branch:
             raise ArgumentError("Cannot deploy to tracking domain %s.  "

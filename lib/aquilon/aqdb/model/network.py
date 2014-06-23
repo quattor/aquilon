@@ -419,7 +419,7 @@ def get_net_id_from_ip(session, ip, network_environment=None):
     q = q.filter_by(network_environment=dbnet_env)
     q = q.filter(Network.ip == subq.as_scalar())
     net = q.first()
-    if not net or not ip in net.network:
+    if not net or ip not in net.network:
         raise NotFoundException("Could not determine network containing IP "
                                 "address %s." % ip)
     return net

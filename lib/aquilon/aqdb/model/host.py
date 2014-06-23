@@ -149,7 +149,7 @@ class Host(Base):
 
     @property
     def effective_grns(self):
-        ## process grns
+        # process grns
         eon_id_map = defaultdict(set)
         pers_eon_id_map = defaultdict(set)
 

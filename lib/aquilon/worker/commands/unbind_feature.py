@@ -29,7 +29,7 @@ class CommandUnBindFeature(CommandBindFeature):
         dblink = FeatureLink.get_unique(session, feature=dbfeature, compel=True,
                                         **params)
 
-        ## check any params defined for feature in personality and delete them
+        # check any params defined for feature in personality and delete them
         del_all_feature_parameter(session, dblink)
 
         dbfeature.links.remove(dblink)

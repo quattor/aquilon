@@ -50,7 +50,7 @@ class CommandShowDiff(BrokerCommand):
     def populate_data(self, session, dbpersona, dtype, ret):
         """ pouplate data we are interesetd in seeing as part of diff """
 
-        ## parameters
+        # parameters
         params = {}
 
         dbpersona_parameters = get_parameters(session, personality=dbpersona)
@@ -59,26 +59,26 @@ class CommandShowDiff(BrokerCommand):
             params.update(Parameter.flatten(param.value))
         ret["Parameters"][dtype] = params
 
-        ## process features
+        # process features
         features = dict((fl.feature.name, True) for fl in dbpersona.features)
         ret["Features"][dtype] = features
 
-        ## process required_services
+        # process required_services
         services = dict((srv.name, True) for srv in dbpersona.services)
         ret["Required Services"][dtype] = services
 
-        ## service maps
+        # service maps
         q = session.query(PersonalityServiceMap).filter_by(personality=dbpersona)
 
         smaps = dict(("{0} {1}".format(sm.service_instance, sm.location), True) for sm in q.all())
 
         ret["ServiceMap"][dtype] = smaps
 
-        ## grns
+        # grns
         grns = dict((grn, True) for grn in dbpersona.grns)
         ret["Grns"][dtype] = grns
 
-        ## options
+        # options
         enabled = defaultdict()
         if dbpersona.config_override:
             enabled["ConfigOverride"] = True

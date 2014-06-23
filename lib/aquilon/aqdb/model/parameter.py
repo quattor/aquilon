@@ -187,9 +187,9 @@ class Parameter(Base):
         pparts = Parameter.path_parts(path)
         lastnode = pparts.pop()
 
-        ## traverse the given path to add the given value
-        ## we need to know the lastnode so we can appropriately
-        ## associate a string value or json value
+        # traverse the given path to add the given value
+        # we need to know the lastnode so we can appropriately
+        # associate a string value or json value
 
         dref = self.value
         for ppart in pparts:
@@ -199,8 +199,8 @@ class Parameter(Base):
 
         dref[lastnode] = value
 
-        ## coerce mutation of parameter since sqlalchemy
-        ## cannot recognize parameter change
+        # coerce mutation of parameter since sqlalchemy
+        # cannot recognize parameter change
         self.value.changed()  # pylint: disable=E1101
 
     def __del_path(self, path):
@@ -226,11 +226,11 @@ class Parameter(Base):
 
         pparts = Parameter.path_parts(path)
         try:
-            ## delete the specified path
+            # delete the specified path
             self.__del_path(path)
 
-            ## after deleting the leaf check if the parent node is empty
-            ## if so delete it
+            # after deleting the leaf check if the parent node is empty
+            # if so delete it
             while pparts.pop():
                 if not pparts:
                     break
@@ -239,8 +239,8 @@ class Parameter(Base):
                     break
                 self.__del_path(newpath)
 
-            ## coerce mutation of parameter since sqlalchemy
-            ## cannot recognize parameter change
+            # coerce mutation of parameter since sqlalchemy
+            # cannot recognize parameter change
             self.value.changed()  # pylint: disable=E1101
         except:
             if compel:

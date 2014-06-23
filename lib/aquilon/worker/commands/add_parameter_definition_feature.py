@@ -33,7 +33,7 @@ class CommandAddParameterDefintionFeature(BrokerCommand):
         if not dbfeature.paramdef_holder:
             dbfeature.paramdef_holder = FeatureParamDef()
 
-        ## strip slash from path start and end
+        # strip slash from path start and end
         if path.startswith("/"):
             path = path[1:]
         if path.endswith("/"):

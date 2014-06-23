@@ -246,7 +246,7 @@ class PlenaryHostData(StructurePlenary):
         pan_assign(lines, "system/build", self.dbobj.status.name)
         pan_assign(lines, "system/advertise_status", self.dbobj.advertise_status)
 
-        ## process grns
+        # process grns
         eon_id_map = self.dbobj.effective_grns
 
         for (target, eon_id_set) in eon_id_map.iteritems():

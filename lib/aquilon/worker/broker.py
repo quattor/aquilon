@@ -183,8 +183,8 @@ class BrokerCommand(object):
                         self.command)
             # Not sure how to handle formatting with deferred...
             self.requires_format = False
-        #free = "True " if self.is_lock_free else "False"
-        #log.msg("is_lock_free = %s [%s]" % (free, self.command))
+        # free = "True " if self.is_lock_free else "False"
+        # log.msg("is_lock_free = %s [%s]" % (free, self.command))
 
     def audit_result(self, session, key, value, **arguments):
         # We need a place to store the result somewhere until we can finish the
@@ -268,7 +268,7 @@ class BrokerCommand(object):
                     if self.requires_readonly:
                         self._set_readonly(session)
                     # begin() is only required if session transactional=False
-                    #session.begin()
+                    # session.begin()
                 if self.badmode:  # pragma: no cover
                     raise UnimplementedError("Command %s not available on "
                                              "a %s broker." %
@@ -380,9 +380,9 @@ class BrokerCommand(object):
     # they all use Plenary classes but do not require a lock.
     @classmethod
     def is_class_lock_free(cls):
-        #log.msg("Checking %s" % cls.__module__)
+        # log.msg("Checking %s" % cls.__module__)
         for (key, item) in sys.modules[cls.__module__].__dict__.items():
-            #log.msg("  Checking %s" % item)
+            # log.msg("  Checking %s" % item)
             if item in [sync_domain, TemplateDomain,
                         add_resource, del_resource]:
                 return False
@@ -401,7 +401,7 @@ class BrokerCommand(object):
                     super_is_free = item._is_lock_free
                 else:
                     super_is_free = item.is_class_lock_free()
-                #log.msg("%s says %s" % (item, super_is_free))
+                # log.msg("%s says %s" % (item, super_is_free))
                 # If the superclass needs a lock, we need a lock.
                 # However, if the superclass does not need a lock, keep
                 # checking in case the subclass imports something else

@@ -393,7 +393,7 @@ class Option(Element):
                 raise ParsingError('Option ' + self.name + ' is missing')
         if hasattr(options, self.name):
             val = getattr(options, self.name)
-            if not val is None:
+            if val is not None:
                 found = True
             result[self.name] = getattr(options, self.name)
 #        if self.mandatory and not found:

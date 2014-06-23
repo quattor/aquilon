@@ -40,7 +40,6 @@ class OperatingSystem(Base):
                                               name='%s_arch_fk' % _ABV,
                                               ondelete="CASCADE"),
                           nullable=False)
-    #vendor id?
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
     comments = Column(String(255), nullable=True)

@@ -39,7 +39,7 @@ class MachineSpecsFormatter(ObjectFormatter):
                         machine_specs.controller_type,
                         machine_specs.disk_type))
         # TODO: there is no way to set the comments on MachineSpecs right now
-        #if machine_specs.comments:
+        # if machine_specs.comments:
         #    details.append(indent + "  Comments: %s" % machine_specs.comments)
         return "\n".join(details)
 

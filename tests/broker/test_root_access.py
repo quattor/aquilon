@@ -159,8 +159,9 @@ class TestRootAccess(TestBrokerCommand):
     def test_380_del_netgroup_stillmapped(self):
         command = ["del", "netgroup_whitelist", "--netgroup", "netgroup2"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "Netgroup netgroup2 used by following and cannot be deleted :"
-                              " Personality aquilon/compileserver",
+        self.matchoutput(out,
+                         "Netgroup netgroup2 used by following and cannot be "
+                         "deleted: Personality aquilon/compileserver",
                          command)
 
         command = ["revoke_root_access", "--netgroup", "netgroup2",

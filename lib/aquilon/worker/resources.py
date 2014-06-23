@@ -85,10 +85,10 @@ class ResponsePage(resource.Resource):
         # A good optimization here would be to have the resource store
         # a compiled regular expression to use instead of this loop.
         for style in self.formatter.formats:
-            #log.msg("Checking style: %s" % style)
+            # log.msg("Checking style: %s" % style)
             extension = "." + style
             if path.endswith(extension):
-                #log.msg("Retrieving formatted child for dynamic page: %s" % path)
+                # log.msg("Retrieving formatted child for dynamic page: %s" % path)
                 request.output_format = style
                 # Chop off the extension when searching for children
                 path = path[:-len(extension)]
@@ -116,7 +116,7 @@ class ResponsePage(resource.Resource):
         if not self.dynamic_child:
             return resource.Resource.getChild(self, path, request)
 
-        #log.msg("Retrieving child for dynamic page: %s" % path)
+        # log.msg("Retrieving child for dynamic page: %s" % path)
         request.args[self.dynamic_child.path_variable] = [path]
         return self.dynamic_child
 
@@ -200,9 +200,9 @@ class ResponsePage(resource.Resource):
     def format(self, result, request):
         # This method is called to format error messages, and the only format
         # we currently support for those is "raw"
-        #style = getattr(self, "output_format", None)
-        #if style is None:
-        #    style = getattr(request, "output_format", "raw")
+        # style = getattr(self, "output_format", None)
+        # if style is None:
+        #     style = getattr(request, "output_format", "raw")
         return self.formatter.format("raw", result, request)
 
     def finishRender(self, result, request):
@@ -236,7 +236,7 @@ class ResponsePage(resource.Resource):
         msg = failure.getErrorMessage()
         log.msg("Internal Error: %s\nTraceback:\n%s" %
                 (msg, failure.getBriefTraceback()))
-        #failure.printDetailedTraceback()
+        # failure.printDetailedTraceback()
         request.setResponseCode(http.INTERNAL_SERVER_ERROR)
         return self.finishRender(msg, request)
 
@@ -262,7 +262,7 @@ class RestServer(ResponsePage):
                         % (level, container.dynamic_child.path))
                 _logChildren(level + 1, container.dynamic_child)
 
-        #_logChildren(0, self)
+        # _logChildren(0, self)
 
     def insert_handler(self, handler, rendermethod, path):
         container = self
@@ -273,22 +273,22 @@ class RestServer(ResponsePage):
         # traverse downward.
         for component in path.split("/"):
             relative = relative + "/" + component
-            #log.msg("Working with component '" + component + "' of '" + relative + "'.")
+            # log.msg("Working with component '" + component + "' of '" + relative + "'.")
             m = varmatch.match(component)
             # Is this piece of the path dynamic?
             if not m:
-                #log.msg("Component '" + component + "' is static.")
+                # log.msg("Component '" + component + "' is static.")
                 child = container.getStaticEntity(component)
                 if child is None:
-                    #log.msg("Creating new static component '" + component + "'.")
+                    # log.msg("Creating new static component '" + component + "'.")
                     child = ResponsePage(relative, self.formatter)
                     container.putChild(component, child)
                 container = child
             else:
-                #log.msg("Component '" + component + "' is dynamic.")
+                # log.msg("Component '" + component + "' is dynamic.")
                 path_variable = m.group(1)
                 if container.dynamic_child is not None:
-                    #log.msg("Dynamic component '" + component + "' already exists.")
+                    # log.msg("Dynamic component '" + component + "' already exists.")
                     current_variable = container.dynamic_child.path_variable
                     if current_variable != path_variable:
                         log.msg("Warning: Could not use variable '"
@@ -298,10 +298,10 @@ class RestServer(ResponsePage):
                         # XXX: Raise an error if they don't match
                         container = container.dynamic_child
                     else:
-                        #log.msg("Dynamic component '" + component + "' had correct variable.")
+                        # log.msg("Dynamic component '" + component + "' had correct variable.")
                         container = container.dynamic_child
                 else:
-                    #log.msg("Creating new dynamic component '" + component + "'.")
+                    # log.msg("Creating new dynamic component '" + component + "'.")
                     child = ResponsePage(relative, self.formatter,
                                          path_variable=path_variable)
                     container.dynamic_child = child
@@ -310,7 +310,7 @@ class RestServer(ResponsePage):
         if container.handlers.get(rendermethod, None):
             log.msg("Warning: Already have a %s here at %s..." %
                     (rendermethod, container.path))
-        #log.msg("Setting 'command_" + fullcommand + "' as '" + rendermethod + "' for container '" + container.path + "'.")
+        # log.msg("Setting 'command_" + fullcommand + "' as '" + rendermethod + "' for container '" + container.path + "'.")
         container.handlers[rendermethod] = handler
 
 ###############################################################################
@@ -488,7 +488,7 @@ class ResourcesCommandEntry(CommandEntry):
         """
         result = {}
         for (arg, req) in self.argument_requirments.items():
-            #log.msg("Checking for arg %s with required=%s" % (arg, req))
+            # log.msg("Checking for arg %s with required=%s" % (arg, req))
             if arg not in arguments:
                 if req:
                     raise ArgumentError("Missing mandatory argument %s" % arg)

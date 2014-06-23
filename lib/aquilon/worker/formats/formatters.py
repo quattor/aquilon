@@ -55,7 +55,7 @@ class ResponseFormatter(object):
         msgclass = desc_node.attrib["name"]
 
         if module in self.loaded_protocols and \
-           self.loaded_protocols[module] == False:
+           self.loaded_protocols[module] is False:
             raise ProtocolError("Protocol %s: previous import attempt was "
                                 "unsuccessful" % module)
 
@@ -380,7 +380,7 @@ class ObjectFormatter(object):
             # TODO: extra IP address/service address information
             # TODO: cluster-provided services
         # TODO: make this conditional to avoid performance problems
-        #for client in service_instance.clients:
+        # for client in service_instance.clients:
         #    self.add_host_data(si_msg.clients.add(), client.host)
 
     def add_service_map_data(self, sm_msg, service_map):

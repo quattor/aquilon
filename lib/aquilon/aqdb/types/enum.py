@@ -27,10 +27,10 @@ class StringEnum(object):
         if not isinstance(value, str):
             raise TypeError("String expected")
         if cls == StringEnum:
-            if not value in _StringEnum_Classes:
+            if value not in _StringEnum_Classes:
                 raise ValueError("Unknown StringEnum %s" % value)
             return _StringEnum_Classes[value]
-        if not value in cls._StringEnum__lookup:
+        if value not in cls._StringEnum__lookup:
             raise ValueError("Unknown %s %s" % (cls._class_label(), value))
         ivalue = cls._StringEnum__lookup[value]
         if ivalue._StringEnum__dynamic:
@@ -80,7 +80,7 @@ class StringEnum(object):
         if isinstance(value, cls):
             return value._StringEnum__value
         if isinstance(value, str):
-            if not value in cls._StringEnum__lookup:
+            if value not in cls._StringEnum__lookup:
                 raise ValueError("Unknown %s %s" % (cls._class_label(), value))
             ivalue = cls._StringEnum__lookup[value]
             if ivalue._StringEnum__dynamic:

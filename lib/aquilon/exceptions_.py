@@ -16,6 +16,7 @@
 # limitations under the License.
 """Exceptions to be used by Aquilon"""
 
+
 def deprecated(message):
     import warnings
     warnings.warn(message, DeprecationWarning, stacklevel=2)

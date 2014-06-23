@@ -28,7 +28,7 @@ class Machine(HardwareEntity):
     __tablename__ = 'machine'
     __mapper_args__ = {'polymorphic_identity': 'machine'}
 
-    #TODO: should this be named hardware_entity_id?
+    # TODO: should this be named hardware_entity_id?
     machine_id = Column(Integer, ForeignKey('hardware_entity.id',
                                             name='machine_hw_ent_fk',
                                             ondelete='CASCADE'),
@@ -37,7 +37,7 @@ class Machine(HardwareEntity):
     cpu_id = Column(Integer, ForeignKey('cpu.id', name='machine_cpu_fk'),
                     nullable=False)
 
-    #TODO: constrain/smallint
+    # TODO: constrain/smallint
     cpu_quantity = Column(Integer, nullable=False, default=2)
 
     memory = Column(Integer, nullable=False, default=512)
@@ -57,9 +57,9 @@ class Machine(HardwareEntity):
         else:
             return None
 
-#TODO: an __init__ (or other method) that could use DSDB to create itself?
-#   check if it exists in dbdb minfo, and get from there if it does
-#    and/or -dsdb option, and, make machine --like [other machine] + overrides
+# TODO: an __init__ (or other method) that could use DSDB to create itself?
+# check if it exists in dbdb minfo, and get from there if it does
+# and/or -dsdb option, and, make machine --like [other machine] + overrides
 
-#TODO: an __init__ that uses the machine specs to dynamically populate default
-#      values for all of the attrs where its possible
+# TODO: an __init__ that uses the machine specs to dynamically populate default
+# values for all of the attrs where its possible

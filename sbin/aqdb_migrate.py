@@ -144,7 +144,7 @@ if __name__ == '__main__':
             )
 
             # insert() is faster, but using .merge() is restartable
-            #dest_session.merge(NewRecord(**data))
+            # dest_session.merge(NewRecord(**data))
             dest_session.execute(table.insert().values(**data))
 
         signal.setitimer(signal.ITIMER_REAL, 0)

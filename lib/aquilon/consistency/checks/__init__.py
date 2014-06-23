@@ -41,4 +41,3 @@ for f in os.listdir(_thisdir):
                 continue
             if issubclass(cls, ConsistencyChecker):
                 consistency_check_classes.append(cls)
-

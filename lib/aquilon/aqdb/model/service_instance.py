@@ -185,7 +185,7 @@ class ServiceInstance(Base):
             if not missing_ids:
                 continue
 
-            ## get map by locations
+            # get map by locations
             q = session.query(map_type.location_id, ServiceInstance)
             q = q.filter(map_type.service_instance_id == ServiceInstance.id)
             if map_type == PersonalityServiceMap:

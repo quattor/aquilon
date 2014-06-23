@@ -148,10 +148,10 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
                 logger.client_info("Warning: {0:l} has no default route, hope "
                                    "that's ok.".format(dbhw_ent))
 
-        #Set this mac address last so that you can update to a bootable
-        #interface *before* adding a mac address. This is so the validation
-        #that takes place in the interface class doesn't have to be worried
-        #about the order of update to bootable=True and mac address
+        # Set this mac address last so that you can update to a bootable
+        # interface *before* adding a mac address. This is so the validation
+        # that takes place in the interface class doesn't have to be worried
+        # about the order of update to bootable=True and mac address
         if mac:
             q = session.query(Interface).filter_by(mac=mac)
             other = q.first()

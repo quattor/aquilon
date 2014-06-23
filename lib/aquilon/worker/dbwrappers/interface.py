@@ -50,8 +50,8 @@ def check_ip_restrictions(dbnetwork, ip, relaxed=False):
         Setting relaxed to true means checking only the most obvious problems.
     """
 
-    #TODO: if the network type doesn't have any applicable offsets, we
-    #      probably want to reserve the first ip for the gateway on all networks
+    # TODO: if the network type doesn't have any applicable offsets, we
+    # probably want to reserve the first ip for the gateway on all networks
     if ip is None:
         # Simple passthrough to make calling logic easier.
         return

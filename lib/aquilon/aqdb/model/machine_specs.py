@@ -32,7 +32,7 @@ from aquilon.aqdb.model.disk import controller_types
 
 class MachineSpecs(Base):
     """ Captures the configuration hardware components for a given model """
-    #TODO: Maybe this entire table is in fact a part of the model "subtype"
+    # TODO: Maybe this entire table is in fact a part of the model "subtype"
 
     __tablename__ = 'machine_specs'
 

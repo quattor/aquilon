@@ -84,7 +84,7 @@ class CommandAddPersonality(BrokerCommand):
                                                    "default_grn_target")))
 
         if copy_from:
-            ## copy config data
+            # copy config data
             dbfrom_persona = Personality.get_unique(session,
                                                     archetype=dbarchetype,
                                                     name=copy_from,
@@ -110,7 +110,7 @@ class CommandAddPersonality(BrokerCommand):
 
                 add_link(session, logger, link.feature, params)
 
-            ## service maps
+            # service maps
             q = session.query(PersonalityServiceMap).filter_by(personality=dbfrom_persona)
 
             for sm in q.all():
@@ -120,7 +120,7 @@ class CommandAddPersonality(BrokerCommand):
                                               personality=dbpersona)
                 session.add(dbmap)
 
-            ## required services
+            # required services
             dbpersona.services.extend(dbfrom_persona.services)
 
         session.flush()

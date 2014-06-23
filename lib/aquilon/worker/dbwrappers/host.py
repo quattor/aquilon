@@ -39,7 +39,6 @@ def create_host(session, logger, config, dbhw, dbarchetype, domain=None,
     # Section in the config used to determin defaults for this archetype
     section = "archetype_" + dbarchetype.name
 
-    ## branch/sandbox_author
     # Pick a default domain if not specified or impled by the sandbox
     if not domain and not sandbox:
         domain = config.get(section, "host_domain")
@@ -54,13 +53,11 @@ def create_host(session, logger, config, dbhw, dbarchetype, domain=None,
         raise ArgumentError("Adding hosts to {0:l} is not allowed."
                             .format(dbbranch))
 
-    # Build Status: defaults to build.
     if not buildstatus:
         buildstatus = 'build'
 
     dbstatus = HostLifecycle.get_instance(session, buildstatus)
 
-    ## Personality
     if not personality:
         if config.has_option(section, "default_personality"):
             personality = config.get(section, "default_personality")
@@ -71,7 +68,6 @@ def create_host(session, logger, config, dbhw, dbarchetype, domain=None,
                                            archetype=dbarchetype,
                                            compel=True)
 
-    ## Operating system
     if not osname:
         if config.has_option(section, "default_osname"):
             osname = config.get(section, "default_osname")
@@ -90,20 +86,17 @@ def create_host(session, logger, config, dbhw, dbarchetype, domain=None,
                                       version=osversion,
                                       archetype=dbarchetype, compel=True)
 
-    ## Lookup GRN's
     dbgrn = None
     if grn or eon_id:
         dbgrn = lookup_grn(session, grn, eon_id, logger=logger,
                            config=config)
 
-    ## Create Host
     dbhost = Host(hardware_entity=dbhw, branch=dbbranch,
                   owner_grn=dbgrn, sandbox_author=dbauthor,
                   personality=dbpersonality, status=dbstatus,
                   operating_system=dbos, comments=comments)
     session.add(dbhost)
 
-    ## Append GRNs
     if dbgrn and config.has_option(section, "default_grn_target"):
         dbhost.grns.append((dbhost, dbgrn,
                             config.get(section, "default_grn_target")))

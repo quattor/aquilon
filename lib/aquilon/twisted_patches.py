@@ -189,7 +189,7 @@ def integrate_logging(config):
         if logvalue not in logging._levelNames:
             # ...but ignore it if it is a default (accidently
             # polluting the section).
-            if not logname in config.defaults():
+            if logname not in config.defaults():
                 log.msg("For config [logging]/%s, "
                         "%s not a valid log level." % (logname, logvalue))
             continue

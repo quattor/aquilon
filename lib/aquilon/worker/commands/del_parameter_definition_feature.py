@@ -37,7 +37,7 @@ class CommandDelParameterDefintionFeature(BrokerCommand):
                                                  holder=dbfeature.paramdef_holder,
                                                  compel=True)
 
-        ## validate if this path is being used
+        # validate if this path is being used
         holder = search_path_in_personas(session, path, dbfeature.paramdef_holder)
         if holder:
             raise ArgumentError("Parameter with path {0} used by following and cannot be deleted : ".format(path) +

@@ -20,17 +20,17 @@ import aquilon.aqdb.depends
 from aquilon.aqdb.model.base import Base, SingleInstanceMixin
 from aquilon.aqdb.model.stateengine import StateEngine
 
-#AUTHORIZATION
+# AUTHORIZATION
 from aquilon.aqdb.model.role import Role
 from aquilon.aqdb.model.realm import Realm
 from aquilon.aqdb.model.user_principal import UserPrincipal
 from aquilon.aqdb.model.user import User
 from aquilon.aqdb.model.netgroup_whitelist import NetGroupWhiteList
 
-#DNS DOMAINS
+# DNS DOMAINS
 from aquilon.aqdb.model.dns_domain import DnsDomain
 
-#LOCATION
+# LOCATION
 from aquilon.aqdb.model.location import Location
 from aquilon.aqdb.model.company import Company
 from aquilon.aqdb.model.hub import Hub
@@ -44,7 +44,7 @@ from aquilon.aqdb.model.bunker import Bunker
 from aquilon.aqdb.model.rack import Rack
 from aquilon.aqdb.model.desk import Desk
 
-#NETWORK
+# NETWORK
 from aquilon.aqdb.model.dns_environment import DnsEnvironment
 from aquilon.aqdb.model.network_environment import NetworkEnvironment
 from aquilon.aqdb.model.network import Network
@@ -59,14 +59,14 @@ from aquilon.aqdb.model.srv_record import SrvRecord
 from aquilon.aqdb.model.ns_record import NsRecord
 from aquilon.aqdb.model.router_address import RouterAddress
 
-#CONFIG
+# CONFIG
 from aquilon.aqdb.model.grn import Grn
 from aquilon.aqdb.model.archetype import Archetype
 from aquilon.aqdb.model.host_environment import HostEnvironment
 from aquilon.aqdb.model.personality import Personality, PersonalityGrnMap
 from aquilon.aqdb.model.operating_system import OperatingSystem
 
-#HARDWARE
+# HARDWARE
 from aquilon.aqdb.model.vendor import Vendor
 from aquilon.aqdb.model.model import Model
 from aquilon.aqdb.model.hardware_entity import HardwareEntity, DeviceLinkMixin
@@ -76,11 +76,11 @@ from aquilon.aqdb.model.hostlifecycle import HostLifecycle
 from aquilon.aqdb.model.network_device import NetworkDevice
 from aquilon.aqdb.model.chassis import Chassis
 
-#HOST
+# HOST
 from aquilon.aqdb.model.branch import Branch, Domain, Sandbox
 from aquilon.aqdb.model.host import Host, HostGrnMap
 
-#HARDWARE/SYSTEM LINKAGES
+# HARDWARE/SYSTEM LINKAGES
 from aquilon.aqdb.model.observed_mac import ObservedMac
 from aquilon.aqdb.model.chassis_slot import ChassisSlot
 from aquilon.aqdb.model.vlan import ObservedVlan, VlanInfo
@@ -91,7 +91,7 @@ from aquilon.aqdb.model.interface import (Interface, PublicInterface,
                                           VirtualInterface, PhysicalInterface)
 from aquilon.aqdb.model.address_assignment import AddressAssignment
 
-#FEATURES
+# FEATURES
 from aquilon.aqdb.model.feature import (Feature, FeatureLink, HostFeature,
                                         HardwareFeature, InterfaceFeature)
 from aquilon.aqdb.model.parameter_definition import (ParamDefinition, ParamDefHolder,
@@ -99,7 +99,7 @@ from aquilon.aqdb.model.parameter_definition import (ParamDefinition, ParamDefHo
 from aquilon.aqdb.model.parameter import (Parameter, ParameterHolder,
                                           PersonalityParameter)
 
-#SERVICE
+# SERVICE
 from aquilon.aqdb.model.service import Service
 from aquilon.aqdb.model.service_instance import ServiceInstance
 from aquilon.aqdb.model.service_map import ServiceMap
@@ -107,7 +107,7 @@ from aquilon.aqdb.model.personality_service_map import PersonalityServiceMap
 
 from aquilon.aqdb.model.disk import Disk, LocalDisk
 
-#CLUSTER
+# CLUSTER
 from aquilon.aqdb.model.clusterlifecycle import ClusterLifecycle
 from aquilon.aqdb.model.cluster import (Cluster, EsxCluster,
                                         ComputeCluster, StorageCluster)
