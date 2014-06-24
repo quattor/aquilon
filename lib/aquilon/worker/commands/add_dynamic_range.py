@@ -24,12 +24,13 @@ from aquilon.aqdb.model import (DynamicStub, ARecord, DnsDomain, Fqdn,
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.dbwrappers.interface import check_ip_restrictions
+from aquilon.worker.dbwrappers.location import get_default_dns_domain
 from aquilon.worker.processes import DSDBRunner
 
 
 class CommandAddDynamicRange(BrokerCommand):
 
-    required_parameters = ["startip", "endip", "dns_domain"]
+    required_parameters = ["startip", "endip"]
 
     def render(self, session, logger, startip, endip, dns_domain, prefix,
                **arguments):
@@ -43,7 +44,12 @@ class CommandAddDynamicRange(BrokerCommand):
             raise ArgumentError("IP addresses %s (%s) and %s (%s) must be on "
                                 "the same subnet." %
                                 (startip, startnet.ip, endip, endnet.ip))
-        dbdns_domain = DnsDomain.get_unique(session, dns_domain, compel=True)
+
+        if dns_domain:
+            dbdns_domain = DnsDomain.get_unique(session, dns_domain,
+                                                compel=True)
+        else:
+            dbdns_domain = get_default_dns_domain(startnet.location)
 
         # Lock order: DNS domain, network
         dbdns_domain.lock_row()

@@ -1,0 +1,89 @@
+<?xml version="1.0"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V5.0//EN"
+"http://docbook.org/xml/5.0/dtd/docbook.dtd" [
+<!ENTITY aqd_version SYSTEM "../version.txt">
+]>
+<refentry xml:id="aq_del_dynamic_range"
+          xmlns="http://docbook.org/ns/docbook"
+	  xmlns:xi="http://www.w3.org/2001/XInclude">
+    <refmeta>
+        <refentrytitle>aq_del_dynamic_range</refentrytitle>
+        <manvolnum>1</manvolnum>
+        <refmiscinfo class="version">&aqd_version;</refmiscinfo>
+        <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
+    </refmeta>
+
+    <refnamediv>
+        <refname>aq del dynamic range</refname>
+        <refpurpose>
+	    Delete a dynamic DHCP IP address range
+        </refpurpose>
+	<refclass>Aquilon</refclass>
+    </refnamediv>
+
+    <refsynopsisdiv>
+	<cmdsynopsis>
+	    <command>aq del dynamic range</command>
+	    <group>
+		<synopfragmentref linkend="global-options">Global options</synopfragmentref>
+	    </group>
+	    <arg choice="plain"><option>--startip <replaceable>IP</replaceable></option></arg>
+	    <arg choice="plain"><option>--endip <replaceable>IP</replaceable></option></arg>
+	    <xi:include href="../common/global_options.xml"/>
+	</cmdsynopsis>
+	<cmdsynopsis>
+	    <command>aq del dynamic range</command>
+	    <arg choice="plain"><option>--clearnetwork <replaceable>NETWORK</replaceable></option></arg>
+	</cmdsynopsis>
+    </refsynopsisdiv>
+
+    <refsect1>
+        <title>Description</title>
+	<para>
+	    The <command>aq del dynamic range</command> command deletes a dynamic DHCP IP address range
+	    that was set up using the <command>aq add dynamic range</command> command.
+	</para>
+    </refsect1>
+
+    <refsect1>
+        <title>Options</title>
+	<variablelist>
+	    <title>Command-specific options</title>
+	    <varlistentry>
+	        <term>
+		    <option>--startip <replaceable>IP</replaceable></option>,
+		    <option>--endip <replaceable>IP</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Delete dynamic DHCP stub records in the specified range, inclusive. Both IP addresses
+			must be on the same network.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--clearnetwork <replaceable>NETWORK</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Delete all dynamic DHCP stubs inside the specified network.
+			<replaceable>NETWORK</replaceable> can be either the network's IP address,
+			or the network's name if the name is unique.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	</variablelist>
+	<xi:include href="../common/global_options_desc.xml"/>
+    </refsect1>
+
+    <refsect1>
+	<title>See also</title>
+	<para>
+	    <citerefentry><refentrytitle>aq_add_dynamic_range</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>aq_search_dns</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+	</para>
+    </refsect1>
+</refentry>
+
+<!-- vim: set ai sw=4: -->

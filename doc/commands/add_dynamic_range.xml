@@ -1,0 +1,139 @@
+<?xml version="1.0"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V5.0//EN"
+"http://docbook.org/xml/5.0/dtd/docbook.dtd" [
+<!ENTITY aqd_version SYSTEM "../version.txt">
+]>
+<refentry xml:id="aq_add_dynamic_range"
+          xmlns="http://docbook.org/ns/docbook"
+	  xmlns:xi="http://www.w3.org/2001/XInclude">
+    <refmeta>
+        <refentrytitle>aq_add_dynamic_range</refentrytitle>
+        <manvolnum>1</manvolnum>
+        <refmiscinfo class="version">&aqd_version;</refmiscinfo>
+        <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
+    </refmeta>
+
+    <refnamediv>
+        <refname>aq add dynamic range</refname>
+        <refpurpose>
+	    Set up an IP address range for dynamic DHCP
+        </refpurpose>
+	<refclass>Aquilon</refclass>
+    </refnamediv>
+
+    <refsynopsisdiv>
+	<cmdsynopsis>
+	    <command>aq add dynamic range</command>
+	    <group>
+		<synopfragmentref linkend="global-options">Global options</synopfragmentref>
+	    </group>
+	    <arg choice="plain"><option>--startip <replaceable>IP</replaceable></option></arg>
+	    <arg choice="plain"><option>--endip <replaceable>IP</replaceable></option></arg>
+	    <arg choice="opt"><option>--dns_domain <replaceable>DOMAIN</replaceable></option></arg>
+	    <arg choice="opt"><option>--prefix <replaceable>PREFIX</replaceable></option></arg>
+	    <xi:include href="../common/global_options.xml"/>
+	</cmdsynopsis>
+	<cmdsynopsis>
+	    <command>aq add dynamic range</command>
+	    <arg choice="plain"><option>--fillnetwork <replaceable>NETWORK</replaceable></option></arg>
+	    <arg choice="opt"><option>--dns_domain <replaceable>DOMAIN</replaceable></option></arg>
+	    <arg choice="opt"><option>--prefix <replaceable>PREFIX</replaceable></option></arg>
+	</cmdsynopsis>
+    </refsynopsisdiv>
+
+    <refsect1>
+        <title>Description</title>
+	<para>
+	    The <command>aq add dynamic range</command> command sets up an IP address range to be used
+	    for dynamic DHCP.
+	</para>
+	<para>
+	    Currently, this function just creates stub DNS entries for all the involved IP
+	    addresses. It's the task of the DHCP configuration generation process to interpret those
+	    stub records and convert them to real ranges.
+	</para>
+	<para>
+	    The format of the generated FQDNs is
+	    <literal><replaceable>PREFIX</replaceable>-<replaceable>IPSTR</replaceable>.<replaceable>DNS_DOMAIN</replaceable></literal>,
+	    where <replaceable>IPSTR</replaceable> is the numeric IP address, with dots being replaced by dashes. See
+	    the documentation of the <option>--dns_domain</option> and <option>--prefix</option> options below for
+	    the default values of <replaceable>DNS_DOMAIN</replaceable> and <replaceable>PREFIX</replaceable>.
+	</para>
+    </refsect1>
+
+    <refsect1>
+        <title>Options</title>
+	<variablelist>
+	    <title>Command-specific options</title>
+	    <varlistentry>
+	        <term>
+		    <option>--startip <replaceable>IP</replaceable></option>,
+		    <option>--endip <replaceable>IP</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			The <option>--startip</option> and <option>--endip</option> options specify the
+			IP address range to set up, inclusive. The two IP addresses must be on the same
+			network. If there are any DNS records or any network interfaces that use any of
+			the IP addresses included, then the command will fail.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--fillnetwork <replaceable>NETWORK</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			The <option>--fillnetwork</option> option causes all usable IP addresses in the
+			network to be configured for dynamic DHCP. The range of usable IP addresses is
+			determined by the type of the network. The first IP address to use is specified
+			by the <literal>first_usable_offset</literal> key in the
+			<literal>network_<replaceable>TYPE</replaceable></literal> section of the broker's
+			configuration. The last IP address to use is always the broadcast address minus one.
+		    </para>
+		    <para>
+			<replaceable>NETWORK</replaceable> can be either the network's IP address,
+			or the network's name if the name is unique.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--dns_domain <replaceable>DNS_DOMAIN</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			The name of the DNS domain where the stub records should be created. If not specified,
+			the broker will look for a default DNS domain assigned to the location of the network,
+			or its parent locations. If none of this locations have a default DNS domain assigned
+			and the <option>--dns_domain</option> option is not specified either, the command
+			will fail.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--prefix <replaceable>PREFIX</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			The prefix to use when generating FQDNs for the stub DNS entries. If not specified,
+			it defaults to <literal>dynamic</literal>.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	</variablelist>
+	<xi:include href="../common/global_options_desc.xml"/>
+    </refsect1>
+
+    <refsect1>
+	<title>See also</title>
+	<para>
+	    <citerefentry><refentrytitle>aq_del_dynamic_range</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>aq_search_dns</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+	</para>
+    </refsect1>
+</refentry>
+
+<!-- vim: set ai sw=4: -->

@@ -36,6 +36,8 @@ class TestAddDynamicRange(TestBrokerCommand):
                                   "building", "ut")
         self.net.allocate_network(self, "dyndhcp3", 28, "unknown",
                                   "building", "ut")
+        self.net.allocate_network(self, "dyndhcp4", 28, "unknown",
+                                  "building", "cards")
 
     def test_100_add_range(self):
         messages = []
@@ -126,18 +128,17 @@ class TestAddDynamicRange(TestBrokerCommand):
                          command)
         self.dsdb_verify()
 
-    def test_120_fillnetwork(self):
+    def test_120_fillnetwork_default_domain(self):
         messages = []
         for ip in range(int(self.net["dyndhcp3"].usable[0]),
                         int(self.net["dyndhcp3"].usable[-1]) + 1):
             address = IPv4Address(ip)
-            hostname = self.dynname(address)
+            hostname = self.dynname(address, domain="one-nyp.ms.com")
             self.dsdb_expect_add(hostname, address)
             messages.append("DSDB: add_host -host_name %s -ip_address %s "
                             "-status aq" % (hostname, address))
         command = ["add_dynamic_range",
-                   "--fillnetwork", self.net["dyndhcp3"].ip,
-                   "--dns_domain=aqd-unittest.ms.com"]
+                   "--fillnetwork", self.net["dyndhcp3"].ip]
         err = self.statustest(command)
         for message in messages:
             self.matchoutput(err, message, command)
@@ -151,10 +152,11 @@ class TestAddDynamicRange(TestBrokerCommand):
             self.noouttest(command)
             checkip += 1
         for ip in self.net["dyndhcp3"].usable:
-            command = ['search_dns', '--ip', checkip,
+            command = ['search_dns', '--ip', ip,
                        '--record_type=dynamic_stub']
             out = self.commandtest(command)
-            self.matchoutput(out, 'aqd-unittest.ms.com', command)
+            self.matchoutput(out, self.dynname(ip, domain="one-nyp.ms.com"),
+                             command)
         broadcast = self.net["dyndhcp3"].broadcast
         command = ['search_dns', '--ip', broadcast]
         self.noouttest(command)
@@ -230,6 +232,17 @@ class TestAddDynamicRange(TestBrokerCommand):
                          (self.net["dyndhcp1"].reserved[0],
                           self.net["dyndhcp1"].ip),
                          command)
+
+    def test_200_fail_no_default_dns_domain(self):
+        command = ["add_dynamic_range", "--fillnetwork", self.net["dyndhcp4"].ip]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "There is no default DNS domain configured for "
+                         "building cards.  Please specify --dns_domain.",
+                         command)
+
+    def test_800_cleanup(self):
+        self.net.dispose_network(self, 'dyndhcp4')
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddDynamicRange)

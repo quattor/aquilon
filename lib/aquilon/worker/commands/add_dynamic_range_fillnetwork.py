@@ -15,7 +15,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.commands.add_dynamic_range import CommandAddDynamicRange
 from aquilon.aqdb.model import Network, NetworkEnvironment
@@ -23,14 +22,15 @@ from aquilon.aqdb.model import Network, NetworkEnvironment
 
 class CommandAddDynamicRangeFillnetwork(CommandAddDynamicRange):
 
-    required_parameters = ["fillnetwork", "dns_domain"]
+    required_parameters = ["fillnetwork"]
 
-    def render(self, session, logger, fillnetwork, **arguments):
+    def render(self, session, fillnetwork, **arguments):
         dbnet_env = NetworkEnvironment.get_unique_or_default(session)
         dbnetwork = Network.get_unique(session, fillnetwork,
                                        network_environment=dbnet_env,
                                        compel=True)
+
         arguments['startip'] = dbnetwork.first_usable_host
         arguments['endip'] = dbnetwork.broadcast - 1
-        return CommandAddDynamicRange.render(self, session, logger,
-                                             **arguments)
+
+        return CommandAddDynamicRange.render(self, session, **arguments)

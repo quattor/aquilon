@@ -4360,17 +4360,15 @@
       For every IP address in the range a DNS entry will be generated of
       the form: prefix-X-X-X-X.subdomain where the X's are the components
       of the IP address.  The prefix defaults to the string 'dynamic'.
-      <optgroup name="add_dynamic_range_opts" mandatory="True" fields="all">
-         <option name="dns_domain" type="string" mandatory="True">DNS domain to use for the generated names</option>
-         <optgroup name="add_dynamic_range_specs" mandatory="True" fields="any">
-            <option name="fillnetwork" type="string" conflicts="startip endip">Allocate dynamic IPs for all available addresses in the network</option>
-            <optgroup name="add_dynamic_range_startend" fields="all">
-               <option name="startip" type="ipv4" conflicts="fillnetwork">First IP address in the range to add</option>
-               <option name="endip" type="ipv4" conflicts="fillnetwork">Last IP address in the range to add</option>
-            </optgroup>
+      <optgroup name="add_dynamic_range_opts" mandatory="True" fields="any">
+         <optgroup name="add_dynamic_range_startend" fields="all">
+            <option name="startip" type="ipv4" conflicts="fillnetwork">First IP address in the range to add</option>
+            <option name="endip" type="ipv4" conflicts="fillnetwork">Last IP address in the range to add</option>
          </optgroup>
+         <option name="fillnetwork" type="string" conflicts="startip endip">Allocate dynamic IPs for all available addresses in the network</option>
       </optgroup>
-      <optgroup name="add_dynamic_range_opts" mandatory="False" fields="any">
+      <optgroup name="add_dynamic_range_opts" mandatory="False">
+         <option name="dns_domain" type="string" mandatory="True">DNS domain to use for the generated names</option>
          <option name="prefix" type="string">Prefix to use for generated names, defaults to 'dynamic'</option>
       </optgroup>
       <transport method="put" path="dynamic_range/%(startip)s/%(endip)s" />
