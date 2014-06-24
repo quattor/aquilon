@@ -2904,6 +2904,7 @@
       </optgroup>
       <optgroup name="optional_opts" mandatory="False" fields="any">
          <option name="timezone" type="string">Timezone of the city (e.g. Europe/London)</option>
+         <option name="fullname" type="string">Full, descriptive name</option>
          <option name="campus" type="string">Campus (should be in the same hub)</option>
          <option name="default_dns_domain" type="string">Default DNS domain for new machines</option>
          <option name="comments" type="string">Comments</option>
