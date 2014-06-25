@@ -18,6 +18,8 @@
     Useful subroutines that don't fit in any place to particularly for aquilon.
 """
 
+from __future__ import print_function
+
 import errno
 import gzip
 import json
@@ -58,11 +60,11 @@ def kill_from_pid_file(pid_file):  # pragma: no cover
         p = f.read()
         f.close()
         pid = int(p)
-        print 'Killing pid %s' % pid
+        print('Killing pid %s' % pid)
         try:
             os.kill(pid, signal.SIGQUIT)
         except OSError, err:
-            print 'Failed to kill %s: %s' % (pid, err.strerror)
+            print('Failed to kill %s: %s' % (pid, err.strerror))
 
 
 def monkeypatch(cls):

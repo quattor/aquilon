@@ -21,8 +21,8 @@ Small utility to populate static objects (i.e. those that do not have plenary
 templates) in the database.
 """
 
-import os
-import sys
+from __future__ import print_function
+
 import logging
 from shlex import shlex
 from inspect import isclass
@@ -96,7 +96,7 @@ def parse_object(session, lexer, lookup=False, verbose=False):
             obj = cls.get_unique(session, compel=True, **params)
         else:
             if verbose:
-                print "Adding %s(%r)." % (cls.__name__, params)
+                print("Adding %s(%r)." % (cls.__name__, params))
             try:
                 obj = cls(**params)
                 session.add(obj)
@@ -176,8 +176,8 @@ def load_from_file(session, filename, verbose=False):
         session.rollback()
         raise SystemExit(err)
     except Exception:
-        print("%s caught exception, bailing out." %
-              lexer.error_leader(lexer.filename))
+        print(("%s caught exception, bailing out." %
+              lexer.error_leader(lexer.filename)))
         session.rollback()
         raise
 

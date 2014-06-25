@@ -16,6 +16,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """ The way to populate an aqdb instance """
+
+from __future__ import print_function
+
 import sys
 import logging
 import optparse
@@ -55,8 +58,8 @@ def importName(modulename, name):
     try:
         return getattr(module, name)
     except AttributeError:
-        print 'getattr(%s, %s) failed (modulename = %s)' % (module,
-                                                            name, modulename)
+        print('getattr(%s, %s) failed (modulename = %s)' % (module,
+                                                            name, modulename))
 
 
 def parse_cli(*args, **kw):

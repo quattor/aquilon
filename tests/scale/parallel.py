@@ -17,6 +17,7 @@
 # limitations under the License.
 """Scale test for parallel execution."""
 
+from __future__ import print_function
 
 import os
 import time
@@ -168,16 +169,16 @@ while queue or allocated:
 
 for key, values in results.items():
     if values:
-        print
-        print "%s:" % key
-        print str(values)
+        print()
+        print("%s:" % key)
+        print(str(values))
         values.sort()
         min = values[0]
-        print
-        print "  min: %d.%d seconds" % (min.seconds, min.microseconds)
+        print()
+        print("  min: %d.%d seconds" % (min.seconds, min.microseconds))
         max = values[-1]
-        print "  max: %d.%d seconds" % (max.seconds, max.microseconds)
-        print
+        print("  max: %d.%d seconds" % (max.seconds, max.microseconds))
+        print()
 
 
 #if __name__=='__main__':

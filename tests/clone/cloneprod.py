@@ -25,6 +25,8 @@ for a proid.
 
 """
 
+from __future__ import print_function
+
 import os
 import sys
 from subprocess import Popen
@@ -155,16 +157,15 @@ class Cloner(object):
             self.do_rsync = False
 
         if self.do_audit and not os.path.exists(self.audit_schema):
-            print >>sys.stderr, "Audit schema %s missing." % self.audit_schema
+            print("Audit schema %s missing." % self.audit_schema, file=sys.stderr)
             sys.exit(1)
 
         if not self.target_dsn.startswith('oracle'):
-            print >>sys.stderr, 'Can only copy into an Oracle database.'
+            print('Can only copy into an Oracle database.', file=sys.stderr)
             sys.exit(1)
         if self.target_db == self.source_db or \
            self.target_dsn.endswith(self.source_db):
-            print >>sys.stderr, \
-                    'Check to make sure config does not point at prod.'
+            print('Check to make sure config does not point at prod.', file=sys.stderr)
             sys.exit(1)
 
     def cloneprod(self):
@@ -174,7 +175,7 @@ class Cloner(object):
         self.add_audit()
         self.run_rsync()
         if self.warnings:
-            print >>sys.stderr, "/n".join(self.warnings)
+            print("/n".join(self.warnings), file=sys.stderr)
 
     def create_dumpfile(self):
         if not self.do_create:
@@ -190,7 +191,7 @@ class Cloner(object):
         p = Popen(exp_args, stdout=1, stderr=2)
         p.communicate()
         if p.returncode != 0:
-            print >>sys.stderr, "exp of %s failed!" % self.source_exp
+            print("exp of %s failed!" % self.source_exp, file=sys.stderr)
             sys.exit(p.returncode)
 
     def clear_target(self):
@@ -207,7 +208,7 @@ class Cloner(object):
                   stdout=1, stderr=2)
         p.communicate()
         if p.returncode != 0:
-            print >>sys.stderr, "imp to %s failed!" % self.target_imp
+            print("imp to %s failed!" % self.target_imp, file=sys.stderr)
             sys.exit(p.returncode)
 
     def add_audit(self):
@@ -217,7 +218,7 @@ class Cloner(object):
                   stdout=1, stderr=2)
         p.communicate()
         if p.returncode != 0:
-            print >>sys.stderr, "sqlplus to %s failed!" % self.target_imp
+            print("sqlplus to %s failed!" % self.target_imp, file=sys.stderr)
             sys.exit(p.returncode)
 
     def run_rsync(self):
@@ -233,7 +234,7 @@ class Cloner(object):
                   stdout=1, stderr=2)
         p.communicate()
         if p.returncode != 0:
-            print >>sys.stderr, "Rsync failed!"
+            print("Rsync failed!", file=sys.stderr)
             sys.exit(p.returncode)
 
 if __name__ == '__main__':

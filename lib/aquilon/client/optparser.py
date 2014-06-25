@@ -17,6 +17,8 @@
 # limitations under the License.
 """Option parsing for the aq client."""
 
+from __future__ import print_function
+
 import sys
 import os
 from optparse import OptionParser, OptionValueError
@@ -108,7 +110,7 @@ class CustomParser(OptionParser):
             p.communicate()
             exit(p.returncode)
         else:
-            print self.command.recursiveHelp(0, width=get_term_width())
+            print(self.command.recursiveHelp(0, width=get_term_width()))
 
 
 class ParsingError(StandardError):
@@ -552,7 +554,7 @@ class OptParser(object):
         helpmsg.append("aq COMMAND --help")
 
         if command == "help":
-            print "\n".join(helpmsg)
+            print("\n".join(helpmsg))
             exit(0)
         elif command:
             errmsg = "Command %s is not known!" % command
@@ -561,7 +563,7 @@ class OptParser(object):
 
         # The previous code used OptParser.error() which exits with return code
         # 2, but now we don't have the parser created yet
-        print >>sys.stderr, "%s\n\nError: %s" % ("\n".join(helpmsg), errmsg)
+        print("%s\n\nError: %s" % ("\n".join(helpmsg), errmsg), file=sys.stderr)
         sys.exit(2)
 
     def handle_command(self, cmd_node, global_node, options):

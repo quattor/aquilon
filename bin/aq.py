@@ -23,6 +23,7 @@ connect directly.
 
 '''
 
+from __future__ import print_function
 
 import sys
 import os
@@ -119,12 +120,11 @@ class CustomAction(object):
         p = Popen(("git", "status", "--porcelain"), stdout=PIPE, stderr=2)
         (out, err) = p.communicate()
         if p.returncode:
-            print >>sys.stderr, \
-                    "\nError running git status --porcelain, returncode %d" \
-                    % p.returncode
+            print("\nError running git status --porcelain, returncode %d" %
+                  p.returncode, file=sys.stderr)
             sys.exit(1)
         if out:
-            print >>sys.stderr, "Not ready to publish, found:\n%s" % out
+            print("Not ready to publish, found:\n%s" % out, file=sys.stderr)
             sys.exit(1)
 
         # Locate the top of the sandbox for the purposes of executing the
@@ -133,7 +133,7 @@ class CustomAction(object):
         (sandbox_dir, err) = p.communicate()
         sandbox_dir = sandbox_dir.strip()
         if p.returncode != 0:
-            print >>sys.stderr, "Failed to find toplevel of sandbox, aborting"
+            print("Failed to find toplevel of sandbox, aborting", file=sys.stderr)
             sys.exit(1)
         # Prevent the branch being published unless the unit tests pass
         testdir = os.path.join(sandbox_dir, 't')
@@ -144,8 +144,10 @@ class CustomAction(object):
                       cwd=testdir, env=self.env)
             p.wait()
             if p.returncode != 0:
-                print >>sys.stderr, "\nUnit tests failed, publish prohibited.",
-                print >>sys.stderr, '(Do you need to run a "make clean test"?)'
+                print("\nUnit tests failed, publish prohibited.", end=' ',
+                      file=sys.stderr)
+                print('(Do you need to run a "make clean test"?)',
+                      file=sys.stderr)
                 sys.exit(1)
 
         if "sandbox" in commandOptions:
@@ -157,14 +159,14 @@ class CustomAction(object):
         (out, err) = p.communicate()
 
         if out:
-            print >>sys.stdout, \
-                "\nThe following changes will be included in this push:\n"
-            print >>sys.stdout, "------------------------"
-            print >>sys.stdout, str(out)
-            print >>sys.stdout, "------------------------"
+            print("\nThe following changes will be included in this push:\n",
+                  file=sys.stdout)
+            print("------------------------", file=sys.stdout)
+            print(str(out), file=sys.stdout)
+            print("------------------------", file=sys.stdout)
         else:
-            print >>sys.stdout, \
-                "\nYou haven't made any changes on this branch\n"
+            print("\nYou haven't made any changes on this branch\n",
+                  file=sys.stdout)
             sys.exit(0)
 
         (handle, filename) = mkstemp()
@@ -172,8 +174,8 @@ class CustomAction(object):
             rc = Popen(("git", "bundle", "create", filename, revlist),
                        stdout=1, stderr=2).wait()
             if rc:
-                print >>sys.stderr, \
-                    "Error running git bundle create, returncode %d" % rc
+                print("Error running git bundle create, returncode %d" % rc,
+                      file=sys.stderr)
                 sys.exit(1)
 
             commandOptions["bundle"] = b64encode(file(filename).read())
@@ -192,32 +194,32 @@ def create_sandbox(pageData, noexec=False):
         (template_king_url, sandbox_name, user_base) = row[0:3]
         break
     if not os.path.exists(user_base):
-        print >>sys.stderr, "Cannot access user directory '%s'.  " \
-            "Is the share mounted and visible?" % user_base
+        print("Cannot access user directory '%s'.  Is the share mounted and "
+              "visible?" % user_base, file=sys.stderr)
         return 1
     sandbox_dir = os.path.join(user_base, sandbox_name)
     if os.path.exists(sandbox_dir):
         # This check is done broker-side as well.  This code should be
         # exercised rarely (and probably never).
-        print >>sys.stderr, "Sandbox directory '%s' already exists.  " \
-            "Use `git fetch` to update it or remove the directory " \
-                "and run `aq get`." % sandbox_dir
+        print("Sandbox directory '%s' already exists.  Use `git fetch` to "
+              "update it or remove the directory and run `aq get`." %
+              sandbox_dir, file=sys.stderr)
         return 1
     cmd = ("git", "clone", "--branch", sandbox_name,
            template_king_url, sandbox_name)
     if noexec:
-        print "cd '%s'" % user_base
-        print " ".join(["'%s'" % c for c in cmd])
+        print("cd '%s'" % user_base)
+        print(" ".join(["'%s'" % c for c in cmd]))
         return 0
     try:
         p = subprocess.Popen(cmd, cwd=user_base, stdin=None,
                              stdout=1, stderr=2)
     except OSError, e:
-        print >>sys.stderr, "Could not execute %s: %s" % (cmd, e)
+        print("Could not execute %s: %s" % (cmd, e), file=sys.stderr)
         return 1
     exit_status = p.wait()
     if exit_status == 0:
-        print "Created sandbox: %s" % sandbox_dir
+        print("Created sandbox: %s" % sandbox_dir)
     return exit_status
 
 
@@ -250,7 +252,7 @@ class StatusThread(Thread):
         # original request before we send the status request.
         while self.waiting_for_request:
             sleep(.1)
-        # print >>sys.stderr, "Attempting status connection..."
+        # print("Attempting status connection...", file=sys.stderr)
         # Ideally we would always make a noauth connection here, but we
         # only know the port that's been specified for this command -
         # so it's either the auth port or it's not.
@@ -279,11 +281,11 @@ class StatusThread(Thread):
 
         if res.status != httplib.OK:
             if self.debug:
-                print >>sys.stderr, "%s: %s" % (httplib.responses[res.status],
-                                                res.read())
+                print("%s: %s" % (httplib.responses[res.status], res.read()),
+                      file=sys.stderr)
             if self.retry <= 0:
-                print >>sys.stderr, \
-                    "Client status messages disabled, retries exceeded."
+                print("Client status messages disabled, retries exceeded.",
+                      file=sys.stderr)
             sconn.close()
             return
 
@@ -315,9 +317,10 @@ if __name__ == "__main__":
     try:
         (command, transport, commandOptions, globalOptions) = \
             parser.parse(sys.argv[1:])
-    except ParsingError, e:
-        print >>sys.stderr, '%s: %s' % (sys.argv[0], e.error)
-        print >>sys.stderr, '%s: Try --help for usage details.' % (sys.argv[0])
+    except ParsingError as e:
+        print('%s: %s' % (sys.argv[0], e.error), file=sys.stderr)
+        print('%s: Try --help for usage details.' % (sys.argv[0]),
+              file=sys.stderr)
         sys.exit(1)
 
     # Setting this as a global default.  It might make sense to set
@@ -348,12 +351,12 @@ if __name__ == "__main__":
     elif os.environ.get('AQSERVICE', None):
         aqservice = os.environ['AQSERVICE']
     elif globalOptions.get('aquser'):
-        print >>sys.stderr, "WARNING: --aquser is deprecated, " \
-                            "please use --aqservice"
+        print("WARNING: --aquser is deprecated, please use --aqservice",
+              file=sys.stderr)
         aqservice = globalOptions.get('aquser')
     elif os.environ.get('AQUSER', None):
-        print >>sys.stderr, "WARNING: AQUSER environment variable is " \
-                            "deprecated, please use AQSERVICE"
+        print("WARNING: AQUSER environment variable is deprecated, please use "
+              "AQSERVICE", file=sys.stderr)
         aqservice = os.environ['AQUSER']
     else:
         aqservice = default_aqservice
@@ -368,7 +371,7 @@ if __name__ == "__main__":
     globalOptions["aqservice"] = aqservice
 
     if transport is None:
-        print >>sys.stderr, "Unimplemented command ", command
+        print("Unimplemented command ", command, file=sys.stderr)
         exit(1)
 
     # Convert unicode options to strings
@@ -492,7 +495,8 @@ if __name__ == "__main__":
             RESTResource(conn, uri).post(**commandOptions)
 
         else:
-            print >>sys.stderr, "Unhandled transport method ", transport.method
+            print("Unhandled transport method ", transport.method,
+                  file=sys.stderr)
             sys.exit(1)
 
         # handle failed requests
@@ -503,20 +507,20 @@ if __name__ == "__main__":
     except (httplib.HTTPException, socket.error), e:
         # noauth connections
         if not hasattr(conn, "getError"):
-            print >>sys.stderr, "Error: %s" % e
+            print("Error: %s" % e, file=sys.stderr)
             sys.exit(1)
         # KNC connections
         msg = conn.getError()
         host_failed = "Failed to connect to %s" % host
         port_failed = "%s port %s" % (host_failed, port)
         if msg.find('Connection refused') >= 0:
-            print >>sys.stderr, "%s: Connection refused." % port_failed
+            print("%s: Connection refused." % port_failed, file=sys.stderr)
         elif msg.find('Connection timed out') >= 0:
-            print >>sys.stderr, "%s: Connection timed out." % port_failed
+            print("%s: Connection timed out." % port_failed, file=sys.stderr)
         elif msg.find('Unknown host') >= 0:
-            print >>sys.stderr, "%s: Unknown host." % host_failed
+            print("%s: Unknown host." % host_failed, file=sys.stderr)
         else:
-            print >>sys.stderr, "Error: %s: %s" % (repr(e), msg)
+            print("Error: %s: %s" % (repr(e), msg), file=sys.stderr)
         sys.exit(1)
 
     if status_thread:
@@ -530,8 +534,8 @@ if __name__ == "__main__":
     pageData = res.read()
 
     if res.status != httplib.OK:
-        print >>sys.stderr, "%s: %s" % (
-            httplib.responses.get(res.status, res.status), pageData)
+        print("%s: %s" % (httplib.responses.get(res.status, res.status),
+                          pageData), file=sys.stderr)
         if res.status == httplib.MULTI_STATUS and \
            globalOptions.get('partialok'):
             sys.exit(0)
@@ -541,13 +545,13 @@ if __name__ == "__main__":
 
     if transport.expect == 'command':
         if not globalOptions.get('exec'):
-            print pageData
+            print(pageData)
         else:
             try:
                 proc = subprocess.Popen(pageData, shell=True, stdin=sys.stdin,
                                         stdout=sys.stdout, stderr=sys.stderr)
             except OSError, e:
-                print >>sys.stderr, e
+                print(e, file=sys.stderr)
                 sys.exit(1)
 
             exit_status = proc.wait()
@@ -559,6 +563,6 @@ if __name__ == "__main__":
         if format == "proto" or format == "csv":
             sys.stdout.write(pageData)
         elif pageData:
-            print pageData
+            print(pageData)
 
     sys.exit(exit_status)

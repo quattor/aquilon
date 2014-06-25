@@ -22,6 +22,8 @@ This script is inteded to be used primarily by the template unit test. It could
 be extended later if that turns out to be useful.
 """
 
+from __future__ import print_function
+
 import sys
 import os
 from subprocess import call
@@ -99,7 +101,7 @@ def run_domain_compile(options, config):
     else:
         args.append("-Dpanc.batch.size=%s" % config.get("panc", "batch_size"))
 
-    print "Running %s" % " ".join(args)
+    print("Running %s" % " ".join(args))
     return call(args, env=panc_env, cwd=options.basedir)
 
 
