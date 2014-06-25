@@ -144,7 +144,8 @@ class Base(object):
             #
             # Heuristic: a word is an acronym if the last letter is in upper
             # case
-            label = ' '.join(map(lambda x: x if x[:-1].isupper() else x.lower(), parts))
+            label = ' '.join(x if x[:-1].isupper() else x.lower()
+                             for x in parts)
         return label
 
     def _get_instance_label(self):
@@ -364,7 +365,7 @@ class Base(object):
     def polymorphic_subclass(cls, value, msg, error=ArgumentError):
         value = value.strip().lower()
         mapper = inspect(cls)
-        if value not in mapper.polymorphic_map.keys():
+        if value not in mapper.polymorphic_map:
             valid_values = ", ".join(sorted(mapper.polymorphic_map.keys()))
             raise error("%s '%s'. The valid values are: %s." %
                         (msg, value, valid_values))

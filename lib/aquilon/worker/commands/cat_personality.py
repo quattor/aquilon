@@ -44,7 +44,7 @@ class CommandCatPersonality(BrokerCommand):
         elif param_tmpl:
             param_templates = get_parameters_by_tmpl(dbpersonality)
 
-            if param_tmpl in param_templates.keys():
+            if param_tmpl in param_templates:
                 values = param_templates[param_tmpl]
             else:
                 values = {}

@@ -193,7 +193,7 @@ class Parameter(Base):
 
         dref = self.value
         for ppart in pparts:
-            if ppart not in dref.keys():  # pylint: disable=E1101
+            if ppart not in dref:
                 dref[ppart] = {}
             dref = dref[ppart]
 
