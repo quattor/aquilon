@@ -192,15 +192,13 @@ class TestManage(TestBrokerCommand):
 
         command = ["search_host", "--cluster=utecl1"]
         out = self.commandtest(command)
-        members = out.splitlines()
-        members.sort()
+        members = sorted(out.splitlines())
         self.failUnless(members, "No hosts in output of %s." % command)
 
         command = ["search_host", "--cluster=utecl1",
                    "--sandbox=%s/utsandbox" % user]
         out = self.commandtest(command)
-        aligned = out.splitlines()
-        aligned.sort()
+        aligned = sorted(out.splitlines())
         self.failUnlessEqual(members, aligned,
                              "Not all utecl1 cluster members (%s) are in "
                              "sandbox utsandbox (%s)." % (members, aligned))

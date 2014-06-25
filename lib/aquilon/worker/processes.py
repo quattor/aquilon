@@ -707,9 +707,9 @@ class DSDBRunner(object):
         # Add the primary address first, and delete it last. The primary address
         # is identified by having an empty ['primary'] key (this is true for the
         # management address as well, but that does not matter).
-        sort_by_primary = lambda x, y: cmp(x['primary'] or "", y['primary'] or "")
-        adds.sort(sort_by_primary)
-        deletes.sort(sort_by_primary, reverse=True)
+        sort_by_primary = lambda x: x['primary'] or ""
+        adds.sort(key=sort_by_primary)
+        deletes.sort(key=sort_by_primary, reverse=True)
 
         for attrs in deletes:
             self.delete_host_details(**attrs)

@@ -131,13 +131,11 @@ class GrnHostListFormatter(ListFormatter):
                 details.append(indent + hstr + " [inherited]")
 
             eon_targets = [grn.target for grn in host._grns]
-            for (target, eon_id_set) in host.effective_grns.iteritems():
+            for target, eon_id_set in host.effective_grns.iteritems():
                 inherited = ""
-                eon_id_list = list(eon_id_set)
-                eon_id_list.sort()
-                if target not in set(eon_targets):
+                if target not in eon_targets:
                     inherited = " [inherited]"
-                for grn_rec in eon_id_list:
+                for grn_rec in sorted(eon_id_set):
                     details.append(indent + "  Used by {0:c}: {0.grn} "
                                             "[target: {1}]{2}"
                                             .format(grn_rec, target, inherited))

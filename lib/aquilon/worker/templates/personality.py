@@ -192,10 +192,8 @@ class PlenaryPersonalityBase(Plenary):
         for grn_rec in self.dbobj._grns:
             eon_id_map[grn_rec.target].add(grn_rec.grn.eon_id)
 
-        for (target, eon_id_set) in eon_id_map.iteritems():
-            eon_id_list = list(eon_id_set)
-            eon_id_list.sort()
-            for eon_id in eon_id_list:
+        for target, eon_id_set in eon_id_map.iteritems():
+            for eon_id in sorted(eon_id_set):
                 pan_append(lines, "/system/eon_id_maps/%s" % target, eon_id)
 
         section = "archetype_" + self.dbobj.archetype.name
@@ -203,23 +201,17 @@ class PlenaryPersonalityBase(Plenary):
         if self.config.has_option(section, "default_grn_target"):
             default_grn_target = self.config.get(section, "default_grn_target")
 
-            eon_id_set = eon_id_map[default_grn_target]
-
-            eon_id_list = list(eon_id_set)
-            eon_id_list.sort()
-            for eon_id in eon_id_list:
+            for eon_id in sorted(eon_id_map[default_grn_target]):
                 pan_append(lines, "/system/eon_ids", eon_id)
 
         pan_assign(lines, "/system/personality/owner_eon_id",
                    self.dbobj.owner_eon_id)
 
-        user_list = [dbusr.name for dbusr in self.dbobj.root_users]
-        user_list.sort()
+        user_list = sorted(dbusr.name for dbusr in self.dbobj.root_users)
         if user_list:
             pan_assign(lines, "/system/root_users", user_list)
 
-        ng_list = ["%s" % ng for ng in self.dbobj.root_netgroups]
-        ng_list.sort()
+        ng_list = sorted(str(ng) for ng in self.dbobj.root_netgroups)
         if ng_list:
             pan_assign(lines, "/system/root_netgroups", ng_list)
 

@@ -528,13 +528,9 @@ class OptParser(object):
         helpmsg.append("Available commands are:")
         helpmsg.append("")
 
-        commands = []
-        for node in self.tree.getiterator("command"):
-            name = node.get("name")
-            if name != "*":
-                commands.append(name)
-
-        commands.sort()
+        commands = sorted([node.get("name")
+                           for node in self.tree.getiterator("command")
+                           if node.get("name") != "*"])
 
         maxlen = max([len(s) for s in commands]) + 4
         columns = (width - 4) / maxlen

@@ -96,7 +96,7 @@ class PlenaryClusterData(StructurePlenary):
         #     v = value("/" + host + "/system/foo/bar/baz");
         # );
         pan_assign(lines, "system/cluster/members",
-                   sorted([member.fqdn for member in self.dbobj.hosts]))
+                   sorted(member.fqdn for member in self.dbobj.hosts))
 
         lines.append("")
         if self.dbobj.resholder:
@@ -108,8 +108,8 @@ class PlenaryClusterData(StructurePlenary):
         pan_assign(lines, "system/build", self.dbobj.status.name)
         if self.dbobj.allowed_personalities:
             pan_assign(lines, "system/cluster/allowed_personalities",
-                       sorted(["%s/%s" % (p.archetype.name, p.name)
-                               for p in self.dbobj.allowed_personalities]))
+                       sorted("%s/%s" % (p.archetype.name, p.name)
+                              for p in self.dbobj.allowed_personalities))
 
         fname = "body_%s" % self.dbobj.cluster_type
         if hasattr(self, fname):

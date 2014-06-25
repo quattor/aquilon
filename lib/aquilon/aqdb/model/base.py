@@ -376,8 +376,8 @@ class Base(object):
         if not cls.populate_table_on_create:
             return
 
-        names = inspect(cls).polymorphic_map.keys()
-        names.sort()  # beautification only
+        # Sorting is for beautification only
+        names = sorted(inspect(cls).polymorphic_map.keys())
         stmt = table.insert()
         for name in names:
             try:
