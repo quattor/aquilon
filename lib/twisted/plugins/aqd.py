@@ -88,7 +88,7 @@ class AQDMaker(object):
         # Start up coverage ASAP.
         coverage_dir = options["coveragedir"]
         if coverage_dir:
-            os.makedirs(coverage_dir, 0755)
+            os.makedirs(coverage_dir, 0o755)
             if options["coveragerc"]:
                 coveragerc = options["coveragerc"]
             else:
@@ -170,8 +170,8 @@ class AQDMaker(object):
 
         sockdir = config.get("broker", "sockdir")
         if not os.path.exists(sockdir):
-            os.makedirs(sockdir, 0700)
-        os.chmod(sockdir, 0700)
+            os.makedirs(sockdir, 0o700)
+        os.chmod(sockdir, 0o700)
 
         if options["usesock"]:
             return strports.service("unix:%s/aqdsock" % sockdir, openSite)

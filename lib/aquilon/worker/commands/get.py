@@ -57,7 +57,7 @@ class CommandGet(BrokerCommand):
         if not os.path.exists(userdir):
             try:
                 logger.client_info("creating %s" % userdir)
-                os.makedirs(userdir, mode=0775)
+                os.makedirs(userdir, mode=0o775)
             except OSError as e:
                 raise ArgumentError("failed to mkdir %s: %s" % (userdir, e))
 

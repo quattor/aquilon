@@ -292,7 +292,7 @@ def write_file(filename, content, mode=None, compress=None,
         try:
             old_mode = os.stat(filename).st_mode
         except OSError:
-            old_mode = 0644
+            old_mode = 0o644
     dirname, basename = os.path.split(filename)
 
     if not os.path.exists(dirname) and create_directory:
