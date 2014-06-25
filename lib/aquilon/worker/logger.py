@@ -85,4 +85,4 @@ class RequestLogger(Logger):
         if self.manager.disable >= CLIENT_INFO:
             return
         if CLIENT_INFO >= self.getEffectiveLevel():
-            apply(self._log, (CLIENT_INFO, msg, args), kwargs)
+            self._log(CLIENT_INFO, msg, args, **kwargs)
