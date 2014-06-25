@@ -158,7 +158,7 @@ class CommandAddInterfaceAddress(BrokerCommand):
                     if dbhost.archetype.name == 'aurora':
                         try:
                             dsdb_runner.show_host(dbdns_rec.fqdn.name)
-                        except ProcessException, e:
+                        except ProcessException as e:
                             raise ArgumentError("Could not find host in DSDB: "
                                                 "%s" % e)
                     else:

@@ -107,7 +107,7 @@ class QIPRefresh(object):
                 self.session.flush()
             if self.incremental:
                 self.session.commit()
-        except Exception, err:  # pragma: no cover
+        except Exception as err:  # pragma: no cover
             self.error(str(err))
             self.session.rollback()
 
@@ -340,7 +340,7 @@ class QIPRefresh(object):
                 if self.building and qipinfo.location.building != self.building:
                     continue
                 qipnetworks[qipinfo.address.ip] = qipinfo
-            except ValueError, err:
+            except ValueError as err:
                 self.error("%s; skipping line %d: %s" % (err, linecnt, line))
 
         # Check/update network attributes that do not affect other objects. Do

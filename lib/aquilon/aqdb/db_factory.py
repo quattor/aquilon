@@ -147,7 +147,7 @@ class DbFactory(object):
             try:
                 log.info("Loading module %s." % module)
                 cmd.load(module)
-            except ModulecmdExecError, err:
+            except ModulecmdExecError as err:
                 log.error("Failed to load module %s: %s" % (module, err))
 
         pool_options = {}
@@ -221,7 +221,7 @@ class DbFactory(object):
                 connection = self.engine.connect()
                 connection.close()
                 return
-            except DatabaseError, e:
+            except DatabaseError as e:
                 errs.append(e)
 
         if errs:

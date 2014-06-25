@@ -102,11 +102,11 @@ def parse_object(session, lexer, lookup=False, verbose=False):
                 session.add(obj)
                 session.flush()
                 session.expire(obj)
-            except IntegrityError, err:
+            except IntegrityError as err:
                 lexer.error(err)
-    except ArgumentError, err:
+    except ArgumentError as err:
         lexer.error(err)
-    except NotFoundException, err:
+    except NotFoundException as err:
         lexer.error(err)
     return obj
 
@@ -172,7 +172,7 @@ def load_from_file(session, filename, verbose=False):
     try:
         while parse_object(session, lexer, verbose=verbose) is not None:
             pass
-    except ValueError, err:
+    except ValueError as err:
         session.rollback()
         raise SystemExit(err)
     except Exception:

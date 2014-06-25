@@ -47,7 +47,7 @@ def read_file(option, opt, value, parser):
     try:
         with open(value) as f:
             setattr(parser.values, option.dest, f.read())
-    except Exception, e:
+    except Exception as e:
         raise OptionValueError("Error opening '%s' for %s: %s" %
                                (value, opt, e))
 
@@ -113,10 +113,10 @@ class CustomParser(OptionParser):
             print(self.command.recursiveHelp(0, width=get_term_width()))
 
 
-class ParsingError(StandardError):
+class ParsingError(Exception):
 
     def __init__(self, errorMessage, helpMessage=''):
-        StandardError.__init__(self)
+        Exception.__init__(self)
         self.help = helpMessage
         self.error = errorMessage
 
@@ -170,7 +170,7 @@ class Command(Element):
         for optgroup in self.optgroups:
             try:
                 (res, found) = optgroup.check(options)
-            except ParsingError, e:
+            except ParsingError as e:
                 e.help = self.recursiveHelp(0, width=get_term_width())
                 raise e
             result.update(res)
@@ -591,7 +591,7 @@ class OptParser(object):
         try:
             dummy, global_options = glb.check(opts)
             transport, command_options = cmd.check(opts)
-        except ParsingError, e:
+        except ParsingError as e:
             self.parser.set_usage(e.help)
             self.parser.error(e.error)
         return cmd.name, transport, command_options, global_options

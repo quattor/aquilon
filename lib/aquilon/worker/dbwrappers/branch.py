@@ -88,7 +88,7 @@ def remove_branch(config, logger, dbbranch):
     try:
         run_git(["branch", "-D", dbbranch.name],
                 path=kingdir, logger=logger)
-    except ProcessException, e:
+    except ProcessException as e:
         logger.warning("Error removing branch %s from template-king, "
                        "proceeding anyway: %s", dbbranch.name, e)
 

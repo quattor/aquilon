@@ -128,7 +128,7 @@ class CommandReconfigureList(BrokerCommand):
                                                   archetype=dbarchetype,
                                                   compel=True)
                     personalities[dbhost.fqdn] = pers
-                except NotFoundException, err:
+                except NotFoundException as err:
                     failed.append("%s: %s" % (dbhost.fqdn, err))
             if grn or eon_id:
                 dbhost.owner_grn = dbgrn
@@ -163,7 +163,7 @@ class CommandReconfigureList(BrokerCommand):
                 choosers.append(chooser)
                 try:
                     chooser.set_required()
-                except ArgumentError, e:
+                except ArgumentError as e:
                     failed.append(str(e))
         if failed:
             raise ArgumentError("The following hosts failed service "
@@ -198,7 +198,7 @@ class CommandReconfigureList(BrokerCommand):
                 for template in plenaries.plenaries:
                     try:
                         template.write(locked=True)
-                    except IncompleteError, err:
+                    except IncompleteError as err:
                         # Ignore IncompleteError for hosts added indirectly,
                         # e.g. servers of service instances. It is debatable
                         # if this is the right thing to do, but it preserves the

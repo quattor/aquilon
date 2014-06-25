@@ -44,7 +44,7 @@ class CommandAddAuroraHost(CommandAddHost):
         dsdb_runner = DSDBRunner(logger=logger)
         try:
             fields = dsdb_runner.show_host(hostname)
-        except ProcessException, e:
+        except ProcessException as e:
             raise ArgumentError("Could not find %s in DSDB: %s" %
                                 (hostname, e))
 
@@ -84,7 +84,7 @@ class CommandAddAuroraHost(CommandAddHost):
                                       rack_row=rack_fields["rack_row"],
                                       rack_column=rack_fields["rack_col"])
                         session.add(dbrack)
-                    except (ProcessException, ValueError), e:
+                    except (ProcessException, ValueError) as e:
                         logger.client_info("Rack %s not defined in DSDB." % rack)
                 dblocation = dbrack or dbbuilding
                 chassis = rack + "c" + cid
@@ -118,7 +118,7 @@ class CommandAddAuroraHost(CommandAddHost):
 
                 try:
                     host_ip = gethostbyname(hostname)
-                except gaierror, e:
+                except gaierror as e:
                     raise ArgumentError("Error when looking up host: %d, %s" %
                                         (e.errno, e.strerror))
 

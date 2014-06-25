@@ -16,13 +16,12 @@
 # limitations under the License.
 """Wrappers for using knc with the stock twisted server implementations."""
 
+import logging
 from twisted.web import http
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.worker.base_protocol import AQDRequest, AQDSite
-
-import logging
 from aquilon.utils import force_ascii, force_ipv4
+from aquilon.worker.base_protocol import AQDRequest, AQDSite
 
 LOGGER = logging.getLogger(__name__)
 
@@ -89,7 +88,7 @@ class KNCHTTPChannel(http.HTTPChannel):
                 if key in self.__KNC_fields:
                     try:
                         self.kncinfo[key] = self.__KNC_fields[key](key, value)
-                    except ArgumentError, e:
+                    except ArgumentError as e:
                         raise KNCProtocolException(e.message)
 
     def lineReceived(self, line):
@@ -97,7 +96,7 @@ class KNCHTTPChannel(http.HTTPChannel):
             self.resetTimeout()
             try:
                 self.kncLineReceived(line)
-            except KNCProtocolException, e:
+            except KNCProtocolException as e:
                 self.logger.warning("Closed KNC Connection: %s" % e.message)
                 self.transport.write("HTTP/1.1 400 Bad KNC Request\r\n\r\n")
                 self.transport.loseConnection()

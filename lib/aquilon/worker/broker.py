@@ -234,7 +234,7 @@ class BrokerCommand(object):
                     # Force connecting to the DB
                     try:
                         conn = session.connection()
-                    except DatabaseError, err:
+                    except DatabaseError as err:
                         raise TransientError("Failed to connect to the "
                                              "database: %s" % err)
 
@@ -283,7 +283,7 @@ class BrokerCommand(object):
                 if session:
                     session.commit()
                 return retval
-            except Exception, e:
+            except Exception as e:
                 raising_exception = e
                 # Need to close after the rollback, or the next time session
                 # is accessed it tries to commit the transaction... (?)

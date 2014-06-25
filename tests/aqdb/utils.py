@@ -39,14 +39,14 @@ def load_classpath():
 def commit(sess):
     try:
         sess.commit()
-    except Exception, e:
+    except Exception as e:
         sess.rollback()
         raise e
 
 def add(sess, obj):
     try:
         sess.add(obj)
-    except Exception, e:
+    except Exception as e:
         sess.rollback()
         raise e
 

@@ -78,7 +78,7 @@ class WrappedHTTPConnection(ChunkedHTTPConnection):
                                        stdin=subprocess.PIPE,
                                        stdout=subprocess.PIPE,
                                        stderr=subprocess.PIPE)
-        except OSError, e:
+        except OSError as e:
             raise httplib.NotConnected(e)
 
         self.sock = ProcessWrapper(process)

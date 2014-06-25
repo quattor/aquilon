@@ -63,7 +63,7 @@ def kill_from_pid_file(pid_file):  # pragma: no cover
         print('Killing pid %s' % pid)
         try:
             os.kill(pid, signal.SIGQUIT)
-        except OSError, err:
+        except OSError as err:
             print('Failed to kill %s: %s' % (pid, err.strerror))
 
 
@@ -93,7 +93,7 @@ def force_ipv4(label, value):
         return value
     try:
         return IPv4Address(value)
-    except AddressValueError, e:
+    except AddressValueError as e:
         raise ArgumentError("Expected an IPv4 address for %s: %s" % (label, e))
 
 
@@ -207,7 +207,7 @@ def force_json_dict(label, value):
         return None
     try:
         value = json.loads(value)
-    except ValueError, e:
+    except ValueError as e:
         raise ArgumentError("The json string specified for %s is invalid : %s"
                             % (label, e))
     return value
@@ -233,13 +233,13 @@ def remove_dir(dir, logger=LOGGER):
             try:
                 thisfile = os.path.join(root, name)
                 os.remove(thisfile)
-            except OSError, e:
+            except OSError as e:
                 logger.info("Failed to remove '%s': %s", thisfile, e)
         for name in dirs:
             try:
                 thisdir = os.path.join(root, name)
                 os.rmdir(thisdir)
-            except OSError, e:
+            except OSError as e:
                 # If this 'directory' is a symlink, the rmdir command
                 # will fail.  Try to remove it as a file.  If this
                 # fails, report the original error.
@@ -249,7 +249,7 @@ def remove_dir(dir, logger=LOGGER):
                     logger.info("Failed to remove '%s': %s", thisdir, e)
     try:
         os.rmdir(dir)
-    except OSError, e:
+    except OSError as e:
         logger.info("Failed to remove '%s': %s", dir, e)
     return
 
@@ -315,7 +315,7 @@ def write_file(filename, content, mode=None, compress=None,
 def remove_file(filename, cleanup_directory=False, logger=LOGGER):
     try:
         os.remove(filename)
-    except OSError, e:
+    except OSError as e:
         if e.errno != errno.ENOENT:
             logger.info("Could not remove file '%s': %s", filename, e)
     if cleanup_directory:

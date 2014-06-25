@@ -83,7 +83,7 @@ class CommandPublish(BrokerCommand):
                     found = run_git(['rev-list', dbsandbox.name],
                                     filterre=filterre, path=temprepo,
                                     logger=logger)
-                except ProcessException, pe:
+                except ProcessException as pe:
                     if pe.code != 128:
                         raise
                     else:
@@ -101,7 +101,7 @@ class CommandPublish(BrokerCommand):
                 target_ref = dbsandbox.name
             run_git(["push", "origin", target_ref],
                     path=temprepo, logger=logger)
-        except ProcessException, e:
+        except ProcessException as e:
             raise ArgumentError("\n%s%s" % (e.out, e.err))
         finally:
             remove_file(filename, logger=logger)
@@ -116,7 +116,7 @@ class CommandPublish(BrokerCommand):
                 continue
             try:
                 sync_domain(domain, logger=logger)
-            except ProcessException, e:
+            except ProcessException as e:
                 logger.warn("Error syncing domain %s: %s" % (domain.name, e))
 
         return client_command

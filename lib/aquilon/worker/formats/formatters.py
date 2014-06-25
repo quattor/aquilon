@@ -72,7 +72,7 @@ class ResponseFormatter(object):
 
             try:
                 self.loaded_protocols[module] = __import__(module)
-            except ImportError, err:  # pragma: no cover
+            except ImportError as err:  # pragma: no cover
                 self.loaded_protocols[module] = False
                 raise ProtocolError("Protocol %s: %s" % (module, err))
 

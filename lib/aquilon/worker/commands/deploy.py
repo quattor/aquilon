@@ -131,7 +131,7 @@ class CommandDeploy(BrokerCommand):
                 run_git(["merge", "--no-ff", "origin/%s" % dbsource.name,
                          "-m", "\n".join(merge_msg)],
                         path=temprepo, logger=logger, loglevel=CLIENT_INFO)
-            except ProcessException, e:
+            except ProcessException as e:
                 # No need to re-print e, output should have gone to client
                 # immediately via the logger.
                 raise ArgumentError("Failed to merge changes from %s into %s" %
@@ -153,7 +153,7 @@ class CommandDeploy(BrokerCommand):
         # fundamentally wrong with the repos.
         try:
             sync_domain(dbtarget, logger=logger)
-        except ProcessException, e:
+        except ProcessException as e:
             logger.warn("Error syncing domain %s: %s" % (dbtarget.name, e))
 
         if not sync or not dbtarget.autosync:
@@ -164,7 +164,7 @@ class CommandDeploy(BrokerCommand):
                 continue
             try:
                 sync_domain(domain, logger=logger)
-            except ProcessException, e:
+            except ProcessException as e:
                 logger.warn("Error syncing domain %s: %s" % (domain.name, e))
 
         return

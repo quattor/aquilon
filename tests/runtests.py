@@ -191,7 +191,7 @@ for dirname in dirs:
     try:
         if not os.path.exists(dirname):
             os.makedirs(dirname)
-    except OSError, e:
+    except OSError as e:
         print("Could not create %s: %s" % (dirname, e), file=sys.stderr)
 
 # Set up DSDB coverage directory

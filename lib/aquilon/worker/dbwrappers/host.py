@@ -181,10 +181,10 @@ def hostlist_to_hosts(session, hostlist):
                 raise NotFoundException("Host %s not found." % host)
             dbhosts.append(dbdns_rec.hardware_entity.host)
 
-        except NotFoundException, err:
+        except NotFoundException as err:
             failed.append("%s: %s" % (host, err))
             continue
-        except ArgumentError, err:
+        except ArgumentError as err:
             failed.append("%s: %s" % (host, err))
             continue
 

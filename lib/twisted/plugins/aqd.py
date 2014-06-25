@@ -74,7 +74,7 @@ def make_required_dirs(config):
             continue
         try:
             os.makedirs(dir)
-        except OSError, e:
+        except OSError as e:
             log.msg("Could not create directory '%s': %s" % (dir, e))
 
 
@@ -241,7 +241,7 @@ class AQDMaker(object):
                 log.msg("Attempting to remove old socket '%s'" % sockname)
                 os.remove(sockname)
                 log.msg("Succeeded removing old socket.")
-            except OSError, e:
+            except OSError as e:
                 log.msg("Could not remove old socket '%s': %s" % (sockname, e))
 
         unixsocket = "unix:%s" % sockname

@@ -77,7 +77,7 @@ def fake_gethostbyname(hostname):
 
         return host_ip
 
-    except IOError, e:
+    except IOError as e:
         # To have the cause in aqd.log
         raise gaierror(-2, "Name or service not known %s" % e)
 

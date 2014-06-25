@@ -468,7 +468,7 @@ class ResourcesCommandEntry(CommandEntry):
             try:
                 enum_class = StringEnum(enumtype)
                 self.parameter_checks[option_name] = enum_class.from_argument
-            except ValueError, e:
+            except ValueError as e:
                 log.msg("Unknown Enum: %s" % e)
                 return
         else:

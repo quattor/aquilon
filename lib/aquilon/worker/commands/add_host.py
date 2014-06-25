@@ -75,7 +75,7 @@ class CommandAddHost(BrokerCommand):
             if not skip_dsdb_check:
                 try:
                     dsdb_runner.show_host(hostname)
-                except ProcessException, e:
+                except ProcessException as e:
                     raise ArgumentError("Could not find host in DSDB: "
                                         "%s" % e)
             # As the host already exists in DSDB we don't need a snapshot

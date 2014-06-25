@@ -214,7 +214,7 @@ def create_sandbox(pageData, noexec=False):
     try:
         p = subprocess.Popen(cmd, cwd=user_base, stdin=None,
                              stdout=1, stderr=2)
-    except OSError, e:
+    except OSError as e:
         print("Could not execute %s: %s" % (cmd, e), file=sys.stderr)
         return 1
     exit_status = p.wait()
@@ -504,7 +504,7 @@ if __name__ == "__main__":
             status_thread.waiting_for_request = False
         res = conn.getresponse()
 
-    except (httplib.HTTPException, socket.error), e:
+    except (httplib.HTTPException, socket.error) as e:
         # noauth connections
         if not hasattr(conn, "getError"):
             print("Error: %s" % e, file=sys.stderr)
@@ -550,7 +550,7 @@ if __name__ == "__main__":
             try:
                 proc = subprocess.Popen(pageData, shell=True, stdin=sys.stdin,
                                         stdout=sys.stdout, stderr=sys.stderr)
-            except OSError, e:
+            except OSError as e:
                 print(e, file=sys.stderr)
                 sys.exit(1)
 

@@ -202,7 +202,7 @@ def start_xtn(session, xtn_id, username, command, is_readonly, details, ignore):
 
     try:
         session.commit()
-    except Exception, e:  # pragma: no cover
+    except Exception as e:  # pragma: no cover
         session.rollback()
         log.error(e)
         # Abort the command if a log entry cannot be created.
@@ -220,7 +220,7 @@ def end_xtn(session, xtn_id, return_code, results=None):
 
     try:
         session.commit()
-    except Exception, e:  # pragma: no cover
+    except Exception as e:  # pragma: no cover
         session.rollback()
         log.error(e)
         # Swallow the error - can't do anything about this, and the

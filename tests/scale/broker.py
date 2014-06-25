@@ -89,7 +89,7 @@ class AQBroker(object):
                 continue
             try:
                 os.makedirs(dir)
-            except OSError, e:
+            except OSError as e:
                 print("Could not create %s: %s" % (dir, e), file=sys.stderr)
         
         dirs = []
@@ -107,7 +107,7 @@ class AQBroker(object):
                     raise ProcessException(code=p.returncode)
             try:
                 os.makedirs(dir)
-            except OSError, e:
+            except OSError as e:
                 print("Could not create %s: %s" % (dir, e), file=sys.stderr)
         
         template_source = "git://nyaqd1/quattor/template-king"

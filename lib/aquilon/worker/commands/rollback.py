@@ -70,7 +70,7 @@ class CommandRollback(BrokerCommand):
                 run_git(["fetch"], path=domaindir, logger=logger)
                 run_git(["reset", "--hard", "origin/%s" % dbdomain.name],
                         path=domaindir, logger=logger)
-            except ProcessException, e:
+            except ProcessException as e:
                 raise ArgumentError("Problem encountered updating templates "
                                     "for domain %s: %s", dbdomain.name, e)
 

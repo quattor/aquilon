@@ -58,7 +58,7 @@ class CommandGet(BrokerCommand):
             try:
                 logger.client_info("creating %s" % userdir)
                 os.makedirs(userdir, mode=0775)
-            except OSError, e:
+            except OSError as e:
                 raise ArgumentError("failed to mkdir %s: %s" % (userdir, e))
 
             args = [self.config.get("broker", "mean")]
@@ -69,7 +69,7 @@ class CommandGet(BrokerCommand):
             args.append("%s" % userdir)
             try:
                 run_command(args, logger=logger)
-            except ProcessException, e:
+            except ProcessException as e:
                 remove_dir(userdir)
                 raise e
 
