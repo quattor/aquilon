@@ -17,7 +17,7 @@
 """Base classes for formatting objects."""
 
 import csv
-import cStringIO
+from cStringIO import StringIO
 import sys
 from operator import attrgetter
 
@@ -91,7 +91,7 @@ class ResponseFormatter(object):
         return ObjectFormatter.redirect_raw(result)
 
     def format_csv(self, result, request):
-        strbuf = cStringIO.StringIO()
+        strbuf = StringIO()
         writer = csv.writer(strbuf, dialect='aquilon')
         ObjectFormatter.redirect_csv(result, writer)
         return strbuf.getvalue()

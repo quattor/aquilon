@@ -17,7 +17,7 @@
 # limitations under the License.
 """Module for tests that bypass the aq client."""
 
-import urllib
+from urllib import urlencode, urlopen, quote
 
 if __name__ == "__main__":
     import utils
@@ -37,15 +37,15 @@ class TestClientBypass(TestBrokerCommand):
         server = self.config.get("broker", "servername")
         url = "http://" + server + ":" + openport + path
         if post:
-            data = urllib.urlencode(kwargs)
-            stream = urllib.urlopen(url, data)
+            data = urlencode(kwargs)
+            stream = urlopen(url, data)
         else:
             arglist = []
             for key, value in kwargs.items():
-                arglist.append("%s=%s" % (urllib.quote(key), urllib.quote(value)))
+                arglist.append("%s=%s" % (quote(key), quote(value)))
             if arglist:
                 url += "?" + "&".join(arglist)
-            stream = urllib.urlopen(url)
+            stream = urlopen(url)
         status = stream.getcode()
         output = "\n".join(stream.readlines())
         self.assertEqual(status, expect_status,

@@ -15,8 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
-import httplib
+from httplib import NotConnected
 import subprocess
 import os
 
@@ -45,7 +44,7 @@ class ProcessWrapper(object):
 
     def send(self, stuff, flags=0):
         if self.process.poll():
-            raise httplib.NotConnected()
+            raise NotConnected()
 
         return self._stdin.write(stuff)
 
@@ -53,7 +52,7 @@ class ProcessWrapper(object):
 
     def recv(self, len=1024, flags=0):
         if self.process.poll():
-            raise httplib.NotConnected()
+            raise NotConnected()
 
         return self._stdout.read(len)
 
@@ -64,7 +63,7 @@ class ProcessWrapper(object):
 class WrappedHTTPConnection(ChunkedHTTPConnection):
 
     def __init__(self, executable, host, port, service=None, strict=None):
-        httplib.HTTPConnection.__init__(self, host, port, strict)
+        ChunkedHTTPConnection.__init__(self, host, port, strict)
         self.executable = executable
         self.service = service
 
@@ -79,7 +78,7 @@ class WrappedHTTPConnection(ChunkedHTTPConnection):
                                        stdout=subprocess.PIPE,
                                        stderr=subprocess.PIPE)
         except OSError as e:
-            raise httplib.NotConnected(e)
+            raise NotConnected(e)
 
         self.sock = ProcessWrapper(process)
         self._process = process

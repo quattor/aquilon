@@ -27,7 +27,7 @@ from __future__ import print_function
 
 import sys
 import os
-import urllib
+from urllib import urlencode, quote
 import re
 import subprocess
 import socket
@@ -66,7 +66,7 @@ class RESTResource(object):
         return self._sendRequest('GET')
 
     def post(self, **kwargs):
-        postData = urllib.urlencode(kwargs)
+        postData = urlencode(kwargs)
         mimeType = 'application/x-www-form-urlencoded'
         return self._sendRequest('POST', postData, mimeType)
 
@@ -298,8 +298,7 @@ class StatusThread(Thread):
 
 
 def quoteOptions(options):
-    return "&".join([urllib.quote(k) + "=" + urllib.quote(v)
-                     for k, v in options.iteritems()])
+    return "&".join([quote(k) + "=" + quote(v) for k, v in options.iteritems()])
 
 
 if __name__ == "__main__":
@@ -393,7 +392,7 @@ if __name__ == "__main__":
         # urllib.quote() does not escape '/' by default. We have to turn off
         # this behavior because otherwise a parameter containing '/' would
         # confuse the URL parsing logic on the server side.
-        cleanOptions[k] = urllib.quote(v, safe='')
+        cleanOptions[k] = quote(v, safe='')
 
     # Decent amount of magic here...
     # Even though the server connection might be tunneled through
@@ -410,7 +409,7 @@ if __name__ == "__main__":
     # tacking on (for example) .html to the uri.
     # Do not apply any formatting for commands (transport.expect == 'command').
     if 'format' in globalOptions and not transport.expect:
-        extension = '.' + urllib.quote(globalOptions["format"])
+        extension = '.' + quote(globalOptions["format"])
 
         query_index = uri.find('?')
         if query_index > -1:
@@ -487,7 +486,7 @@ if __name__ == "__main__":
         elif transport.method == 'put':
             # FIXME: This will need to be more complicated.
             # In some cases, we may even need to call code here.
-            putData = urllib.urlencode(commandOptions)
+            putData = urlencode(commandOptions)
             mimeType = 'application/x-www-form-urlencoded'
             RESTResource(conn, uri).put(putData, mimeType)
 
