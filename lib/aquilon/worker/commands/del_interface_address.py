@@ -16,10 +16,12 @@
 # limitations under the License.
 """Contains the logic for `aq del interface address`."""
 
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from functools import partial
+
+from aquilon.worker.broker import BrokerCommand
 from aquilon.exceptions_ import ArgumentError, IncompleteError
 from aquilon.aqdb.model import (HardwareEntity, Interface, AddressAssignment,
-                                ARecord, NetworkEnvironment)
+                                DnsDomain, Fqdn, ARecord, NetworkEnvironment)
 from aquilon.worker.dbwrappers.dns import delete_dns_record
 from aquilon.worker.dbwrappers.service_instance import check_no_provided_service
 from aquilon.worker.processes import DSDBRunner
@@ -79,6 +81,15 @@ class CommandDelInterfaceAddress(BrokerCommand):
         dbnetwork = addr.network
         ip = addr.ip
 
+        # Lock order: DNS domain(s), network
+        q = session.query(DnsDomain.id)
+        q = q.join(Fqdn, ARecord)
+        q = q.filter_by(network=dbnetwork, ip=ip)
+        q = q.order_by(DnsDomain.id)
+        q = q.with_lockmode("update")
+        session.execute(q)
+        dbnetwork.lock_row()
+
         if dbnetwork.network_environment != dbnet_env:
             raise ArgumentError("The specified address lives in {0:l}, not in "
                                 "{1:l}.  Use the --network_environment option "
@@ -97,16 +108,14 @@ class CommandDelInterfaceAddress(BrokerCommand):
         # Check if the address was assigned to multiple interfaces, and remove
         # the DNS entries if this was the last use
         q = session.query(AddressAssignment)
-        q = q.filter_by(network=dbnetwork)
-        q = q.filter_by(ip=ip)
+        q = q.filter_by(network=dbnetwork, ip=ip)
         other_uses = q.all()
         if not other_uses and not keep_dns:
             q = session.query(ARecord)
-            q = q.filter_by(network=dbnetwork)
-            q = q.filter_by(ip=ip)
+            q = q.filter_by(network=dbnetwork, ip=ip)
             q = q.join(ARecord.fqdn)
             q = q.filter_by(dns_environment=dbnet_env.dns_environment)
-            map(delete_dns_record, q.all())
+            map(partial(delete_dns_record, locked=True), q.all())
 
         session.flush()
 

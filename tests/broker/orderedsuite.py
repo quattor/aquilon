@@ -275,6 +275,7 @@ from test_setup_params import TestSetupParams
 from test_consistency import TestConsistency
 from test_root_access import TestRootAccess
 from test_refresh_user import TestRefreshUser
+from test_justification import TestJustification
 
 
 class BrokerTestSuite(unittest.TestSuite):
@@ -349,6 +350,7 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestUnbindClient, TestRebindClient, TestReconfigure,
                      TestChangeStatus, TestResetAdvertisedStatus,
                      TestParameter, TestParameterFeature,
+                     TestJustification,
                      TestRefreshWindowsHosts,
                      TestChooserConstraints,
                      TestCompile,

@@ -20,19 +20,29 @@
 from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.aqdb.model import Personality, Service
+from aquilon.worker.dbwrappers.personality import validate_personality_justification
+
 
 
 class CommandAddRequiredServicePersonality(BrokerCommand):
 
     required_parameters = ["service", "archetype", "personality"]
 
-    def render(self, session, service, archetype, personality, **arguments):
-        dbpersonality = Personality.get_unique(session, name=personality,
-                                               archetype=archetype, compel=True)
-        dbservice = Service.get_unique(session, service, compel=True)
+    def _update_dbobj(self, archetype, dbpersonality, dbservice):
         if dbpersonality in dbservice.personalities:
             raise ArgumentError("Service %s is already required by personality "
-                                "%s, archetype %s." % (service, personality,
+                                "%s, archetype %s." % (dbservice.name,
+                                                       dbpersonality.name,
                                                        archetype))
         dbservice.personalities.append(dbpersonality)
+
+    def render(self, session, service, archetype, personality, justification,
+               reason, user, **arguments):
+        dbpersonality = Personality.get_unique(session, name=personality,
+                                               archetype=archetype, compel=True)
+        validate_personality_justification(dbpersonality, user, justification, reason)
+        dbservice = Service.get_unique(session, service, compel=True)
+
+        self._update_dbobj(archetype, dbpersonality, dbservice)
+        session.flush()
         return

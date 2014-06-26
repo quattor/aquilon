@@ -74,8 +74,6 @@ class CommandDelAddressDNSEnvironment(BrokerCommand):
             raise NotFoundException("DNS Record %s is not unique." %
                                     ", ".join(parts))
 
-        dbaddress.network.lock_row()
-
         if dbaddress.hardware_entity:
             raise ArgumentError("DNS Record {0:a} is the primary name of "
                                 "{1:l}, therefore it cannot be "
@@ -93,23 +91,10 @@ class CommandDelAddressDNSEnvironment(BrokerCommand):
                                 "DHCP, use del_dynamic_range to delete it."
                                 .format(dbaddress))
 
-        # Do not allow deleting the DNS record if the IP address is still in
-        # use - except if there are other DNS records having the same
-        # address
-        if dbaddress.assignments:
-            last_use = []
-            for addr in dbaddress.assignments:
-                if len(addr.dns_records) == 1:
-                    last_use.append(addr)
-            if last_use:
-                users = " ,".join([format(addr.interface, "l") for addr in
-                                   last_use])
-                raise ArgumentError("IP address %s is still in use by %s." %
-                                    (ip, users))
         ip = dbaddress.ip
         old_fqdn = str(dbaddress.fqdn)
         old_comments = dbaddress.comments
-        delete_dns_record(dbaddress)
+        delete_dns_record(dbaddress, verify_assignments=True)
         session.flush()
 
         if dbdns_env.is_default:

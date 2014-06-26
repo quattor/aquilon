@@ -221,19 +221,23 @@ class TestUnmapService(TestBrokerCommand):
         self.noouttest(["unmap", "service", "--building", "ut",
                         "--service", "esx_management_server",
                         "--instance", "ut.a", "--archetype", "vmhost",
-                        "--personality", "vulcan-1g-desktop-prod"])
+                        "--personality", "vulcan-1g-desktop-prod",
+                        "--justification", "tcm=12345678"])
         self.noouttest(["unmap", "service", "--building", "ut",
                         "--service", "esx_management_server",
                         "--instance", "ut.b", "--archetype", "vmhost",
-                        "--personality", "vulcan-1g-desktop-prod"])
+                        "--personality", "vulcan-1g-desktop-prod",
+                        "--justification", "tcm=12345678"])
         self.noouttest(["unmap", "service", "--building", "ut",
                         "--service", "vmseasoning", "--instance", "salt",
                         "--archetype", "vmhost",
-                        "--personality", "vulcan-1g-desktop-prod"])
+                        "--personality", "vulcan-1g-desktop-prod",
+                        "--justification", "tcm=12345678"])
         self.noouttest(["unmap", "service", "--building", "ut",
                         "--service", "vmseasoning", "--instance", "pepper",
                         "--archetype", "vmhost",
-                        "--personality", "vulcan-1g-desktop-prod"])
+                        "--personality", "vulcan-1g-desktop-prod",
+                        "--justification", "tcm=12345678"])
 
     def testverifyunmapesx(self):
         command = ["show_map", "--archetype=vmhost",

@@ -23,30 +23,30 @@ from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.sql import or_, and_
 
 from aquilon.exceptions_ import ArgumentError, AquilonError, NotFoundException
-from aquilon.aqdb.model import (Fqdn, DnsRecord, ARecord, DynamicStub, Alias,
-                                ReservedName, SrvRecord, DnsEnvironment,
-                                AddressAssignment, NetworkEnvironment)
+from aquilon.aqdb.model import (Fqdn, DnsDomain, DnsRecord, ARecord,
+                                DynamicStub, Alias, ReservedName, SrvRecord,
+                                DnsEnvironment, AddressAssignment,
+                                NetworkEnvironment)
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.worker.dbwrappers.interface import check_ip_restrictions
 
 
-def delete_dns_record(dbdns_rec):
+def delete_dns_record(dbdns_rec, locked=False, verify_assignments=False):
     """
     Delete a DNS record
 
     Deleting a DNS record is a bit tricky because we do not want to keep
     orphaned FQDN entries.
+
+    Set locked=True if the involved DNS domain(s) and network are already locked
+    by the caller.
+
+    Set verify_assignments=True to forbid removing a DNS record which is still
+    in use.
     """
 
     session = object_session(dbdns_rec)
-
-    if dbdns_rec.aliases:
-        raise ArgumentError("{0} still has aliases, delete them "
-                            "first.".format(dbdns_rec))
-    if dbdns_rec.srv_records:
-        raise ArgumentError("{0} is still in use by SRV records, delete them "
-                            "first.".format(dbdns_rec))
 
     dbfqdn = dbdns_rec.fqdn
     targets = []
@@ -55,15 +55,39 @@ def delete_dns_record(dbdns_rec):
     if getattr(dbdns_rec, 'target', None):
         targets.append(dbdns_rec.target)
 
-    # Lock the affected DNS domains
-    dns_domains = [dbfqdn.dns_domain]
-    for tgt in targets:
-        if tgt.dns_domain in dns_domains:
-            continue
-        dns_domains.append(tgt.dns_domain)
-    dns_domains.sort()  # poor man's deadlock avoidance
-    for dbdns_domain in dns_domains:
-        dbdns_domain.lock_row()
+    # Lock order: DNS domain(s), network
+    if not locked:
+        dns_domains = [dbfqdn.dns_domain]
+        for tgt in targets:
+            if tgt.dns_domain in dns_domains:
+                continue
+            dns_domains.append(tgt.dns_domain)
+        DnsDomain.lock_rows(dns_domains)
+
+        if hasattr(dbdns_rec, 'network'):
+            dbdns_rec.network.lock_row()
+
+    if dbdns_rec.aliases:
+        raise ArgumentError("{0} still has aliases, delete them "
+                            "first.".format(dbdns_rec))
+    if dbdns_rec.srv_records:
+        raise ArgumentError("{0} is still in use by SRV records, delete them "
+                            "first.".format(dbdns_rec))
+
+    # Do not allow deleting the DNS record if the IP address is still in
+    # use - except if there are other DNS records having the same
+    # address. Don't perform the test though if the caller is about to change
+    # those assignments
+    if verify_assignments and hasattr(dbdns_rec, 'assignments'):
+        last_use = []
+        for addr in dbdns_rec.assignments:
+            if len(addr.dns_records) == 1:
+                last_use.append(addr)
+        if last_use:
+            users = " ,".join([format(addr.interface, "l") for addr in
+                               last_use])
+            raise ArgumentError("IP address %s is still in use by %s." %
+                                (dbdns_rec.ip, users))
 
     # Delete the DNS record
     session.delete(dbdns_rec)

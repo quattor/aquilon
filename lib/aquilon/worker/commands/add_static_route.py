@@ -22,6 +22,7 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.aqdb.model import NetworkEnvironment, StaticRoute, Personality
 from aquilon.aqdb.model.network import get_net_id_from_ip
+from aquilon.worker.dbwrappers.personality import validate_personality_justification
 from aquilon.worker.dbwrappers.network import get_network_byip
 
 
@@ -31,7 +32,7 @@ class CommandAddStaticRoute(BrokerCommand):
 
     def render(self, session, logger, gateway, networkip, ip, netmask,
                prefixlen, network_environment, comments, personality,
-               archetype, **arguments):
+               archetype, justification, reason, user, **arguments):
         dbnet_env = NetworkEnvironment.get_unique_or_default(session,
                                                              network_environment)
 
@@ -74,6 +75,8 @@ class CommandAddStaticRoute(BrokerCommand):
                                                    name=personality,
                                                    archetype=archetype,
                                                    compel=True)
+            validate_personality_justification(dbpersonality, user,
+                                               justification, reason)
         else:
             dbpersonality = None
 

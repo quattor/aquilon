@@ -22,6 +22,7 @@ from aquilon.aqdb.model import (Personality, Service, ServiceMap,
                                 PersonalityServiceMap, NetworkEnvironment)
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.dbwrappers.service_instance import get_service_instance
+from aquilon.worker.dbwrappers.personality import validate_personality_justification
 from aquilon.worker.dbwrappers.network import get_network_byip
 
 
@@ -30,7 +31,7 @@ class CommandMapService(BrokerCommand):
     required_parameters = ["service", "instance"]
 
     def render(self, session, service, instance, archetype, personality,
-               networkip, **kwargs):
+               networkip, justification, reason, user, **kwargs):
 
         dbservice = Service.get_unique(session, service, compel=True)
         dblocation = get_location(session, **kwargs)
@@ -52,6 +53,8 @@ class CommandMapService(BrokerCommand):
             dbpersona = Personality.get_unique(session, name=personality,
                                                archetype=archetype, compel=True)
 
+            validate_personality_justification(dbpersona, user,
+                                               justification, reason)
             map_class = PersonalityServiceMap
             query = session.query(map_class).filter_by(personality=dbpersona)
 

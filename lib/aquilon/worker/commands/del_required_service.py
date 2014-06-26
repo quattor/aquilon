@@ -28,12 +28,12 @@ class CommandDelRequiredService(BrokerCommand):
     required_parameters = ["service", "archetype"]
 
     def render(self, session, service, archetype, justification, user,
-               **arguments):
+               reason, **arguments):
         if not justification:
             raise AuthorizationException("Changing the required services of "
                                          "an archetype requires "
                                          "--justification.")
-        validate_justification(user, justification)
+        validate_justification(user, justification, reason)
         dbarchetype = Archetype.get_unique(session, archetype, compel=True)
         dbservice = Service.get_unique(session, service, compel=True)
         try:

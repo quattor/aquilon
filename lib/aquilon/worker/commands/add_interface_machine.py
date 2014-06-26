@@ -16,13 +16,9 @@
 # limitations under the License.
 """Contains the logic for `aq add interface --machine`."""
 
-
-from sqlalchemy.sql.expression import asc, desc
-
 from aquilon.exceptions_ import ArgumentError, UnimplementedError
 from aquilon.aqdb.model import Interface, Machine, ARecord, Fqdn, EsxCluster
-from aquilon.aqdb.model.network import get_net_id_from_ip
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.dns import delete_dns_record
 from aquilon.worker.dbwrappers.interface import (get_or_create_interface,
                                                  describe_interface,
@@ -99,22 +95,22 @@ class CommandAddInterfaceMachine(BrokerCommand):
                 # FIXME: Is this just always allowed?  Maybe restrict
                 # to only aqd-admin and the host itself?
                 dummy_machine = prev.hardware_entity
-                dummy_ip = dummy_machine.primary_ip
+                old_ip = dummy_machine.primary_name.ip
+                old_network = dummy_machine.primary_name.network
                 old_fqdn = str(dummy_machine.primary_name)
                 old_iface = prev.name
                 old_mac = prev.mac
-                old_network = get_net_id_from_ip(session, dummy_ip)
                 self.remove_prev(session, logger, prev, pending_removals)
                 session.flush()
-                dsdb_runner.delete_host_details(old_fqdn, dummy_ip, old_iface,
+                dsdb_runner.delete_host_details(old_fqdn, old_ip, old_iface,
                                                 old_mac)
                 self.consolidate_names(session, logger, dbmachine,
-                                       dummy_machine.label, pending_removals)
+                                       dummy_machine.label)
                 # It seems like a shame to throw away the IP address that
                 # had been allocated for the blind host.  Try to use it
                 # as it should be used...
                 dbmanager = self.add_manager(session, logger, dbmachine,
-                                             dummy_ip, old_network)
+                                             old_ip, old_network)
             elif prev:
                 msg = describe_interface(session, prev)
                 raise ArgumentError("MAC address %s is already in use: %s." %
@@ -149,16 +145,13 @@ class CommandAddInterfaceMachine(BrokerCommand):
             assign_address(dbinterface, dbmanager.ip, dbmanager.network,
                            logger=logger)
 
-        session.add(dbinterface)
         session.flush()
 
         plenaries = PlenaryCollection(logger=logger)
         plenaries.append(Plenary.get_plenary(dbmachine))
-        if pending_removals and dbmachine.host:
-            # Not an exact test, but the file won't be re-written
-            # if the contents are the same so calling too often is
-            # not a major expense.
+        if dbmachine.host:
             plenaries.append(Plenary.get_plenary(dbmachine.host))
+
         # Even though there may be removals going on the write key
         # should be sufficient here.
         with plenaries.get_key():
@@ -186,29 +179,25 @@ class CommandAddInterfaceMachine(BrokerCommand):
         """Remove the interface 'prev' and its host and machine."""
         # This should probably be re-factored to call code used elsewhere.
         # The below seems too simple to warrant that, though...
+        dbmachine = prev.hardware_entity
         logger.info("Removing blind host '%s', machine '%s', "
                     "and interface '%s'" %
-                    (prev.hardware_entity.fqdn, prev.hardware_entity.label,
-                     prev.name))
-        host_plenary_info = Plenary.get_plenary(prev.hardware_entity.host,
-                                                logger=logger)
+                    (dbmachine.fqdn, dbmachine.label, prev.name))
+
         # FIXME: Should really do everything that del_host.py does, not
         # just remove the host plenary but adjust all the service
         # plenarys and dependency files.
-        pending_removals.append(host_plenary_info)
-        dbmachine = prev.hardware_entity
-        machine_plenary_info = Plenary.get_plenary(dbmachine, logger=logger)
-        pending_removals.append(machine_plenary_info)
-        # This will cascade to prev & the host
-        if dbmachine.primary_name:
-            dbdns_rec = dbmachine.primary_name
-            dbmachine.primary_name = None
-            delete_dns_record(dbdns_rec)
-        session.delete(dbmachine)
-        session.flush()
+        pending_removals.append(Plenary.get_plenary(dbmachine.host,
+                                                    logger=logger))
+        pending_removals.append(Plenary.get_plenary(dbmachine, logger=logger))
 
-    def consolidate_names(self, session, logger, dbmachine, dummy_machine_name,
-                          pending_removals):
+        dbdns_rec = dbmachine.primary_name
+        dbmachine.primary_name = None
+        session.delete(dbmachine)
+
+        delete_dns_record(dbdns_rec)
+
+    def consolidate_names(self, session, logger, dbmachine, dummy_machine_name):
         short = dbmachine.label[:-1]
         if short != dummy_machine_name[:-1]:
             logger.client_info("Not altering name of machine %s, name of "
@@ -226,10 +215,7 @@ class CommandAddInterfaceMachine(BrokerCommand):
             return
         logger.client_info("Renaming machine %s to %s." %
                            (dbmachine.label, short))
-        pending_removals.append(Plenary.get_plenary(dbmachine))
         dbmachine.label = short
-        session.add(dbmachine)
-        session.flush()
 
     def add_manager(self, session, logger, dbmachine, old_ip, old_network):
         if not old_ip:
@@ -286,8 +272,12 @@ class CommandAddInterfaceMachine(BrokerCommand):
 
         q = session.query(Interface.mac)
         q = q.filter(Interface.mac.between(str(mac_start), str(mac_end)))
-        q = q.with_lockmode("update")
         q = q.order_by(Interface.mac)
+
+        # Prevent concurrent --automac invocations. We need a separate query for
+        # the FOR UPDATE, because a blocked query won't see the value inserted
+        # by the blocking query.
+        session.execute(q.with_lockmode("update"))
 
         existing_macs = [MACAddress(row.mac) for row in q]
         if not existing_macs:

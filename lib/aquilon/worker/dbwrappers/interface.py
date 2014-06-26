@@ -32,7 +32,7 @@ from aquilon.aqdb.types import NicType
 from aquilon.exceptions_ import ArgumentError, InternalError
 from aquilon.aqdb.model import (Interface, ObservedMac, Fqdn, ARecord, VlanInfo,
                                 ObservedVlan, AddressAssignment, Model, Bunker,
-                                Location, HardwareEntity)
+                                Location, HardwareEntity, Network)
 from aquilon.aqdb.model.network import get_net_id_from_ip
 
 
@@ -299,9 +299,7 @@ def choose_port_group(logger, dbmachine):
     selected_capacity = 0
 
     # Protect agains concurrent --autopg invocations.
-    for dbnet in sorted([vlan.network for vlan in dbnetdev.observed_vlans],
-                        key=attrgetter('id')):
-        dbnet.lock_row()
+    Network.lock_rows([vlan.network for vlan in dbnetdev.observed_vlans])
 
     for vlan in sorted(dbnetdev.observed_vlans, key=attrgetter('vlan_id')):
         if vlan.vlan_type != 'user':

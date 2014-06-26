@@ -1636,6 +1636,8 @@
 	 <option name="archetype" type="string">archetype name</option>
          <option name="network_environment" type="string">Network environment (default: internal)</option>
          <option name="comments" type="string">Comments</option>
+         <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
+         <option name="reason" type="string">String to be specified if justification='emergency'</option>
       </optgroup>
       <transport method="put" path="static_route" />
    </command>
@@ -1654,6 +1656,8 @@
          <option name="personality" type="string">personality name</option>
 	 <option name="archetype" type="string">archetype name</option>
          <option name="network_environment" type="string">Network environment (default: internal)</option>
+         <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
+         <option name="reason" type="string">String to be specified if justification='emergency'</option>
       </optgroup>
       <transport method="delete" path="static_route" />
    </command>
@@ -1966,7 +1970,8 @@
       </optgroup>
       <optgroup name="optional_opts">
          <option name="personality" type="string">personality name</option>
-         <option name="justification" type="string">Extra authorization tokens (e.g. TCM number) to validate the request</option>
+         <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
+         <option name="reason" type="string">String to be specified if justification='emergency'</option>
       </optgroup>
       <transport method="put" path="service/%(service)s/required_for/archetype/%(archetype)s" />
       <transport trigger="personality" method="put" path="service/%(service)s/required_for/personality/%(archetype)s/%(personality)s" />
@@ -1996,7 +2001,8 @@
       </optgroup>
       <optgroup name="del_required_service_optional">
          <option name="personality" type="string" mandatory="True">personality name</option>
-         <option name="justification" type="string">Extra authorization tokens (e.g. TCM number) to validate the request</option>
+         <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
+         <option name="reason" type="string">String to be specified if justification='emergency'</option>
       </optgroup>
       <transport method="delete" path="service/%(service)s/required_for/archetype/%(archetype)s" />
       <transport trigger="personality" method="delete" path="service/%(service)s/required_for/personality/%(archetype)s/%(personality)s" />
@@ -2028,6 +2034,8 @@
         <option name="rack" type="string">Rack</option>
         <option name="desk" type="string">Desk</option>
         <option name="networkip" type="ipv4" conflicts="organization hub continent country campus city building room rack desk">Network IP address</option>
+         <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
+         <option name="reason" type="string">String to be specified if justification='emergency'</option>
       </optgroup>
       <transport method="post" path="service/%(service)s/instance/%(instance)s/command/map" />
    </command>
@@ -2088,6 +2096,8 @@
          <option name="rack" type="string">Rack</option>
          <option name="desk" type="string">Desk</option>
          <option name="networkip" type="ipv4" conflicts="organization hub continent country campus city building bunker room rack desk">Network IP address</option>
+         <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
+         <option name="reason" type="string">String to be specified if justification='emergency'</option>
       </optgroup>
       <transport method="post" path="service/%(service)s/instance/%(instance)s/command/unmap" />
    </command>
@@ -2376,7 +2386,8 @@
          <option name="sync" type="boolean" default="True">Automatically sync tracking domains</option>
          <option name="dryrun" type="boolean">Attempt a test merge and run tests without saving the merge result</option>
          <option name="comments" type="string">Comments to include in the merge commit</option>
-	 <option name="justification" type="string">Extra authorization tokens (e.g. TCM number) to validate the request</option>
+         <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
+         <option name="reason" type="string">String to be specified if justification='emergency'</option>
       </optgroup>
       <transport method="post" path="command/deploy" />
    </command>
@@ -3213,6 +3224,8 @@
 	 <option name="grn" type="string" conflicts="eon_id">GRN as string</option>
 	 <option name="eon_id" type="int" conflicts="grn">Numeric EON ID</option>
 	 <option name="leave_existing" type="flag">Do not propagate GRN changes to hosts in the personality</option>
+         <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
+         <option name="reason" type="string">String to be specified if justification='emergency'</option>
       </optgroup>
       <transport method="post" path="personality/archetype/%(archetype)s/personality/%(personality)s" />
   </command>
@@ -5250,6 +5263,8 @@
          <option name="hostname" type="string" conflicts="list personality">Host</option>
          <option name="list" type="list" conflicts="hostname personality">List of hosts</option>
          <option name="personality" type="string" conflicts="hostname list">Personality</option>
+         <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
+         <option name="reason" type="string">String to be specified if justification='emergency'</option>
       </optgroup>
       <optgroup name="map_grn_optional" mandatory="false" fields="any">
          <option name="archetype" type="string">Archetype of the personality</option>
@@ -5273,6 +5288,8 @@
          <option name="hostname" type="string" conflicts="list personality">Host</option>
          <option name="list" type="list" conflicts="hostname personality">List of hosts</option>
          <option name="personality" type="string" conflicts="hostname list">Personality</option>
+         <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
+         <option name="reason" type="string">String to be specified if justification='emergency'</option>
       </optgroup>
       <optgroup name="unmap_grn_optional" mandatory="false" fields="any">
          <option name="archetype" type="string">Archetype of the personality</option>
@@ -5382,7 +5399,8 @@
       </optgroup>
       <optgroup name="bind_feature_optional" mandatory="False" fields="any">
          <option name="vendor" type="string">Vendor name, if the model name is not unique</option>
-         <option name="justification" type="string">Extra authorization tokens (e.g. TCM number) to validate the request</option>
+         <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
+         <option name="reason" type="string">String to be specified if justification='emergency'</option>
       </optgroup>
 
       <transport method="post" path="commands/bind_feature"/>
@@ -5407,7 +5425,8 @@
       </optgroup>
       <optgroup name="unbind_feature_optional" mandatory="False" fields="any">
          <option name="vendor" type="string">Vendor name, if the model name is not unique</option>
-         <option name="justification" type="string">Extra authorization tokens (e.g. TCM number) to validate the request</option>
+         <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
+         <option name="reason" type="string">String to be specified if justification='emergency'</option>
          <option name="flush" type="boolean" default="True">Enable flushing the affected host plenaries</option>
       </optgroup>
 
@@ -5458,6 +5477,8 @@
          <option name="model" type="string">Name of a hardware model</option>
          <option name="value" type="string">Value for the parameter, type depending on the parameter definition</option>
          <option name="comments" type="string">Comments</option>
+         <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
+         <option name="reason" type="string">String to be specified if justification='emergency'</option>
       </optgroup>
       <transport method="put" path="commands/add_parameter"/>
    </command>
@@ -5477,6 +5498,8 @@
          <option name="interface" type="string">Interface of a machine</option>
          <option name="model" type="string">Name of a hardware model</option>
          <option name="comments" type="string">Comments</option>
+         <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
+         <option name="reason" type="string">String to be specified if justification='emergency'</option>
       </optgroup>
       <transport method="put" path="commands/upd_parameter"/>
    </command>
@@ -5494,6 +5517,8 @@
          <option name="archetype" type="string">Archetype</option>
          <option name="interface" type="string">Interface of a machine</option>
          <option name="model" type="string">Name of a hardware model</option>
+         <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
+         <option name="reason" type="string">String to be specified if justification='emergency'</option>
       </optgroup>
       <transport method="put" path="commands/del_parameter"/>
    </command>
@@ -5658,32 +5683,36 @@
       Grant root access to user/netgroup to a personality. The affected host(s) must be
       recompiled for the changes to take effect.
       <optgroup name="grant_root_access_opts" mandatory="true" fields="all">
-         <optgroup name="map_root_access_req" mandatory="true" fields="any">
+         <optgroup name="root_access_req" mandatory="true" fields="any">
             <option name="username" type="string" conflicts="netgroup">User as string</option>
             <option name="netgroup" type="string" conflicts="username">Netgroup as string from white listed netgroups</option>
 	 </optgroup>
          <option name="personality" type="string">Personality</option>
+         <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
       </optgroup>
-      <optgroup name="map_root_access_optional" mandatory="false" fields="any">
+      <optgroup name="root_access_optional" mandatory="false" fields="any">
          <option name="archetype" type="string">Archetype of the personality</option>
+         <option name="reason" type="string">String to be specified if justification='emergency'</option>
       </optgroup>
-      <transport method="post" path="root_access/command/map"/>
+      <transport method="post" path="root_access/command/grant"/>
    </command>
 
    <command name="revoke_root_access">
       Revoke root access from a user/netgroup from a personality. The affected host(s) must be
       recompiled for the changes to take effect.
-      <optgroup name="unmap_root_access" mandatory="true" fields="all">
-         <optgroup name="unmap_root_access_opts" mandatory="true" fields="any">
+      <optgroup name="root_access" mandatory="true" fields="all">
+         <optgroup name="root_access_opts" mandatory="true" fields="any">
             <option name="username" type="string" conflicts="netgroup">User as string</option>
             <option name="netgroup" type="string" conflicts="username">Netgroup as string from white listed netgroups</option>
 	 </optgroup>
          <option name="personality" type="string">Personality</option>
+         <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
       </optgroup>
-      <optgroup name="unmap_root_access_optional" mandatory="false" fields="any">
+      <optgroup name="root_access_optional" mandatory="false" fields="any">
          <option name="archetype" type="string">Archetype of the personality</option>
+         <option name="reason" type="string">String to be specified if justification='emergency'</option>
       </optgroup>
-      <transport method="post" path="root_access/command/unmap"/>
+      <transport method="post" path="root_access/command/revoke"/>
    </command>
 
    <command name="add_netgroup_whitelist">
