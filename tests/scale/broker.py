@@ -64,7 +64,7 @@ class AQBroker(object):
     def stop(self, **kwargs):
         """Attempt to stop a running broker."""
         if os.path.exists(self.pidfile):
-            f = file(self.pidfile)
+            f = open(self.pidfile)
             pid = f.readline()
             f.close()
             os.kill(int(pid), signal.SIGTERM)

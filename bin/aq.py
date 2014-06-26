@@ -178,7 +178,7 @@ class CustomAction(object):
                       file=sys.stderr)
                 sys.exit(1)
 
-            commandOptions["bundle"] = b64encode(file(filename).read())
+            commandOptions["bundle"] = b64encode(open(filename).read())
         finally:
             os.unlink(filename)
 

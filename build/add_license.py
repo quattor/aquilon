@@ -64,7 +64,7 @@ module_re = re.compile(r'^\s*#\s*This module is part of [Aa]quilon')
 
 
 def fix_file(filepath):
-    with file(filepath) as f:
+    with open(filepath) as f:
         contents = f.readlines()
     if not contents:
         return
@@ -142,7 +142,7 @@ def fix_file(filepath):
     if contents == new_contents:
         return
     else:
-        with file(filepath, 'w') as f:
+        with open(filepath, 'w') as f:
             f.writelines(new_contents)
 
 

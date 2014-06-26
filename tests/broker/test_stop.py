@@ -41,7 +41,7 @@ class TestBrokerStop(unittest.TestCase):
         config = Config()
         pidfile = os.path.join(config.get("broker", "rundir"), "aqd.pid")
         self.assert_(os.path.exists(pidfile))
-        f = file(pidfile)
+        f = open(pidfile)
         pid = f.readline()
         self.assertNotEqual(pid, "")
         f.close()

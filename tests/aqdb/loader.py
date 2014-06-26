@@ -43,7 +43,7 @@ class Lexer(shlex):
         self.filename = filename
         self.macros = {}
 
-        input = file(filename, 'rt')
+        input = open(filename, 'rt')
         return shlex.__init__(self, input, posix=True)
 
     def error(self, message):

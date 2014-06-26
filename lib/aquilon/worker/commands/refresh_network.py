@@ -53,10 +53,11 @@ class CommandRefreshNetwork(BrokerCommand):
                         "--noaudit"]
                 run_command(args, logger=logger)
 
-                subnetdata = file(os.path.join(tempdir, "subnetdata.txt"), "r")
                 refresher = QIPRefresh(session, logger, dbbuilding, dryrun,
                                        incremental)
-                refresher.refresh(subnetdata)
+
+                with open(os.path.join(tempdir, "subnetdata.txt"), "r") as f:
+                    refresher.refresh(f)
 
                 session.flush()
 
