@@ -147,7 +147,7 @@ makefile = os.path.join(SRCDIR, "Makefile")
 prod_python = None
 with open(makefile) as f:
     prod_python_re = re.compile(r'^PYTHON_SERVER_PROD\s*=\s*(\S+)(\s+|$)')
-    for line in f.readlines():
+    for line in f:
         m = prod_python_re.search(line)
         if m:
             prod_python = m.group(1)

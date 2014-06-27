@@ -204,7 +204,7 @@ class DbFactory(object):
             passwd_file = config.get("database", "password_file")
             if passwd_file:
                 with open(passwd_file) as f:
-                    passwords = [line.strip() for line in f.readlines()]
+                    passwords = [line.strip() for line in f]
 
                 if not passwords:
                     raise AquilonError("Password file %s is empty." %
