@@ -246,6 +246,7 @@ class TestDelHost(VerifyNotificationsMixin, MachineTestMixin,
     def test_300_del_hp_rack_hosts(self):
         servers = 0
         net = self.net["hp_eth0"]
+        mgmt_net = self.net["hp_mgmt"]
         for i in range(51, 100):
             port = i - 50
             if servers < 10:
@@ -254,7 +255,8 @@ class TestDelHost(VerifyNotificationsMixin, MachineTestMixin,
             else:
                 hostname = "aquilon%d.aqd-unittest.ms.com" % i
             machine = "ut9s03p%d" % port
-            self.delete_host(hostname, net.usable[port], machine)
+            self.delete_host(hostname, net.usable[port], machine,
+                             manager_ip=mgmt_net.usable[port])
 
     def test_300_del_verari_rack_hosts(self):
         net = self.net["verari_eth0"]

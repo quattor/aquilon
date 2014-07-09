@@ -87,7 +87,7 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
     def test_106_verify_show_host_grns(self):
         command = ["show_host", "--grns",
                    "--hostname=unittest02.one-nyp.ms.com"]
-        (out, err) = self.successtest(command)
+        out = self.commandtest(command)
         self.matchoutput(out, "Owned by GRN: grn:/ms/ei/aquilon/unittest [inherited]", command)
         self.matchoutput(out, "Used by GRN: grn:/ms/ei/aquilon/unittest [target: esp] [inherited]", command)
 
@@ -361,17 +361,22 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
         # reserved for manage tests.
         servers = 0
         net = self.net["hp_eth0"]
+        mgmt_net = self.net["hp_mgmt"]
         # number 50 is in use by the tor_switch.
         for i in range(51, 100):
             if servers < 10:
                 servers += 1
                 hostname = "server%d.aqd-unittest.ms.com" % servers
+                manager = "server%dr.aqd-unittest.ms.com" % servers
             else:
                 hostname = "aquilon%d.aqd-unittest.ms.com" % i
+                manager = "aquilon%dr.aqd-unittest.ms.com" % i
             port = i - 50
             machine = "ut9s03p%d" % port
             self.create_host(hostname, net.usable[port], machine, rack="ut9",
-                             model="bl260c", sandbox="%s/utsandbox" % self.user)
+                             model="bl260c", sandbox="%s/utsandbox" % self.user,
+                             manager_iface="ilo",
+                             manager_ip=mgmt_net.usable[port])
 
     def test_310_populate_verari_rack_hosts(self):
         # These are used in add_virtual_hardware:
@@ -622,9 +627,8 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
 
     def test_445_verify_show_host_jack_grns(self):
         ip = self.net["unknown0"].usable[17]
-        command = ["show_host", "--grns",
-                   "--hostname=jack.cards.example.com"]
-        (out, err) = self.successtest(command)
+        command = ["show_host", "--grns", "--hostname=jack.cards.example.com"]
+        out = self.commandtest(command)
         self.matchoutput(out, "Primary Name: jack.cards.example.com [%s]" % ip,
                          command)
         self.matchoutput(out, "Owned by GRN: grn:/example/cards", command)

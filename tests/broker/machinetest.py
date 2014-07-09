@@ -25,6 +25,8 @@ class MachineData(object):
         self.model = model
         self.comments = None
         self.interfaces = {}
+        self.manager_iface = None
+        self.manager_ip = None
         # Other attributes are created on-demand based on the parameters. If you
         # need some attribute (e.g. memory) always avilable, initialize it to
         # None here.
@@ -229,6 +231,7 @@ class MachineTestMixin(object):
 
     def create_host(self, hostname, ip, machine,
                     interfaces=None, zebra=False, model=None,
+                    manager_iface=None, manager_ip=None,
                     archetype="aquilon", **orig_kwargs):
         kwargs = orig_kwargs.copy()
 
@@ -271,6 +274,16 @@ class MachineTestMixin(object):
         self.noouttest(command)
         self.dsdb_verify()
 
+        if manager_iface:
+            command = ["add_manager", "--hostname", hostname,
+                       "--interface", manager_iface,
+                       "--ip", manager_ip, "--mac", manager_ip.mac]
+            short, domain = hostname.split(".", 1)
+            self.dsdb_expect_add(short + "r." + domain, manager_ip,
+                                 manager_iface, manager_ip.mac)
+            self.noouttest(command)
+            self.dsdb_verify()
+
         show_cmd, show_out = self.verify_show_machine(machine, interfaces,
                                                       zebra=zebra, **kwargs)
         self.matchoutput(show_out, "Primary Name: %s [%s]" % (hostname, ip),
@@ -281,9 +294,14 @@ class MachineTestMixin(object):
             self.matchoutput(show_out, "Auxiliary: %s [%s]" % (params["fqdn"],
                                                                params["ip"]),
                              show_cmd)
+        if manager_iface:
+            short, domain = hostname.split(".", 1)
+            self.matchoutput(show_out, "Manager: %sr.%s [%s]" %
+                             (short, domain, manager_ip), command)
         return show_cmd, show_out
 
-    def delete_host(self, hostname, ip, machine, interfaces=None, **kwargs):
+    def delete_host(self, hostname, ip, machine, interfaces=None,
+                    manager_ip=None, **kwargs):
         if not interfaces:
             interfaces = []
 
@@ -297,6 +315,10 @@ class MachineTestMixin(object):
 
         self.dsdb_expect_delete(ip)
         self.statustest(["del_host", "--hostname", hostname])
-        self.dsdb_verify()
-
+        if manager_ip:
+            self.dsdb_expect_delete(manager_ip)
+            short, domain = hostname.split(".", 1)
+            self.noouttest(["del_manager", "--manager", "%sr.%s" %
+                            (short, domain)])
         self.noouttest(["del_machine", "--machine", machine])
+        self.dsdb_verify()

@@ -29,7 +29,7 @@ from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 
 
 class CommandShowBunkerViolations(BrokerCommand):
-    def render(self, session, **arguments):
+    def render(self, session, management_interfaces, **arguments):
         bunker_bucket = {None: None}
         rack_bucket = defaultdict(dict)
 
@@ -55,6 +55,8 @@ class CommandShowBunkerViolations(BrokerCommand):
         q = q.filter(Model.model_type != VirtualMachineType.VirtualMachine)
         q = q.filter(Model.model_type != VirtualMachineType.VirtualAppliance)
         q = q.filter(Interface.hardware_entity_id == HardwareEntity.id)
+        if not management_interfaces:
+            q = q.filter(Interface.interface_type != 'management')
         q = q.filter(AddressAssignment.interface_id == Interface.id)
         q = q.filter(AddressAssignment.network_id == Network.id)
         q = q.filter(Network.network_environment == def_env)
@@ -103,7 +105,10 @@ class CommandShowBunkerViolations(BrokerCommand):
         q = q.join(Network)
         q = q.filter_by(network_environment=def_env)
         q = q.reset_joinpoint()
-        q = q.join(Interface, HardwareEntity, Model)
+        q = q.join(Interface)
+        if not management_interfaces:
+            q = q.filter(Interface.interface_type != 'management')
+        q = q.join(HardwareEntity, Model)
         q = q.filter(Model.model_type != VirtualMachineType.VirtualMachine)
         q = q.options(defer('service_address_id'),
                       contains_eager('network'),

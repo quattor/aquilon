@@ -107,6 +107,25 @@ class TestNetworkConstraints(TestBrokerCommand):
                           r"BUCKET1: aquilon62\.aqd-unittest\.ms\.com/eth0",
                           command)
 
+    def test_210_show_bunker_violations_management(self):
+        command = ["show_bunker_violations", "--management_interfaces"]
+        out = self.commandtest(command)
+        self.searchoutput(out,
+                          r"Warning: Rack ut8 is not part of a bunker, but it "
+                          r"uses bunkerized networks:\s*"
+                          r"BUCKET1: server9\.aqd-unittest\.ms\.com/eth0\s*"
+                          r"BUCKET2: server9\.aqd-unittest\.ms\.com/eth0",
+                          command)
+        self.matchoutput(out, "aq update rack --rack np7 --building np",
+                         command)
+        self.searchoutput(out,
+                          r"Warning: Rack ut9 is part of bunker bucket2.ut, but "
+                          r"also has networks from:\s*"
+                          r"\(No bucket\): aquilon61\.aqd-unittest\.ms\.com/eth0, "
+                          r"aquilon61.aqd-unittest.ms.com/ilo, .*$\s*"
+                          r"BUCKET1: aquilon62\.aqd-unittest\.ms\.com/eth0",
+                          command)
+
     def test_300_mismatch1_cleanup(self):
         net = self.net["bunker_mismatch1"]
         ip = net.usable[0]
