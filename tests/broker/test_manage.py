@@ -61,8 +61,9 @@ class TestManage(TestBrokerCommand):
         command = ["manage", "--hostname", "unittest02.one-nyp.ms.com",
                    "--domain", "nomanage"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "Managing hosts to domain nomanage is "
-                         "not allowed.", command)
+        self.matchoutput(out,
+                         "Managing objects to domain nomanage is not allowed.",
+                         command)
 
     def testverifymanageunittest02(self):
         user = self.config.get("unittest", "user")
