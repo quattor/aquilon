@@ -25,16 +25,16 @@
 	<cmdsynopsis>
 	    <command>aq add reboot schedule</command>
 	    <group>
-	      <arg choice="req"><option>--hostname <replaceable>HOSTNAME</replaceable></option></arg>
-	      <arg choice="req"><option>--cluster <replaceable>CLUSTER</replaceable></option></arg>
-            </group>
-	    <arg choice="req"><option>--week <replaceable>WHEN</replaceable></option></arg>
-	    <arg choice="req"><option>--day <replaceable>WHEN</replaceable></option></arg>
-	    <arg choice="opt"><option>--time <replaceable>WHEN</replaceable></option></arg>
-	    <arg choice="opt"><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
-	    <group>
 		<synopfragmentref linkend="global-options">Global options</synopfragmentref>
 	    </group>
+	    <group choice="req">
+		<arg choice="plain"><option>--hostname <replaceable>HOSTNAME</replaceable></option></arg>
+		<arg choice="plain"><option>--cluster <replaceable>CLUSTER</replaceable></option></arg>
+            </group>
+	    <arg choice="plain"><option>--week <replaceable>WHEN</replaceable></option></arg>
+	    <arg choice="plain"><option>--day <replaceable>WHEN</replaceable></option></arg>
+	    <arg choice="opt"><option>--time <replaceable>WHEN</replaceable></option></arg>
+	    <arg choice="opt"><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
 	    <xi:include href="../common/global_options.xml"/>
 	</cmdsynopsis>
     </refsynopsisdiv>
@@ -56,16 +56,11 @@
     </refsect1>
 
     <refsect1>
-        <title>Entitlements</title>
-        <para>Requires "operations" or "unixops_l2" role</para>
-    </refsect1>
-
-    <refsect1>
         <title>Templates</title>
         <para>
-      This command will modify the templates for the host or
-      cluster (depending on which option was given) and the resource
-      template for the reboot schedule itself.
+	    This command will modify the templates for the host or
+	    cluster (depending on which option was given) and the resource
+	    template for the reboot schedule itself.
 	</para>
     </refsect1>
 
@@ -161,6 +156,7 @@ aq add reboot schedule --hostname foo.example.com --week 1 day Sun
 	<title>See also</title>
 	<para>
 	    <citerefentry><refentrytitle>aq_del_reboot_schedule</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>aq_show_reboot_schedule</refentrytitle><manvolnum>1</manvolnum></citerefentry>
 	</para>
     </refsect1>
 </refentry>

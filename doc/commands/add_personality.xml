@@ -165,111 +165,123 @@
         <example>
 	    <title>add a personality</title>
 	    <programlisting>
-		aq add personality --archetype aquilon --personality foo --grn grn:/some/grn
+aq add personality --archetype aquilon --personality foo \
+    --grn grn:/some/grn
 	    </programlisting>
 	    <para>
-	          This adds personality <literal> foo</literal>.
+		This adds personality <literal>foo</literal>.
             </para>
 	    <programlisting>
-                aq show personality --personality foo
-		Host Personality: foo Archetype: aquilon
-		  GRN: grn:/some/grn
-		  Template: aquilon/personality/foo/config.tpl
+aq show personality --personality foo
 	    </programlisting>
+	    <screen>
+Host Personality: foo Archetype: aquilon
+  Owned by GRN: grn:/some/grn
+  Template: aquilon/personality/foo/config
+	    </screen>
 	    <para>
-                Following are generated templates
+		Following are generated templates
 	    </para>
 	    <programlisting>
-	    template personality/foo/config;
+template personality/foo/config;
 
-	    variable PERSONALITY = "foo";
-	    "/system/eon_ids" = append(1234);
-	    include { if_exists("personality/foo/pre_feature") };
-	    include { if_exists("personality/config") };
-	    include { if_exists("personality/foo/post_feature") };
+variable PERSONALITY = "foo";
+"/system/eon_ids" = append(1234);
+include { if_exists("personality/foo/pre_feature") };
+include { if_exists("personality/config") };
+include { if_exists("personality/foo/post_feature") };
 	    </programlisting>
         </example>
 
         <example>
 	    <title>add a personality with config override option</title>
 	    <programlisting>
-		aq add personality --archetype aquilon --personality foo --grn grn:/some/grn
-		--config_override
+aq add personality --archetype aquilon --personality foo \
+    --grn grn:/some/grn --config_override
 	    </programlisting>
 	    <para>
-	          This adds personality <literal> foo</literal> with config override option enabled.
+	          This adds personality <literal>foo</literal> with config override option enabled.
             </para>
 	    <programlisting>
-                aq show personality --personality foo
-		Host Personality: foo Archetype: aquilon
-		GRN: grn:/some/grn
-		config override: enabled
-		Template: aquilon/personality/foo/config.tpl
+aq show personality --personality foo
 	    </programlisting>
+	    <screen>
+Host Personality: foo Archetype: aquilon
+  Owned by GRN: grn:/some/grn
+  Config override: enabled
+  Template: aquilon/personality/foo/config
+	    </screen>
 	    <para>
                 Following are generated templates
 	    </para>
 	    <programlisting>
-	      aq cat --personality foo
-	      template personality/foo/config;
+template personality/foo/config;
 
-	      variable PERSONALITY = "foo";
-	      "/system/eon_ids" = append(1234);
-	      include { if_exists("personality/foo/pre_feature") };
-	      include { if_exists("personality/config") };
-	      include { "features/personality/config_override/config" };
-	      include { if_exists("personality/foo/post_feature") };
+variable PERSONALITY = "foo";
+"/system/eon_ids" = append(1234);
+include { if_exists("personality/foo/pre_feature") };
+include { if_exists("personality/config") };
+include { "features/personality/config_override/config" };
+include { if_exists("personality/foo/post_feature") };
 	    </programlisting>
         </example>
 
         <example>
 	    <title>add a personality as clone of other personality</title>
 	    <programlisting>
-		aq add personality --archetype aquilon --personality foo --grn grn:/some/grn --copy_from unixeng-test
+aq add personality --archetype aquilon --personality foo \
+    --grn grn:/some/grn --copy_from unixeng-test
 	    </programlisting>
 	    <para>
-	          This adds personality <literal>foo</literal> and will copy any parameters  and feature bindings defined for
+	          This adds personality <literal>foo</literal> and will copy any parameters and feature bindings defined for
 		  personality unixeng-test to personality foo.
             </para>
 	    <programlisting>
-                aq show personality --personality unixeng-test
-		Host Personality: unixeng-test Archetype: aquilon
-		GRN: grn:/some/grn
-		Template: aquilon/personality/unixeng-test/config.tpl
-		  Required Service: service1
-		  Required Service: service2
-		  Host Feature: somefeat1 [post_personality]
-
-               aq show parameter  --personality unixeng-test
-	       Archetype/Personality : aquilon/unixeng-test
-	       espinfo : {
-	                "function": "crash",
-			"description": "Personality to test new features/os/etc",
-			"systemgrn": "[\"grn:/some/grn\"]",
-		}
-
+aq show personality --personality unixeng-test
             </programlisting>
+	    <screen>
+Host Personality: unixeng-test Archetype: aquilon
+  Owned by GRN: grn:/some/grn
+  Template: aquilon/personality/unixeng-test/config.tpl
+    Required Service: service1
+    Required Service: service2
+    Host Feature: somefeat1 [post_personality]
+	    </screen>
+	    <programlisting>
+aq show parameter  --personality unixeng-test
+	    </programlisting>
+	    <screen>
+Archetype/Personality : aquilon/unixeng-test
+espinfo : {
+	"function": "crash",
+	"description": "Personality to test new features/os/etc",
+	"systemgrn": "[\"grn:/some/grn\"]",
+}
+	    </screen>
 	    <para>
 		After running the above commands parameters, feature bindings will be copied. Required services
 		and other service mappings are not copied.
 	    </para>
 	    <programlisting>
-		aq show personality --personality foo
-		Host Personality: foo Archetype: aquilon
-		  GRN: grn:/some/grn
-		  Template: aquilon/personality/foo/config.tpl
-		  Host Feature: somefeat1 [post_personality]
-
-               aq show parameter  --personality foo
-	        Archetype/Personality : aquilon/foo
-		espinfo : {
-                        "function": "crash",
-			"description": "Personality to test new features/os/etc",
-			"systemgrn": "[\"grn:/some/grn\"]",
-		}
-
-
+aq show personality --personality foo
 	    </programlisting>
+	    <screen>
+Host Personality: foo Archetype: aquilon
+  Owned by GRN: grn:/some/grn
+  Template: aquilon/personality/foo/config
+  Host Feature: somefeat1 [post_personality]
+	    </screen>
+	    <programlisting>
+aq show parameter  --personality foo
+	    </programlisting>
+	    <screen>
+Archetype/Personality : aquilon/foo
+espinfo : {
+	"function": "crash",
+	"description": "Personality to test new features/os/etc",
+	"systemgrn": "[\"grn:/some/grn\"]",
+}
+	    </screen>
         </example>
     </refsect1>
     <refsect1>
@@ -277,7 +289,7 @@
 	<para>
 	    <citerefentry><refentrytitle>aq_del_personality</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
 	    <citerefentry><refentrytitle>aq_update_personality</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-	    <citerefentry><refentrytitle>aq_show_personality</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>aq_show_personality</refentrytitle><manvolnum>1</manvolnum></citerefentry>
 	</para>
     </refsect1>
 </refentry>

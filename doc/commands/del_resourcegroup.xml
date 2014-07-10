@@ -23,15 +23,15 @@
 
     <refsynopsisdiv>
 	<cmdsynopsis>
-	    <command>aq del resourcegroup </command>
-	    <group choice="req">
-		<arg choice="plain"><option>--cluster <replaceable>CLUSTER</replaceable></option></arg>
-		<arg choice="plain"><option>--hostname <replaceable>HOST</replaceable></option></arg>
-	    </group>
-	    <arg choice="req"><option>--resourcegroup <replaceable>NAME</replaceable></option></arg>
+	    <command>aq del resourcegroup</command>
 	    <group>
                 <synopfragmentref linkend="global-options">Global options</synopfragmentref>
 	    </group>
+	    <group choice="req">
+		<arg choice="plain"><option>--hostname <replaceable>HOSTNAME</replaceable></option></arg>
+		<arg choice="plain"><option>--cluster <replaceable>CLUSTER</replaceable></option></arg>
+	    </group>
+	    <arg choice="plain"><option>--resourcegroup <replaceable>NAME</replaceable></option></arg>
 	    <xi:include href="../common/global_options.xml"/>
 	</cmdsynopsis>
     </refsynopsisdiv>
@@ -40,14 +40,10 @@
         <title>Description</title>
 	<para>
 	    The <command>aq del_resourcegroup</command> command deletes a
-	    resourcegroup. The resourcegroup should be empty, otherwise the
-	    command will return with an error.
+	    resourcegroup. In most cases, any resources inside the resourcegroup will be deleted
+	    as well, but there are certain resource types (e.g. service address) that need to be
+	    deleted separately before the resourcegroup can be removed.
 	</para>
-    </refsect1>
-
-    <refsect1>
-        <title>Entitlements</title>
-        <para>Requires "operations" role</para>
     </refsect1>
 
     <refsect1>
@@ -88,7 +84,7 @@
 		</term>
 		<listitem>
 		    <para>
-			The name of the resourcegroup.
+			The name of the resourcegroup to delete.
 		    </para>
 		</listitem>
 	    </varlistentry>
@@ -109,7 +105,9 @@ aq del_resourcegroup --cluster ny01vv --resourcegroup ny01vvas01
     <refsect1>
 	<title>See also</title>
 	<para>
-	    <citerefentry><refentrytitle>aq_del_application</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+	    <citerefentry><refentrytitle>aq_del_service_address</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>aq_add_resourcegroup</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>aq_show_resourcegroup</refentrytitle><manvolnum>1</manvolnum></citerefentry>
 	</para>
     </refsect1>
 </refentry>

@@ -23,18 +23,18 @@
 
     <refsynopsisdiv>
 	<cmdsynopsis>
-	    <command>aq add reboot intervention </command>
-	    <group>
-	      <arg choice="req"><option>--hostname <replaceable>HOSTNAME</replaceable></option></arg>
-	      <arg choice="req"><option>--cluster <replaceable>CLUSTER</replaceable></option></arg>
-            </group>
-	    <arg choice="req"><option>--expiry <replaceable>WHEN</replaceable></option></arg>
-	    <arg choice="req"><option>--justification <replaceable>REASON</replaceable></option></arg>
-	    <arg choice="opt"><option>--start_time <replaceable>WHEN</replaceable></option></arg>
-	    <arg choice="opt"><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
+	    <command>aq add reboot intervention</command>
 	    <group>
 		<synopfragmentref linkend="global-options">Global options</synopfragmentref>
 	    </group>
+	    <group choice="req">
+		<arg choice="plain"><option>--hostname <replaceable>HOSTNAME</replaceable></option></arg>
+		<arg choice="plain"><option>--cluster <replaceable>CLUSTER</replaceable></option></arg>
+            </group>
+	    <arg choice="plain"><option>--expiry <replaceable>WHEN</replaceable></option></arg>
+	    <arg choice="plain"><option>--justification <replaceable>REASON</replaceable></option></arg>
+	    <arg choice="opt"><option>--start_time <replaceable>WHEN</replaceable></option></arg>
+	    <arg choice="opt"><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
 	    <xi:include href="../common/global_options.xml"/>
 	</cmdsynopsis>
     </refsynopsisdiv>
@@ -58,16 +58,11 @@
     </refsect1>
 
     <refsect1>
-        <title>Entitlements</title>
-        <para>Requires "operations" or "unixops_l2" role</para>
-    </refsect1>
-
-    <refsect1>
         <title>Templates</title>
         <para>
-      This command will modify the templates for the host or
-      cluster (depending on which option was given) and the resource
-      template for the intervention itself.
+	    This command will modify the templates for the host or
+	    cluster (depending on which option was given) and the resource
+	    template for the intervention itself.
 	</para>
     </refsect1>
 
@@ -101,10 +96,10 @@
 		</term>
 		<listitem>
 		    <para>
-	    A date when the intervention should expire. The date format
-	    is anything that the python library dateutil.parser can understand.
-	    This treats treats the date as the whole day inclusive to
-	    expiry. Time of the expiry is ignored.
+			A date when the intervention should expire. The date format
+			is anything that the python library dateutil.parser can understand.
+			This treats treats the date as the whole day inclusive to
+			expiry. Time of the expiry is ignored.
 		    </para>
 		</listitem>
 	    </varlistentry>
@@ -114,7 +109,7 @@
 		</term>
 		<listitem>
 		    <para>
-	    Extra authorization tokens (e.g. change management reference ID) to with which the system can validate or correlate the request.
+			Extra authorization tokens (e.g. change management reference ID) to with which the system can validate or correlate the request.
 		    </para>
 		</listitem>
 	    </varlistentry>
@@ -124,8 +119,8 @@
 		</term>
 		<listitem>
 		    <para>
-	    A date when the intervention should start. The date format
-	    is anything that the python library dateutil.parser can understand.
+			A date when the intervention should start. The date format
+			is anything that the python library dateutil.parser can understand.
 		    </para>
 		</listitem>
 	    </varlistentry>
@@ -135,7 +130,7 @@
 		</term>
 		<listitem>
 		    <para>
-	    Any additional notes for the intervention.
+			Any additional notes for the intervention.
 		    </para>
 		</listitem>
 	    </varlistentry>
@@ -149,11 +144,11 @@
 	    <title>Suspending reboot</title>
 	    <programlisting>
 aq add reboot intervention --hostname foo.example.com \
-	--justification tcm=6001234 --expiry 1/1/2012
+    --justification tcm=6001234 --expiry 1/1/2012
 	    </programlisting>
 	    <para>
-	    Which results in no scheduled reboots for the host until
-	    January 1, 2012.
+		Which results in no scheduled reboots for the host until
+		January 1, 2012.
 	    </para>
 	</example>
     </refsect1>
@@ -162,6 +157,7 @@ aq add reboot intervention --hostname foo.example.com \
 	<title>See also</title>
 	<para>
 	    <citerefentry><refentrytitle>aq_del_reboot_intervention</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>aq_show_reboot_intervention</refentrytitle><manvolnum>1</manvolnum></citerefentry>
 	</para>
     </refsect1>
 </refentry>

@@ -23,27 +23,27 @@
     <refnamediv>
         <refname>aq add hostlink</refname>
         <refpurpose>
-          Add a hostlink resource onto a host or cluster
+	    Add a hostlink resource onto a host or cluster
         </refpurpose>
 	<refclass>Aquilon</refclass>
     </refnamediv>
 
     <refsynopsisdiv>
 	<cmdsynopsis>
-	    <command>aq add hostlink </command>
-	    <group>
-	      <arg choice="req"><option>--hostname <replaceable>HOSTNAME</replaceable></option></arg>
-	      <arg choice="req"><option>--cluster <replaceable>CLUSTER</replaceable></option></arg>
-	      <arg choice="req"><option>--resourcegroup <replaceable>RESOURCEGROUP</replaceable></option></arg>
-        </group>
-	    <arg choice="req"><option>--hostlink <replaceable>NAME</replaceable></option></arg>
-	    <arg choice="req"><option>--target <replaceable>PATH</replaceable></option></arg>
-	    <arg choice="req"><option>--owner <replaceable>USER</replaceable></option></arg>
-	    <arg choice="opt"><option>--group <replaceable>GROUP</replaceable></option></arg>
-	    <arg choice="opt"><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
+	    <command>aq add hostlink</command>
 	    <group>
 		<synopfragmentref linkend="global-options">Global options</synopfragmentref>
 	    </group>
+	    <group choice="req">
+		<arg choice="plain"><option>--hostname <replaceable>HOSTNAME</replaceable></option></arg>
+		<arg choice="plain"><option>--cluster <replaceable>CLUSTER</replaceable></option></arg>
+	    </group>
+	    <arg choice="opt"><option>--resourcegroup <replaceable>RESOURCEGROUP</replaceable></option></arg>
+	    <arg choice="plain"><option>--hostlink <replaceable>NAME</replaceable></option></arg>
+	    <arg choice="plain"><option>--target <replaceable>PATH</replaceable></option></arg>
+	    <arg choice="plain"><option>--owner <replaceable>USER</replaceable></option></arg>
+	    <arg choice="opt"><option>--group <replaceable>GROUP</replaceable></option></arg>
+	    <arg choice="opt"><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
 	    <xi:include href="../common/global_options.xml"/>
 	</cmdsynopsis>
     </refsynopsisdiv>
@@ -61,16 +61,11 @@
     </refsect1>
 
     <refsect1>
-        <title>Entitlements</title>
-        <para>Requires "operations" role</para>
-    </refsect1>
-
-    <refsect1>
         <title>Templates</title>
         <para>
-      This command will modify the templates for the host or
-      cluster (depending on which option was given) and the resource
-      template for the hostlink itself.
+	    This command will modify the templates for the host or
+	    cluster (depending on which option was given) and the resource
+	    template for the hostlink itself.
 	</para>
     </refsect1>
 
@@ -115,9 +110,9 @@
 		</term>
 		<listitem>
 		    <para>
-              The group owner of the target directory. If not
-              specified then the owner user's default group will be
-              used.
+			The group owner of the target directory. If not
+			specified then the owner user's default group will be
+			used.
 		    </para>
 		</listitem>
 	    </varlistentry>
@@ -139,7 +134,7 @@
 		</term>
 		<listitem>
 		    <para>
-              The username of the owner of the target directory.
+			The username of the owner of the target directory.
 		    </para>
 		</listitem>
 	    </varlistentry>
@@ -149,7 +144,7 @@
 		</term>
 		<listitem>
 		    <para>
-              The target path for the symlink.
+			The target path for the symlink.
 		    </para>
 		</listitem>
 	    </varlistentry>
@@ -173,17 +168,17 @@
 	    <title>Adding a hostlink to a host</title>
 	    <programlisting>
 aq add hostlink --hostname foo.example.com \
-	--hostlink ftp \
-	--target /d/d1/esliprod \
+    --hostlink ftp \
+    --target /d/d1/esliprod \
     --owner esliprod
 	    </programlisting>
-    </example>
-    <example>
+	</example>
+	<example>
 	    <title>Specifying the group owner</title>
 	    <programlisting>
 aq add hostlink --cluster ny01vv \
-	--hostlink nyqsanless1  \
-	--target /var/spool/hostlinks/nyqsanless1 \
+    --hostlink nyqsanless1  \
+    --target /var/spool/hostlinks/nyqsanless1 \
     --owner zeti --group fwpbatch
 	    </programlisting>
 	</example>
@@ -193,6 +188,7 @@ aq add hostlink --cluster ny01vv \
 	<title>See also</title>
 	<para>
 	    <citerefentry><refentrytitle>aq_del_hostlink</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>aq_show_hostlink</refentrytitle><manvolnum>1</manvolnum></citerefentry>
 	</para>
     </refsect1>
 </refentry>

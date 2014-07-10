@@ -24,15 +24,15 @@
     <refsynopsisdiv>
 	<cmdsynopsis>
 	    <command>aq add resourcegroup</command>
+	    <group>
+		<synopfragmentref linkend="global-options">Global options</synopfragmentref>
+	    </group>
 	    <group choice="req">
 		<arg choice="plain"><option>--hostname <replaceable>HOST</replaceable></option></arg>
 		<arg choice="plain"><option>--cluster <replaceable>CLUSTER</replaceable></option></arg>
 	    </group>
-	    <arg choice="req"><option>--resourcegroup <replaceable>NAME</replaceable></option></arg>
+	    <arg choice="plain"><option>--resourcegroup <replaceable>NAME</replaceable></option></arg>
 	    <arg choice="opt"><option>--required_type <replaceable>TYPE</replaceable></option></arg>
-	    <group>
-		<synopfragmentref linkend="global-options">Global options</synopfragmentref>
-	    </group>
 	    <xi:include href="../common/global_options.xml"/>
 	</cmdsynopsis>
     </refsynopsisdiv>
@@ -43,11 +43,6 @@
 	    The <command>aq add_resourcegroup</command> command adds a resourcegroup onto a host or
 	    a cluster. A resourcegroup is a collection or bundle of resources which work together. 
 	</para>
-    </refsect1>
-
-    <refsect1>
-        <title>Entitlements</title>
-        <para>Requires "operations" role</para>
     </refsect1>
 
     <refsect1>
@@ -113,6 +108,7 @@
 	<title>See also</title>
 	<para>
 	    <citerefentry><refentrytitle>aq_del_resourcegroup</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>aq_show_resourcegroup</refentrytitle><manvolnum>1</manvolnum></citerefentry>
 	</para>
     </refsect1>
 </refentry>

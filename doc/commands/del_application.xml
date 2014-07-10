@@ -23,16 +23,16 @@
 
     <refsynopsisdiv>
 	<cmdsynopsis>
-	    <command>aq del application </command>
-	    <group>
-	      <arg choice="req"><option>--hostname <replaceable>HOSTNAME</replaceable></option></arg>
-	      <arg choice="req"><option>--cluster <replaceable>CLUSTER</replaceable></option></arg>
-	      <arg choice="req"><option>--resourcegroup <replaceable>RESOURCEGROUP</replaceable></option></arg>
-        </group>
-	    <arg choice="req"><option>--application <replaceable>NAME</replaceable></option></arg>
+	    <command>aq del application</command>
 	    <group>
 		<synopfragmentref linkend="global-options">Global options</synopfragmentref>
 	    </group>
+	    <group choice="req">
+		<arg choice="plain"><option>--hostname <replaceable>HOSTNAME</replaceable></option></arg>
+		<arg choice="plain"><option>--cluster <replaceable>CLUSTER</replaceable></option></arg>
+	    </group>
+	    <arg choice="opt"><option>--resourcegroup <replaceable>RESOURCEGROUP</replaceable></option></arg>
+	    <arg choice="plain"><option>--application <replaceable>NAME</replaceable></option></arg>
 	    <xi:include href="../common/global_options.xml"/>
 	</cmdsynopsis>
     </refsynopsisdiv>
@@ -46,15 +46,11 @@
     </refsect1>
 
     <refsect1>
-        <title>Entitlements</title>
-        <para>Requires "operations" role</para>
-    </refsect1>
-
-    <refsect1>
         <title>Templates</title>
-        <para>This command will modify the templates for the host or
-	cluster (depending on which option was given) and remove the resource
-	template for the application itself.
+	<para>
+	    This command will modify the templates for the host or
+	    cluster (depending on which option was given) and remove the resource
+	    template for the application itself.
 	</para>
     </refsect1>
 
@@ -120,6 +116,7 @@ aq del_application --hostname foo.example.com --application db01
 	<title>See also</title>
 	<para>
 	    <citerefentry><refentrytitle>aq_add_application</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>aq_show_application</refentrytitle><manvolnum>1</manvolnum></citerefentry>
 	</para>
     </refsect1>
 </refentry>

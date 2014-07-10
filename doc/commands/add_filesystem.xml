@@ -23,27 +23,27 @@
 
     <refsynopsisdiv>
 	<cmdsynopsis>
-	    <command>aq add filesystem </command>
+	    <command>aq add filesystem</command>
 	    <group>
-	      <arg choice="req"><option>--hostname <replaceable>HOSTNAME</replaceable></option></arg>
-	      <arg choice="req"><option>--cluster <replaceable>CLUSTER</replaceable></option></arg>
-	      <arg choice="req"><option>--resourcegroup <replaceable>RESOURCEGROUP</replaceable></option></arg>
-            </group>
-	    <arg choice="req"><option>--filesystem <replaceable>NAME</replaceable></option></arg>
-	    <arg choice="req"><option>--type <replaceable>TYPE</replaceable></option></arg>
-	    <arg choice="req"><option>--mountpoint <replaceable>PATHNAME</replaceable></option></arg>
-	    <arg choice="req"><option>--blockdevice <replaceable>PATHNAME</replaceable></option></arg>
+		<synopfragmentref linkend="global-options">Global options</synopfragmentref>
+	    </group>
 	    <group choice="req">
-	      <arg choice="plain"><option>--bootmount</option></arg>
-	      <arg choice="plain"><option>--nobootmount</option></arg>
+		<arg choice="plain"><option>--hostname <replaceable>HOSTNAME</replaceable></option></arg>
+		<arg choice="plain"><option>--cluster <replaceable>CLUSTER</replaceable></option></arg>
+            </group>
+	    <arg choice="opt"><option>--resourcegroup <replaceable>RESOURCEGROUP</replaceable></option></arg>
+	    <arg choice="plain"><option>--filesystem <replaceable>NAME</replaceable></option></arg>
+	    <arg choice="plain"><option>--type <replaceable>TYPE</replaceable></option></arg>
+	    <arg choice="plain"><option>--mountpoint <replaceable>PATHNAME</replaceable></option></arg>
+	    <arg choice="plain"><option>--blockdevice <replaceable>PATHNAME</replaceable></option></arg>
+	    <group choice="req">
+		<arg choice="plain"><option>--bootmount</option></arg>
+		<arg choice="plain"><option>--nobootmount</option></arg>
 	    </group>
 	    <arg choice="opt"><option>--dumpfreq <replaceable>DUMPFREQ</replaceable></option></arg>
 	    <arg choice="opt"><option>--fsckpass <replaceable>PASSNO</replaceable></option></arg>
 	    <arg choice="opt"><option>--options <replaceable>OPTIONS</replaceable></option></arg>
 	    <arg choice="opt"><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
-	    <group>
-		<synopfragmentref linkend="global-options">Global options</synopfragmentref>
-	    </group>
 	    <xi:include href="../common/global_options.xml"/>
 	</cmdsynopsis>
     </refsynopsisdiv>
@@ -66,15 +66,11 @@
     </refsect1>
 
     <refsect1>
-        <title>Entitlements</title>
-        <para>Requires "operations" role</para>
-    </refsect1>
-
-    <refsect1>
         <title>Templates</title>
-        <para>This command will modify the templates for the host or
-	cluster (depending on which option was given) and the resource
-	template for the filesystem itself.
+	<para>
+	    This command will modify the templates for the host or
+	    cluster (depending on which option was given) and the resource
+	    template for the filesystem itself.
 	</para>
     </refsect1>
 
@@ -226,11 +222,11 @@
 	    <title>Adding a filesystem to a host</title>
 	    <programlisting>
 aq add_filesystem --hostname foo.example.com --filesystem d1 \
-                  --type ext3 --bootmount --mountpoint /d/d1 \
-                  --blockdevice /dev/vx/dg.0/vol.0 \
+    --type ext3 --bootmount --mountpoint /d/d1 \
+    --blockdevice /dev/vx/dg.0/vol.0 \
 	    </programlisting>
 	    <para>
-	    Which results in the following configuration on the host:
+		Which results in the following configuration on the host:
 	    </para>
 	    <programlisting>
 "/system/resources/filesystem/0/name" = "d1";
@@ -247,10 +243,10 @@ aq add_filesystem --hostname foo.example.com --filesystem d1 \
 	    <title>Adding a filesystem to a cluster</title>
 	    <programlisting>
 aq add_filesystem --filesystem d1 --cluster grid1 --type ext3 \
-  --nobootmount --mountpoint /d/d1 --blockdevice /dev/vx/dg.0/vol.0 \
+    --nobootmount --mountpoint /d/d1 --blockdevice /dev/vx/dg.0/vol.0 \
 	    </programlisting>
 	    <para>
-	    Which results in the following configuration on the cluster:
+		Which results in the following configuration on the cluster:
 	    </para>
 	    <programlisting>
 "/system/resources/filesystem/0/name" = "d1";
@@ -269,6 +265,7 @@ aq add_filesystem --filesystem d1 --cluster grid1 --type ext3 \
 	<title>See also</title>
 	<para>
 	    <citerefentry><refentrytitle>aq_del_filesystem</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>aq_show_filesystem</refentrytitle><manvolnum>1</manvolnum></citerefentry>
 	</para>
     </refsect1>
 </refentry>

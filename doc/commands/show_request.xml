@@ -14,7 +14,7 @@
     </refmeta>
 
     <refnamediv>
-        <refname>aq show_request</refname>
+        <refname>aq show request</refname>
         <refpurpose>
 	    Show the status of a previous request
         </refpurpose>
@@ -23,7 +23,7 @@
 
     <refsynopsisdiv>
 	<cmdsynopsis>
-	    <command>aq show_request</command>
+	    <command>aq show request</command>
 	    <group>
 		<synopfragmentref linkend="global-options">Global options</synopfragmentref>
 	    </group>
@@ -51,11 +51,6 @@
 	    This command does not use the database and does not take any locks, so
 	    it is expected to return quickly even if the broker is contended.
 	</para>
-    </refsect1>
-
-    <refsect1>
-        <title>Entitlements</title>
-        <para>Public</para>
     </refsect1>
 
     <refsect1>
