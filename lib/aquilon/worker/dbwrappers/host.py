@@ -22,9 +22,12 @@ from sqlalchemy.orm.attributes import set_committed_value
 from aquilon.exceptions_ import NotFoundException, ArgumentError
 from aquilon.aqdb.model import (HardwareEntity, DnsEnvironment, DnsDomain,
                                 DnsRecord, Host, OperatingSystem, HostLifecycle,
-                                Personality)
+                                Personality, Domain)
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
+from aquilon.worker.dbwrappers.feature import (model_features,
+                                               personality_features,
+                                               check_feature_template)
 from aquilon.worker.dbwrappers.grn import lookup_grn
 from aquilon.worker.dbwrappers.service_instance import check_no_provided_service
 from aquilon.worker.templates import (Plenary, PlenaryServiceInstanceServer)
@@ -67,6 +70,12 @@ def create_host(session, logger, config, dbhw, dbarchetype, domain=None,
     dbpersonality = Personality.get_unique(session, name=personality,
                                            archetype=dbarchetype,
                                            compel=True)
+
+    if isinstance(dbbranch, Domain):
+        pre, post = personality_features(dbpersonality)
+        hw_features = model_features(dbhw.model, dbarchetype, dbpersonality)
+        for dbfeature in pre + post + hw_features:
+            check_feature_template(config, dbarchetype, dbfeature, dbbranch)
 
     if not osname:
         if config.has_option(section, "default_osname"):

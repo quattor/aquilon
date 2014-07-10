@@ -23,9 +23,10 @@ if __name__ == "__main__":
 
 import unittest2 as unittest
 from brokertest import TestBrokerCommand
+from broker.personalitytest import PersonalityTestMixin
 
 
-class TestManage(TestBrokerCommand):
+class TestManage(PersonalityTestMixin, TestBrokerCommand):
 
     def test_100_manage_unittest02(self):
         user = self.config.get("unittest", "user")
@@ -178,6 +179,63 @@ class TestManage(TestBrokerCommand):
         self.successtest(["compile", "--hostname", "unittest20.aqd-unittest.ms.com"])
         self.verify_buildfiles("unittest-json", "unittest20.aqd-unittest.ms.com",
                                xml=False, json=True)
+
+    def test_150_setup_featuretest(self):
+        self.create_personality("aquilon", "featuretest")
+        self.noouttest(["add_feature", "--feature", "notemplate",
+                        "--type", "host"])
+        self.noouttest(["manage", "--hostname", "aquilon68.aqd-unittest.ms.com",
+                        "--domain", "unittest", "--force"])
+        self.statustest(["reconfigure", "--hostname", "aquilon68.aqd-unittest.ms.com",
+                         "--personality", "featuretest"])
+
+    def test_151_bind_no_template(self):
+        command = ["bind_feature", "--feature", "notemplate",
+                   "--personality", "featuretest"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Host Feature notemplate does not have templates "
+                         "present in domain unittest for archetype aquilon.",
+                         command)
+
+    def test_152_move_aquilon68_to_sandbox(self):
+        user = self.config.get("unittest", "user")
+        self.noouttest(["manage", "--hostname", "aquilon68.aqd-unittest.ms.com",
+                        "--sandbox", "%s/utsandbox" % user, "--force"])
+
+    def test_153_bind_feature(self):
+        # The only host in the personality is in a sandbox, so the bind should
+        # succeed
+        command = ["bind_feature", "--feature", "notemplate",
+                   "--personality", "featuretest"]
+        err = self.statustest(command)
+        self.matchoutput(err, "Flushed 1/1 templates.", command)
+
+    def test_154_manage_notemplate(self):
+        command = ["manage", "--hostname", "aquilon68.aqd-unittest.ms.com",
+                   "--domain", "unittest"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Host Feature notemplate does not have templates "
+                         "present in domain unittest for archetype aquilon.",
+                         command)
+
+    def test_155_manage_notemplate_force(self):
+        # --force means you know what you're doing...
+        self.noouttest(["manage", "--hostname", "aquilon68.aqd-unittest.ms.com",
+                        "--domain", "unittest", "--force"])
+
+    def test_159_cleanup_featuretest(self):
+        user = self.config.get("unittest", "user")
+        self.noouttest(["manage", "--hostname", "aquilon68.aqd-unittest.ms.com",
+                        "--sandbox", "%s/utsandbox" % user, "--force"])
+        self.statustest(["reconfigure", "--hostname", "aquilon68.aqd-unittest.ms.com",
+                         "--personality", "inventory"])
+        self.statustest(["unbind_feature", "--feature", "notemplate",
+                         "--personality", "featuretest"])
+        self.noouttest(["del_feature", "--feature", "notemplate", "--type", "host"])
+        self.noouttest(["del_personality", "--personality", "featuretest",
+                        "--archetype", "aquilon"])
 
     def test_200_nomanage_host(self):
         command = ["manage", "--hostname", "unittest02.one-nyp.ms.com",

@@ -16,7 +16,12 @@
 # limitations under the License.
 """ Helper functions for managing features. """
 
+import os.path
+
+from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import FeatureLink, Personality
+
+from aquilon.worker.templates.domain import template_branch_basedir
 
 
 def model_features(dbmodel, dbarch, dbpers, interface_name=None):
@@ -109,3 +114,17 @@ def add_link(session, logger, dbfeature, params):
                                .format(dbfeature, link.personality))
 
     dbfeature.links.append(FeatureLink(**params))
+
+
+def check_feature_template(config, dbarchetype, dbfeature, dbdomain):
+    basedir = template_branch_basedir(config, dbdomain)
+
+    # The broker has no control over the extension used, so we check for
+    # everything panc accepts
+    for ext in ('pan', 'tpl'):
+        if os.path.exists("%s/%s/%s/config.%s" % (basedir, dbarchetype.name,
+                                                  dbfeature.cfg_path, ext)):
+            return
+
+    raise ArgumentError("{0} does not have templates present in {1:l} "
+                        "for {2:l}.".format(dbfeature, dbdomain, dbarchetype))

@@ -16,13 +16,17 @@
 # limitations under the License.
 """Contains the logic for `aq manage --list`."""
 
+from collections import defaultdict
 import os.path
 import re
 
 from aquilon.exceptions_ import ArgumentError, ProcessException
-from aquilon.aqdb.model import Sandbox
+from aquilon.aqdb.model import Domain, Sandbox
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
+from aquilon.worker.dbwrappers.feature import (model_features,
+                                               personality_features,
+                                               check_feature_template)
 from aquilon.worker.dbwrappers.host import (hostlist_to_hosts,
                                             check_hostlist_size,
                                             validate_branch_author)
@@ -135,6 +139,27 @@ class CommandManageList(BrokerCommand):
         if not force:
             validate_branch_commits(dbsource, dbsource_author,
                                     dbbranch, dbauthor, logger, self.config)
+
+            if isinstance(dbbranch, Domain):
+                features = defaultdict(set)
+                personalities = set()
+                for dbobj in objects:
+                    pers = dbobj.personality
+                    arch = pers.archetype
+
+                    personalities.add(pers)
+                    if hasattr(dbobj, 'hardware_entity'):
+                        features[arch].update(model_features(dbobj.hardware_entity.model,
+                                                             arch, pers))
+                for pers in personalities:
+                    pre, post = personality_features(pers)
+                    features[pers.archetype].update(pre)
+                    features[pers.archetype].update(post)
+
+                for dbarch, featureset in features.items():
+                    for dbfeature in featureset:
+                        check_feature_template(self.config, dbarch, dbfeature,
+                                               dbbranch)
 
         plenaries = PlenaryCollection(logger=logger)
 
