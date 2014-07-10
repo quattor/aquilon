@@ -97,8 +97,9 @@ class TestManageList(TestBrokerCommand):
         scratchfile = self.writescratch("managelist", "\n".join(hosts))
         command = ["manage", "--list", scratchfile, "--domain", "nomanage"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "Managing hosts to domain nomanage is "
-                         "not allowed.", command)
+        self.matchoutput(out,
+                         "Managing objects to domain nomanage is not allowed.",
+                         command)
 
     def test_105_fail_manage_empty_list(self):
         user = self.config.get("unittest", "user")

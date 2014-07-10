@@ -175,8 +175,9 @@ class TestManage(TestBrokerCommand):
     def testfailmanagecluster(self):
         command = ["manage", "--cluster", "utecl1", "--domain", "nomanage"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "Managing clusters to domain nomanage is "
-                         "not allowed.", command)
+        self.matchoutput(out,
+                         "Managing objects to domain nomanage is not allowed.",
+                         command)
 
     def testverifymanagecluster(self):
         user = self.config.get("unittest", "user")

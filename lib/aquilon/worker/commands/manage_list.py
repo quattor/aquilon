@@ -31,15 +31,7 @@ class CommandManageList(BrokerCommand):
 
     required_parameters = ["list"]
 
-    def render(self, session, logger, list, domain, sandbox, force,
-               **arguments):
-        dbbranch, dbauthor = get_branch_and_author(session, logger,
-                                                   domain=domain,
-                                                   sandbox=sandbox, compel=True)
-
-        if hasattr(dbbranch, "allow_manage") and not dbbranch.allow_manage:
-            raise ArgumentError("Managing hosts to {0:l} is not allowed."
-                                .format(dbbranch))
+    def get_objects(self, session, list, **arguments):  # pylint: disable=W0613
         check_hostlist_size(self.command, self.config, list)
 
         dbhosts = hostlist_to_hosts(session, list)
@@ -58,16 +50,30 @@ class CommandManageList(BrokerCommand):
             raise ArgumentError("Cannot modify the following hosts:\n%s" %
                                 "\n".join(failed))
 
+        return (dbsource, dbsource_author, dbhosts)
+
+    def render(self, session, logger, domain, sandbox, force, **arguments):
+        dbbranch, dbauthor = get_branch_and_author(session, logger,
+                                                   domain=domain,
+                                                   sandbox=sandbox, compel=True)
+        if hasattr(dbbranch, "allow_manage") and not dbbranch.allow_manage:
+            raise ArgumentError("Managing objects to {0:l} is not allowed."
+                                .format(dbbranch))
+
+        dbsource, dbsource_author, objects = self.get_objects(session,
+                                                              **arguments)
+
         if not force:
             validate_branch_commits(dbsource, dbsource_author,
                                     dbbranch, dbauthor, logger, self.config)
 
         plenaries = PlenaryCollection(logger=logger)
-        for dbhost in dbhosts:
-            plenaries.append(Plenary.get_plenary(dbhost))
 
-            dbhost.branch = dbbranch
-            dbhost.sandbox_author = dbauthor
+        for dbobj in objects:
+            plenaries.append(Plenary.get_plenary(dbobj))
+
+            dbobj.branch = dbbranch
+            dbobj.sandbox_author = dbauthor
 
         session.flush()
 
