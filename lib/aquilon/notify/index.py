@@ -25,7 +25,7 @@ import gzip
 from xml.etree import ElementTree
 
 from aquilon.aqdb.model import Service
-from aquilon.utils import write_file
+from aquilon.utils import write_file, remove_file
 
 LOGGER = logging.getLogger(__name__)
 
@@ -61,11 +61,7 @@ def build_index(config, session, logger=LOGGER):
     else:
         compress_suffix = ""
 
-    suffixes = []
-    if config.getboolean('panc', 'xml_profiles'):
-        suffixes.append(".xml" + compress_suffix)
-    if config.getboolean('panc', 'json_profiles'):
-        suffixes.append(".json" + compress_suffix)
+    suffixes = [".xml" + compress_suffix, ".json" + compress_suffix]
 
     # The profile should be .xml, unless webserver trickery is going to
     # redirect all requests for .xml files to be .xml.gz requests. :)
@@ -114,9 +110,13 @@ def build_index(config, session, logger=LOGGER):
     # have changed since the last index. The values are unused.
     modified_index = {}
 
-    content = []
-    content.append("<?xml version='1.0' encoding='utf-8'?>")
-    content.append("<profiles>")
+    # objects stores the (mtime, suffix) pairs we discovered. Its purpose is
+    # de-duplicating if there are multiple suffixes (say, both .json and .xml)
+    # for the same object - we want to advertise only the newest.
+    objects = {}
+
+    # Old profiles that should be cleaned up, if the profile extension changes
+    cleanup = []
 
     for root, _dirs, files in os.walk(profilesdir):
         for profile in files:
@@ -128,10 +128,12 @@ def build_index(config, session, logger=LOGGER):
                     continue
 
                 obj = os.path.join(root, profile[:-len(suffix)])
+
                 # Remove the common prefix: our profilesdir, so that the
                 # remaining object name is relative to that root (+1 in order
                 # to remove the slash separator)
                 obj = obj[len(profilesdir) + 1:]
+
                 # This operation is not done with a lock, and it's possible
                 # that the file has been removed since calling os.walk().
                 # If that's the case, no need to add it to the modified_index.
@@ -139,8 +141,16 @@ def build_index(config, session, logger=LOGGER):
                     mtime = os.path.getmtime(os.path.join(root, profile))
                 except OSError, e:
                     continue
-                if obj in old_object_index and mtime > old_object_index[obj]:
-                    modified_index[obj] = mtime
+
+                if obj in old_object_index:
+                    if mtime > old_object_index[obj]:
+                        modified_index[obj] = mtime
+
+                    # Note this test means stale profiles will be cleaned up the
+                    # second time the index is rebuilt: the first time the
+                    # profile's mtime will still match the old index
+                    if mtime < old_object_index[obj]:
+                        cleanup.append(os.path.join(root, profile))
 
                 # The index generally just lists whatever is produced.  However,
                 # the webserver may be configured to transparently serve up
@@ -152,9 +162,15 @@ def build_index(config, session, logger=LOGGER):
                 else:
                     advertise_suffix = suffix
 
-                content.append("<profile mtime='%d'>%s%s</profile>" %
-                               (mtime, obj, advertise_suffix))
+                if obj not in objects or objects[obj][0] < mtime:
+                    objects[obj] = (mtime, advertise_suffix)
 
+    content = []
+    content.append("<?xml version='1.0' encoding='utf-8'?>")
+    content.append("<profiles>")
+    for obj, (mtime, advertise_suffix) in objects.items():
+        content.append("<profile mtime='%d'>%s%s</profile>" %
+                       (mtime, obj, advertise_suffix))
     content.append("</profiles>")
 
     compress = None
@@ -164,6 +180,10 @@ def build_index(config, session, logger=LOGGER):
 
     logger.debug("Updated %s, %d objects modified", index_path,
                  len(modified_index))
+
+    for filename in cleanup:
+        logger.debug("Cleaning up %s" % filename)
+        remove_file(filename, logger=logger)
 
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 

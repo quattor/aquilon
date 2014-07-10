@@ -2287,6 +2287,7 @@
          <option name="comments" type="string">Comments on the branch</option>
          <option name="compiler_version" type="string">Version of panc to use</option>
          <option name="autosync" type="boolean">Set the autosync flag</option>
+         <option name="profile_formats" type="string">Profile formats to generate</option>
       </optgroup>
       <transport method="post" path="sandbox/%(sandbox)s" />
    </command>
@@ -2305,6 +2306,7 @@
          <option name="autosync" type="boolean">Set the autosync flag</option>
          <option name="change_manager" type="boolean">Require a change manager for the domain</option>
          <option name="allow_manage" reverse="disallow_manage" type="boolean">Control managing hosts to the domain</option>
+         <option name="profile_formats" type="string">Profile formats to generate</option>
       </optgroup>
       <transport method="post" path="domain/%(domain)s" />
    </command>

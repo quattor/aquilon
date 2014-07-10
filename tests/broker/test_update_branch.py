@@ -117,6 +117,27 @@ class TestUpdateBranch(TestBrokerCommand):
         self.matchclean(out, "ut-prod", command)
         self.matchoutput(out, "deployable", command)
 
+    def testupdateunittestxml(self):
+        # Make this domain produce XML, regardless of the global default
+        command = ["update_domain", "--domain", "unittest-xml",
+                   "--profile_formats", "pan"]
+        self.noouttest(command)
+
+    def testverifyunittestxml(self):
+        command = ["show_domain", "--domain", "unittest-xml"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Profile Formats: pan", command)
+
+    def testupdateunittestjson(self):
+        # Make this domain produce JSON, regardless of the global default
+        command = ["update_domain", "--domain", "unittest-json",
+                   "--profile_formats", "json"]
+        self.noouttest(command)
+
+    def testverifyunittestjson(self):
+        command = ["show_domain", "--domain", "unittest-json"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Profile Formats: json", command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUpdateBranch)

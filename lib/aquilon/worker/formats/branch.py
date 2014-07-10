@@ -38,6 +38,8 @@ class DomainFormatter(ObjectFormatter):
                        domain.requires_change_manager)
         details.append(indent + "  May Contain Hosts/Clusters: %s" %
                        domain.allow_manage)
+        if domain.formats:
+            details.append(indent + "  Profile Formats: %s" % domain.formats)
         if domain.comments:
             details.append(indent + "  Comments: %s" % domain.comments)
         return "\n".join(details)
@@ -67,6 +69,8 @@ class SandboxFormatter(ObjectFormatter):
         details.append(indent + "  Owner: %s" % sandbox.owner.name)
         details.append(indent + "  Compiler: %s" % sandbox.compiler)
         details.append(indent + "  Base Commit: %s" % sandbox.base_commit)
+        if sandbox.formats:
+            details.append(indent + "  Profile Formats: %s" % sandbox.formats)
         if hasattr(sandbox, 'path'):
             details.append(indent + "  Path: %s" % sandbox.path)
         if sandbox.comments:

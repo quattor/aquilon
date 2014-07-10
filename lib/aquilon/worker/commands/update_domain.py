@@ -20,7 +20,8 @@
 from aquilon.exceptions_ import ArgumentError, AuthorizationException
 from aquilon.aqdb.model import Domain
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.dbwrappers.branch import expand_compiler
+from aquilon.worker.dbwrappers.branch import (expand_compiler,
+                                              has_compileable_objects)
 
 
 class CommandUpdateDomain(BrokerCommand):
@@ -28,7 +29,8 @@ class CommandUpdateDomain(BrokerCommand):
     required_parameters = ["domain"]
 
     def render(self, session, dbuser, domain, comments, compiler_version,
-               autosync, change_manager, allow_manage, **arguments):
+               autosync, change_manager, allow_manage, profile_formats,
+               **arguments):
         dbdomain = Domain.get_unique(session, domain, compel=True)
 
         # FIXME: proper authorization
@@ -49,6 +51,16 @@ class CommandUpdateDomain(BrokerCommand):
             dbdomain.requires_change_manager = change_manager
         if allow_manage is not None:
             dbdomain.allow_manage = allow_manage
+
+        if profile_formats is not None:
+            # We don't want to deal with cleaning up existing profiles if the
+            # formats change, so we don't allow changing the format if there are
+            # compileable objects
+            if has_compileable_objects(dbdomain):
+                raise ArgumentError("{0} has compileable objects, the profile "
+                                    "format cannot be changed."
+                                    .format(dbdomain))
+            dbdomain.formats = profile_formats
 
         session.flush()
         return
