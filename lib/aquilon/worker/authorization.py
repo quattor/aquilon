@@ -158,6 +158,8 @@ class AuthorizationBroker(object):
         if dbuser.role.name == 'secadmin':
             if action not in ['permission',
                               'grant_root_access', 'revoke_root_access',
+                              'compile', 'compile_hostname',
+                              'compile_cluster', 'compile_personality',
                               'add_netgroup_whitelist',
                               'del_netgroup_whitelist']:
                 self.raise_auth_error(principal, action, resource)
