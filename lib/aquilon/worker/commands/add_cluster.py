@@ -50,10 +50,8 @@ class CommandAddCluster(BrokerCommand):
             buildstatus = "build"
         dbstatus = ClusterLifecycle.get_instance(session, buildstatus)
 
-        (dbbranch, dbauthor) = get_branch_and_author(session, logger,
-                                                     domain=domain,
-                                                     sandbox=sandbox,
-                                                     compel=True)
+        dbbranch, dbauthor = get_branch_and_author(session, domain=domain,
+                                                   sandbox=sandbox, compel=True)
 
         if hasattr(dbbranch, "allow_manage") and not dbbranch.allow_manage:
             raise ArgumentError("Adding clusters to {0:l} is not allowed."

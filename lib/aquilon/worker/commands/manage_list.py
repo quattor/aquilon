@@ -33,8 +33,7 @@ class CommandManageList(BrokerCommand):
 
     def render(self, session, logger, list, domain, sandbox, force,
                **arguments):
-        dbbranch, dbauthor = get_branch_and_author(session, logger,
-                                                   domain=domain,
+        dbbranch, dbauthor = get_branch_and_author(session, domain=domain,
                                                    sandbox=sandbox, compel=True)
 
         if hasattr(dbbranch, "allow_manage") and not dbbranch.allow_manage:
