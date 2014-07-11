@@ -285,9 +285,8 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
                    "--archetype", "aquilon", "--personality=unixeng-test"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
-                         "unittest01.one-nyp.ms.com: Cannot change archetype "
-                         "because operating system windows/windows-nt61e needs "
-                         "archetype windows.",
+                         "unittest01.one-nyp.ms.com: Operating System "
+                         "windows, version nt61e, archetype aquilon not found.",
                          command)
 
     def testverifyreconfigurewindows(self):
@@ -474,9 +473,9 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
                    "--archetype=vmhost", "--personality=esx_server"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
-                         "evh2.aqd-unittest.ms.com: The personality "
+                         "evh2.aqd-unittest.ms.com: Personality "
                          "vmhost/esx_server is not allowed by ESX Cluster "
-                         "utecl1.  Specify one of ['vmhost/vulcan-1g-desktop-prod'].",
+                         "utecl1.  Specify one of: vmhost/vulcan-1g-desktop-prod.",
                          command)
 
     def testverifyalignedservice(self):
@@ -515,31 +514,21 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
         hosts = ["aquilon91.aqd-unittest.ms.com"]
         scratchfile = self.writescratch("missingosversion", "\n".join(hosts))
         command = ["reconfigure", "--list", scratchfile, "--osname=linux"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out, "Please specify --osversion for OS linux",
-                         command)
+        self.successtest(command)
 
     def testhostlistnoosname(self):
         hosts = ["aquilon91.aqd-unittest.ms.com"]
         scratchfile = self.writescratch("missingosname", "\n".join(hosts))
         command = ["reconfigure", "--list", scratchfile,
                    "--osversion=5.0.1-x86_64"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out,
-                         "Please specify --osname to use with "
-                         "OS version 5.0.1-x86_64",
-                         command)
+        self.successtest(command)
 
     def testhostlistnoosarchetype(self):
         hosts = ["aquilon91.aqd-unittest.ms.com"]
         scratchfile = self.writescratch("missingosarchetype", "\n".join(hosts))
         command = ["reconfigure", "--list", scratchfile,
                    "--osname=linux", "--osversion=5.0.1-x86_64"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out,
-                         "Please specify --archetype for OS "
-                         "linux, version 5.0.1-x86_64",
-                         command)
+        self.successtest(command)
 
     def testhostlistpersonalitynoarchetype(self):
         hosts = ["aquilon91.aqd-unittest.ms.com"]
@@ -547,7 +536,9 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
         command = ["reconfigure", "--list", scratchfile,
                    "--personality=generic"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "Personality generic is not unique.", command)
+        self.matchoutput(out,
+                         "Personality generic, archetype aquilon not found.",
+                         command)
 
     def testemptyhostlist(self):
         hosts = ["#host", "#does", "", "   #not   ", "#exist"]

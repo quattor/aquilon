@@ -613,6 +613,32 @@ class PlenaryCollection(object):
             plenary.set_logger(self.logger)
             self.plenaries.append(plenary)
 
+    def flatten(self):
+        """
+        Flatten embedded plenary collections.
+
+        When reconfiguring multiple objects, we usually end up with a plenary
+        collection that itself contains other plenary collections, and e.g. the
+        plenaries of the same server may appear multiple times embedded in that
+        tree. We still want to process those plenaries only once, so this
+        operation allows flattening a tree of collections to a simple list.
+
+        Note that there are other classes that inherit from PlenaryCollection -
+        we don't want to flatten those, because those classes may add extra
+        behavior in addition to being a container.
+        """
+
+        def walk_plenaries(collection_):
+            for plen in collection_.plenaries:
+                # Don't flatten subclasses
+                if type(plen) == type(collection_):
+                    for plen2 in walk_plenaries(plen):
+                        yield plen2
+                else:
+                    yield plen
+
+        self.plenaries = list(set(walk_plenaries(self)))
+
 
 class TemplateFormatter(ObjectFormatter):
     lookup_raw = build_mako_lookup(ObjectFormatter.config, "pan",
