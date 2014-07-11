@@ -2392,9 +2392,8 @@
       <optgroup name="deploy optional" mandatory="False">
          <option name="sync" type="boolean" default="True">Automatically sync tracking domains</option>
          <option name="dryrun" type="boolean">Attempt a test merge and run tests without saving the merge result</option>
-         <option name="comments" type="string">Comments to include in the merge commit</option>
          <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
-         <option name="reason" type="string">String to be specified if justification='emergency'</option>
+         <option name="reason" type="string">Reason of the deployment to record in the commit log. Mandatory if justification is emergency</option>
       </optgroup>
       <transport method="post" path="command/deploy" />
    </command>

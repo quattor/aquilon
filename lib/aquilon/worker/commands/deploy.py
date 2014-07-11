@@ -43,8 +43,8 @@ def validate_justification(principal, justification, reason):
         raise ArgumentError("Failed to parse the justification: expected "
                             "tcm=NNNNNNNNN or sn=XXXNNNNN.")
     if justification == 'emergency' and not reason:
-            raise AuthorizationException(
-                  "Justification of 'emergency' requires --reason to be specified.")
+        raise AuthorizationException(
+              "Justification of 'emergency' requires --reason to be specified.")
 
     # TODO: EDM validation
     # edm_validate(result.group(0))
@@ -55,7 +55,7 @@ class CommandDeploy(BrokerCommand):
     required_parameters = ["source", "target"]
 
     def render(self, session, logger, source, target, sync, dryrun,
-               comments, justification, user, requestid, reason, **arguments):
+               justification, reason, user, requestid, **arguments):
         # Most of the logic here is duplicated in publish
         dbsource = Branch.get_unique(session, source, compel=True)
 
@@ -127,8 +127,8 @@ class CommandDeploy(BrokerCommand):
             merge_msg.append("Request ID: %s" % requestid)
             if justification:
                 merge_msg.append("Justification: %s" % justification)
-            if comments:
-                merge_msg.append("Comments: %s" % comments)
+            if reason:
+                merge_msg.append("Reason: %s" % reason)
 
             try:
                 run_git(["merge", "--no-ff", "origin/%s" % dbsource.name,
