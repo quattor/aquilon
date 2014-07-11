@@ -16,7 +16,7 @@
 # limitations under the License.
 """Contains the logic for `aq compile`."""
 
-from aquilon.aqdb.model import Cluster, MetaCluster
+from aquilon.aqdb.model import Cluster
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.templates import Plenary, PlenaryCollection
 from aquilon.worker.templates.domain import TemplateDomain
@@ -39,15 +39,8 @@ class CommandCompileCluster(BrokerCommand):
 
         plenaries = PlenaryCollection(logger=logger)
 
-        def add_cluster_plenaries(cluster):
-            plenaries.append(Plenary.get_plenary(cluster))
-            for host in cluster.hosts:
-                plenaries.append(Plenary.get_plenary(host))
-
-        add_cluster_plenaries(dbcluster)
-        if isinstance(dbcluster, MetaCluster):
-            for cluster in dbcluster.members:
-                add_cluster_plenaries(cluster)
+        for dbobj in dbcluster.all_objects():
+            plenaries.append(Plenary.get_plenary(dbobj))
 
         with plenaries.get_key():
             dom.compile(session, only=plenaries.object_templates,

@@ -113,6 +113,12 @@ class MetaCluster(Cluster):
                     usage[name] = value
         return usage
 
+    def all_objects(self):
+        yield self
+        for dbcls in self.members:
+            for dbobj in dbcls.all_objects():
+                yield dbobj
+
     def validate(self):
         """ Validate metacluster constraints """
         if len(self.members) > self.max_clusters:
