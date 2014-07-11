@@ -38,6 +38,14 @@ from aquilon.worker.templates.base import Plenary, PlenaryCollection
 
 def validate_branch_commits(dbsource, dbsource_author,
                             dbtarget, dbtarget_author, logger, config):
+    """
+    Verify that we're not leaving changes behind.
+
+    This function verifies that we're not losing changes in the source sandbox
+    or domain that were not committed, not published, or not merged into the
+    target sandbox or domain.
+    """
+
     domainsdir = config.get('broker', 'domainsdir')
     if isinstance(dbsource, Sandbox):
         authored_sandbox = AuthoredSandbox(dbsource, dbsource_author)
@@ -51,42 +59,44 @@ def validate_branch_commits(dbsource, dbsource_author,
     else:
         target_path = os.path.join(domainsdir, dbtarget.name)
 
-    # check if dbsource has anything uncommitted
+    # Check if the source has anything uncommitted
     git_status = run_git(["status", "--porcelain"],
-                         path=source_path,
-                         logger=logger)
+                         path=source_path, logger=logger)
     if git_status:
         raise ArgumentError("The source {0:l} contains uncommitted files."
                             .format(dbsource))
 
-    # get latest source commit bit
-    dbsource_commit = run_git(['rev-list', '--max-count=1', 'HEAD'],
-                              path=source_path, logger=logger)
-    dbsource_commit = dbsource_commit.rstrip()
-    if not dbsource_commit:  # pragma: no cover
-        raise ArgumentError("Unable to retrieve the git commit history from "
-                            "source branch {0:l}.".format(dbsource))
+    # Get latest source commit and tree ID
+    source_commit = run_git(['rev-parse', '--verify', '-q', 'HEAD^{commit}'],
+                            path=source_path, logger=logger)
+    source_commit = source_commit.strip()
+    source_tree = run_git(['rev-parse', '--verify', '-q', 'HEAD^{tree}'],
+                          path=source_path, logger=logger)
+    source_tree = source_commit.strip()
+    if not source_commit or not source_tree:  # pragma: no cover
+        raise ArgumentError("Unable to retrieve the last commit information "
+                            "from source {0:l}.".format(dbsource))
 
-    # make sure all commits in the source have been published.
-    # we can check the latest commit bit from the source in template-king
-    # any results returned will mean that all commits has been published
+    # Verify that the source is fully published, i.e. template-king has the same
+    # commit
     kingdir = config.get("broker", "kingdir")
     try:
-        found = run_git(['cat-file', '-t', dbsource_commit],
-                        path=kingdir, logger=logger)
-        found = found.strip()
+        king_commit = run_git(['rev-parse', '--verify', '-q',
+                               dbsource.name + '^{commit}'],
+                              path=kingdir, logger=logger)
+        king_commit = king_commit.strip()
     except ProcessException as pe:
-        if pe.code != 128:
+        if pe.code != 1:
             raise
         else:
-            found = None
-    if found != 'commit':
-        raise ArgumentError("The source {0:l} latest commit has not been "
+            king_commit = None
+    if king_commit != source_commit:
+        raise ArgumentError("The latest commit of {0:l} has not been "
                             "published to template-king yet.".format(dbsource))
 
-    # check if target branch has the latest source commit
+    # Check if target branch has the latest source commit
     try:
-        filterre = re.compile('^' + dbsource_commit + '$')
+        filterre = re.compile('^' + source_commit + '$')
         found = run_git(['rev-list', 'HEAD'], filterre=filterre,
                         path=target_path, logger=logger)
     except ProcessException as pe:
@@ -94,6 +104,17 @@ def validate_branch_commits(dbsource, dbsource_author,
             raise
         else:
             found = None
+
+    if not found:
+        # If the commit itself was not found, try to check if the two heads
+        # point to the same tree object, and the difference is only in history
+        # (e.g. merging the same sandbox into different domains will create
+        # different merge commits).
+        target_tree = run_git(['rev-parse', '--verify', '-q', 'HEAD^{tree}'],
+                              path=target_path, logger=logger)
+        target_tree = target_tree.strip()
+        found = target_tree == source_tree
+
     if not found:
         raise ArgumentError("The target {0:l} does not contain the latest "
                             "commit from source {1:l}.".format(dbtarget,

@@ -82,7 +82,7 @@ class TestManageValidateBranch(TestBrokerCommand):
                    "--sandbox", "%s/managetest2" % user]
         out = self.badrequesttest(command)
         self.matchoutput(out,
-                         "The source sandbox managetest1 latest commit has "
+                         "The latest commit of sandbox managetest1 has "
                          "not been published to template-king yet.",
                          command)
 
@@ -103,7 +103,6 @@ class TestManageValidateBranch(TestBrokerCommand):
 
     def test_116_pull_committed_change(self):
         kingdir = self.config.get("broker", "kingdir")
-        user = self.config.get("unittest", "user")
         managetest2dir = os.path.join(self.sandboxdir, "managetest2")
         self.gitcommand(["pull", "--no-ff", kingdir, "managetest1"],
                         cwd=managetest2dir)
