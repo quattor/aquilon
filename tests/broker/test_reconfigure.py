@@ -269,13 +269,13 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
                          command)
 
     def testreconfigurewindowswrongarch(self):
+        # Trying to change archetype, but there's no suitable OS
         command = ["reconfigure", "--hostname", "unittest01.one-nyp.ms.com",
                    "--archetype", "aquilon", "--personality", "unixeng-test"]
-        err = self.badrequesttest(command)
+        err = self.notfoundtest(command)
         self.matchoutput(err,
-                         "Operating System windows/windows-nt61e belongs to "
-                         "archetype windows, not archetype aquilon.  Please "
-                         "specify --osname/--osversion.",
+                         "Operating System windows, version nt61e, "
+                         "archetype aquilon not found.",
                          command)
 
     def testreconfigurewindowswrongarchlist(self):
@@ -352,10 +352,9 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
         command = ["reconfigure",
                    "--hostname", "aquilon62.aqd-unittest.ms.com",
                    "--archetype", "windows"]
-        out = self.badrequesttest(command)
+        out = self.notfoundtest(command)
         self.matchoutput(out,
-                         "Changing archetype also requires "
-                         "specifying --personality.",
+                         "Personality inventory, archetype windows not found.",
                          command)
 
     def testmissingrequiredservice(self):
@@ -378,14 +377,6 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
         self.matchoutput(err, "1/1 object template", command)
         self.matchclean(err, "removing binding", command)
         self.matchclean(err, "adding binding", command)
-
-    def verifykeepbindings(self):
-        for service in ["chooser1", "chooser2", "chooser3"]:
-            command = ["search_host", "--service", service,
-                       "--hostname", "aquilon86.aqd-unittest.ms.com",
-                       "--archetype", "aquilon", "--personality", "inventory"]
-            out = self.commandtest(command)
-            self.matchoutput(out, "aquilon86.aqd-unittest.ms.com")
 
     def testremovebindings(self):
         command = ["reconfigure",
@@ -471,9 +462,9 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
                    "--personality=esx_server"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
-                         "The personality vmhost/esx_server is not allowed by "
-                         "ESX Cluster utecl1.  Specify one of "
-                         "['vmhost/vulcan-1g-desktop-prod'].",
+                         "Personality vmhost/esx_server is not allowed by "
+                         "ESX Cluster utecl1.  Specify one of: "
+                         "vmhost/vulcan-1g-desktop-prod.",
                          command)
 
     def testfailpersonalitynotallowedlist(self):
@@ -585,7 +576,6 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
         self.matchclean(out, "aquilon91.aqd-unittest.ms.com:", command)
 
     def testfailoverlistlimit(self):
-        user = self.config.get("unittest", "user")
         hostlimit = self.config.getint("broker", "reconfigure_max_list_size")
         hosts = []
         for i in range(1, 20):

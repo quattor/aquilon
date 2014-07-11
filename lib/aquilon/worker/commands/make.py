@@ -35,55 +35,47 @@ class CommandMake(BrokerCommand):
                personality, buildstatus, keepbindings, grn, eon_id, cleargrn,
                **arguments):
         dbhost = hostname_to_host(session, hostname)
+        old_archetype = dbhost.archetype
 
-        if archetype and archetype != dbhost.archetype.name:
+        if archetype:
+            dbarchetype = Archetype.get_unique(session, archetype, compel=True)
+            if dbarchetype.cluster_type is not None:
+                raise ArgumentError("{0} is a cluster archetype, it cannot be "
+                                    "used for hosts.".format(dbarchetype))
+        else:
+            dbarchetype = dbhost.archetype
+
+        if personality or old_archetype != dbarchetype:
             if not personality:
-                raise ArgumentError("Changing archetype also requires "
-                                    "specifying --personality.")
-        if personality:
-            if archetype:
-                dbarchetype = Archetype.get_unique(session, archetype,
-                                                   compel=True)
-                if dbarchetype.cluster_type is not None:
-                    raise ArgumentError("Archetype %s is a cluster archetype" %
-                                        dbarchetype.name)
-            else:
-                dbarchetype = dbhost.archetype
-
-            if not osname and not osversion and \
-               dbhost.operating_system.archetype != dbarchetype:
-                raise ArgumentError("{0} belongs to {1:l}, not {2:l}.  Please "
-                                    "specify --osname/--osversion."
-                                    .format(dbhost.operating_system,
-                                            dbhost.operating_system.archetype,
-                                            dbarchetype))
+                personality = dbhost.personality.name
 
             dbpersonality = Personality.get_unique(session, name=personality,
                                                    archetype=dbarchetype,
                                                    compel=True)
+
             if dbhost.cluster and dbhost.cluster.allowed_personalities and \
                dbpersonality not in dbhost.cluster.allowed_personalities:
                 allowed = ["%s/%s" % (p.archetype.name, p.name) for p in
                            dbhost.cluster.allowed_personalities]
-                raise ArgumentError("The {0:l} is not allowed by {1}.  "
-                                    "Specify one of {2}.".format(
-                                        dbpersonality, dbhost.cluster,
-                                        allowed))
+                raise ArgumentError("{0} is not allowed by {1}.  "
+                                    "Specify one of: {2}."
+                                    .format(dbpersonality, dbhost.cluster,
+                                            ", ".join(allowed)))
 
             dbhost.personality = dbpersonality
 
-        if not osname:
-            osname = dbhost.operating_system.name
-        if osname and osversion:
+        if osname or osversion or old_archetype != dbarchetype:
+            if not osname:
+                osname = dbhost.operating_system.name
+            if not osversion:
+                osversion = dbhost.operating_system.version
+
             dbos = OperatingSystem.get_unique(session, name=osname,
                                               version=osversion,
-                                              archetype=dbhost.archetype,
+                                              archetype=dbarchetype,
                                               compel=True)
             # Hmm... no cluster constraint here...
             dbhost.operating_system = dbos
-        elif osname != dbhost.operating_system.name:
-            raise ArgumentError("Please specify a version to use for OS %s." %
-                                osname)
 
         if buildstatus:
             dbstatus = HostLifecycle.get_instance(session, buildstatus)
@@ -108,7 +100,8 @@ class CommandMake(BrokerCommand):
         chooser = Chooser(dbhost, logger=logger,
                           required_only=not keepbindings)
         chooser.set_required()
-        chooser.flush_changes()
+
+        session.flush()
 
         td = TemplateDomain(dbhost.branch, dbhost.sandbox_author, logger=logger)
 
