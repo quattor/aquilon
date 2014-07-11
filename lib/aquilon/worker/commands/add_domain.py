@@ -16,14 +16,15 @@
 # limitations under the License.
 """Contains the logic for `aq add domain`."""
 
-import os
+import os.path
 
 from aquilon.exceptions_ import (AuthorizationException, ArgumentError,
                                  InternalError, ProcessException)
 from aquilon.aqdb.model import Domain, Branch
+from aquilon.utils import remove_dir
 from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.dbwrappers.branch import add_branch
 from aquilon.worker.processes import run_git
-from aquilon.utils import remove_dir, validate_template_name
 
 
 class CommandAddDomain(BrokerCommand):
@@ -36,37 +37,26 @@ class CommandAddDomain(BrokerCommand):
             raise AuthorizationException("Cannot create a domain without "
                                          "an authenticated connection.")
 
-        validate_template_name("--domain", domain)
-        try:
-            run_git(["check-ref-format", "--branch", domain])
-        except ProcessException:
-            raise ArgumentError("'%s' is not a valid git branch name." % domain)
-
-        Branch.get_unique(session, domain, preclude=True)
-
-        compiler = self.config.get("panc", "pan_compiler")
-        dbtracked = None
         if track:
             dbtracked = Branch.get_unique(session, track, compel=True)
             if getattr(dbtracked, "tracked_branch", None):
                 raise ArgumentError("Cannot nest tracking.  Try tracking "
                                     "{0:l} directly.".format(dbtracked.tracked_branch))
-            start_point = dbtracked
+            dbstart = dbtracked
             if change_manager:
                 raise ArgumentError("Cannot enforce a change manager for "
                                     "tracking domains.")
         else:
+            dbtracked = None
             if not start:
                 start = self.config.get("broker", "default_domain_start")
-            start_point = Branch.get_unique(session, start, compel=True)
+            dbstart = Branch.get_unique(session, start, compel=True)
 
-        dbdomain = Domain(name=domain, owner=dbuser, compiler=compiler,
-                          tracked_branch=dbtracked,
-                          requires_change_manager=bool(change_manager),
-                          comments=comments)
-        session.add(dbdomain)
-        if allow_manage is not None:
-            dbdomain.allow_manage = allow_manage
+        dbdomain = add_branch(session, self.config, dbuser, Domain, domain,
+                              tracked_branch=dbtracked,
+                              requires_change_manager=bool(change_manager),
+                              comments=comments, allow_manage=allow_manage)
+
         session.flush()
 
         domainsdir = self.config.get("broker", "domainsdir")
@@ -81,7 +71,7 @@ class CommandAddDomain(BrokerCommand):
         else:
             cmd.append("--no-track")
         cmd.append(dbdomain.name)
-        cmd.append(start_point.name)
+        cmd.append(dbstart.name)
         run_git(cmd, path=kingdir, logger=logger)
 
         # If the branch command above fails the DB will roll back as normal.
