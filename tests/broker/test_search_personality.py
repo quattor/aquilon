@@ -38,7 +38,6 @@ class TestSearchPersonality(VerifyGrnsMixin, TestBrokerCommand):
     def test_100_by_environment(self):
         command = ["search", "personality", "--host_environment", "prod"]
         out = self.commandtest(command)
-        self.matchoutput(out, "aquilon/generic", command)
         self.matchoutput(out, "aurora/generic", command)
         self.matchoutput(out, "filer/generic", command)
         self.matchoutput(out, "f5/generic", command)
@@ -128,13 +127,13 @@ class TestSearchPersonality(VerifyGrnsMixin, TestBrokerCommand):
 
     def test_110_show_diff_1(self):
         command = ["show_diff", "--personality=utpersonality/dev",
-                   "--archetype=aquilon", "--other=generic"]
+                   "--archetype=aquilon", "--other=inventory"]
         out = self.commandtest(command)
         self.searchoutput(out,
-                          r'missing Options in Personality aquilon/generic:\s+ConfigOverride',
+                          r'missing Options in Personality aquilon/inventory:\s+ConfigOverride',
                           command)
         self.searchoutput(out,
-                          r'missing Grns in Personality aquilon/generic:\s+'
+                          r'missing Grns in Personality aquilon/inventory:\s+'
                           r'GRN grn:/ms/ei/aquilon/aqd',
                           command)
 
