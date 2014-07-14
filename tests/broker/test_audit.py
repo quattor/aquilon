@@ -387,8 +387,8 @@ class TestAudit(TestBrokerCommand):
 
     def test_900_empty_list_arg(self):
         """ test the output with an empty string as a list element """
-        hosts = ["no_such_host.ut.com\n", "   \n", "another_non_host.ut.com\n"]
-        scratchfile = self.writescratch("audit_hostlist", "".join(hosts))
+        hosts = ["no_such_host.ut.com", "   ", "another_non_host.ut.com"]
+        scratchfile = self.writescratch("audit_hostlist", "\n".join(hosts))
         cmd1 = ["reconfigure", "--list", scratchfile]
         err = self.badrequesttest(cmd1)
 

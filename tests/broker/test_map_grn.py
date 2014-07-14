@@ -261,8 +261,8 @@ class TestMapGrn(VerifyGrnsMixin, PersonalityTestMixin, TestBrokerCommand):
         hostlimit = self.config.getint("broker", "map_grn_max_list_size")
         hosts = []
         for i in range(1, 20):
-            hosts.append("thishostdoesnotexist%d.aqd-unittest.ms.com\n" % i)
-        scratchfile = self.writescratch("mapgrnlistlimit", "".join(hosts))
+            hosts.append("thishostdoesnotexist%d.aqd-unittest.ms.com" % i)
+        scratchfile = self.writescratch("mapgrnlistlimit", "\n".join(hosts))
         command = ["map", "grn", "--grn", "grn:/ms/ei/aquilon/aqd",
                    "--list", scratchfile, "--target", "esp"]
         out = self.badrequesttest(command)
@@ -276,8 +276,8 @@ class TestMapGrn(VerifyGrnsMixin, PersonalityTestMixin, TestBrokerCommand):
         hostlimit = self.config.getint("broker", "unmap_grn_max_list_size")
         hosts = []
         for i in range(1, 20):
-            hosts.append("thishostdoesnotexist%d.aqd-unittest.ms.com\n" % i)
-        scratchfile = self.writescratch("mapgrnlistlimit", "".join(hosts))
+            hosts.append("thishostdoesnotexist%d.aqd-unittest.ms.com" % i)
+        scratchfile = self.writescratch("mapgrnlistlimit", "\n".join(hosts))
         command = ["unmap", "grn", "--grn", "grn:/ms/ei/aquilon/aqd",
                    "--list", scratchfile, "--target", "esp"]
         out = self.badrequesttest(command)

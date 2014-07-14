@@ -279,8 +279,8 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
                          command)
 
     def testreconfigurewindowswrongarchlist(self):
-        hosts = ["unittest01.one-nyp.ms.com\n"]
-        scratchfile = self.writescratch("hostlist", "".join(hosts))
+        hosts = ["unittest01.one-nyp.ms.com"]
+        scratchfile = self.writescratch("hostlist", "\n".join(hosts))
         command = ["reconfigure", "--list", scratchfile,
                    "--archetype", "aquilon", "--personality=unixeng-test"]
         out = self.badrequesttest(command)
@@ -332,8 +332,8 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
                              "template for aquilon62.aqd-unittest.ms.com")
 
     def testmissingpersonalitytemplatehostlist(self):
-        hosts = ["aquilon93.aqd-unittest.ms.com\n"]
-        scratchfile = self.writescratch("missingtemplate", "".join(hosts))
+        hosts = ["aquilon93.aqd-unittest.ms.com"]
+        scratchfile = self.writescratch("missingtemplate", "\n".join(hosts))
         command = ["reconfigure", "--list", scratchfile,
                    "--archetype", "aquilon", "--personality", "badpersonality"]
         out = self.badrequesttest(command)
@@ -358,8 +358,8 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
                          command)
 
     def testmissingrequiredservice(self):
-        hosts = ["aquilon91.aqd-unittest.ms.com\n"]
-        scratchfile = self.writescratch("missingmap", "".join(hosts))
+        hosts = ["aquilon91.aqd-unittest.ms.com"]
+        scratchfile = self.writescratch("missingmap", "\n".join(hosts))
         command = ["reconfigure", "--list", scratchfile,
                    "--archetype", "aquilon",
                    "--personality", "badpersonality2"]
@@ -469,7 +469,7 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
 
     def testfailpersonalitynotallowedlist(self):
         hosts = ["evh2.aqd-unittest.ms.com"]
-        scratchfile = self.writescratch("persnotallowed", "".join(hosts))
+        scratchfile = self.writescratch("persnotallowed", "\n".join(hosts))
         command = ["reconfigure", "--list", scratchfile,
                    "--archetype=vmhost", "--personality=esx_server"]
         out = self.badrequesttest(command)
@@ -502,9 +502,9 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
     # This doesn't work since the manage test comes after this one.
     # Note that these are template domains and not dns domains.
 #   def testhostlistdomains(self):
-#       hosts = ["unittest02.one-nyp.ms.com\n",
-#                "aquilon91.aqd-unittest.ms.com\n"]
-#       scratchfile = self.writescratch("diffdomains", "".join(hosts))
+#       hosts = ["unittest02.one-nyp.ms.com",
+#                "aquilon91.aqd-unittest.ms.com"]
+#       scratchfile = self.writescratch("diffdomains", "\n".join(hosts))
 #       command = ["reconfigure", "--list", scratchfile]
 #       out = self.badrequesttest(command)
 #       self.matchoutput(out, "All hosts must be in the same domain:", command)
@@ -513,7 +513,7 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
 
     def testhostlistnoosversion(self):
         hosts = ["aquilon91.aqd-unittest.ms.com"]
-        scratchfile = self.writescratch("missingosversion", "".join(hosts))
+        scratchfile = self.writescratch("missingosversion", "\n".join(hosts))
         command = ["reconfigure", "--list", scratchfile, "--osname=linux"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Please specify --osversion for OS linux",
@@ -521,7 +521,7 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
 
     def testhostlistnoosname(self):
         hosts = ["aquilon91.aqd-unittest.ms.com"]
-        scratchfile = self.writescratch("missingosname", "".join(hosts))
+        scratchfile = self.writescratch("missingosname", "\n".join(hosts))
         command = ["reconfigure", "--list", scratchfile,
                    "--osversion=5.0.1-x86_64"]
         out = self.badrequesttest(command)
@@ -532,7 +532,7 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
 
     def testhostlistnoosarchetype(self):
         hosts = ["aquilon91.aqd-unittest.ms.com"]
-        scratchfile = self.writescratch("missingosarchetype", "".join(hosts))
+        scratchfile = self.writescratch("missingosarchetype", "\n".join(hosts))
         command = ["reconfigure", "--list", scratchfile,
                    "--osname=linux", "--osversion=5.0.1-x86_64"]
         out = self.badrequesttest(command)
@@ -543,25 +543,25 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
 
     def testhostlistpersonalitynoarchetype(self):
         hosts = ["aquilon91.aqd-unittest.ms.com"]
-        scratchfile = self.writescratch("missingarchetype", "".join(hosts))
+        scratchfile = self.writescratch("missingarchetype", "\n".join(hosts))
         command = ["reconfigure", "--list", scratchfile,
                    "--personality=generic"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Personality generic is not unique.", command)
 
     def testemptyhostlist(self):
-        hosts = ["#host\n", "#does\n", "\n", "   #not   \n", "#exist\n"]
-        scratchfile = self.writescratch("empty", "".join(hosts))
+        hosts = ["#host", "#does", "", "   #not   ", "#exist"]
+        scratchfile = self.writescratch("empty", "\n".join(hosts))
         command = ["reconfigure", "--list", scratchfile]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Empty list.", command)
 
     def testbadhostsinlist(self):
-        hosts = ["host-does-not-exist.aqd-unittest.ms.com\n",
-                 "another-host-does-not-exist.aqd-unittest.ms.com\n",
-                 "aquilon91.aqd-unittest.ms.com\n",
-                 "host.domain-does-not-exist.ms.com\n"]
-        scratchfile = self.writescratch("missinghost", "".join(hosts))
+        hosts = ["host-does-not-exist.aqd-unittest.ms.com",
+                 "another-host-does-not-exist.aqd-unittest.ms.com",
+                 "aquilon91.aqd-unittest.ms.com",
+                 "host.domain-does-not-exist.ms.com"]
+        scratchfile = self.writescratch("missinghost", "\n".join(hosts))
         # Use the deprecated option name here
         command = ["reconfigure", "--hostlist", scratchfile]
         out = self.badrequesttest(command)
@@ -579,8 +579,8 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
         hostlimit = self.config.getint("broker", "reconfigure_max_list_size")
         hosts = []
         for i in range(1, 20):
-            hosts.append("thishostdoesnotexist%d.aqd-unittest.ms.com\n" % i)
-        scratchfile = self.writescratch("reconfigurelistlimit", "".join(hosts))
+            hosts.append("thishostdoesnotexist%d.aqd-unittest.ms.com" % i)
+        scratchfile = self.writescratch("reconfigurelistlimit", "\n".join(hosts))
         command = ["reconfigure", "--list", scratchfile, "--personality=generic"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "The number of hosts in list {0:d} can not be more "

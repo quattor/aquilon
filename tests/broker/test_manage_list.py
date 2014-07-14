@@ -148,8 +148,8 @@ class TestManageList(TestBrokerCommand):
         self.verify_buildfiles("unittest", "unittest17.aqd-unittest.ms.com",
                                want_exist=True)
         user = self.config.get("unittest", "user")
-        hosts = ["unittest17.aqd-unittest.ms.com\n"]
-        scratchfile = self.writescratch("managelist", "".join(hosts))
+        hosts = ["unittest17.aqd-unittest.ms.com"]
+        scratchfile = self.writescratch("managelist", "\n".join(hosts))
         self.noouttest(["manage", "--list", scratchfile,
                         "--sandbox", "%s/managetest1" % user, "--force"])
         self.verify_buildfiles("unittest", "unittest17.aqd-unittest.ms.com",
@@ -175,8 +175,8 @@ class TestManageList(TestBrokerCommand):
         hostlimit = self.config.getint("broker", "manage_max_list_size")
         hosts = []
         for i in range(1, 20):
-            hosts.append("thishostdoesnotexist%d.aqd-unittest.ms.com\n" % i)
-        scratchfile = self.writescratch("managelistlimit", "".join(hosts))
+            hosts.append("thishostdoesnotexist%d.aqd-unittest.ms.com" % i)
+        scratchfile = self.writescratch("managelistlimit", "\n".join(hosts))
         command = ["manage", "--list", scratchfile, "--sandbox",
                    "%s/changetest1" % user, "--force"]
         out = self.badrequesttest(command)
