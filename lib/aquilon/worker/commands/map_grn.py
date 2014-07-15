@@ -17,7 +17,7 @@
 """Contains the logic for `aq map grn`."""
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import Personality
+from aquilon.aqdb.model import Personality, Cluster
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.grn import lookup_grn
 from aquilon.worker.dbwrappers.host import (hostname_to_host, hostlist_to_hosts,
@@ -41,8 +41,9 @@ class CommandMapGrn(BrokerCommand):
 
         obj.grns.append((obj, grn, target))
 
-    def render(self, session, logger, target, grn, eon_id, hostname, list, personality,
-               archetype, justification, reason, user, **arguments):
+    def render(self, session, logger, target, grn, eon_id, hostname, list,
+               membersof, personality, archetype, justification, reason,
+               user, **arguments):
         dbgrn = lookup_grn(session, grn, eon_id, logger=logger,
                            config=self.config)
 
@@ -54,6 +55,10 @@ class CommandMapGrn(BrokerCommand):
         elif list:
             check_hostlist_size(self.command, self.config, list)
             objs = hostlist_to_hosts(session, list)
+            config_key = "host_grn_targets"
+        elif membersof:
+            dbcluster = Cluster.get_unique(session, membersof, compel=True)
+            objs = dbcluster.hosts
             config_key = "host_grn_targets"
         elif personality:
             objs = [Personality.get_unique(session, name=personality,
