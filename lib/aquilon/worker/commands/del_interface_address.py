@@ -83,7 +83,7 @@ class CommandDelInterfaceAddress(BrokerCommand):
 
         # Lock order: DNS domain(s), network
         q = session.query(DnsDomain.id)
-        q = q.join(Fqdn, ARecord)
+        q = q.join(Fqdn, (ARecord, ARecord.fqdn_id == Fqdn.id))
         q = q.filter_by(network=dbnetwork, ip=ip)
         q = q.order_by(DnsDomain.id)
         q = q.with_lockmode("update")
