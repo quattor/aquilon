@@ -131,7 +131,7 @@ class Cluster(Base):
     location_constraint = relation(Location, lazy=False)
 
     personality = relation(Personality, lazy=False, innerjoin=True)
-    branch = relation(Branch, lazy=False, innerjoin=True, backref='clusters')
+    branch = relation(Branch, lazy=False, innerjoin=True)
     sandbox_author = relation(User)
 
     hosts = association_proxy('_hosts', 'host', creator=_hcm_host_creator)
