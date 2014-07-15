@@ -41,8 +41,7 @@ def check_no_provided_service(dbobject):
         # De-duplicate and sort the provided service instances
         instances = set([srv.service_instance for srv in
                          dbobject.services_provided])
-        instances = list(instances)
-        instances.sort(key=attrgetter("service.name", "name"))
+        instances = sorted(instances, key=attrgetter("service.name", "name"))
 
         msg = ", ".join(["%s/%s" % (si.service.name, si.name)
                          for si in instances])

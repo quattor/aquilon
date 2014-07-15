@@ -30,7 +30,7 @@ def gather_deps(dir):
     dep_re = re.compile(r"^\s*ms.version.addpkg\(\s*'(.*?)'\s*,\s*'(.*?)(-ms\d+)?'")
     for depfile in depfiles:
         with open(depfile) as f:
-            for line in f.readlines():
+            for line in f:
                 m = dep_re.search(line)
                 if m:
                     (package, version, _) = m.groups()

@@ -45,7 +45,7 @@ class CommandAddAlias(BrokerCommand):
         try:
             db_record = Alias(fqdn=dbfqdn, target=dbtarget, comments=comments)
             session.add(db_record)
-        except ValueError, err:
+        except ValueError as err:
             raise ArgumentError(err.message)
 
         session.flush()

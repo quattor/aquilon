@@ -40,8 +40,7 @@ class VerifyGrnsMixin(object):
 
     def check_grns(self, out, grn_list, grn_maps, command):
         def check_grn_for_key(grn_list, key):
-            eon_ids = [self.grns[grn] for grn in grn_list]
-            eon_ids.sort()
+            eon_ids = sorted(self.grns[grn] for grn in grn_list)
             self.searchoutput(out,
                               r'"%s" = list\(\s*' % key +
                               r',\s*'.join([str(eon_id) for eon_id in eon_ids]) +
@@ -54,8 +53,7 @@ class VerifyGrnsMixin(object):
 
     def check_personality_grns(self, out, grn_list, grn_maps, command):
         def check_grn_for_key(grn_list, key):
-            eon_ids = [self.grns[grn] for grn in grn_list]
-            eon_ids.sort()
+            eon_ids = sorted(self.grns[grn] for grn in grn_list)
             for eon_id in eon_ids:
                 self.searchoutput(out,
                                   r'"%s" = append\(%d\);' % (key, eon_id),

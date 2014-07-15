@@ -42,9 +42,9 @@ class CommandAddNetwork(BrokerCommand):
 
         try:
             address = IPv4Network("%s/%s" % (ip, netmask))
-        except AddressValueError, e:
+        except AddressValueError as e:
             raise ArgumentError("Failed to parse the network address: %s" % e)
-        except NetmaskValueError, e:
+        except NetmaskValueError as e:
             raise ArgumentError("Failed to parse the netmask: %s" % e)
 
         if ip != address.network:

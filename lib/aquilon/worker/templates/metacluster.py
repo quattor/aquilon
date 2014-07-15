@@ -69,7 +69,7 @@ class PlenaryMetaClusterData(StructurePlenary):
         lines.append("")
 
         pan_assign(lines, "system/metacluster/members",
-                   sorted([member.name for member in self.dbobj.members]))
+                   sorted(member.name for member in self.dbobj.members))
 
         lines.append("")
 

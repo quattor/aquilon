@@ -17,13 +17,14 @@
 # limitations under the License.
 """Compile a domain."""
 
+from __future__ import print_function
 
 from common import AQRunner
 
 
 def compile(domain, aqservice, aqhost, aqport):
     aq = AQRunner(aqservice=aqservice, aqhost=aqhost, aqport=aqport)
-    print "Compiling domain %s" % domain
+    print("Compiling domain %s" % domain)
     rc = aq.wait(["compile", "--domain=%s" % domain])
 
 

@@ -30,14 +30,16 @@ def lookup_by_name(config, grn):
     name = os.path.join(config.get("broker", "grn_to_eonid_map_location"),
                         "eon_catalog_by_name.cdb")
     cdb_file = cdb.init(name)
-    return cdb_file.has_key(grn)
+    # cdb_file is not iterable, so tell pep8 not to warn about .has_key()
+    return cdb_file.has_key(grn)  # noqa
 
 
 def lookup_by_id(config, eon_id):
     name = os.path.join(config.get("broker", "grn_to_eonid_map_location"),
                         "eon_catalog_by_id.cdb")
     cdb_file = cdb.init(name)
-    return cdb_file.has_key(str(eon_id))
+    # cdb_file is not iterable, so tell pep8 not to warn about .has_key()
+    return cdb_file.has_key(str(eon_id))  # noqa
 
 
 def lookup_autoupdate(config, session, logger, grn, eon_id):

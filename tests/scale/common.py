@@ -91,9 +91,9 @@ class AQRunner(object):
         if self.aqservice:
             full_args.append("--aqservice")
             full_args.append(str(self.aqservice))
-        if not kwargs.has_key("stdout"):
+        if "stdout" not in kwargs:
             kwargs["stdout"] = 1
-        if not kwargs.has_key("stderr"):
+        if "stderr" not in kwargs:
             kwargs["stderr"] = 2
         return Popen(full_args, **kwargs)
 

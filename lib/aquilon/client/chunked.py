@@ -15,11 +15,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from httplib import HTTPResponse, HTTPConnection
 
-import httplib
 
-
-class ChunkedHTTPResponse(httplib.HTTPResponse):
+class ChunkedHTTPResponse(HTTPResponse):
     # This is a modification on the stock _read_chunked() to return
     # chunks as we get them.
     def read_chunk(self, amt=None):
@@ -74,6 +73,6 @@ class ChunkedHTTPResponse(httplib.HTTPResponse):
         return value
 
 
-class ChunkedHTTPConnection(httplib.HTTPConnection):
+class ChunkedHTTPConnection(HTTPConnection):
 
     response_class = ChunkedHTTPResponse

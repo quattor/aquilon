@@ -46,7 +46,7 @@ for f in os.listdir(_thisdir):
         modulename = __name__ + '.' + moduleshort
         try:
             mymodule = __import__(modulename, fromlist=["BrokerCommand"])
-        except Exception, e:  # pragma: no cover
+        except Exception as e:  # pragma: no cover
             log.msg("Error importing %s: %s" % (modulename, format_exc()))
             continue
         if not hasattr(mymodule, "BrokerCommand"):  # pragma: no cover

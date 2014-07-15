@@ -53,7 +53,7 @@ class GracefulProcessMonitor(ProcessMonitor):
             proc.signalProcess('KILL')
         except error.ProcessExitedAlready:
             pass
-        except OSError, e:
+        except OSError as e:
             # Ignore "No such process" errors.
             if e.errno != errno.ESRCH:
                 raise
@@ -72,7 +72,7 @@ class GracefulProcessMonitor(ProcessMonitor):
         except error.ProcessExitedAlready:
             log.msg("Process %s [%s] marked as exited already" %
                     (name, proc.pid))
-        except OSError, e:
+        except OSError as e:
             if e.errno == errno.ESRCH:
                 log.msg("Process %s [%s] pid does not exist" %
                         (name, proc.pid))

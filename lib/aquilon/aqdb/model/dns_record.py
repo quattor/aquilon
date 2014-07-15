@@ -150,9 +150,7 @@ class DnsRecord(Base):
                     queue.append(a)
 
         # Ensure a deterministic order of the returned values
-        aliases = found.values()
-        aliases.sort(cmp=lambda x, y: cmp(str(x.fqdn), str(y.fqdn)))
-        return aliases
+        return sorted(found.values(), key=lambda x: str(x.fqdn))
 
     def __init__(self, fqdn=None, **kwargs):
         if not fqdn:  # pragma: no cover

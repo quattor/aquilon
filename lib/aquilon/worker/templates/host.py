@@ -249,9 +249,8 @@ class PlenaryHostData(StructurePlenary):
         # process grns
         eon_id_map = self.dbobj.effective_grns
 
-        for (target, eon_id_set) in eon_id_map.iteritems():
-            eon_id_list = [grn.eon_id for grn in eon_id_set]
-            eon_id_list.sort()
+        for target, eon_id_set in eon_id_map.iteritems():
+            eon_id_list = sorted(grn.eon_id for grn in eon_id_set)
             pan_assign(lines, "system/eon_id_maps/%s" % target, eon_id_list)
 
         # backward compat for esp reporting
@@ -259,10 +258,7 @@ class PlenaryHostData(StructurePlenary):
         if self.config.has_option(section, "default_grn_target"):
             default_grn_target = self.config.get(section, "default_grn_target")
 
-            eon_id_set = eon_id_map[default_grn_target]
-
-            eon_id_list = [grn.eon_id for grn in eon_id_set]
-            eon_id_list.sort()
+            eon_id_list = sorted(grn.eon_id for grn in eon_id_map[default_grn_target])
             if eon_id_list:
                 pan_assign(lines, "system/eon_ids", eon_id_list)
 
@@ -340,7 +336,7 @@ class PlenaryHostObject(ObjectPlenary):
             required_services.discard(si.service)
             services.append(PlenaryServiceInstanceClientDefault.template_name(si))
         if required_services:
-            missing = ", ".join(sorted([srv.name for srv in required_services]))
+            missing = ", ".join(sorted(srv.name for srv in required_services))
             raise IncompleteError("{0} is missing the following required "
                                   "services, please run 'aq reconfigure': "
                                   "{1!s}.".format(self.dbobj, missing))

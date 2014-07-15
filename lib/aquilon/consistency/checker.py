@@ -16,6 +16,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import print_function
+
 from aquilon.config import Config
 from aquilon.aqdb.db_factory import DbFactory
 
@@ -57,7 +59,7 @@ class ConsistencyChecker(object):
         for key in sorted(self._failures):
             for item in sorted(self._failures[key]):
                 for problem in self._failures[key][item]:
-                    print item + ' ' + problem
+                    print(item + ' ' + problem)
         if self._failures:
             return False
         return True

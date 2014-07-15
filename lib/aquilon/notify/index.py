@@ -99,7 +99,7 @@ def build_index(config, session, logger=LOGGER):
 
                 if obj not in old_object_index or old_object_index[obj] < mtime:
                     old_object_index[obj] = mtime
-        except Exception, e:  # pragma: no cover
+        except Exception as e:  # pragma: no cover
             logger.info("Error processing %s, continuing: %s",
                         index_path, e)
         finally:
@@ -139,7 +139,7 @@ def build_index(config, session, logger=LOGGER):
                 # If that's the case, no need to add it to the modified_index.
                 try:
                     mtime = os.path.getmtime(os.path.join(root, profile))
-                except OSError, e:
+                except OSError as e:
                     continue
 
                 if obj in old_object_index:
@@ -204,7 +204,7 @@ def build_index(config, session, logger=LOGGER):
                     srvinfo = Service.get_unique(session, service, compel=True)
                     for instance in srvinfo.instances:
                         servers.update([srv.fqdn for srv in instance.servers])
-                except Exception, e:
+                except Exception as e:
                     logger.info("failed to lookup up server module %s: %s",
                                 service, e)
         count = send_notification(CDB_NOTIF, servers, sock=sock,
@@ -254,7 +254,7 @@ def send_notification(ntype, modified, sock=None, logger=LOGGER):
             # discard the notification.
             pass
 
-        except Exception, e:
+        except Exception as e:
             logger.info("Error notifying %s: %s", host, e)
 
     return success
@@ -266,12 +266,12 @@ def trigger_notifications(config, logger=LOGGER, loglevel=logging.INFO):
     logger.debug("Attempting connection to notification socket: %s", sockname)
     try:
         sd.connect(sockname)
-    except socket.error, err:
+    except socket.error as err:
         logger.error("Failed to connect to notification socket: %s", err)
 
     try:
         sd.send("update")
-    except socket.error, err:
+    except socket.error as err:
         logger.error("Failed to send to notification socket: %s", err)
 
     sd.close()

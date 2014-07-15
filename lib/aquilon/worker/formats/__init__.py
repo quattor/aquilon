@@ -33,6 +33,6 @@ for f in os.listdir(_thisdir):
         modulename = __name__ + '.' + moduleshort
         try:
             mymodule = __import__(modulename, fromlist=["BrokerCommand"])
-        except Exception, e:
+        except Exception as e:
             log.msg("Error importing %s: %s" % (modulename, format_exc()))
             continue

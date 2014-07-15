@@ -22,7 +22,7 @@ def deprecated(message):
     warnings.warn(message, DeprecationWarning, stacklevel=2)
 
 
-class AquilonError(StandardError):
+class AquilonError(Exception):
     '''Generic error class.'''
 
 

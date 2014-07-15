@@ -18,7 +18,7 @@
 import logging
 from datetime import datetime
 from dateutil.tz import tzutc
-import urllib
+from urllib import quote
 
 from sqlalchemy import (Column, String, Integer, Boolean, ForeignKey,
                         PrimaryKeyConstraint, Index)
@@ -158,7 +158,7 @@ def start_xtn(session, xtn_id, username, command, is_readonly, details, ignore):
         try:
             return str(value).decode('ascii')
         except UnicodeDecodeError:
-            return urllib.quote(value)
+            return quote(value)
 
     # TODO: (maybe) use sql inserts instead of objects to avoid added overhead?
     # We would be able to exploit executemany() for all the xtn_detail rows
@@ -202,7 +202,7 @@ def start_xtn(session, xtn_id, username, command, is_readonly, details, ignore):
 
     try:
         session.commit()
-    except Exception, e:  # pragma: no cover
+    except Exception as e:  # pragma: no cover
         session.rollback()
         log.error(e)
         # Abort the command if a log entry cannot be created.
@@ -220,7 +220,7 @@ def end_xtn(session, xtn_id, return_code, results=None):
 
     try:
         session.commit()
-    except Exception, e:  # pragma: no cover
+    except Exception as e:  # pragma: no cover
         session.rollback()
         log.error(e)
         # Swallow the error - can't do anything about this, and the

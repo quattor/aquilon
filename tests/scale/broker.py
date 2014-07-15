@@ -17,6 +17,7 @@
 # limitations under the License.
 """Convenience methods for manipulating the broker used for testing."""
 
+from __future__ import print_function
 
 import os
 import signal
@@ -63,7 +64,7 @@ class AQBroker(object):
     def stop(self, **kwargs):
         """Attempt to stop a running broker."""
         if os.path.exists(self.pidfile):
-            f = file(self.pidfile)
+            f = open(self.pidfile)
             pid = f.readline()
             f.close()
             os.kill(int(pid), signal.SIGTERM)
@@ -88,8 +89,8 @@ class AQBroker(object):
                 continue
             try:
                 os.makedirs(dir)
-            except OSError, e:
-                print >>sys.stderr, "Could not create %s: %s" % (dir, e)
+            except OSError as e:
+                print("Could not create %s: %s" % (dir, e), file=sys.stderr)
         
         dirs = []
         if self.config.has_option("database", "dbfile"):
@@ -100,14 +101,14 @@ class AQBroker(object):
         
         for dir in dirs:
             if os.path.exists(dir):
-                print "Removing %s" % dir
+                print("Removing %s" % dir)
                 p = Popen(("/bin/rm", "-rf", dir), stdout=1, stderr=2)
                 if p.wait():
                     raise ProcessException(code=p.returncode)
             try:
                 os.makedirs(dir)
-            except OSError, e:
-                print >>sys.stderr, "Could not create %s: %s" % (dir, e)
+            except OSError as e:
+                print("Could not create %s: %s" % (dir, e), file=sys.stderr)
         
         template_source = "git://nyaqd1/quattor/template-king"
         template_dest = self.config.get("broker", "kingdir")

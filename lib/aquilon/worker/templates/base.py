@@ -222,7 +222,7 @@ class Plenary(object):
             self.removed = False
             if self.old_content != content:
                 self.changed = True
-        except Exception, e:
+        except Exception as e:
             if not locked:
                 self.restore_stash()
             raise e
@@ -238,14 +238,14 @@ class Plenary(object):
                           (self.old_path, e.strerror))
         try:
             return open(self.old_path).read()
-        except IOError, e:
+        except IOError as e:
             # Unable to open the file
             if e.errno == errno.ENOENT:
                 raise NotFoundException("Pleanary file %s not found" %
                                         self.old_path)
             else:
                 raise int_error(e)
-        except OSError, e:
+        except OSError as e:
             # Read has failed, which shouldn't happen unless there is a problem
             raise int_error(e)
 
@@ -567,7 +567,7 @@ class PlenaryCollection(object):
                 # it has the nice side effect of not updating the total.
                 try:
                     total += plen.write(locked=True)
-                except IncompleteError, err:
+                except IncompleteError as err:
                     self.logger.client_info("Warning: %s" % err)
         except:
             if not locked:

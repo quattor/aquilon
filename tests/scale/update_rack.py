@@ -17,6 +17,7 @@
 # limitations under the License.
 """Update the dummy information for a rack of machines on a /26."""
 
+from __future__ import print_function
 
 import os
 import sys
@@ -31,18 +32,18 @@ def update_rack(building, rackid, newnetid, aqservice, aqhost, aqport):
     for half in [0, 1]:
         newnetwork = TestNetwork(newnetid, half)
         tor_switch = rack.get_tor_switch(half)
-        print "Updating tor_switch %s" % tor_switch
+        print("Updating tor_switch %s" % tor_switch)
         rc = aq.wait(["update", "interface", "--machine", tor_switch,
             "--interface", "xge49",
             "--mac", newnetwork.get_mac(0), "--ip", newnetwork.get_ip(0)])
         for offset in range(1, 49):
             machine = rack.get_machine(half, offset)
-            print "Updating machine %s" % machine
+            print("Updating machine %s" % machine)
             rc = aq.wait(["update", "interface", "--machine", machine,
                 "--interface", "eth0", "--mac", newnetwork.get_mac(offset),
                 "--ip", newnetwork.get_ip(offset)])
             host = rack.get_host(half, offset)
-            print "reconfiguring host %s" % host
+            print("reconfiguring host %s" % host)
             rc = aq.wait(["reconfigure", "--hostname", host])
 
 

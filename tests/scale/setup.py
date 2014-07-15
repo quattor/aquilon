@@ -17,6 +17,7 @@
 # limitations under the License.
 """Sets up an empty database with any info needed for the tests."""
 
+from __future__ import print_function
 
 import os
 import sys
@@ -35,7 +36,7 @@ def setup():
     broker.initialize()
     rc = broker.start()
     if rc:
-        print >>sys.stderr, "Broker start had return code %d" % rc
+        print("Broker start had return code %d" % rc, file=sys.stderr)
     aq = AQRunner(aqservice=broker.get_aqservice())
     rc = aq.wait(["add", "domain", "--domain", "testdom_odd"])
     rc = aq.wait(["add", "domain", "--domain", "testdom_even"])

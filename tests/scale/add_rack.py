@@ -17,6 +17,7 @@
 # limitations under the License.
 """Add dummy information for a rack of machines on a /26."""
 
+from __future__ import print_function
 
 import os
 import sys
@@ -40,20 +41,20 @@ def add_rack(building, rackid, netid, aqservice, aqhost, aqport):
         domain = "testdom_odd" if rackid % 2 else "testdom_even"
         for offset in range(1, 49):
             machine = rack.get_machine(half, offset)
-            print "Adding machine %s" % machine
+            print("Adding machine %s" % machine)
             rc = aq.wait(["add", "machine", "--machine", machine,
                 "--model", "vb1205xm", "--rack", rack.get_rack()])
-            print "Adding an interface with %s" % network.get_mac(offset)
+            print("Adding an interface with %s" % network.get_mac(offset))
             rc = aq.wait(["add", "interface", "--machine", machine,
                           "--interface", "eth0",
                           "--mac", network.get_mac(offset)])
             host = rack.get_host(half, offset)
-            print "Adding host %s with %s" % (host, network.get_ip(offset))
+            print("Adding host %s with %s" % (host, network.get_ip(offset)))
             rc = aq.wait(["add", "host", "--machine", machine,
                           "--hostname", host, "--archetype", "aquilon",
                           "--domain", domain, "--buildstatus", "blind",
                           "--ip", network.get_ip(offset)])
-            print "make aquilon for host %s" % host
+            print("make aquilon for host %s" % host)
             rc = aq.wait(["make", "aquilon", "--hostname", host,
                           "--os", "linux/5.0.1-x86_64",
                           "--personality", "compileserver"])

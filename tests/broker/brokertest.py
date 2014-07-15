@@ -801,15 +801,12 @@ class TestBrokerCommand(unittest.TestCase):
                          (out, err))
 
     def assert_deprecation(self, depr_str, testfunc):
-         # Let's seek to the end of it, matching only against the relevant part.
-        logfile = open(self.config.get("broker", "logfile"), "r")
-        logfile.seek(0, 2)
-
-        testfunc()
-
-        depr_log = logfile.xreadlines()
-        self.assertTrue([elem for elem in depr_log if depr_str in elem])
-        logfile.close()
+        with open(self.config.get("broker", "logfile"), "r") as logfile:
+            # Let's seek to the end of it, matching only against the relevant part.
+            logfile.seek(0, 2)
+            # Now call the function that should generate the deprecation warning
+            testfunc()
+            self.assertTrue([elem for elem in logfile if depr_str in elem])
 
     @staticmethod
     def dynname(ip, domain="aqd-unittest.ms.com"):

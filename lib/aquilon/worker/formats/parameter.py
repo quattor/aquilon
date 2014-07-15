@@ -79,10 +79,10 @@ class DiffFormatter(ObjectFormatter):
     def format_raw(self, diff, indent=""):
         ret = []
 
-        for k in diff.keys():
+        for key, value in diff.items():
             details = []
-            mydata = diff[k]["my"]
-            otherdata = diff[k]["other"]
+            mydata = value["my"]
+            otherdata = value["other"]
 
             mykeys = set(mydata.keys())
             otherkeys = set(otherdata.keys())
@@ -91,14 +91,14 @@ class DiffFormatter(ObjectFormatter):
             missing = sorted(otherkeys - intersect)
             if missing:
                 details.append(indent + "  missing {0} in {1}:"
-                               .format(k, diff.myobj))
+                               .format(key, diff.myobj))
                 for pp in missing:
                     details.append(indent + "    {0}".format(pp))
 
             missing_other = sorted(mykeys - intersect)
             if missing_other:
                 details.append(indent + "  missing {0} in {1}:"
-                               .format(k, diff.other_obj))
+                               .format(key, diff.other_obj))
                 for pp in missing_other:
                     details.append(indent + "    {0}".format(pp))
 
@@ -109,12 +109,12 @@ class DiffFormatter(ObjectFormatter):
                                            format(pp, mydata[pp], otherdata[pp]))
             if different_value:
                 details.append(indent + "  matching {0} with different values:"
-                               .format(k))
+                               .format(key))
                 for pp in sorted(different_value):
                     details.append(indent + "    {0}".format(pp))
 
             if details:
-                ret.append("Differences for {0}:".format(k))
+                ret.append("Differences for {0}:".format(key))
                 ret.extend(details)
 
         return "\n".join(ret)

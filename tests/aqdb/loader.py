@@ -21,8 +21,8 @@ Small utility to populate static objects (i.e. those that do not have plenary
 templates) in the database.
 """
 
-import os
-import sys
+from __future__ import print_function
+
 import logging
 from shlex import shlex
 from inspect import isclass
@@ -43,7 +43,7 @@ class Lexer(shlex):
         self.filename = filename
         self.macros = {}
 
-        input = file(filename, 'rt')
+        input = open(filename, 'rt')
         return shlex.__init__(self, input, posix=True)
 
     def error(self, message):
@@ -96,17 +96,17 @@ def parse_object(session, lexer, lookup=False, verbose=False):
             obj = cls.get_unique(session, compel=True, **params)
         else:
             if verbose:
-                print "Adding %s(%r)." % (cls.__name__, params)
+                print("Adding %s(%r)." % (cls.__name__, params))
             try:
                 obj = cls(**params)
                 session.add(obj)
                 session.flush()
                 session.expire(obj)
-            except IntegrityError, err:
+            except IntegrityError as err:
                 lexer.error(err)
-    except ArgumentError, err:
+    except ArgumentError as err:
         lexer.error(err)
-    except NotFoundException, err:
+    except NotFoundException as err:
         lexer.error(err)
     return obj
 
@@ -172,12 +172,12 @@ def load_from_file(session, filename, verbose=False):
     try:
         while parse_object(session, lexer, verbose=verbose) is not None:
             pass
-    except ValueError, err:
+    except ValueError as err:
         session.rollback()
         raise SystemExit(err)
     except Exception:
-        print("%s caught exception, bailing out." %
-              lexer.error_leader(lexer.filename))
+        print(("%s caught exception, bailing out." %
+              lexer.error_leader(lexer.filename)))
         session.rollback()
         raise
 

@@ -39,7 +39,7 @@ class CommandSync(BrokerCommand):
 
         try:
             sync_domain(dbdomain, logger=logger)
-        except ProcessException, e:
+        except ProcessException as e:
             raise ArgumentError("Problem encountered updating templates for "
                                 "domain %s: %s", dbdomain.name, e)
 

@@ -462,7 +462,7 @@ def get_or_create_interface(session, dbhw_ent, name=None, mac=None,
         dbinterface = cls(name=name, mac=mac, comments=comments, model=dbmodel,
                           bus_address=bus_address, default_route=default_route,
                           **extra_args)
-    except ValueError, err:
+    except ValueError as err:
         raise ArgumentError(err)
 
     dbhw_ent.interfaces.append(dbinterface)

@@ -17,6 +17,8 @@
 # limitations under the License.
 """Option parsing for the aq client."""
 
+from __future__ import print_function
+
 import sys
 import os
 from optparse import OptionParser, OptionValueError
@@ -45,7 +47,7 @@ def read_file(option, opt, value, parser):
     try:
         with open(value) as f:
             setattr(parser.values, option.dest, f.read())
-    except Exception, e:
+    except Exception as e:
         raise OptionValueError("Error opening '%s' for %s: %s" %
                                (value, opt, e))
 
@@ -108,13 +110,13 @@ class CustomParser(OptionParser):
             p.communicate()
             exit(p.returncode)
         else:
-            print self.command.recursiveHelp(0, width=get_term_width())
+            print(self.command.recursiveHelp(0, width=get_term_width()))
 
 
-class ParsingError(StandardError):
+class ParsingError(Exception):
 
     def __init__(self, errorMessage, helpMessage=''):
-        StandardError.__init__(self)
+        Exception.__init__(self)
         self.help = helpMessage
         self.error = errorMessage
 
@@ -168,7 +170,7 @@ class Command(Element):
         for optgroup in self.optgroups:
             try:
                 (res, found) = optgroup.check(options)
-            except ParsingError, e:
+            except ParsingError as e:
                 e.help = self.recursiveHelp(0, width=get_term_width())
                 raise e
             result.update(res)
@@ -526,13 +528,9 @@ class OptParser(object):
         helpmsg.append("Available commands are:")
         helpmsg.append("")
 
-        commands = []
-        for node in self.tree.getiterator("command"):
-            name = node.get("name")
-            if name != "*":
-                commands.append(name)
-
-        commands.sort()
+        commands = sorted([node.get("name")
+                           for node in self.tree.getiterator("command")
+                           if node.get("name") != "*"])
 
         maxlen = max([len(s) for s in commands]) + 4
         columns = (width - 4) / maxlen
@@ -552,7 +550,7 @@ class OptParser(object):
         helpmsg.append("aq COMMAND --help")
 
         if command == "help":
-            print "\n".join(helpmsg)
+            print("\n".join(helpmsg))
             exit(0)
         elif command:
             errmsg = "Command %s is not known!" % command
@@ -561,7 +559,7 @@ class OptParser(object):
 
         # The previous code used OptParser.error() which exits with return code
         # 2, but now we don't have the parser created yet
-        print >>sys.stderr, "%s\n\nError: %s" % ("\n".join(helpmsg), errmsg)
+        print("%s\n\nError: %s" % ("\n".join(helpmsg), errmsg), file=sys.stderr)
         sys.exit(2)
 
     def handle_command(self, cmd_node, global_node, options):
@@ -589,7 +587,7 @@ class OptParser(object):
         try:
             dummy, global_options = glb.check(opts)
             transport, command_options = cmd.check(opts)
-        except ParsingError, e:
+        except ParsingError as e:
             self.parser.set_usage(e.help)
             self.parser.error(e.error)
         return cmd.name, transport, command_options, global_options

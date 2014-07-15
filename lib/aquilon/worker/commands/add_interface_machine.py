@@ -232,7 +232,7 @@ class CommandAddInterfaceMachine(BrokerCommand):
                               dbmachine.primary_name.fqdn.dns_domain.name)
         try:
             dbfqdn = Fqdn.get_or_create(session, fqdn=manager, preclude=True)
-        except ArgumentError, e:
+        except ArgumentError as e:
             logger.client_info("Could not create manager with name %s and "
                                "IP address %s for machine %s: %s" %
                                (manager, old_ip, dbmachine.label, e))

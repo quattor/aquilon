@@ -28,6 +28,8 @@
 #    ./aqdb_migrate sqlite:////path/aquilon.db
 #    ./aqdb_migrate postgresql://<username>@/
 
+from __future__ import print_function
+
 import os
 import signal
 import sys
@@ -124,7 +126,7 @@ if __name__ == '__main__':
 
     for table in Base.metadata.sorted_tables:
         total = src_session.execute(table.count()).scalar()
-        print 'Processing %s (%d rows)' % (table, total),
+        print('Processing %s (%d rows)' % (table, total), end=' ')
         sys.stdout.flush()
         cnt = 0
 
@@ -135,7 +137,7 @@ if __name__ == '__main__':
         for record in src_session.execute(table.select()):
             cnt = cnt + 1
             if signalled:
-                print "... %d" % cnt,
+                print("... %d" % cnt, end=' ')
                 sys.stdout.flush()
                 signalled = 0
 
@@ -149,6 +151,6 @@ if __name__ == '__main__':
 
         signal.setitimer(signal.ITIMER_REAL, 0)
         dest_session.flush()
-        print
+        print()
 
     dest_session.commit()

@@ -112,7 +112,7 @@ class CommandAddRebootSchedule(BrokerCommand):
         if time is not None:
             try:
                 parse(time)
-            except ValueError, e:
+            except ValueError as e:
                 raise ArgumentError("the preferred time '%s' could not be "
                                     "interpreted: %s" % (time, e))
         holder = get_resource_holder(session, hostname, cluster, compel=False)

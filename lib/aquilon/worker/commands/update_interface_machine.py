@@ -190,7 +190,7 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
                     dsdb_runner = DSDBRunner(logger=logger)
                     dsdb_runner.update_host(dbhw_ent, oldinfo)
                     dsdb_runner.commit_or_rollback()
-            except AquilonError, err:
+            except AquilonError as err:
                 plenaries.restore_stash()
                 raise ArgumentError(err)
             except:

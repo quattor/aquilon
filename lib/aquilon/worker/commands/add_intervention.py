@@ -36,7 +36,7 @@ class CommandAddIntervention(BrokerCommand):
 
         try:
             expire_when = parse(expiry)
-        except ValueError, e:
+        except ValueError as e:
             raise ArgumentError("the expiry value '%s' could not be "
                                 "interpreted: %s" % (expiry, e))
 
@@ -45,7 +45,7 @@ class CommandAddIntervention(BrokerCommand):
         else:
             try:
                 start_when = parse(start_time)
-            except ValueError, e:
+            except ValueError as e:
                 raise ArgumentError("the start time '%s' could not be "
                                     "interpreted: %s" % (start_time, e))
 

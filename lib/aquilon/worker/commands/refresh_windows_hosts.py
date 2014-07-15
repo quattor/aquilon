@@ -46,7 +46,7 @@ class CommandRefreshWindowsHosts(BrokerCommand):
                     session.rollback()
                     return
                 session.commit()
-            except PartialError, e:
+            except PartialError as e:
                 if dryrun:
                     raise
                 partial_error = e
@@ -101,7 +101,7 @@ class CommandRefreshWindowsHosts(BrokerCommand):
                 continue
             try:
                 check_no_provided_service(dbhost)
-            except ArgumentError, err:
+            except ArgumentError as err:
                 msg = "Skipping removal of host %s due to: %s" % \
                     (dbhost.fqdn, err)
                 failed.append(msg)
@@ -138,7 +138,7 @@ class CommandRefreshWindowsHosts(BrokerCommand):
         for (host, mac) in windows_hosts.items():
             try:
                 (short, dbdns_domain) = parse_fqdn(session, host)
-            except AquilonError, err:
+            except AquilonError as err:
                 msg = "Skipping host %s: %s" % (host, err)
                 failed.append(msg)
                 logger.info(msg)

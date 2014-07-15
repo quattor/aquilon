@@ -19,6 +19,8 @@
 Parse AQD configuration
 """
 
+from __future__ import print_function
+
 import sys
 import os
 from ConfigParser import NoSectionError, NoOptionError
@@ -46,7 +48,7 @@ def list_all(config):
 
     for name in sorted(defaults.keys()):
         value = config.get("DEFAULT", name)
-        print "DEFAULT.%s=%s" % (name, value)
+        print("DEFAULT.%s=%s" % (name, value))
 
     for section in sorted(config.sections()):
         for name in sorted(config.options(section)):
@@ -61,7 +63,7 @@ def list_all(config):
             if name == "%s_section" % section:
                 continue
 
-            print "%s.%s=%s" % (section, name, value)
+            print("%s.%s=%s" % (section, name, value))
 
 
 def get_option(config, key):
@@ -69,7 +71,7 @@ def get_option(config, key):
         raise SystemExit("The key must have the syntax SECTION.OPTION.")
     section, name = key.split('.', 1)
     try:
-        print config.get(section, name)
+        print(config.get(section, name))
     except NoSectionError:
         raise SystemExit("No such section: %s" % section)
     except NoOptionError:

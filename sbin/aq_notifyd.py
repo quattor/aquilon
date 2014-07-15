@@ -55,7 +55,7 @@ def update_index_and_notify(config, logger, db):
 
     try:
         build_index(config, session, logger)
-    except AquilonError, err:
+    except AquilonError as err:
         logger.error(err)
 
     db.Session.remove()
@@ -103,7 +103,7 @@ def run_loop(config, logger, db):
         logger.info("Removing old socket " + sockname)
         try:
             os.unlink(sockname)
-        except OSError, err:
+        except OSError as err:
             logger.error("Failed to remove %s: %s" % (sockname, err))
     listener.bind(sockname)
     listener.listen(5)
@@ -117,7 +117,7 @@ def run_loop(config, logger, db):
     while not do_exit:
         try:
             sd, addr = listener.accept()
-        except IOError, err:
+        except IOError as err:
             if err.errno == errno.EINTR:
                 continue
             raise

@@ -15,6 +15,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+from __future__ import print_function
+
 import os
 import sys
 
@@ -33,8 +36,8 @@ for checker_class in consistency_check_classes:
         success_flag = False
 
 if not success_flag:
-    print "There were failuers"
+    print("There were failuers")
     exit(1)
 
-print "All tests passed successfully"
+print("All tests passed successfully")
 exit(0)

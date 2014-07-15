@@ -54,7 +54,7 @@ class CommandUpdatePersonality(BrokerCommand):
                 local_vars = {'memory': 10}
                 capacity = eval(vmhost_capacity_function, global_vars,
                                 local_vars)
-            except Exception, err:
+            except Exception as err:
                 raise ArgumentError("Failed to evaluate the function: %s" % err)
             if not isinstance(capacity, dict):
                 raise ArgumentError("The function should return a dictonary.")
@@ -144,7 +144,7 @@ class CommandUpdatePersonality(BrokerCommand):
         for cluster in clusters:
             try:
                 cluster.validate()
-            except ArgumentError, err:
+            except ArgumentError as err:
                 failures.append(err.message)
         if len(failures):
             raise ArgumentError("Validation failed for the following "

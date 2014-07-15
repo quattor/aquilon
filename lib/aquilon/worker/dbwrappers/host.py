@@ -181,10 +181,10 @@ def hostlist_to_hosts(session, hostlist):
                 raise NotFoundException("Host %s not found." % host)
             dbhosts.append(dbdns_rec.hardware_entity.host)
 
-        except NotFoundException, err:
+        except NotFoundException as err:
             failed.append("%s: %s" % (host, err))
             continue
-        except ArgumentError, err:
+        except ArgumentError as err:
             failed.append("%s: %s" % (host, err))
             continue
 
@@ -236,17 +236,13 @@ def validate_branch_author(dbhosts):
         authors[dbhost.sandbox_author].append(dbhost)
 
     if len(branches) > 1:
-        keys = branches.keys()
-        branch_sort = lambda x, y: cmp(len(branches[x]), len(branches[y]))
-        keys.sort(cmp=branch_sort)
+        keys = sorted(branches.keys(), key=lambda x: len(branches[x]))
         stats = ["{0:d} hosts in {1:l}".format(len(branches[branch]), branch)
                  for branch in keys]
         raise ArgumentError("All hosts must be in the same domain or "
                             "sandbox:\n%s" % "\n".join(stats))
     if len(authors) > 1:
-        keys = authors.keys()
-        author_sort = lambda x, y: cmp(len(authors[x]), len(authors[y]))
-        keys.sort(cmp=author_sort)
+        keys = sorted(authors.keys(), key=lambda x: len(authors[x]))
         stats = ["%s hosts with sandbox author %s" %
                  (len(authors[author]), author.name) for author in keys]
         raise ArgumentError("All hosts must be managed by the same "

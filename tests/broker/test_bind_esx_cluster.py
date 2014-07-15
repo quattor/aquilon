@@ -74,15 +74,13 @@ class TestBindESXCluster(TestBrokerCommand):
 
         command = ["search_host", "--cluster=utecl1"]
         out = self.commandtest(command)
-        members = out.splitlines()
-        members.sort()
+        members = sorted(out.splitlines())
         self.failUnless(members, "No hosts in output of %s." % command)
 
         command = ["search_host", "--cluster=utecl1",
                    "--service=esx_management_server", "--instance=%s" % next]
         out = self.commandtest(command)
-        aligned = out.splitlines()
-        aligned.sort()
+        aligned = sorted(out.splitlines())
         self.failUnlessEqual(members, aligned,
                              "Not all cluster members (%s) are aligned (%s)." %
                              (members, aligned))

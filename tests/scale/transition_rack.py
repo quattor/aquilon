@@ -17,6 +17,7 @@
 # limitations under the License.
 """Add dummy information for a rack of machines on a /26."""
 
+from __future__ import print_function
 
 from common import AQRunner, TestRack
 
@@ -28,7 +29,7 @@ def transition_rack(building, rackid, status, aqservice, aqhost, aqport):
     for half in [0, 1]:
         for offset in range(1, 49):
             host = rack.get_host(half, offset)
-            print "Transitioning host %s to status %s" % (host, status)
+            print("Transitioning host %s to status %s" % (host, status))
             rc = aq.wait(["reconfigure", "--hostname", host,
                           "--buildstatus", status])
 

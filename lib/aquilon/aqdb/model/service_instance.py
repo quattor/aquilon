@@ -18,7 +18,7 @@
 
 from collections import defaultdict
 from datetime import datetime
-from sys import maxint
+from sys import maxsize
 
 from sqlalchemy import (Column, Integer, Sequence, String, DateTime,
                         ForeignKey, UniqueConstraint, PrimaryKeyConstraint,
@@ -167,9 +167,9 @@ class ServiceInstance(Base):
         # Prefer network-based maps over location-based maps
         loc_priorities[None] = -1
 
-        # Use maxint as priority to mark empty slots
+        # Use maxsize as priority to mark empty slots
         instance_cache = {}
-        instance_priority = defaultdict(lambda: maxint)
+        instance_priority = defaultdict(lambda: maxsize)
 
         search_maps = []
         if dbpersonality:

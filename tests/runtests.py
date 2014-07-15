@@ -17,6 +17,7 @@
 # limitations under the License.
 """This sets up and runs the broker unit tests."""
 
+from __future__ import print_function
 
 import os
 import re
@@ -55,13 +56,13 @@ epilog = """
 
 
 def force_yes(msg):
-    print >> sys.stderr, msg
-    print >> sys.stderr, """
+    print(msg, file=sys.stderr)
+    print("""
         Please confirm by typing yes (three letters) and pressing enter.
-        """
+        """, file=sys.stderr)
     answer = sys.stdin.readline()
     if not answer.startswith("yes"):
-        print >> sys.stderr, """Aborting."""
+        print("""Aborting.""", file=sys.stderr)
         sys.exit(1)
 
 parser = argparse.ArgumentParser(description="Run the broker test suite.",
@@ -87,7 +88,7 @@ parser.add_argument('-m', '--mirror', action='store_true',
 opts = parser.parse_args()
 
 if not os.path.exists(opts.config):
-    print >> sys.stderr, "configfile %s does not exist" % opts.config
+    print("configfile %s does not exist" % opts.config, file=sys.stderr)
     sys.exit(1)
 
 if os.environ.get("AQDCONF") and (os.path.realpath(opts.config)
@@ -110,11 +111,11 @@ if opts.profile:
 
 hostname = config.get("unittest", "hostname")
 if hostname.find(".") < 0:
-    print >> sys.stderr, """
+    print("""
 Some regression tests depend on the config value for hostname to be
 fully qualified.  Please set the config value manually since the default
 on this system (%s) is a short name.
-""" % hostname
+""" % hostname, file=sys.stderr)
     sys.exit(1)
 
 if opts.mirror:
@@ -132,7 +133,7 @@ if opts.mirror:
               stdout=1, stderr=2)
     p.communicate()
     if p.returncode != 0:
-        print >> sys.stderr, "Rsync failed!"
+        print("Rsync failed!", file=sys.stderr)
         sys.exit(1)
     args = [sys.executable, os.path.join(mirrordir, 'tests', 'runtests.py')]
     args.extend(sys.argv[1:])
@@ -146,7 +147,7 @@ makefile = os.path.join(SRCDIR, "Makefile")
 prod_python = None
 with open(makefile) as f:
     prod_python_re = re.compile(r'^PYTHON_SERVER_PROD\s*=\s*(\S+)(\s+|$)')
-    for line in f.readlines():
+    for line in f:
         m = prod_python_re.search(line)
         if m:
             prod_python = m.group(1)
@@ -155,7 +156,7 @@ with open(makefile) as f:
 # -c 'import platform; print platform.python_version()' and then compare
 # with the current running python_version.
 if prod_python and sys.executable.find(prod_python) < 0:
-    print "\n"
+    print("\n")
     force_yes("Running with %s but prod is %s" % (sys.executable, prod_python))
 
 # Execute this every run... the man page says that it should do the right
@@ -181,7 +182,7 @@ if existing_dirs:
               "\n\t".join(existing_dirs))
 
 for dirname in existing_dirs:
-    print "Removing %s" % dirname
+    print("Removing %s" % dirname)
     p = Popen(("/bin/rm", "-rf", dirname), stdout=1, stderr=2)
     rc = p.wait()
     # FIXME: check rc
@@ -190,8 +191,8 @@ for dirname in dirs:
     try:
         if not os.path.exists(dirname):
             os.makedirs(dirname)
-    except OSError, e:
-        print >> sys.stderr, "Could not create %s: %s" % (dirname, e)
+    except OSError as e:
+        print("Could not create %s: %s" % (dirname, e), file=sys.stderr)
 
 # Set up DSDB coverage directory
 dsdb_coverage_dir = os.path.join(config.get("unittest", "scratchdir"),

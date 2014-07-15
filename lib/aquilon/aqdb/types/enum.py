@@ -55,9 +55,9 @@ class StringEnum(object):
             return value
         try:
             return cls(value)
-        except TypeError, e:
+        except TypeError as e:
             raise ArgumentError("Expected a string for %s: %s." % (label, e))
-        except ValueError, e:
+        except ValueError as e:
             raise ArgumentError("Value is not permitted for %s: %s." % (label, e))
 
     @classmethod

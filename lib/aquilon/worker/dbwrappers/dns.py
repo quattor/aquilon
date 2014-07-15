@@ -348,7 +348,7 @@ def create_target_if_needed(session, logger, target, dbdns_env):
 
         try:
             socket.gethostbyname(dbtarget.fqdn)
-        except socket.gaierror, e:
+        except socket.gaierror as e:
             logger.warning("WARNING: Will create a reference to {0.fqdn!s}, "
                            "but trying to resolve it resulted in an error: "
                            "{1.strerror}.".format(dbtarget, e))
@@ -410,7 +410,7 @@ def set_reverse_ptr(session, logger, dbdns_rec, reverse_ptr):
     if dbreverse != dbdns_rec.fqdn:
         try:
             dbdns_rec.reverse_ptr = dbreverse
-        except ValueError, err:
+        except ValueError as err:
             raise ArgumentError(err)
     else:
         dbdns_rec.reverse_ptr = None

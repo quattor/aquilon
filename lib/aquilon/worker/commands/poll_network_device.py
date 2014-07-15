@@ -77,7 +77,7 @@ class CommandPollNetworkDevice(BrokerCommand):
 
                 try:
                     self.poll_vlan(session, logger, netdev, now, ssh_args)
-                except ProcessException, e:
+                except ProcessException as e:
                     failed_vlan += 1
                     logger.client_info("Failed getting VLAN info for {0:l}: "
                                        "{1!s}".format(netdev, e))
@@ -104,7 +104,7 @@ class CommandPollNetworkDevice(BrokerCommand):
 
         try:
             out = run_command(args)
-        except ProcessException, err:
+        except ProcessException as err:
             raise ArgumentError("Failed to run network device discovery: %s" % err)
 
         macports = JSONDecoder().decode(out)
@@ -146,18 +146,18 @@ class CommandPollNetworkDevice(BrokerCommand):
                     continue
                 try:
                     vlan_int = int(vlan)
-                except ValueError, e:
+                except ValueError as e:
                     logger.info("Error parsing vlan number in output "
                                 "line #%d: %s error: %s" %
                                 (reader.line_num, row, e))
                     continue
                 try:
                     network = force_ipv4("network", network)
-                except ArgumentError, e:
+                except ArgumentError as e:
                     raise InternalError(e)
                 try:
                     bitmask_int = int(bitmask)
-                except ValueError, e:
+                except ValueError as e:
                     logger.info("Error parsing bitmask in output "
                                 "line #%d: %s error: %s" %
                                 (reader.line_num, row, e))
@@ -190,5 +190,5 @@ class CommandPollNetworkDevice(BrokerCommand):
                 dbvlan = ObservedVlan(vlan_id=vlan_int, network_device=netdev,
                                       network=dbnetwork, creation_date=now)
                 session.add(dbvlan)
-        except CSVError, e:
+        except CSVError as e:
             raise AquilonError("Error parsing vlan2net results: %s" % e)

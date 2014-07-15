@@ -90,12 +90,12 @@ class CommandAddDomain(BrokerCommand):
             run_git(["clone", "--branch", dbdomain.name, "--",
                      kingdir, dbdomain.name],
                     path=domainsdir, logger=logger)
-        except ProcessException, e:
+        except ProcessException as e:
             try:
                 remove_dir(clonedir, logger=logger)
                 run_git(["branch", "-D", dbdomain.name],
                         path=kingdir, logger=logger)
-            except ProcessException, e2:
+            except ProcessException as e2:
                 logger.info("Exception while cleaning up: %s", e2)
             raise e
         return

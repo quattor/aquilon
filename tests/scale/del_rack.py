@@ -17,6 +17,7 @@
 # limitations under the License.
 """Remove dummy information for a rack of machines on a /26."""
 
+from __future__ import print_function
 
 import os
 import sys
@@ -31,13 +32,13 @@ def del_rack(building, rackid, aqservice, aqhost, aqport):
     for half in [0, 1]:
         for offset in range(1, 49):
             host = rack.get_host(half, offset)
-            print "Checking that host exists before deleting."
+            print("Checking that host exists before deleting.")
             rc = aq.wait(["show", "host", "--hostname", host])
             if rc == 0:
-                print "Deleting host %s" % host
+                print("Deleting host %s" % host)
                 rc = aq.wait(["del", "host", "--hostname", host])
             machine = rack.get_machine(half, offset)
-            print "Deleting machine %s" % machine
+            print("Deleting machine %s" % machine)
             rc = aq.wait(["del", "machine", "--machine", machine])
         tor_switch = rack.get_tor_switch(half)
         "Deleting tor_switch %s" % tor_switch

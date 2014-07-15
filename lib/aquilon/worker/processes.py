@@ -193,7 +193,7 @@ def cache_version(config, logger=LOGGER):
         out = run_git("describe", logger=logger,
                       path=config.get("broker", "srcdir"))
         config.set("broker", "version", out.strip())
-    except ProcessException, e:
+    except ProcessException as e:
         logger.info("Could not run git describe to get version: %s" % e)
         config.set("broker", "version", "Unknown")
 
@@ -274,7 +274,7 @@ class DSDBRunner(object):
                     self.logger.client_info("DSDB: %s" %
                                             " ".join([str(a) for a in args]))
                 run_command(cmd, env=self.getenv(), logger=self.logger)
-            except ProcessException, err:
+            except ProcessException as err:
                 if error_filter and err.out and error_filter.search(err.out):
                     self.logger.warn(ignore_msg)
                 else:
@@ -293,7 +293,7 @@ class DSDBRunner(object):
                 self.logger.client_info("DSDB: %s" %
                                         " ".join([str(a) for a in args]))
                 run_command(cmd, env=self.getenv(), logger=self.logger)
-            except ProcessException, err:
+            except ProcessException as err:
                 rollback_failures.append(str(err))
 
         did_something = bool(self.rollback_list)
@@ -308,7 +308,7 @@ class DSDBRunner(object):
     def commit_or_rollback(self, error_msg=None, verbose=False):
         try:
             self.commit(verbose=verbose)
-        except ProcessException, err:
+        except ProcessException as err:
             if not error_msg:
                 error_msg = "DSDB update failed"
             self.logger.warn(str(err))
@@ -707,9 +707,9 @@ class DSDBRunner(object):
         # Add the primary address first, and delete it last. The primary address
         # is identified by having an empty ['primary'] key (this is true for the
         # management address as well, but that does not matter).
-        sort_by_primary = lambda x, y: cmp(x['primary'] or "", y['primary'] or "")
-        adds.sort(sort_by_primary)
-        deletes.sort(sort_by_primary, reverse=True)
+        sort_by_primary = lambda x: x['primary'] or ""
+        adds.sort(key=sort_by_primary)
+        deletes.sort(key=sort_by_primary, reverse=True)
 
         for attrs in deletes:
             self.delete_host_details(**attrs)

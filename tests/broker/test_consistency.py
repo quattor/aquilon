@@ -17,7 +17,6 @@
 # limitations under the License.
 
 import os
-import sys
 from subprocess import Popen, PIPE
 
 if __name__ == "__main__":
@@ -36,7 +35,7 @@ class TestConsistency(TestBrokerCommand):
                                    'dummydomain')
         try:
             os.mkdir(dummydomain)
-        except OSError, e:
+        except OSError as e:
             # Directory may already exist
             pass
 

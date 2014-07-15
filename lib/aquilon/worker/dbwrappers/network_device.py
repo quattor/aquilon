@@ -227,7 +227,7 @@ def discover_network_device(session, logger, config, dbnetdev, dryrun):
 
     try:
         out = run_command(args)
-    except ProcessException, err:
+    except ProcessException as err:
         raise ArgumentError("Failed to run switch discovery: %s" % err)
 
     data = JSONDecoder().decode(out)
