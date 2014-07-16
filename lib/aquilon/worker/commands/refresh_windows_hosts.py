@@ -113,7 +113,7 @@ class CommandRefreshWindowsHosts(BrokerCommand):
                 containers.add(dbmachine.vm_container)
             logger.info("Deleting {0:l} (machine {1.label})"
                         .format(dbhost, dbmachine))
-            session.delete(dbhost)
+            dbmachine.host = None
             dbdns_rec = dbmachine.primary_name
             dbmachine.primary_name = None
             delete_dns_record(dbdns_rec)

@@ -141,7 +141,6 @@ def remove_host(session, logger, dbhw, plenaries, remove_plenaries):
         plenaries.append(Plenary.get_plenary(dbcluster))
 
     dbhw.host = None
-    session.delete(dbhost)
 
 
 def hostname_to_host(session, hostname):
