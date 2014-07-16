@@ -105,7 +105,8 @@ class Cluster(Base):
                                nullable=True)
 
     location_constraint_id = Column(ForeignKey('location.id',
-                                               name='cluster_location_fk'))
+                                               name='cluster_location_fk'),
+                                    nullable=False)
 
     max_hosts = Column(Integer, nullable=True)
     # N+M clusters are defined by setting down_hosts_threshold to M
@@ -128,7 +129,7 @@ class Cluster(Base):
     comments = Column(String(255))
 
     status = relation(ClusterLifecycle, innerjoin=True)
-    location_constraint = relation(Location, lazy=False)
+    location_constraint = relation(Location, lazy=False, innerjoin=True)
 
     personality = relation(Personality, lazy=False, innerjoin=True)
     branch = relation(Branch, lazy=False, innerjoin=True, backref='clusters')

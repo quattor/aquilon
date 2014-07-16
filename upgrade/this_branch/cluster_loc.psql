@@ -1,0 +1,1 @@
+ALTER TABLE clstr ALTER COLUMN location_constraint_id SET NOT NULL;
