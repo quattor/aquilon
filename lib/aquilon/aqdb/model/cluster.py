@@ -31,7 +31,7 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.column_types import AqStr
 from aquilon.aqdb.model import (Base, Host, Location, Personality,
                                 ClusterLifecycle, ServiceInstance, Branch,
-                                NetworkDevice, UserPrincipal)
+                                Sandbox, NetworkDevice, User)
 
 # List of functions allowed to be used in vmhost_capacity_function
 restricted_builtins = {'None': None,
@@ -99,8 +99,9 @@ class Cluster(Base):
                        nullable=False)
 
     sandbox_author_id = Column(Integer,
-                               ForeignKey('user_principal.id',
-                                          name='cluster_sandbox_author_fk'),
+                               ForeignKey('userinfo.id',
+                                          name='cluster_sandbox_author_fk',
+                                          ondelete="SET NULL"),
                                nullable=True)
 
     location_constraint_id = Column(ForeignKey('location.id',
@@ -131,7 +132,7 @@ class Cluster(Base):
 
     personality = relation(Personality, lazy=False, innerjoin=True)
     branch = relation(Branch, lazy=False, innerjoin=True, backref='clusters')
-    sandbox_author = relation(UserPrincipal)
+    sandbox_author = relation(User)
 
     hosts = association_proxy('_hosts', 'host', creator=_hcm_host_creator)
 
@@ -172,9 +173,12 @@ class Cluster(Base):
 
     @property
     def authored_branch(self):
-        if self.sandbox_author:
-            return "%s/%s" % (self.sandbox_author.name, self.branch.name)
-        return str(self.branch.name)
+        if isinstance(self.branch, Sandbox):
+            if self.sandbox_author:
+                return "%s/%s" % (self.sandbox_author.name, self.branch.name)
+            else:
+                return "%s [orphaned]" % self.branch.name
+        return self.branch.name
 
     @property
     def personality_info(self):

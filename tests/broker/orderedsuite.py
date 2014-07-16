@@ -73,6 +73,7 @@ from test_add_desk import TestAddDesk
 from test_add_vendor import TestAddVendor
 from test_add_cpu import TestAddCpu
 from test_add_model import TestAddModel
+from test_add_user import TestAddUser
 from test_add_network import TestAddNetwork
 from test_add_network_environment import TestAddNetworkEnvironment
 from test_add_ns_record import TestAddNSRecord
@@ -250,6 +251,7 @@ from test_del_service import TestDelService
 from test_del_personality import TestDelPersonality
 from test_del_os import TestDelOS
 from test_del_archetype import TestDelArchetype
+from test_del_user import TestDelUser
 from test_del_domain import TestDelDomain
 from test_del_sandbox import TestDelSandbox
 from test_del_ns_record import TestDelNSRecord
@@ -294,6 +296,7 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestPing, TestStatus,
                      TestPermission,
                      TestAddDnsDomain, TestAddDnsEnvironment,
+                     TestAddUser,
                      TestAddSandbox, TestAddDomain, TestUpdateBranch,
                      TestGet, TestPublishSandbox, TestDeployDomain,
                      TestSyncDomain,
@@ -302,7 +305,6 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestAddArchetype, TestAddOS,
                      TestParameterDefinition, TestSetupParams,
                      TestAddService, TestAddPersonality, TestAddRequiredService,
-                     TestRefreshUser, TestRootAccess,
                      TestOrganization, TestHub, TestContinent, TestCountry,
                      TestAddCampus, TestAddCity,
                      TestAddBuilding, TestAddRoom, TestAddBunker,
@@ -392,6 +394,7 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestUpdateCluster,
                      TestPxeswitch, TestManage, TestManageValidateBranch,
                      TestManageList,
+                     TestRefreshUser, TestRootAccess,
                      TestUsecaseDatabase, TestUsecaseHACluster,
                      TestClientBypass,
                      TestUmaskConstraints,
@@ -417,6 +420,7 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestDelCity, TestDelCampus,
                      TestDelPersonality, TestDelOS, TestDelArchetype,
                      TestDelDomain, TestDelSandbox,
+                     TestDelUser,
                      TestDelDnsEnvironment, TestDelDnsDomain,
                      TestClientFailure, TestAudit, TestShowActiveCommands,
                      TestDocumentation,

@@ -32,7 +32,7 @@ class DomainFormatter(ObjectFormatter):
             details.append(indent + "  Rollback commit: %s" %
                            domain.rollback_commit)
         details.append(indent + "  Validated: %s" % domain.is_sync_valid)
-        details.append(indent + "  Owner: %s" % domain.owner.name)
+        details.append(indent + "  Owner: %s" % domain.owner)
         details.append(indent + "  Compiler: %s" % domain.compiler)
         details.append(indent + "  Requires Change Manager: %s" %
                        domain.requires_change_manager)
@@ -67,7 +67,7 @@ class SandboxFormatter(ObjectFormatter):
         flags = " [autosync]" if sandbox.autosync else ""
         details = [indent + "Sandbox: %s%s" % (sandbox.name, flags)]
         details.append(indent + "  Validated: %s" % sandbox.is_sync_valid)
-        details.append(indent + "  Owner: %s" % sandbox.owner.name)
+        details.append(indent + "  Owner: %s" % sandbox.owner)
         details.append(indent + "  Compiler: %s" % sandbox.compiler)
         details.append(indent + "  Base Commit: %s" % sandbox.base_commit)
         if sandbox.formats:

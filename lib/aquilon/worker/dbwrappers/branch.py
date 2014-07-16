@@ -21,9 +21,11 @@ import re
 
 from sqlalchemy.orm.session import object_session
 
-from aquilon.exceptions_ import ArgumentError, ProcessException
+from aquilon.exceptions_ import (ArgumentError, AuthorizationException,
+                                 ProcessException)
+from aquilon.aqdb.column_types import AqStr
 from aquilon.aqdb.model import (Domain, Sandbox, Branch, Host, Cluster,
-                                Archetype, Personality)
+                                Archetype, Personality, User)
 from aquilon.utils import remove_dir, validate_template_name
 from aquilon.worker.dbwrappers.user_principal import get_user_principal
 from aquilon.worker.processes import run_git
@@ -33,24 +35,65 @@ from aquilon.worker.templates.domain import TemplateDomain
 VERSION_RE = re.compile(r'^[-_.a-zA-Z0-9]*$')
 
 
+def parse_sandbox(session, sandbox, default_author=None):
+    if "/" in sandbox:
+        author, branch = sandbox.split("/", 1)
+        dbauthor = User.get_unique(session, author, compel=True)
+    else:
+        branch = sandbox
+        if default_author:
+            dbauthor = User.get_unique(session, default_author, compel=True)
+        else:
+            dbauthor = None
+
+    # This function may be called when the branch does not exist (yet) in the
+    # DB, so we need to do the normalization manually
+    branch = AqStr.normalize(branch)
+
+    return (branch, dbauthor)
+
+
 def get_branch_and_author(session, domain=None, sandbox=None, branch=None,
                           compel=False):
     dbbranch = None
     dbauthor = None
+
     if domain:
         dbbranch = Domain.get_unique(session, domain, compel=True)
     elif branch:
         dbbranch = Branch.get_unique(session, branch, compel=True)
     elif sandbox:
-        (author, slash, name) = sandbox.partition('/')
-        if not slash:
+        try:
+            author, name = sandbox.split("/", 1)
+        except ValueError:
             raise ArgumentError("Expected sandbox as 'author/branch', author "
                                 "name and branch name separated by a slash.")
         dbbranch = Sandbox.get_unique(session, name, compel=True)
-        dbauthor = get_user_principal(session, author)
+        dbauthor = User.get_unique(session, author, compel=True)
     elif compel:
         raise ArgumentError("Please specify either sandbox or domain.")
+
     return (dbbranch, dbauthor)
+
+
+def force_my_sandbox(session, dbuser, sandbox):
+    if not dbuser.realm.trusted:
+        raise AuthorizationException("{0} is not trusted to handle "
+                                     "sandboxes.".format(dbuser.realm))
+
+    sandbox, dbauthor = parse_sandbox(session, sandbox,
+                                      default_author=dbuser.name)
+    sandbox = AqStr.normalize(sandbox)
+
+    # User used the name/branch syntax - that's fine.  They can't
+    # do anything on behalf of anyone else, though, so error if the
+    # user given is anyone else.
+    if dbauthor.name != dbuser.name:
+        raise ArgumentError("Principal {0!s} cannot add or get a sandbox "
+                            "on behalf of '{1!s}'."
+                            .format(dbuser, dbauthor))
+
+    return (sandbox, dbauthor)
 
 
 def get_branch_dependencies(dbbranch):
@@ -104,7 +147,7 @@ def add_branch(session, config, dbuser, cls_, branch, **arguments):
     return dbbranch
 
 
-def remove_branch(config, logger, dbbranch):
+def remove_branch(config, logger, dbbranch, dbauthor=None):
     session = object_session(dbbranch)
     deps = get_branch_dependencies(dbbranch)
     if deps:
@@ -112,7 +155,7 @@ def remove_branch(config, logger, dbbranch):
 
     session.delete(dbbranch)
 
-    domain = TemplateDomain(dbbranch, logger=logger)
+    domain = TemplateDomain(dbbranch, dbauthor, logger=logger)
     # Can this fail?  Is recovery needed?
     with CompileKey(domain=dbbranch.name, logger=logger):
         for dir in domain.directories():

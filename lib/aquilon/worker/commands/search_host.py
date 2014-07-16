@@ -28,7 +28,7 @@ from aquilon.aqdb.model import (Host, Cluster, Archetype, Personality,
                                 DnsRecord, ARecord, Fqdn, DnsDomain, Interface,
                                 AddressAssignment, NetworkEnvironment, Network,
                                 MetaCluster, VirtualMachine, ClusterResource,
-                                HardwareEntity, HostEnvironment)
+                                HardwareEntity, HostEnvironment, User)
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.formats.list import StringAttributeList
@@ -36,8 +36,6 @@ from aquilon.worker.dbwrappers.branch import get_branch_and_author
 from aquilon.worker.dbwrappers.grn import lookup_grn
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.dbwrappers.network import get_network_byip
-from aquilon.worker.dbwrappers.user_principal import get_user_principal
-
 
 class CommandSearchHost(BrokerCommand):
 
@@ -47,7 +45,7 @@ class CommandSearchHost(BrokerCommand):
                buildstatus, personality, host_environment, osname, osversion,
                service, instance, model, machine_type, vendor, serial, cluster,
                guest_on_cluster, guest_on_share, member_cluster_share,
-               domain, sandbox, branch, sandbox_owner,
+               domain, sandbox, branch, sandbox_author,
                dns_domain, shortname, mac, ip, networkip, network_environment,
                exact_location, server_of_service, server_of_instance, grn,
                eon_id, fullinfo, style, **arguments):
@@ -148,8 +146,8 @@ class CommandSearchHost(BrokerCommand):
         dbbranch, dbauthor = get_branch_and_author(session, domain=domain,
                                                    sandbox=sandbox,
                                                    branch=branch)
-        if sandbox_owner:
-            dbauthor = get_user_principal(session, sandbox_owner)
+        if sandbox_author:
+            dbauthor = User.get_unique(session, sandbox_author, compel=True)
 
         if dbbranch:
             q = q.filter_by(branch=dbbranch)

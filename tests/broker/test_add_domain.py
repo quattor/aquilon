@@ -58,6 +58,7 @@ class TestAddDomain(TestBrokerCommand):
         command = ["show_domain", "--domain=unittest"]
         out = self.commandtest(command)
         self.matchoutput(out, "Domain: unittest", command)
+        self.matchoutput(out, "Owner: %s@%s" % (self.user, self.realm), command)
         self.matchoutput(out, "Tracking: sandbox utsandbox", command)
         self.matchoutput(out, "Comments: aqd unit test tracking domain",
                          command)
@@ -70,7 +71,7 @@ class TestAddDomain(TestBrokerCommand):
         domainlist = self.parse_domain_msg(out, expect=1)
         domain = domainlist.domains[0]
         self.assertEqual(domain.name, "unittest")
-        self.assertEqual(domain.owner, self.config.get("unittest", "user"))
+        self.assertEqual(domain.owner, "%s@%s" % (self.user, self.realm))
         self.assertEqual(domain.tracked_branch, "utsandbox")
         self.assertEqual(domain.type, domain.DOMAIN)
         self.assertEqual(domain.allow_manage, False)
@@ -143,8 +144,7 @@ class TestAddDomain(TestBrokerCommand):
         self.noouttest(command)
 
     def test_210_verifysearchowner(self):
-        user = self.config.get("unittest", "user")
-        command = ["search", "domain", "--owner", user]
+        command = ["search", "domain", "--owner", self.user]
         out = self.commandtest(command)
         self.matchoutput(out, "unittest", command)
         self.matchoutput(out, "prod", command)

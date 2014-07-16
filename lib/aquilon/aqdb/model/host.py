@@ -23,8 +23,9 @@ from sqlalchemy import (Integer, Boolean, DateTime, String, Column, ForeignKey,
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import relation, backref, deferred
 
-from aquilon.aqdb.model import (Base, Branch, HardwareEntity, HostLifecycle, Grn,
-                                Personality, OperatingSystem, UserPrincipal)
+from aquilon.aqdb.model import (Base, Branch, Sandbox, HardwareEntity,
+                                HostLifecycle, Grn, Personality,
+                                OperatingSystem, User)
 
 from aquilon.aqdb.column_types import AqStr
 from collections import defaultdict
@@ -67,8 +68,9 @@ class Host(Base):
                        nullable=False)
 
     sandbox_author_id = Column(Integer,
-                               ForeignKey('user_principal.id',
-                                          name='host_sandbox_author_fk'),
+                               ForeignKey('userinfo.id',
+                                          name='host_sandbox_author_fk',
+                                          ondelete="SET NULL"),
                                nullable=True)
 
     personality_id = Column(Integer, ForeignKey('personality.id',
@@ -103,7 +105,7 @@ class Host(Base):
                                                cascade='all, delete-orphan'))
 
     branch = relation(Branch, innerjoin=True, backref='hosts')
-    sandbox_author = relation(UserPrincipal)
+    sandbox_author = relation(User)
     personality = relation(Personality, innerjoin=True)
     status = relation(HostLifecycle, innerjoin=True)
     operating_system = relation(OperatingSystem, innerjoin=True)
@@ -124,10 +126,12 @@ class Host(Base):
 
     @property
     def authored_branch(self):
-        """ return a string representation of sandbox author/branch name """
-        if self.sandbox_author:
-            return "%s/%s" % (self.sandbox_author.name, self.branch.name)
-        return str(self.branch.name)
+        if isinstance(self.branch, Sandbox):
+            if self.sandbox_author:
+                return "%s/%s" % (self.sandbox_author.name, self.branch.name)
+            else:
+                return "%s [orphaned]" % self.branch.name
+        return self.branch.name
 
     # see cluster.py
     @property

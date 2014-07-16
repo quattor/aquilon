@@ -402,10 +402,9 @@ class TestAddESXCluster(PersonalityTestMixin, TestBrokerCommand):
         self.noouttest(command)
 
     def testaddsandboxmc(self):
-        user = self.config.get("unittest", "user")
         command = ["add_esx_cluster", "--cluster=sandboxcl1",
                    "--metacluster=sandboxmc", "--building=ut",
-                   "--sandbox=%s/utsandbox" % user, "--down_hosts_threshold=0",
+                   "--sandbox=%s/utsandbox" % self.user, "--down_hosts_threshold=0",
                    "--archetype=esx_cluster",
                    "--personality=vulcan-1g-desktop-prod"]
         self.noouttest(command)

@@ -14,21 +14,33 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Contains the logic for `aq show netgroup whitelist`."""
 
-from aquilon.exceptions_ import NotFoundException
-from aquilon.aqdb.model import NetGroupWhiteList
+from aquilon.aqdb.model import User
 from aquilon.worker.broker import BrokerCommand
 
 
-class CommandShowNetgroupWhitelist(BrokerCommand):
+class CommandUpdateUser(BrokerCommand):
 
-    def render(self, session, netgroup, all, **arguments):
-        q = session.query(NetGroupWhiteList)
-        if netgroup:
-            q = q.filter_by(name=netgroup)
-        result = q.all()
-        if not result:
-            if netgroup:
-                raise NotFoundException("Netgroup %s not found." % netgroup)
-        return result
+    required_parameters = ["username"]
+
+    def render(self, session, username, uid, gid, full_name, home_directory,
+               **arguments):
+        dbuser = User.get_unique(session, username, compel=True)
+
+        # 0 is a valid value for uid
+        if uid is not None:
+            dbuser.uid = uid
+
+        # 0 is a valid value for gid
+        if gid is not None:
+            dbuser.gid = gid
+
+        if full_name:
+            dbuser.full_name = full_name
+
+        if home_directory:
+            dbuser.home_dir = home_directory
+
+        session.flush()
+
+        return

@@ -31,6 +31,7 @@ _ABV = 'usr_princ'
 class UserPrincipal(Base):
     """ Simple class for strings representing users kerberos credential """
     __tablename__ = _TN
+    _class_label = 'Principal'
 
     id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
 

@@ -18,9 +18,10 @@
 
 from sqlalchemy.orm import joinedload, undefer
 
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.exceptions_ import ArgumentError
-from aquilon.worker.dbwrappers.sandbox import get_sandbox
+from aquilon.aqdb.model import Sandbox
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.dbwrappers.branch import parse_sandbox
 from aquilon.worker.formats.branch import AuthoredSandbox
 
 
@@ -28,15 +29,18 @@ class CommandShowSandboxSandbox(BrokerCommand):
 
     required_parameters = ["sandbox"]
 
-    def render(self, session, logger, sandbox, pathonly, **arguments):
-        (mysandbox, dbauthor) = get_sandbox(session, logger, sandbox,
-                                            query_options=[undefer('comments'),
-                                                           joinedload('owner')])
+    def render(self, session, sandbox, pathonly, **arguments):
+        branch, dbauthor = parse_sandbox(session, sandbox)
+        dbsandbox = Sandbox.get_unique(session, branch, compel=True,
+                                       query_options=[undefer('comments'),
+                                                      joinedload('owner')])
         if dbauthor:
-            mysandbox = AuthoredSandbox(mysandbox, dbauthor)
-        if not pathonly:
-            return mysandbox
-        if not dbauthor:
-            raise ArgumentError("Must specify sandbox as author/branch "
-                                "when using --pathonly")
-        return mysandbox.path
+            dbsandbox = AuthoredSandbox(dbsandbox, dbauthor)
+
+        if pathonly:
+            if not dbauthor:
+                raise ArgumentError("Must specify sandbox as author/branch "
+                                    "when using --pathonly.")
+            return dbsandbox.path
+        else:
+            return dbsandbox

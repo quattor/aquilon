@@ -51,13 +51,12 @@ class TestRebindMetaCluster(TestBrokerCommand):
                          "exceeds the requested limit of 0.", command)
 
     def testfailrebindsandboxcl1(self):
-        user = self.config.get("unittest", "user")
         command = ["rebind_metacluster", "--cluster=sandboxcl1",
                    "--metacluster=utmc1"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "ESX Cluster sandboxcl1 sandbox %s/"
                          "utsandbox does not match ESX metacluster utmc1 "
-                         "domain unittest." % user, command)
+                         "domain unittest." % self.user, command)
 
     def testrebindutecl3(self):
         command = ["rebind_metacluster", "--cluster=utecl3",

@@ -39,7 +39,9 @@ class TestBrokerCommand(unittest.TestCase):
     scratchdir = None
     dsdb_coverage_dir = None
     sandboxdir = None
+
     user = None
+    realm = None
 
     aurora_with_node = "oy604c2n6"
     aurora_without_node = "pissp1"
@@ -58,7 +60,19 @@ class TestBrokerCommand(unittest.TestCase):
             if not os.path.exists(dir):
                 os.makedirs(dir)
 
-        cls.user = cls.config.get("broker", "user")
+        # Run klist and store the information
+        klist = cls.config.get('kerberos', 'klist')
+        p = Popen([klist], stdout=PIPE, stderr=2)
+        out, err = p.communicate()
+        m = re.search(r'^\s*(?:Default p|P)rincipal:\s*'
+                      r'(?P<principal>(?P<user>\S.*)@(?P<realm>.*?))$',
+                      out, re.M)
+        cls.user = m.group('user')
+        cls.realm = m.group('realm')
+
+        if not cls.user or not cls.realm:
+            raise ValueError("Failed to detect the Kerberos principal.")
+
         cls.sandboxdir = os.path.join(cls.config.get("broker", "templatesdir"),
                                       cls.user)
 
@@ -785,8 +799,8 @@ class TestBrokerCommand(unittest.TestCase):
                         (f, command))
 
     def demote_current_user(self, role="nobody"):
-        principal = self.config.get('unittest', 'principal')
-        command = ["permission", "--role", role, "--principal", principal]
+        command = ["permission", "--role", role,
+                   "--principal", "%s@%s" % (self.user, self.realm)]
         self.noouttest(command)
 
     def promote_current_user(self):

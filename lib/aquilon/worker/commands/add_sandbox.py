@@ -22,7 +22,7 @@ from aquilon.exceptions_ import AuthorizationException, ArgumentError
 from aquilon.aqdb.model import Sandbox, Branch
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.commands.get import CommandGet
-from aquilon.worker.dbwrappers.branch import add_branch
+from aquilon.worker.dbwrappers.branch import add_branch, force_my_sandbox
 from aquilon.worker.processes import run_git
 
 
@@ -40,14 +40,14 @@ class CommandAddSandbox(CommandGet):
             raise AuthorizationException("Cannot create a sandbox without an "
                                          "authenticated connection.")
 
-        sandbox = self.force_my_sandbox(session, dbuser, sandbox)
+        sandbox, dbauthor = force_my_sandbox(session, dbuser, sandbox)
 
         # Check that the user has cleared up a directory of the same
         # name; if this is not the case the branch may be created (in git)
         # and added to the database - however CommandGet will fail roleing
         # back the database leaving the branch created in git
         templatesdir = self.config.get("broker", "templatesdir")
-        sandboxdir = os.path.join(templatesdir, dbuser.name, sandbox)
+        sandboxdir = os.path.join(templatesdir, dbauthor.name, sandbox)
         if os.path.exists(sandboxdir):
             raise ArgumentError("Sandbox directory %s already exists; "
                                 "cannot create branch." %

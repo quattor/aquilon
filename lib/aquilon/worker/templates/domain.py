@@ -21,7 +21,7 @@ import logging
 import time
 
 from aquilon.config import Config, lookup_file_path
-from aquilon.exceptions_ import ArgumentError, ProcessException, InternalError
+from aquilon.exceptions_ import ArgumentError, ProcessException, AquilonError
 from aquilon.aqdb.model import (Host, Cluster, Fqdn, DnsDomain, DnsRecord,
                                 HardwareEntity, Sandbox, Domain, Archetype,
                                 Personality)
@@ -36,8 +36,8 @@ LOGGER = logging.getLogger(__name__)
 def template_branch_basedir(config, dbbranch, dbauthor=None):
     if isinstance(dbbranch, Sandbox):
         if not dbauthor:
-            raise InternalError("Missing required author to compile "
-                                "{0:l}." % dbbranch)
+            raise AquilonError("Missing required author to compile "
+                               "{0:l}.".format(dbbranch))
         return os.path.join(config.get("broker", "templatesdir"),
                             dbauthor.name, dbbranch.name)
     else:
@@ -48,6 +48,13 @@ class TemplateDomain(object):
 
     def __init__(self, domain, author=None, logger=LOGGER):
         super(TemplateDomain, self).__init__()
+
+        if isinstance(domain, Sandbox) and not author:
+            raise AquilonError("No author information provided for {0:l}. If "
+                               "the sandbox belonged to an user that got "
+                               "deleted, then all hosts/clusters must be "
+                               "moved to a sandbox owned by an existing user."
+                               .format(domain))
 
         self.domain = domain
         self.author = author

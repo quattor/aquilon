@@ -313,9 +313,10 @@
          <option name="member_hostname" type="string">member_hostname</option>
          <option name="member_personality" type="string">member_personality</option>
          <optgroup name="search_cluster_branch" fields="any">
-            <option name="domain" type="string" conflicts="sandbox branch">template domain</option>
-            <option name="sandbox" type="string" conflicts="domain branch">Name of the sandbox (given as 'author/branch')</option>
-            <option name="branch" type="string" conflicts="domain sandbox">template branch (either a domain or a sandbox)</option>
+            <option name="domain" type="string" conflicts="sandbox branch sandbox_author">template domain</option>
+            <option name="sandbox" type="string" conflicts="domain branch sandbox_author">Name of the sandbox (given as 'author/branch')</option>
+            <option name="branch" type="string" conflicts="domain sandbox sandbox_author">template branch (either a domain or a sandbox)</option>
+            <option name="sandbox_author" type="string" conflicts="domain sandbox branch">Author of the sandbox the cluster is in</option>
          </optgroup>
          <optgroup name="search_esx_opts" fields="any">
            <option name="cluster" type="string">cluster name</option>
@@ -399,11 +400,11 @@
          <option name="guest_on_share" type="string">Host is a virtual machine using this share</option>
          <option name="member_cluster_share" type="string">Host is a member of a cluster with machines using this nas_disk_share</option>
          <optgroup name="search_host_branch" fields="any">
-            <option name="domain" type="string" conflicts="sandbox branch">Template domain</option>
-            <option name="sandbox" type="string" conflicts="domain branch">Name of the sandbox (given as 'author/branch')</option>
-            <option name="branch" type="string" conflicts="domain sandbox">Template branch (either a domain or a sandbox)</option>
+            <option name="domain" type="string" conflicts="sandbox branch sandbox_author">Template domain</option>
+            <option name="sandbox" type="string" conflicts="domain branch sandbox_author">Name of the sandbox (given as 'author/branch')</option>
+            <option name="branch" type="string" conflicts="domain sandbox sandbox_author">Template branch (either a domain or a sandbox)</option>
+            <option name="sandbox_author" type="string" conflicts="domain sandbox branch">Author of the sandbox the host is in</option>
          </optgroup>
-         <option name="sandbox_owner" type="string" conflicts="domain sandbox branch">Owner of the sandbox the host is in</option>
          <optgroup name="search_host_location_opts" fields="any">
 	    <option name="organization" type="string">Organization</option>
 	    <option name="hub" type="string">Hub</option>
@@ -5677,16 +5678,6 @@
       <transport method="get" path="bunker_violations" />
    </command>
 
-   <command name="show_user">
-      Show the user for a given username.
-      <optgroup name="show_user_opts" mandatory="True" fields="any">
-         <option name="username" type="string" conflicts="all">User to check</option>
-         <option name="all" type="flag">list all users</option>
-      </optgroup>
-      <transport trigger="all" method="get" path="users" />
-      <transport method="get" path="user/%(username)s" />
-   </command>
-
    <command name="grant_root_access">
       Grant root access to user/netgroup to a personality. The affected host(s) must be
       recompiled for the changes to take effect.
@@ -5728,7 +5719,7 @@
        <optgroup name="netgroup_whitelist_opts" mandatory="true" fields="all">
 	  <option name="netgroup" type="string" conflicts="username">Netgroup as string</option>
        </optgroup>
-      <transport method="post" path="netgroup_whitelist/command/add"/>
+      <transport method="put" path="netgroup_whitelist/%(netgroup)s"/>
    </command>
 
    <command name="del_netgroup_whitelist">
@@ -5736,7 +5727,7 @@
        <optgroup name="netgroup_whitelist_opts" mandatory="true" fields="all">
 	  <option name="netgroup" type="string" conflicts="username">Netgroup as string</option>
        </optgroup>
-      <transport method="post" path="netgroup_whitelist/command/del"/>
+      <transport method="delete" path="netgroup_whitelist/%(netgroup)s"/>
    </command>
 
    <command name="show_netgroup_whitelist">
@@ -5745,15 +5736,63 @@
          <option name="netgroup" type="string">Netgroup to display</option>
          <option name="all" type="flag">Show all Netgroups</option>
       </optgroup>
-      <transport method="get" path="netgroup_whitelist" />
+      <transport trigger="netgroup" method="get" path="netgroup_whitelist/%(netgroup)s"/>
+      <transport trigger="all" method="get" path="netgroup_whitelist" />
+   </command>
+
+   <command name="add_user">
+      Add a new user.
+      <optgroup name="add_user_options" mandatory="True" fields="all">
+	 <option name="username" type="string">User name</option>
+	 <optgroup name="add_user_uid" mandatory="True" fields="any">
+	    <option name="uid" type="int">Numeric user ID</option>
+	    <option name="autouid" type="flag">Allocate an UID automatically</option>
+	 </optgroup>
+	 <option name="gid" type="int">Numeric primary group ID</option>
+	 <option name="full_name" type="string">Full name of the user</option>
+	 <option name="home_directory" type="string">Home directory of the user</option>
+      </optgroup>
+      <transport method="put" path="user/%(username)s"/>
+   </command>
+
+   <command name="del_user">
+      Delete a user.
+      <optgroup name="del_user_options" mandatory="True" fields="all">
+	 <option name="username" type="string">User name</option>
+      </optgroup>
+      <transport method="delete" path="user/%(username)s"/>
+   </command>
+
+   <command name="update_user">
+      Update parameters of a user.
+      <optgroup name="update_user_options" mandatory="True" fields="all">
+	 <option name="username" type="string">User name</option>
+      </optgroup>
+      <optgroup name="update_user_optional" mandatory="False">
+	 <option name="uid" type="int">Numeric user ID</option>
+	 <option name="gid" type="int">Numeric primary group ID</option>
+	 <option name="full_name" type="string">Full name of the user</option>
+	 <option name="home_directory" type="string">Home directory of the user</option>
+      </optgroup>
+      <transport method="post" path="user/%(username)s"/>
+   </command>
+
+   <command name="show_user">
+      Show the user for a given username.
+      <optgroup name="show_user_opts" mandatory="True" fields="any">
+         <option name="username" type="string" conflicts="all">User to check</option>
+         <option name="all" type="flag">list all users</option>
+      </optgroup>
+      <transport trigger="username" method="get" path="user/%(username)s" />
+      <transport trigger="all" method="get" path="user" />
    </command>
 
    <command name="refresh_user">
       Refresh the User principals in AQD.
-      <transport method="post" path="user/command/refresh"/>
       <optgroup name="refresh_user_optional" mandatory="False">
          <option name="incremental" type="boolean">Commit every change as it is decided</option>
       </optgroup>
+      <transport method="post" path="user/command/refresh"/>
    </command>
 
 </commandline>

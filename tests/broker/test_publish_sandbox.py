@@ -108,6 +108,11 @@ class TestPublishSandbox(TestBrokerCommand):
                               env=self.gitenv(), cwd=sandboxdir)
         # FIXME: verify that changes made it to unittest
 
+    def testpublishutsandboxuser(self):
+        sandboxdir = os.path.join(self.sandboxdir, "utsandbox")
+        self.ignoreoutputtest(["publish", "--sandbox", "%s/utsandbox" % self.user],
+                              env=self.gitenv(), cwd=sandboxdir)
+
     def testrebase(self):
         utsandboxdir = os.path.join(self.sandboxdir, "utsandbox")
         (out, err) = self.gitcommand(["rev-list", "--skip=1", "--max-count=1",

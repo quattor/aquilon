@@ -114,9 +114,8 @@ class TestAddMetaCluster(PersonalityTestMixin, TestBrokerCommand):
 
     def testaddutsandbox(self):
         # Test moving machines between metaclusters
-        user = self.config.get("unittest", "user")
         command = ["add_metacluster", "--metacluster=sandboxmc", "--building=ut",
-                   "--sandbox=%s/utsandbox" % user]
+                   "--sandbox=%s/utsandbox" % self.user]
         self.noouttest(command)
 
     def testaddvulcan1(self):

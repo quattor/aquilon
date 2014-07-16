@@ -17,15 +17,11 @@
 # limitations under the License.
 """Module for testing GRN support."""
 
-import os
-import sys
-import unittest
-from subprocess import Popen, PIPE
-
 if __name__ == "__main__":
     import utils
     utils.import_depends()
 
+import unittest2 as unittest
 from brokertest import TestBrokerCommand
 
 
@@ -44,17 +40,17 @@ class TestRootAccess(TestBrokerCommand):
 
         command = ["show", "netgroup_whitelist", "--all"]
         out = self.commandtest(command)
-        self.matchoutput(out, "Netgroup: netgroup1", command)
-        self.matchoutput(out, "Netgroup: netgroup2", command)
+        self.matchoutput(out, "netgroup1", command)
+        self.matchoutput(out, "netgroup2", command)
 
     def test_210_map_personality_user(self):
         command = ["grant_root_access", "--user", "testuser1",
                    "--personality", "compileserver", "--justification", "tcm=12345678"]
-        (out, err) = self.successtest(command)
+        self.noouttest(command)
 
         command = ["grant_root_access", "--user", "testuser2",
                    "--personality", "compileserver", "--justification", "tcm=12345678"]
-        (out, err) = self.successtest(command)
+        self.noouttest(command)
 
     def test_220_map_personality_invaliduser(self):
         command = ["grant_root_access", "--user", "testinvaliduser",
@@ -77,11 +73,11 @@ class TestRootAccess(TestBrokerCommand):
     def test_240_map_personality_netgroup(self):
         command = ["grant_root_access", "--netgroup", "netgroup1",
                    "--personality", "compileserver", "--justification", "tcm=12345678"]
-        (out, err) = self.successtest(command)
+        self.noouttest(command)
 
         command = ["grant_root_access", "--netgroup", "netgroup2",
                    "--personality", "compileserver", "--justification", "tcm=12345678"]
-        (out, err) = self.successtest(command)
+        self.noouttest(command)
 
     def test_250_map_personality_invalidnetgroup(self):
         command = ["grant_root_access", "--netgroup", "testinvalidnetgroup",
@@ -111,7 +107,7 @@ class TestRootAccess(TestBrokerCommand):
     def test_310_unmap_personality_user(self):
         command = ["revoke_root_access", "--user", "testuser1",
                    "--personality", "compileserver", "--justification", "tcm=12345678"]
-        (out, err) = self.successtest(command)
+        self.noouttest(command)
 
     def test_320_unmap_personality_invaliduser(self):
         command = ["revoke_root_access", "--user", "testinvaliduser",
@@ -128,13 +124,13 @@ class TestRootAccess(TestBrokerCommand):
     def test_340_unmap_personality_netgroup(self):
         command = ["revoke_root_access", "--netgroup", "netgroup1",
                    "--personality", "compileserver", "--justification", "tcm=12345678"]
-        (out, err) = self.successtest(command)
+        self.noouttest(command)
 
     def test_350_unmap_personality_invalidnetgroup(self):
         command = ["grant_root_access", "--netgroup", "testinvalidnetgroup",
                    "--personality", "compileserver", "--justification", "tcm=12345678"]
         out = self.notfoundtest(command)
-        self.matchoutput(out, "NetGroupWhiteList testinvalidnetgroup not found", command)
+        self.matchoutput(out, "Netgroup testinvalidnetgroup not found", command)
 
     def test_360_verify_personality(self):
         command = ["show", "personality", "--personality", "compileserver"]
@@ -199,7 +195,7 @@ class TestRootAccess(TestBrokerCommand):
     def test_430_del_netgroup_notfound(self):
         command = ["del", "netgroup_whitelist", "--netgroup", "notfound"]
         out = self.notfoundtest(command)
-        self.matchoutput(out, "NetGroupWhiteList notfound not found", command)
+        self.matchoutput(out, "Netgroup notfound not found", command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestRootAccess)

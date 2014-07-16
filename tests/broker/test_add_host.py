@@ -337,7 +337,6 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
         # aquilon63.aqd-unittest.ms.com & aquilon64.aqd-unittest.ms.com are
         # reserved for manage tests.
         servers = 0
-        user = self.config.get("unittest", "user")
         net = self.net["hp_eth0"]
         # number 50 is in use by the tor_switch.
         for i in range(51, 100):
@@ -349,7 +348,7 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
             port = i - 50
             machine = "ut9s03p%d" % port
             self.create_host(hostname, net.usable[port], machine, rack="ut9",
-                             model="bl260c", sandbox="%s/utsandbox" % user)
+                             model="bl260c", sandbox="%s/utsandbox" % self.user)
 
     def test_310_populate_verari_rack_hosts(self):
         # These are used in add_virtual_hardware:

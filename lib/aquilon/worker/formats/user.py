@@ -24,10 +24,10 @@ from aquilon.aqdb.model import User
 class UserFormatter(ObjectFormatter):
     def format_raw(self, user, indent=""):
         details = [indent + "User: %s" % user.name]
-        details.append(indent + "  Uid: %s" % user.uid)
-        details.append(indent + "  Gid: %s" % user.gid)
+        details.append(indent + "  UID: %s" % user.uid)
+        details.append(indent + "  GID: %s" % user.gid)
         details.append(indent + "  Full Name: %s" % user.full_name)
-        details.append(indent + "  Home Dir: %s" % user.home_dir)
+        details.append(indent + "  Home Directory: %s" % user.home_dir)
         return "\n".join(details)
 
     def csv_fields(self, user):

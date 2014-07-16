@@ -95,8 +95,7 @@ class TestSearchCluster(TestBrokerCommand):
         self.noouttest(command.split(" "))
 
     def testsandboxavailable(self):
-        user = self.config.get("unittest", "user")
-        command = ["search_cluster", "--sandbox=%s/utsandbox" % user]
+        command = ["search_cluster", "--sandbox=%s/utsandbox" % self.user]
         out = self.commandtest(command)
         self.matchoutput(out, "utstorages2", command)
         self.matchclean(out, "utstorage2", command)

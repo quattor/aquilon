@@ -16,9 +16,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Give anyone with write access to the database the aqd_admin role."""
-import sys
+
 import logging
 import re
+import sys
+from subprocess import Popen, PIPE
 
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger('aqdb.add_admin')
@@ -26,14 +28,9 @@ log = logging.getLogger('aqdb.add_admin')
 import utils
 utils.load_classpath()
 
-from aquilon.config import Config
-config = Config()
-
-
-from subprocess import Popen, PIPE
-
 import argparse
 
+from aquilon.config import Config
 from aquilon.aqdb.model import Base, UserPrincipal, Role, Realm
 from aquilon.aqdb.db_factory import DbFactory
 
@@ -62,10 +59,12 @@ def parse_cli(*args, **kw):
 
 def parse_klist():
     """Run klist and return a (principal, realm) tuple."""
+
+    config = Config()
     klist = config.get('kerberos', 'klist')
     log.debug("Running %s", klist)
     p = Popen([klist], stdout=PIPE, stderr=2)
-    (out, err) = p.communicate()
+    out, err = p.communicate()
     m = re.search(r'^\s*(?:Default p|P)rincipal:\s*(\S.*)@(.*?)$', out, re.M)
     if not m:
         raise ValueError("Could not determine default principal from klist "

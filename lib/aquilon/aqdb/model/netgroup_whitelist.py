@@ -28,6 +28,7 @@ class NetGroupWhiteList(Base):
        membership is not managed here just the names. """
 
     __tablename__ = _TN
+    _class_label = "Netgroup"
 
     id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
     name = Column(AqStr(64), nullable=False)

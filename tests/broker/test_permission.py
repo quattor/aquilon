@@ -22,9 +22,6 @@ that the 'permission' and 'show principal' commands work as expected.
 
 """
 
-import re
-from subprocess import Popen, PIPE
-
 if __name__ == "__main__":
     import utils
     utils.import_depends()
@@ -34,24 +31,8 @@ from brokertest import TestBrokerCommand
 
 
 class TestPermission(TestBrokerCommand):
-
-    def test_000_parse_klist(self):
-        """Run klist and stash information."""
-        klist = self.config.get('kerberos', 'klist')
-        p = Popen([klist], stdout=PIPE, stderr=2)
-        (out, err) = p.communicate()
-        m = re.search(r'^\s*(?:Default p|P)rincipal:\s*'
-                      r'(?P<principal>(?P<user>\S.*)@(?P<realm>.*?))$',
-                      out, re.M)
-        self.assertTrue(m,
-                        "Could not determine default principal from klist "
-                        "output: %s" % out)
-        self.config.set('unittest', 'principal', m.group('principal'))
-        self.config.set('unittest', 'user', m.group('user'))
-        self.config.set('unittest', 'realm', m.group('realm'))
-
     def testpermissionnobody(self):
-        principal = 'testusernobody@' + self.config.get('unittest', 'realm')
+        principal = 'testusernobody@' + self.realm
         command = ["permission", "--principal", principal,
                    "--role", "nobody", "--createuser",
                    "--comments", "Some user comments"]
@@ -60,7 +41,7 @@ class TestPermission(TestBrokerCommand):
                          command)
 
     def testverifynobody(self):
-        principal = 'testusernobody@' + self.config.get('unittest', 'realm')
+        principal = 'testusernobody@' + self.realm
         command = "show principal --principal " + principal
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "User Principal: %s [role: nobody]" % principal,
@@ -68,14 +49,13 @@ class TestPermission(TestBrokerCommand):
         self.matchoutput(out, "Comments: Some user comments", command)
 
     def testverifycsvnocomments(self):
-        realm = self.config.get('unittest', 'realm')
-        command = ["show_principal", "--principal=testusernobody@%s" % realm,
+        command = ["show_principal", "--principal=testusernobody@%s" % self.realm,
                    "--format=csv"]
         out = self.commandtest(command)
-        self.searchoutput(out, r"^testusernobody@%s,nobody$" % realm, command)
+        self.searchoutput(out, r"^testusernobody@%s,nobody$" % self.realm, command)
 
     def testverifysearchnobody(self):
-        principal = 'testusernobody@' + self.config.get('unittest', 'realm')
+        principal = 'testusernobody@' + self.realm
         command = ["search_principal", "--role", "nobody", "--fullinfo"]
         out = self.commandtest(command)
         self.matchoutput(out, "User Principal: %s [role: nobody]" % principal,
@@ -92,8 +72,7 @@ class TestPermission(TestBrokerCommand):
                          command)
 
     def testpermissionoperations(self):
-        realm = self.config.get('unittest', 'realm')
-        principal = 'testuseroperations@' + realm
+        principal = 'testuseroperations@' + self.realm
         command = ["permission", "--principal", principal, "--role=operations",
                    "--createuser"]
         err = self.statustest(command)
@@ -101,8 +80,7 @@ class TestPermission(TestBrokerCommand):
                          command)
 
     def testverifyoperations(self):
-        realm = self.config.get('unittest', 'realm')
-        principal = 'testuseroperations@' + realm
+        principal = 'testuseroperations@' + self.realm
         command = "show principal --principal " + principal
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
@@ -110,17 +88,15 @@ class TestPermission(TestBrokerCommand):
                          command)
 
     def testverifycsv(self):
-        realm = self.config.get('unittest', 'realm')
         command = ["show_principal",
-                   "--principal=testuseroperations@%s" % realm,
+                   "--principal=testuseroperations@%s" % self.realm,
                    "--format=csv"]
         out = self.commandtest(command)
         self.searchoutput(out, r"^testuseroperations@%s,operations$" %
-                          realm, command)
+                          self.realm, command)
 
     def testpermissionengineering(self):
-        realm = self.config.get('unittest', 'realm')
-        principal = 'testuserengineering@' + realm
+        principal = 'testuserengineering@' + self.realm
         command = ["permission", "--principal", principal,
                    "--role=engineering", "--createuser"]
         err = self.statustest(command)
@@ -128,8 +104,7 @@ class TestPermission(TestBrokerCommand):
                          command)
 
     def testverifyengineering(self):
-        realm = self.config.get('unittest', 'realm')
-        principal = 'testuserengineering@' + realm
+        principal = 'testuserengineering@' + self.realm
         command = "show principal --principal " + principal
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
@@ -137,8 +112,7 @@ class TestPermission(TestBrokerCommand):
                          command)
 
     def testpermissionaqd_admin(self):
-        realm = self.config.get('unittest', 'realm')
-        principal = 'testuseraqd_admin@' + realm
+        principal = 'testuseraqd_admin@' + self.realm
         command = ["permission", "--principal", principal, "--role=aqd_admin",
                    "--createuser"]
         err = self.statustest(command)
@@ -146,8 +120,7 @@ class TestPermission(TestBrokerCommand):
                          command)
 
     def testverifyaqd_admin(self):
-        realm = self.config.get('unittest', 'realm')
-        principal = 'testuseraqd_admin@' + realm
+        principal = 'testuseraqd_admin@' + self.realm
         command = "show principal --principal " + principal
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
@@ -170,12 +143,11 @@ class TestPermission(TestBrokerCommand):
         self.matchclean(out, "testoperations", command)
         self.matchclean(out, "testnobody", command)
         self.matchclean(out, "testtestuseraqd_admin", command)
-        self.matchclean(out, '@' + self.config.get('unittest', 'realm'),
+        self.matchclean(out, '@' + self.realm,
                         command)
 
     def testpromote(self):
-        realm = self.config.get('unittest', 'realm')
-        principal = 'testuserpromote@' + realm
+        principal = 'testuserpromote@' + self.realm
         command = ["permission", "--principal", principal, "--role=nobody",
                    "--createuser"]
         err = self.statustest(command)
@@ -186,8 +158,7 @@ class TestPermission(TestBrokerCommand):
         self.noouttest(command)
 
     def testverifypromote(self):
-        realm = self.config.get('unittest', 'realm')
-        principal = 'testuserpromote@' + realm
+        principal = 'testuserpromote@' + self.realm
         command = "show principal --principal " + principal
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
@@ -195,8 +166,7 @@ class TestPermission(TestBrokerCommand):
                          command)
 
     def testdemote(self):
-        realm = self.config.get('unittest', 'realm')
-        principal = 'testuserdemote@' + realm
+        principal = 'testuserdemote@' + self.realm
         command = ["permission", "--principal", principal, "--role=operations",
                    "--createuser"]
         err = self.statustest(command)
@@ -206,19 +176,17 @@ class TestPermission(TestBrokerCommand):
         self.noouttest(command)
 
     def testverifydemote(self):
-        realm = self.config.get('unittest', 'realm')
-        principal = 'testuserdemote@' + realm
+        principal = 'testuserdemote@' + self.realm
         command = "show principal --principal " + principal
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "User Principal: %s [role: nobody]" % principal,
                          command)
 
     def testmissinguser(self):
-        realm = self.config.get('unittest', 'realm')
-        command = ["permission", "--principal", "@" + realm,
+        command = ["permission", "--principal", "@" + self.realm,
                    "--role", "operations", "--createuser"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "User principal '@%s' is not valid." % realm,
+        self.matchoutput(out, "User principal '@%s' is not valid." % self.realm,
                          command)
 
     def testmissingrealm(self):
@@ -229,15 +197,13 @@ class TestPermission(TestBrokerCommand):
                          command)
 
     def testmissinghostname(self):
-        realm = self.config.get('unittest', 'realm')
-        command = ["permission", "--principal", "host/@%s" % realm,
+        command = ["permission", "--principal", "host/@%s" % self.realm,
                    "--role", "operations", "--createuser"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "No fully qualified name specified.", command)
 
     def testmissingdomain(self):
-        realm = self.config.get('unittest', 'realm')
-        command = ["permission", "--principal", "host/no-domain@%s" % realm,
+        command = ["permission", "--principal", "host/no-domain@%s" % self.realm,
                    "--role", "operations", "--createuser"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
@@ -246,8 +212,7 @@ class TestPermission(TestBrokerCommand):
                          command)
 
     def testunknownhost(self):
-        realm = self.config.get('unittest', 'realm')
-        principal = "host/no-such-host.aqd-unittest.ms.com@" + realm
+        principal = "host/no-such-host.aqd-unittest.ms.com@" + self.realm
         command = ["permission", "--role", "operations", "--createuser",
                    "--principal", principal]
         out = self.notfoundtest(command)
@@ -271,9 +236,7 @@ class TestPermission(TestBrokerCommand):
         self.demote_current_user()
 
     def test_autherror_200(self):
-        principal = self.config.get('unittest', 'principal')
-        user = self.config.get('unittest', 'user')
-        realm = self.config.get('unittest', 'realm')
+        principal = "%s@%s" % (self.user, self.realm)
 
         command = ["permission", "--role=aqd_admin", "--principal", principal]
         err = self.unauthorizedtest(command, auth=True)
@@ -281,7 +244,7 @@ class TestPermission(TestBrokerCommand):
         self.matchoutput(err,
                          "Unauthorized access attempt by %s to permission on "
                          "/principal/%s%%40%s/role.  %s" %
-                         (principal, user, realm, message),
+                         (principal, self.user, self.realm, message),
                          command)
 
     def test_autherror_900(self):

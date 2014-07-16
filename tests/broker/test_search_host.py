@@ -92,15 +92,13 @@ class TestSearchHost(TestBrokerCommand):
                          command)
 
     def testsandboxavailable(self):
-        user = self.config.get("unittest", "user")
-        command = ["search_host", "--sandbox=%s/utsandbox" % user]
+        command = ["search_host", "--sandbox=%s/utsandbox" % self.user]
         out = self.commandtest(command)
         self.matchoutput(out, "server1.aqd-unittest.ms.com", command)
         self.matchclean(out, "unittest00.one-nyp.ms.com", command)
 
     def testsandboxowner(self):
-        user = self.config.get("unittest", "user")
-        command = ["search_host", "--sandbox_owner=%s" % user]
+        command = ["search_host", "--sandbox_author=%s" % self.user]
         out = self.commandtest(command)
         self.matchoutput(out, "server1.aqd-unittest.ms.com", command)
         self.matchclean(out, "unittest00.one-nyp.ms.com", command)

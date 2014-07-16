@@ -16,9 +16,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """ A collection of testing utilities for the AQDB package """
+
 import os
 import sys
-import inspect
 
 def load_classpath():
     """ Sets up the class path for aquilon """
@@ -35,26 +35,3 @@ def load_classpath():
 
     import depends
     import aquilon.aqdb.depends
-
-def commit(sess):
-    try:
-        sess.commit()
-    except Exception as e:
-        sess.rollback()
-        raise e
-
-def add(sess, obj):
-    try:
-        sess.add(obj)
-    except Exception as e:
-        sess.rollback()
-        raise e
-
-def create(sess, obj):
-    add(sess, obj)
-    commit(sess)
-
-def func_name():
-    """ return the calling file and function name for useful assert messages """
-    frame = inspect.stack()[1]
-    return '%s.%s()' % (os.path.basename(frame[1]).rstrip('.py'), frame[3])

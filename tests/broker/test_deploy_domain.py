@@ -48,9 +48,8 @@ class TestDeployDomain(TestBrokerCommand):
         self.matchoutput(out, "Reason: Test reason", command)
         self.matchclean(out, "Justification:", command)
 
-        author_name = self.config.get("broker", "user")
         author_email = self.config.get("broker", "git_author_email")
-        self.matchoutput(out, "Author: %s <%s>" % (author_name, author_email),
+        self.matchoutput(out, "Author: %s <%s>" % (self.user, author_email),
                          command)
 
     def test_120_deployfail(self):

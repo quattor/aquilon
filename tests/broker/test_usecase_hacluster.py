@@ -30,18 +30,16 @@ from brokertest import TestBrokerCommand
 class TestUsecaseHACluster(TestBrokerCommand):
 
     def test_100_add_cluster1(self):
-        user = self.config.get("unittest", "user")
         command = ["add", "cluster", "--cluster", "hacl1", "--campus", "ny",
                    "--down_hosts_threshold", 0, "--archetype", "hacluster",
-                   "--sandbox", "%s/utsandbox" % user,
+                   "--sandbox", "%s/utsandbox" % self.user,
                    "--personality", "vcs-msvcs"]
         self.successtest(command)
 
     def test_100_add_cluster2(self):
-        user = self.config.get("unittest", "user")
         command = ["add", "cluster", "--cluster", "hacl2", "--campus", "ny",
                    "--down_hosts_threshold", 0, "--archetype", "hacluster",
-                   "--sandbox", "%s/utsandbox" % user,
+                   "--sandbox", "%s/utsandbox" % self.user,
                    "--personality", "vcs-msvcs"]
         self.successtest(command)
 

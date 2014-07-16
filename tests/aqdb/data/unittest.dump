@@ -52,6 +52,7 @@ Role(name="unixops_l2")
 Role(name="winops")
 
 UserPrincipal(name="cdb", role=Role(name="aqd_admin"), realm=Realm(name="example.realm"))
+UserPrincipal(name="otheruser", role=Role(name="nobody"), realm=Realm(name="example.realm"))
 
 DnsEnvironment(name="internal")
 DnsEnvironment(name="external")
@@ -65,6 +66,8 @@ DnsDomain(name="msad.ms.com", restricted=True)
 DnsDomain(name="one-nyp.ms.com")
 DnsDomain(name="the-ha.ms.com")
 DnsDomain(name="new-york.ms.com")
+
+User(name="otheruser", uid=1001, gid=1001, full_name="Other user", home_dir="/tmp")
 
 Domain(name="prod", owner=UserPrincipal(name="cdb"),
        compiler="/ms/dist/elfms/PROJ/panc/prod/lib/panc.jar",
@@ -80,6 +83,10 @@ Domain(name="break-consistency-domain", owner=UserPrincipal(name="cdb"),
 Sandbox(name="break-consistency-sandbox", owner=UserPrincipal(name="cdb"),
 	compiler="/ms/dist/elfms/PROJ/panc/prod/lib/panc.jar",
         comments="Cause consistency checker to fail.",
+	base_commit='0000000000')
+Sandbox(name="othersandbox", owner=UserPrincipal(name="otheruser"),
+	compiler="/ms/dist/elfms/PROJ/panc/prod/lib/panc.jar",
+        comments="Test if owner is deleted",
 	base_commit='0000000000')
 
 Archetype(name="aquilon", is_compileable=True)
@@ -186,6 +193,3 @@ MachineSpecs(model=Model(name="f5_model"),
              cpu=Cpu(name="f5_cpu"), cpu_quantity=0, memory=0,
              controller_type="scsi", disk_type="local", disk_capacity=0,
 	     nic_count=0, nic_model=@generic_nic)
-
-User(name="testuser3", uid=2361, gid=654, full_name="test user", home_dir="/tmp")
-User(name="testuser4", uid=2362, gid=654, full_name="test user", home_dir="/tmp")

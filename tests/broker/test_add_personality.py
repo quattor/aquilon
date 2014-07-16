@@ -78,8 +78,7 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
         self.setup_personality("aquilon", "eaitools")
 
     def testverifyutpersonalitynothreshold(self):
-        user = self.config.get("unittest", "user")
-        command = ["show_personality", "--sandbox=%s/changetest1" % user,
+        command = ["show_personality", "--sandbox=%s/changetest1" % self.user,
                    "--archetype=aquilon", "--personality=utpersonality/dev"]
         out = self.commandtest(command)
         self.matchoutput(out, "Personality: utpersonality/dev Archetype: aquilon",
@@ -97,8 +96,7 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
         self.matchoutput(out, "Used by GRN: %s" % GRN, command)
 
     def testverifyshowpersonalityallnothreshold(self):
-        user = self.config.get("unittest", "user")
-        command = "show_personality --all --sandbox %s/changetest1" % user
+        command = "show_personality --all --sandbox %s/changetest1" % self.user
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Personality: utpersonality/dev Archetype: aquilon",
                          command)
@@ -205,8 +203,7 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
                     "Found a threshold defined when none expected.")
 
     def testverifyshowutpersonalityprotonothreshold(self):
-        user = self.config.get("unittest", "user")
-        command = ["show_personality", "--sandbox=%s/changetest1" % user,
+        command = ["show_personality", "--sandbox=%s/changetest1" % self.user,
                    "--archetype=aquilon", "--personality=utpersonality/dev",
                    "--format=proto"]
         out = self.commandtest(command)
@@ -221,9 +218,8 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
         self.failUnlessEqual(personality.owner_eonid, self.grns[GRN])
 
     def testverifyshowpersonalityallprotonothreshold(self):
-        user = self.config.get("unittest", "user")
         command = ["show_personality", "--all",
-                   "--sandbox=%s/changetest1" % user, "--format=proto"]
+                   "--sandbox=%s/changetest1" % self.user, "--format=proto"]
         out = self.commandtest(command)
         pl = self.parse_personality_msg(out)
         archetypes = {}

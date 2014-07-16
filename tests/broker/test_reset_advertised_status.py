@@ -195,7 +195,6 @@ class TestResetAdvertisedStatus(TestBrokerCommand):
                               "--buildstatus", "ready"])
 
     def test_150_list_limit(self):
-        user = self.config.get("unittest", "user")
         hostlimit = self.config.getint("broker", "reset_advertised_status_max_list_size")
         hosts = []
         for i in range(1, hostlimit + 5):

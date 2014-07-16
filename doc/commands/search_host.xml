@@ -54,10 +54,10 @@
 		<arg choice="opt"><option>--member_cluster_share <replaceable>NAME</replaceable></option></arg>
 		<group choice="opt">
 		    <arg choice="plain"><option>--domain <replaceable>DOMAIN</replaceable></option></arg>
-		    <arg choice="plain"><option>--sandbox <replaceable>PRINCIPAL</replaceable>/<replaceable>SANDBOX</replaceable></option></arg>
+		    <arg choice="plain"><option>--sandbox <replaceable>USER</replaceable>/<replaceable>SANDBOX</replaceable></option></arg>
 		    <arg choice="plain"><option>--branch <replaceable>NAME</replaceable></option></arg>
+		    <arg choice="plain"><option>--sandbox_author <replaceable>USER</replaceable></option></arg>
 		</group>
-		<arg choice="opt"><option>--sandbox_owner <replaceable>PRINCIPAL</replaceable></option></arg>
 		<arg choice="opt"><option>--server_of_service <replaceable>NAME</replaceable></option></arg>
 		<arg choice="opt"><option>--server_of_instance <replaceable>NAME</replaceable></option></arg>
 		<arg choice="opt"><option>--grn <replaceable>GRN</replaceable></option></arg>
@@ -344,23 +344,24 @@
 	    <varlistentry>
 		<term>
 		    <option>--domain <replaceable>DOMAIN</replaceable></option>,
-		    <option>--sandbox <replaceable>PRINCIPAL</replaceable>/<replaceable>SANDBOX</replaceable></option>,
+		    <option>--sandbox <replaceable>USER</replaceable>/<replaceable>SANDBOX</replaceable></option>,
 		    <option>--branch <replaceable>NAME</replaceable></option>
 		</term>
 		<listitem>
 		    <para>
 			Look for hosts that are in the given template branch (domain or sandbox). The <option>--branch</option>
-			variant matches both domains and sandboxes, and in the case of sandboxes, the author of the sandbox is also ignored.
+			variant matches both domains and sandboxes.
 		    </para>
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
 		<term>
-		    <option>--sandbox_owner <replaceable>PRINCIPAL</replaceable></option>
+		    <option>--sandbox_author <replaceable>USER</replaceable></option>
 		</term>
 		<listitem>
 		    <para>
-			Look for hosts that are in any sandbox owned by <replaceable>PRINCIPAL</replaceable>.
+			Look for hosts that are in any sandbox authored by (the checked out copy of the branch is
+			owned by) <replaceable>USER</replaceable>.
 		    </para>
 		</listitem>
 	    </varlistentry>
