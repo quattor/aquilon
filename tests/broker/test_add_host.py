@@ -300,6 +300,29 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
         self.noouttest(command)
         self.dsdb_verify()
 
+    def test_170_add_cardsmachine(self):
+        net = self.net.allocate_network(self, "cards_net", 28, "unknown",
+                                        "building", "cards")
+        self.create_machine("cardsmachine", "hs21-8853l5u", rack="cards1",
+                            eth0_mac=net.usable[0].mac)
+
+    def test_171_host_prefix_no_domain(self):
+        command = ["add_host", "--machine", "cardsmachine", "--domain", "unittest",
+                   "--archetype", "aquilon", "--personality", "inventory",
+                   "--osname", "linux", "--osversion", "5.0.2-x86_64",
+                   "--grn", "grn:/ms/ei/aquilon/aqd",
+                   "--ip", self.net["cards_net"].usable[0],
+                   "--prefix", "cardshost"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "There is no default DNS domain configured for "
+                         "rack cards1.  Please specify --dns_domain.",
+                         command)
+
+    def test_172_cleanup(self):
+        self.noouttest(["del_machine", "--machine", "cardsmachine"])
+        self.net.dispose_network(self, "cards_net")
+
     def test_200_machine_reuse(self):
         ip = self.net["unknown0"].usable[-1]
         command = ["add", "host", "--hostname", "used-already.one-nyp.ms.com",

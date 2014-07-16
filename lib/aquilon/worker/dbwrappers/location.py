@@ -71,3 +71,17 @@ def add_location(session, cls, name, parent, **kwargs):
     dbloc = cls(name=name, parent=parent, **kwargs)
     session.add(dbloc)
     return dbloc
+
+
+def get_default_dns_domain(dblocation):
+    locations = dblocation.parents[:]
+    locations.append(dblocation)
+    locations.reverse()
+    try:
+        return next(loc.default_dns_domain
+                    for loc in locations
+                    if loc.default_dns_domain)
+    except StopIteration:
+        raise ArgumentError("There is no default DNS domain configured for "
+                            "{0:l}.  Please specify --dns_domain."
+                            .format(dblocation))

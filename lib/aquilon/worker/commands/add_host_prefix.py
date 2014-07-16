@@ -20,6 +20,7 @@
 from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.commands.add_host import CommandAddHost
+from aquilon.worker.dbwrappers.location import get_default_dns_domain
 from aquilon.worker.dbwrappers.search import search_next
 from aquilon.aqdb.model import Machine, DnsDomain, Fqdn
 from aquilon.aqdb.column_types import AqStr
@@ -36,16 +37,7 @@ class CommandAddHostPrefix(CommandAddHost):
                                                 compel=True)
         else:
             dbmachine = Machine.get_unique(session, machine, compel=True)
-            dbdns_domain = None
-            loc = dbmachine.location
-            while loc and not dbdns_domain:
-                dbdns_domain = loc.default_dns_domain
-                loc = loc.parent
-
-            if not dbdns_domain:
-                raise ArgumentError("There is no default DNS domain configured "
-                                    "for the machine's location. Please "
-                                    "specify --dns_domain.")
+            dbdns_domain = get_default_dns_domain(dbmachine.location)
 
         # Lock the DNS domain to prevent the same name generated for
         # simultaneous requests
