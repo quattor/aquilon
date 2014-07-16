@@ -24,17 +24,16 @@ from sqlalchemy.orm.session import object_session
 from aquilon.exceptions_ import ArgumentError, ProcessException
 from aquilon.aqdb.model import (Domain, Sandbox, Branch, Host, Cluster,
                                 Archetype, Personality)
+from aquilon.utils import remove_dir, validate_template_name
 from aquilon.worker.dbwrappers.user_principal import get_user_principal
 from aquilon.worker.processes import run_git
 from aquilon.worker.locks import CompileKey
 from aquilon.worker.templates.domain import TemplateDomain
-from aquilon.utils import remove_dir
 
 VERSION_RE = re.compile(r'^[-_.a-zA-Z0-9]*$')
 
 
-def get_branch_and_author(session, logger,
-                          domain=None, sandbox=None, branch=None,
+def get_branch_and_author(session, domain=None, sandbox=None, branch=None,
                           compel=False):
     dbbranch = None
     dbauthor = None
@@ -77,6 +76,32 @@ def get_branch_dependencies(dbbranch):
         ret.append("%s is tracked by %s." %
                    (format(dbbranch), [str(t.name) for t in dbbranch.trackers]))
     return ret
+
+
+def add_branch(session, config, dbuser, cls_, branch, **arguments):
+    if cls_ == Domain:
+        label = "--domain"
+    else:
+        label = "--sandbox"
+    validate_template_name(label, branch)
+
+    try:
+        run_git(["check-ref-format", "--branch", branch])
+    except ProcessException:
+        raise ArgumentError("'%s' is not a valid git branch name." % branch)
+
+    Branch.get_unique(session, branch, preclude=True)
+
+    compiler = config.get("panc", "pan_compiler")
+    dbbranch = cls_(name=branch, owner=dbuser, compiler=compiler, **arguments)
+
+    if config.has_option("broker", "trash_branch"):
+        trash_branch = config.get("broker", "trash_branch")
+        if dbbranch.name == trash_branch:
+            raise ArgumentError("The branch name %s is reserved." % branch)
+
+    session.add(dbbranch)
+    return dbbranch
 
 
 def remove_branch(config, logger, dbbranch):

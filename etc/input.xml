@@ -2307,6 +2307,7 @@
          <option name="change_manager" type="boolean">Require a change manager for the domain</option>
          <option name="allow_manage" reverse="disallow_manage" type="boolean">Control managing hosts to the domain</option>
          <option name="profile_formats" type="string">Profile formats to generate</option>
+         <option name="archived" type="boolean">Mark the domain as archived</option>
       </optgroup>
       <transport method="post" path="domain/%(domain)s" />
    </command>
@@ -2317,6 +2318,10 @@
       command to reassign those hosts to other domains.
       <optgroup name="del_domain_options" mandatory="True" fields="all">
          <option name="domain" type="string">Name of the domain to be deleted</option>
+      </optgroup>
+      <optgroup name="del_domain_optional" mandatory="False">
+         <option name="justification" type="string">Extra authorization tokens (e.g. TCM number) to validate the request</option>
+         <option name="reason" type="string">Reason for the operation</option>
       </optgroup>
       <transport method="delete" path="domain/%(domain)s" />
    </command>
@@ -2387,9 +2392,8 @@
       <optgroup name="deploy optional" mandatory="False">
          <option name="sync" type="boolean" default="True">Automatically sync tracking domains</option>
          <option name="dryrun" type="boolean">Attempt a test merge and run tests without saving the merge result</option>
-         <option name="comments" type="string">Comments to include in the merge commit</option>
          <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
-         <option name="reason" type="string">String to be specified if justification='emergency'</option>
+         <option name="reason" type="string">Reason of the deployment to record in the commit log. Mandatory if justification is emergency</option>
       </optgroup>
       <transport method="post" path="command/deploy" />
    </command>

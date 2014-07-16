@@ -59,10 +59,9 @@ class CommandAddMetaCluster(BrokerCommand):
         if not domain and not sandbox:
             domain = self.config.get(section, "host_domain")
 
-        (dbbranch, dbauthor) = get_branch_and_author(session, logger,
-                                                     domain=domain,
-                                                     sandbox=sandbox,
-                                                     compel=False)
+        dbbranch, dbauthor = get_branch_and_author(session, domain=domain,
+                                                   sandbox=sandbox,
+                                                   compel=False)
 
         dbloc = get_location(session, **arguments)
 

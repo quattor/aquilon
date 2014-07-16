@@ -69,10 +69,9 @@ class CommandSearchCluster(BrokerCommand):
         # objects, but not when we query just the names. Tell the DB to do so.
         q = q.distinct()
 
-        (dbbranch, dbauthor) = get_branch_and_author(session, logger,
-                                                     domain=domain,
-                                                     sandbox=sandbox,
-                                                     branch=branch)
+        dbbranch, dbauthor = get_branch_and_author(session, domain=domain,
+                                                   sandbox=sandbox,
+                                                   branch=branch)
         if dbbranch:
             q = q.filter_by(branch=dbbranch)
         if dbauthor:

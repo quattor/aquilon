@@ -43,10 +43,8 @@ def create_host(session, logger, config, dbhw, dbarchetype, domain=None,
     if not domain and not sandbox:
         domain = config.get(section, "host_domain")
 
-    (dbbranch, dbauthor) = get_branch_and_author(session, logger,
-                                                 domain=domain,
-                                                 sandbox=sandbox,
-                                                 compel=True)
+    dbbranch, dbauthor = get_branch_and_author(session, domain=domain,
+                                               sandbox=sandbox, compel=True)
 
     # Check if the branch allows hosts to be managed
     if hasattr(dbbranch, "allow_manage") and not dbbranch.allow_manage:

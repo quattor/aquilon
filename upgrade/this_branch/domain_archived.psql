@@ -1,0 +1,3 @@
+ALTER TABLE domain ADD archived BOOLEAN;
+UPDATE domain SET archived = 'f';
+ALTER TABLE domain ALTER archived SET NOT NULL;

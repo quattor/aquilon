@@ -30,7 +30,7 @@ class TestDeployDomain(TestBrokerCommand):
     def test_100_deploychangetest1domain(self):
         self.successtest(["deploy", "--source", "changetest1",
                           "--target", "deployable",
-                          "--comments", "Test comment"])
+                          "--reason", "Test reason"])
 
     def test_110_verifydeploy(self):
         template = self.find_template("aquilon", "archetype", "base",
@@ -45,7 +45,8 @@ class TestDeployDomain(TestBrokerCommand):
         (out, err) = self.gitcommand(command, cwd=kingdir)
         self.matchoutput(out, "User:", command)
         self.matchoutput(out, "Request ID:", command)
-        self.matchoutput(out, "Comments: Test comment", command)
+        self.matchoutput(out, "Reason: Test reason", command)
+        self.matchclean(out, "Justification:", command)
 
         author_name = self.config.get("broker", "user")
         author_email = self.config.get("broker", "git_author_email")
@@ -71,7 +72,7 @@ class TestDeployDomain(TestBrokerCommand):
         self.successtest(["deploy", "--source", "changetest1",
                           "--target", "prod", "--nosync",
                           "--justification", "tcm=12345678",
-                          "--comments", "Test comment 2"])
+                          "--reason", "Just because"])
 
     def test_200_verifynosync(self):
         # The change should be in prod...
@@ -97,7 +98,7 @@ class TestDeployDomain(TestBrokerCommand):
         command = ["log", "--no-color", "-n", "1", "prod"]
         (out, err) = self.gitcommand(command, cwd=kingdir)
         self.matchoutput(out, "Justification: tcm=12345678", command)
-        self.matchoutput(out, "Comments: Test comment 2", command)
+        self.matchoutput(out, "Reason: Just because", command)
 
         # ... but not in ut-prod
         command = ["log", "--no-color", "-n", "1", "ut-prod"]

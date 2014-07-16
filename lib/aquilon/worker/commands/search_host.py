@@ -145,10 +145,9 @@ class CommandSearchHost(BrokerCommand):
                                      PriFqdn.dns_domain == dbdns_domain))
             q = q.reset_joinpoint()
 
-        (dbbranch, dbauthor) = get_branch_and_author(session, logger,
-                                                     domain=domain,
-                                                     sandbox=sandbox,
-                                                     branch=branch)
+        dbbranch, dbauthor = get_branch_and_author(session, domain=domain,
+                                                   sandbox=sandbox,
+                                                   branch=branch)
         if sandbox_owner:
             dbauthor = get_user_principal(session, sandbox_owner)
 

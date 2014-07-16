@@ -18,13 +18,12 @@
 
 import os
 
-from aquilon.exceptions_ import (AuthorizationException, ArgumentError,
-                                 ProcessException)
+from aquilon.exceptions_ import AuthorizationException, ArgumentError
 from aquilon.aqdb.model import Sandbox, Branch
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.commands.get import CommandGet
+from aquilon.worker.dbwrappers.branch import add_branch
 from aquilon.worker.processes import run_git
-from aquilon.utils import validate_template_name
 
 
 class CommandAddSandbox(CommandGet):
@@ -42,16 +41,6 @@ class CommandAddSandbox(CommandGet):
                                          "authenticated connection.")
 
         sandbox = self.force_my_sandbox(session, dbuser, sandbox)
-
-        # See `git check-ref-format --help` for naming restrictions.
-        # We want to layer a few extra restrictions on top of that...
-        validate_template_name("--sandbox", sandbox)
-        try:
-            run_git(["check-ref-format", "--branch", sandbox])
-        except ProcessException:
-            raise ArgumentError("'%s' is not a valid git branch name." % sandbox)
-
-        Branch.get_unique(session, sandbox, preclude=True)
 
         # Check that the user has cleared up a directory of the same
         # name; if this is not the case the branch may be created (in git)
@@ -72,16 +61,15 @@ class CommandAddSandbox(CommandGet):
         base_commit = run_git(["show-ref", "--hash", "refs/heads/" +
                                dbstart.name], logger=logger, path=kingdir)
 
-        compiler = self.config.get("panc", "pan_compiler")
-        dbsandbox = Sandbox(name=sandbox, owner=dbuser, compiler=compiler,
-                            base_commit=base_commit, comments=comments)
-        session.add(dbsandbox)
+        dbsandbox = add_branch(session, self.config, dbuser, Sandbox, sandbox,
+                               base_commit=base_commit, comments=comments)
         session.flush()
 
         # Currently this will fail if the branch already exists...
         # That seems like the right behavior.  It's an internal
         # consistency issue that would need to be addressed explicitly.
-        run_git(["branch", sandbox, dbstart.name], logger=logger, path=kingdir)
+        run_git(["branch", dbsandbox.name, dbstart.name],
+                logger=logger, path=kingdir)
 
         # If we arrive there the above "git branch" command has succeeded;
         # therefore we should comit the changes to the database.  If this is
@@ -94,4 +82,4 @@ class CommandAddSandbox(CommandGet):
             return []
 
         return CommandGet.render(self, session=session, logger=logger,
-                                 dbuser=dbuser, sandbox=sandbox)
+                                 dbuser=dbuser, sandbox=dbsandbox.name)

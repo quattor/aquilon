@@ -35,10 +35,8 @@ class CommandCompile(BrokerCommand):
     def render(self, session, logger, domain, sandbox,
                pancinclude, pancexclude, pancdebug, cleandeps,
                **arguments):
-        (dbdomain, dbauthor) = get_branch_and_author(session, logger,
-                                                     domain=domain,
-                                                     sandbox=sandbox,
-                                                     compel=True)
+        dbdomain, dbauthor = get_branch_and_author(session, domain=domain,
+                                                   sandbox=sandbox, compel=True)
 
         # Grab a shared lock on personalities and services used by the domain.
         # Object templates (hosts, clusters) are protected by the domain lock.

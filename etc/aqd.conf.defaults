@@ -157,6 +157,7 @@ server_notifications =
 client_notifications = yes
 sharedata = /ms/dist/storage/etc/nasobjects.cdb
 default_domain_start = prod
+trash_branch = trash
 authorization_error = Please contact an administrator for access.
 windows_host_info = /ms/dist/aquilon/PROJ/datawarehouse/dumpv3/machines.db
 # See comments in aquilon.worker.resources.set_thread_pool_size

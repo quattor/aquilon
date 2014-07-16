@@ -33,26 +33,11 @@ class TestMergeConflicts(TestBrokerCommand):
     def test_000_addchangetest3sandbox(self):
         self.successtest(["add", "sandbox", "--sandbox", "changetest3"])
 
-    def test_000_verifyaddchangetest3sandbox(self):
-        command = "show sandbox --sandbox changetest3"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Sandbox: changetest3", command)
-
     def test_000_addchangetest4sandbox(self):
         self.successtest(["add", "sandbox", "--sandbox", "changetest4"])
 
-    def test_000_verifyaddchangetest4sandbox(self):
-        command = "show sandbox --sandbox changetest4"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Sandbox: changetest4", command)
-
     def test_000_addchangetargetdomain(self):
         self.successtest(["add", "domain", "--domain", "changetarget"])
-
-    def test_000_verifyaddchangetargetdomain(self):
-        command = "show domain --domain changetarget"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Domain: changetarget", command)
 
     def test_001_clearchangetest3sandbox(self):
         p = Popen(("/bin/rm", "-rf",
@@ -83,15 +68,6 @@ class TestMergeConflicts(TestBrokerCommand):
     def test_001_trackchangetarget(self):
         self.commandtest(["add_domain", "--domain", "changetarget-tracker",
                           "--track", "changetarget"])
-
-    def test_002_tracktracker(self):
-        command = ["add_domain", "--domain=doubletracker",
-                   "--track=changetarget-tracker"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out,
-                         "Cannot nest tracking.  Try tracking "
-                         "domain changetarget directly.",
-                         command)
 
     def test_002_makeconflictingchange(self):
         sandboxdir = os.path.join(self.sandboxdir, "changetest3")
@@ -356,7 +332,8 @@ class TestMergeConflicts(TestBrokerCommand):
         self.notfoundtest(command.split(" "))
 
     def test_024_delchangetarget(self):
-        command = "del domain --domain changetarget"
+        self.noouttest(["update_domain", "--domain=changetarget", "--archived"])
+        command = "del domain --domain changetarget --justification=tcm=123456"
         self.successtest(command.split(" "))
         self.failIf(os.path.exists(os.path.join(
             self.config.get("broker", "domainsdir"), "changetest")))

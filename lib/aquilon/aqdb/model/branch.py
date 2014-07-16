@@ -105,6 +105,9 @@ class Domain(Branch):
     allow_manage = Column(Boolean(name="%s_allow_manage_ck" % _DMN),
                           nullable=False, default=True)
 
+    archived = Column(Boolean(name="%s_archived_ck" % _DMN),
+                      nullable=False, default=False)
+
     tracked_branch = relation(Branch, foreign_keys=tracked_branch_id,
                               backref=backref('trackers'))
 
