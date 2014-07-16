@@ -17,7 +17,7 @@
 """Contains the logic for `aq map grn`."""
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import Personality
+from aquilon.aqdb.model import Personality, Cluster
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.host import (hostname_to_host, hostlist_to_hosts,
                                             check_hostlist_size)
@@ -28,8 +28,8 @@ class CommandUnMapGrnClearAll(BrokerCommand):
 
     required_parameters = ["target"]
 
-    def render(self, session, logger, target, hostname, list, personality,
-               archetype, **arguments):
+    def render(self, session, logger, target, hostname, list, membersof,
+               personality, archetype, **arguments):
 
         target_type = "personality" if personality else "host"
 
@@ -38,6 +38,9 @@ class CommandUnMapGrnClearAll(BrokerCommand):
         elif list:
             check_hostlist_size(self.command, self.config, list)
             objs = hostlist_to_hosts(session, list)
+        elif membersof:
+            dbcluster = Cluster.get_unique(session, membersof, compel=True)
+            objs = dbcluster.hosts
         elif personality:
             objs = [Personality.get_unique(session, name=personality,
                                            archetype=archetype, compel=True)]

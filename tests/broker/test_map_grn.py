@@ -354,6 +354,46 @@ class TestMapGrn(VerifyGrnsMixin, PersonalityTestMixin, TestBrokerCommand):
         self.matchclean(out, "^  Used by GRN", command)
 
 
+    def test_700_map_cluster(self):
+        cluster = "utecl13"
+        for grn in self.grn_list:
+            command = ["map", "grn", "--grn", grn, "--membersof", cluster,
+                       "--target", "esp"]
+            self.statustest(command)
+
+        command = ["search_host", "--cluster", cluster]
+	hosts = sorted(self.commandtest(command).splitlines())
+
+        for host in hosts:
+	    command = ["show_host", "--hostname", host, "--grns"]
+            out = self.commandtest(command)
+            self.matchoutput(out, "Used by GRN: grn:/ms/ei/aquilon/unittest [target: esp]", command)
+            self.matchoutput(out, "Used by GRN: grn:/ms/ei/aquilon/aqd [target: esp]", command)
+
+
+    def test_701_unmap_cluster(self):
+        cluster = "utecl13"
+        command = ["unmap", "grn", "--grn", self.grn_list[0], "--membersof", cluster,
+                   "--target", "esp"]
+        self.statustest(command)
+
+        command = ["search_host", "--cluster", cluster]
+	hosts = sorted(self.commandtest(command).splitlines())
+
+        for host in hosts:
+	    command = ["show_host", "--hostname", host, "--grns"]
+            out = self.commandtest(command)
+            self.matchoutput(out, "Used by GRN: grn:/ms/ei/aquilon/unittest [target: esp]", command)
+            self.matchclean(out, "Used by GRN: grn:/ms/ei/aquilon/aqd", command)
+
+        command = ["unmap", "grn", "--clearall", "--membersof", cluster, "--target", "esp"]
+        self.statustest(command)
+        for host in hosts:
+            command = ["show_host", "--hostname", host, "--grns"]
+            out = self.commandtest(command)
+            self.matchoutput(out, "Used by GRN: grn:/ms/ei/aquilon/aqd [target: esp] [inherited]", command)
+
+
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestMapGrn)
     unittest.TextTestRunner(verbosity=2).run(suite)
