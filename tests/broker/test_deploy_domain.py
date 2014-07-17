@@ -17,6 +17,9 @@
 # limitations under the License.
 """Module for testing the deploy domain command."""
 
+import os.path
+from shutil import rmtree
+
 if __name__ == "__main__":
     import utils
     utils.import_depends()
@@ -104,7 +107,7 @@ class TestDeployDomain(TestBrokerCommand):
         (out, err) = self.gitcommand(command, cwd=kingdir)
         self.matchclean(out, "tcm=12345678", command)
 
-    def test_300_addadvanced(self):
+    def test_300_add_advanced(self):
         self.successtest(["add", "sandbox", "--sandbox", "advanced",
                           "--start", "prod"])
 
@@ -125,6 +128,10 @@ class TestDeployDomain(TestBrokerCommand):
         command = ["deploy", "--source", "advanced", "--target", "leftbehind"]
         self.successtest(command)
 
+    def test_340_cleanup_advanced(self):
+        self.successtest(["del_sandbox", "--sandbox", "advanced"])
+        sandboxdir = os.path.join(self.sandboxdir, "advanced")
+        rmtree(sandboxdir, ignore_errors=True)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDeployDomain)

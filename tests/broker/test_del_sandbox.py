@@ -17,8 +17,8 @@
 # limitations under the License.
 """Module for testing the del sandbox command."""
 
-
 import os
+from shutil import rmtree
 
 if __name__ == "__main__":
     import utils
@@ -36,6 +36,7 @@ class TestDelSandbox(TestBrokerCommand):
         self.assertEmptyOut(out, command)
         sandboxdir = os.path.join(self.sandboxdir, "utsandbox")
         self.matchoutput(err, "please `rm -rf %s`" % sandboxdir, command)
+        rmtree(sandboxdir, ignore_errors=True)
 
     def testverifydelutsandbox(self):
         command = "show sandbox --sandbox utsandbox"
@@ -47,6 +48,7 @@ class TestDelSandbox(TestBrokerCommand):
         self.assertEmptyOut(out, command)
         sandboxdir = os.path.join(self.sandboxdir, "changetest1")
         self.matchoutput(err, "please `rm -rf %s`" % sandboxdir, command)
+        rmtree(sandboxdir, ignore_errors=True)
 
     def testverifydelchangetest1sandbox(self):
         command = "show sandbox --sandbox changetest1"
@@ -72,6 +74,7 @@ class TestDelSandbox(TestBrokerCommand):
         self.matchoutput(err,
                          "No aqdb record for sandbox changetest2 was found",
                          command)
+        rmtree(sandboxdir, ignore_errors=True)
 
     def testverifydelchangetest2sandbox(self):
         command = "show sandbox --sandbox changetest2"
@@ -83,6 +86,7 @@ class TestDelSandbox(TestBrokerCommand):
         self.assertEmptyOut(out, command)
         sandboxdir = os.path.join(self.sandboxdir, "camelcasetest1")
         self.matchoutput(err, "please `rm -rf %s`" % sandboxdir, command)
+        rmtree(sandboxdir, ignore_errors=True)
 
     def testdelcamelcasetest2sandbox(self):
         command = "del sandbox --sandbox camelcasetest2"
@@ -90,6 +94,7 @@ class TestDelSandbox(TestBrokerCommand):
         self.assertEmptyOut(out, command)
         sandboxdir = os.path.join(self.sandboxdir, "camelcasetest2")
         self.matchoutput(err, "please `rm -rf %s`" % sandboxdir, command)
+        rmtree(sandboxdir, ignore_errors=True)
 
     def testdelnonexisting(self):
         command = "del sandbox --sandbox sandbox-does-not-exist"
@@ -104,7 +109,6 @@ class TestDelSandbox(TestBrokerCommand):
                          "Not Found: No aqdb record for sandbox "
                          "sandbox-does-not-exist was found",
                          command)
-
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelSandbox)

@@ -21,6 +21,7 @@ import os
 import gzip
 from cStringIO import StringIO
 from cPickle import Pickler, Unpickler
+from shutil import rmtree
 from subprocess import Popen, PIPE
 from datetime import datetime
 import time
@@ -182,6 +183,9 @@ class TestCompile(VerifyNotificationsMixin, TestBrokerCommand):
         self.successtest(command)
         command = ['compile', '--hostname=unittest02.one-nyp.ms.com']
         self.successtest(command)
+        self.statustest(["del_sandbox", "--sandbox", "out_of_date"])
+        sandboxdir = os.path.join(self.sandboxdir, "out_of_date")
+        rmtree(sandboxdir, ignore_errors=True)
 
     def test_500_adddebug(self):
         sandboxdir = os.path.join(self.sandboxdir, "utsandbox")
