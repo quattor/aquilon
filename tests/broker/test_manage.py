@@ -27,68 +27,18 @@ from brokertest import TestBrokerCommand
 
 class TestManage(TestBrokerCommand):
 
-    def testmanageunittest02(self):
+    def test_100_manage_unittest02(self):
+        user = self.config.get("unittest", "user")
         self.verify_buildfiles("unittest", "unittest02.one-nyp.ms.com",
                                want_exist=True)
-        user = self.config.get("unittest", "user")
         # we are using --force to bypass checks because the source domain unittest
         # latest commit does not exist in template-king
         self.noouttest(["manage", "--hostname", "unittest02.one-nyp.ms.com",
                         "--sandbox", "%s/changetest1" % user, "--force"])
         self.verify_buildfiles("unittest", "unittest02.one-nyp.ms.com",
                                want_exist=False)
-        command = ["cat", "--hostname", "unittest02.one-nyp.ms.com"]
-        out = self.commandtest(command)
-        self.matchoutput(out, '"/metadata/template/branch/name" = "changetest1";', command)
-        self.matchoutput(out, '"/metadata/template/branch/type" = "sandbox";', command)
-        self.matchoutput(out, '"/metadata/template/branch/author" = "%s";' % user, command)
 
-    def testmanageunittest02B(self):
-        user = self.config.get("unittest", "user")
-        # we are using --force to bypass checks because the source domain unittest
-        # latest commit does not exist in template-king
-        self.noouttest(["manage", "--hostname", "unittest02.one-nyp.ms.com",
-                        "--sandbox", "%s/changetest1" % user, "--force"])
-        self.verify_buildfiles("unittest", "unittest02.one-nyp.ms.com",
-                               want_exist=False)
-        command = ["cat", "--hostname", "unittest02.one-nyp.ms.com"]
-        out = self.commandtest(command)
-        self.matchoutput(out, '"/metadata/template/branch/name" = "changetest1";', command)
-        self.matchoutput(out, '"/metadata/template/branch/type" = "sandbox";', command)
-        self.matchoutput(out, '"/metadata/template/branch/author" = "%s";' % user, command)
-
-    def testfailmanageunittest02(self):
-        command = ["manage", "--hostname", "unittest02.one-nyp.ms.com",
-                   "--domain", "nomanage"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out,
-                         "Managing objects to domain nomanage is not allowed.",
-                         command)
-
-    def testverifymanageunittest02(self):
-        user = self.config.get("unittest", "user")
-        command = "show host --hostname unittest02.one-nyp.ms.com"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Primary Name: unittest02.one-nyp.ms.com", command)
-        self.matchoutput(out, "Sandbox: %s/changetest1" % user, command)
-
-    def testmanageserver1(self):
-        # we are using --force to bypass checks because the source domain unittest
-        # latest commit does not exist in template-king
-        self.noouttest(["manage", "--hostname", "server1.aqd-unittest.ms.com",
-                        "--domain", "unittest", "--force"])
-        command = ["cat", "--hostname", "server1.aqd-unittest.ms.com"]
-        out = self.commandtest(command)
-        self.matchoutput(out, '"/metadata/template/branch/name" = "unittest";', command)
-        self.matchoutput(out, '"/metadata/template/branch/type" = "domain";', command)
-
-    def testverifymanageserver1(self):
-        command = "show host --hostname server1.aqd-unittest.ms.com"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Primary Name: server1.aqd-unittest.ms.com", command)
-        self.matchoutput(out, "Domain: unittest", command)
-
-    def testverifycleanup(self):
+    def test_101_verify_cleanup(self):
         basedir = self.config.get("broker", "basedir")
         command = [basedir,
                    "-name", "unittest02.one-nyp.ms.com*",
@@ -99,7 +49,50 @@ class TestManage(TestBrokerCommand):
         self.matchclean(" ".join(out), "/unittest/",
                         "find %s" % " ".join(command))
 
-    def testmanageunittest00(self):
+    def test_105_cat_unittest02(self):
+        user = self.config.get("unittest", "user")
+        command = ["cat", "--hostname", "unittest02.one-nyp.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out, '"/metadata/template/branch/name" = "changetest1";', command)
+        self.matchoutput(out, '"/metadata/template/branch/type" = "sandbox";', command)
+        self.matchoutput(out, '"/metadata/template/branch/author" = "%s";' % user, command)
+
+    def test_105_show_unittest02(self):
+        user = self.config.get("unittest", "user")
+        command = "show host --hostname unittest02.one-nyp.ms.com"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Primary Name: unittest02.one-nyp.ms.com", command)
+        self.matchoutput(out, "Sandbox: %s/changetest1" % user, command)
+
+    def test_108_manage_unittest02_again(self):
+        user = self.config.get("unittest", "user")
+        self.noouttest(["manage", "--hostname", "unittest02.one-nyp.ms.com",
+                        "--sandbox", "%s/changetest1" % user, "--force"])
+        self.verify_buildfiles("unittest", "unittest02.one-nyp.ms.com",
+                               want_exist=False)
+        command = ["cat", "--hostname", "unittest02.one-nyp.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out, '"/metadata/template/branch/name" = "changetest1";', command)
+        self.matchoutput(out, '"/metadata/template/branch/type" = "sandbox";', command)
+        self.matchoutput(out, '"/metadata/template/branch/author" = "%s";' % user, command)
+
+    def test_110_manage_server1(self):
+        # we are using --force to bypass checks because the source domain unittest
+        # latest commit does not exist in template-king
+        self.noouttest(["manage", "--hostname", "server1.aqd-unittest.ms.com",
+                        "--domain", "unittest", "--force"])
+        command = ["cat", "--hostname", "server1.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out, '"/metadata/template/branch/name" = "unittest";', command)
+        self.matchoutput(out, '"/metadata/template/branch/type" = "domain";', command)
+
+    def test_115_verify_server1(self):
+        command = "show host --hostname server1.aqd-unittest.ms.com"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Primary Name: server1.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "Domain: unittest", command)
+
+    def test_120_manage_unittest00(self):
         self.verify_buildfiles("unittest", "unittest00.one-nyp.ms.com",
                                want_exist=True)
         user = self.config.get("unittest", "user")
@@ -110,42 +103,14 @@ class TestManage(TestBrokerCommand):
         self.verify_buildfiles("unittest", "unittest00.one-nyp.ms.com",
                                want_exist=False)
 
-    def testverifymanageunittest00(self):
+    def test_125_verify_unittest00(self):
         user = self.config.get("unittest", "user")
         command = "show host --hostname unittest00.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Primary Name: unittest00.one-nyp.ms.com", command)
         self.matchoutput(out, "Sandbox: %s/changetest2" % user, command)
 
-    def testfailmanagevmhost(self):
-        user = self.config.get("unittest", "user")
-        command = ["manage", "--hostname", "evh1.aqd-unittest.ms.com",
-                   "--sandbox", "%s/changetest1" % user]
-        out = self.badrequesttest(command)
-        self.matchoutput(out,
-                         "Cluster nodes must be managed at the cluster level",
-                         command)
-
-    def testfailmanageclusterwithmc(self):
-        user = self.config.get("unittest", "user")
-        # we are using --force to bypass checks because the source domain unittest
-        # latest commit does not exist in template-king
-        command = ["manage", "--cluster", "utecl1",
-                   "--sandbox", "%s/utsandbox" % user, "--force"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out,
-                         "utecl1 is member of metacluster utmc1, it must be "
-                         "managed at metacluster level.", command)
-
-    def testmanagemissingcluster(self):
-        user = self.config.get("unittest", "user")
-        command = ["manage", "--cluster", "cluster-does-not-exist",
-                   "--sandbox", "%s/changetest1" % user]
-        out = self.notfoundtest(command)
-        self.matchoutput(out, "Cluster cluster-does-not-exist not found",
-                         command)
-
-    def testmanagecluster(self):
+    def test_130_manage_utecl1(self):
         # To compile, this needs templates from the unittest domain.
         # This test takes advantage of the fact that those templates
         # started in the utsandbox sandbox.
@@ -173,14 +138,7 @@ class TestManage(TestBrokerCommand):
         for host in hosts:
             self.verify_buildfiles("utsandbox", host, want_exist=True)
 
-    def testfailmanagecluster(self):
-        command = ["manage", "--cluster", "utecl1", "--domain", "nomanage"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out,
-                         "Managing objects to domain nomanage is not allowed.",
-                         command)
-
-    def testverifymanagecluster(self):
+    def test_135_verify_utecl1(self):
         user = self.config.get("unittest", "user")
         command = ["show_esx_cluster", "--cluster=utecl1"]
         out = self.commandtest(command)
@@ -207,19 +165,62 @@ class TestManage(TestBrokerCommand):
                              "Not all utecl1 cluster members (%s) are in "
                              "sandbox utsandbox (%s)." % (members, aligned))
 
-    def testmanagexml(self):
+    def test_140_xml_profiles(self):
         self.noouttest(["manage", "--domain", "unittest-xml", "--force",
                         "--hostname", "unittest20.aqd-unittest.ms.com"])
         self.successtest(["compile", "--hostname", "unittest20.aqd-unittest.ms.com"])
         self.verify_buildfiles("unittest-xml", "unittest20.aqd-unittest.ms.com",
                                xml=True, json=False)
 
-    def testmanagejson(self):
+    def test_145_json_profiles(self):
         self.noouttest(["manage", "--domain", "unittest-json", "--force",
                         "--hostname", "unittest20.aqd-unittest.ms.com"])
         self.successtest(["compile", "--hostname", "unittest20.aqd-unittest.ms.com"])
         self.verify_buildfiles("unittest-json", "unittest20.aqd-unittest.ms.com",
                                xml=False, json=True)
+
+    def test_200_nomanage_host(self):
+        command = ["manage", "--hostname", "unittest02.one-nyp.ms.com",
+                   "--domain", "nomanage"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Managing objects to domain nomanage is not allowed.",
+                         command)
+
+    def test_200_nomanage_cluster(self):
+        command = ["manage", "--cluster", "utecl1", "--domain", "nomanage"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Managing objects to domain nomanage is not allowed.",
+                         command)
+
+    def test_200_manage_cluster_member(self):
+        user = self.config.get("unittest", "user")
+        command = ["manage", "--hostname", "evh1.aqd-unittest.ms.com",
+                   "--sandbox", "%s/changetest1" % user]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Cluster nodes must be managed at the cluster level",
+                         command)
+
+    def test_200_manage_metacluster_member(self):
+        user = self.config.get("unittest", "user")
+        # we are using --force to bypass checks because the source domain unittest
+        # latest commit does not exist in template-king
+        command = ["manage", "--cluster", "utecl1",
+                   "--sandbox", "%s/utsandbox" % user, "--force"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "utecl1 is member of metacluster utmc1, it must be "
+                         "managed at metacluster level.", command)
+
+    def test_200_bad_cluster(self):
+        user = self.config.get("unittest", "user")
+        command = ["manage", "--cluster", "cluster-does-not-exist",
+                   "--sandbox", "%s/changetest1" % user]
+        out = self.notfoundtest(command)
+        self.matchoutput(out, "Cluster cluster-does-not-exist not found",
+                         command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestManage)
