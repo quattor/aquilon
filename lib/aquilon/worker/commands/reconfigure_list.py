@@ -16,6 +16,8 @@
 # limitations under the License.
 """Contains the logic for `aq reconfigure --list`."""
 
+from collections import defaultdict
+
 from aquilon.exceptions_ import (ArgumentError, NotFoundException,
                                  IncompleteError)
 from aquilon.aqdb.model import (Archetype, Personality, OperatingSystem,
@@ -33,52 +35,23 @@ class CommandReconfigureList(BrokerCommand):
 
     required_parameters = ["list"]
 
-    def render(self, session, logger, list, **arguments):
+    def get_hostlist(self, session, list, **arguments):   # pylint: disable=W0613
         check_hostlist_size(self.command, self.config, list)
-        dbhosts = hostlist_to_hosts(session, list)
+        # TODO: eager loading of properties
+        return hostlist_to_hosts(session, list)
 
-        self.reconfigure_list(session, logger, dbhosts, **arguments)
+    def render(self, session, logger, archetype, personality, keepbindings,
+               buildstatus, osname, osversion, grn, eon_id, cleargrn,
+               **arguments):
+        dbhosts = self.get_hostlist(session, **arguments)
 
-    def reconfigure_list(self, session, logger, dbhosts, archetype, personality,
-                         keepbindings, buildstatus, osname, osversion, grn,
-                         eon_id, cleargrn, **arguments):
-        failed = []
-        # Check all the parameters up front.
-        # Some of these could be more intelligent about defaults
-        # (either by checking for unique entries or relying on the list)
-        # - starting simple.
         if archetype:
-            dbarchetype = Archetype.get_unique(session, archetype, compel=True)
-            if dbarchetype.cluster_type is not None:
-                raise ArgumentError("Archetype %s is a cluster archetype" %
-                                    dbarchetype.name)
-            # TODO: Once OS is a first class object this block needs
-            # to check that either OS is also being reset or that the
-            # OS is valid for the new archetype.
+            target_archetype = Archetype.get_unique(session, archetype, compel=True)
+            if target_archetype.cluster_type is not None:
+                raise ArgumentError("{0} is a cluster archetype, it cannot be "
+                                    "used for hosts.".format(target_archetype))
         else:
-            dbarchetype = None
-        if personality:
-            dbpersonality = Personality.get_unique(session, name=personality,
-                                                   archetype=dbarchetype,
-                                                   compel=True)
-        if osname and not osversion:
-            raise ArgumentError("Please specify --osversion for OS %s." %
-                                osname)
-        if osversion:
-            if not osname:
-                raise ArgumentError("Please specify --osname to use with "
-                                    "OS version %s." % osversion)
-            # Linux model names are the same under aurora and aquilon, so
-            # allowing to omit --archetype would not be useful
-            if not archetype:
-                raise ArgumentError("Please specify --archetype for OS "
-                                    "%s, version %s." % (osname, osversion))
-            dbos = OperatingSystem.get_unique(session, name=osname,
-                                              version=osversion,
-                                              archetype=dbarchetype,
-                                              compel=True)
-        else:
-            dbos = None
+            target_archetype = None
 
         if buildstatus:
             dbstatus = HostLifecycle.get_instance(session, buildstatus)
@@ -87,66 +60,86 @@ class CommandReconfigureList(BrokerCommand):
             dbgrn = lookup_grn(session, grn, eon_id, logger=logger,
                                config=self.config)
 
-        # Take a shortcut if there's nothing to do, but only after all the other
-        # parameters have been checked
+        # Take a shortcut if there's nothing to do
         if not dbhosts:
             return
 
         dbbranch, dbauthor = validate_branch_author(dbhosts)
 
-        personalities = {}
-        # Do any final cross-list or dependency checks before entering
-        # the Chooser loop.
+        failed = []
+        personality_cache = defaultdict(dict)
+        os_cache = defaultdict(dict)
+
         for dbhost in dbhosts:
-            if dbos and not dbarchetype and dbhost.archetype != dbos.archetype:
-                failed.append("{0}: Cannot change operating system because it "
-                              "needs {1:l} instead of "
-                              "{2:l}.".format(dbhost.fqdn, dbhost.archetype,
-                                              dbos.archetype))
-            if dbarchetype and not dbos and \
-               dbhost.operating_system.archetype != dbarchetype:
-                failed.append("{0}: Cannot change archetype because {1:l} needs "
-                              "{2:l}.".format(dbhost.fqdn, dbhost.operating_system,
-                                              dbhost.operating_system.archetype))
-            if (personality and dbhost.cluster and
-                len(dbhost.cluster.allowed_personalities) > 0 and
-                dbpersonality not in dbhost.cluster.allowed_personalities):
-                allowed = ["%s/%s" % (p.archetype.name, p.name) for p in
-                           dbhost.cluster.allowed_personalities]
-                failed.append("{0}: The {1:l} is not allowed by {2}.  "
-                              "Specify one of {3}.".format(
-                                  dbhost.fqdn, dbpersonality,
-                                  dbhost.cluster, allowed))
-            if personality:
-                personalities[dbhost.fqdn] = dbpersonality
-            elif archetype:
-                # This is a strange case - changing archetype while keeping
-                # the personality
-                try:
-                    pers = Personality.get_unique(session,
-                                                  name=dbhost.personality.name,
-                                                  archetype=dbarchetype,
-                                                  compel=True)
-                    personalities[dbhost.fqdn] = pers
-                except NotFoundException as err:
-                    failed.append("%s: %s" % (dbhost.fqdn, err))
+            old_archetype = dbhost.archetype
+            if target_archetype:
+                dbarchetype = target_archetype
+            else:
+                dbarchetype = dbhost.archetype
+
+            if personality or old_archetype != dbarchetype:
+                if not personality:
+                    personality = dbhost.personality.name
+
+                # Cache personalities to avoid looking up the same data many
+                # times
+                if personality in personality_cache[dbarchetype]:
+                    dbpersonality = personality_cache[dbarchetype][personality]
+                else:
+                    try:
+                        dbpersonality = Personality.get_unique(session, name=personality,
+                                                               archetype=dbarchetype,
+                                                               compel=True)
+                        personality_cache[dbarchetype][personality] = dbpersonality
+                    except NotFoundException as err:
+                        failed.append("%s: %s" % (dbhost.fqdn, err))
+                        continue
+
+                if dbhost.cluster and dbhost.cluster.allowed_personalities and \
+                   dbpersonality not in dbhost.cluster.allowed_personalities:
+                    allowed = ["%s/%s" % (p.archetype.name, p.name) for p in
+                               dbhost.cluster.allowed_personalities]
+                    failed.append("{0}: {1} is not allowed by {2}.  "
+                                  "Specify one of: {3}."
+                                  .format(dbhost.fqdn, dbpersonality,
+                                          dbhost.cluster, ", ".join(allowed)))
+                    continue
+
+                dbhost.personality = dbpersonality
+
+            if osname or osversion or old_archetype != dbarchetype:
+                if not osname:
+                    osname = dbhost.operating_system.name
+                if not osversion:
+                    osversion = dbhost.operating_system.version
+
+                oskey = "%s/%s" % (osname, osversion)
+                if oskey in os_cache[dbarchetype]:
+                    dbos = os_cache[dbarchetype][oskey]
+                else:
+                    try:
+                        dbos = OperatingSystem.get_unique(session, name=osname,
+                                                          version=osversion,
+                                                          archetype=dbarchetype,
+                                                          compel=True)
+                        os_cache[dbarchetype][oskey] = dbos
+                    except NotFoundException as err:
+                        failed.append("%s: %s" % (dbhost.fqdn, err))
+                        continue
+
+                dbhost.operating_system = dbos
+
             if grn or eon_id:
                 dbhost.owner_grn = dbgrn
-
             if cleargrn:
                 dbhost.owner_grn = None
+
+            if buildstatus:
+                dbhost.status.transition(dbhost, dbstatus)
 
         if failed:
             raise ArgumentError("Cannot modify the following hosts:\n%s" %
                                 "\n".join(failed))
-
-        for dbhost in dbhosts:
-            if dbhost.fqdn in personalities:
-                dbhost.personality = personalities[dbhost.fqdn]
-            if osversion:
-                dbhost.operating_system = dbos
-            if buildstatus:
-                dbhost.status.transition(dbhost, dbstatus)
 
         session.flush()
 
@@ -154,12 +147,8 @@ class CommandReconfigureList(BrokerCommand):
         choosers = []
         for dbhost in dbhosts:
             if dbhost.archetype.is_compileable:
-                if keepbindings:
-                    chooser = Chooser(dbhost, logger=logger,
-                                      required_only=False)
-                else:
-                    chooser = Chooser(dbhost, logger=logger,
-                                      required_only=True)
+                chooser = Chooser(dbhost, logger=logger,
+                                  required_only=not keepbindings)
                 choosers.append(chooser)
                 try:
                     chooser.set_required()
@@ -170,20 +159,11 @@ class CommandReconfigureList(BrokerCommand):
                                 "binding:\n%s" % "\n".join(failed))
 
         session.flush()
-        logger.info("reconfigure_hostlist processing: %s" %
-                    ",".join([str(dbhost.fqdn) for dbhost in dbhosts]))
-
-        if not choosers:
-            return
 
         plenaries = PlenaryCollection(logger=logger)
-
-        # chooser.plenaries is a PlenaryCollection - this flattens
-        # that top level.
-        plenary_set = set()
         for chooser in choosers:
-            plenary_set.update(chooser.plenaries.plenaries)
-        plenaries.extend(plenary_set)
+            plenaries.append(chooser.plenaries)
+        plenaries.flatten()
 
         td = TemplateDomain(dbbranch, dbauthor, logger=logger)
 

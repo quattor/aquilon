@@ -43,11 +43,6 @@
     </refsect1>
 
     <refsect1>
-        <title>Entitlements</title>
-        <para>Public</para>
-    </refsect1>
-
-    <refsect1>
         <title>Options</title>
 	<xi:include href="../common/global_options_desc.xml"/>
     </refsect1>

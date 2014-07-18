@@ -17,10 +17,11 @@
 
 from aquilon.exceptions_ import (ArgumentError, InternalError,
                                  AuthorizationException, UnimplementedError)
-from aquilon.aqdb.model import Feature, Archetype, Personality, Model
+from aquilon.aqdb.model import (Feature, Archetype, Personality, Model, Domain,
+                                Host, Cluster)
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.commands.deploy import validate_justification
-from aquilon.worker.dbwrappers.feature import add_link
+from aquilon.worker.dbwrappers.feature import add_link, check_feature_template
 from aquilon.worker.dbwrappers.personality import validate_personality_justification
 from aquilon.worker.templates import Plenary, PlenaryCollection
 
@@ -91,7 +92,6 @@ class CommandBindFeature(BrokerCommand):
                                        feature_type=feature_type, compel=True)
 
         cnt = q.count()
-        # TODO: should the limit be configurable?
         if personality:
             validate_personality_justification(dbpersonality, user,
                                                justification, reason)
@@ -115,4 +115,31 @@ class CommandBindFeature(BrokerCommand):
         return
 
     def do_link(self, session, logger, dbfeature, params):
+        # Check that the feature templates exist in all affected domains. We
+        # don't care about sandboxes, it's the job of sandbox owners to fix
+        # them if they break.
+        if "personality" in params:
+            dbpersonality = params["personality"]
+            dbarchetype = dbpersonality.archetype
+        else:
+            dbpersonality = None
+            dbarchetype = params["archetype"]
+
+        queries = []
+        for cls_ in (Host, Cluster):
+            q = session.query(Domain)
+            q = q.join(cls_)
+            if dbpersonality:
+                q = q.filter_by(personality=dbpersonality)
+            else:
+                q = q.join(Personality)
+                q = q.filter_by(archetype=dbarchetype)
+            queries.append(q)
+
+        # This may look a bit strange, but will work without modification if the
+        # above code is extended to more than 2 classes
+        for dbdomain in queries.pop().union(*queries):
+            check_feature_template(self.config, dbarchetype, dbfeature,
+                                   dbdomain)
+
         add_link(session, logger, dbfeature, params)

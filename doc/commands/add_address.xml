@@ -29,10 +29,10 @@
 	    </group>
 	    <arg choice="plain"><option>--fqdn <replaceable>ADDRESS</replaceable></option></arg>
 	    <group choice="req">
-		<arg choice="opt"><option>--ip <replaceable>IPADDR</replaceable></option></arg>
-		<arg choice="opt"><option>--ipfromip <replaceable>NETWORK</replaceable></option></arg>
-		<arg choice="opt"><option>--ipfromsystem <replaceable>FQDN</replaceable></option></arg>
-		<arg choice="opt"><option>--ipalgorithm <replaceable>ALGO</replaceable></option></arg>
+		<arg choice="plain"><option>--ip <replaceable>IPADDR</replaceable></option></arg>
+		<arg choice="plain"><option>--ipfromip <replaceable>NETWORK</replaceable></option></arg>
+		<arg choice="plain"><option>--ipfromsystem <replaceable>FQDN</replaceable></option></arg>
+		<arg choice="plain"><option>--ipalgorithm <replaceable>ALGO</replaceable></option></arg>
 	    </group>
 	    <arg choice="opt"><option>--dns_environment <replaceable>DNSENV</replaceable></option></arg>
 	    <arg choice="opt"><option>--network_environment <replaceable>NETENV</replaceable></option></arg>

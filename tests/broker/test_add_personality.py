@@ -194,7 +194,7 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
         self.failUnless("aurora" in archetypes,
                         "No personality with archetype aurora")
         self.failUnless("generic" in archetypes["aurora"],
-                        "No aquilon/generic in personality list.")
+                        "No aurora/generic in personality list.")
         self.failUnlessEqual(archetypes["aquilon"]["utpersonality/dev"].threshold,
                              -1,
                              "Got threshold %s for aquilon/utpersonality/dev" %
@@ -239,7 +239,7 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
         self.failUnless("aurora" in archetypes,
                         "No personality with archetype aurora")
         self.failUnless("generic" in archetypes["aurora"],
-                        "No aquilon/generic in personality list.")
+                        "No aurora/generic in personality list.")
 
     def testverifyshowutpersonalityprotothreshold(self):
         command = ["show_personality", "--domain=unittest",
@@ -274,7 +274,7 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
         self.failUnless("aurora" in archetypes,
                         "No personality with archetype aurora")
         self.failUnless("generic" in archetypes["aurora"],
-                        "No aquilon/generic in personality list.")
+                        "No aurora/generic in personality list.")
         self.failUnlessEqual(archetypes["aquilon"]["utpersonality/dev"].threshold,
                              50,
                              "Got threshold %s for aquilon/utpersonality/dev" %
@@ -537,7 +537,7 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
                          command)
 
     def testaddgeneric(self):
-        for archetype in ["aquilon", "aurora", "f5", "filer", "vmhost", "windows"]:
+        for archetype in ["aurora", "f5", "filer", "vmhost", "windows"]:
             self.noouttest(["add", "personality", "--personality", "generic",
                             "--archetype", archetype,
                             "--host_environment", "prod",

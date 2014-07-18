@@ -201,6 +201,11 @@ class Cluster(Base):
                     mach.append(res.machine)
         return mach
 
+    def all_objects(self):
+        yield self
+        for dbobj in self.hosts:
+            yield dbobj
+
     @validates('_hosts')
     def validate_host_member(self, key, value):  # pylint: disable=W0613
         session = object_session(self)

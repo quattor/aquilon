@@ -191,9 +191,9 @@
 	    <title>Add an auxiliary address to the second interface of host foo</title>
 	    <programlisting>
 aq add interface address --machine foo.one-nyp.ms.com \
-                         --interface eth1 \
-			 --fqdn foo-e1.one-nyp.ms.com \
-			 --ip 10.10.1.10
+    --interface eth1 \
+    --fqdn foo-e1.one-nyp.ms.com \
+    --ip 10.10.1.10
 	    </programlisting>
 	</example>
 
@@ -201,10 +201,10 @@ aq add interface address --machine foo.one-nyp.ms.com \
 	    <title>Add a second auxiliary address to the same interface</title>
 	    <programlisting>
 aq add interface address --machine foo.one-nyp.ms.com \
-                         --interface eth1 \
-			 --label bar \
-			 --fqdn foo-e1-bar.one-nyp.ms.com \
-			 --ip 10.10.1.11
+    --interface eth1 \
+    --label bar \
+    --fqdn foo-e1-bar.one-nyp.ms.com \
+    --ip 10.10.1.11
 	    </programlisting>
 	</example>
 
@@ -212,8 +212,8 @@ aq add interface address --machine foo.one-nyp.ms.com \
 	    <title>Let the broker auto-generate the DNS entry</title>
 	    <programlisting>
 aq add interface address --network_device foo.one-nyp.ms.com \
-			 --interface vlan110 \
-			 --ip 10.10.1.1
+    --interface vlan110 \
+    --ip 10.10.1.1
 	    </programlisting>
 	    <para>
 		The broker will add foo-vlan110.one-nyp.ms.com to the DNS using IP address 10.10.1.1.

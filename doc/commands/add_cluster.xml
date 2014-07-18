@@ -23,14 +23,17 @@
 
     <refsynopsisdiv>
 	<cmdsynopsis>
-	    <command>aq add cluster </command>
-	    <arg choice="req"><option>--cluster <replaceable>CLUSTER</replaceable></option></arg>
-	    <arg choice="req"><option>--down_hosts_threshold <replaceable>DHT</replaceable></option></arg>
-	    <arg choice="req"><option>--archetype <replaceable>ARCHETYPE</replaceable></option></arg>
-	    <arg choice="req"><option>--personality <replaceable>PERSONALITY</replaceable></option></arg>
+	    <command>aq add cluster</command>
+	    <group>
+		<synopfragmentref linkend="global-options">Global options</synopfragmentref>
+	    </group>
+	    <arg choice="plain"><option>--cluster <replaceable>CLUSTER</replaceable></option></arg>
+	    <arg choice="plain"><option>--archetype <replaceable>ARCHETYPE</replaceable></option></arg>
+	    <arg choice="plain"><option>--personality <replaceable>PERSONALITY</replaceable></option></arg>
+	    <arg choice="plain"><option>--down_hosts_threshold <replaceable>DHT</replaceable></option></arg>
 	    <group choice="req">
-	      <arg choice="plain"><option>--domain <replaceable>DOMAIN</replaceable></option></arg>
-	      <arg choice="plain"><option>--sandbox <replaceable>SANDBOX</replaceable></option></arg>
+		<arg choice="plain"><option>--domain <replaceable>DOMAIN</replaceable></option></arg>
+		<arg choice="plain"><option>--sandbox <replaceable>SANDBOX</replaceable></option></arg>
 	    </group>
 	    <group choice="req">
 		<synopfragmentref linkend="location-options">Location options</synopfragmentref>
@@ -42,9 +45,6 @@
 	    <arg choice="opt"><option>--vm_to_host_ratio <replaceable>VM_COUNT</replaceable>:<replaceable>HOST_COUNT</replaceable></option></arg>
 	    <arg choice="opt"><option>--switch <replaceable>SWITCH</replaceable></option></arg>
 	    <arg choice="opt"><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
-	    <group>
-		<synopfragmentref linkend="global-options">Global options</synopfragmentref>
-	    </group>
 	    <xi:include href="../common/global_options.xml"/>
 	    <xi:include href="../common/location_options.xml"/>
 	</cmdsynopsis>
@@ -62,35 +62,31 @@
     </refsect1>
 
     <refsect1>
-        <title>Entitlements</title>
-        <para>Requires "operations" role</para>
-    </refsect1>
-
-    <refsect1>
         <title>Templates</title>
-        <para>This command will create the following cluster templates:
+	<para>
+	    This command will create the following cluster templates:
         </para>
 	<variablelist>
-	  <varlistentry>
-	    <term>clusters/<replaceable>CLUSTER</replaceable></term>
-	    <listitem><para>
-	      An object template that produces a output configuration
-	      profile for the cluster.
-            </para></listitem>
+	    <varlistentry>
+		<term>clusters/<replaceable>CLUSTER</replaceable></term>
+		<listitem><para>
+		    An object template that produces a output configuration
+		    profile for the cluster.
+		</para></listitem>
           </varlistentry>
 	  <varlistentry>
-	    <term>cluster/<replaceable>CLUSTER</replaceable>/client</term>
-	    <listitem><para>
-	      A normal template that will be included by member hosts to
-	      provide cluster-specific information. By default, this will
-	      try (via if_exists) to include the "features/<replaceable>HOST_ARCHETYPE</replaceable>/<replaceable>CLUSTER_ARCHETYPE</replaceable>/<replaceable>PERSONALITY</replaceable>/config" template.
-	      For example, a cluster called "nyvcs1", of archetype "hacluster" and
-	      personality "vcs" would have a template named
-	      "cluster/nyvcs1/client" which would try to include
-	      "features/<replaceable>HOST_ARCHETYPE</replaceable>/hacluster/vcs/config".
-	      Hosts which are members of the cluster will automatically
-	      include this template.
-            </para></listitem>
+		<term>cluster/<replaceable>CLUSTER</replaceable>/client</term>
+		<listitem><para>
+		    A normal template that will be included by member hosts to
+		    provide cluster-specific information. By default, this will
+		    try (via if_exists) to include the "features/<replaceable>HOST_ARCHETYPE</replaceable>/<replaceable>CLUSTER_ARCHETYPE</replaceable>/<replaceable>PERSONALITY</replaceable>/config" template.
+		    For example, a cluster called "nyvcs1", of archetype "hacluster" and
+		    personality "vcs" would have a template named
+		    "cluster/nyvcs1/client" which would try to include
+		    "features/<replaceable>HOST_ARCHETYPE</replaceable>/hacluster/vcs/config".
+		    Hosts which are members of the cluster will automatically
+		    include this template.
+		</para></listitem>
           </varlistentry>
 	</variablelist>
     </refsect1>
@@ -293,7 +289,7 @@ aq add cluster --cluster nyesx1 \
 	    <citerefentry><refentrytitle>aq_del_cluster</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
 	    <citerefentry><refentrytitle>aq_show_cluster</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
 	    <citerefentry><refentrytitle>aq_cluster</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-	    <citerefentry><refentrytitle>aq_uncluster</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>aq_uncluster</refentrytitle><manvolnum>1</manvolnum></citerefentry>
 	</para>
     </refsect1>
 </refentry>

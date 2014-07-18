@@ -23,13 +23,13 @@
 
     <refsynopsisdiv>
 	<cmdsynopsis>
-	    <command>aq uncluster </command>
-	    <arg choice="req"><option>--hostname <replaceable>HOSTNAME</replaceable></option></arg>
-	    <arg choice="req"><option>--cluster <replaceable>CLUSTER</replaceable></option></arg>
-	    <arg choice="opt"><option>--personality <replaceable>PERSONALITY</replaceable></option></arg>
+	    <command>aq uncluster</command>
 	    <group>
 		<synopfragmentref linkend="global-options">Global options</synopfragmentref>
 	    </group>
+	    <arg choice="plain"><option>--hostname <replaceable>HOSTNAME</replaceable></option></arg>
+	    <arg choice="plain"><option>--cluster <replaceable>CLUSTER</replaceable></option></arg>
+	    <arg choice="opt"><option>--personality <replaceable>PERSONALITY</replaceable></option></arg>
 	    <xi:include href="../common/global_options.xml"/>
 	</cmdsynopsis>
     </refsynopsisdiv>
@@ -53,14 +53,11 @@
     </refsect1>
 
     <refsect1>
-        <title>Entitlements</title>
-        <para>Requires "operations" role</para>
-    </refsect1>
-
-    <refsect1>
         <title>Templates</title>
-        <para>This command will modify the templates for both the cluster
-	itself and for the new host(s)</para>
+	<para>
+	    This command will modify the templates for both the cluster
+	    itself and for the new host(s)
+	</para>
     </refsect1>
 
     <refsect1>
@@ -96,7 +93,8 @@
 		    <para>
 			The name of the personality that should be given to the host. If
 			the operation fails, then the previous personality will remain on
-			the host.
+			the host. This option is needed if the current personality of the
+			host requires a cluster.
 		    </para>
 		</listitem>
 	    </varlistentry>

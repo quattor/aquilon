@@ -16,7 +16,6 @@
 # limitations under the License.
 """Contains the logic for `aq reconfigure --membersof`."""
 
-
 from aquilon.aqdb.model import Cluster
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.commands.reconfigure_list import CommandReconfigureList
@@ -26,6 +25,7 @@ class CommandReconfigureMembersof(CommandReconfigureList):
 
     required_parameters = ["membersof"]
 
-    def render(self, session, logger, membersof, **arguments):
+    def get_hostlist(self, session, membersof, **arguments):  # pylint: disable=W0613
+        # TODO: add eager loading options
         dbcluster = Cluster.get_unique(session, membersof, compel=True)
-        self.reconfigure_list(session, logger, dbcluster.hosts, **arguments)
+        return dbcluster.hosts[:]

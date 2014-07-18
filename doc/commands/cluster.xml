@@ -23,13 +23,13 @@
 
     <refsynopsisdiv>
 	<cmdsynopsis>
-	    <command>aq cluster </command>
-	    <arg choice="req"><option>--hostname <replaceable>HOSTNAME</replaceable></option></arg>
-	    <arg choice="req"><option>--cluster <replaceable>CLUSTER</replaceable></option></arg>
-	    <arg choice="opt"><option>--personality <replaceable>PERSONALITY</replaceable></option></arg>
+	    <command>aq cluster</command>
 	    <group>
 		<synopfragmentref linkend="global-options">Global options</synopfragmentref>
 	    </group>
+	    <arg choice="req"><option>--hostname <replaceable>HOSTNAME</replaceable></option></arg>
+	    <arg choice="req"><option>--cluster <replaceable>CLUSTER</replaceable></option></arg>
+	    <arg choice="opt"><option>--personality <replaceable>PERSONALITY</replaceable></option></arg>
 	    <xi:include href="../common/global_options.xml"/>
 	</cmdsynopsis>
     </refsynopsisdiv>
@@ -76,16 +76,13 @@
     </refsect1>
 
     <refsect1>
-        <title>Entitlements</title>
-        <para>Requires "operations" role</para>
-    </refsect1>
-
-    <refsect1>
         <title>Templates</title>
-        <para>This command will modify the templates for both the cluster
-	itself and for the new host(s). Also, if any service bindings
-	are changed then the service templates will be
-	modified.</para>
+	<para>
+	    This command will modify the templates for both the cluster
+	    itself and for the new host(s). Also, if any service bindings
+	    are changed then the service templates will be
+	    modified.
+	</para>
     </refsect1>
 
     <refsect1>
@@ -142,7 +139,7 @@ aq cluster --hostname foo.example.com --cluster grid1
     <refsect1>
 	<title>See also</title>
 	<para>
-	    <citerefentry><refentrytitle>aq_uncluster</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>aq_uncluster</refentrytitle><manvolnum>1</manvolnum></citerefentry>
 	</para>
     </refsect1>
 </refentry>

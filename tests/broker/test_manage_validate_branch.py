@@ -79,7 +79,7 @@ class TestManageValidateBranch(TestBrokerCommand):
                    "--sandbox", "%s/managetest2" % self.user]
         out = self.badrequesttest(command)
         self.matchoutput(out,
-                         "The source sandbox managetest1 latest commit has "
+                         "The latest commit of sandbox managetest1 has "
                          "not been published to template-king yet.",
                          command)
 

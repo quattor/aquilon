@@ -25,7 +25,7 @@ from sqlalchemy.sql import or_
 
 from aquilon.exceptions_ import ArgumentError, InternalError
 from aquilon.aqdb.model import (Host, Cluster, Service, ServiceInstance,
-                                MetaCluster, EsxCluster, Archetype, Personality)
+                                MetaCluster, Archetype, Personality)
 from aquilon.worker.templates import (Plenary, PlenaryCollection,
                                       PlenaryServiceInstanceServer)
 from aquilon.worker.templates.switchdata import PlenarySwitchData
@@ -661,21 +661,11 @@ class ClusterChooser(Chooser):
                 # Note, host plenary will be written later.
 
     def prestash_primary(self):
-        def add_cluster_dependencies(cluster):
-            self.plenaries.append(Plenary.get_plenary(cluster))
-
-            for dbhost in cluster.hosts:
-                self.plenaries.append(Plenary.get_plenary(dbhost))
-
-            if cluster.resholder:
-                for dbres in cluster.resholder.resources:
+        for dbobj in self.dbobj.all_objects():
+            self.plenaries.append(Plenary.get_plenary(dbobj))
+            if dbobj.resholder:
+                for dbres in dbobj.resholder.resources:
                     self.plenaries.append(Plenary.get_plenary(dbres))
 
-            if isinstance(cluster, EsxCluster) and cluster.network_device:
-                self.plenaries.append(PlenarySwitchData.get_plenary(cluster.network_device))
-
-        add_cluster_dependencies(self.dbobj)
-
-        if isinstance(self.dbobj, MetaCluster):
-            for cluster in self.dbobj.members:
-                add_cluster_dependencies(cluster)
+            if hasattr(dbobj, "network_device") and dbobj.network_device:
+                self.plenaries.append(PlenarySwitchData.get_plenary(dbobj.network_device))

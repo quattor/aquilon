@@ -18,6 +18,7 @@
 """Module for testing that we handle merge conflicts properly"""
 
 import os
+from shutil import rmtree
 from subprocess import Popen
 
 if __name__ == "__main__":
@@ -315,6 +316,7 @@ class TestMergeConflicts(TestBrokerCommand):
         # This just deletes the branch, so the directory should still be there.
         sandboxdir = os.path.join(self.sandboxdir, "changetest3")
         self.assert_(os.path.exists(sandboxdir))
+        rmtree(sandboxdir)
 
     def test_021_verifydelchangetest3sandbox(self):
         command = "show sandbox --sandbox changetest3"
@@ -326,6 +328,7 @@ class TestMergeConflicts(TestBrokerCommand):
         # This just deletes the branch, so the directory should still be there.
         sandboxdir = os.path.join(self.sandboxdir, "changetest4")
         self.assert_(os.path.exists(sandboxdir))
+        rmtree(sandboxdir)
 
     def test_023_verifydelchangetest4sandbox(self):
         command = "show sandbox --sandbox changetest4"

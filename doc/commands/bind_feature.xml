@@ -53,6 +53,13 @@
 	    once. The <command>aq bind feature</command> will also warn if you want to create a binding that
 	    is redundant.
 	</para>
+	<para>
+	    The <command>aq bind feature</command> command verifies that the required templates
+	    exist in any domains used by any hosts or clusters affected by the new binding. Note
+	    that this check merely tests the existence of the templates - no functional testing is
+	    performed. Hosts or clusters in sandboxes are not checked, expecting the owners of such
+	    sandboxes to take care about any potential problems themselves.
+	</para>
     </refsect1>
 
     <refsect1>

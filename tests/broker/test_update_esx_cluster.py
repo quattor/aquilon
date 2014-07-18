@@ -28,8 +28,6 @@ from brokertest import TestBrokerCommand
 class TestUpdateESXCluster(TestBrokerCommand):
 
     def test_100_updatenoop(self):
-        default_max = self.config.get("archetype_esx_cluster",
-                                      "max_members_default")
         self.noouttest(["update_esx_cluster", "--cluster=utecl4",
                         "--building=ut"])
 
@@ -202,14 +200,9 @@ class TestUpdateESXCluster(TestBrokerCommand):
         command = ["reconfigure", "--membersof=utecl1",
                    "--archetype=windows"]
         out = self.badrequesttest(command)
-        # The command complains both about the broker personality and OS.
         self.matchoutput(out,
                          "Personality vulcan-1g-desktop-prod, "
                          "archetype windows not found.",
-                         command)
-        self.matchoutput(out,
-                         "Cannot change archetype because operating system "
-                         "vmhost/esxi-4.0.0 needs archetype vmhost.",
                          command)
 
     def test_390_failupdatemaxmembers(self):
@@ -309,7 +302,7 @@ class TestUpdateESXCluster(TestBrokerCommand):
     def test_605_compileforthreshold(self):
         cname = "utecl7"
         command = "compile --cluster=%s" % cname
-        out = self.successtest(command.split(" "))
+        self.successtest(command.split(" "))
 
     # FIXME: Need tests for plenary templates
     # FIXME: Include test that machine plenary moved correctly

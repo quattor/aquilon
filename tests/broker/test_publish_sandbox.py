@@ -18,7 +18,7 @@
 """Module for testing the publish command."""
 
 import os
-import shutil
+from shutil import copy, rmtree
 from subprocess import Popen, PIPE
 
 if __name__ == "__main__":
@@ -95,8 +95,7 @@ class TestPublishSandbox(TestBrokerCommand):
             if not os.path.exists(dst_dir):
                 os.makedirs(dst_dir)
             for file in files:
-                shutil.copy(os.path.join(root, file),
-                            os.path.join(dst_dir, file))
+                copy(os.path.join(root, file), os.path.join(dst_dir, file))
                 self.gitcommand(["add", os.path.join(relpath, file)],
                                 cwd=sandboxdir)
         self.gitcommand(["commit", "-a", "-m", "Added unittest files"],
@@ -168,6 +167,14 @@ class TestPublishSandbox(TestBrokerCommand):
         self.matchoutput(out, "The published branch no longer contains",
                          command)
 
+    def testzzcleanup(self):
+        self.statustest(["del_sandbox", "--sandbox", "rebasetest"])
+        sandboxdir = os.path.join(self.sandboxdir, "rebasetest")
+        rmtree(sandboxdir, ignore_errors=True)
+
+        self.statustest(["del_sandbox", "--sandbox", "rebasetest2"])
+        sandboxdir = os.path.join(self.sandboxdir, "rebasetest2")
+        rmtree(sandboxdir, ignore_errors=True)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestPublishSandbox)

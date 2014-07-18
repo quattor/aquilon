@@ -31,8 +31,6 @@
 	    <arg choice="plain"><option>--type <replaceable>TYPE</replaceable></option></arg>
 	    <xi:include href="../common/global_options.xml"/>
 	</cmdsynopsis>
-	<!-- This fails validation, although the documentation of refsynopsisdiv allows
-	     multiple cmdsynopsis sections... The manpage conversion at least works as intended. -->
 	<cmdsynopsis>
 	    <command>aq show feature</command>
 	    <arg choice="plain"><option>--all</option></arg>

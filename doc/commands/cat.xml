@@ -24,11 +24,11 @@
     <refsynopsisdiv>
 	<cmdsynopsis>
 	    <command>aq cat</command>
-	    <arg choice="plain"><option>--machine <replaceable>MACHINE</replaceable></option></arg>
-	    <arg choice="opt"><option>--generate</option></arg>
 	    <group>
 		<synopfragmentref linkend="global-options">Global options</synopfragmentref>
 	    </group>
+	    <arg choice="plain"><option>--machine <replaceable>MACHINE</replaceable></option></arg>
+	    <arg choice="opt"><option>--generate</option></arg>
 	    <xi:include href="../common/global_options.xml"/>
 	</cmdsynopsis>
 	<cmdsynopsis>

@@ -68,7 +68,7 @@ class TestResetAdvertisedStatus(TestBrokerCommand):
 
         hostname = "unittest02.one-nyp.ms.com"
         hosts = [hostname]
-        scratchfile = self.writescratch("hostlist", "".join(hosts))
+        scratchfile = self.writescratch("hostlist", "\n".join(hosts))
 
         # we start off as "ready", so each of these transitions (in order)
         # should be valid
@@ -140,7 +140,7 @@ class TestResetAdvertisedStatus(TestBrokerCommand):
 
         hostname = "evh1.aqd-unittest.ms.com"
         hosts = [hostname]
-        scratchfile = self.writescratch("hostlist", "".join(hosts))
+        scratchfile = self.writescratch("hostlist", "\n".join(hosts))
 
         # Skip ready, because the cluster is not necessarily ready
         for status in ['failed', 'reinstall', 'rebuild']:

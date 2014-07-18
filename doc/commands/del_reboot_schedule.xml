@@ -25,11 +25,11 @@
 	<cmdsynopsis>
 	    <command>aq del reboot schedule</command>
 	    <group>
-	      <arg choice="req"><option>--hostname <replaceable>HOSTNAME</replaceable></option></arg>
-	      <arg choice="req"><option>--cluster <replaceable>CLUSTER</replaceable></option></arg>
-            </group>
-	    <group>
 		<synopfragmentref linkend="global-options">Global options</synopfragmentref>
+	    </group>
+	    <group choice="req">
+		<arg choice="plain"><option>--hostname <replaceable>HOSTNAME</replaceable></option></arg>
+		<arg choice="plain"><option>--cluster <replaceable>CLUSTER</replaceable></option></arg>
 	    </group>
 	    <xi:include href="../common/global_options.xml"/>
 	</cmdsynopsis>
@@ -44,15 +44,11 @@
     </refsect1>
 
     <refsect1>
-        <title>Entitlements</title>
-        <para>Requires "operations" or "unixops_l2" role</para>
-    </refsect1>
-
-    <refsect1>
         <title>Templates</title>
-        <para>This command will modify the templates for the host or
-	cluster (depending on which option was given) and remove the resource
-	template for the reboot schedule itself.
+	<para>
+	    This command will modify the templates for the host or
+	    cluster (depending on which option was given) and remove the resource
+	    template for the reboot schedule itself.
 	</para>
     </refsect1>
 
@@ -99,6 +95,7 @@ aq del_reboot_schedule --hostname foo.example.com
 	<title>See also</title>
 	<para>
 	    <citerefentry><refentrytitle>aq_add_reboot_schedule</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	    <citerefentry><refentrytitle>aq_show_reboot_schedule</refentrytitle><manvolnum>1</manvolnum></citerefentry>
 	</para>
     </refsect1>
 </refentry>

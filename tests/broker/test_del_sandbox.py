@@ -17,8 +17,8 @@
 # limitations under the License.
 """Module for testing the del sandbox command."""
 
-
 import os
+from shutil import rmtree
 
 if __name__ == "__main__":
     import utils
@@ -35,6 +35,7 @@ class TestDelSandbox(TestBrokerCommand):
         err = self.statustest(command.split(" "))
         sandboxdir = os.path.join(self.sandboxdir, "utsandbox")
         self.matchoutput(err, "please `rm -rf %s`" % sandboxdir, command)
+        rmtree(sandboxdir, ignore_errors=True)
 
     def test_101_verify_utsandbox(self):
         command = "show sandbox --sandbox utsandbox"
@@ -45,6 +46,7 @@ class TestDelSandbox(TestBrokerCommand):
         err = self.statustest(command.split(" "))
         sandboxdir = os.path.join(self.sandboxdir, "changetest1")
         self.matchoutput(err, "please `rm -rf %s`" % sandboxdir, command)
+        rmtree(sandboxdir, ignore_errors=True)
 
     def test_130_del_changetest2(self):
         command = "del sandbox --sandbox changetest2"
@@ -58,6 +60,7 @@ class TestDelSandbox(TestBrokerCommand):
         sandboxdir = os.path.join(self.sandboxdir, "changetest2")
         self.matchoutput(err, "please `rm -rf %s`" % sandboxdir, command)
         self.matchoutput(err, "Sandbox changetest2 not found.", command)
+        rmtree(sandboxdir, ignore_errors=True)
 
     def test_132_verify_changetest2(self):
         command = "show sandbox --sandbox changetest2"
@@ -68,12 +71,14 @@ class TestDelSandbox(TestBrokerCommand):
         err = self.statustest(command.split(" "))
         sandboxdir = os.path.join(self.sandboxdir, "camelcasetest1")
         self.matchoutput(err, "please `rm -rf %s`" % sandboxdir, command)
+        rmtree(sandboxdir, ignore_errors=True)
 
     def test_145_del_camelcasetest2(self):
         command = "del sandbox --sandbox camelcasetest2"
         err = self.statustest(command.split(" "))
         sandboxdir = os.path.join(self.sandboxdir, "camelcasetest2")
         self.matchoutput(err, "please `rm -rf %s`" % sandboxdir, command)
+        rmtree(sandboxdir, ignore_errors=True)
 
     def test_200_del_nonexisting(self):
         command = "del sandbox --sandbox sandbox-does-not-exist"
