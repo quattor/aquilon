@@ -40,6 +40,9 @@ class UserSync(object):
         self.incremental = incremental
         self.success = []
         self.errors = []
+        self.added = 0
+        self.deleted = 0
+        self.updated = 0
 
         if not config.get("broker", "user_list_location"):
             raise ArgumentError("User synchronization is disabled.")
@@ -75,8 +78,10 @@ class UserSync(object):
                       full_name=details.full_name, home_dir=details.home_dir)
         self.session.add(dbuser)
 
-        return self.commit_if_needed("Adding user %s (uid: %s, gid: %s)" %
-                                     (details.name, details.uid, details.gid))
+        added = self.commit_if_needed("Adding user %s (uid: %s, gid: %s)" %
+                                      (details.name, details.uid, details.gid))
+        self.added += added
+        return dbuser
 
     def check_update_existing(self, dbuser, details):
         update_msg = []
@@ -93,13 +98,11 @@ class UserSync(object):
                 setattr(dbuser, attr, new)
 
         if update_msg:
-            return self.commit_if_needed("Updating user %s (%s)" %
-                                         (dbuser.name, "; ".join(update_msg)))
-        else:
-            return 0
+            updated = self.commit_if_needed("Updating user %s (%s)" %
+                                            (dbuser.name, "; ".join(update_msg)))
+            self.updated += updated
 
     def delete_gone(self, userlist):
-        deleted = 0
         personalities = set()
 
         def chunk(list_, size):
@@ -123,10 +126,10 @@ class UserSync(object):
 
         for dbuser in userlist:
             self.session.delete(dbuser)
-            deleted += self.commit_if_needed("Deleting user %s (uid: %s, gid: %s)" %
-                                             (dbuser.name, dbuser.uid,
-                                              dbuser.gid))
-        return deleted
+            deleted = self.commit_if_needed("Deleting user %s (uid: %s, gid: %s)" %
+                                            (dbuser.name, dbuser.uid,
+                                             dbuser.gid))
+            self.deleted += deleted
 
     def refresh_user(self):
         q = self.session.query(User)
@@ -134,8 +137,6 @@ class UserSync(object):
         for dbuser in q.all():
             users[dbuser.name] = dbuser
 
-        added = 0
-        updated = 0
         for line in open(self.fname):
             user_name, rest = line.split('\t')
             if user_name.startswith("YP_"):
@@ -143,13 +144,13 @@ class UserSync(object):
             details = KeyedTuple(rest.split(':'), labels=self.labels)
 
             if details.name not in users:
-                added += self.add_new(details)
+                dbuser = self.add_new(details)
             else:
                 dbuser = users[details.name]
                 del users[details.name]
-                updated += self.check_update_existing(dbuser, details)
+                self.check_update_existing(dbuser, details)
 
-        deleted = self.delete_gone(users.values())
+        self.delete_gone(users.values())
 
         self.session.flush()
 
@@ -159,6 +160,6 @@ class UserSync(object):
             raise PartialError(success=self.success, failed=self.errors)
         else:
             self.logger.client_info("Added %d, deleted %d, updated %d users." %
-                                    (added, deleted, updated))
+                                    (self.added, self.deleted, self.updated))
 
         return
