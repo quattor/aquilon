@@ -162,6 +162,54 @@ class TestRefreshUser(TestBrokerCommand):
         self.matchclean(out, "bad_line", command)
         self.matchclean(out, "dup_uid", command)
 
+    def test_320_add_users(self):
+        limit = self.config.getint("broker", "user_delete_limit")
+        for i in range(limit + 5):
+            name = "testdel_%d" % i
+            uid = i + 5000
+            self.noouttest(["add_user", "--username", name, "--uid", uid,
+                            "--gid", 1000, "--full_name", "Delete test",
+                            "--home_directory", "/tmp"])
+
+    def test_321_refresh_refuse(self):
+        limit = self.config.getint("broker", "user_delete_limit")
+        command = ["refresh", "user"]
+        out = self.statustest(command)
+        self.matchoutput(out,
+                         "Cowardly refusing to delete %s users, because "
+                         "it's over the limit of %s.  Use the "
+                         "--ignore_delete_limit option to override." %
+                         (limit + 5, limit),
+                         command)
+        self.matchoutput(out, "deleted 0,", command)
+
+    def test_322_verify_still_there(self):
+        command = ["show_user", "--all"]
+        out = self.commandtest(command)
+        limit = self.config.getint("broker", "user_delete_limit")
+        for i in range(limit + 5):
+            name = "testdel_%d" % i
+            self.matchoutput(out, name, command)
+
+    def test_323_refresh_override(self):
+        limit = self.config.getint("broker", "user_delete_limit")
+        command = ["refresh", "user", "--ignore_delete_limit"]
+        out = self.statustest(command)
+        self.matchoutput(out,
+                         "Added 0, deleted %s, updated 0 users." % (limit + 5),
+                         command)
+
+    def test_324_verify_all_gone(self):
+        command = ["show_user", "--all"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "testuser1", command)
+        self.matchoutput(out, "testuser2", command)
+        self.matchoutput(out, "testuser3", command)
+        self.matchclean(out, "testuser4", command)
+        self.matchclean(out, "bad_line", command)
+        self.matchclean(out, "dup_uid", command)
+        self.matchclean(out, "testdel_", command)
+
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestRefreshUser)
     unittest.TextTestRunner(verbosity=2).run(suite)

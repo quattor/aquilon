@@ -33,7 +33,8 @@ class UserSync(object):
     # Labels for the passwd entries - the order must match the file format
     labels = ("name", "passwd", "uid", "gid", "full_name", "home_dir", "shell")
 
-    def __init__(self, config, session, logger=LOGGER, incremental=False):
+    def __init__(self, config, session, logger=LOGGER, incremental=False,
+                 ignore_delete_limit=False):
         self.session = session
         self.logger = logger
         self.plenaries = PlenaryCollection(logger=logger)
@@ -48,6 +49,11 @@ class UserSync(object):
             raise ArgumentError("User synchronization is disabled.")
 
         self.fname = config.get("broker", "user_list_location")
+
+        if ignore_delete_limit:
+            self.limit = None
+        else:
+            self.limit = config.getint("broker", "user_delete_limit")
 
     def commit_if_needed(self, msg):
         if self.incremental:
@@ -103,6 +109,16 @@ class UserSync(object):
             self.updated += updated
 
     def delete_gone(self, userlist):
+        if self.limit is not None and len(userlist) > self.limit:
+            msg = "Cowardly refusing to delete %s users, because it's " \
+                "over the limit of %s.  Use the --ignore_delete_limit " \
+                "option to override." % (len(userlist), self.limit)
+            if self.incremental:
+                self.errors.append(msg)
+            else:
+                self.logger.client_info(msg)
+            return
+
         personalities = set()
 
         def chunk(list_, size):
