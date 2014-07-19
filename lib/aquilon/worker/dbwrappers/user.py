@@ -138,10 +138,34 @@ class UserSync(object):
             users[dbuser.name] = dbuser
 
         for line in open(self.fname):
-            user_name, rest = line.split('\t')
+            try:
+                user_name, rest = line.split('\t')
+            except ValueError:
+                self.logger.info("Failed to unpack, skipping line: %s", line)
+                continue
+
             if user_name.startswith("YP_"):
                 continue
-            details = KeyedTuple(rest.split(':'), labels=self.labels)
+
+            fields = rest.split(':')
+            if len(fields) != len(self.labels):
+                self.logger.info("Unexpected number of fields, "
+                                 "skipping line: %s", line)
+                continue
+
+            try:
+                fields[2] = int(fields[2])
+            except ValueError:
+                self.logger.info("UID is not a number, skipping line: %s", line)
+                continue
+
+            try:
+                fields[3] = int(fields[3])
+            except ValueError:
+                self.logger.info("GID is not a number, skipping line: %s", line)
+                continue
+
+            details = KeyedTuple(fields, labels=self.labels)
 
             if details.name not in users:
                 dbuser = self.add_new(details)

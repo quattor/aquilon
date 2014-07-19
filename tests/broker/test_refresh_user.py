@@ -17,8 +17,8 @@
 # limitations under the License.
 """Module for testing the refresh user principals command."""
 
-import pwd
 import os
+import pwd
 
 if __name__ == "__main__":
     import utils
@@ -30,19 +30,18 @@ from brokertest import TestBrokerCommand
 
 class TestRefreshUser(TestBrokerCommand):
     def test_000_patch_userlist(self):
-        # Make sure the current user is always there
-        pwrec = pwd.getpwuid(os.getuid())
-
         dst_filename = self.config.get("broker", "user_list_location")
         src_filename = dst_filename + ".in"
         with open(src_filename, "r") as f:
             lines = f.readlines()
 
+        # Make sure the current user is always there
+        pwrec = pwd.getpwuid(os.getuid())
+        lines.insert(0, "%s\t%s:dontcare:1000:1000:Current user:%s:%s\n" %
+                     (self.user, pwrec[0], pwrec[5], pwrec[6]))
+
         with open(dst_filename, "w") as f:
             f.writelines(lines)
-            # See test_add_user
-            f.write("%s\t%s:dontcare:%d:%d:%s:%s" %
-                    (pwrec[0], pwrec[0], 1000, 1000, "Current user", pwrec[5]))
 
     def test_110_grant_testuser4_root(self):
         command = ["grant_root_access", "--user", "testuser4",
@@ -71,6 +70,7 @@ class TestRefreshUser(TestBrokerCommand):
         self.matchoutput(out, "testuser2", command)
         self.matchoutput(out, "testuser3", command)
         self.matchclean(out, "testuser4", command)
+        self.matchclean(out, "bad_line", command)
 
     def test_210_verify_testuser1(self):
         command = ["show_user", "--username", "testuser1"]

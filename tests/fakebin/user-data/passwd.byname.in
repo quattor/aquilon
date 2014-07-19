@@ -1,3 +1,6 @@
-testuser1	testuser1:dontcare:1234:423:test user 1:/tmp
-testuser2	testuser2:dontcare:1235:435:test user 2:/tmp
-testuser3	testuser3:dontcare:1236:655:test user 3:/tmp/foo
+testuser1	testuser1:dontcare:1234:423:test user 1:/tmp:/bin/sh
+bad_line
+testuser2	testuser2:dontcare:1235:435:test user 2:/tmp:/bin/sh
+bad_line2	foo:bar:baz
+testuser3	testuser3:dontcare:1236:655:test user 3:/tmp/foo:/bin/sh
+bad_line3	name_str:dontcare:uid_str:gid_str:fullname_str:dir_str:shell_str
