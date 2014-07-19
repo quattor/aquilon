@@ -131,11 +131,21 @@ class UserSync(object):
                                              dbuser.gid))
             self.deleted += deleted
 
+    def report_duplicate_uid(self, new, old):
+        msg = "Duplicate UID: %s is already used by %s, skipping %s." % \
+            (new.uid, old.name, new.name)
+        if self.incremental:
+            self.errors.append(msg)
+        else:
+            self.logger.client_info(msg)
+
     def refresh_user(self):
         q = self.session.query(User)
-        users = {}
+        by_name = {}
+        by_uid = {}
         for dbuser in q.all():
-            users[dbuser.name] = dbuser
+            by_name[dbuser.name] = dbuser
+            by_uid[dbuser.uid] = dbuser
 
         for line in open(self.fname):
             try:
@@ -167,14 +177,30 @@ class UserSync(object):
 
             details = KeyedTuple(fields, labels=self.labels)
 
-            if details.name not in users:
+            if details.name not in by_name:
+                if details.uid in by_uid:
+                    self.report_duplicate_uid(details, by_uid[details.uid])
+                    continue
+
                 dbuser = self.add_new(details)
+                if dbuser:
+                    by_uid[dbuser.uid] = dbuser
             else:
-                dbuser = users[details.name]
-                del users[details.name]
+                dbuser = by_name[details.name]
+
+                if details.uid != dbuser.uid:
+                    if details.uid in by_uid:
+                        self.report_duplicate_uid(details, by_uid[details.uid])
+                        continue
+
+                    del by_uid[dbuser.uid]
+                    by_uid[details.uid] = dbuser
+
+                del by_name[dbuser.name]
+
                 self.check_update_existing(dbuser, details)
 
-        self.delete_gone(users.values())
+        self.delete_gone(by_name.values())
 
         self.session.flush()
 

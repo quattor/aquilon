@@ -61,6 +61,10 @@ class TestRefreshUser(TestBrokerCommand):
     def test_200_refresh(self):
         command = ["refresh", "user"]
         err = self.statustest(command)
+        self.matchoutput(err,
+                         "Duplicate UID: 1236 is already used by testuser3, "
+                         "skipping dup_uid.",
+                         command)
         self.matchoutput(err, "Added 2, deleted 1, updated 1 users.", command)
 
     def test_210_verify_all(self):
@@ -71,6 +75,7 @@ class TestRefreshUser(TestBrokerCommand):
         self.matchoutput(out, "testuser3", command)
         self.matchclean(out, "testuser4", command)
         self.matchclean(out, "bad_line", command)
+        self.matchclean(out, "dup_uid", command)
 
     def test_210_verify_testuser1(self):
         command = ["show_user", "--username", "testuser1"]
@@ -117,8 +122,17 @@ class TestRefreshUser(TestBrokerCommand):
 
     def test_305_refresh_again(self):
         command = ["refresh", "user", "--incremental"]
-        err = self.statustest(command)
-        self.matchoutput(err, "Added 0, deleted 0, updated 1 users.", command)
+        err = self.partialerrortest(command)
+        self.matchoutput(err,
+                         "Duplicate UID: 1236 is already used by testuser3, "
+                         "skipping dup_uid.",
+                         command)
+        self.matchoutput(err,
+                         "Updating user testuser3 (uid = 1236, was 1237; "
+                         "gid = 655, was 123; "
+                         "full_name = test user 3, was Some other name; "
+                         "home_dir = /tmp/foo, was /tmp)",
+                         command)
 
     def test_310_verify_testuser1_again(self):
         command = ["show_user", "--username", "testuser1"]
@@ -137,6 +151,16 @@ class TestRefreshUser(TestBrokerCommand):
         self.searchoutput(out, r'GID: 655$', command)
         self.searchoutput(out, r'Full Name: test user 3$', command)
         self.searchoutput(out, r'Home Directory: /tmp/foo$', command)
+
+    def test_310_verify_all_again(self):
+        command = ["show_user", "--all"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "testuser1", command)
+        self.matchoutput(out, "testuser2", command)
+        self.matchoutput(out, "testuser3", command)
+        self.matchclean(out, "testuser4", command)
+        self.matchclean(out, "bad_line", command)
+        self.matchclean(out, "dup_uid", command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestRefreshUser)
