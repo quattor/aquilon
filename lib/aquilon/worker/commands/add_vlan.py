@@ -16,10 +16,9 @@
 # limitations under the License.
 """Contains the logic for `aq add vlan`."""
 
-
 from aquilon.aqdb.model import VlanInfo
 from aquilon.utils import validate_nlist_key
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 
 
 class CommandAddVlan(BrokerCommand):
@@ -27,14 +26,14 @@ class CommandAddVlan(BrokerCommand):
     required_parameters = ["vlan", "name"]
     requires_format = False
 
-    def render(self, session, logger, vlan, name, vlan_type, **kwargs):
+    def render(self, session, vlan, name, vlan_type, **kwargs):
 
         validate_nlist_key("name", name)
 
         VlanInfo.get_unique(session, vlan_id=vlan, preclude=True)
 
-        dbvlan = VlanInfo(vlan_id=vlan, port_group=name, vlan_type=vlan_type)
-        session.add(dbvlan)
+        dbvi = VlanInfo(vlan_id=vlan, port_group=name, vlan_type=vlan_type)
+        session.add(dbvi)
         session.flush()
 
         return

@@ -17,7 +17,7 @@
 """Contains the logic for `aq del vlan`."""
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import VlanInfo, ObservedVlan
 
 
@@ -25,15 +25,14 @@ class CommandDelVlan(BrokerCommand):
 
     required_parameters = ["vlan"]
 
-    def render(self, session, logger, vlan, **arguments):
-        dbvlan = VlanInfo.get_by_vlan(session, vlan_id=vlan,
-                                      compel=ArgumentError)
+    def render(self, session, vlan, **arguments):
+        dbvi = VlanInfo.get_by_vlan(session, vlan_id=vlan, compel=ArgumentError)
 
         q = session.query(ObservedVlan)
-        q = q.filter_by(vlan=dbvlan)
+        q = q.filter_by(vlan=dbvi)
         if q.first():
             raise ArgumentError("VLAN {0} is still in use and cannot be "
-                                "deleted.".format(dbvlan.vlan_id))
+                                "deleted.".format(dbvi.vlan_id))
 
-        session.delete(dbvlan)
+        session.delete(dbvi)
         return

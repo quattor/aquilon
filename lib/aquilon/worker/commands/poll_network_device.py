@@ -176,15 +176,15 @@ class CommandPollNetworkDevice(BrokerCommand):
                                                                    dbnetwork))
                     continue
 
-                vlan_info = VlanInfo.get_unique(session, vlan_id=vlan_int,
-                                                compel=False)
-                if not vlan_info:
+                dbvi = VlanInfo.get_unique(session, vlan_id=vlan_int,
+                                           compel=False)
+                if not dbvi:
                     logger.client_info("{0}: VLAN {1} is not defined in AQDB. "
                                        "Please use add_vlan to add it."
                                        .format(netdev, vlan_int))
                     continue
 
-                if vlan_info.vlan_type == "unknown":
+                if dbvi.vlan_type == "unknown":
                     continue
 
                 dbvlan = ObservedVlan(vlan_id=vlan_int, network_device=netdev,
