@@ -60,7 +60,7 @@ import ms.modulecmd
 ms.modulecmd.load("fsf/graphviz/2.6")
 
 from aquilon.aqdb.db_factory import DbFactory
-from aquilon.aqdb.model import *
+from aquilon.aqdb.model import *  # pylint: disable=W0401,W0614
 from aquilon.aqdb.utils import schema2dot
 
 from aquilon.aqdb.model.location import LocationLink
@@ -78,80 +78,79 @@ from sqlalchemy import orm
 ###############################################################################
 
 model_group = {
-    'locations' : {
-        'title'   : 'Location Information',
-        'classes' : [ Location, LocationLink, Company, Hub, Continent,
-                      Country, City, Campus, Building, Room, Desk,
-                      Bunker, Rack ],
+    'locations': {
+        'title': 'Location Information',
+        'classes': [Location, LocationLink, Company, Hub, Continent, Country,
+                    City, Campus, Building, Room, Desk, Bunker, Rack],
     },
-    'hardware'  : {
-        'title'   : 'Hardware Information',
-        'classes' : [ HardwareEntity, Model, Vendor, Machine,
-                      MachineSpecs, Cpu, NetworkDevice, Chassis, ChassisSlot ],
+    'hardware': {
+        'title': 'Hardware Information',
+        'classes': [HardwareEntity, Model, Vendor, Machine, MachineSpecs, Cpu,
+                    NetworkDevice, Chassis, ChassisSlot],
     },
-    'resource'  : {
-        'title'   : 'Resources',
-        'classes' : [ Resource, ResourceHolder, Application, Filesystem,
+    'resource': {
+        'title': 'Resources',
+        'classes': [Resource, ResourceHolder, Application, Filesystem,
                       Hostlink, Intervention, RebootIntervention,
                       RebootSchedule, ResourceGroup, ServiceAddress, Share,
-                      VirtualMachine ],
+                      VirtualMachine],
     },
-    'host'      : {
-        'title'   : 'Hosts',
-        'classes' : [ Host, OperatingSystem, HostLifecycle, HostGrnMap, Grn ],
+    'host': {
+        'title': 'Hosts',
+        'classes': [Host, OperatingSystem, HostLifecycle, HostGrnMap, Grn],
     },
-    'personality' : {
-        'title'   : 'Personalities',
-        'classes' : [ Personality, Archetype, HostEnvironment, Grn,
+    'personality': {
+        'title': 'Personalities',
+        'classes': [Personality, Archetype, HostEnvironment, Grn,
                       ParameterHolder, Parameter, PersonalityGrnMap,
-                      __PersonalityRootUser, __PersonalityRootNetGroup ],
+                      __PersonalityRootUser, __PersonalityRootNetGroup],
     },
-    'feature'   : {
-        'title'   : 'Features',
-        'classes' : [ Feature, FeatureLink, ParamDefinition, ParamDefHolder ],
+    'feature': {
+        'title': 'Features',
+        'classes': [Feature, FeatureLink, ParamDefinition, ParamDefHolder],
     },
-    'services'  : {
-        'title'   : 'Services',
-        'classes' : [ Service, PersonalityServiceListItem, ServiceListItem,
+    'services': {
+        'title': 'Services',
+        'classes': [Service, PersonalityServiceListItem, ServiceListItem,
                       ServiceInstance, BuildItem, ServiceInstanceServer,
                       ClusterServiceBinding, PersonalityServiceMap,
-                      ServiceMap ],
+                      ServiceMap],
     },
-    'dns'   : {
-        'title'   : 'DNS',
-        'classes' : [ DnsDomain, DnsRecord, ARecord, SrvRecord,
+    'dns': {
+        'title': 'DNS',
+        'classes': [DnsDomain, DnsRecord, ARecord, SrvRecord,
                       NsRecord, Alias, ReservedName, Fqdn,
-                      DynamicStub, DnsEnvironment, DnsMap ],
+                      DynamicStub, DnsEnvironment, DnsMap],
     },
-    'cluster'   : {
-        'title'   : 'Clusters',
-        'classes' : [ Cluster, ClusterLifecycle, StorageCluster,
+    'cluster': {
+        'title': 'Clusters',
+        'classes': [Cluster, ClusterLifecycle, StorageCluster,
                       ComputeCluster, HostClusterMember,
                       ClusterAllowedPersonality, MetaCluster,
                       MetaClusterMember, EsxCluster, PersonalityClusterInfo,
-                      PersonalityESXClusterInfo ],
+                      PersonalityESXClusterInfo],
     },
-    'network'   : {
-        'title'   : 'Network',
-        'classes' : [ Network, NetworkEnvironment, RouterAddress, StaticRoute,
-                      NetworkDevice, VlanInfo, ObservedMac, ObservedVlan,
-                      AddressAssignment, Interface, ServiceAddress ],
+    'network': {
+        'title': 'Network',
+        'classes': [Network, NetworkEnvironment, RouterAddress, StaticRoute,
+                    NetworkDevice, VlanInfo, ObservedMac, ObservedVlan,
+                    AddressAssignment, Interface, ServiceAddress],
     },
-    'xtn'       : {
-        'title'   : 'Transactions',
-        'classes' : [ Xtn, XtnEnd, XtnDetail ],
+    'xtn': {
+        'title': 'Transactions',
+        'classes': [Xtn, XtnEnd, XtnDetail],
     },
-    'branch'    : {
-        'title'   : 'Configuration Branches',
-        'classes' : [ Branch, Sandbox, Domain ],
+    'branch': {
+        'title': 'Configuration Branches',
+        'classes': [Branch, Sandbox, Domain],
     },
-    'users'     : {
-        'title'   : 'Users',
-        'classes' : [ UserPrincipal, Realm, Role, User, NetGroupWhiteList ],
+    'users': {
+        'title': 'Users',
+        'classes': [UserPrincipal, Realm, Role, User, NetGroupWhiteList],
     },
-    'storage'   : {
-        'title'   : 'Storage',
-        'classes' : [ Disk, Share, Filesystem ],
+    'storage': {
+        'title': 'Storage',
+        'classes': [Disk, Share, Filesystem],
     },
 }
 
@@ -193,26 +192,26 @@ def write_schema_group_png(group):
 
 def write_schema_html():
     htmlfile = os.path.join(opts.dir, "index.html")
-    fh = open (htmlfile, 'w')
-    fh.write ("<html><head><title>AQDB Schema</title></head>")
-    fh.write ("<body><h1>AQDB Schema</h1>")
+    fh = open(htmlfile, 'w')
+    fh.write("<html><head><title>AQDB Schema</title></head>")
+    fh.write("<body><h1>AQDB Schema</h1>")
     for group in model_group.keys():
         classes = model_group[group]['classes']
         title = model_group[group]['title']
         pngfile = "%s.%s.png" % (opts.prefix, group)
-        fh.write ("<hr/><h2>%s</h2>" % title)
-        fh.write ("""<img src="%s" alt="schema"/>""" % pngfile)
-        fh.write ("<table><tr><th>Class</th>\
+        fh.write("<hr/><h2>%s</h2>" % title)
+        fh.write("""<img src="%s" alt="schema"/>""" % pngfile)
+        fh.write("<table><tr><th>Class</th>\
             <th>Table</th><th>Documentation</th></tr>")
         for cls in classes:
-            fh.write ("<tr><td>%s</td><td>%s</td><td>%s</td></tr>"
+            fh.write("<tr><td>%s</td><td>%s</td><td>%s</td></tr>"
                 % (cls.__name__, cls.__tablename__, cls.__doc__))
-        fh.write ("</table>")
-    fh.write ("</body></html>")
+        fh.write("</table>")
+    fh.write("</body></html>")
 
 table_coverage_check()
 
 for group in model_group.keys():
-    write_schema_group_png (group)
+    write_schema_group_png(group)
 
-write_schema_html ()
+write_schema_html()
