@@ -383,7 +383,24 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
                              personality="vulcan-1g-desktop-prod",
                              osname="esxi", osversion="4.0.0")
 
-    def test_320_populate_10gig_rack_hosts(self):
+    def test_320_add_10gig_racks(self):
+        for port in range(1, 13):
+            for (template, rack, offset) in [('ut11s01p%d', "ut11", 0),
+                                             ('ut12s02p%d', "ut12", 12)]:
+                machine = template % port
+                # Both counts would start at 0 except the tor_net has two
+                # switches taking IPs.
+                i = port + 1 + offset
+                j = port - 1 + offset
+                eth0_mac = self.net["vmotion_net"].usable[i].mac
+                eth1_mac = self.net["vm_storage_net"].usable[j].mac
+                self.create_machine_verari(machine, rack=rack,
+                                           interfaces=["eth0", "eth1"],
+                                           eth0_mac=eth0_mac,
+                                           eth1_mac=eth1_mac,
+                                           eth1_pg="storage-v701")
+
+    def test_321_populate_10gig_rack_hosts(self):
         # Assuming evh11 - evh50 will eventually be claimed above.
         net = self.net["vmotion_net"]
         for i in range(1, 25):
@@ -403,6 +420,32 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
                        "--archetype", "vmhost", "--personality", "vulcan-1g-desktop-prod"]
             self.noouttest(command)
         self.dsdb_verify()
+
+    def test_321_verify_show_ut11s01p1(self):
+        command = "show machine --machine ut11s01p1"
+        out = self.commandtest(command.split())
+        self.matchoutput(out,
+                         "Last switch poll: "
+                         "ut01ga2s01.aqd-unittest.ms.com port 1 [",
+                         command)
+
+    def test_325_verify_cat_ut11s01p1(self):
+        command = "cat --machine ut11s01p1"
+        out = self.commandtest(command.split(" "))
+        self.searchoutput(out,
+                          r'"cards/nic/eth0" = '
+                          r'create\("hardware/nic/generic/generic_nic",\s*'
+                          r'"boot", true,\s*'
+                          r'"hwaddr", "%s"\s*\);'
+                          % self.net["vmotion_net"].usable[2].mac,
+                          command)
+        self.searchoutput(out,
+                          r'"cards/nic/eth1" = '
+                          r'create\("hardware/nic/generic/generic_nic",\s*'
+                          r'"hwaddr", "%s",\s*'
+                          r'"port_group", "storage-v701"\s*\);'
+                          % self.net["vm_storage_net"].usable[0].mac,
+                          command)
 
     def test_325_verify_show_host_proto(self):
         # We had a bug where a dangling interface with no IP address

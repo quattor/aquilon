@@ -88,6 +88,10 @@ class MachineTestMixin(object):
                 regexp = r"Interface: %s \(no MAC addr\)%s$" % (nic_name,
                                                                 flagstr)
 
+            # This line may be present if the interface was added after the
+            # switch was polled
+            regexp += r"(\s+Last switch poll:.*$)?"
+
             regexp += r"\s+Type: public$"
             if "model" in params:
                 if "vendor" in params:

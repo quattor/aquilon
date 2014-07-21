@@ -156,14 +156,6 @@ class TestPollNetworkDevice(TestBrokerCommand):
         self.matchoutput(out, "VLAN 713: %s" % self.net["ut01ga2s01_v713"].ip, command)
         self.matchclean(out, "VLAN 714", command)
 
-    def testverifyut11s01p1(self):
-        command = "show machine --machine ut11s01p1"
-        out = self.commandtest(command.split())
-        self.matchoutput(out,
-                         "Last switch poll: "
-                         "ut01ga2s01.aqd-unittest.ms.com port 1 [",
-                         command)
-
     def testpollut01ga2s02(self):
         self.successtest(["poll", "network_device", "--vlan",
                           "--network_device", "ut01ga2s02.aqd-unittest.ms.com"])
