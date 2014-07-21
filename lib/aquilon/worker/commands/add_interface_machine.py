@@ -22,7 +22,7 @@ from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.dns import delete_dns_record
 from aquilon.worker.dbwrappers.interface import (get_or_create_interface,
                                                  describe_interface,
-                                                 verify_port_group,
+                                                 set_port_group,
                                                  choose_port_group,
                                                  assign_address)
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
@@ -122,22 +122,19 @@ class CommandAddInterfaceMachine(BrokerCommand):
             # Ignore now that MAC address can be NULL
             pass
 
-        if pg is not None:
-            port_group_name = verify_port_group(dbmachine, pg)
-        elif autopg:
-            port_group_name = choose_port_group(logger, dbmachine)
-            audit_results.append(('pg', port_group_name))
-        else:
-            port_group_name = None
-
         dbinterface = get_or_create_interface(session, dbmachine,
                                               name=interface,
                                               vendor=vendor, model=model,
                                               interface_type=iftype, mac=mac,
                                               bootable=bootable,
-                                              port_group_name=port_group_name,
                                               bus_address=bus_address,
                                               comments=comments, preclude=True)
+
+        if pg:
+            set_port_group(dbinterface, pg)
+        elif autopg:
+            choose_port_group(logger, dbinterface)
+            audit_results.append(('pg', dbinterface.port_group_name))
 
         # So far, we're *only* creating a manager if we happen to be
         # removing a blind entry and we can steal its IP address.

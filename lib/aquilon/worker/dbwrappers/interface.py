@@ -231,7 +231,7 @@ def describe_interface(session, interface):
     return ", ".join(description)
 
 
-def verify_port_group(dbmachine, port_group_name):
+def set_port_group(dbinterface, port_group_name):
     """Validate that the port_group can be used on an interface.
 
     If the machine is virtual, check that the corresponding VLAN has
@@ -246,11 +246,24 @@ def verify_port_group(dbmachine, port_group_name):
     string is passed in.
 
     """
+    if "port_group_name" not in dbinterface.extra_fields:
+        raise ArgumentError("The port group cannot be set for %s interfaces." %
+                            dbinterface.interface_type)
+
     if not port_group_name:
-        return None
-    session = object_session(dbmachine)
+        dbinterface.port_group_name = None
+        return
+
+    session = object_session(dbinterface)
+    dbmachine = dbinterface.hardware_entity
     dbvi = VlanInfo.get_by_pg(session, port_group=port_group_name,
                               compel=ArgumentError)
+
+    # The capacity check below would account this interface twice if we'd try to
+    # assign the same port group as it already has
+    if dbvi.port_group == dbinterface.port_group_name:
+        return
+
     if dbmachine.model.model_type.isVirtualMachineType():
         dbnetdev = dbmachine.cluster.network_device
         if not dbnetdev:
@@ -287,10 +300,16 @@ def verify_port_group(dbmachine, port_group_name):
         if not q.count():
             raise ArgumentError("VLAN {0} not found for "
                                 "{1:l}.".format(dbvi.vlan_id, dbnetdev))
-    return dbvi.port_group
+
+    dbinterface.port_group_name = dbvi.port_group
 
 
-def choose_port_group(logger, dbmachine):
+def choose_port_group(logger, dbinterface):
+    if "port_group_name" not in dbinterface.extra_fields:
+        raise ArgumentError("The port group cannot be set for %s interfaces." %
+                            dbinterface.interface_type)
+
+    dbmachine = dbinterface.hardware_entity
     if not dbmachine.model.model_type.isVirtualMachineType():
         raise ArgumentError("Can only automatically generate "
                             "portgroup entry for virtual hardware.")
@@ -324,12 +343,13 @@ def choose_port_group(logger, dbmachine):
                     break
             selected_capacity = free_capacity
 
-    if selected_vlan:
-        logger.info("Selected port group {0} for {1:l} (based on {2:l})"
-                    .format(selected_vlan.port_group, dbmachine, dbnetdev))
-        return selected_vlan.port_group
-    raise ArgumentError("No available user port groups on {0:l}."
-                        .format(dbnetdev))
+    if not selected_vlan:
+        raise ArgumentError("No available user port groups on {0:l}."
+                            .format(dbnetdev))
+
+    logger.info("Selected port group {0} for {1:l} (based on {2:l})"
+                .format(selected_vlan.port_group, dbmachine, dbnetdev))
+    dbinterface.port_group_name = selected_vlan.port_group
 
 
 def _type_msg(interface_type, bootable):
@@ -343,8 +363,7 @@ def _type_msg(interface_type, bootable):
 def get_or_create_interface(session, dbhw_ent, name=None, mac=None,
                             model=None, vendor=None, bus_address=None,
                             interface_type='public', bootable=None,
-                            preclude=False, port_group_name=None,
-                            comments=None):
+                            preclude=False, comments=None):
     """
     Look up an existing interface or create a new one.
 
@@ -353,7 +372,7 @@ def get_or_create_interface(session, dbhw_ent, name=None, mac=None,
     checked.
 
     If neither the name nor the MAC address is given, but there is just one
-    existing interface matching the specified interface_type/bootable/port_group
+    existing interface matching the specified interface_type/bootable
     combination, then that interface is returned. If there are multiple matches,
     an exception is raised.
 
@@ -401,10 +420,6 @@ def get_or_create_interface(session, dbhw_ent, name=None, mac=None,
             if bootable is not None and (not hasattr(iface, "bootable") or
                                          iface.bootable != bootable):
                 continue
-            if port_group_name is not None and \
-               (not hasattr(iface, "port_group_name") or
-                iface.port_group_name != port_group_name):
-                continue
             interfaces.append(iface)
         if len(interfaces) > 1:
             type_msg = _type_msg(interface_type, bootable)
@@ -436,8 +451,6 @@ def get_or_create_interface(session, dbhw_ent, name=None, mac=None,
     if bootable is not None:
         extra_args["bootable"] = bootable
         default_route = bootable
-    if port_group_name is not None:
-        extra_args["port_group_name"] = port_group_name
 
     if not model and not vendor:
         dbmodel = dbhw_ent.model.nic_model

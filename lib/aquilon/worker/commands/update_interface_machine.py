@@ -20,7 +20,7 @@ from aquilon.aqdb.types import NicType
 from aquilon.exceptions_ import ArgumentError, AquilonError
 from aquilon.aqdb.model import Machine, Interface, Model
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.dbwrappers.interface import (verify_port_group,
+from aquilon.worker.dbwrappers.interface import (set_port_group,
                                                  choose_port_group,
                                                  assign_address,
                                                  rename_interface)
@@ -66,14 +66,10 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
                                dbhw_ent.primary_name.network, logger=logger)
 
         # We may need extra IP verification (or an autoip option)...
-        # This may also throw spurious errors if attempting to set the
-        # port_group to a value it already has.
-        if pg is not None and dbinterface.port_group_name != pg.lower().strip():
-            dbinterface.port_group_name = verify_port_group(
-                dbinterface.hardware_entity, pg)
+        if pg is not None:
+            set_port_group(dbinterface, pg)
         elif autopg:
-            dbinterface.port_group_name = choose_port_group(
-                logger, dbinterface.hardware_entity)
+            choose_port_group(logger, dbinterface)
             audit_results.append(('pg', dbinterface.port_group_name))
 
         if master:
