@@ -17,12 +17,12 @@
 """Contains the logic for `aq search network`."""
 
 from sqlalchemy.sql import exists
-from sqlalchemy.orm import undefer
+from sqlalchemy.orm import undefer, aliased
 
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import (Network, Machine, VlanInfo, ObservedVlan,
-                                Cluster, ARecord, DynamicStub,
+from aquilon.aqdb.model import (Network, Machine, VlanInfo, PortGroup,
+                                ObservedVlan, Cluster, ARecord, DynamicStub,
                                 NetworkEnvironment)
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.worker.dbwrappers.location import get_location
@@ -69,9 +69,11 @@ class CommandSearchNetwork(BrokerCommand):
                 vlans = [VlanInfo.get_by_pg(session, i.port_group).vlan_id
                          for i in dbmachine.interfaces if i.port_group]
                 if vlans:
-                    q = q.join('observed_vlans')
+                    PGAlias = aliased(PortGroup)
+                    q = q.join(PGAlias)
+                    q = q.filter(PGAlias.network_tag.in_(vlans))
+                    q = q.join(ObservedVlan, aliased=True)
                     q = q.filter_by(network_device=dbmachine.cluster.network_device)
-                    q = q.filter(ObservedVlan.vlan_id.in_(vlans))
                     q = q.reset_joinpoint()
             if not vlans:
                 networks = [addr.network.id for addr in
@@ -95,7 +97,7 @@ class CommandSearchNetwork(BrokerCommand):
         if cluster:
             dbcluster = Cluster.get_unique(session, cluster, compel=True)
             if dbcluster.network_device:
-                q = q.join('observed_vlans')
+                q = q.join(PortGroup, ObservedVlan, aliased=True)
                 q = q.filter_by(network_device=dbcluster.network_device)
                 q = q.reset_joinpoint()
             else:
@@ -105,8 +107,8 @@ class CommandSearchNetwork(BrokerCommand):
                 q = q.filter(Network.id.in_(net_ids))
         if pg:
             dbvi = VlanInfo.get_by_pg(session, pg, compel=ArgumentError)
-            q = q.join('observed_vlans')
-            q = q.filter_by(vlan_id=dbvi.vlan_id)
+            q = q.join(PortGroup, aliased=True)
+            q = q.filter_by(network_tag=dbvi.vlan_id, usage=dbvi.vlan_type)
             q = q.reset_joinpoint()
         dblocation = get_location(session, **arguments)
         if dblocation:

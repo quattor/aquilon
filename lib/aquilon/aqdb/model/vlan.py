@@ -19,8 +19,8 @@
 from datetime import datetime
 
 from sqlalchemy import (Column, Integer, DateTime, ForeignKey, CheckConstraint,
-                        UniqueConstraint, PrimaryKeyConstraint, Index)
-from sqlalchemy.orm import relation, backref, deferred
+                        UniqueConstraint, PrimaryKeyConstraint, Index, Sequence)
+from sqlalchemy.orm import relation, backref, deferred, contains_eager
 from sqlalchemy.sql import and_
 
 from aquilon.exceptions_ import NotFoundException, InternalError
@@ -34,6 +34,7 @@ VLAN_TYPES = ('storage', 'vmotion', 'user', 'unknown', 'vulcan-mgmt', 'vcs')
 _TN = 'observed_vlan'
 _ABV = 'obs_vlan'
 _VTN = 'vlan_info'
+_PG = 'port_group'
 
 
 class VlanInfo(Base):
@@ -75,6 +76,48 @@ vlaninfo.info['unique_fields'] = ['port_group']
 vlaninfo.info['extra_search_fields'] = ['vlan_id']
 
 
+# TODO: eventually this class should be moved to a different file
+class PortGroup(Base):
+    __tablename__ = _PG
+    _class_label = 'Port Group'
+
+    id = Column(Integer, Sequence("%s_seq" % _PG), primary_key=True)
+
+    network_id = Column(Integer, ForeignKey('network.id',
+                                            ondelete='CASCADE',
+                                            name='%s_network_fk' % _PG),
+                        nullable=False)
+
+    # VLAN or VxLAN ID
+    network_tag = Column(Integer, nullable=False)
+
+    usage = Column(Enum(32, VLAN_TYPES), nullable=False)
+
+    creation_date = deferred(Column(DateTime, default=datetime.now,
+                                    nullable=False))
+
+    __table_args__ = (Index("%s_usage_tag_idx" % _PG, usage, network_tag,
+                            oracle_compress=1),
+                      UniqueConstraint(network_id, name="%s_network_uk" % _PG))
+
+    network = relation(Network, innerjoin=True,
+                       backref=backref('port_group', uselist=False,
+                                       passive_deletes=True))
+
+    # This is needed only for legacy naming
+    legacy_vlan = relation(VlanInfo, uselist=False,
+                           primaryjoin=and_(usage == VlanInfo.vlan_type,
+                                            network_tag == VlanInfo.vlan_id),
+                           foreign_keys=[VlanInfo.vlan_type, VlanInfo.vlan_id],
+                           viewonly=True)
+
+    @property
+    def name(self):
+        # The following almost works...
+        # return "%s-v%d" % (self.usage, self.network_tag)
+        return self.legacy_vlan.port_group
+
+
 class ObservedVlan(Base):
     """ reports the observance of a vlan/network on a switch """
     __tablename__ = 'observed_vlan'
@@ -85,55 +128,32 @@ class ObservedVlan(Base):
                                           name='%s_hw_fk' % _ABV),
                                nullable=False)
 
-    network_id = Column(Integer, ForeignKey('network.id',
-                                            ondelete='CASCADE',
-                                            name='%s_net_fk' % _ABV),
-                        nullable=False)
-
-    vlan_id = Column(Integer, ForeignKey('vlan_info.vlan_id',
-                                         name='%s_vlan_fk' % _ABV),
-                     nullable=False)
-
-    creation_date = deferred(Column(DateTime, default=datetime.now,
-                                    nullable=False))
+    port_group_id = Column(Integer,
+                           ForeignKey(PortGroup.id,
+                                      ondelete='CASCADE',
+                                      name='%s_pg_fk' % _ABV),
+                           nullable=False)
 
     network_device = relation(NetworkDevice, innerjoin=True,
-                              backref=backref('%ss' % _TN, cascade='delete',
-                                              passive_deletes=True,
-                                              order_by=[vlan_id]))
-    network = relation(Network, innerjoin=True,
-                       backref=backref('%ss' % _TN, cascade='delete',
-                                       passive_deletes=True,
-                                       order_by=[vlan_id]))
+                              backref=backref('observed_vlans',
+                                              passive_deletes=True))
+    port_group = relation(PortGroup, innerjoin=True,
+                          backref=backref('observed_vlans',
+                                          passive_deletes=True))
 
-    vlan = relation(VlanInfo, uselist=False,
-                    primaryjoin=vlan_id == VlanInfo.vlan_id,
-                    foreign_keys=[VlanInfo.vlan_id],
-                    viewonly=True)
-
-    __table_args__ = (PrimaryKeyConstraint(network_device_id, network_id, vlan_id,
+    __table_args__ = (PrimaryKeyConstraint(network_device_id, port_group_id,
                                            name="%s_pk" % _TN),
-                      CheckConstraint(and_(vlan_id >= 0,
-                                           vlan_id < MAX_VLANS),
-                                      name='%s_vlan_id_ck' % _TN),
-                      Index('%s_network_idx' % _TN, 'network_id'),
-                      Index('%s_vlan_idx' % _TN, 'vlan_id'))
-
-    @property
-    def port_group(self):
-        if self.vlan:
-            return self.vlan.port_group
-        return None
-
-    @property
-    def vlan_type(self):
-        if self.vlan:
-            return self.vlan.vlan_type
-        return None
+                      Index('%s_pg_idx' % _TN, 'port_group_id'))
 
     @classmethod
     def get_network(cls, session, network_device, vlan_id, compel=NotFoundException):
-        q = session.query(cls).filter_by(network_device=network_device, vlan_id=vlan_id)
+        q = session.query(cls)
+        q = q.filter_by(network_device=network_device)
+        q = q.join(PortGroup)
+        q = q.filter_by(network_tag=vlan_id)
+        q = q.join(Network)
+        q = q.options(contains_eager('port_group'),
+                      contains_eager('port_group.network'))
         nets = q.all()
         if not nets:
             raise compel("No network found for switch %s and VLAN %s" %
@@ -141,4 +161,4 @@ class ObservedVlan(Base):
         if len(nets) > 1:
             raise InternalError("More than one network found for switch %s "
                                 "and VLAN %s" % (network_device.fqdn, vlan_id))
-        return nets[0].network
+        return nets[0].port_group.network

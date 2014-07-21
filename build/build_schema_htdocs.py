@@ -134,7 +134,7 @@ model_group = {
         'title': 'Network',
         'classes': [Network, NetworkEnvironment, RouterAddress, StaticRoute,
                     NetworkDevice, VlanInfo, ObservedMac, ObservedVlan,
-                    AddressAssignment, Interface, ServiceAddress],
+                    PortGroup, AddressAssignment, Interface, ServiceAddress],
     },
     'xtn': {
         'title': 'Transactions',

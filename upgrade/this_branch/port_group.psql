@@ -1,0 +1,47 @@
+CREATE TABLE port_group (
+	id INTEGER NOT NULL,
+	network_id INTEGER NOT NULL,
+	network_tag INTEGER NOT NULL,
+	usage VARCHAR(32) NOT NULL,
+	creation_date DATE NOT NULL,
+	CONSTRAINT port_group_network_uk UNIQUE (network_id),
+	CONSTRAINT port_group_network_fk FOREIGN KEY (network_id) REFERENCES network (id) ON DELETE CASCADE,
+	CONSTRAINT port_group_pk PRIMARY KEY (id)
+);
+
+CREATE SEQUENCE port_group_seq;
+
+CREATE OR REPLACE FUNCTION _populate_port_groups() RETURNS VOID LANGUAGE plpgsql AS $$
+DECLARE
+	pg_curs CURSOR IS
+		SELECT ov.network_id, ov.vlan_id, vi.vlan_type, MAX(ov.creation_date) AS creation_date
+		FROM observed_vlan ov JOIN vlan_info vi ON ov.vlan_id = vi.vlan_id
+		GROUP BY ov.network_id, ov.vlan_id, vi.vlan_type;
+	pg_rec RECORD;
+BEGIN
+	FOR pg_rec IN pg_curs LOOP
+		INSERT INTO port_group (id, network_id, network_tag, usage, creation_date)
+			VALUES (nextval('port_group_seq'), pg_rec.network_id, pg_rec.vlan_id, pg_rec.vlan_type, pg_rec.creation_date);
+	END LOOP;
+END
+$$;
+
+BEGIN;
+SELECT _populate_port_groups();
+COMMIT;
+DROP FUNCTION _populate_port_groups();
+
+CREATE INDEX port_group_usage_tag_idx ON port_group (usage, network_tag);
+
+ALTER TABLE observed_vlan ADD port_group_id INTEGER;
+BEGIN;
+UPDATE observed_vlan SET port_group_id = (SELECT id FROM port_group WHERE observed_vlan.network_id = port_group.network_id);
+COMMIT;
+ALTER TABLE observed_vlan ALTER port_group_id SET NOT NULL;
+
+ALTER TABLE observed_vlan DROP CONSTRAINT observed_vlan_pk;
+ALTER TABLE observed_vlan DROP COLUMN network_id;
+ALTER TABLE observed_vlan DROP COLUMN vlan_id;
+ALTER TABLE observed_vlan DROP COLUMN creation_date;
+ALTER TABLE observed_vlan ADD CONSTRAINT observed_vlan_pk PRIMARY KEY (network_device_id, port_group_id);
+ALTER TABLE observed_vlan ADD CONSTRAINT obs_vlan_pg_fk FOREIGN KEY (port_group_id) REFERENCES port_group (id) ON DELETE CASCADE;

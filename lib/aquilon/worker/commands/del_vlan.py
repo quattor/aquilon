@@ -18,7 +18,7 @@
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand
-from aquilon.aqdb.model import VlanInfo, ObservedVlan
+from aquilon.aqdb.model import VlanInfo, PortGroup, Interface
 
 
 class CommandDelVlan(BrokerCommand):
@@ -28,9 +28,13 @@ class CommandDelVlan(BrokerCommand):
     def render(self, session, vlan, **arguments):
         dbvi = VlanInfo.get_by_vlan(session, vlan_id=vlan, compel=ArgumentError)
 
-        q = session.query(ObservedVlan)
-        q = q.filter_by(vlan=dbvi)
-        if q.first():
+        q1 = session.query(PortGroup)
+        q1 = q1.filter_by(usage=dbvi.vlan_type, network_tag=dbvi.vlan_id)
+
+        q2 = session.query(Interface)
+        q2 = q2.filter_by(port_group=dbvi.port_group)
+
+        if q1.first() or q2.first():
             raise ArgumentError("VLAN {0} is still in use and cannot be "
                                 "deleted.".format(dbvi.vlan_id))
 

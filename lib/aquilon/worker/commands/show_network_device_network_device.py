@@ -33,8 +33,9 @@ class CommandShowNetworkDevice(BrokerCommand):
             options = []
         else:
             options = [subqueryload('observed_vlans'),
-                       undefer('observed_vlans.creation_date'),
-                       joinedload('observed_vlans.network'),
+                       joinedload('observed_vlans.port_group'),
+                       undefer('observed_vlans.port_group.creation_date'),
+                       joinedload('observed_vlans.port_group.network'),
                        subqueryload('observed_macs'),
                        undefer('observed_macs.creation_date')]
         dbnetdev = NetworkDevice.get_unique(session, network_device, compel=True,

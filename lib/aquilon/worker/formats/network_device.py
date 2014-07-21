@@ -44,8 +44,8 @@ class NetworkDeviceFormatter(HardwareEntityFormatter):
                                (om.mac_address, om.creation_date, om.last_seen))
         for ov in device.observed_vlans:
             details.append(indent + "  VLAN %d: %s" %
-                           (ov.vlan_id, ov.network.ip))
-            details.append(indent + "    Created: %s" % ov.creation_date)
+                           (ov.port_group.network_tag, ov.port_group.network.ip))
+            details.append(indent + "    Created: %s" % ov.port_group.creation_date)
 
         if device.host:
             details.append(self.redirect_raw_host_details(device.host))

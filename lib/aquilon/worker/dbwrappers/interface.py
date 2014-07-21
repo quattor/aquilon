@@ -31,8 +31,9 @@ from sqlalchemy.orm import object_session
 from aquilon.aqdb.types import NicType
 from aquilon.exceptions_ import ArgumentError, InternalError
 from aquilon.aqdb.model import (Interface, ObservedMac, Fqdn, ARecord, VlanInfo,
-                                ObservedVlan, AddressAssignment, Model, Bunker,
-                                Location, HardwareEntity, Network)
+                                ObservedVlan, PortGroup, AddressAssignment,
+                                Model, Bunker, Location, HardwareEntity,
+                                Network)
 from aquilon.aqdb.model.network import get_net_id_from_ip
 
 
@@ -256,8 +257,9 @@ def verify_port_group(dbmachine, port_group):
             raise ArgumentError("Cannot verify port group availability: no "
                                 "switch record for {0}.".format(dbmachine.cluster))
         q = session.query(ObservedVlan)
-        q = q.filter_by(vlan_id=dbvi.vlan_id)
         q = q.filter_by(network_device=dbnetdev)
+        q = q.join(PortGroup)
+        q = q.filter_by(network_tag=dbvi.vlan_id)
         try:
             dbobserved_vlan = q.one()
         except NoResultFound:
@@ -268,18 +270,20 @@ def verify_port_group(dbmachine, port_group):
             raise InternalError("Too many subnets found for VLAN {0} "
                                 "on {1:l}.".format(dbvi.vlan_id, dbnetdev))
 
-        # Protect against concurrent allocations
-        dbobserved_vlan.network.lock_row()
+        pg = dbobserved_vlan.port_group
 
-        if dbobserved_vlan.network.is_at_guest_capacity:
-            raise ArgumentError("Port group {0} is full for "
-                                "{1:l}.".format(dbvi.port_group,
-                                                dbobserved_vlan.network_device))
+        # Protect against concurrent allocations
+        pg.network.lock_row()
+
+        if pg.network.is_at_guest_capacity:
+            raise ArgumentError("{0} is full for {1:l}.".format(pg, dbnetdev))
     elif dbmachine.host and dbmachine.host.cluster and \
          dbmachine.host.cluster.network_device:
         dbnetdev = dbmachine.host.cluster.network_device
         q = session.query(ObservedVlan)
-        q = q.filter_by(vlan_id=dbvi.vlan_id, network_device=dbnetdev)
+        q = q.filter_by(network_device=dbnetdev)
+        q = q.join(PortGroup)
+        q = q.filter_by(network_tag=dbvi.vlan_id)
         if not q.count():
             raise ArgumentError("VLAN {0} not found for "
                                 "{1:l}.".format(dbvi.vlan_id, dbnetdev))
@@ -298,16 +302,26 @@ def choose_port_group(logger, dbmachine):
     selected_vlan = None
     selected_capacity = 0
 
-    # Protect agains concurrent --autopg invocations.
-    Network.lock_rows([vlan.network for vlan in dbnetdev.observed_vlans])
+    session = object_session(dbmachine)
+    vlans = session.query(VlanInfo).all()
 
-    for vlan in sorted(dbnetdev.observed_vlans, key=attrgetter('vlan_id')):
-        if vlan.vlan_type != 'user':
+    # Protect agains concurrent --autopg invocations.
+    Network.lock_rows([ov.port_group.network for ov in dbnetdev.observed_vlans])
+
+    for ov in sorted(dbnetdev.observed_vlans,
+                       key=attrgetter('port_group.network_tag')):
+        if ov.port_group.usage != 'user':
             continue
-        net = vlan.network
+        net = ov.port_group.network
         free_capacity = net.available_ip_count - net.guest_count
         if free_capacity > 0 and selected_capacity < free_capacity:
-            selected_vlan = vlan
+            # FIXME: name lookup is for backwards compatibility
+            # FIXME: this should be changed to ov.port_group.name
+            for vlan in vlans:
+                if vlan.vlan_type == ov.port_group.usage and \
+                   vlan.vlan_id == ov.port_group.network_tag:
+                    selected_vlan = vlan
+                    break
             selected_capacity = free_capacity
 
     if selected_vlan:
