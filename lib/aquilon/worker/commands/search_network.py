@@ -21,8 +21,8 @@ from sqlalchemy.orm import undefer
 
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import (Network, Machine, VlanInfo, PortGroup,
-                                ObservedVlan, Cluster, ARecord, DynamicStub,
+from aquilon.aqdb.model import (Network, Machine, VlanInfo, PortGroup, Cluster,
+                                NetworkDevice, ARecord, DynamicStub,
                                 NetworkEnvironment)
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.worker.dbwrappers.location import get_location
@@ -86,8 +86,10 @@ class CommandSearchNetwork(BrokerCommand):
         if cluster:
             dbcluster = Cluster.get_unique(session, cluster, compel=True)
             if dbcluster.network_device:
-                q = q.join(PortGroup, ObservedVlan, aliased=True)
-                q = q.filter_by(network_device=dbcluster.network_device)
+                q = q.join(PortGroup,
+                           (NetworkDevice, PortGroup.network_devices),
+                           aliased=True)
+                q = q.filter_by(id=dbcluster.network_device_id)
                 q = q.reset_joinpoint()
             else:
                 net_ids = [h.hardware_entity.primary_name.network.id for h in

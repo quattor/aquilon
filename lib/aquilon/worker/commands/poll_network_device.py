@@ -31,9 +31,8 @@ from aquilon.worker.dbwrappers.observed_mac import (
 from aquilon.worker.dbwrappers.network_device import (determine_helper_hostname,
                                                       determine_helper_args)
 from aquilon.worker.processes import run_command
-from aquilon.aqdb.model import (NetworkDevice, ObservedMac, ObservedVlan,
-                                PortGroup, Network, NetworkEnvironment,
-                                VlanInfo)
+from aquilon.aqdb.model import (NetworkDevice, ObservedMac, PortGroup, Network,
+                                NetworkEnvironment, VlanInfo)
 from aquilon.utils import force_ipv4
 
 
@@ -193,6 +192,6 @@ class CommandPollNetworkDevice(BrokerCommand):
                                                      usage=dbvi.vlan_type,
                                                      creation_date=now)
 
-                netdev.observed_vlans.append(ObservedVlan(port_group=dbnetwork.port_group))
+                netdev.observed_vlans.append(dbnetwork.port_group)
         except CSVError as e:
             raise AquilonError("Error parsing vlan2net results: %s" % e)

@@ -133,7 +133,7 @@ model_group = {
     'network': {
         'title': 'Network',
         'classes': [Network, NetworkEnvironment, RouterAddress, StaticRoute,
-                    NetworkDevice, VlanInfo, ObservedMac, ObservedVlan,
+                    NetworkDevice, VlanInfo, ObservedMac, __ObservedVlan,
                     PortGroup, AddressAssignment, Interface, ServiceAddress],
     },
     'xtn': {

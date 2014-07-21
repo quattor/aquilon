@@ -20,10 +20,10 @@ from datetime import datetime
 
 from sqlalchemy import (Column, Integer, DateTime, ForeignKey, CheckConstraint,
                         UniqueConstraint, PrimaryKeyConstraint, Index, Sequence)
-from sqlalchemy.orm import relation, backref, deferred, contains_eager
+from sqlalchemy.orm import relation, backref, deferred
 from sqlalchemy.sql import and_
 
-from aquilon.exceptions_ import NotFoundException, InternalError
+from aquilon.exceptions_ import InternalError
 from aquilon.aqdb.column_types import AqStr, Enum
 from aquilon.aqdb.model import Base, Network, NetworkDevice
 
@@ -118,7 +118,7 @@ class PortGroup(Base):
         return self.legacy_vlan.port_group
 
 
-class ObservedVlan(Base):
+class __ObservedVlan(Base):
     """ reports the observance of a vlan/network on a switch """
     __tablename__ = 'observed_vlan'
 
@@ -134,31 +134,11 @@ class ObservedVlan(Base):
                                       name='%s_pg_fk' % _ABV),
                            nullable=False)
 
-    network_device = relation(NetworkDevice, innerjoin=True,
-                              backref=backref('observed_vlans',
-                                              passive_deletes=True))
-    port_group = relation(PortGroup, innerjoin=True,
-                          backref=backref('observed_vlans',
-                                          passive_deletes=True))
-
     __table_args__ = (PrimaryKeyConstraint(network_device_id, port_group_id,
                                            name="%s_pk" % _TN),
                       Index('%s_pg_idx' % _TN, 'port_group_id'))
 
-    @classmethod
-    def get_network(cls, session, network_device, vlan_id, compel=NotFoundException):
-        q = session.query(cls)
-        q = q.filter_by(network_device=network_device)
-        q = q.join(PortGroup)
-        q = q.filter_by(network_tag=vlan_id)
-        q = q.join(Network)
-        q = q.options(contains_eager('port_group'),
-                      contains_eager('port_group.network'))
-        nets = q.all()
-        if not nets:
-            raise compel("No network found for switch %s and VLAN %s" %
-                         (network_device.fqdn, vlan_id))
-        if len(nets) > 1:
-            raise InternalError("More than one network found for switch %s "
-                                "and VLAN %s" % (network_device.fqdn, vlan_id))
-        return nets[0].port_group.network
+NetworkDevice.observed_vlans = relation(PortGroup,
+                                        secondary=__ObservedVlan.__table__,
+                                        cascade="save-update, merge",
+                                        backref=backref('network_devices'))
