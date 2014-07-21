@@ -123,19 +123,19 @@ class CommandAddInterfaceMachine(BrokerCommand):
             pass
 
         if pg is not None:
-            port_group = verify_port_group(dbmachine, pg)
+            port_group_name = verify_port_group(dbmachine, pg)
         elif autopg:
-            port_group = choose_port_group(logger, dbmachine)
-            audit_results.append(('pg', port_group))
+            port_group_name = choose_port_group(logger, dbmachine)
+            audit_results.append(('pg', port_group_name))
         else:
-            port_group = None
+            port_group_name = None
 
         dbinterface = get_or_create_interface(session, dbmachine,
                                               name=interface,
                                               vendor=vendor, model=model,
                                               interface_type=iftype, mac=mac,
                                               bootable=bootable,
-                                              port_group=port_group,
+                                              port_group_name=port_group_name,
                                               bus_address=bus_address,
                                               comments=comments, preclude=True)
 

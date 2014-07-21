@@ -32,7 +32,7 @@ class CommandDelVlan(BrokerCommand):
         q1 = q1.filter_by(usage=dbvi.vlan_type, network_tag=dbvi.vlan_id)
 
         q2 = session.query(Interface)
-        q2 = q2.filter_by(port_group=dbvi.port_group)
+        q2 = q2.filter_by(port_group_name=dbvi.port_group)
 
         if q1.first() or q2.first():
             raise ArgumentError("VLAN {0} is still in use and cannot be "

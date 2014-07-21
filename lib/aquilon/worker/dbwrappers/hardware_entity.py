@@ -60,7 +60,7 @@ def search_hardware_entity_query(session, hardware_type=HardwareEntity,
         if mac:
             q = q.filter_by(mac=mac)
         if pg:
-            q = q.filter_by(port_group=pg)
+            q = q.filter_by(port_group_name=pg)
         if interface_bus_address:
             q = q.filter_by(bus_address=interface_bus_address)
         if interface_model or interface_vendor:

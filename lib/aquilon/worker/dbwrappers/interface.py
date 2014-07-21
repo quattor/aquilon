@@ -101,7 +101,7 @@ def generate_ip(session, logger, dbinterface, ip=None, ipfromip=None,
         if not dbinterface:
             raise ArgumentError("No interface available to automatically "
                                 "generate an IP address.")
-        if dbinterface.port_group:
+        if dbinterface.port_group_name:
             # This could either be an interface from a virtual machine
             # or an interface on an ESX vmhost.
             dbcluster = None
@@ -119,7 +119,7 @@ def generate_ip(session, logger, dbinterface, ip=None, ipfromip=None,
                                     "address to an interface with a port group "
                                     "since {0} is not associated with a "
                                     "switch.".format(dbcluster))
-            dbvi = VlanInfo.get_by_pg(session, dbinterface.port_group)
+            dbvi = VlanInfo.get_by_pg(session, dbinterface.port_group_name)
             dbnetwork = ObservedVlan.get_network(session, vlan_id=dbvi.vlan_id,
                                                  network_device=dbcluster.network_device,
                                                  compel=ArgumentError)
@@ -231,7 +231,7 @@ def describe_interface(session, interface):
     return ", ".join(description)
 
 
-def verify_port_group(dbmachine, port_group):
+def verify_port_group(dbmachine, port_group_name):
     """Validate that the port_group can be used on an interface.
 
     If the machine is virtual, check that the corresponding VLAN has
@@ -246,10 +246,10 @@ def verify_port_group(dbmachine, port_group):
     string is passed in.
 
     """
-    if not port_group:
+    if not port_group_name:
         return None
     session = object_session(dbmachine)
-    dbvi = VlanInfo.get_by_pg(session, port_group=port_group,
+    dbvi = VlanInfo.get_by_pg(session, port_group=port_group_name,
                               compel=ArgumentError)
     if dbmachine.model.model_type.isVirtualMachineType():
         dbnetdev = dbmachine.cluster.network_device
@@ -343,7 +343,8 @@ def _type_msg(interface_type, bootable):
 def get_or_create_interface(session, dbhw_ent, name=None, mac=None,
                             model=None, vendor=None, bus_address=None,
                             interface_type='public', bootable=None,
-                            preclude=False, port_group=None, comments=None):
+                            preclude=False, port_group_name=None,
+                            comments=None):
     """
     Look up an existing interface or create a new one.
 
@@ -400,8 +401,9 @@ def get_or_create_interface(session, dbhw_ent, name=None, mac=None,
             if bootable is not None and (not hasattr(iface, "bootable") or
                                          iface.bootable != bootable):
                 continue
-            if port_group is not None and (not hasattr(iface, "port_group") or
-                                           iface.port_group != port_group):
+            if port_group_name is not None and \
+               (not hasattr(iface, "port_group_name") or
+                iface.port_group_name != port_group_name):
                 continue
             interfaces.append(iface)
         if len(interfaces) > 1:
@@ -434,8 +436,8 @@ def get_or_create_interface(session, dbhw_ent, name=None, mac=None,
     if bootable is not None:
         extra_args["bootable"] = bootable
         default_route = bootable
-    if port_group is not None:
-        extra_args["port_group"] = port_group
+    if port_group_name is not None:
+        extra_args["port_group_name"] = port_group_name
 
     if not model and not vendor:
         dbmodel = dbhw_ent.model.nic_model

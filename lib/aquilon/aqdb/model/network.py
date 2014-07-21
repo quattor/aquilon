@@ -338,7 +338,7 @@ class Network(Base):
                                         ObservedVlan, PortGroup)
         session = object_session(self)
         q = session.query(Interface)
-        q = q.filter(Interface.port_group == VlanInfo.port_group,
+        q = q.filter(Interface.port_group_name == VlanInfo.port_group,
                      VlanInfo.vlan_type == PortGroup.usage,
                      VlanInfo.vlan_id == PortGroup.network_tag,
                      Interface.hardware_entity_id == VirtualMachine.machine_id,
@@ -380,7 +380,7 @@ class Network(Base):
         q = q.select_from(Interface)
         q = q.filter(not_(q1.exists()))
 
-        q = q.filter(Interface.port_group == VlanInfo.port_group,
+        q = q.filter(Interface.port_group_name == VlanInfo.port_group,
                      Interface.hardware_entity_id == VirtualMachine.machine_id,
                      VirtualMachine.resource_id == Resource.id,
                      Resource.holder_id == ClusterResource.id,

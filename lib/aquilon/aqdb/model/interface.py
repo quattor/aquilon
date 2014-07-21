@@ -98,7 +98,7 @@ class Interface(DeviceLinkMixin, Base):
                        nullable=True)
 
     # FIXME: move to PublicInterface
-    port_group = Column(AqStr(32), nullable=True)
+    port_group_name = Column(AqStr(32), nullable=True)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
@@ -208,7 +208,7 @@ class PublicInterface(Interface):
 
     __mapper_args__ = {'polymorphic_identity': 'public'}
 
-    extra_fields = ['bootable', 'port_group']
+    extra_fields = ['bootable', 'port_group_name']
 
     name_check = re.compile(r"^[a-z]+\d+[a-z]?$")
 
