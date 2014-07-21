@@ -101,15 +101,12 @@ def generate_ip(session, logger, dbinterface, ip=None, ipfromip=None,
         if not dbinterface:
             raise ArgumentError("No interface available to automatically "
                                 "generate an IP address.")
-        if dbinterface.port_group_name:
-            # This could either be an interface from a virtual machine
-            # or an interface on an ESX vmhost.
-            dbcluster = None
-            if getattr(dbinterface.hardware_entity, "cluster", None):
-                # VM
-                dbcluster = dbinterface.hardware_entity.cluster
-            elif getattr(dbinterface.hardware_entity, "host", None):
-                dbcluster = dbinterface.hardware_entity.host.cluster
+        if dbinterface.port_group:
+            # VM
+            dbnetwork = dbinterface.port_group.network
+        elif dbinterface.port_group_name:
+            # Physical host
+            dbcluster = dbinterface.hardware_entity.host.cluster
             if not dbcluster:
                 raise ArgumentError("Can only automatically assign an IP "
                                     "address to an interface with a port "
@@ -232,13 +229,14 @@ def describe_interface(session, interface):
 
 
 def set_port_group_phys(session, dbinterface, port_group_name):
+    # Physical interface must use a pre-registered port group name
     dbvi = VlanInfo.get_by_pg(session, port_group=port_group_name,
                               compel=ArgumentError)
     dbmachine = dbinterface.hardware_entity
+    dbhost = dbmachine.host
 
-    if dbmachine.host and dbmachine.host.cluster and \
-         dbmachine.host.cluster.network_device:
-        dbnetdev = dbmachine.host.cluster.network_device
+    if dbhost and dbhost.cluster and dbhost.cluster.network_device:
+        dbnetdev = dbhost.cluster.network_device
         q = session.query(ObservedVlan)
         q = q.filter_by(network_device=dbnetdev)
         q = q.join(PortGroup)
@@ -255,15 +253,11 @@ def set_port_group_vm(session, dbinterface, port_group_name):
                               compel=ArgumentError)
     dbmachine = dbinterface.hardware_entity
 
-    # The capacity check below would account this interface twice if we'd try to
-    # assign the same port group as it already has
-    if dbvi.port_group == dbinterface.port_group_name:
-        return
-
     dbnetdev = dbmachine.cluster.network_device
     if not dbnetdev:
         raise ArgumentError("Cannot verify port group availability: no "
                             "switch record for {0}.".format(dbmachine.cluster))
+
     q = session.query(ObservedVlan)
     q = q.filter_by(network_device=dbnetdev)
     q = q.join(PortGroup)
@@ -280,13 +274,18 @@ def set_port_group_vm(session, dbinterface, port_group_name):
 
     pg = dbobserved_vlan.port_group
 
+    # The capacity check below would account this interface twice if we'd try to
+    # assign the same port group as it already has
+    if dbinterface.port_group == pg:
+        return
+
     # Protect against concurrent allocations
     pg.network.lock_row()
 
     if pg.network.is_at_guest_capacity:
         raise ArgumentError("{0} is full for {1:l}.".format(pg, dbnetdev))
 
-    dbinterface.port_group_name = dbvi.port_group
+    dbinterface.port_group = pg
 
 
 def set_port_group(dbinterface, port_group_name):
@@ -309,7 +308,10 @@ def set_port_group(dbinterface, port_group_name):
                             dbinterface.interface_type)
 
     if not port_group_name:
-        dbinterface.port_group_name = None
+        if dbinterface.port_group:
+            dbinterface.port_group = None
+        else:
+            dbinterface.port_group_name = None
         return
 
     session = object_session(dbinterface)
@@ -334,38 +336,30 @@ def choose_port_group(logger, dbinterface):
         raise ArgumentError("Cannot automatically allocate port group: no "
                             "switch record for {0}.".format(dbmachine.cluster))
 
-    selected_vlan = None
+    selected_pg = None
     selected_capacity = 0
-
-    session = object_session(dbmachine)
-    vlans = session.query(VlanInfo).all()
 
     # Protect agains concurrent --autopg invocations.
     Network.lock_rows([ov.port_group.network for ov in dbnetdev.observed_vlans])
 
     for ov in sorted(dbnetdev.observed_vlans,
-                       key=attrgetter('port_group.network_tag')):
-        if ov.port_group.usage != 'user':
+                     key=attrgetter('port_group.network_tag')):
+        pg = ov.port_group
+        if pg.usage != 'user':
             continue
-        net = ov.port_group.network
+        net = pg.network
         free_capacity = net.available_ip_count - net.guest_count
         if free_capacity > 0 and selected_capacity < free_capacity:
-            # FIXME: name lookup is for backwards compatibility
-            # FIXME: this should be changed to ov.port_group.name
-            for vlan in vlans:
-                if vlan.vlan_type == ov.port_group.usage and \
-                   vlan.vlan_id == ov.port_group.network_tag:
-                    selected_vlan = vlan
-                    break
+            selected_pg = pg
             selected_capacity = free_capacity
 
-    if not selected_vlan:
+    if not selected_pg:
         raise ArgumentError("No available user port groups on {0:l}."
                             .format(dbnetdev))
 
-    logger.info("Selected port group {0} for {1:l} (based on {2:l})"
-                .format(selected_vlan.port_group, dbmachine, dbnetdev))
-    dbinterface.port_group_name = selected_vlan.port_group
+    logger.info("Selected {0:l} for {1:l} (based on {2:l})"
+                .format(selected_pg, dbmachine, dbnetdev))
+    dbinterface.port_group = selected_pg
 
 
 def _type_msg(interface_type, bootable):

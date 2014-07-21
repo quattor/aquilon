@@ -100,6 +100,11 @@ class Interface(DeviceLinkMixin, Base):
     # FIXME: move to PublicInterface
     port_group_name = Column(AqStr(32), nullable=True)
 
+    # FIXME: move to PublicInterface
+    port_group_id = Column(Integer, ForeignKey('port_group.id',
+                                               name='%s_pg_fk' % _ABV),
+                           nullable=True)
+
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
 
@@ -118,10 +123,16 @@ class Interface(DeviceLinkMixin, Base):
                       primaryjoin=master_id == id,
                       backref=backref('slaves'))
 
+    # FIXME: move to PublicInterface
+    port_group = relation("PortGroup")
+
     # Order matters here, utils/constraints.py checks for endswith("NOT NULL")
     __table_args__ = (UniqueConstraint(mac, name='%s_mac_addr_uk' % _ABV),
                       UniqueConstraint(hardware_entity_id, name,
                                        name='%s_hw_name_uk' % _ABV),
+                      CheckConstraint(or_(port_group_name == None,
+                                          port_group_id == None),
+                                      name='%s_pg_ck' % _ABV),
                       Index('%s_model_idx' % _ABV, model_id),
                       Index('%s_master_idx' % _ABV, master_id))
     __mapper_args__ = {'polymorphic_on': interface_type}
@@ -178,11 +189,16 @@ class Interface(DeviceLinkMixin, Base):
         q = q.order_by(desc(ObservedMac.last_seen))
         return q.first()
 
-    def __init__(self, **kw):
+    def __init__(self, port_group=None, port_group_name=None, **kw):
         """ Overload the Base initializer to prevent null MAC addresses
             where the interface is bootable or is of type 'management'
         """
-        super(Interface, self).__init__(**kw)
+        if port_group and port_group_name:  # pragma: no cover
+            raise InternalError("port_group and port_group_name cannot be set "
+                                "simultaneously.")
+
+        super(Interface, self).__init__(port_group=port_group,
+                                        port_group_name=port_group_name, **kw)
         self.validate_mac("mac", self.mac)
 
     def __repr__(self):
@@ -208,7 +224,7 @@ class PublicInterface(Interface):
 
     __mapper_args__ = {'polymorphic_identity': 'public'}
 
-    extra_fields = ['bootable', 'port_group_name']
+    extra_fields = ['bootable', 'port_group_name', 'port_group']
 
     name_check = re.compile(r"^[a-z]+\d+[a-z]?$")
 

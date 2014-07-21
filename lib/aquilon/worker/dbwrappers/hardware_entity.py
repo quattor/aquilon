@@ -16,9 +16,12 @@
 # limitations under the License.
 """Wrappers to make getting and using hardware entities simpler."""
 
+from sqlalchemy.sql import and_, or_
+
 from aquilon.exceptions_ import ArgumentError, AquilonError
 from aquilon.aqdb.model import (HardwareEntity, Model, ReservedName,
-                                AddressAssignment, ARecord, Fqdn, Interface)
+                                AddressAssignment, ARecord, Fqdn, Interface,
+                                VlanInfo, PortGroup)
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.worker.dbwrappers.dns import convert_reserved_to_arecord
@@ -59,10 +62,14 @@ def search_hardware_entity_query(session, hardware_type=HardwareEntity,
         q = q.join('interfaces')
         if mac:
             q = q.filter_by(mac=mac)
-        if pg:
-            q = q.filter_by(port_group_name=pg)
         if interface_bus_address:
-            q = q.filter_by(bus_address=interface_bus_address)
+            q = q.filter(bus_address=interface_bus_address)
+        if pg:
+            dbvi = VlanInfo.get_by_pg(session, pg, compel=ArgumentError)
+            q = q.join(PortGroup)
+            q = q.filter(or_(Interface.port_group_name == pg,
+                             and_(PortGroup.network_tag == dbvi.vlan_id,
+                                  PortGroup.usage == dbvi.vlan_type)))
         if interface_model or interface_vendor:
             subq = Model.get_matching_query(session, name=interface_model,
                                             vendor=interface_vendor,

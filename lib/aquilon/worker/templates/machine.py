@@ -124,7 +124,9 @@ class PlenaryMachineInfo(StructurePlenary):
                 ifinfo = {}
                 if interface.mac:
                     ifinfo["hwaddr"] = interface.mac
-                if interface.port_group_name:
+                if interface.port_group:
+                    ifinfo["port_group"] = interface.port_group.name
+                elif interface.port_group_name:
                     ifinfo["port_group"] = interface.port_group_name
                 if interface.bootable:
                     ifinfo["boot"] = interface.bootable

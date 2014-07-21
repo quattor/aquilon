@@ -134,7 +134,10 @@ class CommandAddInterfaceMachine(BrokerCommand):
             set_port_group(dbinterface, pg)
         elif autopg:
             choose_port_group(logger, dbinterface)
-            audit_results.append(('pg', dbinterface.port_group_name))
+            if dbinterface.port_group:
+                audit_results.append(('pg', dbinterface.port_group.name))
+            else:
+                audit_results.append(('pg', dbinterface.port_group_name))
 
         # So far, we're *only* creating a manager if we happen to be
         # removing a blind entry and we can steal its IP address.

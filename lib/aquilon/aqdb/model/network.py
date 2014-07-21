@@ -333,29 +333,24 @@ class Network(Base):
 
     @property
     def guests(self):
-        from aquilon.aqdb.model import (Interface, VirtualMachine, Resource,
-                                        VlanInfo, ClusterResource, EsxCluster,
-                                        ObservedVlan, PortGroup)
+        from aquilon.aqdb.model import Interface
+
+        if not self.port_group:
+            return []
+
         session = object_session(self)
         q = session.query(Interface)
-        q = q.filter(Interface.port_group_name == VlanInfo.port_group,
-                     VlanInfo.vlan_type == PortGroup.usage,
-                     VlanInfo.vlan_id == PortGroup.network_tag,
-                     Interface.hardware_entity_id == VirtualMachine.machine_id,
-                     VirtualMachine.resource_id == Resource.id,
-                     Resource.holder_id == ClusterResource.id,
-                     ClusterResource.cluster_id == EsxCluster.esx_cluster_id,
-                     EsxCluster.network_device_id == ObservedVlan.network_device_id,
-                     ObservedVlan.port_group_id == PortGroup.id,
-                     PortGroup.network_id == self.id)
+        q = q.filter_by(port_group=self.port_group)
         return q.all()
 
     @property
     def guest_count(self):
         # Avoid circular deps by doing the imports here
-        from aquilon.aqdb.model import (Interface, AddressAssignment, VlanInfo,
-                                        PortGroup, VirtualMachine, Resource,
-                                        ClusterResource, EsxCluster)
+        from aquilon.aqdb.model import Interface, AddressAssignment
+
+        if not self.port_group:
+            return 0
+
         session = object_session(self)
 
         # First case: count all existing IP addresses allocated in the usable
@@ -370,7 +365,6 @@ class Network(Base):
 
         # Second case: count all interfaces that
         # - do not have an address assigned on this network (VIPs don't count)
-        # - belong to a cluster where this network is visible
         # - have a matching portgroup
         q1 = session.query(AddressAssignment)
         q1 = q1.filter(AddressAssignment.network_id == self.id,
@@ -379,19 +373,8 @@ class Network(Base):
         q = session.query(func.count(Interface.id.distinct()).label("iface_count"))
         q = q.select_from(Interface)
         q = q.filter(not_(q1.exists()))
-
-        q = q.filter(Interface.port_group_name == VlanInfo.port_group,
-                     Interface.hardware_entity_id == VirtualMachine.machine_id,
-                     VirtualMachine.resource_id == Resource.id,
-                     Resource.holder_id == ClusterResource.id,
-                     ClusterResource.cluster_id == EsxCluster.esx_cluster_id)
-
-        # Doing this in Python appears faster than doing everyting in SQL
-        for ov in self.port_group.observed_vlans:
-            q2 = q.filter(VlanInfo.vlan_id == PortGroup.network_tag,
-                          PortGroup.id == ov.port_group_id,
-                          EsxCluster.network_device_id == ov.network_device_id)
-            cnt = cnt + q2.scalar()
+        q = q.filter(Interface.port_group == self.port_group)
+        cnt += q.scalar()
 
         return cnt
 

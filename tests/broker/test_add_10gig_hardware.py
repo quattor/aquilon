@@ -38,8 +38,8 @@ class TestAdd10GigHardware(TestBrokerCommand):
         command = ["search_network", "--machine=evm18"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
-                         "Machine evm18 has no interfaces with a portgroup or "
-                         "assigned to a network.",
+                         "Machine evm18 has no interfaces with a port group "
+                         "or assigned to a network.",
                          command)
 
     def test_010_oldlocation(self):

@@ -65,8 +65,8 @@ class TestSearchNetwork(TestBrokerCommand):
         command = ["search_network", "--machine=ut3c1n9"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
-                         "Machine ut3c1n9 has no interfaces assigned to a "
-                         "network.",
+                         "Machine ut3c1n9 has no interfaces with a port group "
+                         "or assigned to a network.",
                          command)
 
     # Failure for a virtual machine with no interface is in

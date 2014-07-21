@@ -63,7 +63,10 @@ class InterfaceFormatter(ObjectFormatter):
         if interface.bus_address:
             details.append(indent + "  Controller Bus Address: %s" %
                            interface.bus_address)
-        if interface.port_group_name:
+        if interface.port_group:
+            details.append(indent + "  {0:c}: {0.name}"
+                           .format(interface.port_group))
+        elif interface.port_group_name:
             details.append(indent + "  Port Group: %s" % interface.port_group_name)
 
         if hasattr(interface, "vlan_id"):

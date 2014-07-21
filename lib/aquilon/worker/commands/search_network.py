@@ -17,7 +17,7 @@
 """Contains the logic for `aq search network`."""
 
 from sqlalchemy.sql import exists
-from sqlalchemy.orm import undefer, aliased
+from sqlalchemy.orm import undefer
 
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.exceptions_ import ArgumentError
@@ -61,30 +61,19 @@ class CommandSearchNetwork(BrokerCommand):
             q = q.filter_by(side=side)
         if machine:
             dbmachine = Machine.get_unique(session, machine, compel=True)
-            vlans = []
-            if dbmachine.cluster and dbmachine.cluster.network_device:
-                # If this is a VM on a cluster, consult the VLANs.  There
-                # could be functionality here for real hardware to consult
-                # interface port groups... there's no real use case yet.
-                vlans = [VlanInfo.get_by_pg(session, i.port_group_name).vlan_id
-                         for i in dbmachine.interfaces if i.port_group_name]
-                if vlans:
-                    PGAlias = aliased(PortGroup)
-                    q = q.join(PGAlias)
-                    q = q.filter(PGAlias.network_tag.in_(vlans))
-                    q = q.join(ObservedVlan, aliased=True)
-                    q = q.filter_by(network_device=dbmachine.cluster.network_device)
-                    q = q.reset_joinpoint()
-            if not vlans:
-                networks = [addr.network.id for addr in
-                            dbmachine.all_addresses()]
-                if not networks:
-                    msg = "Machine %s has no interfaces " % dbmachine.label
-                    if dbmachine.cluster:
-                        msg += "with a portgroup or "
-                    msg += "assigned to a network."
-                    raise ArgumentError(msg)
-                q = q.filter(Network.id.in_(networks))
+            # If this is a VM, consult the port groups.  There
+            # could be functionality here for real hardware to consult
+            # interface port groups... there's no real use case yet.
+            networks = set(iface.port_group.network_id
+                           for iface in dbmachine.interfaces
+                           if iface.port_group)
+            networks.update(addr.network.id for addr in
+                            dbmachine.all_addresses())
+            if not networks:
+                raise ArgumentError("{0} has no interfaces with a port group "
+                                    "or assigned to a network."
+                                    .format(dbmachine))
+            q = q.filter(Network.id.in_(networks))
         if fqdn:
             (short, dbdns_domain) = parse_fqdn(session, fqdn)
             dnsq = session.query(ARecord.ip)

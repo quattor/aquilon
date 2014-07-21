@@ -114,6 +114,7 @@ class CommandShowBunkerViolations(BrokerCommand):
                       contains_eager('interface'),
                       defer('interface.mac'),
                       defer('interface.port_group_name'),
+                      defer('interface.port_group_id'),
                       defer('interface.model_id'),
                       defer('interface.bootable'),
                       defer('interface.default_route'),

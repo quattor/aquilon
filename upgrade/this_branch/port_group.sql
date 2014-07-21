@@ -40,5 +40,34 @@ ALTER TABLE observed_vlan ADD CONSTRAINT obs_vlan_pg_fk FOREIGN KEY (port_group_
 
 ALTER TABLE interface RENAME COLUMN port_group TO port_group_name;
 
+ALTER TABLE interface ADD port_group_id INTEGER;
+ALTER TABLE interface ADD CONSTRAINT iface_pg_fk FOREIGN KEY (port_group_id) REFERENCES port_group (id);
+ALTER TABLE interface ADD CONSTRAINT iface_pg_ck CHECK (port_group_id IS NULL OR port_group_name IS NULL);
+
+DECLARE
+	CURSOR vm_iface_curs IS
+		SELECT interface.id, port_group.id AS pg_id
+		FROM interface JOIN hardware_entity ON interface.hardware_entity_id = hardware_entity.id
+			JOIN model ON hardware_entity.model_id = model.id
+			JOIN virtual_machine ON virtual_machine.machine_id = hardware_entity.id
+			JOIN "resource" ON virtual_machine.resource_id = "resource".id
+			JOIN resholder ON "resource".holder_id = resholder.id
+			JOIN clstr ON resholder.cluster_id = clstr.id
+			JOIN esx_cluster ON esx_cluster.esx_cluster_id = clstr.id
+			JOIN network_device ON esx_cluster.network_device_id = network_device.hardware_entity_id
+			JOIN observed_vlan ON network_device.hardware_entity_id = observed_vlan.network_device_id
+			JOIN port_group ON observed_vlan.port_group_id = port_group.id
+			JOIN vlan_info ON port_group.usage = vlan_info.vlan_type AND port_group.network_tag = vlan_info.vlan_id
+		WHERE (model.model_type = 'virtual_machine' OR model.model_type = 'virtual_appliance')
+			AND vlan_info.port_group = interface.port_group_name
+		FOR UPDATE OF interface.port_group_name, interface.port_group_id;
+	vm_iface_rec vm_iface_curs%ROWTYPE;
+BEGIN
+	FOR vm_iface_rec IN vm_iface_curs LOOP
+		UPDATE interface SET port_group_name = NULL, port_group_id = vm_iface_rec.pg_id WHERE CURRENT OF vm_iface_curs;
+	END LOOP;
+END;
+/
+
 COMMIT;
 QUIT;

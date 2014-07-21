@@ -70,7 +70,10 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
             set_port_group(dbinterface, pg)
         elif autopg:
             choose_port_group(logger, dbinterface)
-            audit_results.append(('pg', dbinterface.port_group_name))
+            if dbinterface.port_group:
+                audit_results.append(('pg', dbinterface.port_group.name))
+            else:
+                audit_results.append(('pg', dbinterface.port_group_name))
 
         if master:
             if dbinterface.addresses:
