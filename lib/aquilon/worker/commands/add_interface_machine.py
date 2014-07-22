@@ -23,7 +23,6 @@ from aquilon.worker.dbwrappers.dns import delete_dns_record
 from aquilon.worker.dbwrappers.interface import (get_or_create_interface,
                                                  describe_interface,
                                                  set_port_group,
-                                                 choose_port_group,
                                                  assign_address)
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
 from aquilon.worker.processes import DSDBRunner
@@ -130,10 +129,11 @@ class CommandAddInterfaceMachine(BrokerCommand):
                                               bus_address=bus_address,
                                               comments=comments, preclude=True)
 
-        if pg:
-            set_port_group(dbinterface, pg)
-        elif autopg:
-            choose_port_group(logger, dbinterface)
+        if pg or autopg:
+            if autopg:
+                pg = 'user'
+            set_port_group(session, logger, dbinterface, pg)
+        if autopg:
             if dbinterface.port_group:
                 audit_results.append(('pg', dbinterface.port_group.name))
             else:

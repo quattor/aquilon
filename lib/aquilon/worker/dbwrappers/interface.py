@@ -33,6 +33,7 @@ from aquilon.aqdb.model import (Interface, ObservedMac, Fqdn, ARecord, VlanInfo,
                                 AddressAssignment, Model, Bunker,
                                 Location, HardwareEntity, Network)
 from aquilon.aqdb.model.network import get_net_id_from_ip
+from aquilon.aqdb.model.vlan import VLAN_TYPES
 from aquilon.utils import first_of
 
 
@@ -252,37 +253,65 @@ def set_port_group_phys(session, dbinterface, port_group_name):
     dbinterface.port_group_name = dbvi.port_group
 
 
-def set_port_group_vm(session, dbinterface, port_group_name):
-    dbvi = VlanInfo.get_by_pg(session, port_group=port_group_name,
-                              compel=ArgumentError)
+def set_port_group_vm(session, logger, dbinterface, port_group_name):
     dbmachine = dbinterface.hardware_entity
     dbnetdev = dbmachine.cluster.network_device
     if not dbnetdev:
         raise ArgumentError("Cannot verify port group availability: no "
                             "switch record for {0}.".format(dbmachine.cluster))
 
-    pg = first_of(dbnetdev.observed_vlans,
-                  lambda x: x.network_tag == dbvi.vlan_id)
-    if not pg:
-        raise ArgumentError("Cannot verify port group availability: "
-                            "no record for VLAN {0} on "
-                            "{1:l}.".format(dbvi.vlan_id, dbnetdev))
+    dbvi = VlanInfo.get_by_pg(session, port_group=port_group_name, compel=None)
+    if dbvi:
+        # User requested a specific VLAN, check if it is available
+        selected_pg = first_of(dbnetdev.observed_vlans,
+                               lambda x: x.network_tag == dbvi.vlan_id)
+        if not selected_pg:
+            raise ArgumentError("Cannot verify port group availability: "
+                                "no record for VLAN {0} on "
+                                "{1:l}.".format(dbvi.vlan_id, dbnetdev))
 
-    # The capacity check below would account this interface twice if we'd try to
-    # assign the same port group as it already has
-    if dbinterface.port_group == pg:
-        return
+        # The capacity check below would account this interface twice if we'd
+        # try to assign the same port group as it already has
+        if dbinterface.port_group == selected_pg:
+            return
 
-    # Protect against concurrent allocations
-    pg.network.lock_row()
+        # Protect against concurrent allocations
+        selected_pg.network.lock_row()
 
-    if pg.network.is_at_guest_capacity:
-        raise ArgumentError("{0} is full for {1:l}.".format(pg, dbnetdev))
+        if selected_pg.network.is_at_guest_capacity:
+            raise ArgumentError("{0} is full for {1:l}.".format(selected_pg,
+                                                                dbnetdev))
+    else:
+        if port_group_name not in VLAN_TYPES:
+            raise ArgumentError("Port group %s does not match either a "
+                                "registered port group name, or a port "
+                                "group type." % port_group_name)
+        selected_pg = None
+        selected_capacity = 0
 
-    dbinterface.port_group = pg
+        # Protect agains concurrent invocations
+        Network.lock_rows([pg.network for pg in dbnetdev.observed_vlans])
+
+        for pg in sorted(dbnetdev.observed_vlans, key=attrgetter('network_tag')):
+            if pg.usage != port_group_name:
+                continue
+            net = pg.network
+            free_capacity = net.available_ip_count - net.guest_count
+            if free_capacity > 0 and selected_capacity < free_capacity:
+                selected_pg = pg
+                selected_capacity = free_capacity
+
+        if not selected_pg:
+            raise ArgumentError("No available {0!s} port groups on {1:l}."
+                                .format(port_group_name, dbnetdev))
+
+        logger.info("Selected {0:l} for {1:l} (based on {2:l})"
+                    .format(selected_pg, dbmachine, dbnetdev))
+
+    dbinterface.port_group = selected_pg
 
 
-def set_port_group(dbinterface, port_group_name):
+def set_port_group(session, logger, dbinterface, port_group_name):
     """Validate that the port_group can be used on an interface.
 
     If the machine is virtual, check that the corresponding VLAN has
@@ -311,48 +340,9 @@ def set_port_group(dbinterface, port_group_name):
     session = object_session(dbinterface)
 
     if dbinterface.hardware_entity.model.model_type.isVirtualMachineType():
-        set_port_group_vm(session, dbinterface, port_group_name)
+        set_port_group_vm(session, logger, dbinterface, port_group_name)
     else:
         set_port_group_phys(session, dbinterface, port_group_name)
-
-
-def choose_port_group(logger, dbinterface):
-    if "port_group_name" not in dbinterface.extra_fields:
-        raise ArgumentError("The port group cannot be set for %s interfaces." %
-                            dbinterface.interface_type)
-
-    dbmachine = dbinterface.hardware_entity
-    if not dbmachine.model.model_type.isVirtualMachineType():
-        raise ArgumentError("Can only automatically generate "
-                            "portgroup entry for virtual hardware.")
-
-    dbnetdev = dbmachine.cluster.network_device
-    if not dbnetdev:
-        raise ArgumentError("Cannot automatically allocate port group: no "
-                            "switch record for {0}.".format(dbmachine.cluster))
-
-    selected_pg = None
-    selected_capacity = 0
-
-    # Protect agains concurrent --autopg invocations.
-    Network.lock_rows([pg.network for pg in dbnetdev.observed_vlans])
-
-    for pg in sorted(dbnetdev.observed_vlans, key=attrgetter('network_tag')):
-        if pg.usage != 'user':
-            continue
-        net = pg.network
-        free_capacity = net.available_ip_count - net.guest_count
-        if free_capacity > 0 and selected_capacity < free_capacity:
-            selected_pg = pg
-            selected_capacity = free_capacity
-
-    if not selected_pg:
-        raise ArgumentError("No available user port groups on {0:l}."
-                            .format(dbnetdev))
-
-    logger.info("Selected {0:l} for {1:l} (based on {2:l})"
-                .format(selected_pg, dbmachine, dbnetdev))
-    dbinterface.port_group = selected_pg
 
 
 def _type_msg(interface_type, bootable):
