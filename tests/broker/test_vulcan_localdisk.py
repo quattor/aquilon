@@ -276,21 +276,16 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, MachineTestMixin,
         out = self.commandtest(command)
         self.matchclean(out, "Uses Sertice: vcenter Instance: ut", command)
 
-    def check_path_exclusive(self, path, wrongpath):
-        self.failIf(os.path.exists(wrongpath),
-                    "Plenary file '%s' not removed." % wrongpath)
-        self.failUnless(os.path.exists(path),
-                        "Plenary file '%s' not created." % path)
-
     def test_210_move_machine(self):
-        # self.plenary_core = "machine/%(hub)s/%(building)s/%(rack)s" % self.__dict__
-        oldpath = self.plenary_name("machine", "americas", "ut", "ut3", self.machine[0])
-        newpath = self.plenary_name("machine", "americas", "ut", "ut13", self.machine[0])
+        old_path = ["machine", "americas", "ut", "ut3", self.machine[0]]
+        new_path = ["machine", "americas", "ut", "ut13", self.machine[0]]
 
-        self.check_path_exclusive(oldpath, newpath)
+        self.check_plenary_exists(*old_path)
+        self.check_plenary_gone(*new_path)
         self.noouttest(["update", "machine", "--machine", self.machine[0],
                         "--rack", "ut13"])
-        self.check_path_exclusive(newpath, oldpath)
+        self.check_plenary_gone(*old_path)
+        self.check_plenary_exists(*new_path)
 
     def test_220_check_location(self):
         command = ["show", "machine", "--machine", self.machine[0]]

@@ -17,8 +17,6 @@
 # limitations under the License.
 """Module for testing the del service command."""
 
-import os.path
-
 if __name__ == "__main__":
     import utils
     utils.import_depends()
@@ -58,23 +56,17 @@ class TestDelService(TestBrokerCommand):
 
         for service, instances in services_to_delete.items():
             for pattern in service_plenaries:
-                plenary = self.plenary_name(pattern % service)
-                self.failUnless(os.path.exists(plenary),
-                                "Plenary '%s' does not exist." % plenary)
+                self.check_plenary_exists(pattern % service)
 
             for instance in instances:
                 for pattern in instance_plenaries:
-                    plenary = self.plenary_name(pattern % (service, instance))
-                    self.failUnless(os.path.exists(plenary),
-                                    "Plenary '%s' does not exist." % plenary)
+                    self.check_plenary_exists(pattern % (service, instance))
 
                 self.noouttest(["del_service", "--service", service,
                                 "--instance", instance])
 
                 for pattern in instance_plenaries:
-                    plenary = self.plenary_name(pattern % (service, instance))
-                    self.failIf(os.path.exists(plenary),
-                                "Plenary '%s' still exists." % plenary)
+                    self.check_plenary_gone(pattern % (service, instance))
 
             command = ["show_service", "--service", service]
             out = self.commandtest(command)
@@ -83,9 +75,7 @@ class TestDelService(TestBrokerCommand):
 
             self.noouttest(["del_service", "--service", service])
             for pattern in service_plenaries:
-                plenary = self.plenary_name(pattern % service)
-                self.failIf(os.path.exists(plenary),
-                            "Plenary '%s' still exist." % plenary)
+                self.check_plenary_gone(pattern % service)
 
     # At this point, pa.ny.na still is still mapped.  del_service
     # should silently remove the mappings.

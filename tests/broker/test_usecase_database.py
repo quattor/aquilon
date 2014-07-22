@@ -182,18 +182,16 @@ class TestUsecaseDatabase(TestBrokerCommand):
         plenarydir = self.config.get("broker", "plenarydir")
         cluster_dir = os.path.join(plenarydir, "cluster", "nydb1")
         cluster_res_dir = os.path.join(plenarydir, "resource", "cluster", "nydb1")
-        res_plenaries = [self.plenary_name("resource", "cluster", "nydb1",
-                                           "filesystem", "gnr.0", "config"),
-                         self.plenary_name("resource", "cluster", "nydb1",
-                                           "application", "nydb1", "config"),
-                         self.plenary_name("resource", "cluster", "nydb1",
-                                           "service_address", "nydb1nydb1",
-                                           "config")]
+        res_plenaries = [["resource", "cluster", "nydb1",
+                          "filesystem", "gnr.0", "config"],
+                         ["resource", "cluster", "nydb1",
+                          "application", "nydb1", "config"],
+                         ["resource", "cluster", "nydb1",
+                          "service_address", "nydb1nydb1", "config"]]
 
         # Verify that we got the paths right
-        for plenary in res_plenaries:
-            self.failUnless(os.path.exists(plenary),
-                            "Plenary '%s' does not exist" % plenary)
+        for path in res_plenaries:
+            self.check_plenary_exists(*path)
 
         self.dsdb_expect_delete(self.net["unknown0"].usable[25])
         command = ["del_service_address", "--cluster=nydb1",
@@ -208,16 +206,14 @@ class TestUsecaseDatabase(TestBrokerCommand):
         self.successtest(command)
 
         # The resource plenaries should be gone
-        for plenary in res_plenaries:
-            self.failIf(os.path.exists(plenary),
-                        "Plenary '%s' still exists" % plenary)
+        for path in res_plenaries:
+            self.check_plenary_gone(*path, directory_gone=True)
 
         # The directories should be gone as well
         self.failIf(os.path.exists(cluster_res_dir),
                     "Plenary directory '%s' still exists" % cluster_res_dir)
         self.failIf(os.path.exists(cluster_dir),
                     "Plenary directory '%s' still exists" % cluster_dir)
-
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUsecaseDatabase)

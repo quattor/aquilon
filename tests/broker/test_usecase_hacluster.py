@@ -69,48 +69,31 @@ class TestUsecaseHACluster(TestBrokerCommand):
     def test_120_add_resourcegroups(self):
         for cl in range(1, 3):
             for rg in range(1, 3):
-                plenary = self.plenary_name("resource",
-                                            "cluster", "hacl%d" % cl,
-                                            "resourcegroup",
-                                            "hacl%dg%d" % (cl, rg),
-                                            "config")
-
                 self.successtest(["add", "resourcegroup",
                                   "--cluster", "hacl%d" % cl,
                                   "--resourcegroup", "hacl%dg%d" % (cl, rg)])
-                self.failUnless(os.path.exists(plenary),
-                                "Plenary '%s' does not exist" % plenary)
+                self.check_plenary_exists("resource",
+                                          "cluster", "hacl%d" % cl,
+                                          "resourcegroup", "hacl%dg%d" % (cl, rg),
+                                          "config")
 
     def test_125_add_apps(self):
         for cl in range(1, 3):
             for rg in range(1, 3):
-                plenary = self.plenary_name("resource",
-                                            "cluster", "hacl%d" % cl,
-                                            "resourcegroup",
-                                            "hacl%dg%d" % (cl, rg),
-                                            "application",
-                                            "hacl%dg%dapp" % (cl, rg),
-                                            "config")
-
                 self.successtest(["add", "application",
                                   "--cluster", "hacl%d" % cl,
                                   "--resourcegroup", "hacl%dg%d" % (cl, rg),
                                   "--application", "hacl%dg%dapp" % (cl, rg),
                                   "--eonid", 42])
-                self.failUnless(os.path.exists(plenary),
-                                "Plenary '%s' does not exist" % plenary)
+                self.check_plenary_exists("resource",
+                                          "cluster", "hacl%d" % cl,
+                                          "resourcegroup", "hacl%dg%d" % (cl, rg),
+                                          "application", "hacl%dg%dapp" % (cl, rg),
+                                          "config")
 
     def test_125_add_fs(self):
         for cl in range(1, 3):
             for rg in range(1, 3):
-                plenary = self.plenary_name("resource",
-                                            "cluster", "hacl%d" % cl,
-                                            "resourcegroup",
-                                            "hacl%dg%d" % (cl, rg),
-                                            "filesystem",
-                                            "hacl%dg%dfs" % (cl, rg),
-                                            "config")
-
                 self.successtest(["add", "filesystem", "--type", "ext3",
                                   "--cluster", "hacl%d" % cl,
                                   "--resourcegroup", "hacl%dg%d" % (cl, rg),
@@ -119,22 +102,17 @@ class TestUsecaseHACluster(TestBrokerCommand):
                                   "--blockdevice", "/dev/vx/dsk/dg.0/gnr.%d" % rg,
                                   "--bootmount", "--dumpfreq=1",
                                   "--fsckpass=3", "--options=rw"])
-                self.failUnless(os.path.exists(plenary),
-                                "Plenary '%s' does not exist" % plenary)
+                self.check_plenary_exists("resource",
+                                          "cluster", "hacl%d" % cl,
+                                          "resourcegroup", "hacl%dg%d" % (cl, rg),
+                                          "filesystem", "hacl%dg%dfs" % (cl, rg),
+                                          "config")
 
     def test_125_add_appsrv(self):
         # grep-friendly syntax
         ips = [self.net["unknown0"].usable[28],
                self.net["unknown0"].usable[29]]
         for cl in range(1, 3):
-            plenary = self.plenary_name("resource",
-                                        "cluster", "hacl%d" % cl,
-                                        "resourcegroup",
-                                        "hacl%dg1" % cl,
-                                        "service_address",
-                                        "hacl%dg1addr" % cl,
-                                        "config")
-
             self.dsdb_expect_add("hacl%dg1.aqd-unittest.ms.com" % cl,
                                  ips[cl - 1])
             self.successtest(["add", "service", "address",
@@ -143,8 +121,11 @@ class TestUsecaseHACluster(TestBrokerCommand):
                               "--service_address", "hacl%dg1.aqd-unittest.ms.com" % cl,
                               "--name", "hacl%dg1addr" % cl,
                               "--ip", ips[cl - 1], "--interfaces", "eth0"])
-            self.failUnless(os.path.exists(plenary),
-                            "Plenary '%s' does not exist" % plenary)
+            self.check_plenary_exists("resource",
+                                      "cluster", "hacl%d" % cl,
+                                      "resourcegroup", "hacl%dg1" % cl,
+                                      "service_address", "hacl%dg1addr" % cl,
+                                      "config")
         self.dsdb_verify()
 
     def test_130_add_lb(self):
@@ -153,14 +134,6 @@ class TestUsecaseHACluster(TestBrokerCommand):
                self.net["unknown0"].usable[31]]
         # TODO: range(1, 3) once multi-A records are sorted out
         for cl in range(1, 2):
-            plenary = self.plenary_name("resource",
-                                        "cluster", "hacl%d" % cl,
-                                        "resourcegroup",
-                                        "hacl%dg2" % cl,
-                                        "service_address",
-                                        "hacl%dg2addr" % cl,
-                                        "config")
-
             self.dsdb_expect_add("hashared.aqd-unittest.ms.com", ips[cl - 1])
             self.successtest(["add", "service", "address",
                               "--cluster", "hacl%d" % cl,
@@ -168,8 +141,11 @@ class TestUsecaseHACluster(TestBrokerCommand):
                               "--service_address", "hashared.aqd-unittest.ms.com",
                               "--name", "hacl%dg2addr" % cl,
                               "--ip", ips[cl - 1], "--interfaces", "eth0"])
-            self.failUnless(os.path.exists(plenary),
-                            "Plenary '%s' does not exist" % plenary)
+            self.check_plenary_exists("resource",
+                                      "cluster", "hacl%d" % cl,
+                                      "resourcegroup", "hacl%dg2" % cl,
+                                      "service_address", "hacl%dg2addr" % cl,
+                                      "config")
         self.dsdb_verify()
 
     def test_200_make_cluster(self):
@@ -207,50 +183,40 @@ class TestUsecaseHACluster(TestBrokerCommand):
         ips = [self.net["unknown0"].usable[28],
                self.net["unknown0"].usable[29]]
         for cl in range(1, 3):
-            plenary = self.plenary_name("resource",
-                                        "cluster", "hacl%d" % cl,
-                                        "resourcegroup",
-                                        "hacl%dg1" % cl,
-                                        "service_address",
-                                        "hacl%dg1daddr" % cl,
-                                        "config")
             self.dsdb_expect_delete(ips[cl - 1])
             self.successtest(["del", "service", "address",
                               "--cluster", "hacl%d" % cl,
                               "--resourcegroup", "hacl%dg1" % cl,
                               "--name", "hacl%dg1addr" % cl])
-            self.failIf(os.path.exists(plenary),
-                        "Plenary '%s' still exists" % plenary)
+            self.check_plenary_gone("resource", "cluster", "hacl%d" % cl,
+                                    "resourcegroup", "hacl%dg1" % cl,
+                                    "service_address", "hacl%dg1daddr" % cl,
+                                    "config")
         self.dsdb_verify()
 
     def test_920_del_hacl1g1(self):
         plenarydir = self.config.get("broker", "plenarydir")
         cluster_res_dir = os.path.join(plenarydir, "resource", "cluster", "hacl1")
         rg_dir = os.path.join(cluster_res_dir, "resourcegroup", "hacl1g1")
-        res_plenaries = [self.plenary_name("resource", "cluster", "hacl1",
-                                           "resourcegroup", "hacl1g1",
-                                           "config"),
-                         self.plenary_name("resource", "cluster", "hacl1",
-                                           "resourcegroup", "hacl1g1",
-                                           "application", "hacl1g1app",
-                                           "config"),
-                         self.plenary_name("resource", "cluster", "hacl1",
-                                           "resourcegroup", "hacl1g1",
-                                           "filesystem", "hacl1g1fs",
-                                           "config")]
+        res_plenaries = [["resource", "cluster", "hacl1",
+                          "resourcegroup", "hacl1g1", "config"],
+                         ["resource", "cluster", "hacl1",
+                          "resourcegroup", "hacl1g1",
+                          "application", "hacl1g1app", "config"],
+                         ["resource", "cluster", "hacl1",
+                          "resourcegroup", "hacl1g1",
+                          "filesystem", "hacl1g1fs", "config"]]
 
         # Verify that we got the paths right
-        for plenary in res_plenaries:
-            self.failUnless(os.path.exists(plenary),
-                            "Plenary '%s' does not exist" % plenary)
+        for path in res_plenaries:
+            self.check_plenary_exists(*path)
 
         self.successtest(["del", "resourcegroup", "--resourcegroup", "hacl1g1",
                           "--cluster", "hacl1"])
 
         # The resource plenaries should be gone
-        for plenary in res_plenaries:
-            self.failIf(os.path.exists(plenary),
-                        "Plenary '%s' still exists" % plenary)
+        for path in res_plenaries:
+            self.check_plenary_gone(*path, directory_gone=True)
 
         # The directory should be gone as well
         self.failIf(os.path.exists(rg_dir),

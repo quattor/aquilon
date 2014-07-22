@@ -17,8 +17,6 @@
 # limitations under the License.
 """Module for testing commands that add virtual hardware."""
 
-import os
-
 if __name__ == "__main__":
     import utils
     utils.import_depends()
@@ -231,14 +229,13 @@ class TestAddVirtualHardware(TestBrokerCommand):
         self.matchclean(out, "Share: test_share_9", command)
 
     def test_200_updatemachine(self):
+        old_path = ["machine", "americas", "ut", "ut10", "evm9"]
+        new_path = ["machine", "americas", "ut", "None", "evm9"]
+
         self.noouttest(["update_machine", "--machine", "evm9",
                         "--cluster", "utecl2"])
-        oldpath = self.plenary_name("machine", "americas", "ut", "ut10", "evm9")
-        newpath = self.plenary_name("machine", "americas", "ut", "None", "evm9")
-        self.failIf(os.path.exists(oldpath),
-                    "Plenary file '%s' not removed." % oldpath)
-        self.failUnless(os.path.exists(newpath),
-                        "Plenary file '%s' not created." % newpath)
+        self.check_plenary_gone(*old_path)
+        self.check_plenary_exists(*new_path)
 
     def test_300_failrebindhost(self):
         command = ["cluster", "--cluster=utecl1",

@@ -17,8 +17,6 @@
 # limitations under the License.
 """Module for testing the add reboot_schedule command."""
 
-import os.path
-
 if __name__ == "__main__":
     import utils
     utils.import_depends()
@@ -172,20 +170,15 @@ class TestAddRebootSchedule(TestBrokerCommand):
         self.matchoutput(out, "Key 'day' contains an invalid value. Valid values are (Sun|Mon|Tue|Wed|Thu|Fri|Sat).", command)
 
     def test_300_del_reboot_schedule(self):
-        plenary = self.plenary_name("resource", "host",
-                                    "server1.aqd-unittest.ms.com",
-                                    "reboot_schedule", "reboot_schedule",
-                                    "config")
-        self.failUnless(os.path.exists(plenary),
-                        "Pleanry '%s' does not exist" % plenary)
+        path = ["resource", "host", "server1.aqd-unittest.ms.com",
+                "reboot_schedule", "reboot_schedule", "config"]
+        self.check_plenary_exists(*path)
 
         command = ["del_reboot_schedule",
                    "--hostname=server1.aqd-unittest.ms.com"]
         self.successtest(command)
 
-        dir = os.path.dirname(plenary)
-        self.failIf(os.path.exists(dir),
-                    "Plenary directory '%s' still exists" % dir)
+        self.check_plenary_gone(*path, directory_gone=True)
 
     def test_310_verify_del(self):
         command = ["show_host", "--hostname", "server1.aqd-unittest.ms.com"]

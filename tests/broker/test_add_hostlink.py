@@ -17,8 +17,6 @@
 # limitations under the License.
 """Module for testing the add hostlink command."""
 
-import os
-
 if __name__ == "__main__":
     import utils
     utils.import_depends()
@@ -95,19 +93,15 @@ class TestAddHostlink(TestBrokerCommand):
         self.notfoundtest(command.split(" "))
 
     def test_300_del_hostlink(self):
-        plenary = self.plenary_name("resource", "host",
-                                    "server1.aqd-unittest.ms.com",
-                                    "hostlink", "app1", "config")
-        self.failUnless(os.path.exists(plenary),
-                        "Pleanry '%s' does not exist" % plenary)
+        path = ["resource", "host", "server1.aqd-unittest.ms.com",
+                "hostlink", "app1", "config"]
+        self.check_plenary_exists(*path)
 
         command = ["del_hostlink", "--hostlink=app1",
                    "--hostname=server1.aqd-unittest.ms.com"]
         self.successtest(command)
 
-        dir = os.path.dirname(plenary)
-        self.failIf(os.path.exists(dir),
-                    "Plenary directory '%s' still exists" % dir)
+        self.check_plenary_gone(*path, directory_gone=True)
 
     def test_310_verify_del(self):
         command = ["show_host", "--hostname", "server1.aqd-unittest.ms.com"]
