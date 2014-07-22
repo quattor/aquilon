@@ -231,6 +231,64 @@ def describe_interface(session, interface):
     return ", ".join(description)
 
 
+def set_port_group_phys(session, dbinterface, port_group_name):
+    dbvi = VlanInfo.get_by_pg(session, port_group=port_group_name,
+                              compel=ArgumentError)
+    dbmachine = dbinterface.hardware_entity
+
+    if dbmachine.host and dbmachine.host.cluster and \
+         dbmachine.host.cluster.network_device:
+        dbnetdev = dbmachine.host.cluster.network_device
+        q = session.query(ObservedVlan)
+        q = q.filter_by(network_device=dbnetdev)
+        q = q.join(PortGroup)
+        q = q.filter_by(network_tag=dbvi.vlan_id)
+        if not q.count():
+            raise ArgumentError("VLAN {0} not found for "
+                                "{1:l}.".format(dbvi.vlan_id, dbnetdev))
+
+    dbinterface.port_group_name = dbvi.port_group
+
+
+def set_port_group_vm(session, dbinterface, port_group_name):
+    dbvi = VlanInfo.get_by_pg(session, port_group=port_group_name,
+                              compel=ArgumentError)
+    dbmachine = dbinterface.hardware_entity
+
+    # The capacity check below would account this interface twice if we'd try to
+    # assign the same port group as it already has
+    if dbvi.port_group == dbinterface.port_group_name:
+        return
+
+    dbnetdev = dbmachine.cluster.network_device
+    if not dbnetdev:
+        raise ArgumentError("Cannot verify port group availability: no "
+                            "switch record for {0}.".format(dbmachine.cluster))
+    q = session.query(ObservedVlan)
+    q = q.filter_by(network_device=dbnetdev)
+    q = q.join(PortGroup)
+    q = q.filter_by(network_tag=dbvi.vlan_id)
+    try:
+        dbobserved_vlan = q.one()
+    except NoResultFound:
+        raise ArgumentError("Cannot verify port group availability: "
+                            "no record for VLAN {0} on "
+                            "{1:l}.".format(dbvi.vlan_id, dbnetdev))
+    except MultipleResultsFound:  # pragma: no cover
+        raise InternalError("Too many subnets found for VLAN {0} "
+                            "on {1:l}.".format(dbvi.vlan_id, dbnetdev))
+
+    pg = dbobserved_vlan.port_group
+
+    # Protect against concurrent allocations
+    pg.network.lock_row()
+
+    if pg.network.is_at_guest_capacity:
+        raise ArgumentError("{0} is full for {1:l}.".format(pg, dbnetdev))
+
+    dbinterface.port_group_name = dbvi.port_group
+
+
 def set_port_group(dbinterface, port_group_name):
     """Validate that the port_group can be used on an interface.
 
@@ -255,53 +313,11 @@ def set_port_group(dbinterface, port_group_name):
         return
 
     session = object_session(dbinterface)
-    dbmachine = dbinterface.hardware_entity
-    dbvi = VlanInfo.get_by_pg(session, port_group=port_group_name,
-                              compel=ArgumentError)
 
-    # The capacity check below would account this interface twice if we'd try to
-    # assign the same port group as it already has
-    if dbvi.port_group == dbinterface.port_group_name:
-        return
-
-    if dbmachine.model.model_type.isVirtualMachineType():
-        dbnetdev = dbmachine.cluster.network_device
-        if not dbnetdev:
-            raise ArgumentError("Cannot verify port group availability: no "
-                                "switch record for {0}.".format(dbmachine.cluster))
-        q = session.query(ObservedVlan)
-        q = q.filter_by(network_device=dbnetdev)
-        q = q.join(PortGroup)
-        q = q.filter_by(network_tag=dbvi.vlan_id)
-        try:
-            dbobserved_vlan = q.one()
-        except NoResultFound:
-            raise ArgumentError("Cannot verify port group availability: "
-                                "no record for VLAN {0} on "
-                                "{1:l}.".format(dbvi.vlan_id, dbnetdev))
-        except MultipleResultsFound:  # pragma: no cover
-            raise InternalError("Too many subnets found for VLAN {0} "
-                                "on {1:l}.".format(dbvi.vlan_id, dbnetdev))
-
-        pg = dbobserved_vlan.port_group
-
-        # Protect against concurrent allocations
-        pg.network.lock_row()
-
-        if pg.network.is_at_guest_capacity:
-            raise ArgumentError("{0} is full for {1:l}.".format(pg, dbnetdev))
-    elif dbmachine.host and dbmachine.host.cluster and \
-         dbmachine.host.cluster.network_device:
-        dbnetdev = dbmachine.host.cluster.network_device
-        q = session.query(ObservedVlan)
-        q = q.filter_by(network_device=dbnetdev)
-        q = q.join(PortGroup)
-        q = q.filter_by(network_tag=dbvi.vlan_id)
-        if not q.count():
-            raise ArgumentError("VLAN {0} not found for "
-                                "{1:l}.".format(dbvi.vlan_id, dbnetdev))
-
-    dbinterface.port_group_name = dbvi.port_group
+    if dbinterface.hardware_entity.model.model_type.isVirtualMachineType():
+        set_port_group_vm(session, dbinterface, port_group_name)
+    else:
+        set_port_group_phys(session, dbinterface, port_group_name)
 
 
 def choose_port_group(logger, dbinterface):
