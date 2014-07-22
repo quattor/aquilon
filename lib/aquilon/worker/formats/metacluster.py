@@ -66,7 +66,7 @@ class MetaClusterFormatter(ObjectFormatter):
 
         # for v1 shares
         q = object_session(metacluster).query(Share.name).distinct()
-        q = q.join(ClusterResource, Cluster, '_metacluster')
+        q = q.join(ClusterResource, Cluster)
         q = q.filter_by(metacluster=metacluster)
         q = q.order_by(Share.name)
         shares = q.all()

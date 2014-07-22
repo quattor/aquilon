@@ -36,6 +36,11 @@ def del_cluster(session, logger, dbcluster, config):
         raise ArgumentError("%s is still in use by hosts: %s." %
                             (format(dbcluster), hosts))
 
+    if dbcluster.metacluster:
+        dbmetacluster = dbcluster.metacluster
+        dbmetacluster.members.remove(dbcluster)
+        dbmetacluster.validate()
+
     plenaries = PlenaryCollection(logger=logger)
     plenaries.append(Plenary.get_plenary(dbcluster))
     if dbcluster.resholder:

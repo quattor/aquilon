@@ -33,14 +33,13 @@ class CommandShowMetaClusterAll(BrokerCommand):
         q = session.query(MetaCluster)
 
         q = q.filter_by(name=metacluster)
-        q = q.options(subqueryload('_clusters'),
-                      joinedload('_clusters.cluster'),
-                      subqueryload('_clusters.cluster._hosts'),
-                      lazyload('_clusters.cluster._hosts.cluster'),
-                      joinedload('_clusters.cluster._hosts.host'),
-                      joinedload('_clusters.cluster._hosts.host.hardware_entity'),
-                      joinedload('_clusters.cluster.resholder'),
-                      subqueryload('_clusters.cluster.resholder.resources'))
+        q = q.options(subqueryload('members'),
+                      subqueryload('members._hosts'),
+                      lazyload('members._hosts.cluster'),
+                      joinedload('members._hosts.host'),
+                      joinedload('members._hosts.host.hardware_entity'),
+                      joinedload('members.resholder'),
+                      subqueryload('members.resholder.resources'))
         # TODO: eager load virtual machines
         # TODO: eager load EsxCluster.host_count
         dbmetaclusters = q.order_by(MetaCluster.name).all()

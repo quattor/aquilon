@@ -128,7 +128,7 @@ model_group = {
         'classes' : [ Cluster, ClusterLifecycle, StorageCluster,
                       ComputeCluster, HostClusterMember,
                       ClusterAllowedPersonality, MetaCluster,
-                      MetaClusterMember, EsxCluster, PersonalityClusterInfo,
+                      EsxCluster, PersonalityClusterInfo,
                       PersonalityESXClusterInfo ],
     },
     'network'   : {

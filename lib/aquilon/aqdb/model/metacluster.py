@@ -26,9 +26,6 @@ from sqlalchemy import (Column, Integer, DateTime, Boolean, ForeignKey,
 
 from sqlalchemy.orm import (relation, backref, deferred, validates,
                             object_session)
-from sqlalchemy.orm.attributes import instance_state
-from sqlalchemy.orm.interfaces import MapperExtension
-from sqlalchemy.ext.associationproxy import association_proxy
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Base, Cluster
@@ -59,9 +56,6 @@ class MetaCluster(Cluster):
 
     high_availability = Column(Boolean(name="%s_ha_ck" % _MCT), default=False,
                                nullable=False)
-
-    members = association_proxy('_clusters', 'cluster',
-                                creator=lambda x: MetaClusterMember(cluster=x))
 
     # see cluster.minimum_location
     @property
@@ -146,11 +140,11 @@ class MetaCluster(Cluster):
                                         .format(self, name, value, capacity[name]))
         return
 
-    @validates('_clusters')
-    def validate_cluster_member(self, key, value):
+    @validates('members')
+    def validate_cluster_member(self, key, value):  # pylint: disable=W0613
         session = object_session(self)
         with session.no_autoflush:
-            self.validate_membership(value.cluster)
+            self.validate_membership(value)
         return value
 
     def validate_membership(self, cluster):
@@ -168,27 +162,7 @@ metacluster = MetaCluster.__table__  # pylint: disable=C0103
 metacluster.info['unique_fields'] = ['name']
 
 
-class ValidateMetaCluster(MapperExtension):
-    """ Helper class to perform validation on metacluster membership changes """
-
-    def after_insert(self, mapper, connection, instance):
-        """ Validate the metacluster after a new member has been added """
-        instance.metacluster.validate()
-
-    def after_delete(self, mapper, connection, instance):
-        """ Validate the metacluster after a member has been deleted """
-        # This is a little tricky. If the instance got deleted through an
-        # association proxy, then instance.cluster will be None (although
-        # instance.cluster_id still has the right value).
-        if instance.metacluster:
-            metacluster = instance.metacluster
-        else:
-            state = instance_state(instance)
-            metacluster = state.committed_state['metacluster']
-        metacluster.validate()
-
-
-class MetaClusterMember(Base):
+class _MetaClusterMember(Base):
     """ Binds clusters to metaclusters """
     __tablename__ = _MCM
 
@@ -205,30 +179,10 @@ class MetaClusterMember(Base):
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
 
-    """
-        Association Proxy and relation cascading:
-        We need cascade=all on backrefs so that deletion propagates to avoid
-        AssertionError: Dependency rule tried to blank-out primary key column on
-        deletion of the Metacluster and it's links. On the contrary do not have
-        cascade='all' on the forward mapper here, else deletion of metaclusters
-        and their links also causes deleteion of clusters (BAD)
-    """
-
-    metacluster = relation(MetaCluster, lazy='subquery', innerjoin=True,
-                           foreign_keys=metacluster_id,
-                           backref=backref('_clusters',
-                                           cascade='all, delete-orphan'))
-
-    # This is a one-to-one relation, so we need uselist=False on the backref
-    cluster = relation(Cluster, lazy='subquery', innerjoin=True,
-                       foreign_keys=cluster_id,
-                       backref=backref('_metacluster', uselist=False,
-                                       cascade='all, delete-orphan'))
-
     __table_args__ = (PrimaryKeyConstraint(metacluster_id, cluster_id,
                                            name="%s_pk" % _MCM),
                       UniqueConstraint(cluster_id, name='%s_uk' % _MCM))
-    __mapper_args__ = {'extension': ValidateMetaCluster()}
 
-metamember = MetaClusterMember.__table__  # pylint: disable=C0103
-metamember.info['unique_fields'] = ['metacluster', 'cluster']
+MetaCluster.members = relation(Cluster,
+                               secondary=_MetaClusterMember.__table__,
+                               backref=backref('metacluster', uselist=False))

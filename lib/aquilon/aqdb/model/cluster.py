@@ -136,8 +136,6 @@ class Cluster(Base):
 
     hosts = association_proxy('_hosts', 'host', creator=_hcm_host_creator)
 
-    metacluster = association_proxy('_metacluster', 'metacluster')
-
     __table_args__ = (UniqueConstraint(name, name='cluster_uk'),
                       Index("cluster_branch_idx", branch_id),
                       Index("cluster_prsnlty_idx", personality_id),
