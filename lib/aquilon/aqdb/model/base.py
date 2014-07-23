@@ -18,7 +18,7 @@ import sys
 
 from inspect import isclass
 
-from sqlalchemy.schema import CreateTable
+from sqlalchemy.schema import CreateTable, Index, Table
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.ext.associationproxy import AssociationProxy, _lazy_collection
@@ -28,6 +28,14 @@ from sqlalchemy.inspection import inspect
 
 from aquilon.utils import monkeypatch
 from aquilon.exceptions_ import InternalError, NotFoundException, ArgumentError
+
+
+# Register our custom dialect-specific options. It would be nicer to have this
+# in db_factory.py where the implementation lives, but that's not imported early
+# enough.
+Index.argument_for("oracle", "compress", None)
+Index.argument_for("oracle", "bitmap", None)
+Table.argument_for("oracle", "compress", None)
 
 
 def _raise_custom(cls, defcls, msg):
