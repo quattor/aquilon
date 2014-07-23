@@ -95,7 +95,8 @@ class TestAdd10GigHardware(TestBrokerCommand):
                    "--interface", "eth2", "--pg", "unused-v999"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
-                         "VLAN 999 not found for switch ut01ga2s01.aqd-unittest.ms.com.",
+                         "Switch ut01ga2s01.aqd-unittest.ms.com does not have "
+                         "port group unused-v999 assigned.",
                          command)
 
     def test_100_addinterfaces(self):

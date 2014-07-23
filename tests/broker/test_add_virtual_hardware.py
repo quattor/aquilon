@@ -501,8 +501,9 @@ class TestAddVirtualHardware(TestBrokerCommand):
                    "--interface", "eth1", "--pg", "unused-v999"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
-                         "Cannot verify port group availability: no switch "
-                         "record for ESX Cluster utecl1.",
+                         "ESX Cluster utecl1 does not have either a virtual "
+                         "switch or a network device assigned, automatic IP "
+                         "address and port group allocation is not possible.",
                          command)
 
 
