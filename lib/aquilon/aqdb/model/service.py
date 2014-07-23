@@ -84,7 +84,7 @@ service = Service.__table__  # pylint: disable=C0103
 service.info['unique_fields'] = ['name']
 
 
-class ServiceListItem(Base):
+class __ServiceListItem(Base):
     """ Service list item is an individual member of a service list, defined
         in configuration. They represent requirements for baseline archetype
         builds. Think of things like 'dns', 'syslog', etc. that you'd need just
@@ -107,11 +107,11 @@ class ServiceListItem(Base):
                                            name="%s_pk" % _SLI),
                       Index('srvlst_archtyp_idx', archetype_id))
 
-Service.archetypes = relation(Archetype, secondary=ServiceListItem.__table__,
+Service.archetypes = relation(Archetype, secondary=__ServiceListItem.__table__,
                               backref=backref("services"))
 
 
-class PersonalityServiceListItem(Base):
+class __PersonalityServiceListItem(Base):
     """ A personality service list item is an individual member of a list
        of required services for a given personality. They represent required
        services that need to be assigned/selected in order to build
@@ -134,5 +134,5 @@ class PersonalityServiceListItem(Base):
                       Index('%s_prsnlty_idx' % _ABV, personality_id))
 
 Service.personalities = relation(Personality,
-                                 secondary=PersonalityServiceListItem.__table__,
+                                 secondary=__PersonalityServiceListItem.__table__,
                                  backref=backref("services"))

@@ -218,7 +218,7 @@ service_instance.info['abrev'] = _ABV
 service_instance.info['unique_fields'] = ['name', 'service']
 
 
-class BuildItem(Base):
+class __BuildItem(Base):
     """ Identifies the service_instance bindings of a machine. """
     __tablename__ = 'build_item'
 
@@ -235,12 +235,12 @@ class BuildItem(Base):
     __table_args__ = (PrimaryKeyConstraint(host_id, service_instance_id),
                       Index('build_item_si_idx', service_instance_id))
 
-ServiceInstance.clients = relation(Host, secondary=BuildItem.__table__,
+ServiceInstance.clients = relation(Host, secondary=__BuildItem.__table__,
                                    backref=backref("services_used",
                                                    cascade="all"))
 
 # Make this a column property so it can be undeferred on bulk loads
 ServiceInstance._client_count = column_property(
     select([func.count()],
-           BuildItem.service_instance_id == ServiceInstance.id)
+           __BuildItem.service_instance_id == ServiceInstance.id)
     .label("_client_count"), deferred=True)

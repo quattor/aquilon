@@ -576,7 +576,7 @@ hcm.info['unique_fields'] = ['cluster', 'host']
 Host.cluster = association_proxy('_cluster', 'cluster')
 
 
-class ClusterAllowedPersonality(Base):
+class __ClusterAllowedPersonality(Base):
     __tablename__ = _CAP
 
     cluster_id = Column(Integer, ForeignKey(Cluster.id,
@@ -593,10 +593,10 @@ class ClusterAllowedPersonality(Base):
                       Index('%s_prsnlty_idx' % _CAP, personality_id))
 
 Cluster.allowed_personalities = relation(Personality,
-                                         secondary=ClusterAllowedPersonality.__table__)
+                                         secondary=__ClusterAllowedPersonality.__table__)
 
 
-class ClusterServiceBinding(Base):
+class __ClusterServiceBinding(Base):
     """
         Makes bindings of service instances to clusters
     """
@@ -617,5 +617,5 @@ class ClusterServiceBinding(Base):
                       Index('%s_si_idx' % _CSBABV, service_instance_id))
 
 Cluster.service_bindings = relation(ServiceInstance,
-                                    secondary=ClusterServiceBinding.__table__,
+                                    secondary=__ClusterServiceBinding.__table__,
                                     backref=backref("cluster_clients"))
