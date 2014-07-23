@@ -33,6 +33,7 @@
 	    <arg choice="opt"><option>--maint_threshold <replaceable>THRESHOLD</replaceable></option></arg>
 	    <arg choice="opt"><option>--max_members <replaceable>NUMBER</replaceable></option></arg>
 	    <arg choice="opt"><option>--switch <replaceable>SWITCH</replaceable></option></arg>
+	    <arg choice="opt"><option>--virtual_switch <replaceable>VSWITCH</replaceable></option></arg>
 	    <arg choice="opt"><option>--memory_capacity <replaceable>CAPACITY</replaceable></option></arg>
 	    <arg choice="opt"><option>--clear_overrides</option></arg>
 	    <arg choice="opt"><option>--fix_location</option></arg>
@@ -122,6 +123,25 @@
 		    <para>
 			Update the switch associated with the cluster. This option is valid only for ESX clusters. The
 			switch is used to look up which networks are available for guests to use.
+		    </para>
+		    <para>
+			If <replaceable>SWITCH</replaceable> is the empty string, then the existing
+			switch association is removed.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--virtual_switch <replaceable>VSWITCH</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Update the virtual switch associated with the cluster. The virtual switch is
+			used to look up which networks are available for guests to use.
+		    </para>
+		    <para>
+			If <replaceable>VSWITCH</replaceable> is the empty string, then the existing
+			virtual switch association is removed.
 		    </para>
 		</listitem>
 	    </varlistentry>

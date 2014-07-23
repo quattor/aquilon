@@ -49,6 +49,11 @@ class MetaClusterFormatter(ObjectFormatter):
         details.append(self.redirect_raw(metacluster.personality, indent + "  "))
         details.append(indent + "  {0:c}: {1}"
                        .format(metacluster.branch, metacluster.authored_branch))
+
+        if metacluster.virtual_switch:
+            details.append(indent + "  {0:c}: {0!s}"
+                           .format(metacluster.virtual_switch))
+
         for dbsi in metacluster.service_bindings:
             details.append(indent +
                            "  Member Alignment: Service %s Instance %s" %

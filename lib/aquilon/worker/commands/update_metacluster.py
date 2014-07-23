@@ -26,14 +26,15 @@ class CommandUpdateMetaCluster(CommandUpdateCluster):
     required_parameters = ["metacluster"]
 
     def render(self, session, logger, metacluster, personality, max_members,
-               fix_location, high_availability, comments, **arguments):
+               fix_location, high_availability, virtual_switch, comments,
+               **arguments):
         dbmetacluster = MetaCluster.get_unique(session, metacluster,
                                                compel=True)
         plenaries = PlenaryCollection(logger=logger)
 
         self.update_cluster_common(session, logger, dbmetacluster, plenaries,
                                    personality, max_members, fix_location,
-                                   comments, **arguments)
+                                   virtual_switch, comments, **arguments)
 
         if high_availability is not None:
             dbmetacluster.high_availability = high_availability
