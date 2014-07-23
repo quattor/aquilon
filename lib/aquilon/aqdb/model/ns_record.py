@@ -35,7 +35,7 @@ class NsRecord(Base):
                                              name='%s_a_record_fk' % (_TN)),
                          nullable=False)
 
-    dns_domain_id = Column(Integer, ForeignKey('dns_domain.id',
+    dns_domain_id = Column(Integer, ForeignKey(DnsDomain.id,
                                                name='%s_domain_fk' % (_TN)),
                            nullable=False)
 

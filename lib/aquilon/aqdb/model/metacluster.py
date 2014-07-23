@@ -34,7 +34,6 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Base, Cluster
 from aquilon.aqdb.model.cluster import convert_resources
 
-_TN = 'clstr'
 _MCT = 'metacluster'
 _MCM = 'metacluster_member'
 
@@ -51,7 +50,7 @@ class MetaCluster(Cluster):
     __mapper_args__ = {'polymorphic_identity': 'meta'}
     _class_label = "Metacluster"
 
-    id = Column(Integer, ForeignKey('%s.id' % _TN, name='meta_cluster_fk',
+    id = Column(Integer, ForeignKey(Cluster.id, name='meta_cluster_fk',
                                     ondelete='CASCADE'),
                 primary_key=True)
 
@@ -192,12 +191,12 @@ class MetaClusterMember(Base):
     """ Binds clusters to metaclusters """
     __tablename__ = _MCM
 
-    metacluster_id = Column(Integer, ForeignKey('metacluster.id',
+    metacluster_id = Column(Integer, ForeignKey(MetaCluster.id,
                                                 name='%s_meta_fk' % _MCM,
                                                 ondelete='CASCADE'),
                             nullable=False)
 
-    cluster_id = Column(Integer, ForeignKey('clstr.id',
+    cluster_id = Column(Integer, ForeignKey(Cluster.id,
                                             name='%s_clstr_fk' % _MCM,
                                             ondelete='CASCADE'),
                         nullable=False)

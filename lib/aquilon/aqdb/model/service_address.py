@@ -29,13 +29,13 @@ class ServiceAddress(Resource):
     __tablename__ = _TN
     _class_label = 'Service Address'
 
-    resource_id = Column(Integer, ForeignKey('resource.id',
+    resource_id = Column(Integer, ForeignKey(Resource.id,
                                              name='%s_resource_fk' % _ABV),
                          primary_key=True)
 
     # This is not normalized, as we could get the same object by
     # self.assignments[0].dns_records[0], but this way it's faster
-    dns_record_id = Column(Integer, ForeignKey('a_record.dns_record_id',
+    dns_record_id = Column(Integer, ForeignKey(ARecord.dns_record_id,
                                                name='%s_arecord_fk' % _ABV),
                            nullable=False)
 

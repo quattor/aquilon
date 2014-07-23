@@ -38,7 +38,7 @@ class StaticRoute(Base):
 
     # TODO: should the gateway be a foreign key to RouterAddress?
     gateway_ip = Column(IPV4, nullable=False)
-    network_id = Column(Integer, ForeignKey('network.id',
+    network_id = Column(Integer, ForeignKey(Network.id,
                                             name='%s_network_fk' % _TN,
                                             ondelete="CASCADE"),
                         nullable=False)

@@ -34,7 +34,7 @@ class ReservedName(DnsRecord):
     __mapper_args__ = {'polymorphic_identity': _TN}
     _class_label = 'Reserved Name'
 
-    dns_record_id = Column(Integer, ForeignKey('dns_record.id',
+    dns_record_id = Column(Integer, ForeignKey(DnsRecord.id,
                                                name='%s_dns_record_fk' % _TN,
                                                ondelete='CASCADE'),
                            primary_key=True)

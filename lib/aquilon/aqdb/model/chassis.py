@@ -33,7 +33,7 @@ class Chassis(HardwareEntity):
     __mapper_args__ = {'polymorphic_identity': _TN}
 
     hardware_entity_id = Column(Integer,
-                                ForeignKey('hardware_entity.id',
+                                ForeignKey(HardwareEntity.id,
                                            name='%s_hw_ent_fk' % _TN,
                                            ondelete='CASCADE'),
                                 primary_key=True)

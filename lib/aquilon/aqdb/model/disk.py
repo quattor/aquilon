@@ -53,7 +53,7 @@ class Disk(DeviceLinkMixin, Base):
     address = Column(AqStr(16), nullable=True)
     wwn = Column(AqStr(32), nullable=True)
 
-    machine_id = Column(Integer, ForeignKey('machine.machine_id',
+    machine_id = Column(Integer, ForeignKey(Machine.machine_id,
                                             name='%s_machine_fk' % _TN,
                                             ondelete='CASCADE'),
                         nullable=False)

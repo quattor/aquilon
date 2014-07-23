@@ -69,7 +69,7 @@ class Interface(DeviceLinkMixin, Base):
 
     mac = Column(AqMac(17), nullable=True)
 
-    model_id = Column(Integer, ForeignKey('model.id',
+    model_id = Column(Integer, ForeignKey(Model.id,
                                           name='%s_model_fk' % _ABV),
                       nullable=False)
 
@@ -83,15 +83,14 @@ class Interface(DeviceLinkMixin, Base):
 
     interface_type = Column(AqStr(32), nullable=False)
 
-    hardware_entity_id = Column(Integer, ForeignKey('hardware_entity.id',
+    hardware_entity_id = Column(Integer, ForeignKey(HardwareEntity.id,
                                                     name='%s_hw_ent_fk' % _ABV,
                                                     ondelete='CASCADE'),
                                 nullable=False)
 
     # The FK is deferrable to make it easier to copy the DB between different
     # backends. The broker itself does not make use of deferred constraints.
-    master_id = Column(Integer, ForeignKey('interface.id',
-                                           name='%s_master_fk' % _ABV,
+    master_id = Column(Integer, ForeignKey(id, name='%s_master_fk' % _ABV,
                                            ondelete='CASCADE',
                                            deferrable=True,
                                            initially='IMMEDIATE'),

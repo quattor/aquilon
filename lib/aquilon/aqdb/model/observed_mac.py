@@ -36,7 +36,7 @@ class ObservedMac(Base):
     __tablename__ = _TN
 
     network_device_id = Column(Integer,
-                               ForeignKey('network_device.hardware_entity_id',
+                               ForeignKey(NetworkDevice.hardware_entity_id,
                                           ondelete='CASCADE',
                                           name='obs_mac_hw_fk'),
                                nullable=False)

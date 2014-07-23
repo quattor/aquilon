@@ -37,10 +37,10 @@ class UserPrincipal(Base):
 
     name = Column(String(32), nullable=False)
 
-    realm_id = Column(Integer, ForeignKey('realm.id', name='%s_rlm_fk' % _ABV),
+    realm_id = Column(Integer, ForeignKey(Realm.id, name='%s_rlm_fk' % _ABV),
                       nullable=False)
 
-    role_id = Column(Integer, ForeignKey('role.id', name='%s_role_fk' % _ABV,
+    role_id = Column(Integer, ForeignKey(Role.id, name='%s_role_fk' % _ABV,
                                          ondelete='CASCADE'),
                      nullable=False)
 

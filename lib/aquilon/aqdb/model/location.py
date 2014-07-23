@@ -44,7 +44,7 @@ class Location(Base):
 
     fullname = Column(String(255), nullable=False)
 
-    default_dns_domain_id = Column(Integer, ForeignKey('dns_domain.id',
+    default_dns_domain_id = Column(Integer, ForeignKey(DnsDomain.id,
                                                        name='location_dns_domain_fk',
                                                        ondelete='SET NULL'),
                                    nullable=True)
@@ -234,12 +234,12 @@ location.info['unique_fields'] = ['name', 'location_type']
 class LocationLink(Base):
     __tablename__ = 'location_link'
 
-    child_id = Column(Integer, ForeignKey('location.id',
+    child_id = Column(Integer, ForeignKey(Location.id,
                                           name='location_link_child_fk',
                                           ondelete='CASCADE'),
                       nullable=False)
 
-    parent_id = Column(Integer, ForeignKey('location.id',
+    parent_id = Column(Integer, ForeignKey(Location.id,
                                            name='location_link_parent_fk',
                                            ondelete='CASCADE'),
                        nullable=False)

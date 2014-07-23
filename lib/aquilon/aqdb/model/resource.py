@@ -69,7 +69,7 @@ class ResourceHolder(Base):
 
 
 class HostResource(ResourceHolder):
-    host_id = Column(Integer, ForeignKey('host.hardware_entity_id',
+    host_id = Column(Integer, ForeignKey(Host.hardware_entity_id,
                                          name='%s_host_fk' % _RESHOLDER,
                                          ondelete='CASCADE'),
                      nullable=True)
@@ -93,7 +93,7 @@ class HostResource(ResourceHolder):
 
 
 class ClusterResource(ResourceHolder):
-    cluster_id = Column(Integer, ForeignKey('clstr.id',
+    cluster_id = Column(Integer, ForeignKey(Cluster.id,
                                             name='%s_clstr_fk' % _RESHOLDER,
                                             ondelete='CASCADE'),
                         nullable=True)
@@ -134,7 +134,7 @@ class Resource(Base):
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
     comments = Column(String(255), nullable=True)
-    holder_id = Column(Integer, ForeignKey('%s.id' % _RESHOLDER,
+    holder_id = Column(Integer, ForeignKey(ResourceHolder.id,
                                            name='%s_resholder_fk' % _TN,
                                            ondelete='CASCADE'),
                        nullable=False)

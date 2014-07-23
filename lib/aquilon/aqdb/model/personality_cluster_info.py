@@ -39,7 +39,7 @@ class PersonalityClusterInfo(Base):
 
     id = Column(Integer, Sequence("%s_seq" % _PCIABV), primary_key=True)
 
-    personality_id = Column(Integer, ForeignKey("personality.id",
+    personality_id = Column(Integer, ForeignKey(Personality.id,
                                                 name="%s_pers_fk" % _PCIABV,
                                                 ondelete="CASCADE"),
                             nullable=False)
@@ -69,7 +69,7 @@ class PersonalityESXClusterInfo(PersonalityClusterInfo):
     __mapper_args__ = {'polymorphic_identity': 'esx'}
 
     personality_cluster_info_id = Column(Integer,
-                                         ForeignKey("%s.id" % _PCI,
+                                         ForeignKey(PersonalityClusterInfo.id,
                                                     name="%s_pci_fk" % _PECIABV,
                                                     ondelete="CASCADE"),
                                          primary_key=True)

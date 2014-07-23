@@ -29,12 +29,12 @@ class Machine(HardwareEntity):
     __mapper_args__ = {'polymorphic_identity': 'machine'}
 
     # TODO: should this be named hardware_entity_id?
-    machine_id = Column(Integer, ForeignKey('hardware_entity.id',
+    machine_id = Column(Integer, ForeignKey(HardwareEntity.id,
                                             name='machine_hw_ent_fk',
                                             ondelete='CASCADE'),
                         primary_key=True)
 
-    cpu_id = Column(Integer, ForeignKey('cpu.id', name='machine_cpu_fk'),
+    cpu_id = Column(Integer, ForeignKey(Cpu.id, name='machine_cpu_fk'),
                     nullable=False)
 
     # TODO: constrain/smallint

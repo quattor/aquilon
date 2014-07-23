@@ -68,7 +68,7 @@ class ArchetypeParamDef(ParamDefHolder):
     __mapper_args__ = {'polymorphic_identity': 'archetype'}
 
     archetype_id = Column(Integer,
-                          ForeignKey('archetype.id',
+                          ForeignKey(Archetype.id,
                                      name='%s_archetype_fk' % _PARAM_DEF_HOLDER,
                                      ondelete='CASCADE'),
                           nullable=True)
@@ -93,7 +93,7 @@ class FeatureParamDef(ParamDefHolder):
     """ valid parameter paths which can be associated with this feature """
 
     feature_id = Column(Integer,
-                        ForeignKey('feature.id',
+                        ForeignKey(Feature.id,
                                    name='%s_feature_fk' % _PARAM_DEF_HOLDER,
                                    ondelete='CASCADE'),
                         nullable=True)
@@ -132,7 +132,7 @@ class ParamDefinition(Base):
     value_type = Column(Enum(16, _PATH_TYPES), nullable=False, default="string")
     default = Column(Text, nullable=True)
     description = deferred(Column(String(255), nullable=True))
-    holder_id = Column(Integer, ForeignKey('%s.id' % _PARAM_DEF_HOLDER,
+    holder_id = Column(Integer, ForeignKey(ParamDefHolder.id,
                                            name='%s_holder_fk' % _TN,
                                            ondelete='CASCADE'),
                        nullable=False)

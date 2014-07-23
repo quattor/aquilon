@@ -38,7 +38,7 @@ class Model(Base):
     id = Column(Integer, Sequence('model_id_seq'), primary_key=True)
     name = Column(AqStr(64), nullable=False)
 
-    vendor_id = Column(Integer, ForeignKey('vendor.id',
+    vendor_id = Column(Integer, ForeignKey(Vendor.id,
                                            name='model_vendor_fk'),
                        nullable=False)
 

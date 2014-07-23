@@ -45,7 +45,7 @@ class ServiceInstance(Base):
     _class_label = 'Service Instance'
 
     id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
-    service_id = Column(Integer, ForeignKey('service.id',
+    service_id = Column(Integer, ForeignKey(Service.id,
                                             name='%s_svc_fk' % _ABV),
                         nullable=False)
     name = Column(AqStr(64), nullable=False)
@@ -222,13 +222,13 @@ class BuildItem(Base):
     """ Identifies the service_instance bindings of a machine. """
     __tablename__ = 'build_item'
 
-    host_id = Column('host_id', Integer, ForeignKey('host.hardware_entity_id',
+    host_id = Column('host_id', Integer, ForeignKey(Host.hardware_entity_id,
                                                     ondelete='CASCADE',
                                                     name='build_item_host_fk'),
                      nullable=False)
 
     service_instance_id = Column(Integer,
-                                 ForeignKey('service_instance.id',
+                                 ForeignKey(ServiceInstance.id,
                                             name='build_item_svc_inst_fk'),
                                  nullable=False)
 

@@ -44,17 +44,17 @@ class HardwareEntity(Base):
 
     hardware_type = Column(AqStr(64), nullable=False)
 
-    location_id = Column(Integer, ForeignKey('location.id',
+    location_id = Column(Integer, ForeignKey(Location.id,
                                              name='%s_location_fk' % _ABV),
                          nullable=False)
 
-    model_id = Column(Integer, ForeignKey('model.id',
+    model_id = Column(Integer, ForeignKey(Model.id,
                                           name='%s_model_fk' % _ABV),
                       nullable=False)
 
     serial_no = Column(String(64), nullable=True)
 
-    primary_name_id = Column(Integer, ForeignKey('dns_record.id',
+    primary_name_id = Column(Integer, ForeignKey(DnsRecord.id,
                                                  name='%s_pri_name_fk' % _ABV),
                              nullable=True)
 
@@ -76,7 +76,7 @@ class HardwareEntity(Base):
                                             passive_deletes=True))
 
     __table_args__ = (UniqueConstraint(label, name='%s_label_uk' % _TN),
-                      UniqueConstraint('primary_name_id',
+                      UniqueConstraint(primary_name_id,
                                        name='%s_pri_name_uk' % _ABV),
                       Index('%s_location_idx' % _ABV, location_id),
                       Index('%s_model_idx' % _ABV, model_id))

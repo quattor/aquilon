@@ -93,12 +93,12 @@ class ServiceListItem(Base):
     __tablename__ = _SLI
     _class_label = 'Required Service'
 
-    service_id = Column(Integer, ForeignKey('%s.id' % (_TN),
+    service_id = Column(Integer, ForeignKey(Service.id,
                                             name='sli_svc_fk',
                                             ondelete='CASCADE'),
                         nullable=False)
 
-    archetype_id = Column(Integer, ForeignKey('archetype.id',
+    archetype_id = Column(Integer, ForeignKey(Archetype.id,
                                               name='sli_arctype_fk',
                                               ondelete='CASCADE'),
                           nullable=False)
@@ -119,12 +119,12 @@ class PersonalityServiceListItem(Base):
 
     __tablename__ = _PSLI
 
-    service_id = Column(Integer, ForeignKey('%s.id' % (_TN),
-                                            name='%s_svc_fk' % (_ABV),
+    service_id = Column(Integer, ForeignKey(Service.id,
+                                            name='%s_svc_fk' % _ABV,
                                             ondelete='CASCADE'),
                         nullable=False)
 
-    personality_id = Column(Integer, ForeignKey('personality.id',
+    personality_id = Column(Integer, ForeignKey(Personality.id,
                                                 name='sli_prsnlty_fk',
                                                 ondelete='CASCADE'),
                             nullable=False)
