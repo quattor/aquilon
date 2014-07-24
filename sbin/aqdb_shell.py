@@ -15,10 +15,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 import os
 import sys
 
 # -- begin path_setup --
+import ms.version
+ms.version.addpkg('ipython', '0.13.2')
+ms.version.addpkg('argparse', '1.2.1')
+
 BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
 LIBDIR = os.path.join(BINDIR, "..", "lib")
 
@@ -29,17 +34,15 @@ if LIBDIR not in sys.path:
 import aquilon.aqdb.depends  # pylint: disable=W0611
 
 import argparse
-
 from ipaddr import IPv4Address, IPv4Network  # pylint: disable=W0611
-
 from IPython.config.loader import Config as IPyConfig
 from IPython.frontend.terminal.embed import InteractiveShellEmbed
 
 from aquilon.config import Config  # pylint: disable=W0611
-
-# pylint: disable=W0614
-from aquilon.aqdb.model import *  # pylint: disable=W0401
 from aquilon.aqdb.db_factory import DbFactory
+
+# Make all classes from the model available inside the shell
+from aquilon.aqdb.model import *  # pylint: disable=W0401,W0614
 
 db = DbFactory()
 Base.metadata.bind = db.engine

@@ -21,8 +21,6 @@ import ms.version
 ms.version.addpkg('sqlalchemy', '0.8.1')
 ms.version.addpkg('cx_Oracle', '5.1-11.2.0.1.0')
 ms.version.addpkg('psycopg2', '2.5-9.2.4')
-ms.version.addpkg('ipython', '0.13.2')
-ms.version.addpkg('argparse', '1.2.1')
 ms.version.addpkg('ms.modulecmd', '1.0.4')
 ms.version.addpkg('ipaddr', '2.1.9')
 ms.version.addpkg('dateutil', '1.5')

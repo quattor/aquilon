@@ -21,10 +21,16 @@ from __future__ import print_function
 import os
 import sys
 
-sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "lib"))
+# -- begin path_setup --
+BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
+LIBDIR = os.path.join(BINDIR, "..", "lib")
 
-import aquilon.aqdb.depends
-import aquilon.worker.depends
+if LIBDIR not in sys.path:
+    sys.path.append(LIBDIR)
+# -- end path_setup --
+
+import aquilon.aqdb.depends  # pylint: disable=W0611
+import aquilon.worker.depends  # pylint: disable=W0611
 from aquilon.consistency.checks import consistency_check_classes
 
 

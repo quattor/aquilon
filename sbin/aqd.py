@@ -27,8 +27,8 @@ if LIBDIR not in sys.path:
     sys.path.append(LIBDIR)
 # -- end path_setup --
 
-import aquilon.worker.depends
-import aquilon.aqdb.depends
+import aquilon.aqdb.depends  # pylint: disable=W0611
+import aquilon.worker.depends  # pylint: disable=W0611
 
 from twisted.scripts import twistd
 

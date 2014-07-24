@@ -42,7 +42,7 @@ if LIBDIR not in sys.path:
     sys.path.append(LIBDIR)
 # -- end path_setup --
 
-from aquilon.aqdb import depends
+from aquilon.aqdb import depends  # pylint: disable=W0611
 
 import argparse
 
