@@ -313,28 +313,6 @@ class TestAddNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
         self.check_plenary_exists('network_device', 'americas', 'np', 'np01ga2s05')
         self.check_plenary_exists('hostdata', 'np01ga2s05.one-nyp.ms.com')
 
-    def test_175_add_utpgsw0(self):
-        ip = self.net["ut_net_mgmt"].usable[7]
-        self.dsdb_expect_add("utpgsw0.aqd-unittest.ms.com", ip, "xge49", ip.mac)
-        command = ["add", "network_device", "--type", "tor",
-                   "--network_device", "utpgsw0.aqd-unittest.ms.com",
-                   "--rack", "ut12", "--model", "rs g8000",
-                   "--interface", "xge49", "--iftype", "physical",
-                   "--mac", ip.mac, "--ip", ip]
-        self.successtest(command)
-        self.dsdb_verify()
-
-    def test_175_add_utpgsw1(self):
-        ip = self.net["ut_net_mgmt"].usable[8]
-        self.dsdb_expect_add("utpgsw1.aqd-unittest.ms.com", ip, "xge49", ip.mac)
-        command = ["add", "network_device", "--type", "tor",
-                   "--network_device", "utpgsw1.aqd-unittest.ms.com",
-                   "--rack", "ut12", "--model", "rs g8000",
-                   "--interface", "xge49", "--iftype", "physical",
-                   "--mac", ip.mac, "--ip", ip]
-        self.successtest(command)
-        self.dsdb_verify()
-
     def test_200_reject_ip_in_use(self):
         ip = self.net["ut_net_mgmt"].usable[0]
         command = ["add", "network_device", "--network_device", "ipinuse.aqd-unittest.ms.com",

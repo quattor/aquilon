@@ -193,10 +193,6 @@ class TestSearchNetworkDevice(TestBrokerCommand):
         self.matchoutput(out, "ut01ga2s03.aqd-unittest.ms.com", command)
         self.matchoutput(out, "ut01ga2s04.aqd-unittest.ms.com", command)
 
-        # No such VLAN on these
-        self.matchclean(out, "utpgsw0.aqd-unittest.ms.com", command)
-        self.matchclean(out, "utpgsw1.aqd-unittest.ms.com", command)
-
         # Not a ToR switch
         self.matchclean(out, "ut3gd1r01.aqd-unittest.ms.com", command)
 

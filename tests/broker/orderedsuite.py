@@ -89,6 +89,7 @@ from test_del_share import TestDelShare
 from test_early_constraints_cluster import TestClusterEarlyConstraints
 from test_deprecated_switch import TestDeprecatedSwitch
 from test_add_netdev import TestAddNetworkDevice
+from test_add_virtual_switch import TestAddVirtualSwitch
 from test_add_vlan import TestAddVlan
 from test_update_netdev import TestUpdateNetworkDevice
 from test_rename_netdev import TestRenameNetworkDevice
@@ -231,6 +232,7 @@ from test_del_disk import TestDelDisk
 from test_del_machine import TestDelMachine
 from test_del_chassis import TestDelChassis
 from test_del_netdev import TestDelNetworkDevice
+from test_del_virtual_switch import TestDelVirtualSwitch
 from test_del_vlan import TestDelVlan
 from test_del_esx_cluster import TestDelESXCluster
 from test_del_metacluster import TestDelMetaCluster
@@ -320,6 +322,7 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestDeprecatedSwitch,
                      TestAddVlan,
                      TestAddNetworkDevice, TestUpdateNetworkDevice,
+                     TestAddVirtualSwitch,
                      TestAddChassis, TestUpdateChassis,
                      TestAddMachine, TestAddDisk, TestAddInterface,
                      TestAddAddress,
@@ -407,6 +410,7 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestDelAddress, TestDelNSRecord,
                      TestDelManager, TestDelAuxiliary, TestDelWindowsHost, TestDelHost,
                      TestDelInterface, TestDelDisk, TestDelMachine, TestDelChassis,
+                     TestDelVirtualSwitch,
                      TestDelNetworkDevice,
                      TestDelShare,
                      TestDelCluster,

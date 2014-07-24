@@ -147,9 +147,15 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
 
     # switch tests
     def test_100_addswitch(self):
-        for i in range(0, 2):
-            self.successtest(["update_esx_cluster", "--cluster=utpgcl%d" % i,
-                              "--switch=utpgsw%d.aqd-unittest.ms.com" % i])
+        self.noouttest(["update_metacluster", "--metacluster", "utmc8",
+                        "--virtual_switch", "utvswitch"])
+
+    def test_105_cat_utmc8(self):
+        command = ["cat", "--cluster", "utmc8", "--data"]
+        out = self.commandtest(command)
+        self.matchoutput(out,
+                         '"system/metacluster/virtual_switch" = "utvswitch";',
+                         command)
 
     def test_110_addstorageips(self):
         # storage IPs
@@ -207,8 +213,8 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
                    "--interface", "eth0", "--automac", "--autopg"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
-                         "No available user port groups on switch "
-                         "utpgsw0.aqd-unittest.ms.com",
+                         "No available user port groups on virtual switch "
+                         "utvswitch.",
                          command)
 
         # Free up the IP addresses
@@ -229,8 +235,8 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
                    "--interface", "eth0", "--automac", "--autopg"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
-                         "No available user port groups on switch "
-                         "utpgsw1.aqd-unittest.ms.com",
+                         "No available user port groups on virtual switch "
+                         "utvswitch.",
                          command)
 
     def test_140_verify_audit(self):
@@ -356,14 +362,6 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
         self.matchoutput(out, '"mountpoint" = "/vol/lnn30f1v1/test_v2_share";',
                          command)
         self.matchclean(out, 'latency', command)
-
-    # TODO renumber again
-    def test_235_cat_switch(self):
-        for i in range(0, 2):
-            command = ["cat", "--network_device", "utpgsw%d" % i, "--data"]
-
-            out = self.commandtest(command)
-            self.matchoutput(out, '"user-v710", nlist(', command)
 
     def test_240_verify_resourcegroup_share(self):
         command = ["show_resourcegroup", "--cluster=utmc8"]
