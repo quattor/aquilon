@@ -39,7 +39,7 @@ class CommandSearchNetworkDevice(BrokerCommand):
             q = q.filter_by(id=dbnetdev.id)
 
         if vlan:
-            q = q.join("observed_vlans").filter_by(network_tag=vlan)
+            q = q.join("port_groups").filter_by(network_tag=vlan)
             q = q.reset_joinpoint()
 
         # Prefer the primary name for ordering
@@ -59,9 +59,9 @@ class CommandSearchNetworkDevice(BrokerCommand):
                           joinedload('interfaces.assignments.network'),
                           subqueryload('observed_macs'),
                           undefer('observed_macs.creation_date'),
-                          subqueryload('observed_vlans'),
-                          undefer('observed_vlans.creation_date'),
-                          joinedload('observed_vlans.network'),
+                          subqueryload('port_groups'),
+                          undefer('port_groups.creation_date'),
+                          joinedload('port_groups.network'),
                           subqueryload('model'),
                           # Switches don't have machine specs, but the formatter
                           # checks for their existence anyway

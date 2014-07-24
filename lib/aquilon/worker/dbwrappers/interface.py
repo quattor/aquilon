@@ -118,7 +118,7 @@ def generate_ip(session, logger, dbinterface, ip=None, ipfromip=None,
                                     "switch.".format(dbcluster))
             dbvi = VlanInfo.get_by_pg(session, dbinterface.port_group_name)
 
-            for pg in dbcluster.network_device.observed_vlans:
+            for pg in dbcluster.network_device.port_groups:
                 if pg.network_tag == dbvi.vlan_id:
                     dbnetwork = pg.network
                     break
@@ -244,7 +244,7 @@ def set_port_group_phys(session, dbinterface, port_group_name):
 
     if dbhost and dbhost.cluster and dbhost.cluster.network_device:
         dbnetdev = dbhost.cluster.network_device
-        pg = first_of(dbnetdev.observed_vlans,
+        pg = first_of(dbnetdev.port_groups,
                       lambda x: x.network_tag == dbvi.vlan_id)
         if not pg:
             raise ArgumentError("VLAN {0} not found for "
@@ -263,7 +263,7 @@ def set_port_group_vm(session, logger, dbinterface, port_group_name):
     dbvi = VlanInfo.get_by_pg(session, port_group=port_group_name, compel=None)
     if dbvi:
         # User requested a specific VLAN, check if it is available
-        selected_pg = first_of(dbnetdev.observed_vlans,
+        selected_pg = first_of(dbnetdev.port_groups,
                                lambda x: x.network_tag == dbvi.vlan_id)
         if not selected_pg:
             raise ArgumentError("Cannot verify port group availability: "
@@ -290,9 +290,9 @@ def set_port_group_vm(session, logger, dbinterface, port_group_name):
         selected_capacity = 0
 
         # Protect agains concurrent invocations
-        Network.lock_rows([pg.network for pg in dbnetdev.observed_vlans])
+        Network.lock_rows([pg.network for pg in dbnetdev.port_groups])
 
-        for pg in sorted(dbnetdev.observed_vlans, key=attrgetter('network_tag')):
+        for pg in sorted(dbnetdev.port_groups, key=attrgetter('network_tag')):
             if pg.usage != port_group_name:
                 continue
             net = pg.network

@@ -34,9 +34,9 @@ class CommandShowNetworkDeviceAll(BrokerCommand):
                       joinedload('interfaces.assignments.network'),
                       subqueryload('observed_macs'),
                       undefer('observed_macs.creation_date'),
-                      subqueryload('observed_vlans'),
-                      undefer('observed_vlans.creation_date'),
-                      joinedload('observed_vlans.network'),
+                      subqueryload('port_groups'),
+                      undefer('port_groups.creation_date'),
+                      joinedload('port_groups.network'),
                       subqueryload('model'),
                       # Switches don't have machine specs, but the formatter
                       # checks for their existence anyway
