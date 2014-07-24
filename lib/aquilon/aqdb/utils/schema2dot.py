@@ -20,8 +20,8 @@ import ms.modulecmd
 ms.modulecmd.load('fsf/libtool/1.5.18')
 ms.modulecmd.load('fsf/graphviz/2.28.0')
 
-ms.version.addpkg('pyparsing', '1.5.5')  # pydot relies on pyparsing
-ms.version.addpkg('pydot', '1.0.2')
+ms.version.addpkg('pyparsing', '2.0.1')  # pydot relies on pyparsing
+ms.version.addpkg('pydot', '1.0.28')
 import pydot
 
 from sqlalchemy.orm.properties import PropertyLoader
