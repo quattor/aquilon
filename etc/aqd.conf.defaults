@@ -213,7 +213,6 @@ default_osversion = generic
 [archetype_esx_cluster]
 allow_cascaded_deco = True
 max_members_default = 8
-vm_to_host_ratio = 16:1
 
 [archetype_gridcluster]
 

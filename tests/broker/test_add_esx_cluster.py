@@ -100,13 +100,10 @@ class TestAddESXCluster(PersonalityTestMixin, TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         default_max = self.config.get("archetype_esx_cluster",
                                       "max_members_default")
-        default_ratio = self.config.get("archetype_esx_cluster",
-                                        "vm_to_host_ratio")
         self.matchoutput(out, "ESX Cluster: utecl1", command)
         self.matchoutput(out, "Metacluster: utmc1", command)
         self.matchoutput(out, "Building: ut", command)
         self.matchoutput(out, "Max members: %s" % default_max, command)
-        self.matchoutput(out, "vm_to_host_ratio: %s" % default_ratio, command)
         self.matchoutput(out, "Down Hosts Threshold: 2", command)
         self.matchoutput(out, "Maintenance Threshold: 2", command)
         self.matchoutput(out, "Virtual Machine count: 0", command)
@@ -134,12 +131,6 @@ class TestAddESXCluster(PersonalityTestMixin, TestBrokerCommand):
                                                                 "vulcan-1g-desktop-prod",
                                                                 "esx", "utmc1")
 
-        default_ratio = self.config.get("archetype_esx_cluster",
-                                        "vm_to_host_ratio")
-        default_ratio = re.sub(r"(\d+):(\d+)", r"\1,\\s*\2", default_ratio)
-
-        self.searchoutput(data, r'"system/cluster/ratio" = list\(\s*' +
-                          default_ratio + r'\s*\);', data_cmd)
         self.matchoutput(data, '"system/cluster/down_hosts_threshold" = 2;',
                          data_cmd)
         self.matchoutput(data, '"system/cluster/down_maint_threshold" = 2;',
@@ -158,7 +149,9 @@ class TestAddESXCluster(PersonalityTestMixin, TestBrokerCommand):
                    "--domain=unittest", "--down_hosts_threshold=1",
                    "--max_members=101", "--vm_to_host_ratio=1:1",
                    "--comments=Another test ESX cluster"]
-        self.noouttest(command)
+        err = self.statustest(command)
+        self.matchoutput(err, "The --vm_to_host_ratio option is deprecated.",
+                         command)
 
     def testverifyutecl2(self):
         command = "show esx_cluster --cluster utecl2"
@@ -167,7 +160,6 @@ class TestAddESXCluster(PersonalityTestMixin, TestBrokerCommand):
         self.matchoutput(out, "Metacluster: utmc1", command)
         self.matchoutput(out, "Building: ut", command)
         self.matchoutput(out, "Max members: 101", command)
-        self.matchoutput(out, "vm_to_host_ratio: 1:1", command)
         self.matchoutput(out, "Virtual Machine count: 0", command)
         self.matchoutput(out, "Down Hosts Threshold: 1", command)
         self.matchoutput(out, "Build Status: build", command)
@@ -287,13 +279,10 @@ class TestAddESXCluster(PersonalityTestMixin, TestBrokerCommand):
     def testverifyutecl3(self):
         command = "show esx_cluster --cluster utecl3"
         out = self.commandtest(command.split(" "))
-        default_ratio = self.config.get("archetype_esx_cluster",
-                                        "vm_to_host_ratio")
         self.matchoutput(out, "ESX Cluster: utecl3", command)
         self.matchoutput(out, "Metacluster: utmc2", command)
         self.matchoutput(out, "Building: ut", command)
         self.matchoutput(out, "Max members: 0", command)
-        self.matchoutput(out, "vm_to_host_ratio: %s" % default_ratio, command)
         self.matchoutput(out, "Virtual Machine count: 0", command)
         self.matchoutput(out, "Personality: vulcan-1g-desktop-prod Archetype: esx_cluster",
                          command)
@@ -315,15 +304,12 @@ class TestAddESXCluster(PersonalityTestMixin, TestBrokerCommand):
     def testverifyutecl4(self):
         command = "show esx_cluster --cluster utecl4"
         out = self.commandtest(command.split(" "))
-        default_ratio = self.config.get("archetype_esx_cluster",
-                                        "vm_to_host_ratio")
         default_max = self.config.get("archetype_esx_cluster",
                                       "max_members_default")
         self.matchoutput(out, "ESX Cluster: utecl4", command)
         self.matchoutput(out, "Metacluster: utmc2", command)
         self.matchoutput(out, "Building: ut", command)
         self.matchoutput(out, "Max members: %s" % default_max, command)
-        self.matchoutput(out, "vm_to_host_ratio: %s" % default_ratio, command)
         self.matchoutput(out, "Virtual Machine count: 0", command)
         self.matchoutput(out, "Personality: vulcan-1g-desktop-prod Archetype: esx_cluster",
                          command)

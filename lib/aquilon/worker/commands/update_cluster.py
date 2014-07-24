@@ -22,7 +22,6 @@ from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
 from aquilon.worker.templates.switchdata import PlenarySwitchData
-from aquilon.utils import force_ratio
 
 
 class CommandUpdateCluster(BrokerCommand):
@@ -43,7 +42,7 @@ class CommandUpdateCluster(BrokerCommand):
                max_members, fix_location, down_hosts_threshold,
                maint_threshold, comments,
                # ESX specific options
-               switch, memory_capacity, clear_overrides, vm_to_host_ratio,
+               switch, memory_capacity, clear_overrides,
                **arguments):
 
         dbcluster = Cluster.get_unique(session, cluster, compel=True)
@@ -52,13 +51,6 @@ class CommandUpdateCluster(BrokerCommand):
 
         plenaries = PlenaryCollection(logger=logger)
         plenaries.append(Plenary.get_plenary(dbcluster))
-
-        if vm_to_host_ratio:
-            self.check_cluster_type(dbcluster, require=EsxCluster)
-            (vm_count, host_count) = force_ratio("vm_to_host_ratio",
-                                                 vm_to_host_ratio)
-            dbcluster.vm_count = vm_count
-            dbcluster.host_count = host_count
 
         if switch is not None:
             self.check_cluster_type(dbcluster, require=EsxCluster)

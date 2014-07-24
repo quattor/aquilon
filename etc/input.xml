@@ -4016,13 +4016,6 @@
       The "down hosts threshold" is the number of hosts needed as "effective
       spares" per hardware model and cluster layout.  This value is used
       for cluster montioring alerts.
-      <p/>
-      The vm_to_host_ratio constrains the number of virtual machines
-      allowed on the cluster based on the number of vmhosts.  This
-      ratio is checked when adding virtual machines to a cluster or
-      removing vmhosts from a cluster.  The check assumes
-      down_hosts_threshold less hosts than are currently bound to the
-      cluster.
       <optgroup name="add_esx_cluster_req" mandatory="True" fields="all">
          <option name="cluster" type="string">Name of the new esx_cluster</option>
          <option name="metacluster" type="string">Name of the metacluster containing this cluster</option>
@@ -4085,7 +4078,6 @@
          <option name="down_hosts_threshold" type="string">Down hosts threshold</option>
          <option name="maint_threshold" type="string">Down hosts threshold for maintenance windows</option>
          <option name="max_members" type="int">Max allowed vmhost members</option>
-         <option name="vm_to_host_ratio" type="string">Ratio of virtual machines to ESX servers</option>
          <option name="switch" type="string">Set the switch in use by the cluster.  An empty string removes the setting.</option>
          <option name="fix_location" type="flag">Set the location based on cluster membership.</option>
          <option name="comments" type="string">Comments</option>
@@ -4163,7 +4155,6 @@
          <option name="down_hosts_threshold" type="string">Down hosts threshold</option>
          <option name="maint_threshold" type="string">Down hosts threshold for maintenance windows</option>
          <option name="max_members" type="int">Max allowed host members</option>
-         <option name="vm_to_host_ratio" type="string">Ratio of virtual machines to ESX servers</option>
          <option name="switch" type="string">Set the switch in use by the cluster.  An empty string removes the setting.</option>
          <option name="fix_location" type="flag">Set the location based on cluster membership.</option>
          <option name="comments" type="string">Comments</option>

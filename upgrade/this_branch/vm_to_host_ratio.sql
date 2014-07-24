@@ -1,0 +1,4 @@
+ALTER TABLE esx_cluster DROP COLUMN host_count;
+ALTER TABLE esx_cluster DROP COLUMN vm_count;
+
+QUIT;

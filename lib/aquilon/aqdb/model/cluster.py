@@ -333,9 +333,6 @@ class EsxCluster(Cluster):
                                                 ondelete='CASCADE'),
                             primary_key=True)
 
-    vm_count = Column(Integer, default=16, nullable=True)
-    host_count = Column(Integer, default=1, nullable=False)
-
     # Memory capacity override
     memory_capacity = Column(Integer, nullable=True)
 
@@ -349,19 +346,6 @@ class EsxCluster(Cluster):
 
     __table_args__ = (Index("%s_network_device_idx" % _ETN, network_device_id),)
     __mapper_args__ = {'polymorphic_identity': 'esx'}
-
-    @property
-    def vm_to_host_ratio(self):
-        return '%s:%s' % (self.vm_count, self.host_count)
-
-    @property
-    def max_vm_count(self):
-        if self.host_count == 0:
-            return 0
-        effective_vmhost_count = len(self.hosts) - self.down_hosts_threshold
-        if effective_vmhost_count < 0:
-            return 0
-        return effective_vmhost_count * self.vm_count / self.host_count
 
     @property
     def minimum_location(self):
@@ -504,17 +488,6 @@ class EsxCluster(Cluster):
             raise ArgumentError("%s cannot support VMs with %s "
                                 "vmhosts and a down_hosts_threshold of %s" %
                                 (format(self), len(self.hosts), dhtstr))
-
-        # The current ratio must be less than the requirement...
-        # cur_vm / cur_host <= self.vm_count / self.host_count
-        # cur_vm * self.host_count <= self.vm_count * cur_host
-        # Apply a logical not to test for the error condition...
-        if len(self.virtual_machines) * self.host_count > self.vm_count * adjusted_host_count:
-            raise ArgumentError("%s VMs:%s hosts in %s violates "
-                                "ratio %s:%s with down_hosts_threshold %s" %
-                                (len(self.virtual_machines), len(self.hosts),
-                                 format(self), self.vm_count, self.host_count,
-                                 dhtstr))
 
         capacity = self.get_total_capacity()
         usage = self.get_total_usage()
