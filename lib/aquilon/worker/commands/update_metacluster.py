@@ -15,14 +15,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import MetaCluster, Personality
+from aquilon.aqdb.model import MetaCluster
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.commands.update_cluster import update_cluster_location
-from aquilon.worker.templates.base import Plenary, PlenaryCollection
+from aquilon.worker.commands.update_cluster import CommandUpdateCluster
+from aquilon.worker.templates.base import PlenaryCollection
 
 
-class CommandUpdateMetaCluster(BrokerCommand):
+class CommandUpdateMetaCluster(CommandUpdateCluster):
 
     required_parameters = ["metacluster"]
 
@@ -30,33 +29,14 @@ class CommandUpdateMetaCluster(BrokerCommand):
                fix_location, high_availability, comments, **arguments):
         dbmetacluster = MetaCluster.get_unique(session, metacluster,
                                                compel=True)
-
         plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(Plenary.get_plenary(dbmetacluster))
 
-        if personality:
-            archetype = dbmetacluster.personality.archetype.name
-            dbpersonality = Personality.get_unique(session, name=personality,
-                                                   archetype=archetype,
-                                                   compel=True)
-            if not dbpersonality.is_cluster:
-                raise ArgumentError("Personality {0} is not a cluster " +
-                                    "personality".format(dbpersonality))
-            dbmetacluster.personality = dbpersonality
-
-        if max_members is not None:
-            dbmetacluster.max_clusters = max_members
-
-        if comments is not None:
-            dbmetacluster.comments = comments
+        self.update_cluster_common(session, logger, dbmetacluster, plenaries,
+                                   personality, max_members, fix_location,
+                                   comments, **arguments)
 
         if high_availability is not None:
             dbmetacluster.high_availability = high_availability
-
-        # TODO update_cluster_location would update VMs. Metaclusters
-        # will contain VMs in Vulcan2 model.
-        update_cluster_location(session, logger, dbmetacluster, fix_location,
-                                plenaries, **arguments)
 
         session.flush()
         dbmetacluster.validate()

@@ -51,7 +51,7 @@ class MetaCluster(Cluster):
                                     ondelete='CASCADE'),
                 primary_key=True)
 
-    max_clusters = Column(Integer, nullable=False)
+    max_clusters = Column(Integer, nullable=True)
 
     high_availability = Column(Boolean(name="%s_ha_ck" % _MCT), default=False,
                                nullable=False)
@@ -114,7 +114,7 @@ class MetaCluster(Cluster):
 
     def validate(self):
         """ Validate metacluster constraints """
-        if len(self.members) > self.max_clusters:
+        if self.max_clusters is not None and len(self.members) > self.max_clusters:
             raise ArgumentError("{0} has {1} clusters bound, which exceeds "
                                 "the requested limit of {2}."
                                 .format(self, len(self.members),
