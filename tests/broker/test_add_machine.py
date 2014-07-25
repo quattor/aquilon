@@ -359,15 +359,6 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
         self.noouttest(["add", "machine", "--machine", "utnorack",
                         "--desk", "utdesk1", "--model", "poweredge_6650"])
 
-    def test_192_add_ha_racks(self):
-        # Machines for metacluster high availability testing
-        for port in range(1, 25):
-            for template, rack, net in [('ut13s03p%d', 'ut13', self.net["esx_bcp_ut"]),
-                                        ('np13s03p%d', 'np13', self.net["esx_bcp_np"])]:
-                machine = template % port
-                self.create_machine_verari(machine, rack=rack,
-                                           eth0_mac=net.usable[port].mac)
-
     def test_193_add_f5test(self):
         ip = DummyIP(self.net["f5test"].ip)
         self.create_machine("f5test", "f5_model", rack="ut3", eth0_mac=ip.mac)

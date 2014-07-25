@@ -274,14 +274,6 @@ class TestDelHost(VerifyNotificationsMixin, MachineTestMixin,
                 machine = "ut12s02p%d" % (i - 12)
             self.delete_host(hostname, net.usable[i + 1], machine)
 
-    def test_300_del_esx_bcp_cluster_hosts(self):
-        for port in range(1, 25):
-            for rack, domain, net in [("ut13", "aqd-unittest.ms.com", self.net["esx_bcp_ut"]),
-                                      ("np13", "one-nyp.ms.com", self.net["esx_bcp_np"])]:
-                hostname = "evh%d.%s" % (port + 74, domain)
-                machine = "%ss03p%d" % (rack, port)
-                self.delete_host(hostname, net.usable[port], machine)
-
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelHost)
     unittest.TextTestRunner(verbosity=2).run(suite)

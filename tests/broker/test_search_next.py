@@ -62,12 +62,12 @@ class TestSearchNext(TestBrokerCommand):
     def testmachinedefault(self):
         command = ["search_next", "--machine=evm"]
         out = self.commandtest(command)
-        self.matchoutput(out, "evm123", command)
+        self.matchoutput(out, "evm26", command)
 
     def testmachinenumber(self):
         command = ["search_next", "--number", "--machine=evm"]
         out = self.commandtest(command)
-        self.matchoutput(out, "123", command)
+        self.matchoutput(out, "26", command)
         self.matchclean(out, "evm", command)
 
     def testmachinedefaultmissing(self):
@@ -133,7 +133,7 @@ class TestSearchNext(TestBrokerCommand):
     def testpackfull(self):
         command = ["search_next", "--pack", "--metacluster=utmc"]
         out = self.commandtest(command)
-        self.matchoutput(out, "utmc8", command)
+        self.matchoutput(out, "utmc5", command)
 
     def testpacksparse(self):
         command = ["search_next", "--pack", "--start=0", "--metacluster=utmc"]
@@ -143,7 +143,7 @@ class TestSearchNext(TestBrokerCommand):
     def testpackfullstart(self):
         command = ["search_next", "--pack", "--start=2", "--metacluster=utmc"]
         out = self.commandtest(command)
-        self.matchoutput(out, "utmc8", command)
+        self.matchoutput(out, "utmc5", command)
 
     def testpackskiptostart(self):
         command = ["search_next", "--pack", "--start=9", "--metacluster=utmc"]

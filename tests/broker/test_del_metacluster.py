@@ -66,18 +66,6 @@ class TestDelMetaCluster(VerifyNotificationsMixin, TestBrokerCommand):
         self.statustest(command)
         self.wait_notification(basetime, 0)
 
-    def testdelutmc5(self):
-        basetime = datetime.now()
-        command = ["del_metacluster", "--metacluster=utmc5"]
-        self.statustest(command)
-        self.wait_notification(basetime, 0)
-
-    def testdelutmc6(self):
-        basetime = datetime.now()
-        command = ["del_metacluster", "--metacluster=utmc6"]
-        self.statustest(command)
-        self.wait_notification(basetime, 0)
-
     def testdelutmc7(self):
         basetime = datetime.now()
         command = ["del_metacluster", "--metacluster=utmc7"]

@@ -54,13 +54,6 @@ class TestAdd10GigHardware(TestBrokerCommand):
                        "--fix_location"]
             self.noouttest(command)
 
-    def test_025_fixlocation(self):
-        for i in range(11, 13):
-            for building in ["np", "ut"]:
-                cluster = "%secl%d" % (building, i)
-                self.noouttest(["update_esx_cluster", "--cluster", cluster,
-                                "--fix_location"])
-
     def test_030_newlocation(self):
         for i in range(5, 8):
             command = ["show_esx_cluster", "--cluster=utecl%d" % i]
@@ -78,11 +71,6 @@ class TestAdd10GigHardware(TestBrokerCommand):
         for i in range(8, 11):
             self.noouttest(["update_esx_cluster", "--cluster=utecl%d" % i,
                             "--switch=ut01ga2s02.aqd-unittest.ms.com"])
-        for i in range(11, 13):
-            self.noouttest(["update_esx_cluster", "--cluster=utecl%d" % i,
-                            "--switch=ut01ga2s05.aqd-unittest.ms.com"])
-            self.noouttest(["update_esx_cluster", "--cluster=npecl%d" % i,
-                            "--switch=np01ga2s05.one-nyp.ms.com"])
 
     def test_095_unused_pg(self):
         # If
@@ -267,7 +255,7 @@ class TestAdd10GigHardware(TestBrokerCommand):
         # Skip index 8 and 17 - these don't have interfaces. Index 16 will be
         # used for --prefix testing.
         mac_prefix = "00:50:56:01:20"
-        mac_idx = 60
+        mac_idx = 8
         nets = (self.net["ut01ga2s01_v710"], self.net["ut01ga2s01_v711"],
                 self.net["ut01ga2s01_v712"], self.net["ut01ga2s01_v713"],
                 self.net["ut01ga2s02_v710"], self.net["ut01ga2s02_v711"],
@@ -297,7 +285,7 @@ class TestAdd10GigHardware(TestBrokerCommand):
 
     def test_705_add_nexthost(self):
         ip = self.net["ut01ga2s02_v713"].usable[1]
-        mac = "00:50:56:01:20:4b"
+        mac = "00:50:56:01:20:17"
         self.dsdb_expect_add("ivirt17.aqd-unittest.ms.com", ip, "eth0", mac)
         command = ["add", "host", "--prefix", "ivirt", "--machine", "evm26",
                    "--autoip", "--domain", "unittest",

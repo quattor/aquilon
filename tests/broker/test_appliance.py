@@ -74,7 +74,8 @@ class TestAppliance(VerifyNotificationsMixin, MachineTestMixin,
 
     def test_210_add_appliance_host(self):
         ip = self.net["appliance"].usable[0]
-        self.dsdb_expect_add("utva.aqd-unittest.ms.com", ip, "eth0", "00:50:56:01:20:4b")
+        self.dsdb_expect_add("utva.aqd-unittest.ms.com", ip, "eth0",
+                             "00:50:56:01:20:17")
         command = ["add", "host", "--hostname", "utva.aqd-unittest.ms.com",
                    "--ip", ip,
                    "--machine", self.vapp,

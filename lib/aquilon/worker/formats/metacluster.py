@@ -29,8 +29,6 @@ class MetaClusterFormatter(ObjectFormatter):
         details.append(self.redirect_raw(metacluster.location_constraint,
                                          indent + "  "))
         details.append(indent + "  Max members: %s" % metacluster.max_clusters)
-        details.append(indent + "  High availability enabled: %s" %
-                       metacluster.high_availability)
         caps = metacluster.get_total_capacity()
         if caps:
             capstr = ", ".join(["%s: %s" % (name, value) for name, value in

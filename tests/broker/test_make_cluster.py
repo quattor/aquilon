@@ -51,13 +51,29 @@ class TestMakeCluster(VerifyNotificationsMixin, TestBrokerCommand):
         self.failUnless(os.path.exists(
             self.build_profile_name("clusters", "utecl1", domain="unittest")))
 
-    def testverifycatsvcuta(self):
+    def testverifycatsvc(self):
+        # The cluster may use either the ut.a or ut.b instance, so we need to
+        # check which one was choosen
+        command = ["show_cluster", "--cluster=utecl1"]
+        out = self.commandtest(command)
+        m = self.searchoutput(out,
+                              r'Member Alignment: Service '
+                              r'esx_management_server Instance (\S+)',
+                              command)
+        instance = m.group(1)
+        other = instance == 'ut.a' and 'ut.b' or 'ut.a'
+
         command = ["cat", "--service", "esx_management_server",
-                   "--instance", "np", "--server"]
+                   "--instance", instance, "--server"]
         out = self.commandtest(command)
         self.searchoutput(out,
-                          r'"cluster_clients" = list\(\s*"npecl11",\s*"npecl12"\s*\);',
+                          r'"cluster_clients" = list\([^)]*"utecl1"[^)]*\);',
                           command)
+
+        command = ["cat", "--service", "esx_management_server",
+                   "--instance", other, "--server"]
+        out = self.commandtest(command)
+        self.matchclean(out, '"utecl1"', command)
 
     def testverifycatutecl1(self):
         command = "cat --cluster=utecl1"
@@ -182,11 +198,6 @@ class TestMakeCluster(VerifyNotificationsMixin, TestBrokerCommand):
         for i in range(5, 11):
             command = ["make_cluster", "--cluster", "utecl%d" % i]
             (out, err) = self.successtest(command)
-
-    def testmake_esx_bcp_clusters(self):
-        for i in range(11, 13):
-            self.successtest(["make_cluster", "--cluster", "utecl%d" % i])
-            self.successtest(["make_cluster", "--cluster", "npecl%d" % i])
 
     def testmakeutmc7(self):
         for i in [13]:

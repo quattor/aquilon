@@ -104,7 +104,6 @@ class TestSearchHardware(TestBrokerCommand):
         command = "search hardware --building np"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "ny00l4as01", command)
-        self.matchoutput(out, "evm70", command)
         self.matchoutput(out, "np3c5n5", command)
         self.matchoutput(out, "np06bals03", command)
 
@@ -112,7 +111,6 @@ class TestSearchHardware(TestBrokerCommand):
         command = "search hardware --building np --exact_location"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "ny00l4as01", command)
-        self.matchclean(out, "evm70", command)
         self.matchclean(out, "np3c5n5", command)
         self.matchclean(out, "np06bals03", command)
 

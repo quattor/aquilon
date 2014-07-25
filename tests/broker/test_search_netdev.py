@@ -196,9 +196,6 @@ class TestSearchNetworkDevice(TestBrokerCommand):
         # Not a ToR switch
         self.matchclean(out, "ut3gd1r01.aqd-unittest.ms.com", command)
 
-        # No VLAN polling was done
-        self.matchclean(out, "np01ga2s05.one-nyp.ms.com", command)
-
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestSearchNetworkDevice)

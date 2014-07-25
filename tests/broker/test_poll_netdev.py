@@ -187,14 +187,6 @@ class TestPollNetworkDevice(TestBrokerCommand):
         self.successtest(["poll", "network_device", "--vlan",
                           "--network_device", "ut01ga2s04.aqd-unittest.ms.com"])
 
-    def testpollut01ga2s05(self):
-        self.successtest(["poll", "network_device",
-                          "--network_device", "ut01ga2s05.aqd-unittest.ms.com"])
-
-    def testpollnp01ga2s05(self):
-        self.successtest(["poll", "network_device",
-                          "--network_device", "np01ga2s05.one-nyp.ms.com"])
-
     def testpollbor(self):
         command = ["poll", "network_device", "--vlan",
                    "--network_device", "ut3gd1r01.aqd-unittest.ms.com"]

@@ -48,27 +48,27 @@ class TestClusterConstraints(TestBrokerCommand):
         self.matchoutput(out, "ESX Cluster: utecl1", command)
 
     def testupdatevmhostmemory(self):
-        command = ["update", "machine", "--machine", "np13s03p13",
+        command = ["update", "machine", "--machine", "ut10s04p1",
                    "--memory", 8192]
         out = self.badrequesttest(command)
         self.matchoutput(out,
-                         "ESX Cluster npecl12 is over capacity regarding memory",
+                         "ESX Cluster utecl2 is over capacity regarding memory",
                          command)
 
     def testupdatevmmeory(self):
-        command = ["update", "machine", "--machine", "evm110",
+        command = ["update", "machine", "--machine", "evm1",
                    "--memory", 81920]
         out = self.badrequesttest(command)
         self.matchoutput(out,
-                         "ESX Cluster npecl12 is over capacity regarding memory",
+                         "ESX Cluster utecl1 is over capacity regarding memory",
                          command)
 
     def testunbindmachine(self):
-        command = ["uncluster", "--hostname", "evh87.one-nyp.ms.com",
-                   "--cluster", "npecl12", "--personality", "generic"]
+        command = ["uncluster", "--hostname", "evh51.aqd-unittest.ms.com",
+                   "--cluster", "utecl5", "--personality", "generic"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
-                         "ESX Cluster npecl12 is over capacity regarding memory",
+                         "ESX Cluster utecl5 is over capacity regarding memory",
                          command)
 
 if __name__ == '__main__':
