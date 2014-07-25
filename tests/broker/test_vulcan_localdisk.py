@@ -408,7 +408,13 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, MachineTestMixin,
 
             self.noouttest(["del", "machine", "--machine", machine])
 
-    def test_320_del_vmhost(self):
+    def test_320_uncluster(self):
+        for i in range(0, 2):
+            self.noouttest(["uncluster", "--hostname", self.vmhost[i],
+                            "--cluster", self.cluster[i],
+                            "--personality", "esx_standalone"])
+
+    def test_325_del_vmhost(self):
         for i in range(0, 2):
             ip = self.net["autopg2"].usable[i]
             basetime = datetime.now()

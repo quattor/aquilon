@@ -112,6 +112,25 @@ class TestUncluster(TestBrokerCommand):
                    "--cluster=utstorage1"]
         self.successtest(command)
 
+    def testunbindhaclusters(self):
+        for i in range(25, 49):
+            host = "evh%s.aqd-unittest.ms.com" % (i + 50)
+            cluster = "utecl%d" % (11 + ((i - 25) / 12))
+            self.noouttest(["uncluster", "--hostname", host,
+                            "--cluster", cluster,
+                            "--personality", "generic"])
+
+            host = "evh%s.one-nyp.ms.com" % (i + 50)
+            cluster = "npecl%d" % (11 + ((i - 25) / 12))
+            self.noouttest(["uncluster", "--hostname", host,
+                            "--cluster", cluster,
+                            "--personality", "generic"])
+
+    def testunbindutmc7(self):
+        host = "evh10.aqd-unittest.ms.com"
+        cluster = "utecl13"
+        self.successtest(["uncluster", "--hostname", host, "--cluster", cluster,
+                          "--personality", "generic"])
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUncluster)

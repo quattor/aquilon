@@ -16,6 +16,7 @@
 # limitations under the License.
 """Contains the logic for `aq del host`."""
 
+from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.logger import CLIENT_INFO
 from aquilon.notify.index import trigger_notifications
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
@@ -34,6 +35,11 @@ class CommandDelHost(BrokerCommand):
         # Check dependencies, translate into user-friendly message
         dbhost = hostname_to_host(session, hostname)
         dbmachine = dbhost.hardware_entity
+
+        if dbhost.cluster:
+            raise ArgumentError("{0} is still a member of {1:l}, and cannot "
+                                "be deleted.  Please remove it from the "
+                                "cluster first.".format(dbhost, dbhost.cluster))
 
         # Any service bindings that we need to clean up afterwards
         plenaries = PlenaryCollection(logger=logger)
