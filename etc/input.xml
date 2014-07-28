@@ -95,7 +95,6 @@
          <option name="resources" type="flag">flush the resource templates</option>
          <option name="locations" type="flag">flush templates related to locations. This is only cities for now.</option>
          <option name="network_devices" type="flag">flush templates related to network devices.</option>
-         <option name="switches" type="flag">[Deprecated] flush templates related to switches.</option>
          <option name="all" type="flag">flush all templates</option>
       </optgroup>
       <transport method="post" path="flush" />

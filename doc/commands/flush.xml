@@ -32,7 +32,6 @@
 	        <arg choice="plain"><option>--services</option></arg>
 	        <arg choice="plain"><option>--resources</option></arg>
 	        <arg choice="plain"><option>--locations</option></arg>
-	        <arg choice="plain"><option>--switches</option></arg>
 	        <arg choice="plain"><option>--network_devices</option></arg>
 	    </group>
 	    <group>
@@ -146,7 +145,6 @@
 	    </varlistentry>
 	    <varlistentry>
 	        <term>
-		    <option>--switches</option>
 		    <option>--network_devices</option>
 		</term>
 		<listitem>

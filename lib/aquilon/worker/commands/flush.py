@@ -122,13 +122,8 @@ class CommandFlush(BrokerCommand):
                                 slaves_by_id.get(iface_id, None))
 
     def render(self, session, logger, services, personalities, machines,
-               clusters, hosts, locations, resources, switches,
-               network_devices, all, **arguments):
-        if switches:
-            self.deprecated_option("switchs", "Please use --network_devices instead.",
-                                   logger=logger, **arguments)
-            network_devices = True
-
+               clusters, hosts, locations, resources, network_devices, all,
+               **arguments):
         if all:
             services = True
             personalities = True
