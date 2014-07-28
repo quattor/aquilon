@@ -16,7 +16,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """ This is needed to make sure that a server is bound to the aqd service
-    before make aquilon runs."""
+    before make/reconfigure runs."""
 
 from collections import defaultdict
 import re
