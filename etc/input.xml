@@ -498,7 +498,7 @@
       <optgroup mandatory="False">
          <option name="fullinfo" type="flag">show full information for the matching clusters</option>
       </optgroup>
-      <transport method="get" path="find/cluster/esx" />
+      <transport method="get" path="find/cluster_esx" />
       <format name="proto" >
          <message_class name="ClusterList" module="aqdsystems_pb2"/>
       </format>
@@ -2521,7 +2521,7 @@
       </optgroup>
       <transport trigger="machine" method="get" path="machine/%(machine)s/plenary" />
       <transport trigger="hostname" method="get" path="host/%(hostname)s/plenary" />
-      <transport trigger="cluster" method="get" path="cluster/any/%(cluster)s/plenary" />
+      <transport trigger="cluster" method="get" path="cluster/%(cluster)s/plenary" />
       <transport trigger="service" method="get" path="service/%(service)s/plenary" />
       <transport trigger="instance" method="get" path="service/%(service)s/instance/%(instance)s/plenary" />
       <transport trigger="city" method="get" path="city/%(city)s/plenary" />
@@ -3354,7 +3354,7 @@
       <optgroup>
          <option name="keepbindings" type="boolean">Preserve service bindings that are not marked as aligned</option>
       </optgroup>
-      <transport method="post" path="cluster/any/%(cluster)s/command/make" />
+      <transport method="post" path="cluster/%(cluster)s/command/make" />
    </command>
 
    <command name="add_machine">
@@ -3996,7 +3996,7 @@
          <option name="all" type="flag" conflicts="cluster">Show all. Returns only the names of the clusters.</option>
       </optgroup>
       <transport trigger="cluster" method="get" path="cluster/%(cluster)s" />
-      <transport trigger="all" method="get" path="cluster/" />
+      <transport trigger="all" method="get" path="cluster" />
       <format name="proto" >
          <message_class name="ClusterList" module="aqdsystems_pb2"/>
       </format>
@@ -4049,7 +4049,7 @@
          <option name="buildstatus" type="string">Build status of the cluster (defaults to 'build')</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
-      <transport method="put" path="cluster/esx/%(cluster)s" />
+      <transport method="put" path="cluster/%(cluster)s/esx" />
    </command>
 
    <command name="show_esx_cluster">
@@ -4058,8 +4058,8 @@
          <option name="cluster" type="string" conflicts="all">Name of the cluster</option>
          <option name="all" type="flag" conflicts="cluster">Show all. Returns only the names of the clusters.</option>
       </optgroup>
-      <transport trigger="cluster" method="get" path="cluster/esx/%(cluster)s" />
-      <transport trigger="all" method="get" path="cluster/esx" />
+      <transport trigger="cluster" method="get" path="cluster/%(cluster)s/esx" />
+      <transport trigger="all" method="get" path="cluster_esx" />
       <format name="proto" >
          <message_class name="ClusterList" module="aqdsystems_pb2"/>
       </format>
@@ -4098,7 +4098,7 @@
 	    <option name="desk" type="string">Desk</option>
          </optgroup>
       </optgroup>
-      <transport method="post" path="cluster/esx/%(cluster)s" />
+      <transport method="post" path="cluster/%(cluster)s/esx" />
    </command>
 
    <command name="del_esx_cluster">
@@ -4106,7 +4106,7 @@
       <optgroup mandatory="True" fields="all">
          <option name="cluster" type="string">Name of the cluster</option>
       </optgroup>
-      <transport method="delete" path="cluster/esx/%(cluster)s" />
+      <transport method="delete" path="cluster/%(cluster)s/esx" />
    </command>
 
    <command name="add_cluster">
@@ -4278,7 +4278,7 @@
             </optgroup>
          </optgroup>
       </optgroup>
-      <transport method="put" trigger="service" path="cluster/esx/%(cluster)s/service/%(service)s/%(instance)s" />
+      <transport method="put" trigger="service" path="cluster/%(cluster)s/esx/service/%(service)s/%(instance)s" />
    </command>
 
    <command name="rebind_esx_cluster">
@@ -4295,7 +4295,7 @@
             </optgroup>
          </optgroup>
       </optgroup>
-      <transport method="post" trigger="service" path="cluster/esx/%(cluster)s/service/%(service)s/%(instance)s" />
+      <transport method="post" trigger="service" path="cluster/%(cluster)s/esx/service/%(service)s/%(instance)s" />
    </command>
 
    <command name="unbind_esx_cluster">
@@ -4308,7 +4308,7 @@
                <option name="instance" type="string">Service Instance</option>
          </optgroup>
       </optgroup>
-      <transport method="delete" trigger="service" path="cluster/esx/%(cluster)s/service/%(service)s/%(instance)s" />
+      <transport method="delete" trigger="service" path="cluster/%(cluster)s/esx/service/%(service)s/%(instance)s" />
    </command>
 
    <command name="cluster">
