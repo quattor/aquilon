@@ -20,13 +20,15 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import VirtualSwitch, PortGroup
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.templates import Plenary, PlenaryCollection
 
 
 class CommandBindPortGroup(BrokerCommand):
 
     required_parameters = ["virtual_switch", "networkip"]
 
-    def render(self, session, virtual_switch, networkip, tag, type, **kwargs):
+    def render(self, session, logger, virtual_switch, networkip, tag, type,
+               **kwargs):
         dbvswitch = VirtualSwitch.get_unique(session, virtual_switch,
                                              compel=True)
         dbnetwork = get_net_id_from_ip(session, networkip)
@@ -60,4 +62,6 @@ class CommandBindPortGroup(BrokerCommand):
 
         session.flush()
 
-        # TODO: refresh plenaries
+        plenaries = PlenaryCollection(logger=logger)
+        plenaries.append(Plenary.get_plenary(dbvswitch))
+        plenaries.write()

@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2014  Contributor
+# Copyright (C) 2008,2009,2010,2011,2012,2013,2014  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,26 +14,29 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Contains the logic for `aq update virtual switch`."""
+"""Contains the logic for `aq cat --virtual_switch`."""
 
+from aquilon.exceptions_ import UnimplementedError
 from aquilon.aqdb.model import VirtualSwitch
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.templates import Plenary, PlenaryCollection
+from aquilon.worker.templates import PlenaryVirtualSwitchData
 
 
-class CommandUpdateVirtualSwitch(BrokerCommand):
+class CommandCatSwitch(BrokerCommand):
 
     required_parameters = ["virtual_switch"]
 
-    def render(self, session, logger, virtual_switch, comments, **kwargs):
+    def render(self, session, logger, virtual_switch, data, generate,
+               **arguments):
         dbvswitch = VirtualSwitch.get_unique(session, virtual_switch,
                                              compel=True)
+        if data:
+            plenary_info = PlenaryVirtualSwitchData(dbvswitch, logger=logger)
+        else:
+            raise UnimplementedError("Virtual switches are currently not "
+                                     "compileable.")
 
-        if comments is not None:
-            dbvswitch.comments = comments
-
-        session.flush()
-
-        plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(Plenary.get_plenary(dbvswitch))
-        plenaries.write()
+        if generate:
+            return plenary_info._generate_content()
+        else:
+            return plenary_info.read()

@@ -123,6 +123,10 @@ class PlenaryClusterData(StructurePlenary):
         if hasattr(self, fname):
             getattr(self, fname)(lines)
 
+        if self.dbobj.virtual_switch:
+            pan_assign(lines, "system/cluster/virtual_switch",
+                       self.dbobj.virtual_switch.name)
+
     def body_esx(self, lines):
         # FIXME: deprecate /system/metacluster/name
         if self.dbobj.metacluster:
@@ -131,7 +135,6 @@ class PlenaryClusterData(StructurePlenary):
         if self.dbobj.network_device:
             pan_assign(lines, "system/cluster/switch",
                        self.dbobj.network_device.primary_name)
-
 
 class PlenaryClusterObject(ObjectPlenary):
     """
@@ -170,6 +173,10 @@ class PlenaryClusterObject(ObjectPlenary):
                 # profiles for switches
                 keylist.append(PlenaryKey(exclusive=False,
                                           network_device=self.dbobj.network_device,
+                                          logger=self.logger))
+            if self.dbobj.virtual_switch:
+                keylist.append(PlenaryKey(exclusive=False,
+                                          virtual_switch=self.dbobj.virtual_switch,
                                           logger=self.logger))
         return CompileKey.merge(keylist)
 

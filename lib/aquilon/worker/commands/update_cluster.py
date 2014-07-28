@@ -73,8 +73,7 @@ class CommandUpdateCluster(BrokerCommand):
                                         "that first.".format(dbcluster))
                 dbvswitch = VirtualSwitch.get_unique(session, virtual_switch,
                                                      compel=True)
-                # TODO
-                # plenaries.append(Plenary.get_plenary(dbvswitch))
+                plenaries.append(Plenary.get_plenary(dbvswitch))
             else:
                 dbvswitch = None
 

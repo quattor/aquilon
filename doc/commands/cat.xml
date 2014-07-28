@@ -67,8 +67,10 @@
 	</cmdsynopsis>
 	<cmdsynopsis>
 	    <command>aq cat</command>
-	    <arg choice="plain"><option>--switch <replaceable>SWITCH</replaceable></option></arg>
-	    <arg choice="plain"><option>--network_device <replaceable>NETDEV</replaceable></option></arg>
+	    <group choice="req">
+		<arg choice="plain"><option>--switch <replaceable>SWITCH</replaceable></option></arg>
+		<arg choice="plain"><option>--network_device <replaceable>NETDEV</replaceable></option></arg>
+	    </group>
 	    <arg choice="opt"><option>--generate</option></arg>
 	</cmdsynopsis>
 	<cmdsynopsis>
@@ -78,6 +80,12 @@
 	    <arg choice="opt"><option>--pre_feature</option></arg>
 	    <arg choice="opt"><option>--post_feature</option></arg>
 	    <arg choice="opt"><option>--param_tmpl <replaceable>NAME</replaceable></option></arg>
+	    <arg choice="opt"><option>--generate</option></arg>
+	</cmdsynopsis>
+	<cmdsynopsis>
+	    <command>aq cat</command>
+	    <arg choice="plain"><option>--virtual_switch <replaceable>NAME</replaceable></option></arg>
+	    <arg choice="plain"><option>--data</option></arg>
 	    <arg choice="opt"><option>--generate</option></arg>
 	</cmdsynopsis>
     </refsynopsisdiv>
@@ -196,7 +204,7 @@
 	    <title>Looking at network device plenaries</title>
 	    <varlistentry>
 	        <term>
-		    <option>--switch <replaceable>SWITCH</replaceable></option>
+		    <option>--switch <replaceable>SWITCH</replaceable></option>,
 		    <option>--network_device <replaceable>NETDEV</replaceable></option>
 		</term>
 		<listitem>
@@ -327,6 +335,21 @@
 		<listitem>
 		    <para>
 			Display the template including features after the personality body.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	</variablelist>
+	<variablelist>
+	    <title>Looking at virtual switch plenaries</title>
+	    <varlistentry>
+	        <term>
+		    <option>--virtual_switch <replaceable>NAME</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Display the plenary of the named virtual switch. Virtual switches are currently
+			not compileable, but may be in the future, therefore the <option>--data</option> option
+			is mandatory.
 		    </para>
 		</listitem>
 	    </varlistentry>

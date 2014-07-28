@@ -19,13 +19,14 @@
 from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import VirtualSwitch
+from aquilon.worker.templates import Plenary, PlenaryCollection
 
 
 class CommandDelVirtualSwitch(BrokerCommand):
 
     required_parameters = ["virtual_switch"]
 
-    def render(self, session, virtual_switch, **arguments):
+    def render(self, session, logger, virtual_switch, **arguments):
         dbvswitch = VirtualSwitch.get_unique(session, virtual_switch,
                                              compel=True)
 
@@ -40,4 +41,6 @@ class CommandDelVirtualSwitch(BrokerCommand):
 
         session.flush()
 
-        # TODO: remove templates
+        plenaries = PlenaryCollection(logger=logger)
+        plenaries.append(Plenary.get_plenary(dbvswitch))
+        plenaries.remove(remove_profile=True)

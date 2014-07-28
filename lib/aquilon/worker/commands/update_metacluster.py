@@ -18,7 +18,7 @@
 from aquilon.aqdb.model import MetaCluster
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.commands.update_cluster import CommandUpdateCluster
-from aquilon.worker.templates.base import PlenaryCollection
+from aquilon.worker.templates.base import Plenary, PlenaryCollection
 
 
 class CommandUpdateMetaCluster(CommandUpdateCluster):
