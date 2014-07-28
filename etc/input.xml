@@ -2524,7 +2524,7 @@
       <transport trigger="cluster" method="get" path="cluster/%(cluster)s/plenary" />
       <transport trigger="service" method="get" path="service/%(service)s/plenary" />
       <transport trigger="instance" method="get" path="service/%(service)s/instance/%(instance)s/plenary" />
-      <transport trigger="city" method="get" path="city/%(city)s/plenary" />
+      <transport trigger="city" method="get" path="location/city/%(city)s/plenary" />
       <transport trigger="network_device" method="get" path="network_device/%(network_device)s/plenary" />
       <transport trigger="switch" method="get" path="switch/%(switch)s/plenary" />
       <transport trigger="personality" method="get"  path="personality/personality/%(personality)s/plenary" />
