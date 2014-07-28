@@ -15,7 +15,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Module for testing the unbind esx cluster command."""
+"""Module for testing the unbind cluster command."""
 
 if __name__ == "__main__":
     import utils
@@ -25,10 +25,10 @@ import unittest2 as unittest
 from brokertest import TestBrokerCommand
 
 
-class TestUnbindESXCluster(TestBrokerCommand):
+class TestUnbindCluster(TestBrokerCommand):
 
     def testfailservicemissingcluster(self):
-        command = ["unbind_esx_cluster", "--cluster", "cluster-does-not-exist",
+        command = ["unbind_cluster", "--cluster", "cluster-does-not-exist",
                    "--service=esx_management_server", "--instance=ut.a"]
         out = self.notfoundtest(command)
         self.matchoutput(out,
@@ -36,7 +36,7 @@ class TestUnbindESXCluster(TestBrokerCommand):
                          command)
 
     def testfailservicenotbound(self):
-        command = ["unbind_esx_cluster", "--cluster", "utecl1",
+        command = ["unbind_cluster", "--cluster", "utecl1",
                    "--service=utsvc", "--instance=utsi1"]
         out = self.notfoundtest(command)
         self.matchoutput(out,
@@ -45,7 +45,7 @@ class TestUnbindESXCluster(TestBrokerCommand):
                          command)
 
     def testfailunbindrequiredservice(self):
-        command = ["show_esx_cluster", "--cluster=utecl1"]
+        command = ["show_cluster", "--cluster=utecl1"]
         out = self.commandtest(command)
         m = self.searchoutput(out,
                               r'Member Alignment: Service '
@@ -53,7 +53,7 @@ class TestUnbindESXCluster(TestBrokerCommand):
                               command)
         instance = m.group(1)
 
-        command = ["unbind_esx_cluster", "--cluster=utecl1",
+        command = ["unbind_cluster", "--cluster=utecl1",
                    "--service=esx_management_server",
                    "--instance=%s" % instance]
         out = self.badrequesttest(command)
@@ -66,15 +66,15 @@ class TestUnbindESXCluster(TestBrokerCommand):
         # This also tests binding a non-aligned service...
         # not sure if there should be a test of running make against a
         # cluster (or a cluster with hosts) while bound to such a service...
-        command = ["bind_esx_cluster", "--cluster=utecl4",
+        command = ["bind_cluster", "--cluster=utecl4",
                    "--service=utsvc", "--instance=utsi1"]
         (out, err) = self.successtest(command)
 
-        command = ["unbind_esx_cluster", "--cluster=utecl4",
+        command = ["unbind_cluster", "--cluster=utecl4",
                    "--service=utsvc", "--instance=utsi1"]
         out = self.commandtest(command)
 
 
 if __name__ == '__main__':
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestUnbindESXCluster)
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestUnbindCluster)
     unittest.TextTestRunner(verbosity=2).run(suite)

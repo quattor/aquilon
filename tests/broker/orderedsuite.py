@@ -124,9 +124,9 @@ from test_make import TestMake
 from test_make_cluster import TestMakeCluster
 from test_cluster import TestCluster
 from test_add_allowed_personality import TestAddAllowedPersonality
-from test_bind_esx_cluster import TestBindESXCluster
+from test_bind_cluster import TestBindCluster
 from test_change_status_cluster import TestChangeClusterStatus
-from test_rebind_esx_cluster import TestRebindESXCluster
+from test_rebind_cluster import TestRebindCluster
 from test_rebind_metacluster import TestRebindMetaCluster
 from test_add_virtual_hardware import TestAddVirtualHardware
 from test_add_10gig_hardware import TestAdd10GigHardware
@@ -209,7 +209,7 @@ from test_unbind_server import TestUnbindServer
 from test_unmap_service import TestUnmapService
 from test_del_10gig_hardware import TestDel10GigHardware
 from test_del_virtual_hardware import TestDelVirtualHardware
-from test_unbind_esx_cluster import TestUnbindESXCluster
+from test_unbind_cluster import TestUnbindCluster
 from test_del_allowed_personality import TestDelAllowedPersonality
 from test_uncluster import TestUncluster
 from test_del_static_route import TestDelStaticRoute
@@ -339,7 +339,7 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestMakeAquilon, TestMakeCluster, TestCluster,
                      TestAddAllowedPersonality,
                      TestDelAllowedPersonality,
-                     TestBindESXCluster, TestChangeClusterStatus, TestRebindESXCluster,
+                     TestBindCluster, TestChangeClusterStatus, TestRebindCluster,
                      TestMake,
                      TestAddStaticRoute,
                      TestMapGrn,
@@ -398,7 +398,7 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestUmaskConstraints,
                      TestUnbindServer, TestUnmapService,
                      TestDel10GigHardware, TestDelVirtualHardware,
-                     TestUnbindESXCluster, TestUncluster,
+                     TestUnbindCluster, TestUncluster,
                      TestDelStaticRoute,
                      TestDelServiceAddress, TestDelInterfaceAddress,
                      TestDelDynamicRange, TestDelAlias, TestDelSrvRecord,
