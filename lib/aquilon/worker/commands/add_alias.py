@@ -27,10 +27,16 @@ class CommandAddAlias(BrokerCommand):
 
     required_parameters = ["fqdn", "target"]
 
-    def render(self, session, logger, fqdn, dns_environment, target, comments,
+    def render(self, session, logger, fqdn, dns_environment, target,
+               target_environment, comments,
                **kwargs):
         dbdns_env = DnsEnvironment.get_unique_or_default(session,
                                                          dns_environment)
+        if target_environment:
+            dbtgt_env = DnsEnvironment.get_unique_or_default(session,
+                                                             target_environment)
+        else:
+            dbtgt_env = dbdns_env
 
         dbfqdn = Fqdn.get_or_create(session, dns_environment=dbdns_env,
                                     fqdn=fqdn)
@@ -41,7 +47,7 @@ class CommandAddAlias(BrokerCommand):
 
         DnsRecord.get_unique(session, fqdn=dbfqdn, preclude=True)
 
-        dbtarget = create_target_if_needed(session, logger, target, dbdns_env)
+        dbtarget = create_target_if_needed(session, logger, target, dbtgt_env)
         try:
             db_record = Alias(fqdn=dbfqdn, target=dbtarget, comments=comments)
             session.add(db_record)

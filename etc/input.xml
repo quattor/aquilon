@@ -4521,6 +4521,7 @@
       <optgroup name="add_alias_optional" mandatory="False">
          <option name="comments" type="string">Comments</option>
          <option name="dns_environment" type="string">The name of the environment the address is in (defaults to 'internal')</option>
+         <option name="target_environment" type="string">The name of the environment the target is in (defaults to be the same as the alias environment)</option>
       </optgroup>
       <transport method="put" path="alias/%(fqdn)s" />
    </command>
@@ -4556,6 +4557,7 @@
          <option name="target" type="string">The new target of the alias</option>
          <option name="comments" type="string">Comments</option>
          <option name="dns_environment" type="string">The name of the environment the address is in (defaults to 'internal')</option>
+         <option name="target_environment" type="string">The name of the environment the target is in (defaults to be the same as the alias environment)</option>
       </optgroup>
       <transport method="post" path="alias/%(fqdn)s" />
    </command>

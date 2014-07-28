@@ -71,6 +71,27 @@ class TestAddAlias(TestBrokerCommand):
                          "restricted, aliases are not allowed.",
                          cmd)
 
+    def test_150_add_alias2diff_environment(self):
+        cmd = ['add', 'alias', '--fqdn', 'alias2host.aqd-unittest-ut-env.ms.com',
+               '--dns_environment', 'ut-env',
+               '--target', 'arecord13.aqd-unittest.ms.com',
+               '--target_environment', 'internal']
+        self.noouttest(cmd)
+
+    def test_155_add_alias2explicit_target_environment(self):
+        cmd = ['add', 'alias', '--fqdn', 'alias2alias.aqd-unittest-ut-env.ms.com',
+               '--dns_environment', 'ut-env',
+               '--target', 'alias2host.aqd-unittest-ut-env.ms.com',
+               '--target_environment', 'ut-env']
+        self.noouttest(cmd)
+
+    def test_160_add_alias_with_fqdn_in_diff_environment(self):
+        cmd = ['add', 'alias', '--fqdn', 'alias13.aqd-unittest.ms.com',
+               '--dns_environment', 'ut-env',
+               '--target', 'arecord13.aqd-unittest.ms.com',
+               '--target_environment', 'internal']
+        self.noouttest(cmd)
+
     def test_200_autocreate_target(self):
         cmd = ["add", "alias", "--fqdn", "restrict1.aqd-unittest.ms.com",
                "--target", "target.restrict.aqd-unittest.ms.com"]
@@ -121,6 +142,9 @@ class TestAddAlias(TestBrokerCommand):
         cmd = "show address --fqdn arecord13.aqd-unittest.ms.com"
         out = self.commandtest(cmd.split(" "))
         self.matchoutput(out, "Aliases: alias.ms.com, "
+                         "alias13.aqd-unittest.ms.com [environment: ut-env], "
+                         "alias2alias.aqd-unittest-ut-env.ms.com [environment: ut-env], "
+                         "alias2host.aqd-unittest-ut-env.ms.com [environment: ut-env], "
                          "alias2host.aqd-unittest.ms.com", cmd)
 
     def test_410_verify_mscom_alias(self):
@@ -131,6 +155,20 @@ class TestAddAlias(TestBrokerCommand):
         self.matchoutput(out, "Target: arecord13.aqd-unittest.ms.com", cmd)
         self.matchoutput(out, "DNS Environment: internal", cmd)
         self.matchoutput(out, "Comments: Some alias comments", cmd)
+
+    def test_420_verify_alias2diff_environment(self):
+        cmd = "show alias --fqdn alias2host.aqd-unittest-ut-env.ms.com --dns_environment ut-env"
+        out = self.commandtest(cmd.split(" "))
+        self.matchoutput(out, "Alias: alias2host.aqd-unittest-ut-env.ms.com", cmd)
+        self.matchoutput(out, "Target: arecord13.aqd-unittest.ms.com [environment: internal]", cmd)
+        self.matchoutput(out, "DNS Environment: ut-env", cmd)
+
+    def test_425_verify_alias2alias_with_diff_environment(self):
+        cmd = "show alias --fqdn alias2alias.aqd-unittest-ut-env.ms.com --dns_environment ut-env"
+        out = self.commandtest(cmd.split(" "))
+        self.matchoutput(out, "Alias: alias2alias.aqd-unittest-ut-env.ms.com", cmd)
+        self.matchoutput(out, "Target: alias2host.aqd-unittest-ut-env.ms.com", cmd)
+        self.matchoutput(out, "DNS Environment: ut-env", cmd)
 
     def test_500_add_alias2alias(self):
         cmd = ['add', 'alias', '--fqdn', 'alias2alias.aqd-unittest.ms.com',
@@ -168,7 +206,10 @@ class TestAddAlias(TestBrokerCommand):
         out = self.commandtest(cmd.split(" "))
         self.matchoutput(out,
                          "Aliases: alias.ms.com, "
+                         "alias13.aqd-unittest.ms.com [environment: ut-env], "
+                         "alias2alias.aqd-unittest-ut-env.ms.com [environment: ut-env], "
                          "alias2alias.aqd-unittest.ms.com, "
+                         "alias2host.aqd-unittest-ut-env.ms.com [environment: ut-env], "
                          "alias2host.aqd-unittest.ms.com, "
                          "alias3alias.aqd-unittest.ms.com, "
                          "alias4alias.aqd-unittest.ms.com",

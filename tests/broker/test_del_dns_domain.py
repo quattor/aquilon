@@ -75,6 +75,13 @@ class TestDelDnsDomain(TestBrokerCommand):
         self.noouttest(command)
         self.dsdb_verify()
 
+    def testdelut_env(self):
+        self.dsdb_expect("delete_dns_domain -domain_name aqd-unittest-ut-env.ms.com")
+        command = ["del", "dns", "domain",
+                   "--dns_domain", "aqd-unittest-ut-env.ms.com"]
+        self.noouttest(command)
+        self.dsdb_verify()
+
     def testdeltd3(self):
         """ test delete domain with dsdb failure """
 
