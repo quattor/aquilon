@@ -397,7 +397,7 @@
          <option name="cluster" type="string">Cluster or metacluster name</option>
          <option name="guest_on_cluster" type="string">Host is a virtual machine guest on this cluster</option>
          <option name="guest_on_share" type="string">Host is a virtual machine using this share</option>
-         <option name="member_cluster_share" type="string">Host is a member of a cluster with machines using this nas_disk_share</option>
+         <option name="member_cluster_share" type="string">Host is a member of a cluster with machines using this share</option>
          <optgroup name="search_host_branch" fields="any">
             <option name="domain" type="string" conflicts="sandbox branch sandbox_author">Template domain</option>
             <option name="sandbox" type="string" conflicts="domain branch sandbox_author">Name of the sandbox (given as 'author/branch')</option>
@@ -456,7 +456,7 @@
          <option name="personality" type="string">personality</option>
          <option name="service" type="string">client of service (single service only)</option>
          <option name="instance" type="string">client of service instance (single instance only)</option>
-         <option name="share" type="string">nas_disk_share in use by an virtual machine on the cluster</option>
+         <option name="share" type="string">share in use by an virtual machine on the cluster</option>
          <option name="capacity_override" type="flag">Select clusters with capacity overrides</option>
          <option name="switch" type="string">Select clusters bound to the given switch</option>
          <option name="buildstatus" type="string">status</option>
@@ -1732,16 +1732,6 @@
       <format name="proto" >
          <message_class name="ServiceList" module="aqdservices_pb2"/>
       </format>
-   </command>
-
-   <command name="show_nas_disk_share">
-      Show information for instances of the nas_disk_share service.
-      <optgroup name="show_share_opts" mandatory="True" fields="any">
-         <option name="share" type="string" conflicts="all">Share name</option>
-         <option name="all" type="flag" conflicts="share">Select all shares</option>
-      </optgroup>
-      <transport trigger="share" method="get" path="nas_disk_share/%(share)s"/>
-      <transport trigger="all" method="get" path="nas_disk_share" />
    </command>
 
    <command name="update_service">

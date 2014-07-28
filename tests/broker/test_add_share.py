@@ -79,19 +79,6 @@ class TestAddShare(TestBrokerCommand):
         self.matchoutput(out, '"mountpoint" = "/vol/lnn30f1v1/test_share_1";',
                          command)
 
-    # only backward compatibility - to be removed later.
-    def test_105_show_nas_disk_share(self):
-        command = ["show_nas_disk_share", "--share=test_share_1"]
-        out = self.commandtest(command)
-        self.matchoutput(out, "NAS Disk Share: test_share_1", command)
-        self.matchoutput(out, "Server: lnn30f1", command)
-        self.matchoutput(out, "Mountpoint: /vol/lnn30f1v1/test_share_1",
-                         command)
-        self.matchoutput(out, "Disk Count: 0", command)
-        self.matchoutput(out, "Machine Count: 0", command)
-        self.matchclean(out, "Comments", command)
-        self.matchclean(out, "NAS Disk Share: test_share_2", command)
-
     def test_110_add_not_in_nasobjects(self):
         self.noouttest(["add_share", "--cluster", "utecl1",
                         "--share", "not_in_nasobjects"])
@@ -213,18 +200,6 @@ class TestAddShare(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "Share: test_share_1", command)
         self.matchoutput(out, "Share: test_share_2", command)
-        self.matchoutput(out, "Server: lnn30f1", command)
-        self.matchoutput(out, "Mountpoint: /vol/lnn30f1v1/test_share_1",
-                         command)
-        self.matchoutput(out, "Disk Count: 0", command)
-        self.matchoutput(out, "Machine Count: 0", command)
-
-    # only backward compatibility - to be removed later.
-    def test_320_show_nas_disk_share_all(self):
-        command = ["show_nas_disk_share", "--all"]
-        out = self.commandtest(command)
-        self.matchoutput(out, "NAS Disk Share: test_share_1", command)
-        self.matchoutput(out, "NAS Disk Share: test_share_2", command)
         self.matchoutput(out, "Server: lnn30f1", command)
         self.matchoutput(out, "Mountpoint: /vol/lnn30f1v1/test_share_1",
                          command)
