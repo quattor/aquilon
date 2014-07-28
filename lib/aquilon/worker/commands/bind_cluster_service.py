@@ -24,7 +24,7 @@ from aquilon.worker.dbwrappers.service_instance import get_service_instance
 
 class CommandBindClusterService(BrokerCommand):
 
-    required_parameters = ["cluster", "service", "instance"]
+    required_parameters = ["cluster", "service"]
 
     def render(self, session, logger, cluster, service, instance, force=False,
                **arguments):

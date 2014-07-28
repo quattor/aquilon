@@ -29,7 +29,7 @@ class TestUnbindESXCluster(TestBrokerCommand):
 
     def testfailservicemissingcluster(self):
         command = ["unbind_esx_cluster", "--cluster", "cluster-does-not-exist",
-                   "--service=esx_management_server", "--instance=ut.a"]
+                   "--service=esx_management_server"]
         out = self.notfoundtest(command)
         self.matchoutput(out,
                          "Cluster cluster-does-not-exist not found.",
@@ -37,11 +37,10 @@ class TestUnbindESXCluster(TestBrokerCommand):
 
     def testfailservicenotbound(self):
         command = ["unbind_esx_cluster", "--cluster", "utecl1",
-                   "--service=utsvc", "--instance=utsi1"]
+                   "--service=utsvc"]
         out = self.notfoundtest(command)
         self.matchoutput(out,
-                         "Service Instance utsvc/utsi1 is not bound to "
-                         "ESX cluster utecl1.",
+                         "Service utsvc is not bound to ESX cluster utecl1.",
                          command)
 
     def testfailunbindrequiredservice(self):
@@ -51,11 +50,9 @@ class TestUnbindESXCluster(TestBrokerCommand):
                               r'Member Alignment: Service '
                               r'esx_management_server Instance (\S+)',
                               command)
-        instance = m.group(1)
 
         command = ["unbind_esx_cluster", "--cluster=utecl1",
-                   "--service=esx_management_server",
-                   "--instance=%s" % instance]
+                   "--service=esx_management_server"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "Cannot remove cluster service instance binding for "
@@ -71,9 +68,8 @@ class TestUnbindESXCluster(TestBrokerCommand):
         (out, err) = self.successtest(command)
 
         command = ["unbind_esx_cluster", "--cluster=utecl4",
-                   "--service=utsvc", "--instance=utsi1"]
+                   "--service=utsvc"]
         out = self.commandtest(command)
-
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUnbindESXCluster)

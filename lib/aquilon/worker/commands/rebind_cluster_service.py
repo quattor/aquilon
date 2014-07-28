@@ -23,7 +23,7 @@ from aquilon.worker.commands.bind_cluster_service import (
 
 class CommandRebindClusterService(CommandBindClusterService):
 
-    required_parameters = ["cluster", "service", "instance"]
+    required_parameters = ["cluster", "service"]
 
     def render(self, session, **arguments):
         arguments["force"] = True

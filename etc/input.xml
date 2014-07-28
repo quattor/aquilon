@@ -1884,7 +1884,7 @@
       <optgroup>
          <option name="instance" type="string">Instance name</option>
       </optgroup>
-      <transport method="post" path="host/%(hostname)s/client_of_service/%(service)s/bind" />
+      <transport method="put" path="host/%(hostname)s/client_of_service/%(service)s" />
    </command>
 
    <command name="rebind_client">
@@ -1898,7 +1898,7 @@
       <optgroup>
          <option name="instance" type="string">Instance name</option>
       </optgroup>
-      <transport method="post" path="host/%(hostname)s/client_of_service/%(service)s/rebind" />
+      <transport method="post" path="host/%(hostname)s/client_of_service/%(service)s" />
    </command>
 
    <command name="unbind_client">
@@ -4224,14 +4224,12 @@
       a different instance this command will fail.
       <optgroup mandatory="True" fields="all">
          <option name="cluster" type="string">Cluster name</option>
-         <optgroup mandatory="True" fields="any">
-            <optgroup mandatory="False" fields="all">
-               <option name="service" type="string">Service name</option>
-               <option name="instance" type="string">Service Instance</option>
-            </optgroup>
-         </optgroup>
+         <option name="service" type="string">Service name</option>
       </optgroup>
-      <transport method="put" trigger="service" path="cluster/%(cluster)s/service/%(service)s/%(instance)s" />
+      <optgroup>
+         <option name="instance" type="string">Service instance</option>
+      </optgroup>
+      <transport method="put" trigger="service" path="cluster/%(cluster)s/client_of_service/%(service)s"/>
    </command>
 
    <command name="rebind_cluster">
@@ -4241,27 +4239,21 @@
       a different instance the old binding will be removed.
       <optgroup mandatory="True" fields="all">
          <option name="cluster" type="string">Cluster name</option>
-     <optgroup mandatory="True" fields="any">
-        <optgroup fields="all">
-               <option name="service" type="string">Service name</option>
-               <option name="instance" type="string">Service Instance</option>
-            </optgroup>
-         </optgroup>
+         <option name="service" type="string">Service name</option>
       </optgroup>
-      <transport method="post" trigger="service" path="cluster/%(cluster)s/service/%(service)s/%(instance)s" />
+      <optgroup>
+         <option name="instance" type="string">Service Instance</option>
+      </optgroup>
+      <transport method="post" trigger="service" path="cluster/%(cluster)s/client_of_service/%(service)s"/>
    </command>
 
    <command name="unbind_cluster">
       Remove the binding of the service instance from the named cluster.
-
       <optgroup mandatory="True" fields="all">
          <option name="cluster" type="string">Cluster name</option>
-        <optgroup mandatory="False" fields="all">
-               <option name="service" type="string">Service name</option>
-               <option name="instance" type="string">Service Instance</option>
-         </optgroup>
+         <option name="service" type="string">Service name</option>
       </optgroup>
-      <transport method="delete" trigger="service" path="cluster/%(cluster)s/service/%(service)s/%(instance)s" />
+      <transport method="delete" trigger="service" path="cluster/%(cluster)s/client_of_service/%(service)s" />
    </command>
 
    <command name="bind_esx_cluster">
@@ -4271,14 +4263,12 @@
       a different instance this command will fail.
       <optgroup mandatory="True" fields="all">
          <option name="cluster" type="string">Cluster name</option>
-         <optgroup mandatory="True" fields="any">
-            <optgroup mandatory="False" fields="all">
-               <option name="service" type="string">Service name</option>
-               <option name="instance" type="string">Service Instance</option>
-            </optgroup>
-         </optgroup>
+         <option name="service" type="string">Service name</option>
       </optgroup>
-      <transport method="put" trigger="service" path="cluster/%(cluster)s/esx/service/%(service)s/%(instance)s" />
+      <optgroup>
+         <option name="instance" type="string">Service Instance</option>
+      </optgroup>
+      <transport method="put" trigger="service" path="cluster/%(cluster)s/esx/client_of_service/%(service)s"/>
    </command>
 
    <command name="rebind_esx_cluster">
@@ -4288,27 +4278,21 @@
       a different instance the old binding will be removed.
       <optgroup mandatory="True" fields="all">
          <option name="cluster" type="string">Cluster name</option>
-	 <optgroup mandatory="True" fields="any">
-	    <optgroup fields="all">
-               <option name="service" type="string">Service name</option>
-               <option name="instance" type="string">Service Instance</option>
-            </optgroup>
-         </optgroup>
+         <option name="service" type="string">Service name</option>
       </optgroup>
-      <transport method="post" trigger="service" path="cluster/%(cluster)s/esx/service/%(service)s/%(instance)s" />
+      <optgroup>
+         <option name="instance" type="string">Service Instance</option>
+      </optgroup>
+      <transport method="post" trigger="service" path="cluster/%(cluster)s/esx/client_of_service/%(service)s"/>
    </command>
 
    <command name="unbind_esx_cluster">
       Remove the binding of the service instance from the named cluster.
-
       <optgroup mandatory="True" fields="all">
          <option name="cluster" type="string">Cluster name</option>
-	    <optgroup mandatory="False" fields="all">
-               <option name="service" type="string">Service name</option>
-               <option name="instance" type="string">Service Instance</option>
-         </optgroup>
+         <option name="service" type="string">Service name</option>
       </optgroup>
-      <transport method="delete" trigger="service" path="cluster/%(cluster)s/esx/service/%(service)s/%(instance)s" />
+      <transport method="delete" trigger="service" path="cluster/%(cluster)s/esx/client_of_service/%(service)s"/>
    </command>
 
    <command name="cluster">
