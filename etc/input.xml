@@ -135,7 +135,7 @@
          <option name="switches" type="flag">[Deprecated] flush templates related to switches.</option>
          <option name="all" type="flag">flush all templates</option>
       </optgroup>
-      <transport method="post" path="flush" />
+      <transport method="post" path="command/flush" />
    </command>
 
    <command name="show_host">
@@ -580,7 +580,7 @@
          <option name="pancdebug" type="boolean" conflicts="pancinclude pancexclude">Alias for pancinclude=.* and pancexclude=components/spma/functions</option>
          <option name="cleandeps" type="boolean">Remove pan dependecy files before compiling (should only be required if switching panc versions)</option>
       </optgroup>
-      <transport method="post" path="compile"/>
+      <transport method="post" path="command/compile"/>
       <transport trigger="hostname" method="post" path="host/%(hostname)s/command/compile" />
       <transport trigger="cluster" method="post" path="cluster/%(cluster)s/command/compile" />
       <transport trigger="personality" method="post" path="personality/%(personality)s/command/compile" />
@@ -630,8 +630,8 @@
       <optgroup mandatory="False">
          <option name="pathonly" type="flag" conflicts="all">Show only the sandbox path</option>
       </optgroup>
-      <transport trigger="all" method="get" path="sandbox/command/show_all" />
-      <transport trigger="sandbox" method="get" path="sandbox/command/show" />
+      <transport trigger="all" method="get" path="sandbox" />
+      <transport trigger="sandbox" method="get" path="sandbox/%(sandbox)s" />
       <format name="proto">
          <message_class name="DomainList" module="aqdsystems_pb2"/>
       </format>
@@ -760,7 +760,7 @@
          <option name="dryrun" type="boolean" conflicts="incremental">Report what will change</option>
          <option name="incremental" type="boolean" conflicts="dryrun">Commit every change as it is decided</option>
       </optgroup>
-      <transport method="post" path="command/net_refresh" />
+      <transport method="post" path="command/refresh_network" />
    </command>
 
    <command name="refresh_windows_hosts">
@@ -1493,7 +1493,7 @@
       <optgroup mandatory="False" fields="any">
          <option name="network_environment" type="string">Network environment (default: internal)</option>
       </optgroup>
-      <transport method="post" path="network/split" />
+      <transport method="post" path="network/%(ip)s/command/split"/>
    </command>
 
    <command name="merge_network">
@@ -1512,7 +1512,7 @@
       <optgroup mandatory="False" fields="any">
          <option name="network_environment" type="string">Network environment (default: internal)</option>
       </optgroup>
-      <transport method="post" path="network/merge" />
+      <transport method="post" path="network/%(ip)s/command/merge"/>
    </command>
 
    <command name="add_router">
@@ -2344,7 +2344,7 @@
          <option name="get" type="boolean" default="False">Create the user-controlled sandbox automatically.</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
-      <transport method="post" path="sandbox/command/add" expect="sandbox"/>
+      <transport method="put" path="sandbox/%(sandbox)s" expect="sandbox"/>
    </command>
 
    <command name="get">
@@ -2354,7 +2354,7 @@
       <optgroup mandatory="True" fields="all">
          <option name="sandbox" type="string">Name of the sandbox</option>
       </optgroup>
-      <transport method="post" path="sandbox/command/get" expect="sandbox"/>
+      <transport method="post" path="sandbox/%(sandbox)s/command/get" expect="sandbox"/>
    </command>
 
    <command name="publish">
@@ -2440,7 +2440,7 @@
       <optgroup mandatory="True" fields="all">
          <option name="sandbox" type="string">Name of the sandbox to be deleted</option>
       </optgroup>
-      <transport method="post" path="sandbox/command/delete" />
+      <transport method="delete" path="sandbox/%(sandbox)s" />
    </command>
 
    <command name="manage">
@@ -2470,9 +2470,9 @@
       <optgroup fields="any" mandatory="False">
          <option name="force" type="flag">bypasses git status and branch integrity checks (potentially dangerous)</option>
       </optgroup>
-      <transport method="post" path="command/manage_hostname" trigger="hostname" />
-      <transport method="post" path="command/manage_list" trigger="list" />
-      <transport method="post" trigger="cluster" path="command/manage_cluster" />
+      <transport method="post" trigger="hostname" path="host/%(hostname)s/command/manage"/>
+      <transport method="post" trigger="list" path="command/manage_list"/>
+      <transport method="post" trigger="cluster" path="cluster/%(cluster)s/command/manage"/>
    </command>
 
    <command name="cat">
@@ -3903,7 +3903,7 @@
          <option name="dns_domain" type="string">Name of the DNS domain</option>
          <option name="dns_environment" type="string">The name of the environment (defaults to 'internal')</option>
       </optgroup>
-      <transport method="get" path="dump_dns" />
+      <transport method="get" path="command/dump_dns" />
    </command>
 
    <command name="add_metacluster">
@@ -4694,7 +4694,7 @@
          <option name="position" type="int">Position in the list</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
-      <transport method="post" path="dns_map/%(dns_domain)s/command/map" />
+      <transport method="post" path="dns_domain/%(dns_domain)s/command/map" />
    </command>
 
    <command name="unmap_dns_domain">
@@ -4715,7 +4715,7 @@
             <option name="desk" type="string">Desk</option>
          </optgroup>
       </optgroup>
-      <transport method="post" path="dns_map/%(dns_domain)s/command/unmap" />
+      <transport method="post" path="dns_domain/%(dns_domain)s/command/unmap" />
    </command>
 
    <command name="search_dns_domain_map">
@@ -5243,7 +5243,7 @@
 
    <command name="refresh_grns">
       Refresh the mapping from GRNs to EON IDs.
-      <transport method="post" path="grn/command/refresh"/>
+      <transport method="post" path="command/refresh_grns"/>
    </command>
 
    <command name="map_grn">
@@ -5402,7 +5402,7 @@
          <option name="reason" type="string">String to be specified if justification='emergency'</option>
       </optgroup>
 
-      <transport method="post" path="commands/bind_feature"/>
+      <transport method="post" path="command/bind_feature"/>
    </command>
 
    <command name="unbind_feature">
@@ -5429,7 +5429,7 @@
          <option name="flush" type="boolean" default="True">Enable flushing the affected host plenaries</option>
       </optgroup>
 
-      <transport method="post" path="commands/unbind_feature"/>
+      <transport method="post" path="command/unbind_feature"/>
    </command>
 
    <command name="show_parameter">
@@ -5457,7 +5457,7 @@
             <option name="archetype" type="string">Archetype</option>
          </optgroup>
       </optgroup>
-      <transport method="put" path="validate/parameter/"/>
+      <transport method="post" path="command/validate_parameter"/>
    </command>
 
 
@@ -5479,7 +5479,7 @@
          <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
          <option name="reason" type="string">String to be specified if justification='emergency'</option>
       </optgroup>
-      <transport method="put" path="commands/add_parameter"/>
+      <transport method="put" path="command/add_parameter"/>
    </command>
 
    <command name="update_parameter">
@@ -5500,7 +5500,7 @@
          <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
          <option name="reason" type="string">String to be specified if justification='emergency'</option>
       </optgroup>
-      <transport method="put" path="commands/upd_parameter"/>
+      <transport method="put" path="command/update_parameter"/>
    </command>
 
    <command name="del_parameter">
@@ -5519,7 +5519,7 @@
          <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
          <option name="reason" type="string">String to be specified if justification='emergency'</option>
       </optgroup>
-      <transport method="put" path="commands/del_parameter"/>
+      <transport method="put" path="command/del_parameter"/>
    </command>
 
    <command name="show_diff">
@@ -5534,7 +5534,7 @@
       <optgroup mandatory="False" fields="any">
          <option name="other_archetype" type="string">Archetype</option>
       </optgroup>
-      <transport method="get" path="commands/show_diff"/>
+      <transport method="get" path="diff"/>
    </command>
 
    <command name="add_parameter_definition">
@@ -5783,7 +5783,7 @@
          <option name="incremental" type="boolean">Commit every change as it is decided</option>
          <option name="ignore_delete_limit" type="boolean">Allow deleting any number of users</option>
       </optgroup>
-      <transport method="post" path="user/command/refresh"/>
+      <transport method="post" path="command/refresh_user"/>
    </command>
 
 </commandline>
