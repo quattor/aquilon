@@ -935,48 +935,6 @@
       <transport method="put" trigger="prefix" path="next_host/%(prefix)s"/>
    </command>
 
-   <command name="add_aquilon_host">
-      Add a new host to the database with archetype aquilon.  Requires a
-      machine with a bootable interface and a valid IP address.
-      <p/>
-      The IP address can be derived based on aqdb availabililty using:
-      --ipfromip:     choose a free IP address in the subnet of the given ip
-      --ipfromsystem: choose based on the subnet in use by the given system
-      --autoip:       check discovery tables (filled in by aq poll)
-      <p/>
-      Three algorithms are available for deriving the IP address:
-      lowest:         Use the lowest available IP in the subnet.
-      highest:        Use the highest available IP in the subnet.
-      max:            Find the highest IP in use and add one.
-      The default is lowest.
-      <optgroup name="add_aquilon_host_opts" mandatory="True" fields="all">
-         <option name="hostname" type="string">Fully qualified Host name</option>
-         <option name="machine" type="string">Machine (Node) name</option>
-         <optgroup name="add_host_branch" mandatory="True" fields="any">
-            <option name="domain" type="string" conflicts="sandbox">Template (not DNS) domain</option>
-            <option name="sandbox" type="string" conflicts="domain">Name of the sandbox (given as 'author/branch')</option>
-         </optgroup>
-         <optgroup name="add_host_ip_opts" mandatory="True" fields="any">
-            <option name="ip" type="ipv4" conflicts="ipfromip ipfromsystem autoip">IP address</option>
-            <option name="ipfromip" type="ipv4" conflicts="ip ipfromsystem autoip">choose IP address in subnet</option>
-            <option name="ipfromsystem" type="string" conflicts="ip ipfromip autoip">choose IP address in subnet of system</option>
-            <option name="autoip" type="flag" conflicts="ip ipfromip ipfromsystem">choose IP address based on mac/switch</option>
-         </optgroup>
-      </optgroup>
-      <optgroup name="optional_opts">
-         <option name="osname" type="string">Operating system (e.g. linux)</option>
-         <option name="osversion" type="string">Operating system version (e.g. 5.0-x86_64)</option>
-         <option name="buildstatus" type="string">Build Status: defaults to build.  'blind' and 'ready' also valid.</option>
-         <option name="comments" type="string">Comments</option>
-         <option name="personality" type="string">Personality name.  Defaults to 'inventory'.</option>
-         <option name="ipalgorithm" type="string">Algorithm for automatically choosing an IP.</option>
-         <option name="zebra_interfaces" type="string">Interfaces to configure Zebra on</option>
-         <option name="grn" type="string" conflicts="eon_id">GRN as string</option>
-         <option name="eon_id" type="int" conflicts="grn">Numeric EON ID</option>
-      </optgroup>
-      <transport method="put" path="aquilon_host/%(hostname)s" />
-   </command>
-
    <command name="add_windows_host">
       Add a new host to the database with archetype windows.  Requires a
       machine with a bootable interface and a valid IP address.
