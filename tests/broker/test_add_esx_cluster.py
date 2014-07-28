@@ -242,8 +242,8 @@ class TestAddESXCluster(PersonalityTestMixin, TestBrokerCommand):
                          "not match ESX metacluster utmc1 domain unittest.",
                          command)
 
-    def testverifyshowall(self):
-        command = "show esx_cluster --all"
+    def testverifysearchesx(self):
+        command = "search cluster --cluster_type esx"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "utecl1", command)
         self.matchoutput(out, "utecl2", command)

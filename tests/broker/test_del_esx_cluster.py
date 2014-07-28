@@ -75,7 +75,7 @@ class TestDelESXCluster(TestBrokerCommand):
         self.successtest(["del_esx_cluster", "--cluster=sandboxcl1"])
 
     def testverifyall(self):
-        command = ["show_esx_cluster", "--all"]
+        command = ["search_cluster", "--cluster_type", "esx"]
         out = self.commandtest(command)
         self.matchclean(out, "utecl", command)
 

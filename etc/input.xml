@@ -4049,10 +4049,8 @@
 	Show details for an ESX cluster. DEPRECATED
 	<optgroup mandatory="True" fields="one">
 	    <option name="cluster" type="string">Name of the cluster</option>
-	    <option name="all" type="flag">Show all. Returns only the names of the clusters.</option>
 	</optgroup>
 	<transport trigger="cluster" method="get" path="cluster/%(cluster)s/esx"/>
-	<transport trigger="all" method="get" path="cluster_esx"/>
 	<format name="proto" >
 	    <message_class name="ClusterList" module="aqdsystems_pb2"/>
 	</format>
