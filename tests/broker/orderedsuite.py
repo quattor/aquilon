@@ -77,7 +77,6 @@ from test_add_user import TestAddUser
 from test_add_network import TestAddNetwork
 from test_add_network_environment import TestAddNetworkEnvironment
 from test_add_ns_record import TestAddNSRecord
-from test_deprecated_router import TestDeprecatedRouter
 from test_add_router_address import TestAddRouterAddress
 from test_add_metacluster import TestAddMetaCluster
 from test_add_esx_cluster import TestAddESXCluster
@@ -323,7 +322,6 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestAddChassis, TestUpdateChassis,
                      TestAddMachine, TestAddDisk, TestAddInterface,
                      TestAddAddress,
-                     TestDeprecatedRouter,
                      TestAddRouterAddress, TestAddDynamicRange,
                      TestAddAquilonHost, TestAddWindowsHost, TestAddAuroraHost,
                      TestPollNetworkDevice,
