@@ -126,5 +126,10 @@ def check_feature_template(config, dbarchetype, dbfeature, dbdomain):
                                                   dbfeature.cfg_path, ext)):
             return
 
+        # Legacy path for hardware features
+        if os.path.exists("%s/%s/%s.%s" % (basedir, dbarchetype.name,
+                                           dbfeature.cfg_path, ext)):
+            return
+
     raise ArgumentError("{0} does not have templates present in {1:l} "
                         "for {2:l}.".format(dbfeature, dbdomain, dbarchetype))
