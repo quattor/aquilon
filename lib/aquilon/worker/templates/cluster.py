@@ -111,20 +111,23 @@ class PlenaryClusterData(StructurePlenary):
                        sorted("%s/%s" % (p.archetype.name, p.name)
                               for p in self.dbobj.allowed_personalities))
 
+        if self.dbobj.max_hosts is not None:
+            pan_assign(lines, "system/cluster/max_hosts",
+                       self.dbobj.max_hosts)
+
+        if self.dbobj.metacluster:
+            pan_assign(lines, "system/cluster/metacluster/name",
+                       self.dbobj.metacluster.name)
+
         fname = "body_%s" % self.dbobj.cluster_type
         if hasattr(self, fname):
             getattr(self, fname)(lines)
 
     def body_esx(self, lines):
+        # FIXME: deprecate /system/metacluster/name
         if self.dbobj.metacluster:
             pan_assign(lines, "system/metacluster/name",
                        self.dbobj.metacluster.name)
-        # FIXME: This should move to the generic part because max_hosts makes
-        # sense for non-ESX clusters as well, but the current schema does not
-        # allow that
-        if self.dbobj.max_hosts is not None:
-            pan_assign(lines, "system/cluster/max_hosts",
-                       self.dbobj.max_hosts)
         if self.dbobj.network_device:
             pan_assign(lines, "system/cluster/switch",
                        self.dbobj.network_device.primary_name)

@@ -46,9 +46,15 @@ class TestUsecaseHACluster(TestBrokerCommand):
     def test_100_add_cluster2(self):
         command = ["add", "cluster", "--cluster", "hacl2", "--campus", "ny",
                    "--down_hosts_threshold", 0, "--archetype", "hacluster",
+                   "--max_members", 2,
                    "--sandbox", "%s/utsandbox" % self.user,
                    "--personality", "vcs-msvcs"]
         self.successtest(command)
+
+    def test_105_cat_hacl2(self):
+        command = ["cat", "--cluster", "hacl2", "--data"]
+        out = self.commandtest(command)
+        self.matchoutput(out, '"system/cluster/max_hosts" = 2;', command)
 
     def test_110_add_members(self):
         for i in range(0, 4):

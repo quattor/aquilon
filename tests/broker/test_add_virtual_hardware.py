@@ -302,6 +302,7 @@ class TestAddVirtualHardware(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "structure template clusterdata/utecl1;", command)
         self.matchoutput(out, '"system/cluster/name" = "utecl1";', command)
+        self.matchoutput(out, '"system/cluster/metacluster/name" = "utmc1";', command)
         self.matchoutput(out, '"system/metacluster/name" = "utmc1";', command)
         self.matchoutput(out, '"system/cluster/max_hosts" = 8;', command)
         self.matchoutput(out, '"system/cluster/down_hosts_threshold" = 2;',

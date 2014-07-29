@@ -435,6 +435,8 @@ class TestAddESXCluster(PersonalityTestMixin, TestBrokerCommand):
                          data_command)
         self.matchoutput(data, '"system/cluster/sysloc/location" = "ut.ny.na";',
                          data_command)
+        self.matchoutput(data, '"system/cluster/metacluster/name" = "%s";' %
+                         metacluster, data_command)
         self.matchoutput(data, '"system/metacluster/name" = "%s";' %
                          metacluster, data_command)
         self.matchoutput(data, '"system/build" = "build";', data_command)
