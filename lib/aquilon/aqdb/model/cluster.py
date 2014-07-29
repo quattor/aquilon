@@ -191,6 +191,16 @@ class Cluster(Base):
         return self.personality.services + self.personality.archetype.services
 
     @property
+    def minimum_location(self):
+        location = None
+        for host in self.hosts:
+            if location:
+                location = location.merge(host.hardware_entity.location)
+            else:
+                location = host.hardware_entity.location
+        return location
+
+    @property
     def virtual_machines(self):
         mach = []
         if self.resholder:
@@ -345,16 +355,6 @@ class EsxCluster(Cluster):
 
     __table_args__ = (Index("%s_network_device_idx" % _ETN, network_device_id),)
     __mapper_args__ = {'polymorphic_identity': 'esx'}
-
-    @property
-    def minimum_location(self):
-        location = None
-        for host in self.hosts:
-            if location:
-                location = location.merge(host.hardware_entity.location)
-            else:
-                location = host.hardware_entity.location
-        return location
 
     @property
     def vmhost_capacity_function(self):

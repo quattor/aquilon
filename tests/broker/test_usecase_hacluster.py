@@ -36,6 +36,13 @@ class TestUsecaseHACluster(TestBrokerCommand):
                    "--personality", "vcs-msvcs"]
         self.successtest(command)
 
+    def test_105_verify_hacl1_location(self):
+        command = ["show_cluster", "--cluster", "hacl1"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Campus: ny", command)
+        self.matchclean(out, "Building:", command)
+        self.matchclean(out, "Rack:", command)
+
     def test_100_add_cluster2(self):
         command = ["add", "cluster", "--cluster", "hacl2", "--campus", "ny",
                    "--down_hosts_threshold", 0, "--archetype", "hacluster",
@@ -50,6 +57,15 @@ class TestUsecaseHACluster(TestBrokerCommand):
             self.successtest(["cluster", "--cluster", "hacl%d" % cluster_idx,
                               "--hostname", "server%d.aqd-unittest.ms.com" %
                               server_idx])
+
+    def test_111_fix_location(self):
+        self.noouttest(["update_cluster", "--cluster", "hacl1",
+                        "--fix_location"])
+
+    def test_112_verify_hacl1_fix_location(self):
+        command = ["show_cluster", "--cluster", "hacl1"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Rack: ut9", command)
 
     def test_115_add_cluster_srv(self):
         ip1 = self.net["unknown0"].usable[26]
