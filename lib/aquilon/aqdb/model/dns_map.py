@@ -59,7 +59,7 @@ class DnsMap(Base):
                                     nullable=False))
     comments = deferred(Column(String(255), nullable=True))
 
-    location = relation(Location, lazy=False, innerjoin=True,
+    location = relation(Location, innerjoin=True,
                         backref=backref('dns_maps',
                                         collection_class=ordering_list('position'),
                                         order_by=[position],

@@ -16,8 +16,7 @@
 # limitations under the License.
 """Contains the logic for `aq show network_device --all`."""
 
-from sqlalchemy.orm import (subqueryload, joinedload, lazyload, contains_eager,
-                            undefer)
+from sqlalchemy.orm import subqueryload, joinedload, contains_eager, undefer
 
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.aqdb.model import NetworkDevice, DnsRecord, DnsDomain, Fqdn
@@ -30,7 +29,6 @@ class CommandShowNetworkDeviceAll(BrokerCommand):
 
         q = q.options(subqueryload('location'),
                       subqueryload('interfaces'),
-                      lazyload('interfaces.hardware_entity'),
                       joinedload('interfaces.assignments'),
                       joinedload('interfaces.assignments.dns_records'),
                       joinedload('interfaces.assignments.network'),

@@ -151,7 +151,8 @@ def hostname_to_host(session, hostname):
     # found"
     parse_fqdn(session, hostname)
     try:
-        dbmachine = HardwareEntity.get_unique(session, hostname, compel=True)
+        dbmachine = HardwareEntity.get_unique(session, hostname, compel=True,
+                                              query_options=[joinedload('host')])
     except NotFoundException:
         raise NotFoundException("Host %s not found." % hostname)
 
@@ -178,11 +179,12 @@ def hostlist_to_hosts(session, hostlist):
 
                 dns_domains[dns_domain] = dbdns_domain
 
+            options = [joinedload("hardware_entity"),
+                       joinedload("hardware_entity.host")]
             dbdns_rec = DnsRecord.get_unique(session, name=short,
                                              dns_domain=dns_domains[dns_domain],
                                              dns_environment=dbdns_env,
-                                             query_options=[joinedload('hardware_entity')],
-                                             compel=True)
+                                             query_options=options, compel=True)
             if not dbdns_rec.hardware_entity or \
                not dbdns_rec.hardware_entity.host:
                 raise NotFoundException("Host %s not found." % host)

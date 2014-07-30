@@ -16,7 +16,7 @@
 # limitations under the License.
 """Contains the logic for `aq show machine --machine`."""
 
-from sqlalchemy.orm import joinedload, lazyload, subqueryload, undefer
+from sqlalchemy.orm import joinedload, subqueryload, undefer
 
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.aqdb.column_types import AqStr
@@ -36,7 +36,6 @@ class CommandShowMachineMachine(BrokerCommand):
                    joinedload('model'),
                    joinedload('model.vendor'),
                    subqueryload('interfaces'),
-                   lazyload('interfaces.hardware_entity'),
                    joinedload('interfaces.assignments'),
                    joinedload('interfaces.assignments.network'),
                    joinedload('interfaces.assignments.dns_records'),
@@ -47,8 +46,7 @@ class CommandShowMachineMachine(BrokerCommand):
                    joinedload('chassis_slot.chassis'),
                    subqueryload('disks'),
                    undefer('disks.comments'),
-                   joinedload('host'),
-                   lazyload('host.hardware_entity')]
+                   joinedload('host')]
         dbmachine = Machine.get_unique(session, machine, compel=True,
                                        query_options=options)
         return dbmachine

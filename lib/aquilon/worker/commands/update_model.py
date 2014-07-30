@@ -16,14 +16,13 @@
 # limitations under the License.
 """Contains the logic for `aq update model`."""
 
-
-from sqlalchemy.orm.session import object_session
+from sqlalchemy.orm import object_session, contains_eager
 
 from aquilon.aqdb.types import NicType
 from aquilon.exceptions_ import ArgumentError, UnimplementedError
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.aqdb.model import (Vendor, Model, Cpu, MachineSpecs, Machine, Disk,
                                 HardwareEntity, Interface)
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.templates import Plenary, PlenaryCollection
 
 
@@ -219,6 +218,7 @@ class CommandUpdateModel(BrokerCommand):
             q = q.filter(Interface.model == old_nic_model)
             q = q.join(HardwareEntity)
             q = q.filter(HardwareEntity.model == model)
+            q = q.options(contains_eager('hardware_entity'))
             for dbiface in q.all():
                 dbiface.model = value
                 dbmachines.add(dbiface.hardware_entity)

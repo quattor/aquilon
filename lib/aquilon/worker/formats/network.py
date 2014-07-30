@@ -20,7 +20,7 @@ from collections import defaultdict
 from operator import attrgetter
 
 from sqlalchemy.orm.attributes import set_committed_value
-from sqlalchemy.orm import object_session, subqueryload, lazyload
+from sqlalchemy.orm import object_session, subqueryload
 
 from aquilon.aqdb.model import Network, HardwareEntity, Host
 from aquilon.worker.formats.formatters import ObjectFormatter
@@ -152,8 +152,7 @@ class NetworkFormatter(ObjectFormatter):
             session = object_session(net)
             q = session.query(HardwareEntity)
             q = q.filter(HardwareEntity.id.in_(hw_ids))
-            q = q.options(subqueryload('interfaces'),
-                          lazyload('interfaces.hardware_entity'))
+            q = q.options(subqueryload('interfaces'))
             hwent_by_id = {}
             for dbhwent in q.all():
                 hwent_by_id[dbhwent.id] = dbhwent
@@ -177,7 +176,6 @@ class NetworkFormatter(ObjectFormatter):
             # TODO: once we refactor Host to be an FK to HardwareEntity instead
             # of Machine, this could be converted to a single joinedload('host')
             q = session.query(Host)
-            q = q.options(lazyload('hardware_entity'))
             q = q.filter(Host.hardware_entity_id.in_(hw_ids))
             for host in q.all():
                 set_committed_value(hwent_by_id[host.hardware_entity_id], "host", host)

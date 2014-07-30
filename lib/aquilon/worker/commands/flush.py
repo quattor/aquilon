@@ -65,8 +65,7 @@ class CommandFlush(BrokerCommand):
             Hostlink: [],
             ServiceAddress: [joinedload('dns_record'),
                              joinedload('assignments'),
-                             joinedload('assignments.interface'),
-                             lazyload('assignments.interface.hardware_entity')],
+                             joinedload('assignments.interface')],
             RebootSchedule: [],
             VirtualMachine: [joinedload('machine'),
                              joinedload('machine.primary_name'),
@@ -91,7 +90,6 @@ class CommandFlush(BrokerCommand):
         # attributes, so load interfaces manually.
         q = session.query(Interface)
         q = q.with_polymorphic('*')
-        q = q.options(lazyload("hardware_entity"))
         for iface in q:
             interfaces_by_hwent[iface.hardware_entity_id].append(iface)
             interfaces_by_id[iface.id] = iface
@@ -286,8 +284,7 @@ class CommandFlush(BrokerCommand):
                 chassis = q.all()  # pylint: disable=W0612
 
                 q = session.query(Machine)
-                q = q.options(lazyload("host"),
-                              lazyload("primary_name"),
+                q = q.options(lazyload("primary_name"),
                               subqueryload("chassis_slot"))
 
                 cnt = q.count()
@@ -334,8 +331,6 @@ class CommandFlush(BrokerCommand):
                               subqueryload("services_used"),
                               subqueryload("services_provided"),
                               subqueryload("_cluster"),
-                              lazyload("_cluster.host"),
-                              lazyload("_cluster.cluster"),
                               subqueryload("personality"),
                               subqueryload("personality._grns"))
 
@@ -367,7 +362,6 @@ class CommandFlush(BrokerCommand):
                 q = session.query(Cluster)
                 q = q.with_polymorphic('*')
                 q = q.options(subqueryload('_hosts'),
-                              lazyload('_hosts.cluster'),
                               joinedload('_hosts.host'),
                               joinedload('_hosts.host.hardware_entity'),
                               subqueryload('_metacluster'),

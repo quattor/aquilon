@@ -99,9 +99,8 @@ class Host(Base):
     comments = Column(String(255), nullable=True)
 
     # This is a one-to-one relation, so we need uselist=False on the backref
-    hardware_entity = relation(HardwareEntity, lazy=False, innerjoin=True,
+    hardware_entity = relation(HardwareEntity, innerjoin=True,
                                backref=backref('host', uselist=False,
-                                               lazy=False,
                                                cascade='all, delete-orphan'))
 
     branch = relation(Branch, innerjoin=True, backref='hosts')

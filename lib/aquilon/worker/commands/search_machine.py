@@ -16,7 +16,7 @@
 # limitations under the License.
 """Contains the logic for `aq search machine`."""
 
-from sqlalchemy.orm import subqueryload, joinedload, lazyload
+from sqlalchemy.orm import subqueryload, joinedload
 
 from aquilon.exceptions_ import NotFoundException
 from aquilon.aqdb.model import (Machine, Cpu, Cluster, ClusterResource,
@@ -133,16 +133,14 @@ class CommandSearchMachine(BrokerCommand):
         if fullinfo or style != "raw":
             q = q.options(joinedload('location'),
                           subqueryload('interfaces'),
-                          lazyload('interfaces.hardware_entity'),
                           joinedload('interfaces.assignments'),
                           joinedload('interfaces.assignments.dns_records'),
                           joinedload('chassis_slot'),
                           subqueryload('chassis_slot.chassis'),
                           subqueryload('disks'),
-                          subqueryload('host'),
-                          lazyload('host.hardware_entity'),
+                          joinedload('host'),
                           subqueryload('host.services_used'),
                           subqueryload('host._cluster'),
-                          lazyload('host._cluster.host'))
+                          joinedload('host._cluster.cluster'))
             return q.all()
         return StringAttributeList(q.all(), "label")
