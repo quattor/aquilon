@@ -122,15 +122,15 @@ def main():
                         help="domain name to compile")
     parser.add_argument("--compress_output", action="store_true",
                         help="compress the generated profiles")
-    parser.add_argument("--xml_output", action="store_true",
+    parser.add_argument("--xml_output", action="store_true", default=None,
                         help="generate XML profiles")
     parser.add_argument("--no_xml_output", dest="xml_output",
-                        action="store_false",
+                        action="store_false", default=None,
                         help="suppress XML profiles")
-    parser.add_argument("--json_output", action="store_true",
+    parser.add_argument("--json_output", action="store_true", default=None,
                         help="generate JSON profiles")
     parser.add_argument("--no_json_output", dest="json_output",
-                        action="store_false",
+                        action="store_false", default=None,
                         help="suppress JSON profiles")
     parser.add_argument("--panc_jar", action="store",
                         help="location of panc.jar")
