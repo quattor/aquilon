@@ -67,7 +67,7 @@ class Interface(DeviceLinkMixin, Base):
 
     name = Column(AqStr(32), nullable=False)  # like e0, hme1, etc.
 
-    mac = Column(AqMac, nullable=True)
+    mac = Column(AqMac(name="%s_mac_ck" % _TN), nullable=True)
 
     model_id = Column(Integer, ForeignKey('model.id',
                                           name='%s_model_fk' % _ABV),

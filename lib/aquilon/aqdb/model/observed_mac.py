@@ -44,7 +44,8 @@ class ObservedMac(Base):
 
     # We need autoincrement=False to prevent SQLAlchemy using a sequence for the
     # default value
-    mac_address = Column(AqMac, nullable=False, autoincrement=False)
+    mac_address = Column(AqMac(name='%s_mac_address_ck' % _TN), nullable=False,
+                         autoincrement=False)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))

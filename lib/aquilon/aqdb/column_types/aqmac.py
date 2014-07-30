@@ -18,15 +18,27 @@
 
 import operator
 
-from sqlalchemy.types import BigInteger, TypeDecorator
-import sqlalchemy
+from sqlalchemy.types import BigInteger, TypeDecorator, SchemaType
+from sqlalchemy.schema import CheckConstraint
+from sqlalchemy.sql import and_, type_coerce
+
 from aquilon.aqdb.types import MACAddress
 
 
-class AqMac(TypeDecorator):
+class AqMac(SchemaType, TypeDecorator):
     """ A type that stores MAC address as integers. """
 
     impl = BigInteger
+
+    def __init__(self, name=None, **kw):
+        SchemaType.__init__(self, **kw)
+        TypeDecorator.__init__(self)
+
+        self.name = name
+
+    @property
+    def python_type(self):
+        return MACAddress
 
     def process_bind_param(self, value, engine):  # pylint: disable=W0613
         if value is None:
@@ -45,3 +57,12 @@ class AqMac(TypeDecorator):
         if op == operator.add or op == operator.sub:
             return BigInteger()
         return super(AqMac, self).coerce_compared_value(op, value)
+
+    def _set_table(self, column, table):
+        if not self.name:
+            return
+
+        c = CheckConstraint(and_(type_coerce(column, self) >= 0,
+                                 type_coerce(column, self) < 2 ** 48),
+                            name=self.name)
+        table.append_constraint(c)
