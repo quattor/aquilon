@@ -192,6 +192,8 @@ reset_advertised_status_max_list_size =
 map_grn_max_list_size =
 unmap_grn_max_list_size =
 
+user_delete_limit = 1000
+
 default_network_type = unknown
 
 [hardware_network_device]

@@ -33,18 +33,27 @@ class UserSync(object):
     # Labels for the passwd entries - the order must match the file format
     labels = ("name", "passwd", "uid", "gid", "full_name", "home_dir", "shell")
 
-    def __init__(self, config, session, logger=LOGGER, incremental=False):
+    def __init__(self, config, session, logger=LOGGER, incremental=False,
+                 ignore_delete_limit=False):
         self.session = session
         self.logger = logger
         self.plenaries = PlenaryCollection(logger=logger)
         self.incremental = incremental
         self.success = []
         self.errors = []
+        self.added = 0
+        self.deleted = 0
+        self.updated = 0
 
         if not config.get("broker", "user_list_location"):
             raise ArgumentError("User synchronization is disabled.")
 
         self.fname = config.get("broker", "user_list_location")
+
+        if ignore_delete_limit:
+            self.limit = None
+        else:
+            self.limit = config.getint("broker", "user_delete_limit")
 
     def commit_if_needed(self, msg):
         if self.incremental:
@@ -75,8 +84,10 @@ class UserSync(object):
                       full_name=details.full_name, home_dir=details.home_dir)
         self.session.add(dbuser)
 
-        return self.commit_if_needed("Adding user %s (uid: %s, gid: %s)" %
-                                     (details.name, details.uid, details.gid))
+        added = self.commit_if_needed("Adding user %s (uid: %s, gid: %s)" %
+                                      (details.name, details.uid, details.gid))
+        self.added += added
+        return dbuser
 
     def check_update_existing(self, dbuser, details):
         update_msg = []
@@ -93,13 +104,21 @@ class UserSync(object):
                 setattr(dbuser, attr, new)
 
         if update_msg:
-            return self.commit_if_needed("Updating user %s (%s)" %
-                                         (dbuser.name, "; ".join(update_msg)))
-        else:
-            return 0
+            updated = self.commit_if_needed("Updating user %s (%s)" %
+                                            (dbuser.name, "; ".join(update_msg)))
+            self.updated += updated
 
     def delete_gone(self, userlist):
-        deleted = 0
+        if self.limit is not None and len(userlist) > self.limit:
+            msg = "Cowardly refusing to delete %s users, because it's " \
+                "over the limit of %s.  Use the --ignore_delete_limit " \
+                "option to override." % (len(userlist), self.limit)
+            if self.incremental:
+                self.errors.append(msg)
+            else:
+                self.logger.client_info(msg)
+            return
+
         personalities = set()
 
         def chunk(list_, size):
@@ -123,33 +142,81 @@ class UserSync(object):
 
         for dbuser in userlist:
             self.session.delete(dbuser)
-            deleted += self.commit_if_needed("Deleting user %s (uid: %s, gid: %s)" %
-                                             (dbuser.name, dbuser.uid,
-                                              dbuser.gid))
-        return deleted
+            deleted = self.commit_if_needed("Deleting user %s (uid: %s, gid: %s)" %
+                                            (dbuser.name, dbuser.uid,
+                                             dbuser.gid))
+            self.deleted += deleted
+
+    def report_duplicate_uid(self, new, old):
+        msg = "Duplicate UID: %s is already used by %s, skipping %s." % \
+            (new.uid, old.name, new.name)
+        if self.incremental:
+            self.errors.append(msg)
+        else:
+            self.logger.client_info(msg)
 
     def refresh_user(self):
         q = self.session.query(User)
-        users = {}
+        by_name = {}
+        by_uid = {}
         for dbuser in q.all():
-            users[dbuser.name] = dbuser
+            by_name[dbuser.name] = dbuser
+            by_uid[dbuser.uid] = dbuser
 
-        added = 0
-        updated = 0
         for line in open(self.fname):
-            user_name, rest = line.split('\t')
+            try:
+                user_name, rest = line.split('\t')
+            except ValueError:
+                self.logger.info("Failed to unpack, skipping line: %s", line)
+                continue
+
             if user_name.startswith("YP_"):
                 continue
-            details = KeyedTuple(rest.split(':'), labels=self.labels)
 
-            if details.name not in users:
-                added += self.add_new(details)
+            fields = rest.split(':')
+            if len(fields) != len(self.labels):
+                self.logger.info("Unexpected number of fields, "
+                                 "skipping line: %s", line)
+                continue
+
+            try:
+                fields[2] = int(fields[2])
+            except ValueError:
+                self.logger.info("UID is not a number, skipping line: %s", line)
+                continue
+
+            try:
+                fields[3] = int(fields[3])
+            except ValueError:
+                self.logger.info("GID is not a number, skipping line: %s", line)
+                continue
+
+            details = KeyedTuple(fields, labels=self.labels)
+
+            if details.name not in by_name:
+                if details.uid in by_uid:
+                    self.report_duplicate_uid(details, by_uid[details.uid])
+                    continue
+
+                dbuser = self.add_new(details)
+                if dbuser:
+                    by_uid[dbuser.uid] = dbuser
             else:
-                dbuser = users[details.name]
-                del users[details.name]
-                updated += self.check_update_existing(dbuser, details)
+                dbuser = by_name[details.name]
 
-        deleted = self.delete_gone(users.values())
+                if details.uid != dbuser.uid:
+                    if details.uid in by_uid:
+                        self.report_duplicate_uid(details, by_uid[details.uid])
+                        continue
+
+                    del by_uid[dbuser.uid]
+                    by_uid[details.uid] = dbuser
+
+                del by_name[dbuser.name]
+
+                self.check_update_existing(dbuser, details)
+
+        self.delete_gone(by_name.values())
 
         self.session.flush()
 
@@ -159,6 +226,6 @@ class UserSync(object):
             raise PartialError(success=self.success, failed=self.errors)
         else:
             self.logger.client_info("Added %d, deleted %d, updated %d users." %
-                                    (added, deleted, updated))
+                                    (self.added, self.deleted, self.updated))
 
         return

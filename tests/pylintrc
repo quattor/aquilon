@@ -30,7 +30,7 @@ good-names = e,i,ip,j,k,pg,q
 [TYPECHECK]
 
 generated-members = __mapper__, __table__
-ignored-classes = RelationshipProperty
+ignored-classes = RelationshipProperty, KeyedTuple
 
 [REPORTS]
 

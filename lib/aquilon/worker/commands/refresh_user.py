@@ -23,9 +23,11 @@ from aquilon.worker.locks import SyncKey
 
 class CommandRefreshUser(BrokerCommand):
 
-    def render(self, session, logger, incremental, **arguments):
+    def render(self, session, logger, incremental, ignore_delete_limit,
+               **arguments):
         with SyncKey(data="user", logger=logger):
-            sync = UserSync(self.config, session, logger, incremental)
+            sync = UserSync(self.config, session, logger, incremental,
+                            ignore_delete_limit)
             sync.refresh_user()
 
         return

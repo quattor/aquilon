@@ -17,8 +17,8 @@
 # limitations under the License.
 """Module for testing the refresh user principals command."""
 
-import pwd
 import os
+import pwd
 
 if __name__ == "__main__":
     import utils
@@ -30,19 +30,18 @@ from brokertest import TestBrokerCommand
 
 class TestRefreshUser(TestBrokerCommand):
     def test_000_patch_userlist(self):
-        # Make sure the current user is always there
-        pwrec = pwd.getpwuid(os.getuid())
-
         dst_filename = self.config.get("broker", "user_list_location")
         src_filename = dst_filename + ".in"
         with open(src_filename, "r") as f:
             lines = f.readlines()
 
+        # Make sure the current user is always there
+        pwrec = pwd.getpwuid(os.getuid())
+        lines.insert(0, "%s\t%s:dontcare:1000:1000:Current user:%s:%s\n" %
+                     (self.user, pwrec[0], pwrec[5], pwrec[6]))
+
         with open(dst_filename, "w") as f:
             f.writelines(lines)
-            # See test_add_user
-            f.write("%s\t%s:dontcare:%d:%d:%s:%s" %
-                    (pwrec[0], pwrec[0], 1000, 1000, "Current user", pwrec[5]))
 
     def test_110_grant_testuser4_root(self):
         command = ["grant_root_access", "--user", "testuser4",
@@ -62,6 +61,10 @@ class TestRefreshUser(TestBrokerCommand):
     def test_200_refresh(self):
         command = ["refresh", "user"]
         err = self.statustest(command)
+        self.matchoutput(err,
+                         "Duplicate UID: 1236 is already used by testuser3, "
+                         "skipping dup_uid.",
+                         command)
         self.matchoutput(err, "Added 2, deleted 1, updated 1 users.", command)
 
     def test_210_verify_all(self):
@@ -71,6 +74,8 @@ class TestRefreshUser(TestBrokerCommand):
         self.matchoutput(out, "testuser2", command)
         self.matchoutput(out, "testuser3", command)
         self.matchclean(out, "testuser4", command)
+        self.matchclean(out, "bad_line", command)
+        self.matchclean(out, "dup_uid", command)
 
     def test_210_verify_testuser1(self):
         command = ["show_user", "--username", "testuser1"]
@@ -117,8 +122,17 @@ class TestRefreshUser(TestBrokerCommand):
 
     def test_305_refresh_again(self):
         command = ["refresh", "user", "--incremental"]
-        err = self.statustest(command)
-        self.matchoutput(err, "Added 0, deleted 0, updated 1 users.", command)
+        err = self.partialerrortest(command)
+        self.matchoutput(err,
+                         "Duplicate UID: 1236 is already used by testuser3, "
+                         "skipping dup_uid.",
+                         command)
+        self.matchoutput(err,
+                         "Updating user testuser3 (uid = 1236, was 1237; "
+                         "gid = 655, was 123; "
+                         "full_name = test user 3, was Some other name; "
+                         "home_dir = /tmp/foo, was /tmp)",
+                         command)
 
     def test_310_verify_testuser1_again(self):
         command = ["show_user", "--username", "testuser1"]
@@ -137,6 +151,64 @@ class TestRefreshUser(TestBrokerCommand):
         self.searchoutput(out, r'GID: 655$', command)
         self.searchoutput(out, r'Full Name: test user 3$', command)
         self.searchoutput(out, r'Home Directory: /tmp/foo$', command)
+
+    def test_310_verify_all_again(self):
+        command = ["show_user", "--all"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "testuser1", command)
+        self.matchoutput(out, "testuser2", command)
+        self.matchoutput(out, "testuser3", command)
+        self.matchclean(out, "testuser4", command)
+        self.matchclean(out, "bad_line", command)
+        self.matchclean(out, "dup_uid", command)
+
+    def test_320_add_users(self):
+        limit = self.config.getint("broker", "user_delete_limit")
+        for i in range(limit + 5):
+            name = "testdel_%d" % i
+            uid = i + 5000
+            self.noouttest(["add_user", "--username", name, "--uid", uid,
+                            "--gid", 1000, "--full_name", "Delete test",
+                            "--home_directory", "/tmp"])
+
+    def test_321_refresh_refuse(self):
+        limit = self.config.getint("broker", "user_delete_limit")
+        command = ["refresh", "user"]
+        out = self.statustest(command)
+        self.matchoutput(out,
+                         "Cowardly refusing to delete %s users, because "
+                         "it's over the limit of %s.  Use the "
+                         "--ignore_delete_limit option to override." %
+                         (limit + 5, limit),
+                         command)
+        self.matchoutput(out, "deleted 0,", command)
+
+    def test_322_verify_still_there(self):
+        command = ["show_user", "--all"]
+        out = self.commandtest(command)
+        limit = self.config.getint("broker", "user_delete_limit")
+        for i in range(limit + 5):
+            name = "testdel_%d" % i
+            self.matchoutput(out, name, command)
+
+    def test_323_refresh_override(self):
+        limit = self.config.getint("broker", "user_delete_limit")
+        command = ["refresh", "user", "--ignore_delete_limit"]
+        out = self.statustest(command)
+        self.matchoutput(out,
+                         "Added 0, deleted %s, updated 0 users." % (limit + 5),
+                         command)
+
+    def test_324_verify_all_gone(self):
+        command = ["show_user", "--all"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "testuser1", command)
+        self.matchoutput(out, "testuser2", command)
+        self.matchoutput(out, "testuser3", command)
+        self.matchclean(out, "testuser4", command)
+        self.matchclean(out, "bad_line", command)
+        self.matchclean(out, "dup_uid", command)
+        self.matchclean(out, "testdel_", command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestRefreshUser)
