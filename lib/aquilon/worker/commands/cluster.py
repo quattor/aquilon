@@ -24,9 +24,8 @@ from aquilon.aqdb.model.hostlifecycle import (Ready as HostReady,
                                               Almostready as HostAlmostready)
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.host import hostname_to_host
-from aquilon.worker.templates.base import Plenary, PlenaryCollection
+from aquilon.worker.templates import Plenary, PlenaryCollection
 from aquilon.worker.services import Chooser
-from aquilon.worker.locks import CompileKey
 
 
 class CommandCluster(BrokerCommand):
@@ -116,17 +115,12 @@ class CommandCluster(BrokerCommand):
         chooser = Chooser(dbhost, logger=logger)
         chooser.set_required()
 
+        # the chooser will include the host plenary
+        plenaries.extend(chooser.plenaries)
+        plenaries.flatten()
+
         session.flush()
 
-        # the chooser will include the host plenary
-        with CompileKey.merge([chooser.get_key(), plenaries.get_key()]):
-            plenaries.stash()
-            try:
-                chooser.write_plenary_templates(locked=True)
-                plenaries.write(locked=True)
-            except:
-                chooser.restore_stash()
-                plenaries.restore_stash()
-                raise
+        plenaries.write()
 
         return

@@ -20,7 +20,7 @@ from aquilon.aqdb.model import Personality, PersonalityParameter
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.parameter import set_parameter
 from aquilon.worker.dbwrappers.personality import validate_personality_justification
-from aquilon.worker.templates import Plenary
+from aquilon.worker.templates import Plenary, PlenaryCollection
 
 
 class CommandAddParameter(BrokerCommand):
@@ -57,5 +57,8 @@ class CommandAddParameter(BrokerCommand):
         session.add(dbparameter)
         session.flush()
 
-        plenary = Plenary.get_plenary(dbstage, logger=logger)
-        plenary.write()
+        plenaries = PlenaryCollection(logger=logger)
+        plenaries.append(Plenary.get_plenary(dbstage))
+        plenaries.write()
+
+        return

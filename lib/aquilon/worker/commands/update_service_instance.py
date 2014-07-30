@@ -16,9 +16,9 @@
 # limitations under the License.
 """Contains the logic for `aq update service --instance`."""
 
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import Service, ServiceInstance
-from aquilon.worker.templates.base import Plenary
+from aquilon.worker.templates import Plenary, PlenaryCollection
 
 
 class CommandUpdateServiceInstance(BrokerCommand):
@@ -40,7 +40,8 @@ class CommandUpdateServiceInstance(BrokerCommand):
 
         session.flush()
 
-        plenary = Plenary.get_plenary(dbsi, logger=logger)
-        plenary.write()
+        plenaries = PlenaryCollection(logger=logger)
+        plenaries.append(Plenary.get_plenary(dbsi))
+        plenaries.write()
 
         return

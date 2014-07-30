@@ -25,7 +25,7 @@ from aquilon.aqdb.model import (Archetype, Personality, PersonalityStage,
                                 PersonalityServiceMap)
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.grn import lookup_grn
-from aquilon.worker.templates import Plenary
+from aquilon.worker.templates import Plenary, PlenaryCollection
 
 VALID_PERSONALITY_RE = re.compile(r'^[a-zA-Z0-9_-]+\/?[a-zA-Z0-9_-]+$')
 
@@ -127,6 +127,8 @@ class CommandAddPersonality(BrokerCommand):
 
         session.flush()
 
-        plenary = Plenary.get_plenary(dbstage, logger=logger)
-        plenary.write()
+        plenaries = PlenaryCollection(logger=logger)
+        plenaries.append(Plenary.get_plenary(dbstage))
+        plenaries.write()
+
         return

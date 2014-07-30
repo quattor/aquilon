@@ -17,10 +17,10 @@
 """Contains the logic for `aq add city`."""
 
 from aquilon.aqdb.model import City, Country, Campus
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.location import add_location
 from aquilon.worker.processes import DSDBRunner
-from aquilon.worker.templates import Plenary
+from aquilon.worker.templates import Plenary, PlenaryCollection
 
 
 class CommandAddCity(BrokerCommand):
@@ -40,16 +40,18 @@ class CommandAddCity(BrokerCommand):
 
         session.flush()
 
-        plenary = Plenary.get_plenary(dbcity, logger=logger)
-        with plenary.get_key():
+        plenaries = PlenaryCollection(logger=logger)
+        plenaries.append(Plenary.get_plenary(dbcity))
+        with plenaries.get_key():
+            plenaries.stash()
             try:
-                plenary.write(locked=True)
+                plenaries.write(locked=True)
 
                 dsdb_runner = DSDBRunner(logger=logger)
                 dsdb_runner.add_city(city, dbcity.country.name, fullname)
                 dsdb_runner.commit_or_rollback()
 
             except:
-                plenary.restore_stash()
+                plenaries.restore_stash()
                 raise
         return
