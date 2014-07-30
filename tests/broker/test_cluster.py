@@ -93,9 +93,12 @@ class TestCluster(TestBrokerCommand):
                               command)
             command = "cat --hostname evh%s.aqd-unittest.ms.com --data" % i
             out = self.commandtest(command.split())
-            self.searchoutput(out,
-                              '"system/cluster/name" = "utecl1";',
-                              command)
+            self.matchoutput(out,
+                             '"system/cluster/name" = "utecl1";',
+                             command)
+            self.matchoutput(out,
+                             '"system/cluster/metacluster/name" = "utmc1";',
+                             command)
 
     def testfailmissingcluster(self):
         command = ["cluster", "--hostname=evh9.aqd-unittest.ms.com",

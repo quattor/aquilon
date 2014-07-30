@@ -268,6 +268,9 @@ class PlenaryHostData(StructurePlenary):
             pan_assign(lines, "system/cluster/name", self.dbobj.cluster.name)
             pan_assign(lines, "system/cluster/node_index",
                        self.dbobj._cluster.node_index)
+            if self.dbobj.cluster.metacluster:
+                pan_assign(lines, "system/cluster/metacluster/name",
+                           self.dbobj.cluster.metacluster.name)
         if self.dbobj.resholder:
             lines.append("")
             for resource in sorted(self.dbobj.resholder.resources,

@@ -50,7 +50,9 @@ class CommandRebindMetaCluster(BrokerCommand):
         session.flush()
 
         plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(Plenary.get_plenary(dbcluster))
+
+        for dbobj in dbcluster.all_objects():
+            plenaries.append(Plenary.get_plenary(dbobj))
         if dbmetacluster:
             plenaries.append(Plenary.get_plenary(dbmetacluster))
         if old_metacluster:
