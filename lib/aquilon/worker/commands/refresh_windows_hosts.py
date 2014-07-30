@@ -20,9 +20,8 @@ import sqlite3
 
 from aquilon.exceptions_ import (PartialError, InternalError, AquilonError,
                                  ArgumentError)
-from aquilon.aqdb.model import (Host, Interface, Machine, Domain, Archetype,
-                                Personality, DnsRecord, OperatingSystem,
-                                ReservedName, Fqdn)
+from aquilon.aqdb.model import (Host, Interface, Domain, Archetype, Personality,
+                                DnsRecord, OperatingSystem, ReservedName, Fqdn)
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.aqdb.model.hostlifecycle import Ready
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
@@ -113,7 +112,7 @@ class CommandRefreshWindowsHosts(BrokerCommand):
                 containers.add(dbmachine.vm_container)
             logger.info("Deleting {0:l} (machine {1.label})"
                         .format(dbhost, dbmachine))
-            session.delete(dbhost)
+            dbmachine.host = None
             dbdns_rec = dbmachine.primary_name
             dbmachine.primary_name = None
             delete_dns_record(dbdns_rec)
@@ -172,10 +171,8 @@ class CommandRefreshWindowsHosts(BrokerCommand):
                 failed.append(msg)
                 logger.info(msg)
                 continue
-            q = session.query(Machine)
-            q = q.filter_by(id=dbinterface.hardware_entity.id)
-            dbmachine = q.first()
-            if not dbmachine:
+            dbmachine = dbinterface.hardware_entity
+            if not dbmachine.model.model_type.isMachineType():
                 msg = "Skipping host %s: The AQDB interface with MAC address " \
                     "%s is tied to hardware %s instead of a virtual " \
                     "machine." % (host, mac, dbinterface.hardware_entity.label)

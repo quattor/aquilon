@@ -19,16 +19,18 @@ from sqlalchemy import Column, Integer, String, ForeignKey
 
 from aquilon.aqdb.model import Location, Campus, Country
 
+_TN = 'city'
+
 
 class City(Location):
     """ City is a subtype of location """
-    __tablename__ = 'city'
-    __mapper_args__ = {'polymorphic_identity': 'city'}
+    __tablename__ = _TN
+    __mapper_args__ = {'polymorphic_identity': _TN}
 
     valid_parents = [Campus, Country]
 
-    id = Column(Integer, ForeignKey('location.id',
-                                    name='city_loc_fk',
+    id = Column(Integer, ForeignKey(Location.id,
+                                    name='%s_loc_fk' % _TN,
                                     ondelete='CASCADE'),
                 primary_key=True)
 

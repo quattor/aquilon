@@ -33,18 +33,18 @@ class ARecord(DnsRecord):
     __tablename__ = _TN
     _class_label = 'DNS Record'
 
-    dns_record_id = Column(Integer, ForeignKey('dns_record.id',
+    dns_record_id = Column(Integer, ForeignKey(DnsRecord.id,
                                                name='%s_dns_record_fk' % _TN,
                                                ondelete='CASCADE'),
                            primary_key=True)
 
     ip = Column(IPV4, nullable=False)
 
-    network_id = Column(Integer, ForeignKey('network.id',
+    network_id = Column(Integer, ForeignKey(Network.id,
                                             name='%s_network_fk' % _TN),
                         nullable=False)
 
-    reverse_ptr_id = Column(Integer, ForeignKey('fqdn.id',
+    reverse_ptr_id = Column(Integer, ForeignKey(Fqdn.id,
                                                 name='%s_reverse_fk' % _TN,
                                                 ondelete='SET NULL'),
                             nullable=True)
@@ -150,7 +150,7 @@ class DynamicStub(ARecord):
     __mapper_args__ = {'polymorphic_identity': _DTN}
     _class_label = 'Dynamic Stub'
 
-    dns_record_id = Column(Integer, ForeignKey('%s.dns_record_id' % _TN,
+    dns_record_id = Column(Integer, ForeignKey(ARecord.dns_record_id,
                                                name='%s_arecord_fk' % _DTN,
                                                ondelete='CASCADE'),
                            primary_key=True)

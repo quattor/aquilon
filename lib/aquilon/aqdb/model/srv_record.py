@@ -35,7 +35,7 @@ class SrvRecord(DnsRecord):
     __tablename__ = _TN
     _class_label = "SRV Record"
 
-    dns_record_id = Column(Integer, ForeignKey('dns_record.id',
+    dns_record_id = Column(Integer, ForeignKey(DnsRecord.id,
                                                name='%s_dns_record_fk' % _TN,
                                                ondelete='CASCADE'),
                            primary_key=True)
@@ -44,7 +44,7 @@ class SrvRecord(DnsRecord):
     weight = Column(Integer, nullable=False)
     port = Column(Integer, nullable=False)
 
-    target_id = Column(Integer, ForeignKey('fqdn.id',
+    target_id = Column(Integer, ForeignKey(Fqdn.id,
                                            name='%s_target_fk' % _TN),
                        nullable=False)
 

@@ -38,11 +38,11 @@ class MachineSpecs(Base):
 
     id = Column(Integer, Sequence('mach_specs_id_seq'), primary_key=True)
 
-    model_id = Column(Integer, ForeignKey('model.id',
+    model_id = Column(Integer, ForeignKey(Model.id,
                                           name='mach_spec_model_fk'),
                       nullable=False)
 
-    cpu_id = Column(Integer, ForeignKey('cpu.id',
+    cpu_id = Column(Integer, ForeignKey(Cpu.id,
                                         name='mach_spec_cpu_fk'),
                     nullable=False)
 
@@ -55,7 +55,7 @@ class MachineSpecs(Base):
     controller_type = Column(Enum(64, controller_types), nullable=False)
 
     nic_count = Column(Integer, nullable=False, default=2)
-    nic_model_id = Column(Integer, ForeignKey('model.id',
+    nic_model_id = Column(Integer, ForeignKey(Model.id,
                                               name='mach_spec_nic_model_fk'),
                           nullable=False)
 

@@ -39,17 +39,17 @@ class ServiceMap(Base):
     id = Column(Integer, Sequence('service_map_id_seq'), primary_key=True)
 
     service_instance_id = Column(Integer,
-                                 ForeignKey('service_instance.id',
+                                 ForeignKey(ServiceInstance.id,
                                             name='%s_svc_inst_fk' % _ABV,
                                             ondelete='CASCADE'),
                                  nullable=False)
 
-    location_id = Column(Integer, ForeignKey('location.id',
+    location_id = Column(Integer, ForeignKey(Location.id,
                                              ondelete='CASCADE',
                                              name='%s_loc_fk' % _ABV),
                          nullable=True)
 
-    network_id = Column(Integer, ForeignKey('network.id', ondelete='CASCADE',
+    network_id = Column(Integer, ForeignKey(Network.id, ondelete='CASCADE',
                                             name='%s_net_fk' % _ABV),
                         nullable=True)
 

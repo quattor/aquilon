@@ -31,7 +31,7 @@ class Rack(Location):
 
     valid_parents = [Building, Room, Bunker]
 
-    id = Column(Integer, ForeignKey('location.id', name='rack_loc_fk',
+    id = Column(Integer, ForeignKey(Location.id, name='rack_loc_fk',
                                     ondelete='CASCADE'), primary_key=True)
 
     rack_row = Column(AqStr(4), nullable=True)

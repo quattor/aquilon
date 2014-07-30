@@ -30,7 +30,7 @@ class ChassisSlot(Base):
 
     __tablename__ = _TN
 
-    chassis_id = Column(Integer, ForeignKey('chassis.hardware_entity_id',
+    chassis_id = Column(Integer, ForeignKey(Chassis.hardware_entity_id,
                                             name='%s_chassis_fk' % _TN,
                                             ondelete='CASCADE'),
                         nullable=False)
@@ -38,7 +38,7 @@ class ChassisSlot(Base):
     slot_number = Column(Integer, nullable=False, autoincrement=False)
 
     # TODO: Code constraint that these are Blades...
-    machine_id = Column(Integer, ForeignKey('machine.machine_id',
+    machine_id = Column(Integer, ForeignKey(Machine.machine_id,
                                             name='%s_machine_fk' % _TN),
                         nullable=True)
     # TODO: need a unique key against this, but what if it takes 2 slots?

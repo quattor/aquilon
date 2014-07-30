@@ -28,12 +28,12 @@ class VirtualMachine(Resource):
     __tablename__ = _TN
     _class_label = 'Virtual Machine'
 
-    resource_id = Column(Integer, ForeignKey('resource.id',
+    resource_id = Column(Integer, ForeignKey(Resource.id,
                                              name='%s_resource_fk' % _TN,
                                              ondelete='CASCADE'),
                          primary_key=True)
 
-    machine_id = Column(Integer, ForeignKey('machine.machine_id',
+    machine_id = Column(Integer, ForeignKey(Machine.machine_id,
                                             name='%s_machine_fk' % _TN,
                                             ondelete='CASCADE'),
                         nullable=False)

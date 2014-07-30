@@ -54,7 +54,7 @@ class AddressAssignment(Base):
 
     id = Column(Integer, Sequence('%s_seq' % _TN), primary_key=True)
 
-    interface_id = Column(Integer, ForeignKey('interface.id',
+    interface_id = Column(Integer, ForeignKey(Interface.id,
                                               name='%s_interface_id_fk' % _ABV,
                                               ondelete='CASCADE'),
                           nullable=False)
@@ -63,7 +63,7 @@ class AddressAssignment(Base):
 
     ip = Column(IPV4, nullable=False)
 
-    network_id = Column(Integer, ForeignKey('network.id',
+    network_id = Column(Integer, ForeignKey(Network.id,
                                             name='%s_network_fk' % _TN),
                         nullable=False)
 
@@ -75,7 +75,7 @@ class AddressAssignment(Base):
     # This should be the same as #
     # network.network_environment.dns_environment_id, but using that would mean
     # joining two extra tables in the dns_records relation
-    dns_environment_id = Column(Integer, ForeignKey('dns_environment.id',
+    dns_environment_id = Column(Integer, ForeignKey(DnsEnvironment.id,
                                                     name='%s_dns_env_fk' %
                                                     _ABV),
                                 nullable=False)

@@ -30,7 +30,7 @@ class Building(Location):
 
     valid_parents = [City, Campus]
 
-    id = Column(Integer, ForeignKey('location.id',
+    id = Column(Integer, ForeignKey(Location.id,
                                     name='building_loc_fk',
                                     ondelete='CASCADE'),
                 primary_key=True)

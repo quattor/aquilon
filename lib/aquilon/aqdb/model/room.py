@@ -19,16 +19,18 @@ from sqlalchemy import Column, Integer, ForeignKey
 
 from aquilon.aqdb.model import Location, Building
 
+_TN = 'room'
+
 
 class Room(Location):
     """ Room is a subtype of location """
-    __tablename__ = 'room'
-    __mapper_args__ = {'polymorphic_identity': 'room'}
+    __tablename__ = _TN
+    __mapper_args__ = {'polymorphic_identity': _TN}
 
     valid_parents = [Building]
 
-    id = Column(Integer, ForeignKey('location.id',
-                                    name='room_loc_fk',
+    id = Column(Integer, ForeignKey(Location.id,
+                                    name='%s_loc_fk' % _TN,
                                     ondelete='CASCADE'),
                 primary_key=True)
 

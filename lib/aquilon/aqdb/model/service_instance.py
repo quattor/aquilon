@@ -45,7 +45,7 @@ class ServiceInstance(Base):
     _class_label = 'Service Instance'
 
     id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
-    service_id = Column(Integer, ForeignKey('service.id',
+    service_id = Column(Integer, ForeignKey(Service.id,
                                             name='%s_svc_fk' % _ABV),
                         nullable=False)
     name = Column(AqStr(64), nullable=False)
@@ -218,29 +218,29 @@ service_instance.info['abrev'] = _ABV
 service_instance.info['unique_fields'] = ['name', 'service']
 
 
-class BuildItem(Base):
+class __BuildItem(Base):
     """ Identifies the service_instance bindings of a machine. """
     __tablename__ = 'build_item'
 
-    host_id = Column('host_id', Integer, ForeignKey('host.hardware_entity_id',
+    host_id = Column('host_id', Integer, ForeignKey(Host.hardware_entity_id,
                                                     ondelete='CASCADE',
                                                     name='build_item_host_fk'),
                      nullable=False)
 
     service_instance_id = Column(Integer,
-                                 ForeignKey('service_instance.id',
+                                 ForeignKey(ServiceInstance.id,
                                             name='build_item_svc_inst_fk'),
                                  nullable=False)
 
     __table_args__ = (PrimaryKeyConstraint(host_id, service_instance_id),
                       Index('build_item_si_idx', service_instance_id))
 
-ServiceInstance.clients = relation(Host, secondary=BuildItem.__table__,
+ServiceInstance.clients = relation(Host, secondary=__BuildItem.__table__,
                                    backref=backref("services_used",
                                                    cascade="all"))
 
 # Make this a column property so it can be undeferred on bulk loads
 ServiceInstance._client_count = column_property(
     select([func.count()],
-           BuildItem.service_instance_id == ServiceInstance.id)
+           __BuildItem.service_instance_id == ServiceInstance.id)
     .label("_client_count"), deferred=True)

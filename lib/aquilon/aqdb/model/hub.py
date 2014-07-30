@@ -34,16 +34,18 @@ from sqlalchemy import Column, Integer, ForeignKey
 
 from aquilon.aqdb.model import Location, Company
 
+_TN = 'hub'
+
 
 class Hub(Location):
     """ Hub is a subtype of location """
-    __tablename__ = 'hub'
-    __mapper_args__ = {'polymorphic_identity': 'hub'}
+    __tablename__ = _TN
+    __mapper_args__ = {'polymorphic_identity': _TN}
 
     valid_parents = [Company]
 
     id = Column(Integer, ForeignKey('location.id',
-                                    name='hub_loc_fk',
+                                    name='%s_loc_fk' % _TN,
                                     ondelete='CASCADE'),
                 primary_key=True)
 

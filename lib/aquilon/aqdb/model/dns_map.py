@@ -42,12 +42,12 @@ class DnsMap(Base):
 
     id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
 
-    location_id = Column(Integer, ForeignKey('location.id',
+    location_id = Column(Integer, ForeignKey(Location.id,
                                              name='%s_location_fk' % _TN,
                                              ondelete="CASCADE"),
                          nullable=False)
 
-    dns_domain_id = Column(Integer, ForeignKey('dns_domain.id',
+    dns_domain_id = Column(Integer, ForeignKey(DnsDomain.id,
                                                name='%s_dns_domain_fk' % _TN),
                            nullable=False)
 

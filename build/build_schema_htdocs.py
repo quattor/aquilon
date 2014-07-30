@@ -64,14 +64,14 @@ from aquilon.aqdb.model import *
 from aquilon.aqdb.utils import schema2dot
 
 from aquilon.aqdb.model.location import LocationLink
-from aquilon.aqdb.model.service import (ServiceListItem,
-                                        PersonalityServiceListItem)
-from aquilon.aqdb.model.service_instance import BuildItem
+from aquilon.aqdb.model.service import (__ServiceListItem,
+                                        __PersonalityServiceListItem)
+from aquilon.aqdb.model.service_instance import __BuildItem
 from aquilon.aqdb.model.personality import (__PersonalityRootUser,
                                             __PersonalityRootNetGroup)
-from aquilon.aqdb.model.cluster import (ClusterServiceBinding,
+from aquilon.aqdb.model.cluster import (__ClusterServiceBinding,
                                         HostClusterMember,
-                                        ClusterAllowedPersonality)
+                                        __ClusterAllowedPersonality)
 
 from sqlalchemy import orm
 
@@ -112,9 +112,9 @@ model_group = {
     },
     'services'  : {
         'title'   : 'Services',
-        'classes' : [ Service, PersonalityServiceListItem, ServiceListItem,
-                      ServiceInstance, BuildItem, ServiceInstanceServer,
-                      ClusterServiceBinding, PersonalityServiceMap,
+        'classes' : [ Service, __PersonalityServiceListItem, __ServiceListItem,
+                      ServiceInstance, __BuildItem, ServiceInstanceServer,
+                      __ClusterServiceBinding, PersonalityServiceMap,
                       ServiceMap ],
     },
     'dns'   : {
@@ -127,7 +127,7 @@ model_group = {
         'title'   : 'Clusters',
         'classes' : [ Cluster, ClusterLifecycle, StorageCluster,
                       ComputeCluster, HostClusterMember,
-                      ClusterAllowedPersonality, MetaCluster,
+                      __ClusterAllowedPersonality, MetaCluster,
                       MetaClusterMember, EsxCluster, PersonalityClusterInfo,
                       PersonalityESXClusterInfo ],
     },

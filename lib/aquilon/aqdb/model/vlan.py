@@ -80,17 +80,17 @@ class ObservedVlan(Base):
     __tablename__ = 'observed_vlan'
 
     network_device_id = Column(Integer,
-                               ForeignKey('network_device.hardware_entity_id',
+                               ForeignKey(NetworkDevice.hardware_entity_id,
                                           ondelete='CASCADE',
                                           name='%s_hw_fk' % _ABV),
                                nullable=False)
 
-    network_id = Column(Integer, ForeignKey('network.id',
+    network_id = Column(Integer, ForeignKey(Network.id,
                                             ondelete='CASCADE',
                                             name='%s_net_fk' % _ABV),
                         nullable=False)
 
-    vlan_id = Column(Integer, ForeignKey('vlan_info.vlan_id',
+    vlan_id = Column(Integer, ForeignKey(VlanInfo.vlan_id,
                                          name='%s_vlan_fk' % _ABV),
                      nullable=False)
 

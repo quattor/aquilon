@@ -109,12 +109,12 @@ class Network(Base):
     id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
 
     network_environment_id = Column(Integer,
-                                    ForeignKey('network_environment.id',
+                                    ForeignKey(NetworkEnvironment.id,
                                                name='%s_net_env_fk' % _TN),
                                     nullable=False)
 
     location_id = Column(Integer,
-                         ForeignKey('location.id', name='%s_loc_fk' % _TN),
+                         ForeignKey(Location.id, name='%s_loc_fk' % _TN),
                          nullable=False)
 
     network_type = Column(AqStr(32), nullable=False)

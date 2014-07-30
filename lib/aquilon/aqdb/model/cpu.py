@@ -33,7 +33,7 @@ class Cpu(Base):
 
     id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
     name = Column(AqStr(64), nullable=False)
-    vendor_id = Column(Integer, ForeignKey('vendor.id',
+    vendor_id = Column(Integer, ForeignKey(Vendor.id,
                                            name='cpu_vendor_fk'),
                        nullable=False)
 

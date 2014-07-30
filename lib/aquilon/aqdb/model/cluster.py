@@ -90,22 +90,23 @@ class Cluster(Base):
     name = Column(AqStr(64), nullable=False)
 
     # Lack of cascaded deletion is intentional on personality
-    personality_id = Column(Integer, ForeignKey('personality.id',
+    personality_id = Column(Integer, ForeignKey(Personality.id,
                                                 name='cluster_prsnlty_fk'),
                             nullable=False)
 
-    branch_id = Column(Integer, ForeignKey('branch.id',
+    branch_id = Column(Integer, ForeignKey(Branch.id,
                                            name='cluster_branch_fk'),
                        nullable=False)
 
     sandbox_author_id = Column(Integer,
-                               ForeignKey('userinfo.id',
+                               ForeignKey(User.id,
                                           name='cluster_sandbox_author_fk',
                                           ondelete="SET NULL"),
                                nullable=True)
 
-    location_constraint_id = Column(ForeignKey('location.id',
-                                               name='cluster_location_fk'))
+    location_constraint_id = Column(ForeignKey(Location.id,
+                                               name='cluster_location_fk'),
+                                    nullable=False)
 
     max_hosts = Column(Integer, nullable=True)
     # N+M clusters are defined by setting down_hosts_threshold to M
@@ -122,13 +123,13 @@ class Cluster(Base):
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
-    status_id = Column(Integer, ForeignKey('clusterlifecycle.id',
+    status_id = Column(Integer, ForeignKey(ClusterLifecycle.id,
                                            name='cluster_status_fk'),
                        nullable=False)
     comments = Column(String(255))
 
     status = relation(ClusterLifecycle, innerjoin=True)
-    location_constraint = relation(Location, lazy=False)
+    location_constraint = relation(Location, lazy=False, innerjoin=True)
 
     personality = relation(Personality, lazy=False, innerjoin=True)
     branch = relation(Branch, lazy=False, innerjoin=True, backref='clusters')
@@ -284,7 +285,7 @@ class ComputeCluster(Cluster):
     __mapper_args__ = {'polymorphic_identity': 'compute'}
     _class_label = 'Compute Cluster'
 
-    id = Column(Integer, ForeignKey('%s.id' % _TN,
+    id = Column(Integer, ForeignKey(Cluster.id,
                                     name='compute_cluster_fk',
                                     ondelete='CASCADE'),
                 primary_key=True)
@@ -301,7 +302,7 @@ class StorageCluster(Cluster):
     __mapper_args__ = {'polymorphic_identity': 'storage'}
     _class_label = 'Storage Cluster'
 
-    id = Column(Integer, ForeignKey('%s.id' % _TN,
+    id = Column(Integer, ForeignKey(Cluster.id,
                                     name='storage_cluster_fk',
                                     ondelete='CASCADE'),
                 primary_key=True)
@@ -328,7 +329,7 @@ class EsxCluster(Cluster):
     __tablename__ = _ETN
     _class_label = 'ESX Cluster'
 
-    esx_cluster_id = Column(Integer, ForeignKey('%s.id' % _TN,
+    esx_cluster_id = Column(Integer, ForeignKey(Cluster.id,
                                                 name='%s_cluster_fk' % _ETN,
                                                 ondelete='CASCADE'),
                             primary_key=True)
@@ -340,7 +341,7 @@ class EsxCluster(Cluster):
     memory_capacity = Column(Integer, nullable=True)
 
     network_device_id = Column(Integer,
-                               ForeignKey('network_device.hardware_entity_id',
+                               ForeignKey(NetworkDevice.hardware_entity_id,
                                           name='%s_network_device_fk' % _ETN),
                                nullable=True)
 
@@ -536,12 +537,12 @@ class HostClusterMember(Base):
     """ Association table for clusters and their member hosts """
     __tablename__ = _HCM
 
-    cluster_id = Column(Integer, ForeignKey('%s.id' % _TN,
+    cluster_id = Column(Integer, ForeignKey(Cluster.id,
                                             name='hst_clstr_mmbr_clstr_fk',
                                             ondelete='CASCADE'),
                         nullable=False)
 
-    host_id = Column(Integer, ForeignKey('host.hardware_entity_id',
+    host_id = Column(Integer, ForeignKey(Host.hardware_entity_id,
                                          name='hst_clstr_mmbr_hst_fk',
                                          ondelete='CASCADE'),
                      nullable=False)
@@ -575,15 +576,15 @@ hcm.info['unique_fields'] = ['cluster', 'host']
 Host.cluster = association_proxy('_cluster', 'cluster')
 
 
-class ClusterAllowedPersonality(Base):
+class __ClusterAllowedPersonality(Base):
     __tablename__ = _CAP
 
-    cluster_id = Column(Integer, ForeignKey('%s.id' % _TN,
+    cluster_id = Column(Integer, ForeignKey(Cluster.id,
                                             name='clstr_allowed_pers_c_fk',
                                             ondelete='CASCADE'),
                         nullable=False)
 
-    personality_id = Column(Integer, ForeignKey('personality.id',
+    personality_id = Column(Integer, ForeignKey(Personality.id,
                                                 name='clstr_allowed_pers_p_fk',
                                                 ondelete='CASCADE'),
                             nullable=False)
@@ -592,23 +593,23 @@ class ClusterAllowedPersonality(Base):
                       Index('%s_prsnlty_idx' % _CAP, personality_id))
 
 Cluster.allowed_personalities = relation(Personality,
-                                         secondary=ClusterAllowedPersonality.__table__)
+                                         secondary=__ClusterAllowedPersonality.__table__)
 
 
-class ClusterServiceBinding(Base):
+class __ClusterServiceBinding(Base):
     """
         Makes bindings of service instances to clusters
     """
     __tablename__ = _CSB
     _class_label = 'Cluster Service Binding'
 
-    cluster_id = Column(Integer, ForeignKey('%s.id' % _TN,
+    cluster_id = Column(Integer, ForeignKey(Cluster.id,
                                             name='%s_cluster_fk' % _CSBABV,
                                             ondelete='CASCADE'),
                         nullable=False)
 
     service_instance_id = Column(Integer,
-                                 ForeignKey('service_instance.id',
+                                 ForeignKey(ServiceInstance.id,
                                             name='%s_srv_inst_fk' % _CSBABV),
                                  nullable=False)
 
@@ -616,5 +617,5 @@ class ClusterServiceBinding(Base):
                       Index('%s_si_idx' % _CSBABV, service_instance_id))
 
 Cluster.service_bindings = relation(ServiceInstance,
-                                    secondary=ClusterServiceBinding.__table__,
+                                    secondary=__ClusterServiceBinding.__table__,
                                     backref=backref("cluster_clients"))

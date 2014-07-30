@@ -38,11 +38,11 @@ class ServiceInstanceServer(Base):
 
     id = Column(Integer, Sequence("%s_seq" % _TN), primary_key=True)
 
-    service_instance_id = Column(Integer, ForeignKey('service_instance.id',
+    service_instance_id = Column(Integer, ForeignKey(ServiceInstance.id,
                                                      name='%s_si_fk' % _ABV),
                                  nullable=False)
 
-    host_id = Column(Integer, ForeignKey('host.hardware_entity_id',
+    host_id = Column(Integer, ForeignKey(Host.hardware_entity_id,
                                          name='%s_host_fk' % _ABV),
                      nullable=True)
 
@@ -50,15 +50,15 @@ class ServiceInstanceServer(Base):
                                             name='%s_cluster_fk' % _ABV),
                         nullable=True)
 
-    address_assignment_id = Column(Integer, ForeignKey('address_assignment.id',
+    address_assignment_id = Column(Integer, ForeignKey(AddressAssignment.id,
                                                        name='%s_addr_assign_fk' % _ABV),
                                    nullable=True)
 
-    service_address_id = Column(Integer, ForeignKey('service_address.resource_id',
+    service_address_id = Column(Integer, ForeignKey(ServiceAddress.resource_id,
                                                     name='%s_srv_addr_fk' % _ABV),
                                 nullable=True)
 
-    alias_id = Column(Integer, ForeignKey('alias.dns_record_id',
+    alias_id = Column(Integer, ForeignKey(Alias.dns_record_id,
                                           name='%s_alias_fk' % _ABV),
                       nullable=True)
 

@@ -19,16 +19,17 @@ from sqlalchemy import Column, Integer, ForeignKey
 
 from aquilon.aqdb.model import Location, Hub, Company
 
+_TN = 'continent'
 
 class Continent(Location):
     """ Continent is a subtype of location """
-    __tablename__ = 'continent'
-    __mapper_args__ = {'polymorphic_identity': 'continent'}
+    __tablename__ = _TN
+    __mapper_args__ = {'polymorphic_identity': _TN}
 
     valid_parents = [Hub, Company]
 
-    id = Column(Integer, ForeignKey('location.id',
-                                    name='continent_loc_fk',
+    id = Column(Integer, ForeignKey(Location.id,
+                                    name='%s_loc_fk' % _TN,
                                     ondelete='CASCADE'),
                 primary_key=True)
 

@@ -30,7 +30,7 @@ class Share(Resource):
     __tablename__ = _TN
     __mapper_args__ = {'polymorphic_identity': 'share'}
 
-    id = Column(Integer, ForeignKey('resource.id',
+    id = Column(Integer, ForeignKey(Resource.id,
                                     name='%s_resource_fk' % (_TN),
                                     ondelete='CASCADE'),
                 primary_key=True)

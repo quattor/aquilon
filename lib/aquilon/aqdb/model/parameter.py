@@ -64,7 +64,7 @@ class PersonalityParameter(ParameterHolder):
     """ Association of parameters with Personality """
 
     personality_id = Column(Integer,
-                            ForeignKey('personality.id',
+                            ForeignKey(Personality.id,
                                        name='%s_persona_fk' % _PARAM_HOLDER,
                                        ondelete='CASCADE'),
                             nullable=True)
@@ -99,7 +99,7 @@ class Parameter(Base):
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
     comments = deferred(Column(String(255), nullable=True))
-    holder_id = Column(Integer, ForeignKey('%s.id' % _PARAM_HOLDER,
+    holder_id = Column(Integer, ForeignKey(ParameterHolder.id,
                                            name='%s_paramholder_fk' % _TN,
                                            ondelete='CASCADE'),
                        nullable=False)

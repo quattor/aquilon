@@ -52,7 +52,7 @@ class Personality(Base):
 
     id = Column(Integer, Sequence('%s_seq' % _ABV), primary_key=True)
     name = Column(AqStr(64), nullable=False)
-    archetype_id = Column(Integer, ForeignKey('archetype.id',
+    archetype_id = Column(Integer, ForeignKey(Archetype.id,
                                               name='%s_arch_fk' % _ABV),
                           nullable=False)
 
@@ -62,11 +62,11 @@ class Personality(Base):
     config_override = Column(Boolean(name="persona_cfg_override_ck"),
                              default=False, nullable=False)
 
-    owner_eon_id = Column(Integer, ForeignKey('grn.eon_id',
+    owner_eon_id = Column(Integer, ForeignKey(Grn.eon_id,
                                               name='%s_owner_grn_fk' % _TN),
                           nullable=False)
 
-    host_environment_id = Column(Integer, ForeignKey('host_environment.id',
+    host_environment_id = Column(Integer, ForeignKey(HostEnvironment.id,
                                                      name='host_environment_fk'),
                                  nullable=False)
 
@@ -109,12 +109,12 @@ personality.info['unique_fields'] = ['name', 'archetype']
 class PersonalityGrnMap(Base):
     __tablename__ = _PGN
 
-    personality_id = Column(Integer, ForeignKey('%s.id' % _TN,
+    personality_id = Column(Integer, ForeignKey(Personality.id,
                                                 name='%s_personality_fk' % _PGNABV,
                                                 ondelete='CASCADE'),
                             nullable=False)
 
-    eon_id = Column(Integer, ForeignKey('grn.eon_id',
+    eon_id = Column(Integer, ForeignKey(Grn.eon_id,
                                         name='%s_grn_fk' % _PGNABV),
                     nullable=False)
 
@@ -139,12 +139,12 @@ class PersonalityGrnMap(Base):
 class __PersonalityRootUser(Base):
     __tablename__ = _PRU
 
-    personality_id = Column(Integer, ForeignKey('%s.id' % _TN,
+    personality_id = Column(Integer, ForeignKey(Personality.id,
                                                 ondelete='CASCADE',
                                                 name='%s_pers_fk' % _PRUABV),
                             primary_key=True)
 
-    user_id = Column(Integer, ForeignKey('userinfo.id',
+    user_id = Column(Integer, ForeignKey(User.id,
                                          ondelete='CASCADE',
                                          name='%s_user_fk' % _PRUABV),
                      primary_key=True)
@@ -161,12 +161,12 @@ Personality.root_users = relation(User, secondary=__PersonalityRootUser.__table_
 class __PersonalityRootNetGroup(Base):
     __tablename__ = _PRNG
 
-    personality_id = Column(Integer, ForeignKey('%s.id' % _TN,
+    personality_id = Column(Integer, ForeignKey(Personality.id,
                                                 ondelete='CASCADE',
                                                 name='%s_pers_fk' % _PRNGABV),
                             primary_key=True)
 
-    netgroup_id = Column(Integer, ForeignKey('netgroup_whitelist.id',
+    netgroup_id = Column(Integer, ForeignKey(NetGroupWhiteList.id,
                                              ondelete='CASCADE',
                                              name='%s_group_fk' % _PRNGABV),
                          primary_key=True)
