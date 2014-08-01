@@ -189,17 +189,7 @@ class TestUpdateDisk(TestBrokerCommand):
         self.noouttest(["del_filesystem", "--cluster", "utecl5",
                         "--filesystem", "disk_update_test"])
 
-    def test_120_update_wwn_fail(self):
-        command = ["update_disk", "--machine", "ut3c5n10", "--disk", "sdb",
-                   "--wwn", "600508b112233445566778899aabbccd"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out,
-                         "WWN 600508b112233445566778899aabbccd is already "
-                         "in use by disk c0d1 of machine "
-                         "unittest00.one-nyp.ms.com.",
-                         command)
-
-    def test_121_clear_wwn(self):
+    def test_120_clear_wwn(self):
         command = ["update_disk", "--machine", "ut3c1n3", "--disk", "c0d1",
                    "--wwn", ""]
         self.noouttest(command)

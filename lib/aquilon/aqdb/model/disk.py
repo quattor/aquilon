@@ -70,8 +70,7 @@ class Disk(DeviceLinkMixin, Base):
                        backref=backref('disks', cascade='all'))
 
     __table_args__ = (UniqueConstraint(machine_id, device_name,
-                                       name='%s_mach_dev_name_uk' % _TN),
-                      UniqueConstraint(wwn, name='%s_wwn_uk' % _TN))
+                                       name='%s_mach_dev_name_uk' % _TN),)
     __mapper_args__ = {'polymorphic_on': disk_type,
                        'with_polymorphic': '*'}
 

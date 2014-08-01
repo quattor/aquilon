@@ -49,12 +49,6 @@ class CommandUpdateDisk(BrokerCommand):
 
         if wwn is not None:
             wwn = force_wwn("--wwn", wwn)
-            if wwn:
-                other = session.query(Disk).filter_by(wwn=wwn).first()
-                if other:
-                    raise ArgumentError("WWN {0!s} is already in use by disk "
-                                        "{1!s} of {2:l}."
-                                        .format(wwn, other, other.machine))
             dbdisk.wwn = wwn
 
         if size is not None:
