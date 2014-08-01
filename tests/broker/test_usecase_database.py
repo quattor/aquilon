@@ -45,7 +45,6 @@ class TestUsecaseDatabase(TestBrokerCommand):
 
     def test_105_reconfigure(self):
         command = ["reconfigure", "--personality=sybase-test",
-                   "--buildstatus=rebuild",
                    "--hostname=server1.aqd-unittest.ms.com"]
         self.successtest(command)
 

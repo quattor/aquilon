@@ -46,9 +46,9 @@ class StateEngine(SingleInstanceMixin):
         if target_state.name not in self.__class__.transitions:
             raise ArgumentError("status of %s is invalid" % target_state.name)
 
-        targets = self.__class__.transitions[self.name]
+        targets = sorted(self.__class__.transitions[self.name])
         if target_state.name not in targets:
-            raise ArgumentError("cannot change state to %s from %s. "
+            raise ArgumentError("Cannot change state to %s from %s. "
                                 "Legal states are: %s" %
                                 (target_state.name, self.name,
                                  ", ".join(targets)))

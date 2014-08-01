@@ -179,8 +179,7 @@ class TestMake(TestBrokerCommand):
     def testmakevmhosts(self):
         for i in range(1, 6):
             command = ["make", "--hostname", "evh%s.aqd-unittest.ms.com" % i,
-                       "--osname", "esxi", "--osversion", "4.0.0",
-                       "--buildstatus", "rebuild"]
+                       "--osname", "esxi", "--osversion", "4.0.0"]
             (out, err) = self.successtest(command)
             self.matchclean(err, "removing binding", command)
 
