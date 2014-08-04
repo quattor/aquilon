@@ -847,15 +847,13 @@
 	--all flag to override this and delete all matching disks.
 	<optgroup mandatory="True" fields="all">
 	    <option name="machine" type="string">machine ID</option>
+	    <optgroup mandatory="True" fields="any">
+		<option name="disk" type="string">device name of the disk (like sda)</option>
+		<option name="all" type="flag">remove any matching disks</option>
+	    </optgroup>
 	</optgroup>
-	<optgroup mandatory="False">
-	    <option name="disk" type="string">device name of the disk (like sda)</option>
-	    <option name="controller" type="string">type of the disk</option>
-	    <option name="size" type="int">capacity of the disk (GB)</option>
-	    <option name="all" type="flag">remove any matching disks</option>
-	</optgroup>
-	<transport trigger="disk" method="delete" path="machine/%(machine)s/disk/%(disk)s"/>
-	<transport method="post" path="machine/%(machine)s/command/del_disk"/>
+	<transport method="delete" trigger="disk" path="machine/%(machine)s/disk/%(disk)s"/>
+	<transport method="delete" path="machine/%(machine)s/disk"/>
     </command>
 
     <command name="update_disk">

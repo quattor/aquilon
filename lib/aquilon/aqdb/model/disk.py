@@ -67,7 +67,7 @@ class Disk(DeviceLinkMixin, Base):
     comments = deferred(Column(String(255), nullable=True))
 
     machine = relation(Machine, innerjoin=True,
-                       backref=backref('disks', cascade='all'))
+                       backref=backref('disks', cascade='all, delete-orphan'))
 
     __table_args__ = (UniqueConstraint(machine_id, device_name,
                                        name='%s_mach_dev_name_uk' % _TN),)

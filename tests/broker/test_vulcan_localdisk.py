@@ -355,8 +355,7 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, MachineTestMixin,
 
     def test_250_delutpgm0disk(self):
         for i in range(0, 3):
-            self.noouttest(["del", "disk", "--machine", "utpgm%d" % i,
-                            "--controller", "scsi", "--disk", "sda"])
+            self.noouttest(["del_disk", "--machine", "utpgm%d" % i, "--disk", "sda"])
 
     def test_260_move_vm_to_cluster(self):
         self.noouttest(["update", "machine", "--machine", "utpgm0",
