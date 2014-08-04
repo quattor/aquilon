@@ -16,11 +16,10 @@
 # limitations under the License.
 """Contains the logic for `aq update rack`."""
 
-
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import Machine, DnsDomain
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.dbwrappers.location import get_location
+from aquilon.aqdb.model import Machine
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.dbwrappers.location import get_location, update_location
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
 
 
@@ -31,21 +30,15 @@ class CommandUpdateRack(BrokerCommand):
     def render(self, session, logger, rack, row, column, room, building, bunker,
                fullname, default_dns_domain, comments, **arguments):
         dbrack = get_location(session, rack=rack)
+
         if row is not None:
             dbrack.rack_row = row
         if column is not None:
             dbrack.rack_column = column
-        if fullname is not None:
-            dbrack.fullname = fullname
-        if comments is not None:
-            dbrack.comments = comments
-        if default_dns_domain is not None:
-            if default_dns_domain:
-                dbdns_domain = DnsDomain.get_unique(session, default_dns_domain,
-                                                    compel=True)
-                dbrack.default_dns_domain = dbdns_domain
-            else:
-                dbrack.default_dns_domain = None
+
+        update_location(dbrack, fullname=fullname, comments=comments,
+                        default_dns_domain=default_dns_domain)
+
         if bunker or room or building:
             dbparent = get_location(session, bunker=bunker, room=room,
                                     building=building)

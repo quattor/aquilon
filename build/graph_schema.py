@@ -20,10 +20,18 @@
 import os
 import sys
 
-_DIR = os.path.dirname(os.path.realpath(__file__))
-_LIBDIR = os.path.join(_DIR, '..', 'lib')
-sys.path.insert(0, _LIBDIR)
+import ms.modulecmd
+ms.modulecmd.load("fsf/graphviz/2.28.0")
 
+# -- begin path_setup --
+BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
+LIBDIR = os.path.join(BINDIR, "..", "lib")
+
+if LIBDIR not in sys.path:
+    sys.path.append(LIBDIR)
+# -- end path_setup --
+
+from aquilon.config import Config, lookup_file_path
 import aquilon.aqdb.depends
 
 import argparse
@@ -37,7 +45,6 @@ opts = parser.parse_args()
 if not os.path.exists(opts.dir):
     os.makedirs(opts.dir)
 
-from aquilon.config import Config, lookup_file_path
 config = Config(configfile=lookup_file_path('aqd.conf.mem'))
 
 from aquilon.aqdb.db_factory import DbFactory
@@ -45,9 +52,6 @@ from aquilon.aqdb.model import Base
 db = DbFactory()
 Base.metadata.bind = db.engine
 Base.metadata.create_all()
-
-import ms.modulecmd
-ms.modulecmd.load("fsf/graphviz/2.28.0")
 
 from aquilon.aqdb.utils import schema2dot
 

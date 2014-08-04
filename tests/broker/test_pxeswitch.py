@@ -20,6 +20,7 @@
 This may have issues being tested somewhere that the command actually works...
 """
 
+import os.path
 from tempfile import NamedTemporaryFile
 
 if __name__ == "__main__":
@@ -54,8 +55,9 @@ class TestPxeswitch(TestBrokerCommand):
         self.matchclean(err, "--boot", command)
         self.matchclean(err, "--firmware", command)
         self.matchclean(err, "--livecd", command)
-        sshdir = self.config.get("broker", "installfe_sshdir")
-        self.matchoutput(err, "--sshdir %s" % sshdir, command)
+        ssh = self.config.lookup_tool("ssh")
+        if ssh[0] == '/':
+            self.matchoutput(err, "--sshdir %s" % os.path.dirname(ssh), command)
         user = self.config.get("broker", "installfe_user")
         self.matchoutput(err,
                          "--servers %s@infra1.aqd-unittest.ms.com" % user,
@@ -72,8 +74,9 @@ class TestPxeswitch(TestBrokerCommand):
         self.matchclean(err, "--boot", command)
         self.matchclean(err, "--firmware", command)
         self.matchclean(err, "--livecd", command)
-        sshdir = self.config.get("broker", "installfe_sshdir")
-        self.matchoutput(err, "--sshdir %s" % sshdir, command)
+        ssh = self.config.lookup_tool("ssh")
+        if ssh[0] == '/':
+            self.matchoutput(err, "--sshdir %s" % os.path.dirname(ssh), command)
         user = self.config.get("broker", "installfe_user")
         self.matchoutput(err,
                          "--servers %s@infra1.aqd-unittest.ms.com" % user,

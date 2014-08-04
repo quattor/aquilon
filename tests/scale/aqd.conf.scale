@@ -26,10 +26,11 @@ run_knc = True
 run_git_daemon = True
 server_notifications = 
 client_notifications = no
-dsdb = %(srcdir)s/tests/scale/fake_dsdb.sh
-installfe = /bin/echo
 #sharedata = %(srcdir)s/tests/testnasobjects.map
-#vlan2net = %(srcdir)s/tests/fakebin/fake_vlan2net
+
+[tool_locations]
+dsdb = %(srcdir)s/tests/scale/fake_dsdb.sh
+aii_installfe = /bin/echo
 mean = %(srcdir)s/tests/fakebin/fake_mean
 
 [unittest]

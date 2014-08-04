@@ -103,7 +103,7 @@ class Host(Base):
                                backref=backref('host', uselist=False,
                                                cascade='all, delete-orphan'))
 
-    branch = relation(Branch, innerjoin=True, backref='hosts')
+    branch = relation(Branch, innerjoin=True)
     sandbox_author = relation(User)
     personality = relation(Personality, innerjoin=True)
     status = relation(HostLifecycle, innerjoin=True)

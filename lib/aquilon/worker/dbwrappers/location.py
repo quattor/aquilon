@@ -16,11 +16,11 @@
 # limitations under the License.
 """Wrapper to make getting a location simpler."""
 
-
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
+from sqlalchemy.orm import object_session
 
 from aquilon.exceptions_ import NotFoundException, ArgumentError
-from aquilon.aqdb.model import Location
+from aquilon.aqdb.model import Location, DnsDomain
 from aquilon.utils import validate_nlist_key
 
 
@@ -71,3 +71,37 @@ def add_location(session, cls, name, parent, **kwargs):
     dbloc = cls(name=name, parent=parent, **kwargs)
     session.add(dbloc)
     return dbloc
+
+
+def get_default_dns_domain(dblocation):
+    locations = dblocation.parents[:]
+    locations.append(dblocation)
+    locations.reverse()
+    try:
+        return next(loc.default_dns_domain
+                    for loc in locations
+                    if loc.default_dns_domain)
+    except StopIteration:
+        raise ArgumentError("There is no default DNS domain configured for "
+                            "{0:l}.  Please specify --dns_domain."
+                            .format(dblocation))
+
+
+def update_location(dblocation, fullname=None, default_dns_domain=None,
+                    comments=None):
+    """ Update common location attributes """
+
+    if fullname is not None:
+        dblocation.fullname = fullname
+
+    if default_dns_domain is not None:
+        if default_dns_domain:
+            session = object_session(dblocation)
+            dbdns_domain = DnsDomain.get_unique(session, default_dns_domain,
+                                                compel=True)
+            dblocation.default_dns_domain = dbdns_domain
+        else:
+            dblocation.default_dns_domain = None
+
+    if comments is not None:
+        dblocation.comments = comments

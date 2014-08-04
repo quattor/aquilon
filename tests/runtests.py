@@ -161,7 +161,7 @@ if prod_python and sys.executable.find(prod_python) < 0:
 
 # Execute this every run... the man page says that it should do the right
 # thing in terms of not contacting the kdc very often.
-p = Popen(config.get("kerberos", "krb5_keytab"), stdout=1, stderr=2)
+p = Popen(config.lookup_tool("krb5_keytab"), stdout=1, stderr=2)
 rc = p.wait()
 
 pid_file = os.path.join(config.get('broker', 'rundir'), 'aqd.pid')

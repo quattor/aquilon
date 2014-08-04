@@ -123,3 +123,10 @@ class Config(SafeConfigParser):
                 if self.has_section(alternate_section):
                     for (name, value) in self.items(alternate_section):
                         self.set(section, name, value)
+
+    def lookup_tool(self, prog):
+        key = prog.replace('-', '_')
+        if self.has_option("tool_locations", key):
+            return self.get("tool_locations", key)
+        # If no override was specified, we rely on $PATH lookup
+        return prog

@@ -16,12 +16,11 @@
 # limitations under the License.
 """Contains the logic for `aq update city`."""
 
-
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import Machine, DnsDomain
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.aqdb.model import Machine
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.processes import DSDBRunner
-from aquilon.worker.dbwrappers.location import get_location
+from aquilon.worker.dbwrappers.location import get_location, update_location
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
 
 
@@ -29,7 +28,7 @@ class CommandUpdateCity(BrokerCommand):
 
     required_parameters = ["city"]
 
-    def render(self, session, logger, city, timezone, campus,
+    def render(self, session, logger, city, timezone, fullname, campus,
                default_dns_domain, comments, **arguments):
         dbcity = get_location(session, city=city)
 
@@ -38,15 +37,9 @@ class CommandUpdateCity(BrokerCommand):
 
         if timezone is not None:
             dbcity.timezone = timezone
-        if comments is not None:
-            dbcity.comments = comments
-        if default_dns_domain is not None:
-            if default_dns_domain:
-                dbdns_domain = DnsDomain.get_unique(session, default_dns_domain,
-                                                    compel=True)
-                dbcity.default_dns_domain = dbdns_domain
-            else:
-                dbcity.default_dns_domain = None
+
+        update_location(dbcity, default_dns_domain=default_dns_domain,
+                        fullname=fullname, comments=comments)
 
         prev_campus = None
         dsdb_runner = None

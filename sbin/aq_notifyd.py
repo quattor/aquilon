@@ -25,12 +25,10 @@ from threading import Thread, Condition
 import signal
 import errno
 
+# -- begin path_setup --
 import ms.version
 ms.version.addpkg('argparse', '1.2.1')
 
-import argparse
-
-# -- begin path_setup --
 BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
 LIBDIR = os.path.join(BINDIR, "..", "lib")
 
@@ -38,7 +36,9 @@ if LIBDIR not in sys.path:
     sys.path.append(LIBDIR)
 # -- end path_setup --
 
-import aquilon.aqdb.depends
+import argparse
+
+import aquilon.aqdb.depends  # pylit: disable=W0611
 
 from aquilon.config import Config
 from aquilon.exceptions_ import AquilonError
@@ -154,7 +154,7 @@ def exit_handler(signum, frame):
     do_exit = True
 
     logger = logging.getLogger("aq_notifyd")
-    logger.info("Received signal %d" % signum)
+    logger.info("Received signal %d", signum)
 
     # Wake up the worker thread
     worker_notify.acquire()

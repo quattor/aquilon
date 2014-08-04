@@ -16,17 +16,14 @@
 # limitations under the License.
 """Contains the logic for `aq update building`."""
 
-
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import (Machine, ServiceMap, PersonalityServiceMap,
-                                DnsDomain)
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.dbwrappers.location import get_location
+from aquilon.aqdb.model import Machine, ServiceMap, PersonalityServiceMap
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.dbwrappers.location import get_location, update_location
 from aquilon.worker.processes import DSDBRunner
 from aquilon.worker.templates import Plenary, PlenaryCollection
 
 
-# based on update_rack
 class CommandUpdateBuilding(BrokerCommand):
 
     required_parameters = ["building"]
@@ -44,17 +41,9 @@ class CommandUpdateBuilding(BrokerCommand):
             dbbuilding.address = address
             dsdb_runner.update_building(dbbuilding.name, dbbuilding.address,
                                         old_address)
-        if fullname is not None:
-            dbbuilding.fullname = fullname
-        if comments is not None:
-            dbbuilding.comments = comments
-        if default_dns_domain is not None:
-            if default_dns_domain:
-                dbdns_domain = DnsDomain.get_unique(session, default_dns_domain,
-                                                    compel=True)
-                dbbuilding.default_dns_domain = dbdns_domain
-            else:
-                dbbuilding.default_dns_domain = None
+
+        update_location(dbbuilding, fullname=fullname, comments=comments,
+                        default_dns_domain=default_dns_domain)
 
         plenaries = PlenaryCollection(logger=logger)
         if city:

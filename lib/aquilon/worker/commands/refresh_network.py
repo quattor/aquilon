@@ -48,9 +48,8 @@ class CommandRefreshNetwork(BrokerCommand):
             rundir = self.config.get("broker", "rundir")
             tempdir = mkdtemp(prefix="refresh_network_", dir=rundir)
             try:
-                args = [self.config.get("broker", "qip_dump_subnetdata"),
-                        "--datarootdir", tempdir, "--format", "txt",
-                        "--noaudit"]
+                args = ["qip-dump-subnetdata", "--datarootdir", tempdir,
+                        "--format", "txt", "--noaudit"]
                 run_command(args, logger=logger)
 
                 refresher = QIPRefresh(session, logger, dbbuilding, dryrun,

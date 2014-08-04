@@ -18,6 +18,7 @@
 from tempfile import NamedTemporaryFile
 from collections import defaultdict
 from types import ListType
+import os.path
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
@@ -49,12 +50,11 @@ class CommandPXESwitchList(BrokerCommand):
             arguments["configure"] = None
 
         user = self.config.get("broker", "installfe_user")
-        command = self.config.get("broker", "installfe")
-        args = [command]
-        args.append("--cfgfile")
-        args.append("/dev/null")
-        args.append("--sshdir")
-        args.append(self.config.get("broker", "installfe_sshdir"))
+        args = ["aii-installfe", "--cfgfile", "/dev/null"]
+        ssh = self.config.lookup_tool("ssh")
+        if ssh[0] == '/':
+            args.append("--sshdir")
+            args.append(os.path.dirname(ssh))
         args.append("--logfile")
         logdir = self.config.get("broker", "logdir")
         args.append("%s/aii-installfe.log" % logdir)
@@ -93,8 +93,6 @@ class CommandPXESwitchList(BrokerCommand):
                     if arguments[option]:
                         groupargs.append(mapped)
                         groupargs.append(tmpfile.name)
-                if groupargs[-1] == command:
-                    raise ArgumentError("Missing required target parameter.")
 
                 servers = []
                 for srv in si.servers:

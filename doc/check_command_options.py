@@ -18,7 +18,7 @@
 
 import ms.version
 
-ms.version.addpkg('lxml', '2.3.2')
+ms.version.addpkg('lxml', '3.2.5')
 ms.version.addpkg('argparse', '1.2.1')
 
 import os

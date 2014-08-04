@@ -86,7 +86,7 @@ class CommandPollNetworkDevice(BrokerCommand):
         return
 
     def poll_mac(self, session, netdev, now, ssh_args):
-        importer = self.config.get("broker", "get_camtable")
+        importer = self.config.lookup_tool("get-camtable")
 
         if not netdev.primary_name:
             hostname = netdev.label
@@ -128,7 +128,7 @@ class CommandPollNetworkDevice(BrokerCommand):
         args = []
         if ssh_args:
             args.extend(ssh_args)
-        args.append(self.config.get("broker", "vlan2net"))
+        args.append(self.config.lookup_tool("vlan2net"))
         args.append("-ip")
         args.append(netdev.primary_ip)
         out = run_command(args)
