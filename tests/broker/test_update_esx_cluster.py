@@ -34,22 +34,19 @@ class TestUpdateESXCluster(TestBrokerCommand):
     def test_110_verifynoop(self):
         command = "show esx_cluster --cluster utecl4"
         out = self.commandtest(command.split(" "))
-        default_ratio = self.config.get("archetype_esx_cluster",
-                                        "vm_to_host_ratio")
         default_max = self.config.get("archetype_esx_cluster",
                                       "max_members_default")
         self.matchoutput(out, "ESX Cluster: utecl4", command)
         self.matchoutput(out, "Metacluster: utmc2", command)
         self.matchoutput(out, "Building: ut", command)
         self.matchoutput(out, "Max members: %s" % default_max, command)
-        self.matchoutput(out, "vm_to_host_ratio: %s" % default_ratio, command)
         self.matchoutput(out, "Personality: vulcan-1g-desktop-prod Archetype: esx_cluster",
                          command)
         self.matchclean(out, "Comments", command)
 
     def test_200_updateutecl2(self):
         command = ["update_esx_cluster", "--cluster=utecl2",
-                   "--max_members=97", "--vm_to_host_ratio=5:1",
+                   "--max_members=97",
                    "--comments", "ESX Cluster with a new comment",
                    "--memory_capacity", 16384,
                    "--down_hosts_threshold=0"]
@@ -62,7 +59,6 @@ class TestUpdateESXCluster(TestBrokerCommand):
         self.matchoutput(out, "Metacluster: utmc1", command)
         self.matchoutput(out, "Building: ut", command)
         self.matchoutput(out, "Max members: 97", command)
-        self.matchoutput(out, "vm_to_host_ratio: 5:1", command)
         self.matchoutput(out, "Down Hosts Threshold: 0", command)
         self.matchoutput(out, "Capacity limits: memory: 16384 [override]",
                          command)
@@ -213,24 +209,6 @@ class TestUpdateESXCluster(TestBrokerCommand):
                          "the requested limit of 0.",
                          command)
 
-    def test_400_failupdateratio(self):
-        command = ["update_esx_cluster", "--cluster=utecl1",
-                   "--vm_to_host_ratio=0"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out, "violates ratio", command)
-
-    def test_400_failupdateillegalratio(self):
-        command = ["update_esx_cluster", "--cluster=utecl1",
-                   "--vm_to_host_ratio=not-a:number"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out, "Expected a ratio like", command)
-
-    def test_410_failupdaterealratio(self):
-        command = ["update_esx_cluster", "--cluster=utecl1",
-                   "--vm_to_host_ratio=2:1000"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out, "violates ratio", command)
-
     def test_420_failupdatedht(self):
         command = ["update_esx_cluster", "--cluster=utecl1",
                    "--down_hosts_threshold=4"]
@@ -240,15 +218,12 @@ class TestUpdateESXCluster(TestBrokerCommand):
     def test_450_verifyutecl1(self):
         default_max = self.config.get("archetype_esx_cluster",
                                       "max_members_default")
-        default_ratio = self.config.get("archetype_esx_cluster",
-                                        "vm_to_host_ratio")
         command = "show esx_cluster --cluster utecl1"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "ESX Cluster: utecl1", command)
         self.matchoutput(out, "Metacluster: utmc1", command)
         self.matchoutput(out, "Rack: ut10", command)
         self.matchoutput(out, "Max members: %s" % default_max, command)
-        self.matchoutput(out, "vm_to_host_ratio: %s" % default_ratio, command)
         self.matchoutput(out, "Personality: vulcan-1g-desktop-prod Archetype: esx_cluster",
                          command)
         self.matchoutput(out, "Switch: ut01ga1s04.aqd-unittest.ms.com",

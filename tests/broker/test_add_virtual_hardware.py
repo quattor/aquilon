@@ -243,12 +243,6 @@ class TestAddVirtualHardware(TestBrokerCommand):
         out = self.badrequesttest(command)
         self.matchoutput(out, "cannot support VMs", command)
 
-    def test_310_failrebindmachine(self):
-        command = ["update_machine", "--machine", "evm1",
-                   "--cluster", "utecl2"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out, "violates ratio", command)
-
     def test_500_verifyaddmachines(self):
         # Skipping evm9 since the mac is out of sequence and different cluster
         for i in range(1, 9):
@@ -309,8 +303,6 @@ class TestAddVirtualHardware(TestBrokerCommand):
         self.matchoutput(out, "structure template clusterdata/utecl1;", command)
         self.matchoutput(out, '"system/cluster/name" = "utecl1";', command)
         self.matchoutput(out, '"system/metacluster/name" = "utmc1";', command)
-        self.searchoutput(out, '"system/cluster/ratio" = list\(\s*16,\s*1\s*\);',
-                          command)
         self.matchoutput(out, '"system/cluster/max_hosts" = 8;', command)
         self.matchoutput(out, '"system/cluster/down_hosts_threshold" = 2;',
                          command)
@@ -351,9 +343,6 @@ class TestAddVirtualHardware(TestBrokerCommand):
         self.matchoutput(out, "Building: ut", command)
         self.matchoutput(out, "Max members: 8", command)
         self.matchoutput(out, "Down Hosts Threshold: 2", command)
-        self.matchoutput(out, "Max vm_to_host_ratio: 16:1", command)
-        self.matchoutput(out, "Max virtual machine count: 16", command)
-        self.matchoutput(out, "Current vm_to_host_ratio: 8:3", command)
         self.matchoutput(out, "Virtual Machine count: 8", command)
         self.matchoutput(out, "ESX VMHost count: 3", command)
         self.matchoutput(out, "Personality: vulcan-1g-desktop-prod Archetype: esx_cluster",

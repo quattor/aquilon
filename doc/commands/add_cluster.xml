@@ -211,8 +211,7 @@
 		</term>
 		<listitem>
 		    <para>
-			Maximum allowed ratio of virtual machines to cluster members. This option can
-			only be specified for ESX clusters.
+			This option is retained for backwards compatibility, but it has no effect.
 		    </para>
 		</listitem>
 	    </varlistentry>
@@ -278,7 +277,7 @@ aq add cluster --cluster nygrid1 \
 aq add cluster --cluster nyesx1 \
     --campus ny \
     --archetype esx_cluster --personality vsphere4.1 --domain prod \
-    --down_hosts 2 --max_members 16 --vm_to_host_ratio 16:1
+    --down_hosts 2 --max_members 16
 	    </programlisting>
 	</example>
     </refsect1>

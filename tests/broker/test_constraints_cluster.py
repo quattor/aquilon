@@ -33,6 +33,15 @@ class TestClusterConstraints(TestBrokerCommand):
         self.matchoutput(out, "ESX Cluster utecl1 is still in use by virtual "
                          "machines", command)
 
+    def testdelclusteredhost(self):
+        command = ["del_host", "--hostname", "evh51.aqd-unittest.ms.com"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Host evh51.aqd-unittest.ms.com is still a member of "
+                         "ESX cluster utecl5, and cannot be deleted.  Please "
+                         "remove it from the cluster first.",
+                         command)
+
     def testverifydelclusterwithmachines(self):
         command = ["show_esx_cluster", "--cluster=utecl1"]
         out = self.commandtest(command)
@@ -61,13 +70,6 @@ class TestClusterConstraints(TestBrokerCommand):
         self.matchoutput(out,
                          "ESX Cluster npecl12 is over capacity regarding memory",
                          command)
-
-    # FIXME: Add a test for unbinding a vmhost from a cluster where
-    # the vm_to_host_ratio would be exceeded.
-
-    # FIXME: Add a test for deleting a vmhost where the vm_to_host_ratio
-    # for the cluster would be exceeded.
-
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestClusterConstraints)

@@ -703,7 +703,15 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
 
             self.noouttest(["del", "machine", "--machine", machine])
 
-    def test_720_del10gigrackhosts(self):
+    def test_720_uncluster(self):
+        for i in range(0, 2):
+            host = "utpgh%s.aqd-unittest.ms.com" % i
+            cluster = "utpgcl%d" % i
+            self.noouttest(["uncluster", "--hostname", host,
+                            "--cluster", cluster,
+                            "--personality", "esx_standalone"])
+
+    def test_725_del10gigrackhosts(self):
         for i in range(0, 2):
             basetime = datetime.now()
             ip = self.net["autopg2"].usable[i]

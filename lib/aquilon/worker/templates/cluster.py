@@ -119,8 +119,6 @@ class PlenaryClusterData(StructurePlenary):
         if self.dbobj.metacluster:
             pan_assign(lines, "system/metacluster/name",
                        self.dbobj.metacluster.name)
-        pan_assign(lines, "system/cluster/ratio", [self.dbobj.vm_count,
-                                                   self.dbobj.host_count])
         # FIXME: This should move to the generic part because max_hosts makes
         # sense for non-ESX clusters as well, but the current schema does not
         # allow that

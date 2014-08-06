@@ -21,7 +21,6 @@ from aquilon.utils import validate_nlist_key
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
 from aquilon.worker.dbwrappers.location import get_location
-from aquilon.utils import force_ratio
 from aquilon.aqdb.model import (Personality, ClusterLifecycle, MetaCluster,
                                 NetworkDevice, Cluster)
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
@@ -35,7 +34,9 @@ class CommandAddCluster(BrokerCommand):
                sandbox, max_members, down_hosts_threshold, maint_threshold,
                buildstatus, comments, vm_to_host_ratio, switch, metacluster,
                **arguments):
-
+        if vm_to_host_ratio:
+            self.deprecated_option("vm_to_host_ratio", "It has no effect.",
+                                   logger=logger, **arguments)
         validate_nlist_key("cluster", cluster)
         dbpersonality = Personality.get_unique(session, name=personality,
                                                archetype=archetype, compel=True)
@@ -86,18 +87,6 @@ class CommandAddCluster(BrokerCommand):
               'down_hosts_percent': down_hosts_pct,
               'status': dbstatus,
               'comments': comments}
-
-        if ctype == 'esx':
-            if vm_to_host_ratio is None:
-                if self.config.has_option(section, "vm_to_host_ratio"):
-                    vm_to_host_ratio = self.config.get(section,
-                                                       "vm_to_host_ratio")
-                else:
-                    vm_to_host_ratio = "1:1"
-            (vm_count, host_count) = force_ratio("vm_to_host_ratio",
-                                                 vm_to_host_ratio)
-            kw["vm_count"] = vm_count
-            kw["host_count"] = host_count
 
         if switch and hasattr(clus_type, 'network_device'):
             kw['network_device'] = NetworkDevice.get_unique(session,
