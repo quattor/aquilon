@@ -129,8 +129,8 @@ class Interface(DeviceLinkMixin, Base):
     __table_args__ = (UniqueConstraint(mac, name='%s_mac_addr_uk' % _ABV),
                       UniqueConstraint(hardware_entity_id, name,
                                        name='%s_hw_name_uk' % _ABV),
-                      CheckConstraint(or_(port_group_name == None,
-                                          port_group_id == None),
+                      CheckConstraint(or_(port_group_id == None,
+                                          port_group_name == None),
                                       name='%s_pg_ck' % _ABV),
                       Index('%s_model_idx' % _ABV, model_id),
                       Index('%s_master_idx' % _ABV, master_id))

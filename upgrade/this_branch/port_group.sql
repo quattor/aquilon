@@ -38,6 +38,8 @@ ALTER TABLE observed_vlan DROP COLUMN creation_date;
 ALTER TABLE observed_vlan ADD CONSTRAINT observed_vlan_pk PRIMARY KEY (network_device_id, port_group_id);
 ALTER TABLE observed_vlan ADD CONSTRAINT obs_vlan_pg_fk FOREIGN KEY (port_group_id) REFERENCES port_group (id) ON DELETE CASCADE;
 
+CREATE INDEX observed_vlan_pg_idx ON observed_vlan (port_group_id);
+
 ALTER TABLE interface RENAME COLUMN port_group TO port_group_name;
 
 ALTER TABLE interface ADD port_group_id INTEGER;
