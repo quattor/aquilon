@@ -28,6 +28,7 @@ import os
 import re
 import signal
 from cStringIO import StringIO
+from itertools import islice
 from tempfile import mkstemp
 
 from ipaddr import IPv4Address, AddressValueError
@@ -200,6 +201,18 @@ def first_of(iterable, function):
         if function(item):
             return item
     return None
+
+
+def chunk(iterable, size):
+    """
+    Return tuples of at most the given size from the iterable.
+    """
+    iterator = iter(iterable)
+    while True:
+        next_chunk = tuple(islice(iterator, size))
+        if not next_chunk:
+            return
+        yield next_chunk
 
 
 def remove_dir(dir, logger=LOGGER):
