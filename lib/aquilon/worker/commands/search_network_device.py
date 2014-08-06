@@ -39,7 +39,7 @@ class CommandSearchNetworkDevice(BrokerCommand):
             q = q.filter_by(id=dbnetdev.id)
 
         if vlan:
-            q = q.join("observed_vlans", "vlan").filter_by(vlan_id=vlan)
+            q = q.join("observed_vlans").filter_by(network_tag=vlan)
             q = q.reset_joinpoint()
 
         # Prefer the primary name for ordering

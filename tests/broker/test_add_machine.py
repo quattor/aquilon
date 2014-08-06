@@ -419,23 +419,6 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
         self.noouttest(["add", "machine", "--machine", "utnorack",
                         "--desk", "utdesk1", "--model", "poweredge_6650"])
 
-    def testadd10gigracks(self):
-        for port in range(1, 13):
-            for (template, rack, offset) in [('ut11s01p%d', "ut11", 0),
-                                             ('ut12s02p%d', "ut12", 12)]:
-                machine = template % port
-                # Both counts would start at 0 except the tor_net has two
-                # switches taking IPs.
-                i = port + 1 + offset
-                j = port - 1 + offset
-                eth0_mac = self.net["vmotion_net"].usable[i].mac
-                eth1_mac = self.net["vm_storage_net"].usable[j].mac
-                self.create_machine_verari(machine, rack=rack,
-                                           interfaces=["eth0", "eth1"],
-                                           eth0_mac=eth0_mac,
-                                           eth1_mac=eth1_mac,
-                                           eth1_pg="storage-v701")
-
     def testaddharacks(self):
         # Machines for metacluster high availability testing
         for port in range(1, 25):

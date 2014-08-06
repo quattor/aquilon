@@ -17,8 +17,6 @@
 # limitations under the License.
 """Module for testing the del network device command."""
 
-import os
-
 if __name__ == "__main__":
     import utils
     utils.import_depends()
@@ -35,8 +33,8 @@ class TestDelNetworkDevice(TestBrokerCommand):
         command = "del network_device --network_device ut3gd1r01.aqd-unittest.ms.com"
         self.successtest(command.split(" "))
         self.dsdb_verify()
-        self.check_plenary_nonexistant('network_device', 'americas', 'ut', 'ut3gd1r01')
-        self.check_plenary_nonexistant('hostdata', 'ut3gd1r01.aqd-unittest.ms.com')
+        self.check_plenary_gone('network_device', 'americas', 'ut', 'ut3gd1r01')
+        self.check_plenary_gone('hostdata', 'ut3gd1r01.aqd-unittest.ms.com')
 
     def test_101_verify_ut3gd1r01(self):
         # Deprecated usage.
@@ -48,8 +46,8 @@ class TestDelNetworkDevice(TestBrokerCommand):
         command = "del network_device --network_device ut3gd1r04.aqd-unittest.ms.com"
         self.successtest(command.split(" "))
         self.dsdb_verify()
-        self.check_plenary_nonexistant('network_device', 'americas', 'ut', 'ut3gd1r04')
-        self.check_plenary_nonexistant('hostdata', 'ut3gd1r04.aqd-unittest.ms.com')
+        self.check_plenary_gone('network_device', 'americas', 'ut', 'ut3gd1r04')
+        self.check_plenary_gone('hostdata', 'ut3gd1r04.aqd-unittest.ms.com')
 
     def test_110_del_ut3gd1r05(self):
         ip = self.net["ut_net_mgmt"].usable[0]
@@ -57,16 +55,16 @@ class TestDelNetworkDevice(TestBrokerCommand):
         command = "del network_device --network_device ut3gd1r05.aqd-unittest.ms.com"
         self.successtest(command.split(" "))
         self.dsdb_verify()
-        self.check_plenary_nonexistant('network_device', 'americas', 'ut', 'ut3gd1r05')
-        self.check_plenary_nonexistant('hostdata', 'ut3gd1r05.aqd-unittest.ms.com')
+        self.check_plenary_gone('network_device', 'americas', 'ut', 'ut3gd1r05')
+        self.check_plenary_gone('hostdata', 'ut3gd1r05.aqd-unittest.ms.com')
 
     def test_115_del_ut3gd1r06(self):
         self.dsdb_expect_delete(self.net["ut_net_mgmt"].usable[4])
         command = "del network_device --network_device ut3gd1r06.aqd-unittest.ms.com"
         self.successtest(command.split(" "))
         self.dsdb_verify()
-        self.check_plenary_nonexistant('network_device', 'americas', 'ut', 'ut3gd1r06')
-        self.check_plenary_nonexistant('hostdata', 'ut3gd1r06.aqd-unittest.ms.com')
+        self.check_plenary_gone('network_device', 'americas', 'ut', 'ut3gd1r06')
+        self.check_plenary_gone('hostdata', 'ut3gd1r06.aqd-unittest.ms.com')
 
     def test_120_del_ut3gd1r07(self):
         ip = self.net["ut_net_mgmt"].usable[2]
@@ -74,8 +72,8 @@ class TestDelNetworkDevice(TestBrokerCommand):
         command = "del network_device --network_device ut3gd1r07.aqd-unittest.ms.com"
         self.successtest(command.split(" "))
         self.dsdb_verify()
-        self.check_plenary_nonexistant('network_device', 'americas', 'ut', 'ut3gd1r07')
-        self.check_plenary_nonexistant('hostdata', 'ut3gd1r07.aqd-unittest.ms.com')
+        self.check_plenary_gone('network_device', 'americas', 'ut', 'ut3gd1r07')
+        self.check_plenary_gone('hostdata', 'ut3gd1r07.aqd-unittest.ms.com')
 
     def test_125_del_switch_in_building(self):
         ip = self.net["ut_net_mgmt"].usable[3]
@@ -83,18 +81,18 @@ class TestDelNetworkDevice(TestBrokerCommand):
         command = "del network_device --network_device switchinbuilding.aqd-unittest.ms.com"
         self.successtest(command.split(" "))
         self.dsdb_verify()
-        self.check_plenary_nonexistant('network_device', 'americas', 'ut',
-                                       'switchinbuilding')
-        self.check_plenary_nonexistant('hostdata',
-                                       'switchinbuilding.aqd-unittest.ms.com')
+        self.check_plenary_gone('network_device', 'americas', 'ut',
+                                'switchinbuilding')
+        self.check_plenary_gone('hostdata',
+                                'switchinbuilding.aqd-unittest.ms.com')
 
     def test_130_del_np06bals03(self):
         self.dsdb_expect_delete("172.31.64.69")
         command = "del network_device --network_device np06bals03.ms.com"
         self.noouttest(command.split(" "))
         self.dsdb_verify()
-        self.check_plenary_nonexistant('network_device', 'americas', 'ut', 'np06bals03')
-        self.check_plenary_nonexistant('hostdata', 'np06bals03.ms.com')
+        self.check_plenary_gone('network_device', 'americas', 'ut', 'np06bals03')
+        self.check_plenary_gone('hostdata', 'np06bals03.ms.com')
 
     def test_131_verify_np06bals03(self):
         command = "show network_device --network_device np06bals03.ms.com"
@@ -105,8 +103,8 @@ class TestDelNetworkDevice(TestBrokerCommand):
         command = "del network_device --network_device np06fals01.ms.com"
         self.noouttest(command.split(" "))
         self.dsdb_verify()
-        self.check_plenary_nonexistant('network_device', 'americas', 'ut', 'np06fals01')
-        self.check_plenary_nonexistant('hostdata', 'np06fals01.ms.com')
+        self.check_plenary_gone('network_device', 'americas', 'ut', 'np06fals01')
+        self.check_plenary_gone('hostdata', 'np06fals01.ms.com')
 
     def test_136_verify_np06fals01(self):
         command = "show network_device --network_device np06fals01.ms.com"
@@ -117,8 +115,8 @@ class TestDelNetworkDevice(TestBrokerCommand):
         command = "del network_device --network_device ut01ga1s02.aqd-unittest.ms.com"
         self.noouttest(command.split(" "))
         self.dsdb_verify()
-        self.check_plenary_nonexistant('network_device', 'americas', 'ut', 'ut01ga1s02')
-        self.check_plenary_nonexistant('hostdata', 'ut01ga1s02.aqd-unittest.ms.com')
+        self.check_plenary_gone('network_device', 'americas', 'ut', 'ut01ga1s02')
+        self.check_plenary_gone('hostdata', 'ut01ga1s02.aqd-unittest.ms.com')
 
     def test_141_verify_ut01ga1s02(self):
         command = "show network_device --network_device ut01ga1s02.aqd-unittest.ms.com"
@@ -129,8 +127,8 @@ class TestDelNetworkDevice(TestBrokerCommand):
         command = "del network_device --network_device ut01ga1s03.aqd-unittest.ms.com"
         self.noouttest(command.split(" "))
         self.dsdb_verify()
-        self.check_plenary_nonexistant('network_device', 'americas', 'ut', 'ut01ga1s03')
-        self.check_plenary_nonexistant('hostdata', 'ut01ga1s03.aqd-unittest.ms.com')
+        self.check_plenary_gone('network_device', 'americas', 'ut', 'ut01ga1s03')
+        self.check_plenary_gone('hostdata', 'ut01ga1s03.aqd-unittest.ms.com')
 
     def test_151_verify_ut01ga1s03(self):
         command = "show network_device --network_device ut01ga1s03.aqd-unittest.ms.com"
@@ -141,8 +139,8 @@ class TestDelNetworkDevice(TestBrokerCommand):
         command = "del network_device --network_device ut01ga1s04.aqd-unittest.ms.com"
         self.noouttest(command.split(" "))
         self.dsdb_verify()
-        self.check_plenary_nonexistant('network_device', 'americas', 'ut', 'ut01ga1s04')
-        self.check_plenary_nonexistant('hostdata', 'ut01ga1s04.aqd-unittest.ms.com')
+        self.check_plenary_gone('network_device', 'americas', 'ut', 'ut01ga1s04')
+        self.check_plenary_gone('hostdata', 'ut01ga1s04.aqd-unittest.ms.com')
 
     def test_156_verify_ut01ga1s04(self):
         command = "show network_device --network_device ut01ga1s04.aqd-unittest.ms.com"
@@ -153,16 +151,16 @@ class TestDelNetworkDevice(TestBrokerCommand):
         command = "del network_device --network_device ut01ga2s01.aqd-unittest.ms.com"
         self.noouttest(command.split(" "))
         self.dsdb_verify()
-        self.check_plenary_nonexistant('network_device', 'americas', 'ut', 'ut01ga2s01')
-        self.check_plenary_nonexistant('hostdata', 'ut01ga2s01.aqd-unittest.ms.com')
+        self.check_plenary_gone('network_device', 'americas', 'ut', 'ut01ga2s01')
+        self.check_plenary_gone('hostdata', 'ut01ga2s01.aqd-unittest.ms.com')
 
     def test_161_del_ut01ga2s02(self):
         self.dsdb_expect_delete(self.net["vmotion_net"].usable[1])
         command = "del network_device --network_device ut01ga2s02.aqd-unittest.ms.com"
         self.noouttest(command.split(" "))
         self.dsdb_verify()
-        self.check_plenary_nonexistant('network_device', 'americas', 'ut', 'ut01ga2s02')
-        self.check_plenary_nonexistant('hostdata', 'ut01ga2s02.aqd-unittest.ms.com')
+        self.check_plenary_gone('network_device', 'americas', 'ut', 'ut01ga2s02')
+        self.check_plenary_gone('hostdata', 'ut01ga2s02.aqd-unittest.ms.com')
 
     def test_162_del_ut01ga2s03(self):
         self.dsdb_expect_delete(self.net["ut_net_mgmt"].usable[5])
@@ -181,39 +179,33 @@ class TestDelNetworkDevice(TestBrokerCommand):
         command = "del network_device --network_device ut01ga2s05.aqd-unittest.ms.com"
         self.noouttest(command.split(" "))
         self.dsdb_verify()
-        self.check_plenary_nonexistant('network_device', 'americas', 'ut', 'ut01ga2s05')
-        self.check_plenary_nonexistant('hostdata', 'ut01ga2s05.aqd-unittest.ms.com')
+        self.check_plenary_gone('network_device', 'americas', 'ut', 'ut01ga2s05')
+        self.check_plenary_gone('hostdata', 'ut01ga2s05.aqd-unittest.ms.com')
 
     def test_175_del_np01ga2s05(self):
         self.dsdb_expect_delete(self.net["esx_bcp_np"].usable[0])
         command = "del network_device --network_device np01ga2s05.one-nyp.ms.com"
         self.noouttest(command.split(" "))
         self.dsdb_verify()
-        self.check_plenary_nonexistant('network_device', 'americas', 'ut', 'np01ga2s05')
-        self.check_plenary_nonexistant('hostdata', 'np01ga2s05.one-nyp.ms.com')
+        self.check_plenary_gone('network_device', 'americas', 'ut', 'np01ga2s05')
+        self.check_plenary_gone('hostdata', 'np01ga2s05.one-nyp.ms.com')
 
     def test_180_del_utpgsw0(self):
         ip = self.net["ut_net_mgmt"].usable[7]
         self.dsdb_expect_delete(ip)
-        plenary = self.plenary_name("switchdata", "utpgsw0.aqd-unittest.ms.com")
-        self.failUnless(os.path.exists(plenary),
-                        "Plenary file '%s' does not exist" % plenary)
+        self.check_plenary_exists("switchdata", "utpgsw0.aqd-unittest.ms.com")
         self.noouttest(["del_network_device", "--network_device",
                         "utpgsw0.aqd-unittest.ms.com"])
-        self.failIf(os.path.exists(plenary),
-                    "Plenary file '%s' still exists" % plenary)
+        self.check_plenary_gone("switchdata", "utpgsw0.aqd-unittest.ms.com")
         self.dsdb_verify()
 
     def test_181_del_utpgsw1(self):
         ip = self.net["ut_net_mgmt"].usable[8]
         self.dsdb_expect_delete(ip)
-        plenary = self.plenary_name("switchdata", "utpgsw1.aqd-unittest.ms.com")
-        self.failUnless(os.path.exists(plenary),
-                        "Plenary file '%s' does not exist" % plenary)
+        self.check_plenary_exists("switchdata", "utpgsw1.aqd-unittest.ms.com")
         self.noouttest(["del_network_device", "--network_device",
                         "utpgsw1.aqd-unittest.ms.com"])
-        self.failIf(os.path.exists(plenary),
-                    "Plenary file '%s' still exists" % plenary)
+        self.check_plenary_gone("switchdata", "utpgsw1.aqd-unittest.ms.com")
         self.dsdb_verify()
 
 if __name__ == '__main__':

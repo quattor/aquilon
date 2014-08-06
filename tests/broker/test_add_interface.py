@@ -558,24 +558,6 @@ class TestAddInterface(TestBrokerCommand):
                           r"Interface: eth1 \(no MAC addr\)$",
                           command)
 
-    def testverifycatpg(self):
-        command = "cat --machine ut11s01p1"
-        out = self.commandtest(command.split(" "))
-        self.searchoutput(out,
-                          r'"cards/nic/eth0" = '
-                          r'create\("hardware/nic/generic/generic_nic",\s*'
-                          r'"boot", true,\s*'
-                          r'"hwaddr", "%s"\s*\);'
-                          % self.net["vmotion_net"].usable[2].mac,
-                          command)
-        self.searchoutput(out,
-                          r'"cards/nic/eth1" = '
-                          r'create\("hardware/nic/generic/generic_nic",\s*'
-                          r'"hwaddr", "%s",\s*'
-                          r'"port_group", "storage-v701"\s*\);'
-                          % self.net["vm_storage_net"].usable[0].mac,
-                          command)
-
     # FIXME: Missing a test for a failed DSDB add_host.
     # FIXME: Missing tests around Dell rename hack.
 

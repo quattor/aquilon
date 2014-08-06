@@ -21,8 +21,8 @@ from sqlalchemy.orm import undefer
 
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import (Network, Machine, VlanInfo, ObservedVlan,
-                                Cluster, ARecord, DynamicStub,
+from aquilon.aqdb.model import (Network, Machine, VlanInfo, PortGroup, Cluster,
+                                NetworkDevice, ARecord, DynamicStub,
                                 NetworkEnvironment)
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.worker.dbwrappers.location import get_location
@@ -61,28 +61,19 @@ class CommandSearchNetwork(BrokerCommand):
             q = q.filter_by(side=side)
         if machine:
             dbmachine = Machine.get_unique(session, machine, compel=True)
-            vlans = []
-            if dbmachine.cluster and dbmachine.cluster.network_device:
-                # If this is a VM on a cluster, consult the VLANs.  There
-                # could be functionality here for real hardware to consult
-                # interface port groups... there's no real use case yet.
-                vlans = [VlanInfo.get_by_pg(session, i.port_group).vlan_id
-                         for i in dbmachine.interfaces if i.port_group]
-                if vlans:
-                    q = q.join('observed_vlans')
-                    q = q.filter_by(network_device=dbmachine.cluster.network_device)
-                    q = q.filter(ObservedVlan.vlan_id.in_(vlans))
-                    q = q.reset_joinpoint()
-            if not vlans:
-                networks = [addr.network.id for addr in
-                            dbmachine.all_addresses()]
-                if not networks:
-                    msg = "Machine %s has no interfaces " % dbmachine.label
-                    if dbmachine.cluster:
-                        msg += "with a portgroup or "
-                    msg += "assigned to a network."
-                    raise ArgumentError(msg)
-                q = q.filter(Network.id.in_(networks))
+            # If this is a VM, consult the port groups.  There
+            # could be functionality here for real hardware to consult
+            # interface port groups... there's no real use case yet.
+            networks = set(iface.port_group.network_id
+                           for iface in dbmachine.interfaces
+                           if iface.port_group)
+            networks.update(addr.network.id for addr in
+                            dbmachine.all_addresses())
+            if not networks:
+                raise ArgumentError("{0} has no interfaces with a port group "
+                                    "or assigned to a network."
+                                    .format(dbmachine))
+            q = q.filter(Network.id.in_(networks))
         if fqdn:
             (short, dbdns_domain) = parse_fqdn(session, fqdn)
             dnsq = session.query(ARecord.ip)
@@ -95,8 +86,10 @@ class CommandSearchNetwork(BrokerCommand):
         if cluster:
             dbcluster = Cluster.get_unique(session, cluster, compel=True)
             if dbcluster.network_device:
-                q = q.join('observed_vlans')
-                q = q.filter_by(network_device=dbcluster.network_device)
+                q = q.join(PortGroup,
+                           (NetworkDevice, PortGroup.network_devices),
+                           aliased=True)
+                q = q.filter_by(id=dbcluster.network_device_id)
                 q = q.reset_joinpoint()
             else:
                 net_ids = [h.hardware_entity.primary_name.network.id for h in
@@ -104,9 +97,9 @@ class CommandSearchNetwork(BrokerCommand):
                                                       "network")]
                 q = q.filter(Network.id.in_(net_ids))
         if pg:
-            vlan = VlanInfo.get_by_pg(session, pg, compel=ArgumentError).vlan_id
-            q = q.join('observed_vlans')
-            q = q.filter_by(vlan_id=vlan)
+            dbvi = VlanInfo.get_by_pg(session, pg, compel=ArgumentError)
+            q = q.join(PortGroup, aliased=True)
+            q = q.filter_by(network_tag=dbvi.vlan_id, usage=dbvi.vlan_type)
             q = q.reset_joinpoint()
         dblocation = get_location(session, **arguments)
         if dblocation:

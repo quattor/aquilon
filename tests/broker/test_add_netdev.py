@@ -345,9 +345,8 @@ class TestAddNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
         self.matchoutput(out,
                          "IP address %s is already in use" % ip,
                          command)
-        self.check_plenary_nonexistant('network_device', 'americas', 'ut',
-                                       'ipinuse')
-        self.check_plenary_nonexistant('hostdata', 'ipinuse.aqd-unittest.ms.com')
+        self.check_plenary_gone('network_device', 'americas', 'ut', 'ipinuse')
+        self.check_plenary_gone('hostdata', 'ipinuse.aqd-unittest.ms.com')
 
     def test_200_reject_bad_label_implicit(self):
         ip = self.net["ut_net_mgmt"].usable[-1]
@@ -358,8 +357,8 @@ class TestAddNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
         out = self.badrequesttest(command)
         self.matchoutput(out, "Could not deduce a valid hardware label",
                          command)
-        self.check_plenary_nonexistant('network_device', 'americas', 'ut', 'not-alnum')
-        self.check_plenary_nonexistant('hostdata', 'not-alnum.aqd-unittest.ms.com')
+        self.check_plenary_gone('network_device', 'americas', 'ut', 'not-alnum')
+        self.check_plenary_gone('hostdata', 'not-alnum.aqd-unittest.ms.com')
 
     def test_200_reject_bad_label_explicit(self):
         ip = self.net["ut_net_mgmt"].usable[-1]
@@ -370,8 +369,8 @@ class TestAddNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
         out = self.badrequesttest(command)
         self.matchoutput(out, "Illegal hardware label format 'not-alnum'.",
                          command)
-        self.check_plenary_nonexistant('network_device', 'americas', 'ut', 'not-alnum')
-        self.check_plenary_nonexistant('hostdata', 'notalnum.aqd-unittest.ms.com')
+        self.check_plenary_gone('network_device', 'americas', 'ut', 'not-alnum')
+        self.check_plenary_gone('hostdata', 'notalnum.aqd-unittest.ms.com')
 
     # Testing that add network device does not allow a blade....
     def test_200_reject_bad_model(self):
@@ -383,10 +382,8 @@ class TestAddNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
         out = self.badrequesttest(command)
         self.matchoutput(out, "This command can only be used "
                          "to add network devices.", command)
-        self.check_plenary_nonexistant('network_device', 'americas', 'ut',
-                                       'badmodel')
-        self.check_plenary_nonexistant('hostdata',
-                                       'badmodel.aqd-unittest.ms.com')
+        self.check_plenary_gone('network_device', 'americas', 'ut', 'badmodel')
+        self.check_plenary_gone('hostdata', 'badmodel.aqd-unittest.ms.com')
 
     def test_205_verify_reject_bad_model(self):
         command = "show network_device --network_device badmodel.aqd-unittest.ms.com"

@@ -17,8 +17,6 @@
 # limitations under the License.
 """Module for testing the add resourcegroup command."""
 
-import os.path
-
 if __name__ == "__main__":
     import utils
     utils.import_depends()
@@ -180,33 +178,21 @@ class TestAddResourceGroup(TestBrokerCommand):
 
         rg_path = rg_base[:]
         rg_path.append("config")
-        rg_plenary = self.plenary_name(*rg_path)
 
         fs_path = rg_base[:]
         fs_path.extend(["filesystem", "fs1", "config"])
-        fs_plenary = self.plenary_name(*fs_path)
 
         # Verify that we got the paths right
-        self.failUnless(os.path.exists(fs_plenary),
-                        "Plenary '%s' does not exist" % fs_plenary)
-        self.failUnless(os.path.exists(rg_plenary),
-                        "Plenary '%s' does not exist" % rg_plenary)
+        self.check_plenary_exists(*fs_path)
+        self.check_plenary_exists(*rg_path)
 
         command = ["del_resourcegroup", "--resourcegroup=utvcs1as1",
                    "--cluster=utvcs1"]
         self.successtest(command)
 
-        # The resource plenaries should be gone
-        self.failIf(os.path.exists(fs_plenary),
-                    "Plenary '%s' still exists" % fs_plenary)
-        self.failIf(os.path.exists(rg_plenary),
-                    "Plenary '%s' still exists" % rg_plenary)
-
-        # The directory should be gone
-        rg_dir = os.path.dirname(rg_plenary)
-        self.failIf(os.path.exists(rg_dir),
-                    "Plenary directory '%s' still exists" % rg_dir)
-
+        # The resource plenaries should be gone, and the directory too
+        self.check_plenary_gone(*fs_path, directory_gone=True)
+        self.check_plenary_gone(*rg_path, directory_gone=True)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddResourceGroup)

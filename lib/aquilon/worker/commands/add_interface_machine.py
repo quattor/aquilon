@@ -27,8 +27,7 @@ from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.dns import delete_dns_record
 from aquilon.worker.dbwrappers.interface import (get_or_create_interface,
                                                  describe_interface,
-                                                 verify_port_group,
-                                                 choose_port_group,
+                                                 set_port_group,
                                                  assign_address)
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
 from aquilon.worker.processes import DSDBRunner
@@ -127,22 +126,23 @@ class CommandAddInterfaceMachine(BrokerCommand):
             # Ignore now that MAC address can be NULL
             pass
 
-        if pg is not None:
-            port_group = verify_port_group(dbmachine, pg)
-        elif autopg:
-            port_group = choose_port_group(logger, dbmachine)
-            audit_results.append(('pg', port_group))
-        else:
-            port_group = None
-
         dbinterface = get_or_create_interface(session, dbmachine,
                                               name=interface,
                                               vendor=vendor, model=model,
                                               interface_type=iftype, mac=mac,
                                               bootable=bootable,
-                                              port_group=port_group,
                                               bus_address=bus_address,
                                               comments=comments, preclude=True)
+
+        if pg or autopg:
+            if autopg:
+                pg = 'user'
+            set_port_group(session, logger, dbinterface, pg)
+        if autopg:
+            if dbinterface.port_group:
+                audit_results.append(('pg', dbinterface.port_group.name))
+            else:
+                audit_results.append(('pg', dbinterface.port_group_name))
 
         # So far, we're *only* creating a manager if we happen to be
         # removing a blind entry and we can steal its IP address.

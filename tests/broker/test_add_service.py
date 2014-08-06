@@ -17,8 +17,6 @@
 # limitations under the License.
 """Module for testing the add service command."""
 
-import os.path
-
 if __name__ == "__main__":
     import utils
     utils.import_depends()
@@ -71,30 +69,22 @@ class TestAddService(TestBrokerCommand):
 
         for service, instances in default_services.items():
             for pattern in service_plenaries:
-                plenary = self.plenary_name(pattern % service)
-                self.failIf(os.path.exists(plenary),
-                            "Plenary '%s' was not expected to exist." % plenary)
+                self.check_plenary_gone(pattern % service)
 
             self.noouttest(["add_service", "--service", service])
 
             for instance in instances:
                 for pattern in instance_plenaries:
-                    plenary = self.plenary_name(pattern % (service, instance))
-                    self.failIf(os.path.exists(plenary),
-                                "Plenary '%s' was not expected to exist." % plenary)
+                    self.check_plenary_gone(pattern % (service, instance))
 
                 self.noouttest(["add_service", "--service", service,
                                 "--instance", instance])
 
                 for pattern in instance_plenaries:
-                    plenary = self.plenary_name(pattern % (service, instance))
-                    self.failUnless(os.path.exists(plenary),
-                                    "Plenary '%s' does not exist." % plenary)
+                    self.check_plenary_exists(pattern % (service, instance))
 
             for pattern in service_plenaries:
-                plenary = self.plenary_name(pattern % service)
-                self.failUnless(os.path.exists(plenary),
-                                "Plenary '%s' does not exist." % plenary)
+                self.check_plenary_exists(pattern % service)
 
     def test_105_verify_defaults(self):
         for service, instances in default_services.items():

@@ -17,8 +17,6 @@
 # limitations under the License.
 """Module for testing the update network device command."""
 
-import os.path
-
 if __name__ == "__main__":
     import utils
     utils.import_depends()
@@ -49,9 +47,9 @@ class TestRenameNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
                    "--rename_to", "renametest"]
         self.noouttest(command)
 
-        self.check_plenary_nonexistant("switchdata", "ut3gd1r04.aqd-unittest.ms.com")
-        self.check_plenary_nonexistant('network_device', 'americas', 'ut', 'ut3gd1r04')
-        self.check_plenary_nonexistant('hostdata', 'ut3gd1r04.aqd-unittest.ms.com')
+        self.check_plenary_gone("switchdata", "ut3gd1r04.aqd-unittest.ms.com")
+        self.check_plenary_gone('network_device', 'americas', 'ut', 'ut3gd1r04')
+        self.check_plenary_gone('hostdata', 'ut3gd1r04.aqd-unittest.ms.com')
         self.check_plenary_exists("switchdata", "renametest.aqd-unittest.ms.com")
         self.check_plenary_exists('network_device', 'americas', 'ut', 'renametest')
         self.check_plenary_exists('hostdata', 'renametest.aqd-unittest.ms.com')

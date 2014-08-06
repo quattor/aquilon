@@ -134,10 +134,14 @@ class TestBrokerCommand(unittest.TestCase):
         self.failUnless(os.path.exists(plenary),
                         "Plenary '%s' does not exist." % plenary)
 
-    def check_plenary_nonexistant(self, *path):
+    def check_plenary_gone(self, *path, **kw):
         plenary = self.plenary_name(*path)
         self.failIf(os.path.exists(plenary),
                     "Plenary '%s' was not expected to exist." % plenary)
+        if kw.get("directory_gone", False):
+            dir = os.path.dirname(plenary)
+            self.failIf(os.path.exists(dir),
+                        "Plenary directory '%s' still exists" % dir)
 
     def check_plenary_contents(self, *path, **kwargs):
         # Passing lists as a keyword arg triggrest a type error

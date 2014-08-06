@@ -48,15 +48,16 @@ class PlenarySwitchData(StructurePlenary):
     def body(self, lines):
 
         vlans = {}
-        for ov in self.dbobj.observed_vlans:
+        for pg in self.dbobj.observed_vlans:
             vlan = {}
 
-            vlan["vlanid"] = pan(ov.vlan.vlan_id)
-            vlan["network_ip"] = ov.network.ip
-            vlan["netmask"] = ov.network.netmask
-            vlan["network_type"] = ov.network.network_type
-            vlan["network_environment"] = ov.network.network_environment.name
+            vlan["vlanid"] = pan(pg.network_tag)
+            net = pg.network
+            vlan["network_ip"] = net.ip
+            vlan["netmask"] = net.netmask
+            vlan["network_type"] = net.network_type
+            vlan["network_environment"] = net.network_environment.name
 
-            vlans[ov.vlan.port_group] = vlan
+            vlans[pg.name] = vlan
 
         lines.append('"system/network/vlans" = %s;' % pan(vlans))

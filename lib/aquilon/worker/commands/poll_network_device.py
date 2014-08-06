@@ -25,8 +25,8 @@ from aquilon.exceptions_ import (AquilonError, ArgumentError, InternalError,
                                  NotFoundException, ProcessException)
 from aquilon.utils import force_ipv4
 from aquilon.aqdb.types import MACAddress
-from aquilon.aqdb.model import (NetworkDevice, ObservedMac, ObservedVlan,
-                                Network, NetworkEnvironment, VlanInfo)
+from aquilon.aqdb.model import (NetworkDevice, ObservedMac, PortGroup, Network,
+                                NetworkEnvironment, VlanInfo)
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.dbwrappers.observed_mac import (
@@ -120,7 +120,7 @@ class CommandPollNetworkDevice(BrokerCommand):
         if not netdev.primary_ip:
             raise ArgumentError("Cannot poll VLAN info for {0:l} without "
                                 "a registered IP address.".format(netdev))
-        session.query(ObservedVlan).filter_by(network_device=netdev).delete()
+        del netdev.observed_vlans[:]
         session.flush()
 
         # Restrict operations to the internal network
@@ -177,19 +177,22 @@ class CommandPollNetworkDevice(BrokerCommand):
                                                                    dbnetwork))
                     continue
 
-                vlan_info = VlanInfo.get_unique(session, vlan_id=vlan_int,
-                                                compel=False)
-                if not vlan_info:
+                dbvi = VlanInfo.get_unique(session, vlan_id=vlan_int,
+                                           compel=False)
+                if not dbvi:
                     logger.client_info("{0}: VLAN {1} is not defined in AQDB. "
                                        "Please use add_vlan to add it."
                                        .format(netdev, vlan_int))
                     continue
 
-                if vlan_info.vlan_type == "unknown":
+                if dbvi.vlan_type == "unknown":
                     continue
 
-                dbvlan = ObservedVlan(vlan_id=vlan_int, network_device=netdev,
-                                      network=dbnetwork, creation_date=now)
-                session.add(dbvlan)
+                if not dbnetwork.port_group:
+                    dbnetwork.port_group = PortGroup(network_tag=vlan_int,
+                                                     usage=dbvi.vlan_type,
+                                                     creation_date=now)
+
+                netdev.observed_vlans.append(dbnetwork.port_group)
         except CSVError as e:
             raise AquilonError("Error parsing vlan2net results: %s" % e)
