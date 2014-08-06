@@ -19,7 +19,8 @@
 from collections import defaultdict
 from types import ListType
 
-from sqlalchemy.orm import joinedload, contains_eager, with_polymorphic
+from sqlalchemy.orm import (joinedload, contains_eager, with_polymorphic,
+                            undefer)
 from sqlalchemy.orm.attributes import set_committed_value
 
 from aquilon.exceptions_ import NotFoundException, ArgumentError
@@ -27,7 +28,8 @@ from aquilon.aqdb.column_types import AqStr
 from aquilon.aqdb.model import (HardwareEntity, DnsEnvironment, DnsDomain, Fqdn,
                                 DnsRecord, ARecord, ReservedName, Host,
                                 OperatingSystem, HostLifecycle, Personality,
-                                Domain, Machine, NetworkDevice)
+                                Domain, Machine, NetworkDevice, Disk,
+                                ChassisSlot, VirtualMachine)
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
 from aquilon.worker.dbwrappers.feature import (model_features,
@@ -165,7 +167,8 @@ def hostname_to_host(session, hostname):
     return dbmachine.host
 
 
-def hostlist_to_hosts(session, hostlist, query_options=None):
+def hostlist_to_hosts(session, hostlist, query_options=None,
+                      error=ArgumentError):
     dbdns_env = DnsEnvironment.get_unique_or_default(session)
 
     failed = []
@@ -250,12 +253,67 @@ def hostlist_to_hosts(session, hostlist, query_options=None):
     look_up_dns_records()
     dbhosts = look_up_hosts()
 
-    if failed:
-        raise ArgumentError("Invalid hosts in list:\n%s" %
-                            "\n".join(failed))
-    if not dbhosts:
-        raise ArgumentError("Empty list.")
+    if error:
+        if failed:
+            raise error("Invalid hosts in list:\n%s" % "\n".join(failed))
+        if not dbhosts:
+            raise error("Empty list.")
     return dbhosts
+
+
+def preload_machine_data(session, dbhosts):
+    hw_by_id = {}
+    for dbhost in dbhosts:
+        hw_by_id[dbhost.hardware_entity.id] = dbhost.hardware_entity
+
+    # Not all hosts are bound to machines, so load the machine-specific
+    # attributes separately
+    machines = [dbhost.hardware_entity.id for dbhost in dbhosts if
+                dbhost.hardware_entity.model.model_type.isMachineType()]
+    for machine_chunk in chunk(machines, 1000):
+        disks_by_hw = defaultdict(ListType)
+        q = session.query(Disk)
+        q = q.options(undefer('comments'))
+        q = q.filter(Disk.machine_id.in_(machine_chunk))
+        for dbdisk in q:
+            dbhw = hw_by_id[dbdisk.machine_id]
+            set_committed_value(dbdisk, "machine", dbhw)
+            disks_by_hw[dbdisk.machine_id].append(dbdisk)
+
+        for hw_id in machine_chunk:
+            dbhw = hw_by_id[hw_id]
+            if hw_id in disks_by_hw:
+                set_committed_value(dbhw, "disks", disks_by_hw[hw_id])
+            else:
+                set_committed_value(dbhw, "disks", [])
+
+        slots_by_hw = defaultdict(ListType)
+        q = session.query(ChassisSlot)
+        q = q.filter(ChassisSlot.machine_id.in_(machine_chunk))
+        for dbslot in q:
+            dbhw = hw_by_id[dbslot.machine_id]
+            set_committed_value(dbslot, "machine", dbhw)
+            slots_by_hw[dbslot.machine_id].append(dbslot)
+
+        for hw_id in machine_chunk:
+            dbhw = hw_by_id[hw_id]
+            if hw_id in slots_by_hw:
+                set_committed_value(dbhw, "chassis_slot", slots_by_hw[hw_id])
+            else:
+                set_committed_value(dbhw, "chassis_slot", [])
+
+        vms = set()
+        q = session.query(VirtualMachine)
+        q = q.filter(VirtualMachine.machine_id.in_(machine_chunk))
+        for vm in q:
+            dbhw = hw_by_id[vm.machine_id]
+            set_committed_value(vm, "machine", dbhw)
+            set_committed_value(dbhw, "vm_container", vm)
+            vms.add(vm.machine_id)
+
+        for hw_id in set(machine_chunk) - vms:
+            dbhw = hw_by_id[hw_id]
+            set_committed_value(dbhw, "vm_container", None)
 
 
 def get_host_bound_service(dbhost, dbservice):
