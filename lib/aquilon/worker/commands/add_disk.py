@@ -50,13 +50,6 @@ class CommandAddDisk(BrokerCommand):
                     raise ArgumentError("Machine %s already has a boot disk." %
                                         machine)
 
-        if wwn:
-            dbdisk = session.query(Disk).filter_by(wwn=wwn).first()
-            if dbdisk:
-                raise ArgumentError("WWN {0!s} is already in use by disk {1!s} "
-                                    "of {2:l}.".format(wwn, dbdisk,
-                                                       dbdisk.machine))
-
         if boot is None:
             # Backward compatibility: "sda"/"c0d0" is bootable, except if there
             # is already a boot disk

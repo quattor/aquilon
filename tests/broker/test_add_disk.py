@@ -63,16 +63,6 @@ class TestAddDisk(TestBrokerCommand):
         self.matchoutput(out, "Machine ut3c5n10 already has a boot disk.",
                          command)
 
-    def test_200_duplicate_wwn(self):
-        command = ["add", "disk", "--machine", "ut3c5n10", "--disk", "sdc",
-                   "--controller", "scsi", "--size", "34",
-                   "--wwn", "600508b112233445566778899aabbccd"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out,
-                         "WWN 600508b112233445566778899aabbccd is already "
-                         "in use by disk c0d0 of machine ut3c1n3.",
-                         command)
-
     def test_200_bad_address(self):
         command = ["add_disk", "--machine=ut3c5n10", "--disk=sdc",
                    "--controller=scsi", "--size=34",
