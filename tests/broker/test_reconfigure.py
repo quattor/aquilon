@@ -510,6 +510,12 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
 #       self.matchoutput(out, "1 hosts in domain changetest1", command)
 #       self.matchoutput(out, "1 hosts in domain unittest", command)
 
+    def testhostlistcamelcase(self):
+        hosts = ["Aquilon91.Aqd-Unittest.ms.com"]
+        scratchfile = self.writescratch("camelcase", "\n".join(hosts))
+        command = ["reconfigure", "--list", scratchfile]
+        self.successtest(command)
+
     def testhostlistnoosversion(self):
         hosts = ["aquilon91.aqd-unittest.ms.com"]
         scratchfile = self.writescratch("missingosversion", "\n".join(hosts))
@@ -558,12 +564,18 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
         out = self.badrequesttest(command)
         self.matchoutput(out, "The --hostlist option is deprecated.", command)
         self.matchoutput(out, "Invalid hosts in list:", command)
-        self.matchoutput(out, "host-does-not-exist.aqd-unittest.ms.com:",
+        self.matchoutput(out,
+                         "Host host-does-not-exist.aqd-unittest.ms.com not found.",
                          command)
         self.matchoutput(out,
-                         "another-host-does-not-exist.aqd-unittest.ms.com:",
+                         "Host another-host-does-not-exist.aqd-unittest.ms.com not found.",
                          command)
-        self.matchoutput(out, "host.domain-does-not-exist.ms.com:", command)
+        self.matchoutput(out,
+                         "Host host.domain-does-not-exist.ms.com not found.",
+                         command)
+        self.matchoutput(out,
+                         "DNS Domain domain-does-not-exist.ms.com not found.",
+                         command)
         self.matchclean(out, "aquilon91.aqd-unittest.ms.com:", command)
 
     def testfailoverlistlimit(self):

@@ -106,13 +106,23 @@ class TestManageList(TestBrokerCommand):
         self.matchoutput(out, "Empty list.", command)
 
     def test_106_fail_manage_invalid_list(self):
-        hosts = ["thishostdoesnotexist.aqd-unittest.ms.com"]
+        hosts = ["not-an-fqdn",
+                 "host-does-not-exist.ms.com",
+                 "host.domain-does-not-exist.ms.com"]
         scratchfile = self.writescratch("managelist", "\n".join(hosts))
         command = ["manage", "--list", scratchfile, "--sandbox",
                    "%s/changetest1" % self.user]
         out = self.badrequesttest(command)
+        self.matchoutput(out, "Invalid hosts in list:", command)
+        self.matchoutput(out, "not-an-fqdn: Not an FQDN.", command)
         self.matchoutput(out,
-                         "Invalid hosts in list:\n%s" % hosts[0].rstrip("\n"),
+                         "Host host-does-not-exist.ms.com not found.",
+                         command)
+        self.matchoutput(out,
+                         "Host host.domain-does-not-exist.ms.com not found.",
+                         command)
+        self.matchoutput(out,
+                         "DNS Domain domain-does-not-exist.ms.com not found.",
                          command)
 
     def test_107_fail_manage_list_domain(self):
