@@ -15,11 +15,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import MetaCluster, Cluster
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.templates import Plenary
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.templates import Plenary, PlenaryCollection
 
 
 class CommandRebindMetaCluster(BrokerCommand):
@@ -28,22 +27,35 @@ class CommandRebindMetaCluster(BrokerCommand):
 
     def render(self, session, logger, metacluster, cluster, **arguments):
         dbcluster = Cluster.get_unique(session, cluster, compel=True)
-        dbmetacluster = MetaCluster.get_unique(session, metacluster,
-                                               compel=True)
-        old_metacluster = None
-        if dbcluster.metacluster and dbcluster.metacluster != dbmetacluster:
+
+        if metacluster:
+            dbmetacluster = MetaCluster.get_unique(session, metacluster,
+                                                   compel=True)
+        else:
+            dbmetacluster = None
+
+        old_metacluster = dbcluster.metacluster
+        if old_metacluster != dbmetacluster:
             if dbcluster.virtual_machines:
                 raise ArgumentError("Cannot move cluster to a new metacluster "
                                     "while virtual machines are attached.")
-            old_metacluster = dbcluster.metacluster
-            old_metacluster.members.remove(dbcluster)
-            session.expire(dbcluster, ['_metacluster'])
-        if not dbcluster.metacluster:
-            dbmetacluster.members.append(dbcluster)
+
+        dbcluster.metacluster = dbmetacluster
+
+        if old_metacluster:
+            old_metacluster.validate()
+        if dbmetacluster:
+            dbmetacluster.validate()
 
         session.flush()
 
-        plenary = Plenary.get_plenary(dbcluster, logger=logger)
-        plenary.write()
+        plenaries = PlenaryCollection(logger=logger)
+        plenaries.append(Plenary.get_plenary(dbcluster))
+        if dbmetacluster:
+            plenaries.append(Plenary.get_plenary(dbmetacluster))
+        if old_metacluster:
+            plenaries.append(Plenary.get_plenary(old_metacluster))
+
+        plenaries.write()
 
         return

@@ -210,7 +210,7 @@ class CommandSearchHost(BrokerCommand):
         if cluster:
             dbcluster = Cluster.get_unique(session, cluster, compel=True)
             if isinstance(dbcluster, MetaCluster):
-                q = q.join('_cluster', 'cluster', '_metacluster')
+                q = q.join('_cluster', 'cluster')
                 q = q.filter_by(metacluster=dbcluster)
             else:
                 q = q.filter_by(cluster=dbcluster)

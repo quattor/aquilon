@@ -136,7 +136,6 @@ class CommandSearchCluster(BrokerCommand):
         if esx_metacluster:
             dbmetacluster = MetaCluster.get_unique(session, esx_metacluster,
                                                    compel=True)
-            q = q.join('_metacluster')
             q = q.filter_by(metacluster=dbmetacluster)
             q = q.reset_joinpoint()
         if esx_virtual_machine:

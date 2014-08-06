@@ -72,6 +72,7 @@ from aquilon.aqdb.model.personality import (__PersonalityRootUser,
 from aquilon.aqdb.model.cluster import (__ClusterServiceBinding,
                                         HostClusterMember,
                                         __ClusterAllowedPersonality)
+from aquilon.aqdb.model.metacluster import __MetaClusterMember
 
 from sqlalchemy import orm
 
@@ -128,7 +129,7 @@ model_group = {
         'classes' : [ Cluster, ClusterLifecycle, StorageCluster,
                       ComputeCluster, HostClusterMember,
                       __ClusterAllowedPersonality, MetaCluster,
-                      MetaClusterMember, EsxCluster, PersonalityClusterInfo,
+                      __MetaClusterMember, EsxCluster, PersonalityClusterInfo,
                       PersonalityESXClusterInfo ],
     },
     'network'   : {

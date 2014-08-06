@@ -312,8 +312,7 @@ class CommandFlush(BrokerCommand):
                 logger.client_info("Flushing hosts.")
 
                 q = session.query(Cluster)
-                q = q.options(subqueryload("_metacluster"),
-                              joinedload("_metacluster.metacluster"),
+                q = q.options(subqueryload("metacluster"),
                               lazyload("location_constraint"),
                               lazyload("personality"),
                               lazyload("branch"))
@@ -364,8 +363,7 @@ class CommandFlush(BrokerCommand):
                 q = q.options(subqueryload('_hosts'),
                               joinedload('_hosts.host'),
                               joinedload('_hosts.host.hardware_entity'),
-                              subqueryload('_metacluster'),
-                              joinedload('_metacluster.metacluster'),
+                              subqueryload('metacluster'),
                               joinedload('resholder'),
                               subqueryload('resholder.resources'),
                               subqueryload('service_bindings'),

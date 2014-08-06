@@ -25,8 +25,7 @@ from sqlalchemy import (Column, Integer, DateTime, ForeignKey,
 from sqlalchemy.orm import relation, backref, deferred
 
 from aquilon.aqdb.model import Base, NetworkDevice
-from aquilon.aqdb.column_types.aqmac import AqMac
-from aquilon.aqdb.column_types import AqStr
+from aquilon.aqdb.column_types import AqStr, AqMac
 
 _TN = 'observed_mac'
 
@@ -43,7 +42,10 @@ class ObservedMac(Base):
 
     port = Column(AqStr(32), nullable=False)
 
-    mac_address = Column(AqMac(17), nullable=False)
+    # We need autoincrement=False to prevent SQLAlchemy using a sequence for the
+    # default value
+    mac_address = Column(AqMac(name='%s_mac_address_ck' % _TN), nullable=False,
+                         autoincrement=False)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
@@ -53,7 +55,6 @@ class ObservedMac(Base):
 
     network_device = relation(NetworkDevice, innerjoin=True,
                               backref=backref('observed_macs',
-                                              cascade='delete',
-                                              order_by=[port]))
+                                              cascade='delete'))
 
     __table_args__ = (PrimaryKeyConstraint(network_device_id, port, mac_address),)

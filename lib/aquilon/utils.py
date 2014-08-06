@@ -34,16 +34,13 @@ from ipaddr import IPv4Address, AddressValueError
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.config import Config
+from aquilon.aqdb.types.mac_address import MACAddress
 
 LOGGER = logging.getLogger(__name__)
 
 ratio_re = re.compile(r'^\s*(?P<left>\d+)\s*(?:[:/]\s*(?P<right>\d+))?\s*$')
 yes_re = re.compile(r"^(true|yes|y|1|on|enabled)$", re.I)
 no_re = re.compile(r"^(false|no|n|0|off|disabled)$", re.I)
-_unpadded_re = re.compile(r'\b([0-9a-f])\b')
-_nocolons_re = re.compile(r'^([0-9a-f]{2}){6}$')
-_two_re = re.compile(r'[0-9a-f]{2}')
-_padded_re = re.compile(r'^([0-9a-f]{2}:){5}([0-9a-f]{2})$')
 _hex_re = re.compile(r'[0-9a-f]+$')
 
 # Regexp used to check if a value is suitable to be used as an nlist key,
@@ -149,16 +146,10 @@ def force_mac(label, value):
     if value is None:
         return None
 
-    # Strip, lower, and then use a regex for zero-padding if needed...
-    value = _unpadded_re.sub(r'0\1', str(value).strip().lower())
-    # If we have exactly twelve hex characters, add the colons.
-    if _nocolons_re.search(value):
-        value = ":".join(_two_re.findall(value))
-    # Check to make sure we're good.
-    if _padded_re.search(value):
-        return value
-    raise ArgumentError("Expected a MAC address like 00:1a:2b:3c:0d:55, "
-                        "001a2b3c0d55 or 0:1a:2b:3c:d:55 for %s." % label)
+    try:
+        return MACAddress(value)
+    except ValueError, err:
+        raise ArgumentError("Expected a MAC address for %s: %s" % (label, err))
 
 
 def force_wwn(label, value):

@@ -16,12 +16,12 @@
 # limitations under the License.
 """Contains the logic for `aq update network_device`."""
 
-
 from datetime import datetime
 
 from aquilon.exceptions_ import ArgumentError
+from aquilon.aqdb.types import MACAddress
 from aquilon.aqdb.model import Model, NetworkDevice, ObservedMac
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.dbwrappers.hardware_entity import (update_primary_ip,
                                                        rename_hardware)
@@ -98,7 +98,7 @@ class CommandUpdateNetworkDevice(BrokerCommand):
             now = datetime.now()
             for (macaddr, port) in discovered_macs:
                 update_or_create_observed_mac(session, dbnetdev, port,
-                                              macaddr, now)
+                                              MACAddress(macaddr), now)
 
         session.flush()
 

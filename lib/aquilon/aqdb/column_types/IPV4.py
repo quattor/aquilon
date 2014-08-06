@@ -15,22 +15,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """ Translates dotted quad strings into long integers """
-import sqlalchemy
+
 from ipaddr import IPv4Address
+
+from sqlalchemy.types import TypeDecorator, TypeEngine, Integer
 from sqlalchemy.dialects.postgresql import INET
 
 
-class IPV4(sqlalchemy.types.TypeDecorator):
+class IPV4(TypeDecorator):
     """ A type to wrap IP addresses to and from the DB """
 
     # Placeholder only
-    impl = sqlalchemy.types.TypeEngine
+    impl = TypeEngine
 
     def load_dialect_impl(self, dialect):
         if dialect.name == 'postgresql':
             return dialect.type_descriptor(INET())  # pragma: no cover
         else:
-            return dialect.type_descriptor(sqlalchemy.types.Integer())
+            return dialect.type_descriptor(Integer())
 
     def process_bind_param(self, value, dialect):
         if value is None:
@@ -47,6 +49,3 @@ class IPV4(sqlalchemy.types.TypeDecorator):
             return None
         else:
             return IPv4Address(value)
-
-    def copy(self):
-        return IPV4()

@@ -71,7 +71,7 @@ class ServiceInstance(Base):
         as though max_members are bound.  The tricky bit is de-duplication.
 
         """
-        from aquilon.aqdb.model import Cluster, MetaCluster, MetaClusterMember
+        from aquilon.aqdb.model import Cluster, MetaCluster
 
         # Check if the service instance is used by any cluster-bound personality
         personality_ids = self.service.cluster_aligned_personalities
@@ -87,8 +87,7 @@ class ServiceInstance(Base):
         McAlias = aliased(MetaCluster)
         q = session.query(Cluster.name, Cluster.max_hosts)
         # Force orm to look for mc - service relation
-        q = q.join('_metacluster',
-                   (McAlias, MetaClusterMember.metacluster_id == McAlias.id))
+        q = q.join(McAlias, Cluster.metacluster)
         q = q.filter(McAlias.service_bindings.contains(self))
         q = q.filter(McAlias.personality_id.in_(personality_ids))
 
