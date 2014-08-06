@@ -195,6 +195,28 @@ class TestSearchMachine(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "ut3c1n3", command)
 
+    def testclusterpg(self):
+        command = ["search_machine", "--cluster", "utecl8", "--pg", "user-v710"]
+        out = self.commandtest(command)
+        self.searchoutput(out, r"evm19$", command)
+
+        # These are bound to user-v710, but on different clusters
+        self.matchclean(out, "evm10", command)
+        self.matchclean(out, "evm14", command)
+        self.matchclean(out, "evm23", command)
+
+        # These are on utecl8, but different pg
+        self.matchclean(out, "evm20", command)
+        self.matchclean(out, "evm21", command)
+
+    def testnetworkip(self):
+        command = ["search_machine", "--networkip", self.net["ut01ga2s01_v710"].ip]
+        out = self.commandtest(command)
+        self.searchoutput(out, r"evm10$", command)
+        self.searchoutput(out, r"evm14$", command)
+        self.matchclean(out, "evm11", command)
+        self.matchclean(out, "evm15", command)
+        self.matchclean(out, "evm17", command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestSearchMachine)

@@ -41,7 +41,10 @@
 		<arg choice="opt"><option>--machine_type <replaceable>TYPE</replaceable></option></arg>
 		<arg choice="opt"><option>--vendor <replaceable>NAME</replaceable></option></arg>
 		<arg choice="opt"><option>--ip <replaceable>IP</replaceable></option></arg>
+		<arg choice="opt"><option>--networkip <replaceable>IP</replaceable></option></arg>
+		<arg choice="opt"><option>--network_environment <replaceable>ENV</replaceable></option></arg>
 		<arg choice="opt"><option>--mac <replaceable>MAC</replaceable></option></arg>
+		<arg choice="opt"><option>--interface_name <replaceable>NAME</replaceable></option></arg>
 		<arg choice="opt"><option>--interface_model <replaceable>NAME</replaceable></option></arg>
 		<arg choice="opt"><option>--interface_vendor <replaceable>NAME</replaceable></option></arg>
 		<arg choice="opt"><option>--interface_bus_address <replaceable>URI</replaceable></option></arg>
@@ -276,6 +279,29 @@
 	    </varlistentry>
 	    <varlistentry>
 		<term>
+		    <option>--networkip <replaceable>IP</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Look for machines that either have an IP address on the network identified by <replaceable>IP</replaceable>,
+			have an interface with a port group bound to that network. Allows identifying any machines that would be
+			impacted if there's a problem with the network.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--network_environment <replaceable>ENV</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Select the network environment to use by the <option>--ip</option> and <option>--networkip</option>
+			options.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+		<term>
 		    <option>--mac <replaceable>MAC</replaceable></option>
 		</term>
 		<listitem>
@@ -291,6 +317,16 @@
 		<listitem>
 		    <para>
 			Look for virtual machines having a network interface bound to port group <replaceable>PG</replaceable>.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+		<term>
+		    <option>--interface_name <replaceable>NAME</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Look for machines having a network interface named <replaceable>NAME</replaceable>.
 		    </para>
 		</listitem>
 	    </varlistentry>

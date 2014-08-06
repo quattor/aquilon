@@ -140,6 +140,25 @@ class TestSearchHardware(TestBrokerCommand):
         self.matchoutput(out, "Machine: ut3s01p1", command)
         self.matchoutput(out, "Machine: ny00l4as01", command)
 
+    def testsearchinterfacename(self):
+        command = ["search", "hardware", "--interface_name", "eth1.2"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "ut3c5n10", command)
+        self.searchclean(out, "ut3c5n1$", command)
+        self.matchclean(out, "ut3c5n2", command)
+        self.matchclean(out, "ut3c5n3", command)
+        self.matchclean(out, "ut3gd1r01", command)
+
+    def testsearchinterfacebus(self):
+        command = ["search", "hardware",
+                   "--interface_bus_address", "pci:0000:0b:00.0"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "ut3c5n10", command)
+        self.searchclean(out, "ut3c5n1$", command)
+        self.matchclean(out, "ut3c5n2", command)
+        self.matchclean(out, "ut3c5n3", command)
+        self.matchclean(out, "ut3gd1r01", command)
+
     def testsearchinterfacemodel(self):
         command = ["search", "hardware", "--interface_model", "e1000"]
         out = self.commandtest(command)
@@ -147,6 +166,12 @@ class TestSearchHardware(TestBrokerCommand):
         self.matchclean(out, "ut3c5n1", command)
         self.matchclean(out, "ut3c5n3", command)
         self.matchclean(out, "ut3gd1r01", command)
+
+    def testsearchinterfacemodelbad(self):
+        command = ["search", "hardware", "--interface_model", "utmedium"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out, "Model utmedium, model_type nic not found.",
+                         command)
 
     def testsearchinterfacevendor(self):
         command = ["search", "hardware", "--interface_vendor", "intel"]

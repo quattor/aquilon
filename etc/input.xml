@@ -185,9 +185,12 @@
 	    <option name="model" type="string">model name</option>
 	    <option name="machine_type" type="enum" enum="MachineType">machine type for the model (blade, virtual_machine, etc.)</option>
 	    <option name="vendor" type="string">vendor name</option>
-	    <option name="ip" type="ipv4">IP address</option>
+	    <option name="ip" type="ipv4" conflicts="networkip">IP address</option>
+	    <option name="networkip" type="ipv4" conflicts="ip">Network IP address</option>
+	    <option name="network_environment" type="string">Network environment (default: internal)</option>
 	    <option name="mac" type="mac">MAC address of an attached interface</option>
 	    <option name="pg" type="string">port group of an attached interface</option>
+	    <option name="interface_name" type="string">Having an interface of the given name</option>
 	    <option name="interface_model" type="string">Having an interface of the given model</option>
 	    <option name="interface_vendor" type="string">Having an interface of the given vendor</option>
 	    <option name="interface_bus_address" type="string">Interface at the given bus address</option>
@@ -235,8 +238,11 @@
 	    <option name="model" type="string">model name</option>
 	    <option name="machine_type" type="enum" enum="MachineType">machine type for the model (blade, virtual_machine, etc.)</option>
 	    <option name="vendor" type="string">vendor name</option>
-	    <option name="ip" type="ipv4">IP address</option>
+	    <option name="ip" type="ipv4" conflicts="networkip">IP address</option>
+	    <option name="networkip" type="ipv4" conflicts="ip">Network IP address</option>
+	    <option name="network_environment" type="string">Network environment (default: internal)</option>
 	    <option name="mac" type="mac">MAC address of an attached interface</option>
+	    <option name="interface_name" type="string">Having an interface of the given name</option>
 	    <option name="interface_model" type="string">Having an interface of the given model</option>
 	    <option name="interface_vendor" type="string">Having an interface of the given vendor</option>
 	    <option name="interface_bus_address" type="string">Interface at the given bus address</option>
@@ -3645,7 +3651,9 @@
 	separate line for each.
 	<optgroup mandatory="True" fields="any">
 	    <option name="network_device" type="string">Network device fully qualified name</option>
-	    <option name="ip" type="ipv4">IP address</option>
+	    <option name="ip" type="ipv4" conflicts="networkip">IP address</option>
+	    <option name="networkip" type="ipv4" conflicts="ip">Network IP address</option>
+	    <option name="network_environment" type="string">Network environment (default: internal)</option>
 	    <option name="vlan" type="int">Vlan ID</option>
 	    <option name="type" type="string">Type (tor, bor, agg)</option>
 	    <option name="model" type="string">Network device model</option>
