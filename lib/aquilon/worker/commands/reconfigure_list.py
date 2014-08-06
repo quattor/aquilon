@@ -18,6 +18,8 @@
 
 from collections import defaultdict
 
+from sqlalchemy.orm import joinedload, subqueryload, undefer
+
 from aquilon.exceptions_ import (ArgumentError, NotFoundException,
                                  IncompleteError)
 from aquilon.aqdb.model import (Archetype, Personality, OperatingSystem,
@@ -25,6 +27,7 @@ from aquilon.aqdb.model import (Archetype, Personality, OperatingSystem,
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.grn import lookup_grn
 from aquilon.worker.dbwrappers.host import (hostlist_to_hosts,
+                                            preload_machine_data,
                                             check_hostlist_size,
                                             validate_branch_author)
 from aquilon.worker.templates import PlenaryCollection, TemplateDomain
@@ -37,8 +40,26 @@ class CommandReconfigureList(BrokerCommand):
 
     def get_hostlist(self, session, list, **arguments):   # pylint: disable=W0613
         check_hostlist_size(self.command, self.config, list)
-        # TODO: eager loading of properties
-        return hostlist_to_hosts(session, list)
+        options = [joinedload('personality'),
+                   subqueryload('personality._grns'),
+                   subqueryload('_grns'),
+                   subqueryload('services_used'),
+                   undefer('services_used._client_count'),
+                   subqueryload('services_provided'),
+                   joinedload('resholder'),
+                   subqueryload('resholder.resources'),
+                   joinedload('_cluster'),
+                   subqueryload('_cluster.cluster'),
+                   joinedload('hardware_entity.model'),
+                   subqueryload('hardware_entity.interfaces'),
+                   subqueryload('hardware_entity.interfaces.assignments'),
+                   subqueryload('hardware_entity.interfaces.assignments.dns_records'),
+                   joinedload('hardware_entity.interfaces.assignments.network'),
+                   joinedload('hardware_entity.location'),
+                   subqueryload('hardware_entity.location.parents')]
+        dbhosts = hostlist_to_hosts(session, list, options)
+        preload_machine_data(session, dbhosts)
+        return dbhosts
 
     def render(self, session, logger, archetype, personality, keepbindings,
                buildstatus, osname, osversion, grn, eon_id, cleargrn,
