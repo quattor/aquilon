@@ -124,6 +124,9 @@ if __name__ == '__main__':
 
     signal.signal(signal.SIGALRM, signal_handler)
 
+    # Oracle does not like EINTR
+    signal.siginterrupt(signal.SIGALRM, False)
+
     for table in Base.metadata.sorted_tables:
         total = src_session.execute(table.count()).scalar()
         print('Processing %s (%d rows)' % (table, total), end=' ')
