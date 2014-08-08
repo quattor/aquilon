@@ -788,7 +788,7 @@
       <optgroup>
          <option name="comments" type="string">Comments</option>
       </optgroup>
-      <transport method="put" path="hardware/cpu/%(vendor)s/%(cpu)s/%(speed)s" />
+      <transport method="put" path="vendor/%(vendor)s/cpu/%(cpu)s/%(speed)s" />
    </command>
 
    <command name="show_cpu">
@@ -799,7 +799,7 @@
          <option name="vendor" type="string">name of the vendor</option>
          <option name="speed" type="int">CPU speed</option>
       </optgroup>
-      <transport method="get" path="find/hardware/cpu" />
+      <transport method="get" path="find/cpu" />
    </command>
 
    <command name="del_cpu">
@@ -809,7 +809,7 @@
          <option name="vendor" type="string">name of the vendor</option>
          <option name="speed" type="int">CPU speed</option>
       </optgroup>
-      <transport method="delete" path="hardware/cpu/%(vendor)s/%(cpu)s/%(speed)s" />
+      <transport method="delete" path="vendor/%(vendor)s/cpu/%(cpu)s/%(speed)s" />
    </command>
 
    <command name="add_disk">
@@ -855,7 +855,7 @@
          <option name="all" type="flag">remove any matching disks</option>
       </optgroup>
       <transport trigger="disk" method="delete" path="machine/%(machine)s/disk/%(disk)s" />
-      <transport method="post" path="hardware/disk/%(machine)s/command/del" />
+      <transport method="post" path="machine/%(machine)s/command/del_disk" />
    </command>
 
    <command name="update_disk">
@@ -1202,7 +1202,7 @@
          <option name="nicvendor" type="string">NIC vendor, if the model name is not unique</option>
          <option name="comments" type="string">Comments</option>
       </optgroup>
-      <transport method="put" path="hardware/model/%(vendor)s/%(model)s" />
+      <transport method="put" path="vendor/%(vendor)s/model/%(model)s" />
    </command>
 
    <command name="show_model">
@@ -1241,7 +1241,7 @@
       <optgroup mandatory="False">
          <option name="fullinfo" type="flag">Show full information for the matching models</option>
       </optgroup>
-      <transport method="get" path="find/hardware/model" />
+      <transport method="get" path="find/model" />
       <format name="proto">
          <message_class name="ModelList" module="aqdsystems_pb2"/>
       </format>
@@ -1274,7 +1274,7 @@
          <option name="comments" type="string">Comments</option>
          <option name="leave_existing" type="boolean">Do not update machines using the old defaults to the new values</option>
       </optgroup>
-      <transport method="post" path="hardware/model/%(vendor)s/%(model)s" />
+      <transport method="post" path="vendor/%(vendor)s/model/%(model)s" />
    </command>
 
    <command name="del_model">
@@ -1283,7 +1283,7 @@
          <option name="model" type="string">Name of the model</option>
          <option name="vendor" type="string">Vendor name</option>
       </optgroup>
-      <transport method="delete" path="hardware/model/%(vendor)s/%(model)s" />
+      <transport method="delete" path="vendor/%(vendor)s/model/%(model)s" />
    </command>
 
    <command name="add_interface">
@@ -3440,7 +3440,7 @@
          <option name="uri" type="string">URI to point to a template describing the virtual appliance</option>
          <option name="remap_disk" type="string">Vitual disk backend remapping definitions</option>
       </optgroup>
-      <transport method="post" trigger="hostname" path="host/%(hostname)s/command/update_hardware" />
+      <transport method="post" trigger="hostname" path="host/%(hostname)s/command/update_machine" />
       <transport method="post" path="machine/%(machine)s/command/update" />
    </command>
 
