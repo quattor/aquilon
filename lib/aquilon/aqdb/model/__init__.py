@@ -78,6 +78,7 @@ from aquilon.aqdb.model.chassis import Chassis
 
 # HOST
 from aquilon.aqdb.model.branch import Branch, Domain, Sandbox
+from aquilon.aqdb.model.compileable import CompileableMixin
 from aquilon.aqdb.model.host import Host, HostGrnMap
 
 # HARDWARE/SYSTEM LINKAGES

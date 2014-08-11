@@ -30,8 +30,8 @@ from sqlalchemy.ext.associationproxy import association_proxy
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.column_types import AqStr
 from aquilon.aqdb.model import (Base, Host, Location, Personality,
-                                ClusterLifecycle, ServiceInstance, Branch,
-                                Sandbox, NetworkDevice, User)
+                                ClusterLifecycle, ServiceInstance,
+                                NetworkDevice, CompileableMixin)
 
 # List of functions allowed to be used in vmhost_capacity_function
 restricted_builtins = {'None': None,
@@ -77,32 +77,18 @@ def _hcm_host_creator(tuple):
     return HostClusterMember(host=host, node_index=node_index)
 
 
-class Cluster(Base):
+class Cluster(CompileableMixin, Base):
     """
         A group of two or more hosts for high availablility or grid
         capabilities.  Location constraint is nullable as it may or
         may not be used.
     """
     __tablename__ = _TN
+    _col_prefix = 'cluster'
 
     id = Column(Integer, Sequence('%s_seq' % _TN), primary_key=True)
     cluster_type = Column(AqStr(16), nullable=False)
     name = Column(AqStr(64), nullable=False)
-
-    # Lack of cascaded deletion is intentional on personality
-    personality_id = Column(Integer, ForeignKey(Personality.id,
-                                                name='cluster_prsnlty_fk'),
-                            nullable=False)
-
-    branch_id = Column(Integer, ForeignKey(Branch.id,
-                                           name='cluster_branch_fk'),
-                       nullable=False)
-
-    sandbox_author_id = Column(Integer,
-                               ForeignKey(User.id,
-                                          name='cluster_sandbox_author_fk',
-                                          ondelete="SET NULL"),
-                               nullable=True)
 
     location_constraint_id = Column(ForeignKey(Location.id,
                                                name='cluster_location_fk'),
@@ -131,15 +117,11 @@ class Cluster(Base):
     status = relation(ClusterLifecycle, innerjoin=True)
     location_constraint = relation(Location, lazy=False, innerjoin=True)
 
-    personality = relation(Personality, lazy=False, innerjoin=True)
-    branch = relation(Branch, lazy=False, innerjoin=True)
-    sandbox_author = relation(User)
-
     hosts = association_proxy('_hosts', 'host', creator=_hcm_host_creator)
 
     __table_args__ = (UniqueConstraint(name, name='cluster_uk'),
-                      Index("cluster_branch_idx", branch_id),
-                      Index("cluster_prsnlty_idx", personality_id),
+                      Index("cluster_branch_idx", 'branch_id'),
+                      Index("cluster_prsnlty_idx", 'personality_id'),
                       Index("cluster_location_idx", location_constraint_id))
     __mapper_args__ = {'polymorphic_on': cluster_type}
 
@@ -171,24 +153,11 @@ class Cluster(Base):
         return (is_percent, thresh_value)
 
     @property
-    def authored_branch(self):
-        if isinstance(self.branch, Sandbox):
-            if self.sandbox_author:
-                return "%s/%s" % (self.sandbox_author.name, self.branch.name)
-            else:
-                return "%s [orphaned]" % self.branch.name
-        return self.branch.name
-
-    @property
     def personality_info(self):
         if self.cluster_type in self.personality.cluster_infos:
             return self.personality.cluster_infos[self.cluster_type]
         else:
             return None
-
-    @property
-    def required_services(self):
-        return self.personality.services + self.personality.archetype.services
 
     @property
     def minimum_location(self):
