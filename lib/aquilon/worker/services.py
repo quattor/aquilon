@@ -43,8 +43,6 @@ class Chooser(object):
 
         return chooser
 
-    abstract_fields = ["location", "network"]
-
     def __init__(self, dbobj, logger, required_only=False):
         """Initialize the chooser.
 
@@ -69,14 +67,15 @@ class Chooser(object):
         initialization.
 
         """
+        logger.debug("Creating service chooser for {0:l}.".format(dbobj))
+
         self.dbobj = dbobj
         self.session = object_session(dbobj)
         self.required_only = required_only
         self.logger = logger
-        self.logger.debug("Creating service chooser for {0:l}"
-                          .format(self.dbobj))
-        # Cache of the service maps
-        self.mapped_services = {}
+        self.service_maps = None
+        self.network = None
+        self.location = None
 
         # Stores interim service instance lists
         self.staging_services = {}
@@ -98,7 +97,7 @@ class Chooser(object):
         self.chosen_services = {}
 
         # Keep stashed plenaries for rollback purposes
-        self.plenaries = PlenaryCollection(logger=self.logger)
+        self.plenaries = PlenaryCollection(logger=logger)
 
         self.original_service_instances = {}
 
@@ -106,7 +105,7 @@ class Chooser(object):
         # that was bound (values).
         for si in dbobj.services_used:
             self.original_service_instances[si.service] = si
-            self.logger.debug("{0} original binding: {1}".format(dbobj, si))
+            logger.debug("{0} original binding: {1}".format(dbobj, si))
 
         self.required_services = dbobj.required_services
 
@@ -122,11 +121,6 @@ class Chooser(object):
 
     def verify_init(self):
         """This is more of a verify-and-finalize method..."""
-        for field in self.abstract_fields:
-            if not hasattr(self, field):
-                raise InternalError("%s provides no %s field" %
-                                    (type(self.dbobj), field))
-        # This can be tweaked...
         if not self.required_only:
             for (service, instance) in self.original_service_instances.items():
                 self.staging_services[service] = [instance]
@@ -443,7 +437,7 @@ class Chooser(object):
                 if srv.host:
                     changed_servers.add(srv.host)
                 if srv.cluster:
-                    changed_servers.add(srv.cluster)
+                    changed_servers.update(srv.cluster.all_objects())
 
             plenary = PlenaryServiceInstanceServer.get_plenary(instance)
             self.plenaries.append(plenary)
@@ -459,9 +453,6 @@ class Chooser(object):
                 continue
 
             self.plenaries.append(Plenary.get_plenary(dbobj))
-            if isinstance(dbobj, Cluster):
-                for dbhost in dbobj.hosts:
-                    self.plenaries.append(Plenary.get_plenary(dbhost))
 
     def get_key(self):
         return self.plenaries.get_key()
@@ -471,7 +462,17 @@ class Chooser(object):
         self.plenaries.write(locked=locked)
 
     def prestash_primary(self):
-        pass
+        for dbobj in self.dbobj.all_objects():
+            self.plenaries.append(Plenary.get_plenary(dbobj))
+
+            # This may be too much action at a distance... however, if
+            # we are potentially re-writing a host plenary, it seems like
+            # a good idea to also verify and refresh known dependencies.
+            if dbobj.resholder:
+                for dbres in dbobj.resholder.resources:
+                    self.plenaries.append(Plenary.get_plenary(dbres))
+            if hasattr(dbobj, 'hardware_entity'):
+                self.plenaries.append(Plenary.get_plenary(dbobj.hardware_entity))
 
     def restore_stash(self):
         self.plenaries.restore_stash()
@@ -492,11 +493,6 @@ class HostChooser(Chooser):
         # attribute
         if hasattr(dbhost.hardware_entity.primary_name, 'network'):
             self.network = dbhost.hardware_entity.primary_name.network
-        else:
-            self.network = None
-
-        # all of them would be self. but that should be optimized
-        # dbhost.hardware_entity.interfaces[x].assignments[y].network
 
         self.aligned_services = {}
         if dbhost.cluster:
@@ -562,17 +558,6 @@ class HostChooser(Chooser):
         self.staging_services[dbservice] = [cas]
         return
 
-    def prestash_primary(self):
-        self.plenaries.append(Plenary.get_plenary(self.dbobj))
-
-        # This may be too much action at a distance... however, if
-        # we are potentially re-writing a host plenary, it seems like
-        # a good idea to also verify and refresh known dependencies.
-        self.plenaries.append(Plenary.get_plenary(self.dbobj.hardware_entity))
-        if self.dbobj.resholder:
-            for dbres in self.dbobj.resholder.resources:
-                self.plenaries.append(Plenary.get_plenary(dbres))
-
 
 class ClusterChooser(Chooser):
     """Choose services for a cluster."""
@@ -584,8 +569,6 @@ class ClusterChooser(Chooser):
                                 "clusters, got %r (%s)" % (dbcluster, type(dbcluster)))
         super(ClusterChooser, self).__init__(dbcluster, *args, **kwargs)
         self.location = dbcluster.location_constraint
-        # TODO Should be calculated from member host's network membership.
-        self.network = None
 
     def get_footprint(self, instance):
         """If this cluster is bound to a service, how many hosts bind?"""
@@ -604,10 +587,3 @@ class ClusterChooser(Chooser):
                 host_chooser = Chooser(h, logger=self.logger,
                                        required_only=False)
                 host_chooser.set_single(instance.service, instance, force=True)
-
-    def prestash_primary(self):
-        for dbobj in self.dbobj.all_objects():
-            self.plenaries.append(Plenary.get_plenary(dbobj))
-            if dbobj.resholder:
-                for dbres in dbobj.resholder.resources:
-                    self.plenaries.append(Plenary.get_plenary(dbres))

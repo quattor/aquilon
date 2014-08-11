@@ -112,6 +112,9 @@ class Host(CompileableMixin, Base):
                     mach.append(res.machine)
         return mach
 
+    def all_objects(self):
+        yield self
+
     @property
     def effective_owner_grn(self):
         if self.owner_grn:
