@@ -556,8 +556,7 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
                    "--archetype", "vmhost", "--personality", "vulcan2-server-dev"]
         self.noouttest(command)
 
-        command = ["unbind_cluster", "--cluster", "utmc8",
-                   "--service", "vcenter", "--instance", "ut"]
+        command = ["unbind_cluster", "--cluster", "utmc8", "--service", "vcenter"]
         self.noouttest(command)
 
     def test_440_unmapvcenterservices(self):
@@ -646,8 +645,8 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
                    "--archetype", "metacluster", "--personality", "vulcan2"]
         self.noouttest(command)
 
-        command = ["unbind_cluster", "--cluster", "utmc8", "--service", "esx_management_server",
-                   "--instance", "ut.mc"]
+        command = ["unbind_cluster", "--cluster", "utmc8",
+                   "--service", "esx_management_server"]
         self.noouttest(command)
 
         command = ["unmap", "service", "--service", "esx_management_server", "--instance", "ut.mc",
