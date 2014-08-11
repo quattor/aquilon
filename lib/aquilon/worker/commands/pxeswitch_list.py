@@ -21,13 +21,13 @@ from types import ListType
 import os.path
 
 from aquilon.exceptions_ import ArgumentError
+from aquilon.aqdb.model import Service
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.host import (hostlist_to_hosts,
-                                            get_host_bound_service,
                                             check_hostlist_size)
 from aquilon.worker.processes import run_command
 from aquilon.worker.logger import CLIENT_INFO
-from aquilon.aqdb.model import Service
+from aquilon.utils import first_of
 
 
 class CommandPXESwitchList(BrokerCommand):
@@ -72,7 +72,8 @@ class CommandPXESwitchList(BrokerCommand):
                               .format(dbhost))
 
             # Find what "bootserver" instance we're bound to
-            si = get_host_bound_service(dbhost, dbservice)
+            si = first_of(dbhost.services_used,
+                          lambda x: x.service == dbservice)
             if not si:
                 failed.append("{0} has no bootserver.".format(dbhost))
             else:

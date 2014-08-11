@@ -54,8 +54,9 @@ class TestUnbindCluster(TestBrokerCommand):
                    "--service=esx_management_server"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
-                         "Cannot remove cluster service instance binding for "
-                         "esx cluster aligned service esx_management_server.",
+                         "Service esx_management_server is required for "
+                         "archetype esx_cluster, the binding cannot be "
+                         "removed.",
                          command)
 
     def testunbindservice(self):

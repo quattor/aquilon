@@ -14,11 +14,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+"""Contains the logic for `aq unbind cluster`."""
 
 from aquilon.exceptions_ import ArgumentError, NotFoundException
-from aquilon.aqdb.model import Cluster, Service, ServiceInstance
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.templates.base import Plenary
+from aquilon.aqdb.model import Cluster, Service
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.templates import (Plenary, PlenaryCollection,
+                                      PlenaryServiceInstanceServer)
 from aquilon.utils import first_of
 
 
@@ -31,17 +33,26 @@ class CommandUnbindClusterService(BrokerCommand):
         dbcluster = Cluster.get_unique(session, cluster, compel=True)
         dbinstance = first_of(dbcluster.services_used,
                               lambda x: x.service == dbservice)
+
         if not dbinstance:
             raise NotFoundException("{0} is not bound to {1:l}."
                                     .format(dbservice, dbcluster))
-        if dbservice in dbcluster.required_services:
-            raise ArgumentError("Cannot remove cluster service instance "
-                                "binding for %s cluster aligned service %s." %
-                                (dbcluster.cluster_type, dbservice.name))
+        if dbservice in dbcluster.archetype.services:
+            raise ArgumentError("{0} is required for {1:l}, the binding cannot "
+                                "be removed."
+                                .format(dbservice, dbcluster.archetype))
+        if dbservice in dbcluster.personality.services:
+            raise ArgumentError("{0} is required for {1:l}, the binding cannot "
+                                "be removed."
+                                .format(dbservice, dbcluster.personality))
+
         dbcluster.services_used.remove(dbinstance)
 
         session.flush()
 
-        plenary = Plenary.get_plenary(dbcluster, logger=logger)
-        plenary.write()
+        plenaries = PlenaryCollection(logger=logger)
+        plenaries.append(Plenary.get_plenary(dbcluster))
+        plenaries.append(PlenaryServiceInstanceServer.get_plenary(dbinstance))
+        plenaries.write()
+
         return

@@ -316,13 +316,6 @@ def preload_machine_data(session, dbhosts):
             set_committed_value(dbhw, "vm_container", None)
 
 
-def get_host_bound_service(dbhost, dbservice):
-    for si in dbhost.services_used:
-        if si.service == dbservice:
-            return si
-    return None
-
-
 def check_hostlist_size(command, config, hostlist):
 
     if not hostlist:
