@@ -38,7 +38,9 @@ class CommandMakeCluster(BrokerCommand):
         chooser = Chooser(dbcluster, logger=logger,
                           required_only=not keepbindings)
         chooser.set_required()
-        chooser.flush_changes()
+
+        session.flush()
+
         td = TemplateDomain(dbcluster.branch, dbcluster.sandbox_author,
                             logger=logger)
         # Force a domain lock as pan might overwrite any of the profiles...

@@ -464,9 +464,6 @@ class Chooser(object):
                 for dbhost in dbobj.hosts:
                     self.plenaries.append(Plenary.get_plenary(dbhost))
 
-    def flush_changes(self):
-        self.session.flush()
-
     def get_key(self):
         return self.plenaries.get_key()
 

@@ -119,13 +119,13 @@ class CommandCluster(BrokerCommand):
                 dbhost.status.transition(dbhost, dbready)
                 plenaries.append(Plenary.get_plenary(dbhost))
 
-        session.flush()
-
         # Enforce that service instances are set correctly for the
         # new cluster association.
         chooser = Chooser(dbhost, logger=logger)
         chooser.set_required()
-        chooser.flush_changes()
+
+        session.flush()
+
         # the chooser will include the host plenary
         with CompileKey.merge([chooser.get_key(), plenaries.get_key()]):
             plenaries.stash()
