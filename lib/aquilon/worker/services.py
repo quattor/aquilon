@@ -19,11 +19,9 @@
 from random import choice
 
 from sqlalchemy.orm.session import object_session
-from sqlalchemy.sql import or_
 
 from aquilon.exceptions_ import ArgumentError, InternalError
-from aquilon.aqdb.model import (Host, Cluster, Service, ServiceInstance,
-                                MetaCluster, Archetype, Personality)
+from aquilon.aqdb.model import Host, Cluster, ServiceInstance, MetaCluster
 from aquilon.worker.templates import (Plenary, PlenaryCollection,
                                       PlenaryServiceInstanceServer)
 from aquilon.worker.templates.switchdata import PlenarySwitchData
@@ -46,7 +44,7 @@ class Chooser(object):
 
         return chooser
 
-    abstract_fields = ["location", "required_services", "network"]
+    abstract_fields = ["location", "network"]
 
     def __init__(self, dbobj, logger, required_only=False):
         """Initialize the chooser.
@@ -73,8 +71,6 @@ class Chooser(object):
 
         """
         self.dbobj = dbobj
-        self.personality = dbobj.personality
-        self.archetype = dbobj.personality.archetype
         self.session = object_session(dbobj)
         self.required_only = required_only
         self.logger = logger
@@ -112,6 +108,8 @@ class Chooser(object):
         for si in dbobj.services_used:
             self.original_service_instances[si.service] = si
             self.logger.debug("{0} original binding: {1}".format(dbobj, si))
+
+        self.required_services = dbobj.required_services
 
     def apply_changes(self):
         raise InternalError("This method must be overridden")
@@ -202,7 +200,7 @@ class Chooser(object):
 
     def cache_service_maps(self, dbservices):
         self.service_maps = ServiceInstance.get_mapped_instance_cache(
-            self.personality, self.location, dbservices, self.network)
+            self.dbobj.personality, self.location, dbservices, self.network)
 
     def find_service_instances(self, dbservice):
         """This finds the "closest" service instances, based on the known maps.
@@ -497,21 +495,13 @@ class HostChooser(Chooser):
         # all of them would be self. but that should be optimized
         # dbhost.hardware_entity.interfaces[x].assignments[y].network
 
-        # Stores interim service instance lists.
-        q = self.session.query(Service)
-        q = q.outerjoin(Service.archetypes)
-        q = q.reset_joinpoint()
-        q = q.outerjoin(Service.personalities)
-        q = q.filter(or_(Archetype.id == self.archetype.id,
-                         Personality.id == self.personality.id))
-        self.required_services = set(q.all())
-
         self.cluster_aligned_services = {}
         if dbhost.cluster:
             # Note that cluster services are currently ignored unless
             # they are otherwise required by the archetype/personality.
             for si in dbhost.cluster.services_used:
                 self.cluster_aligned_services[si.service] = si
+
             for service in dbhost.cluster.required_services:
                 if service not in self.cluster_aligned_services:
                     # Don't just error here because the error() call
@@ -539,6 +529,7 @@ class HostChooser(Chooser):
                             cas, si, mc, si.service))
 
                     self.cluster_aligned_services[si.service] = si
+
                 for service in mc.required_services:
                     if service not in self.cluster_aligned_services:
                         # Don't just error here because the error() call
@@ -601,19 +592,12 @@ class ClusterChooser(Chooser):
                                 "clusters, got %r (%s)" % (dbcluster, type(dbcluster)))
         super(ClusterChooser, self).__init__(dbcluster, *args, **kwargs)
         self.location = dbcluster.location_constraint
-        self.required_services = set()
         # TODO Should be calculated from member host's network membership.
         self.network = None
-        # Stores interim service instance lists.
-        for service in self.archetype.services:
-            self.required_services.add(service)
-        for service in self.personality.services:
-            self.required_services.add(service)
 
     def get_footprint(self, instance):
         """If this cluster is bound to a service, how many hosts bind?"""
-        if self.dbobj.personality in instance.service.personalities or \
-            self.dbobj.personality.archetype in instance.service.archetypes:
+        if instance.service in self.required_services:
             if isinstance(self.dbobj, MetaCluster):
                 return 0
             # max_hosts can be None, but we need to return a number
