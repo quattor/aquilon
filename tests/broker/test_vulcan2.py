@@ -502,13 +502,15 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
         command = ["bind_cluster", "--cluster", "utmc8", "--service", "vcenter",
                    "--instance", "ut"]
         err = self.statustest(command)
+        # The service should be bound to the metacluster and to the hosts, but
+        # not to the clusters as they do not require it
         self.matchoutput(err, "Metacluster utmc8 adding binding for "
                          "service instance vcenter/ut", command)
-
-        command = ["make", "--hostname", "utpgh0.aqd-unittest.ms.com"]
-        err = self.statustest(command)
         self.matchoutput(err, "Host utpgh0.aqd-unittest.ms.com adding binding "
                          "for service instance vcenter/ut", command)
+        self.matchoutput(err, "Host utpgh1.aqd-unittest.ms.com adding binding "
+                         "for service instance vcenter/ut", command)
+        self.matchclean(err, "utpgcl", command)
 
         command = ["show", "host", "--hostname", "utpgh0.aqd-unittest.ms.com"]
         out = self.commandtest(command)
@@ -595,23 +597,55 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
                    "--archetype", "metacluster"]
         self.noouttest(command)
 
-        command = ["bind_cluster", "--cluster", "utmc8", "--service", "esx_management_server",
+        command = ["rebind_cluster", "--cluster", "utmc8", "--service", "esx_management_server",
                    "--instance", "ut.mc"]
         err = self.statustest(command)
-        self.matchoutput(err, "Metacluster utmc8 adding binding for "
-                         "service instance esx_management_server/ut.mc", command)
+        self.matchoutput(err,
+                         "Metacluster utmc8 adding binding for service "
+                         "instance esx_management_server/ut.mc",
+                         command)
+        for cluster in ["utpgcl0", "utpgcl1"]:
+            self.matchoutput(err,
+                             "ESX Cluster %s removing binding for service "
+                             "instance esx_management_server/ut.a" % cluster,
+                             command)
+            self.matchoutput(err,
+                             "ESX Cluster %s adding binding for service "
+                             "instance esx_management_server/ut.mc" % cluster,
+                             command)
+        for host in ["utpgh0", "utpgh1"]:
+            self.matchoutput(err,
+                             "Host %s.aqd-unittest.ms.com removing binding for "
+                             "service instance esx_management_server/ut.a" % host,
+                             command)
+            self.matchoutput(err,
+                             "Host %s.aqd-unittest.ms.com adding binding for "
+                             "service instance esx_management_server/ut.mc" % host,
+                             command)
 
     def test_510_fail_make_host(self):
         command = ["make", "--hostname", "utpgh0.aqd-unittest.ms.com"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
-                         "Replacing ut.a instance with ut.mc (bound to "
-                         "ESX metacluster utmc8) for service esx_management_server",
+                         "ESX Metacluster utmc8 is set to use service instance "
+                         "esx_management_server/ut.mc, but that instance is "
+                         "not in a service map for "
+                         "host utpgh0.aqd-unittest.ms.com.",
+                         command)
+
+    def test_510_fail_make_cluster(self):
+        command = ["make", "cluster", "--cluster", "utpgcl0"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "ESX Metacluster utmc8 is set to use service instance "
+                         "esx_management_server/ut.mc, but that instance is "
+                         "not in a service map for ESX cluster utpgcl0.",
                          command)
         self.matchoutput(out,
-                         "ESX Cluster utpgcl0 is set to use service instance "
+                         "ESX Metacluster utmc8 is set to use service instance "
                          "esx_management_server/ut.mc, but that instance is "
-                         "not in a service map for utpgh0.aqd-unittest.ms.com.",
+                         "not in a service map for "
+                         "host utpgh0.aqd-unittest.ms.com.",
                          command)
 
     def test_520_verify_client_count(self):
@@ -635,6 +669,7 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
 
         # Can't unbind an an aligned service here and don't want unalign it
 
+    def test_538_del_utpgcl3(self):
         command = ["del_esx_cluster", "--cluster=utpgcl3"]
         self.successtest(command)
 
@@ -651,6 +686,17 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
                    "--building", "ut", "--personality", "vulcan2",
                    "--archetype", "metacluster"]
         self.noouttest(command)
+
+        out = self.statustest(["make_cluster", "--cluster", "utpgcl0"])
+        self.matchoutput(out, "removing binding for service instance "
+                         "esx_management_server/ut.mc", command)
+        self.matchoutput(out, "adding binding for service instance "
+                         "esx_management_server/ut.a", command)
+        out = self.statustest(["make_cluster", "--cluster", "utpgcl1"])
+        self.matchoutput(out, "removing binding for service instance "
+                         "esx_management_server/ut.mc", command)
+        self.matchoutput(out, "adding binding for service instance "
+                         "esx_management_server/ut.a", command)
 
         command = ["del", "service", "--service", "esx_management_server", "--instance", "ut.mc"]
         self.noouttest(command)

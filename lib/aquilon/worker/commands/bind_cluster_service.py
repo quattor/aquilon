@@ -14,12 +14,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+"""Contains the logic for `aq bind cluster`."""
 
-
+from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Cluster, Service
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.services import Chooser
 from aquilon.worker.dbwrappers.service_instance import get_service_instance
+from aquilon.worker.templates import PlenaryCollection
 
 
 class CommandBindClusterService(BrokerCommand):
@@ -31,15 +33,35 @@ class CommandBindClusterService(BrokerCommand):
 
         dbcluster = Cluster.get_unique(session, cluster, compel=True)
         dbservice = Service.get_unique(session, service, compel=True)
-        chooser = Chooser(dbcluster, logger=logger, required_only=False)
         if instance:
             dbinstance = get_service_instance(session, dbservice, instance)
-            chooser.set_single(dbservice, dbinstance, force=force)
         else:
-            chooser.set_single(dbservice, force=force)
+            dbinstance = None
+
+        choosers = []
+        failed = []
+        # FIXME: this logic should be in the chooser
+        for dbobj in dbcluster.all_objects():
+            # Always add the binding on the cluster we were called on
+            if dbobj == dbcluster or dbservice in dbobj.required_services:
+                chooser = Chooser(dbobj, logger=logger, required_only=False)
+                choosers.append(chooser)
+                try:
+                    chooser.set_single(dbservice, dbinstance, force=force)
+                except ArgumentError as err:
+                    failed.append(str(err))
+
+        if failed:
+            raise ArgumentError("The following objects failed service "
+                                "binding:\n%s" % "\n".join(failed))
 
         session.flush()
 
-        chooser.write_plenary_templates()
+        plenaries = PlenaryCollection(logger=logger)
+        for chooser in choosers:
+            plenaries.append(chooser.plenaries)
+        plenaries.flatten()
+
+        plenaries.write()
 
         return

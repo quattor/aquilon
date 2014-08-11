@@ -99,7 +99,15 @@ class Chooser(object):
         # Keep stashed plenaries for rollback purposes
         self.plenaries = PlenaryCollection(logger=logger)
 
+        # Cache the original service bindings
         self.original_service_instances = {}
+
+        # Services which should be aligned to the parent object (cluster,
+        # metacluster etc.)
+        self.aligned_services = {}
+
+        # Parent object whose services we should align to
+        self.aligned_parents = []
 
         # Cache of any already bound services (keys) and the instance
         # that was bound (values).
@@ -124,6 +132,16 @@ class Chooser(object):
         if not self.required_only:
             for (service, instance) in self.original_service_instances.items():
                 self.staging_services[service] = [instance]
+
+        for parent in self.aligned_parents:
+            for si in parent.services_used:
+                self.aligned_services[si.service] = (si, parent)
+
+            for service in parent.required_services:
+                if service not in self.aligned_services:
+                    # Don't just error here because the error() call
+                    # has not yet been set up.  Will error out later.
+                    self.aligned_services[service] = (None, parent)
 
     def error(self, msg, *args, **kwargs):
         """Errors are consolidated so that many can be reported at once."""
@@ -222,8 +240,25 @@ class Chooser(object):
             raise ArgumentError("\n".join(self.errors))
 
     def choose_aligned(self, dbservice):
-        # Only implemented for hosts.
-        pass
+        if dbservice not in self.aligned_services:
+            return
+
+        si, parent = self.aligned_services[dbservice]
+        if not si:
+            self.error("No instance set for {0:l} aligned service {1.name}.  "
+                       "Please run `make cluster --cluster {0.name}` "
+                       "to resolve.".format(parent, dbservice))
+            return
+
+        # This check is necessary to prevent bind_client from overriding
+        # the cluster's binding.  The error message will be misleading...
+        if si not in self.staging_services[dbservice]:
+            self.error("{0} is set to use {1:l}, but that instance is not in a "
+                       "service map for {2:l}.".format(parent, si, self.dbobj))
+            return
+        self.logger.debug("Chose {0:l} because it is bound to {1:l}."
+                          .format(si, parent))
+        self.staging_services[dbservice] = [si]
 
     def get_footprint(self, instance):
         return 1
@@ -487,77 +522,17 @@ class HostChooser(Chooser):
             raise InternalError("HostChooser can only choose services for "
                                 "hosts, got %r (%s)" % (dbhost, type(dbhost)))
         super(HostChooser, self).__init__(dbhost, *args, **kwargs)
+
         self.location = dbhost.hardware_entity.location
+        if dbhost.cluster:
+            self.aligned_parents.append(dbhost.cluster)
+            if dbhost.cluster.metacluster:
+                self.aligned_parents.append(dbhost.cluster.metacluster)
 
         # If the primary name is a ReservedName, then it does not have a network
         # attribute
         if hasattr(dbhost.hardware_entity.primary_name, 'network'):
             self.network = dbhost.hardware_entity.primary_name.network
-
-        self.aligned_services = {}
-        if dbhost.cluster:
-            # Note that cluster services are currently ignored unless
-            # they are otherwise required by the archetype/personality.
-            for si in dbhost.cluster.services_used:
-                self.aligned_services[si.service] = si
-
-            for service in dbhost.cluster.required_services:
-                if service not in self.aligned_services:
-                    # Don't just error here because the error() call
-                    # has not yet been set up.  Will error out later.
-                    self.aligned_services[service] = None
-                # Went back and forth on this... deciding not to force
-                # an aligned service as required.  This should give
-                # flexibility for multiple services to be aligned for
-                # a cluster type without being forced on all the
-                # personalities.
-                # self.required_services.add(item.service)
-
-            if dbhost.cluster.metacluster:
-                mc = dbhost.cluster.metacluster
-                for si in mc.services_used:
-                    if si.service in self.aligned_services:
-                        cas = self.aligned_services[si.service]
-                        if not cas:
-                            # Error out later.
-                            continue
-
-                        self.logger.client_info(
-                            "Replacing {0.name} instance with {1.name} "
-                            "(bound to {2:l}) for service {3.name}".format(
-                            cas, si, mc, si.service))
-
-                    self.aligned_services[si.service] = si
-
-                for service in mc.required_services:
-                    if service not in self.aligned_services:
-                        # Don't just error here because the error() call
-                        # has not yet been set up.  Will error out later.
-                        self.aligned_services[service] = None
-
-    def choose_aligned(self, dbservice):
-        if dbservice not in self.aligned_services:
-            return
-        cas = self.aligned_services[dbservice]
-        if not cas:
-            self.error("No instance set for %s aligned service %s."
-                       "  Please run `make cluster --cluster %s` to resolve.",
-                       format(self.dbobj.cluster),
-                       dbservice.name,
-                       self.dbobj.cluster.name)
-            return
-        # This check is necessary to prevent bind_client from overriding
-        # the cluster's binding.  The error message will be misleading...
-        if cas not in self.staging_services[dbservice]:
-            self.error("{0} is set to use {1:l}, but that instance is not in a "
-                       "service map for {2}.".format(self.dbobj.cluster, cas,
-                                                     self.dbobj.fqdn))
-            return
-        self.logger.debug("Chose service %s instance %s because it is cluster "
-                          "aligned.", dbservice.name, cas.name)
-        self.staging_services[dbservice] = [cas]
-        return
-
 
 class ClusterChooser(Chooser):
     """Choose services for a cluster."""
@@ -568,7 +543,10 @@ class ClusterChooser(Chooser):
             raise InternalError("ClusterChooser can only choose services for "
                                 "clusters, got %r (%s)" % (dbcluster, type(dbcluster)))
         super(ClusterChooser, self).__init__(dbcluster, *args, **kwargs)
+
         self.location = dbcluster.location_constraint
+        if dbcluster.metacluster:
+            self.aligned_parents.append(dbcluster.metacluster)
 
     def get_footprint(self, instance):
         """If this cluster is bound to a service, how many hosts bind?"""
@@ -578,12 +556,3 @@ class ClusterChooser(Chooser):
             # max_hosts can be None, but we need to return a number
             return self.dbobj.max_hosts or 0
         return 0
-
-    def apply_changes(self):
-        super(ClusterChooser, self).apply_changes()
-
-        for instance in self.instances_bound:
-            for h in self.dbobj.hosts:
-                host_chooser = Chooser(h, logger=self.logger,
-                                       required_only=False)
-                host_chooser.set_single(instance.service, instance, force=True)
