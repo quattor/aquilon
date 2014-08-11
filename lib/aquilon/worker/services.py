@@ -148,7 +148,7 @@ class Chooser(object):
             self.find_service_instances(dbservice)
         self.check_errors()
         for dbservice in self.required_services:
-            self.choose_cluster_aligned(dbservice)
+            self.choose_aligned(dbservice)
             self.choose_available_capacity(dbservice)
             self.choose_past_use(dbservice)
         self.check_errors()
@@ -185,7 +185,7 @@ class Chooser(object):
             self.cache_service_maps([service])
             self.find_service_instances(service)
         self.check_errors()
-        self.choose_cluster_aligned(service)
+        self.choose_aligned(service)
         self.choose_available_capacity(service)
         self.check_errors()
         self.choose_past_use(service)
@@ -228,7 +228,7 @@ class Chooser(object):
         if self.errors:
             raise ArgumentError("\n".join(self.errors))
 
-    def choose_cluster_aligned(self, dbservice):
+    def choose_aligned(self, dbservice):
         # Only implemented for hosts.
         pass
 
@@ -499,18 +499,18 @@ class HostChooser(Chooser):
         # all of them would be self. but that should be optimized
         # dbhost.hardware_entity.interfaces[x].assignments[y].network
 
-        self.cluster_aligned_services = {}
+        self.aligned_services = {}
         if dbhost.cluster:
             # Note that cluster services are currently ignored unless
             # they are otherwise required by the archetype/personality.
             for si in dbhost.cluster.services_used:
-                self.cluster_aligned_services[si.service] = si
+                self.aligned_services[si.service] = si
 
             for service in dbhost.cluster.required_services:
-                if service not in self.cluster_aligned_services:
+                if service not in self.aligned_services:
                     # Don't just error here because the error() call
                     # has not yet been set up.  Will error out later.
-                    self.cluster_aligned_services[service] = None
+                    self.aligned_services[service] = None
                 # Went back and forth on this... deciding not to force
                 # an aligned service as required.  This should give
                 # flexibility for multiple services to be aligned for
@@ -521,8 +521,8 @@ class HostChooser(Chooser):
             if dbhost.cluster.metacluster:
                 mc = dbhost.cluster.metacluster
                 for si in mc.services_used:
-                    if si.service in self.cluster_aligned_services:
-                        cas = self.cluster_aligned_services[si.service]
+                    if si.service in self.aligned_services:
+                        cas = self.aligned_services[si.service]
                         if not cas:
                             # Error out later.
                             continue
@@ -532,18 +532,18 @@ class HostChooser(Chooser):
                             "(bound to {2:l}) for service {3.name}".format(
                             cas, si, mc, si.service))
 
-                    self.cluster_aligned_services[si.service] = si
+                    self.aligned_services[si.service] = si
 
                 for service in mc.required_services:
-                    if service not in self.cluster_aligned_services:
+                    if service not in self.aligned_services:
                         # Don't just error here because the error() call
                         # has not yet been set up.  Will error out later.
-                        self.cluster_aligned_services[service] = None
+                        self.aligned_services[service] = None
 
-    def choose_cluster_aligned(self, dbservice):
-        if dbservice not in self.cluster_aligned_services:
+    def choose_aligned(self, dbservice):
+        if dbservice not in self.aligned_services:
             return
-        cas = self.cluster_aligned_services[dbservice]
+        cas = self.aligned_services[dbservice]
         if not cas:
             self.error("No instance set for %s aligned service %s."
                        "  Please run `make cluster --cluster %s` to resolve.",
