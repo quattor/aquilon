@@ -24,7 +24,6 @@ from aquilon.exceptions_ import ArgumentError, InternalError
 from aquilon.aqdb.model import Host, Cluster, ServiceInstance, MetaCluster
 from aquilon.worker.templates import (Plenary, PlenaryCollection,
                                       PlenaryServiceInstanceServer)
-from aquilon.worker.templates.switchdata import PlenarySwitchData
 
 
 class Chooser(object):
@@ -612,6 +611,3 @@ class ClusterChooser(Chooser):
             if dbobj.resholder:
                 for dbres in dbobj.resholder.resources:
                     self.plenaries.append(Plenary.get_plenary(dbres))
-
-            if hasattr(dbobj, "network_device") and dbobj.network_device:
-                self.plenaries.append(PlenarySwitchData.get_plenary(dbobj.network_device))
