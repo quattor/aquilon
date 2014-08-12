@@ -906,17 +906,17 @@
 	by Zebra. The argument of the option is a comma-separated list of interface names, where
 	Zebra should be configured.
 	<optgroup mandatory="True" fields="all">
-	    <optgroup mandatory="True" fields="one">
+	    <optgroup fields="one">
 		<option name="hostname" type="string">Fully qualified Host name</option>
 		<option name="prefix" type="string">Prefix for generating the host name</option>
 	    </optgroup>
 	    <option name="machine" type="string">Machine (Node) name</option>
 	    <option name="archetype" type="string">Archetype name</option>
-	    <optgroup mandatory="True" fields="one">
+	    <optgroup fields="one">
 		<option name="domain" type="string">Template (not DNS) domain</option>
 		<option name="sandbox" type="string">Name of the sandbox (given as 'author/branch')</option>
 	    </optgroup>
-	    <optgroup mandatory="True" fields="one">
+	    <optgroup fields="one">
 		<option name="ip" type="ipv4">IP address</option>
 		<option name="ipfromip" type="ipv4">choose IP address in subnet</option>
 		<option name="ipfromsystem" type="string">choose IP address in subnet of system</option>
@@ -958,11 +958,11 @@
 	<optgroup mandatory="True" fields="all">
 	    <option name="hostname" type="string">Fully qualified Host name</option>
 	    <option name="machine" type="string">Machine (Node) name</option>
-	    <optgroup mandatory="True" fields="one">
+	    <optgroup fields="one">
 		<option name="domain" type="string">Template (not DNS) domain</option>
 		<option name="sandbox" type="string">Name of the sandbox (given as 'author/branch')</option>
 	    </optgroup>
-	    <optgroup mandatory="True" fields="one">
+	    <optgroup fields="one">
 		<option name="ip" type="ipv4">IP address</option>
 		<option name="ipfromip" type="ipv4">choose IP address in subnet</option>
 		<option name="ipfromsystem" type="string">choose IP address in subnet of system</option>
@@ -1067,12 +1067,12 @@
 	max:      Find the highest IP in use and add one.
 	The default is lowest.
 	<optgroup mandatory="True" fields="all">
-	    <optgroup mandatory="True" fields="one">
+	    <optgroup fields="one">
 		<option name="hostname" type="string">Fully qualified Host name</option>
 		<option name="machine" type="string">Machine (Node) name</option>
 	    </optgroup>
 	    <option name="auxiliary" type="string">Fully qualified name for the auxiliary interface</option>
-	    <optgroup mandatory="True" fields="one">
+	    <optgroup fields="one">
 		<option name="ip" type="ipv4">IP address</option>
 		<option name="ipfromip" type="ipv4">choose IP address in subnet</option>
 		<option name="ipfromsystem" type="string">choose IP address in subnet of system</option>
@@ -1140,7 +1140,7 @@
 	The default is lowest.
 	<optgroup mandatory="True" fields="all">
 	    <option name="hostname" type="string">Fully qualified Host name</option>
-	    <optgroup mandatory="True" fields="one">
+	    <optgroup fields="one">
 		<option name="ip" type="ipv4">IP address</option>
 		<option name="ipfromip" type="ipv4">choose IP address in subnet</option>
 		<option name="ipfromsystem" type="string">choose IP address in subnet of system</option>
@@ -1421,12 +1421,12 @@
 	<optgroup mandatory="True" fields="all">
 	    <option name="network" type="string">Network name</option>
 	    <option name="ip" type="ipv4">Network IP address</option>
-	    <optgroup mandatory="True" fields="one">
+	    <optgroup fields="one">
 		<option name="netmask" type="string">Netmask as dotted quad</option>
 		<option name="prefixlen" type="int">Network prefix length</option>
 		<option name="mask" type="int">Number of hosts</option>
 	    </optgroup>
-	    <optgroup mandatory="True" fields="one">
+	    <optgroup fields="one">
 		<option name="organization" type="string">Organization</option>
 		<option name="hub" type="string">Hub</option>
 		<option name="continent" type="string">Continent</option>
@@ -1499,7 +1499,7 @@
 	be reassigned to the new subnets.
 	<optgroup mandatory="True" fields="all">
 	    <option name="ip" type="ipv4">Network address</option>
-	    <optgroup mandatory="True" fields="one">
+	    <optgroup fields="one">
 		<option name="netmask" type="ipv4">New netmask</option>
 		<option name="prefixlen" type="int">New network prefix length</option>
 	    </optgroup>
@@ -1518,7 +1518,7 @@
 	--prefixlen.
 	<optgroup mandatory="True" fields="all">
 	    <option name="ip" type="ipv4">Network address</option>
-	    <optgroup mandatory="True" fields="one">
+	    <optgroup fields="one">
 		<option name="netmask" type="ipv4">New netmask</option>
 		<option name="prefixlen" type="int">New network prefix length</option>
 	    </optgroup>
@@ -1637,11 +1637,11 @@
 	Add a static route.
 	<optgroup mandatory="True" fields="all">
 	    <option name="ip" type="ipv4">Address of the destination network range</option>
-	    <optgroup mandatory="True" fields="one">
+	    <optgroup fields="one">
 		<option name="netmask" type="string">Netmask as dotted quad</option>
 		<option name="prefixlen" type="int">Network prefix length</option>
 	    </optgroup>
-	    <optgroup mandatory="True" fields="one">
+	    <optgroup fields="one">
 		<option name="gateway" type="ipv4">Address of the gateway</option>
 		<option name="networkip" type="ipv4">Network IP address</option>
 	    </optgroup>
@@ -1662,7 +1662,7 @@
 	<optgroup mandatory="True" fields="all">
 	    <option name="gateway" type="ipv4">Address of the gateway</option>
 	    <option name="ip" type="ipv4">Address of the destination network range</option>
-	    <optgroup mandatory="True" fields="one">
+	    <optgroup fields="one">
 		<option name="netmask" type="string">Netmask as dotted quad</option>
 		<option name="prefixlen" type="int">Network prefix length</option>
 	    </optgroup>
@@ -1757,7 +1757,7 @@
 	the appropriate DNS record must already exist. If you specify both --fqdn
 	and an IP generation option, then a new DNS record will be created.
 	<optgroup mandatory="True" fields="all">
-	    <optgroup mandatory="True" fields="one">
+	    <optgroup fields="one">
 		<option name="machine" type="string">Machine name</option>
 		<option name="chassis" type="string">Chassis name</option>
 		<option name="network_device" type="string">Network device name</option>
@@ -1933,7 +1933,7 @@
 	<optgroup mandatory="True" fields="all">
 	    <option name="service" type="string">Service name</option>
 	    <option name="instance" type="string">Instance name</option>
-	    <optgroup mandatory="True">
+	    <optgroup>
 		<option name="hostname" type="string" conflicts="cluster">Server name</option>
 		<option name="cluster" type="string" conflicts="hostname ip">Cluster name</option>
 		<option name="alias" type="string">Use this alias instead of the real server name when configuring clients</option>
@@ -1952,11 +1952,11 @@
 	Unbind a server as a provider of the service (instance).
 	<optgroup mandatory="True" fields="all">
 	    <option name="service" type="string">Service name</option>
-	    <optgroup mandatory="True">
+	    <optgroup>
 		<option name="instance" type="string">Instance name</option>
 		<option name="all" type="flag">Remove server from all instances of this service</option>
 	    </optgroup>
-	    <optgroup mandatory="True">
+	    <optgroup>
 		<option name="position" type="int" conflicts="hostname cluster alias">Server definition at the given position</option>
 		<option name="hostname" type="string" conflicts="cluster position">Server name</option>
 		<option name="cluster" type="string" conflicts="hostname ip position">Cluster name</option>
@@ -2222,7 +2222,7 @@
 	Changing a cluster buildstatus may cause the member hosts to also change their
 	buildstatus.
 	<optgroup mandatory="True" fields="all">
-	    <optgroup mandatory="True" fields="one">
+	    <optgroup fields="one">
 		<option name="hostname" type="string">Host name</option>
 		<option name="cluster" type="string">Cluster name</option>
 	    </optgroup>
@@ -2242,7 +2242,7 @@
 	for general login access) and so any affected profiles will be recompiled.
 
 	<optgroup mandatory="True" fields="all">
-	    <optgroup mandatory="True" fields="one">
+	    <optgroup fields="one">
 		<option name="hostname" type="string">Host name</option>
 		<option name="list" type="list">File with one host per line</option>
 	    </optgroup>
@@ -2446,7 +2446,7 @@
 	validate has been run or fixes have been deployed.
 	<optgroup mandatory="True" fields="all">
 	    <option name="domain" type="string">Name of domain or sandbox</option>
-	    <optgroup mandatory="True" fields="one">
+	    <optgroup fields="one">
 		<option name="ref" type="string">Any valid git reference to a previous commit in the branch</option>
 		<option name="lastsync" type="flag">Use the reference stored in AQDB of the commit in use before the last sync</option>
 	    </optgroup>
@@ -2481,12 +2481,12 @@
 
 	--force option bypasses git checks between the source and target branch.
 	<optgroup mandatory="True" fields="all">
-	    <optgroup mandatory="True">
+	    <optgroup>
 		<option name="hostname" type="string">Name of the host to manage</option>
 		<option name="cluster" type="string">Name of the cluster to manage</option>
 		<option name="list" type="list">File with one host per line</option>
 	    </optgroup>
-	    <optgroup fields="one" mandatory="True">
+	    <optgroup fields="one">
 		<option name="domain" type="string">Name of the domain</option>
 		<option name="sandbox" type="string">Name of the sandbox (given as 'author/branch')</option>
 	    </optgroup>
@@ -2640,7 +2640,7 @@
 	    <option name="rackid" type="string">Name of the new rack, or just the id number</option>
 	    <option name="row" type="string">Row of the tile location</option>
 	    <option name="column" type="string">Column of the tile location</option>
-	    <optgroup mandatory="True" fields="one">
+	    <optgroup fields="one">
 		<option name="building" type="string">Name of the building that houses the rack</option>
 		<option name="room" type="string">Name of the room that houses the rack</option>
 		<option name="bunker" type="string">Bunker</option>
@@ -2703,7 +2703,7 @@
 	Add a new desk to the database.
 	<optgroup mandatory="True" fields="all">
 	    <option name="desk" type="string">Name of the new desk</option>
-	    <optgroup mandatory="True">
+	    <optgroup>
 		<option name="building" type="string">Building where the desk is</option>
 		<option name="room" type="string">Room where the desk is</option>
 	    </optgroup>
@@ -2852,7 +2852,7 @@
 	Add a new bunker to the database.
 	<optgroup mandatory="True" fields="all">
 	    <option name="bunker" type="string">Name of the new bunker</option>
-	    <optgroup mandatory="True" fields="one">
+	    <optgroup fields="one">
 		<option name="room" type="string">Name of the room that contains the bunker</option>
 		<option name="building" type="string">Name of the building that contains the bunker</option>
 	    </optgroup>
@@ -2911,7 +2911,7 @@
 	<optgroup mandatory="True" fields="all">
 	    <option name="city" type="string">Name of the new city</option>
 	    <option name="timezone" type="string">Timezone of the city (e.g. Europe/London)</option>
-	    <optgroup mandatory="True" fields="one">
+	    <optgroup fields="one">
 		<option name="country" type="string">Name of the country that contains the city</option>
 		<option name="campus" type="string">Campus</option>
 	    </optgroup>
@@ -3141,7 +3141,7 @@
 	<optgroup mandatory="True" fields="all">
 	    <option name="personality" type="string">The name to create</option>
 	    <option name="archetype" type="string">Which archetype to use</option>
-	    <optgroup mandatory="True" fields="one">
+	    <optgroup fields="one">
 		<option name="grn" type="string">GRN as string</option>
 		<option name="eon_id" type="int">Numeric EON ID</option>
 	    </optgroup>
@@ -3407,7 +3407,7 @@
 	indicate the location indirectly.  Whether or not hardware is
 	virtual is indicated by the machine type of the model.
 	<optgroup mandatory="True" fields="all">
-	    <optgroup mandatory="True" fields="one">
+	    <optgroup fields="one">
 		<option name="machine" type="string">machine name</option>
 		<option name="prefix" type="string">machine prefix</option>
 	    </optgroup>
@@ -4150,7 +4150,7 @@
 	    <option name="archetype" type="string">Archetype name</option>
 	    <option name="personality" type="string">Personality name</option>
 	    <option name="down_hosts_threshold" type="string">Number of hosts that can be down before monitoring alarms trigger</option>
-	    <optgroup mandatory="True" fields="one">
+	    <optgroup fields="one">
 		<option name="organization" type="string">Organization</option>
 		<option name="hub" type="string">Hub</option>
 		<option name="continent" type="string">Continent</option>
@@ -4163,7 +4163,7 @@
 		<option name="rack" type="string">Rack</option>
 		<option name="desk" type="string">Desk</option>
 	    </optgroup>
-	    <optgroup mandatory="True" fields="one">
+	    <optgroup fields="one">
 		<option name="domain" type="string">Name of template domain</option>
 		<option name="sandbox" type="string">Name of the sandbox (given as 'author/branch')</option>
 	    </optgroup>
@@ -4427,7 +4427,7 @@
 	The default is lowest.
 	<optgroup mandatory="True" fields="all">
 	    <option name="fqdn" type="string">A fully qualified domain name</option>
-	    <optgroup mandatory="True" fields="one">
+	    <optgroup fields="one">
 		<option name="ip" type="ipv4">IP address</option>
 		<option name="ipfromip" type="ipv4">choose IP address in subnet</option>
 		<option name="ipfromsystem" type="string">choose IP address in subnet of system</option>
@@ -5271,11 +5271,11 @@
 	recompiled for the changes to take effect.
 	<optgroup mandatory="True" fields="all">
 	    <option name="target" type="string">peer system using the GRN</option>
-	    <optgroup mandatory="True" fields="one">
+	    <optgroup fields="one">
 		<option name="grn" type="string">GRN as string</option>
 		<option name="eon_id" type="int">Numeric EON ID</option>
 	    </optgroup>
-	    <optgroup mandatory="True" fields="one">
+	    <optgroup fields="one">
 		<option name="hostname" type="string">Host</option>
 		<option name="list" type="list">List of hosts</option>
 		<option name="personality" type="string">Personality</option>
@@ -5296,12 +5296,12 @@
 	recompiled for the changes to take effect.
 	<optgroup mandatory="True" fields="all">
 	    <option name="target" type="string">peer system using the GRN</option>
-	    <optgroup mandatory="True" fields="one">
+	    <optgroup fields="one">
 		<option name="grn" type="string">GRN as string</option>
 		<option name="eon_id" type="int">Numeric EON ID</option>
 		<option name="clearall" type="flag">Option to clear all target grns</option>
 	    </optgroup>
-	    <optgroup mandatory="True" fields="one">
+	    <optgroup fields="one">
 		<option name="hostname" type="string">Host</option>
 		<option name="list" type="list">List of hosts</option>
 		<option name="membersof" type="string">Hosts which are members of the specified cluster</option>
@@ -5409,7 +5409,7 @@
 
 	<optgroup mandatory="True" fields="all">
 	    <option name="feature" type="string">Name of the feature</option>
-	    <optgroup mandatory="True">
+	    <optgroup>
 		<option name="personality" type="string">Name of a personality</option>
 		<option name="archetype" type="string">Archetype</option>
 		<option name="model" type="string">Name of a hardware model</option>
@@ -5435,7 +5435,7 @@
 
 	<optgroup mandatory="True" fields="all">
 	    <option name="feature" type="string">Name of the feature</option>
-	    <optgroup mandatory="True">
+	    <optgroup>
 		<option name="personality" type="string">Name of a personality</option>
 		<option name="archetype" type="string">Archetype</option>
 		<option name="model" type="string">Name of a hardware model</option>
@@ -5467,15 +5467,13 @@
     </command>
 
     <command name="validate_parameter">
-	Display all parameters configured on a personality
+	Validate all parameters configured on a personality
 	<p/>
-	<optgroup mandatory="True">
-	    <optgroup mandatory="True">
-		<option name="personality" type="string">Name of personality</option>
-	    </optgroup>
-	    <optgroup>
-		<option name="archetype" type="string">Archetype</option>
-	    </optgroup>
+	<optgroup mandatory="True" fields="all">
+	    <option name="personality" type="string">Name of personality</option>
+	</optgroup>
+	<optgroup>
+	    <option name="archetype" type="string">Archetype</option>
 	</optgroup>
 	<transport method="post" path="command/validate_parameter"/>
     </command>
@@ -5546,7 +5544,7 @@
 	Compare config parameter for two object.
 	<optgroup mandatory="True" fields="all">
 	    <option name="archetype" type="string">Archetype</option>
-	    <optgroup mandatory="True" fields="all">
+	    <optgroup fields="all">
 		<option name="personality" type="string">Name of personality</option>
 		<option name="other" type="string">Name of personality</option>
 	    </optgroup>
@@ -5692,7 +5690,7 @@
 	Grant root access to user/netgroup to a personality. The affected host(s) must be
 	recompiled for the changes to take effect.
 	<optgroup mandatory="True" fields="all">
-	    <optgroup mandatory="True" fields="one">
+	    <optgroup fields="one">
 		<option name="username" type="string">User as string</option>
 		<option name="netgroup" type="string">Netgroup as string from white listed netgroups</option>
 	    </optgroup>
@@ -5710,7 +5708,7 @@
 	Revoke root access from a user/netgroup from a personality. The affected host(s) must be
 	recompiled for the changes to take effect.
 	<optgroup mandatory="True" fields="all">
-	    <optgroup mandatory="True" fields="one">
+	    <optgroup fields="one">
 		<option name="username" type="string">User as string</option>
 		<option name="netgroup" type="string">Netgroup as string from white listed netgroups</option>
 	    </optgroup>
@@ -5754,7 +5752,7 @@
 	Add a new user.
 	<optgroup mandatory="True" fields="all">
 	    <option name="username" type="string">User name</option>
-	    <optgroup mandatory="True">
+	    <optgroup>
 		<option name="uid" type="int">Numeric user ID</option>
 		<option name="autouid" type="flag">Allocate an UID automatically</option>
 	    </optgroup>

@@ -265,7 +265,15 @@ class OptGroup(Element):
             if child.tag == "option":
                 self.options.append(Option(child))
             elif child.tag == "optgroup":
-                self.options.append(OptGroup(child))
+                child_node = OptGroup(child)
+
+                # Propagate mandatory setting to child nodes. This is purely
+                # cosmetical, option verification works without it, but it
+                # improves the help messages.
+                if self.mandatory and self.fields == "all":
+                    child_node.mandatory = True
+
+                self.options.append(child_node)
             elif child.tag == etree.Comment:
                 pass
             else:
