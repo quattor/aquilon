@@ -254,7 +254,7 @@ class OptGroup(Element):
         if "fields" in node.attrib:
             self.fields = node.attrib["fields"]
         else:
-            self.fields = 'none'
+            self.fields = 'any'
 
         if "conflicts" in node.attrib:
             self.conflicts = node.attrib["conflicts"].split(' ')
