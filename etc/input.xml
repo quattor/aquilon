@@ -1316,14 +1316,14 @@
 	highest:  Use the highest available IP in the subnet.
 	max:      Find the highest IP in use and add one.
 	The default is lowest.
-	<optgroup mandatory="True" fields="one">
-	    <option name="machine" type="string">Machine (node) name</option>
-	    <option name="hostname" type="string">Hostname</option>
-	    <option name="chassis" type="string">Chassis name</option>
-	    <option name="network_device" type="string">Network device name</option>
-	    <option name="switch" type="string">[Deprecated] Switch name</option>
-	</optgroup>
 	<optgroup mandatory="True" fields="all">
+	    <optgroup mandatory="True" fields="one">
+		<option name="machine" type="string">Machine (node) name</option>
+		<option name="hostname" type="string">Hostname</option>
+		<option name="chassis" type="string">Chassis name</option>
+		<option name="network_device" type="string">Network device name</option>
+		<option name="switch" type="string">[Deprecated] Switch name</option>
+	    </optgroup>
 	    <option name="interface" type="string">Interface name</option>
 	</optgroup>
 	<optgroup fields="one">
@@ -1692,14 +1692,14 @@
 	del_interface_address commands to manage auxiliary IP address allocations. Use the
 	update_network_device, update_chassis and update_machine commands if you wish to change the primary IP address.
 	<optgroup mandatory="True" fields="all">
+	    <optgroup mandatory="True" fields="one">
+		<option name="machine" type="string">Machine name</option>
+		<option name="hostname" type="string">Host name</option>
+		<option name="network_device" type="string">Network device name</option>
+		<option name="switch" type="string">[Deprecated] Switch name</option>
+		<option name="chassis" type="string">Chassis name</option>
+	    </optgroup>
 	    <option name="interface" type="string">Interface name</option>
-	</optgroup>
-	<optgroup mandatory="True" fields="one">
-	    <option name="machine" type="string">Machine name</option>
-	    <option name="hostname" type="string">Host name</option>
-	    <option name="network_device" type="string">Network device name</option>
-	    <option name="switch" type="string">[Deprecated] Switch name</option>
-	    <option name="chassis" type="string">Chassis name</option>
 	</optgroup>
 	<optgroup fields="one">
 	    <option name="pg" type="string">portgroup, or an empty string to clear</option>
@@ -1782,23 +1782,23 @@
 
     <command name="del_interface_address">
 	Delete an IP address from an interface.
-	<optgroup mandatory="True" fields="one">
-	    <option name="machine" type="string">Machine name</option>
-	    <option name="chassis" type="string">Chassis name</option>
-	    <option name="network_device" type="string">Network device name</option>
-	    <option name="switch" type="string">[Deprecated] Switch name</option>
-	</optgroup>
 	<optgroup mandatory="True" fields="all">
+	    <optgroup mandatory="True" fields="one">
+		<option name="machine" type="string">Machine name</option>
+		<option name="chassis" type="string">Chassis name</option>
+		<option name="network_device" type="string">Network device name</option>
+		<option name="switch" type="string">[Deprecated] Switch name</option>
+	    </optgroup>
 	    <option name="interface" type="string">Name of the interface</option>
+	    <optgroup>
+		<option name="fqdn" type="string" conflicts="ip">FQDN of the address</option>
+		<option name="ip" type="ipv4" conflicts="fqdn">IP address</option>
+		<option name="label" type="string" conflicts="fqdn">Interface alias</option>
+	    </optgroup>
 	</optgroup>
 	<optgroup>
 	    <option name="keep_dns" type="flag">Keep the DNS record</option>
 	    <option name="network_environment" type="string">Network environment (default: internal)</option>
-	</optgroup>
-	<optgroup mandatory="True">
-	    <option name="fqdn" type="string" conflicts="ip">FQDN of the address</option>
-	    <option name="ip" type="ipv4" conflicts="fqdn">IP address</option>
-	    <option name="label" type="string" conflicts="fqdn">Interface alias</option>
 	</optgroup>
 	<transport method="delete" trigger="network_device" path="network_device/%(network_device)s/interface/%(interface)s/address"/>
 	<transport method="delete" trigger="switch" path="switch/%(switch)s/interface/%(interface)s/address"/>
@@ -2030,24 +2030,24 @@
 	<optgroup mandatory="True" fields="all">
 	    <option name="service" type="string" mandatory="True">service name</option>
 	    <option name="instance" type="string" mandatory="True">instance name</option>
+	    <optgroup fields="one">
+		<option name="organization" type="string">Organization</option>
+		<option name="hub" type="string">Hub</option>
+		<option name="continent" type="string">Continent</option>
+		<option name="country" type="string">Country</option>
+		<option name="campus" type="string">Campus</option>
+		<option name="city" type="string">City</option>
+		<option name="building" type="string">Building</option>
+		<option name="room" type="string">Room</option>
+		<option name="bunker" type="string">Bunker</option>
+		<option name="rack" type="string">Rack</option>
+		<option name="desk" type="string">Desk</option>
+		<option name="networkip" type="ipv4">Network IP address</option>
+	    </optgroup>
 	</optgroup>
 	<optgroup fields="all">
 	    <option name="archetype" type="string">archetype name</option>
 	    <option name="personality" type="string">personality name</option>
-	</optgroup>
-	<optgroup mandatory="True" fields="one">
-	    <option name="organization" type="string">Organization</option>
-	    <option name="hub" type="string">Hub</option>
-	    <option name="continent" type="string">Continent</option>
-	    <option name="country" type="string">Country</option>
-	    <option name="campus" type="string">Campus</option>
-	    <option name="city" type="string">City</option>
-	    <option name="building" type="string">Building</option>
-	    <option name="room" type="string">Room</option>
-	    <option name="bunker" type="string">Bunker</option>
-	    <option name="rack" type="string">Rack</option>
-	    <option name="desk" type="string">Desk</option>
-	    <option name="networkip" type="ipv4">Network IP address</option>
 	</optgroup>
 	<optgroup>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
@@ -2094,24 +2094,24 @@
 	<optgroup mandatory="True" fields="all">
 	    <option name="service" type="string" mandatory="True">service name</option>
 	    <option name="instance" type="string" mandatory="True">instance name</option>
+	    <optgroup mandatory="True" fields="one">
+		<option name="organization" type="string">Organization</option>
+		<option name="hub" type="string">Hub</option>
+		<option name="continent" type="string">Continent</option>
+		<option name="country" type="string">Country</option>
+		<option name="campus" type="string">Campus</option>
+		<option name="city" type="string">City</option>
+		<option name="building" type="string">Building</option>
+		<option name="room" type="string">Room</option>
+		<option name="bunker" type="string">Bunker</option>
+		<option name="rack" type="string">Rack</option>
+		<option name="desk" type="string">Desk</option>
+		<option name="networkip" type="ipv4">Network IP address</option>
+	    </optgroup>
 	</optgroup>
 	<optgroup fields="all">
 	    <option name="archetype" type="string">archetype name</option>
 	    <option name="personality" type="string">personality name</option>
-	</optgroup>
-	<optgroup mandatory="True" fields="one">
-	    <option name="organization" type="string">Organization</option>
-	    <option name="hub" type="string">Hub</option>
-	    <option name="continent" type="string">Continent</option>
-	    <option name="country" type="string">Country</option>
-	    <option name="campus" type="string">Campus</option>
-	    <option name="city" type="string">City</option>
-	    <option name="building" type="string">Building</option>
-	    <option name="room" type="string">Room</option>
-	    <option name="bunker" type="string">Bunker</option>
-	    <option name="rack" type="string">Rack</option>
-	    <option name="desk" type="string">Desk</option>
-	    <option name="networkip" type="ipv4">Network IP address</option>
 	</optgroup>
 	<optgroup>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
@@ -3409,16 +3409,16 @@
 		<option name="prefix" type="string">machine prefix</option>
 	    </optgroup>
 	    <option name="model" type="string">machine model</option>
-	</optgroup>
-	<optgroup mandatory="True" fields="one">
-	    <optgroup fields="all">
-		<option name="chassis" type="string">Chassis name</option>
-		<option name="slot" type="int">Chassis slot</option>
+	    <optgroup fields="one">
+		<optgroup fields="all">
+		    <option name="chassis" type="string">Chassis name</option>
+		    <option name="slot" type="int">Chassis slot</option>
+		</optgroup>
+		<option name="rack" type="string">Rack name</option>
+		<option name="desk" type="string">Desk name</option>
+		<option name="cluster" type="string">Cluster name</option>
+		<option name="vmhost" type="string">Host where the VM lives</option>
 	    </optgroup>
-	    <option name="rack" type="string">Rack name</option>
-	    <option name="desk" type="string">Desk name</option>
-	    <option name="cluster" type="string">Cluster name</option>
-	    <option name="vmhost" type="string">Host where the VM lives</option>
 	</optgroup>
 	<optgroup>
 	    <option name="vendor" type="string">Machine vendor. Needed if the model name is not unique</option>
@@ -3511,10 +3511,10 @@
 	    <option name="interface" type="string">Interface name (like xge49)</option>
 	    <option name="iftype" type="string">Interface type</option>
 	    <option name="ip" type="ipv4">IP address</option>
-	</optgroup>
-	<optgroup mandatory="True" fields="one">
-	    <option name="rack" type="string">Rack name</option>
-	    <option name="building" type="string">Building name</option>
+	    <optgroup fields="one">
+		<option name="rack" type="string">Rack name</option>
+		<option name="building" type="string">Building name</option>
+	    </optgroup>
 	</optgroup>
 	<optgroup>
 	    <option name="archetype" type="string">Archetype name</option>
@@ -3547,10 +3547,10 @@
 	    <option name="type" type="string">Switch type (tor, bor, agg)</option>
 	    <option name="ip" type="ipv4">IP address</option>
 	    <option name="interface" type="string">Interface name (like xge49)</option>
-	</optgroup>
-	<optgroup mandatory="True" fields="one">
-	    <option name="rack" type="string">Rack name</option>
-	    <option name="building" type="string">Building name</option>
+	    <optgroup fields="one">
+		<option name="rack" type="string">Rack name</option>
+		<option name="building" type="string">Building name</option>
+	    </optgroup>
 	</optgroup>
 	<optgroup>
 	    <option name="iftype" type="string">Interface type (default: oa)</option>
@@ -5554,17 +5554,17 @@
 
     <command name="add_parameter_definition">
 	Add parameter definition for a parameter.
-	<optgroup mandatory="True">
-	    <optgroup fields="all">
-		<option name="archetype" type="string" conflicts="feature type">Archetype</option>
-		<option name="template" type="string" conflicts="feature">Name of structure template this parameter gets included in</option>
-	    </optgroup>
-	    <optgroup fields="all">
-		<option name="feature" type="string" conflicts="archetype template">Feature</option>
-		<option name="type" type="string" conflicts="archetype">Type of the feature: host, hardware or interface</option>
-	    </optgroup>
-	</optgroup>
 	<optgroup mandatory="True" fields="all">
+	    <optgroup fields="one">
+		<optgroup fields="all">
+		    <option name="archetype" type="string" conflicts="feature type">Archetype</option>
+		    <option name="template" type="string" conflicts="feature">Name of structure template this parameter gets included in</option>
+		</optgroup>
+		<optgroup fields="all">
+		    <option name="feature" type="string" conflicts="archetype template">Feature</option>
+		    <option name="type" type="string" conflicts="archetype">Type of the feature: host, hardware or interface</option>
+		</optgroup>
+	    </optgroup>
 	    <option name="path" type="string">Path of the parameter can contain regexp</option>
 	    <option name="value_type" type="string" default="string">Type of value for the parameter[string|numeric|list|json]</option>
 	</optgroup>
@@ -5581,13 +5581,13 @@
     <command name="del_parameter_definition">
 	Delete parameter definition for a given object.
 	<optgroup mandatory="True">
-	    <option name="archetype" type="string" conflicts="feature type">Archetype</option>
-	    <optgroup fields="all">
-		<option name="feature" type="string" conflicts="archetype template">Feature</option>
-		<option name="type" type="string" conflicts="archetype">Type of the feature: host, hardware or interface</option>
+	    <optgroup fields="one">
+		<option name="archetype" type="string" conflicts="feature type">Archetype</option>
+		<optgroup fields="all">
+		    <option name="feature" type="string" conflicts="archetype template">Feature</option>
+		    <option name="type" type="string" conflicts="archetype">Type of the feature: host, hardware or interface</option>
+		</optgroup>
 	    </optgroup>
-	</optgroup>
-	<optgroup mandatory="True">
 	    <option name="path" type="string">Path of the parameter</option>
 	</optgroup>
 	<transport method="delete" trigger="archetype" path="archetype/%(archetype)s/parameter_definitions"/>
@@ -5597,20 +5597,20 @@
     <command name="update_parameter_definition">
 	Update parameter definition for a given object.
 	<optgroup mandatory="True">
-	    <option name="archetype" type="string" conflicts="feature type">Archetype</option>
-	    <optgroup fields="all">
-		<option name="feature" type="string" conflicts="archetype template">Feature</option>
-		<option name="type" type="string" conflicts="archetype">Type of the feature: host, hardware or interface</option>
+	    <optgroup fields="one">
+		<option name="archetype" type="string" conflicts="feature type">Archetype</option>
+		<optgroup fields="all">
+		    <option name="feature" type="string" conflicts="archetype template">Feature</option>
+		    <option name="type" type="string" conflicts="archetype">Type of the feature: host, hardware or interface</option>
+		</optgroup>
 	    </optgroup>
-	    <optgroup mandatory="True">
-		<option name="required" type="flag">Is this parameter required for object compilation </option>
-		<option name="default" type="string">Default value </option>
-		<option name="description" type="string">Description</option>
-		<option name="rebuild_required" type="flag">Adding/Modifiying this parameter value requires rebuild of host </option>
-	    </optgroup>
-	</optgroup>
-	<optgroup mandatory="True">
 	    <option name="path" type="string">Path of the parameter</option>
+	</optgroup>
+	<optgroup>
+	    <option name="required" type="flag">Is this parameter required for object compilation </option>
+	    <option name="default" type="string">Default value </option>
+	    <option name="description" type="string">Description</option>
+	    <option name="rebuild_required" type="flag">Adding/Modifiying this parameter value requires rebuild of host </option>
 	</optgroup>
 	<transport method="post" trigger="archetype" path="archetype/%(archetype)s/parameter_definitions"/>
 	<transport method="post" trigger="feature" path="feature/%(type)s/%(feature)s/parameter_definitions"/>
