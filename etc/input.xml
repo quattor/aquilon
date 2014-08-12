@@ -670,14 +670,10 @@
 	Note that location searches are inclusive.  That is, searching for a
 	building will include all racks, rooms, etc. inside the building.  The
 	--exact_location option can be used to override this behavior.
-	<optgroup mandatory="True">
+	<optgroup mandatory="True" fields="one">
 	    <option name="network" type="string">Network name</option>
 	    <option name="ip" type="ipv4">IP address</option>
 	    <option name="all" type="flag">All</option>
-	    <optgroup>
-		<option name="type" type="string">Network type</option>
-		<option name="hosts" type="flag">Hosts</option>
-	    </optgroup>
 	    <optgroup fields="one">
 		<option name="organization" type="string">Organization</option>
 		<option name="hub" type="string">Hub</option>
@@ -691,10 +687,11 @@
 		<option name="rack" type="string">Rack</option>
 		<option name="desk" type="string">Desk</option>
 	    </optgroup>
-	    <option name="exact_location" type="flag">match the location exactly</option>
 	</optgroup>
 	<optgroup>
+	    <option name="exact_location" type="flag">match the location exactly</option>
 	    <option name="network_environment" type="string">Network environment (default: internal)</option>
+	    <option name="hosts" type="flag">Hosts</option>
 	</optgroup>
 	<transport method="get" path="network"/>
 	<format name="proto" >
