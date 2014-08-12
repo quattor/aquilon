@@ -831,8 +831,6 @@
 	    <option name="share" type="string" conflicts="filesystem">Share name</option>
 	    <option name="filesystem" type="string" conflicts="share">Filesystem name</option>
 	    <option name="resourcegroup" type="string">Resourcegroup of the share or filesystem</option>
-	</optgroup>
-	<optgroup>
 	    <option name="address" type="string">SCSI bus address (e.g. 0:0)</option>
 	    <option name="comments" type="string">Comments</option>
 	    <option name="boot" type="boolean">Mark the disk as bootable</option>
@@ -867,11 +865,9 @@
 	</optgroup>
 	<optgroup>
 	    <option name="rename_to" type="string">New name of the disk</option>
-	    <optgroup>
-		<option name="share" type="string" conflicts="filesystem">Share backing the disk image</option>
-		<option name="filesystem" type="string" conflicts="share">Filesystem backing the disk image</option>
-		<option name="resourcegroup" type="string">Resourcegroup to add share</option>
-	    </optgroup>
+	    <option name="share" type="string" conflicts="filesystem">Share backing the disk image</option>
+	    <option name="filesystem" type="string" conflicts="share">Filesystem backing the disk image</option>
+	    <option name="resourcegroup" type="string">Resourcegroup to add share</option>
 	    <option name="address" type="string">SCSI bus address (e.g. 0:0)</option>
 	    <option name="controller" type="string" conflicts="type">Type of the controller/interface</option>
 	    <option name="size" type="int" conflicts="capacity">Capacity of the disk (GB)</option>
@@ -1009,12 +1005,12 @@
 	    <option name="osversion" type="string">Operating system version.  Default 'generic'.</option>
 	    <option name="comments" type="string">Comments</option>
 	    <option name="ipalgorithm" type="string">Algorithm for automatically choosing an IP.</option>
-	    <optgroup fields="one">
-		<option name="ip" type="ipv4">IP address</option>
-		<option name="ipfromip" type="ipv4">choose IP address in subnet</option>
-		<option name="ipfromsystem" type="string">choose IP address in subnet of system</option>
-		<option name="autoip" type="flag">choose IP address based on mac/switch</option>
-	    </optgroup>
+	</optgroup>
+	<optgroup fields="one">
+	    <option name="ip" type="ipv4">IP address</option>
+	    <option name="ipfromip" type="ipv4">choose IP address in subnet</option>
+	    <option name="ipfromsystem" type="string">choose IP address in subnet of system</option>
+	    <option name="autoip" type="flag">choose IP address based on mac/switch</option>
 	</optgroup>
 	<optgroup fields="one">
 	    <option name="grn" type="string">GRN as string</option>
@@ -1471,19 +1467,19 @@
 	    <option name="type" type="string">Network type</option>
 	    <option name="side" type="string">Network side</option>
 	    <option name="comments" type="string">Comments</option>
-	    <optgroup fields="one">
-		<option name="organization" type="string">Organization</option>
-		<option name="hub" type="string">Hub</option>
-		<option name="continent" type="string">Continent</option>
-		<option name="country" type="string">Country</option>
-		<option name="campus" type="string">Campus</option>
-		<option name="city" type="string">City</option>
-		<option name="building" type="string">Building</option>
-		<option name="room" type="string">Room</option>
-		<option name="bunker" type="string">Bunker</option>
-		<option name="rack" type="string">Rack</option>
-		<option name="desk" type="string">Desk</option>
-	    </optgroup>
+	</optgroup>
+	<optgroup fields="one">
+	    <option name="organization" type="string">Organization</option>
+	    <option name="hub" type="string">Hub</option>
+	    <option name="continent" type="string">Continent</option>
+	    <option name="country" type="string">Country</option>
+	    <option name="campus" type="string">Campus</option>
+	    <option name="city" type="string">City</option>
+	    <option name="building" type="string">Building</option>
+	    <option name="room" type="string">Room</option>
+	    <option name="bunker" type="string">Bunker</option>
+	    <option name="rack" type="string">Rack</option>
+	    <option name="desk" type="string">Desk</option>
 	</optgroup>
 	<optgroup>
 	    <option name="network_environment" type="string">Network environment (default: internal)</option>
@@ -5482,10 +5478,8 @@
 	    <option name="personality" type="string">Name of personality</option>
 	    <option name="path" type="string">Path of the parameter</option>
 	</optgroup>
-	<optgroup fields="all">
-	    <option name="feature" type="string">Feature</option>
-	</optgroup>
 	<optgroup>
+	    <option name="feature" type="string">Feature</option>
 	    <option name="archetype" type="string">Archetype</option>
 	    <option name="interface" type="string">Interface of a machine</option>
 	    <option name="model" type="string">Name of a hardware model</option>
@@ -5504,10 +5498,8 @@
 	    <option name="path" type="string">Path of the parameter</option>
 	    <option name="value" type="string">Value for the parameter, type depending on the parameter definition</option>
 	</optgroup>
-	<optgroup fields="all">
-	    <option name="feature" type="string">Feature</option>
-	</optgroup>
 	<optgroup>
+	    <option name="feature" type="string">Feature</option>
 	    <option name="archetype" type="string">Archetype</option>
 	    <option name="interface" type="string">Interface of a machine</option>
 	    <option name="model" type="string">Name of a hardware model</option>
@@ -5524,10 +5516,8 @@
 	    <option name="personality" type="string">Name of personality</option>
 	    <option name="path" type="string">Path of the parameter</option>
 	</optgroup>
-	<optgroup fields="all">
-	    <option name="feature" type="string">Feature</option>
-	</optgroup>
 	<optgroup>
+	    <option name="feature" type="string">Feature</option>
 	    <option name="archetype" type="string">Archetype</option>
 	    <option name="interface" type="string">Interface of a machine</option>
 	    <option name="model" type="string">Name of a hardware model</option>
