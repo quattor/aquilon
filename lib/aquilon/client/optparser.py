@@ -275,7 +275,7 @@ class OptGroup(Element):
     def check(self, options):
         result = {}
         found = {}
-        foundany = False
+        num_found = 0
         foundall = True
 
         for option in self.options:
@@ -283,23 +283,29 @@ class OptGroup(Element):
             found[option.name] = f
             if f:
                 result.update(res)
-            foundany = foundany or f
+                num_found += 1
             foundall = foundall and f
 
         # check if the options are specified as requested
         if self.mandatory:
             if self.fields == 'all' and not foundall:
                 raise ParsingError('Not all mandatory options specified!')
-            if self.fields == 'any' and not foundany:
+            if self.fields == 'any' and not num_found:
                 raise ParsingError('Please provide any of the required options!')
-            if not foundany:
+            if self.fields == 'one' and num_found != 1:
+                raise ParsingError('Please provide exactly one of the required '
+                                   'options!')
+            if not num_found:
                 raise ParsingError('Mandatory options not provided')
         else:
-            if self.fields == 'all' and foundany and not foundall:
+            if self.fields == 'all' and num_found and not foundall:
                 raise ParsingError('Not all mandatory options specified!')
+            if self.fields == 'one' and num_found > 1:
+                raise ParsingError('Please provide exactly one of the required '
+                                   'options!')
 
         # return result
-        return result, foundany
+        return result, bool(num_found)
 
     def genOptions(self, parser):
         for o in self.options:
@@ -319,10 +325,15 @@ class OptGroup(Element):
 
     def recursiveHelp(self, indentlevel, width=None):
         if self.mandatory:
-            help = "Requires %s of these options:\n" % self.fields
+            if self.fields == 'one':
+                help = "Requires exactly one of these options:\n"
+            else:
+                help = "Requires %s of these options:\n" % self.fields
         else:
             if self.fields == 'all':
                 help = "Optional, but must use all or none:\n"
+            elif self.fields == 'one':
+                help = "Optional, use at most one:\n"
             else:
                 help = "Optional:\n"
 

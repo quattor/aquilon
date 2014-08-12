@@ -89,7 +89,9 @@ class TestAddVirtualHardware(TestBrokerCommand):
         command = ["add_machine", "--machine=evm999", "--rack=np997",
                    "--model=utmedium", "--cluster=utecl1"]
         out = self.badoptiontest(command)
-        self.matchoutput(out, "cluster conflicts with rack", command)
+        self.matchoutput(out,
+                         "Please provide exactly one of the required options!",
+                         command)
 
     def test_050_addutmc5machines(self):
         # 2 clusters, 12 vmhosts with 24G RAM each, down_hosts_threshold=2

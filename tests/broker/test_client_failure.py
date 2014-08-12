@@ -65,31 +65,21 @@ class TestClientFailure(TestBrokerCommand):
     def testconflictingoptions(self):
         command = "add interface --mac 02:02:02:02:02:02 --interface eth0 " \
                   "--machine does-not-exist --network_device does-not-exist-either"
-        (p, out, err) = self.runcommand(command.split(" "))
-        s = "error: Option or option group network_device conflicts with machine"
-        self.assert_(err.find(s) >= 0,
-                     "STDERR for %s did not include '%s':\n@@@\n'%s'\n@@@\n"
-                     % (command, s, err))
-        self.assertEqual(out, "",
-                         "STDOUT for %s was not empty:\n@@@\n'%s'\n@@@\n"
-                         % (command, out))
-        self.assertEqual(p.returncode, 2)
+        err = self.badoptiontest(command.split(" "))
+        self.matchoutput(err,
+                         "Please provide exactly one of the required options!",
+                         command)
 
     def testextraargs(self):
         command = "show cpu --speed 2000 foo"
-        (p, out, err) = self.runcommand(command.split(" "))
-        s = "Extra arguments on the command line"
-        self.assert_(err.find(s) >= 0,
-                     "STDERR for %s did not include '%s':\n@@@\n'%s'\n@@@\n"
-                     % (command, s, err))
+        err = self.badoptiontest(command.split(" "), exit_code=1)
+        self.matchoutput(err, "Extra arguments on the command line", command)
 
     def testinvalidinteger(self):
         command = "show cpu --speed foo"
-        (p, out, err) = self.runcommand(command.split(" "))
-        s = "option --speed: invalid integer value: 'foo'"
-        self.assert_(err.find(s) >= 0,
-                     "STDERR for %s did not include '%s':\n@@@\n'%s'\n@@@\n"
-                     % (command, s, err))
+        err = self.badoptiontest(command.split(" "))
+        self.matchoutput(err, "option --speed: invalid integer value: 'foo'",
+                         command)
 
     def testhelp(self):
         command = "help"
@@ -110,7 +100,6 @@ class TestClientFailure(TestBrokerCommand):
     def testunauthorized(self):
         command = "flush"
         out = self.unauthorizedtest(command)
-
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestClientFailure)
