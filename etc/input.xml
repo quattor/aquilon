@@ -5631,10 +5631,8 @@
 	search a given path in personality or feature parameter
 	<p/>
 	Supported options for --format: raw.
-	<optgroup mandatory="True">
-	    <option name="archetype" type="string" conflicts="feature type">Archetype</option>
-	</optgroup>
-	<optgroup mandatory="True">
+	<optgroup mandatory="True" fields="all">
+	    <option name="archetype" type="string">Archetype</option>
 	    <option name="path" type="string">Path of the parameter</option>
 	</optgroup>
 	<transport method="get" path="find/parameter"/>
