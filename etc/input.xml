@@ -1467,7 +1467,7 @@
 	    <option name="network" type="string">Network name</option>
 	    <option name="ip" type="ipv4">Network address</option>
 	</optgroup>
-	<optgroup mandatory="True">
+	<optgroup>
 	    <option name="type" type="string">Network type</option>
 	    <option name="side" type="string">Network side</option>
 	    <option name="comments" type="string">Comments</option>
@@ -2305,7 +2305,7 @@
 	<optgroup mandatory="True" fields="all">
 	    <option name="sandbox" type="string">Name of the template sandbox</option>
 	</optgroup>
-	<optgroup mandatory="True">
+	<optgroup>
 	    <option name="comments" type="string">Comments on the branch</option>
 	    <option name="compiler_version" type="string">Version of panc to use</option>
 	    <option name="autosync" type="boolean">Set the autosync flag</option>
@@ -2322,7 +2322,7 @@
 	<optgroup mandatory="True" fields="all">
 	    <option name="domain" type="string">Name of the template domain</option>
 	</optgroup>
-	<optgroup mandatory="True">
+	<optgroup>
 	    <option name="comments" type="string">Comments on the domain</option>
 	    <option name="compiler_version" type="string">Version of panc to use</option>
 	    <option name="autosync" type="boolean">Set the autosync flag</option>
