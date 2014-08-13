@@ -4194,21 +4194,29 @@
     <command name="add_allowed_personality">
 	add a personality to the allowed list of a cluster
 	<optgroup mandatory="True" fields="all">
-	    <option name="cluster" type="string">Name of the cluster</option>
+	    <optgroup fields="one">
+		<option name="cluster" type="string">Name of the cluster</option>
+		<option name="metacluster" type="string">Name of the metacluster</option>
+	    </optgroup>
 	    <option name="archetype" type="string">Name of the archetype</option>
 	    <option name="personality" type="string">Name of the personality</option>
 	</optgroup>
-	<transport method="put" path="cluster/%(cluster)s/allowed/%(archetype)s/%(personality)s"/>
+	<transport method="put" trigger="cluster" path="cluster/%(cluster)s/allowed/%(archetype)s/%(personality)s"/>
+	<transport method="put" trigger="metacluster" path="metacluster/%(metacluster)s/allowed/%(archetype)s/%(personality)s"/>
     </command>
 
     <command name="del_allowed_personality">
 	delete a personality from the allowed list of a cluster
 	<optgroup mandatory="True" fields="all">
-	    <option name="cluster" type="string">Name of the cluster</option>
+	    <optgroup fields="one">
+		<option name="cluster" type="string">Name of the cluster</option>
+		<option name="metacluster" type="string">Name of the metacluster</option>
+	    </optgroup>
 	    <option name="archetype" type="string">Name of the archetype</option>
 	    <option name="personality" type="string">Name of the personality</option>
 	</optgroup>
-	<transport method="delete" path="cluster/%(cluster)s/allowed/%(archetype)s/%(personality)s"/>
+	<transport method="delete" trigger="cluster" path="cluster/%(cluster)s/allowed/%(archetype)s/%(personality)s"/>
+	<transport method="delete" trigger="metacluster" path="metacluster/%(metacluster)s/allowed/%(archetype)s/%(personality)s"/>
     </command>
 
     <command name="rebind_metacluster">

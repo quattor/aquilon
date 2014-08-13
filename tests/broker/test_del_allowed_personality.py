@@ -31,9 +31,11 @@ class TestDelAllowedPersonality(TestBrokerCommand):
         command = ["del_allowed_personality", "--archetype", "vmhost",
                    "--personality=vulcan-1g-desktop-prod", "--cluster=utecl1"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "The cluster member evh1.aqd-unittest.ms.com "
-                         "has a personality of vulcan-1g-desktop-prod which is "
-                         "incompatible", command)
+        self.matchoutput(out,
+                         "Member host evh1.aqd-unittest.ms.com has personality "
+                         "vmhost/vulcan-1g-desktop-prod, which is incompatible "
+                         "with this constraint.",
+                         command)
 
     def test_12_failmissingcluster(self):
         command = ["del_allowed_personality", "--archetype", "vmhost",
