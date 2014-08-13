@@ -106,10 +106,9 @@ class Decommissioned(ClusterLifecycle):
 
         if dbcluster.hosts and (not config.has_option(section, opt) or
                                 not config.getboolean(section, opt)):
-            raise ArgumentError("Cannot change state to {0}, as {1}'s "
-                                "archetype is {2}."
-                                .format(dbdecommissioned.name, dbcluster,
-                                        archetype.name))
+            raise ArgumentError("Cascaded decommissioning is not enabled for "
+                                "{0:l}, please remove all members first."
+                                .format(archetype))
 
         if dbcluster.virtual_machines:
             raise ArgumentError("Cannot change state to {0}, as {1} has "

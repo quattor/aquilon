@@ -74,6 +74,10 @@ class MetaCluster(Cluster):
             building = cluster.location_constraint.building
             if building not in building_capacity:
                 building_capacity[building] = {}
+
+            if not hasattr(cluster, 'get_total_capacity'):
+                continue
+
             cap = cluster.get_total_capacity()
             for name, value in cap.items():
                 if name in building_capacity[building]:
@@ -99,6 +103,9 @@ class MetaCluster(Cluster):
     def get_total_usage(self):
         usage = {}
         for cluster in self.members:
+            if not hasattr(cluster, 'get_total_usage'):
+                continue
+
             for name, value in cluster.get_total_usage().items():
                 if name in usage:
                     usage[name] += value

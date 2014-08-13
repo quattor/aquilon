@@ -29,7 +29,7 @@ from brokertest import TestBrokerCommand
 
 class TestUsecaseHACluster(TestBrokerCommand):
 
-    def test_100_add_cluster1(self):
+    def test_100_add_hacl1(self):
         command = ["add", "cluster", "--cluster", "hacl1", "--campus", "ny",
                    "--down_hosts_threshold", 0, "--archetype", "hacluster",
                    "--sandbox", "%s/utsandbox" % self.user,
@@ -43,7 +43,7 @@ class TestUsecaseHACluster(TestBrokerCommand):
         self.matchclean(out, "Building:", command)
         self.matchclean(out, "Rack:", command)
 
-    def test_100_add_cluster2(self):
+    def test_110_add_hacl2(self):
         command = ["add", "cluster", "--cluster", "hacl2", "--campus", "ny",
                    "--down_hosts_threshold", 0, "--archetype", "hacluster",
                    "--max_members", 2,
@@ -51,12 +51,12 @@ class TestUsecaseHACluster(TestBrokerCommand):
                    "--personality", "vcs-msvcs"]
         self.successtest(command)
 
-    def test_105_cat_hacl2(self):
+    def test_115_cat_hacl2(self):
         command = ["cat", "--cluster", "hacl2", "--data"]
         out = self.commandtest(command)
         self.matchoutput(out, '"system/cluster/max_hosts" = 2;', command)
 
-    def test_110_add_members(self):
+    def test_120_add_members(self):
         for i in range(0, 4):
             server_idx = i + 2
             cluster_idx = (i % 2) + 1
@@ -64,16 +64,16 @@ class TestUsecaseHACluster(TestBrokerCommand):
                               "--hostname", "server%d.aqd-unittest.ms.com" %
                               server_idx])
 
-    def test_111_fix_location(self):
+    def test_121_fix_hacl1_location(self):
         self.noouttest(["update_cluster", "--cluster", "hacl1",
                         "--fix_location"])
 
-    def test_112_verify_hacl1_fix_location(self):
+    def test_122_verify_hacl1_location(self):
         command = ["show_cluster", "--cluster", "hacl1"]
         out = self.commandtest(command)
         self.matchoutput(out, "Rack: ut9", command)
 
-    def test_115_add_cluster_srv(self):
+    def test_125_add_cluster_srv(self):
         ip1 = self.net["unknown0"].usable[26]
         ip2 = self.net["unknown0"].usable[27]
         self.dsdb_expect_add("hacl1.aqd-unittest.ms.com", ip1)
@@ -88,7 +88,7 @@ class TestUsecaseHACluster(TestBrokerCommand):
                           "--ip", ip2, "--interfaces", "eth0"])
         self.dsdb_verify()
 
-    def test_120_add_resourcegroups(self):
+    def test_130_add_resourcegroups(self):
         for cl in range(1, 3):
             for rg in range(1, 3):
                 self.successtest(["add", "resourcegroup",
@@ -99,7 +99,7 @@ class TestUsecaseHACluster(TestBrokerCommand):
                                           "resourcegroup", "hacl%dg%d" % (cl, rg),
                                           "config")
 
-    def test_125_add_apps(self):
+    def test_135_add_apps(self):
         for cl in range(1, 3):
             for rg in range(1, 3):
                 self.successtest(["add", "application",
@@ -113,7 +113,7 @@ class TestUsecaseHACluster(TestBrokerCommand):
                                           "application", "hacl%dg%dapp" % (cl, rg),
                                           "config")
 
-    def test_125_add_fs(self):
+    def test_135_add_fs(self):
         for cl in range(1, 3):
             for rg in range(1, 3):
                 self.successtest(["add", "filesystem", "--type", "ext3",
@@ -130,7 +130,7 @@ class TestUsecaseHACluster(TestBrokerCommand):
                                           "filesystem", "hacl%dg%dfs" % (cl, rg),
                                           "config")
 
-    def test_125_add_appsrv(self):
+    def test_135_add_appsrv(self):
         # grep-friendly syntax
         ips = [self.net["unknown0"].usable[28],
                self.net["unknown0"].usable[29]]
@@ -150,7 +150,7 @@ class TestUsecaseHACluster(TestBrokerCommand):
                                       "config")
         self.dsdb_verify()
 
-    def test_130_add_lb(self):
+    def test_140_add_lb(self):
         # Multi-A record pointing to two different service IPs
         ips = [self.net["unknown0"].usable[30],
                self.net["unknown0"].usable[31]]
@@ -170,11 +170,7 @@ class TestUsecaseHACluster(TestBrokerCommand):
                                       "config")
         self.dsdb_verify()
 
-    def test_200_make_cluster(self):
-        self.successtest(["make", "cluster", "--cluster", "hacl1"])
-        self.successtest(["make", "cluster", "--cluster", "hacl2"])
-
-    def test_300_check_dns(self):
+    def test_145_check_hashared(self):
         ips = [self.net["unknown0"].usable[30],
                self.net["unknown0"].usable[31]]
         command = ["show", "fqdn", "--fqdn", "hashared.aqd-unittest.ms.com"]
@@ -182,17 +178,70 @@ class TestUsecaseHACluster(TestBrokerCommand):
         self.matchoutput(out, "IP: %s" % ips[0], command)
         #self.matchoutput(out, "IP: %s" % ips[1], command)
 
-    def test_400_try_deco_hacl1(self):
+    def test_150_make_cluster(self):
+        self.successtest(["make", "cluster", "--cluster", "hacl1"])
+        self.successtest(["make", "cluster", "--cluster", "hacl2"])
+
+    def test_160_add_hamc1(self):
+        self.noouttest(["add_metacluster", "--metacluster", "hamc1",
+                        "--archetype", "metacluster",
+                        "--personality", "metacluster",
+                        "--sandbox", "%s/utsandbox" % self.user])
+
+    def test_161_add_allowed_personality(self):
+        self.noouttest(["add_allowed_personality", "--archetype", "hacluster",
+                        "--personality", "vcs-msvcs", "--metacluster", "hamc1"])
+
+    def test_162_add_clusters(self):
+        self.noouttest(["rebind_metacluster", "--cluster", "hacl1",
+                        "--metacluster", "hamc1"])
+        self.noouttest(["rebind_metacluster", "--cluster", "hacl2",
+                        "--metacluster", "hamc1"])
+
+    def test_163_add_wrong_cluster(self):
+        command = ["rebind_metacluster", "--cluster", "utecl3",
+                   "--metacluster", "hamc1"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Personality esx_cluster/vulcan-1g-desktop-prod is "
+                         "not allowed by the metacluster.  Allowed "
+                         "personalities are: hacluster/vcs-msvcs",
+                         command)
+
+    def test_164_show_hamc1(self):
+        command = ["show_metacluster", "--metacluster", "hamc1"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Member: High Availability Cluster hacl1", command)
+        self.matchoutput(out, "Member: High Availability Cluster hacl2", command)
+        self.matchoutput(out,
+                         "Allowed Personality: Personality hacluster/vcs-msvcs",
+                         command)
+        self.matchoutput(out, "Organization: ms", command)
+
+    def test_165_fix_hamc1_location(self):
+        self.noouttest(["update_metacluster", "--metacluster", "hamc1",
+                        "--fix_location"])
+
+    def test_166_verify_location(self):
+        command = ["show_metacluster", "--metacluster", "hamc1"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Campus: ny", command)
+
+    # TODO: there are no templates yet, so this does not work
+    #def test_167_make_hamc1(self):
+    #    self.successtest(["make_cluster", "--cluster", "hamc1"])
+
+    def test_200_try_deco_hacl1(self):
         command = ["change_status", "--cluster", "hacl1", "--buildstatus",
                    "decommissioned"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
-                         "Cannot change state to decommissioned, as "
-                         "High Availability Cluster hacl1's archetype "
-                         "is hacluster.",
+                         "Cascaded decommissioning is not enabled for "
+                         "archetype hacluster, please remove all members "
+                         "first.",
                          command)
 
-    def test_900_try_del_hacl1g1(self):
+    def test_200_try_del_hacl1g1(self):
         command = ["del", "resourcegroup", "--cluster", "hacl1",
                    "--resourcegroup", "hacl1g1"]
         out = self.badrequesttest(command)
@@ -201,7 +250,7 @@ class TestUsecaseHACluster(TestBrokerCommand):
                          "hacl1g1addr, please delete it first.",
                          command)
 
-    def test_910_del_appsrv(self):
+    def test_300_del_appsrv(self):
         ips = [self.net["unknown0"].usable[28],
                self.net["unknown0"].usable[29]]
         for cl in range(1, 3):
@@ -216,7 +265,7 @@ class TestUsecaseHACluster(TestBrokerCommand):
                                     "config")
         self.dsdb_verify()
 
-    def test_920_del_hacl1g1(self):
+    def test_310_del_hacl1g1(self):
         plenarydir = self.config.get("broker", "plenarydir")
         cluster_res_dir = os.path.join(plenarydir, "resource", "cluster", "hacl1")
         rg_dir = os.path.join(cluster_res_dir, "resourcegroup", "hacl1g1")
@@ -244,11 +293,11 @@ class TestUsecaseHACluster(TestBrokerCommand):
         self.failIf(os.path.exists(rg_dir),
                     "Plenary directory '%s' still exists" % rg_dir)
 
-    def test_920_del_hacl2g1(self):
+    def test_310_del_hacl2g1(self):
         self.successtest(["del", "resourcegroup", "--resourcegroup", "hacl2g1",
                           "--cluster", "hacl2"])
 
-    def test_930_del_hashared(self):
+    def test_320_del_hashared(self):
         ips = [self.net["unknown0"].usable[30],
                self.net["unknown0"].usable[31]]
         self.dsdb_expect_delete(ips[0])
@@ -272,21 +321,21 @@ class TestUsecaseHACluster(TestBrokerCommand):
 
         self.dsdb_verify()
 
-    def test_940_hacl1g2(self):
+    def test_330_hacl1g2(self):
         self.successtest(["del", "resourcegroup", "--resourcegroup", "hacl1g2",
                           "--cluster", "hacl1"])
 
-    def test_940_hacl2g2(self):
+    def test_330_hacl2g2(self):
         self.successtest(["del", "resourcegroup", "--resourcegroup", "hacl2g2",
                           "--cluster", "hacl2"])
 
-    def test_950_uncluster_firsthost(self):
+    def test_340_uncluster_firsthost(self):
         self.successtest(["uncluster", "--cluster", "hacl1",
                           "--hostname", "server2.aqd-unittest.ms.com"])
         self.successtest(["uncluster", "--cluster", "hacl2",
                           "--hostname", "server3.aqd-unittest.ms.com"])
 
-    def test_955_uncluster_fail(self):
+    def test_345_uncluster_fail(self):
         command = ["uncluster", "--cluster", "hacl1",
                    "--hostname", "server4.aqd-unittest.ms.com"]
         out = self.badrequesttest(command)
@@ -296,7 +345,7 @@ class TestUsecaseHACluster(TestBrokerCommand):
                          "member is not allowed.",
                          command)
 
-    def test_960_del_clustersrv(self):
+    def test_350_del_clustersrv(self):
         self.dsdb_expect_delete(self.net["unknown0"].usable[26])
         self.dsdb_expect_delete(self.net["unknown0"].usable[27])
         self.successtest(["del", "service", "address", "--cluster", "hacl1",
@@ -305,16 +354,18 @@ class TestUsecaseHACluster(TestBrokerCommand):
                           "--name", "hacl2"])
         self.dsdb_verify()
 
-    def test_970_uncluster_second(self):
+    def test_360_uncluster_second(self):
         self.successtest(["uncluster", "--cluster", "hacl1",
                           "--hostname", "server4.aqd-unittest.ms.com"])
         self.successtest(["uncluster", "--cluster", "hacl2",
                           "--hostname", "server5.aqd-unittest.ms.com"])
 
-    def test_980_del_clusters(self):
+    def test_370_del_clusters(self):
         self.successtest(["del", "cluster", "--cluster", "hacl1"])
         self.successtest(["del", "cluster", "--cluster", "hacl2"])
 
+    def test_380_del_hamc1(self):
+        self.successtest(["del_metacluster", "--metacluster", "hamc1"])
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUsecaseHACluster)
