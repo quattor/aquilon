@@ -40,7 +40,7 @@ class CommandSearchESXCluster(CommandSearchCluster):
             elif key == 'esx_hostname':
                 esx_hostname = arguments[key]
             # 'esx_' prefix to these options.
-            elif key in ['metacluster', 'guest', 'switch', 'virtual_machine']:
+            elif key in ['guest', 'switch', 'virtual_machine']:
                 gen_arguments["esx_%s" % key] = arguments[key]
             else:
                 gen_arguments[key] = arguments[key]
@@ -58,4 +58,5 @@ class CommandSearchESXCluster(CommandSearchCluster):
                                            member_hostname=esx_hostname,
                                            member_personality=None,
                                            sandbox_author=None,
+                                           esx_metacluster=None,
                                            **gen_arguments)

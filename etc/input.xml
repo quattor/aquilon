@@ -320,7 +320,8 @@
 	    </optgroup>
 	    <optgroup fields="any">
 		<option name="cluster" type="string">cluster name</option>
-		<option name="esx_metacluster" type="string">metacluster name</option>
+		<option name="metacluster" type="string">metacluster name</option>
+		<option name="esx_metacluster" type="string">[Deprecated] metacluster name</option>
 		<option name="esx_virtual_machine" type="string">virtual machine label (evm1)</option>
 		<option name="esx_guest" type="string">fully qualified host name of a virtual machine</option>
 		<option name="service" type="string">client of service (single service only)</option>
