@@ -36,6 +36,7 @@
 	    <group choice="req">
 		<arg choice="plain"><option>--hostname <replaceable>HOSTNAME</replaceable></option></arg>
 		<arg choice="plain"><option>--cluster <replaceable>CLUSTER</replaceable></option></arg>
+		<arg choice="plain"><option>--metacluster <replaceable>METACLUSTER</replaceable></option></arg>
 	    </group>
 	    <arg choice="opt"><option>--data</option></arg>
 	    <arg choice="opt"><option>--resourcegroup <replaceable>GROUP</replaceable></option></arg>
@@ -147,6 +148,21 @@
 		<listitem>
 		    <para>
 			Display plenaries related to the cluster <replaceable>CLUSTER</replaceable>. If
+			no other options are specified, then the object template is displayed. If the
+			<option>--data</option> option is specified, then the template storing all the
+			data for the cluster is displayed. If one of the resource-specific options is
+			specified (e.g. <option>--application</option>, <option>--filesystem</option> etc.),
+			then the named resource is displayed.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--metacluster <replaceable>METACLUSTER</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Display plenaries related to the metacluster <replaceable>METACLUSTER</replaceable>. If
 			no other options are specified, then the object template is displayed. If the
 			<option>--data</option> option is specified, then the template storing all the
 			data for the cluster is displayed. If one of the resource-specific options is

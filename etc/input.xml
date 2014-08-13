@@ -2485,15 +2485,16 @@
 	that template generated on-demand in this way will be incomplete
 	(especially if it cannot be compiled) and is purely provided for debugging.
 	<optgroup mandatory="True" fields="any">
-	    <option name="machine" type="string" conflicts="hostname cluster service instance default city network_device switch personality virtual_switch">Name of the machine</option>
-	    <option name="hostname" type="string" conflicts="machine cluster service instance default city network_device switch personality virtual_switch">Name of the host</option>
-	    <option name="cluster" type="string" conflicts="hostname machine service instance default city network_device switch personality virtual_switch">Name of the cluster</option>
-	    <option name="service" type="string" conflicts="hostname machine cluster city network_device switch personality virtual_switch">Name of the service</option>
-	    <option name="city" type="string" conflicts="hostname machine cluster service instance default network_device switch personality virtual_switch">Name of the city</option>
-	    <option name="network_device" type="string" conflicts="hostname machine cluster service instance default switch personality virtual_switch">Name of the network device</option>
-	    <option name="switch" type="string" conflicts="hostname machine cluster service network_device instance default personality virtual_switch">[Deprecated] Name of the switch</option>
-	    <option name="personality" conflicts="hostname cluster service instance default city network_device switch machine" type="string">Name of personality</option>
-	    <option name="virtual_switch" type="string" conflicts="hostname cluster service instance default city network_device switch machine personality">Virtual Switch name</option>
+	    <option name="machine" type="string" conflicts="hostname cluster service instance default city network_device switch personality virtual_switch metacluster">Name of the machine</option>
+	    <option name="hostname" type="string" conflicts="machine cluster service instance default city network_device switch personality virtual_switch metacluster">Name of the host</option>
+	    <option name="cluster" type="string" conflicts="hostname machine service instance default city network_device switch personality virtual_switch metacluster">Name of the cluster</option>
+	    <option name="metacluster" type="string" conflicts="hostname machine service instance default city network_device switch personality virtual_switch cluster">Name of the metacluster</option>
+	    <option name="service" type="string" conflicts="hostname machine cluster city network_device switch personality virtual_switch metacluster">Name of the service</option>
+	    <option name="city" type="string" conflicts="hostname machine cluster service instance default network_device switch personality virtual_switch metacluster">Name of the city</option>
+	    <option name="network_device" type="string" conflicts="hostname machine cluster service instance default switch personality virtual_switch metacluster">Name of the network device</option>
+	    <option name="switch" type="string" conflicts="hostname machine cluster service network_device instance default personality virtual_switch metacluster">[Deprecated] Name of the switch</option>
+	    <option name="personality" type="string" conflicts="hostname cluster service instance default city network_device switch machine metacluster">Name of personality</option>
+	    <option name="virtual_switch" type="string" conflicts="hostname cluster service instance default city network_device switch machine personality metacluster">Virtual Switch name</option>
 	</optgroup>
 	<optgroup fields="any">
 	    <option name="archetype" conflicts="hostname cluster service instance default city network_device switch machine" type="string">Archetype</option>
@@ -2523,6 +2524,7 @@
 	<transport trigger="machine" method="get" path="machine/%(machine)s/plenary"/>
 	<transport trigger="hostname" method="get" path="host/%(hostname)s/plenary"/>
 	<transport trigger="cluster" method="get" path="cluster/%(cluster)s/plenary"/>
+	<transport trigger="metacluster" method="get" path="metacluster/%(metacluster)s/plenary"/>
 	<transport trigger="service" method="get" path="service/%(service)s/plenary"/>
 	<transport trigger="instance" method="get" path="service/%(service)s/instance/%(instance)s/plenary"/>
 	<transport trigger="city" method="get" path="location/city/%(city)s/plenary"/>

@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012,2013  Contributor
+# Copyright (C) 2014  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,35 +14,32 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Contains the logic for `aq cat --cluster`."""
+"""Contains the logic for `aq cat --metacluster`."""
 
-from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import Cluster, MetaCluster
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.aqdb.model import MetaCluster
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.resources import get_resource
-from aquilon.worker.templates import (Plenary, PlenaryClusterObject,
-                                      PlenaryClusterData)
+from aquilon.worker.templates import (Plenary,
+                                      PlenaryMetaClusterObject,
+                                      PlenaryMetaClusterData)
 
 
-class CommandCatCluster(BrokerCommand):
+class CommandCatMetaCluster(BrokerCommand):
 
-    required_parameters = ["cluster"]
+    required_parameters = ["metacluster"]
 
-    def render(self, session, logger, cluster, data, generate, **arguments):
-        dbcluster = Cluster.get_unique(session, cluster, compel=True)
-        if isinstance(dbcluster, MetaCluster):
-            raise ArgumentError("Please use --metacluster for metaclusters.")
-
-        dbresource = get_resource(session, dbcluster, **arguments)
+    def render(self, session, logger, metacluster, data, generate, **arguments):
+        dbmeta = MetaCluster.get_unique(session, metacluster, compel=True)
+        dbresource = get_resource(session, dbmeta, **arguments)
         if dbresource:
             plenary_info = Plenary.get_plenary(dbresource, logger=logger)
         else:
             if data:
-                cls = PlenaryClusterData
+                cls = PlenaryMetaClusterData
             else:
-                cls = PlenaryClusterObject
+                cls = PlenaryMetaClusterObject
 
-            plenary_info = cls.get_plenary(dbcluster, logger=logger)
+            plenary_info = cls.get_plenary(dbmeta, logger=logger)
 
         if generate:
             return plenary_info._generate_content()

@@ -151,7 +151,7 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
                         "--virtual_switch", "utvswitch"])
 
     def test_105_cat_utmc8(self):
-        command = ["cat", "--cluster", "utmc8", "--data"]
+        command = ["cat", "--metacluster", "utmc8", "--data"]
         out = self.commandtest(command)
         self.matchoutput(out,
                          '"system/metacluster/virtual_switch" = "utvswitch";',
@@ -268,7 +268,7 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
     def test_160_verify_metacluster(self):
         self.successtest(["make", "cluster", "--cluster", "utmc8"])
 
-        command = ["cat", "--cluster", "utmc8", "--data"]
+        command = ["cat", "--metacluster", "utmc8", "--data"]
         out = self.commandtest(command)
         self.matchoutput(out, "structure template clusterdata/utmc8;", command)
         self.matchoutput(out, '"system/metacluster/name" = "utmc8";', command)
@@ -337,7 +337,7 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
                          "bundleresource instance already exists.", command)
 
     def test_220_cat_resourcegroup(self):
-        command = ["cat", "--resourcegroup=utmc8as1", "--cluster=utmc8",
+        command = ["cat", "--resourcegroup=utmc8as1", "--metacluster=utmc8",
                    "--generate"]
         out = self.commandtest(command)
         self.matchoutput(out, "structure template resource/cluster/utmc8/"
@@ -352,7 +352,7 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
 
     def test_230_cat_share(self):
         command = ["cat", "--share=test_v2_share", "--resourcegroup=utmc8as1",
-                   "--cluster=utmc8", "--generate"]
+                   "--metacluster=utmc8", "--generate"]
         out = self.commandtest(command)
         self.matchoutput(out, "structure template resource/cluster/utmc8/"
                          "resourcegroup/utmc8as1/share/test_v2_share/config;",
