@@ -17,8 +17,8 @@
 
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import (MetaCluster, Personality, ClusterLifecycle,
-                                Location)
+from aquilon.aqdb.model import (Cluster, MetaCluster, Personality,
+                                ClusterLifecycle, Location)
 from aquilon.utils import validate_nlist_key
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
@@ -82,6 +82,9 @@ class CommandAddMetaCluster(BrokerCommand):
             raise ArgumentError("Metacluster name global is reserved.")
 
         MetaCluster.get_unique(session, metacluster, preclude=True)
+        # Clusters and metaclusters share the same namespace, so provide a buce
+        # error message if a cluster with the same name exists
+        Cluster.get_unique(session, metacluster, preclude=True)
 
         dbcluster = MetaCluster(name=metacluster, location_constraint=dbloc,
                                 personality=dbpersonality,
