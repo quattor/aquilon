@@ -31,6 +31,7 @@
 		<arg choice="plain"><option>--hostname <replaceable>HOSTNAME</replaceable></option></arg>
 		<arg choice="plain"><option>--list <replaceable>FILENAME</replaceable></option></arg>
 		<arg choice="plain"><option>--cluster <replaceable>CLUSTER</replaceable></option></arg>
+		<arg choice="plain"><option>--metacluster <replaceable>METACLUSTER</replaceable></option></arg>
             </group>
             <group choice="req">
 		<arg choice="plain"><option>--domain <replaceable>DOMAIN</replaceable></option></arg>
@@ -85,7 +86,7 @@
 		</term>
 		<listitem>
 		    <para>
-			Only the named <replaceable>HOSTNAME</replaceable> will be managed.
+			Move the named <replaceable>HOSTNAME</replaceable> to the target domain or sandbox.
 		    </para>
 		</listitem>
             </varlistentry>
@@ -95,11 +96,8 @@
 		</term>
 		<listitem>
 		    <para>
-			A list of hosts will be read from
-			<replaceable>FILENAME</replaceable> and the given reconfiguration
-			options will be applied equally to all hosts. The format of the
-			file is one hostname per line.     All hosts must be in the same domain, and
-			after applying all changes the full domain will be compiled.
+			Move list of hosts, read from <replaceable>FILENAME</replaceable>, to the
+			target domain or sandbox.
 		    </para>
 		</listitem>
             </varlistentry>
@@ -109,7 +107,19 @@
                 </term>
                 <listitem>
 		    <para>
-			Only the named <replaceable>CLUSTER</replaceable> will be managed.
+			Move the named <replaceable>CLUSTER</replaceable> and all its to the target
+			domain or sandbox.
+		    </para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--metacluster <replaceable>METACLUSTER</replaceable></option>
+                </term>
+                <listitem>
+		    <para>
+			Move the named <replaceable>METACLUSTER</replaceable> and all its members to the
+			target domain or sandbox.
 		    </para>
                 </listitem>
             </varlistentry>

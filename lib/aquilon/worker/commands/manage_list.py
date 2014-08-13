@@ -154,6 +154,7 @@ class CommandManageList(BrokerCommand):
                                 .format(dbbranch))
 
         dbsource, dbsource_author, objects = self.get_objects(session,
+                                                              logger=logger,
                                                               **arguments)
 
         if not force:

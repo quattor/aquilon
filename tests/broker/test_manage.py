@@ -125,7 +125,7 @@ class TestManage(PersonalityTestMixin, TestBrokerCommand):
         # we want to manage utecl1, but have to do it at metacluster level.
         # we are using --force to bypass checks because the source domain unittest
         # latest commit does not exist in template-king
-        command = ["manage", "--cluster", "utmc1",
+        command = ["manage", "--metacluster", "utmc1",
                    "--sandbox", "%s/utsandbox" % self.user, "--force"]
         self.noouttest(command)
         self.verify_buildfiles("unittest", "clusters/utecl1", want_exist=False)

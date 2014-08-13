@@ -2460,6 +2460,7 @@
 	    <optgroup fields="any" mandatory="True">
 		<option name="hostname" type="string">Name of the host to manage</option>
 		<option name="cluster" type="string">Name of the cluster to manage</option>
+		<option name="metacluster" type="string">Name of the metacluster to manage</option>
 		<option name="list" type="list">File with one host per line</option>
 	    </optgroup>
 	    <optgroup fields="any" mandatory="True">
@@ -2473,6 +2474,7 @@
 	<transport method="post" trigger="hostname" path="host/%(hostname)s/command/manage"/>
 	<transport method="post" trigger="list" path="command/manage_list"/>
 	<transport method="post" trigger="cluster" path="cluster/%(cluster)s/command/manage"/>
+	<transport method="post" trigger="metacluster" path="metacluster/%(metacluster)s/command/manage"/>
     </command>
 
     <command name="cat">
