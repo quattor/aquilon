@@ -26,13 +26,20 @@ from brokertest import TestBrokerCommand
 
 
 class TestChangeStatus(TestBrokerCommand):
-    def testchangeunittest02(self):
-        # we start off as "ready", so each of these transitions (in order)
-        # should be valid
-        for status in ['failed', 'rebuild', 'ready']:
+    def test_100_transitions(self):
+        # List of (state, forbidden transitions) tuples. We're starting from
+        # ready.
+        transitions = [('failed', ['build', 'install', 'ready', 'almostready']),
+                       ('decommissioned', ['build', 'install', 'ready',
+                                           'almostready', 'failed']),
+                       ('rebuild', ['build', 'install']),
+                       ('ready', ['build', 'install'])]
+
+        for status, forbidden in transitions:
             command = ["change_status", "--hostname=unittest02.one-nyp.ms.com",
                        "--buildstatus", status]
-            (out, err) = self.successtest(command)
+
+            out, err = self.successtest(command)
             self.matchoutput(err, "1/1 object template", command)
 
             command = "show host --hostname unittest02.one-nyp.ms.com"
@@ -43,33 +50,14 @@ class TestChangeStatus(TestBrokerCommand):
             out = self.commandtest(command.split(" "))
             self.matchoutput(out, '"system/build" = "%s";' % status, command)
 
-        # And a transition that should be illegal from the final state above (ready)
-        command = ["change_status", "--hostname=unittest02.one-nyp.ms.com",
-                   "--buildstatus", "install"]
-        self.badrequesttest(command)
-
-    def testchangeunittest03(self):
-        # we start off as "ready", so each of these transitions (in order)
-        # should be valid
-        for status in ['decommissioned', 'rebuild', 'ready']:
-            command = ["change_status", "--hostname=unittest02.one-nyp.ms.com",
-                       "--buildstatus", status]
-            (out, err) = self.successtest(command)
-            self.matchoutput(err, "1/1 object template", command)
-
-            command = "show host --hostname unittest02.one-nyp.ms.com"
-            out = self.commandtest(command.split(" "))
-            self.matchoutput(out, "Build Status: %s" % status, command)
-
-            command = "cat --hostname unittest02.one-nyp.ms.com --data"
-            out = self.commandtest(command.split(" "))
-            self.matchoutput(out, '"system/build" = "%s";' % status, command)
-
-        # And a transition that should be illegal from the final state above (ready)
-        command = ["change_status", "--hostname=unittest02.one-nyp.ms.com",
-                   "--buildstatus", "install"]
-        self.badrequesttest(command)
-
+            for bad_status in forbidden:
+                command = ["change_status", "--hostname=unittest02.one-nyp.ms.com",
+                           "--buildstatus", bad_status]
+                out = self.badrequesttest(command)
+                self.matchoutput(out,
+                                 "Cannot change state to %s from %s." %
+                                 (bad_status, status),
+                                 command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestChangeStatus)

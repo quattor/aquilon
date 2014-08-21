@@ -117,7 +117,7 @@ class TestCluster(TestBrokerCommand):
         command = ["reconfigure", "--hostname=aquilon61.aqd-unittest.ms.com",
                    "--personality=esx_server", "--archetype=vmhost",
                    "--osname", "esxi", "--osversion", "4.0.0",
-                   "--buildstatus=rebuild"]
+                   "--buildstatus=build"]
         (out, err) = self.successtest(command)
         self.matchoutput(err,
                          "Warning: Personality vmhost/esx_server requires "
@@ -185,7 +185,7 @@ class TestCluster(TestBrokerCommand):
         command = ["reconfigure", "--hostname=aquilon61.aqd-unittest.ms.com",
                    "--personality=inventory", "--archetype=aquilon",
                    "--osname=linux", "--osversion=5.0.1-x86_64",
-                   "--buildstatus=rebuild"]
+                   "--buildstatus=build"]
         self.successtest(command)
 
     def testfailbadlocation(self):

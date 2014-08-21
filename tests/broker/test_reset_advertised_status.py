@@ -180,6 +180,8 @@ class TestResetAdvertisedStatus(TestBrokerCommand):
 
         for host in hosts:
             self.successtest(["change_status", "--hostname", host,
+                              "--buildstatus", "ready"])
+            self.successtest(["change_status", "--hostname", host,
                               "--buildstatus", "rebuild"])
 
         ## reset advertised state to build
@@ -205,7 +207,6 @@ class TestResetAdvertisedStatus(TestBrokerCommand):
         out = self.badrequesttest(command)
         self.matchoutput(out, "The number of hosts in list {0:d} can not be more "
                          "than {1:d}".format(len(hosts), hostlimit), command)
-
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestResetAdvertisedStatus)

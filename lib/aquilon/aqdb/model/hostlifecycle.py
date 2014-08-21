@@ -32,8 +32,8 @@ class HostLifecycle(StateEngine, Base):
     """ Describes the state a host is within the provisioning lifecycle """
 
     transitions = {'blind': ['build', 'failed', 'decommissioned'],
-                   'build': ['almostready', 'ready', 'failed', 'rebuild',
-                             'reinstall', 'decommissioned'],
+                   'build': ['almostready', 'ready', 'failed',
+                             'decommissioned'],
                    'install': ['build', 'reinstall', 'failed',
                                'decommissioned'],
                    'almostready': ['ready', 'rebuild', 'reinstall', 'failed',
