@@ -15,7 +15,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Module for testing the make aquilon command."""
+"""Module for testing the make command."""
 
 import os
 import re
@@ -29,12 +29,10 @@ import unittest2 as unittest
 from brokertest import TestBrokerCommand
 from notificationtest import VerifyNotificationsMixin
 
+# TODO: this file should be merged into test_make.py and/or test_reconfigure.py
+
 
 class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
-    """ This tests the "make aquilon" command
-
-        which has the specific feature of auto-binding required services
-    """
 
     def testmakeinfra(self):
         command = ["make", "--hostname", "infra1.one-nyp.ms.com"]
@@ -44,7 +42,7 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
 
     def testmakeunittest02(self):
         basetime = datetime.now()
-        command = ["make", "aquilon",
+        command = ["make", "--archetype", "aquilon",
                    "--hostname", "unittest02.one-nyp.ms.com",
                    "--osname", "linux", "--osversion", "5.0.1-x86_64"]
         (out, err) = self.successtest(command)
@@ -58,7 +56,7 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
         self.wait_notification(basetime, 1)
 
         self.verify_buildfiles("unittest", "unittest02.one-nyp.ms.com",
-                               command="make_aquilon")
+                               command="make")
 
         # The .dep file should not get copied into the web directory
         profilesdir = self.config.get("broker", "profilesdir")
@@ -156,7 +154,7 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
 
     def testmakeunittest00(self):
         basetime = datetime.now()
-        command = ["make", "aquilon",
+        command = ["make", "--archetype", "aquilon",
                    "--hostname", "unittest00.one-nyp.ms.com",
                    "--buildstatus", "blind", "--personality", "compileserver",
                    "--osname", "linux", "--osversion", "5.0.1-x86_64"]
@@ -357,14 +355,14 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
         self.matchoutput(err, "service instance chooser3", command)
 
     def testmissingrequiredservice(self):
-        command = ["make", "aquilon",
+        command = ["make", "--archetype", "aquilon",
                    "--hostname", "aquilon91.aqd-unittest.ms.com",
                    "--personality", "badpersonality2"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Could not find a relevant service map", command)
 
     def testmissingrequiredservicedebug(self):
-        command = ["make", "aquilon", "--debug",
+        command = ["make", "--archetype", "aquilon", "--debug",
                    "--hostname", "aquilon92.aqd-unittest.ms.com",
                    "--personality", "badpersonality2"]
         out = self.badrequesttest(command)
@@ -372,7 +370,7 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
         self.matchoutput(out, "Could not find a relevant service map", command)
 
     def testmissingpersonalitytemplate(self):
-        command = ["make", "aquilon",
+        command = ["make", "--archetype", "aquilon",
                    "--hostname", "aquilon93.aqd-unittest.ms.com",
                    "--personality", "badpersonality"]
         out = self.badrequesttest(command)
@@ -388,12 +386,12 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
                              "aquilon93.aqd-unittest.ms.com")
 
     def testmakecardedhost(self):
-        command = ["make", "aquilon",
+        command = ["make", "--archetype", "aquilon",
                    "--hostname", "jack.cards.example.com"]
         (out, err) = self.successtest(command)
 
     def testmakewithos(self):
-        command = ["make", "aquilon",
+        command = ["make", "--archetype", "aquilon",
                    "--hostname", "unittest17.aqd-unittest.ms.com",
                    "--osname", "linux", "--osversion", "5.0.1-x86_64"]
         (out, err) = self.successtest(command)

@@ -15,7 +15,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Module for testing the add aquilon host command."""
+"""Module for testing the add host command."""
 
 if __name__ == "__main__":
     import utils
@@ -24,13 +24,15 @@ if __name__ == "__main__":
 import unittest2 as unittest
 from brokertest import TestBrokerCommand
 
+# TODO: this file should be merged into test_add_host.py
+
 
 class TestAddAquilonHost(TestBrokerCommand):
 
     def testaddunittest00(self):
         ip = self.net["unknown0"].usable[2]
         self.dsdb_expect_add("unittest00.one-nyp.ms.com", ip, "eth0", ip.mac)
-        self.noouttest(["add", "aquilon", "host",
+        self.noouttest(["add", "host", "--archetype", "aquilon",
                         "--hostname", "unittest00.one-nyp.ms.com", "--ip", ip,
                         "--machine", "ut3c1n3", "--domain", "unittest",
                         "--personality", "inventory", "--buildstatus", "blind"])
@@ -55,7 +57,7 @@ class TestAddAquilonHost(TestBrokerCommand):
         ip = self.net["unknown0"].usable[7]
         self.dsdb_expect_add("unittest12.aqd-unittest.ms.com", ip, "eth0",
                              ip.mac)
-        self.noouttest(["add", "aquilon", "host",
+        self.noouttest(["add", "host", "--archetype", "aquilon",
                         "--hostname", "unittest12.aqd-unittest.ms.com",
                         "--ip", ip, "--buildstatus", "blind",
                         "--machine", "ut3s01p1a", "--domain", "unittest"])
@@ -79,7 +81,7 @@ class TestAddAquilonHost(TestBrokerCommand):
         ip = self.net["unknown0"].usable[8]
         self.dsdb_expect_add("unittest13.aqd-unittest.ms.com", ip, "eth0",
                              ip.mac)
-        self.noouttest(["add", "aquilon", "host",
+        self.noouttest(["add", "host", "--archetype", "aquilon",
                         "--hostname", "unittest13.aqd-unittest.ms.com",
                         "--ip", ip, "--buildstatus", "blind",
                         "--machine", "ut3s01p1b", "--domain", "unittest",
@@ -102,7 +104,7 @@ class TestAddAquilonHost(TestBrokerCommand):
 
     def testaddunittest20bad(self):
         ip = self.net["zebra_vip"].usable[2]
-        command = ["add", "aquilon", "host",
+        command = ["add", "host", "--archetype", "aquilon",
                    "--hostname", "unittest20.aqd-unittest.ms.com",
                    "--ip", ip, "--zebra_interfaces", "eth0,eth2",
                    "--machine", "ut3c5n2", "--domain", "unittest",
@@ -130,7 +132,7 @@ class TestAddAquilonHost(TestBrokerCommand):
         self.dsdb_expect_delete(eth1_ip)
         self.dsdb_expect_add("unittest20-e1.aqd-unittest.ms.com", eth1_ip, "eth1",
                              eth1_ip.mac, primary="unittest20.aqd-unittest.ms.com")
-        self.noouttest(["add", "aquilon", "host",
+        self.noouttest(["add", "host", "--archetype", "aquilon",
                         "--hostname", "unittest20.aqd-unittest.ms.com",
                         "--ip", ip, "--zebra_interfaces", "eth0,eth1",
                         "--machine", "ut3c5n2", "--domain", "unittest",
@@ -206,7 +208,7 @@ class TestAddAquilonHost(TestBrokerCommand):
     def testaddunittest21(self):
         ip = self.net["zebra_eth0"].usable[1]
         self.dsdb_expect_add("unittest21.aqd-unittest.ms.com", ip, "bond0")
-        self.noouttest(["add", "aquilon", "host",
+        self.noouttest(["add", "host", "--archetype", "aquilon",
                         "--hostname", "unittest21.aqd-unittest.ms.com",
                         "--ip", ip, "--machine", "ut3c5n3",
                         "--domain", "unittest",
@@ -242,7 +244,7 @@ class TestAddAquilonHost(TestBrokerCommand):
     def testaddunittest22(self):
         ip = self.net["zebra_eth0"].usable[2]
         self.dsdb_expect_add("unittest22.aqd-unittest.ms.com", ip, "br0")
-        self.noouttest(["add", "aquilon", "host",
+        self.noouttest(["add", "host", "--archetype", "aquilon",
                         "--hostname", "unittest22.aqd-unittest.ms.com",
                         "--ip", ip, "--machine", "ut3c5n4",
                         "--domain", "unittest",
@@ -279,7 +281,7 @@ class TestAddAquilonHost(TestBrokerCommand):
         ip = self.net["vpls"].usable[1]
         self.dsdb_expect_add("unittest23.aqd-unittest.ms.com", ip, "eth0",
                              ip.mac)
-        self.noouttest(["add", "aquilon", "host",
+        self.noouttest(["add", "host", "--archetype", "aquilon",
                         "--hostname", "unittest23.aqd-unittest.ms.com",
                         "--ip", ip, "--machine", "ut3c5n5",
                         "--domain", "unittest",
@@ -290,7 +292,7 @@ class TestAddAquilonHost(TestBrokerCommand):
         ip = self.net["vpls"].usable[2]
         self.dsdb_expect_add("unittest24.aqd-unittest.ms.com", ip, "eth0",
                              ip.mac)
-        self.noouttest(["add", "aquilon", "host",
+        self.noouttest(["add", "host", "--archetype", "aquilon",
                         "--hostname", "unittest24.aqd-unittest.ms.com",
                         "--ip", ip, "--machine", "np3c5n5",
                         "--domain", "unittest",
@@ -301,7 +303,7 @@ class TestAddAquilonHost(TestBrokerCommand):
         ip = self.net["unknown0"].usable[20]
         self.dsdb_expect_add("unittest25.aqd-unittest.ms.com", ip, "eth0",
                              ip.mac)
-        self.noouttest(["add", "aquilon", "host",
+        self.noouttest(["add", "host", "--archetype", "aquilon",
                         "--hostname", "unittest25.aqd-unittest.ms.com",
                         "--ip", ip, "--machine", "ut3c5n7",
                         "--domain", "unittest",
@@ -312,7 +314,7 @@ class TestAddAquilonHost(TestBrokerCommand):
         ip = self.net["unknown0"].usable[23]
         self.dsdb_expect_add("unittest26.aqd-unittest.ms.com", ip, "eth0",
                              ip.mac)
-        self.noouttest(["add", "aquilon", "host",
+        self.noouttest(["add", "host", "--archetype", "aquilon",
                         "--hostname", "unittest26.aqd-unittest.ms.com",
                         "--ip", ip, "--machine", "ut3c5n8",
                         "--domain", "unittest",

@@ -25,12 +25,12 @@ import unittest2 as unittest
 from brokertest import TestBrokerCommand
 
 
-# Note, this used to test the rebind_esx_cluster, however I've
+# Note, this used to test the rebind_cluster, however I've
 # deco'ed that command. I've kept this test here in order to preserve
 # the state of all the previous and subsequent tests that assume the
 # state of evh1 (it's a tangled web of statefulness going on here!)
 
-class TestRebindESXCluster(TestBrokerCommand):
+class TestRebindCluster(TestBrokerCommand):
 
     # Failure test is in add_virtual_hardware.
     def test_100_rebind_evh1(self):
@@ -67,5 +67,5 @@ class TestRebindESXCluster(TestBrokerCommand):
 
 
 if __name__ == '__main__':
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestRebindESXCluster)
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestRebindCluster)
     unittest.TextTestRunner(verbosity=2).run(suite)

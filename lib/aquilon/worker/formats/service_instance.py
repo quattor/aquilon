@@ -90,38 +90,3 @@ class ServiceInstanceFormatter(ObjectFormatter):
         return max_clients
 
 ObjectFormatter.handlers[ServiceInstance] = ServiceInstanceFormatter()
-
-
-class ServiceShareList(list):
-    pass
-
-
-class ServiceShareListFormatter(ObjectFormatter):
-    def format_raw(self, shares, indent=""):
-        sharedata = {}
-        parser = StormapParser()
-
-        for dbshare in shares:
-            if dbshare.name not in sharedata:
-                share_info = parser.lookup(dbshare.name)
-
-                sharedata[dbshare.name] = {"disks": 0,
-                                           "machines": 0,
-                                           "server": share_info.server,
-                                           "mount": share_info.mount}
-            sharedata[dbshare.name]["disks"] += dbshare.virtual_disk_count
-            sharedata[dbshare.name]["machines"] += dbshare.virtual_machine_count
-
-        details = []
-
-        for name in sorted(sharedata.keys()):
-            rec = sharedata[name]
-
-            details.append(indent + "NAS Disk Share: %s" % name)
-            details.append(indent + "  Server: %s" % rec["server"])
-            details.append(indent + "  Mountpoint: %s" % rec["mount"])
-            details.append(indent + "  Disk Count: %d" % rec["disks"])
-            details.append(indent + "  Machine Count: %d" % rec["machines"])
-        return "\n".join(details)
-
-ObjectFormatter.handlers[ServiceShareList] = ServiceShareListFormatter()

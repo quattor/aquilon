@@ -29,7 +29,7 @@ class TestBindClient(TestBrokerCommand):
     """Testing manually binding client to services.
 
     Once a client has been bound, you can't use it to test
-    the auto-selection logic in make_aquilon.  Those tests
+    the auto-selection logic in make/reconfigure.  Those tests
     are done exclusively with the chooser* services, which
     should not be used here.
 
@@ -157,7 +157,7 @@ class TestBindClient(TestBrokerCommand):
                          "Uses Service: ntp Instance: pa.ny.na",
                          command)
 
-    # For unittest00, will test that afs and dns are bound by make aquilon
+    # For unittest00, will test that afs and dns are bound by make/reconfigure
     # because they are required services.  Checking the service map
     # functionality for bind client, below.
 
