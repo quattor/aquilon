@@ -28,32 +28,47 @@ from brokertest import TestBrokerCommand
 class TestDelDisk(TestBrokerCommand):
 
     def test_100_del_ut3c1n3_sda(self):
-        self.noouttest(["del", "disk", "--machine", "ut3c1n3",
-                        "--controller", "sata", "--size", "50"])
+        self.noouttest(["del", "disk", "--machine", "ut3c1n3", "--disk", "sda"])
 
-    def test_101_del_ut3c1n3_c0d0(self):
-        self.noouttest(["del", "disk", "--machine", "ut3c1n3",
-                        "--disk", "c0d1"])
-
-    def test_200_show_ut3c1n3(self):
+    def test_105_show_ut3c1n3(self):
         command = "show machine --machine ut3c1n3"
         out = self.commandtest(command.split(" "))
-        self.matchclean(out, "Disk: sda 68 GB scsi", command)
-        self.matchclean(out, "Disk: c0d1", command)
+        self.matchclean(out, "sda", command)
+        self.searchoutput(out,
+                          r'Disk: c0d1 34 GB cciss \(local\) \[boot\]$',
+                          command)
 
-    # This should now list the 34 GB disk that was added previously...
-    def test_200_cat_ut3c1n3(self):
+    def test_105_cat_ut3c1n3(self):
+        command = "cat --machine ut3c1n3"
+        out = self.commandtest(command.split(" "))
+        self.matchclean(out, "sda", command)
+        self.searchoutput(out,
+                          r'"harddisks/{cciss/c0d1}" = '
+                          r'create\("hardware/harddisk/generic/cciss",\s*'
+                          r'"boot", true,\s*'
+                          r'"bus", "pci:0000:01:00.0",\s*'
+                          r'"capacity", 34\*GB,\s*'
+                          r'"interface", "cciss"\s*\)',
+                          command)
+
+    def test_110_del_ut3c1n3_all(self):
+        self.noouttest(["del", "disk", "--machine", "ut3c1n3", "--all"])
+
+    def test_115_show_ut3c1n3(self):
+        command = "show machine --machine ut3c1n3"
+        out = self.commandtest(command.split(" "))
+        self.matchclean(out, "sda", command)
+        self.matchclean(out, "c0d0", command)
+
+    def test_115_cat_ut3c1n3(self):
         command = "cat --machine ut3c1n3"
         out = self.commandtest(command.split(" "))
         self.matchclean(out, "harddisks", command)
 
-    def test_300_del_unknown_controller(self):
-        command = ["del", "disk", "--machine", "ut3c1n3",
-                   "--controller", "controller-does-not-exist"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out,
-                         "controller-does-not-exist is not a valid controller type",
-                         command)
+    def test_200_del_ut3c1n3_c0d0(self):
+        command = ["del", "disk", "--machine", "ut3c1n3", "--disk", "c0d0"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out, "Disk c0d0, machine ut3c1n3 not found.", command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelDisk)

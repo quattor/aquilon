@@ -659,8 +659,7 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
 
     def test_600_delutpgmdisk(self):
         for i in range(0, 3):
-            self.noouttest(["del", "disk", "--machine", "utpgm%d" % i,
-                            "--controller", "scsi", "--disk", "sda"])
+            self.noouttest(["del_disk", "--machine", "utpgm%d" % i, "--disk", "sda"])
 
     def test_610_delresourcegroup(self):
         command = ["del_share", "--resourcegroup=utmc8as1",

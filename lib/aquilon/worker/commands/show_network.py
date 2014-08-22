@@ -31,7 +31,7 @@ class CommandShowNetwork(BrokerCommand):
     required_parameters = []
 
     def render(self, session, network, ip, network_environment, all, style,
-               type, hosts, exact_location, **arguments):
+               hosts, exact_location, **arguments):
         options = [undefer('comments'), joinedload('location')]
         if hosts or style == "proto":
             options.extend([subqueryload("assignments"),
@@ -45,16 +45,15 @@ class CommandShowNetwork(BrokerCommand):
                                                    query_options=options) or None
         dbnetwork = ip and get_network_byip(session, ip, dbnet_env,
                                             query_options=options) or dbnetwork
-        q = session.query(Network)
-        q = q.filter_by(network_environment=dbnet_env)
-        q = q.options(*options)
         if dbnetwork:
             if hosts:
                 return NetworkHostList([dbnetwork])
             else:
                 return dbnetwork
-        if type:
-            q = q.filter_by(network_type=type)
+
+        q = session.query(Network)
+        q = q.filter_by(network_environment=dbnet_env)
+
         dblocation = get_location(session, **arguments)
         if dblocation:
             if exact_location:

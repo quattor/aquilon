@@ -388,13 +388,13 @@ class TestBrokerCommand(unittest.TestCase):
         return err
 
     # Test for conflicting or invalid aq client options.
-    def badoptiontest(self, command, **kwargs):
+    def badoptiontest(self, command, exit_code=2, **kwargs):
         (p, out, err) = self.runcommand(command, **kwargs)
-        self.assertEqual(p.returncode, 2,
+        self.assertEqual(p.returncode, exit_code,
                          "Return code for %s was %d instead of %d"
                          "\nSTDOUT:\n@@@\n'%s'\n@@@"
                          "\nSTDERR:\n@@@\n'%s'\n@@@" %
-                         (command, p.returncode, 2, out, err))
+                         (command, p.returncode, exit_code, out, err))
         self.assertEqual(out, "",
                          "STDOUT for %s was not empty:\n@@@\n'%s'\n@@@\n" %
                          (command, out))

@@ -93,7 +93,9 @@ class TestMake(TestBrokerCommand):
                    "--building", "whatever"]
         out = self.badoptiontest(command)
 
-        self.matchoutput(out, "networkip conflicts with building", command)
+        self.matchoutput(out,
+                         "Please provide exactly one of the required options!",
+                         command)
 
     # network / personality based service mappings
 

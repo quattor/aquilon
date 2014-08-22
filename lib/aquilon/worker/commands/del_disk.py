@@ -16,9 +16,7 @@
 # limitations under the License.
 """Contains the logic for `aq del disk`."""
 
-from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.aqdb.model import Disk, Machine
-from aquilon.aqdb.model.disk import controller_types
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
 
@@ -27,33 +25,16 @@ class CommandDelDisk(BrokerCommand):
 
     required_parameters = ["machine"]
 
-    def render(self, session, logger, machine, disk, controller, size, all,
-               **arguments):
+    def render(self, session, logger, machine, disk, all, **arguments):
         dbmachine = Machine.get_unique(session, machine, compel=True)
-        q = session.query(Disk).filter_by(machine=dbmachine)
         if disk:
-            q = q.filter_by(device_name=disk)
-        if controller:
-            if controller not in controller_types:
-                raise ArgumentError("%s is not a valid controller type, use "
-                                    "one of: %s." % (controller,
-                                                     ", ".join(controller_types)
-                                                     ))
-            q = q.filter_by(controller_type=controller)
-        if size is not None:
-            q = q.filter_by(capacity=size)
-        results = q.all()
-
-        if len(results) == 0:
-            raise NotFoundException("No disks found.")
-        elif len(results) > 1 and not all:
-            raise ArgumentError("More than one matching disks found.  "
-                                "Use --all to delete them all.")
-        for result in results:
-            session.delete(result)
+            dbdisk = Disk.get_unique(session, machine=dbmachine,
+                                     device_name=disk, compel=True)
+            dbmachine.disks.remove(dbdisk)
+        elif all:
+            del dbmachine.disks[:]
 
         session.flush()
-        session.expire(dbmachine, ['disks'])
 
         plenaries = PlenaryCollection(logger=logger)
         plenaries.append(Plenary.get_plenary(dbmachine))

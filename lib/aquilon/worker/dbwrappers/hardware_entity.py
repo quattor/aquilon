@@ -16,28 +16,33 @@
 # limitations under the License.
 """Wrappers to make getting and using hardware entities simpler."""
 
+from sqlalchemy.orm import aliased
 from sqlalchemy.sql import and_, or_
 
 from aquilon.exceptions_ import ArgumentError, AquilonError
-from aquilon.aqdb.model import (HardwareEntity, Model, ReservedName,
+from aquilon.aqdb.model import (HardwareEntity, Model, ReservedName, Network,
                                 AddressAssignment, ARecord, Fqdn, Interface,
-                                VlanInfo, PortGroup)
+                                VlanInfo, PortGroup, NetworkEnvironment)
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.worker.dbwrappers.dns import convert_reserved_to_arecord
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.dbwrappers.interface import (check_ip_restrictions,
                                                  assign_address)
+from aquilon.worker.dbwrappers.network import get_network_byip
 from aquilon.utils import first_of
 
 
 def search_hardware_entity_query(session, hardware_type=HardwareEntity,
                                  subquery=False,
                                  model=None, vendor=None, machine_type=None,
-                                 exact_location=False, ip=None,
+                                 exact_location=False, ip=None, networkip=None,
+                                 network_environment=None,
                                  mac=None, pg=None, serial=None,
-                                 interface_model=None, interface_vendor=None,
-                                 interface_bus_address=None, **kwargs):
+                                 interface_name=None, interface_model=None,
+                                 interface_vendor=None,
+                                 interface_bus_address=None,
+                                 **kwargs):
     q = session.query(hardware_type)
     if hardware_type is HardwareEntity:
         q = q.with_polymorphic('*')
@@ -57,27 +62,44 @@ def search_hardware_entity_query(session, hardware_type=HardwareEntity,
         subq = Model.get_matching_query(session, name=model, vendor=vendor,
                                         model_type=machine_type, compel=True)
         q = q.filter(HardwareEntity.model_id.in_(subq))
-    if ip or mac or pg or interface_vendor or interface_model or \
-       interface_bus_address:
+    if ip or networkip or mac or pg or interface_name or interface_vendor \
+       or interface_model or interface_bus_address:
         q = q.join('interfaces')
         if mac:
             q = q.filter_by(mac=mac)
+        if interface_name:
+            q = q.filter_by(name=interface_name)
         if interface_bus_address:
-            q = q.filter(bus_address=interface_bus_address)
+            q = q.filter_by(bus_address=interface_bus_address)
         if pg:
             dbvi = VlanInfo.get_by_pg(session, pg, compel=ArgumentError)
-            q = q.join(PortGroup)
+            PGAlias = aliased(PortGroup)
+            q = q.join(PGAlias)
             q = q.filter(or_(Interface.port_group_name == pg,
-                             and_(PortGroup.network_tag == dbvi.vlan_id,
-                                  PortGroup.usage == dbvi.vlan_type)))
+                             and_(PGAlias.network_tag == dbvi.vlan_id,
+                                  PGAlias.usage == dbvi.vlan_type)))
         if interface_model or interface_vendor:
             subq = Model.get_matching_query(session, name=interface_model,
                                             vendor=interface_vendor,
                                             model_type='nic', compel=True)
             q = q.filter(Interface.model_id.in_(subq))
         if ip:
-            q = q.join(AddressAssignment)
-            q = q.filter(AddressAssignment.ip == ip)
+            dbnet_env = NetworkEnvironment.get_unique_or_default(session,
+                                                                 network_environment)
+            q = q.join(AddressAssignment, aliased=True)
+            q = q.filter_by(ip=ip)
+            q = q.join(Network, aliased=True, from_joinpoint=True)
+            q = q.filter_by(network_environment=dbnet_env)
+        elif networkip:
+            dbnet_env = NetworkEnvironment.get_unique_or_default(session,
+                                                                 network_environment)
+            dbnetwork = get_network_byip(session, networkip, dbnet_env)
+            PGAlias = aliased(PortGroup)
+            AAAlias = aliased(AddressAssignment)
+            q = q.outerjoin(PGAlias, Interface.port_group)
+            q = q.outerjoin(AAAlias, Interface.assignments)
+            q = q.filter(or_(PGAlias.network == dbnetwork,
+                             AAAlias.network == dbnetwork))
         q = q.reset_joinpoint()
     if serial:
         q = q.filter_by(serial_no=serial)

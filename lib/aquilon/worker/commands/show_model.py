@@ -16,11 +16,14 @@
 # limitations under the License.
 """Contains the logic for `aq show model`."""
 
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import Model
 
 
 class CommandShowModel(BrokerCommand):
+
+    required_parameters = ["model"]
+
     def render(self, session, model, vendor, type, **arguments):
         return Model.get_unique(session, name=model, vendor=vendor,
                                 model_type=type, compel=True)

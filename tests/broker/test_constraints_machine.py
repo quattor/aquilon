@@ -37,12 +37,6 @@ class TestMachineConstraints(TestBrokerCommand):
         self.matchoutput(out, "Machine: ut3c5n10", command)
         self.matchoutput(out, "Model Type: blade", command)
 
-    # Expected to fail without the --all flag...
-    def testdelalldisks(self):
-        command = "del disk --machine ut3c5n10"
-        self.badrequesttest(command.split(" "))
-
-
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestMachineConstraints)
     unittest.TextTestRunner(verbosity=2).run(suite)
