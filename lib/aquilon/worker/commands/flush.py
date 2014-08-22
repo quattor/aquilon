@@ -396,8 +396,8 @@ class CommandFlush(BrokerCommand):
             if network_devices:
                 logger.client_info("Flushing network devices.")
                 q = session.query(NetworkDevice)
-                q = q.options(subqueryload('observed_vlans'),
-                              joinedload('observed_vlans.network'))
+                q = q.options(subqueryload('port_groups'),
+                              joinedload('port_groups.network'))
                 for dbnetdev in q:
                     try:
                         plenary = PlenarySwitchData.get_plenary(dbnetdev, logger=logger)

@@ -16,13 +16,12 @@
 # limitations under the License.
 """Contains the logic for `aq cat --cluster`."""
 
+from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Cluster, MetaCluster
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.resources import get_resource
 from aquilon.worker.templates import (Plenary, PlenaryClusterObject,
-                                      PlenaryClusterData,
-                                      PlenaryMetaClusterObject,
-                                      PlenaryMetaClusterData)
+                                      PlenaryClusterData)
 
 
 class CommandCatCluster(BrokerCommand):
@@ -31,20 +30,17 @@ class CommandCatCluster(BrokerCommand):
 
     def render(self, session, logger, cluster, data, generate, **arguments):
         dbcluster = Cluster.get_unique(session, cluster, compel=True)
+        if isinstance(dbcluster, MetaCluster):
+            raise ArgumentError("Please use --metacluster for metaclusters.")
+
         dbresource = get_resource(session, dbcluster, **arguments)
         if dbresource:
             plenary_info = Plenary.get_plenary(dbresource, logger=logger)
         else:
-            if isinstance(dbcluster, MetaCluster):
-                if data:
-                    cls = PlenaryMetaClusterData
-                else:
-                    cls = PlenaryMetaClusterObject
+            if data:
+                cls = PlenaryClusterData
             else:
-                if data:
-                    cls = PlenaryClusterData
-                else:
-                    cls = PlenaryClusterObject
+                cls = PlenaryClusterObject
 
             plenary_info = cls.get_plenary(dbcluster, logger=logger)
 

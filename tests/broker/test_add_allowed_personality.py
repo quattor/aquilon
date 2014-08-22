@@ -31,9 +31,11 @@ class TestAddAllowedPersonality(TestBrokerCommand):
         command = ["add_allowed_personality", "--archetype", "vmhost",
                    "--personality=generic", "--cluster=utecl1"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "The cluster member evh1.aqd-unittest.ms.com "
-                         "has a personality of vulcan-1g-desktop-prod which is "
-                         "incompatible", command)
+        self.matchoutput(out,
+                         "Member host evh1.aqd-unittest.ms.com has personality "
+                         "vmhost/vulcan-1g-desktop-prod, which is incompatible "
+                         "with this constraint.",
+                         command)
 
     def test_12_failmissingcluster(self):
         command = ["add_allowed_personality", "--archetype", "vmhost",
@@ -62,9 +64,9 @@ class TestAddAllowedPersonality(TestBrokerCommand):
                           "--personality=generic",
                           "--cluster", "utecl1"])
         self.successtest(["add_allowed_personality",
-                          "--archetype", "metacluster",
-                          "--personality=metacluster",
-                          "--cluster", "utmc1"])
+                          "--archetype", "esx_cluster",
+                          "--personality=vulcan-1g-desktop-prod",
+                          "--metacluster", "utmc1"])
 
     def test_20_checkconstraint(self):
         command = ["show_cluster", "--cluster=utecl1"]
@@ -74,8 +76,9 @@ class TestAddAllowedPersonality(TestBrokerCommand):
 
         command = ["show_cluster", "--cluster=utmc1"]
         out = self.commandtest(command)
-        self.matchoutput(out, "Allowed Personality: Personality metacluster/metacluster", command)
-
+        self.matchoutput(out,
+                         "Allowed Personality: Personality esx_cluster/vulcan-1g-desktop-prod",
+                         command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddAllowedPersonality)

@@ -74,6 +74,9 @@ from aquilon.aqdb.model.cluster import (__ClusterServiceBinding,
                                         __ClusterAllowedPersonality)
 from aquilon.aqdb.model.metacluster import __MetaClusterMember
 from aquilon.aqdb.model.vlan import __ObservedVlan
+from aquilon.aqdb.model.virtual_switch import (__VSwitchClusterAssignment,
+                                               __VSwitchHostAssignment,
+                                               __VSwitchPGAssignment)
 
 from sqlalchemy import orm
 
@@ -98,7 +101,9 @@ model_group = {
     },
     'host': {
         'title': 'Hosts',
-        'classes': [Host, OperatingSystem, HostLifecycle, HostGrnMap, Grn],
+        'classes': [Host, OperatingSystem, HostLifecycle, HostGrnMap, Grn,
+                    VirtualSwitch, __VSwitchPGAssignment,
+                    __VSwitchHostAssignment],
     },
     'personality': {
         'title': 'Personalities',
@@ -126,7 +131,9 @@ model_group = {
         'classes': [Cluster, ClusterLifecycle, StorageCluster, ComputeCluster,
                     HostClusterMember, __ClusterAllowedPersonality, MetaCluster,
                     __MetaClusterMember, EsxCluster, PersonalityClusterInfo,
-                    PersonalityESXClusterInfo],
+                    PersonalityESXClusterInfo,
+                    VirtualSwitch, __VSwitchClusterAssignment,
+                    __VSwitchPGAssignment],
     },
     'network': {
         'title': 'Network',

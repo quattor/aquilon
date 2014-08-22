@@ -1,0 +1,1 @@
+ALTER TABLE metacluster ALTER max_clusters DROP NOT NULL;

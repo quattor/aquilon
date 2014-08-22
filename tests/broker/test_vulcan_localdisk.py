@@ -36,7 +36,6 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, MachineTestMixin,
 
     metacluster = "utmc9"
     cluster = ["utlccl0", "utlccl1"]
-    switch = ["utpgsw0.aqd-unittest.ms.com", "utpgsw1.aqd-unittest.ms.com"]
     vmhost = ["utpgh0.aqd-unittest.ms.com", "utpgh1.aqd-unittest.ms.com"]
     machine = ["utpgs01p0", "utpgs01p1"]
 
@@ -86,9 +85,8 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, MachineTestMixin,
 
     def test_030_addswitch(self):
         for i in range(0, 2):
-            self.successtest(["update_esx_cluster",
-                              "--cluster=%s" % self.cluster[i],
-                              "--switch=%s" % self.switch[i]])
+            self.successtest(["update_cluster", "--cluster", self.cluster[i],
+                              "--virtual_switch", "utvswitch"])
 
     def test_050_add_vmhost(self):
         for i in range(0, 2):

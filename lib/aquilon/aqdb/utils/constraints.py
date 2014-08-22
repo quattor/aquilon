@@ -78,6 +78,7 @@ _long_nms['NETWORK_DEVICE_ID'] = 'NETDEV_ID'
 _long_nms['PERSONALITY_ROOTUSER'] = 'PERS_ROOT_USER'
 _long_nms['PERSONALITY_ROOTNETGROUP'] = 'PERS_ROOT_NG'
 _long_nms['LOCATION_CONSTRAINT_ID'] = 'LOC_CONSTR_ID'
+_long_nms['VIRTUAL_SWITCH_ID'] = 'VSWITCH_ID'
 
 
 def rename_non_null_check_constraints(db):

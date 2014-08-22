@@ -191,6 +191,16 @@ class Cluster(Base):
         return self.personality.services + self.personality.archetype.services
 
     @property
+    def minimum_location(self):
+        location = None
+        for host in self.hosts:
+            if location:
+                location = location.merge(host.hardware_entity.location)
+            else:
+                location = host.hardware_entity.location
+        return location
+
+    @property
     def virtual_machines(self):
         mach = []
         if self.resholder:
@@ -213,6 +223,14 @@ class Cluster(Base):
         return value
 
     def validate_membership(self, host):
+        if self.allowed_personalities and \
+                host.personality not in self.allowed_personalities:
+            allowed = sorted("%s/%s" % (pers.archetype, pers.name)
+                             for pers in self.allowed_personalities)
+            raise ArgumentError("{0} is not allowed by the cluster.  Allowed "
+                                "personalities are: {1!s}"
+                                .format(host.personality, ", ".join(allowed)))
+
         if host.hardware_entity.location != self.location_constraint and \
                 self.location_constraint not in \
                 host.hardware_entity.location.parents:
@@ -345,16 +363,6 @@ class EsxCluster(Cluster):
 
     __table_args__ = (Index("%s_network_device_idx" % _ETN, network_device_id),)
     __mapper_args__ = {'polymorphic_identity': 'esx'}
-
-    @property
-    def minimum_location(self):
-        location = None
-        for host in self.hosts:
-            if location:
-                location = location.merge(host.hardware_entity.location)
-            else:
-                location = host.hardware_entity.location
-        return location
 
     @property
     def vmhost_capacity_function(self):

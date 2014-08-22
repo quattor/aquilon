@@ -190,24 +190,6 @@ class TestDelNetworkDevice(TestBrokerCommand):
         self.check_plenary_gone('network_device', 'americas', 'ut', 'np01ga2s05')
         self.check_plenary_gone('hostdata', 'np01ga2s05.one-nyp.ms.com')
 
-    def test_180_del_utpgsw0(self):
-        ip = self.net["ut_net_mgmt"].usable[7]
-        self.dsdb_expect_delete(ip)
-        self.check_plenary_exists("switchdata", "utpgsw0.aqd-unittest.ms.com")
-        self.noouttest(["del_network_device", "--network_device",
-                        "utpgsw0.aqd-unittest.ms.com"])
-        self.check_plenary_gone("switchdata", "utpgsw0.aqd-unittest.ms.com")
-        self.dsdb_verify()
-
-    def test_181_del_utpgsw1(self):
-        ip = self.net["ut_net_mgmt"].usable[8]
-        self.dsdb_expect_delete(ip)
-        self.check_plenary_exists("switchdata", "utpgsw1.aqd-unittest.ms.com")
-        self.noouttest(["del_network_device", "--network_device",
-                        "utpgsw1.aqd-unittest.ms.com"])
-        self.check_plenary_gone("switchdata", "utpgsw1.aqd-unittest.ms.com")
-        self.dsdb_verify()
-
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelNetworkDevice)
     unittest.TextTestRunner(verbosity=2).run(suite)

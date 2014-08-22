@@ -60,16 +60,6 @@ class CommandCluster(BrokerCommand):
                 dbhost.personality = dbpersonality
                 personality_change = True
 
-        # Allow for non-restricted clusters (the default?)
-        if (len(dbcluster.allowed_personalities) > 0 and
-            dbhost.personality not in dbcluster.allowed_personalities):
-            raise ArgumentError("The personality %s for %s is not allowed "
-                                "by the cluster. Specify --personality "
-                                "and provide one of %s" %
-                                (dbhost.personality, dbhost.fqdn,
-                                 ", ".join([x.name for x in
-                                            dbcluster.allowed_personalities])))
-
         # Now that we've changed the personality, we can check
         # if this is a valid membership change
         dbcluster.validate_membership(dbhost)

@@ -302,6 +302,7 @@ class TestAddVirtualHardware(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "structure template clusterdata/utecl1;", command)
         self.matchoutput(out, '"system/cluster/name" = "utecl1";', command)
+        self.matchoutput(out, '"system/cluster/metacluster/name" = "utmc1";', command)
         self.matchoutput(out, '"system/metacluster/name" = "utmc1";', command)
         self.matchoutput(out, '"system/cluster/max_hosts" = 8;', command)
         self.matchoutput(out, '"system/cluster/down_hosts_threshold" = 2;',
@@ -500,8 +501,9 @@ class TestAddVirtualHardware(TestBrokerCommand):
                    "--interface", "eth1", "--pg", "unused-v999"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
-                         "Cannot verify port group availability: no switch "
-                         "record for ESX Cluster utecl1.",
+                         "ESX Cluster utecl1 does not have either a virtual "
+                         "switch or a network device assigned, automatic IP "
+                         "address and port group allocation is not possible.",
                          command)
 
 

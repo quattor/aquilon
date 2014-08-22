@@ -16,7 +16,7 @@
 # limitations under the License.
 
 from aquilon.aqdb.model import (Cluster, EsxCluster, MetaCluster, Personality,
-                                NetworkDevice)
+                                NetworkDevice, VirtualSwitch)
 from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.location import get_location
@@ -38,37 +38,10 @@ class CommandUpdateCluster(BrokerCommand):
                                 .format(dbcluster,
                                         forbid._get_class_label(tolower=True)))
 
-    def render(self, session, logger, cluster, personality,
-               max_members, fix_location, down_hosts_threshold,
-               maint_threshold, comments,
-               # ESX specific options
-               switch, memory_capacity, clear_overrides,
-               **arguments):
-
-        dbcluster = Cluster.get_unique(session, cluster, compel=True)
-
-        self.check_cluster_type(dbcluster, forbid=MetaCluster)
-
-        plenaries = PlenaryCollection(logger=logger)
+    def update_cluster_common(self, session, logger, dbcluster, plenaries,
+                              personality, max_members, fix_location,
+                              virtual_switch, comments, **arguments):
         plenaries.append(Plenary.get_plenary(dbcluster))
-
-        if switch is not None:
-            self.check_cluster_type(dbcluster, require=EsxCluster)
-            if switch:
-                # FIXME: Verify that any hosts are on the same network
-                dbnetdev = NetworkDevice.get_unique(session, switch, compel=True)
-                plenaries.append(PlenarySwitchData.get_plenary(dbnetdev))
-            else:
-                dbnetdev = None
-            dbcluster.network_device = dbnetdev
-
-        if memory_capacity is not None:
-            self.check_cluster_type(dbcluster, require=EsxCluster)
-            dbcluster.memory_capacity = memory_capacity
-
-        if clear_overrides is not None:
-            self.check_cluster_type(dbcluster, require=EsxCluster)
-            dbcluster.memory_capacity = None
 
         update_cluster_location(session, logger, dbcluster, fix_location,
                                 plenaries, **arguments)
@@ -87,10 +60,62 @@ class CommandUpdateCluster(BrokerCommand):
             # Allow removing the restriction
             if max_members < 0:
                 max_members = None
-            dbcluster.max_hosts = max_members
+
+            if hasattr(dbcluster, 'max_clusters'):
+                dbcluster.max_clusters = max_members
+            else:
+                dbcluster.max_hosts = max_members
+
+        if virtual_switch is not None:
+            if virtual_switch:
+                if hasattr(dbcluster, 'network_device') and dbcluster.network_device:
+                    raise ArgumentError("{0} has a switch bound to it, unbind "
+                                        "that first.".format(dbcluster))
+                dbvswitch = VirtualSwitch.get_unique(session, virtual_switch,
+                                                     compel=True)
+                plenaries.append(Plenary.get_plenary(dbvswitch))
+            else:
+                dbvswitch = None
+
+            dbcluster.virtual_switch = dbvswitch
 
         if comments is not None:
             dbcluster.comments = comments
+
+
+    def render(self, session, logger, cluster, personality, max_members,
+               fix_location, down_hosts_threshold, maint_threshold, comments,
+               switch, virtual_switch, memory_capacity, clear_overrides,
+               **arguments):
+        dbcluster = Cluster.get_unique(session, cluster, compel=True)
+        self.check_cluster_type(dbcluster, forbid=MetaCluster)
+        plenaries = PlenaryCollection(logger=logger)
+
+        self.update_cluster_common(session, logger, dbcluster, plenaries,
+                                   personality, max_members, fix_location,
+                                   virtual_switch, comments, **arguments)
+
+        if switch is not None:
+            self.check_cluster_type(dbcluster, require=EsxCluster)
+
+            if switch:
+                if dbcluster.virtual_switch:
+                    raise ArgumentError("{0} has a virtual switch bound to it, "
+                                        "unbind that first.".format(dbcluster))
+                # FIXME: Verify that any hosts are on the same network
+                dbnetdev = NetworkDevice.get_unique(session, switch, compel=True)
+                plenaries.append(PlenarySwitchData.get_plenary(dbnetdev))
+            else:
+                dbnetdev = None
+            dbcluster.network_device = dbnetdev
+
+        if memory_capacity is not None:
+            self.check_cluster_type(dbcluster, require=EsxCluster)
+            dbcluster.memory_capacity = memory_capacity
+
+        if clear_overrides is not None:
+            self.check_cluster_type(dbcluster, require=EsxCluster)
+            dbcluster.memory_capacity = None
 
         if down_hosts_threshold is not None:
             (dbcluster.down_hosts_percent,

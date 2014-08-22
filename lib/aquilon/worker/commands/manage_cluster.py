@@ -17,7 +17,7 @@
 """Contains the logic for `aq manage --cluster`."""
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import Cluster
+from aquilon.aqdb.model import Cluster, MetaCluster
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.commands.manage_list import CommandManageList
 
@@ -26,8 +26,11 @@ class CommandManageCluster(CommandManageList):
 
     required_parameters = ["cluster"]
 
-    def get_objects(self, session, cluster, **arguments):  # pylint: disable=W0613
+    def get_objects(self, session, logger, cluster, **arguments):  # pylint: disable=W0613
         dbcluster = Cluster.get_unique(session, cluster, compel=True)
+        if isinstance(dbcluster, MetaCluster):
+            logger.client_info("Please use the --metacluster option for "
+                               "managing metaclusters.")
         if dbcluster.metacluster:
             raise ArgumentError("{0.name} is member of metacluster {1.name}, "
                                 "it must be managed at metacluster level.".

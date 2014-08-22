@@ -74,6 +74,7 @@ class TestMakeCluster(VerifyNotificationsMixin, TestBrokerCommand):
         command = "cat --cluster=utecl1 --data"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, '"system/cluster/name" = "utecl1";', command)
+        self.matchoutput(out, '"system/cluster/metacluster/name" = "utmc1";', command)
         self.matchoutput(out, '"system/metacluster/name" = "utmc1";', command)
         self.matchclean(out, "resources/virtual_machine", command)
 
@@ -167,6 +168,7 @@ class TestMakeCluster(VerifyNotificationsMixin, TestBrokerCommand):
         command = "cat --cluster=utecl2 --data"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, '"system/cluster/name" = "utecl2";', command)
+        self.matchoutput(out, '"system/cluster/metacluster/name" = "utmc1";', command)
         self.matchoutput(out, '"system/metacluster/name" = "utmc1";', command)
         self.matchclean(out, "resources/virtual_machine", command)
 

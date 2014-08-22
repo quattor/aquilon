@@ -45,7 +45,7 @@ class NetworkDeviceFormatter(HardwareEntityFormatter):
             for om in ports[port]:
                 details.append(indent + "    MAC: %s, created: %s, last seen: %s" %
                                (om.mac_address, om.creation_date, om.last_seen))
-        for pg in device.observed_vlans:
+        for pg in device.port_groups:
             details.append(indent + "  VLAN %d: %s" % (pg.network_tag,
                                                        pg.network.ip))
             details.append(indent + "    Created: %s" % pg.creation_date)

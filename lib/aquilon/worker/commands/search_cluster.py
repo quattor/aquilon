@@ -43,7 +43,7 @@ class CommandSearchCluster(BrokerCommand):
                down_hosts_threshold, down_maint_threshold, max_members,
                member_archetype, member_hostname, member_personality,
                capacity_override, cluster, esx_guest, instance,
-               esx_metacluster, service, share, esx_share,
+               metacluster, esx_metacluster, service, share, esx_share,
                esx_switch, esx_virtual_machine,
                fullinfo, style, **arguments):
 
@@ -51,6 +51,12 @@ class CommandSearchCluster(BrokerCommand):
             self.deprecated_option("esx_share", "Please use --share instead.",
                                    logger=logger, **arguments)
             share = esx_share
+
+        if esx_metacluster:
+            self.deprecated_option("esx_metacluster", "Please use "
+                                   "--metacluster instead.", logger=logger,
+                                   **arguments)
+            metacluster = esx_metacluster
 
         if cluster_type:
             cls = Cluster.polymorphic_subclass(cluster_type,
@@ -133,8 +139,8 @@ class CommandSearchCluster(BrokerCommand):
         # esx stuff
         if cluster:
             q = q.filter_by(name=cluster)
-        if esx_metacluster:
-            dbmetacluster = MetaCluster.get_unique(session, esx_metacluster,
+        if metacluster:
+            dbmetacluster = MetaCluster.get_unique(session, metacluster,
                                                    compel=True)
             q = q.filter_by(metacluster=dbmetacluster)
             q = q.reset_joinpoint()

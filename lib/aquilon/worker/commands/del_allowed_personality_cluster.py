@@ -14,29 +14,38 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+"""Contains the logic for `aq del allowed personality --cluster`."""
 
-
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.aqdb.model import Personality, Cluster
+from aquilon.worker.broker import BrokerCommand
+from aquilon.aqdb.model import Personality, Cluster, MetaCluster
 from aquilon.exceptions_ import ArgumentError
 
 
-class CommandDelAllowedPersonality(BrokerCommand):
+class CommandDelAllowedPersonalityCluster(BrokerCommand):
 
     required_parameters = ["archetype", "personality", "cluster"]
 
-    def render(self, session, archetype, personality, cluster,
+    def render(self, session, archetype, personality, cluster, metacluster,
                **kwargs):
         dbpers = Personality.get_unique(session, name=personality,
                                         archetype=archetype, compel=True)
-        dbclus = Cluster.get_unique(session, cluster, compel=True)
+        if cluster:
+            dbclus = Cluster.get_unique(session, cluster, compel=True)
+            if isinstance(dbclus, MetaCluster):
+                raise ArgumentError("Please use --metacluster for metaclusters.")
+        else:
+            dbclus = MetaCluster.get_unique(session, metacluster, compel=True)
+
         if len(dbclus.allowed_personalities) > 1:
-            for host in dbclus.hosts:
-                if host.personality == dbpers:
-                    raise ArgumentError("The cluster member %s has a "
-                                        "personality of %s which is "
-                                        "incompatible with this constraint." %
-                                        (host.fqdn, host.personality))
+            members = dbclus.hosts[:]
+            if hasattr(dbclus, 'members'):
+                members.extend(dbclus.members)
+
+            for obj in members:
+                if obj.personality == dbpers:
+                    raise ArgumentError("Member {0:l} has {1:l}, which is "
+                                        "incompatible with this constraint."
+                                        .format(obj, obj.personality))
 
         if dbpers in dbclus.allowed_personalities:
             dbclus.allowed_personalities.remove(dbpers)

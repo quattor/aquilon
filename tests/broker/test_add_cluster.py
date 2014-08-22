@@ -306,6 +306,16 @@ class TestAddCluster(PersonalityTestMixin, TestBrokerCommand):
                    "--comments=Test storage cluster for sandbox"]
         self.noouttest(command)
 
+    def test_60_metacluster_name_conflict(self):
+        command = ["add_metacluster", "--metacluster", "utvcs1",
+                   "--domain", "unittest", "--building", "ut",
+                   "--archetype", "metacluster",
+                   "--personality", "metacluster"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Compute Cluster utvcs1 already exists.",
+                         command)
+
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddCluster)
     unittest.TextTestRunner(verbosity=2).run(suite)

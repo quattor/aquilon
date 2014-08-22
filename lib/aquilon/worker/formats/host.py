@@ -79,6 +79,9 @@ class HostFormatter(ObjectFormatter):
             details.append(indent + "  Used by {0.grn:c}: {0.grn.grn} "
                            "[target: {0.target}]".format(grn_rec))
 
+        if host.virtual_switch:
+            details.append(indent + "  {0:c}: {0!s}".format(host.virtual_switch))
+
         for feature in model_features(host.hardware_entity.model,
                                       host.personality.archetype,
                                       host.personality):

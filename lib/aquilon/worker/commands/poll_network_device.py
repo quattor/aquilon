@@ -120,7 +120,7 @@ class CommandPollNetworkDevice(BrokerCommand):
         if not netdev.primary_ip:
             raise ArgumentError("Cannot poll VLAN info for {0:l} without "
                                 "a registered IP address.".format(netdev))
-        del netdev.observed_vlans[:]
+        del netdev.port_groups[:]
         session.flush()
 
         # Restrict operations to the internal network
@@ -193,6 +193,6 @@ class CommandPollNetworkDevice(BrokerCommand):
                                                      usage=dbvi.vlan_type,
                                                      creation_date=now)
 
-                netdev.observed_vlans.append(dbnetwork.port_group)
+                netdev.port_groups.append(dbnetwork.port_group)
         except CSVError as e:
             raise AquilonError("Error parsing vlan2net results: %s" % e)

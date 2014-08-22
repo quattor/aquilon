@@ -51,7 +51,7 @@ class MetaCluster(Cluster):
                                     ondelete='CASCADE'),
                 primary_key=True)
 
-    max_clusters = Column(Integer, nullable=False)
+    max_clusters = Column(Integer, nullable=True)
 
     high_availability = Column(Boolean(name="%s_ha_ck" % _MCT), default=False,
                                nullable=False)
@@ -74,6 +74,10 @@ class MetaCluster(Cluster):
             building = cluster.location_constraint.building
             if building not in building_capacity:
                 building_capacity[building] = {}
+
+            if not hasattr(cluster, 'get_total_capacity'):
+                continue
+
             cap = cluster.get_total_capacity()
             for name, value in cap.items():
                 if name in building_capacity[building]:
@@ -99,6 +103,9 @@ class MetaCluster(Cluster):
     def get_total_usage(self):
         usage = {}
         for cluster in self.members:
+            if not hasattr(cluster, 'get_total_usage'):
+                continue
+
             for name, value in cluster.get_total_usage().items():
                 if name in usage:
                     usage[name] += value
@@ -114,7 +121,7 @@ class MetaCluster(Cluster):
 
     def validate(self):
         """ Validate metacluster constraints """
-        if len(self.members) > self.max_clusters:
+        if self.max_clusters is not None and len(self.members) > self.max_clusters:
             raise ArgumentError("{0} has {1} clusters bound, which exceeds "
                                 "the requested limit of {2}."
                                 .format(self, len(self.members),
@@ -147,6 +154,14 @@ class MetaCluster(Cluster):
         return value
 
     def validate_membership(self, cluster):
+        if self.allowed_personalities and \
+                cluster.personality not in self.allowed_personalities:
+            allowed = sorted("%s/%s" % (pers.archetype, pers.name)
+                             for pers in self.allowed_personalities)
+            raise ArgumentError("{0} is not allowed by the metacluster.  "
+                                "Allowed personalities are: {1!s}"
+                                .format(cluster.personality, ", ".join(allowed)))
+
         if (cluster.branch != self.branch or
             cluster.sandbox_author != self.sandbox_author):
             raise ArgumentError("{0} {1} {2} does not match {3:l} {4} "

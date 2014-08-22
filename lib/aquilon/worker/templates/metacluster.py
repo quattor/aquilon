@@ -75,6 +75,10 @@ class PlenaryMetaClusterData(StructurePlenary):
 
         pan_assign(lines, "system/build", self.dbobj.status.name)
 
+        if self.dbobj.virtual_switch:
+            pan_assign(lines, "system/metacluster/virtual_switch",
+                       self.dbobj.virtual_switch.name)
+
         lines.append("")
         if self.dbobj.resholder:
             for resource in sorted(self.dbobj.resholder.resources,
@@ -100,6 +104,10 @@ class PlenaryMetaClusterObject(ObjectPlenary):
                                       logger=self.logger))
             for si in self.dbobj.service_bindings:
                 keylist.append(PlenaryKey(exclusive=False, service_instance=si,
+                                          logger=self.logger))
+            if self.dbobj.virtual_switch:
+                keylist.append(PlenaryKey(exclusive=False,
+                                          virtual_switch=self.dbobj.virtual_switch,
                                           logger=self.logger))
         return CompileKey.merge(keylist)
 

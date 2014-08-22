@@ -69,12 +69,12 @@ class TestUpdateMetaCluster(TestBrokerCommand, PersonalityTestMixin):
                          command)
 
     def test_100_failreducemaxmembers(self):
-        command = ["update_metacluster", "--metacluster=utmc3",
-                   "--max_members=-1"]
+        command = ["update_metacluster", "--metacluster=utmc1",
+                   "--max_members=1"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
-                         "Metacluster utmc3 has 0 clusters bound, "
-                         "which exceeds the requested limit of -1.",
+                         "Metacluster utmc1 has 3 clusters bound, "
+                         "which exceeds the requested limit of 1.",
                          command)
 
     def test_100_failhabuilding(self):

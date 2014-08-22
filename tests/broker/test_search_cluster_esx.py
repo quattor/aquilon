@@ -40,8 +40,16 @@ class TestSearchClusterESX(TestBrokerCommand):
                    '--cluster', 'cluster-does-not-exist']
         self.notfoundtest(command)
 
-    def testmetaclusteravailable(self):
+    def testmetaclusteravailabledeprecated(self):
         command = "search cluster --cluster_type esx --esx_metacluster utmc1"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "utecl1", command)
+        self.matchoutput(out, "utecl2", command)
+        self.matchoutput(out, "utecl3", command)
+        self.matchclean(out, "utecl4", command)
+
+    def testmetaclusteravailable(self):
+        command = "search cluster --cluster_type esx --metacluster utmc1"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "utecl1", command)
         self.matchoutput(out, "utecl2", command)

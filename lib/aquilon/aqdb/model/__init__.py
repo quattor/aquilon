@@ -114,6 +114,7 @@ from aquilon.aqdb.model.cluster import (Cluster, EsxCluster,
 from aquilon.aqdb.model.personality_cluster_info import (PersonalityClusterInfo,
                                                          PersonalityESXClusterInfo)
 
+from aquilon.aqdb.model.virtual_switch import VirtualSwitch
 from aquilon.aqdb.model.metacluster import MetaCluster
 from aquilon.aqdb.model.machine_specs import MachineSpecs
 

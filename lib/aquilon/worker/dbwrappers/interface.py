@@ -31,7 +31,7 @@ from aquilon.aqdb.types import NicType
 from aquilon.exceptions_ import ArgumentError, InternalError
 from aquilon.aqdb.model import (Interface, ObservedMac, Fqdn, ARecord, VlanInfo,
                                 AddressAssignment, Model, Bunker,
-                                Location, HardwareEntity, Network)
+                                Location, HardwareEntity, Network, Host)
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.aqdb.model.vlan import VLAN_TYPES
 from aquilon.utils import first_of
@@ -78,6 +78,40 @@ def check_ip_restrictions(dbnetwork, ip, relaxed=False):
     return
 
 
+def get_cluster_pg_allocator(dbcluster):
+    if dbcluster.virtual_switch:
+        return dbcluster.virtual_switch
+    if dbcluster.metacluster and dbcluster.metacluster.virtual_switch:
+        return dbcluster.metacluster.virtual_switch
+    # Fallback
+    if dbcluster.network_device:
+        return dbcluster.network_device
+
+    raise ArgumentError("{0} does not have either a virtual switch or a "
+                        "network device assigned, automatic IP address "
+                        "and port group allocation is not possible."
+                        .format(dbcluster))
+
+
+def get_host_pg_allocator(dbhost):
+    if dbhost.virtual_switch:
+        return dbhost.virtual_switch
+    if dbhost.cluster:
+        return get_cluster_pg_allocator(dbhost.cluster)
+    raise ArgumentError("{0} does not have a virtual switch assigned and "
+                        "is not part of a cluster either, automatic IP "
+                        "address and port group allocation is not possible."
+                        .format(dbhost))
+
+
+def get_vm_pg_allocator(dbmachine):
+    holder = dbmachine.vm_container.holder.toplevel_holder_object
+    if isinstance(holder, Host):
+        return get_host_pg_allocator(holder)
+    else:
+        return get_cluster_pg_allocator(holder)
+
+
 def generate_ip(session, logger, dbinterface, ip=None, ipfromip=None,
                 ipfromsystem=None, autoip=None, ipalgorithm=None, compel=False,
                 network_environment=None, audit_results=None, **kwargs):
@@ -106,27 +140,18 @@ def generate_ip(session, logger, dbinterface, ip=None, ipfromip=None,
             dbnetwork = dbinterface.port_group.network
         elif dbinterface.port_group_name:
             # Physical host
-            dbcluster = dbinterface.hardware_entity.host.cluster
-            if not dbcluster:
-                raise ArgumentError("Can only automatically assign an IP "
-                                    "address to an interface with a port "
-                                    "group on virtual machines or ESX hosts.")
-            if not dbcluster.network_device:
-                raise ArgumentError("Cannot automatically assign an IP "
-                                    "address to an interface with a port group "
-                                    "since {0} is not associated with a "
-                                    "switch.".format(dbcluster))
+            allocator = get_host_pg_allocator(dbinterface.hardware_entity.host)
+
             dbvi = VlanInfo.get_by_pg(session, dbinterface.port_group_name)
 
-            for pg in dbcluster.network_device.observed_vlans:
-                if pg.network_tag == dbvi.vlan_id:
-                    dbnetwork = pg.network
-                    break
+            pg = first_of(allocator.port_groups,
+                          lambda x: x.network_tag == dbvi.vlan_id)
 
-            if not dbnetwork:
-                raise ArgumentError("No network found for {0:l} and VLAN {1}"
-                                    .format(dbcluster.network_device,
-                                            dbvi.vlan_id))
+            if not pg:
+                raise ArgumentError("No network found for {0:l} and port "
+                                    "group {1}".format(allocator,
+                                                       dbinterface.pot_group_name))
+            dbnetwork = pg.network
         elif dbinterface.mac:
             q = session.query(ObservedMac)
             q = q.filter_by(mac_address=dbinterface.mac)
@@ -242,33 +267,29 @@ def set_port_group_phys(session, dbinterface, port_group_name):
     dbmachine = dbinterface.hardware_entity
     dbhost = dbmachine.host
 
-    if dbhost and dbhost.cluster and dbhost.cluster.network_device:
-        dbnetdev = dbhost.cluster.network_device
-        pg = first_of(dbnetdev.observed_vlans,
+    if dbhost:
+        allocator = get_host_pg_allocator(dbhost)
+        pg = first_of(allocator.port_groups,
                       lambda x: x.network_tag == dbvi.vlan_id)
         if not pg:
-            raise ArgumentError("VLAN {0} not found for "
-                                "{1:l}.".format(dbvi.vlan_id, dbnetdev))
+            raise ArgumentError("{0} does not have port group {1!s} assigned."
+                                .format(allocator, port_group_name))
 
     dbinterface.port_group_name = dbvi.port_group
 
 
 def set_port_group_vm(session, logger, dbinterface, port_group_name):
     dbmachine = dbinterface.hardware_entity
-    dbnetdev = dbmachine.cluster.network_device
-    if not dbnetdev:
-        raise ArgumentError("Cannot verify port group availability: no "
-                            "switch record for {0}.".format(dbmachine.cluster))
-
+    allocator = get_vm_pg_allocator(dbmachine)
     dbvi = VlanInfo.get_by_pg(session, port_group=port_group_name, compel=None)
     if dbvi:
         # User requested a specific VLAN, check if it is available
-        selected_pg = first_of(dbnetdev.observed_vlans,
+        selected_pg = first_of(allocator.port_groups,
                                lambda x: x.network_tag == dbvi.vlan_id)
         if not selected_pg:
             raise ArgumentError("Cannot verify port group availability: "
                                 "no record for VLAN {0} on "
-                                "{1:l}.".format(dbvi.vlan_id, dbnetdev))
+                                "{1:l}.".format(dbvi.vlan_id, allocator))
 
         # The capacity check below would account this interface twice if we'd
         # try to assign the same port group as it already has
@@ -280,7 +301,7 @@ def set_port_group_vm(session, logger, dbinterface, port_group_name):
 
         if selected_pg.network.is_at_guest_capacity:
             raise ArgumentError("{0} is full for {1:l}.".format(selected_pg,
-                                                                dbnetdev))
+                                                                allocator))
     else:
         if port_group_name not in VLAN_TYPES:
             raise ArgumentError("Port group %s does not match either a "
@@ -290,9 +311,9 @@ def set_port_group_vm(session, logger, dbinterface, port_group_name):
         selected_capacity = 0
 
         # Protect agains concurrent invocations
-        Network.lock_rows([pg.network for pg in dbnetdev.observed_vlans])
+        Network.lock_rows(pg.network for pg in allocator.port_groups)
 
-        for pg in sorted(dbnetdev.observed_vlans, key=attrgetter('network_tag')):
+        for pg in sorted(allocator.port_groups, key=attrgetter('network_tag')):
             if pg.usage != port_group_name:
                 continue
             net = pg.network
@@ -303,10 +324,10 @@ def set_port_group_vm(session, logger, dbinterface, port_group_name):
 
         if not selected_pg:
             raise ArgumentError("No available {0!s} port groups on {1:l}."
-                                .format(port_group_name, dbnetdev))
+                                .format(port_group_name, allocator))
 
         logger.info("Selected {0:l} for {1:l} (based on {2:l})"
-                    .format(selected_pg, dbmachine, dbnetdev))
+                    .format(selected_pg, dbmachine, allocator))
 
     dbinterface.port_group = selected_pg
 

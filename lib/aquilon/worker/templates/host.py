@@ -268,6 +268,14 @@ class PlenaryHostData(StructurePlenary):
             pan_assign(lines, "system/cluster/name", self.dbobj.cluster.name)
             pan_assign(lines, "system/cluster/node_index",
                        self.dbobj._cluster.node_index)
+            if self.dbobj.cluster.metacluster:
+                pan_assign(lines, "system/cluster/metacluster/name",
+                           self.dbobj.cluster.metacluster.name)
+
+        if self.dbobj.virtual_switch:
+            pan_assign(lines, "system/virtual_switch",
+                       self.dbobj.virtual_switch.name)
+
         if self.dbobj.resholder:
             lines.append("")
             for resource in sorted(self.dbobj.resholder.resources,
@@ -304,6 +312,10 @@ class PlenaryHostObject(ObjectPlenary):
             if self.dbobj.cluster:
                 keylist.append(PlenaryKey(exclusive=False,
                                           cluster_member=self.dbobj.cluster,
+                                          logger=self.logger))
+            if self.dbobj.virtual_switch:
+                keylist.append(PlenaryKey(exclusive=False,
+                                          virtual_switch=self.dbobj.virtual_switch,
                                           logger=self.logger))
         return CompileKey.merge(keylist)
 
