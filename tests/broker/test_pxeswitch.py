@@ -21,7 +21,6 @@ This may have issues being tested somewhere that the command actually works...
 """
 
 import os.path
-from tempfile import NamedTemporaryFile
 
 if __name__ == "__main__":
     import utils
@@ -125,83 +124,80 @@ class TestPxeswitch(TestBrokerCommand):
         self.matchoutput(err, "--rescuelist", command)
 
     def testconfigurelist(self):
-        with NamedTemporaryFile() as f:
-            f.writelines(["unittest02.one-nyp.ms.com\n",
-                          "unittest00.one-nyp.ms.com\n"])
-            f.flush()
-            command = "pxeswitch --list %s" % f.name
-            (out, err) = self.successtest(command.split(" "))
-            self.matchoutput(err, "--configurelist", command)
-            # We would like to test more of the output... we need something
-            # special for aii-shellfe however...
+        hosts = ["uNitTest02.one-nyp.ms.com",
+                 "unittest00.One-Nyp.ms.com"]
+        scratchfile = self.writescratch("pxeswitchlist", "\n".join(hosts))
+        command = "pxeswitch --list %s" % scratchfile
+        (out, err) = self.successtest(command.split(" "))
+        self.matchoutput(err, "--configurelist", command)
+        # We would like to test more of the output... we need something
+        # special for aii-shellfe however...
 
     def testconfigurelisterror1(self):
-        with NamedTemporaryFile() as f:
-            f.writelines(["host-does-not-exist.ms.com\n",
-                          "host.domain-does-not-exist.ms.com\n"])
-            f.flush()
-            command = "pxeswitch --list %s --configure" % f.name
-            out = self.badrequesttest(command.split(" "))
-            self.matchoutput(out, "Invalid hosts in list:", command)
-            self.matchoutput(out, "host-does-not-exist.ms.com: DnsRecord "
-                             "host-does-not-exist.ms.com, DNS environment "
-                             "internal not found.",
-                             command)
-            self.matchoutput(out, "domain-does-not-exist.ms.com: DNS Domain "
-                             "domain-does-not-exist.ms.com not found.",
-                             command)
+        hosts = ["not-an-fqdn",
+                 "host-does-not-exist.ms.com",
+                 "host.domain-does-not-exist.ms.com"]
+        scratchfile = self.writescratch("pxeswitchlist", "\n".join(hosts))
+        command = "pxeswitch --list %s --configure" % scratchfile
+        out = self.badrequesttest(command.split(" "))
+        self.matchoutput(out, "Invalid hosts in list:", command)
+        self.matchoutput(out, "not-an-fqdn: Not an FQDN.", command)
+        self.matchoutput(out,
+                         "Host host-does-not-exist.ms.com not found.",
+                         command)
+        self.matchoutput(out,
+                         "Host host.domain-does-not-exist.ms.com not found.",
+                         command)
+        self.matchoutput(out,
+                         "DNS Domain domain-does-not-exist.ms.com not found.",
+                         command)
 
     def testconfigurelisterror2(self):
-        with NamedTemporaryFile() as f:
-            f.writelines([self.aurora_without_node + ".ms.com\n"])
-            f.flush()
-            command = "pxeswitch --list %s --configure" % f.name
-            out = self.badrequesttest(command.split(" "))
-            self.matchoutput(out, "Invalid hosts in list:", command)
-            self.matchoutput(out, "Host %s.ms.com has no bootserver." %
-                             self.aurora_without_node, command)
+        hosts = [self.aurora_without_node + ".ms.com"]
+        scratchfile = self.writescratch("pxeswitchlist", "\n".join(hosts))
+        command = "pxeswitch --list %s --configure" % scratchfile
+        out = self.badrequesttest(command.split(" "))
+        self.matchoutput(out, "Invalid hosts in list:", command)
+        self.matchoutput(out, "Host %s.ms.com has no bootserver." %
+                         self.aurora_without_node, command)
 
     def testinstallisterror(self):
-        with NamedTemporaryFile() as f:
-            f.writelines(["unittest02.one-nyp.ms.com\n",
-                          "unittest00.one-nyp.ms.com\n"])
-            f.flush()
-            command = "pxeswitch --install --list %s" % f.name
-            out = self.badrequesttest(command.split(" "))
-            self.matchoutput(out, "unittest02.one-nyp.ms.com: You should "
-                             "change the build status before switching the "
-                             "PXE link to install.", command)
-            self.matchclean(out, "unittest00.one-nyp.ms.com", command)
+        hosts = ["unittest02.one-nyp.ms.com",
+                 "unittest00.one-nyp.ms.com"]
+        scratchfile = self.writescratch("pxeswitchlist", "\n".join(hosts))
+        command = "pxeswitch --install --list %s" % scratchfile
+        out = self.badrequesttest(command.split(" "))
+        self.matchoutput(out, "unittest02.one-nyp.ms.com: You should "
+                         "change the build status before switching the "
+                         "PXE link to install.", command)
+        self.matchclean(out, "unittest00.one-nyp.ms.com", command)
 
     def testblindbuildlist(self):
-        with NamedTemporaryFile() as f:
-            f.writelines(["unittest02.one-nyp.ms.com\n",
-                          "unittest00.one-nyp.ms.com\n"])
-            f.flush()
-            command = "pxeswitch --list %s --blindbuild" % f.name
-            (out, err) = self.successtest(command.split(" "))
-            self.matchoutput(err, "--configurelist", command)
-            self.matchoutput(err, "--livecdlist", command)
+        hosts = ["unittest02.one-nyp.ms.com",
+                 "unittest00.one-nyp.ms.com"]
+        scratchfile = self.writescratch("pxeswitchlist", "\n".join(hosts))
+        command = "pxeswitch --list %s --blindbuild" % scratchfile
+        (out, err) = self.successtest(command.split(" "))
+        self.matchoutput(err, "--configurelist", command)
+        self.matchoutput(err, "--livecdlist", command)
 
     def testrescuelist(self):
-        with NamedTemporaryFile() as f:
-            f.writelines(["unittest02.one-nyp.ms.com\n",
-                          "unittest00.one-nyp.ms.com\n"])
-            f.flush()
-            command = "pxeswitch --list %s --rescue" % f.name
-            (out, err) = self.successtest(command.split(" "))
-            self.matchoutput(err, "--configurelist", command)
-            self.matchoutput(err, "--rescuelist", command)
+        hosts = ["unittest02.one-nyp.ms.com",
+                 "unittest00.one-nyp.ms.com"]
+        scratchfile = self.writescratch("pxeswitchlist", "\n".join(hosts))
+        command = "pxeswitch --list %s --rescue" % scratchfile
+        (out, err) = self.successtest(command.split(" "))
+        self.matchoutput(err, "--configurelist", command)
+        self.matchoutput(err, "--rescuelist", command)
 
     def testrescuelistnoconf(self):
-        with NamedTemporaryFile() as f:
-            f.writelines(["unittest02.one-nyp.ms.com\n",
-                          "unittest00.one-nyp.ms.com\n"])
-            f.flush()
-            command = "pxeswitch --list %s --rescue --noconfigure" % f.name
-            (out, err) = self.successtest(command.split(" "))
-            self.matchclean(err, "--configurelist", command)
-            self.matchoutput(err, "--rescuelist", command)
+        hosts = ["unittest02.one-nyp.ms.com",
+                 "unittest00.one-nyp.ms.com"]
+        scratchfile = self.writescratch("pxeswitchlist", "\n".join(hosts))
+        command = "pxeswitch --list %s --rescue --noconfigure" % scratchfile
+        (out, err) = self.successtest(command.split(" "))
+        self.matchclean(err, "--configurelist", command)
+        self.matchoutput(err, "--rescuelist", command)
 
 # --configure is the default now, so this is no longer a conflict
 #    def teststatusconflictconfigure(self):
@@ -233,16 +229,15 @@ class TestPxeswitch(TestBrokerCommand):
         self.matchclean(err, "--firmware", command)
 
     def testallowconfigureblindbuildlist(self):
-        with NamedTemporaryFile() as f:
-            f.writelines(["unittest02.one-nyp.ms.com\n",
-                          "unittest00.one-nyp.ms.com\n"])
-            f.flush()
-            command = ["pxeswitch", "--list", f.name,
-                       "--configure", "--blindbuild"]
-            (out, err) = self.successtest(command)
-            self.matchoutput(err, "--configurelist", command)
-            self.matchoutput(err, "--livecdlist", command)
-            self.matchclean(err, "--firmware", command)
+        hosts = ["unittest02.one-nyp.ms.com",
+                 "unittest00.one-nyp.ms.com"]
+        scratchfile = self.writescratch("pxeswitchlist", "\n".join(hosts))
+        command = ["pxeswitch", "--list", scratchfile,
+                   "--configure", "--blindbuild"]
+        (out, err) = self.successtest(command)
+        self.matchoutput(err, "--configurelist", command)
+        self.matchoutput(err, "--livecdlist", command)
+        self.matchclean(err, "--firmware", command)
 
     def testfailoverpxeswitchlimitlist(self):
         hostlimit = self.config.getint("broker", "pxeswitch_max_list_size")

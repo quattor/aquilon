@@ -18,8 +18,6 @@
 
 from random import choice
 
-from sqlalchemy.orm import undefer
-from sqlalchemy.orm.attributes import set_committed_value
 from sqlalchemy.orm.session import object_session
 from sqlalchemy.sql import or_
 
@@ -502,12 +500,6 @@ class HostChooser(Chooser):
         self.required_services = set(q.all())
 
         self.original_service_instances = {}
-        # Cache of any already bound services (keys) and the instance
-        # that was bound (values).
-        q = self.session.query(ServiceInstance)
-        q = q.options(undefer('_client_count'))
-        q = q.filter(ServiceInstance.clients.contains(dbhost))
-        set_committed_value(dbhost, 'services_used', q.all())
         for si in dbhost.services_used:
             self.original_service_instances[si.service] = si
             self.logger.debug("{0} original binding: {1}"

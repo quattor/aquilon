@@ -25,6 +25,7 @@ from sqlalchemy.util import KeyedTuple
 from aquilon.exceptions_ import ArgumentError, PartialError
 from aquilon.aqdb.model import User, Personality
 from aquilon.worker.templates import Plenary, PlenaryCollection
+from aquilon.utils import chunk
 
 LOGGER = logging.getLogger(__name__)
 
@@ -121,10 +122,6 @@ class UserSync(object):
 
         personalities = set()
 
-        def chunk(list_, size):
-            for i in xrange(0, len(list_), size):
-                yield list_[i:i + size]
-
         # Oracle has limits on the size of the IN clause, so we'll need to split the
         # list to smaller chunks
         for userchunk in chunk(userlist, 1000):
@@ -132,7 +129,7 @@ class UserSync(object):
             q = self.session.query(Personality)
             q = q.join(Personality.root_users)
             q = q.options(contains_eager('root_users'))
-            q = q.filter(User.id.in_([dbuser.id for dbuser in userchunk]))
+            q = q.filter(User.id.in_(dbuser.id for dbuser in userchunk))
             for p in q:
                 for dbuser in userset & set(p.root_users):
                     p.root_users.remove(dbuser)

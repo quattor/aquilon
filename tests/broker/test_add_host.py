@@ -635,6 +635,19 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
         self.matchoutput(out, "filer1.ms.com", command)
         self.matchoutput(out, "f5test.aqd-unittest.ms.com", command)
 
+    def test_800_verify_host_list(self):
+        hosts = ["unittest15.aqd-unittest.ms.com",
+                 "unittest16.aqd-unittest.ms.com",
+                 "filer1.ms.com"]
+        scratchfile = self.writescratch("show_host_list", "\n".join(hosts))
+        command = ["show_host", "--list", scratchfile]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Machine: ut8s02p1", command)
+        self.matchoutput(out, "Machine: ut8s02p2", command)
+        self.matchoutput(out, "Machine: filer1", command)
+        self.matchclean(out, "evh1.aqd-unittest.ms.com", command)
+        self.matchclean(out, "ut10s04", command)
+
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddHost)
     unittest.TextTestRunner(verbosity=2).run(suite)

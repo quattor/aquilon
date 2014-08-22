@@ -16,13 +16,20 @@
 # limitations under the License.
 """Wrappers to make getting and using hosts simpler."""
 
-from sqlalchemy.orm import joinedload
+from collections import defaultdict
+from types import ListType
+
+from sqlalchemy.orm import (joinedload, contains_eager, with_polymorphic,
+                            undefer)
 from sqlalchemy.orm.attributes import set_committed_value
 
 from aquilon.exceptions_ import NotFoundException, ArgumentError
-from aquilon.aqdb.model import (HardwareEntity, DnsEnvironment, DnsDomain,
-                                DnsRecord, Host, OperatingSystem, HostLifecycle,
-                                Personality, Domain)
+from aquilon.aqdb.column_types import AqStr
+from aquilon.aqdb.model import (HardwareEntity, DnsEnvironment, DnsDomain, Fqdn,
+                                DnsRecord, ARecord, ReservedName, Host,
+                                OperatingSystem, HostLifecycle, Personality,
+                                Domain, Machine, NetworkDevice, Disk,
+                                ChassisSlot, VirtualMachine)
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
 from aquilon.worker.dbwrappers.feature import (model_features,
@@ -31,8 +38,7 @@ from aquilon.worker.dbwrappers.feature import (model_features,
 from aquilon.worker.dbwrappers.grn import lookup_grn
 from aquilon.worker.dbwrappers.service_instance import check_no_provided_service
 from aquilon.worker.templates import (Plenary, PlenaryServiceInstanceServer)
-from collections import defaultdict
-from types import ListType
+from aquilon.utils import chunk
 
 
 def create_host(session, logger, config, dbhw, dbarchetype, domain=None,
@@ -161,48 +167,153 @@ def hostname_to_host(session, hostname):
     return dbmachine.host
 
 
-def hostlist_to_hosts(session, hostlist):
+def hostlist_to_hosts(session, hostlist, query_options=None,
+                      error=ArgumentError):
     dbdns_env = DnsEnvironment.get_unique_or_default(session)
+
     failed = []
-    dbhosts = []
+    parsed_fqdns = defaultdict(list)
     dns_domains = {}
-    for host in hostlist:
-        if "." not in host:
-            failed.append("%s: Not an FQDN." % host)
-            continue
-        short, dns_domain = host.split(".", 1)
-        try:
-            if dns_domain not in dns_domains:
-                dbdns_domain = DnsDomain.get_unique(session, dns_domain,
-                                                    compel=True)
+    dns_records_by_name = {}
+    dns_records_by_id = {}
 
-                dns_domains[dns_domain] = dbdns_domain
+    hostlist = [AqStr.normalize(host) for host in hostlist]
 
-            options = [joinedload("hardware_entity"),
-                       joinedload("hardware_entity.host")]
-            dbdns_rec = DnsRecord.get_unique(session, name=short,
-                                             dns_domain=dns_domains[dns_domain],
-                                             dns_environment=dbdns_env,
-                                             query_options=options, compel=True)
-            if not dbdns_rec.hardware_entity or \
-               not dbdns_rec.hardware_entity.host:
-                raise NotFoundException("Host %s not found." % host)
-            dbhosts.append(dbdns_rec.hardware_entity.host)
+    def parse_fqdns():
+        for host in hostlist:
+            if "." not in host:
+                failed.append("%s: Not an FQDN." % host)
+                continue
+            short, dns_domain = host.split(".", 1)
+            parsed_fqdns[dns_domain].append(short)
 
-        except NotFoundException as err:
-            failed.append("%s: %s" % (host, err))
-            continue
-        except ArgumentError as err:
-            failed.append("%s: %s" % (host, err))
-            continue
+    def look_up_dns_domains():
+        q = session.query(DnsDomain)
+        q = q.filter(DnsDomain.name.in_(parsed_fqdns.keys()))
+        for dbdns_domain in q:
+            dns_domains[dbdns_domain.name] = dbdns_domain
 
-    if failed:
-        raise ArgumentError("Invalid hosts in list:\n%s" %
-                            "\n".join(failed))
+        missing = set(parsed_fqdns.iterkeys())
+        missing.difference_update(dns_domains.iterkeys())
+        for item in missing:
+            failed.append("DNS Domain %s not found." % item)
 
-    if not dbhosts:
-        raise ArgumentError("Empty list.")
+    def look_up_dns_records():
+        for dbdns_domain in dns_domains.itervalues():
+            short_names = parsed_fqdns[dbdns_domain.name]
+            for name_chunk in chunk(short_names, 1000):
+                q = session.query(DnsRecord)
+                q = q.with_polymorphic([ARecord, ReservedName])
+                q = q.join(Fqdn, DnsRecord.fqdn_id == Fqdn.id)
+                q = q.filter_by(dns_environment=dbdns_env, dns_domain=dbdns_domain)
+                q = q.filter(Fqdn.name.in_(name_chunk))
+                q = q.options(contains_eager('fqdn'))
+                for dbdns_rec in q:
+                    set_committed_value(dbdns_rec.fqdn, 'dns_domain', dbdns_domain)
+                    dns_records_by_name[str(dbdns_rec.fqdn)] = dbdns_rec
+                    dns_records_by_id[dbdns_rec.id] = dbdns_rec
+
+        missing = set(hostlist)
+        missing.difference_update(dns_records_by_name.iterkeys())
+        for item in missing:
+            failed.append("Host %s not found." % item)
+
+    def look_up_hosts():
+        hosts_by_fqdn = {}
+        for dns_rec_chunk in chunk(dns_records_by_name.values(), 1000):
+            q = session.query(Host)
+            # TODO: SQLAlchemy 0.8 needs drop aliased=True, remove it after
+            # upgrading to 0.9
+            HWAlias = with_polymorphic(HardwareEntity, [Machine, NetworkDevice],
+                                       aliased=True)
+            q = q.join(HWAlias)
+            q = q.filter(HWAlias.primary_name_id.in_(rec.id for rec in
+                                                     dns_rec_chunk))
+            q = q.options(contains_eager(Host.hardware_entity.of_type(HWAlias)))
+            if query_options:
+                q = q.options(*query_options)
+
+            for dbhost in q:
+                primary_name = dns_records_by_id[dbhost.hardware_entity.primary_name_id]
+                set_committed_value(dbhost.hardware_entity, 'primary_name',
+                                    primary_name)
+                hosts_by_fqdn[str(primary_name.fqdn)] = dbhost
+
+        # Don't report bad hostnames twice - start from dns_records_by_name
+        # rather than from hostlist
+        missing = set(dns_records_by_name.iterkeys())
+        missing.difference_update(hosts_by_fqdn.iterkeys())
+        for item in missing:
+            failed.append("Host %s not found." % item)
+
+        return hosts_by_fqdn.values()
+
+    parse_fqdns()
+    look_up_dns_domains()
+    look_up_dns_records()
+    dbhosts = look_up_hosts()
+
+    if error:
+        if failed:
+            raise error("Invalid hosts in list:\n%s" % "\n".join(failed))
+        if not dbhosts:
+            raise error("Empty list.")
     return dbhosts
+
+
+def preload_machine_data(session, dbhosts):
+    hw_by_id = {}
+    for dbhost in dbhosts:
+        hw_by_id[dbhost.hardware_entity.id] = dbhost.hardware_entity
+
+    # Not all hosts are bound to machines, so load the machine-specific
+    # attributes separately
+    machines = [dbhost.hardware_entity.id for dbhost in dbhosts if
+                dbhost.hardware_entity.model.model_type.isMachineType()]
+    for machine_chunk in chunk(machines, 1000):
+        disks_by_hw = defaultdict(ListType)
+        q = session.query(Disk)
+        q = q.options(undefer('comments'))
+        q = q.filter(Disk.machine_id.in_(machine_chunk))
+        for dbdisk in q:
+            dbhw = hw_by_id[dbdisk.machine_id]
+            set_committed_value(dbdisk, "machine", dbhw)
+            disks_by_hw[dbdisk.machine_id].append(dbdisk)
+
+        for hw_id in machine_chunk:
+            dbhw = hw_by_id[hw_id]
+            if hw_id in disks_by_hw:
+                set_committed_value(dbhw, "disks", disks_by_hw[hw_id])
+            else:
+                set_committed_value(dbhw, "disks", [])
+
+        slots_by_hw = defaultdict(ListType)
+        q = session.query(ChassisSlot)
+        q = q.filter(ChassisSlot.machine_id.in_(machine_chunk))
+        for dbslot in q:
+            dbhw = hw_by_id[dbslot.machine_id]
+            set_committed_value(dbslot, "machine", dbhw)
+            slots_by_hw[dbslot.machine_id].append(dbslot)
+
+        for hw_id in machine_chunk:
+            dbhw = hw_by_id[hw_id]
+            if hw_id in slots_by_hw:
+                set_committed_value(dbhw, "chassis_slot", slots_by_hw[hw_id])
+            else:
+                set_committed_value(dbhw, "chassis_slot", [])
+
+        vms = set()
+        q = session.query(VirtualMachine)
+        q = q.filter(VirtualMachine.machine_id.in_(machine_chunk))
+        for vm in q:
+            dbhw = hw_by_id[vm.machine_id]
+            set_committed_value(vm, "machine", dbhw)
+            set_committed_value(dbhw, "vm_container", vm)
+            vms.add(vm.machine_id)
+
+        for hw_id in set(machine_chunk) - vms:
+            dbhw = hw_by_id[hw_id]
+            set_committed_value(dbhw, "vm_container", None)
 
 
 def get_host_bound_service(dbhost, dbservice):

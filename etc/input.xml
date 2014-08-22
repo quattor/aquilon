@@ -141,14 +141,17 @@
 	Shows the complete configuration for a given host. If the '--all' option
 	is provided, then the command simply outputs a listing of all known hostnames.
 	<optgroup mandatory="True" fields="any">
-	    <option name="hostname" type="string" conflicts="all">Host name</option>
-	    <option name="all" type="flag" conflicts="hostname">Select all hosts</option>
+	    <option name="hostname" type="string" conflicts="all list">Host name</option>
+	    <option name="list" type="list" conflicts="hostname all">Host list</option>
+	    <option name="all" type="flag" conflicts="hostname list">Select all hosts</option>
 	</optgroup>
 	<optgroup mandatory="False" fields="any">
-	    <option name="grns" type="flag" conflicts="all">Shows grns</option>
+	    <option name="grns" type="flag" conflicts="list all">Shows grns</option>
 	</optgroup>
-	<transport method="get" path="host/%(hostname)s"/>
 	<transport trigger="all" method="get" path="host"/>
+	<!-- "list" needs to be POST, because the value may be too big for GET -->
+	<transport trigger="list" method="post" path="host"/>
+	<transport trigger="hostname" method="get" path="host/%(hostname)s"/>
 	<transport trigger="grns" method="get" path="host/%(hostname)s/grns"/>
 	<format name="proto">
 	    <message_class name="HostList" module="aqdsystems_pb2"/>

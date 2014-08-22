@@ -16,7 +16,8 @@
 # limitations under the License.
 """Contains the logic for `aq search host`."""
 
-from sqlalchemy.orm import aliased, contains_eager
+from sqlalchemy.orm import (aliased, contains_eager, joinedload, subqueryload,
+                            undefer)
 from sqlalchemy.sql import and_, or_
 
 from aquilon.exceptions_ import NotFoundException
@@ -30,12 +31,14 @@ from aquilon.aqdb.model import (Host, Cluster, Archetype, Personality,
                                 MetaCluster, VirtualMachine, ClusterResource,
                                 HardwareEntity, HostEnvironment, User)
 from aquilon.aqdb.model.dns_domain import parse_fqdn
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.formats.list import StringAttributeList
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
 from aquilon.worker.dbwrappers.grn import lookup_grn
+from aquilon.worker.dbwrappers.host import preload_machine_data
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.dbwrappers.network import get_network_byip
+
 
 class CommandSearchHost(BrokerCommand):
 
@@ -261,5 +264,25 @@ class CommandSearchHost(BrokerCommand):
             q = q.reset_joinpoint()
 
         if fullinfo or style != "raw":
-            return q.all()
+            q = q.options(joinedload('personality'),
+                          undefer('personality.archetype.comments'),
+                          subqueryload('personality._grns'),
+                          subqueryload('_grns'),
+                          subqueryload('services_used'),
+                          subqueryload('services_provided'),
+                          joinedload('resholder'),
+                          subqueryload('resholder.resources'),
+                          joinedload('_cluster'),
+                          subqueryload('_cluster.cluster'),
+                          joinedload('hardware_entity.model'),
+                          subqueryload('hardware_entity.interfaces'),
+                          subqueryload('hardware_entity.interfaces.assignments'),
+                          subqueryload('hardware_entity.interfaces.assignments.dns_records'),
+                          joinedload('hardware_entity.interfaces.assignments.network'),
+                          joinedload('hardware_entity.location'),
+                          subqueryload('hardware_entity.location.parents'))
+            dbhosts = q.all()
+            preload_machine_data(session, dbhosts)
+            return dbhosts
+
         return StringAttributeList(q.all(), "fqdn")
