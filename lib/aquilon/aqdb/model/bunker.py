@@ -29,9 +29,7 @@ class Bunker(Location):
 
     valid_parents = [Building, Room]
 
-    id = Column(Integer, ForeignKey(Location.id,
-                                    name='%s_loc_fk' % _TN,
-                                    ondelete='CASCADE'),
+    id = Column(Integer, ForeignKey(Location.id, ondelete='CASCADE'),
                 primary_key=True)
 
 

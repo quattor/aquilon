@@ -25,7 +25,6 @@ from sqlalchemy.orm import relation, deferred
 from aquilon.aqdb.model import Base, Role, Realm
 
 _TN = 'user_principal'
-_ABV = 'usr_princ'
 
 
 class UserPrincipal(Base):
@@ -37,11 +36,9 @@ class UserPrincipal(Base):
 
     name = Column(String(32), nullable=False)
 
-    realm_id = Column(Integer, ForeignKey(Realm.id, name='%s_rlm_fk' % _ABV),
-                      nullable=False)
+    realm_id = Column(Integer, ForeignKey(Realm.id), nullable=False)
 
-    role_id = Column(Integer, ForeignKey(Role.id, name='%s_role_fk' % _ABV,
-                                         ondelete='CASCADE'),
+    role_id = Column(Integer, ForeignKey(Role.id, ondelete='CASCADE'),
                      nullable=False)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,

@@ -31,7 +31,6 @@ class Share(Resource):
     __mapper_args__ = {'polymorphic_identity': 'share'}
 
     id = Column(Integer, ForeignKey(Resource.id,
-                                    name='%s_resource_fk' % (_TN),
                                     ondelete='CASCADE'),
                 primary_key=True)
 

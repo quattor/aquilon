@@ -41,18 +41,14 @@ class RouterAddress(Base):
 
     # With the introduction of network environments, the IP alone is not enough
     # to uniquely identify the router
-    network_id = Column(Integer, ForeignKey(Network.id,
-                                            name='%s_network_fk' % _TN),
-                        nullable=False)
+    network_id = Column(Integer, ForeignKey(Network.id), nullable=False)
 
-    dns_environment_id = Column(Integer, ForeignKey(DnsEnvironment.id,
-                                                    name='%s_dns_env_fk' % _TN),
+    dns_environment_id = Column(Integer, ForeignKey(DnsEnvironment.id),
                                 nullable=False)
 
     # We don't want deleting a location to disrupt networking, so use "ON DELETE
     # SET NULL" here
     location_id = Column(Integer, ForeignKey(Location.id,
-                                             name='%s_location_fk' % _TN,
                                              ondelete="SET NULL"),
                          nullable=True)
 

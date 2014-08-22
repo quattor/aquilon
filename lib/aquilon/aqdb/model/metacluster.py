@@ -47,8 +47,7 @@ class MetaCluster(Cluster):
     __mapper_args__ = {'polymorphic_identity': 'meta'}
     _class_label = "Metacluster"
 
-    id = Column(Integer, ForeignKey(Cluster.id, name='meta_cluster_fk',
-                                    ondelete='CASCADE'),
+    id = Column(Integer, ForeignKey(Cluster.id, ondelete='CASCADE'),
                 primary_key=True)
 
     max_clusters = Column(Integer, nullable=True)
@@ -181,12 +180,10 @@ class __MetaClusterMember(Base):
     __tablename__ = _MCM
 
     metacluster_id = Column(Integer, ForeignKey(MetaCluster.id,
-                                                name='%s_meta_fk' % _MCM,
                                                 ondelete='CASCADE'),
                             nullable=False)
 
     cluster_id = Column(Integer, ForeignKey(Cluster.id,
-                                            name='%s_clstr_fk' % _MCM,
                                             ondelete='CASCADE'),
                         nullable=False)
 

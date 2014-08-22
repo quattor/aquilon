@@ -29,17 +29,11 @@ from aquilon.aqdb.column_types.aqstr import AqStr
 from aquilon.aqdb.model import (Base, Archetype, Grn, HostEnvironment,
                                 User, NetGroupWhiteList)
 
-_ABV = 'prsnlty'
 _TN = 'personality'
-
+_ABV = 'prsnlty'
 _PGN = 'personality_grn_map'
-_PGNABV = 'pers_grn_map'
-
 _PRU = 'personality_rootuser'
-_PRUABV = 'pers_rootuser'
-
 _PRNG = 'personality_rootnetgroup'
-_PRNGABV = 'pers_rootng'
 
 
 def _pgm_creator(tuple):
@@ -52,8 +46,7 @@ class Personality(Base):
 
     id = Column(Integer, Sequence('%s_seq' % _ABV), primary_key=True)
     name = Column(AqStr(64), nullable=False)
-    archetype_id = Column(Integer, ForeignKey(Archetype.id,
-                                              name='%s_arch_fk' % _ABV),
+    archetype_id = Column(Integer, ForeignKey(Archetype.id),
                           nullable=False)
 
     cluster_required = Column(Boolean(name="%s_clstr_req_ck" % _TN),
@@ -66,8 +59,7 @@ class Personality(Base):
                                               name='%s_owner_grn_fk' % _TN),
                           nullable=False)
 
-    host_environment_id = Column(Integer, ForeignKey(HostEnvironment.id,
-                                                     name='host_environment_fk'),
+    host_environment_id = Column(Integer, ForeignKey(HostEnvironment.id),
                                  nullable=False)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
@@ -110,13 +102,10 @@ class PersonalityGrnMap(Base):
     __tablename__ = _PGN
 
     personality_id = Column(Integer, ForeignKey(Personality.id,
-                                                name='%s_personality_fk' % _PGNABV,
                                                 ondelete='CASCADE'),
                             nullable=False)
 
-    eon_id = Column(Integer, ForeignKey(Grn.eon_id,
-                                        name='%s_grn_fk' % _PGNABV),
-                    nullable=False)
+    eon_id = Column(Integer, ForeignKey(Grn.eon_id), nullable=False)
 
     target = Column(AqStr(32), nullable=False)
 
@@ -140,13 +129,10 @@ class __PersonalityRootUser(Base):
     __tablename__ = _PRU
 
     personality_id = Column(Integer, ForeignKey(Personality.id,
-                                                ondelete='CASCADE',
-                                                name='%s_pers_fk' % _PRUABV),
+                                                ondelete='CASCADE'),
                             nullable=False)
 
-    user_id = Column(Integer, ForeignKey(User.id,
-                                         ondelete='CASCADE',
-                                         name='%s_user_fk' % _PRUABV),
+    user_id = Column(Integer, ForeignKey(User.id, ondelete='CASCADE'),
                      nullable=False)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
@@ -161,13 +147,11 @@ class __PersonalityRootNetGroup(Base):
     __tablename__ = _PRNG
 
     personality_id = Column(Integer, ForeignKey(Personality.id,
-                                                ondelete='CASCADE',
-                                                name='%s_pers_fk' % _PRNGABV),
+                                                ondelete='CASCADE'),
                             nullable=False)
 
     netgroup_id = Column(Integer, ForeignKey(NetGroupWhiteList.id,
-                                             ondelete='CASCADE',
-                                             name='%s_group_fk' % _PRNGABV),
+                                             ondelete='CASCADE'),
                          nullable=False)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,

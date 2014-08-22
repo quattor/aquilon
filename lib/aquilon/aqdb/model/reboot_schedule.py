@@ -28,7 +28,6 @@ class RebootSchedule(Resource):
     __mapper_args__ = {'polymorphic_identity': 'reboot_schedule'}
 
     id = Column(Integer, ForeignKey(Resource.id,
-                                    name='rs_resource_fk',
                                     ondelete='CASCADE'),
                 primary_key=True)
 
@@ -54,7 +53,6 @@ class RebootIntervention(Intervention):
     __mapper_args__ = {'polymorphic_identity': 'reboot_iv'}
 
     id = Column(Integer, ForeignKey(Intervention.id,
-                                    name='ri_resource_fk',
                                     ondelete='CASCADE'),
                 primary_key=True)
 

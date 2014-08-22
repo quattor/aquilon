@@ -31,13 +31,10 @@ class NsRecord(Base):
     __tablename__ = _TN
     _class_label = "Name Server"
 
-    a_record_id = Column(Integer, ForeignKey(ARecord.dns_record_id,
-                                             name='%s_a_record_fk' % (_TN)),
+    a_record_id = Column(Integer, ForeignKey(ARecord.dns_record_id),
                          nullable=False)
 
-    dns_domain_id = Column(Integer, ForeignKey(DnsDomain.id,
-                                               name='%s_domain_fk' % (_TN)),
-                           nullable=False)
+    dns_domain_id = Column(Integer, ForeignKey(DnsDomain.id), nullable=False)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))

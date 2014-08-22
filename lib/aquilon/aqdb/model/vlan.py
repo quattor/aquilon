@@ -32,7 +32,6 @@ MAX_VLANS = 4096  # IEEE 802.1Q standard
 VLAN_TYPES = ('storage', 'vmotion', 'user', 'unknown', 'vulcan-mgmt', 'vcs')
 
 _TN = 'observed_vlan'
-_ABV = 'obs_vlan'
 _VTN = 'vlan_info'
 _PG = 'port_group'
 
@@ -84,8 +83,7 @@ class PortGroup(Base):
     id = Column(Integer, Sequence("%s_seq" % _PG), primary_key=True)
 
     network_id = Column(Integer, ForeignKey(Network.id,
-                                            ondelete='CASCADE',
-                                            name='%s_network_fk' % _PG),
+                                            ondelete='CASCADE'),
                         nullable=False)
 
     # VLAN or VxLAN ID
@@ -120,18 +118,15 @@ class PortGroup(Base):
 
 class __ObservedVlan(Base):
     """ reports the observance of a vlan/network on a switch """
-    __tablename__ = 'observed_vlan'
+    __tablename__ = _TN
 
     network_device_id = Column(Integer,
                                ForeignKey(NetworkDevice.hardware_entity_id,
-                                          ondelete='CASCADE',
-                                          name='%s_hw_fk' % _ABV),
+                                          ondelete='CASCADE'),
                                nullable=False)
 
-    port_group_id = Column(Integer,
-                           ForeignKey(PortGroup.id,
-                                      ondelete='CASCADE',
-                                      name='%s_pg_fk' % _ABV),
+    port_group_id = Column(Integer, ForeignKey(PortGroup.id,
+                                               ondelete='CASCADE'),
                            nullable=False)
 
     __table_args__ = (PrimaryKeyConstraint(network_device_id, port_group_id),

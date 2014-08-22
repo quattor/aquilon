@@ -53,12 +53,10 @@ class VirtualSwitch(Base):
 class __VSwitchClusterAssignment(Base):
     __tablename__ = _VSC
 
-    virtual_switch_id = Column(Integer, ForeignKey(VirtualSwitch.id,
-                                                   name='%s_vswitch_fk' % _VSC),
+    virtual_switch_id = Column(Integer, ForeignKey(VirtualSwitch.id),
                                nullable=False)
 
     cluster_id = Column(Integer, ForeignKey(Cluster.id,
-                                            name='%s_cluster_fk' % _VSC,
                                             ondelete='CASCADE'),
                         nullable=False)
 
@@ -77,12 +75,10 @@ VirtualSwitch.clusters = relation(Cluster,
 class __VSwitchHostAssignment(Base):
     __tablename__ = _VSH
 
-    virtual_switch_id = Column(Integer, ForeignKey(VirtualSwitch.id,
-                                                   name='%s_vswitch_fk' % _VSH),
+    virtual_switch_id = Column(Integer, ForeignKey(VirtualSwitch.id),
                                nullable=False)
 
     host_id = Column(Integer, ForeignKey(Host.hardware_entity_id,
-                                         name='%s_host_fk' % _VSH,
                                          ondelete='CASCADE'),
                      nullable=False)
 
@@ -100,12 +96,10 @@ class __VSwitchPGAssignment(Base):
     __tablename__ = _VSP
 
     virtual_switch_id = Column(Integer, ForeignKey(VirtualSwitch.id,
-                                                   name='%s_vswitch_fk' % _VSP,
                                                    ondelete='CASCADE'),
                                nullable=False)
 
     port_group_id = Column(Integer, ForeignKey(PortGroup.network_id,
-                                               name='%s_port_group_fk' % _VSP,
                                                ondelete='CASCADE'),
                            nullable=False)
 

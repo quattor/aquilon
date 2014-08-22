@@ -32,10 +32,8 @@ class NetworkDevice(HardwareEntity):
     _class_label = 'Switch'
     __mapper_args__ = {'polymorphic_identity': _TN}
 
-    hardware_entity_id = Column(Integer,
-                                ForeignKey(HardwareEntity.id,
-                                           name='%s_hw_ent_fk' % _TN,
-                                           ondelete='CASCADE'),
+    hardware_entity_id = Column(Integer, ForeignKey(HardwareEntity.id,
+                                                    ondelete='CASCADE'),
                                 primary_key=True)
 
     switch_type = Column(Enum(16, SWITCH_TYPES), nullable=False)

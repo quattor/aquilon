@@ -29,9 +29,7 @@ class Country(Location):
 
     valid_parents = [Continent]
 
-    id = Column(Integer, ForeignKey(Location.id,
-                                    name='%s_loc_fk' % _TN,
-                                    ondelete='CASCADE'),
+    id = Column(Integer, ForeignKey(Location.id, ondelete='CASCADE'),
                 primary_key=True)
 
 country = Country.__table__  # pylint: disable=C0103

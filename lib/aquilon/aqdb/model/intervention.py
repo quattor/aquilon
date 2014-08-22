@@ -29,9 +29,7 @@ class Intervention(Resource):
     __tablename__ = _TN
     __mapper_args__ = {'polymorphic_identity': 'intervention'}
 
-    id = Column(Integer, ForeignKey(Resource.id,
-                                    name='iv_resource_fk',
-                                    ondelete='CASCADE'),
+    id = Column(Integer, ForeignKey(Resource.id, ondelete='CASCADE'),
                 primary_key=True)
 
     start_date = Column(DateTime, default=datetime.now, nullable=False)

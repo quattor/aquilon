@@ -93,14 +93,10 @@ class __ServiceListItem(Base):
     __tablename__ = _SLI
     _class_label = 'Required Service'
 
-    service_id = Column(Integer, ForeignKey(Service.id,
-                                            name='sli_svc_fk',
-                                            ondelete='CASCADE'),
+    service_id = Column(Integer, ForeignKey(Service.id, ondelete='CASCADE'),
                         nullable=False)
 
-    archetype_id = Column(Integer, ForeignKey(Archetype.id,
-                                              name='sli_arctype_fk',
-                                              ondelete='CASCADE'),
+    archetype_id = Column(Integer, ForeignKey(Archetype.id, ondelete='CASCADE'),
                           nullable=False)
 
     __table_args__ = (PrimaryKeyConstraint(service_id, archetype_id),
@@ -118,13 +114,10 @@ class __PersonalityServiceListItem(Base):
 
     __tablename__ = _PSLI
 
-    service_id = Column(Integer, ForeignKey(Service.id,
-                                            name='%s_svc_fk' % _ABV,
-                                            ondelete='CASCADE'),
+    service_id = Column(Integer, ForeignKey(Service.id, ondelete='CASCADE'),
                         nullable=False)
 
     personality_id = Column(Integer, ForeignKey(Personality.id,
-                                                name='sli_prsnlty_fk',
                                                 ondelete='CASCADE'),
                             nullable=False)
 

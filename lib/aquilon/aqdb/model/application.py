@@ -27,9 +27,7 @@ class Application(Resource):
     __tablename__ = _TN
     __mapper_args__ = {'polymorphic_identity': _TN}
 
-    id = Column(Integer, ForeignKey(Resource.id,
-                                    name='app_resource_fk',
-                                    ondelete='CASCADE'),
+    id = Column(Integer, ForeignKey(Resource.id, ondelete='CASCADE'),
                 primary_key=True)
 
     eonid = Column(Integer, nullable=False)

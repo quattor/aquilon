@@ -40,23 +40,18 @@ class PersonalityServiceMap(Base):
 
     id = Column(Integer, Sequence('%s_seq' % _ABV), primary_key=True)
 
-    service_instance_id = Column(Integer,
-                                 ForeignKey(ServiceInstance.id,
-                                            name='%s_svc_inst_fk' % _ABV,
-                                            ondelete='CASCADE'),
+    service_instance_id = Column(Integer, ForeignKey(ServiceInstance.id,
+                                                     ondelete='CASCADE'),
                                  nullable=False)
 
-    location_id = Column(Integer, ForeignKey(Location.id, ondelete='CASCADE',
-                                             name='%s_loc_fk' % _ABV),
+    location_id = Column(Integer, ForeignKey(Location.id, ondelete='CASCADE'),
                          nullable=True)
 
     personality_id = Column(Integer, ForeignKey(Personality.id,
-                                                name='personality',
                                                 ondelete='CASCADE'),
                             nullable=False)
 
-    network_id = Column(Integer, ForeignKey(Network.id, ondelete='CASCADE',
-                                            name='%s_net_fk' % _ABV),
+    network_id = Column(Integer, ForeignKey(Network.id, ondelete='CASCADE'),
                         nullable=True)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,

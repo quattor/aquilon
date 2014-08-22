@@ -26,7 +26,6 @@ from aquilon.aqdb.column_types import AqStr
 from aquilon.aqdb.model import Base, Cluster, Host
 
 _TN = 'resource'
-_ABV = 'res'
 _RESHOLDER = 'resholder'
 
 
@@ -64,13 +63,12 @@ class ResourceHolder(Base):
     def _validate_resources(self, key, value):
         return self.validate_resources(key, value)
 
-    def validate_resources(self, key, value):
+    def validate_resources(self, key, value):  # pylint: disable=W0613
         return value
 
 
 class HostResource(ResourceHolder):
     host_id = Column(Integer, ForeignKey(Host.hardware_entity_id,
-                                         name='%s_host_fk' % _RESHOLDER,
                                          ondelete='CASCADE'),
                      nullable=True)
 
@@ -94,7 +92,6 @@ class HostResource(ResourceHolder):
 
 class ClusterResource(ResourceHolder):
     cluster_id = Column(Integer, ForeignKey(Cluster.id,
-                                            name='%s_clstr_fk' % _RESHOLDER,
                                             ondelete='CASCADE'),
                         nullable=True)
 
@@ -135,7 +132,6 @@ class Resource(Base):
                                     nullable=False))
     comments = Column(String(255), nullable=True)
     holder_id = Column(Integer, ForeignKey(ResourceHolder.id,
-                                           name='%s_resholder_fk' % _TN,
                                            ondelete='CASCADE'),
                        nullable=False)
 
@@ -152,7 +148,7 @@ class Resource(Base):
     def _validate_holder(self, key, value):
         return self.validate_holder(key, value)
 
-    def validate_holder(self, key, value):
+    def validate_holder(self, key, value):  # pylint: disable=W0613
         return value
 
     def __repr__(self):

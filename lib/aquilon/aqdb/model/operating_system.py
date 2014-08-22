@@ -36,9 +36,7 @@ class OperatingSystem(Base):
     id = Column(Integer, Sequence('%s_seq' % _ABV), primary_key=True)
     name = Column(AqStr(32), nullable=False)
     version = Column(AqStr(16), nullable=False)
-    archetype_id = Column(Integer, ForeignKey(Archetype.id,
-                                              name='%s_arch_fk' % _ABV,
-                                              ondelete="CASCADE"),
+    archetype_id = Column(Integer, ForeignKey(Archetype.id, ondelete="CASCADE"),
                           nullable=False)
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))

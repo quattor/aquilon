@@ -34,18 +34,15 @@ class ARecord(DnsRecord):
     _class_label = 'DNS Record'
 
     dns_record_id = Column(Integer, ForeignKey(DnsRecord.id,
-                                               name='%s_dns_record_fk' % _TN,
                                                ondelete='CASCADE'),
                            primary_key=True)
 
     ip = Column(IPV4, nullable=False)
 
-    network_id = Column(Integer, ForeignKey(Network.id,
-                                            name='%s_network_fk' % _TN),
-                        nullable=False)
+    network_id = Column(Integer, ForeignKey(Network.id), nullable=False)
 
     reverse_ptr_id = Column(Integer, ForeignKey(Fqdn.id,
-                                                name='%s_reverse_fk' % _TN,
+                                                name='%s_reverse_ptr_fk' % _TN,
                                                 ondelete='SET NULL'),
                             nullable=True)
 
@@ -99,7 +96,7 @@ class ARecord(DnsRecord):
     def _validate_reverse_ptr(self, key, value):
         return self.validate_reverse_ptr(key, value)
 
-    def validate_reverse_ptr(self, key, value):
+    def validate_reverse_ptr(self, key, value):  # pylint: disable=W0613
         if value and self.fqdn.dns_environment != value.dns_environment:  # pragma: no cover
             raise ValueError("DNS environment mismatch: %s != %s" %
                              (self.fqdn.dns_environment, value.dns_environment))
@@ -151,7 +148,6 @@ class DynamicStub(ARecord):
     _class_label = 'Dynamic Stub'
 
     dns_record_id = Column(Integer, ForeignKey(ARecord.dns_record_id,
-                                               name='%s_arecord_fk' % _DTN,
                                                ondelete='CASCADE'),
                            primary_key=True)
 

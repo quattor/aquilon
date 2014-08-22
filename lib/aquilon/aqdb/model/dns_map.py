@@ -43,13 +43,10 @@ class DnsMap(Base):
     id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
 
     location_id = Column(Integer, ForeignKey(Location.id,
-                                             name='%s_location_fk' % _TN,
                                              ondelete="CASCADE"),
                          nullable=False)
 
-    dns_domain_id = Column(Integer, ForeignKey(DnsDomain.id,
-                                               name='%s_dns_domain_fk' % _TN),
-                           nullable=False)
+    dns_domain_id = Column(Integer, ForeignKey(DnsDomain.id), nullable=False)
 
     # No default value to force the use of the Location.dns_maps relation to
     # manage the maps

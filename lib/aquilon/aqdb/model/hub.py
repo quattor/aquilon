@@ -44,9 +44,7 @@ class Hub(Location):
 
     valid_parents = [Company]
 
-    id = Column(Integer, ForeignKey('location.id',
-                                    name='%s_loc_fk' % _TN,
-                                    ondelete='CASCADE'),
+    id = Column(Integer, ForeignKey(Location.id, ondelete='CASCADE'),
                 primary_key=True)
 
 hub = Hub.__table__  # pylint: disable=C0103

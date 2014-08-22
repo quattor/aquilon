@@ -54,30 +54,23 @@ class AddressAssignment(Base):
 
     id = Column(Integer, Sequence('%s_seq' % _TN), primary_key=True)
 
-    interface_id = Column(Integer, ForeignKey(Interface.id,
-                                              name='%s_interface_id_fk' % _ABV,
-                                              ondelete='CASCADE'),
+    interface_id = Column(Integer, ForeignKey(Interface.id, ondelete='CASCADE'),
                           nullable=False)
 
     _label = Column("label", AqStr(16), nullable=False)
 
     ip = Column(IPV4, nullable=False)
 
-    network_id = Column(Integer, ForeignKey(Network.id,
-                                            name='%s_network_fk' % _TN),
-                        nullable=False)
+    network_id = Column(Integer, ForeignKey(Network.id), nullable=False)
 
     service_address_id = Column(Integer, ForeignKey('service_address.resource_id',
-                                                    name='%s_srv_addr_id' % _ABV,
                                                     ondelete="CASCADE"),
                                 nullable=True)
 
     # This should be the same as #
     # network.network_environment.dns_environment_id, but using that would mean
     # joining two extra tables in the dns_records relation
-    dns_environment_id = Column(Integer, ForeignKey(DnsEnvironment.id,
-                                                    name='%s_dns_env_fk' %
-                                                    _ABV),
+    dns_environment_id = Column(Integer, ForeignKey(DnsEnvironment.id),
                                 nullable=False)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,

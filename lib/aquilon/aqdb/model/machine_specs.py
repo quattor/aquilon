@@ -29,22 +29,20 @@ from aquilon.aqdb.column_types import Enum
 from aquilon.aqdb.model import Base, Model, Cpu, Disk
 from aquilon.aqdb.model.disk import controller_types
 
+_TN = 'machine_specs'
+
 
 class MachineSpecs(Base):
     """ Captures the configuration hardware components for a given model """
     # TODO: Maybe this entire table is in fact a part of the model "subtype"
 
-    __tablename__ = 'machine_specs'
+    __tablename__ = _TN
 
     id = Column(Integer, Sequence('mach_specs_id_seq'), primary_key=True)
 
-    model_id = Column(Integer, ForeignKey(Model.id,
-                                          name='mach_spec_model_fk'),
-                      nullable=False)
+    model_id = Column(Integer, ForeignKey(Model.id), nullable=False)
 
-    cpu_id = Column(Integer, ForeignKey(Cpu.id,
-                                        name='mach_spec_cpu_fk'),
-                    nullable=False)
+    cpu_id = Column(Integer, ForeignKey(Cpu.id), nullable=False)
 
     cpu_quantity = Column(Integer, nullable=False)  # Constrain to below 512?
 
@@ -56,7 +54,7 @@ class MachineSpecs(Base):
 
     nic_count = Column(Integer, nullable=False, default=2)
     nic_model_id = Column(Integer, ForeignKey(Model.id,
-                                              name='mach_spec_nic_model_fk'),
+                                              name='%s_nic_model_fk' % _TN),
                           nullable=False)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,

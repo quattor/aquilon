@@ -50,12 +50,9 @@ class NetworkEnvironment(Base):
     id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
     name = Column(AqStr(64), nullable=False)
 
-    location_id = Column(Integer, ForeignKey(Location.id,
-                                             name='%s_loc_fk' % _ABV),
-                         nullable=True)
+    location_id = Column(Integer, ForeignKey(Location.id), nullable=True)
 
-    dns_environment_id = Column(Integer, ForeignKey(DnsEnvironment.id,
-                                                    name='%s_dns_env_fk' % _ABV),
+    dns_environment_id = Column(Integer, ForeignKey(DnsEnvironment.id),
                                 nullable=False)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,

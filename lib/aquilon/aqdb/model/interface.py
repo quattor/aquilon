@@ -69,9 +69,7 @@ class Interface(DeviceLinkMixin, Base):
 
     mac = Column(AqMac(name="%s_mac_ck" % _TN), nullable=True)
 
-    model_id = Column(Integer, ForeignKey(Model.id,
-                                          name='%s_model_fk' % _ABV),
-                      nullable=False)
+    model_id = Column(Integer, ForeignKey(Model.id), nullable=False)
 
     # PXE boot control. Does not affect how the OS configures the interface.
     # FIXME: move to PublicInterface
@@ -84,13 +82,12 @@ class Interface(DeviceLinkMixin, Base):
     interface_type = Column(AqStr(32), nullable=False)
 
     hardware_entity_id = Column(Integer, ForeignKey(HardwareEntity.id,
-                                                    name='%s_hw_ent_fk' % _ABV,
                                                     ondelete='CASCADE'),
                                 nullable=False)
 
     # The FK is deferrable to make it easier to copy the DB between different
     # backends. The broker itself does not make use of deferred constraints.
-    master_id = Column(Integer, ForeignKey(id, name='%s_master_fk' % _ABV,
+    master_id = Column(Integer, ForeignKey(id, name='%s_master_fk' % _TN,
                                            ondelete='CASCADE',
                                            deferrable=True,
                                            initially='IMMEDIATE'),
@@ -100,8 +97,7 @@ class Interface(DeviceLinkMixin, Base):
     port_group_name = Column(AqStr(32), nullable=True)
 
     # FIXME: move to PublicInterface
-    port_group_id = Column(Integer, ForeignKey('port_group.id',
-                                               name='%s_pg_fk' % _ABV),
+    port_group_id = Column(Integer, ForeignKey('port_group.id'),
                            nullable=True)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
@@ -109,7 +105,7 @@ class Interface(DeviceLinkMixin, Base):
 
     # Most of the update_* commands need to load the comments due to
     # snapshot_hw(), so it is not worth deferring it
-    comments = Column('comments', String(255), nullable=True)
+    comments = Column(String(255), nullable=True)
 
     hardware_entity = relation(HardwareEntity, innerjoin=True,
                                backref=backref('interfaces',
@@ -268,7 +264,7 @@ class VlanInterface(Interface):
     # The FK is deferrable to make it easier to copy the DB between different
     # backends. The broker itself does not make use of deferred constraints.
     parent_id = Column(Integer, ForeignKey(Interface.id,
-                                           name='iface_vlan_parent_fk',
+                                           name='%s_parent_fk' % _TN,
                                            ondelete='CASCADE',
                                            deferrable=True,
                                            initially='IMMEDIATE'))

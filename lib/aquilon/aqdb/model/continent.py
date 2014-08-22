@@ -21,6 +21,7 @@ from aquilon.aqdb.model import Location, Hub, Company
 
 _TN = 'continent'
 
+
 class Continent(Location):
     """ Continent is a subtype of location """
     __tablename__ = _TN
@@ -28,9 +29,7 @@ class Continent(Location):
 
     valid_parents = [Hub, Company]
 
-    id = Column(Integer, ForeignKey(Location.id,
-                                    name='%s_loc_fk' % _TN,
-                                    ondelete='CASCADE'),
+    id = Column(Integer, ForeignKey(Location.id, ondelete='CASCADE'),
                 primary_key=True)
 
 continent = Continent.__table__  # pylint: disable=C0103

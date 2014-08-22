@@ -28,7 +28,6 @@ from aquilon.aqdb.model import (Base, ServiceInstance, Host, Cluster,
                                 AddressAssignment, ServiceAddress, Alias)
 
 _TN = 'service_instance_server'
-_ABV = 'sis'
 
 
 class ServiceInstanceServer(Base):
@@ -38,28 +37,21 @@ class ServiceInstanceServer(Base):
 
     id = Column(Integer, Sequence("%s_seq" % _TN), primary_key=True)
 
-    service_instance_id = Column(Integer, ForeignKey(ServiceInstance.id,
-                                                     name='%s_si_fk' % _ABV),
+    service_instance_id = Column(Integer, ForeignKey(ServiceInstance.id),
                                  nullable=False)
 
-    host_id = Column(Integer, ForeignKey(Host.hardware_entity_id,
-                                         name='%s_host_fk' % _ABV),
+    host_id = Column(Integer, ForeignKey(Host.hardware_entity_id),
                      nullable=True)
 
-    cluster_id = Column(Integer, ForeignKey(Cluster.id,
-                                            name='%s_cluster_fk' % _ABV),
-                        nullable=True)
+    cluster_id = Column(Integer, ForeignKey(Cluster.id), nullable=True)
 
-    address_assignment_id = Column(Integer, ForeignKey(AddressAssignment.id,
-                                                       name='%s_addr_assign_fk' % _ABV),
+    address_assignment_id = Column(Integer, ForeignKey(AddressAssignment.id),
                                    nullable=True)
 
-    service_address_id = Column(Integer, ForeignKey(ServiceAddress.resource_id,
-                                                    name='%s_srv_addr_fk' % _ABV),
+    service_address_id = Column(Integer, ForeignKey(ServiceAddress.resource_id),
                                 nullable=True)
 
-    alias_id = Column(Integer, ForeignKey(Alias.dns_record_id,
-                                          name='%s_alias_fk' % _ABV),
+    alias_id = Column(Integer, ForeignKey(Alias.dns_record_id),
                       nullable=True)
 
     position = Column(Integer, nullable=False)

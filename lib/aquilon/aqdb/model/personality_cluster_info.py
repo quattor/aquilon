@@ -29,7 +29,6 @@ from aquilon.aqdb.column_types.aqstr import AqStr
 _PCI = "personality_cluster_info"
 _PCIABV = "pers_clst_info"
 _PECI = "personality_esx_cluster_info"
-_PECIABV = "pers_esxcl_info"
 
 
 class PersonalityClusterInfo(Base):
@@ -40,7 +39,6 @@ class PersonalityClusterInfo(Base):
     id = Column(Integer, Sequence("%s_seq" % _PCIABV), primary_key=True)
 
     personality_id = Column(Integer, ForeignKey(Personality.id,
-                                                name="%s_pers_fk" % _PCIABV,
                                                 ondelete="CASCADE"),
                             nullable=False)
     cluster_type = Column(AqStr(16), nullable=False)
@@ -67,7 +65,6 @@ class PersonalityESXClusterInfo(PersonalityClusterInfo):
 
     personality_cluster_info_id = Column(Integer,
                                          ForeignKey(PersonalityClusterInfo.id,
-                                                    name="%s_pci_fk" % _PECIABV,
                                                     ondelete="CASCADE"),
                                          primary_key=True)
 

@@ -417,9 +417,24 @@ def pk_name(constraint, table):  # pylint: disable=W0613
     return ref_constraint_name(table.name, suffix="pk")
 
 
+def fk_name(constraint, table):
+    fk = constraint.elements[0]
+    refs = fk.target_fullname.split(".")
+    if len(refs) == 3:
+        # refschema, reftable, refcol = refs
+        reftable = refs[1]
+    else:
+        # reftable, refcol = refs
+        reftable = refs[0]
+
+    return ref_constraint_name(table.name, reftable, suffix='fk')
+
+
 convention = {
     'pk_name': pk_name,
+    'fk_name': fk_name,
     'pk': '%(pk_name)s',
+    'fk': '%(fk_name)s',
 }
 
 metadata = MetaData(naming_convention=convention)

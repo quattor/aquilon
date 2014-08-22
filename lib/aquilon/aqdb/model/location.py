@@ -45,7 +45,6 @@ class Location(Base):
     fullname = Column(String(255), nullable=False)
 
     default_dns_domain_id = Column(Integer, ForeignKey(DnsDomain.id,
-                                                       name='location_dns_domain_fk',
                                                        ondelete='SET NULL'),
                                    nullable=True)
 

@@ -30,12 +30,10 @@ class Machine(HardwareEntity):
 
     # TODO: should this be named hardware_entity_id?
     machine_id = Column(Integer, ForeignKey(HardwareEntity.id,
-                                            name='machine_hw_ent_fk',
                                             ondelete='CASCADE'),
                         primary_key=True)
 
-    cpu_id = Column(Integer, ForeignKey(Cpu.id, name='machine_cpu_fk'),
-                    nullable=False)
+    cpu_id = Column(Integer, ForeignKey(Cpu.id), nullable=False)
 
     # TODO: constrain/smallint
     cpu_quantity = Column(Integer, nullable=False, default=2)

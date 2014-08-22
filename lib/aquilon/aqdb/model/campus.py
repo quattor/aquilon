@@ -30,9 +30,7 @@ class Campus(Location):
 
     valid_parents = [Country]
 
-    id = Column(Integer, ForeignKey(Location.id,
-                                    name='%s_loc_fk' % _TN,
-                                    ondelete='CASCADE'),
+    id = Column(Integer, ForeignKey(Location.id, ondelete='CASCADE'),
                 primary_key=True)
 
 campus = Campus.__table__  # pylint: disable=C0103

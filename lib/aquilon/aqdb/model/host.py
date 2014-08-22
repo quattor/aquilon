@@ -59,30 +59,22 @@ class Host(Base):
     __tablename__ = _TN
     _instance_label = 'fqdn'
 
-    hardware_entity_id = Column(Integer, ForeignKey(HardwareEntity.id,
-                                                    name='host_hwent_fk'),
+    hardware_entity_id = Column(Integer, ForeignKey(HardwareEntity.id),
                                 primary_key=True)
 
-    branch_id = Column(Integer, ForeignKey(Branch.id,
-                                           name='host_branch_fk'),
-                       nullable=False)
+    branch_id = Column(Integer, ForeignKey(Branch.id), nullable=False)
 
     sandbox_author_id = Column(Integer,
                                ForeignKey(User.id,
-                                          name='host_sandbox_author_fk',
+                                          name='%s_sandbox_author_fk' % _TN,
                                           ondelete="SET NULL"),
                                nullable=True)
 
-    personality_id = Column(Integer, ForeignKey(Personality.id,
-                                                name='host_prsnlty_fk'),
-                            nullable=False)
+    personality_id = Column(Integer, ForeignKey(Personality.id), nullable=False)
 
-    lifecycle_id = Column(Integer, ForeignKey(HostLifecycle.id,
-                                              name='host_lifecycle_fk'),
-                          nullable=False)
+    lifecycle_id = Column(Integer, ForeignKey(HostLifecycle.id), nullable=False)
 
-    operating_system_id = Column(Integer, ForeignKey(OperatingSystem.id,
-                                                     name='host_os_fk'),
+    operating_system_id = Column(Integer, ForeignKey(OperatingSystem.id),
                                  nullable=False)
 
     owner_eon_id = Column(Integer, ForeignKey(Grn.eon_id,
@@ -173,13 +165,10 @@ class HostGrnMap(Base):
     __tablename__ = _HOSTGRN
 
     host_id = Column(Integer, ForeignKey(Host.hardware_entity_id,
-                                         name="%s_host_fk" % _HOSTGRN,
                                          ondelete="CASCADE"),
                      nullable=False)
 
-    eon_id = Column(Integer, ForeignKey(Grn.eon_id,
-                                        name='%s_grn_fk' % _HOSTGRN),
-                    nullable=False)
+    eon_id = Column(Integer, ForeignKey(Grn.eon_id), nullable=False)
 
     target = Column(AqStr(32), nullable=False)
 

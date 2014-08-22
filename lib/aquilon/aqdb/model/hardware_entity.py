@@ -44,18 +44,14 @@ class HardwareEntity(Base):
 
     hardware_type = Column(AqStr(64), nullable=False)
 
-    location_id = Column(Integer, ForeignKey(Location.id,
-                                             name='%s_location_fk' % _ABV),
-                         nullable=False)
+    location_id = Column(Integer, ForeignKey(Location.id), nullable=False)
 
-    model_id = Column(Integer, ForeignKey(Model.id,
-                                          name='%s_model_fk' % _ABV),
-                      nullable=False)
+    model_id = Column(Integer, ForeignKey(Model.id), nullable=False)
 
     serial_no = Column(String(64), nullable=True)
 
     primary_name_id = Column(Integer, ForeignKey(DnsRecord.id,
-                                                 name='%s_pri_name_fk' % _ABV),
+                                                 name='%s_pri_name_fk' % _TN),
                              nullable=True)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,

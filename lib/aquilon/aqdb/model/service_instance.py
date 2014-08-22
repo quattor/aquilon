@@ -33,7 +33,6 @@ from aquilon.aqdb.model import (Base, Service, Host, DnsRecord, DnsDomain,
 from aquilon.aqdb.column_types.aqstr import AqStr
 
 _TN = 'service_instance'
-_ABV = 'svc_inst'
 
 
 class ServiceInstance(Base):
@@ -45,9 +44,7 @@ class ServiceInstance(Base):
     _class_label = 'Service Instance'
 
     id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
-    service_id = Column(Integer, ForeignKey(Service.id,
-                                            name='%s_svc_fk' % _ABV),
-                        nullable=False)
+    service_id = Column(Integer, ForeignKey(Service.id), nullable=False)
     name = Column(AqStr(64), nullable=False)
     max_clients = Column(Integer, nullable=True)  # null means 'no limit'
     creation_date = deferred(Column(DateTime, default=datetime.now,
@@ -213,7 +210,6 @@ class ServiceInstance(Base):
         return instance_cache
 
 service_instance = ServiceInstance.__table__  # pylint: disable=C0103
-service_instance.info['abrev'] = _ABV
 service_instance.info['unique_fields'] = ['name', 'service']
 
 
@@ -221,14 +217,11 @@ class __BuildItem(Base):
     """ Identifies the service_instance bindings of a machine. """
     __tablename__ = 'build_item'
 
-    host_id = Column('host_id', Integer, ForeignKey(Host.hardware_entity_id,
-                                                    ondelete='CASCADE',
-                                                    name='build_item_host_fk'),
+    host_id = Column(Integer, ForeignKey(Host.hardware_entity_id,
+                                         ondelete='CASCADE'),
                      nullable=False)
 
-    service_instance_id = Column(Integer,
-                                 ForeignKey(ServiceInstance.id,
-                                            name='build_item_svc_inst_fk'),
+    service_instance_id = Column(Integer, ForeignKey(ServiceInstance.id),
                                  nullable=False)
 
     __table_args__ = (PrimaryKeyConstraint(host_id, service_instance_id),

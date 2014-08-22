@@ -54,7 +54,6 @@ class Disk(DeviceLinkMixin, Base):
     wwn = Column(AqStr(32), nullable=True)
 
     machine_id = Column(Integer, ForeignKey(Machine.machine_id,
-                                            name='%s_machine_fk' % _TN,
                                             ondelete='CASCADE'),
                         nullable=False)
 

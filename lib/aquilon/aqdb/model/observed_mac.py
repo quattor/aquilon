@@ -36,8 +36,7 @@ class ObservedMac(Base):
 
     network_device_id = Column(Integer,
                                ForeignKey(NetworkDevice.hardware_entity_id,
-                                          ondelete='CASCADE',
-                                          name='obs_mac_hw_fk'),
+                                          ondelete='CASCADE'),
                                nullable=False)
 
     port = Column(AqStr(32), nullable=False)
@@ -50,8 +49,7 @@ class ObservedMac(Base):
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
 
-    last_seen = Column('last_seen', DateTime,
-                       default=datetime.now, nullable=False)
+    last_seen = Column(DateTime, default=datetime.now, nullable=False)
 
     network_device = relation(NetworkDevice, innerjoin=True,
                               backref=backref('observed_macs',
