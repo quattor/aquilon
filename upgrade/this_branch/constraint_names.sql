@@ -119,4 +119,13 @@ ALTER TABLE static_route RENAME CONSTRAINT static_route_cr_date_nn TO static_rou
 ALTER TABLE userinfo RENAME CONSTRAINT userinfo_cr_date_nn TO userinfo_creation_date_nn;
 ALTER TABLE vendor RENAME CONSTRAINT vendor_cr_date_nn TO vendor_creation_date_nn;
 
+ALTER TABLE personality_cluster_info RENAME CONSTRAINT pers_clst_info_pk TO personality_cluster_info_pk;
+ALTER INDEX pers_clst_info_pk RENAME TO personality_cluster_info_pk;
+ALTER TABLE personality_esx_cluster_info RENAME CONSTRAINT pers_esxcl_info_pk TO pers_esxclstr_pk;
+ALTER INDEX pers_esxcl_info_pk RENAME TO pers_esxclstr_pk;
+ALTER TABLE personality_service_list_item RENAME CONSTRAINT prsnlty_sli_pk TO psli_pk;
+ALTER INDEX prsnlty_sli_pk RENAME TO psli_pk;
+ALTER TABLE xtn_detail RENAME CONSTRAINT xtn_dtl_pk TO xtn_detail_pk;
+ALTER INDEX xtn_dtl_pk RENAME TO xtn_detail_pk;
+
 QUIT;

@@ -56,8 +56,7 @@ class Xtn(Base):
     # Given that, we don't really *need* the foreign key, but we'll keep it
     # unless it proves otherwise cumbersome for performance (mainly insert).
 
-    __table_args__ = (Index('xtn_username_idx', username,
-                            oracle_compress=True),
+    __table_args__ = (Index('xtn_username_idx', username, oracle_compress=True),
                       Index('xtn_command_idx', command, oracle_compress=True),
                       Index('xtn_isreadonly_idx', is_readonly,
                             oracle_bitmap=True),
@@ -124,10 +123,8 @@ class XtnDetail(Base):
     # we cannot make this column too large.
     value = Column(String(3000), nullable=False)
 
-    __table_args__ = (PrimaryKeyConstraint(xtn_id, name, value,
-                                           name="xtn_detail_pk"),
-                      Index('xtn_dtl_name_idx', name,
-                            oracle_compress=True),
+    __table_args__ = (PrimaryKeyConstraint(xtn_id, name, value),
+                      Index('xtn_dtl_name_idx', name, oracle_compress=True),
                       Index('xtn_dtl_value_idx', value, oracle_compress=True),
                       {'oracle_compress': 'OLTP'})
 

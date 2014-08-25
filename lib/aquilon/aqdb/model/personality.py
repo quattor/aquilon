@@ -118,6 +118,8 @@ class PersonalityGrnMap(Base):
                                         name='%s_grn_fk' % _PGNABV),
                     nullable=False)
 
+    target = Column(AqStr(32), nullable=False)
+
     personality = relation(Personality, innerjoin=True,
                            backref=backref('_grns',
                                            cascade='all, delete-orphan',
@@ -125,8 +127,6 @@ class PersonalityGrnMap(Base):
 
     grn = relation(Grn, lazy=False, innerjoin=True,
                    backref=backref('_personalities', passive_deletes=True))
-
-    target = Column(AqStr(32), nullable=False)
 
     __table_args__ = (PrimaryKeyConstraint(personality_id, eon_id, target),)
 
@@ -142,18 +142,17 @@ class __PersonalityRootUser(Base):
     personality_id = Column(Integer, ForeignKey(Personality.id,
                                                 ondelete='CASCADE',
                                                 name='%s_pers_fk' % _PRUABV),
-                            primary_key=True)
+                            nullable=False)
 
     user_id = Column(Integer, ForeignKey(User.id,
                                          ondelete='CASCADE',
                                          name='%s_user_fk' % _PRUABV),
-                     primary_key=True)
+                     nullable=False)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
 
-pru = __PersonalityRootUser.__table__  # pylint: disable=C0103
-pru.primary_key.name = '%s_pk' % _PRU
+    __table_args__ = (PrimaryKeyConstraint(personality_id, user_id),)
 
 Personality.root_users = relation(User, secondary=__PersonalityRootUser.__table__)
 
@@ -164,18 +163,17 @@ class __PersonalityRootNetGroup(Base):
     personality_id = Column(Integer, ForeignKey(Personality.id,
                                                 ondelete='CASCADE',
                                                 name='%s_pers_fk' % _PRNGABV),
-                            primary_key=True)
+                            nullable=False)
 
     netgroup_id = Column(Integer, ForeignKey(NetGroupWhiteList.id,
                                              ondelete='CASCADE',
                                              name='%s_group_fk' % _PRNGABV),
-                         primary_key=True)
+                         nullable=False)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
 
-prng = __PersonalityRootNetGroup.__table__  # pylint: disable=C0103
-prng.primary_key.name = '%s_pk' % _PRNG
+    __table_args__ = (PrimaryKeyConstraint(personality_id, netgroup_id),)
 
 Personality.root_netgroups = relation(NetGroupWhiteList,
                                       secondary=__PersonalityRootNetGroup.__table__)

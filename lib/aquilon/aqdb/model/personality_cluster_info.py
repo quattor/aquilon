@@ -58,9 +58,6 @@ class PersonalityClusterInfo(Base):
                                        name="%s_pc_uk" % _PCIABV),)
     __mapper_args__ = {'polymorphic_on': cluster_type}
 
-pci = PersonalityClusterInfo.__table__  # pylint: disable=C0103
-pci.primary_key.name = "%s_pk" % _PCIABV
-
 
 class PersonalityESXClusterInfo(PersonalityClusterInfo):
     """ Extra personality data specific to ESX clusters """
@@ -109,6 +106,3 @@ class PersonalityESXClusterInfo(PersonalityClusterInfo):
     def __init__(self, **kwargs):
         super(PersonalityESXClusterInfo, self).__init__(**kwargs)
         self._compiled_vmhost = None
-
-pcei = PersonalityESXClusterInfo.__table__  # pylint: disable=C0103
-pcei.primary_key.name = "%s_pk" % _PECIABV

@@ -542,8 +542,7 @@ class HostClusterMember(Base):
                     backref=backref('_cluster', uselist=False,
                                     cascade='all, delete-orphan'))
 
-    __table_args__ = (PrimaryKeyConstraint(cluster_id, host_id,
-                                           name="%s_pk" % _HCM),
+    __table_args__ = (PrimaryKeyConstraint(cluster_id, host_id),
                       UniqueConstraint(host_id,
                                        name='host_cluster_member_host_uk'),
                       UniqueConstraint(cluster_id, node_index,

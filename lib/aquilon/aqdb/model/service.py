@@ -103,8 +103,7 @@ class __ServiceListItem(Base):
                                               ondelete='CASCADE'),
                           nullable=False)
 
-    __table_args__ = (PrimaryKeyConstraint(service_id, archetype_id,
-                                           name="%s_pk" % _SLI),
+    __table_args__ = (PrimaryKeyConstraint(service_id, archetype_id),
                       Index('srvlst_archtyp_idx', archetype_id))
 
 Service.archetypes = relation(Archetype, secondary=__ServiceListItem.__table__,
@@ -129,8 +128,7 @@ class __PersonalityServiceListItem(Base):
                                                 ondelete='CASCADE'),
                             nullable=False)
 
-    __table_args__ = (PrimaryKeyConstraint(service_id, personality_id,
-                                           name="%s_pk" % _ABV),
+    __table_args__ = (PrimaryKeyConstraint(service_id, personality_id),
                       Index('%s_prsnlty_idx' % _ABV, personality_id))
 
 Service.personalities = relation(Personality,

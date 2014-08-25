@@ -62,8 +62,7 @@ class __VSwitchClusterAssignment(Base):
                                             ondelete='CASCADE'),
                         nullable=False)
 
-    __table_args__ = (PrimaryKeyConstraint(virtual_switch_id, cluster_id,
-                                           name='%s_pk' % _VSC),
+    __table_args__ = (PrimaryKeyConstraint(virtual_switch_id, cluster_id),
                       UniqueConstraint(cluster_id,
                                        name='%s_cluster_uk' % _VSC))
 
@@ -87,8 +86,7 @@ class __VSwitchHostAssignment(Base):
                                          ondelete='CASCADE'),
                      nullable=False)
 
-    __table_args__ = (PrimaryKeyConstraint(virtual_switch_id, host_id,
-                                           name='%s_pk' % _VSH),
+    __table_args__ = (PrimaryKeyConstraint(virtual_switch_id, host_id),
                       UniqueConstraint(host_id, name='%s_host_uk' % _VSH))
 
 VirtualSwitch.hosts = relation(Host,
@@ -111,8 +109,7 @@ class __VSwitchPGAssignment(Base):
                                                ondelete='CASCADE'),
                            nullable=False)
 
-    __table_args__ = (PrimaryKeyConstraint(virtual_switch_id, port_group_id,
-                                           name='%s_pk' % _VSP),
+    __table_args__ = (PrimaryKeyConstraint(virtual_switch_id, port_group_id),
                       Index('%s_port_group_idx' % _VSP, port_group_id))
 
 VirtualSwitch.port_groups = relation(PortGroup,

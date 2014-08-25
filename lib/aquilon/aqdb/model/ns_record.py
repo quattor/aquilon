@@ -51,8 +51,7 @@ class NsRecord(Base):
     dns_domain = relation(DnsDomain, lazy=False, innerjoin=True,
                           backref=backref('_ns_records', cascade='all'))
 
-    __table_args__ = (PrimaryKeyConstraint(a_record_id, dns_domain_id,
-                                           name="%s_pk" % _TN),)
+    __table_args__ = (PrimaryKeyConstraint(a_record_id, dns_domain_id),)
 
     def __format__(self, format_spec):
         instance = "%s [%s] of DNS Domain %s" % (self.a_record.fqdn,

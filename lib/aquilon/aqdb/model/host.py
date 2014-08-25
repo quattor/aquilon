@@ -181,14 +181,14 @@ class HostGrnMap(Base):
                                         name='%s_grn_fk' % _HOSTGRN),
                     nullable=False)
 
+    target = Column(AqStr(32), nullable=False)
+
     host = relation(Host, innerjoin=True,
                     backref=backref('_grns', cascade='all, delete-orphan',
                                     passive_deletes=True))
 
     grn = relation(Grn, lazy=False, innerjoin=True,
                    backref=backref('_hosts', passive_deletes=True))
-
-    target = Column(AqStr(32), nullable=False)
 
     __table_args__ = (PrimaryKeyConstraint(host_id, eon_id, target),)
 

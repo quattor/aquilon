@@ -18,7 +18,7 @@ import sys
 
 from inspect import isclass
 
-from sqlalchemy.schema import CreateTable, Index, Table
+from sqlalchemy.schema import CreateTable, Index, Table, MetaData
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm.session import Session, object_session
@@ -26,6 +26,7 @@ from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from sqlalchemy.inspection import inspect
 
 from aquilon.exceptions_ import InternalError, NotFoundException, ArgumentError
+from aquilon.aqdb.utils.constraints import ref_constraint_name
 
 
 # Register our custom dialect-specific options. It would be nicer to have this
@@ -411,11 +412,19 @@ class Base(object):
             cls.__table__._init_items(*cls.__extra_table_args__)
             del cls.__extra_table_args__
 
-        # Give a sensible name to the primary key
-        if not cls.__table__.primary_key.name:
-            cls.__table__.primary_key.name = '%s_pk' % cls.__table__.name
 
-Base = declarative_base(cls=Base)
+def pk_name(constraint, table):  # pylint: disable=W0613
+    return ref_constraint_name(table.name, suffix="pk")
+
+
+convention = {
+    'pk_name': pk_name,
+    'pk': '%(pk_name)s',
+}
+
+metadata = MetaData(naming_convention=convention)
+
+Base = declarative_base(cls=Base, metadata=metadata)
 
 
 class SingleInstanceMixin(object):

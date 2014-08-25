@@ -193,8 +193,7 @@ class __MetaClusterMember(Base):
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
 
-    __table_args__ = (PrimaryKeyConstraint(metacluster_id, cluster_id,
-                                           name="%s_pk" % _MCM),
+    __table_args__ = (PrimaryKeyConstraint(metacluster_id, cluster_id),
                       UniqueConstraint(cluster_id, name='%s_uk' % _MCM))
 
 MetaCluster.members = relation(Cluster,

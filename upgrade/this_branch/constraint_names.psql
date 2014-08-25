@@ -1,0 +1,3 @@
+ALTER INDEX pers_clst_info_pk RENAME TO personality_cluster_info_pk;
+ALTER INDEX pers_esxcl_info_pk RENAME TO pers_esxclstr_pk;
+ALTER INDEX prsnlty_sli_pk RENAME TO psli_pk;
