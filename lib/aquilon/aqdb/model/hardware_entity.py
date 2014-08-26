@@ -21,7 +21,7 @@ from inspect import isclass
 import re
 
 from sqlalchemy import (Column, Integer, Sequence, ForeignKey, UniqueConstraint,
-                        Index, String, DateTime)
+                        String, DateTime)
 from sqlalchemy.orm import relation, backref, lazyload, validates, deferred
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.orm.attributes import set_committed_value
@@ -31,7 +31,6 @@ from aquilon.aqdb.model import Base, Location, Model, DnsRecord
 from aquilon.aqdb.column_types import AqStr
 
 _TN = "hardware_entity"
-_ABV = "hw_ent"
 
 
 class HardwareEntity(Base):
@@ -44,9 +43,10 @@ class HardwareEntity(Base):
 
     hardware_type = Column(AqStr(64), nullable=False)
 
-    location_id = Column(Integer, ForeignKey(Location.id), nullable=False)
+    location_id = Column(Integer, ForeignKey(Location.id), nullable=False,
+                         index=True)
 
-    model_id = Column(Integer, ForeignKey(Model.id), nullable=False)
+    model_id = Column(Integer, ForeignKey(Model.id), nullable=False, index=True)
 
     serial_no = Column(String(64), nullable=True)
 
@@ -72,9 +72,7 @@ class HardwareEntity(Base):
                                             passive_deletes=True))
 
     __table_args__ = (UniqueConstraint(primary_name_id,
-                                       name='%s_pri_name_uk' % _TN),
-                      Index('%s_location_idx' % _ABV, location_id),
-                      Index('%s_model_idx' % _ABV, model_id))
+                                       name='%s_pri_name_uk' % _TN),)
     __mapper_args__ = {'polymorphic_on': hardware_type}
 
     _label_check = re.compile("^[a-z][a-z0-9]{,62}$")

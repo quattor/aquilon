@@ -65,13 +65,13 @@ class AddressAssignment(Base):
 
     service_address_id = Column(Integer, ForeignKey('service_address.resource_id',
                                                     ondelete="CASCADE"),
-                                nullable=True)
+                                nullable=True, index=True)
 
     # This should be the same as #
     # network.network_environment.dns_environment_id, but using that would mean
     # joining two extra tables in the dns_records relation
     dns_environment_id = Column(Integer, ForeignKey(DnsEnvironment.id),
-                                nullable=False)
+                                nullable=False, index=True)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
@@ -102,9 +102,7 @@ class AddressAssignment(Base):
 
     __table_args__ = (UniqueConstraint(interface_id, ip),
                       UniqueConstraint(interface_id, _label),
-                      Index("%s_service_addr_idx" % _ABV, service_address_id),
-                      Index("%s_network_ip_idx" % _ABV, network_id, ip),
-                      Index("%s_dns_env_idx" % _ABV, dns_environment_id))
+                      Index("%s_network_ip_idx" % _ABV, network_id, ip))
 
     @property
     def logical_name(self):

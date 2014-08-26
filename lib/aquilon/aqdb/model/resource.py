@@ -18,7 +18,7 @@
 from datetime import datetime
 
 from sqlalchemy import (Column, Integer, String, DateTime, ForeignKey,
-                        Sequence, UniqueConstraint, Index)
+                        Sequence, UniqueConstraint)
 from sqlalchemy.orm import relation, backref, validates, deferred
 
 from aquilon.exceptions_ import InternalError
@@ -129,15 +129,14 @@ class Resource(Base):
     comments = Column(String(255), nullable=True)
     holder_id = Column(Integer, ForeignKey(ResourceHolder.id,
                                            ondelete='CASCADE'),
-                       nullable=False)
+                       nullable=False, index=True)
 
     holder = relation(ResourceHolder, innerjoin=True,
                       backref=backref('resources',
                                       cascade='all, delete-orphan'))
 
     __table_args__ = (UniqueConstraint(holder_id, name, resource_type,
-                                       name='%s_holder_name_type_uk' % _TN),
-                      Index('%s_holder_idx' % _TN, holder_id))
+                                       name='%s_holder_name_type_uk' % _TN),)
     __mapper_args__ = {'polymorphic_on': resource_type}
 
     @validates('holder')

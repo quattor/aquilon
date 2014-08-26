@@ -19,9 +19,7 @@ import re
 from datetime import datetime
 
 from sqlalchemy import (Column, Integer, Boolean, String, DateTime, Sequence,
-                        ForeignKey, UniqueConstraint, PrimaryKeyConstraint,
-                        Index)
-
+                        ForeignKey, UniqueConstraint, PrimaryKeyConstraint)
 from sqlalchemy.orm import (object_session, relation, backref, deferred,
                             joinedload, validates)
 from sqlalchemy.orm.attributes import set_committed_value
@@ -67,7 +65,6 @@ _TN = 'clstr'
 _ETN = 'esx_cluster'
 _HCM = 'host_cluster_member'
 _CSB = 'cluster_service_binding'
-_CSBABV = 'clstr_svc_bndg'
 _CAP = 'clstr_allow_per'
 
 
@@ -90,9 +87,11 @@ class Cluster(Base):
     name = Column(AqStr(64), nullable=False, unique=True)
 
     # Lack of cascaded deletion is intentional on personality
-    personality_id = Column(Integer, ForeignKey(Personality.id), nullable=False)
+    personality_id = Column(Integer, ForeignKey(Personality.id), nullable=False,
+                            index=True)
 
-    branch_id = Column(Integer, ForeignKey(Branch.id), nullable=False)
+    branch_id = Column(Integer, ForeignKey(Branch.id), nullable=False,
+                       index=True)
 
     sandbox_author_id = Column(Integer,
                                ForeignKey(User.id,
@@ -100,7 +99,8 @@ class Cluster(Base):
                                           ondelete="SET NULL"),
                                nullable=True)
 
-    location_constraint_id = Column(ForeignKey(Location.id), nullable=False)
+    location_constraint_id = Column(ForeignKey(Location.id), nullable=False,
+                                    index=True)
 
     max_hosts = Column(Integer, nullable=True)
     # N+M clusters are defined by setting down_hosts_threshold to M
@@ -130,9 +130,6 @@ class Cluster(Base):
 
     hosts = association_proxy('_hosts', 'host', creator=_hcm_host_creator)
 
-    __table_args__ = (Index("cluster_branch_idx", branch_id),
-                      Index("cluster_prsnlty_idx", personality_id),
-                      Index("cluster_location_idx", location_constraint_id))
     __mapper_args__ = {'polymorphic_on': cluster_type}
 
     @property
@@ -341,12 +338,11 @@ class EsxCluster(Cluster):
 
     network_device_id = Column(Integer,
                                ForeignKey(NetworkDevice.hardware_entity_id),
-                               nullable=True)
+                               nullable=True, index=True)
 
     network_device = relation(NetworkDevice, lazy=False,
                               backref=backref('esx_clusters'))
 
-    __table_args__ = (Index("%s_network_device_idx" % _ETN, network_device_id),)
     __mapper_args__ = {'polymorphic_identity': 'esx'}
 
     @property
@@ -542,10 +538,9 @@ class __ClusterAllowedPersonality(Base):
 
     personality_id = Column(Integer, ForeignKey(Personality.id,
                                                 ondelete='CASCADE'),
-                            nullable=False)
+                            nullable=False, index=True)
 
-    __table_args__ = (PrimaryKeyConstraint(cluster_id, personality_id),
-                      Index('%s_prsnlty_idx' % _CAP, personality_id))
+    __table_args__ = (PrimaryKeyConstraint(cluster_id, personality_id),)
 
 Cluster.allowed_personalities = relation(Personality,
                                          secondary=__ClusterAllowedPersonality.__table__)
@@ -562,10 +557,9 @@ class __ClusterServiceBinding(Base):
                         nullable=False)
 
     service_instance_id = Column(Integer, ForeignKey(ServiceInstance.id),
-                                 nullable=False)
+                                 nullable=False, index=True)
 
-    __table_args__ = (PrimaryKeyConstraint(cluster_id, service_instance_id),
-                      Index('%s_si_idx' % _CSBABV, service_instance_id))
+    __table_args__ = (PrimaryKeyConstraint(cluster_id, service_instance_id),)
 
 Cluster.service_bindings = relation(ServiceInstance,
                                     secondary=__ClusterServiceBinding.__table__,

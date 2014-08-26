@@ -19,7 +19,7 @@
 from datetime import datetime
 
 from sqlalchemy import (Integer, Boolean, DateTime, String, Column, ForeignKey,
-                        PrimaryKeyConstraint, Index)
+                        PrimaryKeyConstraint)
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import relation, backref, deferred
 
@@ -62,7 +62,8 @@ class Host(Base):
     hardware_entity_id = Column(Integer, ForeignKey(HardwareEntity.id),
                                 primary_key=True)
 
-    branch_id = Column(Integer, ForeignKey(Branch.id), nullable=False)
+    branch_id = Column(Integer, ForeignKey(Branch.id), nullable=False,
+                       index=True)
 
     sandbox_author_id = Column(Integer,
                                ForeignKey(User.id,
@@ -70,7 +71,8 @@ class Host(Base):
                                           ondelete="SET NULL"),
                                nullable=True)
 
-    personality_id = Column(Integer, ForeignKey(Personality.id), nullable=False)
+    personality_id = Column(Integer, ForeignKey(Personality.id), nullable=False,
+                            index=True)
 
     lifecycle_id = Column(Integer, ForeignKey(HostLifecycle.id), nullable=False)
 
@@ -102,9 +104,6 @@ class Host(Base):
     operating_system = relation(OperatingSystem, innerjoin=True)
     owner_grn = relation(Grn)
     grns = association_proxy('_grns', 'grn', creator=_hgm_creator)
-
-    __table_args__ = (Index('host_prsnlty_idx', personality_id),
-                      Index('%s_branch_idx' % _TN, branch_id))
 
     @property
     def fqdn(self):

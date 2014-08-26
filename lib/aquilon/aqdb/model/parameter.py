@@ -18,8 +18,7 @@
 
 from datetime import datetime
 
-from sqlalchemy import (Column, Integer, DateTime, Sequence, String, ForeignKey,
-                        Index)
+from sqlalchemy import Column, Integer, DateTime, Sequence, String, ForeignKey
 from sqlalchemy.orm import relation, backref, deferred
 
 from aquilon.aqdb.column_types import JSONEncodedDict, MutationDict
@@ -97,14 +96,13 @@ class Parameter(Base):
     comments = deferred(Column(String(255), nullable=True))
     holder_id = Column(Integer, ForeignKey(ParameterHolder.id,
                                            ondelete='CASCADE'),
-                       nullable=False)
+                       nullable=False, index=True)
 
     holder = relation(ParameterHolder, innerjoin=True,
                       backref=backref('parameters',
                                       cascade='all, delete-orphan'))
 
-    __table_args__ = (Index('%s_holder_idx' % _TN, holder_id),
-                      {'oracle_compress': True})
+    __table_args__ = {'oracle_compress': True}
 
     @staticmethod
     def tokey(path):

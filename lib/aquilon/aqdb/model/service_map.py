@@ -19,7 +19,7 @@
 from datetime import datetime
 
 from sqlalchemy import (Column, Integer, Sequence, String, DateTime, ForeignKey,
-                        UniqueConstraint, Index)
+                        UniqueConstraint)
 from sqlalchemy.orm import relation, deferred, backref
 
 from aquilon.aqdb.model import Base, Location, ServiceInstance, Network
@@ -43,10 +43,10 @@ class ServiceMap(Base):
                                  nullable=False)
 
     location_id = Column(Integer, ForeignKey(Location.id, ondelete='CASCADE'),
-                         nullable=True)
+                         nullable=True, index=True)
 
     network_id = Column(Integer, ForeignKey(Network.id, ondelete='CASCADE'),
-                        nullable=True)
+                        nullable=True, index=True)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
@@ -60,9 +60,7 @@ class ServiceMap(Base):
 
     __table_args__ = (UniqueConstraint(service_instance_id, location_id,
                                        network_id,
-                                       name='%s_loc_net_inst_uk' % _ABV),
-                      Index("%s_location_idx" % _ABV, location_id),
-                      Index("%s_network_idx" % _ABV, network_id))
+                                       name='%s_loc_net_inst_uk' % _ABV),)
 
     @property
     def service(self):

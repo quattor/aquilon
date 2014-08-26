@@ -17,10 +17,9 @@
 """ How we represent location data in Aquilon """
 
 from datetime import datetime
-from sqlalchemy import (Integer, DateTime, Sequence, String, Column,
-                        ForeignKey, UniqueConstraint, PrimaryKeyConstraint,
-                        Index)
 
+from sqlalchemy import (Integer, DateTime, Sequence, String, Column,
+                        ForeignKey, UniqueConstraint, PrimaryKeyConstraint)
 from sqlalchemy.orm import (relation, backref, object_session, deferred,
                             reconstructor)
 from sqlalchemy.sql import and_, or_, desc
@@ -240,7 +239,7 @@ class LocationLink(Base):
     parent_id = Column(Integer, ForeignKey(Location.id,
                                            name='location_link_parent_fk',
                                            ondelete='CASCADE'),
-                       nullable=False)
+                       nullable=False, index=True)
 
     # Distance from the given parent. 1 means direct child.
     distance = Column(Integer, nullable=False)
@@ -255,8 +254,7 @@ class LocationLink(Base):
                                       cascade="all, delete-orphan",
                                       passive_deletes=True))
 
-    __table_args__ = (PrimaryKeyConstraint(child_id, parent_id),
-                      Index("location_link_parent_idx", parent_id))
+    __table_args__ = (PrimaryKeyConstraint(child_id, parent_id),)
 
 # Make these relations view-only, to make sure the distance is managed
 # explicitely

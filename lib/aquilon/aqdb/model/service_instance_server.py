@@ -20,7 +20,7 @@ from datetime import datetime
 import socket
 
 from sqlalchemy import (Column, Integer, String, DateTime, Sequence, ForeignKey,
-                        UniqueConstraint, Index)
+                        UniqueConstraint)
 from sqlalchemy.orm import relation, deferred, backref
 from sqlalchemy.ext.orderinglist import ordering_list
 
@@ -41,18 +41,19 @@ class ServiceInstanceServer(Base):
                                  nullable=False)
 
     host_id = Column(Integer, ForeignKey(Host.hardware_entity_id),
-                     nullable=True)
+                     nullable=True, index=True)
 
-    cluster_id = Column(Integer, ForeignKey(Cluster.id), nullable=True)
+    cluster_id = Column(Integer, ForeignKey(Cluster.id), nullable=True,
+                        index=True)
 
     address_assignment_id = Column(Integer, ForeignKey(AddressAssignment.id),
-                                   nullable=True)
+                                   nullable=True, index=True)
 
     service_address_id = Column(Integer, ForeignKey(ServiceAddress.resource_id),
-                                nullable=True)
+                                nullable=True, index=True)
 
     alias_id = Column(Integer, ForeignKey(Alias.dns_record_id),
-                      nullable=True)
+                      nullable=True, index=True)
 
     position = Column(Integer, nullable=False)
 
@@ -77,12 +78,7 @@ class ServiceInstanceServer(Base):
     __table_args__ = (UniqueConstraint(service_instance_id, host_id, cluster_id,
                                        address_assignment_id,
                                        service_address_id, alias_id,
-                                       name="%s_uk" % _TN),
-                      Index("sis_host_idx", host_id),
-                      Index("sis_cluster_idx", cluster_id),
-                      Index("sis_srv_addr_idx", service_address_id),
-                      Index("sis_addr_assign_idx", address_assignment_id),
-                      Index("sis_alias_idx", alias_id))
+                                       name="%s_uk" % _TN),)
 
     def __init__(self, host=None, cluster=None, service_address=None,
                  address_assignment=None, alias=None, **kwargs):

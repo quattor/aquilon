@@ -19,7 +19,7 @@
 from datetime import datetime
 
 from sqlalchemy import (Column, Integer, DateTime, Sequence, String, Boolean,
-                        ForeignKey, UniqueConstraint, Index)
+                        ForeignKey, UniqueConstraint)
 from sqlalchemy.orm import relation, backref, deferred, validates
 from sqlalchemy.orm.exc import NoResultFound
 
@@ -146,15 +146,15 @@ class FeatureLink(Base):
 
     model_id = Column(Integer, ForeignKey(Model.id,
                                           ondelete='CASCADE'),
-                      nullable=True)
+                      nullable=True, index=True)
 
     archetype_id = Column(Integer, ForeignKey(Archetype.id,
                                               ondelete='CASCADE'),
-                          nullable=True)
+                          nullable=True, index=True)
 
     personality_id = Column(Integer, ForeignKey(Personality.id,
                                                 ondelete='CASCADE'),
-                            nullable=True)
+                            nullable=True, index=True)
 
     interface_name = Column(AqStr(32), nullable=True)
 
@@ -183,10 +183,7 @@ class FeatureLink(Base):
     # - Trying to add ('b', NULL) after ('a', NULL) should succeed
     __table_args__ = (UniqueConstraint(feature_id, model_id, archetype_id,
                                        personality_id, interface_name,
-                                       name='%s_uk' % _LINK),
-                      Index('%s_model_idx' % _LINK, model_id),
-                      Index('%s_archetype_idx' % _LINK, archetype_id),
-                      Index('%s_personality_idx' % _LINK, personality_id))
+                                       name='%s_uk' % _LINK),)
 
     def __init__(self, feature=None, archetype=None, personality=None,
                  model=None, interface_name=None):

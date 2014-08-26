@@ -31,7 +31,7 @@
 from datetime import datetime
 
 from sqlalchemy import (Column, Integer, Sequence, String, DateTime, Boolean,
-                        ForeignKey, PrimaryKeyConstraint, Index)
+                        ForeignKey, PrimaryKeyConstraint)
 from sqlalchemy.orm import relation, backref, deferred, aliased, object_session
 from sqlalchemy.sql import or_
 from sqlalchemy.util import memoized_property
@@ -42,7 +42,6 @@ from aquilon.aqdb.model import Base, Archetype, Personality
 _TN = 'service'
 _SLI = 'service_list_item'
 _PSLI = 'personality_service_list_item'
-_ABV = 'prsnlty_sli'
 
 
 class Service(Base):
@@ -94,10 +93,9 @@ class __ServiceListItem(Base):
                         nullable=False)
 
     archetype_id = Column(Integer, ForeignKey(Archetype.id, ondelete='CASCADE'),
-                          nullable=False)
+                          nullable=False, index=True)
 
-    __table_args__ = (PrimaryKeyConstraint(service_id, archetype_id),
-                      Index('srvlst_archtyp_idx', archetype_id))
+    __table_args__ = (PrimaryKeyConstraint(service_id, archetype_id),)
 
 Service.archetypes = relation(Archetype, secondary=__ServiceListItem.__table__,
                               backref=backref("services"))
@@ -116,10 +114,9 @@ class __PersonalityServiceListItem(Base):
 
     personality_id = Column(Integer, ForeignKey(Personality.id,
                                                 ondelete='CASCADE'),
-                            nullable=False)
+                            nullable=False, index=True)
 
-    __table_args__ = (PrimaryKeyConstraint(service_id, personality_id),
-                      Index('%s_prsnlty_idx' % _ABV, personality_id))
+    __table_args__ = (PrimaryKeyConstraint(service_id, personality_id),)
 
 Service.personalities = relation(Personality,
                                  secondary=__PersonalityServiceListItem.__table__,

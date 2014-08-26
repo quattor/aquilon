@@ -19,7 +19,7 @@
 from datetime import datetime
 
 from sqlalchemy import (Integer, Boolean, DateTime, Sequence, String,
-                        Column, ForeignKey, Index)
+                        Column, ForeignKey)
 from sqlalchemy.orm import relation, deferred, backref, validates
 
 from aquilon.exceptions_ import ArgumentError
@@ -92,7 +92,7 @@ class Domain(Branch):
 
     tracked_branch_id = Column(Integer, ForeignKey(Branch.id,
                                                    name='%s_tracked_branch_fk' % _DMN),
-                               nullable=True)
+                               nullable=True, index=True)
     rollback_commit = Column(AqStr(40), nullable=True)
 
     requires_change_manager = Column(Boolean(name="%s_req_chg_mgr_ck" % _DMN),
@@ -107,8 +107,6 @@ class Domain(Branch):
     tracked_branch = relation(Branch, foreign_keys=tracked_branch_id,
                               backref=backref('trackers'))
 
-    __table_args__ = (Index("%s_tracked_branch_idx" % _DMN,
-                            tracked_branch_id),)
     __mapper_args__ = {'polymorphic_identity': _DMN,
                        'inherit_condition': domain_id == Branch.id}
 

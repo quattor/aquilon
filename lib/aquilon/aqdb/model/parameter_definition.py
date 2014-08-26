@@ -19,7 +19,7 @@
 from datetime import datetime
 
 from sqlalchemy import (Column, Integer, DateTime, Sequence, String, Boolean,
-                        Text, ForeignKey, Index)
+                        Text, ForeignKey)
 from sqlalchemy.orm import (relation, backref, deferred)
 
 from aquilon.aqdb.model import Base, Archetype, Feature
@@ -123,7 +123,7 @@ class ParamDefinition(Base):
     description = deferred(Column(String(255), nullable=True))
     holder_id = Column(Integer, ForeignKey(ParamDefHolder.id,
                                            ondelete='CASCADE'),
-                       nullable=False)
+                       nullable=False, index=True)
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
     rebuild_required = Column(Boolean(name="%s_rebuild_ck" % _TN),
@@ -132,8 +132,7 @@ class ParamDefinition(Base):
                       backref=backref('param_definitions',
                                       cascade='all, delete-orphan'))
 
-    __table_args__ = (Index('%s_holder_idx' % _TN, holder_id),
-                      {'oracle_compress': True})
+    __table_args__ = {'oracle_compress': True}
 
     @property
     def template_base(self, base_object):

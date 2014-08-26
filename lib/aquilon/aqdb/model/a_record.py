@@ -44,7 +44,7 @@ class ARecord(DnsRecord):
     reverse_ptr_id = Column(Integer, ForeignKey(Fqdn.id,
                                                 name='%s_reverse_ptr_fk' % _TN,
                                                 ondelete='SET NULL'),
-                            nullable=True)
+                            nullable=True, index=True)
 
     network = relation(Network, innerjoin=True,
                        backref=backref('dns_records', passive_deletes=True))
@@ -53,8 +53,7 @@ class ARecord(DnsRecord):
                            backref=backref('reverse_entries',
                                            passive_deletes=True))
 
-    __table_args__ = (Index("%s_reverse_ptr_idx" % _TN, reverse_ptr_id),
-                      Index("%s_network_ip_idx" % _TN, network_id, ip))
+    __table_args__ = (Index("%s_network_ip_idx" % _TN, network_id, ip),)
     __mapper_args__ = {'polymorphic_identity': _TN}
 
     def __format__(self, format_spec):

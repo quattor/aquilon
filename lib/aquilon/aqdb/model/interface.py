@@ -21,7 +21,7 @@ from collections import deque
 import re
 
 from sqlalchemy import (Column, Integer, DateTime, Sequence, String, Boolean,
-                        ForeignKey, UniqueConstraint, CheckConstraint, Index)
+                        ForeignKey, UniqueConstraint, CheckConstraint)
 from sqlalchemy.orm import (relation, backref, validates, object_session,
                             deferred)
 from sqlalchemy.orm.collections import attribute_mapped_collection
@@ -69,7 +69,7 @@ class Interface(DeviceLinkMixin, Base):
 
     mac = Column(AqMac(name="%s_mac_ck" % _TN), nullable=True, unique=True)
 
-    model_id = Column(Integer, ForeignKey(Model.id), nullable=False)
+    model_id = Column(Integer, ForeignKey(Model.id), nullable=False, index=True)
 
     # PXE boot control. Does not affect how the OS configures the interface.
     # FIXME: move to PublicInterface
@@ -91,7 +91,7 @@ class Interface(DeviceLinkMixin, Base):
                                            ondelete='CASCADE',
                                            deferrable=True,
                                            initially='IMMEDIATE'),
-                       nullable=True)
+                       nullable=True, index=True)
 
     # FIXME: move to PublicInterface
     port_group_name = Column(AqStr(32), nullable=True)
@@ -125,9 +125,7 @@ class Interface(DeviceLinkMixin, Base):
     __table_args__ = (UniqueConstraint(hardware_entity_id, name),
                       CheckConstraint(or_(port_group_id == None,
                                           port_group_name == None),
-                                      name='%s_pg_ck' % _ABV),
-                      Index('%s_model_idx' % _ABV, model_id),
-                      Index('%s_master_idx' % _ABV, master_id))
+                                      name='%s_pg_ck' % _ABV))
     __mapper_args__ = {'polymorphic_on': interface_type}
 
     # Interfaces also have the property 'assignments' which is defined in

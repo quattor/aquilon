@@ -19,7 +19,7 @@
 from datetime import datetime
 
 from sqlalchemy import (Column, Integer, String, DateTime, Sequence, ForeignKey,
-                        PrimaryKeyConstraint, Index)
+                        PrimaryKeyConstraint)
 from sqlalchemy.orm import relation, backref, deferred
 
 from aquilon.aqdb.column_types import AqStr
@@ -97,10 +97,9 @@ class __VSwitchPGAssignment(Base):
 
     port_group_id = Column(Integer, ForeignKey(PortGroup.network_id,
                                                ondelete='CASCADE'),
-                           nullable=False)
+                           nullable=False, index=True)
 
-    __table_args__ = (PrimaryKeyConstraint(virtual_switch_id, port_group_id),
-                      Index('%s_port_group_idx' % _VSP, port_group_id))
+    __table_args__ = (PrimaryKeyConstraint(virtual_switch_id, port_group_id),)
 
 VirtualSwitch.port_groups = relation(PortGroup,
                                      secondary=__VSwitchPGAssignment.__table__,

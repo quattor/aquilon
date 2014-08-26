@@ -58,7 +58,7 @@ class Xtn(Base):
 
     __table_args__ = (Index('xtn_username_idx', username, oracle_compress=True),
                       Index('xtn_command_idx', command, oracle_compress=True),
-                      Index('xtn_isreadonly_idx', is_readonly,
+                      Index('xtn_is_readonly_idx', is_readonly,
                             oracle_bitmap=True),
                       Index('xtn_start_time_idx', desc(start_time)),
                       {'oracle_compress': 'OLTP'})
@@ -122,8 +122,8 @@ class XtnDetail(Base):
     value = Column(String(3000), nullable=False)
 
     __table_args__ = (PrimaryKeyConstraint(xtn_id, name, value),
-                      Index('xtn_dtl_name_idx', name, oracle_compress=True),
-                      Index('xtn_dtl_value_idx', value, oracle_compress=True),
+                      Index('xtn_detail_name_idx', name, oracle_compress=True),
+                      Index('xtn_detail_value_idx', value, oracle_compress=True),
                       {'oracle_compress': 'OLTP'})
 
 Xtn.args = relationship(XtnDetail, lazy="joined", order_by=[XtnDetail.name])

@@ -18,7 +18,7 @@
 from datetime import datetime
 
 from sqlalchemy import (Column, Integer, String, DateTime, ForeignKey,
-                        PrimaryKeyConstraint, Index)
+                        PrimaryKeyConstraint)
 from sqlalchemy.orm import relation, deferred, backref
 from sqlalchemy.sql import and_
 
@@ -44,13 +44,13 @@ class RouterAddress(Base):
     network_id = Column(Integer, ForeignKey(Network.id), nullable=False)
 
     dns_environment_id = Column(Integer, ForeignKey(DnsEnvironment.id),
-                                nullable=False)
+                                nullable=False, index=True)
 
     # We don't want deleting a location to disrupt networking, so use "ON DELETE
     # SET NULL" here
     location_id = Column(Integer, ForeignKey(Location.id,
                                              ondelete="SET NULL"),
-                         nullable=True)
+                         nullable=True, index=True)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
@@ -73,9 +73,5 @@ class RouterAddress(Base):
                            viewonly=True)
 
     __table_args__ = (PrimaryKeyConstraint(network_id, ip),
-                      Index("%s_dns_env_idx" % _TN, dns_environment_id),
-                      Index("%s_location_idx" % _TN, location_id))
-
-rtaddr = RouterAddress.__table__  # pylint: disable=C0103
-rtaddr.info['unique_fields'] = ['ip', 'network']
-rtaddr.info['extra_search_fields'] = ['dns_environment']
+                      {'info': {'unique_fields': ['ip', 'network'],
+                                'extra_search_fields': ['dns_environment']}})

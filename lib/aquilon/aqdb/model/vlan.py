@@ -124,10 +124,9 @@ class __ObservedVlan(Base):
 
     port_group_id = Column(Integer, ForeignKey(PortGroup.id,
                                                ondelete='CASCADE'),
-                           nullable=False)
+                           nullable=False, index=True)
 
-    __table_args__ = (PrimaryKeyConstraint(network_device_id, port_group_id),
-                      Index('%s_pg_idx' % _TN, 'port_group_id'))
+    __table_args__ = (PrimaryKeyConstraint(network_device_id, port_group_id),)
 
 NetworkDevice.port_groups = relation(PortGroup,
                                      secondary=__ObservedVlan.__table__,

@@ -19,8 +19,7 @@
 from datetime import datetime
 from collections import deque
 
-from sqlalchemy import (Integer, DateTime, Sequence, String, Column, ForeignKey,
-                        Index)
+from sqlalchemy import Integer, DateTime, Sequence, String, Column, ForeignKey
 from sqlalchemy.orm import relation, deferred, backref, object_session, lazyload
 from sqlalchemy.orm.attributes import set_committed_value
 from sqlalchemy.ext.associationproxy import association_proxy
@@ -56,7 +55,7 @@ class DnsRecord(Base):
 
     id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
 
-    fqdn_id = Column(Integer, ForeignKey(Fqdn.id), nullable=False)
+    fqdn_id = Column(Integer, ForeignKey(Fqdn.id), nullable=False, index=True)
 
     dns_record_type = Column(AqStr(32), nullable=False)
 
@@ -71,7 +70,6 @@ class DnsRecord(Base):
     aliases = association_proxy('fqdn', 'aliases')
     srv_records = association_proxy('fqdn', 'srv_records')
 
-    __table_args__ = (Index('%s_fqdn_idx' % _TN, fqdn_id),)
     __mapper_args__ = {'polymorphic_on': dns_record_type,
                        'polymorphic_identity': _TN}
 

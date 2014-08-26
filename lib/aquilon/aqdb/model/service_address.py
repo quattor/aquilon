@@ -15,13 +15,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from sqlalchemy import Integer, Column, ForeignKey, Index
+from sqlalchemy import Integer, Column, ForeignKey
 from sqlalchemy.orm import relation, backref
 
 from aquilon.aqdb.model import Resource, AddressAssignment, ARecord
 
 _TN = 'service_address'
-_ABV = 'srv_addr'
 
 
 class ServiceAddress(Resource):
@@ -34,7 +33,7 @@ class ServiceAddress(Resource):
     # This is not normalized, as we could get the same object by
     # self.assignments[0].dns_records[0], but this way it's faster
     dns_record_id = Column(Integer, ForeignKey(ARecord.dns_record_id),
-                           nullable=False)
+                           nullable=False, index=True)
 
     assignments = relation(AddressAssignment, cascade="all, delete-orphan",
                            passive_deletes=True,
@@ -44,7 +43,6 @@ class ServiceAddress(Resource):
                           backref=backref('service_address', uselist=False,
                                           passive_deletes=True))
 
-    __table_args__ = (Index("%s_dns_record_idx" % _ABV, dns_record_id),)
     __mapper_args__ = {'polymorphic_identity': _TN}
 
     @property

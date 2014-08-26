@@ -23,7 +23,7 @@ from ipaddr import (IPv4Address, IPv4Network, AddressValueError,
 import logging
 
 from sqlalchemy import (Column, Integer, Sequence, String, DateTime, ForeignKey,
-                        UniqueConstraint, CheckConstraint, Index, desc, event)
+                        UniqueConstraint, CheckConstraint, desc, event)
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import (relation, deferred, reconstructor, validates,
                             object_session)
@@ -112,7 +112,8 @@ class Network(Base):
                                     ForeignKey(NetworkEnvironment.id),
                                     nullable=False)
 
-    location_id = Column(Integer, ForeignKey(Location.id), nullable=False)
+    location_id = Column(Integer, ForeignKey(Location.id), nullable=False,
+                         index=True)
 
     network_type = Column(AqStr(32), nullable=False)
     cidr = Column(Integer, nullable=False)
@@ -134,8 +135,7 @@ class Network(Base):
 
     __table_args__ = (UniqueConstraint(network_environment_id, ip),
                       CheckConstraint(and_(cidr >= 1, cidr <= 32),
-                                      name="%s_cidr_ck" % _TN),
-                      Index('%s_location_idx' % _TN, location_id))
+                                      name="%s_cidr_ck" % _TN))
 
     def __init__(self, network=None, network_type=None, **kw):
         # pylint: disable=W0621

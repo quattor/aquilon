@@ -21,8 +21,7 @@ from datetime import datetime
 from sys import maxsize
 
 from sqlalchemy import (Column, Integer, Sequence, String, DateTime,
-                        ForeignKey, UniqueConstraint, PrimaryKeyConstraint,
-                        Index)
+                        ForeignKey, UniqueConstraint, PrimaryKeyConstraint)
 from sqlalchemy.orm import (relation, contains_eager, column_property, backref,
                             deferred, defer, undefer, aliased, lazyload,
                             object_session)
@@ -222,10 +221,9 @@ class __BuildItem(Base):
                      nullable=False)
 
     service_instance_id = Column(Integer, ForeignKey(ServiceInstance.id),
-                                 nullable=False)
+                                 nullable=False, index=True)
 
-    __table_args__ = (PrimaryKeyConstraint(host_id, service_instance_id),
-                      Index('build_item_si_idx', service_instance_id))
+    __table_args__ = (PrimaryKeyConstraint(host_id, service_instance_id),)
 
 ServiceInstance.clients = relation(Host, secondary=__BuildItem.__table__,
                                    backref=backref("services_used",

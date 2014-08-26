@@ -18,7 +18,7 @@
 
 import re
 
-from sqlalchemy import Column, Boolean, Integer, ForeignKey, Index
+from sqlalchemy import Column, Boolean, Integer, ForeignKey
 from sqlalchemy.orm import relation, column_property, validates
 from sqlalchemy.sql import select, func
 
@@ -35,12 +35,11 @@ class VirtualDisk(Disk):
 
     backing_store_id = Column(Integer, ForeignKey(Resource.id,
                                                   name='%s_backing_store_fk' % _TN),
-                              nullable=True)
+                              nullable=True, index=True)
 
     backing_store = relation(Resource)
 
     __mapper_args__ = {'polymorphic_identity': 'virtual_disk'}
-    __extra_table_args__ = (Index('%s_backing_store_idx' % _TN, backing_store_id),)
 
     def __init__(self, address=None, backing_store=None, **kw):
         if not address:
