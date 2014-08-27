@@ -35,7 +35,7 @@ class VirtualSwitch(Base):
     __tablename__ = _VS
     _class_label = 'Virtual Switch'
 
-    id = Column(Integer, Sequence('%s_seq' % _VS), primary_key=True)
+    id = Column(Integer, Sequence('%s_id_seq' % _VS), primary_key=True)
 
     name = Column(AqStr(63), nullable=False, unique=True)
 

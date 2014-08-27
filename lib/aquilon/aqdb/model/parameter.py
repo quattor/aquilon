@@ -39,7 +39,7 @@ class ParameterHolder(Base):
     _class_label = 'Parameter Holder'
     _instance_label = 'holder_name'
 
-    id = Column(Integer, Sequence('%s_seq' % _PARAM_HOLDER), primary_key=True)
+    id = Column(Integer, Sequence('%s_id_seq' % _PARAM_HOLDER), primary_key=True)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
@@ -89,7 +89,7 @@ class Parameter(Base):
 
     __tablename__ = _TN
 
-    id = Column(Integer, Sequence('%s_seq' % _TN), primary_key=True)
+    id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
     value = Column(MutationDict.as_mutable(JSONEncodedDict))
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))

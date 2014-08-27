@@ -42,7 +42,7 @@ class DnsEnvironment(Base):
     __tablename__ = _TN
     _class_label = 'DNS Environment'
 
-    id = Column(Integer, Sequence('%s_id_seq' % (_TN)), primary_key=True)
+    id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
     name = Column(AqStr(32), nullable=False, unique=True)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,

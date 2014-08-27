@@ -30,7 +30,6 @@ from aquilon.aqdb.model import (Base, Archetype, Grn, HostEnvironment,
                                 User, NetGroupWhiteList)
 
 _TN = 'personality'
-_ABV = 'prsnlty'
 _PGN = 'personality_grn_map'
 _PRU = 'personality_rootuser'
 _PRNG = 'personality_rootnetgroup'
@@ -44,7 +43,7 @@ class Personality(Base):
     """ Personality names """
     __tablename__ = _TN
 
-    id = Column(Integer, Sequence('%s_seq' % _ABV), primary_key=True)
+    id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
     name = Column(AqStr(64), nullable=False)
     archetype_id = Column(Integer, ForeignKey(Archetype.id),
                           nullable=False)
@@ -52,7 +51,7 @@ class Personality(Base):
     cluster_required = Column(Boolean(name="%s_clstr_req_ck" % _TN),
                               default=False, nullable=False)
 
-    config_override = Column(Boolean(name="persona_cfg_override_ck"),
+    config_override = Column(Boolean(name="%s_config_override_ck" % _TN),
                              default=False, nullable=False)
 
     owner_eon_id = Column(Integer, ForeignKey(Grn.eon_id,

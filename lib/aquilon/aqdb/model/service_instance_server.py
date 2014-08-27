@@ -35,7 +35,7 @@ class ServiceInstanceServer(Base):
 
     __tablename__ = _TN
 
-    id = Column(Integer, Sequence("%s_seq" % _TN), primary_key=True)
+    id = Column(Integer, Sequence("%s_id_seq" % _TN), primary_key=True)
 
     service_instance_id = Column(Integer, ForeignKey(ServiceInstance.id),
                                  nullable=False)

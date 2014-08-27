@@ -82,7 +82,7 @@ class Cluster(Base):
     """
     __tablename__ = _TN
 
-    id = Column(Integer, Sequence('%s_seq' % _TN), primary_key=True)
+    id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
     cluster_type = Column(AqStr(16), nullable=False)
     name = Column(AqStr(64), nullable=False, unique=True)
 

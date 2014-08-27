@@ -40,7 +40,7 @@ class ResourceHolder(Base):
     """
     __tablename__ = _RESHOLDER
 
-    id = Column(Integer, Sequence('%s_seq' % _RESHOLDER), primary_key=True)
+    id = Column(Integer, Sequence('%s_id_seq' % _RESHOLDER), primary_key=True)
 
     # I don't like this as a string...
     holder_type = Column(AqStr(16), nullable=False)
@@ -121,7 +121,7 @@ class Resource(Base):
     """
     __tablename__ = _TN
 
-    id = Column(Integer, Sequence('%s_seq' % _TN), primary_key=True)
+    id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
     resource_type = Column(AqStr(16), nullable=False)
     name = Column(AqStr(64), nullable=False)
     creation_date = deferred(Column(DateTime, default=datetime.now,

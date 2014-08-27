@@ -37,7 +37,7 @@ class MachineSpecs(Base):
 
     __tablename__ = _TN
 
-    id = Column(Integer, Sequence('mach_specs_id_seq'), primary_key=True)
+    id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
 
     model_id = Column(Integer, ForeignKey(Model.id), nullable=False,
                       unique=True)

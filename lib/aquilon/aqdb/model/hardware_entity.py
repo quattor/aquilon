@@ -37,7 +37,7 @@ class HardwareEntity(Base):
     __tablename__ = _TN
     _instance_label = 'printable_name'
 
-    id = Column(Integer, Sequence('%s_seq' % _TN), primary_key=True)
+    id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
 
     label = Column(AqStr(63), nullable=False, unique=True)
 

@@ -284,3 +284,27 @@ ALTER INDEX svc_map_network_idx RENAME TO service_map_network_idx;
 ALTER INDEX xtn_isreadonly_idx RENAME TO xtn_is_readonly_idx;
 ALTER INDEX xtn_dtl_name_idx RENAME TO xtn_detail_name_idx;
 ALTER INDEX xtn_dtl_value_idx RENAME TO xtn_detail_value_idx;
+
+ALTER TABLE interface DROP CONSTRAINT iface_pg_ck;
+ALTER TABLE interface ADD CONSTRAINT interface_port_group_ck CHECK (port_group_id IS NULL OR port_group_name IS NULL);
+ALTER TABLE interface DROP CONSTRAINT iface_vlan_ck;
+ALTER TABLE interface ADD CONSTRAINT interface_vlan_ck CHECK ((parent_id IS NOT NULL AND vlan_id > 0 AND vlan_id < 4096) OR interface_type != 'vlan');
+
+ALTER SEQUENCE address_assignment_seq RENAME TO address_assignment_id_seq;
+ALTER SEQUENCE clstr_seq RENAME TO clstr_id_seq;
+ALTER SEQUENCE hardware_entity_seq RENAME TO hardware_entity_id_seq;
+ALTER SEQUENCE interface_seq RENAME TO interface_id_seq;
+ALTER SEQUENCE mach_specs_id_seq RENAME TO machine_specs_id_seq;
+ALTER SEQUENCE os_seq RENAME TO operating_system_id_seq;
+ALTER SEQUENCE parameter_seq RENAME TO parameter_id_seq;
+ALTER SEQUENCE param_definition_seq RENAME TO param_definition_id_seq;
+ALTER SEQUENCE param_def_holder_seq RENAME TO param_def_holder_id_seq;
+ALTER SEQUENCE param_holder_seq RENAME TO param_holder_id_seq;
+ALTER SEQUENCE pers_clst_info_seq RENAME TO pers_clstr_id_seq;
+ALTER SEQUENCE prsnlty_seq RENAME TO personality_id_seq;
+ALTER SEQUENCE port_group_seq RENAME TO port_group_id_seq;
+ALTER SEQUENCE prsnlty_svc_map_seq RENAME TO pers_svc_map_id_seq;
+ALTER SEQUENCE resholder_seq RENAME TO resholder_id_seq;
+ALTER SEQUENCE resource_seq RENAME TO resource_id_seq;
+ALTER SEQUENCE service_instance_server_seq RENAME TO service_instance_server_id_seq;
+ALTER SEQUENCE virtual_switch_seq RENAME TO virtual_switch_id_seq;

@@ -78,7 +78,7 @@ class PortGroup(Base):
     __tablename__ = _PG
     _class_label = 'Port Group'
 
-    id = Column(Integer, Sequence("%s_seq" % _PG), primary_key=True)
+    id = Column(Integer, Sequence("%s_id_seq" % _PG), primary_key=True)
 
     network_id = Column(Integer, ForeignKey(Network.id,
                                             ondelete='CASCADE'),

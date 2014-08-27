@@ -26,7 +26,7 @@ from aquilon.aqdb.model import (Base, Location, Personality, ServiceInstance,
                                 Network)
 
 _TN = 'personality_service_map'
-_ABV = 'prsnlty_svc_map'
+_ABV = 'pers_svc_map'
 
 
 class PersonalityServiceMap(Base):
@@ -38,7 +38,7 @@ class PersonalityServiceMap(Base):
 
     __tablename__ = _TN
 
-    id = Column(Integer, Sequence('%s_seq' % _ABV), primary_key=True)
+    id = Column(Integer, Sequence('%s_id_seq' % _ABV), primary_key=True)
 
     service_instance_id = Column(Integer, ForeignKey(ServiceInstance.id,
                                                      ondelete='CASCADE'),

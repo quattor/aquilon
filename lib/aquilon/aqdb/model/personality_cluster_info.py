@@ -27,7 +27,7 @@ from aquilon.aqdb.model import Base, Personality
 from aquilon.aqdb.column_types.aqstr import AqStr
 
 _PCI = "personality_cluster_info"
-_PCIABV = "pers_clst_info"
+_PCIABV = "pers_clstr"
 _PECI = "personality_esx_cluster_info"
 
 
@@ -36,7 +36,7 @@ class PersonalityClusterInfo(Base):
 
     __tablename__ = _PCI
 
-    id = Column(Integer, Sequence("%s_seq" % _PCIABV), primary_key=True)
+    id = Column(Integer, Sequence("%s_id_seq" % _PCIABV), primary_key=True)
 
     personality_id = Column(Integer, ForeignKey(Personality.id,
                                                 ondelete="CASCADE"),

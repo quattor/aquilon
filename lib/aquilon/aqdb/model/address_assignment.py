@@ -52,7 +52,7 @@ class AddressAssignment(Base):
 
     _label_check = re.compile('^[a-z0-9]{0,16}$')
 
-    id = Column(Integer, Sequence('%s_seq' % _TN), primary_key=True)
+    id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
 
     interface_id = Column(Integer, ForeignKey(Interface.id, ondelete='CASCADE'),
                           nullable=False)

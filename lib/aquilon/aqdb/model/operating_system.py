@@ -25,7 +25,6 @@ from aquilon.aqdb.model import Base, Archetype
 from aquilon.aqdb.column_types.aqstr import AqStr
 
 _TN = 'operating_system'
-_ABV = 'os'
 
 
 class OperatingSystem(Base):
@@ -33,7 +32,7 @@ class OperatingSystem(Base):
     __tablename__ = _TN
     _class_label = 'Operating System'
 
-    id = Column(Integer, Sequence('%s_seq' % _ABV), primary_key=True)
+    id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
     name = Column(AqStr(32), nullable=False)
     version = Column(AqStr(16), nullable=False)
     archetype_id = Column(Integer, ForeignKey(Archetype.id, ondelete="CASCADE"),

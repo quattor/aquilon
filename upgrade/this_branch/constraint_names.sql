@@ -333,4 +333,34 @@ ALTER INDEX xtn_isreadonly_idx RENAME TO xtn_is_readonly_idx;
 ALTER INDEX xtn_dtl_name_idx RENAME TO xtn_detail_name_idx;
 ALTER INDEX xtn_dtl_value_idx RENAME TO xtn_detail_value_idx;
 
+ALTER TABLE interface RENAME CONSTRAINT iface_bootable_ck TO interface_bootable_ck;
+ALTER TABLE interface RENAME CONSTRAINT iface_default_route_ck TO interface_default_route_ck;
+ALTER TABLE interface RENAME CONSTRAINT iface_pg_ck TO interface_port_group_ck;
+ALTER TABLE interface RENAME CONSTRAINT iface_vlan_ck TO interface_vlan_ck;
+ALTER TABLE param_definition RENAME CONSTRAINT param_definition_paramdef_ck TO param_definition_required_ck;
+ALTER TABLE param_definition RENAME CONSTRAINT param_definition_rebuild_ck TO param_definition_rebld_req_ck;
+ALTER TABLE personality RENAME CONSTRAINT persona_cfg_override_ck TO personality_config_override_ck;
+
+DROP SEQUENCE build_item_id_seq;
+DROP SEQUENCE service_list_item_id_seq;
+
+RENAME address_assignment_seq TO address_assignment_id_seq;
+RENAME clstr_seq TO clstr_id_seq;
+RENAME hardware_entity_seq TO hardware_entity_id_seq;
+RENAME interface_seq TO interface_id_seq;
+RENAME mach_specs_id_seq TO machine_specs_id_seq;
+RENAME os_seq TO operating_system_id_seq;
+RENAME parameter_seq TO parameter_id_seq;
+RENAME param_definition_seq TO param_definition_id_seq;
+RENAME param_def_holder_seq TO param_def_holder_id_seq;
+RENAME param_holder_seq TO param_holder_id_seq;
+RENAME pers_clst_info_seq TO pers_clstr_id_seq;
+RENAME prsnlty_seq TO personality_id_seq;
+RENAME port_group_seq TO port_group_id_seq;
+RENAME prsnlty_svc_map_seq TO pers_svc_map_id_seq;
+RENAME resholder_seq TO resholder_id_seq;
+RENAME resource_seq TO resource_id_seq;
+RENAME service_instance_server_seq TO service_instance_server_id_seq;
+RENAME virtual_switch_seq TO virtual_switch_id_seq;
+
 QUIT;

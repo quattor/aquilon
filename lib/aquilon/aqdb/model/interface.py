@@ -34,7 +34,6 @@ from aquilon.aqdb.model import (Base, HardwareEntity, DeviceLinkMixin,
 from aquilon.aqdb.model.vlan import MAX_VLANS
 
 _TN = "interface"
-_ABV = "iface"
 
 
 class Interface(DeviceLinkMixin, Base):
@@ -63,7 +62,7 @@ class Interface(DeviceLinkMixin, Base):
     # It's also extra work we may not enjoy, it means rewriting the table
     # since we'd blow away its PK.
 
-    id = Column(Integer, Sequence('%s_seq' % _TN), primary_key=True)
+    id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
 
     name = Column(AqStr(32), nullable=False)  # like e0, hme1, etc.
 
@@ -73,10 +72,10 @@ class Interface(DeviceLinkMixin, Base):
 
     # PXE boot control. Does not affect how the OS configures the interface.
     # FIXME: move to PublicInterface
-    bootable = Column(Boolean(name="%s_bootable_ck" % _ABV), nullable=False,
+    bootable = Column(Boolean(name="%s_bootable_ck" % _TN), nullable=False,
                       default=False)
 
-    default_route = Column(Boolean(name="%s_default_route_ck" % _ABV),
+    default_route = Column(Boolean(name="%s_default_route_ck" % _TN),
                            nullable=False, default=False)
 
     interface_type = Column(AqStr(32), nullable=False)
@@ -125,7 +124,7 @@ class Interface(DeviceLinkMixin, Base):
     __table_args__ = (UniqueConstraint(hardware_entity_id, name),
                       CheckConstraint(or_(port_group_id == None,
                                           port_group_name == None),
-                                      name='%s_pg_ck' % _ABV))
+                                      name='%s_port_group_ck' % _TN))
     __mapper_args__ = {'polymorphic_on': interface_type}
 
     # Interfaces also have the property 'assignments' which is defined in
@@ -279,7 +278,7 @@ class VlanInterface(Interface):
                                                      vlan_id > 0,
                                                      vlan_id < MAX_VLANS),
                                                 Interface.interface_type != "vlan"),
-                                            name="%s_vlan_ck" % _ABV),
+                                            name="%s_vlan_ck" % _TN),
                             UniqueConstraint(parent_id, vlan_id,
                                              name="%s_parent_vlan_uk" % _TN))
 

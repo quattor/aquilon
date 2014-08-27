@@ -36,7 +36,7 @@ class ServiceMap(Base):
 
     __tablename__ = _TN
 
-    id = Column(Integer, Sequence('service_map_id_seq'), primary_key=True)
+    id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
 
     service_instance_id = Column(Integer, ForeignKey(ServiceInstance.id,
                                                      ondelete='CASCADE'),

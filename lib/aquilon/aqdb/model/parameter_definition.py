@@ -40,7 +40,7 @@ class ParamDefHolder(Base):
     _class_label = 'Parameter Definition Holder'
     _instance_label = 'holder_name'
 
-    id = Column(Integer, Sequence('%s_seq' % _PARAM_DEF_HOLDER), primary_key=True)
+    id = Column(Integer, Sequence('%s_id_seq' % _PARAM_DEF_HOLDER), primary_key=True)
 
     type = Column(AqStr(16), nullable=False)
 
@@ -113,10 +113,10 @@ class ParamDefinition(Base):
     _class_label = 'Parameter Definition'
     _instance_label = 'path'
 
-    id = Column(Integer, Sequence('%s_seq' % _TN), primary_key=True)
+    id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
     path = Column(String(255), nullable=False)
     template = Column(String(32))
-    required = Column(Boolean(name="%s_paramdef_ck" % _TN), default=False,
+    required = Column(Boolean(name="%s_required_ck" % _TN), default=False,
                       nullable=False)
     value_type = Column(Enum(16, _PATH_TYPES), nullable=False, default="string")
     default = Column(Text, nullable=True)
@@ -126,7 +126,7 @@ class ParamDefinition(Base):
                        nullable=False, index=True)
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
-    rebuild_required = Column(Boolean(name="%s_rebuild_ck" % _TN),
+    rebuild_required = Column(Boolean(name="%s_rebld_req_ck" % _TN),
                               nullable=False, default=False)
     holder = relation(ParamDefHolder, innerjoin=True,
                       backref=backref('param_definitions',
