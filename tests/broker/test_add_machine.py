@@ -28,28 +28,30 @@ from networktest import DummyIP
 
 
 class TestAddMachine(MachineTestMixin, TestBrokerCommand):
-
-    def testaddut3c5n10(self):
+    def test_100_add_ut3c5n10(self):
         self.noouttest(["add", "machine", "--machine", "ut3c5n10",
-                        "--rack", "ut3", "--model", "hs21-8853l5u",
+                        "--chassis", "ut3c5", "--slot", 10,
+                        "--model", "hs21-8853l5u",
                         "--cpucount", "2", "--cpuvendor", "intel",
                         "--cpuname", "xeon_2660", "--cpuspeed", "2660",
                         "--memory", "8192", "--serial", "99C5553",
                         "--comments", "Some machine comments"])
 
-    def testupdateut3c5n10(self):
+    def test_101_update_ut3c5n10_ip(self):
         command = ["update", "machine", "--machine", "ut3c5n10",
                    "--ip", self.net["unknown0"].usable[0]]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Machine ut3c5n10 does not have a primary name.",
                          command)
 
-    def testverifyaddut3c5n10(self):
+    def test_105_show_ut3c5n10(self):
         command = "show machine --machine ut3c5n10"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Machine: ut3c5n10", command)
         self.matchoutput(out, "Model Type: blade", command)
         self.matchoutput(out, "Rack: ut3", command)
+        self.matchoutput(out, "Chassis: ut3c5.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "Slot: 10", command)
         self.matchoutput(out, "Vendor: ibm Model: hs21-8853l5u", command)
         self.matchoutput(out, "Cpu: xeon_2660 x 2", command)
         self.matchoutput(out, "Memory: 8192 MB", command)
@@ -57,7 +59,7 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
         self.matchoutput(out, "Comments: Some machine comments", command)
         self.matchclean(out, "Primary Name:", command)
 
-    def testverifydelmodel(self):
+    def test_105_verify_del_model(self):
         # This should be in test_del_model.py but when that is run there are no
         # more machines defined...
         command = "del model --model hs21-8853l5u --vendor ibm"
@@ -65,7 +67,7 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
         self.matchoutput(out, "Model ibm/hs21-8853l5u is still in use and "
                          "cannot be deleted.", command)
 
-    def testverifycatut3c5n10(self):
+    def test_105_cat_ut3c5n10(self):
         command = "cat --machine ut3c5n10"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, '"location" = "ut.ny.na";', command)
@@ -96,10 +98,12 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
                           r'create\("hardware/cpu/intel/xeon_2660"\),\s*'
                           r'create\("hardware/cpu/intel/xeon_2660"\s*\)\s*\);',
                           command)
+        self.matchoutput(out, '"chassis" = "ut3c5.aqd-unittest.ms.com";', command)
+        self.matchoutput(out, '"slot" = 10;', command)
 
     # Used for Zebra tests
-    def testaddut3c5n2(self):
-        self.create_machine_hs21("ut3c5n2", rack="ut3",
+    def test_110_add_ut3c5n2(self):
+        self.create_machine_hs21("ut3c5n2", chassis="ut3c5", slot=2,
                                  interfaces=["eth0", "eth1"],
                                  eth0_mac=self.net["zebra_eth0"].usable[0].mac,
                                  eth0_vendor="intel", eth0_model="e1000",
@@ -107,44 +111,46 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
                                  eth1_model="e1000")
 
     # Used for bonding tests
-    def testaddut3c5n3(self):
-        self.create_machine_hs21("ut3c5n3", rack="ut3",
+    def test_111_add_ut3c5n3(self):
+        self.create_machine_hs21("ut3c5n3", chassis="ut3c5", slot=3,
                                  interfaces=["eth0", "eth1"],
                                  eth0_mac=self.net["zebra_eth0"].usable[1].mac,
                                  eth1_mac=self.net["zebra_eth1"].usable[1].mac)
 
     # Used for bridge tests
-    def testaddut3c5n4(self):
-        self.create_machine_hs21("ut3c5n4", rack="ut3",
+    def test_112_add_ut3c5n4(self):
+        self.create_machine_hs21("ut3c5n4", chassis="ut3c5", slot=4,
                                  interfaces=["eth0", "eth1"],
                                  eth0_mac=self.net["zebra_eth0"].usable[2].mac,
                                  eth1_mac=self.net["zebra_eth1"].usable[2].mac)
 
     # Used for house-of-cards location testing
-    def testaddjack(self):
+    def test_120_add_jack(self):
         self.noouttest(["add", "machine", "--machine", "jack",
-                        "--rack", "cards1", "--model", "hs21-8853l5u"])
+                        "--rack", "cards1", "--model", "utrackmount"])
 
     # Used for filer - a fake machine for now
-    def testaddfiler(self):
+    def test_125_add_filer(self):
         self.noouttest(["add", "machine", "--machine", "filer1",
-                        "--rack", "ut3", "--model", "hs21-8853l5u"])
+                        "--rack", "ut3", "--model", "utrackmount"])
 
     # Used for VPLS network tests
-    def testaddut3c5n5(self):
-        self.create_machine_hs21("ut3c5n5", rack="ut3",
+    def test_130_add_ut3c5n5(self):
+        self.create_machine_hs21("ut3c5n5", chassis="ut3c5", slot=5,
                                  eth0_mac=self.net["vpls"].usable[1].mac)
 
     # Test normalization
-    def testaddnp3c5n5(self):
-        self.create_machine_hs21("np3C5N5", rack="np3",
+    def test_131_add_np3c5n5(self):
+        self.create_machine_hs21("np3C5N5", chassis="np3c5", slot=5,
                                  eth0_mac=self.net["vpls"].usable[2].mac)
 
-    def testverifynormalization(self):
+    def test_135_verify_normalization(self):
         command = "show machine --machine NP3c5N5"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Machine: np3c5n5", command)
         self.matchoutput(out, "Model Type: blade", command)
+        self.matchoutput(out, "Chassis: np3c5.one-nyp.ms.com", command)
+        self.matchoutput(out, "Slot: 5", command)
 
         command = "show machine --machine np3c5n5"
         out = self.commandtest(command.split(" "))
@@ -152,27 +158,27 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
         self.matchoutput(out, "Model Type: blade", command)
 
     # Used for testing notifications
-    def testaddut3c5n6(self):
-        self.create_machine_hs21("ut3c5n6", rack="ut3",
+    def test_140_add_ut3c5n6(self):
+        self.create_machine_hs21("ut3c5n6", chassis="ut3c5", slot=6,
                                  eth0_mac=self.net["unknown0"].usable[19].mac)
 
     # Network environment testing
-    def testaddut3c5n7(self):
+    def test_141_add_ut3c5n7(self):
         net = self.net["unknown0"]
-        self.create_machine_hs21("ut3c5n7", rack="ut3",
+        self.create_machine_hs21("ut3c5n7", chassis="ut3c5", slot=7,
                                  interfaces=["eth0", "eth1", "eth2"],
                                  eth0_mac=net.usable[20].mac,
                                  eth1_mac=net.usable[21].mac,
                                  eth2_mac=net.usable[22].mac)
 
     # Network environment testing
-    def testaddut3c5n8(self):
-        self.create_machine_hs21("ut3c5n8", rack="ut3",
+    def test_142_add_ut3c5n8(self):
+        self.create_machine_hs21("ut3c5n8", chassis="ut3c5", slot=8,
                                  interfaces=["eth0", "eth1"],
                                  eth0_mac=self.net["unknown0"].usable[23].mac,
                                  eth1_mac=self.net["routing1"].usable[0].mac)
 
-    def testaddut3c1n3(self):
+    def test_143_add_ut3c1n3(self):
         self.noouttest(["add", "machine", "--machine", "ut3c1n3",
                         "--chassis", "ut3c1.aqd-unittest.ms.com", "--slot", "3",
                         "--model", "hs21-8853l5u", "--cpucount", "2",
@@ -180,19 +186,19 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
                         "--cpuspeed", "2660",
                         "--memory", "8192", "--serial", "KPDZ406"])
 
-    def testshowslot(self):
+    def test_145_show_slot(self):
         command = "search machine --slot 3 --fullinfo"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Machine: ut3c1n3", command)
         self.matchoutput(out, "Model Type: blade", command)
 
-    def testshowchassisslot(self):
+    def test_145_show_chassis_slot(self):
         command = "search machine --chassis ut3c1.aqd-unittest.ms.com --slot 3 --fullinfo"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Machine: ut3c1n3", command)
         self.matchoutput(out, "Model Type: blade", command)
 
-    def testverifyaddut3c1n3(self):
+    def test_145_show_ut3c1n3(self):
         command = "show machine --machine ut3c1n3"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Machine: ut3c1n3", command)
@@ -204,7 +210,7 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
         self.matchoutput(out, "Memory: 8192 MB", command)
         self.matchoutput(out, "Serial: KPDZ406", command)
 
-    def testverifycatut3c1n3(self):
+    def test_145_cat_ut3c1n3(self):
         command = "cat --machine ut3c1n3"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, '"location" = "ut.ny.na";', command)
@@ -215,6 +221,10 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
         self.matchoutput(out, '"sysloc/building" = "ut";', command)
         self.matchoutput(out, '"sysloc/city" = "ny";', command)
         self.matchoutput(out, '"sysloc/continent" = "na";', command)
+        self.matchoutput(out,
+                         '"chassis" = "ut3c1.aqd-unittest.ms.com";',
+                         command)
+        self.matchoutput(out, '"slot" = 3;', command)
         self.matchoutput(out, '"serialnumber" = "KPDZ406";', command)
         self.matchoutput(out,
                          'include { "hardware/machine/ibm/hs21-8853l5u" };',
@@ -230,12 +240,12 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
                           r'create\("hardware/cpu/intel/xeon_2660"\s*\)\s*\);',
                           command)
 
-    def testaddut3c1n4(self):
+    def test_150_add_ut3c1n4(self):
         self.noouttest(["add", "machine", "--machine", "ut3c1n4",
-                        "--rack", "ut3", "--model", "hs21-8853l5u",
-                        "--serial", "KPDZ407"])
+                        "--chassis", "ut3c1", "--slot", 4,
+                        "--model", "hs21-8853l5u", "--serial", "KPDZ407"])
 
-    def testverifyaddut3c1n4(self):
+    def test_155_show_ut3c1n4(self):
         command = "show machine --machine ut3c1n4"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Machine: ut3c1n4", command)
@@ -246,7 +256,7 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
         self.matchoutput(out, "Memory: 8192 MB", command)
         self.matchoutput(out, "Serial: KPDZ407", command)
 
-    def testverifycatut3c1n4(self):
+    def test_155_cat_ut3c1n4(self):
         command = "cat --machine ut3c1n4"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, '"location" = "ut.ny.na";', command)
@@ -265,11 +275,11 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
                           r'create\("hardware/cpu/intel/xeon_2660"\s*\)\s*\);',
                           command)
 
-    def testaddccissmachine(self):
+    def test_160_add_cciss_machine(self):
         self.create_machine("ut3c1n8", "utccissmodel", rack="ut3",
                             eth0_mac=self.net["unknown0"].usable[18].mac)
 
-    def testverifyccissmachine(self):
+    def test_165_show_cciss_machine(self):
         command = "show machine --machine ut3c1n8"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Machine: ut3c1n8", command)
@@ -280,7 +290,7 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
         self.matchoutput(out, "Memory: 49152 MB", command)
         self.matchoutput(out, "Disk: c0d0 466 GB cciss (local) [boot]", command)
 
-    def testverifycatut3c1n8(self):
+    def test_165_cat_cciss_machine(self):
         command = "cat --machine ut3c1n8"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, '"location" = "ut.ny.na";', command)
@@ -295,11 +305,74 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
                          '"capacity", 466*GB',
                          command)
 
-    def testaddut3c1n9(self):
+    def test_170_add_ut3c1n9(self):
         self.noouttest(["add", "machine", "--machine", "ut3c1n9",
-                        "--rack", "ut3", "--model", "hs21-8853l5u"])
+                        "--model", "hs21-8853l5u",
+                        "--chassis", "ut3c1", "--slot", 9])
 
-    def testrejectqualifiedname(self):
+    def test_171_addut3s01p2(self):
+        self.noouttest(["add", "machine", "--machine", "ut3s01p2",
+                        "--rack", "ut3", "--model", "poweredge_6650"])
+
+    def test_175_show_ut3s01p2(self):
+        command = "show machine --machine ut3s01p2"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Machine: ut3s01p2", command)
+        self.matchoutput(out, "Model Type: rackmount", command)
+
+    # When doing an end-to-end test, these two entries should be
+    # created as part of a sweep of a Dell rack.  They represent
+    # two mac addresses seen on the same port, only one of which
+    # is actually a host.  The other is a management interface.
+    def test_180_add_ut3s01p1a(self):
+        self.noouttest(["add", "machine", "--machine", "ut3s01p1a",
+                        "--rack", "ut3", "--model", "poweredge_6650"])
+
+    def test_181_show_ut3s01p1a(self):
+        command = "show machine --machine ut3s01p1a"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Machine: ut3s01p1a", command)
+        self.matchoutput(out, "Model Type: rackmount", command)
+
+    def test_182_add_ut3s01p1b(self):
+        self.noouttest(["add", "machine", "--machine", "ut3s01p1b",
+                        "--rack", "ut3", "--model", "poweredge_6650"])
+
+    def test_183_show_ut3s01p1b(self):
+        command = "show machine --machine ut3s01p1b"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Machine: ut3s01p1b", command)
+        self.matchoutput(out, "Model Type: rackmount", command)
+
+    # When doing an end-to-end test, these entries should be
+    # created as part of a sweep of a Verari rack
+    # (ut01ga1s02.aqd-unittest.ms.com).
+    def test_190_add_verari_ut8(self):
+        net = self.net["tor_net_0"]
+        for port in range(1, 6):
+            machine = "ut8s02p%d" % port
+            self.create_machine(machine, "vb1205xm", rack="ut8",
+                                eth0_mac=net.usable[port].mac)
+
+    def test_191_add_ut_no_rack(self):
+        # A machine that's not in a rack
+        self.noouttest(["add", "machine", "--machine", "utnorack",
+                        "--desk", "utdesk1", "--model", "poweredge_6650"])
+
+    def test_192_add_ha_racks(self):
+        # Machines for metacluster high availability testing
+        for port in range(1, 25):
+            for template, rack, net in [('ut13s03p%d', 'ut13', self.net["esx_bcp_ut"]),
+                                        ('np13s03p%d', 'np13', self.net["esx_bcp_np"])]:
+                machine = template % port
+                self.create_machine_verari(machine, rack=rack,
+                                           eth0_mac=net.usable[port].mac)
+
+    def test_193_add_f5test(self):
+        ip = DummyIP(self.net["f5test"].ip)
+        self.create_machine("f5test", "f5_model", rack="ut3", eth0_mac=ip.mac)
+
+    def test_200_reject_qualified_name(self):
         command = ["add", "machine", "--machine", "qualified.ms.com",
                    "--rack", "ut3", "--model", "hs21-8853l5u"]
         out = self.badrequesttest(command)
@@ -308,31 +381,31 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
                          command)
 
     # Testing that add machine does not allow a tor_switch....
-    def testrejectut3gd2r01(self):
+    def test_210_reject_switch(self):
         command = ["add", "machine", "--machine", "ut3gd1r02",
                    "--rack", "ut3", "--model", "uttorswitch"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "cannot add machines of type switch",
                          command)
 
-    def testverifyrejectut3gd2r01(self):
+    def test_215_verify_reject_switch(self):
         command = "show machine --machine ut3gd2r01"
         out = self.notfoundtest(command.split(" "))
 
     # Testing that an invalid cpu returns an error (not an internal error)...
     # (There should be no cpu with speed==2 in the database)
-    def testrejectut3c1n5(self):
+    def test_220_reject_bad_cpuspeed(self):
         self.badrequesttest(["add", "machine", "--machine", "ut3c1n5",
                              "--rack", "ut3", "--model", "hs21-8853l5u",
                              "--cpucount", "2", "--cpuvendor", "intel",
                              "--cpuname", "xeon_2660", "--cpuspeed", "2",
                              "--memory", "8192", "--serial", "KPDZ406"])
 
-    def testverifyrejectut3c1n5(self):
+    def test_225_verify_reject_bad_cpuspeed(self):
         command = "show machine --machine ut3c1n5"
         out = self.notfoundtest(command.split(" "))
 
-    def testrejectmissingmemory(self):
+    def test_230_reject_missing_memory(self):
         command = ["add", "machine", "--machine", "ut3c1n6",
                    "--rack", "ut3", "--model", "utblade", "--cpucount", "2",
                    "--cpuvendor", "intel", "--cpuname", "xeon_2500",
@@ -342,22 +415,22 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
                          "does not have machine specification defaults, please specify --memory",
                          command)
 
-    def testverifyrejectmissingmemory(self):
+    def test_235_verify_reject_missing_memory(self):
         command = "show machine --machine ut3c1n6"
         out = self.notfoundtest(command.split(" "))
 
-    def testrejectmissingmodel(self):
+    def test_240_reject_missing_model(self):
         command = ["add", "machine", "--machine", "ut3c1n7", "--rack", "ut3",
                    "--model", "utblade", "--serial", "BBBBBBB"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "does not have machine specification defaults",
                          command)
 
-    def testverifyrejectmissingmodel(self):
+    def test_245_verify_reject_missing_model(self):
         command = "show machine --machine ut3c1n7"
         out = self.notfoundtest(command.split(" "))
 
-    def testrejectmachineuri(self):
+    def test_250_reject_machine_uri(self):
         command = ["add", "machine", "--machine", "ut3c1n10",
                    "--rack", "ut3", "--model", "hs21-8853l5u",
                    "--uri", "file:///somepath/to/ovf"]
@@ -366,77 +439,14 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
                          "appliances and the model's type is blade",
                          command)
 
-    def testverifyrejectmachineuri(self):
+    def test_255_verify_reject_machine_uri(self):
         command = "show machine --machine ut3c1n10"
         out = self.notfoundtest(command.split(" "))
-
-    # When doing an end-to-end test, these two entries should be
-    # created as part of a sweep of a Dell rack.  They represent
-    # two mac addresses seen on the same port, only one of which
-    # is actually a host.  The other is a management interface.
-    def testaddut3s01p1a(self):
-        self.noouttest(["add", "machine", "--machine", "ut3s01p1a",
-                        "--rack", "ut3", "--model", "poweredge_6650"])
-
-    def testverifyaddut3s01p1a(self):
-        command = "show machine --machine ut3s01p1a"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Machine: ut3s01p1a", command)
-        self.matchoutput(out, "Model Type: rackmount", command)
-
-    def testaddut3s01p1b(self):
-        self.noouttest(["add", "machine", "--machine", "ut3s01p1b",
-                        "--rack", "ut3", "--model", "poweredge_6650"])
-
-    def testverifyaddut3s01p1b(self):
-        command = "show machine --machine ut3s01p1b"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Machine: ut3s01p1b", command)
-        self.matchoutput(out, "Model Type: rackmount", command)
-
-    def testaddut3s01p2(self):
-        self.noouttest(["add", "machine", "--machine", "ut3s01p2",
-                        "--rack", "ut3", "--model", "poweredge_6650"])
-
-    def testverifyaddut3s01p2(self):
-        command = "show machine --machine ut3s01p2"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Machine: ut3s01p2", command)
-        self.matchoutput(out, "Model Type: rackmount", command)
-
-    # When doing an end-to-end test, these entries should be
-    # created as part of a sweep of a Verari rack
-    # (ut01ga1s02.aqd-unittest.ms.com).
-    def testaddverariut8(self):
-        net = self.net["tor_net_0"]
-        for port in range(1, 6):
-            machine = "ut8s02p%d" % port
-            self.create_machine(machine, "vb1205xm", rack="ut8",
-                                eth0_mac=net.usable[port].mac)
-
-    def testaddutnorack(self):
-        # A machine that's not in a rack
-        self.noouttest(["add", "machine", "--machine", "utnorack",
-                        "--desk", "utdesk1", "--model", "poweredge_6650"])
-
-    def testaddharacks(self):
-        # Machines for metacluster high availability testing
-        for port in range(1, 25):
-            for template, rack, net in [('ut13s03p%d', 'ut13', self.net["esx_bcp_ut"]),
-                                        ('np13s03p%d', 'np13', self.net["esx_bcp_np"])]:
-                machine = template % port
-                self.create_machine_verari(machine, rack=rack,
-                                           eth0_mac=net.usable[port].mac)
-
-    def testaddf5test(self):
-        ip = DummyIP(self.net["f5test"].ip)
-        self.create_machine("f5test", "f5_model", rack="ut3", eth0_mac=ip.mac)
 
     # FIXME: Missing a test for adding a macihne to a chassis where the
     # fqdn given for the chassis isn't *actually* a chassis.
     # FIXME: Missing a test for chassis without a slot.  (May not be possible
     # with the aq client.)
-    # FIXME: Missing a test for a location that conflicts with chassis loc.
     # FIXME: Missing a test for a slot without a chassis.  (May not be possible
     # with the aq client.)
     # FIXME: Add a test where the machine trying to be created already exists.

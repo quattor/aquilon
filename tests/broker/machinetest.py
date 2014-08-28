@@ -49,12 +49,17 @@ class MachineTestMixin(object):
         if vmhost:
             self.matchoutput(show_out, "Hosted by: Host %s" % vmhost, show_cmd)
 
-        for arg in ["rack", "desk", "chassis", "slot", "serial", "comments"]:
+        for arg in ["desk", "chassis", "slot", "serial", "comments"]:
             if arg in kwargs:
                 self.matchoutput(show_out, "%s: %s" %
                                  (arg.title(), kwargs[arg]), show_cmd)
             else:
                 self.matchclean(show_out, arg.title(), show_cmd)
+
+        # Specifying chassis will put the machine inside a rack, so we can't use
+        # matchclean() if the rack was not specified explicitly
+        if "rack" in kwargs:
+            self.matchoutput(show_out, "Rack: %s" % kwargs["rack"], show_cmd)
 
         if memory:
             self.matchoutput(show_out, "Memory: %d MB" % memory, show_cmd)

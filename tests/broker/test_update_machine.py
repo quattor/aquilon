@@ -26,8 +26,7 @@ from brokertest import TestBrokerCommand
 
 
 class TestUpdateMachine(TestBrokerCommand):
-
-    def testupdateut3c1n3(self):
+    def test_100_updateut3c1n3(self):
         self.noouttest(["update", "machine", "--machine", "ut3c1n3",
                         "--slot", "10", "--serial", "USN99C5553"])
 
@@ -61,20 +60,22 @@ class TestUpdateMachine(TestBrokerCommand):
                           r'create\("hardware/cpu/intel/xeon_2660"\),\s*'
                           r'create\("hardware/cpu/intel/xeon_2660"\s*\)\s*\);',
                           command)
+        self.matchoutput(out, '"chassis" = "ut3c1.aqd-unittest.ms.com";', command)
+        self.matchoutput(out, '"slot" = 10;', command)
 
     def testupdateut3c5n10(self):
         self.noouttest(["update", "machine",
                         "--hostname", "unittest02.one-nyp.ms.com",
-                        "--chassis", "ut3c5.aqd-unittest.ms.com", "--slot", "2"])
+                        "--chassis", "ut3c5.aqd-unittest.ms.com", "--slot", "20"])
 
     def testverifyshowslot(self):
-        command = "search machine --slot 2 --fullinfo"
+        command = "search machine --slot 20 --fullinfo"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Machine: ut3c5n10", command)
         self.matchoutput(out, "Model Type: blade", command)
 
     def testverifyshowchassisslot(self):
-        command = "search machine --chassis ut3c5.aqd-unittest.ms.com --slot 2 --fullinfo"
+        command = "search machine --chassis ut3c5.aqd-unittest.ms.com --slot 20 --fullinfo"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Machine: ut3c5n10", command)
         self.matchoutput(out, "Model Type: blade", command)
@@ -85,7 +86,7 @@ class TestUpdateMachine(TestBrokerCommand):
         self.matchoutput(out, "Machine: ut3c5n10", command)
         self.matchoutput(out, "Model Type: blade", command)
         self.matchoutput(out, "Chassis: ut3c5.aqd-unittest.ms.com", command)
-        self.matchoutput(out, "Slot: 2", command)
+        self.matchoutput(out, "Slot: 20", command)
         self.matchoutput(out, "Vendor: ibm Model: hs21-8853l5u", command)
         self.matchoutput(out, "Cpu: xeon_2660 x 2", command)
         self.matchoutput(out, "Memory: 8192 MB", command)
@@ -109,6 +110,8 @@ class TestUpdateMachine(TestBrokerCommand):
                           r'create\("hardware/cpu/intel/xeon_2660"\),\s*'
                           r'create\("hardware/cpu/intel/xeon_2660"\s*\)\s*\);',
                           command)
+        self.matchoutput(out, '"chassis" = "ut3c5.aqd-unittest.ms.com";', command)
+        self.matchoutput(out, '"slot" = 20;', command)
 
     def testupdateut3c1n4(self):
         self.noouttest(["update", "machine", "--machine", "ut3c1n4",

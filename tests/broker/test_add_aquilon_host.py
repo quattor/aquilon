@@ -28,8 +28,7 @@ from brokertest import TestBrokerCommand
 
 
 class TestAddAquilonHost(TestBrokerCommand):
-
-    def testaddunittest00(self):
+    def test_100_add_unittest00(self):
         ip = self.net["unknown0"].usable[2]
         self.dsdb_expect_add("unittest00.one-nyp.ms.com", ip, "eth0", ip.mac)
         self.noouttest(["add", "host", "--archetype", "aquilon",
@@ -38,7 +37,7 @@ class TestAddAquilonHost(TestBrokerCommand):
                         "--personality", "inventory", "--buildstatus", "blind"])
         self.dsdb_verify()
 
-    def testverifyaddunittest00(self):
+    def test_105_show_unittest00(self):
         command = "show host --hostname unittest00.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
@@ -52,8 +51,39 @@ class TestAddAquilonHost(TestBrokerCommand):
         self.matchoutput(out, "Domain: unittest", command)
         self.matchoutput(out, "Build Status: blind", command)
         self.matchoutput(out, "Advertise Status: False", command)
+        self.matchoutput(out, "Build Status: blind", command)
 
-    def testaddunittest12(self):
+    def test_105_show_unittest00_proto(self):
+        command = ["show", "host", "--hostname=unittest00.one-nyp.ms.com",
+                   "--format=proto"]
+        out = self.commandtest(command)
+        hostlist = self.parse_hostlist_msg(out, expect=1)
+        host = hostlist.hosts[0]
+        self.failUnlessEqual(host.hostname, 'unittest00')
+        self.failUnlessEqual(host.personality.name, 'inventory')
+        self.failUnlessEqual(host.personality.archetype.name, 'aquilon')
+        self.failUnlessEqual(host.fqdn, 'unittest00.one-nyp.ms.com')
+        self.failUnlessEqual(host.mac, self.net["unknown0"].usable[2].mac)
+        self.failUnlessEqual(host.ip, str(self.net["unknown0"].usable[2]))
+        self.failUnlessEqual(host.archetype.name, 'aquilon')
+        self.failUnlessEqual(host.dns_domain, 'one-nyp.ms.com')
+        self.failUnlessEqual(host.domain.name, 'unittest')
+        self.failUnlessEqual(host.status, 'blind')
+        self.failUnlessEqual(host.machine.name, 'ut3c1n3')
+        self.failUnlessEqual(host.sysloc, 'ut.ny.na')
+        self.failUnlessEqual(host.type, 'host')
+        self.failUnlessEqual(len(host.resources), 0)
+        self.failUnlessEqual(len(host.services_used), 0)
+        self.failUnlessEqual(len(host.services_provided), 0)
+        self.failUnlessEqual(host.operating_system.archetype.name, 'aquilon')
+        self.failUnlessEqual(host.operating_system.name,
+                             self.config.get("archetype_aquilon",
+                                             "default_osname"))
+        self.failUnlessEqual(host.operating_system.version,
+                             self.config.get("archetype_aquilon",
+                                             "default_osversion"))
+
+    def test_110_add_unittest12(self):
         ip = self.net["unknown0"].usable[7]
         self.dsdb_expect_add("unittest12.aqd-unittest.ms.com", ip, "eth0",
                              ip.mac)
@@ -63,7 +93,7 @@ class TestAddAquilonHost(TestBrokerCommand):
                         "--machine", "ut3s01p1a", "--domain", "unittest"])
         self.dsdb_verify()
 
-    def testverifyaddunittest12(self):
+    def test_115_show_unittest12(self):
         command = "show host --hostname unittest12.aqd-unittest.ms.com"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
@@ -77,7 +107,7 @@ class TestAddAquilonHost(TestBrokerCommand):
         self.matchoutput(out, "Domain: unittest", command)
         self.matchoutput(out, "Build Status: blind", command)
 
-    def testaddunittest13(self):
+    def test_120_add_unittest13(self):
         ip = self.net["unknown0"].usable[8]
         self.dsdb_expect_add("unittest13.aqd-unittest.ms.com", ip, "eth0",
                              ip.mac)
@@ -88,7 +118,7 @@ class TestAddAquilonHost(TestBrokerCommand):
                         "--personality", "compileserver"])
         self.dsdb_verify()
 
-    def testverifyaddunittest13(self):
+    def test_125_show_unittest13(self):
         command = "show host --hostname unittest13.aqd-unittest.ms.com"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
@@ -102,7 +132,7 @@ class TestAddAquilonHost(TestBrokerCommand):
         self.matchoutput(out, "Domain: unittest", command)
         self.matchoutput(out, "Build Status: blind", command)
 
-    def testaddunittest20bad(self):
+    def test_130_add_unittest20_bad(self):
         ip = self.net["zebra_vip"].usable[2]
         command = ["add", "host", "--archetype", "aquilon",
                    "--hostname", "unittest20.aqd-unittest.ms.com",
@@ -113,7 +143,7 @@ class TestAddAquilonHost(TestBrokerCommand):
         self.matchoutput(out, "Machine unittest20.aqd-unittest.ms.com does not "
                          "have an interface named eth2.", command)
 
-    def testaddunittest20e1(self):
+    def test_131_add_unittest20_e1(self):
         # Add the transit before the host to verify that the reverse DNS entry
         # will get fixed up
         ip = self.net["zebra_eth1"].usable[0]
@@ -125,7 +155,7 @@ class TestAddAquilonHost(TestBrokerCommand):
         self.noouttest(command)
         self.dsdb_verify()
 
-    def testaddunittest20good(self):
+    def test_132_add_unittest20_good(self):
         ip = self.net["zebra_vip"].usable[2]
         eth1_ip = self.net["zebra_eth1"].usable[0]
         self.dsdb_expect_add("unittest20.aqd-unittest.ms.com", ip, "le0")
@@ -139,7 +169,7 @@ class TestAddAquilonHost(TestBrokerCommand):
                         "--personality", "compileserver"])
         self.dsdb_verify()
 
-    def testverifyunittest20(self):
+    def test_135_show_unittest20(self):
         ip = self.net["zebra_vip"].usable[2]
         eth0_ip = self.net["zebra_eth0"].usable[0]
         eth1_ip = self.net["zebra_eth1"].usable[0]
@@ -158,7 +188,7 @@ class TestAddAquilonHost(TestBrokerCommand):
                          "Provides: unittest20-e1.aqd-unittest.ms.com [%s]" % eth1_ip,
                          command)
 
-    def testverifyunittest20proto(self):
+    def test_135_show_unittest20_proto(self):
         ip = self.net["zebra_vip"].usable[2]
         eth0_ip = self.net["zebra_eth0"].usable[0]
         eth1_ip = self.net["zebra_eth1"].usable[0]
@@ -182,7 +212,7 @@ class TestAddAquilonHost(TestBrokerCommand):
                         ", ".join(["%s %s" % (res.type, res.name)
                                    for res in host.resources]))
 
-    def testverifyunittest20hostname(self):
+    def test_135_verify_unittest20_service(self):
         ip = self.net["zebra_vip"].usable[2]
         command = ["show", "service", "address", "--name", "hostname",
                    "--hostname", "unittest20.aqd-unittest.ms.com"]
@@ -194,7 +224,7 @@ class TestAddAquilonHost(TestBrokerCommand):
                          command)
         self.matchoutput(out, "Interfaces: eth0, eth1", command)
 
-    def testverifyunittest20e1(self):
+    def test_135_verify_unittest20_e1(self):
         command = ["show", "address",
                    "--fqdn", "unittest20-e1.aqd-unittest.ms.com"]
         out = self.commandtest(command)
@@ -205,7 +235,7 @@ class TestAddAquilonHost(TestBrokerCommand):
         self.matchoutput(out, "Reverse PTR: unittest20.aqd-unittest.ms.com",
                          command)
 
-    def testaddunittest21(self):
+    def test_140_add_unittest21(self):
         ip = self.net["zebra_eth0"].usable[1]
         self.dsdb_expect_add("unittest21.aqd-unittest.ms.com", ip, "bond0")
         self.noouttest(["add", "host", "--archetype", "aquilon",
@@ -215,7 +245,7 @@ class TestAddAquilonHost(TestBrokerCommand):
                         "--personality", "compileserver"])
         self.dsdb_verify()
 
-    def testverifyunittest21network(self):
+    def test_145_verify_unittest21_network(self):
         net = self.net["zebra_eth0"]
         ip = net.usable[1]
         command = ["show", "network", "--ip", net.ip, "--format", "proto"]
@@ -241,7 +271,7 @@ class TestAddAquilonHost(TestBrokerCommand):
         self.failUnless(seen,
                         "%s is missing from network protobuf output" % ip)
 
-    def testaddunittest22(self):
+    def test_150_add_unittest22(self):
         ip = self.net["zebra_eth0"].usable[2]
         self.dsdb_expect_add("unittest22.aqd-unittest.ms.com", ip, "br0")
         self.noouttest(["add", "host", "--archetype", "aquilon",
@@ -251,7 +281,7 @@ class TestAddAquilonHost(TestBrokerCommand):
                         "--personality", "compileserver"])
         self.dsdb_verify()
 
-    def testverifyunittest22network(self):
+    def test_155_verify_unittest22_network(self):
         net = self.net["zebra_eth0"]
         ip = net.usable[2]
         command = ["show", "network", "--ip", net.ip, "--format", "proto"]
@@ -277,7 +307,7 @@ class TestAddAquilonHost(TestBrokerCommand):
         self.failUnless(seen,
                         "%s is missing from network protobuf output" % ip)
 
-    def testaddunittest23(self):
+    def test_160_add_unittest23(self):
         ip = self.net["vpls"].usable[1]
         self.dsdb_expect_add("unittest23.aqd-unittest.ms.com", ip, "eth0",
                              ip.mac)
@@ -288,7 +318,7 @@ class TestAddAquilonHost(TestBrokerCommand):
                         "--personality", "compileserver"])
         self.dsdb_verify()
 
-    def testaddunittest24(self):
+    def test_161_add_unittest24(self):
         ip = self.net["vpls"].usable[2]
         self.dsdb_expect_add("unittest24.aqd-unittest.ms.com", ip, "eth0",
                              ip.mac)
@@ -299,7 +329,7 @@ class TestAddAquilonHost(TestBrokerCommand):
                         "--personality", "compileserver"])
         self.dsdb_verify()
 
-    def testaddunittest25(self):
+    def test_162_add_unittest25(self):
         ip = self.net["unknown0"].usable[20]
         self.dsdb_expect_add("unittest25.aqd-unittest.ms.com", ip, "eth0",
                              ip.mac)
@@ -310,7 +340,7 @@ class TestAddAquilonHost(TestBrokerCommand):
                         "--personality", "compileserver"])
         self.dsdb_verify()
 
-    def testaddunittest26(self):
+    def test_163_add_unittest26(self):
         ip = self.net["unknown0"].usable[23]
         self.dsdb_expect_add("unittest26.aqd-unittest.ms.com", ip, "eth0",
                              ip.mac)

@@ -26,37 +26,46 @@ from brokertest import TestBrokerCommand
 
 
 class TestDelChassis(TestBrokerCommand):
-
-    def testdelut3c5(self):
+    def test_100_del_ut3c5(self):
         self.dsdb_expect_delete(self.net["unknown0"].usable[6])
         command = "del chassis --chassis ut3c5.aqd-unittest.ms.com"
         self.noouttest(command.split(" "))
         self.dsdb_verify()
 
-    def testverifydelut3c5(self):
+    def test_105_verify_ut3c5(self):
         command = "show chassis --chassis ut3c5.aqd-unittest.ms.com"
         self.notfoundtest(command.split(" "))
 
-    def testdelut3c1(self):
+    def test_106_del_ut3c5_again(self):
+        command = ["del_chassis", "--chassis", "ut3c5.aqd-unittest.ms.com"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out,
+                         "DnsRecord ut3c5.aqd-unittest.ms.com, "
+                         "DNS environment internal not found.",
+                         command)
+
+    def test_110_del_ut3c1(self):
         command = "del chassis --chassis ut3c1.aqd-unittest.ms.com"
         self.noouttest(command.split(" "))
 
-    def testverifydelut3c1(self):
+    def test_115_verify_ut3c1(self):
         command = "show chassis --chassis ut3c1.aqd-unittest.ms.com"
         self.notfoundtest(command.split(" "))
 
-    def testdelut9chassis(self):
+    def test_120_del_ut9_chassis(self):
         for i in range(1, 6):
             self.dsdb_expect_delete(self.net["ut9_chassis"].usable[i])
             command = "del chassis --chassis ut9c%d.aqd-unittest.ms.com" % i
             self.noouttest(command.split(" "))
         self.dsdb_verify()
 
-    def testverifydelut9chassis(self):
+    def test_125_verify_ut9_chassis(self):
         for i in range(1, 6):
             command = "show chassis --chassis ut9c%d.aqd-unittest.ms.com" % i
             self.notfoundtest(command.split(" "))
 
+    def test_130_del_np3c5(self):
+        self.noouttest(["del_chassis", "--chassis", "np3c5.one-nyp.ms.com"])
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelChassis)

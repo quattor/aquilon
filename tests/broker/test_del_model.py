@@ -35,6 +35,10 @@ class TestDelModel(TestBrokerCommand):
         command = "show model --model uttorswitch"
         self.notfoundtest(command.split(" "))
 
+    def test_106_del_uttorswitch_again(self):
+        command = "del model --model uttorswitch --vendor hp"
+        self.notfoundtest(command.split(" "))
+
     def test_110_del_utblade(self):
         command = "del model --model utblade --vendor aurora_vendor"
         self.noouttest(command.split(" "))
@@ -59,14 +63,17 @@ class TestDelModel(TestBrokerCommand):
         command = "show model --model utmedium"
         self.notfoundtest(command.split(" "))
 
-    def test_150_del_utlarge(self):
+    def test_140_del_utlarge(self):
         command = ["del_model", "--model=utlarge", "--vendor=utvendor"]
         self.noouttest(command)
 
-    def test_130_delutva(self):
+    def test_150_delutva(self):
         command = ["del_model", "--model=utva", "--vendor=utvendor"]
         self.noouttest(command)
 
+    def test_160_del_utrackmount(self):
+        self.noouttest(["del_model", "--vendor", "utvendor",
+                        "--model", "utrackmount"])
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelModel)
