@@ -15,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from sqlalchemy import Integer, Column, ForeignKey
+from sqlalchemy import Column, ForeignKey
 from sqlalchemy.orm import relation, backref
 
 from aquilon.aqdb.model import Resource, AddressAssignment, ARecord
@@ -28,11 +28,11 @@ class ServiceAddress(Resource):
     __tablename__ = _TN
     _class_label = 'Service Address'
 
-    resource_id = Column(Integer, ForeignKey(Resource.id), primary_key=True)
+    resource_id = Column(ForeignKey(Resource.id), primary_key=True)
 
     # This is not normalized, as we could get the same object by
     # self.assignments[0].dns_records[0], but this way it's faster
-    dns_record_id = Column(Integer, ForeignKey(ARecord.dns_record_id),
+    dns_record_id = Column(ForeignKey(ARecord.dns_record_id),
                            nullable=False, index=True)
 
     assignments = relation(AddressAssignment, cascade="all, delete-orphan",

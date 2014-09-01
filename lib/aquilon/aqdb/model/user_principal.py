@@ -36,10 +36,9 @@ class UserPrincipal(Base):
 
     name = Column(String(32), nullable=False)
 
-    realm_id = Column(Integer, ForeignKey(Realm.id), nullable=False)
+    realm_id = Column(ForeignKey(Realm.id), nullable=False)
 
-    role_id = Column(Integer, ForeignKey(Role.id, ondelete='CASCADE'),
-                     nullable=False)
+    role_id = Column(ForeignKey(Role.id, ondelete='CASCADE'), nullable=False)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))

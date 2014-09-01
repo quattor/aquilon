@@ -78,8 +78,7 @@ class PortGroup(Base):
 
     id = Column(Integer, Sequence("%s_id_seq" % _PG), primary_key=True)
 
-    network_id = Column(Integer, ForeignKey(Network.id,
-                                            ondelete='CASCADE'),
+    network_id = Column(ForeignKey(Network.id, ondelete='CASCADE'),
                         nullable=False, unique=True)
 
     # VLAN or VxLAN ID
@@ -115,13 +114,11 @@ class __ObservedVlan(Base):
     """ reports the observance of a vlan/network on a switch """
     __tablename__ = _TN
 
-    network_device_id = Column(Integer,
-                               ForeignKey(NetworkDevice.hardware_entity_id,
+    network_device_id = Column(ForeignKey(NetworkDevice.hardware_entity_id,
                                           ondelete='CASCADE'),
                                nullable=False)
 
-    port_group_id = Column(Integer, ForeignKey(PortGroup.id,
-                                               ondelete='CASCADE'),
+    port_group_id = Column(ForeignKey(PortGroup.id, ondelete='CASCADE'),
                            nullable=False, index=True)
 
     __table_args__ = (PrimaryKeyConstraint(network_device_id, port_group_id),)

@@ -40,10 +40,9 @@ class Fqdn(Base):
 
     name = Column(AqStr(63), nullable=False)
 
-    dns_domain_id = Column(Integer, ForeignKey(DnsDomain.id),
-                           nullable=False)
+    dns_domain_id = Column(ForeignKey(DnsDomain.id), nullable=False)
 
-    dns_environment_id = Column(Integer, ForeignKey(DnsEnvironment.id),
+    dns_environment_id = Column(ForeignKey(DnsEnvironment.id),
                                 nullable=False, index=True)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,

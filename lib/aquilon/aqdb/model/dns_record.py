@@ -55,7 +55,7 @@ class DnsRecord(Base):
 
     id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
 
-    fqdn_id = Column(Integer, ForeignKey(Fqdn.id), nullable=False, index=True)
+    fqdn_id = Column(ForeignKey(Fqdn.id), nullable=False, index=True)
 
     dns_record_type = Column(AqStr(32), nullable=False)
 

@@ -16,7 +16,7 @@
 # limitations under the License.
 """ DnsRecords are higher level constructs which can provide services """
 
-from sqlalchemy import Integer, Column, ForeignKey
+from sqlalchemy import Column, ForeignKey
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import DnsRecord
@@ -34,8 +34,7 @@ class ReservedName(DnsRecord):
     __mapper_args__ = {'polymorphic_identity': _TN}
     _class_label = 'Reserved Name'
 
-    dns_record_id = Column(Integer, ForeignKey(DnsRecord.id,
-                                               ondelete='CASCADE'),
+    dns_record_id = Column(ForeignKey(DnsRecord.id, ondelete='CASCADE'),
                            primary_key=True)
 
     __table_args__ = ({'info': {'unique_fields': ['fqdn'],

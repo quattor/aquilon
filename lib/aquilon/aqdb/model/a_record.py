@@ -16,7 +16,7 @@
 # limitations under the License.
 """ Representation of DNS A records """
 
-from sqlalchemy import Integer, Column, ForeignKey, Index
+from sqlalchemy import Column, ForeignKey, Index
 from sqlalchemy.orm import (relation, backref, mapper, deferred, object_session,
                             validates)
 from sqlalchemy.orm.attributes import instance_state
@@ -33,17 +33,15 @@ class ARecord(DnsRecord):
     __tablename__ = _TN
     _class_label = 'DNS Record'
 
-    dns_record_id = Column(Integer, ForeignKey(DnsRecord.id,
-                                               ondelete='CASCADE'),
+    dns_record_id = Column(ForeignKey(DnsRecord.id, ondelete='CASCADE'),
                            primary_key=True)
 
     ip = Column(IPV4, nullable=False)
 
-    network_id = Column(Integer, ForeignKey(Network.id), nullable=False)
+    network_id = Column(ForeignKey(Network.id), nullable=False)
 
-    reverse_ptr_id = Column(Integer, ForeignKey(Fqdn.id,
-                                                name='%s_reverse_ptr_fk' % _TN,
-                                                ondelete='SET NULL'),
+    reverse_ptr_id = Column(ForeignKey(Fqdn.id, name='%s_reverse_ptr_fk' % _TN,
+                                       ondelete='SET NULL'),
                             nullable=True, index=True)
 
     network = relation(Network, innerjoin=True,
@@ -146,8 +144,8 @@ class DynamicStub(ARecord):
     __mapper_args__ = {'polymorphic_identity': _DTN}
     _class_label = 'Dynamic Stub'
 
-    dns_record_id = Column(Integer, ForeignKey(ARecord.dns_record_id,
-                                               ondelete='CASCADE'),
+    dns_record_id = Column(ForeignKey(ARecord.dns_record_id,
+                                      ondelete='CASCADE'),
                            primary_key=True)
 
     __table_args__ = ({'info': {'unique_fields': ['fqdn'],

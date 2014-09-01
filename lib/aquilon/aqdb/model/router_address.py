@@ -17,7 +17,7 @@
 
 from datetime import datetime
 
-from sqlalchemy import (Column, Integer, String, DateTime, ForeignKey,
+from sqlalchemy import (Column, String, DateTime, ForeignKey,
                         PrimaryKeyConstraint)
 from sqlalchemy.orm import relation, deferred, backref
 from sqlalchemy.sql import and_
@@ -41,15 +41,14 @@ class RouterAddress(Base):
 
     # With the introduction of network environments, the IP alone is not enough
     # to uniquely identify the router
-    network_id = Column(Integer, ForeignKey(Network.id), nullable=False)
+    network_id = Column(ForeignKey(Network.id), nullable=False)
 
-    dns_environment_id = Column(Integer, ForeignKey(DnsEnvironment.id),
+    dns_environment_id = Column(ForeignKey(DnsEnvironment.id),
                                 nullable=False, index=True)
 
     # We don't want deleting a location to disrupt networking, so use "ON DELETE
     # SET NULL" here
-    location_id = Column(Integer, ForeignKey(Location.id,
-                                             ondelete="SET NULL"),
+    location_id = Column(ForeignKey(Location.id, ondelete="SET NULL"),
                          nullable=True, index=True)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,

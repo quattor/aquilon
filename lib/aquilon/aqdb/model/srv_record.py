@@ -35,15 +35,14 @@ class SrvRecord(DnsRecord):
     __tablename__ = _TN
     _class_label = "SRV Record"
 
-    dns_record_id = Column(Integer, ForeignKey(DnsRecord.id,
-                                               ondelete='CASCADE'),
+    dns_record_id = Column(ForeignKey(DnsRecord.id, ondelete='CASCADE'),
                            primary_key=True)
 
     priority = Column(Integer, nullable=False)
     weight = Column(Integer, nullable=False)
     port = Column(Integer, nullable=False)
 
-    target_id = Column(Integer, ForeignKey(Fqdn.id, name='%s_target_fk' % _TN),
+    target_id = Column(ForeignKey(Fqdn.id, name='%s_target_fk' % _TN),
                        nullable=False, index=True)
 
     target = relation(Fqdn, innerjoin=True, foreign_keys=target_id,

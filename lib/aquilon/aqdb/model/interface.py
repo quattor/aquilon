@@ -68,7 +68,7 @@ class Interface(DeviceLinkMixin, Base):
 
     mac = Column(AqMac(name="%s_mac_ck" % _TN), nullable=True, unique=True)
 
-    model_id = Column(Integer, ForeignKey(Model.id), nullable=False, index=True)
+    model_id = Column(ForeignKey(Model.id), nullable=False, index=True)
 
     # PXE boot control. Does not affect how the OS configures the interface.
     # FIXME: move to PublicInterface
@@ -80,24 +80,22 @@ class Interface(DeviceLinkMixin, Base):
 
     interface_type = Column(AqStr(32), nullable=False)
 
-    hardware_entity_id = Column(Integer, ForeignKey(HardwareEntity.id,
-                                                    ondelete='CASCADE'),
+    hardware_entity_id = Column(ForeignKey(HardwareEntity.id,
+                                           ondelete='CASCADE'),
                                 nullable=False)
 
     # The FK is deferrable to make it easier to copy the DB between different
     # backends. The broker itself does not make use of deferred constraints.
-    master_id = Column(Integer, ForeignKey(id, name='%s_master_fk' % _TN,
-                                           ondelete='CASCADE',
-                                           deferrable=True,
-                                           initially='IMMEDIATE'),
+    master_id = Column(ForeignKey(id, name='%s_master_fk' % _TN,
+                                  ondelete='CASCADE', deferrable=True,
+                                  initially='IMMEDIATE'),
                        nullable=True, index=True)
 
     # FIXME: move to PublicInterface
     port_group_name = Column(AqStr(32), nullable=True)
 
     # FIXME: move to PublicInterface
-    port_group_id = Column(Integer, ForeignKey('port_group.id'),
-                           nullable=True)
+    port_group_id = Column(ForeignKey('port_group.id'), nullable=True)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
@@ -260,11 +258,9 @@ class VlanInterface(Interface):
 
     # The FK is deferrable to make it easier to copy the DB between different
     # backends. The broker itself does not make use of deferred constraints.
-    parent_id = Column(Integer, ForeignKey(Interface.id,
-                                           name='%s_parent_fk' % _TN,
-                                           ondelete='CASCADE',
-                                           deferrable=True,
-                                           initially='IMMEDIATE'))
+    parent_id = Column(ForeignKey(Interface.id, name='%s_parent_fk' % _TN,
+                                  ondelete='CASCADE', deferrable=True,
+                                  initially='IMMEDIATE'))
 
     vlan_id = Column(Integer)
 

@@ -30,15 +30,14 @@ class ChassisSlot(Base):
 
     __tablename__ = _TN
 
-    chassis_id = Column(Integer, ForeignKey(Chassis.hardware_entity_id,
-                                            ondelete='CASCADE'),
+    chassis_id = Column(ForeignKey(Chassis.hardware_entity_id,
+                                   ondelete='CASCADE'),
                         nullable=False)
 
     slot_number = Column(Integer, nullable=False, autoincrement=False)
 
     # TODO: Code constraint that these are Blades...
-    machine_id = Column(Integer, ForeignKey(Machine.machine_id),
-                        nullable=True)
+    machine_id = Column(ForeignKey(Machine.machine_id), nullable=True)
     # TODO: need a unique key against this, but what if it takes 2 slots?
     # TODO: remove delete-orphan?
     chassis = relation(Chassis, innerjoin=True,

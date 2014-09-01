@@ -15,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from sqlalchemy import Integer, String, Column, ForeignKey
+from sqlalchemy import String, Column, ForeignKey
 
 from aquilon.aqdb.model import (Resource, Intervention)
 
@@ -27,9 +27,7 @@ class RebootSchedule(Resource):
     """ RebootSchedule resources """
     __tablename__ = _TN_RES
 
-    id = Column(Integer, ForeignKey(Resource.id,
-                                    ondelete='CASCADE'),
-                primary_key=True)
+    id = Column(ForeignKey(Resource.id, ondelete='CASCADE'), primary_key=True)
 
     # str representation of time '00:00'
     time = Column(String(5), nullable=True)
@@ -49,8 +47,7 @@ class RebootIntervention(Intervention):
     # Hack: Should probably just increase the length of the field to
     # support the string reboot_intervention.
 
-    id = Column(Integer, ForeignKey(Intervention.id,
-                                    ondelete='CASCADE'),
+    id = Column(ForeignKey(Intervention.id, ondelete='CASCADE'),
                 primary_key=True)
 
     __table_args__ = ({'info': {'unique_fields': ['name', 'holder']}},)

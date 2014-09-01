@@ -62,8 +62,7 @@ paramholder = ParameterHolder.__table__  # pylint: disable=C0103
 class PersonalityParameter(ParameterHolder):
     """ Association of parameters with Personality """
 
-    personality_id = Column(Integer, ForeignKey(Personality.id,
-                                                ondelete='CASCADE'),
+    personality_id = Column(ForeignKey(Personality.id, ondelete='CASCADE'),
                             nullable=True, unique=True)
 
     personality = relation(Personality,
@@ -94,8 +93,7 @@ class Parameter(Base):
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
     comments = deferred(Column(String(255), nullable=True))
-    holder_id = Column(Integer, ForeignKey(ParameterHolder.id,
-                                           ondelete='CASCADE'),
+    holder_id = Column(ForeignKey(ParameterHolder.id, ondelete='CASCADE'),
                        nullable=False, index=True)
 
     holder = relation(ParameterHolder, innerjoin=True,

@@ -15,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from sqlalchemy import Integer, Column, ForeignKey
+from sqlalchemy import Column, ForeignKey
 
 from aquilon.aqdb.model import Resource, ResourceHolder
 from aquilon.aqdb.column_types.aqstr import AqStr
@@ -33,8 +33,7 @@ class ResourceGroup(Resource):
     __tablename__ = _TN
     _class_label = 'Resource Group'
 
-    id = Column(Integer, ForeignKey(Resource.id,
-                                    ondelete='CASCADE'),
+    id = Column(ForeignKey(Resource.id, ondelete='CASCADE'),
                 primary_key=True)
 
     # declare any per-group attributes here (none for now)
@@ -59,8 +58,7 @@ class ResourceGroup(Resource):
 class BundleResource(ResourceHolder):
     '''Allow ResourceGroups to hold other types of resource. '''
 
-    resourcegroup_id = Column(Integer,
-                              ForeignKey(ResourceGroup.id,
+    resourcegroup_id = Column(ForeignKey(ResourceGroup.id,
                                          name='%s_bundle_fk' % _RESHOLDER,
                                          ondelete='CASCADE',
                                          deferrable=True,

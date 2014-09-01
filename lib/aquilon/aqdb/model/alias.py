@@ -16,7 +16,7 @@
 # limitations under the License.
 """ DNS CNAME records """
 
-from sqlalchemy import Column, Integer, ForeignKey
+from sqlalchemy import Column, ForeignKey
 from sqlalchemy.orm import relation, backref, column_property
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.sql import select, func
@@ -31,12 +31,10 @@ class Alias(DnsRecord):
     """ Aliases a.k.a. CNAMES """
     __tablename__ = _TN
 
-    dns_record_id = Column(Integer, ForeignKey(DnsRecord.id,
-                                               ondelete='CASCADE'),
+    dns_record_id = Column(ForeignKey(DnsRecord.id, ondelete='CASCADE'),
                            primary_key=True)
 
-    target_id = Column(Integer, ForeignKey(Fqdn.id,
-                                           name='%s_target_fk' % _TN),
+    target_id = Column(ForeignKey(Fqdn.id, name='%s_target_fk' % _TN),
                        nullable=False, index=True)
 
     target = relation(Fqdn, innerjoin=True, foreign_keys=target_id,

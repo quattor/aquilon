@@ -38,8 +38,7 @@ class PersonalityClusterInfo(Base):
 
     id = Column(Integer, Sequence("%s_id_seq" % _PCIABV), primary_key=True)
 
-    personality_id = Column(Integer, ForeignKey(Personality.id,
-                                                ondelete="CASCADE"),
+    personality_id = Column(ForeignKey(Personality.id, ondelete="CASCADE"),
                             nullable=False)
     cluster_type = Column(AqStr(16), nullable=False)
 
@@ -63,8 +62,7 @@ class PersonalityESXClusterInfo(PersonalityClusterInfo):
     __tablename__ = _PECI
     __mapper_args__ = {'polymorphic_identity': 'esx'}
 
-    personality_cluster_info_id = Column(Integer,
-                                         ForeignKey(PersonalityClusterInfo.id,
+    personality_cluster_info_id = Column(ForeignKey(PersonalityClusterInfo.id,
                                                     ondelete="CASCADE"),
                                          primary_key=True)
 

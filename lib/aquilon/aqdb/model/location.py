@@ -43,8 +43,8 @@ class Location(Base):
 
     fullname = Column(String(255), nullable=False)
 
-    default_dns_domain_id = Column(Integer, ForeignKey(DnsDomain.id,
-                                                       ondelete='SET NULL'),
+    default_dns_domain_id = Column(ForeignKey(DnsDomain.id,
+                                              ondelete='SET NULL'),
                                    nullable=True)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
@@ -229,14 +229,12 @@ class Location(Base):
 class LocationLink(Base):
     __tablename__ = 'location_link'
 
-    child_id = Column(Integer, ForeignKey(Location.id,
-                                          name='location_link_child_fk',
-                                          ondelete='CASCADE'),
+    child_id = Column(ForeignKey(Location.id, name='location_link_child_fk',
+                                 ondelete='CASCADE'),
                       nullable=False)
 
-    parent_id = Column(Integer, ForeignKey(Location.id,
-                                           name='location_link_parent_fk',
-                                           ondelete='CASCADE'),
+    parent_id = Column(ForeignKey(Location.id, name='location_link_parent_fk',
+                                  ondelete='CASCADE'),
                        nullable=False, index=True)
 
     # Distance from the given parent. 1 means direct child.

@@ -43,7 +43,7 @@ class ServiceInstance(Base):
     _class_label = 'Service Instance'
 
     id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
-    service_id = Column(Integer, ForeignKey(Service.id), nullable=False)
+    service_id = Column(ForeignKey(Service.id), nullable=False)
     name = Column(AqStr(64), nullable=False)
     max_clients = Column(Integer, nullable=True)  # null means 'no limit'
     creation_date = deferred(Column(DateTime, default=datetime.now,
@@ -214,11 +214,10 @@ class __BuildItem(Base):
     """ Identifies the service_instance bindings of a machine. """
     __tablename__ = 'build_item'
 
-    host_id = Column(Integer, ForeignKey(Host.hardware_entity_id,
-                                         ondelete='CASCADE'),
+    host_id = Column(ForeignKey(Host.hardware_entity_id, ondelete='CASCADE'),
                      nullable=False)
 
-    service_instance_id = Column(Integer, ForeignKey(ServiceInstance.id),
+    service_instance_id = Column(ForeignKey(ServiceInstance.id),
                                  nullable=False, index=True)
 
     __table_args__ = (PrimaryKeyConstraint(host_id, service_instance_id),)

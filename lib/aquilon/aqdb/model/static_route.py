@@ -38,12 +38,10 @@ class StaticRoute(Base):
 
     # TODO: should the gateway be a foreign key to RouterAddress?
     gateway_ip = Column(IPV4, nullable=False)
-    network_id = Column(Integer, ForeignKey(Network.id,
-                                            ondelete="CASCADE"),
+    network_id = Column(ForeignKey(Network.id, ondelete="CASCADE"),
                         nullable=False)
 
-    personality_id = Column(Integer, ForeignKey('personality.id',
-                                                ondelete='CASCADE'),
+    personality_id = Column(ForeignKey('personality.id', ondelete='CASCADE'),
                             nullable=True)
 
     # It is possible and useful to cover multiple real networks with one routing

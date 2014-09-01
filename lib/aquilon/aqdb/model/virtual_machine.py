@@ -15,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from sqlalchemy import Integer, Column, ForeignKey
+from sqlalchemy import Column, ForeignKey
 from sqlalchemy.orm import relation, backref
 
 from aquilon.aqdb.model import Resource, Machine
@@ -28,13 +28,11 @@ class VirtualMachine(Resource):
     __tablename__ = _TN
     _class_label = 'Virtual Machine'
 
-    resource_id = Column(Integer, ForeignKey(Resource.id,
-                                             ondelete='CASCADE'),
+    resource_id = Column(ForeignKey(Resource.id, ondelete='CASCADE'),
                          primary_key=True)
 
     # A machine can be assigned to one holder only.
-    machine_id = Column(Integer, ForeignKey(Machine.machine_id,
-                                            ondelete='CASCADE'),
+    machine_id = Column(ForeignKey(Machine.machine_id, ondelete='CASCADE'),
                         nullable=False, unique=True)
 
     machine = relation(Machine, innerjoin=True,

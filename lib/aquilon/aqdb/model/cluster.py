@@ -87,14 +87,12 @@ class Cluster(Base):
     name = Column(AqStr(64), nullable=False, unique=True)
 
     # Lack of cascaded deletion is intentional on personality
-    personality_id = Column(Integer, ForeignKey(Personality.id), nullable=False,
+    personality_id = Column(ForeignKey(Personality.id), nullable=False,
                             index=True)
 
-    branch_id = Column(Integer, ForeignKey(Branch.id), nullable=False,
-                       index=True)
+    branch_id = Column(ForeignKey(Branch.id), nullable=False, index=True)
 
-    sandbox_author_id = Column(Integer,
-                               ForeignKey(User.id,
+    sandbox_author_id = Column(ForeignKey(User.id,
                                           name='%s_sandbox_author_fk' % _TN,
                                           ondelete="SET NULL"),
                                nullable=True)
@@ -117,8 +115,7 @@ class Cluster(Base):
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
-    status_id = Column(Integer, ForeignKey(ClusterLifecycle.id),
-                       nullable=False)
+    status_id = Column(ForeignKey(ClusterLifecycle.id), nullable=False)
     comments = Column(String(255))
 
     status = relation(ClusterLifecycle, innerjoin=True)
@@ -287,8 +284,7 @@ class ComputeCluster(Cluster):
     __tablename__ = 'compute_cluster'
     _class_label = 'Compute Cluster'
 
-    id = Column(Integer, ForeignKey(Cluster.id, ondelete='CASCADE'),
-                primary_key=True)
+    id = Column(ForeignKey(Cluster.id, ondelete='CASCADE'), primary_key=True)
 
     __table_args__ = ({'info': {'unique_fields': ['name']}},)
     __mapper_args__ = {'polymorphic_identity': 'compute'}
@@ -301,8 +297,7 @@ class StorageCluster(Cluster):
     __tablename__ = 'storage_cluster'
     _class_label = 'Storage Cluster'
 
-    id = Column(Integer, ForeignKey(Cluster.id, ondelete='CASCADE'),
-                primary_key=True)
+    id = Column(ForeignKey(Cluster.id, ondelete='CASCADE'), primary_key=True)
 
     __table_args__ = ({'info': {'unique_fields': ['name']}},)
     __mapper_args__ = {'polymorphic_identity': 'storage'}
@@ -326,14 +321,13 @@ class EsxCluster(Cluster):
     __tablename__ = _ETN
     _class_label = 'ESX Cluster'
 
-    esx_cluster_id = Column(Integer, ForeignKey(Cluster.id, ondelete='CASCADE'),
+    esx_cluster_id = Column(ForeignKey(Cluster.id, ondelete='CASCADE'),
                             primary_key=True)
 
     # Memory capacity override
     memory_capacity = Column(Integer, nullable=True)
 
-    network_device_id = Column(Integer,
-                               ForeignKey(NetworkDevice.hardware_entity_id),
+    network_device_id = Column(ForeignKey(NetworkDevice.hardware_entity_id),
                                nullable=True, index=True)
 
     network_device = relation(NetworkDevice, lazy=False,
@@ -491,11 +485,10 @@ class HostClusterMember(Base):
     """ Association table for clusters and their member hosts """
     __tablename__ = _HCM
 
-    cluster_id = Column(Integer, ForeignKey(Cluster.id, ondelete='CASCADE'),
+    cluster_id = Column(ForeignKey(Cluster.id, ondelete='CASCADE'),
                         nullable=False)
 
-    host_id = Column(Integer, ForeignKey(Host.hardware_entity_id,
-                                         ondelete='CASCADE'),
+    host_id = Column(ForeignKey(Host.hardware_entity_id, ondelete='CASCADE'),
                      nullable=False, unique=True)
 
     node_index = Column(Integer, nullable=False)
@@ -525,11 +518,10 @@ Host.cluster = association_proxy('_cluster', 'cluster')
 class __ClusterAllowedPersonality(Base):
     __tablename__ = _CAP
 
-    cluster_id = Column(Integer, ForeignKey(Cluster.id, ondelete='CASCADE'),
+    cluster_id = Column(ForeignKey(Cluster.id, ondelete='CASCADE'),
                         nullable=False)
 
-    personality_id = Column(Integer, ForeignKey(Personality.id,
-                                                ondelete='CASCADE'),
+    personality_id = Column(ForeignKey(Personality.id, ondelete='CASCADE'),
                             nullable=False, index=True)
 
     __table_args__ = (PrimaryKeyConstraint(cluster_id, personality_id),)
@@ -545,10 +537,10 @@ class __ClusterServiceBinding(Base):
     __tablename__ = _CSB
     _class_label = 'Cluster Service Binding'
 
-    cluster_id = Column(Integer, ForeignKey(Cluster.id, ondelete='CASCADE'),
+    cluster_id = Column(ForeignKey(Cluster.id, ondelete='CASCADE'),
                         nullable=False)
 
-    service_instance_id = Column(Integer, ForeignKey(ServiceInstance.id),
+    service_instance_id = Column(ForeignKey(ServiceInstance.id),
                                  nullable=False, index=True)
 
     __table_args__ = (PrimaryKeyConstraint(cluster_id, service_instance_id),)

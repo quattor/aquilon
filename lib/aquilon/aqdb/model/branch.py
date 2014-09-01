@@ -53,7 +53,7 @@ class Branch(Base):
     autosync = Column(Boolean(name="%s_autosync_ck" % _TN), nullable=False,
                       default=True)
 
-    owner_id = Column(Integer, ForeignKey(UserPrincipal.id), nullable=False)
+    owner_id = Column(ForeignKey(UserPrincipal.id), nullable=False)
 
     formats = Column(AqStr(16), nullable=True)
 
@@ -85,11 +85,11 @@ class Domain(Branch):
     """
     __tablename__ = _DMN
 
-    domain_id = Column(Integer, ForeignKey(Branch.id, ondelete='CASCADE'),
+    domain_id = Column(ForeignKey(Branch.id, ondelete='CASCADE'),
                        primary_key=True)
 
-    tracked_branch_id = Column(Integer, ForeignKey(Branch.id,
-                                                   name='%s_tracked_branch_fk' % _DMN),
+    tracked_branch_id = Column(ForeignKey(Branch.id,
+                                          name='%s_tracked_branch_fk' % _DMN),
                                nullable=True, index=True)
     rollback_commit = Column(AqStr(40), nullable=True)
 
@@ -117,7 +117,7 @@ class Sandbox(Branch):
     """
     __tablename__ = _SBX
 
-    sandbox_id = Column(Integer, ForeignKey(Branch.id, ondelete='CASCADE'),
+    sandbox_id = Column(ForeignKey(Branch.id, ondelete='CASCADE'),
                         primary_key=True)
 
     base_commit = Column(AqStr(40), nullable=False)

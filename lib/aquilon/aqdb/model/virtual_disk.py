@@ -18,7 +18,7 @@
 
 import re
 
-from sqlalchemy import Column, Boolean, Integer, ForeignKey
+from sqlalchemy import Column, Boolean, ForeignKey
 from sqlalchemy.orm import relation, column_property, validates
 from sqlalchemy.sql import select, func
 
@@ -33,8 +33,8 @@ class VirtualDisk(Disk):
     snapshotable = Column(Boolean(name="%s_snapshotable_ck" % _TN),
                           nullable=True)
 
-    backing_store_id = Column(Integer, ForeignKey(Resource.id,
-                                                  name='%s_backing_store_fk' % _TN),
+    backing_store_id = Column(ForeignKey(Resource.id,
+                                         name='%s_backing_store_fk' % _TN),
                               nullable=True, index=True)
 
     backing_store = relation(Resource)

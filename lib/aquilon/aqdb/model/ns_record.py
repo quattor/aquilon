@@ -17,7 +17,7 @@
 """ NS Records tell us what name servers to use for a given Dns Domain """
 from datetime import datetime
 
-from sqlalchemy import (Column, Integer, DateTime, String, ForeignKey,
+from sqlalchemy import (Column, DateTime, String, ForeignKey,
                         PrimaryKeyConstraint)
 from sqlalchemy.orm import relation, backref, deferred
 
@@ -31,10 +31,9 @@ class NsRecord(Base):
     __tablename__ = _TN
     _class_label = "Name Server"
 
-    a_record_id = Column(Integer, ForeignKey(ARecord.dns_record_id),
-                         nullable=False)
+    a_record_id = Column(ForeignKey(ARecord.dns_record_id), nullable=False)
 
-    dns_domain_id = Column(Integer, ForeignKey(DnsDomain.id), nullable=False)
+    dns_domain_id = Column(ForeignKey(DnsDomain.id), nullable=False)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))

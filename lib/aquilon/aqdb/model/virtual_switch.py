@@ -52,11 +52,9 @@ class VirtualSwitch(Base):
 class __VSwitchClusterAssignment(Base):
     __tablename__ = _VSC
 
-    virtual_switch_id = Column(Integer, ForeignKey(VirtualSwitch.id),
-                               nullable=False)
+    virtual_switch_id = Column(ForeignKey(VirtualSwitch.id), nullable=False)
 
-    cluster_id = Column(Integer, ForeignKey(Cluster.id,
-                                            ondelete='CASCADE'),
+    cluster_id = Column(ForeignKey(Cluster.id, ondelete='CASCADE'),
                         nullable=False, unique=True)
 
     __table_args__ = (PrimaryKeyConstraint(virtual_switch_id, cluster_id),)
@@ -72,11 +70,9 @@ VirtualSwitch.clusters = relation(Cluster,
 class __VSwitchHostAssignment(Base):
     __tablename__ = _VSH
 
-    virtual_switch_id = Column(Integer, ForeignKey(VirtualSwitch.id),
-                               nullable=False)
+    virtual_switch_id = Column(ForeignKey(VirtualSwitch.id), nullable=False)
 
-    host_id = Column(Integer, ForeignKey(Host.hardware_entity_id,
-                                         ondelete='CASCADE'),
+    host_id = Column(ForeignKey(Host.hardware_entity_id, ondelete='CASCADE'),
                      nullable=False, unique=True)
 
     __table_args__ = (PrimaryKeyConstraint(virtual_switch_id, host_id),)
@@ -91,12 +87,10 @@ VirtualSwitch.hosts = relation(Host,
 class __VSwitchPGAssignment(Base):
     __tablename__ = _VSP
 
-    virtual_switch_id = Column(Integer, ForeignKey(VirtualSwitch.id,
-                                                   ondelete='CASCADE'),
+    virtual_switch_id = Column(ForeignKey(VirtualSwitch.id, ondelete='CASCADE'),
                                nullable=False)
 
-    port_group_id = Column(Integer, ForeignKey(PortGroup.network_id,
-                                               ondelete='CASCADE'),
+    port_group_id = Column(ForeignKey(PortGroup.network_id, ondelete='CASCADE'),
                            nullable=False, index=True)
 
     __table_args__ = (PrimaryKeyConstraint(virtual_switch_id, port_group_id),)

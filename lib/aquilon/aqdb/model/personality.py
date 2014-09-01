@@ -45,8 +45,7 @@ class Personality(Base):
 
     id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
     name = Column(AqStr(64), nullable=False)
-    archetype_id = Column(Integer, ForeignKey(Archetype.id),
-                          nullable=False)
+    archetype_id = Column(ForeignKey(Archetype.id), nullable=False)
 
     cluster_required = Column(Boolean(name="%s_clstr_req_ck" % _TN),
                               default=False, nullable=False)
@@ -54,12 +53,10 @@ class Personality(Base):
     config_override = Column(Boolean(name="%s_config_override_ck" % _TN),
                              default=False, nullable=False)
 
-    owner_eon_id = Column(Integer, ForeignKey(Grn.eon_id,
-                                              name='%s_owner_grn_fk' % _TN),
+    owner_eon_id = Column(ForeignKey(Grn.eon_id, name='%s_owner_grn_fk' % _TN),
                           nullable=False)
 
-    host_environment_id = Column(Integer, ForeignKey(HostEnvironment.id),
-                                 nullable=False)
+    host_environment_id = Column(ForeignKey(HostEnvironment.id), nullable=False)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
@@ -97,11 +94,10 @@ class Personality(Base):
 class PersonalityGrnMap(Base):
     __tablename__ = _PGN
 
-    personality_id = Column(Integer, ForeignKey(Personality.id,
-                                                ondelete='CASCADE'),
+    personality_id = Column(ForeignKey(Personality.id, ondelete='CASCADE'),
                             nullable=False)
 
-    eon_id = Column(Integer, ForeignKey(Grn.eon_id), nullable=False)
+    eon_id = Column(ForeignKey(Grn.eon_id), nullable=False)
 
     target = Column(AqStr(32), nullable=False)
 
@@ -124,12 +120,10 @@ class PersonalityGrnMap(Base):
 class __PersonalityRootUser(Base):
     __tablename__ = _PRU
 
-    personality_id = Column(Integer, ForeignKey(Personality.id,
-                                                ondelete='CASCADE'),
+    personality_id = Column(ForeignKey(Personality.id, ondelete='CASCADE'),
                             nullable=False)
 
-    user_id = Column(Integer, ForeignKey(User.id, ondelete='CASCADE'),
-                     nullable=False)
+    user_id = Column(ForeignKey(User.id, ondelete='CASCADE'), nullable=False)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
@@ -142,12 +136,10 @@ Personality.root_users = relation(User, secondary=__PersonalityRootUser.__table_
 class __PersonalityRootNetGroup(Base):
     __tablename__ = _PRNG
 
-    personality_id = Column(Integer, ForeignKey(Personality.id,
-                                                ondelete='CASCADE'),
+    personality_id = Column(ForeignKey(Personality.id, ondelete='CASCADE'),
                             nullable=False)
 
-    netgroup_id = Column(Integer, ForeignKey(NetGroupWhiteList.id,
-                                             ondelete='CASCADE'),
+    netgroup_id = Column(ForeignKey(NetGroupWhiteList.id, ondelete='CASCADE'),
                          nullable=False)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,

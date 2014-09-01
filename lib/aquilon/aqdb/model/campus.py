@@ -16,7 +16,7 @@
 # limitations under the License.
 """ Campus is a subclass of Location """
 
-from sqlalchemy import Column, Integer, ForeignKey
+from sqlalchemy import Column, ForeignKey
 
 from aquilon.aqdb.model import Location, Country
 
@@ -30,7 +30,6 @@ class Campus(Location):
 
     valid_parents = [Country]
 
-    id = Column(Integer, ForeignKey(Location.id, ondelete='CASCADE'),
-                primary_key=True)
+    id = Column(ForeignKey(Location.id, ondelete='CASCADE'), primary_key=True)
 
     __table_args__ = ({'info': {'unique_fields': ['name']}},)

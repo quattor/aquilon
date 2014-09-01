@@ -68,8 +68,7 @@ class ResourceHolder(Base):
 
 
 class HostResource(ResourceHolder):
-    host_id = Column(Integer, ForeignKey(Host.hardware_entity_id,
-                                         ondelete='CASCADE'),
+    host_id = Column(ForeignKey(Host.hardware_entity_id, ondelete='CASCADE'),
                      nullable=True, unique=True)
 
     # This is a one-to-one relation, so we need uselist=False on the backref
@@ -89,8 +88,7 @@ class HostResource(ResourceHolder):
 
 
 class ClusterResource(ResourceHolder):
-    cluster_id = Column(Integer, ForeignKey(Cluster.id,
-                                            ondelete='CASCADE'),
+    cluster_id = Column(ForeignKey(Cluster.id, ondelete='CASCADE'),
                         nullable=True, unique=True)
 
     # This is a one-to-one relation, so we need uselist=False on the backref
@@ -127,8 +125,7 @@ class Resource(Base):
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
     comments = Column(String(255), nullable=True)
-    holder_id = Column(Integer, ForeignKey(ResourceHolder.id,
-                                           ondelete='CASCADE'),
+    holder_id = Column(ForeignKey(ResourceHolder.id, ondelete='CASCADE'),
                        nullable=False, index=True)
 
     holder = relation(ResourceHolder, innerjoin=True,

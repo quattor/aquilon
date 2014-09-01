@@ -16,7 +16,7 @@
 # limitations under the License.
 """ Rack is a subclass of Location """
 
-from sqlalchemy import Column, Integer, ForeignKey
+from sqlalchemy import Column, ForeignKey
 from sqlalchemy.orm import validates
 
 from aquilon.aqdb.column_types import AqStr
@@ -31,8 +31,7 @@ class Rack(Location):
 
     valid_parents = [Building, Room, Bunker]
 
-    id = Column(Integer, ForeignKey(Location.id, ondelete='CASCADE'),
-                primary_key=True)
+    id = Column(ForeignKey(Location.id, ondelete='CASCADE'), primary_key=True)
 
     rack_row = Column(AqStr(4), nullable=True)
     rack_column = Column(AqStr(4), nullable=True)

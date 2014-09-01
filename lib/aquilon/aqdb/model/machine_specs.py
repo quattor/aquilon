@@ -39,10 +39,9 @@ class MachineSpecs(Base):
 
     id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
 
-    model_id = Column(Integer, ForeignKey(Model.id), nullable=False,
-                      unique=True)
+    model_id = Column(ForeignKey(Model.id), nullable=False, unique=True)
 
-    cpu_id = Column(Integer, ForeignKey(Cpu.id), nullable=False)
+    cpu_id = Column(ForeignKey(Cpu.id), nullable=False)
 
     cpu_quantity = Column(Integer, nullable=False)  # Constrain to below 512?
 
@@ -53,8 +52,7 @@ class MachineSpecs(Base):
     controller_type = Column(Enum(64, controller_types), nullable=False)
 
     nic_count = Column(Integer, nullable=False, default=2)
-    nic_model_id = Column(Integer, ForeignKey(Model.id,
-                                              name='%s_nic_model_fk' % _TN),
+    nic_model_id = Column(ForeignKey(Model.id, name='%s_nic_model_fk' % _TN),
                           nullable=False)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,

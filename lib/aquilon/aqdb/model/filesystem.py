@@ -27,8 +27,7 @@ class Filesystem(Resource):
     __tablename__ = _TN
     __mapper_args__ = {'polymorphic_identity': 'filesystem'}
 
-    id = Column(Integer, ForeignKey(Resource.id, ondelete='CASCADE'),
-                primary_key=True)
+    id = Column(ForeignKey(Resource.id, ondelete='CASCADE'), primary_key=True)
 
     blockdev = Column(String(255), nullable=False)
     fstype = Column(String(32), nullable=False)

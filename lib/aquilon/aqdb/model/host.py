@@ -18,7 +18,7 @@
 
 from datetime import datetime
 
-from sqlalchemy import (Integer, Boolean, DateTime, String, Column, ForeignKey,
+from sqlalchemy import (Boolean, DateTime, String, Column, ForeignKey,
                         PrimaryKeyConstraint)
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import relation, backref, deferred
@@ -59,28 +59,23 @@ class Host(Base):
     __tablename__ = _TN
     _instance_label = 'fqdn'
 
-    hardware_entity_id = Column(Integer, ForeignKey(HardwareEntity.id),
-                                primary_key=True)
+    hardware_entity_id = Column(ForeignKey(HardwareEntity.id), primary_key=True)
 
-    branch_id = Column(Integer, ForeignKey(Branch.id), nullable=False,
-                       index=True)
+    branch_id = Column(ForeignKey(Branch.id), nullable=False, index=True)
 
-    sandbox_author_id = Column(Integer,
-                               ForeignKey(User.id,
+    sandbox_author_id = Column(ForeignKey(User.id,
                                           name='%s_sandbox_author_fk' % _TN,
                                           ondelete="SET NULL"),
                                nullable=True)
 
-    personality_id = Column(Integer, ForeignKey(Personality.id), nullable=False,
+    personality_id = Column(ForeignKey(Personality.id), nullable=False,
                             index=True)
 
-    lifecycle_id = Column(Integer, ForeignKey(HostLifecycle.id), nullable=False)
+    lifecycle_id = Column(ForeignKey(HostLifecycle.id), nullable=False)
 
-    operating_system_id = Column(Integer, ForeignKey(OperatingSystem.id),
-                                 nullable=False)
+    operating_system_id = Column(ForeignKey(OperatingSystem.id), nullable=False)
 
-    owner_eon_id = Column(Integer, ForeignKey(Grn.eon_id,
-                                              name='%s_owner_grn_fk' % _TN),
+    owner_eon_id = Column(ForeignKey(Grn.eon_id, name='%s_owner_grn_fk' % _TN),
                           nullable=True)
 
     # something to retain the advertised status of the host
@@ -163,11 +158,10 @@ class Host(Base):
 class HostGrnMap(Base):
     __tablename__ = _HOSTGRN
 
-    host_id = Column(Integer, ForeignKey(Host.hardware_entity_id,
-                                         ondelete="CASCADE"),
+    host_id = Column(ForeignKey(Host.hardware_entity_id, ondelete="CASCADE"),
                      nullable=False)
 
-    eon_id = Column(Integer, ForeignKey(Grn.eon_id), nullable=False)
+    eon_id = Column(ForeignKey(Grn.eon_id), nullable=False)
 
     target = Column(AqStr(32), nullable=False)
 

@@ -139,19 +139,15 @@ class FeatureLink(Base):
 
     id = Column(Integer, Sequence("%s_id_seq" % _LINK), primary_key=True)
 
-    feature_id = Column(Integer, ForeignKey(Feature.id),
-                        nullable=False)
+    feature_id = Column(ForeignKey(Feature.id), nullable=False)
 
-    model_id = Column(Integer, ForeignKey(Model.id,
-                                          ondelete='CASCADE'),
+    model_id = Column(ForeignKey(Model.id, ondelete='CASCADE'),
                       nullable=True, index=True)
 
-    archetype_id = Column(Integer, ForeignKey(Archetype.id,
-                                              ondelete='CASCADE'),
+    archetype_id = Column(ForeignKey(Archetype.id, ondelete='CASCADE'),
                           nullable=True, index=True)
 
-    personality_id = Column(Integer, ForeignKey(Personality.id,
-                                                ondelete='CASCADE'),
+    personality_id = Column(ForeignKey(Personality.id, ondelete='CASCADE'),
                             nullable=True, index=True)
 
     interface_name = Column(AqStr(32), nullable=True)
