@@ -156,7 +156,7 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
         basetime = datetime.now()
         command = ["make", "--archetype", "aquilon",
                    "--hostname", "unittest00.one-nyp.ms.com",
-                   "--buildstatus", "blind", "--personality", "compileserver",
+                   "--buildstatus", "build", "--personality", "compileserver",
                    "--osname", "linux", "--osversion", "5.0.1-x86_64"]
         (out, err) = self.successtest(command)
         self.matchoutput(err,
@@ -182,7 +182,7 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
     def testverifybuildstatus(self):
         command = "show host --hostname unittest00.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Build Status: blind", command)
+        self.matchoutput(out, "Build Status: build", command)
         self.matchoutput(out, "Advertise Status: False", command)
 
     def testverifybindautoafs(self):
@@ -207,18 +207,17 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
         host = hostlist.hosts[0]
         self.failUnlessEqual(host.hostname, 'unittest00')
         self.failUnlessEqual(host.personality.name, 'compileserver')
+        self.failUnlessEqual(host.personality.archetype.name, 'aquilon')
+        self.failUnlessEqual(host.archetype.name, 'aquilon')
         self.failUnlessEqual(host.fqdn, 'unittest00.one-nyp.ms.com')
         self.failUnlessEqual(host.mac, self.net["unknown0"].usable[2].mac)
         self.failUnlessEqual(host.ip, str(self.net["unknown0"].usable[2]))
-        self.failUnlessEqual(host.archetype.name, 'aquilon')
         self.failUnlessEqual(host.dns_domain, 'one-nyp.ms.com')
         self.failUnlessEqual(host.domain.name, 'unittest')
-        self.failUnlessEqual(host.status, 'blind')
+        self.failUnlessEqual(host.status, 'build')
         self.failUnlessEqual(host.machine.name, 'ut3c1n3')
         self.failUnlessEqual(host.sysloc, 'ut.ny.na')
         self.failUnlessEqual(host.type, 'host')
-        self.failUnlessEqual(host.personality.name, 'compileserver')
-        self.failUnlessEqual(host.personality.archetype.name, 'aquilon')
         services = set()
         for svc_msg in host.services_used:
             services.add("%s/%s" % (svc_msg.service, svc_msg.instance))

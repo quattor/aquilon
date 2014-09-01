@@ -303,7 +303,7 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
     def test_170_add_cardsmachine(self):
         net = self.net.allocate_network(self, "cards_net", 28, "unknown",
                                         "building", "cards")
-        self.create_machine("cardsmachine", "hs21-8853l5u", rack="cards1",
+        self.create_machine("cardsmachine", "utrackmount", rack="cards1",
                             eth0_mac=net.usable[0].mac)
 
     def test_171_host_prefix_no_domain(self):
@@ -553,14 +553,14 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
     def test_410_add_afsbynet(self):
         ip = self.net["netsvcmap"].usable[0]
         self.create_host("afs-by-net.aqd-unittest.ms.com", ip, "ut3c5n11",
-                         model="hs21-8853l5u", rack="ut3",
+                         model="hs21-8853l5u", chassis="ut3c5", slot=11,
                          personality="compileserver",
                          comments="For network based service mappings")
 
     def test_420_add_netmappers(self):
         ip = self.net["netperssvcmap"].usable[0]
         self.create_host("netmap-pers.aqd-unittest.ms.com", ip, "ut3c5n12",
-                         model="hs21-8853l5u", rack="ut3",
+                         model="hs21-8853l5u", chassis="ut3c5", slot=12,
                          personality="eaitools",
                          comments="For net/pers based service mappings")
 
@@ -569,7 +569,7 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
         eth1_ip = self.net["unknown1"].usable[34]
         ip = self.net["zebra_vip"].usable[3]
         self.create_host("infra1.aqd-unittest.ms.com", ip, "ut3c5n13",
-                         model="hs21-8853l5u", rack="ut3",
+                         model="utrackmount", chassis="ut3c5", slot=13,
                          interfaces=["eth0", "eth1"], zebra=True,
                          eth0_mac=eth0_ip.mac, eth0_ip=eth0_ip,
                          eth0_fqdn="infra1-e0.aqd-unittest.ms.com",
@@ -582,7 +582,7 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
         eth1_ip = self.net["unknown1"].usable[36]
         ip = self.net["zebra_vip"].usable[4]
         self.create_host("infra1.one-nyp.ms.com", ip, "np3c5n13",
-                         model="hs21-8853l5u", rack="np3",
+                         model="utrackmount", chassis="np3c5", slot=13,
                          interfaces=["eth0", "eth1"], zebra=True,
                          eth0_mac=eth0_ip.mac, eth0_ip=eth0_ip,
                          eth0_fqdn="infra1-e0.one-nyp.ms.com",
