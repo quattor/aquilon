@@ -21,12 +21,10 @@ from inspect import isclass
 from sqlalchemy.schema import CreateTable, Index, Table
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.ext.associationproxy import AssociationProxy, _lazy_collection
 from sqlalchemy.orm.session import Session, object_session
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from sqlalchemy.inspection import inspect
 
-from aquilon.utils import monkeypatch
 from aquilon.exceptions_ import InternalError, NotFoundException, ArgumentError
 
 
@@ -436,46 +434,3 @@ class SingleInstanceMixin(object):
                 raise InternalError("get_instance(): value must be None when "
                                     "called on a child class.")
         return session.query(cls).one()
-
-
-# WAY too much magic in AssociationProxy.  This bug and proposed patch is
-# listed in the second half of this message:
-# http://groups.google.com/group/sqlalchemy-devel/browse_thread/thread/973f4104007f6964/9a001201b3179c58
-# Basically, scalar assocation proxies are much more annoying without this
-# patch.  Accessing a null attribute normally returns None.  However, the AP
-# tries to proxy through the None.  This raises an exception when the AP
-# (in a scalar context) should just itself return None.
-@monkeypatch(AssociationProxy)
-def __get__(self, obj, class_):
-    if self.owning_class is None:
-        self.owning_class = class_ and class_ or type(obj)
-    if obj is None:
-        return self
-    elif self.scalar is None:
-        self.scalar = self._target_is_scalar()
-        if self.scalar:
-            self._initialize_scalar_accessors()
-
-    if self.scalar:
-        # Original line from 0.5.8
-        # proxy = self._new(self._lazy_collection(weakref.ref(obj)))
-        # setattr(obj, self.key, (id(obj), proxy))
-        # return proxy
-
-        target = getattr(obj, self.target_collection)
-        if target is None:
-            return None
-        else:
-            return self._scalar_get(target)
-    else:
-        try:
-            # If the owning instance is reborn (orm session resurrect,
-            # etc.), refresh the proxy cache.
-            creator_id, proxy = getattr(obj, self.key)
-            if id(obj) == creator_id:
-                return proxy
-        except AttributeError:
-            pass
-        proxy = self._new(_lazy_collection(obj, self.target_collection))
-        setattr(obj, self.key, (id(obj), proxy))
-        return proxy
