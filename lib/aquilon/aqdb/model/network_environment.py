@@ -18,8 +18,7 @@
 
 from datetime import datetime
 
-from sqlalchemy import (Column, Integer, DateTime, Sequence, String,
-                        ForeignKey, UniqueConstraint)
+from sqlalchemy import Column, Integer, DateTime, Sequence, String, ForeignKey
 from sqlalchemy.orm import deferred, relation
 
 from aquilon.exceptions_ import InternalError
@@ -28,7 +27,6 @@ from aquilon.aqdb.column_types.aqstr import AqStr
 from aquilon.config import Config
 
 _TN = "network_environment"
-_ABV = "net_env"
 
 _config = Config()
 
@@ -48,7 +46,7 @@ class NetworkEnvironment(Base):
     _class_label = 'Network Environment'
 
     id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
-    name = Column(AqStr(64), nullable=False)
+    name = Column(AqStr(64), nullable=False, unique=True)
 
     location_id = Column(Integer, ForeignKey(Location.id), nullable=True)
 
@@ -63,8 +61,6 @@ class NetworkEnvironment(Base):
     location = relation(Location)
 
     dns_environment = relation(DnsEnvironment, innerjoin=True)
-
-    __table_args__ = (UniqueConstraint(name, name='%s_name_uk' % _ABV),)
 
     @property
     def is_default(self):

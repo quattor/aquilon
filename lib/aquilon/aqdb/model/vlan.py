@@ -19,7 +19,7 @@
 from datetime import datetime
 
 from sqlalchemy import (Column, Integer, DateTime, ForeignKey, CheckConstraint,
-                        UniqueConstraint, PrimaryKeyConstraint, Index, Sequence)
+                        PrimaryKeyConstraint, Index, Sequence)
 from sqlalchemy.orm import relation, backref, deferred
 from sqlalchemy.sql import and_
 
@@ -42,14 +42,12 @@ class VlanInfo(Base):
     _instance_label = 'vlan_id'
 
     vlan_id = Column(Integer, primary_key=True, autoincrement=False)
-    port_group = Column(AqStr(32), nullable=False)
+    port_group = Column(AqStr(32), nullable=False, unique=True)
     vlan_type = Column(Enum(32, VLAN_TYPES), nullable=False)
 
-    __table_args__ = (UniqueConstraint(port_group,
-                                       name='%s_port_group_uk' % _VTN),
-                      CheckConstraint(and_(vlan_id >= 0,
+    __table_args__ = (CheckConstraint(and_(vlan_id >= 0,
                                            vlan_id < MAX_VLANS),
-                                      name='%s_vlan_id_ck' % _VTN))
+                                      name='%s_vlan_id_ck' % _VTN),)
 
     @classmethod
     def get_by_pg(cls, session, port_group, compel=InternalError):
@@ -84,7 +82,7 @@ class PortGroup(Base):
 
     network_id = Column(Integer, ForeignKey(Network.id,
                                             ondelete='CASCADE'),
-                        nullable=False)
+                        nullable=False, unique=True)
 
     # VLAN or VxLAN ID
     network_tag = Column(Integer, nullable=False)
@@ -95,8 +93,7 @@ class PortGroup(Base):
                                     nullable=False))
 
     __table_args__ = (Index("%s_usage_tag_idx" % _PG, usage, network_tag,
-                            oracle_compress=1),
-                      UniqueConstraint(network_id, name="%s_network_uk" % _PG))
+                            oracle_compress=1),)
 
     network = relation(Network, innerjoin=True,
                        backref=backref('port_group', uselist=False,

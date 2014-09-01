@@ -19,7 +19,7 @@
 from datetime import datetime
 
 from sqlalchemy import (Column, Integer, String, DateTime, Sequence, ForeignKey,
-                        UniqueConstraint, PrimaryKeyConstraint, Index)
+                        PrimaryKeyConstraint, Index)
 from sqlalchemy.orm import relation, backref, deferred
 
 from aquilon.aqdb.column_types import AqStr
@@ -37,7 +37,7 @@ class VirtualSwitch(Base):
 
     id = Column(Integer, Sequence('%s_seq' % _VS), primary_key=True)
 
-    name = Column(AqStr(63), nullable=False)
+    name = Column(AqStr(63), nullable=False, unique=True)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
@@ -46,8 +46,7 @@ class VirtualSwitch(Base):
     # snapshot_hw(), so it is not worth deferring it
     comments = Column(String(255), nullable=True)
 
-    __table_args__ = (UniqueConstraint(name, name='%s_name_uk' % _VS),
-                      {'info': {'unique_fields': ['name']}})
+    __table_args__ = {'info': {'unique_fields': ['name']}}
 
 
 class __VSwitchClusterAssignment(Base):
@@ -58,11 +57,9 @@ class __VSwitchClusterAssignment(Base):
 
     cluster_id = Column(Integer, ForeignKey(Cluster.id,
                                             ondelete='CASCADE'),
-                        nullable=False)
+                        nullable=False, unique=True)
 
-    __table_args__ = (PrimaryKeyConstraint(virtual_switch_id, cluster_id),
-                      UniqueConstraint(cluster_id,
-                                       name='%s_cluster_uk' % _VSC))
+    __table_args__ = (PrimaryKeyConstraint(virtual_switch_id, cluster_id),)
 
 VirtualSwitch.clusters = relation(Cluster,
                                   secondary=__VSwitchClusterAssignment.__table__,
@@ -80,10 +77,9 @@ class __VSwitchHostAssignment(Base):
 
     host_id = Column(Integer, ForeignKey(Host.hardware_entity_id,
                                          ondelete='CASCADE'),
-                     nullable=False)
+                     nullable=False, unique=True)
 
-    __table_args__ = (PrimaryKeyConstraint(virtual_switch_id, host_id),
-                      UniqueConstraint(host_id, name='%s_host_uk' % _VSH))
+    __table_args__ = (PrimaryKeyConstraint(virtual_switch_id, host_id),)
 
 VirtualSwitch.hosts = relation(Host,
                                secondary=__VSwitchHostAssignment.__table__,

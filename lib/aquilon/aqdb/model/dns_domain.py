@@ -19,8 +19,7 @@
 from datetime import datetime
 import re
 
-from sqlalchemy import (Column, Integer, DateTime, Sequence, String, Boolean,
-                        UniqueConstraint)
+from sqlalchemy import Column, Integer, DateTime, Sequence, String, Boolean
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import deferred
 
@@ -61,7 +60,7 @@ class DnsDomain(Base):
     _name_check = re.compile('^[a-zA-Z]([-a-zA-Z0-9]*[a-zA-Z0-9])?$')
 
     id = Column(Integer, Sequence('%s_id_seq' % (_TN)), primary_key=True)
-    name = Column(AqStr(32), nullable=False)
+    name = Column(AqStr(32), nullable=False, unique=True)
 
     restricted = Column(Boolean(name="%s_restricted_ck" % _TN),
                         nullable=False, default=False)
@@ -74,8 +73,6 @@ class DnsDomain(Base):
 
     # The relation is defined in dns_map.py
     mapped_locations = association_proxy('dns_maps', 'location')
-
-    __table_args__ = (UniqueConstraint(name, name='%s_uk' % _TN),)
 
     @classmethod
     def check_label(cls, label):  # TODO: database check constraint for length

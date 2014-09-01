@@ -16,10 +16,11 @@
 # limitations under the License.
 """ Enumerates whitelisted netgroups """
 
-from sqlalchemy import Column, Integer, Sequence, UniqueConstraint
+from sqlalchemy import Column, Integer, Sequence
 
 from aquilon.aqdb.model import Base
 from aquilon.aqdb.column_types.aqstr import AqStr
+
 _TN = 'netgroup_whitelist'
 
 
@@ -31,10 +32,6 @@ class NetGroupWhiteList(Base):
     _class_label = "Netgroup"
 
     id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
-    name = Column(AqStr(64), nullable=False)
+    name = Column(AqStr(64), nullable=False, unique=True)
 
-ng_whitelist = NetGroupWhiteList.__table__  # pylint: disable=C0103
-
-ng_whitelist.primary_key.name = '%s_pk' % _TN
-ng_whitelist.append_constraint(UniqueConstraint('name', name='%s_uk' % _TN))
-ng_whitelist.info['unique_fields'] = ['name']
+    __table_args__ = ({'info': {'unique_fields': ['name']}},)

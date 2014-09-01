@@ -72,8 +72,7 @@ class Personality(Base):
 
     host_environment = relation(HostEnvironment, innerjoin=True)
 
-    __table_args__ = (UniqueConstraint(archetype_id, name,
-                                       name='%s_arch_name_uk' % _TN),)
+    __table_args__ = (UniqueConstraint(archetype_id, name),)
 
     @property
     def is_cluster(self):

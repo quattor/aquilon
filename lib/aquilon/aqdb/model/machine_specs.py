@@ -21,8 +21,7 @@
 
 from datetime import datetime
 
-from sqlalchemy import (Column, Integer, DateTime, Sequence, String, ForeignKey,
-                        UniqueConstraint)
+from sqlalchemy import Column, Integer, DateTime, Sequence, String, ForeignKey
 from sqlalchemy.orm import relation, backref, deferred, validates
 
 from aquilon.aqdb.column_types import Enum
@@ -40,7 +39,8 @@ class MachineSpecs(Base):
 
     id = Column(Integer, Sequence('mach_specs_id_seq'), primary_key=True)
 
-    model_id = Column(Integer, ForeignKey(Model.id), nullable=False)
+    model_id = Column(Integer, ForeignKey(Model.id), nullable=False,
+                      unique=True)
 
     cpu_id = Column(Integer, ForeignKey(Cpu.id), nullable=False)
 
@@ -66,9 +66,6 @@ class MachineSpecs(Base):
                      backref=backref('machine_specs', uselist=False))
     cpu = relation(Cpu, innerjoin=True)
     nic_model = relation(Model, foreign_keys=nic_model_id)
-
-    __table_args__ = (UniqueConstraint(model_id,
-                                       name='machine_specs_model_uk'),)
 
     @validates('disk_type')
     def validate_disk(self, key, value):  # pylint: disable=W0613

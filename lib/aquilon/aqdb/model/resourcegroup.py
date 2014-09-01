@@ -15,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from sqlalchemy import Integer, Column, ForeignKey, UniqueConstraint
+from sqlalchemy import Integer, Column, ForeignKey
 
 from aquilon.aqdb.model import Resource, ResourceHolder
 from aquilon.aqdb.column_types.aqstr import AqStr
@@ -68,7 +68,7 @@ class BundleResource(ResourceHolder):
                                          deferrable=True,
                                          initially='IMMEDIATE',
                                          use_alter=True),
-                              nullable=True)
+                              nullable=True, unique=True)
 
     # This is a one-to-one relation, so we need uselist=False on the backref
     resourcegroup = relation(ResourceGroup, lazy='subquery',
@@ -76,9 +76,6 @@ class BundleResource(ResourceHolder):
                              backref=backref('resholder',
                                              cascade='all, delete-orphan',
                                              uselist=False))
-
-    __extra_table_args__ = (UniqueConstraint(resourcegroup_id,
-                                             name="resholder_rg_uk"),)
 
     # Note: the polymorphic identity of ResourceGroup and BundleResource should
     # be the same, because plenary paths sometimes use one or the other,

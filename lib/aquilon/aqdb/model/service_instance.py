@@ -53,7 +53,7 @@ class ServiceInstance(Base):
 
     service = relation(Service, lazy=False, innerjoin=True, backref='instances')
 
-    __table_args__ = (UniqueConstraint(service_id, name, name='svc_inst_uk'),)
+    __table_args__ = (UniqueConstraint(service_id, name),)
 
     def __format__(self, format_spec):
         instance = "%s/%s" % (self.service.name, self.name)

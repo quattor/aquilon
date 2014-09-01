@@ -22,8 +22,7 @@
 from datetime import datetime
 
 from sqlalchemy import (Column, Integer, DateTime, Boolean, ForeignKey,
-                        UniqueConstraint, PrimaryKeyConstraint)
-
+                        PrimaryKeyConstraint)
 from sqlalchemy.orm import (relation, backref, deferred, validates,
                             object_session)
 
@@ -185,13 +184,12 @@ class __MetaClusterMember(Base):
 
     cluster_id = Column(Integer, ForeignKey(Cluster.id,
                                             ondelete='CASCADE'),
-                        nullable=False)
+                        nullable=False, unique=True)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
 
-    __table_args__ = (PrimaryKeyConstraint(metacluster_id, cluster_id),
-                      UniqueConstraint(cluster_id, name='%s_uk' % _MCM))
+    __table_args__ = (PrimaryKeyConstraint(metacluster_id, cluster_id),)
 
 MetaCluster.members = relation(Cluster,
                                secondary=__MetaClusterMember.__table__,

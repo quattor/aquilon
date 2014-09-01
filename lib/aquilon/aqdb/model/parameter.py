@@ -19,7 +19,7 @@
 from datetime import datetime
 
 from sqlalchemy import (Column, Integer, DateTime, Sequence, String, ForeignKey,
-                        UniqueConstraint, Index)
+                        Index)
 from sqlalchemy.orm import relation, backref, deferred
 
 from aquilon.aqdb.column_types import JSONEncodedDict, MutationDict
@@ -63,17 +63,14 @@ paramholder = ParameterHolder.__table__  # pylint: disable=C0103
 class PersonalityParameter(ParameterHolder):
     """ Association of parameters with Personality """
 
-    personality_id = Column(Integer,
-                            ForeignKey(Personality.id,
-                                       ondelete='CASCADE'),
-                            nullable=True)
+    personality_id = Column(Integer, ForeignKey(Personality.id,
+                                                ondelete='CASCADE'),
+                            nullable=True, unique=True)
 
     personality = relation(Personality,
                            backref=backref('paramholder', uselist=False,
                                            cascade='all, delete-orphan'))
 
-    __extra_table_args__ = (UniqueConstraint(personality_id,
-                                             name='param_holder_persona_uk'),)
     __mapper_args__ = {'polymorphic_identity': 'personality'}
 
     @property

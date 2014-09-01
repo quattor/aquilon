@@ -18,8 +18,8 @@
 
 from datetime import datetime
 
-from sqlalchemy import (Column, Integer, DateTime, Sequence, String,
-                        Boolean, Text, ForeignKey, UniqueConstraint, Index)
+from sqlalchemy import (Column, Integer, DateTime, Sequence, String, Boolean,
+                        Text, ForeignKey, Index)
 from sqlalchemy.orm import (relation, backref, deferred)
 
 from aquilon.aqdb.model import Base, Archetype, Feature
@@ -67,16 +67,12 @@ class ArchetypeParamDef(ParamDefHolder):
 
     __mapper_args__ = {'polymorphic_identity': 'archetype'}
 
-    archetype_id = Column(Integer,
-                          ForeignKey(Archetype.id, ondelete='CASCADE'),
-                          nullable=True)
+    archetype_id = Column(Integer, ForeignKey(Archetype.id, ondelete='CASCADE'),
+                          nullable=True, unique=True)
 
     archetype = relation(Archetype,
                          backref=backref('paramdef_holder', uselist=False,
                                          cascade='all, delete-orphan'))
-
-    __extra_table_args__ = (UniqueConstraint(archetype_id,
-                                             name='param_def_holder_archetype_uk'),)
 
     @property
     def holder_name(self):
@@ -90,16 +86,13 @@ class ArchetypeParamDef(ParamDefHolder):
 class FeatureParamDef(ParamDefHolder):
     """ valid parameter paths which can be associated with this feature """
 
-    feature_id = Column(Integer,
-                        ForeignKey(Feature.id, ondelete='CASCADE'),
-                        nullable=True)
+    feature_id = Column(Integer, ForeignKey(Feature.id, ondelete='CASCADE'),
+                        nullable=True, unique=True)
 
     feature = relation(Feature,
                        backref=backref('paramdef_holder', uselist=False,
                                        cascade='all, delete-orphan'))
 
-    __extra_table_args__ = (UniqueConstraint(feature_id,
-                                             name='param_def_holder_feature_uk'),)
     __mapper_args__ = {'polymorphic_identity': 'feature'}
 
     @property

@@ -31,8 +31,7 @@
 from datetime import datetime
 
 from sqlalchemy import (Column, Integer, Sequence, String, DateTime, Boolean,
-                        ForeignKey, UniqueConstraint, PrimaryKeyConstraint,
-                        Index)
+                        ForeignKey, PrimaryKeyConstraint, Index)
 from sqlalchemy.orm import relation, backref, deferred, aliased, object_session
 from sqlalchemy.sql import or_
 from sqlalchemy.util import memoized_property
@@ -54,15 +53,13 @@ class Service(Base):
     __tablename__ = _TN
 
     id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
-    name = Column(AqStr(64), nullable=False)
+    name = Column(AqStr(64), nullable=False, unique=True)
     max_clients = Column(Integer, nullable=True)  # 0 means 'no limit'
     need_client_list = Column(Boolean(name='%s_need_client_list_ck' % _TN),
                               nullable=False, default=True)
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
     comments = Column(String(255), nullable=True)
-
-    __table_args__ = (UniqueConstraint(name, name='svc_name_uk'),)
 
     @memoized_property
     def cluster_aligned_personalities(self):

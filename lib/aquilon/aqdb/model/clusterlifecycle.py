@@ -17,8 +17,7 @@
 
 from datetime import datetime
 
-from sqlalchemy import (Column, Enum, Integer, DateTime, Sequence,
-                        UniqueConstraint, event)
+from sqlalchemy import Column, Enum, Integer, DateTime, Sequence, event
 from sqlalchemy.orm import deferred
 from sqlalchemy.orm.session import object_session
 
@@ -44,11 +43,10 @@ class ClusterLifecycle(StateEngine, Base):
     _class_label = 'Cluster Lifecycle'
 
     id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
-    name = Column(Enum(32, transitions.keys()), nullable=False)
+    name = Column(Enum(32, transitions.keys()), nullable=False, unique=True)
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
 
-    __table_args__ = (UniqueConstraint(name, name='%s_uk' % _TN),)
     __mapper_args__ = {'polymorphic_on': name}
 
     def __repr__(self):

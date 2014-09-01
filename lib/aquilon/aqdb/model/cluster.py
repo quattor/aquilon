@@ -87,7 +87,7 @@ class Cluster(Base):
 
     id = Column(Integer, Sequence('%s_seq' % _TN), primary_key=True)
     cluster_type = Column(AqStr(16), nullable=False)
-    name = Column(AqStr(64), nullable=False)
+    name = Column(AqStr(64), nullable=False, unique=True)
 
     # Lack of cascaded deletion is intentional on personality
     personality_id = Column(Integer, ForeignKey(Personality.id), nullable=False)
@@ -130,8 +130,7 @@ class Cluster(Base):
 
     hosts = association_proxy('_hosts', 'host', creator=_hcm_host_creator)
 
-    __table_args__ = (UniqueConstraint(name, name='cluster_uk'),
-                      Index("cluster_branch_idx", branch_id),
+    __table_args__ = (Index("cluster_branch_idx", branch_id),
                       Index("cluster_prsnlty_idx", personality_id),
                       Index("cluster_location_idx", location_constraint_id))
     __mapper_args__ = {'polymorphic_on': cluster_type}
@@ -507,7 +506,7 @@ class HostClusterMember(Base):
 
     host_id = Column(Integer, ForeignKey(Host.hardware_entity_id,
                                          ondelete='CASCADE'),
-                     nullable=False)
+                     nullable=False, unique=True)
 
     node_index = Column(Integer, nullable=False)
 
@@ -526,10 +525,8 @@ class HostClusterMember(Base):
                                     cascade='all, delete-orphan'))
 
     __table_args__ = (PrimaryKeyConstraint(cluster_id, host_id),
-                      UniqueConstraint(host_id,
-                                       name='host_cluster_member_host_uk'),
                       UniqueConstraint(cluster_id, node_index,
-                                       name='host_cluster_member_node_uk'))
+                                       name='%s_node_uk' % _HCM),)
 
 hcm = HostClusterMember.__table__  # pylint: disable=C0103
 hcm.info['unique_fields'] = ['cluster', 'host']

@@ -19,7 +19,7 @@
 from datetime import datetime
 
 from sqlalchemy import (Integer, Boolean, DateTime, Sequence, String,
-                        Column, ForeignKey, UniqueConstraint, Index)
+                        Column, ForeignKey, Index)
 from sqlalchemy.orm import relation, deferred, backref, validates
 
 from aquilon.exceptions_ import ArgumentError
@@ -43,7 +43,7 @@ class Branch(Base):
 
     branch_type = Column(AqStr(16), nullable=False)
 
-    name = Column(AqStr(32), nullable=False)
+    name = Column(AqStr(32), nullable=False, unique=True)
 
     compiler = Column(String(255), nullable=False)
 
@@ -65,7 +65,6 @@ class Branch(Base):
     owner = relation(UserPrincipal, innerjoin=True)
 
     __mapper_args__ = {'polymorphic_on': branch_type}
-    __table_args__ = (UniqueConstraint(name, name='%s_uk' % _TN),)
 
     @validates("formats")
     def _validate_formats(self, key, value):  # pylint: disable=W0613

@@ -18,8 +18,7 @@
 
 from datetime import datetime
 
-from sqlalchemy import (Column, Integer, String, Sequence, UniqueConstraint,
-                        DateTime)
+from sqlalchemy import Column, Integer, String, Sequence, DateTime
 from sqlalchemy.orm import deferred
 
 from aquilon.aqdb.model import Base
@@ -37,18 +36,15 @@ class User(Base):
     id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
 
     # user names are case sensitive, so no AqStr here
-    name = Column(String(32), nullable=False)
+    name = Column(String(32), nullable=False, unique=True)
 
-    uid = Column(Integer, nullable=False)
+    uid = Column(Integer, nullable=False, unique=True)
     gid = Column(Integer, nullable=False)
     full_name = Column(String(64), nullable=False)
     home_dir = Column(String(64), nullable=False)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
-
-    __table_args__ = (UniqueConstraint(name, name='%s_user_uk' % _TN),
-                      UniqueConstraint(uid, name='%s_uid_uk' % _TN))
 
 usr = User.__table__  # pylint: disable=C0103
 usr.info['unique_fields'] = ['name']

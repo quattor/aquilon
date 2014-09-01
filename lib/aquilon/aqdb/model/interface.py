@@ -67,7 +67,7 @@ class Interface(DeviceLinkMixin, Base):
 
     name = Column(AqStr(32), nullable=False)  # like e0, hme1, etc.
 
-    mac = Column(AqMac(name="%s_mac_ck" % _TN), nullable=True)
+    mac = Column(AqMac(name="%s_mac_ck" % _TN), nullable=True, unique=True)
 
     model_id = Column(Integer, ForeignKey(Model.id), nullable=False)
 
@@ -122,9 +122,7 @@ class Interface(DeviceLinkMixin, Base):
     port_group = relation("PortGroup")
 
     # Order matters here, utils/constraints.py checks for endswith("NOT NULL")
-    __table_args__ = (UniqueConstraint(mac, name='%s_mac_addr_uk' % _ABV),
-                      UniqueConstraint(hardware_entity_id, name,
-                                       name='%s_hw_name_uk' % _ABV),
+    __table_args__ = (UniqueConstraint(hardware_entity_id, name),
                       CheckConstraint(or_(port_group_id == None,
                                           port_group_name == None),
                                       name='%s_pg_ck' % _ABV),
@@ -285,7 +283,7 @@ class VlanInterface(Interface):
                                                 Interface.interface_type != "vlan"),
                                             name="%s_vlan_ck" % _ABV),
                             UniqueConstraint(parent_id, vlan_id,
-                                             name="%s_parent_vlan_uk" % _ABV))
+                                             name="%s_parent_vlan_uk" % _TN))
 
     @validates('vlan_id')
     def validate_vlan_id(self, key, value):

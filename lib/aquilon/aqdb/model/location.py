@@ -55,8 +55,7 @@ class Location(Base):
 
     default_dns_domain = relation(DnsDomain)
 
-    __table_args__ = (UniqueConstraint(name, location_type,
-                                       name='loc_name_type_uk'),)
+    __table_args__ = (UniqueConstraint(name, location_type),)
     __mapper_args__ = {'polymorphic_on': location_type}
 
     def get_p_dict(self, loc_type):

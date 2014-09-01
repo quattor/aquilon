@@ -68,8 +68,7 @@ class Disk(DeviceLinkMixin, Base):
     machine = relation(Machine, innerjoin=True,
                        backref=backref('disks', cascade='all, delete-orphan'))
 
-    __table_args__ = (UniqueConstraint(machine_id, device_name,
-                                       name='%s_mach_dev_name_uk' % _TN),)
+    __table_args__ = (UniqueConstraint(machine_id, device_name),)
     __mapper_args__ = {'polymorphic_on': disk_type,
                        'with_polymorphic': '*'}
 

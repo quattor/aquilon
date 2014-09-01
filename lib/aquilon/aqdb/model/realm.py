@@ -17,8 +17,7 @@
 """ Enumerates kerberos realms """
 from datetime import datetime
 
-from sqlalchemy import (Column, Integer, String, DateTime, Sequence, Boolean,
-                        UniqueConstraint)
+from sqlalchemy import Column, Integer, String, DateTime, Sequence, Boolean
 from sqlalchemy.orm import deferred
 
 from aquilon.aqdb.model import Base
@@ -31,13 +30,11 @@ class Realm(Base):
     __tablename__ = _TN
 
     id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
-    name = Column(String(32), nullable=False)
+    name = Column(String(32), nullable=False, unique=True)
     trusted = Column(Boolean(name='%s_trusted_ck' % _TN), nullable=False)
     creation_date = deferred(Column(DateTime, nullable=False,
                                     default=datetime.now))
     comments = deferred(Column(String(255), nullable=True))
-
-    __table_args__ = (UniqueConstraint(name, name='realm_uk'),)
 
 realm = Realm.__table__  # pylint: disable=C0103
 realm.info['unique_fields'] = ['name']

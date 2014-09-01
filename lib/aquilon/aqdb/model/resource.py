@@ -70,15 +70,13 @@ class ResourceHolder(Base):
 class HostResource(ResourceHolder):
     host_id = Column(Integer, ForeignKey(Host.hardware_entity_id,
                                          ondelete='CASCADE'),
-                     nullable=True)
+                     nullable=True, unique=True)
 
     # This is a one-to-one relation, so we need uselist=False on the backref
     host = relation(Host,
                     backref=backref('resholder', uselist=False,
                                     cascade='all, delete-orphan'))
 
-    __extra_table_args__ = (UniqueConstraint(host_id,
-                                             name='%s_host_uk' % _RESHOLDER),)
     __mapper_args__ = {'polymorphic_identity': 'host'}
 
     @property
@@ -93,15 +91,13 @@ class HostResource(ResourceHolder):
 class ClusterResource(ResourceHolder):
     cluster_id = Column(Integer, ForeignKey(Cluster.id,
                                             ondelete='CASCADE'),
-                        nullable=True)
+                        nullable=True, unique=True)
 
     # This is a one-to-one relation, so we need uselist=False on the backref
     cluster = relation(Cluster,
                        backref=backref('resholder', uselist=False,
                                        cascade='all, delete-orphan'))
 
-    __extra_table_args__ = (UniqueConstraint(cluster_id,
-                                             name='%s_cluster_uk' % _RESHOLDER),)
     __mapper_args__ = {'polymorphic_identity': 'cluster'}
 
     @property

@@ -40,7 +40,7 @@ class HardwareEntity(Base):
 
     id = Column(Integer, Sequence('%s_seq' % _TN), primary_key=True)
 
-    label = Column(AqStr(63), nullable=False)
+    label = Column(AqStr(63), nullable=False, unique=True)
 
     hardware_type = Column(AqStr(64), nullable=False)
 
@@ -71,9 +71,8 @@ class HardwareEntity(Base):
                             backref=backref('hardware_entity', uselist=False,
                                             passive_deletes=True))
 
-    __table_args__ = (UniqueConstraint(label, name='%s_label_uk' % _TN),
-                      UniqueConstraint(primary_name_id,
-                                       name='%s_pri_name_uk' % _ABV),
+    __table_args__ = (UniqueConstraint(primary_name_id,
+                                       name='%s_pri_name_uk' % _TN),
                       Index('%s_location_idx' % _ABV, location_id),
                       Index('%s_model_idx' % _ABV, model_id))
     __mapper_args__ = {'polymorphic_on': hardware_type}

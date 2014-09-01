@@ -132,8 +132,7 @@ class Network(Base):
     # The routers relation is defined in router_address.py
     router_ips = association_proxy("routers", "ip")
 
-    __table_args__ = (UniqueConstraint(network_environment_id, ip,
-                                       name='%s_net_env_ip_uk' % _TN),
+    __table_args__ = (UniqueConstraint(network_environment_id, ip),
                       CheckConstraint(and_(cidr >= 1, cidr <= 32),
                                       name="%s_cidr_ck" % _TN),
                       Index('%s_location_idx' % _TN, location_id))

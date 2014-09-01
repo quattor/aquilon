@@ -47,8 +47,7 @@ class Feature(Base):
                                     nullable=False))
     comments = deferred(Column(String(255), nullable=True))
 
-    __table_args__ = (UniqueConstraint(name, feature_type,
-                                       name='%s_name_type_uk' % _TN),)
+    __table_args__ = (UniqueConstraint(name, feature_type),)
     __mapper_args__ = {'polymorphic_on': feature_type}
 
     @validates('links')

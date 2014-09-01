@@ -26,7 +26,8 @@ from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from sqlalchemy.inspection import inspect
 
 from aquilon.exceptions_ import InternalError, NotFoundException, ArgumentError
-from aquilon.aqdb.utils.constraints import ref_constraint_name
+from aquilon.aqdb.utils.constraints import (ref_constraint_name,
+                                            multi_col_constraint_name)
 
 
 # Register our custom dialect-specific options. It would be nicer to have this
@@ -430,11 +431,17 @@ def fk_name(constraint, table):
     return ref_constraint_name(table.name, reftable, suffix='fk')
 
 
+def uk_name(constraint, table):
+    return multi_col_constraint_name(table.name, constraint.columns, 'uk')
+
+
 convention = {
     'pk_name': pk_name,
     'fk_name': fk_name,
+    'uk_name': uk_name,
     'pk': '%(pk_name)s',
     'fk': '%(fk_name)s',
+    'uq': '%(uk_name)s',
 }
 
 metadata = MetaData(naming_convention=convention)
