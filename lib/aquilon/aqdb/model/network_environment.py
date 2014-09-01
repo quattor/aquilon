@@ -62,6 +62,8 @@ class NetworkEnvironment(Base):
 
     dns_environment = relation(DnsEnvironment, innerjoin=True)
 
+    __table_args__ = ({'info': {'unique_fields': ['name']}},)
+
     @property
     def is_default(self):
         return self.name == _config.get("site", "default_network_environment")
@@ -74,9 +76,6 @@ class NetworkEnvironment(Base):
             return cls.get_unique(session, _config.get("site",
                                                        "default_network_environment"),
                                   compel=InternalError)
-
-netenv = NetworkEnvironment.__table__  # pylint: disable=C0103
-netenv.info['unique_fields'] = ['name']
 
 
 def get_net_dns_env(session, network_environment=None,

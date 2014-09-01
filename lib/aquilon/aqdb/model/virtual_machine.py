@@ -41,7 +41,5 @@ class VirtualMachine(Resource):
                        backref=backref('vm_container', uselist=False,
                                        cascade='all'))
 
+    __table_args__ = ({'info': {'unique_fields': ['name', 'holder']}},)
     __mapper_args__ = {'polymorphic_identity': 'virtual_machine'}
-
-vm = VirtualMachine.__table__
-vm.info['unique_fields'] = ['name', 'holder']

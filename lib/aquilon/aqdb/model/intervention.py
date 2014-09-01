@@ -46,5 +46,4 @@ class Intervention(Resource):
     disabled = Column(String(255), nullable=True)
     enabled = Column(String(255), nullable=True)
 
-intervention = Intervention.__table__
-intervention.info['unique_fields'] = ['name', 'holder']
+    __table_args__ = ({'info': {'unique_fields': ['name', 'holder']}},)

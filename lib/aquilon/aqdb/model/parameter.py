@@ -102,7 +102,8 @@ class Parameter(Base):
                       backref=backref('parameters',
                                       cascade='all, delete-orphan'))
 
-    __table_args__ = {'oracle_compress': True}
+    __table_args__ = ({'oracle_compress': True,
+                       'info': {'unique_fields': ['holder']}},)
 
     @staticmethod
     def tokey(path):
@@ -254,6 +255,3 @@ class Parameter(Base):
         else:
             flattened[((path + PATH_SEP) if path else "") + key] = data
         return flattened
-
-parameter = Parameter.__table__  # pylint: disable=C0103
-parameter.info['unique_fields'] = ['holder']

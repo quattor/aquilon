@@ -72,7 +72,8 @@ class HardwareEntity(Base):
                                             passive_deletes=True))
 
     __table_args__ = (UniqueConstraint(primary_name_id,
-                                       name='%s_pri_name_uk' % _TN),)
+                                       name='%s_pri_name_uk' % _TN),
+                      {'info': {'unique_fields': ['label']}},)
     __mapper_args__ = {'polymorphic_on': hardware_type}
 
     _label_check = re.compile("^[a-z][a-z0-9]{,62}$")
@@ -194,9 +195,6 @@ class HardwareEntity(Base):
         for iface in self.interfaces:
             for addr in iface.assignments:
                 yield addr
-
-hardware_entity = HardwareEntity.__table__  # pylint: disable=C0103
-hardware_entity.info['unique_fields'] = ['label']
 
 
 class DeviceLinkMixin(object):

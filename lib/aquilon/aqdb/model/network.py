@@ -135,7 +135,9 @@ class Network(Base):
 
     __table_args__ = (UniqueConstraint(network_environment_id, ip),
                       CheckConstraint(and_(cidr >= 1, cidr <= 32),
-                                      name="%s_cidr_ck" % _TN))
+                                      name="%s_cidr_ck" % _TN),
+                      {'info': {'unique_fields': ['network_environment', 'ip'],
+                                'extra_search_fields': ['name', 'cidr']}})
 
     def __init__(self, network=None, network_type=None, **kw):
         # pylint: disable=W0621
@@ -199,7 +201,7 @@ class Network(Base):
     def network(self, value):
         if not isinstance(value, IPv4Network):
             raise InternalError("Expected an IPv4Network, got: %s" %
-                                type(network))
+                                type(value))
         self._network = value
         self.ip = value.network
         self.cidr = value.prefixlen
@@ -373,10 +375,6 @@ class Network(Base):
         cnt += q.scalar()
 
         return cnt
-
-network = Network.__table__  # pylint: disable=C0103
-network.info['unique_fields'] = ['network_environment', 'ip']
-network.info['extra_search_fields'] = ['name', 'cidr']
 
 
 def get_net_id_from_ip(session, ip, network_environment=None):

@@ -43,12 +43,10 @@ class OperatingSystem(Base):
 
     archetype = relation(Archetype, lazy=False, innerjoin=True)
 
-    __table_args__ = (UniqueConstraint(archetype_id, name, version),)
+    __table_args__ = (UniqueConstraint(archetype_id, name, version),
+                      {'info': {'unique_fields': ['name', 'version',
+                                                  'archetype']}})
 
     def __format__(self, format_spec):
         instance = "%s/%s-%s" % (self.archetype.name, self.name, self.version)
         return self.format_helper(format_spec, instance)
-
-
-operating_system = OperatingSystem.__table__  # pylint: disable=C0103
-operating_system.info['unique_fields'] = ['name', 'version', 'archetype']

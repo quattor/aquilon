@@ -32,5 +32,4 @@ class Desk(Location):
     id = Column(Integer, ForeignKey(Location.id, ondelete='CASCADE'),
                 primary_key=True)
 
-desk = Desk.__table__  # pylint: disable=C0103
-desk.info['unique_fields'] = ['name']
+    __table_args__ = ({'info': {'unique_fields': ['name']}},)

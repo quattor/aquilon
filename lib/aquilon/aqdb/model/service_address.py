@@ -43,6 +43,7 @@ class ServiceAddress(Resource):
                           backref=backref('service_address', uselist=False,
                                           passive_deletes=True))
 
+    __table_args__ = ({'info': {'unique_fields': ['name', 'holder']}},)
     __mapper_args__ = {'polymorphic_identity': _TN}
 
     @property
@@ -54,6 +55,3 @@ class ServiceAddress(Resource):
 
         ifaces.sort()
         return ifaces
-
-srvaddr = ServiceAddress.__table__
-srvaddr.info['unique_fields'] = ['name', 'holder']

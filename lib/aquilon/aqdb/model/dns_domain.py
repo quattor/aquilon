@@ -74,6 +74,8 @@ class DnsDomain(Base):
     # The relation is defined in dns_map.py
     mapped_locations = association_proxy('dns_maps', 'location')
 
+    __table_args__ = ({'info': {'unique_fields': ['name']}},)
+
     @classmethod
     def check_label(cls, label):  # TODO: database check constraint for length
         if len(label) < 1 or len(label) > 63:
@@ -104,6 +106,3 @@ class DnsDomain(Base):
             self.check_label(part)
 
         super(DnsDomain, self).__init__(*args, **kwargs)
-
-dnsdomain = DnsDomain.__table__  # pylint: disable=C0103
-dnsdomain.info['unique_fields'] = ['name']

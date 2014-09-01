@@ -67,7 +67,8 @@ class DnsMap(Base):
 
     # In theory we should have a unique constraint on (location_id, position),
     # but the ordering_list documentation does not recommend that
-    __table_args__ = (UniqueConstraint(location_id, dns_domain_id),)
+    __table_args__ = (UniqueConstraint(location_id, dns_domain_id),
+                      {'info': {'unique_fields': ['location', 'dns_domain']}},)
 
     def __repr__(self):
         return '<%s %s at %s>' % (self.__class__.__name__,
@@ -78,6 +79,3 @@ class DnsMap(Base):
             raise TypeError("Always use the Location.dns_maps relation to "
                             "manage the position attribute.")
         super(DnsMap, self).__init__(**kwargs)
-
-dnsmap = DnsMap.__table__  # pylint: disable=C0103
-dnsmap.info['unique_fields'] = ['location', 'dns_domain']

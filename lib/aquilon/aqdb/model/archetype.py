@@ -45,5 +45,4 @@ class Archetype(Base):
 
     comments = deferred(Column(String(255), nullable=True))
 
-archetype = Archetype.__table__  # pylint: disable=C0103
-archetype.info['unique_fields'] = ['name']
+    __table_args__ = ({'info': {'unique_fields': ['name']}},)

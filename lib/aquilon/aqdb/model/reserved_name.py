@@ -38,12 +38,10 @@ class ReservedName(DnsRecord):
                                                ondelete='CASCADE'),
                            primary_key=True)
 
+    __table_args__ = ({'info': {'unique_fields': ['fqdn'],
+                                'extra_search_fields': ['dns_environment']}},)
+
     def __init__(self, **kwargs):
         if "ip" in kwargs and kwargs["ip"]:  # pragma: no cover
             raise ArgumentError("Reserved names must not have an IP address.")
         super(ReservedName, self).__init__(**kwargs)
-
-
-resname = ReservedName.__table__  # pylint: disable=C0103
-resname.info['unique_fields'] = ['fqdn']
-resname.info['extra_search_fields'] = ['dns_environment']

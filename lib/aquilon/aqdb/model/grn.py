@@ -45,6 +45,5 @@ class Grn(Base):
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
 
-grn = Grn.__table__  # pylint: disable=C0103
-grn.info['unique_fields'] = ['grn']
-grn.info['extra_search_fields'] = ['eon_id']
+    __table_args__ = ({'info': {'unique_fields': ['grn'],
+                                'extra_search_fields': ['eon_id']}},)

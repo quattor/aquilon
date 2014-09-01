@@ -34,5 +34,4 @@ class City(Location):
 
     timezone = Column(String(64), nullable=True, default='UTC')
 
-city = City.__table__  # pylint: disable=C0103
-city.info['unique_fields'] = ['name']
+    __table_args__ = ({'info': {'unique_fields': ['name']}},)

@@ -36,5 +36,4 @@ class Realm(Base):
                                     default=datetime.now))
     comments = deferred(Column(String(255), nullable=True))
 
-realm = Realm.__table__  # pylint: disable=C0103
-realm.info['unique_fields'] = ['name']
+    __table_args__ = ({'info': {'unique_fields': ['name']}},)

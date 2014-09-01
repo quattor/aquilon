@@ -32,5 +32,4 @@ class Room(Location):
     id = Column(Integer, ForeignKey(Location.id, ondelete='CASCADE'),
                 primary_key=True)
 
-room = Room.__table__  # pylint: disable=C0103
-room.info['unique_fields'] = ['name']
+    __table_args__ = ({'info': {'unique_fields': ['name']}},)

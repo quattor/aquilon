@@ -50,6 +50,8 @@ class DnsEnvironment(Base):
 
     comments = deferred(Column(String(255), nullable=True))
 
+    __table_args__ = ({'info': {'unique_fields': ['name']}},)
+
     @property
     def is_default(self):
         return self.name == _config.get("site", "default_dns_environment")
@@ -62,6 +64,3 @@ class DnsEnvironment(Base):
             return cls.get_unique(session, _config.get("site",
                                                        "default_dns_environment"),
                                   compel=InternalError)
-
-dnsenv = DnsEnvironment.__table__  # pylint: disable=C0103
-dnsenv.info['unique_fields'] = ['name']

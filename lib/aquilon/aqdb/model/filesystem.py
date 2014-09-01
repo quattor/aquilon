@@ -39,5 +39,4 @@ class Filesystem(Resource):
     dumpfreq = Column(Integer)
     passno = Column(Integer)
 
-filesystem = Filesystem.__table__
-filesystem.info['unique_fields'] = ['name', 'holder']
+    __table_args__ = ({'info': {'unique_fields': ['name', 'holder']}},)

@@ -48,7 +48,8 @@ class NsRecord(Base):
     dns_domain = relation(DnsDomain, lazy=False, innerjoin=True,
                           backref=backref('_ns_records', cascade='all'))
 
-    __table_args__ = (PrimaryKeyConstraint(a_record_id, dns_domain_id),)
+    __table_args__ = (PrimaryKeyConstraint(a_record_id, dns_domain_id),
+                      {'info': {'unique_fields': ['a_record', 'dns_domain']}})
 
     def __format__(self, format_spec):
         instance = "%s [%s] of DNS Domain %s" % (self.a_record.fqdn,
@@ -64,9 +65,6 @@ class NsRecord(Base):
 
     def _get_instance_label(self):
         return "{0:a} of {1:l}".format(self.a_record, self.dns_domain)
-
-nsrecord = NsRecord.__table__  # pylint: disable=C0103
-nsrecord.info['unique_fields'] = ['a_record', 'dns_domain']
 
 # Association proxies from/to NSRecord:
 # DnsDomain.servers = association_proxy('_name_servers', 'a_record')

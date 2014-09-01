@@ -37,6 +37,8 @@ class Share(Resource):
     # threshold for Storage I/O Control throttle in millisecs.
     latency_threshold = Column(Integer)
 
+    __table_args__ = ({'info': {'unique_fields': ['name', 'holder']}},)
+
     @validates('latency_threshold')
     def validate_latency_threshold(self, key, value):
         if value:
@@ -69,7 +71,3 @@ class Share(Resource):
 
     def populate_share_info(self, parser):
         self._share_info = parser.lookup(self.name)
-
-
-share = Share.__table__
-share.info['unique_fields'] = ['name', 'holder']

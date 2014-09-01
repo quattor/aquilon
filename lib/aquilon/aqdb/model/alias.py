@@ -45,6 +45,9 @@ class Alias(DnsRecord):
     # The same name may resolve to multiple RRs
     target_rrs = association_proxy('target', 'dns_records')
 
+    __table_args__ = ({'info': {'unique_fields': ['fqdn'],
+                                'extra_search_fields': ['target',
+                                                        'dns_environment']}},)
     __mapper_args__ = {'polymorphic_identity': _TN}
 
     @property
@@ -61,13 +64,9 @@ class Alias(DnsRecord):
         if self.alias_depth > MAX_ALIAS_DEPTH:
             raise ValueError("Maximum alias depth exceeded")
 
-alias = Alias.__table__  # pylint: disable=C0103
-alias.info['unique_fields'] = ['fqdn']
-alias.info['extra_search_fields'] = ['target', 'dns_environment']
-
 # Most addresses will not have aliases. This bulk loadable property allows the
 # formatter to avoid querying the alias table for every displayed DNS record
 # See http://www.sqlalchemy.org/trac/ticket/2139 about why we need the .alias()
 DnsRecord.alias_cnt = column_property(
-    select([func.count()], DnsRecord.fqdn_id == alias.alias().c.target_id)
+    select([func.count()], DnsRecord.fqdn_id == Alias.__table__.alias().c.target_id)
     .label("alias_cnt"), deferred=True)

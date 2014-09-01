@@ -64,6 +64,7 @@ class Branch(Base):
 
     owner = relation(UserPrincipal, innerjoin=True)
 
+    __table_args__ = ({'info': {'unique_fields': ['name']}},)
     __mapper_args__ = {'polymorphic_on': branch_type}
 
     @validates("formats")
@@ -75,9 +76,6 @@ class Branch(Base):
             if format not in ["pan", "json"]:
                 raise ArgumentError("Unknown format: %s" % format)
         return ",".join(formats)
-
-branch = Branch.__table__  # pylint: disable=C0103
-branch.info['unique_fields'] = ['name']
 
 
 class Domain(Branch):
@@ -107,11 +105,9 @@ class Domain(Branch):
     tracked_branch = relation(Branch, foreign_keys=tracked_branch_id,
                               backref=backref('trackers'))
 
+    __table_args__ = ({'info': {'unique_fields': ['name']}},)
     __mapper_args__ = {'polymorphic_identity': _DMN,
                        'inherit_condition': domain_id == Branch.id}
-
-domain = Domain.__table__  # pylint: disable=C0103
-domain.info['unique_fields'] = ['name']
 
 
 class Sandbox(Branch):
@@ -126,7 +122,5 @@ class Sandbox(Branch):
 
     base_commit = Column(AqStr(40), nullable=False)
 
+    __table_args__ = ({'info': {'unique_fields': ['name']}},)
     __mapper_args__ = {'polymorphic_identity': _SBX}
-
-sandbox = Sandbox.__table__  # pylint: disable=C0103
-sandbox.info['unique_fields'] = ['name']

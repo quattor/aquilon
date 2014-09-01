@@ -47,7 +47,8 @@ class Feature(Base):
                                     nullable=False))
     comments = deferred(Column(String(255), nullable=True))
 
-    __table_args__ = (UniqueConstraint(name, feature_type),)
+    __table_args__ = (UniqueConstraint(name, feature_type),
+                      {'info': {'unique_fields': ['name', 'feature_type']}},)
     __mapper_args__ = {'polymorphic_on': feature_type}
 
     @validates('links')
@@ -58,9 +59,6 @@ class Feature(Base):
 
     def validate_link(self, key, link):  # pragma: no cover
         return link
-
-feature = Feature.__table__  # pylint: disable=C0103
-feature.info['unique_fields'] = ['name', 'feature_type']
 
 
 class HostFeature(Feature):

@@ -20,12 +20,12 @@ from sqlalchemy import Integer, String, Column, ForeignKey
 from aquilon.aqdb.model import (Resource, Intervention)
 
 _TN_RES = 'reboot_schedule'
+_TN_IV = 'reboot_intervention'
 
 
 class RebootSchedule(Resource):
     """ RebootSchedule resources """
     __tablename__ = _TN_RES
-    __mapper_args__ = {'polymorphic_identity': 'reboot_schedule'}
 
     id = Column(Integer, ForeignKey(Resource.id,
                                     ondelete='CASCADE'),
@@ -39,10 +39,8 @@ class RebootSchedule(Resource):
     # only accepting one).
     day = Column(String(32), nullable=False)
 
-reboot_schedule = RebootSchedule.__table__
-reboot_schedule.info['unique_fields'] = ['name', 'holder']
-
-_TN_IV = 'reboot_intervention'
+    __table_args__ = ({'info': {'unique_fields': ['name', 'holder']}},)
+    __mapper_args__ = {'polymorphic_identity': 'reboot_schedule'}
 
 
 class RebootIntervention(Intervention):
@@ -50,11 +48,10 @@ class RebootIntervention(Intervention):
     __tablename__ = _TN_IV
     # Hack: Should probably just increase the length of the field to
     # support the string reboot_intervention.
-    __mapper_args__ = {'polymorphic_identity': 'reboot_iv'}
 
     id = Column(Integer, ForeignKey(Intervention.id,
                                     ondelete='CASCADE'),
                 primary_key=True)
 
-reboot_intervention = RebootIntervention.__table__
-reboot_intervention.info['unique_fields'] = ['name', 'holder']
+    __table_args__ = ({'info': {'unique_fields': ['name', 'holder']}},)
+    __mapper_args__ = {'polymorphic_identity': 'reboot_iv'}

@@ -47,5 +47,4 @@ class Hub(Location):
     id = Column(Integer, ForeignKey(Location.id, ondelete='CASCADE'),
                 primary_key=True)
 
-hub = Hub.__table__  # pylint: disable=C0103
-hub.info['unique_fields'] = ['name']
+    __table_args__ = ({'info': {'unique_fields': ['name']}},)

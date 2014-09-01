@@ -51,6 +51,9 @@ class SrvRecord(DnsRecord):
 
     target_rrs = association_proxy('target', 'dns_records')
 
+    __table_args__ = ({'info': {'unique_fields': ["fqdn"],
+                                'extra_search_fields': ['target',
+                                                        'dns_environment']}},)
     __mapper_args__ = {'polymorphic_identity': _TN}
 
     @validates('priority', 'weight', 'port')
@@ -127,7 +130,3 @@ class SrvRecord(DnsRecord):
 
         super(SrvRecord, self).__init__(fqdn=fqdn, priority=priority, weight=weight,
                                         port=port, target=target, **kwargs)
-
-srv_record = SrvRecord.__table__  # pylint: disable=C0103
-srv_record.info["unique_fields"] = ["fqdn"]
-srv_record.info["extra_search_fields"] = ['target', 'dns_environment']

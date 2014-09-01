@@ -35,11 +35,10 @@ class Hostlink(Resource):
     owner_user = Column(String(32), default='root', nullable=False)
     owner_group = Column(String(32), nullable=True)
 
+    __table_args__ = ({'info': {'unique_fields': ['name', 'holder']}},)
+
     @validates(owner_user, owner_group)
     def validate_owner(self, key, value):
         if ':' in value:
             raise ValueError("%s cannot contain the ':' character" % key)
         return value
-
-hostlink = Hostlink.__table__
-hostlink.info['unique_fields'] = ['name', 'holder']

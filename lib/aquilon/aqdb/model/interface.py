@@ -124,7 +124,9 @@ class Interface(DeviceLinkMixin, Base):
     __table_args__ = (UniqueConstraint(hardware_entity_id, name),
                       CheckConstraint(or_(port_group_id == None,
                                           port_group_name == None),
-                                      name='%s_port_group_ck' % _TN))
+                                      name='%s_port_group_ck' % _TN),
+                      {'info': {'unique_fields': ['name', 'hardware_entity'],
+                                'extra_search_fields': ['mac']}})
     __mapper_args__ = {'polymorphic_on': interface_type}
 
     # Interfaces also have the property 'assignments' which is defined in
@@ -360,8 +362,3 @@ class PhysicalInterface(Interface):
     _class_label = "Physical Interface"
 
     __mapper_args__ = {'polymorphic_identity': 'physical'}
-
-
-interface = Interface.__table__  # pylint: disable=C0103
-interface.info['unique_fields'] = ['name', 'hardware_entity']
-interface.info['extra_search_fields'] = ['mac']

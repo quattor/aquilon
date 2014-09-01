@@ -52,7 +52,8 @@ class ServiceInstance(Base):
 
     service = relation(Service, lazy=False, innerjoin=True, backref='instances')
 
-    __table_args__ = (UniqueConstraint(service_id, name),)
+    __table_args__ = (UniqueConstraint(service_id, name),
+                      {'info': {'unique_fields': ['name', 'service']}},)
 
     def __format__(self, format_spec):
         instance = "%s/%s" % (self.service.name, self.name)
@@ -207,9 +208,6 @@ class ServiceInstance(Base):
                     instance_cache[service].append(si)
 
         return instance_cache
-
-service_instance = ServiceInstance.__table__  # pylint: disable=C0103
-service_instance.info['unique_fields'] = ['name', 'service']
 
 
 class __BuildItem(Base):

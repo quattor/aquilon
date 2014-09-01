@@ -42,6 +42,7 @@ class ResourceGroup(Resource):
     # This is to enforce the same type of resources in the group
     required_type = Column(AqStr(32), nullable=True)
 
+    __table_args__ = ({'info': {'unique_fields': ['name', 'holder']}},)
     __mapper_args__ = {'polymorphic_identity': _TN}
 
     def validate_holder(self, key, value):
@@ -53,9 +54,6 @@ class ResourceGroup(Resource):
     @property
     def branch(self):
         return self.holder.holder_object.branch
-
-resourcegroup = ResourceGroup.__table__
-resourcegroup.info['unique_fields'] = ['holder', 'name']
 
 
 class BundleResource(ResourceHolder):

@@ -32,6 +32,4 @@ class Bunker(Location):
     id = Column(Integer, ForeignKey(Location.id, ondelete='CASCADE'),
                 primary_key=True)
 
-
-bunker = Bunker.__table__  # pylint: disable=C0103
-bunker.info['unique_fields'] = ['name']
+    __table_args__ = ({'info': {'unique_fields': ['name']}},)

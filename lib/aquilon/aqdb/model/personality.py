@@ -71,7 +71,8 @@ class Personality(Base):
 
     host_environment = relation(HostEnvironment, innerjoin=True)
 
-    __table_args__ = (UniqueConstraint(archetype_id, name),)
+    __table_args__ = (UniqueConstraint(archetype_id, name),
+                      {'info': {'unique_fields': ['name', 'archetype']}},)
 
     @property
     def is_cluster(self):
@@ -91,9 +92,6 @@ class Personality(Base):
             raise ArgumentError("Environment value in personality name '{0}' "
                                 "does not match the host environment '{1}'"
                                 .format(name, host_environment))
-
-personality = Personality.__table__   # pylint: disable=C0103
-personality.info['unique_fields'] = ['name', 'archetype']
 
 
 class PersonalityGrnMap(Base):

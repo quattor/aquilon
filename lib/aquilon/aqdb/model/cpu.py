@@ -43,7 +43,5 @@ class Cpu(Base):
 
     vendor = relation(Vendor, innerjoin=True)
 
-    __table_args__ = (UniqueConstraint(vendor_id, name, speed),)
-
-cpu = Cpu.__table__   # pylint: disable=C0103
-cpu.info['unique_fields'] = ['name', 'vendor', 'speed']
+    __table_args__ = (UniqueConstraint(vendor_id, name, speed),
+                      {'info': {'unique_fields': ['name', 'vendor', 'speed']}},)

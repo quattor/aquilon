@@ -47,6 +47,7 @@ class ParamDefHolder(Base):
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
 
+    __table_args = ({'info': {'unique_fields': ['id']}},)
     __mapper_args__ = {'polymorphic_on': type}
 
     @property
@@ -56,10 +57,6 @@ class ParamDefHolder(Base):
     @property
     def holder_object(self):  # pragma: no cover
         raise InternalError("Abstract base method called")
-
-
-param_definition_holder = ParamDefHolder.__table__  # pylint: disable=C0103
-param_definition_holder.info['unique_fields'] = ['id']
 
 
 class ArchetypeParamDef(ParamDefHolder):
@@ -132,7 +129,8 @@ class ParamDefinition(Base):
                       backref=backref('param_definitions',
                                       cascade='all, delete-orphan'))
 
-    __table_args__ = {'oracle_compress': True}
+    __table_args__ = ({'oracle_compress': True,
+                       'info': {'unique_fields': ['path', 'holder']}},)
 
     @property
     def template_base(self, base_object):
@@ -146,6 +144,3 @@ class ParamDefinition(Base):
         valid_types = ", ".join(sorted(_PATH_TYPES))
         raise ArgumentError("Unknown value type '%s'.  The valid types are: "
                             "%s." % (value_type, valid_types))
-
-param_definition = ParamDefinition.__table__  # pylint: disable=C0103
-param_definition.info['unique_fields'] = ['path', 'holder']

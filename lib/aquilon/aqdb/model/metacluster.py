@@ -43,7 +43,6 @@ class MetaCluster(Cluster):
     """
 
     __tablename__ = _MCT
-    __mapper_args__ = {'polymorphic_identity': 'meta'}
     _class_label = "Metacluster"
 
     id = Column(Integer, ForeignKey(Cluster.id, ondelete='CASCADE'),
@@ -53,6 +52,9 @@ class MetaCluster(Cluster):
 
     high_availability = Column(Boolean(name="%s_ha_ck" % _MCT), default=False,
                                nullable=False)
+
+    __table_args__ = ({'info': {'unique_fields': ['name']}},)
+    __mapper_args__ = {'polymorphic_identity': 'meta'}
 
     # see cluster.minimum_location
     @property
@@ -169,9 +171,6 @@ class MetaCluster(Cluster):
                                               self,
                                               self.branch.branch_type,
                                               self.authored_branch))
-
-metacluster = MetaCluster.__table__  # pylint: disable=C0103
-metacluster.info['unique_fields'] = ['name']
 
 
 class __MetaClusterMember(Base):

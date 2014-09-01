@@ -32,5 +32,4 @@ class Continent(Location):
     id = Column(Integer, ForeignKey(Location.id, ondelete='CASCADE'),
                 primary_key=True)
 
-continent = Continent.__table__  # pylint: disable=C0103
-continent.info['unique_fields'] = ['name']
+    __table_args__ = ({'info': {'unique_fields': ['name']}},)

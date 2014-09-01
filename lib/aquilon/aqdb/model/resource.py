@@ -136,7 +136,9 @@ class Resource(Base):
                                       cascade='all, delete-orphan'))
 
     __table_args__ = (UniqueConstraint(holder_id, name, resource_type,
-                                       name='%s_holder_name_type_uk' % _TN),)
+                                       name='%s_holder_name_type_uk' % _TN),
+                      {'info': {'unique_fields': ['name', 'resource_type',
+                                                  'holder']}})
     __mapper_args__ = {'polymorphic_on': resource_type}
 
     @validates('holder')
@@ -148,6 +150,3 @@ class Resource(Base):
 
     def __repr__(self):
         return "<{0:c} Resource {0.name} of {1}>".format(self, self.holder.holder_object)
-
-resource = Resource.__table__  # pylint: disable=C0103
-resource.info['unique_fields'] = ['name', 'resource_type', 'holder']

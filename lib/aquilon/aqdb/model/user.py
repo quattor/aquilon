@@ -46,5 +46,4 @@ class User(Base):
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
 
-usr = User.__table__  # pylint: disable=C0103
-usr.info['unique_fields'] = ['name']
+    __table_args__ = ({'info': {'unique_fields': ['name']}},)

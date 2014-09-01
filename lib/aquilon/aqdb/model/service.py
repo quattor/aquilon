@@ -60,6 +60,8 @@ class Service(Base):
                                     nullable=False))
     comments = Column(String(255), nullable=True)
 
+    __table_args__ = ({'info': {'unique_fields': ['name']}},)
+
     @memoized_property
     def cluster_aligned_personalities(self):
         session = object_session(self)
@@ -75,9 +77,6 @@ class Service(Base):
         q = q.outerjoin(ArchService, Archetype.services)
         q = q.filter(or_(PersService.id == self.id, ArchService.id == self.id))
         return [pers.id for pers in q]
-
-service = Service.__table__  # pylint: disable=C0103
-service.info['unique_fields'] = ['name']
 
 
 class __ServiceListItem(Base):

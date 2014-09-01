@@ -54,7 +54,8 @@ class Location(Base):
 
     default_dns_domain = relation(DnsDomain)
 
-    __table_args__ = (UniqueConstraint(name, location_type),)
+    __table_args__ = (UniqueConstraint(name, location_type),
+                      {'info': {'unique_fields': ['name', 'location_type']}},)
     __mapper_args__ = {'polymorphic_on': location_type}
 
     def get_p_dict(self, loc_type):
@@ -223,9 +224,6 @@ class Location(Base):
         session.expire(parent, ["_child_links", "children"])
         session.expire(self, ["_parent_links", "parent", "parents"])
         self._parent_dict = None
-
-location = Location.__table__  # pylint: disable=C0103
-location.info['unique_fields'] = ['name', 'location_type']
 
 
 class LocationLink(Base):

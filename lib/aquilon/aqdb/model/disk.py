@@ -68,7 +68,8 @@ class Disk(DeviceLinkMixin, Base):
     machine = relation(Machine, innerjoin=True,
                        backref=backref('disks', cascade='all, delete-orphan'))
 
-    __table_args__ = (UniqueConstraint(machine_id, device_name),)
+    __table_args__ = (UniqueConstraint(machine_id, device_name),
+                      {'info': {'unique_fields': ['machine', 'device_name']}},)
     __mapper_args__ = {'polymorphic_on': disk_type,
                        'with_polymorphic': '*'}
 
@@ -114,9 +115,6 @@ class Disk(DeviceLinkMixin, Base):
 
         # Unknown WWN format
         return None
-
-disk = Disk.__table__  # pylint: disable=C0103
-disk.info['unique_fields'] = ['machine', 'device_name']
 
 
 class LocalDisk(Disk):

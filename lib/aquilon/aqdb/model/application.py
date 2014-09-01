@@ -32,5 +32,4 @@ class Application(Resource):
 
     eonid = Column(Integer, nullable=False)
 
-application = Application.__table__
-application.info['unique_fields'] = ['name', 'holder']
+    __table_args__ = ({'info': {'unique_fields': ['name', 'holder']}},)

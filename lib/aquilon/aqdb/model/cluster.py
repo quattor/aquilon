@@ -130,6 +130,7 @@ class Cluster(Base):
 
     hosts = association_proxy('_hosts', 'host', creator=_hcm_host_creator)
 
+    __table_args__ = ({'info': {'unique_fields': ['name']}},)
     __mapper_args__ = {'polymorphic_on': cluster_type}
 
     @property
@@ -278,23 +279,19 @@ class Cluster(Base):
         val = "%s %s" % (clsname, instance)
         return val.__format__(passthrough)
 
-cluster = Cluster.__table__  # pylint: disable=C0103
-cluster.info['unique_fields'] = ['name']
-
 
 class ComputeCluster(Cluster):
     """
         A cluster containing computers - no special characteristics
     """
     __tablename__ = 'compute_cluster'
-    __mapper_args__ = {'polymorphic_identity': 'compute'}
     _class_label = 'Compute Cluster'
 
     id = Column(Integer, ForeignKey(Cluster.id, ondelete='CASCADE'),
                 primary_key=True)
 
-compute_cluster = ComputeCluster.__table__  # pylint: disable=C0103
-compute_cluster.info['unique_fields'] = ['name']
+    __table_args__ = ({'info': {'unique_fields': ['name']}},)
+    __mapper_args__ = {'polymorphic_identity': 'compute'}
 
 
 class StorageCluster(Cluster):
@@ -302,11 +299,13 @@ class StorageCluster(Cluster):
         A cluster of storage devices
     """
     __tablename__ = 'storage_cluster'
-    __mapper_args__ = {'polymorphic_identity': 'storage'}
     _class_label = 'Storage Cluster'
 
     id = Column(Integer, ForeignKey(Cluster.id, ondelete='CASCADE'),
                 primary_key=True)
+
+    __table_args__ = ({'info': {'unique_fields': ['name']}},)
+    __mapper_args__ = {'polymorphic_identity': 'storage'}
 
     def validate_membership(self, host):
         super(StorageCluster, self).validate_membership(host)
@@ -315,9 +314,6 @@ class StorageCluster(Cluster):
             raise ArgumentError("Only hosts with archetype 'filer' can be "
                                 "added to a storage cluster. {0} is "
                                 "of {1:l}.".format(host, host.archetype))
-
-storage_cluster = StorageCluster.__table__  # pylint: disable=C0103
-storage_cluster.info['unique_fields'] = ['name']
 
 
 # ESX Cluster is really a Grid Cluster, but we have
@@ -343,6 +339,7 @@ class EsxCluster(Cluster):
     network_device = relation(NetworkDevice, lazy=False,
                               backref=backref('esx_clusters'))
 
+    __table_args__ = ({'info': {'unique_fields': ['name']}},)
     __mapper_args__ = {'polymorphic_identity': 'esx'}
 
     @property
@@ -489,9 +486,6 @@ class EsxCluster(Cluster):
                                     .format(self, name, value, capacity[name]))
         return
 
-esx_cluster = EsxCluster.__table__  # pylint: disable=C0103
-esx_cluster.info['unique_fields'] = ['name']
-
 
 class HostClusterMember(Base):
     """ Association table for clusters and their member hosts """
@@ -522,10 +516,8 @@ class HostClusterMember(Base):
 
     __table_args__ = (PrimaryKeyConstraint(cluster_id, host_id),
                       UniqueConstraint(cluster_id, node_index,
-                                       name='%s_node_uk' % _HCM),)
-
-hcm = HostClusterMember.__table__  # pylint: disable=C0103
-hcm.info['unique_fields'] = ['cluster', 'host']
+                                       name='%s_node_uk' % _HCM),
+                      {'info': {'unique_fields': ['cluster', 'host']}},)
 
 Host.cluster = association_proxy('_cluster', 'cluster')
 

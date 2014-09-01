@@ -70,6 +70,8 @@ class DnsRecord(Base):
     aliases = association_proxy('fqdn', 'aliases')
     srv_records = association_proxy('fqdn', 'srv_records')
 
+    __table_args__ = ({'info': {'unique_fields': ['fqdn'],
+                                'extra_search_fields': ['dns_environment']}},)
     __mapper_args__ = {'polymorphic_on': dns_record_type,
                        'polymorphic_identity': _TN}
 
@@ -168,7 +170,3 @@ class DnsRecord(Base):
                     raise ArgumentError("{0} already exist.".format(existing))
 
         super(DnsRecord, self).__init__(fqdn=fqdn, **kwargs)
-
-dns_record = DnsRecord.__table__  # pylint: disable=C0103
-dns_record.info['unique_fields'] = ['fqdn']
-dns_record.info['extra_search_fields'] = ['dns_environment']

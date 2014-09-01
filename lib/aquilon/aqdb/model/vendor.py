@@ -37,5 +37,4 @@ class Vendor(Base):
                                     nullable=False))
     comments = Column(String(255), nullable=True)
 
-vendor = Vendor.__table__  # pylint: disable=C0103
-vendor.info['unique_fields'] = ['name']
+    __table_args__ = ({'info': {'unique_fields': ['name']}},)

@@ -47,7 +47,9 @@ class VlanInfo(Base):
 
     __table_args__ = (CheckConstraint(and_(vlan_id >= 0,
                                            vlan_id < MAX_VLANS),
-                                      name='%s_vlan_id_ck' % _VTN),)
+                                      name='%s_vlan_id_ck' % _VTN),
+                      {'info': {'unique_fields': ['port_group'],
+                                'extra_search_fields': ['vlan_id']}})
 
     @classmethod
     def get_by_pg(cls, session, port_group, compel=InternalError):
@@ -67,10 +69,6 @@ class VlanInfo(Base):
         return '<%s vlan_id=%s port_group=%s vlan_type=%s>' % (
             self.__class__.__name__, self.vlan_id, self.port_group,
             self.vlan_type)
-
-vlaninfo = VlanInfo.__table__  # pylint: disable=C0103
-vlaninfo.info['unique_fields'] = ['port_group']
-vlaninfo.info['extra_search_fields'] = ['vlan_id']
 
 
 # TODO: eventually this class should be moved to a different file
