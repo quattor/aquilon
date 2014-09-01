@@ -98,7 +98,7 @@ class CommandSearchNetwork(BrokerCommand):
                 q = q.filter(Network.id.in_(net_ids))
         if pg:
             dbvi = VlanInfo.get_by_pg(session, pg, compel=ArgumentError)
-            q = q.join(PortGroup, aliased=True)
+            q = q.join(PortGroup, Network.port_group, aliased=True)
             q = q.filter_by(network_tag=dbvi.vlan_id, usage=dbvi.vlan_type)
             q = q.reset_joinpoint()
         dblocation = get_location(session, **arguments)
