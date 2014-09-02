@@ -17,7 +17,7 @@
 """Contains the logic for `aq search cluster`."""
 
 from sqlalchemy.orm import aliased
-from sqlalchemy.sql import or_
+from sqlalchemy.sql import or_, null
 
 from aquilon.exceptions_ import NotFoundException
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
@@ -157,7 +157,7 @@ class CommandSearchCluster(BrokerCommand):
             q = q.filter_by(host=dbguest)
             q = q.reset_joinpoint()
         if capacity_override:
-            q = q.filter(EsxCluster.memory_capacity != None)
+            q = q.filter(EsxCluster.memory_capacity != null())
         if esx_switch:
             dbnetdev = NetworkDevice.get_unique(session, esx_switch, compel=True)
             q = q.filter_by(network_device=dbnetdev)

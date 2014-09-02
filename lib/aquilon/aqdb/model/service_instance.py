@@ -25,7 +25,7 @@ from sqlalchemy import (Column, Integer, Sequence, String, DateTime,
 from sqlalchemy.orm import (relation, contains_eager, column_property, backref,
                             deferred, defer, undefer, aliased, lazyload,
                             object_session)
-from sqlalchemy.sql import select, func, or_
+from sqlalchemy.sql import select, func, or_, null
 
 from aquilon.aqdb.model import (Base, Service, Host, DnsRecord, DnsDomain,
                                 HardwareEntity, Fqdn)
@@ -105,7 +105,7 @@ class ServiceInstance(Base):
         q = session.query(Host)
         q = q.filter(Host.services_used.contains(self))
         q = q.outerjoin('_cluster', 'cluster', from_joinpoint=True)
-        q = q.filter(or_(Cluster.id == None,
+        q = q.filter(or_(Cluster.id == null(),
                          ~Cluster.personality_id.in_(personality_ids)))
         adjusted_count += q.count()
         return adjusted_count

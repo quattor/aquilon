@@ -33,7 +33,7 @@ from datetime import datetime
 from sqlalchemy import (Column, Integer, Sequence, String, DateTime, Boolean,
                         ForeignKey, PrimaryKeyConstraint)
 from sqlalchemy.orm import relation, backref, deferred, aliased, object_session
-from sqlalchemy.sql import or_
+from sqlalchemy.sql import or_, null
 from sqlalchemy.util import memoized_property
 
 from aquilon.aqdb.column_types.aqstr import AqStr
@@ -73,7 +73,7 @@ class Service(Base):
         q = session.query(Personality.id)
         q = q.outerjoin(PersService, Personality.services)
         q = q.reset_joinpoint()
-        q = q.join(Archetype).filter(Archetype.cluster_type != None)
+        q = q.join(Archetype).filter(Archetype.cluster_type != null())
         q = q.outerjoin(ArchService, Archetype.services)
         q = q.filter(or_(PersService.id == self.id, ArchService.id == self.id))
         return [pers.id for pers in q]

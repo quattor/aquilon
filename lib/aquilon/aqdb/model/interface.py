@@ -25,7 +25,7 @@ from sqlalchemy import (Column, Integer, DateTime, Sequence, String, Boolean,
 from sqlalchemy.orm import (relation, backref, validates, object_session,
                             deferred)
 from sqlalchemy.orm.collections import attribute_mapped_collection
-from sqlalchemy.sql import desc, case, and_, or_
+from sqlalchemy.sql import desc, case, and_, or_, null
 
 from aquilon.exceptions_ import InternalError
 from aquilon.aqdb.column_types import AqMac, AqStr
@@ -120,8 +120,8 @@ class Interface(DeviceLinkMixin, Base):
 
     # Order matters here, utils/constraints.py checks for endswith("NOT NULL")
     __table_args__ = (UniqueConstraint(hardware_entity_id, name),
-                      CheckConstraint(or_(port_group_id == None,
-                                          port_group_name == None),
+                      CheckConstraint(or_(port_group_id == null(),
+                                          port_group_name == null()),
                                       name='%s_port_group_ck' % _TN),
                       {'info': {'unique_fields': ['name', 'hardware_entity'],
                                 'extra_search_fields': ['mac']}})
@@ -272,7 +272,7 @@ class VlanInterface(Interface):
 
     __mapper_args__ = {'polymorphic_identity': 'vlan'}
     # Order matters here, utils/constraints.py checks for endswith("NOT NULL")
-    __extra_table_args__ = (CheckConstraint(or_(and_(parent_id != None,
+    __extra_table_args__ = (CheckConstraint(or_(and_(parent_id != null(),
                                                      vlan_id > 0,
                                                      vlan_id < MAX_VLANS),
                                                 Interface.interface_type != "vlan"),

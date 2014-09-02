@@ -17,7 +17,7 @@
 """Contains the logic for `aq show auxiliary --all`."""
 
 from sqlalchemy.orm import contains_eager
-from sqlalchemy.sql import and_
+from sqlalchemy.sql import and_, null
 
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.aqdb.model import (PublicInterface, AddressAssignment,
@@ -32,7 +32,7 @@ class CommandShowAuxiliaryAll(BrokerCommand):
         q = session.query(ARecord)
         # ... is not a primary name...
         q = q.outerjoin(HardwareEntity)
-        q = q.filter(HardwareEntity.id == None)
+        q = q.filter(HardwareEntity.id == null())
         q = q.reset_joinpoint()
         # ... and is assigned to a public interface...
         q = q.join((AddressAssignment,
