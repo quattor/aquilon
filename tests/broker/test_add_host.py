@@ -423,7 +423,19 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
                                            eth1_mac=eth1_mac,
                                            eth1_pg="storage-v701")
 
-    def test_321_populate_10gig_rack_hosts(self):
+    def test_321_auxiliary_no_host(self):
+        # Test port group based IP address allocation when there is no host yet
+        command = ["add_auxiliary", "--machine", "ut11s01p1",
+                   "--interface", "eth1", "--autoip",
+                   "--auxiliary", "evh51-e1.aqd-unittest.ms.com"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Machine ut11s01p1 does not have a host, assigning an "
+                         "IP address based on port group membership is not "
+                         "possible.",
+                         command)
+
+    def test_322_populate_10gig_rack_hosts(self):
         # Assuming evh11 - evh50 will eventually be claimed above.
         net = self.net["vmotion_net"]
         for i in range(1, 25):
@@ -444,7 +456,7 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
             self.noouttest(command)
         self.dsdb_verify()
 
-    def test_321_verify_show_ut11s01p1(self):
+    def test_323_verify_show_ut11s01p1(self):
         command = "show machine --machine ut11s01p1"
         out = self.commandtest(command.split())
         self.matchoutput(out,
