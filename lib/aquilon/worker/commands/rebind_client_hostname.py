@@ -14,17 +14,16 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Contains a wrapper for `aq rebind client`."""
-
+"""Contains a wrapper for `aq rebind client --hostname`."""
 
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.commands.bind_client import CommandBindClient
+from aquilon.worker.commands.bind_client_hostname import CommandBindClientHostname
 
 
-class CommandRebindClient(CommandBindClient):
+class CommandRebindClientHostname(CommandBindClientHostname):
 
     required_parameters = ["hostname", "service"]
 
     def render(self, *args, **arguments):
         arguments["force"] = True
-        return CommandBindClient.render(self, *args, **arguments)
+        return CommandBindClientHostname.render(self, *args, **arguments)

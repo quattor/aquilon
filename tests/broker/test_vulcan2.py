@@ -499,8 +499,8 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
         self.noouttest(command)
 
     def test_410_bindvcenterservices(self):
-        command = ["bind_cluster", "--cluster", "utmc8", "--service", "vcenter",
-                   "--instance", "ut"]
+        command = ["bind_client", "--metacluster", "utmc8",
+                   "--service", "vcenter", "--instance", "ut"]
         err = self.statustest(command)
         # The service should be bound to the metacluster and to the hosts, but
         # not to the clusters as they do not require it
@@ -557,8 +557,8 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
                    "--archetype", "vmhost", "--personality", "vulcan2-server-dev"]
         self.noouttest(command)
 
-        command = ["unbind_cluster", "--cluster", "utmc8", "--service", "vcenter"]
-        self.noouttest(command)
+        self.noouttest(["unbind_client", "--metacluster", "utmc8",
+                        "--service", "vcenter"])
 
     def test_440_unmapvcenterservices(self):
         command = ["unmap", "service", "--service", "vcenter",
@@ -593,8 +593,8 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
                    "--archetype", "metacluster"]
         self.noouttest(command)
 
-        command = ["rebind_cluster", "--cluster", "utmc8", "--service", "esx_management_server",
-                   "--instance", "ut.mc"]
+        command = ["rebind_client", "--metacluster", "utmc8",
+                   "--service", "esx_management_server", "--instance", "ut.mc"]
         err = self.statustest(command)
         self.matchoutput(err,
                          "Metacluster utmc8 adding binding for service "
@@ -652,7 +652,7 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
 
     def test_530_verify_mixed_client_count(self):
         self.add_utcluster("utpgcl3", "utmc8")
-        command = ["bind_cluster", "--cluster", "utpgcl3", "--service",
+        command = ["bind_client", "--cluster", "utpgcl3", "--service",
                    "esx_management_server", "--instance", "ut.mc"]
         err = self.statustest(command)
         self.matchoutput(err, "ESX Cluster utpgcl3 adding binding for service "
@@ -673,7 +673,7 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
                    "--archetype", "metacluster", "--personality", "vulcan2"]
         self.noouttest(command)
 
-        command = ["unbind_cluster", "--cluster", "utmc8",
+        command = ["unbind_client", "--metacluster", "utmc8",
                    "--service", "esx_management_server"]
         self.noouttest(command)
 

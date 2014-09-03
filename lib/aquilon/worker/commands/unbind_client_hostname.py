@@ -14,7 +14,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Contains the logic for `aq unbind client`."""
+"""Contains the logic for `aq unbind client --hostname`."""
 
 from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.aqdb.model import Service
@@ -25,7 +25,7 @@ from aquilon.worker.templates import (Plenary, PlenaryCollection,
 from aquilon.utils import first_of
 
 
-class CommandUnbindClient(BrokerCommand):
+class CommandUnbindClientHostname(BrokerCommand):
 
     required_parameters = ["hostname", "service"]
 

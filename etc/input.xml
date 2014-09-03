@@ -1789,13 +1789,19 @@
 	If the client already has the service bound, this will fail: use rebind
 	client instead.
 	<optgroup mandatory="True" fields="all">
-	    <option name="hostname" type="string">Host name</option>
+	    <optgroup fields="one">
+		<option name="hostname" type="string">Host name</option>
+		<option name="cluster" type="string">Host name</option>
+		<option name="metacluster" type="string">Host name</option>
+	    </optgroup>
 	    <option name="service" type="string">Service name</option>
 	</optgroup>
 	<optgroup>
 	    <option name="instance" type="string">Instance name</option>
 	</optgroup>
-	<transport method="put" path="host/%(hostname)s/client_of_service/%(service)s"/>
+	<transport method="put" trigger="hostname" path="host/%(hostname)s/client_of_service/%(service)s"/>
+	<transport method="put" trigger="cluster" path="cluster/%(cluster)s/client_of_service/%(service)s"/>
+	<transport method="put" trigger="metacluster" path="metacluster/%(metacluster)s/client_of_service/%(service)s"/>
     </command>
 
     <command name="rebind_client">
@@ -1803,22 +1809,34 @@
 	service map has been defined, an instance will be picked automatically.
 	If the client already has the service bound, this will override the old value.
 	<optgroup mandatory="True" fields="all">
-	    <option name="hostname" type="string">Host name</option>
+	    <optgroup fields="one">
+		<option name="hostname" type="string">Host name</option>
+		<option name="cluster" type="string">Host name</option>
+		<option name="metacluster" type="string">Host name</option>
+	    </optgroup>
 	    <option name="service" type="string">Service name</option>
 	</optgroup>
 	<optgroup>
 	    <option name="instance" type="string">Instance name</option>
 	</optgroup>
-	<transport method="post" path="host/%(hostname)s/client_of_service/%(service)s"/>
+	<transport method="post" trigger="hostname" path="host/%(hostname)s/client_of_service/%(service)s"/>
+	<transport method="post" trigger="cluster" path="cluster/%(cluster)s/client_of_service/%(service)s"/>
+	<transport method="post" trigger="metacluster" path="metacluster/%(metacluster)s/client_of_service/%(service)s"/>
     </command>
 
     <command name="unbind_client">
 	Unbind a service from a client.
 	<optgroup mandatory="True" fields="all">
-	    <option name="hostname" type="string">Host name</option>
+	    <optgroup fields="one">
+		<option name="hostname" type="string">Host name</option>
+		<option name="cluster" type="string">Host name</option>
+		<option name="metacluster" type="string">Host name</option>
+	    </optgroup>
 	    <option name="service" type="string">Service name</option>
 	</optgroup>
-	<transport method="delete" path="host/%(hostname)s/client_of_service/%(service)s"/>
+	<transport method="delete" trigger="hostname" path="host/%(hostname)s/client_of_service/%(service)s"/>
+	<transport method="delete" trigger="cluster" path="cluster/%(cluster)s/client_of_service/%(service)s"/>
+	<transport method="delete" trigger="metacluster" path="metacluster/%(metacluster)s/client_of_service/%(service)s"/>
     </command>
 
     <command name="bind_server">
@@ -4154,7 +4172,7 @@
 	<optgroup>
 	    <option name="instance" type="string">Service instance</option>
 	</optgroup>
-	<transport method="put" trigger="service" path="cluster/%(cluster)s/client_of_service/%(service)s"/>
+	<transport method="put" trigger="service" path="cluster/%(cluster)s/client_of_service_old/%(service)s"/>
     </command>
 
     <command name="rebind_cluster">
@@ -4169,7 +4187,7 @@
 	<optgroup>
 	    <option name="instance" type="string">Service Instance</option>
 	</optgroup>
-	<transport method="post" trigger="service" path="cluster/%(cluster)s/client_of_service/%(service)s"/>
+	<transport method="post" trigger="service" path="cluster/%(cluster)s/client_of_service_old/%(service)s"/>
     </command>
 
     <command name="unbind_cluster">
@@ -4178,7 +4196,7 @@
 	    <option name="cluster" type="string">Cluster name</option>
 	    <option name="service" type="string">Service name</option>
 	</optgroup>
-	<transport method="delete" trigger="service" path="cluster/%(cluster)s/client_of_service/%(service)s"/>
+	<transport method="delete" trigger="service" path="cluster/%(cluster)s/client_of_service_old/%(service)s"/>
     </command>
 
     <command name="cluster">

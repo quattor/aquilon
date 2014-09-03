@@ -16,52 +16,13 @@
 # limitations under the License.
 """Contains the logic for `aq bind cluster`."""
 
-from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import Cluster, Service
-from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.services import Chooser
-from aquilon.worker.dbwrappers.service_instance import get_service_instance
-from aquilon.worker.templates import PlenaryCollection
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.commands.bind_client_cluster import CommandBindClientCluster
 
 
-class CommandBindClusterService(BrokerCommand):
-
-    required_parameters = ["cluster", "service"]
-
-    def render(self, session, logger, cluster, service, instance, force=False,
-               **arguments):
-
-        dbcluster = Cluster.get_unique(session, cluster, compel=True)
-        dbservice = Service.get_unique(session, service, compel=True)
-        if instance:
-            dbinstance = get_service_instance(session, dbservice, instance)
-        else:
-            dbinstance = None
-
-        choosers = []
-        failed = []
-        # FIXME: this logic should be in the chooser
-        for dbobj in dbcluster.all_objects():
-            # Always add the binding on the cluster we were called on
-            if dbobj == dbcluster or dbservice in dbobj.required_services:
-                chooser = Chooser(dbobj, logger=logger, required_only=False)
-                choosers.append(chooser)
-                try:
-                    chooser.set_single(dbservice, dbinstance, force=force)
-                except ArgumentError as err:
-                    failed.append(str(err))
-
-        if failed:
-            raise ArgumentError("The following objects failed service "
-                                "binding:\n%s" % "\n".join(failed))
-
-        session.flush()
-
-        plenaries = PlenaryCollection(logger=logger)
-        for chooser in choosers:
-            plenaries.append(chooser.plenaries)
-        plenaries.flatten()
-
-        plenaries.write()
-
-        return
+class CommandBindClusterService(CommandBindClientCluster):
+    def render(self, **arguments):
+        self.deprecated_command("Command bind_cluster is deprecated. "
+                                "Please use 'bind_client --cluster' instead.",
+                                **arguments)
+        return super(CommandBindClusterService, self).render(**arguments)

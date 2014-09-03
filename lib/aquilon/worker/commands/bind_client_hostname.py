@@ -14,17 +14,16 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Contains the logic for `aq bind client`."""
+"""Contains the logic for `aq bind client --hostname`."""
 
-
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.aqdb.model import Service
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.host import hostname_to_host
 from aquilon.worker.dbwrappers.service_instance import get_service_instance
 from aquilon.worker.services import Chooser
-from aquilon.aqdb.model import Service
 
 
-class CommandBindClient(BrokerCommand):
+class CommandBindClientHostname(BrokerCommand):
 
     required_parameters = ["hostname", "service"]
 

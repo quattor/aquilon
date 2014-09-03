@@ -14,18 +14,17 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+"""Contains a wrapper for `aq rebind client --metacluster`."""
 
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.commands.bind_client_cluster import CommandBindClientCluster
+from aquilon.worker.commands.bind_client_metacluster import (
+    CommandBindClientMetacluster)
 
 
-class CommandRebindClusterService(CommandBindClientCluster):
+class CommandRebindClientMetacluster(CommandBindClientMetacluster):
 
-    required_parameters = ["cluster", "service"]
+    required_parameters = ["metacluster", "service"]
 
-    def render(self, **arguments):
-        self.deprecated_command("Command rebind_cluster is deprecated. "
-                                "Please use 'rebind_client --cluster' instead.",
-                                **arguments)
+    def render(self, session, **arguments):
         arguments["force"] = True
-        return super(CommandRebindClusterService, self).render(**arguments)
+        return CommandBindClientMetacluster.render(self, session, **arguments)
