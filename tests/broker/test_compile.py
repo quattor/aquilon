@@ -167,6 +167,25 @@ class TestCompile(VerifyNotificationsMixin, TestBrokerCommand):
                          command)
         self.matchoutput(out, "4/4 compiled", command)
 
+    def test_320_compile_metacluster(self):
+        command = ["compile", "--metacluster", "utmc1"]
+        out = self.statustest(command)
+        self.matchoutput(out, "0/9 object template(s) being processed",
+                         command)
+
+    def test_321_compile_metacluster_fallback(self):
+        command = ["compile", "--cluster", "utmc1"]
+        out = self.statustest(command)
+        self.matchoutput(out, "Please use the --metacluster option for "
+                         "metaclusters.", command)
+
+    def test_325_compile_metacluster_cleandeps(self):
+        command = ["compile", "--metacluster", "utmc1", "--cleandeps"]
+        out = self.statustest(command)
+        self.matchoutput(out, "9/9 object template(s) being processed",
+                         command)
+        self.matchoutput(out, "9/9 compiled", command)
+
     def test_400_addsandbox(self):
         command = "add_sandbox --sandbox=out_of_date --start=utsandbox"
         self.successtest(command.split())

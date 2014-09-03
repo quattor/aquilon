@@ -14,9 +14,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Contains the logic for `aq change status`."""
+"""Contains the logic for `aq change status --cluster`."""
 
-from aquilon.aqdb.model import Cluster, ClusterLifecycle
+from aquilon.aqdb.model import Cluster, MetaCluster, ClusterLifecycle
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.templates import Plenary, PlenaryCollection, TemplateDomain
 
@@ -25,8 +25,18 @@ class CommandChangeClusterStatus(BrokerCommand):
 
     required_parameters = ["cluster"]
 
-    def render(self, session, logger, cluster, buildstatus, **arguments):
-        dbcluster = Cluster.get_unique(session, cluster, compel=True)
+    def render(self, session, logger, cluster, metacluster, buildstatus,
+               **arguments):
+        if cluster:
+            # TODO: disallow metaclusters here
+            dbcluster = Cluster.get_unique(session, cluster, compel=True)
+            if isinstance(dbcluster, MetaCluster):
+                logger.client_info("Please use the --metacluster option for "
+                                   "metaclusters.")
+        else:
+            dbcluster = MetaCluster.get_unique(session, metacluster,
+                                               compel=True)
+
         dbstatus = ClusterLifecycle.get_instance(session, buildstatus)
 
         if not dbcluster.status.transition(dbcluster, dbstatus):

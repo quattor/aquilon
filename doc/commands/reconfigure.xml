@@ -137,7 +137,8 @@
 		<listitem>
 		    <para>
 			Behaves like --list, except the hosts to be reconfigured are
-			the members of <replaceable>CLUSTER</replaceable>.
+			the members of <replaceable>CLUSTER</replaceable>. If <replaceable>CLUSTER</replaceable>
+			is a metacluster, then all member hosts of all member clusters are reconfigured.
 		    </para>
 		</listitem>
 	    </varlistentry>

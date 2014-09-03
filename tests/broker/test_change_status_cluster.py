@@ -163,6 +163,15 @@ class TestChangeClusterStatus(TestBrokerCommand):
                               "--hostname", "evh%d.aqd-unittest.ms.com" % i,
                               "--buildstatus", "rebuild"])
 
+    def test_150_change_status_metacluster(self):
+        command = ["change_status", "--metacluster", "utmc1",
+                   "--buildstatus", "ready"]
+        self.statustest(command)
+
+    def test_155_verify_metacluster(self):
+        command = ["show_metacluster", "--metacluster", "utmc1"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Build Status: ready", command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestChangeClusterStatus)

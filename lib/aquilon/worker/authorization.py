@@ -91,7 +91,8 @@ class AuthorizationBroker(object):
                     "Must have the aqd_admin role to %s." % action)
         if dbuser.role.name == 'winops':
             if action not in ['add_host', 'add_host_prefix', 'add_windows_host',
-                              'make_cluster',
+                              'make_cluster_cluster',
+                              'make_cluster_metacluster',
                               'reconfigure', 'reconfigure_list',
                               'reconfigure_membersof',
                               'update_machine']:
@@ -109,8 +110,11 @@ class AuthorizationBroker(object):
                               'add_address', 'del_address',
                               'reconfigure', 'reconfigure_list',
                               'reconfigure_membersof',
-                              'add_cluster', 'make_cluster', 'update_cluster',
+                              'add_cluster', 'update_cluster',
+                              'make_cluster_cluster',
+                              'make_cluster_metacluster',
                               'change_status', 'change_status_cluster',
+                              'change_status_metacluster',
                               'add_service_instance', 'map_service',
                               'bind_server', 'update_machine']:
                 self.raise_auth_error(principal, action, resource)
@@ -149,7 +153,8 @@ class AuthorizationBroker(object):
                               'add_address', 'del_address',
                               'add_host', 'add_host_prefix', 'del_host',
                               'add_alias', 'del_alias',
-                              'make', 'make_cluster',
+                              'make', 'make_cluster_cluster',
+                              'make_cluster_metacluster',
                               'pxeswitch',
                               'change_status',
                               'add_room', 'add_rack', 'add_rack_room',
@@ -163,7 +168,8 @@ class AuthorizationBroker(object):
             if action not in ['permission',
                               'grant_root_access', 'revoke_root_access',
                               'compile', 'compile_hostname',
-                              'compile_cluster', 'compile_personality',
+                              'compile_cluster', 'compile_metacluster',
+                              'compile_personality',
                               'add_netgroup_whitelist',
                               'del_netgroup_whitelist']:
                 self.raise_auth_error(principal, action, resource)
@@ -297,7 +303,8 @@ class AuthorizationBroker(object):
             if action not in ['add_host', 'add_host_prefix', 'add_windows_host',
                               'del_host', 'del_windows_host',
                               'compile', 'compile_hostname',
-                              'compile_cluster', 'compile_personality',
+                              'compile_cluster', 'compile_metacluster',
+                              'compile_personality',
                               'reconfigure', 'reconfigure_membersof',
                               'reconfigure_list', 'reconfigure_hostlist',
                               'change_status',
@@ -323,7 +330,9 @@ class AuthorizationBroker(object):
                               'del_esx_cluster',
                               'bind_esx_cluster_hostname',
                               'rebind_esx_cluster_hostname',
-                              'cluster', 'uncluster', 'change_status_cluster',
+                              'cluster', 'uncluster',
+                              'change_status_cluster',
+                              'change_status_metacluster',
                               'add_allowed_personality',
                               'add_manager', 'add_dynamic_range', 'add_disk',
                               'add_auxiliary',
@@ -357,7 +366,8 @@ class AuthorizationBroker(object):
                               'manage_cluster',
                               'map_grn', 'unmap_grn',
                               'unmap_grn_clearall',
-                              'make', 'make_cluster']:
+                              'make', 'make_cluster_cluster',
+                              'make_cluster_metacluster']:
                 self.raise_auth_error(principal, action, resource)
         if dbuser.role.name == 'alias_manager':
             if action not in ['add_alias', 'del_alias', 'update_alias']:

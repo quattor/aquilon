@@ -579,14 +579,15 @@
 	sandbox, or only for the specified host.  Only out of date profiles
 	will be compiled.
 	<optgroup mandatory="True">
-	    <option name="domain" type="string" conflicts="sandbox hostname cluster">Domain name</option>
-	    <option name="sandbox" type="string" conflicts="domain hostname cluster">Name of the sandbox (given as 'author/branch')</option>
-	    <option name="hostname" type="string" conflicts="domain sandbox cluster">FQDN</option>
-	    <option name="cluster" type="string" conflicts="domain sandbox hostname">Name of cluster</option>
-	    <option name="personality" type="string" conflicts="hostname cluster">personality name</option>
+	    <option name="domain" type="string" conflicts="sandbox hostname cluster metacluster">Domain name</option>
+	    <option name="sandbox" type="string" conflicts="domain hostname cluster metacluster">Name of the sandbox (given as 'author/branch')</option>
+	    <option name="hostname" type="string" conflicts="domain sandbox cluster metacluster personality">FQDN</option>
+	    <option name="cluster" type="string" conflicts="domain sandbox hostname metacluster personality">Name of cluster</option>
+	    <option name="metacluster" type="string" conflicts="domain sandbox hostname cluster personality">Name of metacluster</option>
+	    <option name="personality" type="string" conflicts="hostname cluster metacluster">personality name</option>
 	</optgroup>
 	<optgroup>
-	    <option name="archetype" type="string" conflicts="hostname cluster">archetype name</option>
+	    <option name="archetype" type="string" conflicts="hostname cluster metacluster">archetype name</option>
 	    <option name="pancinclude" type="string" conflicts="pancdebug">Regex for templates to include in debug output (None included by default)</option>
 	    <option name="pancexclude" type="string" conflicts="pancdebug">Regex for templates to exclude in debug output (only useful if pancinclude has been given)</option>
 	    <option name="pancdebug" type="boolean" conflicts="pancinclude pancexclude">Alias for pancinclude=.* and pancexclude=components/spma/functions</option>
@@ -595,6 +596,7 @@
 	<transport method="post" path="command/compile"/>
 	<transport trigger="hostname" method="post" path="host/%(hostname)s/command/compile"/>
 	<transport trigger="cluster" method="post" path="cluster/%(cluster)s/command/compile"/>
+	<transport trigger="metacluster" method="post" path="metacluster/%(metacluster)s/command/compile"/>
 	<transport trigger="personality" method="post" path="personality/%(personality)s/command/compile"/>
     </command>
 
@@ -2118,11 +2120,13 @@
 	    <optgroup fields="one">
 		<option name="hostname" type="string">Host name</option>
 		<option name="cluster" type="string">Cluster name</option>
+		<option name="metacluster" type="string">Metacluster name</option>
 	    </optgroup>
 	    <option name="buildstatus" type="string">The new value of the buildstatus</option>
 	</optgroup>
 	<transport method="put" path="host/%(hostname)s/buildstatus/%(buildstatus)s"/>
 	<transport method="put" trigger="cluster" path="cluster/%(cluster)s/buildstatus/%(buildstatus)s"/>
+	<transport method="put" trigger="metacluster" path="metacluster/%(metacluster)s/buildstatus/%(buildstatus)s"/>
     </command>
 
     <command name="reset_advertised_status">
@@ -3249,13 +3253,15 @@
 	created, then the new configuration may be "advertised" to the cluster
 	itself, to the data warehouse and to the bootservers, making the
 	cluster ready to build.
-	<optgroup mandatory="True" fields="all">
+	<optgroup mandatory="True" fields="one">
 	    <option name="cluster" type="string">Cluster name to make</option>
+	    <option name="metacluster" type="string">Metacluster name to make</option>
 	</optgroup>
 	<optgroup>
 	    <option name="keepbindings" type="boolean">Preserve service bindings that are not marked as aligned</option>
 	</optgroup>
-	<transport method="post" path="cluster/%(cluster)s/command/make"/>
+	<transport method="post" trigger="cluster" path="cluster/%(cluster)s/command/make"/>
+	<transport method="post" trigger="metacluster" path="metacluster/%(metacluster)s/command/make"/>
     </command>
 
     <command name="add_machine">

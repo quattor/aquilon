@@ -14,21 +14,31 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Contains the logic for `aq make cluster`."""
+"""Contains the logic for `aq make cluster --cluster`."""
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand
-from aquilon.aqdb.model import Cluster
+from aquilon.aqdb.model import Cluster, MetaCluster
 from aquilon.worker.templates import PlenaryCollection, TemplateDomain
 from aquilon.worker.services import Chooser
 
 
-class CommandMakeCluster(BrokerCommand):
+class CommandMakeClusterCluster(BrokerCommand):
 
     required_parameters = ["cluster"]
 
-    def render(self, session, logger, cluster, keepbindings, **arguments):
-        dbcluster = Cluster.get_unique(session, cluster, compel=True)
+    def render(self, session, logger, cluster, metacluster, keepbindings,
+               **arguments):
+        if cluster:
+            # TODO: disallow metaclusters here
+            dbcluster = Cluster.get_unique(session, cluster, compel=True)
+            if isinstance(dbcluster, MetaCluster):
+                logger.client_info("Please use the --metacluster option for "
+                                   "metaclusters.")
+        else:
+            dbcluster = MetaCluster.get_unique(session, metacluster,
+                                               compel=True)
+
         if not dbcluster.personality.archetype.is_compileable:
             raise ArgumentError("{0} is not a compilable archetype "
                                 "({1!s}).".format(dbcluster,

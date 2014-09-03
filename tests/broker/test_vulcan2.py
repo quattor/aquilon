@@ -266,7 +266,7 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
         self.matchoutput(out, "Resource Group: utmc8as2", command)
 
     def test_160_verify_metacluster(self):
-        self.statustest(["make", "cluster", "--cluster", "utmc8"])
+        self.statustest(["make", "cluster", "--metacluster", "utmc8"])
 
         command = ["cat", "--metacluster", "utmc8", "--data"]
         out = self.commandtest(command)
@@ -535,6 +535,8 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
 
         command = ["make", "cluster", "--cluster", "utmc8"]
         out = self.badrequesttest(command)
+        self.matchoutput(out, "Please use the --metacluster option for "
+                         "metaclusters.", command)
         self.matchoutput(out,
                          "The available instances ['ut'] for service vcenter "
                          "are at full capacity.",

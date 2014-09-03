@@ -695,6 +695,17 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
         out = self.commandtest(command.split(" "))
         self.searchclean(out, "^  Owned by GRN", command)
 
+    def test_190_reconfigure_membersof_cluster(self):
+        command = ["reconfigure", "--membersof", "utecl1"]
+        out = self.statustest(command)
+        self.matchoutput(out, "/3 object template(s) being processed",
+                         command)
+
+    def test_190_reconfigure_membersof_metacluster(self):
+        command = ["reconfigure", "--membersof", "utmc1"]
+        out = self.statustest(command)
+        self.matchoutput(out, "/5 object template(s) being processed",
+                         command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestReconfigure)
