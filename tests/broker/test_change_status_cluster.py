@@ -143,7 +143,7 @@ class TestChangeClusterStatus(TestBrokerCommand):
                    "--cluster", "utecl1", "--model", "utmedium"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
-                         "Cannot add virtual machines to decommissioned clusters.",
+                         "Cannot add virtual machines to decommissioned holders.",
                          command)
 
         # can't add host.
@@ -154,7 +154,7 @@ class TestChangeClusterStatus(TestBrokerCommand):
                          "Cannot add hosts to decommissioned clusters.",
                          command)
 
-        #revert status changes
+        # revert status changes
         self.successtest(["change_status", "--cluster", "utecl1",
                           "--buildstatus", "rebuild"])
 

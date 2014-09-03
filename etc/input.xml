@@ -235,8 +235,11 @@
 	    <option name="cpuspeed" type="int">cpu speed</option>
 	    <option name="cpucount" type="int">cpu count</option>
 	    <option name="memory" type="int">memory in MB</option>
-	    <option name="cluster" type="string" conflicts="vmhost">Cluster name hosting the VM</option>
-	    <option name="vmhost" type="string" conflicts="cluster">Hypervisor host name</option>
+	    <optgroup fields="one">
+		<option name="cluster" type="string">Cluster name hosting the VM</option>
+		<option name="metacluster" type="string">Metacluster name hosting the VM</option>
+		<option name="vmhost" type="string">Hypervisor host name</option>
+	    </optgroup>
 	    <option name="model" type="string">model name</option>
 	    <option name="machine_type" type="enum" enum="MachineType">machine type for the model (blade, virtual_machine, etc.)</option>
 	    <option name="vendor" type="string">vendor name</option>
@@ -3286,6 +3289,7 @@
 		<option name="rack" type="string">Rack name</option>
 		<option name="desk" type="string">Desk name</option>
 		<option name="cluster" type="string">Cluster name</option>
+		<option name="metacluster" type="string">Metacluster name</option>
 		<option name="vmhost" type="string">Host where the VM lives</option>
 	    </optgroup>
 	</optgroup>
@@ -3314,6 +3318,17 @@
 	    <option name="machine" type="string">machine name</option>
 	    <option name="hostname" type="string">fully qualified host name</option>
 	</optgroup>
+	<optgroup fields="one">
+	    <optgroup>
+		<option name="chassis" type="string">chassis name</option>
+		<option name="slot" type="int">chassis slot</option>
+	    </optgroup>
+	    <option name="rack" type="string">rack name</option>
+	    <option name="desk" type="string">desk name</option>
+	    <option name="cluster" type="string">Cluster name hosting the VM</option>
+	    <option name="metacluster" type="string">Metacluster name hosting the VM</option>
+	    <option name="vmhost" type="string">Host name hosting the VM</option>
+	</optgroup>
 	<optgroup>
 	    <option name="model" type="string">machine model</option>
 	    <option name="vendor" type="string">machine vendor</option>
@@ -3322,16 +3337,10 @@
 	    <option name="cpuspeed" type="int">cpu speed</option>
 	    <option name="cpucount" type="int">cpu count</option>
 	    <option name="memory" type="int">memory in MB</option>
-	    <option name="chassis" type="string">chassis name</option>
-	    <option name="slot" type="int">chassis slot</option>
+	    <option name="serial" type="string">serial number</option>
 	    <option name="clearchassis" type="boolean">remove chassis and slot information</option>
 	    <option name="multislot" type="boolean">use to record machine as taking multiple slots in a chassis</option>
-	    <option name="rack" type="string">rack name</option>
-	    <option name="desk" type="string">desk name</option>
-	    <option name="serial" type="string">serial number</option>
-	    <option name="cluster" type="string">Cluster name hosting the VM</option>
 	    <option name="allow_metacluster_change" type="boolean">when changing clusters, allow the cluster to be in a different metacluster</option>
-	    <option name="vmhost" type="string">Host name hosting the VM</option>
 	    <option name="ip" type="ipv4">New primary IP address</option>
 	    <option name="uri" type="string">URI to point to a template describing the virtual appliance</option>
 	    <option name="remap_disk" type="string">Vitual disk backend remapping definitions</option>

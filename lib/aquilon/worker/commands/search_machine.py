@@ -45,7 +45,7 @@ class CommandSearchMachine(BrokerCommand):
     }
 
     def render(self, session, hostname, machine, cpuname, cpuvendor, cpuspeed,
-               cpucount, memory, cluster, vmhost, share, disk_share,
+               cpucount, memory, cluster, metacluster, vmhost, share, disk_share,
                disk_filesystem, chassis, slot, fullinfo, style, **arguments):
         if share:
             self.deprecated_option("share", "Please use --disk_share instead.",
@@ -73,12 +73,18 @@ class CommandSearchMachine(BrokerCommand):
 
         if cluster:
             dbcluster = Cluster.get_unique(session, cluster, compel=True)
+            # TODO: disallow metaclusters here
             if isinstance(dbcluster, MetaCluster):
                 q = q.join('vm_container', ClusterResource, Cluster)
                 q = q.filter_by(metacluster=dbcluster)
             else:
                 q = q.join('vm_container', ClusterResource)
                 q = q.filter_by(cluster=dbcluster)
+            q = q.reset_joinpoint()
+        elif metacluster:
+            dbmeta = MetaCluster.get_unique(session, metacluster, compel=True)
+            q = q.join('vm_container', ClusterResource, Cluster)
+            q = q.filter_by(metacluster=dbmeta)
             q = q.reset_joinpoint()
         elif vmhost:
             dbhost = hostname_to_host(session, vmhost)

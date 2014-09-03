@@ -19,9 +19,8 @@
 import re
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import (Cpu, Chassis, ChassisSlot, Model, Cluster,
-                                Machine, Resource, BundleResource, Share,
-                                Filesystem)
+from aquilon.aqdb.model import (Cpu, Chassis, ChassisSlot, Model, Machine,
+                                Resource, BundleResource, Share, Filesystem)
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.hardware_entity import update_primary_ip
 from aquilon.worker.dbwrappers.location import get_location
@@ -72,7 +71,7 @@ class CommandUpdateMachine(BrokerCommand):
             return holder.metacluster
 
         # vmhost
-        if holder.cluster:
+        if hasattr(holder, "cluster") and holder.cluster:
             return holder.cluster.metacluster
         else:
             # TODO vlocal still has clusters, so this case not tested yet.
@@ -80,11 +79,12 @@ class CommandUpdateMachine(BrokerCommand):
 
     def render(self, session, logger, machine, model, vendor, serial,
                chassis, slot, clearchassis, multislot,
-               vmhost, cluster, allow_metacluster_change,
+               vmhost, cluster, metacluster, allow_metacluster_change,
                cpuname, cpuvendor, cpuspeed, cpucount, memory, ip, uri,
                remap_disk, **arguments):
         dbmachine = Machine.get_unique(session, machine, compel=True)
         oldinfo = DSDBRunner.snapshot_hw(dbmachine)
+        old_location = dbmachine.location
 
         plenaries = PlenaryCollection(logger=logger)
         plenaries.append(Plenary.get_plenary(dbmachine))
@@ -135,11 +135,6 @@ class CommandUpdateMachine(BrokerCommand):
             if loc_clear_chassis:
                 del dbmachine.chassis_slot[:]
             dbmachine.location = dblocation
-
-            if dbmachine.host:
-                for vm in dbmachine.host.virtual_machines:
-                    plenaries.append(Plenary.get_plenary(vm))
-                    vm.location = dblocation
 
         if model or vendor:
             # If overriding model, should probably overwrite default
@@ -201,14 +196,16 @@ class CommandUpdateMachine(BrokerCommand):
         # re-evaluate the portgroup for overflow.
         # It would be better to have --pg and --autopg options to let it
         # happen at this point.
-        if cluster or vmhost:
+        if cluster or vmhost or metacluster:
             if not dbmachine.vm_container:
                 raise ArgumentError("Cannot convert a physical machine to "
                                     "virtual.")
 
             old_holder = dbmachine.vm_container.holder.holder_object
             resholder = get_resource_holder(session, logger, hostname=vmhost,
-                                            cluster=cluster, compel=False)
+                                            cluster=cluster,
+                                            metacluster=metacluster,
+                                            compel=False)
             new_holder = resholder.holder_object
 
             if self.get_metacluster(new_holder) != self.get_metacluster(old_holder) \
@@ -240,11 +237,15 @@ class CommandUpdateMachine(BrokerCommand):
                                                error=ArgumentError)
                 dbdisk.backing_store = new_bstore
 
-            if isinstance(new_holder, Cluster):
+            if hasattr(new_holder, 'location_constraint'):
                 dbmachine.location = new_holder.location_constraint
             else:
-                # vmhost
                 dbmachine.location = new_holder.hardware_entity.location
+
+        if dbmachine.location != old_location and dbmachine.host:
+            for vm in dbmachine.host.virtual_machines:
+                plenaries.append(Plenary.get_plenary(vm))
+                vm.location = dbmachine.location
 
         session.flush()
 
@@ -252,7 +253,7 @@ class CommandUpdateMachine(BrokerCommand):
         # requiremets
         if dbmachine.cluster:
             dbmachine.cluster.validate()
-            if allow_metacluster_change:
+            if allow_metacluster_change and dbmachine.cluster.metacluster:
                 dbmachine.cluster.metacluster.validate()
         if dbmachine.host and dbmachine.host.cluster:
             dbmachine.host.cluster.validate()

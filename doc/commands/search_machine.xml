@@ -36,6 +36,7 @@
 		<arg choice="opt"><option>--cpucount <replaceable>NUMBER</replaceable></option></arg>
 		<arg choice="opt"><option>--memory <replaceable>NUMBER</replaceable></option></arg>
 		<arg choice="opt"><option>--cluster <replaceable>NAME</replaceable></option></arg>
+		<arg choice="opt"><option>--metacluster <replaceable>NAME</replaceable></option></arg>
 		<arg choice="opt"><option>--vmhost <replaceable>FQFDN</replaceable></option></arg>
 		<arg choice="opt"><option>--model <replaceable>NAME</replaceable></option></arg>
 		<arg choice="opt"><option>--machine_type <replaceable>TYPE</replaceable></option></arg>
@@ -155,6 +156,16 @@
 		<listitem>
 		    <para>
 			Look for virtual machines hosted by cluster <replaceable>NAME</replaceable>.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+		<term>
+		    <option>--metacluster <replaceable>NAME</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Look for virtual machines hosted by metacluster <replaceable>NAME</replaceable>.
 		    </para>
 		</listitem>
 	    </varlistentry>
