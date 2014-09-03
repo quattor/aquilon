@@ -20,7 +20,7 @@ from datetime import datetime
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import RebootIntervention
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.resources import (add_resource,
                                                  get_resource_holder)
 
@@ -29,9 +29,8 @@ class CommandAddRebootIntervention(BrokerCommand):
 
     required_parameters = ["expiry", "justification"]
 
-    def render(self, session, logger, expiry, start_time,
-               comments, justification, hostname, cluster,
-               **arguments):
+    def render(self, session, logger, expiry, start_time, comments,
+               justification, hostname, cluster, **arguments):
 
         allowusers = None
         allowgroups = None
@@ -72,7 +71,8 @@ class CommandAddRebootIntervention(BrokerCommand):
         # v) test all the above doesn't conflict within 1hr of each other.
 
         # Setup intervention
-        holder = get_resource_holder(session, hostname, cluster, compel=False)
+        holder = get_resource_holder(session, logger, hostname, cluster,
+                                     compel=False)
 
         RebootIntervention.get_unique(session, name=intervention,
                                       holder=holder, preclude=True)

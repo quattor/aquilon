@@ -30,6 +30,7 @@
 	    <group choice="req">
 		<arg choice="plain"><option>--hostname <replaceable>HOSTNAME</replaceable></option></arg>
 		<arg choice="plain"><option>--cluster <replaceable>CLUSTER</replaceable></option></arg>
+		<arg choice="plain"><option>--metacluster <replaceable>METACLUSTER</replaceable></option></arg>
 	    </group>
 	    <arg choice="plain"><option>--resourcegroup <replaceable>NAME</replaceable></option></arg>
 	    <xi:include href="../common/global_options.xml"/>
@@ -49,7 +50,7 @@
     <refsect1>
         <title>Templates</title>
 	<para>
-	    This command will modify the templates for the host or cluster that
+	    This command will modify the templates for the host, cluster or metacluster that
 	    held this resourcegroup.
 	</para>
     </refsect1>
@@ -75,6 +76,16 @@
 		<listitem>
 		    <para>
 			Name of the cluster holding the resourcegroup.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--metacluster <replaceable>METACLUSTER</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			The name of the target metacluster of the application.
 		    </para>
 		</listitem>
 	    </varlistentry>

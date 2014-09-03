@@ -15,9 +15,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 from aquilon.aqdb.model import Application
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.commands.show_resource import show_resource
 
 
@@ -25,11 +24,11 @@ class CommandShowApplication(BrokerCommand):
 
     required_parameters = []
 
-    def render(self, session, hostname, cluster, resourcegroup, all,
-               application, eonid, **arguments):
+    def render(self, session, logger, hostname, cluster, metacluster,
+               resourcegroup, all, application, eonid, **arguments):
 
         #if eonid:
         #    q = q.filter_by(eonid=eonid)
 
-        return show_resource(session, hostname, cluster, resourcegroup, all,
-                             application, Application)
+        return show_resource(session, logger, hostname, cluster, metacluster,
+                             resourcegroup, all, application, Application)

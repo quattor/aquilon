@@ -28,7 +28,7 @@ class CommandAddResourceGroup(BrokerCommand):
     required_parameters = ["resourcegroup"]
 
     def render(self, session, logger, resourcegroup, required_type,
-               hostname, cluster, **arguments):
+               hostname, cluster, metacluster, **arguments):
 
         validate_nlist_key("resourcegroup", resourcegroup)
 
@@ -39,7 +39,8 @@ class CommandAddResourceGroup(BrokerCommand):
                 raise ArgumentError("A resourcegroup can't hold other "
                                     "resourcegroups.")
 
-        holder = get_resource_holder(session, hostname, cluster, compel=False)
+        holder = get_resource_holder(session, logger, hostname, cluster,
+                                     metacluster, compel=False)
 
         ResourceGroup.get_unique(session, name=resourcegroup, holder=holder,
                                  preclude=True)

@@ -25,9 +25,10 @@ class CommandDelIntervention(BrokerCommand):
 
     required_parameters = ["intervention"]
 
-    def render(self, session, logger, hostname, cluster, intervention,
-               **arguments):
-        holder = get_resource_holder(session, hostname, cluster)
+    def render(self, session, logger, hostname, cluster, metacluster,
+               intervention, **arguments):
+        holder = get_resource_holder(session, logger, hostname, cluster,
+                                     metacluster)
         dbapp = Intervention.get_unique(session, name=intervention,
                                         holder=holder, compel=True)
         del_resource(session, logger, dbapp)

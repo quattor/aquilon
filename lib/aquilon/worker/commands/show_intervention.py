@@ -15,15 +15,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 from aquilon.aqdb.model import Intervention
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.commands.show_resource import show_resource
 
 
 class CommandShowIntervention(BrokerCommand):
 
-    def render(self, session, intervention,
-               hostname, cluster, resourcegroup, all, **arguments):
-        return show_resource(session, hostname, cluster, resourcegroup, all,
-                             intervention, Intervention)
+    def render(self, session, logger, intervention, hostname, cluster,
+               metacluster, all, **arguments):
+        return show_resource(session, logger, hostname, cluster, metacluster,
+                             None, all, intervention, Intervention)

@@ -27,8 +27,8 @@ from aquilon.worker.dbwrappers.service_instance import get_service_instance
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
 
 
-def lookup_target(session, plenaries, hostname, ip, cluster, resourcegroup,
-                  service_address, alias):
+def lookup_target(session, logger, plenaries, hostname, ip, cluster,
+                  resourcegroup, service_address, alias):
     """
     Check the parameters of the server providing a given service
 
@@ -61,7 +61,7 @@ def lookup_target(session, plenaries, hostname, ip, cluster, resourcegroup,
         # TODO: it would be nice to also accept an FQDN for the service address,
         # to be consistent with the usage of the --service_address option in
         # add_service_address/del_service_address
-        holder = get_resource_holder(session, hostname=hostname,
+        holder = get_resource_holder(session, logger, hostname=hostname,
                                      cluster=cluster,
                                      resgroup=resourcegroup, compel=True)
 
@@ -131,8 +131,8 @@ class CommandBindServer(BrokerCommand):
         plenaries = PlenaryCollection(logger=logger)
         plenaries.append(Plenary.get_plenary(dbinstance))
 
-        params = lookup_target(session, plenaries, hostname, ip, cluster,
-                               resourcegroup, service_address, alias)
+        params = lookup_target(session, logger, plenaries, hostname, ip,
+                               cluster, resourcegroup, service_address, alias)
 
         # TODO: someday we should verify that the target really points to the
         # host/cluster specified by the other options

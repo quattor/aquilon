@@ -25,9 +25,10 @@ class CommandDelHostlink(BrokerCommand):
 
     required_parameters = ["hostlink"]
 
-    def render(self, session, logger, hostname, cluster, resourcegroup,
-               hostlink, **arguments):
-        holder = get_resource_holder(session, hostname, cluster, resourcegroup)
+    def render(self, session, logger, hostname, cluster, metacluster,
+               resourcegroup, hostlink, **arguments):
+        holder = get_resource_holder(session, logger, hostname, cluster,
+                                     metacluster, resourcegroup)
         dbhl = Hostlink.get_unique(session, name=hostlink, holder=holder,
                                    compel=True)
         del_resource(session, logger, dbhl)

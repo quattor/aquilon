@@ -31,7 +31,7 @@ class CommandAddIntervention(BrokerCommand):
 
     def render(self, session, logger, intervention, expiry, start_time,
                allowusers, allowgroups, disabled_actions,
-               comments, justification, hostname, cluster,
+               comments, justification, hostname, cluster, metacluster,
                **arguments):
 
         try:
@@ -52,7 +52,8 @@ class CommandAddIntervention(BrokerCommand):
         if start_when > expire_when:
             raise ArgumentError("the start time is later than the expiry time")
 
-        holder = get_resource_holder(session, hostname, cluster, compel=False)
+        holder = get_resource_holder(session, logger, hostname, cluster,
+                                     metacluster, compel=False)
 
         Intervention.get_unique(session, name=intervention, holder=holder,
                                 preclude=True)

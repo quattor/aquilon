@@ -16,7 +16,7 @@
     <refnamediv>
         <refname>aq add intervention</refname>
         <refpurpose>
-	    Add an intervention resource onto a host or cluster
+	    Add an intervention resource onto a host, cluster or metacluster
         </refpurpose>
 	<refclass>Aquilon</refclass>
     </refnamediv>
@@ -30,6 +30,7 @@
 	    <group choice="req">
 		<arg choice="plain"><option>--hostname <replaceable>HOSTNAME</replaceable></option></arg>
 		<arg choice="plain"><option>--cluster <replaceable>CLUSTER</replaceable></option></arg>
+		<arg choice="plain"><option>--metacluster <replaceable>METACLUSTER</replaceable></option></arg>
             </group>
 	    <arg choice="plain"><option>--intervention <replaceable>NAME</replaceable></option></arg>
 	    <arg choice="plain"><option>--expiry <replaceable>WHEN</replaceable></option></arg>
@@ -47,14 +48,14 @@
         <title>Description</title>
 	<para>
 	    The <command>aq add_intervention</command> command adds an
-	    intervention resource onto a host or a cluster. An
+	    intervention resource onto a host, cluster or metacluster. An
 	    intervention is a temporary modification of host
 	    configuration. The modifications available
 	    are currently limited to only modifying host login
 	    access, or disabling actions.
 	</para>
 	<para>
-	    Adding a intervention onto a host or cluster adds a new
+	    Adding a intervention adds a new
 	    entry into the configuration profile under
 	    /system/resources/intervention.  How that resource gets
 	    used is down to the archetype and personality
@@ -69,8 +70,8 @@
     <refsect1>
         <title>Templates</title>
         <para>
-	    This command will modify the templates for the host or
-	    cluster (depending on which option was given) and the resource
+	    This command will modify the templates for the host, cluster or
+	    metacluster (depending on which option was given) and the resource
 	    template for the intervention itself.
 	</para>
     </refsect1>
@@ -96,6 +97,16 @@
 		<listitem>
 		    <para>
 			The name of the target cluster for the intervention.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--metacluster <replaceable>METACLUSTER</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			The name of the target metacluster for the intervention.
 		    </para>
 		</listitem>
 	    </varlistentry>

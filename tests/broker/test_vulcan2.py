@@ -246,15 +246,18 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
     def test_150_add_rg_to_cluster(self):
         command = ["add_resourcegroup", "--resourcegroup=utmc8as1",
                    "--cluster=utmc8", "--required_type=share"]
-        self.successtest(command)
+        out = self.statustest(command)
+        self.matchoutput(out,
+                         "Please use the --metacluster option for metaclusters.",
+                         command)
 
-        command = ["show_resourcegroup", "--cluster=utmc8"]
+        command = ["show_resourcegroup", "--metacluster=utmc8"]
         out = self.commandtest(command)
         self.matchoutput(out, "Resource Group: utmc8as1", command)
         self.matchoutput(out, "Bound to: ESX Metacluster utmc8", command)
 
         command = ["add_resourcegroup", "--resourcegroup=utmc8as2",
-                   "--cluster=utmc8", "--required_type=share"]
+                   "--metacluster=utmc8", "--required_type=share"]
         self.successtest(command)
 
         command = ["show_resourcegroup", "--all"]
@@ -306,18 +309,18 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
     # share tests
     def test_200_add_share_to_rg(self):
         command = ["add_share", "--resourcegroup=utmc8as1",
-                   "--cluster=utmc8", "--share=test_v2_share"]
+                   "--metacluster=utmc8", "--share=test_v2_share"]
         self.successtest(command)
 
         command = ["show_share", "--resourcegroup=utmc8as1",
-                   "--cluster=utmc8", "--share=test_v2_share"]
+                   "--metacluster=utmc8", "--share=test_v2_share"]
         out = self.commandtest(command)
         self.matchoutput(out, "Share: test_v2_share", command)
         self.matchoutput(out, "Bound to: Resource Group utmc8as1", command)
         self.matchclean(out, "Latency", command)
 
         command = ["add_share", "--resourcegroup=utmc8as2",
-                   "--cluster=utmc8", "--share=test_v2_share"]
+                   "--metacluster=utmc8", "--share=test_v2_share"]
         self.successtest(command)
 
         command = ["show_share", "--all"]
@@ -361,7 +364,7 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
         self.matchclean(out, 'latency', command)
 
     def test_240_verify_resourcegroup_share(self):
-        command = ["show_resourcegroup", "--cluster=utmc8"]
+        command = ["show_resourcegroup", "--metacluster=utmc8"]
         out = self.commandtest(command)
         self.matchoutput(out, "Resource Group: utmc8as1", command)
         self.matchoutput(out, "Share: test_v2_share", command)
@@ -416,7 +419,7 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
         self.assertEqual(machine.disks[0].backing_store.type, "share")
 
         command = ["show_share", "--resourcegroup=utmc8as1",
-                   "--cluster=utmc8", "--share=test_v2_share"]
+                   "--metacluster=utmc8", "--share=test_v2_share"]
         out = self.commandtest(command)
         self.matchoutput(out, "Share: test_v2_share", command)
         self.matchoutput(out, "Bound to: Resource Group utmc8as1", command)
@@ -573,9 +576,9 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
                         "Uses Service: vcenter Instance: ut",
                         command)
 
-#
-##    service binding conflicts
-#
+    #
+    # service binding conflicts
+    #
     def test_500_add_mc_esx_service(self):
         command = ["add", "service", "--service", "esx_management_server", "--instance", "ut.mc"]
         self.noouttest(command)
@@ -701,19 +704,19 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
 
     def test_610_delresourcegroup(self):
         command = ["del_share", "--resourcegroup=utmc8as1",
-                   "--cluster=utmc8", "--share=test_v2_share"]
+                   "--metacluster=utmc8", "--share=test_v2_share"]
         self.successtest(command)
 
         command = ["del_resourcegroup", "--resourcegroup=utmc8as1",
-                   "--cluster=utmc8"]
+                   "--metacluster=utmc8"]
         self.successtest(command)
 
         command = ["del_share", "--resourcegroup=utmc8as2",
-                   "--cluster=utmc8", "--share=test_v2_share"]
+                   "--metacluster=utmc8", "--share=test_v2_share"]
         self.successtest(command)
 
         command = ["del_resourcegroup", "--resourcegroup=utmc8as2",
-                   "--cluster=utmc8"]
+                   "--metacluster=utmc8"]
         self.successtest(command)
 
     # Metacluster / cluster / Switch deletes
@@ -774,8 +777,7 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
 
     def test_760_delutmc8(self):
         basetime = datetime.now()
-        command = ["del_metacluster", "--metacluster=utmc8"]
-        err = self.statustest(command)
+        self.statustest(["del_metacluster", "--metacluster=utmc8"])
         self.wait_notification(basetime, 1)
 
         self.assertFalse(os.path.exists(os.path.join(

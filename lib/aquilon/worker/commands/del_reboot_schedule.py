@@ -25,10 +25,9 @@ from aquilon.worker.dbwrappers.resources import (del_resource,
 class CommandDelRebootSchedule(BrokerCommand):
 
     def render(self, session, logger, hostname, cluster, **arguments):
-
         reboot_schedule = "reboot_schedule"
 
-        holder = get_resource_holder(session, hostname, cluster)
+        holder = get_resource_holder(session, logger, hostname, cluster)
         res = RebootSchedule.get_unique(session, name=reboot_schedule,
                                         holder=holder, compel=True)
 

@@ -207,7 +207,7 @@ class CommandUpdateMachine(BrokerCommand):
                                     "virtual.")
 
             old_holder = dbmachine.vm_container.holder.holder_object
-            resholder = get_resource_holder(session, hostname=vmhost,
+            resholder = get_resource_holder(session, logger, hostname=vmhost,
                                             cluster=cluster, compel=False)
             new_holder = resholder.holder_object
 

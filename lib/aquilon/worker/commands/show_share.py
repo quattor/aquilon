@@ -27,8 +27,8 @@ class CommandShowShare(BrokerCommand):
 
     required_parameters = []
 
-    def render(self, session, share, hostname, resourcegroup, cluster, all,
-               **arguments):
+    def render(self, session, logger, share, hostname, resourcegroup, cluster,
+               metacluster, all, **arguments):
         q = session.query(Share)
         if share:
             q = q.filter_by(name=share)
@@ -37,7 +37,8 @@ class CommandShowShare(BrokerCommand):
                       undefer(Share.virtual_machine_count))
 
         if hostname or cluster or resourcegroup:
-            who = get_resource_holder(session, hostname, cluster, resourcegroup)
+            who = get_resource_holder(session, logger, hostname, cluster,
+                                      metacluster, resourcegroup)
             q = q.filter_by(holder=who)
 
         shares = q.all()

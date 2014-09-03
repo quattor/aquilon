@@ -16,20 +16,21 @@
     <refnamediv>
         <refname>aq add application</refname>
         <refpurpose>
-	    Add an application resource onto a host or cluster
+	    Add an application resource onto a host, cluster or metacluster
         </refpurpose>
 	<refclass>Aquilon</refclass>
     </refnamediv>
 
     <refsynopsisdiv>
 	<cmdsynopsis>
-	    <command>aq add application </command>
+	    <command>aq add application</command>
 	    <group>
 		<synopfragmentref linkend="global-options">Global options</synopfragmentref>
 	    </group>
 	    <group choice="req">
 		<arg choice="plain"><option>--hostname <replaceable>HOSTNAME</replaceable></option></arg>
 		<arg choice="plain"><option>--cluster <replaceable>CLUSTER</replaceable></option></arg>
+		<arg choice="plain"><option>--metacluster <replaceable>METACLUSTER</replaceable></option></arg>
 		<arg choice="plain"><option>--resourcegroup <replaceable>RESOURCEGROUP</replaceable></option></arg>
 	    </group>
 	    <group choice="req">
@@ -45,7 +46,7 @@
         <title>Description</title>
 	<para>
 	    The <command>aq add_application</command> command adds an
-	    application resource onto a host or a cluster. An
+	    application resource onto a host, cluster or metacluster. An
 	    application is a personality specific resource - all
 	    interpretation of this resource is entirely down to the
 	    personality templates.
@@ -55,8 +56,8 @@
     <refsect1>
         <title>Templates</title>
         <para>
-	    This command will modify the templates for the host or
-	    cluster (depending on which option was given) and the resource
+	    This command will modify the templates for the host, cluster or
+	    metacluster (depending on which option was given) and the resource
 	    template for the application itself.
 	</para>
     </refsect1>
@@ -82,6 +83,16 @@
 		<listitem>
 		    <para>
 			The name of the target cluster for the application.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--metacluster <replaceable>METACLUSTER</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			The name of the target metacluster for the application.
 		    </para>
 		</listitem>
 	    </varlistentry>

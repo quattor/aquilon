@@ -25,9 +25,10 @@ class CommandDelApplication(BrokerCommand):
 
     required_parameters = ["application"]
 
-    def render(self, session, logger, hostname, cluster, application,
-               **arguments):
-        holder = get_resource_holder(session, hostname, cluster)
+    def render(self, session, logger, hostname, cluster, metacluster,
+               resourcegroup, application, **arguments):
+        holder = get_resource_holder(session, logger, hostname, cluster,
+                                     metacluster, resourcegroup)
         dbapp = Application.get_unique(session, name=application, holder=holder,
                                        compel=True)
         del_resource(session, logger, dbapp)

@@ -15,9 +15,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 from aquilon.aqdb.model import RebootIntervention
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.resources import (del_resource,
                                                  get_resource_holder)
 
@@ -28,7 +27,7 @@ class CommandDelRebootIntervention(BrokerCommand):
 
         intervention = "reboot_intervention"
 
-        holder = get_resource_holder(session, hostname, cluster)
+        holder = get_resource_holder(session, logger, hostname, cluster)
         res = RebootIntervention.get_unique(session, name=intervention,
                                             holder=holder, compel=True)
         return del_resource(session, logger, res)

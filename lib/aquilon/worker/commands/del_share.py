@@ -26,8 +26,9 @@ class CommandDelShare(BrokerCommand):
     required_parameters = ["share"]
 
     def render(self, session, logger, share, hostname, resourcegroup, cluster,
-               **arguments):
-        holder = get_resource_holder(session, hostname, cluster, resourcegroup)
+               metacluster, **arguments):
+        holder = get_resource_holder(session, logger, hostname, cluster,
+                                     metacluster, resourcegroup)
         dbshare = Share.get_unique(session, name=share, holder=holder,
                                    compel=True)
         del_resource(session, logger, dbshare)

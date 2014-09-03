@@ -16,7 +16,7 @@
     <refnamediv>
         <refname>aq add filesystem</refname>
         <refpurpose>
-	    Add a filesystem resource onto a host or cluster
+	    Add a filesystem resource
         </refpurpose>
 	<refclass>Aquilon</refclass>
     </refnamediv>
@@ -30,8 +30,9 @@
 	    <group choice="req">
 		<arg choice="plain"><option>--hostname <replaceable>HOSTNAME</replaceable></option></arg>
 		<arg choice="plain"><option>--cluster <replaceable>CLUSTER</replaceable></option></arg>
+		<arg choice="plain"><option>--metacluster <replaceable>METACLUSTER</replaceable></option></arg>
+		<arg choice="plain"><option>--resourcegroup <replaceable>RESOURCEGROUP</replaceable></option></arg>
             </group>
-	    <arg choice="opt"><option>--resourcegroup <replaceable>RESOURCEGROUP</replaceable></option></arg>
 	    <arg choice="plain"><option>--filesystem <replaceable>NAME</replaceable></option></arg>
 	    <arg choice="plain"><option>--type <replaceable>TYPE</replaceable></option></arg>
 	    <arg choice="plain"><option>--mountpoint <replaceable>PATHNAME</replaceable></option></arg>
@@ -95,6 +96,16 @@
 		<listitem>
 		    <para>
 			The name of the target cluster for the filesystem.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--metacluster <replaceable>METACLUSTER</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			The name of the target metacluster for the filesystem.
 		    </para>
 		</listitem>
 	    </varlistentry>

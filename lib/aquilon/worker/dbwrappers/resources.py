@@ -22,16 +22,16 @@ from sqlalchemy.inspection import inspect
 
 from aquilon.exceptions_ import (IncompleteError, NotFoundException,
                                  ArgumentError)
-from aquilon.aqdb.model import (Cluster, ClusterResource, HostResource,
-                                Resource, ResourceGroup, BundleResource,
-                                RebootIntervention)
+from aquilon.aqdb.model import (Cluster, MetaCluster, ClusterResource,
+                                HostResource, Resource, ResourceGroup,
+                                BundleResource, RebootIntervention)
 from aquilon.worker.templates import Plenary
 from aquilon.worker.dbwrappers.host import hostname_to_host
 from aquilon.worker.locks import CompileKey
 
 
-def get_resource_holder(session, hostname=None, cluster=None, resgroup=None,
-                        compel=True):
+def get_resource_holder(session, logger, hostname=None, cluster=None,
+                        metacluster=None, resgroup=None, compel=True):
     who = None
     if hostname is not None:
         dbhost = hostname_to_host(session, hostname)
@@ -45,7 +45,11 @@ def get_resource_holder(session, hostname=None, cluster=None, resgroup=None,
             who = dbhost.resholder
 
     if cluster is not None:
+        # TODO: disallow metaclusters here
         dbcluster = Cluster.get_unique(session, cluster, compel=True)
+        if isinstance(dbcluster, MetaCluster):
+            logger.client_info("Please use the --metacluster option for "
+                               "metaclusters.")
         who = dbcluster.resholder
         if who is None:
             if compel:
@@ -54,6 +58,17 @@ def get_resource_holder(session, hostname=None, cluster=None, resgroup=None,
             session.add(dbcluster.resholder)
             session.flush()
             who = dbcluster.resholder
+
+    if metacluster is not None:
+        dbmeta = MetaCluster.get_unique(session, metacluster, compel=True)
+        who = dbmeta.resholder
+        if who is None:
+            if compel:
+                raise NotFoundException("{0} has no resources.".format(dbmeta))
+            dbmeta.resholder = ClusterResource(cluster=dbmeta)
+            session.add(dbmeta.resholder)
+            session.flush()
+            who = dbmeta.resholder
 
     if resgroup is not None:
         dbrg = ResourceGroup.get_unique(session, name=resgroup, holder=who,

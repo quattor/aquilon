@@ -28,12 +28,12 @@ class CommandAddHostlink(BrokerCommand):
     required_parameters = ["hostlink", "target", "owner"]
 
     def render(self, session, logger, hostlink, target, owner,
-               group, hostname, cluster, resourcegroup,
+               group, hostname, cluster, metacluster, resourcegroup,
                comments, **arguments):
 
         validate_nlist_key("hostlink", hostlink)
-        holder = get_resource_holder(session, hostname, cluster,
-                                     resourcegroup, compel=False)
+        holder = get_resource_holder(session, logger, hostname, cluster,
+                                     metacluster, resourcegroup, compel=False)
 
         Hostlink.get_unique(session, name=hostlink, holder=holder,
                             preclude=True)

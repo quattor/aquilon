@@ -18,13 +18,14 @@
 from aquilon.worker.dbwrappers.resources import get_resource_holder
 
 
-def show_resource(session, hostname, cluster, resourcegroup,
-                  all, name, resource_class):
+def show_resource(session, logger, hostname, cluster, metacluster,
+                  resourcegroup, all, name, resource_class):
     q = session.query(resource_class)
     if name:
         q = q.filter_by(name=name)
     if hostname or cluster or resourcegroup:
-        who = get_resource_holder(session, hostname, cluster, resourcegroup)
+        who = get_resource_holder(session, logger, hostname, cluster,
+                                  metacluster, resourcegroup)
         q = q.filter_by(holder=who)
 
     return q.all()

@@ -69,7 +69,7 @@ class CommandAddMachine(BrokerCommand):
                                     .format(dbmodel))
 
             # TODO: do we need VMs inside resource groups?
-            vmholder = get_resource_holder(session, hostname=vmhost,
+            vmholder = get_resource_holder(session, logger, hostname=vmhost,
                                            cluster=cluster, resgroup=None,
                                            compel=False)
 

@@ -4663,16 +4663,16 @@
 	For schedule to take affect the server must be bound to reboot
 	service instance 'scheduled'. A warning will be printed if not.
 	<optgroup mandatory="True" fields="all">
+	    <optgroup fields="one">
+		<option name="hostname" type="string">Hostname to apply resource</option>
+		<option name="cluster" type="string">Cluster to apply resource</option>
+	    </optgroup>
 	    <option name="week" type="string" default="all">Comma separated week (1-4 or all)</option>
 	    <option name="day" type="string" default="Sun">Week day (Sun,Mon...Sat) maching maintenance WW</option>
 	</optgroup>
 	<optgroup>
 	    <option name="time" type="string">Preferred time (omit for anytime within WW)</option>
 	    <option name="comments" type="string">Comments</option>
-	</optgroup>
-	<optgroup mandatory="True">
-	    <option name="hostname" type="string">Hostname to apply resource</option>
-	    <option name="cluster" type="string">Cluster to apply resource</option>
 	</optgroup>
 	<transport method="put" path="resource/reboot_schedule"/>
     </command>
@@ -4716,16 +4716,16 @@
 	<p/> Only a single reboot intervention can be in place at once.
 
 	<optgroup mandatory="True" fields="all">
+	    <optgroup fields="one">
+		<option name="hostname" type="string">Host</option>
+		<option name="cluster" type="string">Cluster</option>
+	    </optgroup>
 	    <option name="expiry" type="string">when to expire this intervention</option>
 	    <option name="justification" type="string">the reason for the intervention</option>
 	</optgroup>
 	<optgroup>
 	    <option name="comments" type="string">Comments</option>
 	    <option name="start_time" type="string">when to start this intervention (default=now)</option>
-	</optgroup>
-	<optgroup>
-	    <option name="hostname" type="string">Host</option>
-	    <option name="cluster" type="string">Cluster</option>
 	</optgroup>
 	<transport method="post" path="resource/reboot_intervention"/>
     </command>
@@ -4735,7 +4735,7 @@
 
 	<p/> The intervention will be removed after host compilation and NCM
 	update.
-	<optgroup mandatory="True">
+	<optgroup mandatory="True" fields="one">
 	    <option name="hostname" type="string">Hostname to apply resource</option>
 	    <option name="cluster" type="string">Cluster to apply resource</option>
 	</optgroup>
@@ -4745,6 +4745,12 @@
     <command name="add_filesystem">
 	Add a new filesystem resource.
 	<optgroup mandatory="True" fields="all">
+	    <optgroup>
+		<option name="hostname" type="string" conflicts="cluster metacluster">Hostname to apply resource</option>
+		<option name="cluster" type="string" conflicts="hostname metacluster">Cluster to apply resource</option>
+		<option name="metacluster" type="string" conflicts="hostname cluster">Metacluster to apply resource</option>
+		<option name="resourcegroup" type="string">Resourcegroup to apply resource</option>
+	    </optgroup>
 	    <option name="filesystem" type="string">name</option>
 	    <option name="type" type="string">type</option>
 	    <option name="mountpoint" type="string">mountpoint</option>
@@ -4757,23 +4763,19 @@
 	    <option name="options" type="string">mountoptions</option>
 	    <option name="comments" type="string">Comments</option>
 	</optgroup>
-	<optgroup mandatory="True">
-	    <option name="hostname" type="string">Hostname to apply resource</option>
-	    <option name="resourcegroup" type="string">Resourcegroup to apply resource</option>
-	    <option name="cluster" type="string">Cluster to apply resource</option>
-	</optgroup>
 	<transport method="put" path="resource/filesystem/%(filesystem)s"/>
     </command>
 
     <command name="del_filesystem">
 	Delete a filesystem resource.
 	<optgroup mandatory="True" fields="all">
+	    <optgroup>
+		<option name="hostname" type="string" conflicts="cluster metacluster">Hostname to apply resource</option>
+		<option name="cluster" type="string" conflicts="hostname metacluster">Cluster to apply resource</option>
+		<option name="metacluster" type="string" conflicts="hostname cluster">Metacluster to apply resource</option>
+		<option name="resourcegroup" type="string">Resourcegroup to apply resource</option>
+	    </optgroup>
 	    <option name="filesystem" type="string">name</option>
-	</optgroup>
-	<optgroup mandatory="True">
-	    <option name="hostname" type="string">Hostname of resource</option>
-	    <option name="resourcegroup" type="string">Resourcegroup to apply resource</option>
-	    <option name="cluster" type="string">Cluster of resource</option>
 	</optgroup>
 	<transport method="delete" path="resource/filesystem/%(filesystem)s"/>
     </command>
@@ -4781,11 +4783,14 @@
     <command name="show_filesystem">
 	Show filesystems based on filtering for host/cluster association
 	<optgroup mandatory="True">
-	    <option name="resourcegroup" type="string">resourcegroup name</option>
-	    <option name="cluster" type="string">cluster name</option>
-	    <option name="hostname" type="string">hostname</option>
+	    <optgroup>
+		<option name="hostname" type="string" conflicts="cluster metacluster">Hostname to apply resource</option>
+		<option name="cluster" type="string" conflicts="hostname metacluster">Cluster to apply resource</option>
+		<option name="metacluster" type="string" conflicts="hostname cluster">Metacluster to apply resource</option>
+		<option name="resourcegroup" type="string">Resourcegroup to apply resource</option>
+	    </optgroup>
 	    <option name="filesystem" type="string">filesystem name</option>
-	    <option name="all" type="flag">list all hardware</option>
+	    <option name="all" type="flag" conflicts="hostname cluster metacluster resourcegroup filesystem">list all filesystems</option>
 	</optgroup>
 	<transport method="get" trigger="filesystem" path="resource/filesystem/%(filesystem)s"/>
 	<transport method="get" path="find/resource/filesystem"/>
@@ -4797,15 +4802,16 @@
     <command name="add_share">
 	Add a new share resource.
 	<optgroup mandatory="True" fields="all">
+	    <optgroup>
+		<option name="hostname" type="string" conflicts="cluster metacluster">Hostname to apply resource</option>
+		<option name="cluster" type="string" conflicts="hostname metacluster">Cluster to apply resource</option>
+		<option name="metacluster" type="string" conflicts="hostname cluster">Metacluster to apply resource</option>
+		<option name="resourcegroup" type="string">Resourcegroup to apply resource</option>
+	    </optgroup>
 	    <option name="share" type="string">name</option>
 	</optgroup>
 	<optgroup>
 	    <option name="comments" type="string">Comments</option>
-	</optgroup>
-	<optgroup mandatory="True">
-	    <option name="hostname" type="string">Hostname to add share</option>
-	    <option name="resourcegroup" type="string">Resourcegroup name</option>
-	    <option name="cluster" type="string">cluster to add share</option>
 	</optgroup>
 	<transport method="put" path="resource/share/%(share)s"/>
     </command>
@@ -4825,12 +4831,13 @@
     <command name="del_share">
 	Delete a share resource.
 	<optgroup mandatory="True" fields="all">
+	    <optgroup>
+		<option name="hostname" type="string" conflicts="cluster metacluster">Hostname to apply resource</option>
+		<option name="cluster" type="string" conflicts="hostname metacluster">Cluster to apply resource</option>
+		<option name="metacluster" type="string" conflicts="hostname cluster">Metacluster to apply resource</option>
+		<option name="resourcegroup" type="string">Resourcegroup to apply resource</option>
+	    </optgroup>
 	    <option name="share" type="string">name</option>
-	</optgroup>
-	<optgroup mandatory="True">
-	    <option name="hostname" type="string">Hostname</option>
-	    <option name="resourcegroup" type="string">Resourcegroup name</option>
-	    <option name="cluster" type="string">cluster name</option>
 	</optgroup>
 	<transport method="delete" path="resource/share/%(share)s"/>
     </command>
@@ -4838,11 +4845,14 @@
     <command name="show_share">
 	Show shares based on filtering for host/cluster association
 	<optgroup mandatory="True">
+	    <optgroup>
+		<option name="hostname" type="string" conflicts="cluster metacluster">Hostname to apply resource</option>
+		<option name="cluster" type="string" conflicts="hostname metacluster">Cluster to apply resource</option>
+		<option name="metacluster" type="string" conflicts="hostname cluster">Metacluster to apply resource</option>
+		<option name="resourcegroup" type="string">Resourcegroup to apply resource</option>
+	    </optgroup>
 	    <option name="share" type="string">share name</option>
-	    <option name="hostname" type="string">Hostname name</option>
-	    <option name="resourcegroup" type="string">Resourcegroup name</option>
-	    <option name="cluster" type="string">cluster name</option>
-	    <option name="all" type="flag">list all hardware</option>
+	    <option name="all" type="flag" conflicts="hostname cluster metacluster resourcegroup share">list all shares</option>
 	</optgroup>
 	<transport method="get" trigger="share" path="resource/share/%(share)s"/>
 	<transport method="get" path="find/resource/share"/>
@@ -4854,16 +4864,17 @@
     <command name="add_application">
 	Add a new application resource.
 	<optgroup mandatory="True" fields="all">
+	    <optgroup>
+		<option name="hostname" type="string" conflicts="cluster metacluster">Hostname to apply resource</option>
+		<option name="cluster" type="string" conflicts="hostname metacluster">Cluster to apply resource</option>
+		<option name="metacluster" type="string" conflicts="hostname cluster">Metacluster to apply resource</option>
+		<option name="resourcegroup" type="string">Resourcegroup to apply resource</option>
+	    </optgroup>
 	    <option name="application" type="string">Name of applicaiton</option>
 	    <option name="eonid" type="int">EON identity</option>
 	</optgroup>
 	<optgroup>
 	    <option name="comments" type="string">Comments</option>
-	</optgroup>
-	<optgroup mandatory="True">
-	    <option name="resourcegroup" type="string">Resourcegroup to apply resource</option>
-	    <option name="hostname" type="string">Hostname to apply resource</option>
-	    <option name="cluster" type="string">Cluster to apply resource</option>
 	</optgroup>
 	<transport method="put" path="resource/application/%(application)s"/>
     </command>
@@ -4871,12 +4882,13 @@
     <command name="del_application">
 	Delete an application resource.
 	<optgroup mandatory="True" fields="all">
+	    <optgroup>
+		<option name="hostname" type="string" conflicts="cluster metacluster">Hostname to apply resource</option>
+		<option name="cluster" type="string" conflicts="hostname metacluster">Cluster to apply resource</option>
+		<option name="metacluster" type="string" conflicts="hostname cluster">Metacluster to apply resource</option>
+		<option name="resourcegroup" type="string">Resourcegroup to apply resource</option>
+	    </optgroup>
 	    <option name="application" type="string">name</option>
-	</optgroup>
-	<optgroup mandatory="True">
-	    <option name="resourcegroup" type="string">Resourcegroup to apply resource</option>
-	    <option name="hostname" type="string">Hostname of resource</option>
-	    <option name="cluster" type="string">Cluster of resource</option>
 	</optgroup>
 	<transport method="delete" path="resource/application/%(application)s"/>
     </command>
@@ -4884,12 +4896,15 @@
     <command name="show_application">
 	Show applications based on filtering for host/cluster association
 	<optgroup mandatory="True">
-	    <option name="cluster" type="string">cluster name</option>
-	    <option name="hostname" type="string">hostname</option>
-	    <option name="resourcegroup" type="string">resourcegroup</option>
+	    <optgroup>
+		<option name="hostname" type="string" conflicts="cluster metacluster">Hostname to apply resource</option>
+		<option name="cluster" type="string" conflicts="hostname metacluster">Cluster to apply resource</option>
+		<option name="metacluster" type="string" conflicts="hostname cluster">Metacluster to apply resource</option>
+		<option name="resourcegroup" type="string">Resourcegroup to apply resource</option>
+	    </optgroup>
 	    <option name="application" type="string">application name</option>
 	    <option name="eonid" type="int">EON id</option>
-	    <option name="all" type="flag">list all hardware</option>
+	    <option name="all" type="flag" conflicts="hostname cluster metacluster resourcegroup application eonid">list all applications</option>
 	</optgroup>
 	<transport method="get" trigger="application" path="resource/application/%(application)s"/>
 	<transport method="get" path="find/resource/application"/>
@@ -4901,20 +4916,19 @@
     <command name="add_hostlink">
 	Add a new hostlink resource.
 	<optgroup mandatory="True" fields="all">
+	    <optgroup>
+		<option name="hostname" type="string" conflicts="cluster metacluster">Hostname to apply resource</option>
+		<option name="cluster" type="string" conflicts="hostname metacluster">Cluster to apply resource</option>
+		<option name="metacluster" type="string" conflicts="hostname cluster">Metacluster to apply resource</option>
+		<option name="resourcegroup" type="string">Resourcegroup to apply resource</option>
+	    </optgroup>
 	    <option name="hostlink" type="string">Name of hostlink</option>
 	    <option name="target" type="string">Target path of link</option>
-	    <option name="owner" type="string">Username to be owner of the
-	    target directory</option>
+	    <option name="owner" type="string">Username to be owner of the target directory</option>
 	</optgroup>
 	<optgroup>
-	    <option name="group" type="string">Group owner of the target
-	    directory</option>
+	    <option name="group" type="string">Group owner of the target directory</option>
 	    <option name="comments" type="string">Comments</option>
-	</optgroup>
-	<optgroup mandatory="True">
-	    <option name="resourcegroup" type="string">Resourcegroup to apply resource</option>
-	    <option name="hostname" type="string">Hostname to apply resource</option>
-	    <option name="cluster" type="string">Cluster to apply resource</option>
 	</optgroup>
 	<transport method="put" path="resource/hostlink/%(hostlink)s"/>
     </command>
@@ -4922,12 +4936,13 @@
     <command name="del_hostlink">
 	Delete an hostlink resource.
 	<optgroup mandatory="True" fields="all">
+	    <optgroup>
+		<option name="hostname" type="string" conflicts="cluster metacluster">Hostname to apply resource</option>
+		<option name="cluster" type="string" conflicts="hostname metacluster">Cluster to apply resource</option>
+		<option name="metacluster" type="string" conflicts="hostname cluster">Metacluster to apply resource</option>
+		<option name="resourcegroup" type="string">Resourcegroup to apply resource</option>
+	    </optgroup>
 	    <option name="hostlink" type="string">name</option>
-	</optgroup>
-	<optgroup mandatory="True">
-	    <option name="resourcegroup" type="string">Resourcegroup to apply resource</option>
-	    <option name="hostname" type="string">Hostname of resource</option>
-	    <option name="cluster" type="string">Cluster of resource</option>
 	</optgroup>
 	<transport method="delete" path="resource/hostlink/%(hostlink)s"/>
     </command>
@@ -4935,11 +4950,14 @@
     <command name="show_hostlink">
 	Show a hostlink resource.
 	<optgroup mandatory="True">
-	    <option name="cluster" type="string">cluster name</option>
-	    <option name="hostname" type="string">hostname</option>
-	    <option name="resourcegroup" type="string">resourcegroup</option>
+	    <optgroup>
+		<option name="hostname" type="string" conflicts="cluster metacluster">Hostname to apply resource</option>
+		<option name="cluster" type="string" conflicts="hostname metacluster">Cluster to apply resource</option>
+		<option name="metacluster" type="string" conflicts="hostname cluster">Metacluster to apply resource</option>
+		<option name="resourcegroup" type="string">Resourcegroup to apply resource</option>
+	    </optgroup>
 	    <option name="hostlink" type="string">hostlink name</option>
-	    <option name="all" type="flag">list all hostlinks</option>
+	    <option name="all" type="flag" conflicts="hostname cluster metacluster resourcegroup hostlink">list all hostlinks</option>
 	</optgroup>
 	<transport method="get" trigger="hostlink" path="resource/hostlink/%(hostlink)s"/>
 	<transport method="get" path="find/resource/hostlink"/>
@@ -4948,10 +4966,14 @@
 	</format>
     </command>
 
-
     <command name="add_intervention">
 	Add a new intervention resource.
 	<optgroup mandatory="True" fields="all">
+	    <optgroup fields="one">
+		<option name="hostname" type="string">Host</option>
+		<option name="cluster" type="string">Cluster</option>
+		<option name="metacluster" type="string">Metacluster to apply resource</option>
+	    </optgroup>
 	    <option name="expiry" type="string">when to expire this intervention</option>
 	    <option name="intervention" type="string">the name of the intervention</option>
 	    <option name="justification" type="string">the reason for the intervention</option>
@@ -4963,21 +4985,19 @@
 	    <option name="disabled_actions" type="string">Disabled actions</option>
 	    <option name="start_time" type="string">when to start this intervention (default=now)</option>
 	</optgroup>
-	<optgroup>
-	    <option name="hostname" type="string">Host</option>
-	    <option name="cluster" type="string">Cluster</option>
-	</optgroup>
 	<transport method="post" path="resource/intervention/%(intervention)s"/>
     </command>
 
     <command name="show_intervention">
 	Display the attributes of an existing intervention resource.
 	<optgroup mandatory="True">
+	    <optgroup fields="one">
+		<option name="hostname" type="string">hostname</option>
+		<option name="cluster" type="string">cluster name</option>
+		<option name="metacluster" type="string">metacluster name</option>
+	    </optgroup>
 	    <option name="intervention" type="string">the name of the intervention</option>
-	    <option name="cluster" type="string">cluster name</option>
-	    <option name="hostname" type="string">hostname</option>
-	    <option name="resourcegroup" type="string">resource group</option>
-	    <option name="all" type="flag">list all hardware</option>
+	    <option name="all" type="flag" conflicts="hostname cluster metacluster resourcegroup intervention">list all interventions</option>
 	</optgroup>
 	<transport method="get" trigger="intervention" path="resource/intervention/%(intervention)s"/>
 	<transport method="get" path="find/resource/intervention"/>
@@ -4989,11 +5009,12 @@
     <command name="del_intervention">
 	Delete an intervention resource.
 	<optgroup mandatory="True" fields="all">
+	    <optgroup fields="one">
+		<option name="hostname" type="string">Hostname of resource</option>
+		<option name="cluster" type="string">Cluster of resource</option>
+		<option name="metacluster" type="string">Metacluster to apply resource</option>
+	    </optgroup>
 	    <option name="intervention" type="string">name</option>
-	</optgroup>
-	<optgroup mandatory="True">
-	    <option name="hostname" type="string">Hostname of resource</option>
-	    <option name="cluster" type="string">Cluster of resource</option>
 	</optgroup>
 	<transport method="delete" path="resource/intervention/%(intervention)s"/>
     </command>
@@ -5001,14 +5022,15 @@
     <command name="add_service_address">
 	Add a new service address resource.
 	<optgroup mandatory="True" fields="all">
+	    <optgroup>
+		<option name="hostname" type="string" conflicts="cluster metacluster">Hostname to apply resource</option>
+		<option name="cluster" type="string" conflicts="hostname metacluster">Cluster to apply resource</option>
+		<option name="metacluster" type="string" conflicts="hostname cluster">Metacluster to apply resource</option>
+		<option name="resourcegroup" type="string">Resourcegroup to apply resource</option>
+	    </optgroup>
 	    <option name="service_address" type="string">Fully qualified name to register in the DNS</option>
 	    <option name="name" type="string">Logical name of the service address</option>
 	    <option name="interfaces" type="string">Comma separed list of interfaces</option>
-	</optgroup>
-	<optgroup mandatory="True">
-	    <option name="resourcegroup" type="string">Resourcegroup to apply resource</option>
-	    <option name="hostname" type="string">Hostname to apply resource</option>
-	    <option name="cluster" type="string">Cluster to apply resource</option>
 	</optgroup>
 	<optgroup>
 	    <option name="ip" type="ipv4">IP address</option>
@@ -5022,12 +5044,13 @@
     <command name="del_service_address">
 	Delete a service address resource.
 	<optgroup mandatory="True" fields="all">
+	    <optgroup>
+		<option name="hostname" type="string" conflicts="cluster metacluster">Hostname to apply resource</option>
+		<option name="cluster" type="string" conflicts="hostname metacluster">Cluster to apply resource</option>
+		<option name="metacluster" type="string" conflicts="hostname cluster">Metacluster to apply resource</option>
+		<option name="resourcegroup" type="string">Resourcegroup to apply resource</option>
+	    </optgroup>
 	    <option name="name" type="string">Logical name of the service address</option>
-	</optgroup>
-	<optgroup mandatory="True">
-	    <option name="resourcegroup" type="string">Resourcegroup to apply resource</option>
-	    <option name="hostname" type="string">Hostname of resource</option>
-	    <option name="cluster" type="string">Cluster of resource</option>
 	</optgroup>
 	<optgroup>
 	    <option name="keep_dns" type="flag">Keep the DNS record</option>
@@ -5038,11 +5061,14 @@
     <command name="show_service_address">
 	Show service addresss based on filtering for host/cluster association
 	<optgroup mandatory="True">
-	    <option name="cluster" type="string">cluster name</option>
-	    <option name="hostname" type="string">hostname</option>
-	    <option name="resourcegroup" type="string">resourcegroup</option>
+	    <optgroup>
+		<option name="hostname" type="string" conflicts="cluster metacluster">Hostname to apply resource</option>
+		<option name="cluster" type="string" conflicts="hostname metacluster">Cluster to apply resource</option>
+		<option name="metacluster" type="string" conflicts="hostname cluster">Metacluster to apply resource</option>
+		<option name="resourcegroup" type="string">Resourcegroup to apply resource</option>
+	    </optgroup>
 	    <option name="name" type="string">service address name</option>
-	    <option name="all" type="flag">list all service addresses</option>
+	    <option name="all" type="flag" conflicts="hostname cluster metacluster resourcegroup name">list all service addresses</option>
 	</optgroup>
 	<transport method="get" trigger="name" path="resource/service_address/%(name)s"/>
 	<transport method="get" path="find/resource/service_address"/>
@@ -5060,7 +5086,6 @@
 	<optgroup>
 	    <option name="disabled" type="flag">GRN is disabled and cannot be added to new systems</option>
 	</optgroup>
-
 	<transport method="put" path="grn/%(eon_id)s/%(grn)s"/>
     </command>
 
@@ -5070,7 +5095,6 @@
 	    <option name="grn" type="string">GRN to delete</option>
 	    <option name="eon_id" type="int">Numeric EON ID to delete</option>
 	</optgroup>
-
 	<transport method="delete" path="grn"/>
     </command>
 
@@ -5080,12 +5104,10 @@
 	    <option name="grn" type="string">GRN to update</option>
 	    <option name="eon_id" type="int">Numeric EON ID to update</option>
 	</optgroup>
-
 	<optgroup>
 	    <option name="disabled" type="boolean">GRN is disabled and cannot be mapped to new systems</option>
 	    <option name="rename_to" type="string">Rename GRN</option>
 	</optgroup>
-
 	<transport method="post" path="grn"/>
     </command>
 
@@ -5096,7 +5118,6 @@
 	    <option name="eon_id" type="int">Numeric EON ID to display</option>
 	    <option name="all" type="flag">Show all GRNs</option>
 	</optgroup>
-
 	<transport method="get" path="grn"/>
     </command>
 
@@ -5126,7 +5147,6 @@
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
 	    <option name="reason" type="string">String to be specified if justification='emergency'</option>
 	</optgroup>
-
 	<transport method="post" path="grn/command/map"/>
     </command>
 
@@ -5152,7 +5172,6 @@
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
 	    <option name="reason" type="string">String to be specified if justification='emergency'</option>
 	</optgroup>
-
 	<transport method="post" path="grn/command/unmap"/>
 	<transport trigger="clearall" method="post" path="grn/command/unmap_clearall"/>
     </command>
@@ -5160,14 +5179,15 @@
     <command name="add_resourcegroup">
 	Add a new resource group.
 	<optgroup mandatory="True" fields="all">
+	    <optgroup fields="one">
+		<option name="hostname" type="string">Hostname to apply resource group</option>
+		<option name="cluster" type="string">Cluster to apply resource group</option>
+		<option name="metacluster" type="string">Metacluster to apply resource</option>
+	    </optgroup>
 	    <option name="resourcegroup" type="string">Name of the resource group</option>
 	</optgroup>
 	<optgroup>
 	    <option name="required_type" type="string">group members must have this type</option>
-	</optgroup>
-	<optgroup mandatory="True">
-	    <option name="hostname" type="string">Hostname to apply resource group</option>
-	    <option name="cluster" type="string">Cluster to apply resource group</option>
 	</optgroup>
 	<transport method="put" path="resource/resourcegroup/%(resourcegroup)s"/>
     </command>
@@ -5175,11 +5195,12 @@
     <command name="del_resourcegroup">
 	Delete a resource group.
 	<optgroup mandatory="True" fields="all">
+	    <optgroup fields="one">
+		<option name="hostname" type="string">Hostname of the resource group</option>
+		<option name="cluster" type="string">Cluster of the resource group</option>
+		<option name="metacluster" type="string">Metacluster to apply resource</option>
+	    </optgroup>
 	    <option name="resourcegroup" type="string">Name of the resource group</option>
-	</optgroup>
-	<optgroup mandatory="True">
-	    <option name="hostname" type="string">Hostname of the resource group</option>
-	    <option name="cluster" type="string">Cluster of the resource group</option>
 	</optgroup>
 	<transport method="delete" path="resource/resourcegroup/%(resourcegroup)s"/>
     </command>
@@ -5187,10 +5208,13 @@
     <command name="show_resourcegroup">
 	Show resource groups based on filtering for host/cluster association.
 	<optgroup mandatory="True">
-	    <option name="cluster" type="string">cluster name</option>
-	    <option name="hostname" type="string">hostname</option>
+	    <optgroup fields="one">
+		<option name="hostname" type="string">hostname</option>
+		<option name="cluster" type="string">cluster name</option>
+		<option name="metacluster" type="string">metacluster name</option>
+	    </optgroup>
 	    <option name="resourcegroup" type="string">resource group name</option>
-	    <option name="all" type="flag">list all hardware</option>
+	    <option name="all" type="flag" conflicts="hostname cluster metacluster resourcegroup">list all resource groups</option>
 	</optgroup>
 	<transport method="get" trigger="resourcegroup" path="resource/resourcegroup/%(resourcegroup)s"/>
 	<transport method="get" path="find/resource/resourcegroup"/>
@@ -5316,7 +5340,6 @@
 	</optgroup>
 	<transport method="post" path="command/validate_parameter"/>
     </command>
-
 
     <command name="add_parameter">
 	add a parameter to a given object.
