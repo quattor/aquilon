@@ -15,11 +15,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """ Continent is a subclass of Location """
-from sqlalchemy import Column, Integer, ForeignKey
+
+from sqlalchemy import Column, ForeignKey
 
 from aquilon.aqdb.model import Location, Hub, Company
 
 _TN = 'continent'
+
 
 class Continent(Location):
     """ Continent is a subtype of location """
@@ -28,10 +30,6 @@ class Continent(Location):
 
     valid_parents = [Hub, Company]
 
-    id = Column(Integer, ForeignKey(Location.id,
-                                    name='%s_loc_fk' % _TN,
-                                    ondelete='CASCADE'),
-                primary_key=True)
+    id = Column(ForeignKey(Location.id, ondelete='CASCADE'), primary_key=True)
 
-continent = Continent.__table__  # pylint: disable=C0103
-continent.info['unique_fields'] = ['name']
+    __table_args__ = ({'info': {'unique_fields': ['name']}},)

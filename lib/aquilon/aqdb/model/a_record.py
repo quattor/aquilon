@@ -16,7 +16,7 @@
 # limitations under the License.
 """ Representation of DNS A records """
 
-from sqlalchemy import Integer, Column, ForeignKey, Index
+from sqlalchemy import Column, ForeignKey, Index
 from sqlalchemy.orm import (relation, backref, mapper, deferred, object_session,
                             validates)
 from sqlalchemy.orm.attributes import instance_state
@@ -33,21 +33,16 @@ class ARecord(DnsRecord):
     __tablename__ = _TN
     _class_label = 'DNS Record'
 
-    dns_record_id = Column(Integer, ForeignKey(DnsRecord.id,
-                                               name='%s_dns_record_fk' % _TN,
-                                               ondelete='CASCADE'),
+    dns_record_id = Column(ForeignKey(DnsRecord.id, ondelete='CASCADE'),
                            primary_key=True)
 
     ip = Column(IPV4, nullable=False)
 
-    network_id = Column(Integer, ForeignKey(Network.id,
-                                            name='%s_network_fk' % _TN),
-                        nullable=False)
+    network_id = Column(ForeignKey(Network.id), nullable=False)
 
-    reverse_ptr_id = Column(Integer, ForeignKey(Fqdn.id,
-                                                name='%s_reverse_fk' % _TN,
-                                                ondelete='SET NULL'),
-                            nullable=True)
+    reverse_ptr_id = Column(ForeignKey(Fqdn.id, name='%s_reverse_ptr_fk' % _TN,
+                                       ondelete='SET NULL'),
+                            nullable=True, index=True)
 
     network = relation(Network, innerjoin=True,
                        backref=backref('dns_records', passive_deletes=True))
@@ -56,8 +51,10 @@ class ARecord(DnsRecord):
                            backref=backref('reverse_entries',
                                            passive_deletes=True))
 
-    __table_args__ = (Index("%s_reverse_ptr_idx" % _TN, reverse_ptr_id),
-                      Index("%s_network_ip_idx" % _TN, network_id, ip))
+    __table_args__ = (Index("%s_network_ip_idx" % _TN, network_id, ip),
+                      {'info': {'unique_fields': ['fqdn'],
+                                'extra_search_fields': ['ip', 'network',
+                                                        'dns_environment']}})
     __mapper_args__ = {'polymorphic_identity': _TN}
 
     def __format__(self, format_spec):
@@ -99,42 +96,39 @@ class ARecord(DnsRecord):
     def _validate_reverse_ptr(self, key, value):
         return self.validate_reverse_ptr(key, value)
 
-    def validate_reverse_ptr(self, key, value):
+    def validate_reverse_ptr(self, key, value):  # pylint: disable=W0613
         if value and self.fqdn.dns_environment != value.dns_environment:  # pragma: no cover
             raise ValueError("DNS environment mismatch: %s != %s" %
                              (self.fqdn.dns_environment, value.dns_environment))
         return value
 
-arecord = ARecord.__table__  # pylint: disable=C0103
-arecord.info['unique_fields'] = ['fqdn']
-arecord.info['extra_search_fields'] = ['ip', 'network', 'dns_environment']
-
-dns_record = DnsRecord.__table__  # pylint: disable=C0103
-fqdn = Fqdn.__table__  # pylint: disable=C0103
+_dnsrec_table = DnsRecord.__table__  # pylint: disable=C0103
+_fqdn_table = Fqdn.__table__  # pylint: disable=C0103
 
 # Create a secondary mapper on the join of the DnsRecord and Fqdn tables
 dns_fqdn_mapper = mapper(ARecord,
-                         arecord.join(dns_record)
-                         .join(fqdn, dns_record.c.fqdn_id == fqdn.c.id),
+                         ARecord.__table__
+                         .join(_dnsrec_table)
+                         .join(_fqdn_table, _dnsrec_table.c.fqdn_id == _fqdn_table.c.id),
                          # DnsRecord has a column with the same name
-                         exclude_properties=[fqdn.c.creation_date],
+                         exclude_properties=[_fqdn_table.c.creation_date],
                          properties={
                              # Both DnsRecord and Fqdn have a column named 'id'.
                              # Tell the ORM that DnsRecord.fqdn_id and Fqdn.id are
                              # really the same thing due to the join condition
-                             'fqdn_id': [dns_record.c.fqdn_id, fqdn.c.id],
+                             'fqdn_id': [_dnsrec_table.c.fqdn_id, _fqdn_table.c.id],
 
                              # Usually these columns are not needed, so don't
                              # load them automatically
-                             'creation_date': deferred(dns_record.c.creation_date),
-                             'comments': deferred(dns_record.c.comments),
+                             'creation_date': deferred(_dnsrec_table.c.creation_date),
+                             'comments': deferred(_dnsrec_table.c.comments),
                              # Make sure FQDNs are eager loaded when using this
                              # mapper
                              'fqdn': relation(Fqdn, lazy=False, innerjoin=True,
                                               primaryjoin=ARecord.fqdn_id == Fqdn.id)
                          },
                          polymorphic_identity=_TN,
-                         primary_key=arecord.c.dns_record_id,
+                         primary_key=ARecord.__table__.c.dns_record_id,
                          non_primary=True)
 
 
@@ -150,10 +144,13 @@ class DynamicStub(ARecord):
     __mapper_args__ = {'polymorphic_identity': _DTN}
     _class_label = 'Dynamic Stub'
 
-    dns_record_id = Column(Integer, ForeignKey(ARecord.dns_record_id,
-                                               name='%s_arecord_fk' % _DTN,
-                                               ondelete='CASCADE'),
+    dns_record_id = Column(ForeignKey(ARecord.dns_record_id,
+                                      ondelete='CASCADE'),
                            primary_key=True)
+
+    __table_args__ = ({'info': {'unique_fields': ['fqdn'],
+                                'extra_search_fields': ['ip', 'network',
+                                                        'dns_environment']}},)
 
     def validate_reverse_ptr(self, key, value):
         super(DynamicStub, self).validate_reverse_ptr(key, value)
@@ -161,10 +158,6 @@ class DynamicStub(ARecord):
             raise ValueError("The reverse PTR record cannot be set for "
                              "DNS records used for dynamic DHCP.")
         return value
-
-dynstub = DynamicStub.__table__  # pylint: disable=C0103
-dynstub.info['unique_fields'] = ['fqdn']
-dynstub.info['extra_search_fields'] = ['ip', 'network', 'dns_environment']
 
 Network.dynamic_stubs = relation(DynamicStub, order_by=[DynamicStub.ip],
                                  viewonly=True)

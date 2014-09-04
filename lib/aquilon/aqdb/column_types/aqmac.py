@@ -17,6 +17,7 @@
 """ This module implements the AqMac column_type. """
 
 import operator
+from numbers import Integral
 
 from sqlalchemy.types import BigInteger, TypeDecorator, SchemaType
 from sqlalchemy.schema import CheckConstraint
@@ -45,6 +46,8 @@ class AqMac(SchemaType, TypeDecorator):
             return None
         if isinstance(value, MACAddress):
             return value.value
+        if isinstance(value, Integral):
+            return value
         raise TypeError("Unknown input type for MAC column: %r" % value)
 
     def process_result_value(self, value, engine):  # pylint: disable=W0613

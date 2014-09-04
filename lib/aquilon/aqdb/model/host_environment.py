@@ -18,8 +18,7 @@
 from datetime import datetime
 
 from sqlalchemy.orm import deferred
-from sqlalchemy import (Column, Integer, DateTime, Sequence, String,
-                        UniqueConstraint, event)
+from sqlalchemy import Column, Integer, DateTime, Sequence, String, event
 
 from aquilon.aqdb.model import Base, SingleInstanceMixin
 
@@ -32,19 +31,17 @@ class HostEnvironment(SingleInstanceMixin, Base):
     _class_label = 'Host Environment'
 
     id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
-    name = Column(String(16), nullable=False)
+    name = Column(String(16), nullable=False, unique=True)
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
 
-    __table_args__ = (UniqueConstraint(name, name='%s_uk' % _TN),)
+    __table_args__ = ({'info': {'unique_fields': ['name']}},)
     __mapper_args__ = {'polymorphic_on': name}
 
     def __repr__(self):
         return str(self.name)
 
 host_env = HostEnvironment.__table__  # pylint: disable=C0103
-host_env.info['unique_fields'] = ['name']
-
 event.listen(host_env, "after_create", HostEnvironment.populate_const_table)
 
 

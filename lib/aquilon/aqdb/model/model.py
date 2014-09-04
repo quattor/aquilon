@@ -38,9 +38,7 @@ class Model(Base):
     id = Column(Integer, Sequence('model_id_seq'), primary_key=True)
     name = Column(AqStr(64), nullable=False)
 
-    vendor_id = Column(Integer, ForeignKey(Vendor.id,
-                                           name='model_vendor_fk'),
-                       nullable=False)
+    vendor_id = Column(ForeignKey(Vendor.id), nullable=False)
 
     model_type = Column(StringEnumColumn(ModelType, 20, True), nullable=False)
 
@@ -50,8 +48,9 @@ class Model(Base):
 
     vendor = relation(Vendor, innerjoin=True)
 
-    __table_args__ = (UniqueConstraint(vendor_id, name,
-                                       name='model_vendor_name_uk'),)
+    __table_args__ = (UniqueConstraint(vendor_id, name),
+                      {'info': {'unique_fields': ['name', 'vendor'],
+                                'extra_search_fields': ['model_type']}})
 
     def __format__(self, format_spec):
         instance = "%s/%s" % (self.vendor.name, self.name)
@@ -70,7 +69,3 @@ class Model(Base):
 
         session = object_session(self)
         return self.default_nic_model(session)
-
-model = Model.__table__  # pylint: disable=C0103
-model.info['unique_fields'] = ['name', 'vendor']
-model.info['extra_search_fields'] = ['model_type']

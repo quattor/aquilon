@@ -15,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from sqlalchemy import Integer, String, Column, ForeignKey
+from sqlalchemy import String, Column, ForeignKey
 from sqlalchemy.orm import validates
 
 from aquilon.aqdb.model import Resource
@@ -28,19 +28,16 @@ class Hostlink(Resource):
     __tablename__ = _TN
     __mapper_args__ = {'polymorphic_identity': 'hostlink'}
 
-    id = Column(Integer, ForeignKey('resource.id', name='%s_resource_fk' % _TN,
-                                    ondelete='CASCADE'),
-                primary_key=True)
+    id = Column(ForeignKey(Resource.id, ondelete='CASCADE'), primary_key=True)
 
     target = Column(String(255), nullable=False)
     owner_user = Column(String(32), default='root', nullable=False)
     owner_group = Column(String(32), nullable=True)
+
+    __table_args__ = ({'info': {'unique_fields': ['name', 'holder']}},)
 
     @validates(owner_user, owner_group)
     def validate_owner(self, key, value):
         if ':' in value:
             raise ValueError("%s cannot contain the ':' character" % key)
         return value
-
-hostlink = Hostlink.__table__
-hostlink.info['unique_fields'] = ['name', 'holder']

@@ -17,8 +17,7 @@
 """ Contains tables and objects for authorization in Aquilon """
 from datetime import datetime
 
-from sqlalchemy import (Column, Integer, String, DateTime, Sequence,
-                        UniqueConstraint)
+from sqlalchemy import Column, Integer, String, DateTime, Sequence
 from sqlalchemy.orm import deferred
 
 from aquilon.aqdb.model import Base
@@ -32,15 +31,11 @@ class Role(Base):
 
     id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
 
-    name = Column(AqStr(32), nullable=False)
+    name = Column(AqStr(32), nullable=False, unique=True)
 
     creation_date = deferred(Column(DateTime, nullable=False,
                                     default=datetime.now))
 
     comments = deferred(Column(String(255), nullable=True))
 
-    __table_args__ = (UniqueConstraint(name, name='role_uk'),)
-
-role = Role.__table__  # pylint: disable=C0103
-role.primary_key.name = '%s_pk' % _TN
-role.info['unique_fields'] = ['name']
+    __table_args__ = ({'info': {'unique_fields': ['name']}},)

@@ -21,11 +21,11 @@ from collections import deque
 import re
 
 from sqlalchemy import (Column, Integer, DateTime, Sequence, String, Boolean,
-                        ForeignKey, UniqueConstraint, CheckConstraint, Index)
+                        ForeignKey, UniqueConstraint, CheckConstraint)
 from sqlalchemy.orm import (relation, backref, validates, object_session,
                             deferred)
 from sqlalchemy.orm.collections import attribute_mapped_collection
-from sqlalchemy.sql import desc, case, and_, or_
+from sqlalchemy.sql import desc, case, and_, or_, null
 
 from aquilon.exceptions_ import InternalError
 from aquilon.aqdb.column_types import AqMac, AqStr
@@ -34,7 +34,6 @@ from aquilon.aqdb.model import (Base, HardwareEntity, DeviceLinkMixin,
 from aquilon.aqdb.model.vlan import MAX_VLANS
 
 _TN = "interface"
-_ABV = "iface"
 
 
 class Interface(DeviceLinkMixin, Base):
@@ -63,53 +62,47 @@ class Interface(DeviceLinkMixin, Base):
     # It's also extra work we may not enjoy, it means rewriting the table
     # since we'd blow away its PK.
 
-    id = Column(Integer, Sequence('%s_seq' % _TN), primary_key=True)
+    id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
 
     name = Column(AqStr(32), nullable=False)  # like e0, hme1, etc.
 
-    mac = Column(AqMac(name="%s_mac_ck" % _TN), nullable=True)
+    mac = Column(AqMac(name="%s_mac_ck" % _TN), nullable=True, unique=True)
 
-    model_id = Column(Integer, ForeignKey(Model.id,
-                                          name='%s_model_fk' % _ABV),
-                      nullable=False)
+    model_id = Column(ForeignKey(Model.id), nullable=False, index=True)
 
     # PXE boot control. Does not affect how the OS configures the interface.
     # FIXME: move to PublicInterface
-    bootable = Column(Boolean(name="%s_bootable_ck" % _ABV), nullable=False,
+    bootable = Column(Boolean(name="%s_bootable_ck" % _TN), nullable=False,
                       default=False)
 
-    default_route = Column(Boolean(name="%s_default_route_ck" % _ABV),
+    default_route = Column(Boolean(name="%s_default_route_ck" % _TN),
                            nullable=False, default=False)
 
     interface_type = Column(AqStr(32), nullable=False)
 
-    hardware_entity_id = Column(Integer, ForeignKey(HardwareEntity.id,
-                                                    name='%s_hw_ent_fk' % _ABV,
-                                                    ondelete='CASCADE'),
+    hardware_entity_id = Column(ForeignKey(HardwareEntity.id,
+                                           ondelete='CASCADE'),
                                 nullable=False)
 
     # The FK is deferrable to make it easier to copy the DB between different
     # backends. The broker itself does not make use of deferred constraints.
-    master_id = Column(Integer, ForeignKey(id, name='%s_master_fk' % _ABV,
-                                           ondelete='CASCADE',
-                                           deferrable=True,
-                                           initially='IMMEDIATE'),
-                       nullable=True)
+    master_id = Column(ForeignKey(id, name='%s_master_fk' % _TN,
+                                  ondelete='CASCADE', deferrable=True,
+                                  initially='IMMEDIATE'),
+                       nullable=True, index=True)
 
     # FIXME: move to PublicInterface
     port_group_name = Column(AqStr(32), nullable=True)
 
     # FIXME: move to PublicInterface
-    port_group_id = Column(Integer, ForeignKey('port_group.id',
-                                               name='%s_pg_fk' % _ABV),
-                           nullable=True)
+    port_group_id = Column(ForeignKey('port_group.id'), nullable=True)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
 
     # Most of the update_* commands need to load the comments due to
     # snapshot_hw(), so it is not worth deferring it
-    comments = Column('comments', String(255), nullable=True)
+    comments = Column(String(255), nullable=True)
 
     hardware_entity = relation(HardwareEntity, innerjoin=True,
                                backref=backref('interfaces',
@@ -126,14 +119,12 @@ class Interface(DeviceLinkMixin, Base):
     port_group = relation("PortGroup")
 
     # Order matters here, utils/constraints.py checks for endswith("NOT NULL")
-    __table_args__ = (UniqueConstraint(mac, name='%s_mac_addr_uk' % _ABV),
-                      UniqueConstraint(hardware_entity_id, name,
-                                       name='%s_hw_name_uk' % _ABV),
-                      CheckConstraint(or_(port_group_id == None,
-                                          port_group_name == None),
-                                      name='%s_pg_ck' % _ABV),
-                      Index('%s_model_idx' % _ABV, model_id),
-                      Index('%s_master_idx' % _ABV, master_id))
+    __table_args__ = (UniqueConstraint(hardware_entity_id, name),
+                      CheckConstraint(or_(port_group_id == null(),
+                                          port_group_name == null()),
+                                      name='%s_port_group_ck' % _TN),
+                      {'info': {'unique_fields': ['name', 'hardware_entity'],
+                                'extra_search_fields': ['mac']}})
     __mapper_args__ = {'polymorphic_on': interface_type}
 
     # Interfaces also have the property 'assignments' which is defined in
@@ -267,11 +258,9 @@ class VlanInterface(Interface):
 
     # The FK is deferrable to make it easier to copy the DB between different
     # backends. The broker itself does not make use of deferred constraints.
-    parent_id = Column(Integer, ForeignKey(Interface.id,
-                                           name='iface_vlan_parent_fk',
-                                           ondelete='CASCADE',
-                                           deferrable=True,
-                                           initially='IMMEDIATE'))
+    parent_id = Column(ForeignKey(Interface.id, name='%s_parent_fk' % _TN,
+                                  ondelete='CASCADE', deferrable=True,
+                                  initially='IMMEDIATE'))
 
     vlan_id = Column(Integer)
 
@@ -283,13 +272,13 @@ class VlanInterface(Interface):
 
     __mapper_args__ = {'polymorphic_identity': 'vlan'}
     # Order matters here, utils/constraints.py checks for endswith("NOT NULL")
-    __extra_table_args__ = (CheckConstraint(or_(and_(parent_id != None,
+    __extra_table_args__ = (CheckConstraint(or_(and_(parent_id != null(),
                                                      vlan_id > 0,
                                                      vlan_id < MAX_VLANS),
                                                 Interface.interface_type != "vlan"),
-                                            name="%s_vlan_ck" % _ABV),
+                                            name="%s_vlan_ck" % _TN),
                             UniqueConstraint(parent_id, vlan_id,
-                                             name="%s_parent_vlan_uk" % _ABV))
+                                             name="%s_parent_vlan_uk" % _TN))
 
     @validates('vlan_id')
     def validate_vlan_id(self, key, value):
@@ -369,8 +358,3 @@ class PhysicalInterface(Interface):
     _class_label = "Physical Interface"
 
     __mapper_args__ = {'polymorphic_identity': 'physical'}
-
-
-interface = Interface.__table__  # pylint: disable=C0103
-interface.info['unique_fields'] = ['name', 'hardware_entity']
-interface.info['extra_search_fields'] = ['mac']

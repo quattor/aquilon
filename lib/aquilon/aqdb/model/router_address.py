@@ -17,8 +17,8 @@
 
 from datetime import datetime
 
-from sqlalchemy import (Column, Integer, String, DateTime, ForeignKey,
-                        PrimaryKeyConstraint, Index)
+from sqlalchemy import (Column, String, DateTime, ForeignKey,
+                        PrimaryKeyConstraint)
 from sqlalchemy.orm import relation, deferred, backref
 from sqlalchemy.sql import and_
 
@@ -41,20 +41,15 @@ class RouterAddress(Base):
 
     # With the introduction of network environments, the IP alone is not enough
     # to uniquely identify the router
-    network_id = Column(Integer, ForeignKey(Network.id,
-                                            name='%s_network_fk' % _TN),
-                        nullable=False)
+    network_id = Column(ForeignKey(Network.id), nullable=False)
 
-    dns_environment_id = Column(Integer, ForeignKey(DnsEnvironment.id,
-                                                    name='%s_dns_env_fk' % _TN),
-                                nullable=False)
+    dns_environment_id = Column(ForeignKey(DnsEnvironment.id),
+                                nullable=False, index=True)
 
     # We don't want deleting a location to disrupt networking, so use "ON DELETE
     # SET NULL" here
-    location_id = Column(Integer, ForeignKey(Location.id,
-                                             name='%s_location_fk' % _TN,
-                                             ondelete="SET NULL"),
-                         nullable=True)
+    location_id = Column(ForeignKey(Location.id, ondelete="SET NULL"),
+                         nullable=True, index=True)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
@@ -77,9 +72,5 @@ class RouterAddress(Base):
                            viewonly=True)
 
     __table_args__ = (PrimaryKeyConstraint(network_id, ip),
-                      Index("%s_dns_env_idx" % _TN, dns_environment_id),
-                      Index("%s_location_idx" % _TN, location_id))
-
-rtaddr = RouterAddress.__table__  # pylint: disable=C0103
-rtaddr.info['unique_fields'] = ['ip', 'network']
-rtaddr.info['extra_search_fields'] = ['dns_environment']
+                      {'info': {'unique_fields': ['ip', 'network'],
+                                'extra_search_fields': ['dns_environment']}})

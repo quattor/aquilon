@@ -15,7 +15,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """ Company is a subclass of Location """
-from sqlalchemy import Column, Integer, ForeignKey
+
+from sqlalchemy import Column, ForeignKey
 
 from aquilon.aqdb.model import Location
 
@@ -30,10 +31,6 @@ class Company(Location):
 
     valid_parents = []
 
-    id = Column(Integer, ForeignKey(Location.id,
-                                    name='%s_loc_fk' % _TN,
-                                    ondelete='CASCADE'),
-                primary_key=True)
+    id = Column(ForeignKey(Location.id, ondelete='CASCADE'), primary_key=True)
 
-company = Company.__table__  # pylint: disable=C0103
-company.info['unique_fields'] = ['name']
+    __table_args__ = ({'info': {'unique_fields': ['name']}},)

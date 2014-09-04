@@ -16,7 +16,7 @@
 # limitations under the License.
 """ Rack is a subclass of Location """
 
-from sqlalchemy import Column, Integer, ForeignKey
+from sqlalchemy import Column, ForeignKey
 from sqlalchemy.orm import validates
 
 from aquilon.aqdb.column_types import AqStr
@@ -31,11 +31,12 @@ class Rack(Location):
 
     valid_parents = [Building, Room, Bunker]
 
-    id = Column(Integer, ForeignKey(Location.id, name='rack_loc_fk',
-                                    ondelete='CASCADE'), primary_key=True)
+    id = Column(ForeignKey(Location.id, ondelete='CASCADE'), primary_key=True)
 
     rack_row = Column(AqStr(4), nullable=True)
     rack_column = Column(AqStr(4), nullable=True)
+
+    __table_args__ = ({'info': {'unique_fields': ['name']}},)
 
     @validates('rack_row', 'rack_column')
     def check_rack_coordinates(self, key, value):
@@ -47,6 +48,3 @@ class Rack(Location):
             raise ArgumentError(msg)
         else:
             return value
-
-rack = Rack.__table__  # pylint: disable=C0103
-rack.info['unique_fields'] = ['name']

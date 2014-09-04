@@ -18,8 +18,7 @@
 
 from datetime import datetime
 
-from sqlalchemy import (Column, Integer, DateTime, Sequence, String,
-                        ForeignKey, UniqueConstraint)
+from sqlalchemy import Column, Integer, DateTime, Sequence, String, ForeignKey
 from sqlalchemy.orm import deferred, relation
 
 from aquilon.exceptions_ import InternalError
@@ -28,7 +27,6 @@ from aquilon.aqdb.column_types.aqstr import AqStr
 from aquilon.config import Config
 
 _TN = "network_environment"
-_ABV = "net_env"
 
 _config = Config()
 
@@ -48,15 +46,11 @@ class NetworkEnvironment(Base):
     _class_label = 'Network Environment'
 
     id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
-    name = Column(AqStr(64), nullable=False)
+    name = Column(AqStr(64), nullable=False, unique=True)
 
-    location_id = Column(Integer, ForeignKey(Location.id,
-                                             name='%s_loc_fk' % _ABV),
-                         nullable=True)
+    location_id = Column(ForeignKey(Location.id), nullable=True)
 
-    dns_environment_id = Column(Integer, ForeignKey(DnsEnvironment.id,
-                                                    name='%s_dns_env_fk' % _ABV),
-                                nullable=False)
+    dns_environment_id = Column(ForeignKey(DnsEnvironment.id), nullable=False)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
@@ -67,7 +61,7 @@ class NetworkEnvironment(Base):
 
     dns_environment = relation(DnsEnvironment, innerjoin=True)
 
-    __table_args__ = (UniqueConstraint(name, name='%s_name_uk' % _ABV),)
+    __table_args__ = ({'info': {'unique_fields': ['name']}},)
 
     @property
     def is_default(self):
@@ -81,9 +75,6 @@ class NetworkEnvironment(Base):
             return cls.get_unique(session, _config.get("site",
                                                        "default_network_environment"),
                                   compel=InternalError)
-
-netenv = NetworkEnvironment.__table__  # pylint: disable=C0103
-netenv.info['unique_fields'] = ['name']
 
 
 def get_net_dns_env(session, network_environment=None,

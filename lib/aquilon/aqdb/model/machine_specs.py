@@ -21,30 +21,27 @@
 
 from datetime import datetime
 
-from sqlalchemy import (Column, Integer, DateTime, Sequence, String, ForeignKey,
-                        UniqueConstraint)
+from sqlalchemy import Column, Integer, DateTime, Sequence, String, ForeignKey
 from sqlalchemy.orm import relation, backref, deferred, validates
 
 from aquilon.aqdb.column_types import Enum
 from aquilon.aqdb.model import Base, Model, Cpu, Disk
 from aquilon.aqdb.model.disk import controller_types
 
+_TN = 'machine_specs'
+
 
 class MachineSpecs(Base):
     """ Captures the configuration hardware components for a given model """
     # TODO: Maybe this entire table is in fact a part of the model "subtype"
 
-    __tablename__ = 'machine_specs'
+    __tablename__ = _TN
 
-    id = Column(Integer, Sequence('mach_specs_id_seq'), primary_key=True)
+    id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
 
-    model_id = Column(Integer, ForeignKey(Model.id,
-                                          name='mach_spec_model_fk'),
-                      nullable=False)
+    model_id = Column(ForeignKey(Model.id), nullable=False, unique=True)
 
-    cpu_id = Column(Integer, ForeignKey(Cpu.id,
-                                        name='mach_spec_cpu_fk'),
-                    nullable=False)
+    cpu_id = Column(ForeignKey(Cpu.id), nullable=False)
 
     cpu_quantity = Column(Integer, nullable=False)  # Constrain to below 512?
 
@@ -55,8 +52,7 @@ class MachineSpecs(Base):
     controller_type = Column(Enum(64, controller_types), nullable=False)
 
     nic_count = Column(Integer, nullable=False, default=2)
-    nic_model_id = Column(Integer, ForeignKey(Model.id,
-                                              name='mach_spec_nic_model_fk'),
+    nic_model_id = Column(ForeignKey(Model.id, name='%s_nic_model_fk' % _TN),
                           nullable=False)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
@@ -68,9 +64,6 @@ class MachineSpecs(Base):
                      backref=backref('machine_specs', uselist=False))
     cpu = relation(Cpu, innerjoin=True)
     nic_model = relation(Model, foreign_keys=nic_model_id)
-
-    __table_args__ = (UniqueConstraint(model_id,
-                                       name='machine_specs_model_uk'),)
 
     @validates('disk_type')
     def validate_disk(self, key, value):  # pylint: disable=W0613

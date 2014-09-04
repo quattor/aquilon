@@ -18,7 +18,7 @@
 
 from sqlalchemy.ext.declarative import declared_attr
 
-from sqlalchemy import Integer, Column, ForeignKey
+from sqlalchemy import Column, ForeignKey
 from sqlalchemy.orm import relation
 
 from aquilon.aqdb.model import Branch, Sandbox, Personality, User
@@ -27,26 +27,16 @@ from aquilon.aqdb.model import Branch, Sandbox, Personality, User
 class CompileableMixin(object):
     @declared_attr
     def branch_id(cls):  # pylint: disable=E0213
-        return Column(Integer,
-                      ForeignKey(Branch.id,
-                                 name='%s_branch_fk' % cls._col_prefix),
-                      nullable=False)
+        return Column(ForeignKey(Branch.id), nullable=False, index=True)
 
     @declared_attr
     def sandbox_author_id(cls):  # pylint: disable=E0213
-        return Column(Integer,
-                      ForeignKey(User.id,
-                                 name='%s_sandbox_author_fk' % cls._col_prefix,
-                                 ondelete="SET NULL"),
-                      nullable=True)
+        return Column(ForeignKey(User.id, ondelete="SET NULL"), nullable=True)
 
     @declared_attr
     def personality_id(cls):  # pylint: disable=E0213
         # Lack of cascaded deletion is intentional on personality
-        return Column(Integer,
-                      ForeignKey(Personality.id,
-                                 name='%s_prsnlty_fk' % cls._col_prefix),
-                      nullable=False)
+        return Column(ForeignKey(Personality.id), nullable=False, index=True)
 
     @declared_attr
     def personality(cls):  # pylint: disable=E0213
@@ -79,5 +69,3 @@ class CompileableMixin(object):
         rqs = set(self.personality.services)
         rqs.update(self.personality.archetype.services)
         return rqs
-
-    # TODO: define indexes on personality_id and branch_id here

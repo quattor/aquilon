@@ -19,14 +19,14 @@
 from datetime import datetime
 
 from sqlalchemy import (Column, Integer, Sequence, String, DateTime, ForeignKey,
-                        UniqueConstraint, Index)
+                        UniqueConstraint)
 from sqlalchemy.orm import relation, deferred, backref
 
 from aquilon.aqdb.model import (Base, Location, Personality, ServiceInstance,
                                 Network)
 
 _TN = 'personality_service_map'
-_ABV = 'prsnlty_svc_map'
+_ABV = 'pers_svc_map'
 
 
 class PersonalityServiceMap(Base):
@@ -38,26 +38,20 @@ class PersonalityServiceMap(Base):
 
     __tablename__ = _TN
 
-    id = Column(Integer, Sequence('%s_seq' % _ABV), primary_key=True)
+    id = Column(Integer, Sequence('%s_id_seq' % _ABV), primary_key=True)
 
-    service_instance_id = Column(Integer,
-                                 ForeignKey(ServiceInstance.id,
-                                            name='%s_svc_inst_fk' % _ABV,
+    service_instance_id = Column(ForeignKey(ServiceInstance.id,
                                             ondelete='CASCADE'),
-                                 nullable=False)
+                                 nullable=False, index=True)
 
-    location_id = Column(Integer, ForeignKey(Location.id, ondelete='CASCADE',
-                                             name='%s_loc_fk' % _ABV),
-                         nullable=True)
+    location_id = Column(ForeignKey(Location.id, ondelete='CASCADE'),
+                         nullable=True, index=True)
 
-    personality_id = Column(Integer, ForeignKey(Personality.id,
-                                                name='personality',
-                                                ondelete='CASCADE'),
+    personality_id = Column(ForeignKey(Personality.id, ondelete='CASCADE'),
                             nullable=False)
 
-    network_id = Column(Integer, ForeignKey(Network.id, ondelete='CASCADE',
-                                            name='%s_net_fk' % _ABV),
-                        nullable=True)
+    network_id = Column(ForeignKey(Network.id, ondelete='CASCADE'),
+                        nullable=True, index=True)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
@@ -73,10 +67,7 @@ class PersonalityServiceMap(Base):
     # TODO: reconsider the surrogate primary key?
     __table_args__ = (UniqueConstraint(personality_id, service_instance_id,
                                        location_id, network_id,
-                                       name='%s_loc_net_ins_uk' % _ABV),
-                      Index("%s_location_idx" % _ABV, location_id),
-                      Index("%s_si_idx" % _ABV, service_instance_id),
-                      Index("%s_network_idx" % _ABV, network_id))
+                                       name='%s_loc_net_ins_uk' % _ABV),)
 
     @property
     def service(self):

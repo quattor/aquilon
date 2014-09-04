@@ -15,7 +15,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """ City is a subclass of Location """
-from sqlalchemy import Column, Integer, String, ForeignKey
+
+from sqlalchemy import Column, String, ForeignKey
 
 from aquilon.aqdb.model import Location, Campus, Country
 
@@ -29,12 +30,8 @@ class City(Location):
 
     valid_parents = [Campus, Country]
 
-    id = Column(Integer, ForeignKey(Location.id,
-                                    name='%s_loc_fk' % _TN,
-                                    ondelete='CASCADE'),
-                primary_key=True)
+    id = Column(ForeignKey(Location.id, ondelete='CASCADE'), primary_key=True)
 
     timezone = Column(String(64), nullable=True, default='UTC')
 
-city = City.__table__  # pylint: disable=C0103
-city.info['unique_fields'] = ['name']
+    __table_args__ = ({'info': {'unique_fields': ['name']}},)

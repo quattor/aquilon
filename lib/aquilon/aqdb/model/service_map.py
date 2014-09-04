@@ -19,7 +19,7 @@
 from datetime import datetime
 
 from sqlalchemy import (Column, Integer, Sequence, String, DateTime, ForeignKey,
-                        UniqueConstraint, Index)
+                        UniqueConstraint)
 from sqlalchemy.orm import relation, deferred, backref
 
 from aquilon.aqdb.model import Base, Location, ServiceInstance, Network
@@ -36,22 +36,17 @@ class ServiceMap(Base):
 
     __tablename__ = _TN
 
-    id = Column(Integer, Sequence('service_map_id_seq'), primary_key=True)
+    id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
 
-    service_instance_id = Column(Integer,
-                                 ForeignKey(ServiceInstance.id,
-                                            name='%s_svc_inst_fk' % _ABV,
+    service_instance_id = Column(ForeignKey(ServiceInstance.id,
                                             ondelete='CASCADE'),
                                  nullable=False)
 
-    location_id = Column(Integer, ForeignKey(Location.id,
-                                             ondelete='CASCADE',
-                                             name='%s_loc_fk' % _ABV),
-                         nullable=True)
+    location_id = Column(ForeignKey(Location.id, ondelete='CASCADE'),
+                         nullable=True, index=True)
 
-    network_id = Column(Integer, ForeignKey(Network.id, ondelete='CASCADE',
-                                            name='%s_net_fk' % _ABV),
-                        nullable=True)
+    network_id = Column(ForeignKey(Network.id, ondelete='CASCADE'),
+                        nullable=True, index=True)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
@@ -65,9 +60,7 @@ class ServiceMap(Base):
 
     __table_args__ = (UniqueConstraint(service_instance_id, location_id,
                                        network_id,
-                                       name='%s_loc_net_inst_uk' % _ABV),
-                      Index("%s_location_idx" % _ABV, location_id),
-                      Index("%s_network_idx" % _ABV, network_id))
+                                       name='%s_loc_net_inst_uk' % _ABV),)
 
     @property
     def service(self):

@@ -17,10 +17,9 @@
 """ How we represent location data in Aquilon """
 
 from datetime import datetime
-from sqlalchemy import (Integer, DateTime, Sequence, String, Column,
-                        ForeignKey, UniqueConstraint, PrimaryKeyConstraint,
-                        Index)
 
+from sqlalchemy import (Integer, DateTime, Sequence, String, Column,
+                        ForeignKey, UniqueConstraint, PrimaryKeyConstraint)
 from sqlalchemy.orm import (relation, backref, object_session, deferred,
                             reconstructor)
 from sqlalchemy.sql import and_, or_, desc
@@ -44,9 +43,8 @@ class Location(Base):
 
     fullname = Column(String(255), nullable=False)
 
-    default_dns_domain_id = Column(Integer, ForeignKey(DnsDomain.id,
-                                                       name='location_dns_domain_fk',
-                                                       ondelete='SET NULL'),
+    default_dns_domain_id = Column(ForeignKey(DnsDomain.id,
+                                              ondelete='SET NULL'),
                                    nullable=True)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
@@ -56,8 +54,8 @@ class Location(Base):
 
     default_dns_domain = relation(DnsDomain)
 
-    __table_args__ = (UniqueConstraint(name, location_type,
-                                       name='loc_name_type_uk'),)
+    __table_args__ = (UniqueConstraint(name, location_type),
+                      {'info': {'unique_fields': ['name', 'location_type']}},)
     __mapper_args__ = {'polymorphic_on': location_type}
 
     def get_p_dict(self, loc_type):
@@ -227,22 +225,17 @@ class Location(Base):
         session.expire(self, ["_parent_links", "parent", "parents"])
         self._parent_dict = None
 
-location = Location.__table__  # pylint: disable=C0103
-location.info['unique_fields'] = ['name', 'location_type']
-
 
 class LocationLink(Base):
     __tablename__ = 'location_link'
 
-    child_id = Column(Integer, ForeignKey(Location.id,
-                                          name='location_link_child_fk',
-                                          ondelete='CASCADE'),
+    child_id = Column(ForeignKey(Location.id, name='location_link_child_fk',
+                                 ondelete='CASCADE'),
                       nullable=False)
 
-    parent_id = Column(Integer, ForeignKey(Location.id,
-                                           name='location_link_parent_fk',
-                                           ondelete='CASCADE'),
-                       nullable=False)
+    parent_id = Column(ForeignKey(Location.id, name='location_link_parent_fk',
+                                  ondelete='CASCADE'),
+                       nullable=False, index=True)
 
     # Distance from the given parent. 1 means direct child.
     distance = Column(Integer, nullable=False)
@@ -257,8 +250,7 @@ class LocationLink(Base):
                                       cascade="all, delete-orphan",
                                       passive_deletes=True))
 
-    __table_args__ = (PrimaryKeyConstraint(child_id, parent_id),
-                      Index("location_link_parent_idx", parent_id))
+    __table_args__ = (PrimaryKeyConstraint(child_id, parent_id),)
 
 # Make these relations view-only, to make sure the distance is managed
 # explicitely

@@ -30,7 +30,7 @@
 
     Really."""
 
-from sqlalchemy import Column, Integer, ForeignKey
+from sqlalchemy import Column, ForeignKey
 
 from aquilon.aqdb.model import Location, Company
 
@@ -44,10 +44,6 @@ class Hub(Location):
 
     valid_parents = [Company]
 
-    id = Column(Integer, ForeignKey('location.id',
-                                    name='%s_loc_fk' % _TN,
-                                    ondelete='CASCADE'),
-                primary_key=True)
+    id = Column(ForeignKey(Location.id, ondelete='CASCADE'), primary_key=True)
 
-hub = Hub.__table__  # pylint: disable=C0103
-hub.info['unique_fields'] = ['name']
+    __table_args__ = ({'info': {'unique_fields': ['name']}},)

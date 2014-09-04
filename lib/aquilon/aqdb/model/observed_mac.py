@@ -20,8 +20,7 @@
 
 from datetime import datetime
 
-from sqlalchemy import (Column, Integer, DateTime, ForeignKey,
-                        PrimaryKeyConstraint)
+from sqlalchemy import Column, DateTime, ForeignKey, PrimaryKeyConstraint
 from sqlalchemy.orm import relation, backref, deferred
 
 from aquilon.aqdb.model import Base, NetworkDevice
@@ -34,10 +33,8 @@ class ObservedMac(Base):
     """ reports the observance of a mac address on a switch port. """
     __tablename__ = _TN
 
-    network_device_id = Column(Integer,
-                               ForeignKey(NetworkDevice.hardware_entity_id,
-                                          ondelete='CASCADE',
-                                          name='obs_mac_hw_fk'),
+    network_device_id = Column(ForeignKey(NetworkDevice.hardware_entity_id,
+                                          ondelete='CASCADE'),
                                nullable=False)
 
     port = Column(AqStr(32), nullable=False)
@@ -50,8 +47,7 @@ class ObservedMac(Base):
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
 
-    last_seen = Column('last_seen', DateTime,
-                       default=datetime.now, nullable=False)
+    last_seen = Column(DateTime, default=datetime.now, nullable=False)
 
     network_device = relation(NetworkDevice, innerjoin=True,
                               backref=backref('observed_macs',

@@ -20,7 +20,7 @@ from datetime import datetime
 import socket
 
 from sqlalchemy import (Column, Integer, String, DateTime, Sequence, ForeignKey,
-                        UniqueConstraint, Index)
+                        UniqueConstraint)
 from sqlalchemy.orm import relation, deferred, backref
 from sqlalchemy.ext.orderinglist import ordering_list
 
@@ -28,7 +28,6 @@ from aquilon.aqdb.model import (Base, ServiceInstance, Host, Cluster,
                                 AddressAssignment, ServiceAddress, Alias)
 
 _TN = 'service_instance_server'
-_ABV = 'sis'
 
 
 class ServiceInstanceServer(Base):
@@ -36,31 +35,23 @@ class ServiceInstanceServer(Base):
 
     __tablename__ = _TN
 
-    id = Column(Integer, Sequence("%s_seq" % _TN), primary_key=True)
+    id = Column(Integer, Sequence("%s_id_seq" % _TN), primary_key=True)
 
-    service_instance_id = Column(Integer, ForeignKey(ServiceInstance.id,
-                                                     name='%s_si_fk' % _ABV),
-                                 nullable=False)
+    service_instance_id = Column(ForeignKey(ServiceInstance.id), nullable=False)
 
-    host_id = Column(Integer, ForeignKey(Host.hardware_entity_id,
-                                         name='%s_host_fk' % _ABV),
-                     nullable=True)
+    host_id = Column(ForeignKey(Host.hardware_entity_id),
+                     nullable=True, index=True)
 
-    cluster_id = Column(Integer, ForeignKey(Cluster.id,
-                                            name='%s_cluster_fk' % _ABV),
-                        nullable=True)
+    cluster_id = Column(ForeignKey(Cluster.id), nullable=True, index=True)
 
-    address_assignment_id = Column(Integer, ForeignKey(AddressAssignment.id,
-                                                       name='%s_addr_assign_fk' % _ABV),
-                                   nullable=True)
+    address_assignment_id = Column(ForeignKey(AddressAssignment.id),
+                                   nullable=True, index=True)
 
-    service_address_id = Column(Integer, ForeignKey(ServiceAddress.resource_id,
-                                                    name='%s_srv_addr_fk' % _ABV),
-                                nullable=True)
+    service_address_id = Column(ForeignKey(ServiceAddress.resource_id),
+                                nullable=True, index=True)
 
-    alias_id = Column(Integer, ForeignKey(Alias.dns_record_id,
-                                          name='%s_alias_fk' % _ABV),
-                      nullable=True)
+    alias_id = Column(ForeignKey(Alias.dns_record_id),
+                      nullable=True, index=True)
 
     position = Column(Integer, nullable=False)
 
@@ -85,12 +76,7 @@ class ServiceInstanceServer(Base):
     __table_args__ = (UniqueConstraint(service_instance_id, host_id, cluster_id,
                                        address_assignment_id,
                                        service_address_id, alias_id,
-                                       name="%s_uk" % _TN),
-                      Index("sis_host_idx", host_id),
-                      Index("sis_cluster_idx", cluster_id),
-                      Index("sis_srv_addr_idx", service_address_id),
-                      Index("sis_addr_assign_idx", address_assignment_id),
-                      Index("sis_alias_idx", alias_id))
+                                       name="%s_uk" % _TN),)
 
     def __init__(self, host=None, cluster=None, service_address=None,
                  address_assignment=None, alias=None, **kwargs):

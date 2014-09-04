@@ -21,7 +21,7 @@ from inspect import isclass
 import re
 
 from sqlalchemy import (Column, Integer, Sequence, ForeignKey, UniqueConstraint,
-                        Index, String, DateTime)
+                        String, DateTime)
 from sqlalchemy.orm import relation, backref, lazyload, validates, deferred
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.orm.attributes import set_committed_value
@@ -31,31 +31,26 @@ from aquilon.aqdb.model import Base, Location, Model, DnsRecord
 from aquilon.aqdb.column_types import AqStr
 
 _TN = "hardware_entity"
-_ABV = "hw_ent"
 
 
 class HardwareEntity(Base):
     __tablename__ = _TN
     _instance_label = 'printable_name'
 
-    id = Column(Integer, Sequence('%s_seq' % _TN), primary_key=True)
+    id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
 
-    label = Column(AqStr(63), nullable=False)
+    label = Column(AqStr(63), nullable=False, unique=True)
 
     hardware_type = Column(AqStr(64), nullable=False)
 
-    location_id = Column(Integer, ForeignKey(Location.id,
-                                             name='%s_location_fk' % _ABV),
-                         nullable=False)
+    location_id = Column(ForeignKey(Location.id), nullable=False, index=True)
 
-    model_id = Column(Integer, ForeignKey(Model.id,
-                                          name='%s_model_fk' % _ABV),
-                      nullable=False)
+    model_id = Column(ForeignKey(Model.id), nullable=False, index=True)
 
     serial_no = Column(String(64), nullable=True)
 
-    primary_name_id = Column(Integer, ForeignKey(DnsRecord.id,
-                                                 name='%s_pri_name_fk' % _ABV),
+    primary_name_id = Column(ForeignKey(DnsRecord.id,
+                                        name='%s_pri_name_fk' % _TN),
                              nullable=True)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
@@ -75,11 +70,9 @@ class HardwareEntity(Base):
                             backref=backref('hardware_entity', uselist=False,
                                             passive_deletes=True))
 
-    __table_args__ = (UniqueConstraint(label, name='%s_label_uk' % _TN),
-                      UniqueConstraint(primary_name_id,
-                                       name='%s_pri_name_uk' % _ABV),
-                      Index('%s_location_idx' % _ABV, location_id),
-                      Index('%s_model_idx' % _ABV, model_id))
+    __table_args__ = (UniqueConstraint(primary_name_id,
+                                       name='%s_pri_name_uk' % _TN),
+                      {'info': {'unique_fields': ['label']}},)
     __mapper_args__ = {'polymorphic_on': hardware_type}
 
     _label_check = re.compile("^[a-z][a-z0-9]{,62}$")
@@ -201,9 +194,6 @@ class HardwareEntity(Base):
         for iface in self.interfaces:
             for addr in iface.assignments:
                 yield addr
-
-hardware_entity = HardwareEntity.__table__  # pylint: disable=C0103
-hardware_entity.info['unique_fields'] = ['label']
 
 
 class DeviceLinkMixin(object):

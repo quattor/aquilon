@@ -15,7 +15,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """ Bunker is a subclass of Location """
-from sqlalchemy import Column, Integer, ForeignKey
+
+from sqlalchemy import Column, ForeignKey
 
 from aquilon.aqdb.model import Location, Building, Room
 
@@ -29,11 +30,6 @@ class Bunker(Location):
 
     valid_parents = [Building, Room]
 
-    id = Column(Integer, ForeignKey(Location.id,
-                                    name='%s_loc_fk' % _TN,
-                                    ondelete='CASCADE'),
-                primary_key=True)
+    id = Column(ForeignKey(Location.id, ondelete='CASCADE'), primary_key=True)
 
-
-bunker = Bunker.__table__  # pylint: disable=C0103
-bunker.info['unique_fields'] = ['name']
+    __table_args__ = ({'info': {'unique_fields': ['name']}},)

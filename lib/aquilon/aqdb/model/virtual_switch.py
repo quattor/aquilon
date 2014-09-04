@@ -19,7 +19,7 @@
 from datetime import datetime
 
 from sqlalchemy import (Column, Integer, String, DateTime, Sequence, ForeignKey,
-                        UniqueConstraint, PrimaryKeyConstraint, Index)
+                        PrimaryKeyConstraint)
 from sqlalchemy.orm import relation, backref, deferred
 
 from aquilon.aqdb.column_types import AqStr
@@ -35,9 +35,9 @@ class VirtualSwitch(Base):
     __tablename__ = _VS
     _class_label = 'Virtual Switch'
 
-    id = Column(Integer, Sequence('%s_seq' % _VS), primary_key=True)
+    id = Column(Integer, Sequence('%s_id_seq' % _VS), primary_key=True)
 
-    name = Column(AqStr(63), nullable=False)
+    name = Column(AqStr(63), nullable=False, unique=True)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
@@ -46,26 +46,18 @@ class VirtualSwitch(Base):
     # snapshot_hw(), so it is not worth deferring it
     comments = Column(String(255), nullable=True)
 
-    __table_args__ = (UniqueConstraint(name, name='%s_name_uk' % _VS),
-                      {'info': {'unique_fields': ['name']}})
+    __table_args__ = {'info': {'unique_fields': ['name']}}
 
 
 class __VSwitchClusterAssignment(Base):
     __tablename__ = _VSC
 
-    virtual_switch_id = Column(Integer, ForeignKey(VirtualSwitch.id,
-                                                   name='%s_vswitch_fk' % _VSC),
-                               nullable=False)
+    virtual_switch_id = Column(ForeignKey(VirtualSwitch.id), nullable=False)
 
-    cluster_id = Column(Integer, ForeignKey(Cluster.id,
-                                            name='%s_cluster_fk' % _VSC,
-                                            ondelete='CASCADE'),
-                        nullable=False)
+    cluster_id = Column(ForeignKey(Cluster.id, ondelete='CASCADE'),
+                        nullable=False, unique=True)
 
-    __table_args__ = (PrimaryKeyConstraint(virtual_switch_id, cluster_id,
-                                           name='%s_pk' % _VSC),
-                      UniqueConstraint(cluster_id,
-                                       name='%s_cluster_uk' % _VSC))
+    __table_args__ = (PrimaryKeyConstraint(virtual_switch_id, cluster_id),)
 
 VirtualSwitch.clusters = relation(Cluster,
                                   secondary=__VSwitchClusterAssignment.__table__,
@@ -78,18 +70,12 @@ VirtualSwitch.clusters = relation(Cluster,
 class __VSwitchHostAssignment(Base):
     __tablename__ = _VSH
 
-    virtual_switch_id = Column(Integer, ForeignKey(VirtualSwitch.id,
-                                                   name='%s_vswitch_fk' % _VSH),
-                               nullable=False)
+    virtual_switch_id = Column(ForeignKey(VirtualSwitch.id), nullable=False)
 
-    host_id = Column(Integer, ForeignKey(Host.hardware_entity_id,
-                                         name='%s_host_fk' % _VSH,
-                                         ondelete='CASCADE'),
-                     nullable=False)
+    host_id = Column(ForeignKey(Host.hardware_entity_id, ondelete='CASCADE'),
+                     nullable=False, unique=True)
 
-    __table_args__ = (PrimaryKeyConstraint(virtual_switch_id, host_id,
-                                           name='%s_pk' % _VSH),
-                      UniqueConstraint(host_id, name='%s_host_uk' % _VSH))
+    __table_args__ = (PrimaryKeyConstraint(virtual_switch_id, host_id),)
 
 VirtualSwitch.hosts = relation(Host,
                                secondary=__VSwitchHostAssignment.__table__,
@@ -101,19 +87,13 @@ VirtualSwitch.hosts = relation(Host,
 class __VSwitchPGAssignment(Base):
     __tablename__ = _VSP
 
-    virtual_switch_id = Column(Integer, ForeignKey(VirtualSwitch.id,
-                                                   name='%s_vswitch_fk' % _VSP,
-                                                   ondelete='CASCADE'),
+    virtual_switch_id = Column(ForeignKey(VirtualSwitch.id, ondelete='CASCADE'),
                                nullable=False)
 
-    port_group_id = Column(Integer, ForeignKey(PortGroup.network_id,
-                                               name='%s_port_group_fk' % _VSP,
-                                               ondelete='CASCADE'),
-                           nullable=False)
+    port_group_id = Column(ForeignKey(PortGroup.network_id, ondelete='CASCADE'),
+                           nullable=False, index=True)
 
-    __table_args__ = (PrimaryKeyConstraint(virtual_switch_id, port_group_id,
-                                           name='%s_pk' % _VSP),
-                      Index('%s_port_group_idx' % _VSP, port_group_id))
+    __table_args__ = (PrimaryKeyConstraint(virtual_switch_id, port_group_id),)
 
 VirtualSwitch.port_groups = relation(PortGroup,
                                      secondary=__VSwitchPGAssignment.__table__,

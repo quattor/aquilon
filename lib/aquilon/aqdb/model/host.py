@@ -18,8 +18,8 @@
 
 from datetime import datetime
 
-from sqlalchemy import (Integer, Boolean, DateTime, String, Column, ForeignKey,
-                        PrimaryKeyConstraint, Index)
+from sqlalchemy import (Boolean, DateTime, String, Column, ForeignKey,
+                        PrimaryKeyConstraint)
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import relation, backref, deferred
 
@@ -57,22 +57,14 @@ class Host(CompileableMixin, Base):
 
     __tablename__ = _TN
     _instance_label = 'fqdn'
-    _col_prefix = 'host'
 
-    hardware_entity_id = Column(Integer, ForeignKey(HardwareEntity.id,
-                                                    name='%s_hwent_fk' % _TN),
-                                primary_key=True)
+    hardware_entity_id = Column(ForeignKey(HardwareEntity.id), primary_key=True)
 
-    lifecycle_id = Column(Integer, ForeignKey(HostLifecycle.id,
-                                              name='%s_lifecycle_fk' % _TN),
-                          nullable=False)
+    lifecycle_id = Column(ForeignKey(HostLifecycle.id), nullable=False)
 
-    operating_system_id = Column(Integer, ForeignKey(OperatingSystem.id,
-                                                     name='%s_os_fk' % _TN),
-                                 nullable=False)
+    operating_system_id = Column(ForeignKey(OperatingSystem.id), nullable=False)
 
-    owner_eon_id = Column(Integer, ForeignKey(Grn.eon_id,
-                                              name='%s_owner_grn_fk' % _TN),
+    owner_eon_id = Column(ForeignKey(Grn.eon_id, name='%s_owner_grn_fk' % _TN),
                           nullable=True)
 
     # something to retain the advertised status of the host
@@ -93,9 +85,6 @@ class Host(CompileableMixin, Base):
     operating_system = relation(OperatingSystem, innerjoin=True)
     owner_grn = relation(Grn)
     grns = association_proxy('_grns', 'grn', creator=_hgm_creator)
-
-    __table_args__ = (Index('%s_prsnlty_idx' % _TN, 'personality_id'),
-                      Index('%s_branch_idx' % _TN, 'branch_id'))
 
     @property
     def fqdn(self):
@@ -144,14 +133,12 @@ class Host(CompileableMixin, Base):
 class HostGrnMap(Base):
     __tablename__ = _HOSTGRN
 
-    host_id = Column(Integer, ForeignKey(Host.hardware_entity_id,
-                                         name="%s_host_fk" % _HOSTGRN,
-                                         ondelete="CASCADE"),
+    host_id = Column(ForeignKey(Host.hardware_entity_id, ondelete="CASCADE"),
                      nullable=False)
 
-    eon_id = Column(Integer, ForeignKey(Grn.eon_id,
-                                        name='%s_grn_fk' % _HOSTGRN),
-                    nullable=False)
+    eon_id = Column(ForeignKey(Grn.eon_id), nullable=False)
+
+    target = Column(AqStr(32), nullable=False)
 
     host = relation(Host, innerjoin=True,
                     backref=backref('_grns', cascade='all, delete-orphan',
@@ -159,8 +146,6 @@ class HostGrnMap(Base):
 
     grn = relation(Grn, lazy=False, innerjoin=True,
                    backref=backref('_hosts', passive_deletes=True))
-
-    target = Column(AqStr(32), nullable=False)
 
     __table_args__ = (PrimaryKeyConstraint(host_id, eon_id, target),)
 

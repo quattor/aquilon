@@ -17,7 +17,7 @@
 
 from datetime import datetime
 
-from sqlalchemy import Integer, DateTime, String, Column, ForeignKey
+from sqlalchemy import DateTime, String, Column, ForeignKey
 
 from aquilon.aqdb.model import Resource
 
@@ -29,10 +29,7 @@ class Intervention(Resource):
     __tablename__ = _TN
     __mapper_args__ = {'polymorphic_identity': 'intervention'}
 
-    id = Column(Integer, ForeignKey(Resource.id,
-                                    name='iv_resource_fk',
-                                    ondelete='CASCADE'),
-                primary_key=True)
+    id = Column(ForeignKey(Resource.id, ondelete='CASCADE'), primary_key=True)
 
     start_date = Column(DateTime, default=datetime.now, nullable=False)
     expiry_date = Column(DateTime, default=datetime.now, nullable=False)
@@ -48,5 +45,4 @@ class Intervention(Resource):
     disabled = Column(String(255), nullable=True)
     enabled = Column(String(255), nullable=True)
 
-intervention = Intervention.__table__
-intervention.info['unique_fields'] = ['name', 'holder']
+    __table_args__ = ({'info': {'unique_fields': ['name', 'holder']}},)

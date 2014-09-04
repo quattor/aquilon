@@ -16,69 +16,140 @@
 # limitations under the License.
 """ Functions for managing Oracle constraints """
 
-from __future__ import print_function
 import re
 
 from sqlalchemy.sql import text
 
-_long_nms = {}
-_long_nms['CHASSIS_MANAGER'] = 'CHAS_MGR'
-_long_nms['HARDWARE_ENTITY_TYPE'] = 'HW_ENT_TYP'
-_long_nms['HARDWARE_ENTITY_TYPE_ID'] = 'HW_ENT_TYP_ID'
-_long_nms['HARDWARE_ENTITY'] = 'HW_ENT'
-_long_nms['HARDWARE_ENTITY_ID'] = 'HW_ENT_ID'
-_long_nms['LOCATION_SEARCH_LIST'] = 'LOC_SRCH_LST'
-_long_nms['LOCATION_SEARCH_LIST_ID'] = 'LOC_SRCH_LIST_ID'
-_long_nms['SEARCH_LIST_ITEM'] = 'SRCH_LI'
-_long_nms['SYSTEM_LIST_ITEM'] = 'SYSTEM_LI'
-_long_nms['CONSOLE_SERVER_ID'] = 'CONS_SVR_ID'
-_long_nms['INTERFACE'] = 'IFACE'
-_long_nms['SERVICE_ID'] = 'SVC_ID'
-_long_nms['SERVICE_MAP'] = 'SVC_MAP'
-_long_nms['SERVICE_LIST_ITEM'] = 'SVC_LI'
-_long_nms['SERVICE_INSTANCE'] = 'SVC_INST'
-_long_nms['SERVICE_INSTANCE_ID'] = 'SVC_INST_ID'
-_long_nms['SERVICE_INSTANCE_SERVER'] = 'SIS'
-_long_nms['PERSONALITY_ID'] = 'PRSNLTY_ID'
-_long_nms['PERSONALITY_SERVICE_LIST_ITEM'] = 'PRSNLTY_SLI'
-_long_nms['PERSONALITY_SERVICE_MAP'] = 'PRSNLTY_SVC_MAP'
-_long_nms['CREATION_DATE'] = 'CR_DATE'
-_long_nms['USER_PRINCIPAL_ID'] = 'USR_PRNC_ID'
-_long_nms['CLUSTER_TYPE'] = 'CLSTR_TYP'
-_long_nms['CLUSTER_REQUIRED'] = 'CLSTR_REQ'
-_long_nms['METACLUSTER_ID'] = 'MTACLSTR_ID'
-_long_nms['METACLUSTER_MEMBER'] = 'MTACLSTR_MBR'
-_long_nms['ESX_CLUSTER'] = 'ESX_CLSTR'
-_long_nms['ESX_CLUSTER_ID'] = 'ESX_CLSTR_ID'
-_long_nms['ESX_CLUSTER_MEMBER'] = 'ESX_CLSTR_MBR'
-_long_nms['CLUSTER_SERVICE_BINDING'] = 'CLSTR_SVC_BNDG'
-_long_nms['HOST_CLUSTER_MEMBER'] = 'HOST_CLSTR_MMBR'
-_long_nms['MACHINE_SPECS'] = 'MCHN_SPECS'
-_long_nms['CONTROLLER_TYPE'] = 'CNTRLR_TYPE'
-_long_nms['CREATION_DATE'] = 'CR_DATE'
-_long_nms['USER_PRINCIPAL_ID'] = 'USR_PRNC_ID'
-_long_nms['OPERATING_SYSTEM'] = 'OS'
-_long_nms['DOWN_HOSTS_THRESHOLD'] = 'DOWN_HOSTS_THR'
-_long_nms['PERSONALITY_CLUSTER_INFO'] = 'PERS_CLSTR'
-_long_nms['PERSONALITY_CLUSTER_INFO_ID'] = 'PERS_CLSTRID'
-_long_nms['PERSONALITY_ESX_CLUSTER_INFO'] = 'PERS_ESXCLSTR'
-_long_nms['VMHOST_OVERCOMMIT_MEMORY'] = 'VM_OVRCMT_MEM'
-_long_nms['HIGH_AVAILABILITY'] = 'HA'
-_long_nms['VLAN_INTERFACE_ID'] = 'VLAN_IFACE_ID'
-_long_nms['ADDRESS_ASSIGNMENT'] = 'ADDR_ASSIGN'
-_long_nms['DNS_ENVIRONMENT_ID'] = 'DNS_ENV_ID'
-_long_nms['NETWORK_ENVIRONMENT'] = 'NET_ENV'
-_long_nms['NETWORK_ENVIRONMENT_ID'] = 'NET_ENV_ID'
-_long_nms['REQUIRES_CHANGE_MANAGER'] = 'REQ_CHG_MGR'
-_long_nms['PERSONALITY_GRN_MAP'] = 'PERS_GRN_MAP'
-_long_nms['SERVICE_ADDRESS'] = 'SRV_ADDR'
-_long_nms['REBUILD_REQUIRED'] = 'REBLD_REQ'
-_long_nms['HOST_ENVIRONMENT_ID'] = 'HOST_ENV_ID'
-_long_nms['NETWORK_DEVICE_ID'] = 'NETDEV_ID'
-_long_nms['PERSONALITY_ROOTUSER'] = 'PERS_ROOT_USER'
-_long_nms['PERSONALITY_ROOTNETGROUP'] = 'PERS_ROOT_NG'
-_long_nms['LOCATION_CONSTRAINT_ID'] = 'LOC_CONSTR_ID'
-_long_nms['VIRTUAL_SWITCH_ID'] = 'VSWITCH_ID'
+from aquilon.exceptions_ import AquilonError
+
+# It would be nice to have this information as part of the definitions of the
+# tables/classes instead of one giant table here, but that would not work: the
+# names of constraints referencing other tables may need to be calculated when
+# the remote table has not been defined yet, so the Table objects cannot be used
+# to store the information.
+_table_abbrev = {
+    'address_assignment': 'addr_assign',
+    'archetype': 'arch',
+    'cluster_service_binding': 'clstr_svc_bndg',
+    'dns_environment': 'dns_env',
+    'dns_record': 'dnsrec',
+    'hardware_entity': 'hw_ent',
+    'host_cluster_member': 'host_clstr_mmbr',
+    'host_environment': 'host_env',
+    'interface': 'iface',
+    'metacluster': 'mtaclstr',
+    'metacluster_member': 'mtaclstr_mbr',
+    'netgroup_whitelist': 'netgr_whtlst',
+    'network_device': 'netdev',
+    'network_environment': 'net_env',
+    'operating_system': 'os',
+    'param_definition': 'param_def',
+    'param_def_holder': 'pd_holder',
+    'personality': 'pers',
+    'personality_cluster_info': 'pers_clstr',
+    'personality_esx_cluster_info': 'pers_esxclstr',
+    'personality_grn_map': 'pers_grn_map',
+    'personality_rootuser': 'pers_rootuser',
+    'personality_rootnetgroup': 'pers_rootng',
+    'personality_service_list_item': 'psli',
+    'personality_service_map': 'pers_svc_map',
+    'reboot_intervention': 'reboot_iv',
+    'service': 'svc',
+    'service_address': 'srv_addr',
+    'service_instance': 'svc_inst',
+    'service_instance_server': 'sis',
+    'service_list_item': 'sli',
+    'virtual_switch': 'vswitch',
+}
+
+_col_abbrev = {
+    'cluster_required': 'clstr_req',
+    'controller_type': 'ctrl_type',
+    'creation_date': 'cr_date',
+    'high_availability': 'ha',
+    'location_constraint_id': 'loc_constr_id',
+    'rebuild_required': 'rebld_req',
+    'requires_change_manager': 'req_chg_mgr',
+    'vmhost_overcommit_memory': 'vm_ovrcmt_mem',
+}
+
+
+def ref_constraint_name(local_table, remote_table=None, column=None, suffix=None):
+    # Oracle has a rather small limit on identifier names, so we need to
+    # abbreviate. The logic we use for abbreviation:
+    # - Abbreviate only when it's needed, use the full table/column name if it
+    #   fits inside the limit
+    # - Abbreviate from right to left. In this case, it means trying to
+    #   abbreviate the column name first, if that's not enough then the remote
+    #   table, if even that's not enough then the local table name.
+
+    local_abbrev = _table_abbrev.get(local_table, local_table)
+
+    if remote_table:
+        remote_abbrev = _table_abbrev.get(remote_table, remote_table)
+    else:
+        remote_abbrev = None
+
+    if column:
+        col_abbrev = _col_abbrev.get(column, column)
+    else:
+        col_abbrev = None
+
+    # Try to abbreviate from the right: first the column, then the remote table,
+    # lastly the local table.
+    for local in (local_table, local_abbrev):
+        for remote in (remote_table, remote_abbrev):
+            for col in (column, col_abbrev):
+                # Ignore empty components
+                items = [item for item in (local, remote, col) if item]
+
+                items.append(suffix)
+                name = "_".join(items)
+                if len(name) <= 30:
+                    return name
+
+    raise AquilonError("Cannot abbreviate (%s, %s, %s)" %
+                       (local_table, remote_table, column))
+
+
+def multi_col_constraint_name(table_name, columns, suffix):
+    col_names = []
+    for name in columns.keys():
+        # If the column looks like a reference to a remote table, then use the
+        # name of the remote object. It's not really a table name in all cases,
+        # but that's not a problem.
+        if name.endswith('_id') and columns[name].foreign_keys:
+            col_names.append(name[:-3])
+        else:
+            col_names.append(name)
+
+    name = '%s_%s_%s' % (table_name, "_".join(col_names), suffix)
+    if len(name) <= 30:
+        return name
+
+    # Try to abbreviate column names
+    col_names = []
+    for name in columns.keys():
+        # If the column looks like a reference to another table, then try to
+        # abbreviate the remote table name.
+        if name.endswith('_id') and columns[name].foreign_keys:
+            rtable = name[:-3]
+            col_names.append(_table_abbrev.get(rtable, rtable))
+        else:
+            col_names.append(_col_abbrev.get(name, name))
+
+    name = '%s_%s_%s' % (table_name, "_".join(col_names), suffix)
+    if len(name) <= 30:
+        return name
+
+    # Try to abbreviate the local table name too
+    name = '%s_%s_%s' % (_table_abbrev.get(table_name, table_name),
+                         "_".join(col_names), suffix)
+    if len(name) <= 30:
+        return name
+
+    raise AquilonError("Cannot abbreviate (%s, %s)" %
+                       (table_name, ", ".join(columns.keys())))
 
 
 def rename_non_null_check_constraints(db):
@@ -95,25 +166,22 @@ def rename_non_null_check_constraints(db):
     rename = []
     pat = re.compile('\"(.*)\"')
 
-    for (constraint, table, condition) in result:
-        if condition.endswith('IS NOT NULL'):
-            col = pat.match(condition).group().strip('"')
+    for (constraint, orig_table, condition) in result:
+        if not condition.endswith('IS NOT NULL'):
+            continue
 
-            # Replace the column name if its long
-            if col in _long_nms:
-                col = _long_nms[col]
+        table = orig_table.lower()
+        col = pat.match(condition).group().strip('"').lower()
 
-            # Replace table name if its long
-            if table in _long_nms:
-                new_name = '%s_%s_NN' % (_long_nms[table], col)
-            else:
-                new_name = '%s_%s_NN' % (table, col)
+        # If the column looks like a reference to a remote table, then try to
+        # abbreviate both the local and the remote table name. This is just
+        # heuristics, since we do not check for foreign keys here.
+        if col.endswith("_id") and col not in _col_abbrev:
+            rtable, rcol = col.rsplit("_", 1)
+            new_name = ref_constraint_name(table, rtable, rcol, 'nn')
+        else:
+            new_name = ref_constraint_name(table, None, col, 'nn')
 
-            if len(new_name) > 30:
-                print("Renaming %s to %s would fail, new name longer than 32 "
-                      "characters" % (constraint, new_name))
-                continue
-
-            rename = text('ALTER TABLE "%s" RENAME CONSTRAINT "%s" TO "%s"' %
-                          (table, constraint, new_name))
-            db.engine.execute(rename)
+        rename = text('ALTER TABLE "%s" RENAME CONSTRAINT "%s" TO "%s"' %
+                      (orig_table, constraint, new_name.upper()))
+        db.engine.execute(rename)

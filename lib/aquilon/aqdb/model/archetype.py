@@ -17,8 +17,7 @@
 """ Archetype specifies the metaclass of the build """
 
 from datetime import datetime
-from sqlalchemy import (Column, Integer, DateTime, Sequence, String,
-                        UniqueConstraint, Boolean)
+from sqlalchemy import Column, Integer, DateTime, Sequence, String, Boolean
 from sqlalchemy.orm import deferred
 
 from aquilon.aqdb.model import Base
@@ -33,7 +32,7 @@ class Archetype(Base):
 
     id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
 
-    name = Column(AqStr(32), nullable=False)
+    name = Column(AqStr(32), nullable=False, unique=True)
     outputdesc = Column(String(255), nullable=True)
 
     is_compileable = Column(Boolean(name="%s_is_compileable_ck" % _TN),
@@ -46,7 +45,4 @@ class Archetype(Base):
 
     comments = deferred(Column(String(255), nullable=True))
 
-    __table_args__ = (UniqueConstraint(name, name='%s_uk' % _TN),)
-
-archetype = Archetype.__table__  # pylint: disable=C0103
-archetype.info['unique_fields'] = ['name']
+    __table_args__ = ({'info': {'unique_fields': ['name']}},)

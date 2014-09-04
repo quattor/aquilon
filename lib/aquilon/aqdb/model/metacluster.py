@@ -22,8 +22,7 @@
 from datetime import datetime
 
 from sqlalchemy import (Column, Integer, DateTime, Boolean, ForeignKey,
-                        UniqueConstraint, PrimaryKeyConstraint)
-
+                        PrimaryKeyConstraint)
 from sqlalchemy.orm import (relation, backref, deferred, validates,
                             object_session)
 
@@ -44,17 +43,17 @@ class MetaCluster(Cluster):
     """
 
     __tablename__ = _MCT
-    __mapper_args__ = {'polymorphic_identity': 'meta'}
     _class_label = "Metacluster"
 
-    id = Column(Integer, ForeignKey(Cluster.id, name='meta_cluster_fk',
-                                    ondelete='CASCADE'),
-                primary_key=True)
+    id = Column(ForeignKey(Cluster.id, ondelete='CASCADE'), primary_key=True)
 
     max_clusters = Column(Integer, nullable=True)
 
     high_availability = Column(Boolean(name="%s_ha_ck" % _MCT), default=False,
                                nullable=False)
+
+    __table_args__ = ({'info': {'unique_fields': ['name']}},)
+    __mapper_args__ = {'polymorphic_identity': 'meta'}
 
     # see cluster.minimum_location
     @property
@@ -172,30 +171,21 @@ class MetaCluster(Cluster):
                                               self.branch.branch_type,
                                               self.authored_branch))
 
-metacluster = MetaCluster.__table__  # pylint: disable=C0103
-metacluster.info['unique_fields'] = ['name']
-
 
 class __MetaClusterMember(Base):
     """ Binds clusters to metaclusters """
     __tablename__ = _MCM
 
-    metacluster_id = Column(Integer, ForeignKey(MetaCluster.id,
-                                                name='%s_meta_fk' % _MCM,
-                                                ondelete='CASCADE'),
+    metacluster_id = Column(ForeignKey(MetaCluster.id, ondelete='CASCADE'),
                             nullable=False)
 
-    cluster_id = Column(Integer, ForeignKey(Cluster.id,
-                                            name='%s_clstr_fk' % _MCM,
-                                            ondelete='CASCADE'),
-                        nullable=False)
+    cluster_id = Column(ForeignKey(Cluster.id, ondelete='CASCADE'),
+                        nullable=False, unique=True)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
 
-    __table_args__ = (PrimaryKeyConstraint(metacluster_id, cluster_id,
-                                           name="%s_pk" % _MCM),
-                      UniqueConstraint(cluster_id, name='%s_uk' % _MCM))
+    __table_args__ = (PrimaryKeyConstraint(metacluster_id, cluster_id),)
 
 MetaCluster.members = relation(Cluster,
                                secondary=__MetaClusterMember.__table__,

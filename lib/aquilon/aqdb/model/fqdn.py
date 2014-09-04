@@ -19,7 +19,7 @@
 from datetime import datetime
 
 from sqlalchemy import (Integer, DateTime, Sequence, Column, ForeignKey,
-                        UniqueConstraint, Index)
+                        UniqueConstraint)
 from sqlalchemy.orm import relation, deferred
 from sqlalchemy.orm.session import Session
 
@@ -40,13 +40,10 @@ class Fqdn(Base):
 
     name = Column(AqStr(63), nullable=False)
 
-    dns_domain_id = Column(Integer, ForeignKey(DnsDomain.id,
-                                               name='%s_dns_domain_fk' % _TN),
-                           nullable=False)
+    dns_domain_id = Column(ForeignKey(DnsDomain.id), nullable=False)
 
-    dns_environment_id = Column(Integer, ForeignKey(DnsEnvironment.id,
-                                                    name='%s_dns_env_fk' % _TN),
-                                nullable=False)
+    dns_environment_id = Column(ForeignKey(DnsEnvironment.id),
+                                nullable=False, index=True)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
@@ -57,7 +54,8 @@ class Fqdn(Base):
 
     __table_args__ = (UniqueConstraint(dns_domain_id, name, dns_environment_id,
                                        name='%s_domain_name_env_uk' % _TN),
-                      Index('%s_dns_env_idx' % _TN, dns_environment_id))
+                      {'info': {'unique_fields': ['dns_environment',
+                                                  'dns_domain', 'name']}})
 
     @property
     def fqdn(self):
@@ -139,6 +137,3 @@ class Fqdn(Base):
 
         super(Fqdn, self).__init__(name=name, dns_domain=dns_domain,
                                    dns_environment=dns_environment, **kwargs)
-
-fqdn = Fqdn.__table__  # pylint: disable=C0103
-fqdn.info['unique_fields'] = ['dns_environment', 'dns_domain', 'name']

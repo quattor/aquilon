@@ -16,6 +16,7 @@
 # limitations under the License.
 """Contains the logic for `aq del chassis`."""
 
+from sqlalchemy.sql import null
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
@@ -36,7 +37,7 @@ class CommandDelChassis(BrokerCommand):
 
         q = session.query(ChassisSlot)
         q = q.filter_by(chassis=dbchassis)
-        q = q.filter(ChassisSlot.machine_id != None)
+        q = q.filter(ChassisSlot.machine_id != null())
 
         machine_count = q.count()
         if machine_count > 0 and not clear_slots:

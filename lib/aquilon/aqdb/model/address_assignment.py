@@ -52,33 +52,26 @@ class AddressAssignment(Base):
 
     _label_check = re.compile('^[a-z0-9]{0,16}$')
 
-    id = Column(Integer, Sequence('%s_seq' % _TN), primary_key=True)
+    id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
 
-    interface_id = Column(Integer, ForeignKey(Interface.id,
-                                              name='%s_interface_id_fk' % _ABV,
-                                              ondelete='CASCADE'),
+    interface_id = Column(ForeignKey(Interface.id, ondelete='CASCADE'),
                           nullable=False)
 
     _label = Column("label", AqStr(16), nullable=False)
 
     ip = Column(IPV4, nullable=False)
 
-    network_id = Column(Integer, ForeignKey(Network.id,
-                                            name='%s_network_fk' % _TN),
-                        nullable=False)
+    network_id = Column(ForeignKey(Network.id), nullable=False)
 
-    service_address_id = Column(Integer, ForeignKey('service_address.resource_id',
-                                                    name='%s_srv_addr_id' % _ABV,
-                                                    ondelete="CASCADE"),
-                                nullable=True)
+    service_address_id = Column(ForeignKey('service_address.resource_id',
+                                           ondelete="CASCADE"),
+                                nullable=True, index=True)
 
     # This should be the same as #
     # network.network_environment.dns_environment_id, but using that would mean
     # joining two extra tables in the dns_records relation
-    dns_environment_id = Column(Integer, ForeignKey(DnsEnvironment.id,
-                                                    name='%s_dns_env_fk' %
-                                                    _ABV),
-                                nullable=False)
+    dns_environment_id = Column(ForeignKey(DnsEnvironment.id), nullable=False,
+                                index=True)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
@@ -107,13 +100,9 @@ class AddressAssignment(Base):
                        backref=backref('assignments', passive_deletes=True,
                                        order_by=[ip]))
 
-    __table_args__ = (UniqueConstraint(interface_id, ip,
-                                       name="%s_iface_ip_uk" % _ABV),
-                      UniqueConstraint(interface_id, _label,
-                                       name="%s_iface_label_uk" % _ABV),
-                      Index("%s_service_addr_idx" % _ABV, service_address_id),
-                      Index("%s_network_ip_idx" % _ABV, network_id, ip),
-                      Index("%s_dns_env_idx" % _ABV, dns_environment_id))
+    __table_args__ = (UniqueConstraint(interface_id, ip),
+                      UniqueConstraint(interface_id, _label),
+                      Index("%s_network_ip_idx" % _ABV, network_id, ip))
 
     @property
     def logical_name(self):

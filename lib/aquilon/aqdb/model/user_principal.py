@@ -25,7 +25,6 @@ from sqlalchemy.orm import relation, deferred
 from aquilon.aqdb.model import Base, Role, Realm
 
 _TN = 'user_principal'
-_ABV = 'usr_princ'
 
 
 class UserPrincipal(Base):
@@ -37,12 +36,9 @@ class UserPrincipal(Base):
 
     name = Column(String(32), nullable=False)
 
-    realm_id = Column(Integer, ForeignKey(Realm.id, name='%s_rlm_fk' % _ABV),
-                      nullable=False)
+    realm_id = Column(ForeignKey(Realm.id), nullable=False)
 
-    role_id = Column(Integer, ForeignKey(Role.id, name='%s_role_fk' % _ABV,
-                                         ondelete='CASCADE'),
-                     nullable=False)
+    role_id = Column(ForeignKey(Role.id, ondelete='CASCADE'), nullable=False)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
@@ -52,12 +48,8 @@ class UserPrincipal(Base):
     role = relation(Role, innerjoin=True)
     realm = relation(Realm, innerjoin=True)
 
-    __table_args__ = (UniqueConstraint(name, realm_id,
-                                       name='user_principal_realm_uk'),)
+    __table_args__ = (UniqueConstraint(name, realm_id),
+                      {'info': {'unique_fields': ['name', 'realm']}})
 
     def __str__(self):
         return '@'.join([self.name, self.realm.name])
-
-user_principal = UserPrincipal.__table__  # pylint: disable=C0103
-user_principal.primary_key.name = '%s_pk' % _TN
-user_principal.info['unique_fields'] = ['name', 'realm']

@@ -17,8 +17,7 @@
 """ Manufacturer names """
 from datetime import datetime
 
-from sqlalchemy import (Integer, DateTime, Sequence, String, Column,
-                        UniqueConstraint)
+from sqlalchemy import Integer, DateTime, Sequence, String, Column
 from sqlalchemy.orm import deferred
 
 from aquilon.aqdb.model import Base
@@ -32,13 +31,10 @@ class Vendor(Base):
     __tablename__ = _TN
 
     id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
-    name = Column(AqStr(32), nullable=False)
+    name = Column(AqStr(32), nullable=False, unique=True)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
     comments = Column(String(255), nullable=True)
 
-    __table_args__ = (UniqueConstraint(name, name='%s_uk' % _TN),)
-
-vendor = Vendor.__table__  # pylint: disable=C0103
-vendor.info['unique_fields'] = ['name']
+    __table_args__ = ({'info': {'unique_fields': ['name']}},)

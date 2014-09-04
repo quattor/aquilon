@@ -27,9 +27,8 @@ from aquilon.aqdb.model import Base, Personality
 from aquilon.aqdb.column_types.aqstr import AqStr
 
 _PCI = "personality_cluster_info"
-_PCIABV = "pers_clst_info"
+_PCIABV = "pers_clstr"
 _PECI = "personality_esx_cluster_info"
-_PECIABV = "pers_esxcl_info"
 
 
 class PersonalityClusterInfo(Base):
@@ -37,11 +36,9 @@ class PersonalityClusterInfo(Base):
 
     __tablename__ = _PCI
 
-    id = Column(Integer, Sequence("%s_seq" % _PCIABV), primary_key=True)
+    id = Column(Integer, Sequence("%s_id_seq" % _PCIABV), primary_key=True)
 
-    personality_id = Column(Integer, ForeignKey(Personality.id,
-                                                name="%s_pers_fk" % _PCIABV,
-                                                ondelete="CASCADE"),
+    personality_id = Column(ForeignKey(Personality.id, ondelete="CASCADE"),
                             nullable=False)
     cluster_type = Column(AqStr(16), nullable=False)
 
@@ -58,9 +55,6 @@ class PersonalityClusterInfo(Base):
                                        name="%s_pc_uk" % _PCIABV),)
     __mapper_args__ = {'polymorphic_on': cluster_type}
 
-pci = PersonalityClusterInfo.__table__  # pylint: disable=C0103
-pci.primary_key.name = "%s_pk" % _PCIABV
-
 
 class PersonalityESXClusterInfo(PersonalityClusterInfo):
     """ Extra personality data specific to ESX clusters """
@@ -68,9 +62,7 @@ class PersonalityESXClusterInfo(PersonalityClusterInfo):
     __tablename__ = _PECI
     __mapper_args__ = {'polymorphic_identity': 'esx'}
 
-    personality_cluster_info_id = Column(Integer,
-                                         ForeignKey(PersonalityClusterInfo.id,
-                                                    name="%s_pci_fk" % _PECIABV,
+    personality_cluster_info_id = Column(ForeignKey(PersonalityClusterInfo.id,
                                                     ondelete="CASCADE"),
                                          primary_key=True)
 
@@ -109,6 +101,3 @@ class PersonalityESXClusterInfo(PersonalityClusterInfo):
     def __init__(self, **kwargs):
         super(PersonalityESXClusterInfo, self).__init__(**kwargs)
         self._compiled_vmhost = None
-
-pcei = PersonalityESXClusterInfo.__table__  # pylint: disable=C0103
-pcei.primary_key.name = "%s_pk" % _PECIABV

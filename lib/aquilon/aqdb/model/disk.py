@@ -53,9 +53,7 @@ class Disk(DeviceLinkMixin, Base):
     address = Column(AqStr(16), nullable=True)
     wwn = Column(AqStr(32), nullable=True)
 
-    machine_id = Column(Integer, ForeignKey(Machine.machine_id,
-                                            name='%s_machine_fk' % _TN,
-                                            ondelete='CASCADE'),
+    machine_id = Column(ForeignKey(Machine.machine_id, ondelete='CASCADE'),
                         nullable=False)
 
     bootable = Column(Boolean(name="%s_bootable_ck" % _TN), nullable=False,
@@ -69,8 +67,8 @@ class Disk(DeviceLinkMixin, Base):
     machine = relation(Machine, innerjoin=True,
                        backref=backref('disks', cascade='all, delete-orphan'))
 
-    __table_args__ = (UniqueConstraint(machine_id, device_name,
-                                       name='%s_mach_dev_name_uk' % _TN),)
+    __table_args__ = (UniqueConstraint(machine_id, device_name),
+                      {'info': {'unique_fields': ['machine', 'device_name']}},)
     __mapper_args__ = {'polymorphic_on': disk_type,
                        'with_polymorphic': '*'}
 
@@ -116,9 +114,6 @@ class Disk(DeviceLinkMixin, Base):
 
         # Unknown WWN format
         return None
-
-disk = Disk.__table__  # pylint: disable=C0103
-disk.info['unique_fields'] = ['machine', 'device_name']
 
 
 class LocalDisk(Disk):

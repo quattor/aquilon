@@ -15,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from sqlalchemy import Integer, Column, ForeignKey, UniqueConstraint
+from sqlalchemy import Column, ForeignKey
 
 from aquilon.aqdb.model import Resource, ResourceHolder
 from aquilon.aqdb.column_types.aqstr import AqStr
@@ -33,9 +33,7 @@ class ResourceGroup(Resource):
     __tablename__ = _TN
     _class_label = 'Resource Group'
 
-    id = Column(Integer, ForeignKey(Resource.id,
-                                    name='rg_resource_fk',
-                                    ondelete='CASCADE'),
+    id = Column(ForeignKey(Resource.id, ondelete='CASCADE'),
                 primary_key=True)
 
     # declare any per-group attributes here (none for now)
@@ -43,6 +41,7 @@ class ResourceGroup(Resource):
     # This is to enforce the same type of resources in the group
     required_type = Column(AqStr(32), nullable=True)
 
+    __table_args__ = ({'info': {'unique_fields': ['name', 'holder']}},)
     __mapper_args__ = {'polymorphic_identity': _TN}
 
     def validate_holder(self, key, value):
@@ -55,21 +54,17 @@ class ResourceGroup(Resource):
     def branch(self):
         return self.holder.holder_object.branch
 
-resourcegroup = ResourceGroup.__table__
-resourcegroup.info['unique_fields'] = ['holder', 'name']
-
 
 class BundleResource(ResourceHolder):
     '''Allow ResourceGroups to hold other types of resource. '''
 
-    resourcegroup_id = Column(Integer,
-                              ForeignKey(ResourceGroup.id,
+    resourcegroup_id = Column(ForeignKey(ResourceGroup.id,
                                          name='%s_bundle_fk' % _RESHOLDER,
                                          ondelete='CASCADE',
                                          deferrable=True,
                                          initially='IMMEDIATE',
                                          use_alter=True),
-                              nullable=True)
+                              nullable=True, unique=True)
 
     # This is a one-to-one relation, so we need uselist=False on the backref
     resourcegroup = relation(ResourceGroup, lazy='subquery',
@@ -77,9 +72,6 @@ class BundleResource(ResourceHolder):
                              backref=backref('resholder',
                                              cascade='all, delete-orphan',
                                              uselist=False))
-
-    __extra_table_args__ = (UniqueConstraint(resourcegroup_id,
-                                             name="resholder_rg_uk"),)
 
     # Note: the polymorphic identity of ResourceGroup and BundleResource should
     # be the same, because plenary paths sometimes use one or the other,

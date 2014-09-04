@@ -19,7 +19,7 @@
 from datetime import datetime
 
 from sqlalchemy import (Column, Integer, DateTime, Sequence, String, Boolean,
-                        ForeignKey, UniqueConstraint, Index)
+                        ForeignKey, UniqueConstraint)
 from sqlalchemy.orm import relation, backref, deferred, validates
 from sqlalchemy.orm.exc import NoResultFound
 
@@ -47,8 +47,8 @@ class Feature(Base):
                                     nullable=False))
     comments = deferred(Column(String(255), nullable=True))
 
-    __table_args__ = (UniqueConstraint(name, feature_type,
-                                       name='%s_name_type_uk' % _TN),)
+    __table_args__ = (UniqueConstraint(name, feature_type),
+                      {'info': {'unique_fields': ['name', 'feature_type']}},)
     __mapper_args__ = {'polymorphic_on': feature_type}
 
     @validates('links')
@@ -59,9 +59,6 @@ class Feature(Base):
 
     def validate_link(self, key, link):  # pragma: no cover
         return link
-
-feature = Feature.__table__  # pylint: disable=C0103
-feature.info['unique_fields'] = ['name', 'feature_type']
 
 
 class HostFeature(Feature):
@@ -142,24 +139,16 @@ class FeatureLink(Base):
 
     id = Column(Integer, Sequence("%s_id_seq" % _LINK), primary_key=True)
 
-    feature_id = Column(Integer, ForeignKey(Feature.id,
-                                            name='%s_feat_fk' % _LINK),
-                        nullable=False)
+    feature_id = Column(ForeignKey(Feature.id), nullable=False)
 
-    model_id = Column(Integer, ForeignKey(Model.id,
-                                          name='%s_model_fk' % _LINK,
-                                          ondelete='CASCADE'),
-                      nullable=True)
+    model_id = Column(ForeignKey(Model.id, ondelete='CASCADE'),
+                      nullable=True, index=True)
 
-    archetype_id = Column(Integer, ForeignKey(Archetype.id,
-                                              name='%s_arch_fk' % _LINK,
-                                              ondelete='CASCADE'),
-                          nullable=True)
+    archetype_id = Column(ForeignKey(Archetype.id, ondelete='CASCADE'),
+                          nullable=True, index=True)
 
-    personality_id = Column(Integer, ForeignKey(Personality.id,
-                                                name='%s_pers_fk' % _LINK,
-                                                ondelete='CASCADE'),
-                            nullable=True)
+    personality_id = Column(ForeignKey(Personality.id, ondelete='CASCADE'),
+                            nullable=True, index=True)
 
     interface_name = Column(AqStr(32), nullable=True)
 
@@ -188,10 +177,7 @@ class FeatureLink(Base):
     # - Trying to add ('b', NULL) after ('a', NULL) should succeed
     __table_args__ = (UniqueConstraint(feature_id, model_id, archetype_id,
                                        personality_id, interface_name,
-                                       name='%s_uk' % _LINK),
-                      Index('%s_model_idx' % _LINK, model_id),
-                      Index('%s_archetype_idx' % _LINK, archetype_id),
-                      Index('%s_personality_idx' % _LINK, personality_id))
+                                       name='%s_uk' % _LINK),)
 
     def __init__(self, feature=None, archetype=None, personality=None,
                  model=None, interface_name=None):

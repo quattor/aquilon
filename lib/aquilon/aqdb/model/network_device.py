@@ -17,7 +17,7 @@
 """ Network Devices """
 from datetime import datetime
 
-from sqlalchemy import Column, Integer, ForeignKey, DateTime
+from sqlalchemy import Column, ForeignKey, DateTime
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import HardwareEntity
@@ -32,9 +32,7 @@ class NetworkDevice(HardwareEntity):
     _class_label = 'Switch'
     __mapper_args__ = {'polymorphic_identity': _TN}
 
-    hardware_entity_id = Column(Integer,
-                                ForeignKey(HardwareEntity.id,
-                                           name='%s_hw_ent_fk' % _TN,
+    hardware_entity_id = Column(ForeignKey(HardwareEntity.id,
                                            ondelete='CASCADE'),
                                 primary_key=True)
 

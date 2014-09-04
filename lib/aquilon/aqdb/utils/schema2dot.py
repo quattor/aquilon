@@ -24,7 +24,7 @@ ms.version.addpkg('pyparsing', '2.0.1')  # pydot relies on pyparsing
 ms.version.addpkg('pydot', '1.0.28')
 import pydot
 
-from sqlalchemy.orm.properties import PropertyLoader
+from sqlalchemy.orm import RelationshipProperty
 
 
 def create_uml_graph(mappers,
@@ -57,7 +57,7 @@ def create_uml_graph(mappers,
                            arrowsize=linewidth))
 
         for loader in mapper.iterate_properties:
-            if isinstance(loader, PropertyLoader) and loader.mapper in mappers:
+            if isinstance(loader, RelationshipProperty) and loader.mapper in mappers:
                 if hasattr(loader, 'reverse_property'):
                     relations.add(frozenset([loader, loader.reverse_property]))
                 else:

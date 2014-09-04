@@ -18,7 +18,7 @@
 from datetime import datetime
 
 from sqlalchemy import (Column, Integer, String, DateTime, ForeignKey,
-                        Sequence, UniqueConstraint, Index)
+                        Sequence, UniqueConstraint)
 from sqlalchemy.orm import relation, backref, validates, deferred
 
 from aquilon.exceptions_ import InternalError
@@ -26,7 +26,6 @@ from aquilon.aqdb.column_types import AqStr
 from aquilon.aqdb.model import Base, Cluster, Host
 
 _TN = 'resource'
-_ABV = 'res'
 _RESHOLDER = 'resholder'
 
 
@@ -41,7 +40,7 @@ class ResourceHolder(Base):
     """
     __tablename__ = _RESHOLDER
 
-    id = Column(Integer, Sequence('%s_seq' % _RESHOLDER), primary_key=True)
+    id = Column(Integer, Sequence('%s_id_seq' % _RESHOLDER), primary_key=True)
 
     # I don't like this as a string...
     holder_type = Column(AqStr(16), nullable=False)
@@ -64,23 +63,19 @@ class ResourceHolder(Base):
     def _validate_resources(self, key, value):
         return self.validate_resources(key, value)
 
-    def validate_resources(self, key, value):
+    def validate_resources(self, key, value):  # pylint: disable=W0613
         return value
 
 
 class HostResource(ResourceHolder):
-    host_id = Column(Integer, ForeignKey(Host.hardware_entity_id,
-                                         name='%s_host_fk' % _RESHOLDER,
-                                         ondelete='CASCADE'),
-                     nullable=True)
+    host_id = Column(ForeignKey(Host.hardware_entity_id, ondelete='CASCADE'),
+                     nullable=True, unique=True)
 
     # This is a one-to-one relation, so we need uselist=False on the backref
     host = relation(Host,
                     backref=backref('resholder', uselist=False,
                                     cascade='all, delete-orphan'))
 
-    __extra_table_args__ = (UniqueConstraint(host_id,
-                                             name='%s_host_uk' % _RESHOLDER),)
     __mapper_args__ = {'polymorphic_identity': 'host'}
 
     @property
@@ -93,18 +88,14 @@ class HostResource(ResourceHolder):
 
 
 class ClusterResource(ResourceHolder):
-    cluster_id = Column(Integer, ForeignKey(Cluster.id,
-                                            name='%s_clstr_fk' % _RESHOLDER,
-                                            ondelete='CASCADE'),
-                        nullable=True)
+    cluster_id = Column(ForeignKey(Cluster.id, ondelete='CASCADE'),
+                        nullable=True, unique=True)
 
     # This is a one-to-one relation, so we need uselist=False on the backref
     cluster = relation(Cluster,
                        backref=backref('resholder', uselist=False,
                                        cascade='all, delete-orphan'))
 
-    __extra_table_args__ = (UniqueConstraint(cluster_id,
-                                             name='%s_cluster_uk' % _RESHOLDER),)
     __mapper_args__ = {'polymorphic_identity': 'cluster'}
 
     @property
@@ -128,16 +119,14 @@ class Resource(Base):
     """
     __tablename__ = _TN
 
-    id = Column(Integer, Sequence('%s_seq' % _TN), primary_key=True)
+    id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
     resource_type = Column(AqStr(16), nullable=False)
     name = Column(AqStr(64), nullable=False)
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
     comments = Column(String(255), nullable=True)
-    holder_id = Column(Integer, ForeignKey(ResourceHolder.id,
-                                           name='%s_resholder_fk' % _TN,
-                                           ondelete='CASCADE'),
-                       nullable=False)
+    holder_id = Column(ForeignKey(ResourceHolder.id, ondelete='CASCADE'),
+                       nullable=False, index=True)
 
     holder = relation(ResourceHolder, innerjoin=True,
                       backref=backref('resources',
@@ -145,18 +134,16 @@ class Resource(Base):
 
     __table_args__ = (UniqueConstraint(holder_id, name, resource_type,
                                        name='%s_holder_name_type_uk' % _TN),
-                      Index('%s_holder_idx' % _TN, holder_id))
+                      {'info': {'unique_fields': ['name', 'resource_type',
+                                                  'holder']}})
     __mapper_args__ = {'polymorphic_on': resource_type}
 
     @validates('holder')
     def _validate_holder(self, key, value):
         return self.validate_holder(key, value)
 
-    def validate_holder(self, key, value):
+    def validate_holder(self, key, value):  # pylint: disable=W0613
         return value
 
     def __repr__(self):
         return "<{0:c} Resource {0.name} of {1}>".format(self, self.holder.holder_object)
-
-resource = Resource.__table__  # pylint: disable=C0103
-resource.info['unique_fields'] = ['name', 'resource_type', 'holder']

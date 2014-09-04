@@ -42,14 +42,10 @@ class DnsMap(Base):
 
     id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
 
-    location_id = Column(Integer, ForeignKey(Location.id,
-                                             name='%s_location_fk' % _TN,
-                                             ondelete="CASCADE"),
+    location_id = Column(ForeignKey(Location.id, ondelete="CASCADE"),
                          nullable=False)
 
-    dns_domain_id = Column(Integer, ForeignKey(DnsDomain.id,
-                                               name='%s_dns_domain_fk' % _TN),
-                           nullable=False)
+    dns_domain_id = Column(ForeignKey(DnsDomain.id), nullable=False)
 
     # No default value to force the use of the Location.dns_maps relation to
     # manage the maps
@@ -70,8 +66,8 @@ class DnsMap(Base):
 
     # In theory we should have a unique constraint on (location_id, position),
     # but the ordering_list documentation does not recommend that
-    __table_args__ = (UniqueConstraint(location_id, dns_domain_id,
-                                       name='%s_loc_dns_dom_uk' % _TN),)
+    __table_args__ = (UniqueConstraint(location_id, dns_domain_id),
+                      {'info': {'unique_fields': ['location', 'dns_domain']}},)
 
     def __repr__(self):
         return '<%s %s at %s>' % (self.__class__.__name__,
@@ -82,6 +78,3 @@ class DnsMap(Base):
             raise TypeError("Always use the Location.dns_maps relation to "
                             "manage the position attribute.")
         super(DnsMap, self).__init__(**kwargs)
-
-dnsmap = DnsMap.__table__  # pylint: disable=C0103
-dnsmap.info['unique_fields'] = ['location', 'dns_domain']

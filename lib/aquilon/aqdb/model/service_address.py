@@ -15,13 +15,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from sqlalchemy import Integer, Column, ForeignKey, Index
+from sqlalchemy import Column, ForeignKey
 from sqlalchemy.orm import relation, backref
 
 from aquilon.aqdb.model import Resource, AddressAssignment, ARecord
 
 _TN = 'service_address'
-_ABV = 'srv_addr'
 
 
 class ServiceAddress(Resource):
@@ -29,15 +28,12 @@ class ServiceAddress(Resource):
     __tablename__ = _TN
     _class_label = 'Service Address'
 
-    resource_id = Column(Integer, ForeignKey(Resource.id,
-                                             name='%s_resource_fk' % _ABV),
-                         primary_key=True)
+    resource_id = Column(ForeignKey(Resource.id), primary_key=True)
 
     # This is not normalized, as we could get the same object by
     # self.assignments[0].dns_records[0], but this way it's faster
-    dns_record_id = Column(Integer, ForeignKey(ARecord.dns_record_id,
-                                               name='%s_arecord_fk' % _ABV),
-                           nullable=False)
+    dns_record_id = Column(ForeignKey(ARecord.dns_record_id),
+                           nullable=False, index=True)
 
     assignments = relation(AddressAssignment, cascade="all, delete-orphan",
                            passive_deletes=True,
@@ -47,7 +43,7 @@ class ServiceAddress(Resource):
                           backref=backref('service_address', uselist=False,
                                           passive_deletes=True))
 
-    __table_args__ = (Index("%s_dns_record_idx" % _ABV, dns_record_id),)
+    __table_args__ = ({'info': {'unique_fields': ['name', 'holder']}},)
     __mapper_args__ = {'polymorphic_identity': _TN}
 
     @property
@@ -59,6 +55,3 @@ class ServiceAddress(Resource):
 
         ifaces.sort()
         return ifaces
-
-srvaddr = ServiceAddress.__table__
-srvaddr.info['unique_fields'] = ['name', 'holder']

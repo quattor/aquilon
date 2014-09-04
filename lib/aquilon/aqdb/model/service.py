@@ -31,10 +31,9 @@
 from datetime import datetime
 
 from sqlalchemy import (Column, Integer, Sequence, String, DateTime, Boolean,
-                        ForeignKey, UniqueConstraint, PrimaryKeyConstraint,
-                        Index)
+                        ForeignKey, PrimaryKeyConstraint)
 from sqlalchemy.orm import relation, backref, deferred, aliased, object_session
-from sqlalchemy.sql import or_
+from sqlalchemy.sql import or_, null
 from sqlalchemy.util import memoized_property
 
 from aquilon.aqdb.column_types.aqstr import AqStr
@@ -43,7 +42,6 @@ from aquilon.aqdb.model import Base, Archetype, Personality
 _TN = 'service'
 _SLI = 'service_list_item'
 _PSLI = 'personality_service_list_item'
-_ABV = 'prsnlty_sli'
 
 
 class Service(Base):
@@ -54,7 +52,7 @@ class Service(Base):
     __tablename__ = _TN
 
     id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
-    name = Column(AqStr(64), nullable=False)
+    name = Column(AqStr(64), nullable=False, unique=True)
     max_clients = Column(Integer, nullable=True)  # 0 means 'no limit'
     need_client_list = Column(Boolean(name='%s_need_client_list_ck' % _TN),
                               nullable=False, default=True)
@@ -62,7 +60,7 @@ class Service(Base):
                                     nullable=False))
     comments = Column(String(255), nullable=True)
 
-    __table_args__ = (UniqueConstraint(name, name='svc_name_uk'),)
+    __table_args__ = ({'info': {'unique_fields': ['name']}},)
 
     @memoized_property
     def cluster_aligned_personalities(self):
@@ -75,13 +73,10 @@ class Service(Base):
         q = session.query(Personality.id)
         q = q.outerjoin(PersService, Personality.services)
         q = q.reset_joinpoint()
-        q = q.join(Archetype).filter(Archetype.cluster_type != None)
+        q = q.join(Archetype).filter(Archetype.cluster_type != null())
         q = q.outerjoin(ArchService, Archetype.services)
         q = q.filter(or_(PersService.id == self.id, ArchService.id == self.id))
         return [pers.id for pers in q]
-
-service = Service.__table__  # pylint: disable=C0103
-service.info['unique_fields'] = ['name']
 
 
 class __ServiceListItem(Base):
@@ -93,19 +88,13 @@ class __ServiceListItem(Base):
     __tablename__ = _SLI
     _class_label = 'Required Service'
 
-    service_id = Column(Integer, ForeignKey(Service.id,
-                                            name='sli_svc_fk',
-                                            ondelete='CASCADE'),
+    service_id = Column(ForeignKey(Service.id, ondelete='CASCADE'),
                         nullable=False)
 
-    archetype_id = Column(Integer, ForeignKey(Archetype.id,
-                                              name='sli_arctype_fk',
-                                              ondelete='CASCADE'),
-                          nullable=False)
+    archetype_id = Column(ForeignKey(Archetype.id, ondelete='CASCADE'),
+                          nullable=False, index=True)
 
-    __table_args__ = (PrimaryKeyConstraint(service_id, archetype_id,
-                                           name="%s_pk" % _SLI),
-                      Index('srvlst_archtyp_idx', archetype_id))
+    __table_args__ = (PrimaryKeyConstraint(service_id, archetype_id),)
 
 Service.archetypes = relation(Archetype, secondary=__ServiceListItem.__table__,
                               backref=backref("services"))
@@ -119,19 +108,13 @@ class __PersonalityServiceListItem(Base):
 
     __tablename__ = _PSLI
 
-    service_id = Column(Integer, ForeignKey(Service.id,
-                                            name='%s_svc_fk' % _ABV,
-                                            ondelete='CASCADE'),
+    service_id = Column(ForeignKey(Service.id, ondelete='CASCADE'),
                         nullable=False)
 
-    personality_id = Column(Integer, ForeignKey(Personality.id,
-                                                name='sli_prsnlty_fk',
-                                                ondelete='CASCADE'),
-                            nullable=False)
+    personality_id = Column(ForeignKey(Personality.id, ondelete='CASCADE'),
+                            nullable=False, index=True)
 
-    __table_args__ = (PrimaryKeyConstraint(service_id, personality_id,
-                                           name="%s_pk" % _ABV),
-                      Index('%s_prsnlty_idx' % _ABV, personality_id))
+    __table_args__ = (PrimaryKeyConstraint(service_id, personality_id),)
 
 Service.personalities = relation(Personality,
                                  secondary=__PersonalityServiceListItem.__table__,

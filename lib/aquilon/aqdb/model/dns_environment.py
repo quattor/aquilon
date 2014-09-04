@@ -17,8 +17,7 @@
 """ Environments in DNS are groups of network segments. """
 from datetime import datetime
 
-from sqlalchemy import (Column, Integer, DateTime, Sequence, String,
-                        UniqueConstraint)
+from sqlalchemy import Column, Integer, DateTime, Sequence, String
 from sqlalchemy.orm import deferred
 
 from aquilon.exceptions_ import InternalError
@@ -43,15 +42,15 @@ class DnsEnvironment(Base):
     __tablename__ = _TN
     _class_label = 'DNS Environment'
 
-    id = Column(Integer, Sequence('%s_id_seq' % (_TN)), primary_key=True)
-    name = Column(AqStr(32), nullable=False)
+    id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
+    name = Column(AqStr(32), nullable=False, unique=True)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
 
     comments = deferred(Column(String(255), nullable=True))
 
-    __table_args__ = (UniqueConstraint(name, name='%s_name_uk' % _TN),)
+    __table_args__ = ({'info': {'unique_fields': ['name']}},)
 
     @property
     def is_default(self):
@@ -65,6 +64,3 @@ class DnsEnvironment(Base):
             return cls.get_unique(session, _config.get("site",
                                                        "default_dns_environment"),
                                   compel=InternalError)
-
-dnsenv = DnsEnvironment.__table__  # pylint: disable=C0103
-dnsenv.info['unique_fields'] = ['name']

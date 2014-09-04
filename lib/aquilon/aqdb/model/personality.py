@@ -29,17 +29,10 @@ from aquilon.aqdb.column_types.aqstr import AqStr
 from aquilon.aqdb.model import (Base, Archetype, Grn, HostEnvironment,
                                 User, NetGroupWhiteList)
 
-_ABV = 'prsnlty'
 _TN = 'personality'
-
 _PGN = 'personality_grn_map'
-_PGNABV = 'pers_grn_map'
-
 _PRU = 'personality_rootuser'
-_PRUABV = 'pers_rootuser'
-
 _PRNG = 'personality_rootnetgroup'
-_PRNGABV = 'pers_rootng'
 
 
 def _pgm_creator(tuple):
@@ -50,25 +43,20 @@ class Personality(Base):
     """ Personality names """
     __tablename__ = _TN
 
-    id = Column(Integer, Sequence('%s_seq' % _ABV), primary_key=True)
+    id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
     name = Column(AqStr(64), nullable=False)
-    archetype_id = Column(Integer, ForeignKey(Archetype.id,
-                                              name='%s_arch_fk' % _ABV),
-                          nullable=False)
+    archetype_id = Column(ForeignKey(Archetype.id), nullable=False)
 
     cluster_required = Column(Boolean(name="%s_clstr_req_ck" % _TN),
                               default=False, nullable=False)
 
-    config_override = Column(Boolean(name="persona_cfg_override_ck"),
+    config_override = Column(Boolean(name="%s_config_override_ck" % _TN),
                              default=False, nullable=False)
 
-    owner_eon_id = Column(Integer, ForeignKey(Grn.eon_id,
-                                              name='%s_owner_grn_fk' % _TN),
+    owner_eon_id = Column(ForeignKey(Grn.eon_id, name='%s_owner_grn_fk' % _TN),
                           nullable=False)
 
-    host_environment_id = Column(Integer, ForeignKey(HostEnvironment.id,
-                                                     name='host_environment_fk'),
-                                 nullable=False)
+    host_environment_id = Column(ForeignKey(HostEnvironment.id), nullable=False)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
@@ -80,8 +68,8 @@ class Personality(Base):
 
     host_environment = relation(HostEnvironment, innerjoin=True)
 
-    __table_args__ = (UniqueConstraint(archetype_id, name,
-                                       name='%s_arch_name_uk' % _TN),)
+    __table_args__ = (UniqueConstraint(archetype_id, name),
+                      {'info': {'unique_fields': ['name', 'archetype']}},)
 
     @property
     def is_cluster(self):
@@ -102,21 +90,16 @@ class Personality(Base):
                                 "does not match the host environment '{1}'"
                                 .format(name, host_environment))
 
-personality = Personality.__table__   # pylint: disable=C0103
-personality.info['unique_fields'] = ['name', 'archetype']
-
 
 class PersonalityGrnMap(Base):
     __tablename__ = _PGN
 
-    personality_id = Column(Integer, ForeignKey(Personality.id,
-                                                name='%s_personality_fk' % _PGNABV,
-                                                ondelete='CASCADE'),
+    personality_id = Column(ForeignKey(Personality.id, ondelete='CASCADE'),
                             nullable=False)
 
-    eon_id = Column(Integer, ForeignKey(Grn.eon_id,
-                                        name='%s_grn_fk' % _PGNABV),
-                    nullable=False)
+    eon_id = Column(ForeignKey(Grn.eon_id), nullable=False)
+
+    target = Column(AqStr(32), nullable=False)
 
     personality = relation(Personality, innerjoin=True,
                            backref=backref('_grns',
@@ -125,8 +108,6 @@ class PersonalityGrnMap(Base):
 
     grn = relation(Grn, lazy=False, innerjoin=True,
                    backref=backref('_personalities', passive_deletes=True))
-
-    target = Column(AqStr(32), nullable=False)
 
     __table_args__ = (PrimaryKeyConstraint(personality_id, eon_id, target),)
 
@@ -139,21 +120,15 @@ class PersonalityGrnMap(Base):
 class __PersonalityRootUser(Base):
     __tablename__ = _PRU
 
-    personality_id = Column(Integer, ForeignKey(Personality.id,
-                                                ondelete='CASCADE',
-                                                name='%s_pers_fk' % _PRUABV),
-                            primary_key=True)
+    personality_id = Column(ForeignKey(Personality.id, ondelete='CASCADE'),
+                            nullable=False)
 
-    user_id = Column(Integer, ForeignKey(User.id,
-                                         ondelete='CASCADE',
-                                         name='%s_user_fk' % _PRUABV),
-                     primary_key=True)
+    user_id = Column(ForeignKey(User.id, ondelete='CASCADE'), nullable=False)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
 
-pru = __PersonalityRootUser.__table__  # pylint: disable=C0103
-pru.primary_key.name = '%s_pk' % _PRU
+    __table_args__ = (PrimaryKeyConstraint(personality_id, user_id),)
 
 Personality.root_users = relation(User, secondary=__PersonalityRootUser.__table__)
 
@@ -161,21 +136,16 @@ Personality.root_users = relation(User, secondary=__PersonalityRootUser.__table_
 class __PersonalityRootNetGroup(Base):
     __tablename__ = _PRNG
 
-    personality_id = Column(Integer, ForeignKey(Personality.id,
-                                                ondelete='CASCADE',
-                                                name='%s_pers_fk' % _PRNGABV),
-                            primary_key=True)
+    personality_id = Column(ForeignKey(Personality.id, ondelete='CASCADE'),
+                            nullable=False)
 
-    netgroup_id = Column(Integer, ForeignKey(NetGroupWhiteList.id,
-                                             ondelete='CASCADE',
-                                             name='%s_group_fk' % _PRNGABV),
-                         primary_key=True)
+    netgroup_id = Column(ForeignKey(NetGroupWhiteList.id, ondelete='CASCADE'),
+                         nullable=False)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
 
-prng = __PersonalityRootNetGroup.__table__  # pylint: disable=C0103
-prng.primary_key.name = '%s_pk' % _PRNG
+    __table_args__ = (PrimaryKeyConstraint(personality_id, netgroup_id),)
 
 Personality.root_netgroups = relation(NetGroupWhiteList,
                                       secondary=__PersonalityRootNetGroup.__table__)

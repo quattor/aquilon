@@ -18,8 +18,7 @@
 
 from datetime import datetime
 
-from sqlalchemy import (Column, Integer, DateTime, Sequence, String, ForeignKey,
-                        UniqueConstraint, Index)
+from sqlalchemy import Column, Integer, DateTime, Sequence, String, ForeignKey
 from sqlalchemy.orm import relation, backref, deferred
 
 from aquilon.aqdb.column_types import JSONEncodedDict, MutationDict
@@ -40,7 +39,7 @@ class ParameterHolder(Base):
     _class_label = 'Parameter Holder'
     _instance_label = 'holder_name'
 
-    id = Column(Integer, Sequence('%s_seq' % _PARAM_HOLDER), primary_key=True)
+    id = Column(Integer, Sequence('%s_id_seq' % _PARAM_HOLDER), primary_key=True)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
@@ -63,18 +62,13 @@ paramholder = ParameterHolder.__table__  # pylint: disable=C0103
 class PersonalityParameter(ParameterHolder):
     """ Association of parameters with Personality """
 
-    personality_id = Column(Integer,
-                            ForeignKey(Personality.id,
-                                       name='%s_persona_fk' % _PARAM_HOLDER,
-                                       ondelete='CASCADE'),
-                            nullable=True)
+    personality_id = Column(ForeignKey(Personality.id, ondelete='CASCADE'),
+                            nullable=True, unique=True)
 
     personality = relation(Personality,
                            backref=backref('paramholder', uselist=False,
                                            cascade='all, delete-orphan'))
 
-    __extra_table_args__ = (UniqueConstraint(personality_id,
-                                             name='param_holder_persona_uk'),)
     __mapper_args__ = {'polymorphic_identity': 'personality'}
 
     @property
@@ -94,22 +88,20 @@ class Parameter(Base):
 
     __tablename__ = _TN
 
-    id = Column(Integer, Sequence('%s_seq' % _TN), primary_key=True)
+    id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
     value = Column(MutationDict.as_mutable(JSONEncodedDict))
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
     comments = deferred(Column(String(255), nullable=True))
-    holder_id = Column(Integer, ForeignKey(ParameterHolder.id,
-                                           name='%s_paramholder_fk' % _TN,
-                                           ondelete='CASCADE'),
-                       nullable=False)
+    holder_id = Column(ForeignKey(ParameterHolder.id, ondelete='CASCADE'),
+                       nullable=False, index=True)
 
     holder = relation(ParameterHolder, innerjoin=True,
                       backref=backref('parameters',
                                       cascade='all, delete-orphan'))
 
-    __table_args__ = (Index('%s_holder_idx' % _TN, holder_id),
-                      {'oracle_compress': True})
+    __table_args__ = ({'oracle_compress': True,
+                       'info': {'unique_fields': ['holder']}},)
 
     @staticmethod
     def tokey(path):
@@ -261,6 +253,3 @@ class Parameter(Base):
         else:
             flattened[((path + PATH_SEP) if path else "") + key] = data
         return flattened
-
-parameter = Parameter.__table__  # pylint: disable=C0103
-parameter.info['unique_fields'] = ['holder']

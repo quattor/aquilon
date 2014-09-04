@@ -19,7 +19,7 @@
     IBM: BCE and BCH (blade center e and blade center h). There may be some
     blade center e's in VA but they are like rackmounts as well"""
 
-from sqlalchemy import Column, Integer, ForeignKey
+from sqlalchemy import Column, ForeignKey
 
 from aquilon.aqdb.model import HardwareEntity
 
@@ -32,8 +32,6 @@ class Chassis(HardwareEntity):
     __tablename__ = _TN
     __mapper_args__ = {'polymorphic_identity': _TN}
 
-    hardware_entity_id = Column(Integer,
-                                ForeignKey(HardwareEntity.id,
-                                           name='%s_hw_ent_fk' % _TN,
+    hardware_entity_id = Column(ForeignKey(HardwareEntity.id,
                                            ondelete='CASCADE'),
                                 primary_key=True)

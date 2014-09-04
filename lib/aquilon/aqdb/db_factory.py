@@ -53,7 +53,8 @@ def visit_create_index(create, compiler, **kw):  # pylint: disable=W0613
     text += "INDEX %s ON %s (%s)" \
         % (compiler._prepared_index_name(index, include_schema=True),
            preparer.format_table(index.table, use_schema=True),
-           ', '.join(compiler.sql_compiler.process(expr, include_table=False)
+           ', '.join(compiler.sql_compiler.process(expr, include_table=False,
+                                                   literal_binds=True)
                      for expr in index.expressions))
 
     compress = index.kwargs.get("oracle_compress", False)
@@ -145,10 +146,10 @@ class DbFactory(object):
             module = config.get("database", "module")
             cmd = Modulecmd()
             try:
-                log.info("Loading module %s." % module)
+                log.info("Loading module %s.", module)
                 cmd.load(module)
             except ModulecmdExecError as err:
-                log.error("Failed to load module %s: %s" % (module, err))
+                log.error("Failed to load module %s: %s", module, err)
 
         pool_options = {}
 
@@ -164,7 +165,7 @@ class DbFactory(object):
         if config.has_option("database", "pool_max_overflow"):
             pool_options["max_overflow"] = config.getint("database",
                                                          "pool_max_overflow")
-        log.info("Database engine using pool options %s" % pool_options)
+        log.info("Database engine using pool options %s", pool_options)
 
         dsn = config.get('database', 'dsn')
         dialect = make_url(dsn).get_dialect()

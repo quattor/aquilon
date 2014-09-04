@@ -19,9 +19,7 @@ import re
 from datetime import datetime
 
 from sqlalchemy import (Column, Integer, Boolean, String, DateTime, Sequence,
-                        ForeignKey, UniqueConstraint, PrimaryKeyConstraint,
-                        Index)
-
+                        ForeignKey, UniqueConstraint, PrimaryKeyConstraint)
 from sqlalchemy.orm import (object_session, relation, backref, deferred,
                             joinedload, validates)
 from sqlalchemy.orm.attributes import set_committed_value
@@ -67,7 +65,6 @@ _TN = 'clstr'
 _ETN = 'esx_cluster'
 _HCM = 'host_cluster_member'
 _CSB = 'cluster_service_binding'
-_CSBABV = 'clstr_svc_bndg'
 _CAP = 'clstr_allow_per'
 
 
@@ -84,15 +81,13 @@ class Cluster(CompileableMixin, Base):
         may not be used.
     """
     __tablename__ = _TN
-    _col_prefix = 'cluster'
 
-    id = Column(Integer, Sequence('%s_seq' % _TN), primary_key=True)
+    id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
     cluster_type = Column(AqStr(16), nullable=False)
-    name = Column(AqStr(64), nullable=False)
+    name = Column(AqStr(64), nullable=False, unique=True)
 
-    location_constraint_id = Column(ForeignKey(Location.id,
-                                               name='cluster_location_fk'),
-                                    nullable=False)
+    location_constraint_id = Column(ForeignKey(Location.id), nullable=False,
+                                    index=True)
 
     max_hosts = Column(Integer, nullable=True)
     # N+M clusters are defined by setting down_hosts_threshold to M
@@ -109,9 +104,7 @@ class Cluster(CompileableMixin, Base):
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
-    status_id = Column(Integer, ForeignKey(ClusterLifecycle.id,
-                                           name='cluster_status_fk'),
-                       nullable=False)
+    status_id = Column(ForeignKey(ClusterLifecycle.id), nullable=False)
     comments = Column(String(255))
 
     status = relation(ClusterLifecycle, innerjoin=True)
@@ -119,10 +112,7 @@ class Cluster(CompileableMixin, Base):
 
     hosts = association_proxy('_hosts', 'host', creator=_hcm_host_creator)
 
-    __table_args__ = (UniqueConstraint(name, name='cluster_uk'),
-                      Index("cluster_branch_idx", 'branch_id'),
-                      Index("cluster_prsnlty_idx", 'personality_id'),
-                      Index("cluster_location_idx", location_constraint_id))
+    __table_args__ = ({'info': {'unique_fields': ['name']}},)
     __mapper_args__ = {'polymorphic_on': cluster_type}
 
     @property
@@ -258,25 +248,18 @@ class Cluster(CompileableMixin, Base):
         val = "%s %s" % (clsname, instance)
         return val.__format__(passthrough)
 
-cluster = Cluster.__table__  # pylint: disable=C0103
-cluster.info['unique_fields'] = ['name']
-
 
 class ComputeCluster(Cluster):
     """
         A cluster containing computers - no special characteristics
     """
     __tablename__ = 'compute_cluster'
-    __mapper_args__ = {'polymorphic_identity': 'compute'}
     _class_label = 'Compute Cluster'
 
-    id = Column(Integer, ForeignKey(Cluster.id,
-                                    name='compute_cluster_fk',
-                                    ondelete='CASCADE'),
-                primary_key=True)
+    id = Column(ForeignKey(Cluster.id, ondelete='CASCADE'), primary_key=True)
 
-compute_cluster = ComputeCluster.__table__  # pylint: disable=C0103
-compute_cluster.info['unique_fields'] = ['name']
+    __table_args__ = ({'info': {'unique_fields': ['name']}},)
+    __mapper_args__ = {'polymorphic_identity': 'compute'}
 
 
 class StorageCluster(Cluster):
@@ -284,13 +267,12 @@ class StorageCluster(Cluster):
         A cluster of storage devices
     """
     __tablename__ = 'storage_cluster'
-    __mapper_args__ = {'polymorphic_identity': 'storage'}
     _class_label = 'Storage Cluster'
 
-    id = Column(Integer, ForeignKey(Cluster.id,
-                                    name='storage_cluster_fk',
-                                    ondelete='CASCADE'),
-                primary_key=True)
+    id = Column(ForeignKey(Cluster.id, ondelete='CASCADE'), primary_key=True)
+
+    __table_args__ = ({'info': {'unique_fields': ['name']}},)
+    __mapper_args__ = {'polymorphic_identity': 'storage'}
 
     def validate_membership(self, host):
         super(StorageCluster, self).validate_membership(host)
@@ -299,9 +281,6 @@ class StorageCluster(Cluster):
             raise ArgumentError("Only hosts with archetype 'filer' can be "
                                 "added to a storage cluster. {0} is "
                                 "of {1:l}.".format(host, host.archetype))
-
-storage_cluster = StorageCluster.__table__  # pylint: disable=C0103
-storage_cluster.info['unique_fields'] = ['name']
 
 
 # ESX Cluster is really a Grid Cluster, but we have
@@ -314,23 +293,19 @@ class EsxCluster(Cluster):
     __tablename__ = _ETN
     _class_label = 'ESX Cluster'
 
-    esx_cluster_id = Column(Integer, ForeignKey(Cluster.id,
-                                                name='%s_cluster_fk' % _ETN,
-                                                ondelete='CASCADE'),
+    esx_cluster_id = Column(ForeignKey(Cluster.id, ondelete='CASCADE'),
                             primary_key=True)
 
     # Memory capacity override
     memory_capacity = Column(Integer, nullable=True)
 
-    network_device_id = Column(Integer,
-                               ForeignKey(NetworkDevice.hardware_entity_id,
-                                          name='%s_network_device_fk' % _ETN),
-                               nullable=True)
+    network_device_id = Column(ForeignKey(NetworkDevice.hardware_entity_id),
+                               nullable=True, index=True)
 
     network_device = relation(NetworkDevice, lazy=False,
                               backref=backref('esx_clusters'))
 
-    __table_args__ = (Index("%s_network_device_idx" % _ETN, network_device_id),)
+    __table_args__ = ({'info': {'unique_fields': ['name']}},)
     __mapper_args__ = {'polymorphic_identity': 'esx'}
 
     @property
@@ -477,23 +452,16 @@ class EsxCluster(Cluster):
                                     .format(self, name, value, capacity[name]))
         return
 
-esx_cluster = EsxCluster.__table__  # pylint: disable=C0103
-esx_cluster.info['unique_fields'] = ['name']
-
 
 class HostClusterMember(Base):
     """ Association table for clusters and their member hosts """
     __tablename__ = _HCM
 
-    cluster_id = Column(Integer, ForeignKey(Cluster.id,
-                                            name='hst_clstr_mmbr_clstr_fk',
-                                            ondelete='CASCADE'),
+    cluster_id = Column(ForeignKey(Cluster.id, ondelete='CASCADE'),
                         nullable=False)
 
-    host_id = Column(Integer, ForeignKey(Host.hardware_entity_id,
-                                         name='hst_clstr_mmbr_hst_fk',
-                                         ondelete='CASCADE'),
-                     nullable=False)
+    host_id = Column(ForeignKey(Host.hardware_entity_id, ondelete='CASCADE'),
+                     nullable=False, unique=True)
 
     node_index = Column(Integer, nullable=False)
 
@@ -511,15 +479,10 @@ class HostClusterMember(Base):
                     backref=backref('_cluster', uselist=False,
                                     cascade='all, delete-orphan'))
 
-    __table_args__ = (PrimaryKeyConstraint(cluster_id, host_id,
-                                           name="%s_pk" % _HCM),
-                      UniqueConstraint(host_id,
-                                       name='host_cluster_member_host_uk'),
+    __table_args__ = (PrimaryKeyConstraint(cluster_id, host_id),
                       UniqueConstraint(cluster_id, node_index,
-                                       name='host_cluster_member_node_uk'))
-
-hcm = HostClusterMember.__table__  # pylint: disable=C0103
-hcm.info['unique_fields'] = ['cluster', 'host']
+                                       name='%s_node_uk' % _HCM),
+                      {'info': {'unique_fields': ['cluster', 'host']}},)
 
 Host.cluster = association_proxy('_cluster', 'cluster')
 
@@ -527,18 +490,13 @@ Host.cluster = association_proxy('_cluster', 'cluster')
 class __ClusterAllowedPersonality(Base):
     __tablename__ = _CAP
 
-    cluster_id = Column(Integer, ForeignKey(Cluster.id,
-                                            name='clstr_allowed_pers_c_fk',
-                                            ondelete='CASCADE'),
+    cluster_id = Column(ForeignKey(Cluster.id, ondelete='CASCADE'),
                         nullable=False)
 
-    personality_id = Column(Integer, ForeignKey(Personality.id,
-                                                name='clstr_allowed_pers_p_fk',
-                                                ondelete='CASCADE'),
-                            nullable=False)
+    personality_id = Column(ForeignKey(Personality.id, ondelete='CASCADE'),
+                            nullable=False, index=True)
 
-    __table_args__ = (PrimaryKeyConstraint(cluster_id, personality_id),
-                      Index('%s_prsnlty_idx' % _CAP, personality_id))
+    __table_args__ = (PrimaryKeyConstraint(cluster_id, personality_id),)
 
 Cluster.allowed_personalities = relation(Personality,
                                          secondary=__ClusterAllowedPersonality.__table__)
@@ -551,18 +509,13 @@ class __ClusterServiceBinding(Base):
     __tablename__ = _CSB
     _class_label = 'Cluster Service Binding'
 
-    cluster_id = Column(Integer, ForeignKey(Cluster.id,
-                                            name='%s_cluster_fk' % _CSBABV,
-                                            ondelete='CASCADE'),
+    cluster_id = Column(ForeignKey(Cluster.id, ondelete='CASCADE'),
                         nullable=False)
 
-    service_instance_id = Column(Integer,
-                                 ForeignKey(ServiceInstance.id,
-                                            name='%s_srv_inst_fk' % _CSBABV),
-                                 nullable=False)
+    service_instance_id = Column(ForeignKey(ServiceInstance.id),
+                                 nullable=False, index=True)
 
-    __table_args__ = (PrimaryKeyConstraint(cluster_id, service_instance_id),
-                      Index('%s_si_idx' % _CSBABV, service_instance_id))
+    __table_args__ = (PrimaryKeyConstraint(cluster_id, service_instance_id),)
 
 Cluster.services_used = relation(ServiceInstance,
                                  secondary=__ClusterServiceBinding.__table__,

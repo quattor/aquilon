@@ -23,7 +23,7 @@ from ipaddr import (IPv4Address, IPv4Network, AddressValueError,
 import logging
 
 from sqlalchemy import (Column, Integer, Sequence, String, DateTime, ForeignKey,
-                        UniqueConstraint, CheckConstraint, Index, desc, event)
+                        UniqueConstraint, CheckConstraint, desc, event)
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import (relation, deferred, reconstructor, validates,
                             object_session)
@@ -108,14 +108,10 @@ class Network(Base):
 
     id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
 
-    network_environment_id = Column(Integer,
-                                    ForeignKey(NetworkEnvironment.id,
-                                               name='%s_net_env_fk' % _TN),
+    network_environment_id = Column(ForeignKey(NetworkEnvironment.id),
                                     nullable=False)
 
-    location_id = Column(Integer,
-                         ForeignKey(Location.id, name='%s_loc_fk' % _TN),
-                         nullable=False)
+    location_id = Column(ForeignKey(Location.id), nullable=False, index=True)
 
     network_type = Column(AqStr(32), nullable=False)
     cidr = Column(Integer, nullable=False)
@@ -135,11 +131,11 @@ class Network(Base):
     # The routers relation is defined in router_address.py
     router_ips = association_proxy("routers", "ip")
 
-    __table_args__ = (UniqueConstraint(network_environment_id, ip,
-                                       name='%s_net_env_ip_uk' % _TN),
+    __table_args__ = (UniqueConstraint(network_environment_id, ip),
                       CheckConstraint(and_(cidr >= 1, cidr <= 32),
                                       name="%s_cidr_ck" % _TN),
-                      Index('%s_location_idx' % _TN, location_id))
+                      {'info': {'unique_fields': ['network_environment', 'ip'],
+                                'extra_search_fields': ['name', 'cidr']}})
 
     def __init__(self, network=None, network_type=None, **kw):
         # pylint: disable=W0621
@@ -203,7 +199,7 @@ class Network(Base):
     def network(self, value):
         if not isinstance(value, IPv4Network):
             raise InternalError("Expected an IPv4Network, got: %s" %
-                                type(network))
+                                type(value))
         self._network = value
         self.ip = value.network
         self.cidr = value.prefixlen
@@ -234,11 +230,11 @@ class Network(Base):
     def personality_static_routes(self, personality):
         if personality:
             return [route for route in self.static_routes
-                    if route.personality == None or
+                    if route.personality is None or
                     route.personality == personality]
         else:
             return [route for route in self.static_routes
-                    if route.personality == None]
+                    if route.personality is None]
 
     def __le__(self, other):
         if self.network_environment_id != other.network_environment_id:
@@ -377,10 +373,6 @@ class Network(Base):
         cnt += q.scalar()
 
         return cnt
-
-network = Network.__table__  # pylint: disable=C0103
-network.info['unique_fields'] = ['network_environment', 'ip']
-network.info['extra_search_fields'] = ['name', 'cidr']
 
 
 def get_net_id_from_ip(session, ip, network_environment=None):

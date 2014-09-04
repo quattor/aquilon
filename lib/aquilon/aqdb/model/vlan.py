@@ -19,7 +19,7 @@
 from datetime import datetime
 
 from sqlalchemy import (Column, Integer, DateTime, ForeignKey, CheckConstraint,
-                        UniqueConstraint, PrimaryKeyConstraint, Index, Sequence)
+                        PrimaryKeyConstraint, Index, Sequence)
 from sqlalchemy.orm import relation, backref, deferred
 from sqlalchemy.sql import and_
 
@@ -32,7 +32,6 @@ MAX_VLANS = 4096  # IEEE 802.1Q standard
 VLAN_TYPES = ('storage', 'vmotion', 'user', 'unknown', 'vulcan-mgmt', 'vcs')
 
 _TN = 'observed_vlan'
-_ABV = 'obs_vlan'
 _VTN = 'vlan_info'
 _PG = 'port_group'
 
@@ -43,14 +42,14 @@ class VlanInfo(Base):
     _instance_label = 'vlan_id'
 
     vlan_id = Column(Integer, primary_key=True, autoincrement=False)
-    port_group = Column(AqStr(32), nullable=False)
+    port_group = Column(AqStr(32), nullable=False, unique=True)
     vlan_type = Column(Enum(32, VLAN_TYPES), nullable=False)
 
-    __table_args__ = (UniqueConstraint(port_group,
-                                       name='%s_port_group_uk' % _VTN),
-                      CheckConstraint(and_(vlan_id >= 0,
+    __table_args__ = (CheckConstraint(and_(vlan_id >= 0,
                                            vlan_id < MAX_VLANS),
-                                      name='%s_vlan_id_ck' % _VTN))
+                                      name='%s_vlan_id_ck' % _VTN),
+                      {'info': {'unique_fields': ['port_group'],
+                                'extra_search_fields': ['vlan_id']}})
 
     @classmethod
     def get_by_pg(cls, session, port_group, compel=InternalError):
@@ -71,22 +70,16 @@ class VlanInfo(Base):
             self.__class__.__name__, self.vlan_id, self.port_group,
             self.vlan_type)
 
-vlaninfo = VlanInfo.__table__  # pylint: disable=C0103
-vlaninfo.info['unique_fields'] = ['port_group']
-vlaninfo.info['extra_search_fields'] = ['vlan_id']
-
 
 # TODO: eventually this class should be moved to a different file
 class PortGroup(Base):
     __tablename__ = _PG
     _class_label = 'Port Group'
 
-    id = Column(Integer, Sequence("%s_seq" % _PG), primary_key=True)
+    id = Column(Integer, Sequence("%s_id_seq" % _PG), primary_key=True)
 
-    network_id = Column(Integer, ForeignKey(Network.id,
-                                            ondelete='CASCADE',
-                                            name='%s_network_fk' % _PG),
-                        nullable=False)
+    network_id = Column(ForeignKey(Network.id, ondelete='CASCADE'),
+                        nullable=False, unique=True)
 
     # VLAN or VxLAN ID
     network_tag = Column(Integer, nullable=False)
@@ -97,8 +90,7 @@ class PortGroup(Base):
                                     nullable=False))
 
     __table_args__ = (Index("%s_usage_tag_idx" % _PG, usage, network_tag,
-                            oracle_compress=1),
-                      UniqueConstraint(network_id, name="%s_network_uk" % _PG))
+                            oracle_compress=1),)
 
     network = relation(Network, innerjoin=True,
                        backref=backref('port_group', uselist=False,
@@ -120,23 +112,16 @@ class PortGroup(Base):
 
 class __ObservedVlan(Base):
     """ reports the observance of a vlan/network on a switch """
-    __tablename__ = 'observed_vlan'
+    __tablename__ = _TN
 
-    network_device_id = Column(Integer,
-                               ForeignKey(NetworkDevice.hardware_entity_id,
-                                          ondelete='CASCADE',
-                                          name='%s_hw_fk' % _ABV),
+    network_device_id = Column(ForeignKey(NetworkDevice.hardware_entity_id,
+                                          ondelete='CASCADE'),
                                nullable=False)
 
-    port_group_id = Column(Integer,
-                           ForeignKey(PortGroup.id,
-                                      ondelete='CASCADE',
-                                      name='%s_pg_fk' % _ABV),
-                           nullable=False)
+    port_group_id = Column(ForeignKey(PortGroup.id, ondelete='CASCADE'),
+                           nullable=False, index=True)
 
-    __table_args__ = (PrimaryKeyConstraint(network_device_id, port_group_id,
-                                           name="%s_pk" % _TN),
-                      Index('%s_pg_idx' % _TN, 'port_group_id'))
+    __table_args__ = (PrimaryKeyConstraint(network_device_id, port_group_id),)
 
 NetworkDevice.port_groups = relation(PortGroup,
                                      secondary=__ObservedVlan.__table__,

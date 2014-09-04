@@ -18,8 +18,7 @@
 
 from datetime import datetime
 
-from sqlalchemy import (Column, Integer, String, Boolean, UniqueConstraint,
-                        DateTime)
+from sqlalchemy import Column, Integer, String, Boolean, DateTime
 from sqlalchemy.orm import deferred
 
 from aquilon.aqdb.model import Base
@@ -37,7 +36,7 @@ class Grn(Base):
 
     # GRNs are case sensitive, so no AqStr here
     # TODO: is there a limit on the length of GRNs? 132 is the longest currently
-    grn = Column(String(255), nullable=False)
+    grn = Column(String(255), nullable=False, unique=True)
 
     # If False, then assigning new objects to this GRN should fail, but old
     # objects may still point to it
@@ -46,8 +45,5 @@ class Grn(Base):
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
 
-    __table_args__ = (UniqueConstraint(grn, name='%s_grn_uk' % _TN),)
-
-grn = Grn.__table__  # pylint: disable=C0103
-grn.info['unique_fields'] = ['grn']
-grn.info['extra_search_fields'] = ['eon_id']
+    __table_args__ = ({'info': {'unique_fields': ['grn'],
+                                'extra_search_fields': ['eon_id']}},)
