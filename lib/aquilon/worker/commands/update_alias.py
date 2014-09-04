@@ -27,20 +27,28 @@ class CommandUpdateAlias(BrokerCommand):
 
     required_parameters = ["fqdn"]
 
-    def render(self, session, logger, fqdn, dns_environment, target, comments,
+    def render(self, session, logger, fqdn, dns_environment, target,
+               target_environment, comments,
                **kwargs):
         dbdns_env = DnsEnvironment.get_unique_or_default(session,
                                                          dns_environment)
+
+        if target_environment:
+            dbtgt_env = DnsEnvironment.get_unique_or_default(session,
+                                                             target_environment)
+        else:
+            dbtgt_env = dbdns_env
+
         dbalias = Alias.get_unique(session, fqdn=fqdn,
                                    dns_environment=dbdns_env, compel=True)
 
         old_target_fqdn = str(dbalias.target.fqdn)
         old_comments = dbalias.comments
 
-        if target:
+        if target or target_environment:
             old_target = dbalias.target
             dbalias.target = create_target_if_needed(session, logger,
-                                                     target, dbdns_env)
+                                                     target, dbtgt_env)
 
             # TODO: at some day we should verify that the new target is also
             # bound as a server, and modify the ServiceInstanceServer bindings

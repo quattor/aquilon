@@ -62,6 +62,21 @@ class TestDelAlias(TestBrokerCommand):
         self.noouttest(command)
         self.dsdb_verify()
 
+    def test_230_del_alias2diff_environment(self):
+        command = ["del", "alias", "--fqdn", "alias2alias.aqd-unittest-ut-env.ms.com",
+                   "--dns_environment", "ut-env"]
+        self.noouttest(command)
+
+    def test_235_del_alias2diff_environment(self):
+        command = ["del", "alias", "--fqdn", "alias2host.aqd-unittest-ut-env.ms.com",
+                   "--dns_environment", "ut-env"]
+        self.noouttest(command)
+
+    def test_238_del_alias2diff_environment(self):
+        command = ["del", "alias", "--fqdn", "alias13.aqd-unittest.ms.com",
+                   "--dns_environment", "ut-env"]
+        self.noouttest(command)
+
     def test_300_del_restrict1(self):
         command = ["del", "alias", "--fqdn", "restrict1.aqd-unittest.ms.com"]
         self.noouttest(command)

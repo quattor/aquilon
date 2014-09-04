@@ -34,6 +34,13 @@ class TestAddDnsDomain(TestBrokerCommand):
                         "--comments", "Some DNS domain comments"])
         self.dsdb_verify()
 
+    def testaddaqdunittest_ut_env_domain(self):
+        self.dsdb_expect("add_dns_domain -domain_name aqd-unittest-ut-env.ms.com "
+                         "-comments Some DNS domain comments")
+        self.noouttest(["add", "dns_domain", "--dns_domain", "aqd-unittest-ut-env.ms.com",
+                        "--comments", "Some DNS domain comments"])
+        self.dsdb_verify()
+
     def testaddcardsdomain(self):
         self.dsdb_expect("add_dns_domain -domain_name cards.example.com "
                          "-comments A pack of lies")
@@ -98,13 +105,14 @@ class TestAddDnsDomain(TestBrokerCommand):
         command = "show dns_domain --all"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "DNS Domain: aqd-unittest.ms.com", command)
+        self.matchoutput(out, "DNS Domain: aqd-unittest-ut-env.ms.com", command)
 
     def testverifyshowallproto(self):
         command = "show dns_domain --all --format=proto"
         out = self.commandtest(command.split(" "))
         dns_domains = self.parse_dns_domainlist_msg(out).dns_domains
         dns_names = [d.name for d in dns_domains]
-        for domain in ['ms.com', 'aqd-unittest.ms.com']:
+        for domain in ['ms.com', 'aqd-unittest.ms.com', 'aqd-unittest-ut-env.ms.com']:
             self.failUnless(domain in dns_names,
                             "Domain %s not in list %s" % (domain, dns_names))
 

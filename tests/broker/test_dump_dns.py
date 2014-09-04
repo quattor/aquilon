@@ -80,6 +80,11 @@ class TestDumpDns(TestBrokerCommand):
                          "=unittest25-e1.utcolo.aqd-unittest.ms.com:%s" %
                          self.net["unknown1"][4],
                          command)
+        # Alias across differnet environment should be included
+        self.matchoutput(out, "Calias2host.aqd-unittest-ut-env.ms.com:arecord13.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "Calias13.aqd-unittest.ms.com:arecord13.aqd-unittest.ms.com", command)
+        # The target definition in different environment should not be included
+        self.matchclean(out, "=arecord13.aqd-unittest.ms.com", command)
 
     def test_bind(self):
         command = ["dump", "dns", "--format", "raw"]

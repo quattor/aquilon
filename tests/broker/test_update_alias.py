@@ -132,6 +132,23 @@ class TestUpdateAlias(TestBrokerCommand):
                          "restrict2.aqd-unittest.ms.com",
                          command)
 
+    def test_500_repoint2diff_environment(self):
+        command = ["update", "alias",
+                   "--fqdn", "alias2host.aqd-unittest-ut-env.ms.com",
+                   "--dns_environment", "ut-env",
+                   "--target", "alias13.aqd-unittest.ms.com",
+                   "--target_environment", "ut-env"]
+        self.noouttest(command)
+
+    def test_505_verify_alias_repoint2diff_environment(self):
+        command = ["show", "alias",
+                   "--fqdn", "alias2host.aqd-unittest-ut-env.ms.com",
+                   "--dns_environment", "ut-env"]
+        out = self.commandtest(command)
+
+        self.matchoutput(out, "Alias: alias2host.aqd-unittest-ut-env.ms.com", command)
+        self.matchoutput(out, "Target: alias13.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "DNS Environment: ut-env", command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUpdateAlias)
