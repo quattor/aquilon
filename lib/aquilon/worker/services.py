@@ -19,14 +19,11 @@
 from random import choice
 
 from sqlalchemy.orm.session import object_session
-from sqlalchemy.sql import or_
 
 from aquilon.exceptions_ import ArgumentError, InternalError
-from aquilon.aqdb.model import (Host, Cluster, Service, ServiceInstance,
-                                MetaCluster, Archetype, Personality)
+from aquilon.aqdb.model import Host, Cluster, ServiceInstance, MetaCluster
 from aquilon.worker.templates import (Plenary, PlenaryCollection,
                                       PlenaryServiceInstanceServer)
-from aquilon.worker.templates.switchdata import PlenarySwitchData
 
 
 class Chooser(object):
@@ -45,9 +42,6 @@ class Chooser(object):
         dbobj.lock_row()
 
         return chooser
-
-    abstract_fields = ["location", "required_services", "network",
-                       "original_service_instances"]
 
     def __init__(self, dbobj, logger, required_only=False):
         """Initialize the chooser.
@@ -73,16 +67,15 @@ class Chooser(object):
         initialization.
 
         """
+        logger.debug("Creating service chooser for {0:l}.".format(dbobj))
+
         self.dbobj = dbobj
-        self.personality = dbobj.personality
-        self.archetype = dbobj.personality.archetype
         self.session = object_session(dbobj)
         self.required_only = required_only
         self.logger = logger
-        self.logger.debug("Creating service chooser for {0:l}"
-                          .format(self.dbobj))
-        # Cache of the service maps
-        self.mapped_services = {}
+        self.service_maps = None
+        self.network = None
+        self.location = None
 
         # Stores interim service instance lists
         self.staging_services = {}
@@ -104,21 +97,51 @@ class Chooser(object):
         self.chosen_services = {}
 
         # Keep stashed plenaries for rollback purposes
-        self.plenaries = PlenaryCollection(logger=self.logger)
+        self.plenaries = PlenaryCollection(logger=logger)
+
+        # Cache the original service bindings
+        self.original_service_instances = {}
+
+        # Services which should be aligned to the parent object (cluster,
+        # metacluster etc.)
+        self.aligned_services = {}
+
+        # Parent object whose services we should align to
+        self.aligned_parents = []
+
+        # Cache of any already bound services (keys) and the instance
+        # that was bound (values).
+        for si in dbobj.services_used:
+            self.original_service_instances[si.service] = si
+            logger.debug("{0} original binding: {1}".format(dbobj, si))
+
+        self.required_services = dbobj.required_services
 
     def apply_changes(self):
-        raise InternalError("This method must be overridden")
+        for instance in self.instances_unbound:
+            self.logger.client_info("{0} removing binding for {1:l}"
+                                    .format(self.dbobj, instance))
+            self.dbobj.services_used.remove(instance)
+        for instance in self.instances_bound:
+            self.logger.client_info("{0} adding binding for {1:l}"
+                                    .format(self.dbobj, instance))
+            self.dbobj.services_used.append(instance)
 
     def verify_init(self):
         """This is more of a verify-and-finalize method..."""
-        for field in self.abstract_fields:
-            if not hasattr(self, field):
-                raise InternalError("%s provides no %s field" %
-                                    (type(self.dbobj), field))
-        # This can be tweaked...
         if not self.required_only:
             for (service, instance) in self.original_service_instances.items():
                 self.staging_services[service] = [instance]
+
+        for parent in self.aligned_parents:
+            for si in parent.services_used:
+                self.aligned_services[si.service] = (si, parent)
+
+            for service in parent.required_services:
+                if service not in self.aligned_services:
+                    # Don't just error here because the error() call
+                    # has not yet been set up.  Will error out later.
+                    self.aligned_services[service] = (None, parent)
 
     def error(self, msg, *args, **kwargs):
         """Errors are consolidated so that many can be reported at once."""
@@ -136,7 +159,7 @@ class Chooser(object):
             self.find_service_instances(dbservice)
         self.check_errors()
         for dbservice in self.required_services:
-            self.choose_cluster_aligned(dbservice)
+            self.choose_aligned(dbservice)
             self.choose_available_capacity(dbservice)
             self.choose_past_use(dbservice)
         self.check_errors()
@@ -173,7 +196,7 @@ class Chooser(object):
             self.cache_service_maps([service])
             self.find_service_instances(service)
         self.check_errors()
-        self.choose_cluster_aligned(service)
+        self.choose_aligned(service)
         self.choose_available_capacity(service)
         self.check_errors()
         self.choose_past_use(service)
@@ -195,7 +218,7 @@ class Chooser(object):
 
     def cache_service_maps(self, dbservices):
         self.service_maps = ServiceInstance.get_mapped_instance_cache(
-            self.personality, self.location, dbservices, self.network)
+            self.dbobj.personality, self.location, dbservices, self.network)
 
     def find_service_instances(self, dbservice):
         """This finds the "closest" service instances, based on the known maps.
@@ -216,9 +239,26 @@ class Chooser(object):
         if self.errors:
             raise ArgumentError("\n".join(self.errors))
 
-    def choose_cluster_aligned(self, dbservice):
-        # Only implemented for hosts.
-        pass
+    def choose_aligned(self, dbservice):
+        if dbservice not in self.aligned_services:
+            return
+
+        si, parent = self.aligned_services[dbservice]
+        if not si:
+            self.error("No instance set for {0:l} aligned service {1.name}.  "
+                       "Please run `make cluster --cluster {0.name}` "
+                       "to resolve.".format(parent, dbservice))
+            return
+
+        # This check is necessary to prevent bind_client from overriding
+        # the cluster's binding.  The error message will be misleading...
+        if si not in self.staging_services[dbservice]:
+            self.error("{0} is set to use {1:l}, but that instance is not in a "
+                       "service map for {2:l}.".format(parent, si, self.dbobj))
+            return
+        self.logger.debug("Chose {0:l} because it is bound to {1:l}."
+                          .format(si, parent))
+        self.staging_services[dbservice] = [si]
 
     def get_footprint(self, instance):
         return 1
@@ -432,7 +472,7 @@ class Chooser(object):
                 if srv.host:
                     changed_servers.add(srv.host)
                 if srv.cluster:
-                    changed_servers.add(srv.cluster)
+                    changed_servers.update(srv.cluster.all_objects())
 
             plenary = PlenaryServiceInstanceServer.get_plenary(instance)
             self.plenaries.append(plenary)
@@ -448,12 +488,6 @@ class Chooser(object):
                 continue
 
             self.plenaries.append(Plenary.get_plenary(dbobj))
-            if isinstance(dbobj, Cluster):
-                for dbhost in dbobj.hosts:
-                    self.plenaries.append(Plenary.get_plenary(dbhost))
-
-    def flush_changes(self):
-        self.session.flush()
 
     def get_key(self):
         return self.plenaries.get_key()
@@ -463,7 +497,17 @@ class Chooser(object):
         self.plenaries.write(locked=locked)
 
     def prestash_primary(self):
-        pass
+        for dbobj in self.dbobj.all_objects():
+            self.plenaries.append(Plenary.get_plenary(dbobj))
+
+            # This may be too much action at a distance... however, if
+            # we are potentially re-writing a host plenary, it seems like
+            # a good idea to also verify and refresh known dependencies.
+            if dbobj.resholder:
+                for dbres in dbobj.resholder.resources:
+                    self.plenaries.append(Plenary.get_plenary(dbres))
+            if hasattr(dbobj, 'hardware_entity'):
+                self.plenaries.append(Plenary.get_plenary(dbobj.hardware_entity))
 
     def restore_stash(self):
         self.plenaries.restore_stash()
@@ -478,120 +522,17 @@ class HostChooser(Chooser):
             raise InternalError("HostChooser can only choose services for "
                                 "hosts, got %r (%s)" % (dbhost, type(dbhost)))
         super(HostChooser, self).__init__(dbhost, *args, **kwargs)
+
         self.location = dbhost.hardware_entity.location
+        if dbhost.cluster:
+            self.aligned_parents.append(dbhost.cluster)
+            if dbhost.cluster.metacluster:
+                self.aligned_parents.append(dbhost.cluster.metacluster)
 
         # If the primary name is a ReservedName, then it does not have a network
         # attribute
         if hasattr(dbhost.hardware_entity.primary_name, 'network'):
             self.network = dbhost.hardware_entity.primary_name.network
-        else:
-            self.network = None
-
-        # all of them would be self. but that should be optimized
-        # dbhost.hardware_entity.interfaces[x].assignments[y].network
-
-        # Stores interim service instance lists.
-        q = self.session.query(Service)
-        q = q.outerjoin(Service.archetypes)
-        q = q.reset_joinpoint()
-        q = q.outerjoin(Service.personalities)
-        q = q.filter(or_(Archetype.id == self.archetype.id,
-                         Personality.id == self.personality.id))
-        self.required_services = set(q.all())
-
-        self.original_service_instances = {}
-        for si in dbhost.services_used:
-            self.original_service_instances[si.service] = si
-            self.logger.debug("{0} original binding: {1}"
-                              .format(self.dbobj, si))
-        self.cluster_aligned_services = {}
-        if dbhost.cluster:
-            # Note that cluster services are currently ignored unless
-            # they are otherwise required by the archetype/personality.
-            for si in dbhost.cluster.service_bindings:
-                self.cluster_aligned_services[si.service] = si
-            for service in dbhost.cluster.required_services:
-                if service not in self.cluster_aligned_services:
-                    # Don't just error here because the error() call
-                    # has not yet been set up.  Will error out later.
-                    self.cluster_aligned_services[service] = None
-                # Went back and forth on this... deciding not to force
-                # an aligned service as required.  This should give
-                # flexibility for multiple services to be aligned for
-                # a cluster type without being forced on all the
-                # personalities.
-                # self.required_services.add(item.service)
-
-            if dbhost.cluster.metacluster:
-                mc = dbhost.cluster.metacluster
-                for si in mc.service_bindings:
-                    if si.service in self.cluster_aligned_services:
-                        cas = self.cluster_aligned_services[si.service]
-                        if not cas:
-                            # Error out later.
-                            continue
-
-                        self.logger.client_info(
-                            "Replacing {0.name} instance with {1.name} "
-                            "(bound to {2:l}) for service {3.name}".format(
-                            cas, si, mc, si.service))
-
-                    self.cluster_aligned_services[si.service] = si
-                for service in mc.required_services:
-                    if service not in self.cluster_aligned_services:
-                        # Don't just error here because the error() call
-                        # has not yet been set up.  Will error out later.
-                        self.cluster_aligned_services[service] = None
-
-    def choose_cluster_aligned(self, dbservice):
-        if dbservice not in self.cluster_aligned_services:
-            return
-        if not self.cluster_aligned_services[dbservice]:
-            self.error("No instance set for %s aligned service %s."
-                       "  Please run `make cluster --cluster %s` to resolve.",
-                       format(self.dbobj.cluster),
-                       dbservice.name,
-                       self.dbobj.cluster.name)
-            return
-        # This check is necessary to prevent bind_client from overriding
-        # the cluster's binding.  The error message will be misleading...
-        if self.cluster_aligned_services[dbservice] not in \
-           self.staging_services[dbservice]:
-            self.error("{0} is set to use {1:l}, but that instance is not in a "
-                       "service map for {2}.".format(self.dbobj.cluster,
-                                                     self.cluster_aligned_services[dbservice],
-                                                     self.dbobj.fqdn))
-            return
-        self.logger.debug("Chose service %s instance %s because it is cluster "
-                          "aligned.",
-                          dbservice.name,
-                          self.cluster_aligned_services[dbservice].name)
-        self.staging_services[dbservice] = [
-            self.cluster_aligned_services[dbservice]]
-        return
-
-    def apply_changes(self):
-        """Update the host object with pending changes."""
-        for instance in self.instances_bound:
-            self.logger.client_info("{0} adding binding for {1:l}"
-                                    .format(self.dbobj, instance))
-            self.dbobj.services_used.append(instance)
-        for instance in self.instances_unbound:
-            self.logger.client_info("{0} removing binding for {1:l}"
-                                    .format(self.dbobj, instance))
-            self.dbobj.services_used.remove(instance)
-
-    def prestash_primary(self):
-        self.plenaries.append(Plenary.get_plenary(self.dbobj))
-
-        # This may be too much action at a distance... however, if
-        # we are potentially re-writing a host plenary, it seems like
-        # a good idea to also verify and refresh known dependencies.
-        self.plenaries.append(Plenary.get_plenary(self.dbobj.hardware_entity))
-        if self.dbobj.resholder:
-            for dbres in self.dbobj.resholder.resources:
-                self.plenaries.append(Plenary.get_plenary(dbres))
-
 
 class ClusterChooser(Chooser):
     """Choose services for a cluster."""
@@ -602,62 +543,16 @@ class ClusterChooser(Chooser):
             raise InternalError("ClusterChooser can only choose services for "
                                 "clusters, got %r (%s)" % (dbcluster, type(dbcluster)))
         super(ClusterChooser, self).__init__(dbcluster, *args, **kwargs)
-        self.location = dbcluster.location_constraint
-        self.required_services = set()
-        # TODO Should be calculated from member host's network membership.
-        self.network = None
-        # Stores interim service instance lists.
-        for service in self.archetype.services:
-            self.required_services.add(service)
-        for service in self.personality.services:
-            self.required_services.add(service)
 
-        self.original_service_instances = {}
-        # Cache of any already bound services (keys) and the instance
-        # that was bound (values).
-        for si in dbcluster.service_bindings:
-            self.original_service_instances[si.service] = si
-            self.logger.debug("{0} original binding: {1:l}"
-                              .format(dbcluster, si))
+        self.location = dbcluster.location_constraint
+        if dbcluster.metacluster:
+            self.aligned_parents.append(dbcluster.metacluster)
 
     def get_footprint(self, instance):
         """If this cluster is bound to a service, how many hosts bind?"""
-        if self.dbobj.personality in instance.service.personalities or \
-            self.dbobj.personality.archetype in instance.service.archetypes:
+        if instance.service in self.required_services:
             if isinstance(self.dbobj, MetaCluster):
                 return 0
             # max_hosts can be None, but we need to return a number
             return self.dbobj.max_hosts or 0
         return 0
-
-    def apply_changes(self):
-        """Update the cluster object with pending changes."""
-        for instance in self.instances_unbound:
-            self.logger.client_info("{0} removing binding for {1:l}"
-                                    .format(self.dbobj, instance))
-            if instance in self.dbobj.service_bindings:
-                self.dbobj.service_bindings.remove(instance)
-            else:
-                self.error("Internal Error: Could not unbind {0:l}"
-                           .format(instance))
-        for instance in self.instances_bound:
-            self.logger.client_info("{0} adding binding for {1:l}"
-                                    .format(self.dbobj, instance))
-            self.dbobj.service_bindings.append(instance)
-            self.flush_changes()
-            for h in self.dbobj.hosts:
-                host_chooser = Chooser(h, logger=self.logger,
-                                       required_only=False)
-                host_chooser.set_single(instance.service, instance, force=True)
-                host_chooser.flush_changes()
-                # Note, host plenary will be written later.
-
-    def prestash_primary(self):
-        for dbobj in self.dbobj.all_objects():
-            self.plenaries.append(Plenary.get_plenary(dbobj))
-            if dbobj.resholder:
-                for dbres in dbobj.resholder.resources:
-                    self.plenaries.append(Plenary.get_plenary(dbres))
-
-            if hasattr(dbobj, "network_device") and dbobj.network_device:
-                self.plenaries.append(PlenarySwitchData.get_plenary(dbobj.network_device))

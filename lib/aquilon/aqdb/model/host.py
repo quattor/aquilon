@@ -23,9 +23,8 @@ from sqlalchemy import (Integer, Boolean, DateTime, String, Column, ForeignKey,
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import relation, backref, deferred
 
-from aquilon.aqdb.model import (Base, Branch, Sandbox, HardwareEntity,
-                                HostLifecycle, Grn, Personality,
-                                OperatingSystem, User)
+from aquilon.aqdb.model import (Base, HardwareEntity, HostLifecycle, Grn,
+                                OperatingSystem, CompileableMixin)
 
 from aquilon.aqdb.column_types import AqStr
 from collections import defaultdict
@@ -38,7 +37,7 @@ def _hgm_creator(tuple):
     return HostGrnMap(host=tuple[0], grn=tuple[1], target=tuple[2])
 
 
-class Host(Base):
+class Host(CompileableMixin, Base):
     """ The Host class captures the configuration profile of a machine.
 
         Putting a physical machine into a chassis and powering it up leaves it
@@ -58,31 +57,18 @@ class Host(Base):
 
     __tablename__ = _TN
     _instance_label = 'fqdn'
+    _col_prefix = 'host'
 
     hardware_entity_id = Column(Integer, ForeignKey(HardwareEntity.id,
-                                                    name='host_hwent_fk'),
+                                                    name='%s_hwent_fk' % _TN),
                                 primary_key=True)
 
-    branch_id = Column(Integer, ForeignKey(Branch.id,
-                                           name='host_branch_fk'),
-                       nullable=False)
-
-    sandbox_author_id = Column(Integer,
-                               ForeignKey(User.id,
-                                          name='host_sandbox_author_fk',
-                                          ondelete="SET NULL"),
-                               nullable=True)
-
-    personality_id = Column(Integer, ForeignKey(Personality.id,
-                                                name='host_prsnlty_fk'),
-                            nullable=False)
-
     lifecycle_id = Column(Integer, ForeignKey(HostLifecycle.id,
-                                              name='host_lifecycle_fk'),
+                                              name='%s_lifecycle_fk' % _TN),
                           nullable=False)
 
     operating_system_id = Column(Integer, ForeignKey(OperatingSystem.id,
-                                                     name='host_os_fk'),
+                                                     name='%s_os_fk' % _TN),
                                  nullable=False)
 
     owner_eon_id = Column(Integer, ForeignKey(Grn.eon_id,
@@ -103,34 +89,17 @@ class Host(Base):
                                backref=backref('host', uselist=False,
                                                cascade='all, delete-orphan'))
 
-    branch = relation(Branch, innerjoin=True)
-    sandbox_author = relation(User)
-    personality = relation(Personality, innerjoin=True)
     status = relation(HostLifecycle, innerjoin=True)
     operating_system = relation(OperatingSystem, innerjoin=True)
     owner_grn = relation(Grn)
     grns = association_proxy('_grns', 'grn', creator=_hgm_creator)
 
-    __table_args__ = (Index('host_prsnlty_idx', personality_id),
-                      Index('%s_branch_idx' % _TN, branch_id))
+    __table_args__ = (Index('%s_prsnlty_idx' % _TN, 'personality_id'),
+                      Index('%s_branch_idx' % _TN, 'branch_id'))
 
     @property
     def fqdn(self):
         return self.hardware_entity.fqdn
-
-    @property
-    def archetype(self):
-        """ proxy in our archetype attr """
-        return self.personality.archetype
-
-    @property
-    def authored_branch(self):
-        if isinstance(self.branch, Sandbox):
-            if self.sandbox_author:
-                return "%s/%s" % (self.sandbox_author.name, self.branch.name)
-            else:
-                return "%s [orphaned]" % self.branch.name
-        return self.branch.name
 
     # see cluster.py
     @property
@@ -142,6 +111,9 @@ class Host(Base):
                 if res.resource_type == "virtual_machine":
                     mach.append(res.machine)
         return mach
+
+    def all_objects(self):
+        yield self
 
     @property
     def effective_owner_grn(self):

@@ -16,14 +16,13 @@
 # limitations under the License.
 """Contains the logic for `aq unbind client`."""
 
-
-from aquilon.exceptions_ import ArgumentError
+from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.aqdb.model import Service
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.dbwrappers.host import (hostname_to_host,
-                                            get_host_bound_service)
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.dbwrappers.host import hostname_to_host
 from aquilon.worker.templates import (Plenary, PlenaryCollection,
                                       PlenaryServiceInstanceServer)
+from aquilon.utils import first_of
 
 
 class CommandUnbindClient(BrokerCommand):
@@ -32,21 +31,28 @@ class CommandUnbindClient(BrokerCommand):
 
     def render(self, session, logger, hostname, service, **arguments):
         dbhost = hostname_to_host(session, hostname)
-        for srv in dbhost.archetype.services + dbhost.personality.services:
-            if srv.name == service:
-                raise ArgumentError("Cannot unbind a required service. "
-                                    "Perhaps you want to rebind?")
-
         dbservice = Service.get_unique(session, service, compel=True)
-        si = get_host_bound_service(dbhost, dbservice)
-        if si:
-            logger.info("Removing client binding")
-            dbhost.services_used.remove(si)
-            session.flush()
+        dbinstance = first_of(dbhost.services_used,
+                              lambda x: x.service == dbservice)
 
-            plenaries = PlenaryCollection(logger=logger)
-            plenaries.append(Plenary.get_plenary(dbhost))
-            plenaries.append(PlenaryServiceInstanceServer.get_plenary(si))
-            plenaries.write()
+        if not dbinstance:
+            raise NotFoundException("{0} is not bound to {1:l}."
+                                    .format(dbservice, dbhost))
+        if dbservice in dbhost.archetype.services:
+            raise ArgumentError("{0} is required for {1:l}, the binding cannot "
+                                "be removed."
+                                .format(dbservice, dbhost.archetype))
+        if dbservice in dbhost.personality.services:
+            raise ArgumentError("{0} is required for {1:l}, the binding cannot "
+                                "be removed."
+                                .format(dbservice, dbhost.personality))
+
+        dbhost.services_used.remove(dbinstance)
+        session.flush()
+
+        plenaries = PlenaryCollection(logger=logger)
+        plenaries.append(Plenary.get_plenary(dbhost))
+        plenaries.append(PlenaryServiceInstanceServer.get_plenary(dbinstance))
+        plenaries.write()
 
         return

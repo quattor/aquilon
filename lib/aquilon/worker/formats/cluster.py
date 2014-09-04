@@ -44,7 +44,7 @@ class ClusterFormatter(ObjectFormatter):
             for resource in cluster.resholder.resources:
                 self.redirect_proto(resource, skeleton)
 
-        for dbsi in cluster.service_bindings:
+        for dbsi in cluster.services_used:
             # Should be just 'services', but that would change the protocol.
             si = skeleton.aligned_services.add()
             si.service = dbsi.service.name
@@ -147,7 +147,7 @@ class ClusterFormatter(ObjectFormatter):
         details.append(self.redirect_raw(cluster.personality, indent + "  "))
         details.append(indent + "  {0:c}: {1}"
                        .format(cluster.branch, cluster.authored_branch))
-        for dbsi in cluster.service_bindings:
+        for dbsi in cluster.services_used:
             details.append(indent +
                            "  Member Alignment: Service %s Instance %s" %
                            (dbsi.service.name, dbsi.name))

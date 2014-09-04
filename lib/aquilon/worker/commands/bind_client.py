@@ -39,7 +39,8 @@ class CommandBindClient(BrokerCommand):
         else:
             chooser.set_single(dbservice, force=force)
 
-        chooser.flush_changes()
+        session.flush()
+
         chooser.write_plenary_templates()
 
         return
