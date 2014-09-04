@@ -36,17 +36,17 @@ class TestUsecaseDatabase(TestBrokerCommand):
                    "--bootmount",
                    "--dumpfreq=1", "--fsckpass=3", "--options=rw",
                    "--hostname=server1.aqd-unittest.ms.com"]
-        self.successtest(command)
+        self.noouttest(command)
 
     def test_101_add_app(self):
         command = ["add_application", "--application=nydb1", "--eonid=42",
                    "--hostname=server1.aqd-unittest.ms.com"]
-        self.successtest(command)
+        self.noouttest(command)
 
     def test_105_reconfigure(self):
         command = ["reconfigure", "--personality=sybase-test",
                    "--hostname=server1.aqd-unittest.ms.com"]
-        self.successtest(command)
+        self.statustest(command)
 
     def test_110_verify_show(self):
         command = ["show_host", "--hostname=server1.aqd-unittest.ms.com"]
@@ -67,16 +67,16 @@ class TestUsecaseDatabase(TestBrokerCommand):
                    "--bootmount",
                    "--dumpfreq=1", "--fsckpass=3", "--options=rw",
                    "--hostname=server1.aqd-unittest.ms.com"]
-        self.successtest(command)
+        self.noouttest(command)
 
     def test_111_add_app(self):
         command = ["add_application", "--application=utdb2", "--eonid=42",
                    "--hostname=server1.aqd-unittest.ms.com"]
-        self.successtest(command)
+        self.noouttest(command)
 
     def test_115_compile(self):
         command = ["compile", "--hostname=server1.aqd-unittest.ms.com"]
-        self.successtest(command)
+        self.statustest(command)
 
     def test_130_verify_show(self):
         command = ["show_host", "--hostname=server1.aqd-unittest.ms.com"]
@@ -97,22 +97,22 @@ class TestUsecaseDatabase(TestBrokerCommand):
     def test_190_del_fs1(self):
         command = ["del_filesystem", "--filesystem=gnr.0",
                    "--hostname=server1.aqd-unittest.ms.com"]
-        self.successtest(command)
+        self.noouttest(command)
 
     def test_190_del_app1(self):
         command = ["del_application", "--application=nydb1",
                    "--hostname=server1.aqd-unittest.ms.com"]
-        self.successtest(command)
+        self.noouttest(command)
 
     def test_190_del_fs2(self):
         command = ["del_filesystem", "--filesystem=gnr.1",
                    "--hostname=server1.aqd-unittest.ms.com"]
-        self.successtest(command)
+        self.noouttest(command)
 
     def test_190_del_app2(self):
         command = ["del_application", "--application=utdb2",
                    "--hostname=server1.aqd-unittest.ms.com"]
-        self.successtest(command)
+        self.noouttest(command)
 
     def test_200_clustered_dbserver(self):
         # We'll just do a single-node cluster for now
@@ -120,12 +120,12 @@ class TestUsecaseDatabase(TestBrokerCommand):
                    "--campus=ny",
                    "--domain=unittest", "--down_hosts_threshold=0",
                    "--archetype=hacluster", "--personality=vcs-msvcs"]
-        self.successtest(command)
+        self.noouttest(command)
 
     def test_201_add_member(self):
         command = ["cluster", "--cluster=nydb1",
                    "--hostname=server1.aqd-unittest.ms.com"]
-        self.successtest(command)
+        self.statustest(command)
 
     def test_205_add_fs(self):
         command = ["add_filesystem", "--filesystem=gnr.0", "--type=ext3",
@@ -134,12 +134,12 @@ class TestUsecaseDatabase(TestBrokerCommand):
                    "--nobootmount",
                    "--dumpfreq=1", "--fsckpass=3", "--options=rw",
                    "--cluster=nydb1"]
-        self.successtest(command)
+        self.noouttest(command)
 
     def test_205_add_app(self):
         command = ["add_application", "--application=nydb1", "--eonid=42",
                    "--cluster=nydb1"]
-        self.successtest(command)
+        self.noouttest(command)
 
     def test_205_add_srv(self):
         ip = self.net["unknown0"].usable[25]
@@ -147,12 +147,12 @@ class TestUsecaseDatabase(TestBrokerCommand):
         command = ["add_service_address", "--ip", ip, "--name", "nydb1nydb1",
                    "--service_address", "nydb1nydb1.aqd-unittest.ms.com",
                    "--cluster", "nydb1", "--interfaces", "eth0"]
-        self.successtest(command)
+        self.statustest(command)
         self.dsdb_verify()
 
     def test_210_compile(self):
         command = ["compile", "--cluster=nydb1"]
-        self.successtest(command)
+        self.statustest(command)
 
     def test_220_verify_show(self):
         srv_ip = self.net["unknown0"].usable[25]
@@ -195,14 +195,14 @@ class TestUsecaseDatabase(TestBrokerCommand):
         self.dsdb_expect_delete(self.net["unknown0"].usable[25])
         command = ["del_service_address", "--cluster=nydb1",
                    "--name", "nydb1nydb1"]
-        self.successtest(command)
+        self.noouttest(command)
         self.dsdb_verify()
 
         command = ["uncluster", "--hostname=server1.aqd-unittest.ms.com",
                    "--cluster=nydb1"]
-        self.successtest(command)
+        self.statustest(command)
         command = ["del_cluster", "--cluster=nydb1"]
-        self.successtest(command)
+        self.statustest(command)
 
         # The resource plenaries should be gone
         for path in res_plenaries:

@@ -115,10 +115,10 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
 
             host = "utpgh%s.aqd-unittest.ms.com" % i
             cluster = "utpgcl%d" % i
-            self.successtest(["make", "cluster", "--cluster", cluster])
+            self.statustest(["make", "cluster", "--cluster", cluster])
 
-            self.successtest(["cluster",
-                              "--hostname", host, "--cluster", cluster])
+            self.statustest(["cluster",
+                             "--hostname", host, "--cluster", cluster])
 
     def test_090_addmachines(self):
         for i in range(0, 3):
@@ -258,7 +258,7 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
 
         command = ["add_resourcegroup", "--resourcegroup=utmc8as2",
                    "--metacluster=utmc8", "--required_type=share"]
-        self.successtest(command)
+        self.noouttest(command)
 
         command = ["show_resourcegroup", "--all"]
         out = self.commandtest(command)
@@ -266,7 +266,7 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
         self.matchoutput(out, "Resource Group: utmc8as2", command)
 
     def test_160_verify_metacluster(self):
-        self.successtest(["make", "cluster", "--cluster", "utmc8"])
+        self.statustest(["make", "cluster", "--cluster", "utmc8"])
 
         command = ["cat", "--metacluster", "utmc8", "--data"]
         out = self.commandtest(command)
@@ -310,7 +310,7 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
     def test_200_add_share_to_rg(self):
         command = ["add_share", "--resourcegroup=utmc8as1",
                    "--metacluster=utmc8", "--share=test_v2_share"]
-        self.successtest(command)
+        self.noouttest(command)
 
         command = ["show_share", "--resourcegroup=utmc8as1",
                    "--metacluster=utmc8", "--share=test_v2_share"]
@@ -321,7 +321,7 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
 
         command = ["add_share", "--resourcegroup=utmc8as2",
                    "--metacluster=utmc8", "--share=test_v2_share"]
-        self.successtest(command)
+        self.noouttest(command)
 
         command = ["show_share", "--all"]
         out = self.commandtest(command)
@@ -544,8 +544,7 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
                    "--instance", "ut", "--building", "ut"]
         self.noouttest(command)
 
-        command = ["del_esx_cluster", "--cluster=utpgcl2"]
-        self.successtest(command)
+        self.statustest(["del_esx_cluster", "--cluster=utpgcl2"])
 
     def test_430_unbindvcenterservices(self):
         command = ["del_required_service", "--service", "vcenter",
@@ -665,8 +664,7 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
         # Can't unbind an an aligned service here and don't want unalign it
 
     def test_538_del_utpgcl3(self):
-        command = ["del_esx_cluster", "--cluster=utpgcl3"]
-        self.successtest(command)
+        self.statustest(["del_esx_cluster", "--cluster=utpgcl3"])
 
     def test_540_remove_mc_esx_service(self):
         command = ["del_required_service", "--service", "esx_management_server",
@@ -705,19 +703,19 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
     def test_610_delresourcegroup(self):
         command = ["del_share", "--resourcegroup=utmc8as1",
                    "--metacluster=utmc8", "--share=test_v2_share"]
-        self.successtest(command)
+        self.noouttest(command)
 
         command = ["del_resourcegroup", "--resourcegroup=utmc8as1",
                    "--metacluster=utmc8"]
-        self.successtest(command)
+        self.noouttest(command)
 
         command = ["del_share", "--resourcegroup=utmc8as2",
                    "--metacluster=utmc8", "--share=test_v2_share"]
-        self.successtest(command)
+        self.noouttest(command)
 
         command = ["del_resourcegroup", "--resourcegroup=utmc8as2",
                    "--metacluster=utmc8"]
-        self.successtest(command)
+        self.noouttest(command)
 
     # Metacluster / cluster / Switch deletes
     def test_700_delinterfaces(self):
@@ -756,7 +754,7 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
 
             self.dsdb_expect_delete(ip)
             command = ["del", "host", "--hostname", hostname]
-            self.successtest(command)
+            self.statustest(command)
             self.wait_notification(basetime, 1)
         self.dsdb_verify()
 
@@ -773,7 +771,7 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
 
         for i in range(0, 2):
             command = ["del_esx_cluster", "--cluster=utpgcl%d" % i]
-            self.successtest(command)
+            self.statustest(command)
 
     def test_760_delutmc8(self):
         basetime = datetime.now()

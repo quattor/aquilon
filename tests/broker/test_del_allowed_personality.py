@@ -52,15 +52,12 @@ class TestDelAllowedPersonality(TestBrokerCommand):
                          command)
 
     def test_15_delconstraint(self):
-        self.successtest(["del_allowed_personality",
-                          "--archetype", "vmhost",
-                          "--personality=generic",
-                          "--cluster=utecl1"])
+        self.noouttest(["del_allowed_personality", "--archetype", "vmhost",
+                        "--personality=generic", "--cluster=utecl1"])
 
     def test_17_delconstraint(self):
-        command = ["del_allowed_personality", "--archetype", "vmhost",
-                   "--personality=generic", "--cluster=utecl1"]
-        self.successtest(command)
+        self.noouttest(["del_allowed_personality", "--archetype", "vmhost",
+                        "--personality=generic", "--cluster=utecl1"])
 
     def test_20_checkconstraint(self):
         command = ["show_cluster", "--cluster=utecl1"]
