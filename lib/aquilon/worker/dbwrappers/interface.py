@@ -129,7 +129,6 @@ def generate_ip(session, logger, dbinterface, ip=None, ipfromip=None,
     if ip:
         return ip
 
-    dbsystem = None
     dbnetwork = None
     if autoip:
         if not dbinterface:
@@ -140,7 +139,12 @@ def generate_ip(session, logger, dbinterface, ip=None, ipfromip=None,
             dbnetwork = dbinterface.port_group.network
         elif dbinterface.port_group_name:
             # Physical host
-            allocator = get_host_pg_allocator(dbinterface.hardware_entity.host)
+            dbhw_ent = dbinterface.hardware_entity
+            if not dbhw_ent.host:
+                raise ArgumentError("{0} does not have a host, assigning an IP "
+                                    "address based on port group membership is "
+                                    "not possible.".format(dbhw_ent))
+            allocator = get_host_pg_allocator(dbhw_ent.host)
 
             dbvi = VlanInfo.get_by_pg(session, dbinterface.port_group_name)
 
@@ -181,9 +185,9 @@ def generate_ip(session, logger, dbinterface, ip=None, ipfromip=None,
         # determine network
         dbnetwork = get_net_id_from_ip(session, ipfromip, network_environment)
 
-    if not dbnetwork:
+    if not dbnetwork:  # pragma: no cover
         raise ArgumentError("Could not determine network to use for %s." %
-                            dbsystem.fqdn)
+                            dbinterface)
 
     # When there are e.g. multiple "add manager --autoip" operations going on in
     # parallel, we must ensure that they won't try to use the same IP address.
