@@ -18,17 +18,17 @@
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Cluster, MetaCluster
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.resources import get_resource
 from aquilon.worker.templates import (Plenary, PlenaryClusterObject,
-                                      PlenaryClusterData)
+                                      PlenaryClusterData, PlenaryClusterClient)
 
 
 class CommandCatCluster(BrokerCommand):
 
     required_parameters = ["cluster"]
 
-    def render(self, session, logger, cluster, data, generate, **arguments):
+    def render(self, session, logger, cluster, data, client, generate, **arguments):
         dbcluster = Cluster.get_unique(session, cluster, compel=True)
         if isinstance(dbcluster, MetaCluster):
             raise ArgumentError("Please use --metacluster for metaclusters.")
@@ -39,6 +39,8 @@ class CommandCatCluster(BrokerCommand):
         else:
             if data:
                 cls = PlenaryClusterData
+            elif client:
+                cls = PlenaryClusterClient
             else:
                 cls = PlenaryClusterObject
 
