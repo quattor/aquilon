@@ -223,10 +223,7 @@ def hostlist_to_hosts(session, hostlist, query_options=None,
         hosts_by_fqdn = {}
         for dns_rec_chunk in chunk(dns_records_by_name.values(), 1000):
             q = session.query(Host)
-            # TODO: SQLAlchemy 0.8 needs drop aliased=True, remove it after
-            # upgrading to 0.9
-            HWAlias = with_polymorphic(HardwareEntity, [Machine, NetworkDevice],
-                                       aliased=True)
+            HWAlias = with_polymorphic(HardwareEntity, [Machine, NetworkDevice])
             q = q.join(HWAlias)
             q = q.filter(HWAlias.primary_name_id.in_(rec.id for rec in
                                                      dns_rec_chunk))
