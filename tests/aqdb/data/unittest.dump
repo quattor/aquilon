@@ -72,14 +72,7 @@ User(name="otheruser", uid=1001, gid=1001, full_name="Other user", home_dir="/tm
 Domain(name="prod", owner=UserPrincipal(name="cdb"),
        compiler="/ms/dist/elfms/PROJ/panc/prod/lib/panc.jar",
        comments="Production source domain.")
-Domain(name="break-consistency-domain", owner=UserPrincipal(name="cdb"),
-       compiler="/ms/dist/elfms/PROJ/panc/prod/lib/panc.jar",
-       comments="Cause consistency checker to fail.")
 
-Sandbox(name="break-consistency-sandbox", owner=UserPrincipal(name="cdb"),
-	compiler="/ms/dist/elfms/PROJ/panc/prod/lib/panc.jar",
-        comments="Cause consistency checker to fail.",
-	base_commit='0000000000')
 Sandbox(name="othersandbox", owner=UserPrincipal(name="otheruser"),
 	compiler="/ms/dist/elfms/PROJ/panc/prod/lib/panc.jar",
         comments="Test if owner is deleted",

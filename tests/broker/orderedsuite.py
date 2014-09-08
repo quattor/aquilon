@@ -26,8 +26,6 @@ and 'unbind', 'map' and 'unmap', etc.
 
 from __future__ import absolute_import
 
-import os
-import sys
 import unittest2 as unittest
 
 from .test_start import TestBrokerStart
@@ -392,6 +390,7 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestRefreshUser, TestRootAccess,
                      TestUsecaseDatabase, TestUsecaseHACluster,
                      TestClientBypass,
+                     TestConsistency,
                      TestUmaskConstraints,
                      TestUnbindServer, TestUnmapService,
                      TestDel10GigHardware, TestDelVirtualHardware,
@@ -421,6 +420,5 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestDelDnsEnvironment, TestDelDnsDomain,
                      TestClientFailure, TestAudit, TestShowActiveCommands,
                      TestDocumentation,
-                     TestBrokerStop,
-                     TestConsistency]:
+                     TestBrokerStop]:
             self.addTest(unittest.TestLoader().loadTestsFromTestCase(test))

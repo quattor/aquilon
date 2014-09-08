@@ -18,6 +18,7 @@
 
 import os
 from subprocess import Popen, PIPE
+from shutil import rmtree
 
 if __name__ == "__main__":
     import utils
@@ -28,79 +29,144 @@ from brokertest import TestBrokerCommand
 
 
 class TestConsistency(TestBrokerCommand):
-
-    def test_consistency(self):
-        # Create a dummy domain directory, not in the database!
-        dummydomain = os.path.join(self.config.get("broker", "domainsdir"),
-                                   'dummydomain')
+    def test_010_add_filesystem_only(self):
+        # Create a dummy domain directory, not in the database and neither in
+        # template-king
+        dir = os.path.join(self.config.get("broker", "domainsdir"),
+                           'filesystem-only')
         try:
-            os.mkdir(dummydomain)
-        except OSError as e:
+            os.makedirs(dir, 0o755)
+        except OSError:
             # Directory may already exist
             pass
 
+    def test_020_add_branch_only(self):
+        kingdir = self.config.get("broker", "kingdir")
+        self.gitcommand(["branch", "branch-only", "prod"], cwd=kingdir)
+
+    def test_030_add_domain_no_fileystem(self):
+        self.successtest(["add_domain", "--domain", "domain-no-filesystem"])
+        dir = os.path.join(self.config.get("broker", "domainsdir"),
+                           "domain-no-filesystem")
+        rmtree(dir)
+
+    def test_040_add_domain_no_template_king(self):
+        kingdir = self.config.get("broker", "kingdir")
+        self.successtest(["add_domain", "--domain", "domain-no-template-king"])
+        self.gitcommand(["branch", "-D", "domain-no-template-king"], cwd=kingdir)
+
+    def test_050_add_sandbox_no_template_king(self):
+        kingdir = self.config.get("broker", "kingdir")
+        self.successtest(["add_sandbox", "--sandbox",
+                          "sandbox-no-template-king", "--noget"])
+        self.gitcommand(["branch", "-D", "sandbox-no-template-king"], cwd=kingdir)
+
+    def test_100_consistency(self):
         # Run the checker and collect its output
         command = 'aqd_consistency_check.py'
         dir = os.path.dirname(os.path.realpath(__file__))
         checker = os.path.join(dir, '..', '..', 'sbin', command)
         env = os.environ.copy()
         env['AQDCONF'] = self.config.baseconfig
-        (out, err) = Popen(checker, stdout=PIPE, stderr=PIPE, env=env).communicate()
+        out, err = Popen(checker, stdout=PIPE, stderr=PIPE,
+                         env=env).communicate()
         self.assertEmptyErr(err, command)
 
-        ########## Database (domains+sandbox's) == Git (domains+sandbox's)
+        # 1. BranchChecker
+        #
+        # "Domain XXXX found in the database but not in template-king"
+        self.matchoutput(out, "Domain domain-no-template-king found in the "
+                         "database but not in template-king", command)
+        self.matchoutput(out, "Sandbox sandbox-no-template-king found in the "
+                         "database but not in template-king", command)
+        self.matchclean(out, "Domain prod found", command)
 
-        # "Domain XXXX found in database and not template-king"
-        # The break-consistency-domain branch was added directly to the database
-        # at the start of the unit test.  Unlike the prod domain, it
-        # will not be in template-king.
-        self.matchoutput(out, "Domain break-consistency-domain found in database "
-                         "and not template-king", command)
-        self.matchoutput(out, "Sandbox break-consistency-sandbox found in database "
-                         "and not template-king", command)
-        self.matchclean(out, "Domain prod found in database "
-                        "and not template-king", command)
+        # "Branch XXXX found in template-king but not in the database"
+        self.matchoutput(out, "Branch branch-only found in template-king "
+                         "but not in the database", command)
 
-        # "Branch XXXX found in template-king and not database"
-        # There will be a whole pile of these errors because we cloned
-        # the template-king as part of the unit test system.
-        self.matchoutput(out, 'found in template-king and not database',
-                         command)
-        self.matchclean(out, 'Domain prod found in template-king '
-                        'and not database', command)
+        # The trash branch does not exist in the DB and that's OK
+        trash = self.config.get("broker", "trash_branch")
+        self.matchclean(out, trash, command)
 
-        ########## Database (sandbox) == Filesystem (sandbox)
+        # 2. SandboxChecker
+        #
+        # "Sandbox XXXX found in the database but not on the filesystem"
+        self.matchoutput(out, "Sandbox sandbox-no-template-king found in the "
+                         "database but not on the filesystem", command)
+        self.matchclean(out, "Sandbox managetest1 found", command)
 
-        # "Sandbox XXXX found in database but not on filesystem"
-        # The break-consistency-sandbox branch was added directly to the database
-        # at the start of the unit test.  Unlike the prod domain, it
-        # will not be found on the filing system.
-        self.matchoutput(out, "Sandbox break-consistency-sandbox found in database "
-                         "but not on filesystem", command)
-        self.matchclean(out, "Sandbox managetest1 found in database "
-                        "but not on filesystem", command)
-
-        ########## Database (domains) == Filesystem (domains)
-
-        # "Branch XXXX found in database but not on fileing system"
-        # The break-consistency-domain is added to the database at the start
-        # of the  unit test; however, it is created directly in the database
-        # and not through the broker.  Hence why this is not found on the
-        # filing system.
-        self.matchoutput(out, "Domain break-consistency-domain found in database "
-                         "but not on filesystem", command)
-        self.matchclean(out, "Domain prod found in database "
-                        "but not on filesystem", command)
+        # 3. DomainChecker
+        #
+        # "Branch XXXX found in the database but not on the filesystem"
+        self.matchoutput(out, "Domain domain-no-filesystem found in the "
+                         "database but not on the filesystem", command)
+        self.matchclean(out, "Domain prod found in the database", command)
 
         # "Domain XXXX found on filesystem (%s) but not in database"
-        # We created a dummy path at the beginning of this test, as a result
-        # it's not represented in the database.
-        self.matchoutput(out, "Domain dummydomain found on filesystem (%s) "
-                         "but not in database" % dummydomain,
+        dir = os.path.join(self.config.get("broker", "domainsdir"),
+                           "filesystem-only")
+        self.matchoutput(out, "Domain filesystem-only found on the filesystem "
+                         "(%s) but not in the database" % dir,
                          command)
-        self.matchclean(out, "Domain prod found on filesystem",
-                        command)
+        self.matchclean(out, "Domain prod found", command)
 
+    def test_110_repair_branch(self):
+        command = 'aqd_consistency_check.py'
+        dir = os.path.dirname(os.path.realpath(__file__))
+        checker = os.path.join(dir, '..', '..', 'sbin', command)
+        env = os.environ.copy()
+        env['AQDCONF'] = self.config.baseconfig
+        out, err = Popen([checker, "--repair", "--only=BranchChecker"],
+                         stdout=PIPE, stderr=PIPE, env=env).communicate()
+        self.assertEmptyErr(err, command)
+
+        self.matchoutput(out, "Deleting branch branch-only", command)
+
+        # The trash branch should not get deleted
+        trash = self.config.get("broker", "trash_branch")
+        self.matchclean(out, trash, command)
+
+    # def test_115_verify_delete_orphaned_branch(self):
+    #     kingdir = self.config.get("broker", "kingdir")
+    #     command = ["log", "--no-color", "-n", "1", self.config.get("broker",
+    #                                                                "trash_branch")]
+    #     out, err = self.gitcommand(command, cwd=kingdir)
+    #     self.matchoutput(out, "Delete orphaned branch branch-only", command)
+
+    def test_120_repair_domain(self):
+        command = 'aqd_consistency_check.py'
+        dir = os.path.dirname(os.path.realpath(__file__))
+        checker = os.path.join(dir, '..', '..', 'sbin', command)
+        env = os.environ.copy()
+        env['AQDCONF'] = self.config.baseconfig
+        out, err = Popen([checker, "--repair", "--only=DomainChecker"],
+                         stdout=PIPE, stderr=PIPE, env=env).communicate()
+        self.assertEmptyErr(err, command)
+
+        dir = os.path.join(self.config.get("broker", "domainsdir"),
+                           "filesystem-only")
+        self.matchoutput(out, "Removing %s" % dir, command)
+        self.failIf(os.path.exists(dir))
+
+        dir = os.path.join(self.config.get("broker", "domainsdir"),
+                           "domain-no-filesystem")
+        self.matchoutput(out, "Checking out domain domain-no-filesystem",
+                         command)
+        self.failUnless(os.path.exists(dir))
+
+    def test_800_cleanup(self):
+        self.noouttest(["update_domain", "--domain", "domain-no-filesystem",
+                        "--archived"])
+        self.statustest(["del_domain", "--domain", "domain-no-filesystem",
+                         "--justification", "tcm=123456"])
+
+        # self.noouttest(["update_domain", "--domain", "domain-no-template-king",
+        #                 "--archived"])
+        # self.statustest(["del_domain", "--domain", "domain-no-template-king",
+        #                  "--justification", "tcm=123456"])
+
+        self.statustest(["del_sandbox", "--sandbox", "sandbox-no-template-king"])
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestConsistency)
