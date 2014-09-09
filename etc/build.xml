@@ -86,7 +86,7 @@
 		<var name="delete.dep.includes" value="" />
 		<for list="${object.profile}" delimiter=" " param="profile">
 			<sequential>
-				<var name="delete.dep.includes" value="${compiled.includes} @{profile}.dep" />
+				<var name="delete.dep.includes" value="${delete.dep.includes} @{profile}.dep" />
 			</sequential>
 		</for>
 		<delete failonerror="false">

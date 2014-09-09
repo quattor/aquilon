@@ -146,6 +146,27 @@ class TestCompile(VerifyNotificationsMixin, TestBrokerCommand):
         self.matchoutput(out, "0/1 object template(s) being processed",
                          command)
 
+    def test_300_compile_host_cleandeps(self):
+        command = ["compile", "--hostname", "unittest02.one-nyp.ms.com",
+                   "--cleandeps"]
+        out = self.statustest(command)
+        self.matchoutput(out, "1/1 object template(s) being processed",
+                         command)
+        self.matchoutput(out, "1/1 compiled", command)
+
+    def test_310_compile_cluster(self):
+        command = ["compile", "--cluster", "utecl1"]
+        out = self.statustest(command)
+        self.matchoutput(out, "0/4 object template(s) being processed",
+                         command)
+
+    def test_315_compile_cluster_cleandeps(self):
+        command = ["compile", "--cluster", "utecl1", "--cleandeps"]
+        out = self.statustest(command)
+        self.matchoutput(out, "4/4 object template(s) being processed",
+                         command)
+        self.matchoutput(out, "4/4 compiled", command)
+
     def test_400_addsandbox(self):
         command = "add_sandbox --sandbox=out_of_date --start=utsandbox"
         self.successtest(command.split())
@@ -258,10 +279,18 @@ class TestCompile(VerifyNotificationsMixin, TestBrokerCommand):
         self.matchoutput(out, "0/10 object template(s) being processed",
                          command)
 
-    def test_560_compilepersonality(self):
-        command = ['manage', '--hostname=unittest02.one-nyp.ms.com',
-                   '--domain=ut-prod', '--force']
-        self.successtest(command)
+    def test_555_compile_personality_cleandeps(self):
+        command = ["compile", "--personality", "compileserver",
+                   "--archetype", "aquilon", "--cleandeps"]
+        out = self.statustest(command)
+        self.matchoutput(out, "10/10 object template(s) being processed",
+                         command)
+        self.matchoutput(out, "10/10 compiled", command)
+
+    def test_560_compile_personality_multiple_domains(self):
+        self.statustest(['manage', '--hostname=unittest02.one-nyp.ms.com',
+                         '--domain=ut-prod', '--force'])
+
         command = ['compile', '--personality=compileserver', '--archetype=aquilon']
         err = self.badrequesttest(command)
         self.matchoutput(err, 'Bad Request: All hosts must be in the same domain or sandbox:',
