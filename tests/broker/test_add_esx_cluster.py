@@ -36,9 +36,6 @@ class TestAddESXCluster(PersonalityTestMixin, TestBrokerCommand):
                 "ut.b": {
                     "building": ["ut"],
                 },
-                "np": {
-                    "building": ["np"],
-                },
             },
             "vmseasoning": {
                 "salt": {
@@ -46,9 +43,6 @@ class TestAddESXCluster(PersonalityTestMixin, TestBrokerCommand):
                 },
                 "pepper": {
                     "building": ["ut"],
-                },
-                "sugar": {
-                    "building": ["np"],
                 },
             },
         }
@@ -59,9 +53,6 @@ class TestAddESXCluster(PersonalityTestMixin, TestBrokerCommand):
                 },
                 "ut.b": {
                     "building": ["ut"],
-                },
-                "np": {
-                    "building": ["np"],
                 },
             },
         }
