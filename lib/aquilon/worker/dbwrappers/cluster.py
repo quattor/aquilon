@@ -16,14 +16,25 @@
 # limitations under the License.
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import Personality, ClusterLifecycle
+from aquilon.aqdb.model import Archetype, Personality, ClusterLifecycle
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
 
 
 def parse_cluster_arguments(session, config, archetype, personality, domain, sandbox,
                             buildstatus, max_members):
+    dbarchetype = Archetype.get_unique(session, archetype, compel=True)
+    section = "archetype_" + dbarchetype.name
+
+    if not personality:
+        if config.has_option(section, "default_personality"):
+            personality = config.get(section, "default_personality")
+    if not personality:
+        raise ArgumentError("There is no default personality configured "
+                            "for {0:l}, please specify --personality."
+                            .format(dbarchetype))
+
     dbpersonality = Personality.get_unique(session, name=personality,
-                                           archetype=archetype, compel=True)
+                                           archetype=dbarchetype, compel=True)
     if not dbpersonality.is_cluster:
         raise ArgumentError("%s is not a cluster personality." %
                             personality)
@@ -31,8 +42,6 @@ def parse_cluster_arguments(session, config, archetype, personality, domain, san
     if not buildstatus:
         buildstatus = "build"
     dbstatus = ClusterLifecycle.get_instance(session, buildstatus)
-
-    section = "archetype_" + dbpersonality.archetype.name
 
     if not domain and not sandbox and \
        config.has_option(section, "default_domain"):

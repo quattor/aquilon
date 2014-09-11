@@ -69,8 +69,10 @@ def create_host(session, logger, config, dbhw, dbarchetype, domain=None,
     if not personality:
         if config.has_option(section, "default_personality"):
             personality = config.get(section, "default_personality")
-        else:
-            personality = 'generic'
+    if not personality:
+        raise ArgumentError("There is no default personality configured "
+                            "for {0:l}, please specify --personality."
+                            .format(dbarchetype))
 
     dbpersonality = Personality.get_unique(session, name=personality,
                                            archetype=dbarchetype,

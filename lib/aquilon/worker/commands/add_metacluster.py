@@ -43,8 +43,6 @@ class CommandAddMetaCluster(BrokerCommand):
         # This should be reverted when virtbuild supports these options
         if not archetype:
             archetype = "metacluster"
-        if not personality:
-            personality = "metacluster"
 
         kw = parse_cluster_arguments(session, self.config, archetype,
                                      personality, domain, sandbox, buildstatus,
