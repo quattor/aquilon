@@ -15,49 +15,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import MetaCluster, Cluster
-from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.templates import Plenary, PlenaryCollection
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.commands.update_cluster import CommandUpdateCluster
 
 
-class CommandRebindMetaCluster(BrokerCommand):
+class CommandRebindMetaCluster(CommandUpdateCluster):
 
     required_parameters = ["metacluster", "cluster"]
 
-    def render(self, session, logger, metacluster, cluster, **arguments):
-        dbcluster = Cluster.get_unique(session, cluster, compel=True)
+    def render(self, session, metacluster, cluster, **arguments):
+        self.deprecated_command("Command rebind_metacluster is deprecated.  "
+                                "Please use update_cluster --metacluster "
+                                "instead.", **arguments)
 
-        if metacluster:
-            dbmetacluster = MetaCluster.get_unique(session, metacluster,
-                                                   compel=True)
-        else:
-            dbmetacluster = None
-
-        old_metacluster = dbcluster.metacluster
-        if old_metacluster != dbmetacluster:
-            if dbcluster.virtual_machines:
-                raise ArgumentError("Cannot move cluster to a new metacluster "
-                                    "while virtual machines are attached.")
-
-        dbcluster.metacluster = dbmetacluster
-
-        if old_metacluster:
-            old_metacluster.validate()
-        if dbmetacluster:
-            dbmetacluster.validate()
-
-        session.flush()
-
-        plenaries = PlenaryCollection(logger=logger)
-
-        for dbobj in dbcluster.all_objects():
-            plenaries.append(Plenary.get_plenary(dbobj))
-        if dbmetacluster:
-            plenaries.append(Plenary.get_plenary(dbmetacluster))
-        if old_metacluster:
-            plenaries.append(Plenary.get_plenary(old_metacluster))
-
-        plenaries.write()
-
-        return
+        return CommandUpdateCluster.render(self, session=session,
+                                           cluster=cluster,
+                                           metacluster=metacluster,
+                                           personality=None, max_members=None,
+                                           fix_location=None,
+                                           down_hosts_threshold=None,
+                                           maint_threshold=None, comments=None,
+                                           switch=None, virtual_switch=None,
+                                           memory_capacity=None,
+                                           clear_overrides=None, **arguments)

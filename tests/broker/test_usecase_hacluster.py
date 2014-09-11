@@ -194,13 +194,13 @@ class TestUsecaseHACluster(TestBrokerCommand):
                         "--personality", "vcs-msvcs", "--metacluster", "hamc1"])
 
     def test_162_add_clusters(self):
-        self.noouttest(["rebind_metacluster", "--cluster", "hacl1",
+        self.noouttest(["update_cluster", "--cluster", "hacl1",
                         "--metacluster", "hamc1"])
-        self.noouttest(["rebind_metacluster", "--cluster", "hacl2",
+        self.noouttest(["update_cluster", "--cluster", "hacl2",
                         "--metacluster", "hamc1"])
 
     def test_163_add_wrong_cluster(self):
-        command = ["rebind_metacluster", "--cluster", "utecl3",
+        command = ["update_cluster", "--cluster", "utecl3",
                    "--metacluster", "hamc1"]
         out = self.badrequesttest(command)
         self.matchoutput(out,

@@ -50,7 +50,7 @@ class TestAdd10GigHardware(TestBrokerCommand):
 
     def test_020_fixlocation(self):
         for i in range(5, 11):
-            command = ["update_esx_cluster", "--cluster=utecl%d" % i,
+            command = ["update_cluster", "--cluster=utecl%d" % i,
                        "--fix_location"]
             self.noouttest(command)
 
@@ -66,10 +66,10 @@ class TestAdd10GigHardware(TestBrokerCommand):
 
     def test_090_addswitch(self):
         for i in range(5, 8):
-            self.successtest(["update_esx_cluster", "--cluster=utecl%d" % i,
+            self.successtest(["update_cluster", "--cluster=utecl%d" % i,
                               "--switch=ut01ga2s01.aqd-unittest.ms.com"])
         for i in range(8, 11):
-            self.noouttest(["update_esx_cluster", "--cluster=utecl%d" % i,
+            self.noouttest(["update_cluster", "--cluster=utecl%d" % i,
                             "--switch=ut01ga2s02.aqd-unittest.ms.com"])
 
     def test_095_unused_pg(self):

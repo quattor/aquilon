@@ -31,6 +31,8 @@ class TestRebindMetaCluster(TestBrokerCommand):
         command = ["rebind_metacluster", "--cluster=cluster-does-not-exist",
                    "--metacluster=utmc1"]
         out = self.notfoundtest(command)
+        self.matchoutput(out, "Command rebind_metacluster is deprecated.",
+                         command)
         self.matchoutput(out,
                          "Cluster cluster-does-not-exist not found.",
                          command)
@@ -44,14 +46,13 @@ class TestRebindMetaCluster(TestBrokerCommand):
                          command)
 
     def testfailfullmetacluster(self):
-        command = ["rebind_metacluster", "--cluster=utecl4",
-                   "--metacluster=utmc3"]
+        command = ["update_cluster", "--cluster=utecl4", "--metacluster=utmc3"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Metacluster utmc3 has 1 clusters bound, which "
                          "exceeds the requested limit of 0.", command)
 
     def testfailrebindsandboxcl1(self):
-        command = ["rebind_metacluster", "--cluster=sandboxcl1",
+        command = ["update_cluster", "--cluster=sandboxcl1",
                    "--metacluster=utmc1"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "ESX Cluster sandboxcl1 sandbox %s/"
@@ -59,8 +60,7 @@ class TestRebindMetaCluster(TestBrokerCommand):
                          "domain unittest." % self.user, command)
 
     def testrebindutecl3(self):
-        command = ["rebind_metacluster", "--cluster=utecl3",
-                   "--metacluster=utmc1"]
+        command = ["update_cluster", "--cluster=utecl3", "--metacluster=utmc1"]
         self.noouttest(command)
 
     def testverifyrebindutecl3(self):
@@ -71,7 +71,6 @@ class TestRebindMetaCluster(TestBrokerCommand):
         self.matchoutput(out, '"system/cluster/metacluster/name" = "utmc1";', command)
         self.matchoutput(out, '"system/metacluster/name" = "utmc1";', command)
         self.matchclean(out, "resources/virtual_machine", command)
-
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestRebindMetaCluster)

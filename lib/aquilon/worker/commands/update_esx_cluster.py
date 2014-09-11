@@ -15,7 +15,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.commands.update_cluster import CommandUpdateCluster
 
@@ -23,3 +22,10 @@ from aquilon.worker.commands.update_cluster import CommandUpdateCluster
 class CommandUpdateESXCluster(CommandUpdateCluster):
 
     required_parameters = ["cluster"]
+
+    def render(self, **arguments):
+        self.deprecated_command("Command update_esx_cluster is deprecated.  "
+                                "Please use update_cluster instead.",
+                                **arguments)
+
+        return CommandUpdateCluster.render(self, metacluster=None, **arguments)

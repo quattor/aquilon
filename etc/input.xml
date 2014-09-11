@@ -4096,6 +4096,7 @@
 	    <option name="memory_capacity" type="int" conflicts="clear_overrides">Override the computed memory capacity</option>
 	    <option name="clear_overrides" type="flag" conflicts="override_memory_capacity">Clear capacity overrides</option>
 	    <option name="virtual_switch" type="string" conflicts="switch">The virtual switch used by the cluster</option>
+	    <option name="metacluster" type="string">Metacluster name</option>
 	    <optgroup fields="one">
 		<option name="organization" type="string">Organization</option>
 		<option name="hub" type="string">Hub</option>
