@@ -15,13 +15,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import (Cluster, MetaCluster, Personality,
-                                ClusterLifecycle, Location)
+from aquilon.aqdb.model import Cluster, MetaCluster, Location
 from aquilon.utils import validate_nlist_key
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.dbwrappers.branch import get_branch_and_author
+from aquilon.worker.dbwrappers.cluster import parse_cluster_arguments
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.templates import Plenary
 
@@ -33,40 +31,31 @@ class CommandAddMetaCluster(BrokerCommand):
     def render(self, session, logger, metacluster, archetype, personality,
                domain, sandbox, max_members, buildstatus, comments,
                **arguments):
-
         validate_nlist_key("metacluster", metacluster)
+        if metacluster.strip().lower() == 'global':
+            raise ArgumentError("Metacluster name global is reserved.")
 
-        # this should be reverted when virtbuild supports these options
+        MetaCluster.get_unique(session, metacluster, preclude=True)
+        # Clusters and metaclusters share the same namespace, so provide a nice
+        # error message if a cluster with the same name exists
+        Cluster.get_unique(session, metacluster, preclude=True)
+
+        # This should be reverted when virtbuild supports these options
         if not archetype:
             archetype = "metacluster"
-
         if not personality:
             personality = "metacluster"
 
-        dbpersonality = Personality.get_unique(session, name=personality,
-                                               archetype=archetype, compel=True)
-        if not dbpersonality.is_cluster:
-            raise ArgumentError("%s is not a cluster personality." %
-                                personality)
-
-        section = "archetype_" + dbpersonality.archetype.name
-
-        if not buildstatus:
-            buildstatus = "build"
-        dbstatus = ClusterLifecycle.get_instance(session, buildstatus)
-
-        if not domain and not sandbox and \
-           self.config.has_option(section, "default_domain"):
-            domain = self.config.get(section, "default_domain")
-
-        dbbranch, dbauthor = get_branch_and_author(session, domain=domain,
-                                                   sandbox=sandbox,
-                                                   compel=True)
+        kw = parse_cluster_arguments(session, self.config, archetype,
+                                     personality, domain, sandbox, buildstatus,
+                                     max_members)
+        max_clusters = kw.pop('max_members')
 
         dbloc = get_location(session, **arguments)
 
-        # this should be reverted when virtbuild supports this option
+        # This should be reverted when virtbuild supports this option
         if not dbloc:
+            section = "archetype_" + kw['personality'].archetype.name
             dbloc = Location.get_unique(session,
                                         name=self.config.get(section,
                                                              "location_name"),
@@ -75,22 +64,9 @@ class CommandAddMetaCluster(BrokerCommand):
         elif not dbloc.campus:
             raise ArgumentError("{0} is not within a campus.".format(dbloc))
 
-        if max_members is None:
-            max_members = self.config.getint(section, "max_members_default")
-
-        if metacluster.strip().lower() == 'global':
-            raise ArgumentError("Metacluster name global is reserved.")
-
-        MetaCluster.get_unique(session, metacluster, preclude=True)
-        # Clusters and metaclusters share the same namespace, so provide a buce
-        # error message if a cluster with the same name exists
-        Cluster.get_unique(session, metacluster, preclude=True)
-
         dbcluster = MetaCluster(name=metacluster, location_constraint=dbloc,
-                                personality=dbpersonality,
-                                max_clusters=max_members,
-                                branch=dbbranch, sandbox_author=dbauthor,
-                                status=dbstatus, comments=comments)
+                                max_clusters=max_clusters, comments=comments,
+                                **kw)
 
         session.add(dbcluster)
         session.flush()
