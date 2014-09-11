@@ -51,6 +51,10 @@ class CommandAddCluster(BrokerCommand):
             buildstatus = "build"
         dbstatus = ClusterLifecycle.get_instance(session, buildstatus)
 
+        if not domain and not sandbox and \
+           self.config.has_option(section, "default_domain"):
+            domain = self.config.get(section, "default_domain")
+
         dbbranch, dbauthor = get_branch_and_author(session, domain=domain,
                                                    sandbox=sandbox, compel=True)
 

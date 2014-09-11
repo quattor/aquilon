@@ -82,17 +82,12 @@ class CommandAddNetworkDevice(BrokerCommand):
         if not archetype:
             hw_section = 'hardware_network_device'
             if not self.config.has_option(hw_section, 'default_archetype'):
-                raise ArgumentError("Cannot determin achetype for network devices")
+                raise ArgumentError("Cannot determine the archetype for "
+                                    "network devices.  Please specify "
+                                    "--archetype.")
             archetype = self.config.get(hw_section, 'default_archetype')
 
         dbarchetype = Archetype.get_unique(session, archetype, compel=True)
-
-        if not domain and not sandbox:
-            arch_section = 'archetype_' + dbarchetype.name
-            if self.config.has_option(arch_section, 'default_domain'):
-                domain = self.config.get(arch_section, 'default_domain')
-            else:
-                ArgumentError("Cannot determin default domain for network devices")
 
         dbhost = create_host(session, logger, self.config, dbnetdev,
                              dbarchetype, domain=domain, sandbox=sandbox,

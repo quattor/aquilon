@@ -49,7 +49,8 @@ def create_host(session, logger, config, dbhw, dbarchetype, domain=None,
     section = "archetype_" + dbarchetype.name
 
     # Pick a default domain if not specified or impled by the sandbox
-    if not domain and not sandbox:
+    if not domain and not sandbox and \
+       config.has_option(section, "default_domain"):
         domain = config.get(section, "default_domain")
 
     dbbranch, dbauthor = get_branch_and_author(session, domain=domain,

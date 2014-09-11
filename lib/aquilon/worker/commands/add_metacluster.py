@@ -55,13 +55,13 @@ class CommandAddMetaCluster(BrokerCommand):
             buildstatus = "build"
         dbstatus = ClusterLifecycle.get_instance(session, buildstatus)
 
-        # this should be reverted when virtbuild supports these options
-        if not domain and not sandbox:
+        if not domain and not sandbox and \
+           self.config.has_option(section, "default_domain"):
             domain = self.config.get(section, "default_domain")
 
         dbbranch, dbauthor = get_branch_and_author(session, domain=domain,
                                                    sandbox=sandbox,
-                                                   compel=False)
+                                                   compel=True)
 
         dbloc = get_location(session, **arguments)
 
