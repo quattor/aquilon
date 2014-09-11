@@ -50,7 +50,7 @@ def create_host(session, logger, config, dbhw, dbarchetype, domain=None,
 
     # Pick a default domain if not specified or impled by the sandbox
     if not domain and not sandbox:
-        domain = config.get(section, "host_domain")
+        domain = config.get(section, "default_domain")
 
     dbbranch, dbauthor = get_branch_and_author(session, domain=domain,
                                                sandbox=sandbox, compel=True)

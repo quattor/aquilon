@@ -57,7 +57,7 @@ class CommandAddMetaCluster(BrokerCommand):
 
         # this should be reverted when virtbuild supports these options
         if not domain and not sandbox:
-            domain = self.config.get(section, "host_domain")
+            domain = self.config.get(section, "default_domain")
 
         dbbranch, dbauthor = get_branch_and_author(session, domain=domain,
                                                    sandbox=sandbox,

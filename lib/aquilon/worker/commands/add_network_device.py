@@ -89,8 +89,8 @@ class CommandAddNetworkDevice(BrokerCommand):
 
         if not domain and not sandbox:
             arch_section = 'archetype_' + dbarchetype.name
-            if self.config.has_option(arch_section, 'host_domain'):
-                domain = self.config.get(arch_section, 'host_domain')
+            if self.config.has_option(arch_section, 'default_domain'):
+                domain = self.config.get(arch_section, 'default_domain')
             else:
                 ArgumentError("Cannot determin default domain for network devices")
 
