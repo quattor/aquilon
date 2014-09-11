@@ -47,7 +47,7 @@ class TestAddWindowsHost(TestBrokerCommand):
         self.matchoutput(out, "Model Type: blade", command)
         self.matchoutput(out, "Archetype: windows", command)
         self.matchoutput(out, "Personality: generic", command)
-        self.matchoutput(out, "Domain: ny-prod", command)
+        self.matchoutput(out, "Domain: ut-prod", command)
         self.matchoutput(out, "Build Status: build", command)
         self.matchoutput(out, "Advertise Status: False", command)
         self.matchoutput(out, "Operating System: windows", command)

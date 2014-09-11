@@ -45,7 +45,7 @@ class TestAddAuroraHost(TestBrokerCommand):
         self.matchoutput(out, "Slot: 6", command)
         self.matchoutput(out, "Archetype: aurora", command)
         self.matchoutput(out, "Personality: generic", command)
-        self.matchoutput(out, "Domain: ny-prod", command)
+        self.matchoutput(out, "Domain: ut-prod", command)
         self.matchoutput(out, "Status: ready", command)
 
         # Rack data from DSDB supported.
@@ -69,7 +69,7 @@ class TestAddAuroraHost(TestBrokerCommand):
         self.matchoutput(out, "Building: ", command)
         self.matchoutput(out, "Archetype: aurora", command)
         self.matchoutput(out, "Personality: generic", command)
-        self.matchoutput(out, "Domain: ny-prod", command)
+        self.matchoutput(out, "Domain: ut-prod", command)
         self.matchoutput(out, "Status: ready", command)
 
     def testdsdbmissing(self):

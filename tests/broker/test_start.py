@@ -96,32 +96,34 @@ class TestBrokerStart(unittest.TestCase):
         env = {}
         env["PATH"] = os.environ.get("PATH", "")
         git = config.lookup_tool("git")
-        p = Popen((git, "clone", "--bare", source, dest),
-                  env=env, stdout=PIPE, stderr=PIPE)
+
+        # This value can be used to test against a different branch/commit
+        # than the current 'prod'.
+        start = None
+        if config.has_option("unittest", "template_alternate_prod"):
+            start = config.get("unittest", "template_alternate_prod").strip()
+        if not start:
+            start = "prod"
+
+        p = Popen((git, "clone", "--bare", "--branch", start, "--single-branch",
+                   source, dest), env=env, stdout=PIPE, stderr=PIPE)
         (out, err) = p.communicate()
         # Ignore out/err unless we get a non-zero return code, then log it.
         self.assertEqual(p.returncode, 0,
                          "Non-zero return code for clone of template-king, "
                          "STDOUT:\n@@@\n'%s'\n@@@\nSTDERR:\n@@@\n'%s'\n@@@\n"
                          % (out, err))
-        # This value can be used to test against a different branch/commit
-        # than the current 'prod'.
-        new_prod = None
-        if config.has_option("unittest", "template_alternate_prod"):
-            new_prod = config.get("unittest", "template_alternate_prod")
 
-        if new_prod:
-            for domain in ['prod', 'ny-prod']:
-                p = Popen((git, "push", ".", '+%s:%s' % (new_prod, domain)),
-                          env=env, cwd=dest, stdout=PIPE, stderr=PIPE)
-                (out, err) = p.communicate()
-                # Ignore out/err unless we get a non-zero return code, then log it.
-                self.assertEqual(p.returncode, 0,
-                                 "Non-zero return code while setting alternate "
-                                 "'%s' branch locally to '%s':"
-                                 "\nSTDOUT:\n@@@\n'%s'\n@@@\n"
-                                 "\nSTDERR:\n@@@\n'%s'\n@@@\n"
-                                 % (domain, new_prod, out, err))
+        if start != "prod":
+            p = Popen((git, "branch", "-m", start, "prod"), env=env, cwd=dest,
+                      stdout=PIPE, stderr=PIPE)
+            (out, err) = p.communicate()
+            # Ignore out/err unless we get a non-zero return code, then log it.
+            self.assertEqual(p.returncode, 0,
+                             "Non-zero return code while setting up prod:"
+                             "\nSTDOUT:\n@@@\n'%s'\n@@@\n"
+                             "\nSTDERR:\n@@@\n'%s'\n@@@\n"
+                             % (out, err))
 
         if config.has_option("broker", "trash_branch"):
             trash_branch = config.get("broker", "trash_branch")
@@ -187,7 +189,6 @@ class TestBrokerStart(unittest.TestCase):
         self.assertEqual(p.returncode, 0, "Failed to clone template-king")
 
         repodir = os.path.join(tempdir, "template-king")
-        makefile = os.path.join(repodir, "Makefile")
         if os.path.exists(os.path.join(repodir, "t", "Makefile")):
             p = Popen((git, "rm", "-f", os.path.join("t", "Makefile")),
                       cwd=repodir, env=env, stdout=PIPE, stderr=PIPE)
@@ -199,7 +200,7 @@ class TestBrokerStart(unittest.TestCase):
             out, err = p.communicate()
             self.assertEqual(p.returncode, 0, "Failed to commit removal of t/Makefile")
 
-            for branch in ['prod', 'ny-prod']:
+            for branch in ['prod']:
                 p = Popen((git, "push", "origin", "prod:%s" % branch),
                           cwd=repodir, env=env, stdout=PIPE, stderr=PIPE)
                 out, err = p.communicate()

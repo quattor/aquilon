@@ -220,7 +220,7 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
         self.dsdb_expect("show_host -host_name test-aurora-default-os")
         self.noouttest(["add", "host", "--archetype", "aurora",
                         "--hostname", "test-aurora-default-os.ms.com",
-                        "--ip", ip, "--domain", "ny-prod", "--machine",
+                        "--ip", ip, "--domain", "ut-prod", "--machine",
                         "ut8s02p4"])
         self.dsdb_verify()
 
@@ -230,7 +230,7 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
         self.matchoutput(out, "Primary Name: test-aurora-default-os.ms.com", command)
         self.matchoutput(out, "Archetype: aurora", command)
         self.matchoutput(out, "Personality: generic", command)
-        self.matchoutput(out, "Domain: ny-prod", command)
+        self.matchoutput(out, "Domain: ut-prod", command)
         self.searchoutput(out,
                           r'Operating System: linux\s*'
                           r'Version: generic\s*'
@@ -243,7 +243,7 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
                              "eth0", self.net["tor_net_0"].usable[5].mac)
         self.noouttest(["add", "host", "--archetype", "windows",
                         "--hostname", "test-windows-default-os.msad.ms.com",
-                        "--ip", ip, "--domain", "ny-prod",
+                        "--ip", ip, "--domain", "ut-prod",
                         "--machine", "ut8s02p5"])
         self.dsdb_verify()
 
@@ -253,7 +253,7 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
         self.matchoutput(out, "Primary Name: test-windows-default-os.msad.ms.com", command)
         self.matchoutput(out, "Archetype: windows", command)
         self.matchoutput(out, "Personality: generic", command)
-        self.matchoutput(out, "Domain: ny-prod", command)
+        self.matchoutput(out, "Domain: ut-prod", command)
         self.searchoutput(out,
                           r'Operating System: windows\s*'
                           r'Version: generic\s*'

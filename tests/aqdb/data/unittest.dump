@@ -72,10 +72,6 @@ User(name="otheruser", uid=1001, gid=1001, full_name="Other user", home_dir="/tm
 Domain(name="prod", owner=UserPrincipal(name="cdb"),
        compiler="/ms/dist/elfms/PROJ/panc/prod/lib/panc.jar",
        comments="Production source domain.")
-Domain(name="ny-prod", owner=UserPrincipal(name="cdb"),
-       tracked_branch=Domain(name="prod"),
-       compiler="/ms/dist/elfms/PROJ/panc/prod/lib/panc.jar",
-       comments="Production source domain.")
 Domain(name="break-consistency-domain", owner=UserPrincipal(name="cdb"),
        compiler="/ms/dist/elfms/PROJ/panc/prod/lib/panc.jar",
        comments="Cause consistency checker to fail.")
