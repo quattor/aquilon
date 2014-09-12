@@ -127,12 +127,12 @@ class TestConsistency(TestBrokerCommand):
         trash = self.config.get("broker", "trash_branch")
         self.matchclean(out, trash, command)
 
-    # def test_115_verify_delete_orphaned_branch(self):
-    #     kingdir = self.config.get("broker", "kingdir")
-    #     command = ["log", "--no-color", "-n", "1", self.config.get("broker",
-    #                                                                "trash_branch")]
-    #     out, err = self.gitcommand(command, cwd=kingdir)
-    #     self.matchoutput(out, "Delete orphaned branch branch-only", command)
+    def test_115_verify_delete_orphaned_branch(self):
+        kingdir = self.config.get("broker", "kingdir")
+        command = ["log", "--no-color", "-n", "1", self.config.get("broker",
+                                                                   "trash_branch")]
+        out, err = self.gitcommand(command, cwd=kingdir)
+        self.matchoutput(out, "Delete orphaned branch branch-only", command)
 
     def test_120_repair_domain(self):
         command = 'aqd_consistency_check.py'
