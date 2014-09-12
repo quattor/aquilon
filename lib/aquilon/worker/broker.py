@@ -294,6 +294,9 @@ class BrokerCommand(object):
                         rollback_failed = True
                         raise
                     session.close()
+                if logger:
+                    # Knowing which exception class was thrown might be useful
+                    logger.info("%s: %s", type(e).__name__, e)
                 raise
             finally:
                 # Obliterating the scoped_session - next call to session()
