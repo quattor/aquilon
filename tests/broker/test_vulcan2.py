@@ -546,7 +546,7 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
                    "--instance", "ut", "--building", "ut"]
         self.noouttest(command)
 
-        self.statustest(["del_esx_cluster", "--cluster=utpgcl2"])
+        self.statustest(["del_cluster", "--cluster=utpgcl2"])
 
     def test_430_unbindvcenterservices(self):
         command = ["del_required_service", "--service", "vcenter",
@@ -666,7 +666,7 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
         # Can't unbind an an aligned service here and don't want unalign it
 
     def test_538_del_utpgcl3(self):
-        self.statustest(["del_esx_cluster", "--cluster=utpgcl3"])
+        self.statustest(["del_cluster", "--cluster=utpgcl3"])
 
     def test_540_remove_mc_esx_service(self):
         command = ["del_required_service", "--service", "esx_management_server",
@@ -772,7 +772,7 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
                          "clusters: utpgcl0, utpgcl1.", command)
 
         for i in range(0, 2):
-            command = ["del_esx_cluster", "--cluster=utpgcl%d" % i]
+            command = ["del_cluster", "--cluster=utpgcl%d" % i]
             self.statustest(command)
 
     def test_760_delutmc8(self):

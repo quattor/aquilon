@@ -26,14 +26,25 @@ from brokertest import TestBrokerCommand
 
 
 class TestClusterConstraints(TestBrokerCommand):
-
-    def testdelclusterwithmachines(self):
-        command = "del esx cluster --cluster utecl1"
+    def test_100_del_cluster_with_machines(self):
+        command = "del cluster --cluster utecl1"
         out = self.badrequesttest(command.split(" "))
         self.matchoutput(out, "ESX Cluster utecl1 is still in use by virtual "
                          "machines", command)
 
-    def testdelclusteredhost(self):
+    def test_101_del_esx_cluster_with_machines(self):
+        command = "del esx cluster --cluster utecl1"
+        out = self.badrequesttest(command.split(" "))
+        self.matchoutput(out, "Command del_esx_cluster is deprecated.", command)
+        self.matchoutput(out, "ESX Cluster utecl1 is still in use by virtual "
+                         "machines", command)
+
+    def test_105_verify_utecl1(self):
+        command = ["show_esx_cluster", "--cluster=utecl1"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "ESX Cluster: utecl1", command)
+
+    def test_110_del_clustered_host(self):
         command = ["del_host", "--hostname", "evh51.aqd-unittest.ms.com"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
@@ -42,12 +53,7 @@ class TestClusterConstraints(TestBrokerCommand):
                          "remove it from the cluster first.",
                          command)
 
-    def testverifydelclusterwithmachines(self):
-        command = ["show_esx_cluster", "--cluster=utecl1"]
-        out = self.commandtest(command)
-        self.matchoutput(out, "ESX Cluster: utecl1", command)
-
-    def testupdatevmhostmemory(self):
+    def test_120_update_vmhost_memory(self):
         command = ["update", "machine", "--machine", "ut10s04p1",
                    "--memory", 8192]
         out = self.badrequesttest(command)
@@ -55,7 +61,7 @@ class TestClusterConstraints(TestBrokerCommand):
                          "ESX Cluster utecl2 is over capacity regarding memory",
                          command)
 
-    def testupdatevmmeory(self):
+    def test_130_update_vm_meory(self):
         command = ["update", "machine", "--machine", "evm1",
                    "--memory", 81920]
         out = self.badrequesttest(command)
@@ -63,7 +69,7 @@ class TestClusterConstraints(TestBrokerCommand):
                          "ESX Cluster utecl1 is over capacity regarding memory",
                          command)
 
-    def testunbindmachine(self):
+    def test_140_unbind_machine(self):
         command = ["uncluster", "--hostname", "evh51.aqd-unittest.ms.com",
                    "--cluster", "utecl5", "--personality", "generic"]
         out = self.badrequesttest(command)

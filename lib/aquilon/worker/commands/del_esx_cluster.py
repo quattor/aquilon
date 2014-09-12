@@ -15,24 +15,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
-from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import EsxCluster
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.commands.del_cluster import CommandDelCluster
 
 
 class CommandDelESXCluster(CommandDelCluster):
-
-    required_parameters = ["cluster"]
-
-    def render(self, session, logger, cluster, **arguments):
-        dbcluster = EsxCluster.get_unique(session, cluster, compel=True)
-        cluster = str(dbcluster.name)
-        if dbcluster.virtual_machines:
-            machines = ", ".join([m.label for m in dbcluster.virtual_machines])
-            raise ArgumentError("%s is still in use by virtual machines: %s." %
-                                (format(dbcluster), machines))
-
-        return CommandDelCluster.render(self, session=session, logger=logger,
-                                        cluster=cluster, **arguments)
+    def render(self, **arguments):
+        self.deprecated_command("Command del_esx_cluster is deprecated.  "
+                                "Please use del_cluster instead.",
+                                **arguments)
+        return CommandDelCluster.render(self, **arguments)

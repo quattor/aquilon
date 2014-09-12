@@ -419,7 +419,7 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, MachineTestMixin,
 
     def test_330_delutlccl1(self):
         for i in range(0, 2):
-            command = ["del_esx_cluster", "--cluster=%s" % self.cluster[i]]
+            command = ["del_cluster", "--cluster=%s" % self.cluster[i]]
             self.statustest(command)
 
     def test_340_delutmc9(self):
