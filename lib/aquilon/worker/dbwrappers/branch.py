@@ -16,8 +16,10 @@
 # limitations under the License.
 """Wrapper to make getting a branch simpler."""
 
-import os
+import logging
+import os.path
 import re
+from tempfile import mkdtemp
 
 from sqlalchemy.orm.session import object_session
 
@@ -213,3 +215,27 @@ def has_compileable_objects(dbbranch):
     q2 = q2.filter_by(is_compileable=True)
 
     return q1.count() or q2.count()
+
+
+def merge_into_trash(config, logger, branch, merge_msg, loglevel=logging.INFO):
+    trash_branch = config.get("broker", "trash_branch")
+    kingdir = config.get("broker", "kingdir")
+    rundir = config.get("broker", "rundir")
+
+    tempdir = mkdtemp(prefix="trash_", suffix="_%s" % branch, dir=rundir)
+
+    try:
+        run_git(["clone", "--shared", "--branch", trash_branch, "--",
+                 kingdir, trash_branch], path=tempdir, logger=logger,
+                 loglevel=loglevel)
+
+        temprepo = os.path.join(tempdir, trash_branch)
+        run_git(["merge", "-s", "ours", "origin/" + branch,
+                 "-m", merge_msg], path=temprepo, logger=logger,
+                 loglevel=loglevel)
+        run_git(["push", "origin", trash_branch], path=temprepo, logger=logger,
+                loglevel=loglevel)
+    except ProcessException as e:
+        raise ArgumentError("\n%s%s" % (e.out, e.err))
+    finally:
+        remove_dir(tempdir, logger=logger)
