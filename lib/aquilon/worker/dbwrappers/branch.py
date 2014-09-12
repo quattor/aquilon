@@ -222,6 +222,14 @@ def merge_into_trash(config, logger, branch, merge_msg, loglevel=logging.INFO):
     kingdir = config.get("broker", "kingdir")
     rundir = config.get("broker", "rundir")
 
+    try:
+        run_git(["show-ref", "--verify", "--quiet", "refs/heads/" + branch],
+                path=kingdir, logger=logger, loglevel=loglevel)
+    except ProcessException as e:
+        logger.client_info("Branch %s does not exist in template-king." %
+                           branch)
+        return
+
     tempdir = mkdtemp(prefix="trash_", suffix="_%s" % branch, dir=rundir)
 
     try:

@@ -161,10 +161,10 @@ class TestConsistency(TestBrokerCommand):
         self.statustest(["del_domain", "--domain", "domain-no-filesystem",
                          "--justification", "tcm=123456"])
 
-        # self.noouttest(["update_domain", "--domain", "domain-no-template-king",
-        #                 "--archived"])
-        # self.statustest(["del_domain", "--domain", "domain-no-template-king",
-        #                  "--justification", "tcm=123456"])
+        self.noouttest(["update_domain", "--domain", "domain-no-template-king",
+                        "--archived"])
+        self.statustest(["del_domain", "--domain", "domain-no-template-king",
+                         "--justification", "tcm=123456"])
 
         self.statustest(["del_sandbox", "--sandbox", "sandbox-no-template-king"])
 
