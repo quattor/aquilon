@@ -19,6 +19,7 @@ import re
 
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.aqdb.model import Feature
+from aquilon.worker.dbwrappers.grn import lookup_grn
 from aquilon.exceptions_ import ArgumentError, UnimplementedError
 
 # Do not allow path components to start with '.' to avoid games like "../foo" or
@@ -31,7 +32,7 @@ class CommandAddFeature(BrokerCommand):
     required_parameters = ['feature', 'type']
 
     def render(self, session, feature, type, post_personality, comments,
-               **arguments):
+               grn, eon_id, visibility, logger, **arguments):
         cls = Feature.polymorphic_subclass(type, "Unknown feature type")
 
         if _name_re.search(feature):
@@ -42,9 +43,17 @@ class CommandAddFeature(BrokerCommand):
             raise UnimplementedError("The post_personality attribute is "
                                      "implemented only for host features.")
 
+        if not (grn or eon_id):
+            raise ArgumentError("GRN or EON ID is required for adding a "
+                                "feature.")
+
         cls.get_unique(session, name=feature, preclude=True)
 
+        dbgrn = lookup_grn(session, grn, eon_id, logger=logger,
+                           config=self.config)
+
         dbfeature = cls(name=feature, post_personality=post_personality,
+                        owner_grn=dbgrn, visibility=visibility,
                         comments=comments)
         session.add(dbfeature)
 

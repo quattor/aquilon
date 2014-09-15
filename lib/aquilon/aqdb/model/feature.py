@@ -24,13 +24,14 @@ from sqlalchemy.orm import relation, backref, deferred, validates
 from sqlalchemy.orm.exc import NoResultFound
 
 from aquilon.exceptions_ import ArgumentError, NotFoundException, InternalError
-from aquilon.aqdb.model import Base, Archetype, Personality, Model
-from aquilon.aqdb.column_types import AqStr
+from aquilon.aqdb.model import Base, Archetype, Personality, Model, Grn
+from aquilon.aqdb.column_types import AqStr, Enum
 from aquilon.aqdb.model.base import _raise_custom
 
 _TN = 'feature'
 _LINK = 'feature_link'
 
+_VISIBILITY = ('public', 'restricted', 'owner-approved', 'owner-only')
 
 class Feature(Base):
     __tablename__ = _TN
@@ -42,13 +43,19 @@ class Feature(Base):
     feature_type = Column(AqStr(16), nullable=False)
     post_personality = Column(Boolean(name="%s_post_personality_ck" % _TN),
                               nullable=False, default=False)
-
+    owner_eon_id = Column(ForeignKey(Grn.eon_id, name='%s_owner_grn_fk' % _TN),
+                          nullable=False)
+    visibility = Column(Enum(16, _VISIBILITY), nullable=False,
+                        default = 'public')
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
     comments = deferred(Column(String(255), nullable=True))
 
+    owner_grn = relation(Grn, innerjoin=True)
+
     __table_args__ = (UniqueConstraint(name, feature_type),
                       {'info': {'unique_fields': ['name', 'feature_type']}},)
+
     __mapper_args__ = {'polymorphic_on': feature_type}
 
     @validates('links')
@@ -60,6 +67,16 @@ class Feature(Base):
     def validate_link(self, key, link):  # pragma: no cover
         return link
 
+    @validates('visibility')
+    def validate_visibility(self, key, visibility):
+        """ Utility function for validating the value type """
+        if not visibility:
+            return
+        if visibility in _VISIBILITY:
+            return visibility
+        valid_visibility = ", ".join(sorted(_VISIBILITY))
+        raise ArgumentError("Unknown value for visibility '%s'.  The valid values are: "
+                            "%s." % (visibility, valid_visibility))
 
 class HostFeature(Feature):
     _class_label = "Host Feature"

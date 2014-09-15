@@ -29,6 +29,11 @@ class FeatureFormatter(ObjectFormatter):
         if feature.post_personality_allowed:
             details.append(indent + "  Post Personality: %s" %
                            feature.post_personality)
+        details.append(indent + "  Owned by {0:c}: {0.grn}"
+                       .format(feature.owner_grn))
+        details.append(indent + "  Visibility: {0.visibility}"
+                       .format(feature))
+
         details.append(indent + "  Template: %s" % feature.cfg_path)
 
         for link in feature.links:

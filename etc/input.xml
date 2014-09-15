@@ -5205,14 +5205,37 @@
 	<optgroup mandatory="True" fields="all">
 	    <option name="feature" type="string">The name of the feature</option>
 	    <option name="type" type="string">Type of the feature: host, hardware or interface</option>
+	    <optgroup fields="one">
+		<option name="grn" type="string" conflicts="eon_id">GRN as string</option>
+		<option name="eon_id" type="int" conflicts="grn">Numeric EON ID</option>
+	    </optgroup>
 	</optgroup>
 	<optgroup>
 	    <option name="post_personality" type="flag">Call the feature after the personality</option>
 	    <option name="comments" type="string">Comments</option>
+	    <option name="visibility" type="string">scope of the feature values are public(default), restricted, owner-only, owner-approved</option>
 	</optgroup>
 
 	<transport method="put" path="feature/%(type)s/%(feature)s"/>
     </command>
+
+    <command name="update_feature">
+        Update feature attributes.
+	<optgroup mandatory="True" fields="all">
+	    <option name="feature" type="string">The name of the feature</option>
+	    <option name="type" type="string">Type of the feature: host, hardware or interface</option>
+	</optgroup>
+	<optgroup>
+	    <option name="comments" type="string">Comments</option>
+	    <option name="visibility" type="string">scope of the feature values are public, restricted, owner-only, owner-approved</option>
+	    <optgroup fields="one">
+		<option name="grn" type="string" conflicts="eon_id">GRN as string</option>
+		<option name="eon_id" type="int" conflicts="grn">Numeric EON ID</option>
+	    </optgroup>
+	</optgroup>
+	<transport method="post" path="feature/%(type)s/%(feature)s"/>
+    </command>
+
 
     <command name="del_feature">
 	Delete a feature.

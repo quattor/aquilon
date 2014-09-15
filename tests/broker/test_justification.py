@@ -33,6 +33,7 @@ PPROD = "justify-prod"
 QPROD = "justify-qa"
 AUTHERR = "Personality aquilon/%s is marked production and is under change management control. Please specify --justification or --justification='emergency' and reason."
 AUTHERR2 = "Justification of 'emergency' requires --reason to be specified."
+AUTHERR3 = "Changing feature bindings for a non public feature where owner grns do not match requires --justification."
 
 class TestJustification(PersonalityTestMixin,
                          TestBrokerCommand):
@@ -47,7 +48,8 @@ class TestJustification(PersonalityTestMixin,
             self.create_personality("aquilon", personality, **kwargs)
 
         command = ["add", "feature", "--feature", "testfeature",
-                   "--type", "host", "--comment", "Test comment"]
+                   "--type", "host", "--comment", "Test comment",
+                   "--grn", GRN]
         self.noouttest(command)
 
     def test_110_host_setup(self):
@@ -581,7 +583,51 @@ class TestJustification(PersonalityTestMixin,
                    "--reason", "reason flag check"]
         out = self.successtest (command)
 
-    def test_800_cleanup(self):
+    def test_800_bind_feature_restricted(self):
+        command = ["add", "feature", "--feature", "nonpublicfeature",
+                   "--type", "host", "--comment", "Test comment",
+                   "--grn", "grn:/ms/ei/aquilon/unittest",
+                   "--visibility", "restricted" ]
+        self.noouttest(command)
+
+    def test_810_bind_feature_restricted_qa(self):
+        command = ["bind", "feature", "--feature", "nonpublicfeature",
+                   "--archetype", "aquilon", "--personality", QPROD]
+        out = self.unauthorizedtest(command, auth=True, msgcheck=False)
+        self.matchoutput(out,  AUTHERR3, command )
+
+        command = ["bind", "feature", "--feature", "nonpublicfeature",
+                   "--archetype", "aquilon", "--personality", QPROD,
+                   "--justification", "tcm=12345678"]
+        out = self.successtest (command)
+
+        command = ["unbind", "feature", "--feature", "nonpublicfeature",
+                   "--archetype", "aquilon", "--personality", QPROD,
+                   "--justification", "tcm=12345678"]
+        out = self.successtest (command)
+
+    def test_820_bind_feature_restricted_prod(self):
+        command = ["bind", "feature", "--feature", "nonpublicfeature",
+                   "--archetype", "aquilon", "--personality", PPROD]
+        out = self.unauthorizedtest(command, auth=True, msgcheck=False)
+        self.matchoutput(out,  AUTHERR3, command )
+
+        command = ["bind", "feature", "--feature", "nonpublicfeature",
+                   "--archetype", "aquilon", "--personality", PPROD,
+                   "--justification", "tcm=12345678"]
+        out = self.successtest (command)
+
+        command = ["unbind", "feature", "--feature", "nonpublicfeature",
+                   "--archetype", "aquilon", "--personality", PPROD,
+                   "--justification", "tcm=12345678"]
+        out = self.successtest (command)
+
+    def test_850_bind_feature_restricted(self):
+        command = ["del", "feature", "--feature", "nonpublicfeature",
+                   "--type", "host"]
+        self.noouttest(command)
+
+    def test_900_cleanup(self):
         h = "aquilon91.aqd-unittest.ms.com"
         p = "unixeng-test"
 

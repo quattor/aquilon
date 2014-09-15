@@ -93,8 +93,16 @@ class CommandBindFeature(BrokerCommand):
 
         cnt = q.count()
         if personality:
-            validate_personality_justification(dbpersonality, user,
-                                               justification, reason)
+            if dbpersonality.owner_grn != dbfeature.owner_grn and \
+               dbfeature.visibility != 'public':
+                if not justification:
+                   raise AuthorizationException("Changing feature bindings for "
+                                                "a non public feature where owner grns "
+                                                "do not match requires --justification.")
+                validate_justification(user, justification, reason)
+            else:
+                validate_personality_justification(dbpersonality, user,
+                                                   justification, reason)
         elif cnt > 0:
             if not justification:
                 raise AuthorizationException("Changing feature bindings for "
