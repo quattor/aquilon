@@ -24,9 +24,9 @@ from aquilon.aqdb.model import (Feature, Archetype, Personality,
                                 PersonalityStage, Model, Domain,
                                 CompileableMixin)
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.commands.deploy import validate_justification
+from aquilon.worker.dbwrappers.change_management import (validate_justification,
+                                                         validate_personality_justification)
 from aquilon.worker.dbwrappers.feature import add_link, check_feature_template
-from aquilon.worker.dbwrappers.personality import validate_personality_justification
 from aquilon.worker.templates import Plenary, PlenaryCollection
 
 

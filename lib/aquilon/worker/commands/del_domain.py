@@ -18,9 +18,9 @@
 
 from aquilon.exceptions_ import ArgumentError, AuthorizationException
 from aquilon.aqdb.model import Domain
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.branch import remove_branch, merge_into_trash
-from aquilon.worker.commands.deploy import validate_justification
+from aquilon.worker.dbwrappers.change_management import validate_justification
 
 
 class CommandDelDomain(BrokerCommand):

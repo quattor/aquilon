@@ -23,32 +23,11 @@ from tempfile import mkdtemp
 from aquilon.exceptions_ import (ProcessException, ArgumentError,
                                  AuthorizationException)
 from aquilon.aqdb.model import Domain, Branch, Sandbox
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.dbwrappers.change_management import validate_justification
 from aquilon.worker.processes import run_git, sync_domain
 from aquilon.worker.logger import CLIENT_INFO
 from aquilon.utils import remove_dir
-
-TCM_RE = re.compile(r"^tcm=([0-9]+)$", re.IGNORECASE)
-SN_RE = re.compile(r"^sn=([a-z]+[0-9]+)$", re.IGNORECASE)
-EMERG_RE = re.compile("emergency")
-
-
-# TODO: move this to an external class
-def validate_justification(principal, justification, reason):
-    result = None
-    for valid_re in [TCM_RE, SN_RE, EMERG_RE]:
-        result = valid_re.search(justification)
-        if result:
-            break
-    if not result:
-        raise ArgumentError("Failed to parse the justification: expected "
-                            "tcm=NNNNNNNNN or sn=XXXNNNNN.")
-    if justification == 'emergency' and not reason:
-        raise AuthorizationException(
-            "Justification of 'emergency' requires --reason to be specified.")
-
-    # TODO: EDM validation
-    # edm_validate(result.group(0))
 
 
 class CommandDeploy(BrokerCommand):

@@ -16,11 +16,10 @@
 # limitations under the License.
 """Contains the logic for `aq add required service`."""
 
-
 from aquilon.exceptions_ import ArgumentError, AuthorizationException
 from aquilon.aqdb.model import Archetype, Service
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.commands.deploy import validate_justification
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.dbwrappers.change_management import validate_justification
 
 
 class CommandAddRequiredService(BrokerCommand):

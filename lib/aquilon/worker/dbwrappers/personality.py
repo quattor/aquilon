@@ -18,9 +18,8 @@
 
 from sqlalchemy.orm.session import object_session
 
-from aquilon.exceptions_ import AuthorizationException
 from aquilon.aqdb.model import Host, Cluster
-from aquilon.worker.commands.deploy import validate_justification
+from aquilon.aqdb.model.host_environment import Production
 
 
 def is_prod_personality_used(dbstage):
@@ -31,19 +30,7 @@ def is_prod_personality_used(dbstage):
         q = session.query(Host.hardware_entity_id)
     q = q.filter_by(personality_stage=dbstage)
 
-    if dbstage.host_environment.name == 'prod' and q.count():
+    if isinstance(dbstage.host_environment, Production) and q.count():
         return True
 
     return False
-
-
-def validate_personality_justification(dbstage, user, justification, reason):
-    if is_prod_personality_used(dbstage):
-        if not justification:
-            raise AuthorizationException(
-                "{0} is marked production and is under "
-                "change management control. Please specify "
-                "--justification or --justification='emergency' and reason."
-                .format(dbstage))
-
-        validate_justification(user, justification, reason)
