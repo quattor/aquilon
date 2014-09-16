@@ -32,7 +32,8 @@
 		<arg choice="plain"><option>--cluster <replaceable>CLUSTER</replaceable></option></arg>
             </group>
 	    <arg choice="plain"><option>--expiry <replaceable>WHEN</replaceable></option></arg>
-	    <arg choice="plain"><option>--justification <replaceable>REASON</replaceable></option></arg>
+	    <arg choice="plain"><option>--justification <replaceable>TOKENS</replaceable></option></arg>
+	    <arg><option>--reason <replaceable>REASON</replaceable></option></arg>
 	    <arg><option>--start_time <replaceable>WHEN</replaceable></option></arg>
 	    <arg><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
 	    <xi:include href="../common/global_options.xml"/>
@@ -105,16 +106,6 @@
 	    </varlistentry>
 	    <varlistentry>
 	        <term>
-		    <option>--justification <replaceable>WHY</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			Extra authorization tokens (e.g. change management reference ID) to with which the system can validate or correlate the request.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-	        <term>
 		    <option>--start_time <replaceable>WHEN</replaceable></option>
 		</term>
 		<listitem>
@@ -135,6 +126,7 @@
 		</listitem>
 	    </varlistentry>
 	</variablelist>
+	<xi:include href="../common/change_management_desc.xml"/>
 	<xi:include href="../common/global_options_desc.xml"/>
     </refsect1>
 

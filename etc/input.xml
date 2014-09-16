@@ -5008,6 +5008,7 @@
 	    <option name="justification" type="string">the reason for the intervention</option>
 	</optgroup>
 	<optgroup>
+	    <option name="reason" type="string">String to be specified if justification='emergency'</option>
 	    <option name="comments" type="string">Comments</option>
 	    <option name="start_time" type="string">when to start this intervention (default=now)</option>
 	</optgroup>
@@ -5270,6 +5271,7 @@
 	    <option name="justification" type="string">the reason for the intervention</option>
 	</optgroup>
 	<optgroup>
+	    <option name="reason" type="string">String to be specified if justification='emergency'</option>
 	    <option name="comments" type="string">Comments</option>
 	    <option name="allowusers" type="string">Additional users allowed access</option>
 	    <option name="allowgroups" type="string">Additional groups allowed access</option>
