@@ -29,9 +29,10 @@ from sqlalchemy.orm import object_session
 
 from aquilon.aqdb.types import NicType
 from aquilon.exceptions_ import ArgumentError, InternalError
-from aquilon.aqdb.model import (Interface, ObservedMac, Fqdn, ARecord, VlanInfo,
-                                AddressAssignment, Model, Bunker,
-                                Location, HardwareEntity, Network, Host)
+from aquilon.aqdb.model import (Interface, ManagementInterface, ObservedMac,
+                                Fqdn, ARecord, VlanInfo, AddressAssignment,
+                                Model, Bunker, Location, HardwareEntity,
+                                Network, Host)
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.aqdb.model.vlan import VLAN_TYPES
 from aquilon.utils import first_of
@@ -580,7 +581,10 @@ def assign_address(dbinterface, ip, dbnetwork, label=None, resource=None,
         raise ArgumentError("Slave interfaces cannot hold addresses.")
 
     dbrack = dbinterface.hardware_entity.location.rack
-    if dbrack:
+
+    # Do not enforce bucket alignment for OOB management interfaces. We may want
+    # to make that configurable in the future.
+    if dbrack and not isinstance(dbinterface, ManagementInterface):
         enforce_bucket_alignment(dbrack, dbnetwork, logger)
 
     for addr in dbinterface.assignments:

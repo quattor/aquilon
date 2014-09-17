@@ -5515,6 +5515,9 @@
 
     <command name="show_bunker_violations">
 	Show bunker violations.
+	<optgroup>
+	    <option name="management_interfaces" type="boolean">Include management interfaces too</option>
+	</optgroup>
 	<transport method="get" path="bunker_violations"/>
     </command>
 
