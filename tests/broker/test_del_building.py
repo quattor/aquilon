@@ -41,7 +41,7 @@ class TestDelBuilding(TestBrokerCommand):
         self.dsdb_verify()
 
     def test_100_del_tu(self):
-        self.dsdb_expect_del_campus_building("ta", "tu")
+        self.dsdb_expect_del_campus_building("ln", "tu")
         self.dsdb_expect("delete_building_aq -building tu")
         command = "del building --building tu"
         self.noouttest(command.split(" "))

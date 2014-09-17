@@ -17,7 +17,8 @@
 """Contains the logic for `aq update building`."""
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import Machine, ServiceMap, PersonalityServiceMap
+from aquilon.aqdb.model import (HardwareEntity, Machine, NetworkDevice,
+                                ServiceMap, PersonalityServiceMap)
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.location import get_location, update_location
 from aquilon.worker.processes import DSDBRunner
@@ -49,14 +50,20 @@ class CommandUpdateBuilding(BrokerCommand):
         if city:
             dbcity = get_location(session, city=city)
 
+            q = session.query(HardwareEntity)
+            # HW types which have plenary templates
+            q = q.filter(HardwareEntity.hardware_type.in_(['machine',
+                                                           'network_device']))
+            q = q.filter(HardwareEntity.location_id.in_(dbbuilding.offspring_ids()))
+
             # This one would change the template's locations hence forbidden
-            if dbcity.hub != dbbuilding.hub:
+            if dbcity.hub != dbbuilding.hub and q.count():
                 # Doing this both to reduce user error and to limit
                 # testing required.
-                raise ArgumentError("Cannot change hubs. {0} is in {1} "
-                                    "while {2} is in {3}.".format(
-                                        dbcity, dbcity.hub,
-                                        dbbuilding, dbbuilding.hub))
+                raise ArgumentError("Cannot change hubs. {0} is in {1:l}, "
+                                    "while {2:l} is in {3:l}."
+                                    .format(dbcity, dbcity.hub, dbbuilding,
+                                            dbbuilding.hub))
 
             # issue svcmap warnings
             maps = 0
@@ -68,8 +75,8 @@ class CommandUpdateBuilding(BrokerCommand):
                 logger.client_info("There are {0} service(s) mapped to the "
                                    "old location of the ({1:l}), please "
                                    "review and manually update mappings for "
-                                   "the new location as needed.".format(
-                                       maps, dbbuilding.city))
+                                   "the new location as needed."
+                                   .format(maps, dbbuilding.city))
 
             dbbuilding.update_parent(parent=dbcity)
 
@@ -79,11 +86,8 @@ class CommandUpdateBuilding(BrokerCommand):
             if dbcity.campus and (old_city.campus != dbcity.campus):
                 dsdb_runner.add_campus_building(dbcity.campus, building)
 
-            query = session.query(Machine)
-            query = query.filter(Machine.location_id.in_(dbcity.offspring_ids()))
-
-            for dbmachine in query:
-                plenaries.append(Plenary.get_plenary(dbmachine))
+            for dbobj in q:
+                plenaries.append(Plenary.get_plenary(dbobj))
 
         session.flush()
 
