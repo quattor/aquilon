@@ -21,7 +21,7 @@
 
 from datetime import datetime
 
-from sqlalchemy import (Column, Integer, DateTime, Boolean, ForeignKey,
+from sqlalchemy import (Column, Integer, DateTime, ForeignKey,
                         PrimaryKeyConstraint)
 from sqlalchemy.orm import (relation, backref, deferred, validates,
                             object_session)
@@ -48,9 +48,6 @@ class MetaCluster(Cluster):
     id = Column(ForeignKey(Cluster.id, ondelete='CASCADE'), primary_key=True)
 
     max_clusters = Column(Integer, nullable=True)
-
-    high_availability = Column(Boolean(name="%s_ha_ck" % _MCT), default=False,
-                               nullable=False)
 
     __table_args__ = ({'info': {'unique_fields': ['name']}},)
     __mapper_args__ = {'polymorphic_identity': 'meta'}
@@ -88,13 +85,8 @@ class MetaCluster(Cluster):
         # building-provided values
         resmap = convert_resources(building_capacity.values())
 
-        # high_availability is down_buildings_threshold == 1. So if high
-        # availability is enabled, drop the largest value from every resource
-        # list
         for name in resmap:
             reslist = sorted(resmap[name])
-            if self.high_availability:
-                reslist = reslist[:-1]
             resmap[name] = sum(reslist)
 
         return resmap
@@ -129,20 +121,6 @@ class MetaCluster(Cluster):
         if self.metacluster:
             raise ArgumentError("Metaclusters can't contain other "
                                 "metaclusters.")
-
-        # Small optimization: avoid enumerating all the clusters/VMs if high
-        # availability is not enabled
-        if self.high_availability:
-            capacity = self.get_total_capacity()
-            usage = self.get_total_usage()
-            for name, value in usage.items():
-                # Skip resources that are not restricted
-                if name not in capacity:
-                    continue
-                if value > capacity[name]:
-                    raise ArgumentError("{0} is over capacity regarding {1}: "
-                                        "wanted {2}, but the limit is {3}."
-                                        .format(self, name, value, capacity[name]))
         return
 
     @validates('members')
@@ -161,8 +139,8 @@ class MetaCluster(Cluster):
                                 "Allowed personalities are: {1!s}"
                                 .format(cluster.personality, ", ".join(allowed)))
 
-        if (cluster.branch != self.branch or
-            cluster.sandbox_author != self.sandbox_author):
+        if cluster.branch != self.branch or \
+           cluster.sandbox_author != self.sandbox_author:
             raise ArgumentError("{0} {1} {2} does not match {3:l} {4} "
                                 "{5}.".format(cluster,
                                               cluster.branch.branch_type,

@@ -109,24 +109,17 @@ class TestAddShare(TestBrokerCommand):
             self.noouttest(["add_share", "--cluster=utecl%d" % i,
                             "--share=utecl%d_share" % i])
 
-    def test_140_add_ha_shares(self):
-        for i in range(11, 13):
-            self.noouttest(["add_share", "--cluster=utecl%d" % i,
-                            "--share=utecl%d_share" % i])
-            self.noouttest(["add_share", "--cluster=npecl%d" % i,
-                            "--share=npecl%d_share" % i])
-
-    def test_150_update_no_latency(self):
+    def test_140_update_no_latency(self):
         command = ["update_share", "--share=test_share_1", "--latency_threshold=0",
                    "--comments=updated comment"]
         out = self.commandtest(command)
 
-    def test_151_verify_no_latency(self):
+    def test_141_verify_no_latency(self):
         command = ["show_share", "--share=test_share_1"]
         out = self.commandtest(command)
         self.matchclean(out, "Latency", command)
 
-    def test_152_verify_no_latency_per_cluster(self):
+    def test_142_verify_no_latency_per_cluster(self):
         for cluster in ("utecl1", "utecl2", "utecl3", "utecl13"):
             command = ["show_share", "--share=test_share_1", "--cluster=%s" % cluster]
             out = self.commandtest(command)
@@ -138,21 +131,21 @@ class TestAddShare(TestBrokerCommand):
             self.matchoutput(out, '"name" = "test_share_1";', command)
             self.matchclean(out, 'latency_threshold', command)
 
-    def test_153_set_latency(self):
+    def test_143_set_latency(self):
         command = ["update_share", "--share=test_share_1", "--latency_threshold=20",
                    "--comments=updated comment"]
         out = self.commandtest(command)
 
-    def test_154_verify_test_share_1(self):
+    def test_144_verify_test_share_1(self):
         command = ["show_share", "--share=test_share_1"]
         out = self.commandtest(command)
         self.matchoutput(out, "Latency threshold: 20", command)
 
-    def test_155_update_latency(self):
+    def test_145_update_latency(self):
         self.noouttest(["update_share", "--share=test_share_1", "--latency_threshold=30",
                         "--comments=updated comment"])
 
-    def test_156_verify_updated_latency(self):
+    def test_146_verify_updated_latency(self):
         for cluster in ("utecl1", "utecl2", "utecl3", "utecl13"):
             command = ["show_share", "--share=test_share_1", "--cluster=%s" % cluster]
             out = self.commandtest(command)

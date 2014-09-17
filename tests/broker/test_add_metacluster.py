@@ -92,20 +92,6 @@ class TestAddMetaCluster(PersonalityTestMixin, TestBrokerCommand):
                    "--domain=unittest"]
         self.noouttest(command)
 
-    def testaddutmc5(self):
-        # High availability testing
-        command = ["add_metacluster", "--metacluster=utmc5",
-                   "--max_members=6", "--building=ut",
-                   "--domain=unittest"]
-        self.noouttest(command)
-
-    def testaddutmc6(self):
-        # High availability testing
-        command = ["add_metacluster", "--metacluster=utmc6",
-                   "--max_members=6", "--building=ut",
-                   "--domain=unittest"]
-        self.noouttest(command)
-
     def testaddutmc7(self):
         # Test moving machines between metaclusters
         command = ["add_metacluster", "--metacluster=utmc7", "--building=ut",

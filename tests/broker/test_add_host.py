@@ -521,35 +521,6 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
             else:
                 self.fail("Unrecognized interface '%s'" % i.device)
 
-    def test_330_populate_esx_bcp_cluster_hosts(self):
-        utnet = self.net["esx_bcp_ut"]
-        npnet = self.net["esx_bcp_np"]
-        for i in range(25, 49):
-            port = i - 24
-
-            hostname = "evh%d.aqd-unittest.ms.com" % (i + 50)
-            machine = "ut13s03p%d" % port
-            self.dsdb_expect_add(hostname, utnet.usable[port], "eth0",
-                                 utnet.usable[port].mac)
-            command = ["add", "host", "--hostname", hostname, "--autoip",
-                       "--machine", machine,
-                       "--domain", "unittest",
-                       "--osname", "esxi", "--osversion", "4.0.0",
-                       "--archetype", "vmhost", "--personality", "vulcan-1g-desktop-prod"]
-            self.noouttest(command)
-
-            hostname = "evh%d.one-nyp.ms.com" % (i + 50)
-            machine = "np13s03p%d" % port
-            self.dsdb_expect_add(hostname, npnet.usable[port], "eth0",
-                                 npnet.usable[port].mac)
-            command = ["add", "host", "--hostname", hostname, "--autoip",
-                       "--machine", machine,
-                       "--domain", "unittest", "--buildstatus", "build",
-                       "--osname", "esxi", "--osversion", "4.0.0",
-                       "--archetype", "vmhost", "--personality", "vulcan-1g-desktop-prod"]
-            self.noouttest(command)
-        self.dsdb_verify()
-
     def test_400_add_utnotify(self):
         hostname = self.config.get("unittest", "hostname")
         # We _could_ also look up the real address of the host...

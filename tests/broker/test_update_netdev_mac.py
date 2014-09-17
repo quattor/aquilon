@@ -127,10 +127,6 @@ class TestUpdateNetworkDeviceMac(TestBrokerCommand):
 
     # def testverifypollut01ga2s02(self):
 
-    # def testpollut01ga2s05(self):
-
-    # def testpollnp01ga2s05(self):
-
     # def testpollbor(self):
 
     # These should be removed when aq poll_network_device is removed, we won't look for

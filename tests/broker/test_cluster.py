@@ -232,24 +232,6 @@ class TestCluster(TestBrokerCommand):
                    "--cluster=utstorage1"]
         self.successtest(command)
 
-    def testbindhaclusters(self):
-        for i in range(25, 49):
-            host = "evh%s.aqd-unittest.ms.com" % (i + 50)
-            cluster = "utecl%d" % (11 + ((i - 25) / 12))
-            self.successtest(["cluster",
-                              "--hostname", host, "--cluster", cluster])
-            host = "evh%s.one-nyp.ms.com" % (i + 50)
-            cluster = "npecl%d" % (11 + ((i - 25) / 12))
-            self.successtest(["cluster",
-                              "--hostname", host, "--cluster", cluster])
-
-            command = ["show_cluster", "--cluster", cluster, "--format=proto"]
-            out = self.commandtest(command)
-            clus_list = self.parse_clusters_msg(out, 1)
-            clustobj = clus_list.clusters[0]
-            hostfromproto = filter(lambda x: x.fqdn == host, clustobj.hosts)
-            self.assertEqual(len(hostfromproto), 1)
-
     def testclusterutmc7(self):
         host = "evh10.aqd-unittest.ms.com"
         cluster = "utecl13"

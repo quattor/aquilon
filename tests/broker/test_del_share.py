@@ -32,13 +32,6 @@ class TestDelShare(TestBrokerCommand):
             self.noouttest(["del_share", "--cluster=utecl%d" % i,
                             "--share=utecl%d_share" % i])
 
-    def testdelhashares(self):
-        for i in range(11, 13):
-            self.noouttest(["del_share", "--cluster=utecl%d" % i,
-                            "--share=utecl%d_share" % i])
-            self.noouttest(["del_share", "--cluster=npecl%d" % i,
-                            "--share=npecl%d_share" % i])
-
     def testdelnasshares(self):
         for i in range(1, 9):
             self.noouttest(["del_share", "--cluster=utecl1",

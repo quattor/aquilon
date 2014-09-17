@@ -194,7 +194,7 @@ class TestSearchCluster(TestBrokerCommand):
         command = "search cluster --member_archetype vmhost"
         out = self.commandtest(command.split(" "))
 
-        self.matchoutput(out, "utecl11", command)
+        self.matchoutput(out, "utecl1", command)
         self.matchclean(out, "utgrid1", command)
         self.matchclean(out, "utstorage1", command)
 
@@ -217,7 +217,7 @@ class TestSearchCluster(TestBrokerCommand):
         command = "search cluster --member_personality vulcan-1g-desktop-prod"
         out = self.commandtest(command.split(" "))
 
-        self.matchoutput(out, "utecl11", command)
+        self.matchoutput(out, "utecl1", command)
         self.matchclean(out, "utgrid1", command)
         self.matchclean(out, "utstorage1", command)
 

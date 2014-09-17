@@ -40,7 +40,7 @@ default_services = {
     "chooser3": ["ut.a", "ut.b"],
 
     "dns": ["unittest", "one-nyp"],
-    "esx_management_server": ["ut.a", "ut.b", "np"],
+    "esx_management_server": ["ut.a", "ut.b"],
     "lemon": ["ny-prod"],
     "ntp": ["pa.ny.na"],
     "support-group": ["ec-service"],
@@ -51,8 +51,8 @@ default_services = {
 
     "utnotify": ["localhost"],
     "utsvc": ["utsi1", "utsi2"],
-    "vcenter": ["ut", "np"],
-    "vmseasoning": ["salt", "pepper", "sugar"],
+    "vcenter": ["ut"],
+    "vmseasoning": ["salt", "pepper"],
 }
 
 

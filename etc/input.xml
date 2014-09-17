@@ -3862,7 +3862,6 @@
 	    <option name="personality" type="string">Personality Name</option>
 	    <option name="max_members" type="int">Maximum number of clusters that can be members of this metacluster</option>
 	    <option name="comments" type="string">Comments</option>
-	    <option name="high_availability" type="boolean">Turn on high availaibility mode</option>
 	    <option name="fix_location" type="flag">Sets the location of the metacluster based on the location of its member clusters.</option>
 	    <option name="virtual_switch" type="string">The virtual switch used by the metacluster</option>
 	    <optgroup fields="one">

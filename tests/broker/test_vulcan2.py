@@ -46,9 +46,6 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
                 "ut": {
                     "building": ["ut"],
                 },
-                "np": {
-                    "building": ["np"],
-                },
             },
         }
         esx_cluster_maps = {
@@ -562,11 +559,6 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
     def test_440_unmapvcenterservices(self):
         command = ["unmap", "service", "--service", "vcenter",
                    "--instance", "ut", "--building", "ut",
-                   "--personality", "vulcan2-server-dev", "--archetype", "vmhost"]
-        self.noouttest(command)
-
-        command = ["unmap", "service", "--service", "vcenter",
-                   "--instance", "np", "--building", "np",
                    "--personality", "vulcan2-server-dev", "--archetype", "vmhost"]
         self.noouttest(command)
 

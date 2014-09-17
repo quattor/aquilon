@@ -17,8 +17,6 @@
 # limitations under the License.
 """Module for testing the add esx_cluster command."""
 
-import re
-
 if __name__ == "__main__":
     import utils
     utils.import_depends()
@@ -38,9 +36,6 @@ class TestAddESXCluster(PersonalityTestMixin, TestBrokerCommand):
                 "ut.b": {
                     "building": ["ut"],
                 },
-                "np": {
-                    "building": ["np"],
-                },
             },
             "vmseasoning": {
                 "salt": {
@@ -48,9 +43,6 @@ class TestAddESXCluster(PersonalityTestMixin, TestBrokerCommand):
                 },
                 "pepper": {
                     "building": ["ut"],
-                },
-                "sugar": {
-                    "building": ["np"],
                 },
             },
         }
@@ -61,9 +53,6 @@ class TestAddESXCluster(PersonalityTestMixin, TestBrokerCommand):
                 },
                 "ut.b": {
                     "building": ["ut"],
-                },
-                "np": {
-                    "building": ["np"],
                 },
             },
         }
@@ -338,46 +327,6 @@ class TestAddESXCluster(PersonalityTestMixin, TestBrokerCommand):
                        "--archetype=esx_cluster",
                        "--personality=vulcan-1g-desktop-prod"]
             self.noouttest(command)
-
-    def testaddutmc5(self):
-        command = ["add_esx_cluster", "--cluster=utecl11",
-                   "--metacluster=utmc5", "--rack=ut13",
-                   "--domain=unittest", "--down_hosts_threshold=2",
-                   "--max_members=15",
-                   "--archetype=esx_cluster",
-                   "--personality=vulcan-1g-desktop-prod"]
-        self.noouttest(command)
-        command = ["add_esx_cluster", "--cluster=npecl11",
-                   "--metacluster=utmc5", "--rack=np13",
-                   "--domain=unittest", "--down_hosts_threshold=2",
-                   "--max_members=15",
-                   "--archetype=esx_cluster",
-                   "--personality=vulcan-1g-desktop-prod"]
-        self.noouttest(command)
-
-    def testverifyutecl11(self):
-        self.verify_cat_clusters("utecl11", "vulcan-1g-desktop-prod", "esx", "utmc5",
-                                 on_rack=True)
-
-    def testaddutmc6(self):
-        command = ["add_esx_cluster", "--cluster=utecl12",
-                   "--metacluster=utmc6", "--rack=ut13",
-                   "--domain=unittest", "--down_hosts_threshold=2",
-                   "--max_members=15",
-                   "--archetype=esx_cluster",
-                   "--personality=vulcan-1g-desktop-prod"]
-        self.noouttest(command)
-        command = ["add_esx_cluster", "--cluster=npecl12",
-                   "--metacluster=utmc6", "--rack=np13",
-                   "--domain=unittest", "--down_hosts_threshold=2",
-                   "--max_members=15",
-                   "--archetype=esx_cluster",
-                   "--personality=vulcan-1g-desktop-prod"]
-        self.noouttest(command)
-
-    def testverifyutecl12(self):
-        self.verify_cat_clusters("utecl12", "vulcan-1g-desktop-prod", "esx", "utmc6",
-                                 on_rack=True)
 
     def testaddutmc7(self):
         command = ["add_esx_cluster", "--cluster=utecl13",
