@@ -23,8 +23,9 @@ import sys
 import os
 from optparse import OptionParser, OptionValueError
 from lxml import etree
-from subprocess import Popen
 import re
+from subprocess import Popen
+from six.moves import range
 import textwrap
 
 # The code is not exactly pretty. If you want to improve it, here are some
@@ -555,9 +556,9 @@ class OptParser(object):
         columns = (width - 4) / maxlen
         rows = len(commands) / columns + 1
 
-        for row in xrange(rows):
+        for row in range(rows):
             res = "    "
-            for column in xrange(columns):
+            for column in range(columns):
                 if column * rows + row < len(commands):
                     res += "%-*s" % (maxlen, commands[column * rows + row])
             helpmsg.append(res)

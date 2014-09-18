@@ -28,6 +28,7 @@ if __name__ == "__main__":
 import unittest2 as unittest
 from dateutil.parser import parse
 from dateutil.tz import tzutc
+from six.moves import range
 
 from broker.brokertest import TestBrokerCommand
 
@@ -407,7 +408,7 @@ class TestAudit(TestBrokerCommand):
         # Generate a really big command and verify all arguments arrive in the
         # audit log
         hosts = ["list-test-%d.aqd-unittest.ms.com" % i
-                 for i in xrange(1000, 2000)]
+                 for i in range(1000, 2000)]
         scratchfile = self.writescratch("audit_hostlist", "\n".join(hosts))
         cmd1 = ["reconfigure", "--list", scratchfile]
         err = self.badrequesttest(cmd1)
