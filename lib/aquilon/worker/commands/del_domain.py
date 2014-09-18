@@ -61,7 +61,7 @@ class CommandDelDomain(BrokerCommand):
                     path=temprepo, logger=logger)
             run_git(["push", "origin", trash_branch],
                     path=temprepo, logger=logger)
-        except ProcessException, e:
+        except ProcessException as e:
             raise ArgumentError("\n%s%s" % (e.out, e.err))
         finally:
             remove_dir(tempdir, logger=logger)

@@ -134,7 +134,7 @@ def force_mac(label, value):
 
     try:
         return MACAddress(value)
-    except ValueError, err:
+    except ValueError as err:
         raise ArgumentError("Expected a MAC address for %s: %s" % (label, err))
 
 
