@@ -79,7 +79,8 @@ class CommandMergeNetwork(BrokerCommand):
         for oldnet in dbnets:
             # Delete routers of the old subnets
             for dbrouter in oldnet.routers:
-                map(delete_dns_record, dbrouter.dns_records)
+                for dns_rec in dbrouter.dns_records:
+                    delete_dns_record(dns_rec)
             oldnet.routers = []
 
             fix_foreign_links(session, oldnet, dbsuper)

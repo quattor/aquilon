@@ -255,7 +255,8 @@ class QIPRefresh(object):
         for router in del_routers:
             self.logger.client_info("Removing router {0:s} from "
                                     "{1:l}".format(router.ip, dbnetwork))
-            map(delete_dns_record, router.dns_records)
+            for dns_rec in router.dns_records:
+                delete_dns_record(dns_rec)
             dbnetwork.routers.remove(router)
 
         for ip in new_rtrs - old_rtrs:
@@ -296,7 +297,8 @@ class QIPRefresh(object):
             for router in dbnetwork.routers:
                 self.logger.client_info("Removing router {0:s} from "
                                         "{1:l}".format(router.ip, dbnetwork))
-                map(delete_dns_record, router.dns_records)
+                for dns_rec in router.dns_records:
+                    delete_dns_record(dns_rec)
             dbnetwork.routers = []
             self.logger.client_info("Deleting network {0:a}".format(dbnetwork))
             self.session.delete(dbnetwork)

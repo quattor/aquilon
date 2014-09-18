@@ -50,7 +50,8 @@ class CommandDelRouterAddress(BrokerCommand):
             raise NotFoundException("IP address {0} is not a router on "
                                     "{1:l}.".format(ip, dbnetwork))
 
-        map(delete_dns_record, dbrouter.dns_records)
+        for dns_rec in dbrouter.dns_records:
+            delete_dns_record(dns_rec)
         dbnetwork.routers.remove(dbrouter)
         session.flush()
 
