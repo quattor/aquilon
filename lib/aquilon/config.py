@@ -20,7 +20,7 @@
 import os
 import socket
 import pwd
-from ConfigParser import SafeConfigParser
+from six.moves.configparser import SafeConfigParser
 
 from aquilon.exceptions_ import AquilonError
 

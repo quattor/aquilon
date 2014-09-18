@@ -17,11 +17,13 @@
 # limitations under the License.
 """Module for tests that bypass the aq client."""
 
-from urllib import urlencode, urlopen, quote
-
 if __name__ == "__main__":
     import utils
     utils.import_depends()
+
+from six.moves.urllib_parse import urlencode, quote
+from six.moves.urllib_request import urlopen
+from six.moves.urllib_error import HTTPError
 
 import unittest2 as unittest
 from brokertest import TestBrokerCommand
@@ -36,18 +38,23 @@ class TestClientBypass(TestBrokerCommand):
         openport = self.config.get("broker", "openport")
         server = self.config.get("broker", "servername")
         url = "http://" + server + ":" + openport + path
-        if post:
-            data = urlencode(kwargs)
-            stream = urlopen(url, data)
-        else:
-            arglist = []
-            for key, value in kwargs.items():
-                arglist.append("%s=%s" % (quote(key), quote(value)))
-            if arglist:
-                url += "?" + "&".join(arglist)
-            stream = urlopen(url)
-        status = stream.getcode()
-        output = "\n".join(stream.readlines())
+        try:
+            if post:
+                data = urlencode(kwargs)
+                stream = urlopen(url, data)
+            else:
+                arglist = []
+                for key, value in kwargs.items():
+                    arglist.append("%s=%s" % (quote(key), quote(value)))
+                if arglist:
+                    url += "?" + "&".join(arglist)
+                stream = urlopen(url)
+            status = stream.getcode()
+            output = stream.read()
+        except HTTPError as err:
+            status = err.code
+            output = err.read()
+
         self.assertEqual(status, expect_status,
                          "HTTP status code for %s (%s) was %d instead of %d"
                          "\nOutput was:\n@@@\n%s\n@@@\n"

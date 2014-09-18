@@ -27,11 +27,9 @@ from __future__ import print_function
 
 import sys
 import os
-from urllib import urlencode, quote
 import re
 import subprocess
 import socket
-import httplib
 import csv
 from time import sleep
 from threading import Thread
@@ -44,13 +42,16 @@ if LIBDIR not in sys.path:
     sys.path.append(LIBDIR)
 # -- end path_setup --
 
+from aquilon.client import depends
 from aquilon.config import lookup_file_path
 from aquilon.exceptions_ import AquilonError
-from aquilon.client import depends
 from aquilon.client.knchttp import KNCHTTPConnection
 from aquilon.client.chunked import ChunkedHTTPConnection
 from aquilon.client.optparser import OptParser, ParsingError
 from aquilon.python_patches import load_uuid_quickly
+
+from six.moves.urllib_parse import urlencode, quote
+import six.moves.http_client as httplib
 
 # Stolen from aquilon.worker.formats.fomatters
 csv.register_dialect('aquilon', delimiter=',', quoting=csv.QUOTE_MINIMAL,

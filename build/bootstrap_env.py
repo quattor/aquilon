@@ -15,6 +15,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 import os
 import virtualenv
 import textwrap
@@ -45,7 +46,6 @@ def gather_deps(dir):
 def bootstrap(dependencies, dir):
     extra = textwrap.dedent("""
     import os, subprocess
-    import urllib
     from tempfile import mkdtemp
     def extend_parser(optparse_parser):
         pass

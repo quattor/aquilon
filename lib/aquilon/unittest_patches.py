@@ -29,7 +29,7 @@ if LIBDIR not in sys.path:
 if SBINDIR not in sys.path:
     sys.path.append(SBINDIR)
 
-
+from aquilon.worker import depends
 from aquilon.config import Config
 from socket import gaierror
 import socket

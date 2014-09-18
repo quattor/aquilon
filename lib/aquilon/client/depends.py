@@ -23,6 +23,7 @@ import sys
 import ms.version
 
 ms.version.addpkg('lxml', '3.2.5')
+ms.version.addpkg('six', '1.7.3')
 
 if sys.platform == "sunos5":
     # ctypes is missing from the default Python build on Solaris, due to

@@ -28,8 +28,8 @@ if LIBDIR not in sys.path:
     sys.path.append(LIBDIR)
 # -- end path_setup --
 
-from aquilon.config import Config, lookup_file_path
 import aquilon.aqdb.depends
+from aquilon.config import Config, lookup_file_path
 
 import ms.modulecmd
 ms.modulecmd.load("fsf/graphviz/2.28.0")

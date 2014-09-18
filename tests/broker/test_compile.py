@@ -19,8 +19,8 @@
 
 import os
 import gzip
-from cStringIO import StringIO
-from cPickle import Pickler, Unpickler
+from six.moves import cStringIO as StringIO
+from six.moves.cPickle import Pickler, Unpickler
 from shutil import rmtree
 from subprocess import Popen, PIPE
 from datetime import datetime

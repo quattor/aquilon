@@ -18,7 +18,7 @@
 
 import os
 from csv import DictReader
-import cPickle as pickle
+import six.moves.cPickle as pickle
 from ipaddr import IPv4Network, IPv4Address
 
 # Ranges for dynamic network allocation. The idea is to allocate a /N network

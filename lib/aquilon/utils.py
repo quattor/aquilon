@@ -27,7 +27,7 @@ import logging
 import os
 import re
 import signal
-from cStringIO import StringIO
+from six.moves import cStringIO as StringIO
 from itertools import islice
 from tempfile import mkstemp
 

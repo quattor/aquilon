@@ -18,7 +18,7 @@
 import logging
 from datetime import datetime
 from dateutil.tz import tzutc
-from urllib import quote
+from six.moves.urllib_parse import quote
 
 from sqlalchemy import (Column, String, Integer, Boolean, ForeignKey,
                         PrimaryKeyConstraint, Index)
