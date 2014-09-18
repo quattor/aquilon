@@ -30,37 +30,21 @@ from brokertest import TestBrokerCommand
 class TestDelCluster(TestBrokerCommand):
 
     def test_100_delutgrid1(self):
+        self.check_plenary_exists("cluster", "utgrid1", "client")
         command = ["del_cluster", "--cluster=utgrid1"]
         self.successtest(command)
+        self.check_plenary_gone("cluster", "utgrid1", "client",
+                                directory_gone=True)
 
-    def test_100_verifydelutgrid1(self):
+    def test_105_verifydelutgrid1(self):
         command = ["show_cluster", "--cluster=utgrid1"]
         self.notfoundtest(command)
 
-    def test_100_verifyall(self):
-        command = ["show_cluster", "--all"]
-        out = self.commandtest(command)
-        self.matchclean(out, "utgrid", command)
-
-    def test_100_delnotfound(self):
-        command = ["del_cluster", "--cluster=grid_cluster-does-not-exist"]
-        self.notfoundtest(command)
-
-    def test_100_verifyplenaryclusterclient(self):
-        dir = os.path.join(self.config.get("broker", "plenarydir"),
-                           "cluster", "utgrid1")
-        self.failIf(os.path.exists(dir),
-                    "Plenary directory '%s' still exists" % dir)
-        plenary = self.build_profile_name("clusters", "utgrid1",
-                                          domain="unittest")
-        self.failIf(os.path.exists(plenary),
-                    "Plenary file '%s' still exists" % plenary)
-
-    def test_200_delutvcs1(self):
+    def test_110_delutvcs1(self):
         command = ["del_cluster", "--cluster=utvcs1"]
         self.successtest(command)
 
-    def test_200_verifydelutvcs1(self):
+    def test_115_verifydelutvcs1(self):
         command = ["show_cluster", "--cluster=utvcs1"]
         self.notfoundtest(command)
 
@@ -69,34 +53,39 @@ class TestDelCluster(TestBrokerCommand):
         self.failIf(os.path.exists(profile),
                     "Profile file '%s' still exists" % profile)
 
-    def test_200_verifyall(self):
-        command = ["show_cluster", "--all"]
-        out = self.commandtest(command)
-        self.matchclean(out, "utvcs", command)
-
-    def test_300_delutstorage1(self):
+    def test_120_delutstorage1(self):
         command = ["del_cluster", "--cluster=utstorage1"]
         self.successtest(command)
 
-    def test_300_verifydelutstorage1(self):
+    def test_125_verifydelutstorage1(self):
         command = ["show_cluster", "--cluster=utstorage1"]
         self.notfoundtest(command)
 
-    def test_300_delutstorage2(self):
+    def test_130_delutstorage2(self):
         command = ["del_cluster", "--cluster=utstorage2"]
         self.successtest(command)
 
-    def test_300_verifydelutstorage2(self):
-        command = ["show_cluster", "--cluster=utstorage2"]
-        self.notfoundtest(command)
-
-    def test_300_delutstorages2(self):
+    def test_135_delutstorages2(self):
         command = ["del_cluster", "--cluster=utstorages2"]
         self.successtest(command)
 
-    def test_300_verifydelutstorages2(self):
-        command = ["show_cluster", "--cluster=utstorages2"]
+    def test_140_del_camelcase(self):
+        self.check_plenary_exists("clusterdata", "camelcase")
+        self.check_plenary_exists("cluster", "camelcase", "client")
+        self.successtest(["del_cluster", "--cluster", "CaMeLcAsE"])
+        self.check_plenary_gone("clusterdata", "camelcase")
+        self.check_plenary_gone("cluster", "camelcase", "client",
+                                directory_gone=True)
+
+    def test_200_delnotfound(self):
+        command = ["del_cluster", "--cluster=grid_cluster-does-not-exist"]
         self.notfoundtest(command)
+
+    def test_300_verifyall(self):
+        command = ["show_cluster", "--all"]
+        out = self.commandtest(command)
+        self.matchclean(out, "utgrid", command)
+        self.matchclean(out, "utvcs", command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelCluster)

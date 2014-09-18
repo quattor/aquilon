@@ -316,6 +316,17 @@ class TestAddCluster(PersonalityTestMixin, TestBrokerCommand):
                          "Compute Cluster utvcs1 already exists.",
                          command)
 
+    def test_70_add_camelcase(self):
+        command = ["add_cluster", "--cluster=CaMeLcAsE",
+                   "--building=ut",
+                   "--domain=unittest", "--down_hosts_threshold=0",
+                   "--archetype=hacluster", "--personality=vcs-msvcs"]
+        self.noouttest(command)
+        self.check_plenary_exists("clusterdata", "camelcase")
+        self.check_plenary_gone("clusterdata", "CaMeLcAsE")
+        self.check_plenary_exists("cluster", "camelcase", "client")
+        self.check_plenary_gone("cluster", "CaMeLcAsE", "client")
+
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddCluster)
     unittest.TextTestRunner(verbosity=2).run(suite)

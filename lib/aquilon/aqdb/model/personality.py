@@ -71,6 +71,10 @@ class Personality(Base):
     __table_args__ = (UniqueConstraint(archetype_id, name),
                       {'info': {'unique_fields': ['name', 'archetype']}},)
 
+    def __init__(self, name=None, **kwargs):
+        name = AqStr.normalize(name)
+        super(Personality, self).__init__(name=name, **kwargs)
+
     @property
     def is_cluster(self):
         return self.archetype.cluster_type is not None

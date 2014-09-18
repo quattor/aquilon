@@ -84,6 +84,11 @@ class TestAddVirtualSwitch(TestBrokerCommand):
         self.searchoutput(out, "^utvswitch$", command)
         self.searchoutput(out, "^utvswitch2$", command)
 
+    def test_130_add_camelcase(self):
+        self.noouttest(["add_virtual_switch", "--virtual_switch", "CaMeLcAsE"])
+        self.check_plenary_exists("virtualswitchdata", "camelcase")
+        self.check_plenary_gone("virtualswitchdata", "CaMeLcAsE")
+
     def test_200_add_utvswitch_again(self):
         command = ["add_virtual_switch", "--virtual_switch", "utvswitch"]
         out = self.badrequesttest(command)

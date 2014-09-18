@@ -39,6 +39,11 @@ class TestDelVirtualSwitch(TestBrokerCommand):
         command = ["del_virtual_switch", "--virtual_switch", "utvswitch2"]
         self.noouttest(command)
 
+    def test_120_del_camelcase(self):
+        self.check_plenary_exists("virtualswitchdata", "camelcase")
+        self.noouttest(["del_virtual_switch", "--virtual_switch", "CaMeLcAsE"])
+        self.check_plenary_gone("virtualswitchdata", "camelcase")
+
     def test_200_del_again(self):
         command = ["del_virtual_switch", "--virtual_switch", "utvswitch"]
         out = self.notfoundtest(command)

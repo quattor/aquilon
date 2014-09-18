@@ -154,6 +154,7 @@ class Location(Base):
         # Keep compatibility with the old behavior of the "parent" attribute
         # when creating new objects. Note that both the location manipulation
         # commands and the data loader in the unittest suite depends on this.
+        name = AqStr.normalize(name)
         if parent is not None:
             if parent.__class__ not in self.valid_parents:
                 raise AquilonError("{0} cannot be a parent of {1:lc} {2}."

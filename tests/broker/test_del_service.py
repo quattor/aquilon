@@ -120,6 +120,16 @@ class TestDelService(TestBrokerCommand):
         service = self.config.get("broker", "poll_helper_service")
         self.notfoundtest(["del", "service", "--service", service])
 
+    def test_140_del_camelcase_instance(self):
+        self.check_plenary_exists("servicedata", "camelcase", "camelcase", "config")
+        self.noouttest(["del_service", "--service", "camelcase",
+                        "--instance", "CaMeLcAsE"])
+        self.check_plenary_gone("servicedata", "camelcase", "camelcase", "config")
+
+    def test_141_del_camelcase(self):
+        self.check_plenary_exists("servicedata", "camelcase", "config")
+        self.noouttest(["del_service", "--service", "CaMeLcAsE"])
+        self.check_plenary_gone("servicedata", "camelcase", "config")
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelService)

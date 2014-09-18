@@ -90,6 +90,13 @@ class TestDelPersonality(TestBrokerCommand):
                    "--personality=metacluster", "--archetype=metacluster"]
         self.noouttest(command)
 
+    def testdelcamelcase(self):
+        self.check_plenary_exists("aquilon", "personality", "camelcase",
+                                  "config")
+        self.noouttest(["del_personality", "--personality", "CaMeLcAsE",
+                        "--archetype", "aquilon"])
+        self.check_plenary_gone("aquilon", "personality", "camelcase", "config",
+                                directory_gone=True)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelPersonality)

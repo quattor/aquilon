@@ -62,6 +62,10 @@ class Service(Base):
 
     __table_args__ = ({'info': {'unique_fields': ['name']}},)
 
+    def __init__(self, name=None, **kwargs):
+        name = AqStr.normalize(name)
+        super(Service, self).__init__(name=name, **kwargs)
+
     @memoized_property
     def cluster_aligned_personalities(self):
         session = object_session(self)

@@ -208,8 +208,10 @@ class TestDelHost(VerifyNotificationsMixin, MachineTestMixin,
                          self.net["vpls"].usable[1], "ut3c5n5")
 
     def test_300_del_unittest24(self):
+        self.check_plenary_exists("machine", "americas", "np", "np3", "np3c5n5")
         self.delete_host("unittest24.aqd-unittest.ms.com",
                          self.net["vpls"].usable[2], "np3c5n5")
+        self.check_plenary_gone("machine", "americas", "np", "np3", "np3c5n5")
 
     def test_300_del_unittest25(self):
         self.delete_host("unittest25.aqd-unittest.ms.com",

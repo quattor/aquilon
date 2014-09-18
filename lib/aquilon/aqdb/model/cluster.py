@@ -115,6 +115,10 @@ class Cluster(CompileableMixin, Base):
     __table_args__ = ({'info': {'unique_fields': ['name']}},)
     __mapper_args__ = {'polymorphic_on': cluster_type}
 
+    def __init__(self, name=None, **kwargs):
+        name = AqStr.normalize(name)
+        super(Cluster, self).__init__(name=name, **kwargs)
+
     @property
     def title(self):
         if self.personality.archetype.outputdesc is not None:
