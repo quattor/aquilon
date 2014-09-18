@@ -21,7 +21,7 @@ import sys
 
 # -- begin path_setup --
 import ms.version
-ms.version.addpkg('ipython', '0.13.2')
+ms.version.addpkg('ipython', '1.1.0')
 ms.version.addpkg('argparse', '1.2.1')
 
 BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
@@ -36,7 +36,7 @@ import aquilon.aqdb.depends  # pylint: disable=W0611
 import argparse
 from ipaddr import IPv4Address, IPv4Network  # pylint: disable=W0611
 from IPython.config.loader import Config as IPyConfig
-from IPython.frontend.terminal.embed import InteractiveShellEmbed
+from IPython import embed
 
 from aquilon.config import Config  # pylint: disable=W0611
 from aquilon.aqdb.db_factory import DbFactory
@@ -62,8 +62,17 @@ def main():
     if opts.verbose >= 1:
         db.engine.echo = True
 
-    if db.engine.url.drivername == 'sqlite':
+    if db.engine.dialect.name == 'sqlite':
         prompt = str(db.engine.url).split('///')[1]
+    elif db.engine.dialect.name == 'oracle':
+        stmt = "SELECT sys_context('userenv', 'session_user') FROM DUAL"
+        user = session.execute(stmt).scalar()
+        stmt = "SELECT sys_context('userenv', 'instance_name') FROM DUAL"
+        instance = session.execute(stmt).scalar()
+        stmt = "SELECT sys_context('userenv', 'db_name') FROM DUAL"
+        dbname = session.execute(stmt).scalar()
+
+        prompt = '%s@%s/%s' % (user, instance, dbname)
     else:
         # couldn't use the underlying dbapi connection.current_schema
         # from the engine as it too is ''
@@ -81,8 +90,7 @@ def main():
     ipycfg.InteractiveShell.separate_out = ''
     ipycfg.InteractiveShell.separate_out2 = ''
     ipycfg.InteractiveShell.colors = 'Linux'
-    ipshell = InteractiveShellEmbed(config=ipycfg, banner1=_banner)
-    ipshell()
+    embed(config=ipycfg, banner1=_banner)
 
 
 if __name__ == '__main__':

@@ -38,7 +38,7 @@ ms.version.addpkg("astroid", "1.0.1")
 ms.version.addpkg("logilab.common", "0.60.1")
 
 # These are not used directly, but may be used by code pylint is called for
-ms.version.addpkg('ipython', '0.13.2')
+ms.version.addpkg('ipython', '1.1.0')
 ms.version.addpkg('argparse', '1.2.1')
 
 from pylint import lint
