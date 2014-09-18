@@ -185,9 +185,9 @@ class PlenaryMachineInfo(StructurePlenary):
         lines.append("")
         pan_assign(lines, "ram", ram)
         pan_assign(lines, "cpu", cpus)
-        for name in sorted(disks.keys()):
+        for name in sorted(disks):
             pan_assign(lines, "harddisks/{%s}" % name, disks[name])
-        for name in sorted(interfaces.keys()):
+        for name in sorted(interfaces):
             # This is ugly. We can't blindly escape, because that would affect
             # e.g. VLAN interfaces. Calling unescape() for a non-escaped VLAN
             # interface name is safe though, so we can hopefully get rid of this
@@ -199,7 +199,7 @@ class PlenaryMachineInfo(StructurePlenary):
 
         # /hardware/console/preferred must be set, so we can't assign to
         # "/console" directly
-        for manager in sorted(managers.keys()):
+        for manager in sorted(managers):
             pan_assign(lines, "console/%s" % manager, managers[manager])
 
         if self.dbobj.uri:

@@ -111,13 +111,13 @@ class CommandSearchCluster(BrokerCommand):
         # specific set of location arguments that are stripped of the
         # given prefix.
         location_args = {'cluster_': {}, 'member_': {}}
-        for prefix in location_args.keys():
-            for (k, v) in arguments.items():
+        for prefix, values in location_args.items():
+            for k, v in arguments.items():
                 if k.startswith(prefix):
                     # arguments['cluster_building'] = 'dd'
                     # becomes
                     # location_args['cluster_']['building'] = 'dd'
-                    location_args[prefix][k.replace(prefix, '')] = v
+                    values[k.replace(prefix, '')] = v
 
         dblocation = get_location(session, **location_args['cluster_'])
         if dblocation:

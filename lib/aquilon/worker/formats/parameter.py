@@ -84,8 +84,8 @@ class DiffFormatter(ObjectFormatter):
             mydata = value["my"]
             otherdata = value["other"]
 
-            mykeys = set(mydata.keys())
-            otherkeys = set(otherdata.keys())
+            mykeys = set(mydata)
+            otherkeys = set(otherdata)
             intersect = mykeys.intersection(otherkeys)
 
             missing = sorted(otherkeys - intersect)
@@ -134,8 +134,8 @@ class SimpleParameterListFormatter(ListFormatter):
         ret = []
         for k, v in hlist:
             ret.append(indent + "{0.holder_object}:".format(k))
-            for ikey in v.iterkeys():
-                ret.append(indent + "  {0}: {1}".format(ikey, json.dumps(v[ikey])))
+            for ikey, ivalue in v.items():
+                ret.append(indent + "  {0}: {1}".format(ikey, json.dumps(ivalue)))
         return "\n".join(ret)
 
     def format_proto(self, hostlist, container):

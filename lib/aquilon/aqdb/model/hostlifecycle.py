@@ -49,7 +49,7 @@ class HostLifecycle(StateEngine, Base):
     _class_label = 'Host Lifecycle'
 
     id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
-    name = Column(Enum(32, transitions.keys()), nullable=False, unique=True)
+    name = Column(Enum(32, list(transitions.keys())), nullable=False, unique=True)
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
 

@@ -83,7 +83,7 @@ class Personality(Base):
     def validate_env_in_name(cls, name, host_environment):
         env_mapper = inspect(HostEnvironment)
         persona_env = re.search("[-/](" +
-                                "|".join(env_mapper.polymorphic_map.keys()) +
+                                "|".join(env_mapper.polymorphic_map) +
                                 ")$", name, re.IGNORECASE)
         if persona_env and (persona_env.group(1) != host_environment):
             raise ArgumentError("Environment value in personality name '{0}' "

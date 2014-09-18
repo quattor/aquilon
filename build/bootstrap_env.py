@@ -54,7 +54,7 @@ def bootstrap(dependencies, dir):
     def after_install(options, home_dir):
         easy_install = join(home_dir, 'bin', 'easy_install')
     """)
-    for package in sorted(dependencies.keys()):
+    for package in sorted(dependencies):
         if package == 'protobuf':
             continue
         extra += "    if subprocess.call([easy_install, '%s==%s']) != 0:\n" % (

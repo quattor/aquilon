@@ -46,7 +46,7 @@ def list_all(config):
     for name, value in config.items("DEFAULT"):
         defaults[name] = value
 
-    for name in sorted(defaults.keys()):
+    for name in sorted(defaults):
         value = config.get("DEFAULT", name)
         print("DEFAULT.%s=%s" % (name, value))
 

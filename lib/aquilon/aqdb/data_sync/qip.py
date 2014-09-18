@@ -95,7 +95,7 @@ class QIPRefresh(object):
             self.aqnetworks[item.ip] = item
 
         # Save how many networks we had initially
-        self.networks_before = len(self.aqnetworks.keys())
+        self.networks_before = len(self.aqnetworks)
 
     def error(self, msg):
         self.logger.error(msg)
@@ -345,7 +345,7 @@ class QIPRefresh(object):
 
         # Check/update network attributes that do not affect other objects. Do
         # this in a single transaction, even in incremental mode
-        ips = self.aqnetworks.keys()
+        ips = list(self.aqnetworks.keys())[:]
         for ip in ips:
             if ip not in qipnetworks:
                 # "Forget" networks not inside the requested building to prevent

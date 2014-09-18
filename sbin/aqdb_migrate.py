@@ -133,8 +133,6 @@ if __name__ == '__main__':
         sys.stdout.flush()
         cnt = 0
 
-        columns = table.columns.keys()
-
         NewRecord = dummy_mapper(table)
         signal.setitimer(signal.ITIMER_REAL, 5, 5)
         for record in src_session.execute(table.select()):
@@ -145,7 +143,8 @@ if __name__ == '__main__':
                 signalled = 0
 
             data = dict(
-                [(str(column), getattr(record, column)) for column in columns]
+                [(str(colname), getattr(record, colname))
+                 for colname in table.columns]
             )
 
             # insert() is faster, but using .merge() is restartable

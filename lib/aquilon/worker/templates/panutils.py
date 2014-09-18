@@ -54,7 +54,7 @@ def pan(obj, indent=0):
         accumulator.append("nlist(")
         # Enforce a deterministic order to avoid recompilations due to change in
         # ordering. This also helps with the testsuite.
-        for key in sorted(obj.keys()):
+        for key in sorted(obj):
             val = pan(obj[key], indent + 1)
             if isinstance(key, basestring):
                 if not _valid_id.match(str(key)):  # pragma: no cover
@@ -95,7 +95,7 @@ def pan_create(path, params=None, indent=0):
     # Enforce a deterministic order to avoid recompilations due to change in
     # ordering. This also helps with the testsuite.
     if params:
-        for key in sorted(params.keys()):
+        for key in sorted(params):
             val = pan(params[key], indent + 2)
             if isinstance(key, basestring):
                 if not _valid_id.match(str(key)):  # pragma: no cover

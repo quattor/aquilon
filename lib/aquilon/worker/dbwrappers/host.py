@@ -189,12 +189,12 @@ def hostlist_to_hosts(session, hostlist, query_options=None,
 
     def look_up_dns_domains():
         q = session.query(DnsDomain)
-        q = q.filter(DnsDomain.name.in_(parsed_fqdns.keys()))
+        q = q.filter(DnsDomain.name.in_(parsed_fqdns))
         for dbdns_domain in q:
             dns_domains[dbdns_domain.name] = dbdns_domain
 
-        missing = set(parsed_fqdns.iterkeys())
-        missing.difference_update(dns_domains.iterkeys())
+        missing = set(parsed_fqdns)
+        missing.difference_update(dns_domains)
         for item in missing:
             failed.append("DNS Domain %s not found." % item)
 
@@ -214,7 +214,7 @@ def hostlist_to_hosts(session, hostlist, query_options=None,
                     dns_records_by_id[dbdns_rec.id] = dbdns_rec
 
         missing = set(hostlist)
-        missing.difference_update(dns_records_by_name.iterkeys())
+        missing.difference_update(dns_records_by_name)
         for item in missing:
             failed.append("Host %s not found." % item)
 
@@ -241,8 +241,8 @@ def hostlist_to_hosts(session, hostlist, query_options=None,
 
         # Don't report bad hostnames twice - start from dns_records_by_name
         # rather than from hostlist
-        missing = set(dns_records_by_name.iterkeys())
-        missing.difference_update(hosts_by_fqdn.iterkeys())
+        missing = set(dns_records_by_name)
+        missing.difference_update(hosts_by_fqdn)
         for item in missing:
             failed.append("Host %s not found." % item)
 
@@ -348,13 +348,13 @@ def validate_branch_author(dbhosts):
         authors[dbhost.sandbox_author].append(dbhost)
 
     if len(branches) > 1:
-        keys = sorted(branches.keys(), key=lambda x: len(branches[x]))
+        keys = sorted(branches, key=lambda x: len(branches[x]))
         stats = ["{0:d} hosts in {1:l}".format(len(branches[branch]), branch)
                  for branch in keys]
         raise ArgumentError("All hosts must be in the same domain or "
                             "sandbox:\n%s" % "\n".join(stats))
     if len(authors) > 1:
-        keys = sorted(authors.keys(), key=lambda x: len(authors[x]))
+        keys = sorted(authors, key=lambda x: len(authors[x]))
         stats = ["%s hosts with sandbox author %s" %
                  (len(authors[author]), author.name) for author in keys]
         raise ArgumentError("All hosts must be managed by the same "

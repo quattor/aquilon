@@ -79,7 +79,7 @@ class CommandShowBunkerViolations(BrokerCommand):
 
         violation_ids = []
         updates = []
-        for rack in sorted(rack_bucket.keys(), key=attrgetter("name")):
+        for rack in sorted(rack_bucket, key=attrgetter("name")):
             buckets = rack_bucket[rack]
             if len(buckets) > 1:
                 violation_ids.append(rack.id)
@@ -150,7 +150,7 @@ class CommandShowBunkerViolations(BrokerCommand):
             else:
                 errors.append("Warning: {0} is not part of a bunker, but "
                               "it uses bunkerized networks:".format(rack))
-            for bucket in sorted(buckets.keys()):
+            for bucket in sorted(buckets):
                 if bucket == rack_bucket:
                     continue
                 hws = ["%s/%s" % (addr.interface.hardware_entity.printable_name,

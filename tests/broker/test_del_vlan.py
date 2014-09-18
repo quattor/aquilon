@@ -28,7 +28,7 @@ from test_add_vlan import default_vlans
 
 class TestDelVlan(TestBrokerCommand):
     def test_100_delete_defaults(self):
-        for vlan_id in default_vlans.keys():
+        for vlan_id in default_vlans:
             self.noouttest(["del_vlan", "--vlan", vlan_id])
             self.notfoundtest(["show_vlan", "--vlan", vlan_id])
 

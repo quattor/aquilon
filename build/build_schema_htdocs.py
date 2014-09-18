@@ -179,12 +179,12 @@ def table_coverage_check():
         for cls in model_group[group]['classes']:
             tbl = cls.__tablename__
             seen[tbl] = 1
-    for tbl in Base.metadata.tables.keys():
+    for tbl in Base.metadata.tables:
         if tbl in seen:
             del seen[tbl]
         else:
             seen[tbl] = 0
-    for tbl in seen.keys():
+    for tbl in seen:
         print "Table %s is missing from this script" % tbl
 
 
@@ -200,7 +200,7 @@ def write_schema_html():
     fh = open(htmlfile, 'w')
     fh.write("<html><head><title>AQDB Schema</title></head>")
     fh.write("<body><h1>AQDB Schema</h1>")
-    for group in model_group.keys():
+    for group in model_group:
         classes = model_group[group]['classes']
         title = model_group[group]['title']
         pngfile = "%s.%s.png" % (opts.prefix, group)
@@ -216,7 +216,7 @@ def write_schema_html():
 
 table_coverage_check()
 
-for group in model_group.keys():
+for group in model_group:
     write_schema_group_png(group)
 
 write_schema_html()

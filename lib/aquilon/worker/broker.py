@@ -455,6 +455,6 @@ class BrokerCommand(object):
             if args:
                 names = ["--%s" % arg for arg in args]
             else:
-                names = ["--%s" % arg for arg in kwargs.keys()]
+                names = ["--%s" % arg for arg in kwargs]
             raise ArgumentError("Exactly one of %s should be sepcified." %
                                 (', '.join(names[:-1]) + ' and ' + names[-1]))

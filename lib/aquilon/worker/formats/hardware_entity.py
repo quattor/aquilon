@@ -35,7 +35,7 @@ class HardwareEntityFormatter(ObjectFormatter):
 
         self.header_raw(hwe, details, indent)
 
-        for location_type in sorted(Location.__mapper__.polymorphic_map.keys()):
+        for location_type in sorted(Location.__mapper__.polymorphic_map):
             if getattr(hwe.location, location_type, None) is not None:
                 loc = getattr(hwe.location, location_type)
                 details.append(indent + "  {0:c}: {0.name}".format(loc))
