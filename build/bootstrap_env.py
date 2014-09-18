@@ -62,8 +62,6 @@ def bootstrap(dependencies, dir):
         extra += "        subprocess.call([easy_install, '%s'])\n" % package
     extra += "    subprocess.call([easy_install, '.'], cwd='%s')\n" % (
         os.path.join(dir, 'bootstrap_ms'))
-    extra += "    subprocess.call([easy_install, '.'], cwd='%s')\n" % (
-        os.path.join(dir, 'bootstrap_Sybase'))
     print virtualenv.create_bootstrap_script(extra)
 
 
