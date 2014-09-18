@@ -17,7 +17,7 @@
 
 import re
 from aquilon.exceptions_ import ArgumentError
-
+from six import iteritems
 
 _StringEnum_Classes = {}
 
@@ -134,7 +134,7 @@ class StringEnum(object):
 
             # Process all of the attributes of the class that is being
             # constructed, building the class as we go
-            for name, value in attrs.iteritems():
+            for name, value in iteritems(attrs):
                 # Skip any reserved names
                 if name.startswith('_'):
                     continue

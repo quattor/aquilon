@@ -19,6 +19,7 @@ import logging
 from datetime import datetime
 from dateutil.tz import tzutc
 from six.moves.urllib_parse import quote
+from six import iteritems
 
 from sqlalchemy import (Column, String, Integer, Boolean, ForeignKey,
                         PrimaryKeyConstraint, Index)
@@ -161,7 +162,7 @@ def start_xtn(session, xtn_id, username, command, is_readonly, details, ignore):
             is_readonly=is_readonly)
     session.add(x)
 
-    for key, value in details.iteritems():
+    for key, value in iteritems(details):
         if key in ignore:
             continue
 

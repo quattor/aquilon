@@ -52,6 +52,7 @@ from aquilon.python_patches import load_uuid_quickly
 
 from six.moves.urllib_parse import urlencode, quote
 import six.moves.http_client as httplib
+from six import iteritems
 
 # Stolen from aquilon.worker.formats.fomatters
 csv.register_dialect('aquilon', delimiter=',', quoting=csv.QUOTE_MINIMAL,
@@ -299,7 +300,7 @@ class StatusThread(Thread):
 
 
 def quoteOptions(options):
-    return "&".join([quote(k) + "=" + quote(v) for k, v in options.iteritems()])
+    return "&".join([quote(k) + "=" + quote(v) for k, v in iteritems(options)])
 
 
 if __name__ == "__main__":
@@ -376,7 +377,7 @@ if __name__ == "__main__":
 
     # Convert unicode options to strings
     newOptions = {}
-    for k, v in commandOptions.iteritems():
+    for k, v in iteritems(commandOptions):
         newOptions[str(k)] = str(v)
     commandOptions = newOptions
     # Should maybe have an input.xml flag on which global options
@@ -389,7 +390,7 @@ if __name__ == "__main__":
 
     # Quote options so that they can be safely included in the URI
     cleanOptions = {}
-    for k, v in commandOptions.iteritems():
+    for k, v in iteritems(commandOptions):
         # urllib.quote() does not escape '/' by default. We have to turn off
         # this behavior because otherwise a parameter containing '/' would
         # confuse the URL parsing logic on the server side.

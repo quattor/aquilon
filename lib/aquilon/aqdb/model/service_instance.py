@@ -18,6 +18,7 @@
 
 from collections import defaultdict
 from datetime import datetime
+from six import itervalues
 from sys import maxsize
 
 from sqlalchemy import (Column, Integer, Sequence, String, DateTime,
@@ -100,7 +101,7 @@ class ServiceInstance(Base):
         for name, max_host in q.all():
             clusters[name] = max_host
 
-        adjusted_count = sum(clusters.itervalues())
+        adjusted_count = sum(itervalues(clusters))
 
         q = session.query(Host)
         q = q.filter(Host.services_used.contains(self))

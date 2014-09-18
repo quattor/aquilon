@@ -17,6 +17,7 @@
 """Wrappers to make getting and using hosts simpler."""
 
 from collections import defaultdict
+from six import itervalues
 from types import ListType
 
 from sqlalchemy.orm import (joinedload, contains_eager, with_polymorphic,
@@ -199,7 +200,7 @@ def hostlist_to_hosts(session, hostlist, query_options=None,
             failed.append("DNS Domain %s not found." % item)
 
     def look_up_dns_records():
-        for dbdns_domain in dns_domains.itervalues():
+        for dbdns_domain in itervalues(dns_domains):
             short_names = parsed_fqdns[dbdns_domain.name]
             for name_chunk in chunk(short_names, 1000):
                 q = session.query(DnsRecord)

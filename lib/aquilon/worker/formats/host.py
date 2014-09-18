@@ -17,6 +17,7 @@
 """Host formatter."""
 
 from operator import attrgetter
+from six import iteritems
 
 from aquilon.aqdb.model import Host
 from aquilon.worker.formats.formatters import ObjectFormatter
@@ -134,7 +135,7 @@ class GrnHostListFormatter(ListFormatter):
                 details.append(indent + hstr + " [inherited]")
 
             eon_targets = [grn.target for grn in host._grns]
-            for target, eon_id_set in host.effective_grns.iteritems():
+            for target, eon_id_set in iteritems(host.effective_grns):
                 inherited = ""
                 if target not in eon_targets:
                     inherited = " [inherited]"
@@ -164,7 +165,7 @@ class GrnHostListFormatter(ListFormatter):
                 map.target = grn_rec.target
                 map.eonid = grn_rec.eon_id
 
-            for (target, eon_id_set) in host.effective_grns.iteritems():
+            for target, eon_id_set in iteritems(host.effective_grns):
                 for grn_rec in list(eon_id_set):
                     map = msg.eonid_maps.add()
                     map.target = target
