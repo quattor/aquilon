@@ -5259,6 +5259,9 @@
 
 	<transport trigger="all" method="get" path="feature"/>
 	<transport method="get" path="feature/%(type)s/%(feature)s"/>
+        <format name="proto">
+            <message_class name="FeatureList" module="aqdsystems_pb2"/>
+        </format>
     </command>
 
     <command name="bind_feature">

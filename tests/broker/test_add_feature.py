@@ -65,6 +65,16 @@ class TestAddFeature(TestBrokerCommand):
         self.matchoutput(out, "Owned by GRN: grn:/ms/ei/aquilon/aqd", command)
         self.matchclean(out, "Bound to", command)
 
+        command = ["show", "feature", "--feature", "pre_host", "--type", "host", "--format", "proto"]
+        out = self.commandtest(command)
+        f1 = self.parse_feature_msg(out)
+        feature = f1.features[0]
+        self.failUnlessEqual(feature.name, "pre_host")
+        self.failUnlessEqual(feature.type, "host")
+        self.failUnlessEqual(feature.post_personality, False)
+        self.failUnlessEqual(feature.owner_eonid, 2)
+        self.failUnlessEqual(feature.visibility, feature.PUBLIC)
+
     def test_110_verify_post(self):
         command = ["show", "feature", "--feature", "post_host", "--type", "host"]
         out = self.commandtest(command)
@@ -75,6 +85,16 @@ class TestAddFeature(TestBrokerCommand):
         self.matchoutput(out, "Owned by GRN: grn:/ms/ei/aquilon/aqd", command)
         self.matchclean(out, "Comments", command)
         self.matchclean(out, "Bound to", command)
+
+        command = ["show", "feature", "--feature", "post_host", "--type", "host", "--format", "proto"]
+        out = self.commandtest(command)
+        f1 = self.parse_feature_msg(out)
+        feature = f1.features[0]
+        self.failUnlessEqual(feature.name, "post_host")
+        self.failUnlessEqual(feature.type, "host")
+        self.failUnlessEqual(feature.post_personality, True)
+        self.failUnlessEqual(feature.owner_eonid, 2)
+        self.failUnlessEqual(feature.visibility, feature.PUBLIC)
 
     def test_110_verify_hw(self):
         command = ["show", "feature", "--feature", "bios_setup",
@@ -88,6 +108,15 @@ class TestAddFeature(TestBrokerCommand):
         self.matchclean(out, "Comments", command)
         self.matchclean(out, "Bound to", command)
 
+        command = ["show", "feature", "--feature", "bios_setup", "--type", "hardware", "--format", "proto"]
+        out = self.commandtest(command)
+        f1 = self.parse_feature_msg(out)
+        feature = f1.features[0]
+        self.failUnlessEqual(feature.name, "bios_setup")
+        self.failUnlessEqual(feature.type, "hardware")
+        self.failUnlessEqual(feature.owner_eonid, 2)
+        self.failUnlessEqual(feature.visibility, feature.PUBLIC)
+
     def test_110_verify_iface(self):
         command = ["show", "feature", "--feature", "src_route",
                    "--type", "interface"]
@@ -100,6 +129,15 @@ class TestAddFeature(TestBrokerCommand):
         self.matchclean(out, "Comments", command)
         self.matchclean(out, "Bound to", command)
 
+        command = ["show", "feature", "--feature", "src_route", "--type", "interface", "--format", "proto"]
+        out = self.commandtest(command)
+        f1 = self.parse_feature_msg(out)
+        feature = f1.features[0]
+        self.failUnlessEqual(feature.name, "src_route")
+        self.failUnlessEqual(feature.type, "interface")
+        self.failUnlessEqual(feature.owner_eonid, 2)
+        self.failUnlessEqual(feature.visibility, feature.PUBLIC)
+
     def test_120_show_all(self):
         command = ["show", "feature", "--all"]
         out = self.commandtest(command)
@@ -107,6 +145,32 @@ class TestAddFeature(TestBrokerCommand):
         self.matchoutput(out, "Host Feature: post_host", command)
         self.matchoutput(out, "Hardware Feature: bios_setup", command)
         self.matchoutput(out, "Interface Feature: src_route", command)
+
+        command = ["show", "feature", "--all", "--format", "proto"]
+        out = self.commandtest(command)
+        f1 = self.parse_feature_msg(out)
+        feature = f1.features[0]
+        self.failUnlessEqual(feature.name, "bios_setup")
+        self.failUnlessEqual(feature.type, "hardware")
+        self.failUnlessEqual(feature.owner_eonid, 2)
+        self.failUnlessEqual(feature.visibility, feature.PUBLIC)
+        feature = f1.features[1]
+        self.failUnlessEqual(feature.name, "disable_ht")
+        feature = f1.features[2]
+        self.failUnlessEqual(feature.name, "pre_host")
+        self.failUnlessEqual(feature.type, "host")
+        self.failUnlessEqual(feature.post_personality, False)
+        self.failUnlessEqual(feature.owner_eonid, 2)
+        feature = f1.features[3]
+        self.failUnlessEqual(feature.name, "post_host")
+        self.failUnlessEqual(feature.type, "host")
+        self.failUnlessEqual(feature.post_personality, True)
+        self.failUnlessEqual(feature.owner_eonid, 2)
+        feature = f1.features[4]
+        self.failUnlessEqual(feature.name, "src_route")
+        self.failUnlessEqual(feature.type, "interface")
+        self.failUnlessEqual(feature.owner_eonid, 2)
+        self.failUnlessEqual(feature.visibility, feature.PUBLIC)
 
     def test_200_post_hw(self):
         command = ["add", "feature", "--feature", "post_hw",
