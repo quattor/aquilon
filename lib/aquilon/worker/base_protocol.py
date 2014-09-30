@@ -23,6 +23,8 @@ from aquilon.worker.messages import StatusCatalog
 _next_sequence_no = 0
 """Next request sequence number, see _get_next_sequence_no()"""
 
+catalog = StatusCatalog()
+
 
 def _get_next_sequence_no():
     """Return the next sequence number for an AQDRequest"""
@@ -31,7 +33,18 @@ def _get_next_sequence_no():
     _next_sequence_no += 1
     return num
 
-catalog = StatusCatalog()
+
+def alt_repr(s):
+    # Small helper borrowed from twisted: a version of repr() which always uses
+    # double quotes
+    r = repr(s)
+    if not isinstance(r, unicode):
+        r = r.decode("ascii")
+    if r.startswith(u"b"):
+        r = r[1:]
+    if r.startswith(u"'"):
+        return r[1:-1].replace(u'"', u'\\"').replace(u"\\'", u"'")
+    return r[1:-1]
 
 
 class AQDRequest(server.Request):
@@ -75,11 +88,11 @@ class AQDSite(server.Site):
                 request.getClientIP(),
                 request.getPrincipal() or "-",
                 self._logDateTime,
-                '%s %s %s' % (self._escape(request.method),
-                              self._escape(request.uri),
-                              self._escape(request.clientproto)),
+                '%s %s %s' % (alt_repr(request.method),
+                              alt_repr(request.uri),
+                              alt_repr(request.clientproto)),
                 request.code,
                 request.sentLength or "-",
-                self._escape(request.getHeader("referer") or "-"),
-                self._escape(request.getHeader("user-agent") or "-"))
+                alt_repr(request.getHeader("referer") or "-"),
+                alt_repr(request.getHeader("user-agent") or "-"))
             self.logFile.write(line)
