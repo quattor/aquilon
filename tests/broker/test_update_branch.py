@@ -32,16 +32,13 @@ class TestUpdateBranch(TestBrokerCommand):
     def test_100_update_deployable(self):
         self.noouttest(["update", "domain", "--domain", "deployable",
                         "--comments", "Updated Comments",
-                        "--compiler_version=8.2.7"])
+                        "--compiler_version=utpanc"])
 
     def test_105_verify_deployable(self):
         command = "show domain --domain deployable"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Domain: deployable", command)
-        compiler = self.config.get("panc", "pan_compiler", raw=True) % {
-            'version': '8.2.7'}
-        self.matchoutput(out, "Compiler: %s" % compiler,
-                         command)
+        self.searchoutput(out, r"Compiler: .*/panc-utpanc.jar", command)
         self.matchoutput(out, "Comments: Updated Comments", command)
 
     def test_110_update_prod(self):
@@ -144,7 +141,7 @@ class TestUpdateBranch(TestBrokerCommand):
         self.matchclean(out, "deployable", command)
 
     def test_300_verify_search_version(self):
-        command = ["search", "domain", "--compiler_version", "8.2.7"]
+        command = ["search", "domain", "--compiler_version", "utpanc"]
         out = self.commandtest(command)
         self.matchclean(out, "prod", command)
         self.matchclean(out, "ut-prod", command)

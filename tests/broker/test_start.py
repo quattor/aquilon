@@ -32,11 +32,11 @@ from aquilon.config import Config
 
 class TestBrokerStart(unittest.TestCase):
 
-    def setUp(self):
-        pass
+    config = None
 
-    def tearDown(self):
-        pass
+    @classmethod
+    def setUpClass(cls):
+        cls.config = Config()
 
     def teststart(self):
         # FIXME: Either remove any old pidfiles, or ignore it as a warning
@@ -44,34 +44,33 @@ class TestBrokerStart(unittest.TestCase):
         # python processes, kill -9 the pids and delete the files (with a
         # warning message it tickles you)
 
-        config = Config()
-        aqd = os.path.join(config.get("broker", "srcdir"),
+        aqd = os.path.join(self.config.get("broker", "srcdir"),
                            "lib", "aquilon", "unittest_patches.py")
-        pidfile = os.path.join(config.get("broker", "rundir"), "aqd.pid")
-        logfile = config.get("broker", "logfile")
+        pidfile = os.path.join(self.config.get("broker", "rundir"), "aqd.pid")
+        logfile = self.config.get("broker", "logfile")
 
         # Specify aqd and options...
         args = [sys.executable, aqd,
                 "--pidfile", pidfile, "--logfile", logfile]
 
-        if config.has_option("unittest", "profile"):
-            if config.getboolean("unittest", "profile"):
+        if self.config.has_option("unittest", "profile"):
+            if self.config.getboolean("unittest", "profile"):
                 args.append("--profile")
-                args.append(os.path.join(config.get("broker", "logdir"),
+                args.append(os.path.join(self.config.get("broker", "logdir"),
                                          "aqd.profile"))
                 args.append("--profiler=cProfile")
                 args.append("--savestats")
 
         # And then aqd and options...
-        args.extend(["aqd", "--config", config.baseconfig])
+        args.extend(["aqd", "--config", self.config.baseconfig])
 
-        if config.has_option("unittest", "coverage"):
-            if config.getboolean("unittest", "coverage"):
+        if self.config.has_option("unittest", "coverage"):
+            if self.config.getboolean("unittest", "coverage"):
                 args.append("--coveragedir")
-                dir = os.path.join(config.get("broker", "logdir"), "coverage")
+                dir = os.path.join(self.config.get("broker", "logdir"), "coverage")
                 args.append(dir)
 
-                coveragerc = os.path.join(config.get("broker", "srcdir"),
+                coveragerc = os.path.join(self.config.get("broker", "srcdir"),
                                           "tests", "coverage.rc")
                 args.append("--coveragerc")
                 args.append(coveragerc)
@@ -82,12 +81,11 @@ class TestBrokerStart(unittest.TestCase):
         # FIXME: Check that it is listening on the correct port(s)...
 
         # FIXME: If it fails, either cat the log file, or tell the user to try
-        # running '%s -bn aqd --config %s'%(aqd, config.baseconfig)
+        # running '%s -bn aqd --config %s'%(aqd, self.config.baseconfig)
 
     def testclonetemplateking(self):
-        config = Config()
-        source = config.get("unittest", "template_base")
-        dest = config.get("broker", "kingdir")
+        source = self.config.get("unittest", "template_base")
+        dest = self.config.get("broker", "kingdir")
         p = Popen(("/bin/rm", "-rf", dest), stdout=1, stderr=2)
         rc = p.wait()
         self.assertEqual(rc, 0,
@@ -95,7 +93,8 @@ class TestBrokerStart(unittest.TestCase):
                          dest)
         env = {}
         env["PATH"] = os.environ.get("PATH", "")
-        git = config.lookup_tool("git")
+        git = self.config.lookup_tool("git")
+
         p = Popen((git, "clone", "--bare", source, dest),
                   env=env, stdout=PIPE, stderr=PIPE)
         (out, err) = p.communicate()
@@ -107,8 +106,8 @@ class TestBrokerStart(unittest.TestCase):
         # This value can be used to test against a different branch/commit
         # than the current 'prod'.
         new_prod = None
-        if config.has_option("unittest", "template_alternate_prod"):
-            new_prod = config.get("unittest", "template_alternate_prod")
+        if self.config.has_option("unittest", "template_alternate_prod"):
+            new_prod = self.config.get("unittest", "template_alternate_prod")
 
         if new_prod:
             for domain in ['prod', 'ny-prod']:
@@ -123,8 +122,8 @@ class TestBrokerStart(unittest.TestCase):
                                  "\nSTDERR:\n@@@\n'%s'\n@@@\n"
                                  % (domain, new_prod, out, err))
 
-        if config.has_option("broker", "trash_branch"):
-            trash_branch = config.get("broker", "trash_branch")
+        if self.config.has_option("broker", "trash_branch"):
+            trash_branch = self.config.get("broker", "trash_branch")
             p = Popen(("git", "branch", trash_branch, "prod"),
                       env=env, cwd=dest, stdout=PIPE, stderr=PIPE)
             (out, err) = p.communicate()
@@ -149,9 +148,8 @@ class TestBrokerStart(unittest.TestCase):
         return
 
     def testcloneswrep(self):
-        config = Config()
-        source = config.get("unittest", "swrep_repository")
-        dest = os.path.join(config.get("broker", "swrepdir"), "repository")
+        source = self.config.get("unittest", "swrep_repository")
+        dest = os.path.join(self.config.get("broker", "swrepdir"), "repository")
         p = Popen(("/bin/rm", "-rf", dest), stdout=1, stderr=2)
         rc = p.wait()
         self.assertEqual(rc, 0,
@@ -159,7 +157,7 @@ class TestBrokerStart(unittest.TestCase):
                          dest)
         env = {}
         env["PATH"] = os.environ.get("PATH", "")
-        git = config.lookup_tool("git")
+        git = self.config.lookup_tool("git")
         p = Popen((git, "clone", source, dest),
                   env=env, stdout=PIPE, stderr=PIPE)
         (out, err) = p.communicate()
@@ -171,10 +169,9 @@ class TestBrokerStart(unittest.TestCase):
         return
 
     def testdisabletemplatetests(self):
-        config = Config()
-        kingdir = config.get("broker", "kingdir")
-        rundir = config.get("broker", "rundir")
-        git = config.lookup_tool("git")
+        kingdir = self.config.get("broker", "kingdir")
+        rundir = self.config.get("broker", "rundir")
+        git = self.config.lookup_tool("git")
         env = {}
         env["PATH"] = os.environ.get("PATH", "")
 
@@ -187,7 +184,6 @@ class TestBrokerStart(unittest.TestCase):
         self.assertEqual(p.returncode, 0, "Failed to clone template-king")
 
         repodir = os.path.join(tempdir, "template-king")
-        makefile = os.path.join(repodir, "Makefile")
         if os.path.exists(os.path.join(repodir, "t", "Makefile")):
             p = Popen((git, "rm", "-f", os.path.join("t", "Makefile")),
                       cwd=repodir, env=env, stdout=PIPE, stderr=PIPE)
@@ -210,6 +206,25 @@ class TestBrokerStart(unittest.TestCase):
         p = Popen(("rm", "-rf", tempdir))
         p.communicate()
 
+    def testsetuppanclinks(self):
+        # Some tests want multiple versions of panc.jar available. Nothing
+        # depends on the behavior being different, so a couple symlinks will do
+        # the job
+        real_panc = self.config.get("unittest", "real_panc_location")
+        fake_panc_default = self.config.get("panc", "pan_compiler")
+        fake_panc_utpanc = self.config.get("panc", "pan_compiler",
+                                           vars={'version': 'utpanc'})
+
+        fake_panc_dir = os.path.dirname(fake_panc_default)
+        if not os.path.exists(fake_panc_dir):
+            os.makedirs(fake_panc_dir, 0o755)
+
+        for dst in (fake_panc_default, fake_panc_utpanc):
+            try:
+                os.unlink(dst)
+            except OSError:
+                pass
+            os.symlink(real_panc, dst)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestBrokerStart)

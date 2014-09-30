@@ -179,8 +179,8 @@ def search_branch_query(config, session, cls, owner=None, compiler_version=None,
     if compiler_version:
         if not VERSION_RE.match(compiler_version):
             raise ArgumentError("Invalid characters in compiler version")
-        compiler = config.get("panc", "pan_compiler", raw=True) % {
-            'version': compiler_version}
+        compiler = config.get("panc", "pan_compiler",
+                              vars={'version': compiler_version})
         q = q.filter_by(compiler=compiler)
     if autosync is not None:
         q = q.filter_by(autosync=autosync)
@@ -192,8 +192,8 @@ def search_branch_query(config, session, cls, owner=None, compiler_version=None,
 def expand_compiler(config, compiler_version):
     if not VERSION_RE.match(compiler_version):
         raise ArgumentError("Invalid characters in compiler version")
-    compiler = config.get("panc", "pan_compiler", raw=True) % {
-        'version': compiler_version}
+    compiler = config.get("panc", "pan_compiler",
+                          vars={'version': compiler_version})
     if not os.path.exists(compiler):
         raise ArgumentError("Compiler not found at '%s'" % compiler)
     return compiler
