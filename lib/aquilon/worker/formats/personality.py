@@ -22,6 +22,7 @@ from aquilon.aqdb.model import Personality
 from aquilon.worker.formats.formatters import ObjectFormatter
 from aquilon.worker.formats.list import ListFormatter
 
+import json
 
 class ThresholdedPersonality(object):
     def __init__(self, dbpersonality, thresholds):
@@ -145,6 +146,29 @@ class PersonalityFormatter(ObjectFormatter):
             map = skeleton.eonid_maps.add()
             map.target = grn_rec.target
             map.eonid = grn_rec.eon_id
+
+    def format_json(self, personality):
+        result = {
+            personality.__class__.__name__ : personality.name,
+            "Comments" : personality.comments
+        }
+
+        environmenthandler = ObjectFormatter.handlers.get(personality.host_environment.__class__, ObjectFormatter.default_handler)
+        environment = json.loads(environmenthandler.format_json(personality.host_environment))
+        key, value = environment.popitem()
+        result.update({"Environment" : value})
+
+        featurelist = []
+        features = personality.features[:]
+        if len(features) != 0:
+            for link in features:
+                featurehandler = ObjectFormatter.handlers.get(link.feature.__class__, ObjectFormatter.default_handler)
+                feature= json.loads(featurehandler.format_json(link.feature))
+                featurelist.append(feature)
+            result.update({"Features" : featurelist})
+
+        return json.dumps(result)
+
 
 ObjectFormatter.handlers[Personality] = PersonalityFormatter()
 ObjectFormatter.handlers[ThresholdedPersonality] = PersonalityFormatter()
