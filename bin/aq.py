@@ -34,7 +34,7 @@ import socket
 import httplib
 import csv
 from time import sleep
-from threading import Thread
+from threading import Thread, Condition
 
 # -- begin path_setup --
 BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
@@ -55,6 +55,8 @@ from aquilon.python_patches import load_uuid_quickly
 # Stolen from aquilon.worker.formats.fomatters
 csv.register_dialect('aquilon', delimiter=',', quoting=csv.QUOTE_MINIMAL,
                      doublequote=True, lineterminator='\n')
+
+STATUS_RETRY = 5
 
 
 class RESTResource(object):
@@ -234,9 +236,10 @@ class StatusThread(Thread):
         self.finished = False
         self.debug = debug
         self.response_status = None
-        self.retry = 5
+        self.retry = STATUS_RETRY
         self.outstream = outstream
         self.waiting_for_request = True
+        self.condition = Condition()
         Thread.__init__(self)
 
     def run(self):
@@ -250,8 +253,11 @@ class StatusThread(Thread):
         # Delay before attempting to retrieve status messages.
         # We want to give the main thread a chance to compose and send the
         # original request before we send the status request.
+        self.condition.acquire()
         while self.waiting_for_request:
-            sleep(.1)
+            # print("Status thread sleeping...", file=sys.stderr)
+            self.condition.wait(1.0)
+        self.condition.release()
         # print("Attempting status connection...", file=sys.stderr)
         # Ideally we would always make a noauth connection here, but we
         # only know the port that's been specified for this command -
@@ -263,6 +269,7 @@ class StatusThread(Thread):
         parameters = ""
         if self.debug:
             parameters = "?debug=True"
+            sconn.set_debuglevel(10)
         if self.auditid:
             uri = "/status/auditid/%s%s" % (self.auditid, parameters)
         else:
@@ -276,7 +283,7 @@ class StatusThread(Thread):
             sconn.close()
             self.retry -= 1
             # Maybe the command has not gotten to the server yet... retry.
-            sleep(.1)
+            sleep(.2 * (STATUS_RETRY - self.retry))
             return self.show_request()
 
         if res.status != httplib.OK:
@@ -295,6 +302,13 @@ class StatusThread(Thread):
                 self.outstream.write(pageData)
         sconn.close()
         return
+
+    def wakeup(self):
+        # print("Waking up status thread", file=sys.stderr)
+        self.condition.acquire()
+        self.waiting_for_request = False
+        self.condition.notify()
+        self.condition.release()
 
 
 def quoteOptions(options):
@@ -442,8 +456,8 @@ if __name__ == "__main__":
 
     if command == "show_request":
         status_thread.outstream = sys.stdout
-        status_thread.waiting_for_request = False
         status_thread.start()
+        status_thread.wakeup()
         status_thread.join()
         if not status_thread.response_status or \
            status_thread.response_status == httplib.OK:
@@ -500,7 +514,7 @@ if __name__ == "__main__":
 
         # handle failed requests
         if status_thread:
-            status_thread.waiting_for_request = False
+            status_thread.wakeup()
         res = conn.getresponse()
 
     except (httplib.HTTPException, socket.error) as e:
