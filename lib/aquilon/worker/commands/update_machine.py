@@ -208,12 +208,13 @@ class CommandUpdateMachine(BrokerCommand):
                                             compel=False)
             new_holder = resholder.holder_object
 
-            if self.get_metacluster(new_holder) != self.get_metacluster(old_holder) \
-               and not allow_metacluster_change:
-                raise ArgumentError("Current {0:l} does not match "
-                                    "new {1:l}."
-                                    .format(self.get_metacluster(old_holder),
-                                            self.get_metacluster(new_holder)))
+            old_mc = self.get_metacluster(old_holder)
+            new_mc = self.get_metacluster(new_holder)
+            if old_mc != new_mc and not allow_metacluster_change:
+                raise ArgumentError("Moving VMs between metaclusters is "
+                                    "disabled by default.  Use the "
+                                    "--allow_metacluster_change option to "
+                                    "override.")
 
             plenaries.append(Plenary.get_plenary(old_holder))
             plenaries.append(Plenary.get_plenary(new_holder))
