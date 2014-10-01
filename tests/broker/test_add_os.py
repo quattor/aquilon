@@ -27,43 +27,34 @@ from brokertest import TestBrokerCommand
 
 
 class TestAddOS(TestBrokerCommand):
+    linux_version_prev = None
+    linux_version_curr = None
 
-    def testaddexisting(self):
-        command = "add os --archetype aquilon --osname linux --osversion 5.0.1-x86_64"
-        out = self.badrequesttest(command.split(" "))
-        self.matchoutput(out, "Operating System linux, version 5.0.1-x86_64, "
-                         "archetype aquilon already exists.",
-                         command)
+    @classmethod
+    def setUpClass(cls):
+        super(TestAddOS, cls).setUpClass()
+        cls.linux_version_prev = cls.config.get("unittest",
+                                                "linux_version_prev")
+        cls.linux_version_curr = cls.config.get("unittest",
+                                                "linux_version_curr")
 
-    def testadd60(self):
-        command = "add os --archetype aquilon --osname linux --osversion 6.0-x86_64"
-        self.noouttest(command.split(" "))
+    def test_100_add_aquilon_prev(self):
+        self.noouttest(["add_os", "--archetype", "aquilon", "--osname", "linux",
+                        "--osversion", self.linux_version_prev])
 
-    def testaddbadname(self):
-        command = "add os --archetype aquilon --osname oops@! --osversion 1.0"
-        out = self.badrequesttest(command.split(" "))
-        self.matchoutput(out, "'oops@!' is not a valid value for --osname.",
-                         command)
+    def test_105_add_aquilon_new(self):
+        self.noouttest(["add_os", "--archetype", "aquilon", "--osname", "linux",
+                        "--osversion", self.linux_version_curr])
 
-    def testaddbadversion(self):
-        command = "add os --archetype aquilon --osname newos --osversion oops@!"
-        out = self.badrequesttest(command.split(" "))
-        self.matchoutput(out, "'oops@!' is not a valid value for --osversion.",
-                         command)
+    def test_110_add_aurora_prev(self):
+        self.noouttest(["add_os", "--archetype", "aurora", "--osname", "linux",
+                        "--osversion", self.linux_version_prev])
 
-    def testaddutos(self):
+    def test_120_add_utos(self):
         command = "add os --archetype utarchetype1 --osname utos --osversion 1.0"
         self.noouttest(command.split(" "))
 
-    def testaddutos2(self):
-        command = "add os --archetype utarchetype3 --osname utos2 --osversion 1.0"
-        self.noouttest(command.split(" "))
-
-    def testaddutappos(self):
-        command = "add os --archetype utappliance --osname utos --osversion 1.0"
-        self.noouttest(command.split(" "))
-
-    def testverifyutos(self):
+    def test_121_show_utos(self):
         command = "show os --archetype utarchetype1 --osname utos --osversion 1.0"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Operating System: utos", command)
@@ -71,7 +62,7 @@ class TestAddOS(TestBrokerCommand):
         self.matchoutput(out, "Archetype: utarchetype1", command)
         self.matchclean(out, "linux", command)
 
-    def testverifyutosproto(self):
+    def test_121_show_utos_proto(self):
         command = ["show_os", "--archetype=utarchetype1", "--osname=utos",
                    "--osversion=1.0", "--format=proto"]
         out = self.commandtest(command)
@@ -81,19 +72,52 @@ class TestAddOS(TestBrokerCommand):
         self.assertEqual(utos.name, "utos")
         self.assertEqual(utos.version, "1.0")
 
-    def testverifyosonly(self):
+    def test_121_verify_os_only(self):
         command = "show os --osname utos --archetype utarchetype1"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Operating System: utos", command)
         self.matchclean(out, "linux", command)
 
-    def testverifyversonly(self):
+    def test_121_verify_vers_only(self):
         command = "show os --osversion 1.0 --archetype utarchetype1"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Version: 1.0", command)
         self.matchclean(out, "linux", command)
 
-    def testverifyall(self):
+    def test_125_add_utos2(self):
+        command = "add os --archetype utarchetype3 --osname utos2 --osversion 1.0"
+        self.noouttest(command.split(" "))
+
+    def test_130_add_utappos(self):
+        command = "add os --archetype utappliance --osname utos --osversion 1.0"
+        self.noouttest(command.split(" "))
+
+    def test_200_add_existing(self):
+        command = ["add_os", "--archetype", "aquilon", "--osname", "linux",
+                   "--osversion", self.linux_version_prev]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Operating System linux, version %s, "
+                         "archetype aquilon already exists." %
+                         self.linux_version_prev,
+                         command)
+
+    def test_200_add_bad_name(self):
+        command = "add os --archetype aquilon --osname oops@! --osversion 1.0"
+        out = self.badrequesttest(command.split(" "))
+        self.matchoutput(out, "'oops@!' is not a valid value for --osname.",
+                         command)
+
+    def test_200_add_bad_version(self):
+        command = "add os --archetype aquilon --osname newos --osversion oops@!"
+        out = self.badrequesttest(command.split(" "))
+        self.matchoutput(out, "'oops@!' is not a valid value for --osversion.",
+                         command)
+
+    def test_200_show_not_found(self):
+        command = "show os --osname os-does-not-exist --osversion foobar --archetype aquilon"
+        self.notfoundtest(command.split(" "))
+
+    def test_300_verify_all(self):
         command = "show os --all"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Operating System: utos", command)
@@ -101,35 +125,32 @@ class TestAddOS(TestBrokerCommand):
         self.matchoutput(out, "Archetype: utarchetype1", command)
         self.matchoutput(out, "Archetype: aquilon", command)
 
-    def testverifyallproto(self):
+    def test_310_verify_all_proto(self):
         command = "show os --all --format=proto"
         out = self.commandtest(command.split(" "))
         oslist = self.parse_os_msg(out)
-        found_rhel5 = False
+        found_aquilon_new = False
         found_ut = False
         for os in oslist.operating_systems:
             if os.archetype.name == 'aquilon' and \
-               os.name == 'linux' and os.version == '5.0.1-x86_64':
-                found_rhel5 = True
+               os.name == 'linux' and os.version == self.linux_version_curr:
+                found_aquilon_new = True
             if os.archetype.name == 'utarchetype1' and \
                os.name == 'utos' and os.version == '1.0':
                 found_ut = True
-        self.assertTrue(found_rhel5,
-                        "Missing proto output for aquilon/linux/5.0.1-x86_64")
+        self.assertTrue(found_aquilon_new,
+                        "Missing proto output for aquilon/linux/%s" %
+                        self.linux_version_curr)
         self.assertTrue(found_ut,
                         "Missing proto output for utarchetype1/utos/1.0")
 
-    def testshownotfound(self):
-        command = "show os --osname os-does-not-exist --osversion foobar --archetype aquilon"
-        self.notfoundtest(command.split(" "))
-
-    def testupdateoscomments(self):
+    def test_400_update_os_comments(self):
         command = ["update_os", "--osname", "windows", "--osversion", "nt61e",
                    "--archetype", "windows",
                    "--comments", "Windows 7 Enterprise (x86)"]
         self.noouttest(command)
 
-    def testverifyoscomments(self):
+    def test_410_verify_os_comments(self):
         command = "show os --archetype windows --osname windows --osversion nt61e"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Comments: Windows 7 Enterprise (x86)", command)

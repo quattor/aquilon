@@ -33,6 +33,13 @@ from notificationtest import VerifyNotificationsMixin
 
 
 class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
+    linux_version_prev = None
+
+    @classmethod
+    def setUpClass(cls):
+        super(TestMakeAquilon, cls).setUpClass()
+        cls.linux_version_prev = cls.config.get("unittest",
+                                                  "linux_version_prev")
 
     def testmakeinfra(self):
         command = ["make", "--hostname", "infra1.one-nyp.ms.com"]
@@ -44,7 +51,7 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
         basetime = datetime.now()
         command = ["make", "--archetype", "aquilon",
                    "--hostname", "unittest02.one-nyp.ms.com",
-                   "--osname", "linux", "--osversion", "5.0.1-x86_64"]
+                   "--osname", "linux", "--osversion", self.linux_version_prev]
         (out, err) = self.successtest(command)
         self.matchoutput(err,
                          "unittest02.one-nyp.ms.com adding binding for "
@@ -112,7 +119,8 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
                          """include { "archetype/base" };""",
                          command)
         self.matchoutput(out,
-                         """include { "os/linux/5.0.1-x86_64/config" };""",
+                         'include { "os/linux/%s/config" };' %
+                         self.linux_version_prev,
                          command)
         self.matchoutput(out,
                          """include { "service/afs/q.ny.ms.com/client/config" };""",
@@ -157,7 +165,7 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
         command = ["make", "--archetype", "aquilon",
                    "--hostname", "unittest00.one-nyp.ms.com",
                    "--buildstatus", "build", "--personality", "compileserver",
-                   "--osname", "linux", "--osversion", "5.0.1-x86_64"]
+                   "--osname", "linux", "--osversion", self.linux_version_prev]
         (out, err) = self.successtest(command)
         self.matchoutput(err,
                          "unittest00.one-nyp.ms.com adding binding for "
@@ -271,7 +279,8 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
                          """include { "archetype/base" };""",
                          command)
         self.matchoutput(out,
-                         """include { "os/linux/5.0.1-x86_64/config" };""",
+                         'include { "os/linux/%s/config" };' %
+                         self.linux_version_prev,
                          command)
         self.matchoutput(out,
                          """include { "service/afs/q.ny.ms.com/client/config" };""",
@@ -332,7 +341,8 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
         scratchfile = self.writescratch("rhel5hosts", "\n".join(hosts))
         command = ["reconfigure", "--list", scratchfile,
                    "--buildstatus=build", "--archetype=aquilon",
-                   "--osname=linux", "--osversion=5.0.1-x86_64"]
+                   "--osname=linux",
+                   "--osversion=%s" % self.linux_version_prev]
         (out, err) = self.successtest(command)
         for hostname in hosts:
             h = hostname.strip()
@@ -392,7 +402,7 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
     def testmakewithos(self):
         command = ["make", "--archetype", "aquilon",
                    "--hostname", "unittest17.aqd-unittest.ms.com",
-                   "--osname", "linux", "--osversion", "5.0.1-x86_64"]
+                   "--osname", "linux", "--osversion", self.linux_version_prev]
         (out, err) = self.successtest(command)
 
     def testverifyunittest17(self):
@@ -402,11 +412,10 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
                          "Primary Name: unittest17.aqd-unittest.ms.com [%s]" %
                          self.net["tor_net_0"].usable[3],
                          command)
-        self.searchoutput(out,
-                          r'Operating System: linux\s*'
-                          r'Version: 5\.0\.1-x86_64\s*'
-                          r'Archetype: aquilon',
-                          command)
+        self.matchoutput(out, 'Operating System: linux', command)
+        self.matchoutput(out, 'Version: %s' % self.linux_version_prev,
+                         command)
+        self.matchoutput(out, 'Archetype: aquilon', command)
 
     def testverifyunittest17proto(self):
         command = ["show_host", "--format=proto",
