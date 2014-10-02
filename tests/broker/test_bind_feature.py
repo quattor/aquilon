@@ -400,14 +400,17 @@ class TestBindFeature(TestBrokerCommand):
         out = self.commandtest(command)
         pl = self.parse_personality_msg(out, 1)
         personality = pl.personalities[0]
-        feature = personality.features[0]
+        features = {feature.interface_name: feature
+                    for feature in personality.features}
+        self.assertEqual(sorted(features.keys()), ["bond0", "eth1"])
+        feature = features["eth1"]
         self.failUnlessEqual(feature.name, "src_route")
         self.failUnlessEqual(feature.type, "interface")
         self.failUnlessEqual(feature.post_personality, False)
         self.failUnlessEqual(feature.interface_name, "eth1")
         self.failUnlessEqual(feature.model.name, "e1000")
         self.failUnlessEqual(feature.model.vendor, "intel")
-        feature = personality.features[1]
+        feature = features["bond0"]
         self.failUnlessEqual(feature.name, "src_route")
         self.failUnlessEqual(feature.type, "interface")
         self.failUnlessEqual(feature.post_personality, False)
