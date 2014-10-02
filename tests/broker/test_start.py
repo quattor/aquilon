@@ -20,6 +20,7 @@
 import os
 import sys
 from tempfile import mkdtemp
+from shutil import rmtree
 from subprocess import Popen, PIPE
 
 if __name__ == "__main__":
@@ -37,6 +38,15 @@ class TestBrokerStart(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.config = Config()
+
+    def run_command(self, command, **kwargs):
+        p = Popen(command, stdout=PIPE, stderr=PIPE, **kwargs)
+        out, err = p.communicate()
+        self.assertEqual(p.returncode, 0,
+                         "Command '%s' returned %d:"
+                         "\nSTDOUT:\n@@@\n'%s'\n@@@\n"
+                         "\nSTDERR:\n@@@\n'%s'\n@@@\n"
+                         % (command, p.returncode, out, err))
 
     def teststart(self):
         # FIXME: Either remove any old pidfiles, or ignore it as a warning
@@ -75,8 +85,7 @@ class TestBrokerStart(unittest.TestCase):
                 args.append("--coveragerc")
                 args.append(coveragerc)
 
-        p = Popen(args)
-        self.assertEqual(p.wait(), 0)
+        self.run_command(args)
 
         # FIXME: Check that it is listening on the correct port(s)...
 
@@ -86,23 +95,12 @@ class TestBrokerStart(unittest.TestCase):
     def testclonetemplateking(self):
         source = self.config.get("unittest", "template_base")
         dest = self.config.get("broker", "kingdir")
-        p = Popen(("/bin/rm", "-rf", dest), stdout=1, stderr=2)
-        rc = p.wait()
-        self.assertEqual(rc, 0,
-                         "Failed to clear old template-king directory '%s'" %
-                         dest)
+        rmtree(dest, ignore_errors=True)
         env = {}
         env["PATH"] = os.environ.get("PATH", "")
         git = self.config.lookup_tool("git")
 
-        p = Popen((git, "clone", "--bare", source, dest),
-                  env=env, stdout=PIPE, stderr=PIPE)
-        (out, err) = p.communicate()
-        # Ignore out/err unless we get a non-zero return code, then log it.
-        self.assertEqual(p.returncode, 0,
-                         "Non-zero return code for clone of template-king, "
-                         "STDOUT:\n@@@\n'%s'\n@@@\nSTDERR:\n@@@\n'%s'\n@@@\n"
-                         % (out, err))
+        self.run_command([git, "clone", "--bare", source, dest], env=env)
         # This value can be used to test against a different branch/commit
         # than the current 'prod'.
         new_prod = None
@@ -111,62 +109,27 @@ class TestBrokerStart(unittest.TestCase):
 
         if new_prod:
             for domain in ['prod', 'ny-prod']:
-                p = Popen((git, "push", ".", '+%s:%s' % (new_prod, domain)),
-                          env=env, cwd=dest, stdout=PIPE, stderr=PIPE)
-                (out, err) = p.communicate()
-                # Ignore out/err unless we get a non-zero return code, then log it.
-                self.assertEqual(p.returncode, 0,
-                                 "Non-zero return code while setting alternate "
-                                 "'%s' branch locally to '%s':"
-                                 "\nSTDOUT:\n@@@\n'%s'\n@@@\n"
-                                 "\nSTDERR:\n@@@\n'%s'\n@@@\n"
-                                 % (domain, new_prod, out, err))
+                self.run_command([git, "push", ".", '+%s:%s' % (new_prod, domain)],
+                                 env=env, cwd=dest)
 
         if self.config.has_option("broker", "trash_branch"):
             trash_branch = self.config.get("broker", "trash_branch")
-            p = Popen(("git", "branch", trash_branch, "prod"),
-                      env=env, cwd=dest, stdout=PIPE, stderr=PIPE)
-            (out, err) = p.communicate()
-            # Ignore out/err unless we get a non-zero return code, then log it.
-            self.assertEqual(p.returncode, 0,
-                             "Non-zero return code while creating trash "
-                             "branch '%s':"
-                             "\nSTDOUT:\n@@@\n'%s'\n@@@\n"
-                             "\nSTDERR:\n@@@\n'%s'\n@@@\n"
-                             % (trash_branch, out, err))
+            self.run_command([git, "branch", trash_branch, "prod"],
+                             env=env, cwd=dest)
 
         # Set the default branch
-        p = Popen((git, "symbolic-ref", "HEAD", "refs/heads/prod"),
-                  env=env, cwd=dest, stdout=PIPE, stderr=PIPE)
-        (out, err) = p.communicate()
-        self.assertEqual(p.returncode, 0,
-                         "Non-zero return code while setting HEAD "
-                         "to refs/heads/prod:"
-                         "\nSTDOUT:\n@@@\n'%s'\n@@@\n"
-                         "\nSTDERR:\n@@@\n'%s'\n@@@\n"
-                         % (out, err))
-        return
+        self.run_command([git, "symbolic-ref", "HEAD", "refs/heads/prod"],
+                         env=env, cwd=dest)
 
     def testcloneswrep(self):
         source = self.config.get("unittest", "swrep_repository")
         dest = os.path.join(self.config.get("broker", "swrepdir"), "repository")
-        p = Popen(("/bin/rm", "-rf", dest), stdout=1, stderr=2)
-        rc = p.wait()
-        self.assertEqual(rc, 0,
-                         "Failed to clear old swrep directory '%s'" %
-                         dest)
+        rmtree(dest, ignore_errors=True)
+
         env = {}
         env["PATH"] = os.environ.get("PATH", "")
         git = self.config.lookup_tool("git")
-        p = Popen((git, "clone", source, dest),
-                  env=env, stdout=PIPE, stderr=PIPE)
-        (out, err) = p.communicate()
-        # Ignore out/err unless we get a non-zero return code, then log it.
-        self.assertEqual(p.returncode, 0,
-                         "Non-zero return code for clone of swrep, "
-                         "STDOUT:\n@@@\n'%s'\n@@@\nSTDERR:\n@@@\n'%s'\n@@@\n"
-                         % (out, err))
-        return
+        self.run_command([git, "clone", source, dest], env=env)
 
     def testdisabletemplatetests(self):
         kingdir = self.config.get("broker", "kingdir")
@@ -177,34 +140,21 @@ class TestBrokerStart(unittest.TestCase):
 
         tempdir = mkdtemp(prefix="fixup", dir=rundir)
 
-        p = Popen((git, "clone", "--shared", kingdir, "template-king",
-                   "--branch", "prod"),
-                  cwd=tempdir, env=env, stdout=PIPE, stderr=PIPE)
-        out, err = p.communicate()
-        self.assertEqual(p.returncode, 0, "Failed to clone template-king")
+        self.run_command([git, "clone", "--shared", kingdir, "template-king",
+                          "--branch", "prod"], cwd=tempdir, env=env)
 
         repodir = os.path.join(tempdir, "template-king")
         if os.path.exists(os.path.join(repodir, "t", "Makefile")):
-            p = Popen((git, "rm", "-f", os.path.join("t", "Makefile")),
-                      cwd=repodir, env=env, stdout=PIPE, stderr=PIPE)
-            out, err = p.communicate()
-            self.assertEqual(p.returncode, 0, "Failed to remove t/Makefile")
-
-            p = Popen((git, "commit", "-m", "Removed t/Makefile"),
-                      cwd=repodir, env=env, stdout=PIPE, stderr=PIPE)
-            out, err = p.communicate()
-            self.assertEqual(p.returncode, 0, "Failed to commit removal of t/Makefile")
+            self.run_command([git, "rm", "-f", os.path.join("t", "Makefile")],
+                             cwd=repodir, env=env)
+            self.run_command([git, "commit", "-m", "Removed t/Makefile"],
+                             cwd=repodir, env=env)
 
             for branch in ['prod', 'ny-prod']:
-                p = Popen((git, "push", "origin", "prod:%s" % branch),
-                          cwd=repodir, env=env, stdout=PIPE, stderr=PIPE)
-                out, err = p.communicate()
-                self.assertEqual(p.returncode, 0,
-                                 "Failed to push to %s, "
-                                 "STDOUT:\n@@@\n'%s'\n@@@\nSTDERR:\n@@@\n'%s'\n@@@\n"
-                                 % (branch, out, err))
-        p = Popen(("rm", "-rf", tempdir))
-        p.communicate()
+                self.run_command([git, "push", "origin", "prod:%s" % branch],
+                                 cwd=repodir, env=env)
+
+        rmtree(tempdir, ignore_errors=True)
 
     def testsetuppanclinks(self):
         # Some tests want multiple versions of panc.jar available. Nothing
