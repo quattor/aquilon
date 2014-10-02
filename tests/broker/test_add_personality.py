@@ -215,8 +215,8 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
                          command)
 
     def testaddbadaquilonpersonality(self):
-        # This personality is 'bad' because there will not be a set of
-        # templates defined for it in the repository.
+        # This personality is 'bad' because no required parameters will be set
+        # up for it, so anything using it will fail to compile.
         command = ["add_personality", "--personality=badpersonality",
                    "--host_environment=dev",
                    "--archetype=aquilon", "--eon_id=2"]

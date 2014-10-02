@@ -331,7 +331,7 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
         self.matchclean(err, "removing binding", command)
         self.matchclean(err, "adding binding", command)
 
-    def testmissingpersonalitytemplate(self):
+    def testmissingrequiredparams(self):
         command = ["reconfigure",
                    "--hostname", "aquilon62.aqd-unittest.ms.com",
                    "--personality", "badpersonality"]

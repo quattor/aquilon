@@ -378,7 +378,7 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
         self.matchoutput(out, "Creating service chooser", command)
         self.matchoutput(out, "Could not find a relevant service map", command)
 
-    def testmissingpersonalitytemplate(self):
+    def testmissingrequiredparams(self):
         command = ["make", "--archetype", "aquilon",
                    "--hostname", "aquilon93.aqd-unittest.ms.com",
                    "--personality", "badpersonality"]
