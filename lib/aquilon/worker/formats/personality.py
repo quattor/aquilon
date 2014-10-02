@@ -23,24 +23,8 @@ from aquilon.worker.formats.formatters import ObjectFormatter
 from aquilon.worker.formats.list import ListFormatter
 
 
-class ThresholdedPersonality(object):
-    def __init__(self, dbpersonality, thresholds):
-        self.dbpersonality = dbpersonality
-        if not thresholds:
-            thresholds = {}
-        self.threshold = thresholds.get('threshold')
-        self.maintenance_threshold = thresholds.get('maintenance_threshold')
-
-
 class PersonalityFormatter(ObjectFormatter):
     def format_raw(self, personality, indent=""):
-        # Transparently handle Personality and ThresholdedPersonality
-        has_threshold = False
-        if hasattr(personality, "dbpersonality"):
-            threshold = personality.threshold
-            maintenance_threshold = personality.maintenance_threshold
-            has_threshold = True
-            personality = personality.dbpersonality
         description = "Host"
         if personality.is_cluster:
             description = "Cluster"
@@ -60,10 +44,6 @@ class PersonalityFormatter(ObjectFormatter):
         details.append(indent + "  Template: {0.archetype.name}/personality/{0.name}/config"
                        .format(personality))
 
-        if has_threshold:
-            details.append(indent + "  Threshold: {0}".format(threshold))
-            details.append(indent + "  Maintenance Threshold: {0}"
-                           .format(maintenance_threshold))
         if personality.cluster_required:
             details.append(indent + "  Requires clustered hosts")
         for service in personality.services:
@@ -113,15 +93,7 @@ class PersonalityFormatter(ObjectFormatter):
 
     def format_proto(self, personality, container):
         skeleton = container.personalities.add()
-        # Transparently handle Personality and ThresholdedPersonality
-        threshold = None
-        if hasattr(personality, "dbpersonality"):
-            threshold = personality.threshold
-            personality = personality.dbpersonality
-
         self.add_personality_data(skeleton, personality)
-        if threshold is not None:
-            skeleton.threshold = threshold
 
         features = personality.features[:]
         features.sort(key=attrgetter("feature.feature_type",
@@ -147,7 +119,6 @@ class PersonalityFormatter(ObjectFormatter):
             map.eonid = grn_rec.eon_id
 
 ObjectFormatter.handlers[Personality] = PersonalityFormatter()
-ObjectFormatter.handlers[ThresholdedPersonality] = PersonalityFormatter()
 
 
 class SimplePersonalityList(list):

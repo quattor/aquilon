@@ -86,7 +86,6 @@ class TestSearchPersonality(VerifyGrnsMixin, TestBrokerCommand):
         self.matchoutput(out, "Config override: enabled", command)
         self.matchoutput(out, "Environment: dev", command)
         self.matchoutput(out, "Comments: Some personality comments", command)
-        self.matchclean(out, "Threshold:", command)
         self.matchclean(out, "Personality: inventory Archetype: aquilon",
                         command)
         self.matchclean(out,

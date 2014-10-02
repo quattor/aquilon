@@ -3173,10 +3173,6 @@
 	    <option name="archetype" type="string" conflicts="all">which archetype to use</option>
 	    <option name="all" type="flag" conflicts="personality archetype">all</option>
 	</optgroup>
-	<optgroup fields="one">
-	    <option name="domain" type="string">Domain to check for threshold information</option>
-	    <option name="sandbox" type="string">Name of the sandbox (given as 'author/branch')</option>
-	</optgroup>
 	<transport method="get" path="personality"/>
 	<format name="proto" >
 	    <message_class name="PersonalityList" module="aqdsystems_pb2"/>
