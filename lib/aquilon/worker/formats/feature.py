@@ -54,6 +54,9 @@ class FeatureFormatter(ObjectFormatter):
 
         return "\n".join(details)
 
+    def format_proto(self, feature, container):
+        self.add_feature_data(container.features.add(), feature)
+
 ObjectFormatter.handlers[Feature] = FeatureFormatter()
 ObjectFormatter.handlers[HostFeature] = FeatureFormatter()
 ObjectFormatter.handlers[HardwareFeature] = FeatureFormatter()

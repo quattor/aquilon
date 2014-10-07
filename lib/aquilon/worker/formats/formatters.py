@@ -403,9 +403,7 @@ class ObjectFormatter(object):
             sm_msg.personality.archetype.name = 'aquilon'
 
     def add_featurelink_data(self, feat_msg, featlink):
-        feat_msg.name = str(featlink.feature.name)
-        feat_msg.type = str(featlink.feature.feature_type)
-        feat_msg.post_personality = featlink.feature.post_personality
+        self.add_feature_data(feat_msg, featlink.feature)
         if featlink.model:
             self.add_model_data(feat_msg.model, featlink.model)
         if featlink.interface_name:
@@ -415,6 +413,9 @@ class ObjectFormatter(object):
         feat_msg.name = str(feature.name)
         feat_msg.type = str(feature.feature_type)
         feat_msg.post_personality = feature.post_personality
+        feat_msg.owner_eonid = feature.owner_eon_id
+        desc = feat_msg.DESCRIPTOR
+        feat_msg.visibility = desc.enum_values_by_name[feature.visibility.upper()].number
 
     def add_resource_data(self, resource_msg, resource):
         resource_msg.name = str(resource.name)
