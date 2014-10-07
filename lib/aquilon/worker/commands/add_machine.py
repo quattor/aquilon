@@ -19,13 +19,13 @@
 from sqlalchemy.orm import joinedload, subqueryload
 
 from aquilon.exceptions_ import ArgumentError
+from aquilon.aqdb.model import (Chassis, ChassisSlot, Model, Machine,
+                                VirtualMachine)
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.dbwrappers.machine import create_machine
 from aquilon.worker.dbwrappers.resources import get_resource_holder
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
-from aquilon.aqdb.model import (Chassis, ChassisSlot, Model, Machine,
-                                VirtualMachine)
 
 
 class CommandAddMachine(BrokerCommand):
@@ -35,7 +35,7 @@ class CommandAddMachine(BrokerCommand):
     # arguments will contain one of --chassis --rack or --desk
     def render(self, session, logger, machine, model, vendor, serial, chassis,
                slot, cpuname, cpuvendor, cpuspeed, cpucount, memory, cluster,
-               vmhost, uri, comments, **arguments):
+               metacluster, vmhost, uri, comments, **arguments):
         dblocation = get_location(session,
                                   query_options=[subqueryload('parents'),
                                                  joinedload('parents.dns_maps')],
@@ -60,24 +60,22 @@ class CommandAddMachine(BrokerCommand):
 
         vmholder = None
 
-        if cluster or vmhost:
-            if cluster and vmhost:
-                raise ArgumentError("Cluster and vmhost cannot be specified "
-                                    "together.")
+        if cluster or metacluster or vmhost:
             if not dbmodel.model_type.isVirtualMachineType():
                 raise ArgumentError("{0} is not a virtual machine."
                                     .format(dbmodel))
 
             # TODO: do we need VMs inside resource groups?
-            vmholder = get_resource_holder(session, hostname=vmhost,
-                                           cluster=cluster, resgroup=None,
-                                           compel=False)
+            vmholder = get_resource_holder(session, logger, hostname=vmhost,
+                                           cluster=cluster,
+                                           metacluster=metacluster,
+                                           resgroup=None, compel=False)
 
             if vmholder.holder_object.status.name == 'decommissioned':
                 raise ArgumentError("Cannot add virtual machines to "
-                                    "decommissioned clusters.")
+                                    "decommissioned holders.")
 
-            if cluster:
+            if hasattr(vmholder.holder_object, 'location_constraint'):
                 container_loc = vmholder.holder_object.location_constraint
             else:
                 container_loc = vmholder.holder_object.hardware_entity.location

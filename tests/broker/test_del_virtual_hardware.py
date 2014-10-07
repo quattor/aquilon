@@ -61,7 +61,7 @@ class TestDelVirtualHardware(TestBrokerCommand):
 
     # Hack... doing this test here for timing reasons...
     def test_900_verifydelclusterwithmachines(self):
-        command = "del esx cluster --cluster utecl1"
+        command = "del cluster --cluster utecl1"
         out = self.badrequesttest(command.split(" "))
         self.matchoutput(out, "Cluster utecl1 is still in use by hosts",
                          command)

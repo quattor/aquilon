@@ -47,7 +47,7 @@ class CommandAddServiceAddress(BrokerCommand):
     required_parameters = ["service_address", "name", "interfaces"]
 
     def render(self, session, logger, service_address, ip, name, interfaces,
-               hostname, cluster, resourcegroup,
+               hostname, cluster, metacluster, resourcegroup,
                network_environment, map_to_primary, comments, **arguments):
 
         validate_nlist_key("name", name)
@@ -65,8 +65,8 @@ class CommandAddServiceAddress(BrokerCommand):
         if not ifnames:
             raise ArgumentError("Please specify at least one interface name.")
 
-        holder = get_resource_holder(session, hostname, cluster,
-                                     resourcegroup, compel=False)
+        holder = get_resource_holder(session, logger, hostname, cluster,
+                                     metacluster, resourcegroup, compel=False)
         toplevel_holder = holder.toplevel_holder_object
 
         ServiceAddress.get_unique(session, name=name, holder=holder,

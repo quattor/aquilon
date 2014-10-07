@@ -68,7 +68,7 @@ class TestCompile(VerifyNotificationsMixin, TestBrokerCommand):
     def test_000_precompile(self):
         # Before the tests below, make sure everything is up to date.
         command = "compile --domain unittest"
-        (out, err) = self.successtest(command.split(" "))
+        self.statustest(command.split(" "))
 
     def test_010_index(self):
         # Verify and stash mtimes
@@ -76,7 +76,7 @@ class TestCompile(VerifyNotificationsMixin, TestBrokerCommand):
         buffer = StringIO()
         pickler = Pickler(buffer)
         pickler.dump(stashed_mtimes)
-        scratchfile = self.writescratch("stashed_mtimes", buffer.getvalue())
+        self.writescratch("stashed_mtimes", buffer.getvalue())
 
         command = ["search_host", "--domain=unittest",
                    "--service=utsvc", "--instance=utsi1"]
@@ -110,14 +110,14 @@ class TestCompile(VerifyNotificationsMixin, TestBrokerCommand):
             f.close()
 
     def test_200_compileunittest(self):
-        hosts = self.commandtest(["search_host", "--domain=unittest",
-                                  "--service=utsvc", "--instance=utsi1"]
-                                ).splitlines()
+        out = self.commandtest(["search_host", "--domain=unittest",
+                                "--service=utsvc", "--instance=utsi1"])
+        hosts = out.splitlines()
         total = len(hosts)
         basetime = datetime.now()
         command = "compile --domain unittest"
-        (out, err) = self.successtest(command.split(" "))
-        self.matchoutput(err, "%s/%s compiled" % (total, total), command)
+        out = self.statustest(command.split(" "))
+        self.matchoutput(out, "%s/%s compiled" % (total, total), command)
         # Index building is now asynchronous, so we have to wait for it
         self.wait_notification(basetime, 1)
 
@@ -139,12 +139,52 @@ class TestCompile(VerifyNotificationsMixin, TestBrokerCommand):
                             "host %s mtime %s not greater than original %s" %
                             (host, new_mtimes[host], stashed_mtimes[host]))
 
-    def test_300_compilehost(self):
-        command = "compile --hostname unittest02.one-nyp.ms.com"
-        (out, err) = self.successtest(command.split(" "))
+    def test_300_compile_host(self):
+        command = ["compile", "--hostname", "unittest02.one-nyp.ms.com"]
+        out = self.statustest(command)
         # This should have been compiled above...
-        self.matchoutput(err, "0/1 object template(s) being processed",
+        self.matchoutput(out, "0/1 object template(s) being processed",
                          command)
+
+    def test_300_compile_host_cleandeps(self):
+        command = ["compile", "--hostname", "unittest02.one-nyp.ms.com",
+                   "--cleandeps"]
+        out = self.statustest(command)
+        self.matchoutput(out, "1/1 object template(s) being processed",
+                         command)
+        self.matchoutput(out, "1/1 compiled", command)
+
+    def test_310_compile_cluster(self):
+        command = ["compile", "--cluster", "utecl1"]
+        out = self.statustest(command)
+        self.matchoutput(out, "0/4 object template(s) being processed",
+                         command)
+
+    def test_315_compile_cluster_cleandeps(self):
+        command = ["compile", "--cluster", "utecl1", "--cleandeps"]
+        out = self.statustest(command)
+        self.matchoutput(out, "4/4 object template(s) being processed",
+                         command)
+        self.matchoutput(out, "4/4 compiled", command)
+
+    def test_320_compile_metacluster(self):
+        command = ["compile", "--metacluster", "utmc1"]
+        out = self.statustest(command)
+        self.matchoutput(out, "0/9 object template(s) being processed",
+                         command)
+
+    def test_321_compile_metacluster_fallback(self):
+        command = ["compile", "--cluster", "utmc1"]
+        out = self.statustest(command)
+        self.matchoutput(out, "Please use the --metacluster option for "
+                         "metaclusters.", command)
+
+    def test_325_compile_metacluster_cleandeps(self):
+        command = ["compile", "--metacluster", "utmc1", "--cleandeps"]
+        out = self.statustest(command)
+        self.matchoutput(out, "9/9 object template(s) being processed",
+                         command)
+        self.matchoutput(out, "9/9 compiled", command)
 
     def test_400_addsandbox(self):
         command = "add_sandbox --sandbox=out_of_date --start=utsandbox"
@@ -152,15 +192,14 @@ class TestCompile(VerifyNotificationsMixin, TestBrokerCommand):
 
     def test_405_compileempty(self):
         command = "compile --sandbox %s/out_of_date" % self.user
-        (out, err) = self.successtest(command.split(' '))
-        self.matchoutput(err, "No object profiles: nothing to do.", command)
+        out = self.statustest(command.split(' '))
+        self.matchoutput(out, "No object profiles: nothing to do.", command)
 
     def test_410_manage(self):
         # using --force to bypass normal checks due to git status
         # containing uncommitted files
-        command = ['manage', '--hostname=unittest02.one-nyp.ms.com',
-                   '--sandbox=%s/out_of_date' % self.user, '--force']
-        self.successtest(command)
+        self.statustest(['manage', '--hostname=unittest02.one-nyp.ms.com',
+                         '--sandbox=%s/out_of_date' % self.user, '--force'])
 
     def test_420_update(self):
         sandboxdir = os.path.join(self.sandboxdir, 'out_of_date')
@@ -169,20 +208,15 @@ class TestCompile(VerifyNotificationsMixin, TestBrokerCommand):
 
     def test_425_compileupdated(self):
         command = ['compile', '--sandbox=%s/out_of_date' % self.user]
-        (out, err) = self.successtest(command)
-        self.matchclean(err,
-                        "Sandbox %s/out_of_date does not contain the "
-                        "latest changes from the prod domain." % self.user,
-                        command)
+        out = self.statustest(command)
+        self.matchclean(out, "does not contain the latest changes", command)
 
     def test_430_cleanup(self):
         # using --force to bypass normal checks due to git status
         # containing uncommitted files
-        command = ['manage', '--hostname=unittest02.one-nyp.ms.com',
-                   '--domain=unittest', '--force']
-        self.successtest(command)
-        command = ['compile', '--hostname=unittest02.one-nyp.ms.com']
-        self.successtest(command)
+        self.statustest(['manage', '--hostname=unittest02.one-nyp.ms.com',
+                         '--domain=unittest', '--force'])
+        self.statustest(['compile', '--hostname=unittest02.one-nyp.ms.com'])
         self.statustest(["del_sandbox", "--sandbox", "out_of_date"])
         sandboxdir = os.path.join(self.sandboxdir, "out_of_date")
         rmtree(sandboxdir, ignore_errors=True)
@@ -215,10 +249,10 @@ class TestCompile(VerifyNotificationsMixin, TestBrokerCommand):
 
     def test_505_verifynodebug(self):
         command = ['compile', '--domain=unittest', '--cleandeps']
-        (out, err) = self.successtest(command)
-        self.matchoutput(err, "0 errors", command)
-        self.matchclean(err, "aqd unittest debug for aquilon base", command)
-        self.matchclean(err, "aqd unittest debug for aquilon final", command)
+        out = self.statustest(command)
+        self.matchoutput(out, "0 errors", command)
+        self.matchclean(out, "aqd unittest debug for aquilon base", command)
+        self.matchclean(out, "aqd unittest debug for aquilon final", command)
 
     # The 'Assigning repositories to packages...' line is a debug() in
     # aquilon/components/spma/functions.tpl that is used here to verify
@@ -226,18 +260,18 @@ class TestCompile(VerifyNotificationsMixin, TestBrokerCommand):
     def test_510_verifydebughost(self):
         command = ['compile', '--hostname=unittest02.one-nyp.ms.com',
                    '--pancdebug', '--cleandeps']
-        (out, err) = self.successtest(command)
-        self.matchoutput(err, "aqd unittest debug for aquilon base", command)
-        self.matchoutput(err, "aqd unittest debug for aquilon final", command)
-        self.matchclean(err, "Assigning repositories to packages...", command)
+        out = self.statustest(command)
+        self.matchoutput(out, "aqd unittest debug for aquilon base", command)
+        self.matchoutput(out, "aqd unittest debug for aquilon final", command)
+        self.matchclean(out, "Assigning repositories to packages...", command)
 
     def test_520_verifydebugdomain(self):
         command = ['compile', '--domain=unittest', '--pancdebug',
                    '--cleandeps']
-        (out, err) = self.successtest(command)
-        self.matchoutput(err, "aqd unittest debug for aquilon base", command)
-        self.matchoutput(err, "aqd unittest debug for aquilon final", command)
-        self.matchclean(err, "Assigning repositories to packages...", command)
+        out = self.statustest(command)
+        self.matchoutput(out, "aqd unittest debug for aquilon base", command)
+        self.matchoutput(out, "aqd unittest debug for aquilon final", command)
+        self.matchclean(out, "Assigning repositories to packages...", command)
 
     # If this fails on the 'Assigning...' line then all four tests
     # (510, 520, 530, 540) should be revisited.  See comments above 510.
@@ -245,55 +279,61 @@ class TestCompile(VerifyNotificationsMixin, TestBrokerCommand):
         command = ['compile', '--hostname=unittest02.one-nyp.ms.com',
                    '--pancexclude=archetype/base',
                    '--pancinclude=.*', '--cleandeps']
-        (out, err) = self.successtest(command)
-        self.matchclean(err, "aqd unittest debug for aquilon base", command)
-        self.matchoutput(err, "aqd unittest debug for aquilon final", command)
-        self.matchoutput(err, "Assigning repositories to packages...", command)
+        out = self.statustest(command)
+        self.matchclean(out, "aqd unittest debug for aquilon base", command)
+        self.matchoutput(out, "aqd unittest debug for aquilon final", command)
+        self.matchoutput(out, "Assigning repositories to packages...", command)
 
     def test_540_verifyinclude(self):
         command = ['compile', '--hostname=unittest02.one-nyp.ms.com',
                    '--pancinclude=archetype/base', '--cleandeps']
-        (out, err) = self.successtest(command)
-        self.matchoutput(err, "aqd unittest debug for aquilon base", command)
-        self.matchclean(err, "aqd unittest debug for aquilon final", command)
-        self.matchclean(err, "Assigning repositories to packages...", command)
+        out = self.statustest(command)
+        self.matchoutput(out, "aqd unittest debug for aquilon base", command)
+        self.matchclean(out, "aqd unittest debug for aquilon final", command)
+        self.matchclean(out, "Assigning repositories to packages...", command)
 
-    def test_550_compilepersonality(self):
+    def test_550_compile_personality(self):
         command = "compile --personality compileserver --archetype aquilon"
-        (out, err) = self.successtest(command.split(" "))
-        self.matchoutput(err, "0/10 object template(s) being processed",
+        out = self.statustest(command.split(" "))
+        self.matchoutput(out, "0/10 object template(s) being processed",
                          command)
 
-    def test_560_compilepersonality(self):
-        command = ['manage', '--hostname=unittest02.one-nyp.ms.com',
-                   '--domain=ut-prod', '--force']
-        self.successtest(command)
+    def test_555_compile_personality_cleandeps(self):
+        command = ["compile", "--personality", "compileserver",
+                   "--archetype", "aquilon", "--cleandeps"]
+        out = self.statustest(command)
+        self.matchoutput(out, "10/10 object template(s) being processed",
+                         command)
+        self.matchoutput(out, "10/10 compiled", command)
+
+    def test_560_compile_personality_multiple_domains(self):
+        self.statustest(['manage', '--hostname=unittest02.one-nyp.ms.com',
+                         '--domain=ut-prod', '--force'])
+
         command = ['compile', '--personality=compileserver', '--archetype=aquilon']
         err = self.badrequesttest(command)
         self.matchoutput(err, 'Bad Request: All hosts must be in the same domain or sandbox:',
                          command)
         self.matchoutput(err, '1 hosts in domain ut-prod', command)
 
-    def test_570_compilepersonalityidomain(self):
+    def test_570_compile_personality_domain(self):
         command = ['compile', '--personality=compileserver', '--archetype=aquilon',
                    '--domain=ut-prod']
-        (out, err) = self.successtest(command)
-        self.matchoutput(err, "1/1 object template(s) being processed",
+        out = self.statustest(command)
+        self.matchoutput(out, "1/1 object template(s) being processed",
                          command)
 
-    def test_575_compilepersonalitynohost(self):
+    def test_575_compile_personality_no_host(self):
         command = ['compile', '--personality=utpersonality/dev', '--archetype=aquilon',
                    '--domain=ut-prod']
-        (out, err) = self.successtest(command)
         self.noouttest(command)
 
     def test_580_reset_data(self):
-        command = ['manage', '--hostname=unittest02.one-nyp.ms.com',
-                   '--domain=unittest', '--force']
-        self.successtest(command)
+        self.statustest(['manage', '--hostname=unittest02.one-nyp.ms.com',
+                         '--domain=unittest', '--force'])
+
         # Make sure the build files exist - further tests depend on that
-        command = ['compile', '--hostname=unittest02.one-nyp.ms.com']
-        self.successtest(command)
+        self.statustest(['compile', '--hostname=unittest02.one-nyp.ms.com'])
 
     def test_600_aqcompile(self):
         aqcompile = os.path.join(self.config.get("broker", "srcdir"),

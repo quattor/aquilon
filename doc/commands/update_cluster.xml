@@ -29,6 +29,7 @@
 	    </group>
 	    <arg choice="plain"><option>--cluster <replaceable>CLUSTER</replaceable></option></arg>
 	    <arg choice="opt"><option>--personality <replaceable>PERSONALITY</replaceable></option></arg>
+	    <arg choice="opt"><option>--metacluster <replaceable>NAME</replaceable></option></arg>
 	    <arg choice="opt"><option>--down_hosts_threshold <replaceable>THRESHOLD</replaceable></option></arg>
 	    <arg choice="opt"><option>--maint_threshold <replaceable>THRESHOLD</replaceable></option></arg>
 	    <arg choice="opt"><option>--max_members <replaceable>NUMBER</replaceable></option></arg>
@@ -73,6 +74,17 @@
 		    <para>
 			Change the personality of the cluster to <replaceable>PERSONALITY</replaceable>. Changing the
 			archetype of a cluster is not supported.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--metacluster <replaceable>NAME</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Change the metacluster this cluster belongs to. If <replaceable>NAME</replaceable> is the empty string,
+			then the cluster is removed from the current metacluster.
 		    </para>
 		</listitem>
 	    </varlistentry>

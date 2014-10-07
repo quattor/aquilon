@@ -16,7 +16,7 @@
     <refnamediv>
         <refname>aq add resourcegroup</refname>
         <refpurpose>
-	    Add a resourcegroup onto a host or cluster
+	    Add a resourcegroup onto a host, cluster or metacluster
         </refpurpose>
 	<refclass>Aquilon</refclass>
     </refnamediv>
@@ -30,6 +30,7 @@
 	    <group choice="req">
 		<arg choice="plain"><option>--hostname <replaceable>HOST</replaceable></option></arg>
 		<arg choice="plain"><option>--cluster <replaceable>CLUSTER</replaceable></option></arg>
+		<arg choice="plain"><option>--metacluster <replaceable>METACLUSTER</replaceable></option></arg>
 	    </group>
 	    <arg choice="plain"><option>--resourcegroup <replaceable>NAME</replaceable></option></arg>
 	    <arg choice="opt"><option>--required_type <replaceable>TYPE</replaceable></option></arg>
@@ -40,15 +41,15 @@
     <refsect1>
         <title>Description</title>
 	<para>
-	    The <command>aq add_resourcegroup</command> command adds a resourcegroup onto a host or
-	    a cluster. A resourcegroup is a collection or bundle of resources which work together. 
+	    The <command>aq add_resourcegroup</command> command adds a resourcegroup onto a host,
+	    cluster or metacluster. A resourcegroup is a collection or bundle of resources which work together.
 	</para>
     </refsect1>
 
     <refsect1>
         <title>Templates</title>
         <para>
-	    This command will modify the templates for the host or cluster (depending on which
+	    This command will modify the templates for the host, cluster or metacluster (depending on which
 	    option was given).
 	</para>
     </refsect1>
@@ -74,6 +75,16 @@
 		<listitem>
 		    <para>
 			The name of the cluster which will hold this resourcegroup.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--metacluster <replaceable>METACLUSTER</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			The name of the target metacluster which will hold this resourcegroup.
 		    </para>
 		</listitem>
 	    </varlistentry>

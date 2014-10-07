@@ -23,7 +23,7 @@
     <refnamediv>
         <refname>aq add hostlink</refname>
         <refpurpose>
-	    Add a hostlink resource onto a host or cluster
+	    Add a hostlink resource onto a host, cluster or metacluster
         </refpurpose>
 	<refclass>Aquilon</refclass>
     </refnamediv>
@@ -37,8 +37,9 @@
 	    <group choice="req">
 		<arg choice="plain"><option>--hostname <replaceable>HOSTNAME</replaceable></option></arg>
 		<arg choice="plain"><option>--cluster <replaceable>CLUSTER</replaceable></option></arg>
+		<arg choice="plain"><option>--metacluster <replaceable>METACLUSTER</replaceable></option></arg>
+		<arg choice="plain"><option>--resourcegroup <replaceable>RESOURCEGROUP</replaceable></option></arg>
 	    </group>
-	    <arg choice="opt"><option>--resourcegroup <replaceable>RESOURCEGROUP</replaceable></option></arg>
 	    <arg choice="plain"><option>--hostlink <replaceable>NAME</replaceable></option></arg>
 	    <arg choice="plain"><option>--target <replaceable>PATH</replaceable></option></arg>
 	    <arg choice="plain"><option>--owner <replaceable>USER</replaceable></option></arg>
@@ -52,7 +53,7 @@
         <title>Description</title>
 	<para>
 	    The <command>aq add_hostlink</command> command adds a hostlink
-	    resource onto a host or a cluster. A hostlink allows the
+	    resource onto a host, cluster or metacluster. A hostlink allows the
 	    creation of host or cluster specific symlinks under
 	    /var/hostlinks which may point to arbitrary locations. If the
 	    location does not exist then it will be created and given the
@@ -63,8 +64,8 @@
     <refsect1>
         <title>Templates</title>
         <para>
-	    This command will modify the templates for the host or
-	    cluster (depending on which option was given) and the resource
+	    This command will modify the templates for the host, cluster or
+	    metacluster (depending on which option was given) and the resource
 	    template for the hostlink itself.
 	</para>
     </refsect1>
@@ -90,6 +91,16 @@
 		<listitem>
 		    <para>
 			The name of the target cluster for the hostlink.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--metacluster <replaceable>METACLUSTER</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			The name of the target metacluster for the hostlink.
 		    </para>
 		</listitem>
 	    </varlistentry>

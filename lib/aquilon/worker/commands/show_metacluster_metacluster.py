@@ -15,11 +15,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from sqlalchemy.orm import joinedload, subqueryload
 
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.commands.show_metacluster_all import CommandShowMetaClusterAll
+from aquilon.aqdb.model import MetaCluster
+from aquilon.worker.broker import BrokerCommand
 
 
-class CommandShowMetaClusterMetaCluster(CommandShowMetaClusterAll):
+class CommandShowMetaClusterMetaCluster(BrokerCommand):
 
     required_parameters = ['metacluster']
+
+    def render(self, session, metacluster, **arguments):
+        options = [subqueryload('members'),
+                   subqueryload('members._hosts'),
+                   joinedload('members._hosts.host'),
+                   joinedload('members._hosts.host.hardware_entity'),
+                   joinedload('members.resholder'),
+                   subqueryload('members.resholder.resources')]
+        # TODO: eager-load virtual machines and other resources
+        return MetaCluster.get_unique(session, metacluster, compel=True,
+                                      query_options=options)

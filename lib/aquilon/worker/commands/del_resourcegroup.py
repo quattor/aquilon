@@ -27,8 +27,9 @@ class CommandDelResourceGroup(BrokerCommand):
     required_parameters = ["resourcegroup"]
 
     def render(self, session, logger, resourcegroup, hostname, cluster,
-               **arguments):
-        holder = get_resource_holder(session, hostname, cluster, compel=True)
+               metacluster, **arguments):
+        holder = get_resource_holder(session, logger, hostname, cluster,
+                                     metacluster, compel=True)
         dbrg = ResourceGroup.get_unique(session, name=resourcegroup,
                                         holder=holder, compel=True)
 

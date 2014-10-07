@@ -51,8 +51,9 @@ class CommandUnbindServer(BrokerCommand):
         if position is not None:
             params = None
         else:
-            params = lookup_target(session, plenaries, hostname, ip, cluster,
-                                   resourcegroup, service_address, alias)
+            params = lookup_target(session, logger, plenaries, hostname, ip,
+                                   cluster, resourcegroup, service_address,
+                                   alias)
 
         for dbinstance in dbinstances:
             if position is not None:

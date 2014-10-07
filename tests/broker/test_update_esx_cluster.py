@@ -25,11 +25,11 @@ import unittest2 as unittest
 from brokertest import TestBrokerCommand
 
 
+# TODO: Merge this into test_update_cluster.py
 class TestUpdateESXCluster(TestBrokerCommand):
 
     def test_100_updatenoop(self):
-        self.noouttest(["update_esx_cluster", "--cluster=utecl4",
-                        "--building=ut"])
+        self.noouttest(["update_cluster", "--cluster=utecl4", "--building=ut"])
 
     def test_110_verifynoop(self):
         command = "show esx_cluster --cluster utecl4"
@@ -50,7 +50,9 @@ class TestUpdateESXCluster(TestBrokerCommand):
                    "--comments", "ESX Cluster with a new comment",
                    "--memory_capacity", 16384,
                    "--down_hosts_threshold=0"]
-        self.noouttest(command)
+        out = self.statustest(command)
+        self.matchoutput(out, "Command update_esx_cluster is deprecated",
+                         command)
 
     def test_210_verifyutecl2(self):
         command = "show esx_cluster --cluster utecl2"
@@ -90,7 +92,7 @@ class TestUpdateESXCluster(TestBrokerCommand):
                          command)
 
     def test_240_clearoverrideutecl2(self):
-        command = ["update_esx_cluster", "--cluster", "utecl2",
+        command = ["update_cluster", "--cluster", "utecl2",
                    "--clear_overrides"]
         self.noouttest(command)
 
@@ -108,7 +110,7 @@ class TestUpdateESXCluster(TestBrokerCommand):
         # Testing both that an empty cluster can have its personality
         # updated and that personality without archetype will assume
         # the current archetype.
-        command = ["update_esx_cluster", "--cluster=utecl3",
+        command = ["update_cluster", "--cluster=utecl3",
                    "--personality=vulcan-1g-desktop-prod"]
         self.noouttest(command)
 
@@ -122,7 +124,7 @@ class TestUpdateESXCluster(TestBrokerCommand):
                          command)
 
     def test_320_updateutecl1(self):
-        command = ["update_esx_cluster", "--cluster=utecl1", "--rack=ut10"]
+        command = ["update_cluster", "--cluster=utecl1", "--rack=ut10"]
         self.noouttest(command)
 
     def test_330_updateutecl1switch(self):

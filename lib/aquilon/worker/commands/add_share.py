@@ -28,12 +28,11 @@ class CommandAddShare(BrokerCommand):
     required_parameters = ["share"]
 
     def render(self, session, logger, share, comments, hostname,
-               resourcegroup, cluster, **arguments):
+               resourcegroup, cluster, metacluster, **arguments):
 
         validate_nlist_key("share", share)
-        holder = get_resource_holder(session,
-                                     hostname, cluster, resourcegroup,
-                                     compel=False)
+        holder = get_resource_holder(session, logger, hostname, cluster,
+                                     metacluster, resourcegroup, compel=False)
 
         Share.get_unique(session, name=share, holder=holder, preclude=True)
 

@@ -57,7 +57,7 @@ class CommandAddRebootSchedule(BrokerCommand):
 
         return ",".join(new)
 
-    def _validate_args(self, logger, **arguments):
+    def _validate_args(self, **arguments):
         """ Validate arguments used for adding a new record"""
         regexps = CommandAddRebootSchedule.REGEXP_VALIDATION
         for key, validator in regexps.iteritems():
@@ -97,25 +97,23 @@ class CommandAddRebootSchedule(BrokerCommand):
 
         return arguments
 
-    def render(self, session, logger, **arguments):
+    def render(self, session, logger, hostname, cluster, comments, **arguments):
 
         reboot_schedule = "reboot_schedule"
         validate_nlist_key("reboot_schedule", reboot_schedule)
-        arguments = self._validate_args(logger, **arguments)
+        arguments = self._validate_args(**arguments)
 
         time = arguments["time"]
         week = arguments["week"].capitalize()
         day = arguments["day"].capitalize()
-        hostname = arguments["hostname"]
-        cluster = arguments["cluster"]
-        comments = arguments["comments"]
         if time is not None:
             try:
                 parse(time)
             except ValueError as e:
                 raise ArgumentError("the preferred time '%s' could not be "
                                     "interpreted: %s" % (time, e))
-        holder = get_resource_holder(session, hostname, cluster, compel=False)
+        holder = get_resource_holder(session, logger, hostname, cluster,
+                                     compel=False)
 
         RebootSchedule.get_unique(session, name=reboot_schedule, holder=holder,
                                   preclude=True)

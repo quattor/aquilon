@@ -15,10 +15,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import (Cluster, EsxCluster, MetaCluster, Personality,
                                 NetworkDevice, VirtualSwitch)
-from aquilon.exceptions_ import ArgumentError
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
 from aquilon.worker.templates.switchdata import PlenarySwitchData
@@ -82,11 +82,10 @@ class CommandUpdateCluster(BrokerCommand):
         if comments is not None:
             dbcluster.comments = comments
 
-
     def render(self, session, logger, cluster, personality, max_members,
                fix_location, down_hosts_threshold, maint_threshold, comments,
                switch, virtual_switch, memory_capacity, clear_overrides,
-               **arguments):
+               metacluster, **arguments):
         dbcluster = Cluster.get_unique(session, cluster, compel=True)
         self.check_cluster_type(dbcluster, forbid=MetaCluster)
         plenaries = PlenaryCollection(logger=logger)
@@ -126,6 +125,36 @@ class CommandUpdateCluster(BrokerCommand):
             (dbcluster.down_maint_percent,
              dbcluster.down_maint_threshold) = \
                 Cluster.parse_threshold(maint_threshold)
+
+        if metacluster is not None:
+            if metacluster:
+                dbmetacluster = MetaCluster.get_unique(session, metacluster,
+                                                       compel=True)
+                plenaries.append(Plenary.get_plenary(dbmetacluster))
+            else:
+                dbmetacluster = None
+
+            old_metacluster = dbcluster.metacluster
+            if old_metacluster:
+                plenaries.append(Plenary.get_plenary(old_metacluster))
+
+            if old_metacluster != dbmetacluster:
+                if dbcluster.virtual_machines:
+                    raise ArgumentError("Cannot move cluster to a new metacluster "
+                                        "while virtual machines are attached.")
+
+            for dbobj in dbcluster.all_objects():
+                # Don't refresh the cluster plenaries twice
+                if dbobj is dbcluster:
+                    continue
+                plenaries.append(Plenary.get_plenary(dbobj))
+
+            dbcluster.metacluster = dbmetacluster
+
+            if old_metacluster:
+                old_metacluster.validate()
+            if dbmetacluster:
+                dbmetacluster.validate()
 
         session.flush()
         dbcluster.validate()

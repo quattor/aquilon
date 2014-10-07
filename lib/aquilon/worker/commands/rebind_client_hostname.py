@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012,2013  Contributor
+# Copyright (C) 2008,2009,2010,2011,2013  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,18 +14,16 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+"""Contains a wrapper for `aq rebind client --hostname`."""
 
-from aquilon.aqdb.model import Hostlink
-from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.commands.show_resource import show_resource
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.commands.bind_client_hostname import CommandBindClientHostname
 
 
-class CommandShowHostlink(BrokerCommand):
+class CommandRebindClientHostname(CommandBindClientHostname):
 
-    required_parameters = []
+    required_parameters = ["hostname", "service"]
 
-    def render(self, session, logger, hostname, cluster, metacluster,
-               resourcegroup, all, hostlink, **arguments):
-
-        return show_resource(session, logger, hostname, cluster, metacluster,
-                             resourcegroup, all, hostlink, Hostlink)
+    def render(self, *args, **arguments):
+        arguments["force"] = True
+        return CommandBindClientHostname.render(self, *args, **arguments)

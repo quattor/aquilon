@@ -15,16 +15,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.commands.bind_cluster_service import (
-    CommandBindClusterService)
+from aquilon.worker.commands.bind_client_cluster import CommandBindClientCluster
 
 
-class CommandRebindClusterService(CommandBindClusterService):
+class CommandRebindClusterService(CommandBindClientCluster):
 
     required_parameters = ["cluster", "service"]
 
-    def render(self, session, **arguments):
+    def render(self, **arguments):
+        self.deprecated_command("Command rebind_cluster is deprecated. "
+                                "Please use 'rebind_client --cluster' instead.",
+                                **arguments)
         arguments["force"] = True
-        return CommandBindClusterService.render(self, session, **arguments)
+        return super(CommandRebindClusterService, self).render(**arguments)

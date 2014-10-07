@@ -26,8 +26,9 @@ class CommandDelFilesystem(BrokerCommand):
     required_parameters = ["filesystem"]
 
     def render(self, session, logger, filesystem, hostname, cluster,
-               resourcegroup, **arguments):
-        holder = get_resource_holder(session, hostname, cluster, resourcegroup)
+               metacluster, resourcegroup, **arguments):
+        holder = get_resource_holder(session, logger, hostname, cluster,
+                                     metacluster, resourcegroup)
         dbfs = Filesystem.get_unique(session, name=filesystem, holder=holder,
                                      compel=True)
         del_resource(session, logger, dbfs)

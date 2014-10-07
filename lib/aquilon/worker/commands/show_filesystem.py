@@ -15,7 +15,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 from aquilon.aqdb.model import Filesystem
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.commands.show_resource import show_resource
@@ -25,8 +24,8 @@ class CommandShowFilesystem(BrokerCommand):
 
     required_parameters = []
 
-    def render(self, session, hostname, cluster, resourcegroup, all,
-               filesystem, **arguments):
+    def render(self, session, logger, hostname, cluster, metacluster,
+               resourcegroup, all, filesystem, **arguments):
 
-        return show_resource(session, hostname, cluster, resourcegroup, all,
-                             filesystem, Filesystem)
+        return show_resource(session, logger, hostname, cluster, metacluster,
+                             resourcegroup, all, filesystem, Filesystem)

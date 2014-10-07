@@ -15,33 +15,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from sqlalchemy.orm import joinedload, subqueryload
-
-from aquilon.exceptions_ import NotFoundException
 from aquilon.aqdb.model import MetaCluster
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.formats.list import StringAttributeList
 
 
 class CommandShowMetaClusterAll(BrokerCommand):
 
-    def render(self, session, metacluster, **arguments):
-        if not metacluster:
-            q = session.query(MetaCluster.name).order_by(MetaCluster.name)
-            return StringAttributeList(q.all(), "name")
-
-        q = session.query(MetaCluster)
-
-        q = q.filter_by(name=metacluster)
-        q = q.options(subqueryload('members'),
-                      subqueryload('members._hosts'),
-                      joinedload('members._hosts.host'),
-                      joinedload('members._hosts.host.hardware_entity'),
-                      joinedload('members.resholder'),
-                      subqueryload('members.resholder.resources'))
-        # TODO: eager load virtual machines
-        # TODO: eager load EsxCluster.host_count
-        dbmetaclusters = q.order_by(MetaCluster.name).all()
-        if metacluster and not dbmetaclusters:
-            raise NotFoundException("Metacluster %s not found." % metacluster)
-        return dbmetaclusters
+    def render(self, session, **arguments):
+        q = session.query(MetaCluster.name).order_by(MetaCluster.name)
+        return StringAttributeList(q.all(), "name")

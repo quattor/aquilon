@@ -14,10 +14,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Contains the logic for `aq compile`."""
+"""Contains the logic for `aq compile --cluster`."""
 
-from aquilon.aqdb.model import Cluster
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.aqdb.model import Cluster, MetaCluster
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.templates import Plenary, PlenaryCollection
 from aquilon.worker.templates.domain import TemplateDomain
 
@@ -27,10 +27,19 @@ class CommandCompileCluster(BrokerCommand):
     required_parameters = ["cluster"]
     requires_readonly = True
 
-    def render(self, session, logger, cluster,
+    def render(self, session, logger, cluster, metacluster,
                pancinclude, pancexclude, pancdebug, cleandeps,
                **arguments):
-        dbcluster = Cluster.get_unique(session, cluster, compel=True)
+        if cluster:
+            # TODO: disallow metaclusters here
+            dbcluster = Cluster.get_unique(session, cluster, compel=True)
+            if isinstance(dbcluster, MetaCluster):
+                logger.client_info("Please use the --metacluster option for "
+                                   "metaclusters.")
+        else:
+            dbcluster = MetaCluster.get_unique(session, metacluster,
+                                               compel=True)
+
         if pancdebug:
             pancinclude = r'.*'
             pancexclude = r'components/spma/functions'

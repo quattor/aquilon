@@ -85,8 +85,8 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, MachineTestMixin,
 
     def test_030_addswitch(self):
         for i in range(0, 2):
-            self.successtest(["update_cluster", "--cluster", self.cluster[i],
-                              "--virtual_switch", "utvswitch"])
+            self.noouttest(["update_cluster", "--cluster", self.cluster[i],
+                            "--virtual_switch", "utvswitch"])
 
     def test_050_add_vmhost(self):
         for i in range(0, 2):
@@ -99,10 +99,9 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, MachineTestMixin,
 
     def test_060_bind_host_to_cluster(self):
         for i in range(0, 2):
-            self.successtest(["make", "cluster", "--cluster", self.cluster[i]])
-
-            self.successtest(["cluster",
-                              "--hostname", self.vmhost[i], "--cluster", self.cluster[i]])
+            self.statustest(["make", "cluster", "--cluster", self.cluster[i]])
+            self.statustest(["cluster", "--hostname", self.vmhost[i],
+                             "--cluster", self.cluster[i]])
 
     def test_065_add_vms(self):
         for i in range(0, 3):
@@ -143,7 +142,7 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, MachineTestMixin,
                    "--dumpfreq=1", "--fsckpass=3", "--options=ro",
                    "--comments=testing",
                    "--hostname=%s" % self.vmhost[0]]
-        self.successtest(command)
+        self.noouttest(command)
 
         # Quick test
         command = ["cat", "--filesystem=utfs1",
@@ -256,18 +255,18 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, MachineTestMixin,
     def test_175_make_vm_host(self):
         basetime = datetime.now()
         command = ["make", "--hostname", "utpgm0.aqd-unittest.ms.com"]
-        self.successtest(command)
+        self.statustest(command)
         self.wait_notification(basetime, 1)
 
-        command = ["show", "host", "--hostname", "utpgm0.aqd-unittest.ms.com"]
-        out = self.commandtest(command)
-        #TODO what to test here?
+        # TODO what to test here?
+        # command = ["show", "host", "--hostname", "utpgm0.aqd-unittest.ms.com"]
+        # out = self.commandtest(command)
         # self.matchclean(out, "Template: service/vcenter/ut", command)
 
     def test_200_make_host(self):
         basetime = datetime.now()
         command = ["make", "--hostname", self.vmhost[0]]
-        self.successtest(command)
+        self.statustest(command)
         self.wait_notification(basetime, 1)
 
         command = ["show", "host", "--hostname", self.vmhost[0]]
@@ -381,9 +380,8 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, MachineTestMixin,
 
     # deleting fs before depending disk would drop them as well
     def test_295_delvmfs(self):
-        command = ["del_filesystem", "--filesystem=utfs1",
-                   "--hostname=%s" % self.vmhost[0]]
-        self.successtest(command)
+        self.noouttest(["del_filesystem", "--filesystem=utfs1",
+                        "--hostname=%s" % self.vmhost[0]])
 
     def test_305_del_vm_host(self):
         basetime = datetime.now()
@@ -421,8 +419,8 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, MachineTestMixin,
 
     def test_330_delutlccl1(self):
         for i in range(0, 2):
-            command = ["del_esx_cluster", "--cluster=%s" % self.cluster[i]]
-            self.successtest(command)
+            command = ["del_cluster", "--cluster=%s" % self.cluster[i]]
+            self.statustest(command)
 
     def test_340_delutmc9(self):
         basetime = datetime.now()

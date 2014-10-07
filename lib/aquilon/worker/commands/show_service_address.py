@@ -15,9 +15,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 from aquilon.aqdb.model import ServiceAddress
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.commands.show_resource import show_resource
 
 
@@ -25,8 +24,7 @@ class CommandShowServiceAddress(BrokerCommand):
 
     required_parameters = []
 
-    def render(self, session, hostname, cluster, resourcegroup, all,
-               name, **arguments):
-
-        return show_resource(session, hostname, cluster, resourcegroup, all,
-                             name, ServiceAddress)
+    def render(self, session, logger, hostname, cluster, metacluster,
+               resourcegroup, all, name, **arguments):
+        return show_resource(session, logger, hostname, cluster, metacluster,
+                             resourcegroup, all, name, ServiceAddress)

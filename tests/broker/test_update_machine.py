@@ -233,14 +233,12 @@ class TestUpdateMachine(TestBrokerCommand):
         self.matchoutput(out, "Chassis: ut9c1.aqd-unittest.ms.com", command)
         self.matchoutput(out, "Slot: 4", command)
 
-    def testsimplechassisupdatewithrack(self):
-        # The rack info is redundant but valid
+    def testsimplechassisupdate2(self):
         command = ["update", "machine", "--machine", "ut9s03p5",
-                   "--rack", "ut9",
                    "--chassis", "ut9c1.aqd-unittest.ms.com", "--slot", "5"]
         self.noouttest(command)
 
-    def testverifysimplechassisupdatewithrack(self):
+    def testverifysimplechassisupdate2(self):
         command = ["show", "machine", "--machine", "ut9s03p5"]
         out = self.commandtest(command)
         self.matchoutput(out, "Machine: ut9s03p5", command)
@@ -248,17 +246,12 @@ class TestUpdateMachine(TestBrokerCommand):
         self.matchoutput(out, "Chassis: ut9c1.aqd-unittest.ms.com", command)
         self.matchoutput(out, "Slot: 5", command)
 
-    def testtruechassisupdatewithrack(self):
-        # The rack info is redundant but valid
+    def testsimplechassisupdate3(self):
         command = ["update", "machine", "--machine", "ut9s03p6",
-                   "--chassis", "ut9c5.aqd-unittest.ms.com", "--slot", "4"]
-        self.noouttest(command)
-        command = ["update", "machine", "--machine", "ut9s03p6",
-                   "--rack", "ut9",
                    "--chassis", "ut9c1.aqd-unittest.ms.com", "--slot", "6"]
         self.noouttest(command)
 
-    def testverifytruechassisupdatewithrack(self):
+    def testverifsimplechassisupdate3(self):
         command = ["show", "machine", "--machine", "ut9s03p6"]
         out = self.commandtest(command)
         self.matchoutput(out, "Machine: ut9s03p6", command)
@@ -468,7 +461,7 @@ class TestUpdateMachine(TestBrokerCommand):
     def testallowchangemetacluster_10(self):
         command = ["update_machine", "--machine=evm1", "--cluster=utecl13",
                    "--allow_metacluster_change"]
-        out = self.commandtest(command)
+        self.noouttest(command)
 
     def testallowchangemetacluster_15(self):
         command = ["show_share", "--all"]
@@ -506,7 +499,7 @@ class TestUpdateMachine(TestBrokerCommand):
         command = ["update_machine", "--machine=evm1", "--cluster=utecl1",
                    "--allow_metacluster_change"]
         # restore
-        out = self.commandtest(command)
+        self.noouttest(command)
 
     def testfailfullcluster(self):
         command = ["update_machine", "--machine=evm1", "--cluster=utecl3"]

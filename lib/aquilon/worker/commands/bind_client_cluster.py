@@ -14,37 +14,40 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Contains the logic for `aq make cluster`."""
+"""Contains the logic for `aq bind client --cluster`."""
 
 from aquilon.exceptions_ import ArgumentError
+from aquilon.aqdb.model import Cluster, Service
 from aquilon.worker.broker import BrokerCommand
-from aquilon.aqdb.model import Cluster
-from aquilon.worker.templates import PlenaryCollection, TemplateDomain
 from aquilon.worker.services import Chooser
+from aquilon.worker.dbwrappers.service_instance import get_service_instance
+from aquilon.worker.templates import PlenaryCollection
 
 
-class CommandMakeCluster(BrokerCommand):
+class CommandBindClientCluster(BrokerCommand):
 
-    required_parameters = ["cluster"]
+    required_parameters = ["cluster", "service"]
 
-    def render(self, session, logger, cluster, keepbindings, **arguments):
+    def render(self, session, logger, cluster, service, instance, force=False,
+               **arguments):
+
         dbcluster = Cluster.get_unique(session, cluster, compel=True)
-        if not dbcluster.personality.archetype.is_compileable:
-            raise ArgumentError("{0} is not a compilable archetype "
-                                "({1!s}).".format(dbcluster,
-                                                  dbcluster.personality.archetype))
+        dbservice = Service.get_unique(session, service, compel=True)
+        if instance:
+            dbinstance = get_service_instance(session, dbservice, instance)
+        else:
+            dbinstance = None
 
-        # TODO: this duplicates the logic from reconfigure_list.py; it should be
-        # refactored later
         choosers = []
         failed = []
+        # FIXME: this logic should be in the chooser
         for dbobj in dbcluster.all_objects():
-            if dbobj.archetype.is_compileable:
-                chooser = Chooser(dbobj, logger=logger,
-                                  required_only=not keepbindings)
+            # Always add the binding on the cluster we were called on
+            if dbobj == dbcluster or dbservice in dbobj.required_services:
+                chooser = Chooser(dbobj, logger=logger, required_only=False)
                 choosers.append(chooser)
                 try:
-                    chooser.set_required()
+                    chooser.set_single(dbservice, dbinstance, force=force)
                 except ArgumentError as err:
                     failed.append(str(err))
 
@@ -59,16 +62,6 @@ class CommandMakeCluster(BrokerCommand):
             plenaries.append(chooser.plenaries)
         plenaries.flatten()
 
-        td = TemplateDomain(dbcluster.branch, dbcluster.sandbox_author,
-                            logger=logger)
-        with plenaries.get_key():
-            plenaries.stash()
-            try:
-                plenaries.write(locked=True)
-                td.compile(session, only=plenaries.object_templates,
-                           locked=True)
-            except:
-                plenaries.restore_stash()
-                raise
+        plenaries.write()
 
         return

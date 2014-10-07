@@ -14,18 +14,20 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Contains the logic for `aq change status --cluster`."""
+"""Contains the logic for `aq make cluster --cluster`."""
 
-from aquilon.aqdb.model import Cluster, MetaCluster, ClusterLifecycle
+from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.templates import Plenary, PlenaryCollection, TemplateDomain
+from aquilon.aqdb.model import Cluster, MetaCluster
+from aquilon.worker.templates import PlenaryCollection, TemplateDomain
+from aquilon.worker.services import Chooser
 
 
-class CommandChangeClusterStatus(BrokerCommand):
+class CommandMakeClusterCluster(BrokerCommand):
 
     required_parameters = ["cluster"]
 
-    def render(self, session, logger, cluster, metacluster, buildstatus,
+    def render(self, session, logger, cluster, metacluster, keepbindings,
                **arguments):
         if cluster:
             # TODO: disallow metaclusters here
@@ -37,25 +39,38 @@ class CommandChangeClusterStatus(BrokerCommand):
             dbcluster = MetaCluster.get_unique(session, metacluster,
                                                compel=True)
 
-        dbstatus = ClusterLifecycle.get_instance(session, buildstatus)
-
-        if not dbcluster.status.transition(dbcluster, dbstatus):
-            return
-
         if not dbcluster.personality.archetype.is_compileable:
-            return
+            raise ArgumentError("{0} is not a compilable archetype "
+                                "({1!s}).".format(dbcluster,
+                                                  dbcluster.personality.archetype))
+
+        # TODO: this duplicates the logic from reconfigure_list.py; it should be
+        # refactored later
+        choosers = []
+        failed = []
+        for dbobj in dbcluster.all_objects():
+            if dbobj.archetype.is_compileable:
+                chooser = Chooser(dbobj, logger=logger,
+                                  required_only=not keepbindings)
+                choosers.append(chooser)
+                try:
+                    chooser.set_required()
+                except ArgumentError as err:
+                    failed.append(str(err))
+
+        if failed:
+            raise ArgumentError("The following objects failed service "
+                                "binding:\n%s" % "\n".join(failed))
 
         session.flush()
 
         plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(Plenary.get_plenary(dbcluster))
-
-        for dbhost in dbcluster.hosts:
-            plenaries.append(Plenary.get_plenary(dbhost))
+        for chooser in choosers:
+            plenaries.append(chooser.plenaries)
+        plenaries.flatten()
 
         td = TemplateDomain(dbcluster.branch, dbcluster.sandbox_author,
                             logger=logger)
-        # Force a host lock as pan might overwrite the profile...
         with plenaries.get_key():
             plenaries.stash()
             try:
@@ -65,4 +80,5 @@ class CommandChangeClusterStatus(BrokerCommand):
             except:
                 plenaries.restore_stash()
                 raise
+
         return

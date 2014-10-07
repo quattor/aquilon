@@ -45,10 +45,10 @@ class TestUnbindCluster(TestBrokerCommand):
     def testfailunbindrequiredservice(self):
         command = ["show_cluster", "--cluster=utecl1"]
         out = self.commandtest(command)
-        m = self.searchoutput(out,
-                              r'Member Alignment: Service '
-                              r'esx_management_server Instance (\S+)',
-                              command)
+        self.searchoutput(out,
+                          r'Member Alignment: Service '
+                          r'esx_management_server Instance (\S+)',
+                          command)
 
         command = ["unbind_cluster", "--cluster=utecl1",
                    "--service=esx_management_server"]
@@ -63,12 +63,13 @@ class TestUnbindCluster(TestBrokerCommand):
         # This also tests binding a non-aligned service...
         # not sure if there should be a test of running make against a
         # cluster (or a cluster with hosts) while bound to such a service...
-        command = ["bind_cluster", "--cluster=utecl4",
-                   "--service=utsvc", "--instance=utsi1"]
-        (out, err) = self.successtest(command)
+        self.statustest(["bind_cluster", "--cluster=utecl4",
+                         "--service=utsvc", "--instance=utsi1"])
 
         command = ["unbind_cluster", "--cluster=utecl4", "--service=utsvc"]
-        out = self.commandtest(command)
+        out = self.statustest(command)
+        self.matchoutput(out, "Command unbind_cluster is deprecated. Please "
+                         "use 'unbind_client --cluster' instead.", command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUnbindCluster)

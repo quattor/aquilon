@@ -31,12 +31,12 @@ class CommandAddFilesystem(BrokerCommand):
     def render(self, session, logger, filesystem, type, mountpoint,
                blockdevice, bootmount,
                dumpfreq, fsckpass, options,
-               hostname, cluster, resourcegroup,
+               hostname, cluster, metacluster, resourcegroup,
                comments, **arguments):
 
         validate_nlist_key("filesystem", filesystem)
-        holder = get_resource_holder(session, hostname, cluster, resourcegroup,
-                                     compel=False)
+        holder = get_resource_holder(session, logger, hostname, cluster,
+                                     metacluster, resourcegroup, compel=False)
 
         Filesystem.get_unique(session, name=filesystem, holder=holder,
                               preclude=True)

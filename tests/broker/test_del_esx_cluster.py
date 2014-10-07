@@ -27,11 +27,13 @@ import unittest2 as unittest
 from brokertest import TestBrokerCommand
 
 
+# TODO: merge this into test_del_cluster.py
 class TestDelESXCluster(TestBrokerCommand):
 
     def testdelutecl1(self):
         command = ["del_esx_cluster", "--cluster=utecl1"]
-        self.successtest(command)
+        out = self.statustest(command)
+        self.matchoutput(out, "Command del_esx_cluster is deprecated.", command)
 
     def testverifydelutecl1(self):
         command = ["show_esx_cluster", "--cluster=utecl1"]

@@ -55,18 +55,14 @@ class TestAddAllowedPersonality(TestBrokerCommand):
                          command)
 
     def test_15_addconstraint(self):
-        self.successtest(["add_allowed_personality",
-                          "--archetype", "vmhost",
-                          "--personality=vulcan-1g-desktop-prod",
-                          "--cluster", "utecl1"])
-        self.successtest(["add_allowed_personality",
-                          "--archetype", "vmhost",
-                          "--personality=generic",
-                          "--cluster", "utecl1"])
-        self.successtest(["add_allowed_personality",
-                          "--archetype", "esx_cluster",
-                          "--personality=vulcan-1g-desktop-prod",
-                          "--metacluster", "utmc1"])
+        self.noouttest(["add_allowed_personality", "--archetype", "vmhost",
+                        "--personality=vulcan-1g-desktop-prod",
+                        "--cluster", "utecl1"])
+        self.noouttest(["add_allowed_personality", "--archetype", "vmhost",
+                        "--personality=generic", "--cluster", "utecl1"])
+        self.noouttest(["add_allowed_personality", "--archetype", "esx_cluster",
+                        "--personality=vulcan-1g-desktop-prod",
+                        "--metacluster", "utmc1"])
 
     def test_20_checkconstraint(self):
         command = ["show_cluster", "--cluster=utecl1"]

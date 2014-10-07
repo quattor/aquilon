@@ -16,7 +16,7 @@
     <refnamediv>
         <refname>aq del intervention</refname>
         <refpurpose>
-	    Removes a intervention resource from a host or cluster
+	    Removes a intervention resource from a host, cluster or metacluster
         </refpurpose>
 	<refclass>Aquilon</refclass>
     </refnamediv>
@@ -30,6 +30,7 @@
 	    <group choice="req">
 		<arg choice="plain"><option>--hostname <replaceable>HOSTNAME</replaceable></option></arg>
 		<arg choice="plain"><option>--cluster <replaceable>CLUSTER</replaceable></option></arg>
+		<arg choice="plain"><option>--metacluster <replaceable>METACLUSTER</replaceable></option></arg>
 	    </group>
 	    <arg choice="plain"><option>--intervention <replaceable>NAME</replaceable></option></arg>
 	    <xi:include href="../common/global_options.xml"/>
@@ -40,15 +41,15 @@
         <title>Description</title>
 	<para>
 	    The <command>aq del_intervention</command> command removes a
-	    intervention resource from a host or a cluster.
+	    intervention resource from a host, cluster or metacluster.
 	</para>
     </refsect1>
 
     <refsect1>
         <title>Templates</title>
 	<para>
-	    This command will modify the templates for the host or
-	    cluster (depending on which option was given) and remove the resource
+	    This command will modify the templates for the host, cluster or
+	    metacluster (depending on which option was given) and remove the resource
 	    template for the intervention itself.
 	</para>
     </refsect1>
@@ -74,6 +75,16 @@
 		<listitem>
 		    <para>
 			The name of the target cluster of the intervention.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--metacluster <replaceable>METACLUSTER</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			The name of the target metacluster of the intervention.
 		    </para>
 		</listitem>
 	    </varlistentry>
