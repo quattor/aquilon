@@ -20,7 +20,6 @@ from datetime import datetime
 
 from sqlalchemy import (Boolean, DateTime, String, Column, ForeignKey,
                         PrimaryKeyConstraint)
-from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import relation, backref, deferred
 
 from aquilon.aqdb.model import (Base, HardwareEntity, HostLifecycle, Grn,
@@ -31,10 +30,6 @@ from collections import defaultdict
 
 _TN = 'host'
 _HOSTGRN = 'host_grn_map'
-
-
-def _hgm_creator(tuple):
-    return HostGrnMap(host=tuple[0], grn=tuple[1], target=tuple[2])
 
 
 class Host(CompileableMixin, Base):
@@ -84,7 +79,6 @@ class Host(CompileableMixin, Base):
     status = relation(HostLifecycle, innerjoin=True)
     operating_system = relation(OperatingSystem, innerjoin=True)
     owner_grn = relation(Grn)
-    grns = association_proxy('_grns', 'grn', creator=_hgm_creator)
 
     @property
     def fqdn(self):
@@ -118,9 +112,9 @@ class Host(CompileableMixin, Base):
         pers_eon_id_map = defaultdict(set)
 
         # own
-        for grn_rec in self._grns:
+        for grn_rec in self.grns:
             eon_id_map[grn_rec.target].add(grn_rec.grn)
-        for grn_rec in self.personality._grns:
+        for grn_rec in self.personality.grns:
             pers_eon_id_map[grn_rec.target].add(grn_rec.grn)
 
         for target in pers_eon_id_map:
@@ -140,16 +134,9 @@ class HostGrnMap(Base):
 
     target = Column(AqStr(32), nullable=False)
 
-    host = relation(Host, innerjoin=True,
-                    backref=backref('_grns', cascade='all, delete-orphan',
-                                    passive_deletes=True))
-
-    grn = relation(Grn, lazy=False, innerjoin=True,
-                   backref=backref('_hosts', passive_deletes=True))
+    grn = relation(Grn, lazy=False, innerjoin=True)
 
     __table_args__ = (PrimaryKeyConstraint(host_id, eon_id, target),)
 
-    # used by unmap
-    @property
-    def mapped_object(self):
-        return self.host
+Host.grns = relation(HostGrnMap, cascade='all, delete-orphan',
+                     passive_deletes=True)

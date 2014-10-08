@@ -28,8 +28,8 @@ class CommandShowHostList(BrokerCommand):
     def render(self, session, list, **arguments):
         options = [joinedload('personality'),
                    undefer('personality.archetype.comments'),
-                   subqueryload('personality._grns'),
-                   subqueryload('_grns'),
+                   subqueryload('personality.grns'),
+                   subqueryload('grns'),
                    subqueryload('services_used'),
                    subqueryload('services_provided'),
                    joinedload('resholder'),

@@ -190,7 +190,7 @@ class PlenaryPersonalityBase(Plenary):
         eon_id_map = defaultdict(set)
 
         # own == pers level
-        for grn_rec in self.dbobj._grns:
+        for grn_rec in self.dbobj.grns:
             eon_id_map[grn_rec.target].add(grn_rec.grn.eon_id)
 
         for target, eon_id_set in iteritems(eon_id_map):

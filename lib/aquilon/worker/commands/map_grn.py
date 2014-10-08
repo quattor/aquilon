@@ -17,7 +17,8 @@
 """Contains the logic for `aq map grn`."""
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import Personality, Cluster
+from aquilon.aqdb.model import (Personality, PersonalityGrnMap, HostGrnMap,
+                                Cluster)
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.grn import lookup_grn
 from aquilon.worker.dbwrappers.host import (hostname_to_host, hostlist_to_hosts,
@@ -30,16 +31,13 @@ class CommandMapGrn(BrokerCommand):
 
     required_parameters = ["target"]
 
-    def _update_dbobj(self, obj, target, grn):
-
+    def _update_dbobj(self, obj, target, grn, mapcls):
         # Don't add twice the same tuple
-        for grn_rec in obj._grns:
-            if (obj == grn_rec.mapped_object and
-                grn == grn_rec.grn and
-                target == grn_rec.target):
+        for grn_rec in obj.grns:
+            if grn == grn_rec.grn and target == grn_rec.target:
                 return
 
-        obj.grns.append((obj, grn, target))
+        obj.grns.append(mapcls(grn=grn, target=target))
 
     def render(self, session, logger, target, grn, eon_id, hostname, list,
                membersof, personality, archetype, justification, reason,
@@ -51,18 +49,22 @@ class CommandMapGrn(BrokerCommand):
 
         if hostname:
             objs = [hostname_to_host(session, hostname)]
+            mapcls = HostGrnMap
             config_key = "host_grn_targets"
         elif list:
             check_hostlist_size(self.command, self.config, list)
             objs = hostlist_to_hosts(session, list)
+            mapcls = HostGrnMap
             config_key = "host_grn_targets"
         elif membersof:
             dbcluster = Cluster.get_unique(session, membersof, compel=True)
             objs = dbcluster.hosts
+            mapcls = HostGrnMap
             config_key = "host_grn_targets"
         elif personality:
             objs = [Personality.get_unique(session, name=personality,
                                            archetype=archetype, compel=True)]
+            mapcls = PersonalityGrnMap
             config_key = "personality_grn_targets"
             validate_personality_justification(objs[0], user,
                                                justification, reason)
@@ -83,7 +85,7 @@ class CommandMapGrn(BrokerCommand):
                                      ", ".join(valid_targets)))
 
             plenaries.append(Plenary.get_plenary(obj))
-            self._update_dbobj(obj, target, dbgrn)
+            self._update_dbobj(obj, target, dbgrn, mapcls)
 
         session.flush()
 

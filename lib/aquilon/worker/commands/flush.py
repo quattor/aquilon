@@ -247,7 +247,7 @@ class CommandFlush(BrokerCommand):
                 paramdefs = q.all()  # pylint: disable=W0612
 
                 q = session.query(Personality)
-                q = q.options(subqueryload('_grns'),
+                q = q.options(subqueryload('grns'),
                               subqueryload('features'),
                               joinedload('paramholder'),
                               subqueryload('paramholder.parameters'),
@@ -319,14 +319,14 @@ class CommandFlush(BrokerCommand):
                 q = q.options(joinedload("hardware_entity"),
                               joinedload("hardware_entity.primary_name"),
                               joinedload("hardware_entity.primary_name.fqdn"),
-                              subqueryload("_grns"),
+                              subqueryload("grns"),
                               joinedload("resholder"),
                               subqueryload("resholder.resources"),
                               subqueryload("services_used"),
                               subqueryload("services_provided"),
                               subqueryload("_cluster"),
                               subqueryload("personality"),
-                              subqueryload("personality._grns"))
+                              subqueryload("personality.grns"))
 
                 for h in q:
                     idx += 1

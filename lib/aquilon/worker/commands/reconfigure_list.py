@@ -41,8 +41,8 @@ class CommandReconfigureList(BrokerCommand):
     def get_hostlist(self, session, list, **arguments):   # pylint: disable=W0613
         check_hostlist_size(self.command, self.config, list)
         options = [joinedload('personality'),
-                   subqueryload('personality._grns'),
-                   subqueryload('_grns'),
+                   subqueryload('personality.grns'),
+                   subqueryload('grns'),
                    subqueryload('services_used'),
                    undefer('services_used._client_count'),
                    subqueryload('services_provided'),

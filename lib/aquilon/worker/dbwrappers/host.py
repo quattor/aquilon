@@ -28,9 +28,9 @@ from aquilon.exceptions_ import NotFoundException, ArgumentError
 from aquilon.aqdb.column_types import AqStr
 from aquilon.aqdb.model import (HardwareEntity, DnsEnvironment, DnsDomain, Fqdn,
                                 DnsRecord, ARecord, ReservedName, Host,
-                                OperatingSystem, HostLifecycle, Personality,
-                                Domain, Machine, NetworkDevice, Disk,
-                                ChassisSlot, VirtualMachine)
+                                HostGrnMap, OperatingSystem, HostLifecycle,
+                                Personality, Domain, Machine, NetworkDevice,
+                                Disk, ChassisSlot, VirtualMachine)
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
 from aquilon.worker.dbwrappers.feature import (model_features,
@@ -115,8 +115,8 @@ def create_host(session, logger, config, dbhw, dbarchetype, domain=None,
     session.add(dbhost)
 
     if dbgrn and config.has_option(section, "default_grn_target"):
-        dbhost.grns.append((dbhost, dbgrn,
-                            config.get(section, "default_grn_target")))
+        target = config.get(section, "default_grn_target")
+        dbhost.grns.append(HostGrnMap(grn=dbgrn, target=target))
 
     return dbhost
 

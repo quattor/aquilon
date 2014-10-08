@@ -57,9 +57,9 @@ class CommandUnMapGrnClearAll(BrokerCommand):
                                                         obj.archetype.name,
                                                         valid_targets))
 
-            for grn_rec in obj._grns[:]:
+            for grn_rec in obj.grns[:]:
                 if target == grn_rec.target:
-                    obj._grns.remove(grn_rec)
+                    obj.grns.remove(grn_rec)
             plenaries.append(Plenary.get_plenary(obj))
 
         session.flush()
