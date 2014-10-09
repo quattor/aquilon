@@ -62,7 +62,7 @@ class CommandMake(BrokerCommand):
                                     .format(dbpersonality, dbhost.cluster,
                                             ", ".join(allowed)))
 
-            dbhost.personality_stage = dbpersonality
+            dbhost.personality_stage = dbpersonality.default_stage
 
         if osname or osversion or old_archetype != dbarchetype:
             if not osname:

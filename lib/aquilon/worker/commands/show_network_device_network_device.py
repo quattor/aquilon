@@ -35,7 +35,7 @@ class CommandShowNetworkDevice(BrokerCommand):
             options = [undefer('comments'),
                        joinedload('host'),
                        undefer('host.comments'),
-                       undefer('host.personality_stage.archetype.comments'),
+                       undefer('host.personality_stage.personality.archetype.comments'),
                        subqueryload('port_groups'),
                        undefer('port_groups.creation_date'),
                        joinedload('port_groups.network'),

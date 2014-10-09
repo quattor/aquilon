@@ -324,7 +324,9 @@ class CommandFlush(BrokerCommand):
                               subqueryload("services_provided"),
                               subqueryload("_cluster"),
                               subqueryload("personality_stage"),
-                              subqueryload("personality_stage.grns"))
+                              joinedload("personality_stage.personality"),
+                              # FIXME: undo this when GRNs are staged
+                              subqueryload("personality_stage.personality.grns"))
 
                 progress = ProgressReport(logger, q.count(), "host")
                 for h in q:

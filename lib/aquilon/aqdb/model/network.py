@@ -231,7 +231,7 @@ class Network(Base):
         if dbstage:
             return [route for route in self.static_routes
                     if route.personality is None or
-                    route.personality == dbstage]
+                    route.personality == dbstage.personality]
         else:
             return [route for route in self.static_routes
                     if route.personality is None]

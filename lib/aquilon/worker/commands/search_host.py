@@ -22,14 +22,14 @@ from sqlalchemy.sql import and_, or_
 
 from aquilon.exceptions_ import NotFoundException
 from aquilon.aqdb.model import (Host, Cluster, Archetype, Personality,
-                                PersonalityGrnMap, HostGrnMap, HostLifecycle,
-                                OperatingSystem, ServiceInstance,
-                                ServiceInstanceServer,
-                                Share, VirtualDisk, Machine, Model,
-                                DnsRecord, ARecord, Fqdn, DnsDomain, Interface,
-                                AddressAssignment, NetworkEnvironment, Network,
-                                MetaCluster, VirtualMachine, ClusterResource,
-                                HardwareEntity, HostEnvironment, User)
+                                PersonalityStage, PersonalityGrnMap,
+                                HostGrnMap, HostLifecycle, OperatingSystem,
+                                ServiceInstance, ServiceInstanceServer, Share,
+                                VirtualDisk, Machine, Model, DnsRecord, ARecord,
+                                Fqdn, DnsDomain, Interface, AddressAssignment,
+                                NetworkEnvironment, Network, MetaCluster,
+                                VirtualMachine, ClusterResource, HardwareEntity,
+                                HostEnvironment, User)
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.formats.list import StringAttributeList
@@ -165,15 +165,16 @@ class CommandSearchHost(BrokerCommand):
             dbarchetype = None
 
         if archetype or personality or host_environment:
-            q = q.join(Personality, aliased=True)
-
-            if archetype:
-                q = q.filter_by(archetype=dbarchetype)
+            q = q.join(PersonalityStage, aliased=True)
             if personality:
                 subq = Personality.get_matching_query(session, name=personality,
                                                       archetype=dbarchetype,
                                                       compel=True)
-                q = q.filter(Personality.id.in_(subq))
+                q = q.filter(PersonalityStage.personality_id.in_(subq))
+
+            q = q.join(Personality, aliased=True, from_joinpoint=True)
+            if archetype:
+                q = q.filter_by(archetype=dbarchetype)
             if host_environment:
                 dbhost_env = HostEnvironment.get_instance(session,
                                                           host_environment)
@@ -253,20 +254,27 @@ class CommandSearchHost(BrokerCommand):
             dbgrn = lookup_grn(session, grn, eon_id, autoupdate=False,
                                usable_only=False)
 
+            PersStages = aliased(PersonalityStage)
+            HostGrnAlias = aliased(HostGrnMap)
+
             persq = session.query(Personality.id)
             persq = persq.outerjoin(PersonalityGrnMap)
             persq = persq.filter(or_(Personality.owner_eon_id == dbgrn.eon_id,
                                      PersonalityGrnMap.eon_id == dbgrn.eon_id))
-            q = q.outerjoin(HostGrnMap, aliased=True)
+
+            q = q.join(PersStages, Host.personality_stage)
+            q = q.outerjoin(HostGrnAlias, Host.grns)
             q = q.filter(or_(Host.owner_eon_id == dbgrn.eon_id,
                              HostGrnMap.eon_id == dbgrn.eon_id,
-                             Host.personality_id.in_(persq.subquery())))
+                             PersStages.personality_id.in_(persq.subquery())))
             q = q.reset_joinpoint()
 
         if fullinfo or style != "raw":
             q = q.options(joinedload('personality_stage'),
-                          undefer('personality_stage.archetype.comments'),
-                          subqueryload('personality_stage.grns'),
+                          joinedload('personality_stage.personality'),
+                          undefer('personality_stage.personality.archetype.comments'),
+                          # FIXME: Undo this when GRNs are staged
+                          subqueryload('personality_stage.personality.grns'),
                           subqueryload('grns'),
                           subqueryload('services_used'),
                           subqueryload('services_provided'),

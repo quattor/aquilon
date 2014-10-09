@@ -21,7 +21,7 @@ from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy import Column, ForeignKey
 from sqlalchemy.orm import relation
 
-from aquilon.aqdb.model import Branch, Sandbox, Personality, User
+from aquilon.aqdb.model import Branch, Sandbox, PersonalityStage, User
 
 
 class CompileableMixin(object):
@@ -34,13 +34,13 @@ class CompileableMixin(object):
         return Column(ForeignKey(User.id, ondelete="SET NULL"), nullable=True)
 
     @declared_attr
-    def personality_id(cls):  # pylint: disable=E0213
+    def personality_stage_id(cls):  # pylint: disable=E0213
         # Lack of cascaded deletion is intentional on personality
-        return Column(ForeignKey(Personality.id), nullable=False, index=True)
+        return Column(ForeignKey(PersonalityStage.id), nullable=False, index=True)
 
     @declared_attr
     def personality_stage(cls):  # pylint: disable=E0213
-        return relation(Personality, lazy=False, innerjoin=True)
+        return relation(PersonalityStage, lazy=False, innerjoin=True)
 
     @declared_attr
     def branch(cls):  # pylint: disable=E0213
@@ -56,7 +56,7 @@ class CompileableMixin(object):
 
     @property
     def personality(self):
-        return self.personality_stage
+        return self.personality_stage.personality
 
     @property
     def authored_branch(self):

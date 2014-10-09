@@ -41,7 +41,9 @@ class CommandReconfigureList(BrokerCommand):
     def get_hostlist(self, session, list, **arguments):   # pylint: disable=W0613
         check_hostlist_size(self.command, self.config, list)
         options = [joinedload('personality_stage'),
-                   subqueryload('personality_stage.grns'),
+                   joinedload('personality_stage.personality'),
+                   # FIXME: Undo this when GRNs are staged
+                   subqueryload('personality_stage.personality.grns'),
                    subqueryload('grns'),
                    subqueryload('services_used'),
                    undefer('services_used._client_count'),
@@ -105,13 +107,15 @@ class CommandReconfigureList(BrokerCommand):
                 # Cache personalities to avoid looking up the same data many
                 # times
                 if personality in personality_cache[dbarchetype]:
-                    dbpersonality = personality_cache[dbarchetype][personality]
+                    dbstage = personality_cache[dbarchetype][personality]
+                    dbpersonality = dbstage.personality
                 else:
                     try:
                         dbpersonality = Personality.get_unique(session, name=personality,
                                                                archetype=dbarchetype,
                                                                compel=True)
-                        personality_cache[dbarchetype][personality] = dbpersonality
+                        dbstage = dbpersonality.default_stage
+                        personality_cache[dbarchetype][personality] = dbstage
                     except NotFoundException as err:
                         failed.append("%s: %s" % (dbhost.fqdn, err))
                         continue
@@ -126,7 +130,7 @@ class CommandReconfigureList(BrokerCommand):
                                           dbhost.cluster, ", ".join(allowed)))
                     continue
 
-                dbhost.personality_stage = dbpersonality
+                dbhost.personality_stage = dbstage
 
             if osname or osversion or old_archetype != dbarchetype:
                 if not osname:

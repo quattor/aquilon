@@ -151,7 +151,7 @@ class CommandSearchMachine(BrokerCommand):
                           undefer('disks.comments'),
                           joinedload('host'),
                           undefer('host.comments'),
-                          undefer('host.personality_stage.archetype.comments'),
+                          undefer('host.personality_stage.personality.archetype.comments'),
                           subqueryload('host.services_used'),
                           subqueryload('host._cluster'),
                           joinedload('host._cluster.cluster'))

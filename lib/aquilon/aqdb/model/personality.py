@@ -20,11 +20,12 @@ import re
 
 from sqlalchemy import (Column, Integer, Boolean, DateTime, Sequence, String,
                         ForeignKey, UniqueConstraint, PrimaryKeyConstraint)
-from sqlalchemy.orm import relation, deferred
 from sqlalchemy.inspection import inspect
+from sqlalchemy.orm import relation, backref, deferred
+from sqlalchemy.orm.collections import column_mapped_collection
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.column_types.aqstr import AqStr
+from aquilon.aqdb.column_types import AqStr, Enum
 from aquilon.aqdb.model import (Base, Archetype, Grn, HostEnvironment,
                                 User, NetGroupWhiteList)
 
@@ -32,6 +33,8 @@ _TN = 'personality'
 _PGN = 'personality_grn_map'
 _PRU = 'personality_rootuser'
 _PRNG = 'personality_rootnetgroup'
+_PS = 'personality_stage'
+_ALLOWED_STAGES = ('previous', 'current', 'next')
 
 
 class Personality(Base):
@@ -88,6 +91,104 @@ class Personality(Base):
                                 "does not match the host environment '{1}'"
                                 .format(name, host_environment))
 
+    @property
+    def default_stage(self):
+        """
+        Return the default stage to be used for non-update operations
+        """
+        return self.stages["current"]
+
+    @property
+    def active_stage(self):
+        """
+        Return the default stage to be used for updates
+        """
+        return self.stages["current"]
+
+
+class PersonalityStage(Base):
+    __tablename__ = _PS
+
+    id = Column(Integer, Sequence('%s_id_seq' % _PS), primary_key=True)
+
+    personality_id = Column(ForeignKey(Personality.id, ondelete='CASCADE'),
+                            nullable=False)
+    name = Column(Enum(8, _ALLOWED_STAGES), nullable=False)
+
+    # The plenary classes need the ORM to be aware if the object is deleted, so
+    # we're using a ORM cascading instead of passive_deletes=True here.
+    personality = relation(Personality, innerjoin=True,
+                           backref=backref('stages',
+                                           cascade='all, delete-orphan',
+                                           collection_class=column_mapped_collection(name)))
+
+    __table_args__ = (UniqueConstraint(personality_id, name,
+                                       name='%s_uk' % _PS),)
+
+    def __format__(self, format_spec):
+        return format(self.personality, format_spec)
+
+    @property
+    def qualified_name(self):
+        return self.personality.qualified_name
+
+    @property
+    def cluster_required(self):
+        return self.personality.cluster_required
+
+    @property
+    def owner_eon_id(self):
+        return self.personality.owner_eon_id
+
+    @property
+    def archetype(self):
+        return self.personality.archetype
+
+    @property
+    def owner_grn(self):
+        return self.personality.owner_grn
+
+    @property
+    def host_environment(self):
+        return self.personality.host_environment
+
+    @property
+    def root_users(self):
+        return self.personality.root_users
+
+    @property
+    def root_netgroups(self):
+        return self.personality.root_netgroups
+
+    # FIXME: Drop this property when features are staged
+    @property
+    def features(self):
+        return self.personality.features
+
+    # FIXME: Drop this property when required services are staged
+    @property
+    def services(self):
+        return self.personality.services
+
+    # FIXME: Drop this property when GRNs are staged
+    @property
+    def grns(self):
+        return self.personality.grns
+
+    # FIXME: Drop this property when cluster_infos is staged
+    @property
+    def cluster_infos(self):
+        return self.personality.cluster_infos
+
+    # FIXME: Drop this property when parameters are staged
+    @property
+    def paramholder(self):
+        return self.personality.paramholder
+
+    def copy(self, name="current"):
+        new = self.__class__(name=name)
+
+        return new
 
 class PersonalityGrnMap(Base):
     __tablename__ = _PGN

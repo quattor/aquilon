@@ -16,7 +16,7 @@
 # limitations under the License.
 """Contains the logic for `aq compile --personality`."""
 
-from aquilon.aqdb.model import Host, Personality
+from aquilon.aqdb.model import Host, Personality, PersonalityStage
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
 from aquilon.worker.dbwrappers.host import validate_branch_author
@@ -45,11 +45,14 @@ class CommandCompilePersonality(BrokerCommand):
             pancexclude = r'components/spma/functions'
 
         q = session.query(Host)
-        q = q.filter_by(personality_stage=dbpersonality)
+
         if dbdomain:
             q = q.filter_by(branch=dbdomain)
         if dbauthor:
             q = q.filter_by(sandbox_author=dbauthor)
+
+        q = q.join(PersonalityStage)
+        q = q.filter_by(personality=dbpersonality)
 
         host_list = q.all()
 

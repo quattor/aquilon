@@ -373,7 +373,7 @@ class PlenaryHostObject(ObjectPlenary):
         pan_include(lines, services)
         pan_include(lines, provides)
 
-        path = PlenaryPersonalityBase.template_name(pers)
+        path = PlenaryPersonalityBase.template_name(pers.personality)
         pan_include(lines, path)
 
         if self.dbobj.cluster:

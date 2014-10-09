@@ -20,9 +20,10 @@ import re
 from six.moves.configparser import NoSectionError, NoOptionError  # pylint: disable=F0401
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import (Archetype, Personality, PersonalityGrnMap,
-                                Parameter, HostEnvironment, StaticRoute,
-                                PersonalityServiceMap, PersonalityParameter)
+from aquilon.aqdb.model import (Archetype, Personality, PersonalityStage,
+                                PersonalityGrnMap, Parameter, HostEnvironment,
+                                StaticRoute, PersonalityServiceMap,
+                                PersonalityParameter)
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.grn import lookup_grn
 from aquilon.worker.templates import Plenary
@@ -64,6 +65,7 @@ class CommandAddPersonality(BrokerCommand):
                             "not be copied, you will need to set it separately "
                             "on the new personality if needed."
                             .format(dbfrom_persona))
+            dbfrom_vers = dbfrom_persona.default_stage
 
         if not grn and not eon_id:
             raise ArgumentError("GRN or EON ID is required for adding a "
@@ -100,6 +102,9 @@ class CommandAddPersonality(BrokerCommand):
         session.add(dbpersona)
 
         if copy_from:
+            dbstage = dbfrom_vers.copy()
+            dbpersona.stages["current"] = dbstage
+
             if dbfrom_persona.paramholder:
                 dbpersona.paramholder = PersonalityParameter()
 
@@ -143,6 +148,9 @@ class CommandAddPersonality(BrokerCommand):
             # TODO: should we copy root users and netgroups? Not doing so is
             # safer.
         else:
+            dbstage = PersonalityStage(name="current")
+            dbpersona.stages["current"] = dbstage
+
             if self.config.has_option(section, "default_grn_target"):
                 target = self.config.get(section, "default_grn_target")
                 dbpersona.grns.append(PersonalityGrnMap(grn=dbgrn, target=target))

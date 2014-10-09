@@ -57,7 +57,7 @@ def parse_cluster_arguments(session, config, archetype, personality, domain, san
     if max_members is None and config.has_option(section, "max_members_default"):
         max_members = config.getint(section, "max_members_default")
 
-    kw = {'personality_stage': dbpersonality,
+    kw = {'personality_stage': dbpersonality.default_stage,
           'branch': dbbranch,
           'sandbox_author': dbauthor,
           'status': dbstatus,

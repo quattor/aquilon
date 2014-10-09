@@ -17,7 +17,7 @@
 """Contains the logic for `aq del personality`."""
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import Personality, Host, Cluster
+from aquilon.aqdb.model import Personality, PersonalityStage, Host, Cluster
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.templates import Plenary
 
@@ -34,13 +34,17 @@ class CommandDelPersonality(BrokerCommand):
             q = session.query(Cluster.id)
         else:
             q = session.query(Host.hardware_entity_id)
-        q = q.filter_by(personality_stage=dbpersona)
+        q = q.join(PersonalityStage)
+        q = q.filter_by(personality=dbpersona)
         if q.count():
             raise ArgumentError("{0} is still in use and cannot be deleted."
                                 .format(dbpersona))
 
         plenary = Plenary.get_plenary(dbpersona, logger=logger)
+        # FIXME: clean up plenaries of the stages
+
         session.delete(dbpersona)
+
         session.flush()
         plenary.remove()
 

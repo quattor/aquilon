@@ -18,7 +18,7 @@
 
 from operator import attrgetter
 
-from aquilon.aqdb.model import Personality
+from aquilon.aqdb.model import Personality, PersonalityStage
 from aquilon.worker.formats.formatters import ObjectFormatter
 
 
@@ -133,3 +133,22 @@ class PersonalityFormatter(ObjectFormatter):
         yield (obj.archetype.name, obj.name,)
 
 ObjectFormatter.handlers[Personality] = PersonalityFormatter()
+
+
+class PersonalityStageFormatter(ObjectFormatter):
+    def format_raw(self, personality_stage, indent="", embedded=True,
+                   indirect_attrs=True):
+        return self.redirect_raw(personality_stage.personality, indent=indent,
+                                 embedded=embedded,
+                                 indirect_attrs=indirect_attrs)
+
+    def format_proto(self, personality_stage, container, embedded=True,
+                     indirect_attrs=True):
+        return self.redirect_proto(personality_stage.personality, container,
+                                   embedded=embedded,
+                                   indirect_attrs=indirect_attrs)
+
+    def csv_fields(self, obj):
+        yield (obj.archetype.name, obj.personality.name, obj.name)
+
+ObjectFormatter.handlers[PersonalityStage] = PersonalityStageFormatter()

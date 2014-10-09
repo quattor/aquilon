@@ -29,7 +29,7 @@ from sqlalchemy.orm import (relation, contains_eager, column_property, backref,
 from sqlalchemy.sql import select, func, or_, null
 
 from aquilon.aqdb.model import (Base, Service, Host, DnsRecord, DnsDomain,
-                                HardwareEntity, Fqdn)
+                                HardwareEntity, Fqdn, PersonalityStage)
 from aquilon.aqdb.column_types.aqstr import AqStr
 
 _TN = 'service_instance'
@@ -87,11 +87,13 @@ class ServiceInstance(Base):
 
         # Meta
         McAlias = aliased(MetaCluster)
+        PersStage = aliased(PersonalityStage)
         q = session.query(Cluster.name, Cluster.max_hosts)
         # Force orm to look for mc - service relation
         q = q.join(McAlias, Cluster.metacluster)
         q = q.filter(McAlias.services_used.contains(self))
-        q = q.filter(McAlias.personality_id.in_(personality_ids))
+        q = q.join(PersStage, McAlias.personality_stage)
+        q = q.filter(PersStage.personality_id.in_(personality_ids))
 
         for name, max_host in q.all():
             clusters[name] = max_host
@@ -100,18 +102,21 @@ class ServiceInstance(Base):
         q = session.query(Cluster.name, Cluster.max_hosts)
         q = q.filter(Cluster.cluster_type != 'meta')
         q = q.filter(Cluster.services_used.contains(self))
-        q = q.filter(Cluster.personality_id.in_(personality_ids))
+        q = q.join(PersonalityStage)
+        q = q.filter(PersonalityStage.personality_id.in_(personality_ids))
 
         for name, max_host in q.all():
             clusters[name] = max_host
 
         adjusted_count = sum(itervalues(clusters))
 
+        PersStage = aliased(PersonalityStage)
         q = session.query(Host)
         q = q.filter(Host.services_used.contains(self))
         q = q.outerjoin('_cluster', 'cluster')
+        q = q.outerjoin(PersStage, Cluster.personality_stage)
         q = q.filter(or_(Cluster.id == null(),
-                         ~Cluster.personality_id.in_(personality_ids)))
+                         ~PersStage.personality_id.in_(personality_ids)))
         adjusted_count += q.count()
         return adjusted_count
 

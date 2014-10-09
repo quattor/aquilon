@@ -20,7 +20,7 @@ import logging
 
 from aquilon.exceptions_ import InternalError
 from aquilon.locks import LockQueue, LockKey
-from aquilon.aqdb.model import Personality, ServiceInstance
+from aquilon.aqdb.model import Personality, PersonalityStage, ServiceInstance
 from aquilon.worker.logger import CLIENT_INFO
 
 LOGGER = logging.getLogger(__name__)
@@ -99,7 +99,8 @@ class PlenaryKey(LockKey):
             lockset = self.shared
 
         if personality:
-            if not isinstance(personality, Personality):
+            if not isinstance(personality, Personality) and \
+               not isinstance(personality, PersonalityStage):
                 raise InternalError("PlenaryKey got %r instead of Personality"
                                     % type(personality))
             lockset["personality"].add(personality.qualified_name)

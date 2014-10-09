@@ -20,7 +20,8 @@ from sqlalchemy.orm import joinedload, subqueryload
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import (Personality, PersonalityESXClusterInfo,
-                                Cluster, Host, HostEnvironment)
+                                PersonalityStage, Cluster, Host,
+                                HostEnvironment)
 from aquilon.aqdb.model.cluster import restricted_builtins
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.grn import lookup_grn
@@ -85,7 +86,8 @@ class CommandUpdatePersonality(BrokerCommand):
                 q = session.query(Cluster.id)
             else:
                 q = session.query(Host.hardware_entity_id)
-            q = q.filter_by(personality_stage=dbpersona)
+            q = q.join(PersonalityStage)
+            q = q.filter_by(personality=dbpersona)
             # XXX: Ideally, filter based on hosts/clusters that are/arenot in
             # cluster/metacluster
             if q.count():
@@ -116,7 +118,9 @@ class CommandUpdatePersonality(BrokerCommand):
                 # various GRNs inside the personality, so make sure we preserve
                 # those GRNs by filtering on the original GRN of the personality
                 q = session.query(Host)
-                q = q.filter_by(personality_stage=dbpersona, owner_grn=old_grn)
+                q = q.filter_by(owner_grn=old_grn)
+                q = q.join(PersonalityStage)
+                q = q.filter_by(personality=dbpersona)
                 for dbhost in q.all():
                     dbhost.owner_grn = dbgrn
                     plenaries.append(Plenary.get_plenary(dbhost))
@@ -141,7 +145,8 @@ class CommandUpdatePersonality(BrokerCommand):
                       joinedload('resholder'),
                       subqueryload('resholder.resources'))
         # TODO: preload virtual machines
-        q = q.filter_by(personality_stage=dbpersona)
+        q = q.join(PersonalityStage)
+        q = q.filter_by(personality=dbpersona)
         clusters = q.all()
         failures = []
         for cluster in clusters:

@@ -194,8 +194,8 @@ class CommandRefreshWindowsHosts(BrokerCommand):
                 logger.info(msg)
                 continue
             dbhost = Host(hardware_entity=dbmachine, branch=dbdomain,
-                          status=dbstatus, personality_stage=dbpersonality,
-                          operating_system=dbos,
+                          status=dbstatus, operating_system=dbos,
+                          personality_stage=dbpersonality.default_stage,
                           comments="Created by refresh_windows_host")
             session.add(dbhost)
 

@@ -28,8 +28,10 @@ class CommandShowHostList(BrokerCommand):
     def render(self, session, list, **arguments):
         options = [undefer('comments'),
                    joinedload('personality_stage'),
-                   undefer('personality_stage.archetype.comments'),
-                   subqueryload('personality_stage.grns'),
+                   joinedload('personality_stage.personality'),
+                   undefer('personality_stage.personality.archetype.comments'),
+                   # FIXME: Undo this when GRNs are staged
+                   subqueryload('personality_stage.personality.grns'),
                    subqueryload('grns'),
                    subqueryload('services_used'),
                    subqueryload('services_provided'),

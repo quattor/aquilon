@@ -18,7 +18,8 @@
 from sqlalchemy.inspection import inspect
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import Archetype, Cluster, Host, Personality
+from aquilon.aqdb.model import (Archetype, Cluster, Host, Personality,
+                                PersonalityStage)
 from aquilon.worker.broker import BrokerCommand
 
 
@@ -52,7 +53,7 @@ class CommandUpdateArchetype(BrokerCommand):
                 q = session.query(Host.hardware_entity_id)
             else:
                 q = session.query(Cluster.id)
-            q = q.join(Personality)
+            q = q.join(PersonalityStage, Personality)
             q = q.filter_by(archetype=dbarchetype)
             if q.count():
                 raise ArgumentError("{0} is currently in use, the cluster "

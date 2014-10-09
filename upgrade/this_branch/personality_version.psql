@@ -1,0 +1,46 @@
+CREATE SEQUENCE personality_stage_id_seq;
+
+CREATE TABLE personality_stage (
+	id INTEGER NOT NULL,
+	personality_id INTEGER NOT NULL,
+	name VARCHAR(8) NOT NULL,
+	CONSTRAINT personality_stage_pers_fk FOREIGN KEY (personality_id) REFERENCES personality (id) ON DELETE CASCADE,
+	CONSTRAINT personality_stage_pk PRIMARY KEY (id),
+	CONSTRAINT personality_stage_uk UNIQUE (personality_id, name)
+);
+
+ALTER TABLE host ADD personality_stage_id INTEGER;
+ALTER TABLE clstr ADD personality_stage_id INTEGER;
+
+CREATE OR REPLACE FUNCTION _convert_personalities() RETURNS VOID LANGUAGE plpgsql AS $$
+DECLARE
+	pers_curs CURSOR IS SELECT id FROM personality;
+	pers_rec RECORD;
+	vers_id personality_stage.id%TYPE;
+BEGIN
+	FOR pers_rec IN pers_curs LOOP
+		INSERT INTO personality_stage (id, personality_id, name)
+			VALUES (nextval('personality_stage_id_seq'), pers_rec.id, 'current')
+			RETURNING id INTO vers_id;
+		UPDATE host SET personality_stage_id = vers_id WHERE personality_id = pers_rec.id;
+		UPDATE clstr SET personality_stage_id = vers_id WHERE personality_id = pers_rec.id;
+	END LOOP;
+END;
+$$;
+
+BEGIN;
+SELECT _convert_personalities();
+COMMIT;
+DROP FUNCTION _convert_personalities();
+
+ALTER TABLE host ALTER COLUMN personality_stage_id SET NOT NULL;
+ALTER TABLE host ADD CONSTRAINT host_personality_stage_fk
+	FOREIGN KEY (personality_stage_id) REFERENCES personality_stage (id);
+ALTER TABLE host DROP COLUMN personality_id;
+CREATE INDEX host_personality_stage_idx ON host (personality_stage_id);
+
+ALTER TABLE clstr ALTER COLUMN personality_stage_id SET NOT NULL;
+ALTER TABLE clstr ADD CONSTRAINT clstr_personality_stage_fk
+	FOREIGN KEY (personality_stage_id) REFERENCES personality_stage (id);
+ALTER TABLE clstr DROP COLUMN personality_id;
+CREATE INDEX clstr_personality_stage_idx ON clstr (personality_stage_id);

@@ -27,7 +27,8 @@ from aquilon.exceptions_ import (ArgumentError, AuthorizationException,
                                  ProcessException)
 from aquilon.aqdb.column_types import AqStr
 from aquilon.aqdb.model import (Domain, Sandbox, Branch, Host, Cluster,
-                                Archetype, Personality, User)
+                                Archetype, Personality, PersonalityStage,
+                                User)
 from aquilon.utils import remove_dir, validate_template_name
 from aquilon.worker.dbwrappers.user_principal import get_user_principal
 from aquilon.worker.processes import run_git
@@ -210,12 +211,12 @@ def has_compileable_objects(dbbranch):
 
     q1 = session.query(Cluster.id)
     q1 = q1.filter_by(branch=dbbranch)
-    q1 = q1.join(Personality, Archetype)
+    q1 = q1.join(PersonalityStage, Personality, Archetype)
     q1 = q1.filter_by(is_compileable=True)
 
     q2 = session.query(Host.hardware_entity_id)
     q2 = q2.filter_by(branch=dbbranch)
-    q2 = q2.join(Personality, Archetype)
+    q2 = q2.join(PersonalityStage, Personality, Archetype)
     q2 = q2.filter_by(is_compileable=True)
 
     return q1.count() or q2.count()

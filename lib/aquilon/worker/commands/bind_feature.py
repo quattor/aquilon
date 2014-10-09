@@ -17,8 +17,9 @@
 
 from aquilon.exceptions_ import (ArgumentError, InternalError,
                                  AuthorizationException, UnimplementedError)
-from aquilon.aqdb.model import (Feature, Archetype, Personality, Model, Domain,
-                                Host, Cluster)
+from aquilon.aqdb.model import (Feature, Archetype, Personality,
+                                PersonalityStage, Model, Domain, Host,
+                                Cluster)
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.commands.deploy import validate_justification
 from aquilon.worker.dbwrappers.feature import add_link, check_feature_template
@@ -136,9 +137,9 @@ class CommandBindFeature(BrokerCommand):
         queries = []
         for cls_ in (Host, Cluster):
             q = session.query(Domain)
-            q = q.join(cls_)
+            q = q.join(cls_, PersonalityStage)
             if dbpersonality:
-                q = q.filter_by(personality_stage=dbpersonality)
+                q = q.filter_by(personality=dbpersonality)
             else:
                 q = q.join(Personality)
                 q = q.filter_by(archetype=dbarchetype)

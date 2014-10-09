@@ -19,7 +19,7 @@
 from sqlalchemy.orm import joinedload, subqueryload
 from sqlalchemy.sql import and_
 
-from aquilon.aqdb.model import Personality, Host, Cluster, ServiceInstance
+from aquilon.aqdb.model import PersonalityStage, Host, Cluster, ServiceInstance
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
 from aquilon.worker.locks import CompileKey
@@ -42,24 +42,28 @@ class CommandCompile(BrokerCommand):
         # Object templates (hosts, clusters) are protected by the domain lock.
         plenaries = PlenaryCollection(logger=logger)
 
-        q1 = session.query(Personality)
+        q1 = session.query(PersonalityStage)
         q1 = q1.join(Host)
         q1 = q1.filter(and_(Host.branch == dbdomain,
                             Host.sandbox_author == dbauthor))
         q1 = q1.reset_joinpoint()
-        q1 = q1.options(joinedload('paramholder'),
-                        subqueryload('paramholder.parameters'))
+        # TODO: undo this change once parameters are staged
+        q1 = q1.options(joinedload('personality'),
+                        joinedload('personality.paramholder'),
+                        subqueryload('personality.paramholder.parameters'))
 
-        q2 = session.query(Personality)
+        q2 = session.query(PersonalityStage)
         q2 = q2.join(Cluster)
         q2 = q2.filter(and_(Cluster.branch == dbdomain,
                             Cluster.sandbox_author == dbauthor))
         q2 = q2.reset_joinpoint()
-        q2 = q2.options(joinedload('paramholder'),
-                        subqueryload('paramholder.parameters'))
+        # TODO: undo this change once parameters are staged
+        q2 = q2.options(joinedload('personality'),
+                        joinedload('personality.paramholder'),
+                        subqueryload('personality.paramholder.parameters'))
 
-        for dbpers in q1.union(q2):
-            plenaries.append(Plenary.get_plenary(dbpers))
+        for dbstage in q1.union(q2):
+            plenaries.append(Plenary.get_plenary(dbstage.personality))
 
         q1 = session.query(ServiceInstance)
         q1 = q1.join(ServiceInstance.clients)
