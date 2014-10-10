@@ -31,7 +31,6 @@ from aquilon.worker.formats.parameter_definition import ParamDefinitionFormatter
 
 
 def get_feature_link(session, feature, model, interface_name, personality):
-    dblink = None
     dbmodel = None
     feature_type = 'host'
     if interface_name:
@@ -89,7 +88,7 @@ def del_parameter(session, path, param_holder, feature=None, model=None, interfa
         dblink = get_feature_link(session, feature, model, interface_name,
                                   param_holder.personality)
 
-    match = get_paramdef_for_parameter(session, path, param_holder, dblink)
+    match = get_paramdef_for_parameter(path, param_holder, dblink)
 
     if match and match.rebuild_required:
         validate_rebuild_required(session, path, param_holder)
@@ -148,12 +147,10 @@ def validate_parameter(session, path, value, param_holder, featurelink=None):
         - if rebuild_required validate do validation on host status
     """
 
-    match = get_paramdef_for_parameter(session, path, param_holder, featurelink)
+    match = get_paramdef_for_parameter(path, param_holder, featurelink)
     if not match:
         raise ArgumentError("Parameter %s does not match any parameter definitions"
                             % path)
-
-    retval = None
 
     # check if default specified on parameter definition
     if not value:
@@ -191,19 +188,17 @@ def validate_rebuild_required(session, path, param_holder):
                             (path, personality, personality))
 
 
-def get_paramdef_for_parameter(session, path, param_holder, dbfeaturelink=None):
-    param_definitions = None
-    match = None
-
+def get_paramdef_for_parameter(path, param_holder, dbfeaturelink):
     if dbfeaturelink:
         paramdef_holder = dbfeaturelink.feature.paramdef_holder
     else:
         paramdef_holder = param_holder.personality.archetype.paramdef_holder
 
-    if paramdef_holder:
-        param_definitions = paramdef_holder.param_definitions
-    else:
-        param_definitions = []
+    if not paramdef_holder:
+        return None
+
+    param_definitions = paramdef_holder.param_definitions
+    match = None
 
     # the specified path of the parameter should either be an actual match
     # or match input specified regexp.
@@ -212,11 +207,13 @@ def get_paramdef_for_parameter(session, path, param_holder, dbfeaturelink=None):
     for paramdef in param_definitions:
         if path == paramdef.path:
             match = paramdef
+            break
 
     if not match:
         for paramdef in param_definitions:
             if re.match(paramdef.path + '$', path):
                 match = paramdef
+                break
 
     return match
 
@@ -246,7 +243,6 @@ def validate_required_parameter(param_definitions, parameters, dbfeaturelink=Non
 
 
 def search_path_in_personas(session, path, paramdef_holder):
-
     q = session.query(PersonalityParameter)
     q = q.join(Personality)
     if isinstance(paramdef_holder, ArchetypeParamDef):
@@ -280,22 +276,20 @@ def search_path_in_personas(session, path, paramdef_holder):
     return holder
 
 
-def validate_personality_config(session, archetype, personality):
+def validate_personality_config(dbpersonality):
     """
         Validates all the parameters on personality to validate
         if all required parameters have been set. All feature
         parameters are also validated.
     """
-    dbpersonality = None
-    if isinstance(personality, Personality):
-        dbpersonality = personality
-    else:
-        dbpersonality = Personality.get_unique(session, name=personality,
-                                               archetype=archetype, compel=True)
     dbarchetype = dbpersonality.archetype
 
+    if dbpersonality.paramholder:
+        parameters = dbpersonality.paramholder.parameters
+    else:
+        parameters = None
+
     error = []
-    # validate parameters
     param_definitions = []
 
     if dbpersonality.paramholder:

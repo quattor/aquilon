@@ -45,7 +45,6 @@ def get_parameters_by_feature(dbpersonality, dbfeaturelink):
 
     parameters = dbpersonality.paramholder.parameters
     for param_def in paramdef_holder.param_definitions:
-        value = None
         for param in parameters:
             value = param.get_feature_path(dbfeaturelink,
                                            param_def.path, compel=False)
