@@ -18,7 +18,7 @@
 """Module for testing the bind feature command."""
 
 if __name__ == "__main__":
-    from broker import utils
+    import utils
     utils.import_depends()
 
 import unittest2 as unittest
@@ -285,6 +285,17 @@ class TestBindFeature(TestBrokerCommand):
         command = ["bind", "feature", "--feature", "src_route",
                    "--model", "e1000", "--vendor", "intel",
                    "--personality", "compileserver", "--interface", "eth1"]
+        out = self.unauthorizedtest(command, auth=True, msgcheck=False)
+        self.matchoutput(out,
+                         "Unauthorized: Changing feature bindings for a "
+                         "non public feature where owner grns do not "
+                         "match requires --justification.",
+                         command)
+
+        command = ["bind", "feature", "--feature", "src_route",
+                   "--model", "e1000", "--vendor", "intel",
+                   "--personality", "compileserver", "--interface", "eth1",
+                   "--justification", "tcm=12345678"]
         (out, err) = self.successtest(command)
         self.matchoutput(err, "Flush", command)
 
@@ -363,6 +374,16 @@ class TestBindFeature(TestBrokerCommand):
     def test_160_bind_interface_personality(self):
         command = ["bind", "feature", "--feature", "src_route",
                    "--personality", "compileserver", "--interface", "bond0"]
+        out = self.unauthorizedtest(command, auth=True, msgcheck=False)
+        self.matchoutput(out,
+                         "Unauthorized: Changing feature bindings for a "
+                         "non public feature where owner grns do not "
+                         "match requires --justification.",
+                         command)
+
+        command = ["bind", "feature", "--feature", "src_route",
+                   "--personality", "compileserver", "--interface", "bond0",
+                   "--justification", "tcm=123456789"]
         err = self.statustest(command)
         self.matchoutput(err, "Flushed 1/1 templates.", command)
 

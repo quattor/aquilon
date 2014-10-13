@@ -117,12 +117,23 @@ class TestUnbindFeature(TestBrokerCommand):
                    "--model", "e1000", "--vendor", "intel",
                    "--personality", "compileserver",
                    "--interface", "eth1"]
+        out = self.unauthorizedtest(command, auth=True, msgcheck=False)
+        self.matchoutput(out,
+                         "Unauthorized: Changing feature bindings for a "
+                         "non public feature where owner grns do not "
+                         "match requires --justification.",
+                         command)
+        command = ["unbind", "feature", "--feature", "src_route",
+                   "--model", "e1000", "--vendor", "intel",
+                   "--personality", "compileserver",
+                   "--interface", "eth1", "--justification", "tcm=12345678"]
         err = self.statustest(command)
         self.matchoutput(err, "Flush", command)
 
     def test_160_unbind_interface_personality(self):
         command = ["unbind", "feature", "--feature", "src_route",
-                   "--personality", "compileserver", "--interface", "bond0"]
+                   "--personality", "compileserver", "--interface", "bond0",
+                   "--justification", "tcm=12345678"]
         err = self.statustest(command)
         self.matchoutput(err, "Flushed 1/1 templates.", command)
 
@@ -159,7 +170,8 @@ class TestUnbindFeature(TestBrokerCommand):
 
     def test_200_unbind_interface_personality_again(self):
         command = ["unbind", "feature", "--feature", "src_route",
-                   "--personality", "compileserver", "--interface", "bond0"]
+                   "--personality", "compileserver", "--interface", "bond0",
+                   "--justification", "tcm=12345678"]
         out = self.notfoundtest(command)
         self.matchoutput(out,
                          "Interface Feature src_route is not bound to "
