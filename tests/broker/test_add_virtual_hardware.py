@@ -441,10 +441,10 @@ class TestAddVirtualHardware(TestBrokerCommand):
 
     def testfailaddnoncluster(self):
         command = ["add_machine", "--machine=ut3c1n1", "--cluster=utecl1",
-                   "--model=hs21-8853l5u"]
+                   "--model=hs21-8853"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
-                         "Model ibm/hs21-8853l5u is not a virtual machine.",
+                         "Model ibm/hs21-8853 is not a virtual machine.",
                          command)
 
     def testpgnoswitch(self):

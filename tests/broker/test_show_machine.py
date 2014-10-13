@@ -46,13 +46,13 @@ class TestShowMachine(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         net = self.net["unknown0"]
         self.matchoutput(out,
-                         "ut3c1n3,ut3,ut,ibm,hs21-8853l5u,KPDZ406,eth0,%s,%s" %
+                         "ut3c1n3,ut3,ut,ibm,hs21-8853,KPDZ406,eth0,%s,%s" %
                          (net.usable[2].mac, net.usable[2]), command)
         self.matchoutput(out,
-                         "ut3c1n3,ut3,ut,ibm,hs21-8853l5u,KPDZ406,eth1,%s,%s" %
+                         "ut3c1n3,ut3,ut,ibm,hs21-8853,KPDZ406,eth1,%s,%s" %
                          (net.usable[3].mac, net.usable[3]), command)
         self.matchoutput(out,
-                         "ut3c1n3,ut3,ut,ibm,hs21-8853l5u,KPDZ406,bmc,%s,%s" %
+                         "ut3c1n3,ut3,ut,ibm,hs21-8853,KPDZ406,bmc,%s,%s" %
                          (net.usable[4].mac, net.usable[4]), command)
 
     def testrejectfqdn(self):
@@ -68,7 +68,7 @@ class TestShowMachine(TestBrokerCommand):
         self.assertEqual(machine.name, "ut3c1n3")
         self.assertEqual(machine.host, "unittest00.one-nyp.ms.com")
         self.assertEqual(machine.location.name, "ut3")
-        self.assertEqual(machine.model.name, "hs21-8853l5u")
+        self.assertEqual(machine.model.name, "hs21-8853")
         self.assertEqual(machine.model.vendor, "ibm")
         self.assertEqual(machine.model.model_type, "blade")
         self.assertEqual(machine.cpu, "xeon_2660")

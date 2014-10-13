@@ -327,7 +327,7 @@ class TestAddNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
         ip = self.net["ut_net_mgmt"].usable[-1]
         command = ["add", "network_device", "--type", "tor",
                    "--network_device", "badmodel.aqd-unittest.ms.com",
-                   "--rack", "ut3", "--model", "hs21-8853l5u",
+                   "--rack", "ut3", "--model", "hs21-8853",
                    "--ip", ip, "--interface", "xge49", "--iftype", "physical"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "This command can only be used "

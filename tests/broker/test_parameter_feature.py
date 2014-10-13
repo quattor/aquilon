@@ -71,7 +71,7 @@ class TestParameterFeature(TestBrokerCommand):
 
     def test_040_bind_hardware_feature(self):
         cmd = ["bind_feature", "--feature", HARDWAREFEATURE, "--personality", PERSONALITY,
-               "--archetype", ARCHETYPE, "--justification=tcm=12345678", "--model", "hs21-8853l5u"]
+               "--archetype", ARCHETYPE, "--justification=tcm=12345678", "--model", "hs21-8853"]
         self.ignoreoutputtest(cmd)
         self.load_paramdefs(HARDWAREFEATURE, 'hardware')
 
@@ -224,13 +224,13 @@ class TestParameterFeature(TestBrokerCommand):
         value = "hardware_feature"
         feature = "hardwarefeature"
         cmd = ADD_CMD + ["--path", path, "--value", value, "--feature", feature,
-                         "--model", "hs21-8853l5u"]
+                         "--model", "hs21-8853"]
         self.noouttest(cmd)
 
         path = "testlist"
         value = "hardware1,hardware2"
         cmd = ADD_CMD + ["--path", path, "--value", value,
-                         "--feature", feature, "--model", "hs21-8853l5u"]
+                         "--feature", feature, "--model", "hs21-8853"]
         self.noouttest(cmd)
 
     def test_310_verify_hardware_feature(self):
@@ -238,7 +238,7 @@ class TestParameterFeature(TestBrokerCommand):
         out = self.commandtest(cmd)
         self.searchoutput(out, r'"hardware": {\s*'
                                r'"hardwarefeature": {\s*'
-                               r'"hs21-8853l5u": {\s*'
+                               r'"hs21-8853": {\s*'
                                r'"testlist": "hardware1,hardware2",\s*'
                                r'"teststring": "hardware_feature"', cmd)
 
@@ -258,13 +258,13 @@ class TestParameterFeature(TestBrokerCommand):
         self.failUnless('features/hostfeature/testlist' in param_values)
         self.failUnlessEqual(param_values['features/hostfeature/testlist'],
                              'host1,host2')
-        self.failUnless('features/hardware/hardwarefeature/hs21-8853l5u/teststring'
+        self.failUnless('features/hardware/hardwarefeature/hs21-8853/teststring'
                         in param_values)
-        self.failUnlessEqual(param_values['features/hardware/hardwarefeature/hs21-8853l5u/teststring'],
+        self.failUnlessEqual(param_values['features/hardware/hardwarefeature/hs21-8853/teststring'],
                              'hardware_feature')
-        self.failUnless('features/hardware/hardwarefeature/hs21-8853l5u/testlist'
+        self.failUnless('features/hardware/hardwarefeature/hs21-8853/testlist'
                         in param_values)
-        self.failUnlessEqual(param_values['features/hardware/hardwarefeature/hs21-8853l5u/testlist'],
+        self.failUnlessEqual(param_values['features/hardware/hardwarefeature/hs21-8853/testlist'],
                              'hardware1,hardware2')
         self.failUnless('features/interface/interfacefeature/eth0/teststring'
                         in param_values)
@@ -278,14 +278,14 @@ class TestParameterFeature(TestBrokerCommand):
     def test_320_verify_cat_hardware_feature(self):
         cmd = CAT_CMD + ["--pre_feature"]
         out = self.commandtest(cmd)
-        self.searchoutput(out, r'"/system/features/hardware/hardwarefeature/{hs21-8853l5u}/testdefault" = "defaultval";\s*'
-                               r'"/system/features/hardware/hardwarefeature/{hs21-8853l5u}/testlist" = list\(\s*'
+        self.searchoutput(out, r'"/system/features/hardware/hardwarefeature/{hs21-8853}/testdefault" = "defaultval";\s*'
+                               r'"/system/features/hardware/hardwarefeature/{hs21-8853}/testlist" = list\(\s*'
                                r'"hardware1",\s*"hardware2"\s*\);\s*'
-                               r'"/system/features/hardware/hardwarefeature/{hs21-8853l5u}/teststring" = "hardware_feature";\s*',
+                               r'"/system/features/hardware/hardwarefeature/{hs21-8853}/teststring" = "hardware_feature";\s*',
                           cmd)
         self.searchoutput(out, r'include \{\s*'
                                r'if \(\(value\("/hardware/manufacturer"\) == "ibm"\) &&\s*'
-                               r'\(value\("/hardware/template_name"\) == "hs21-8853l5u"\)\)\{\s*'
+                               r'\(value\("/hardware/template_name"\) == "hs21-8853"\)\)\{\s*'
                                r'return\("features/hardware/hardwarefeature"\)\s*'
                                r'\} else\{ return\(undef\); \};\s*};',
                           cmd)
@@ -293,14 +293,14 @@ class TestParameterFeature(TestBrokerCommand):
     def test_360_add_existing(self):
         path = "teststring"
         value = "hardware_feature"
-        cmd = ADD_CMD + ["--path", path, "--value", value, "--feature", HARDWAREFEATURE, "--model", "hs21-8853l5u"]
+        cmd = ADD_CMD + ["--path", path, "--value", value, "--feature", HARDWAREFEATURE, "--model", "hs21-8853"]
         out = self.badrequesttest(cmd)
-        self.matchoutput(out, "Parameter with path=features/hardware/hardwarefeature/hs21-8853l5u/teststring already exists", cmd)
+        self.matchoutput(out, "Parameter with path=features/hardware/hardwarefeature/hs21-8853/teststring already exists", cmd)
 
     def test_370_upd_existing(self):
         path = "teststring"
         value = "hardware_newstring"
-        cmd = UPD_CMD + ["--path", path, "--value", value, "--feature", HARDWAREFEATURE, "--model", "hs21-8853l5u"]
+        cmd = UPD_CMD + ["--path", path, "--value", value, "--feature", HARDWAREFEATURE, "--model", "hs21-8853"]
         out = self.noouttest(cmd)
 
     def test_380_verify_hardware_feature(self):
@@ -308,17 +308,17 @@ class TestParameterFeature(TestBrokerCommand):
         out = self.commandtest(cmd)
         self.searchoutput(out, r'"hardware": {\s*'
                                r'"hardwarefeature": {\s*'
-                               r'"hs21-8853l5u": {\s*'
+                               r'"hs21-8853": {\s*'
                                r'"testlist": "hardware1,hardware2",\s*'
                                r'"teststring": "hardware_newstring"', cmd)
 
     def test_390_verify_cat_hardware_feature(self):
         cmd = CAT_CMD + ["--pre_feature"]
         out = self.commandtest(cmd)
-        self.searchoutput(out, r'"/system/features/hardware/hardwarefeature/{hs21-8853l5u}/testdefault" = "defaultval";\s*'
-                               r'"/system/features/hardware/hardwarefeature/{hs21-8853l5u}/testlist" = list\(\s*'
+        self.searchoutput(out, r'"/system/features/hardware/hardwarefeature/{hs21-8853}/testdefault" = "defaultval";\s*'
+                               r'"/system/features/hardware/hardwarefeature/{hs21-8853}/testlist" = list\(\s*'
                                r'"hardware1",\s*"hardware2"\s*\);\s*'
-                               r'"/system/features/hardware/hardwarefeature/{hs21-8853l5u}/teststring" = "hardware_newstring";\s*',
+                               r'"/system/features/hardware/hardwarefeature/{hs21-8853}/teststring" = "hardware_newstring";\s*',
                           cmd)
 
     def test_500_verify_diff(self):
@@ -340,8 +340,8 @@ class TestParameterFeature(TestBrokerCommand):
                           cmd)
         self.searchoutput(out, r'Differences for Parameters:\s*'
                                r'missing Parameters in Personality aquilon/eaitools:\s*'
-                               r'//features/hardware/hardwarefeature/hs21-8853l5u/testlist\s*'
-                               r'//features/hardware/hardwarefeature/hs21-8853l5u/teststring\s*'
+                               r'//features/hardware/hardwarefeature/hs21-8853/testlist\s*'
+                               r'//features/hardware/hardwarefeature/hs21-8853/teststring\s*'
                                r'//features/hostfeature/testlist\s*'
                                r'//features/hostfeature/teststring\s*'
                                r'//features/interface/interfacefeature/eth0/testlist\s*'
@@ -363,7 +363,7 @@ class TestParameterFeature(TestBrokerCommand):
             if type == "interface":
                 cmd.extend(["--interface", "eth0"])
             if type == "hardware":
-                cmd.extend(["--model", "hs21-8853l5u"])
+                cmd.extend(["--model", "hs21-8853"])
             self.successtest(cmd)
 
     def test_610_add_same_name_feature_parameter(self):
@@ -374,7 +374,7 @@ class TestParameterFeature(TestBrokerCommand):
             if type == "interface":
                 cmd.extend(["--interface", "eth0"])
             if type == "hardware":
-                cmd.extend(["--model", "hs21-8853l5u"])
+                cmd.extend(["--model", "hs21-8853"])
             self.successtest(cmd)
 
     def test_620_verify_name_feature_parameter(self):
@@ -386,7 +386,7 @@ class TestParameterFeature(TestBrokerCommand):
                                r'"car": "bmwinterface"', cmd)
         self.searchoutput(out, r'"hardware": {\s*'
                                r'"shinynew": {\s*'
-                               r'"hs21-8853l5u": {\s*'
+                               r'"hs21-8853": {\s*'
                                r'"car": "bmwhardware"', cmd)
         self.searchoutput(out, r'"shinynew": {\s*'
                                r'"car": "bmwhost"', cmd)
@@ -399,7 +399,7 @@ class TestParameterFeature(TestBrokerCommand):
             if type == "interface":
                 cmd.extend(["--interface", "eth0"])
             if type == "hardware":
-                cmd.extend(["--model", "hs21-8853l5u"])
+                cmd.extend(["--model", "hs21-8853"])
             self.successtest(cmd)
 
     def test_640_verify_name_feature_parameter(self):
@@ -411,7 +411,7 @@ class TestParameterFeature(TestBrokerCommand):
                                r'"car": "audiinterface"', cmd)
         self.searchoutput(out, r'"hardware": {\s*'
                                r'"shinynew": {\s*'
-                               r'"hs21-8853l5u": {\s*'
+                               r'"hs21-8853": {\s*'
                                r'"car": "audihardware"', cmd)
         self.searchoutput(out, r'"shinynew": {\s*'
                                r'"car": "audihost"', cmd)
@@ -428,12 +428,12 @@ class TestParameterFeature(TestBrokerCommand):
         self.noouttest(cmd)
 
     def test_920_del_hardware_feature_params(self):
-        cmd = DEL_CMD + ["--path=teststring", "--feature", HARDWAREFEATURE, "--model", "hs21-8853l5u"]
+        cmd = DEL_CMD + ["--path=teststring", "--feature", HARDWAREFEATURE, "--model", "hs21-8853"]
         self.noouttest(cmd)
 
     def test_925_unbind_hardware_feature(self):
         cmd = ["unbind_feature", "--feature", HARDWAREFEATURE, "--personality", PERSONALITY,
-               "--archetype", ARCHETYPE, "--justification=tcm=12345678", "--model", "hs21-8853l5u"]
+               "--archetype", ARCHETYPE, "--justification=tcm=12345678", "--model", "hs21-8853"]
         self.ignoreoutputtest(cmd)
 
         cmd = ["del_feature", "--feature", HARDWAREFEATURE, "--type=hardware"]
@@ -463,7 +463,7 @@ class TestParameterFeature(TestBrokerCommand):
             if type == "interface":
                 cmd.extend(["--interface", "eth0"])
             if type == "hardware":
-                cmd.extend(["--model", "hs21-8853l5u"])
+                cmd.extend(["--model", "hs21-8853"])
             self.noouttest(cmd)
 
     def test_960_verify_same_name_feature_parameter(self):
@@ -479,7 +479,7 @@ class TestParameterFeature(TestBrokerCommand):
             if type == "interface":
                 cmd.extend(["--interface", "eth0"])
             if type == "hardware":
-                cmd.extend(["--model", "hs21-8853l5u"])
+                cmd.extend(["--model", "hs21-8853"])
             self.successtest(cmd)
 
             cmd = ["del_feature", "--feature", feature, "--type", type]

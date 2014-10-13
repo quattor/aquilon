@@ -28,7 +28,7 @@ from brokertest import TestBrokerCommand
 class TestSearchHardware(TestBrokerCommand):
 
     def testmodelavailable(self):
-        command = "search hardware --model hs21-8853l5u"
+        command = "search hardware --model hs21-8853"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "ut3c1n3", command)
         self.matchoutput(out, "ut3c1n4", command)

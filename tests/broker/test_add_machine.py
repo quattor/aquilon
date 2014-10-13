@@ -31,7 +31,7 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
     def test_100_add_ut3c5n10(self):
         self.noouttest(["add", "machine", "--machine", "ut3c5n10",
                         "--chassis", "ut3c5", "--slot", 10,
-                        "--model", "hs21-8853l5u",
+                        "--model", "hs21-8853",
                         "--cpucount", "2", "--cpuvendor", "intel",
                         "--cpuname", "xeon_2660", "--cpuspeed", "2660",
                         "--memory", "8192", "--serial", "99C5553",
@@ -52,7 +52,7 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
         self.matchoutput(out, "Rack: ut3", command)
         self.matchoutput(out, "Chassis: ut3c5.aqd-unittest.ms.com", command)
         self.matchoutput(out, "Slot: 10", command)
-        self.matchoutput(out, "Vendor: ibm Model: hs21-8853l5u", command)
+        self.matchoutput(out, "Vendor: ibm Model: hs21-8853", command)
         self.matchoutput(out, "Cpu: xeon_2660 x 2", command)
         self.matchoutput(out, "Memory: 8192 MB", command)
         self.matchoutput(out, "Serial: 99C5553", command)
@@ -62,9 +62,9 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
     def test_105_verify_del_model(self):
         # This should be in test_del_model.py but when that is run there are no
         # more machines defined...
-        command = "del model --model hs21-8853l5u --vendor ibm"
+        command = "del model --model hs21-8853 --vendor ibm"
         out = self.badrequesttest(command.split(" "))
-        self.matchoutput(out, "Model ibm/hs21-8853l5u is still in use and "
+        self.matchoutput(out, "Model ibm/hs21-8853 is still in use and "
                          "cannot be deleted.", command)
 
     def test_105_cat_ut3c5n10(self):
@@ -86,7 +86,7 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
                           r'"new-york.ms.com"\s*\);',
                           command)
         self.matchoutput(out,
-                         'include { "hardware/machine/ibm/hs21-8853l5u" };',
+                         'include { "hardware/machine/ibm/hs21-8853" };',
                          command)
         self.searchoutput(out,
                           r'"ram" = list\(\s*'
@@ -181,7 +181,7 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
     def test_143_add_ut3c1n3(self):
         self.noouttest(["add", "machine", "--machine", "ut3c1n3",
                         "--chassis", "ut3c1.aqd-unittest.ms.com", "--slot", "3",
-                        "--model", "hs21-8853l5u", "--cpucount", "2",
+                        "--model", "hs21-8853", "--cpucount", "2",
                         "--cpuvendor", "intel", "--cpuname", "xeon_2660",
                         "--cpuspeed", "2660",
                         "--memory", "8192", "--serial", "KPDZ406"])
@@ -205,7 +205,7 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
         self.matchoutput(out, "Model Type: blade", command)
         self.matchoutput(out, "Chassis: ut3c1.aqd-unittest.ms.com", command)
         self.matchoutput(out, "Slot: 3", command)
-        self.matchoutput(out, "Vendor: ibm Model: hs21-8853l5u", command)
+        self.matchoutput(out, "Vendor: ibm Model: hs21-8853", command)
         self.matchoutput(out, "Cpu: xeon_2660 x 2", command)
         self.matchoutput(out, "Memory: 8192 MB", command)
         self.matchoutput(out, "Serial: KPDZ406", command)
@@ -227,7 +227,7 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
         self.matchoutput(out, '"slot" = 3;', command)
         self.matchoutput(out, '"serialnumber" = "KPDZ406";', command)
         self.matchoutput(out,
-                         'include { "hardware/machine/ibm/hs21-8853l5u" };',
+                         'include { "hardware/machine/ibm/hs21-8853" };',
                          command)
         self.searchoutput(out,
                           r'"ram" = list\(\s*'
@@ -243,7 +243,7 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
     def test_150_add_ut3c1n4(self):
         self.noouttest(["add", "machine", "--machine", "ut3c1n4",
                         "--chassis", "ut3c1", "--slot", 4,
-                        "--model", "hs21-8853l5u", "--serial", "KPDZ407"])
+                        "--model", "hs21-8853", "--serial", "KPDZ407"])
 
     def test_155_show_ut3c1n4(self):
         command = "show machine --machine ut3c1n4"
@@ -251,7 +251,7 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
         self.matchoutput(out, "Machine: ut3c1n4", command)
         self.matchoutput(out, "Model Type: blade", command)
         self.matchoutput(out, "Rack: ut3", command)
-        self.matchoutput(out, "Vendor: ibm Model: hs21-8853l5u", command)
+        self.matchoutput(out, "Vendor: ibm Model: hs21-8853", command)
         self.matchoutput(out, "Cpu: xeon_2660 x 2", command)
         self.matchoutput(out, "Memory: 8192 MB", command)
         self.matchoutput(out, "Serial: KPDZ407", command)
@@ -262,7 +262,7 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
         self.matchoutput(out, '"location" = "ut.ny.na";', command)
         self.matchoutput(out, '"serialnumber" = "KPDZ407";', command)
         self.matchoutput(out,
-                         'include { "hardware/machine/ibm/hs21-8853l5u" };',
+                         'include { "hardware/machine/ibm/hs21-8853" };',
                          command)
         self.searchoutput(out,
                           r'"ram" = list\(\s*'
@@ -307,7 +307,7 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
 
     def test_170_add_ut3c1n9(self):
         self.noouttest(["add", "machine", "--machine", "ut3c1n9",
-                        "--model", "hs21-8853l5u",
+                        "--model", "hs21-8853",
                         "--chassis", "ut3c1", "--slot", 9])
 
     def test_171_addut3s01p2(self):
@@ -365,7 +365,7 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
 
     def test_200_reject_qualified_name(self):
         command = ["add", "machine", "--machine", "qualified.ms.com",
-                   "--rack", "ut3", "--model", "hs21-8853l5u"]
+                   "--rack", "ut3", "--model", "hs21-8853"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "Illegal hardware label format 'qualified.ms.com'.",
@@ -387,7 +387,7 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
     # (There should be no cpu with speed==2 in the database)
     def test_220_reject_bad_cpuspeed(self):
         self.badrequesttest(["add", "machine", "--machine", "ut3c1n5",
-                             "--rack", "ut3", "--model", "hs21-8853l5u",
+                             "--rack", "ut3", "--model", "hs21-8853",
                              "--cpucount", "2", "--cpuvendor", "intel",
                              "--cpuname", "xeon_2660", "--cpuspeed", "2",
                              "--memory", "8192", "--serial", "KPDZ406"])
@@ -423,7 +423,7 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
 
     def test_250_reject_machine_uri(self):
         command = ["add", "machine", "--machine", "ut3c1n10",
-                   "--rack", "ut3", "--model", "hs21-8853l5u",
+                   "--rack", "ut3", "--model", "hs21-8853",
                    "--uri", "file:///somepath/to/ovf"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "URI can be specified only for virtual "
