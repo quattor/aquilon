@@ -83,14 +83,14 @@ class TestUnbindFeature(TestBrokerCommand):
 
     def test_130_unbind_model(self):
         command = ["unbind", "feature", "--feature", "bios_setup",
-                   "--model", "hs21-8853l5u",
+                   "--model", "hs21-8853",
                    "--archetype", "aquilon",
                    "--justification", "tcm=12345678"]
         err = self.statustest(command)
         self.verify_personality_flush(err, command)
 
     def test_131_verify_show_model(self):
-        command = ["show", "model", "--model", "hs21-8853l5u"]
+        command = ["show", "model", "--model", "hs21-8853"]
         out = self.commandtest(command)
         self.matchclean(out, "bios_setup", command)
 
@@ -98,7 +98,7 @@ class TestUnbindFeature(TestBrokerCommand):
         command = ["show", "feature", "--feature", "bios_setup",
                    "--type", "hardware"]
         out = self.commandtest(command)
-        self.matchclean(out, "hs21-8853l5u", command)
+        self.matchclean(out, "hs21-8853", command)
 
     def test_131_verify_show_host(self):
         command = ["show", "host", "--hostname", "unittest02.one-nyp.ms.com"]

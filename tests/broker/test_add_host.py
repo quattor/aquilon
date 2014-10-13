@@ -541,14 +541,14 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
     def test_410_add_afsbynet(self):
         ip = self.net["netsvcmap"].usable[0]
         self.create_host("afs-by-net.aqd-unittest.ms.com", ip, "ut3c5n11",
-                         model="hs21-8853l5u", chassis="ut3c5", slot=11,
+                         model="hs21-8853", chassis="ut3c5", slot=11,
                          personality="compileserver",
                          comments="For network based service mappings")
 
     def test_420_add_netmappers(self):
         ip = self.net["netperssvcmap"].usable[0]
         self.create_host("netmap-pers.aqd-unittest.ms.com", ip, "ut3c5n12",
-                         model="hs21-8853l5u", chassis="ut3c5", slot=12,
+                         model="hs21-8853", chassis="ut3c5", slot=12,
                          personality="eaitools",
                          comments="For net/pers based service mappings")
 

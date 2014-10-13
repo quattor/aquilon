@@ -184,10 +184,10 @@ class MachineTestMixin(object):
         if not interfaces:
             interfaces = ["eth0"]
 
-        self.create_machine(name, "hs21-8853l5u", interfaces, **kwargs)
+        self.create_machine(name, "hs21-8853", interfaces, **kwargs)
 
         # Now fill in default values needed for verification
-        kwargs["model"] = "hs21-8853l5u"
+        kwargs["model"] = "hs21-8853"
         if "vendor" not in kwargs:
             kwargs["vendor"] = "ibm"
         if "cpuname" not in kwargs:

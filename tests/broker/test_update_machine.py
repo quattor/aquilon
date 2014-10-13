@@ -37,7 +37,7 @@ class TestUpdateMachine(TestBrokerCommand):
         self.matchoutput(out, "Model Type: blade", command)
         self.matchoutput(out, "Chassis: ut3c1.aqd-unittest.ms.com", command)
         self.matchoutput(out, "Slot: 10", command)
-        self.matchoutput(out, "Vendor: ibm Model: hs21-8853l5u", command)
+        self.matchoutput(out, "Vendor: ibm Model: hs21-8853", command)
         self.matchoutput(out, "Cpu: xeon_2660 x 2", command)
         self.matchoutput(out, "Memory: 8192 MB", command)
         self.matchoutput(out, "Serial: USN99C5553", command)
@@ -48,7 +48,7 @@ class TestUpdateMachine(TestBrokerCommand):
         self.matchoutput(out, '"location" = "ut.ny.na";', command)
         self.matchoutput(out, '"serialnumber" = "USN99C5553";', command)
         self.matchoutput(out,
-                         'include { "hardware/machine/ibm/hs21-8853l5u" };',
+                         'include { "hardware/machine/ibm/hs21-8853" };',
                          command)
         self.searchoutput(out,
                           r'"ram" = list\(\s*'
@@ -87,7 +87,7 @@ class TestUpdateMachine(TestBrokerCommand):
         self.matchoutput(out, "Model Type: blade", command)
         self.matchoutput(out, "Chassis: ut3c5.aqd-unittest.ms.com", command)
         self.matchoutput(out, "Slot: 20", command)
-        self.matchoutput(out, "Vendor: ibm Model: hs21-8853l5u", command)
+        self.matchoutput(out, "Vendor: ibm Model: hs21-8853", command)
         self.matchoutput(out, "Cpu: xeon_2660 x 2", command)
         self.matchoutput(out, "Memory: 8192 MB", command)
         self.matchoutput(out, "Serial: 99C5553", command)
@@ -98,7 +98,7 @@ class TestUpdateMachine(TestBrokerCommand):
         self.matchoutput(out, '"location" = "ut.ny.na";', command)
         self.matchoutput(out, '"serialnumber" = "99C5553";', command)
         self.matchoutput(out,
-                         'include { "hardware/machine/ibm/hs21-8853l5u" };',
+                         'include { "hardware/machine/ibm/hs21-8853" };',
                          command)
         self.searchoutput(out,
                           r'"ram" = list\(\s*'
@@ -141,7 +141,7 @@ class TestUpdateMachine(TestBrokerCommand):
         self.matchoutput(out, "Machine: ut3c1n4", command)
         self.matchoutput(out, "Model Type: blade", command)
         self.matchoutput(out, "Rack: ut4", command)
-        self.matchoutput(out, "Vendor: ibm Model: hs21-8853l5u", command)
+        self.matchoutput(out, "Vendor: ibm Model: hs21-8853", command)
         self.matchoutput(out, "Cpu: xeon_3000 x 2", command)
         self.matchoutput(out, "Memory: 8192 MB", command)
         self.matchoutput(out, "Serial: USNKPDZ407", command)
@@ -152,7 +152,7 @@ class TestUpdateMachine(TestBrokerCommand):
         self.matchoutput(out, '"location" = "ut.ny.na";', command)
         self.matchoutput(out, '"serialnumber" = "USNKPDZ407";', command)
         self.matchoutput(out,
-                         'include { "hardware/machine/ibm/hs21-8853l5u" };',
+                         'include { "hardware/machine/ibm/hs21-8853" };',
                          command)
         self.searchoutput(out,
                           r'"ram" = list\(\s*'
@@ -531,7 +531,7 @@ class TestUpdateMachine(TestBrokerCommand):
 
     def testupdateut3s01p2(self):
         self.noouttest(["update", "machine", "--machine", "ut3s01p2",
-                        "--model", "hs21-8853l5u", "--vendor", "ibm"])
+                        "--model", "hs21-8853", "--vendor", "ibm"])
 
     def testverifyupdateut3s01p2(self):
         command = "show machine --machine ut3s01p2"

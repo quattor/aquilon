@@ -107,7 +107,7 @@ Cpu(vendor=Vendor(name="virtual"), name="virtual_cpu", speed=0)
 
 Model(vendor=@ibm, name="hs20-884345u", model_type="blade")
 Model(vendor=@ibm, name="ls20-8850pap", model_type="blade")
-Model(vendor=@ibm, name="hs21-8853l5u", model_type="blade")
+Model(vendor=@ibm, name="hs21-8853", model_type="blade")
 Model(vendor=@ibm, name="bce", model_type="chassis")
 Model(vendor=@ibm, name="bch", model_type="chassis")
 Model(vendor=@ibm, name="dx320-6388ac1", model_type="rackmount")
@@ -135,7 +135,7 @@ Model(vendor=@dell, name="optiplex_260", model_type="workstation")
 MachineSpecs(model=Model(name="hs20-884345u"),
              cpu=Cpu(name="xeon_2660"), cpu_quantity=2, memory=8192,
              controller_type="scsi", disk_type="local", disk_capacity=36, nic_count=2)
-MachineSpecs(model=Model(name="hs21-8853l5u"),
+MachineSpecs(model=Model(name="hs21-8853"),
              cpu=Cpu(name="xeon_2660"), cpu_quantity=2, memory=8192,
              controller_type="scsi", disk_type="local", disk_capacity=68, nic_count=2)
 MachineSpecs(model=Model(name="poweredge_6650"),

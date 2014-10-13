@@ -31,13 +31,13 @@ hs21_hosts = None
 
 hardware_feature_str = r'include {\n'
 r'\s*if ((value("/hardware/manufacturer") == "ibm") &&\n'
-r'\s*(value("/hardware/template_name") == "hs21-8853l5u")){\n'
+r'\s*(value("/hardware/template_name") == "hs21-8853")){\n'
 r'\s*return("features/hardware/bios_setup")\n'
 r'\s*} else{ return(undef); };\n'
 r'};'
 r'"/metadata/features"={\n'
 r'\s*if ((value("/hardware/manufacturer") == "ibm") &&\n'
-r'\s(value("/hardware/template_name") == "hs21-8853l5u")){\n'
+r'\s(value("/hardware/template_name") == "hs21-8853")){\n'
 r'\sappend("features/hardware/bios_setup");\n'
 r'\s} else { SELF; };\n'
 r'};'
@@ -67,7 +67,7 @@ class TestBindFeature(TestBrokerCommand):
 
         if hs21_hosts is None:
             command = ["search", "host", "--archetype", "aquilon",
-                       "--model", "hs21-8853l5u", "--format", "proto"]
+                       "--model", "hs21-8853", "--format", "proto"]
             out = self.commandtest(command)
             hostlist = self.parse_hostlist_msg(out)
             hs21_hosts = len(hostlist.hosts)
@@ -239,14 +239,14 @@ class TestBindFeature(TestBrokerCommand):
 
     def test_130_bind_model(self):
         command = ["bind", "feature", "--feature", "bios_setup",
-                   "--model", "hs21-8853l5u",
+                   "--model", "hs21-8853",
                    "--archetype", "aquilon",
                    "--justification", "tcm=12345678"]
         err = self.statustest(command)
         self.verify_personality_flush(err, command)
 
     def test_131_verify_show_model(self):
-        command = ["show", "model", "--model", "hs21-8853l5u"]
+        command = ["show", "model", "--model", "hs21-8853"]
         out = self.commandtest(command)
         self.searchoutput(out,
                           r'Hardware Feature: bios_setup$\n'
@@ -258,14 +258,14 @@ class TestBindFeature(TestBrokerCommand):
         out = self.commandtest(command)
         self.searchoutput(out,
                           r'Hardware Feature: bios_setup$\n'
-                          r'^    Vendor: ibm Model: hs21-8853l5u$',
+                          r'^    Vendor: ibm Model: hs21-8853$',
                           command)
 
     def test_131_verify_show_feature(self):
         command = ["show", "feature", "--feature", "bios_setup",
                    "--type", "hardware"]
         out = self.commandtest(command)
-        self.matchoutput(out, "Bound to: Model ibm/hs21-8853l5u",
+        self.matchoutput(out, "Bound to: Model ibm/hs21-8853",
                          command)
 
     def test_131_verify_show_host(self):
@@ -437,7 +437,7 @@ class TestBindFeature(TestBrokerCommand):
 
     def test_200_bind_model_noarch(self):
         command = ["bind", "feature", "--feature", "bios_setup",
-                   "--model", "hs21-8853l5u",
+                   "--model", "hs21-8853",
                    "--justification", "tcm=12345678"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
@@ -455,13 +455,13 @@ class TestBindFeature(TestBrokerCommand):
 
     def test_200_bind_model_again(self):
         command = ["bind", "feature", "--feature", "bios_setup",
-                   "--model", "hs21-8853l5u",
+                   "--model", "hs21-8853",
                    "--archetype", "aquilon",
                    "--justification", "tcm=12345678"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "Hardware Feature bios_setup is already bound to "
-                         "archetype aquilon, model ibm/hs21-8853l5u.",
+                         "archetype aquilon, model ibm/hs21-8853.",
                          command)
 
     def test_200_bind_not_iface(self):
@@ -478,7 +478,7 @@ class TestBindFeature(TestBrokerCommand):
 
     def test_200_bind_not_hardware(self):
         command = ["bind", "feature", "--feature", "post_host",
-                   "--model", "hs21-8853l5u", "--personality", "compileserver"]
+                   "--model", "hs21-8853", "--personality", "compileserver"]
         out = self.notfoundtest(command)
         self.matchoutput(out, "Hardware Feature post_host not found.", command)
 

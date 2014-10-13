@@ -141,7 +141,7 @@ class TestSearchModel(TestBrokerCommand):
         out = self.commandtest(command)
 
         # CPU: xeon_2660
-        self.matchoutput(out, "hs21-8853l5u", command)
+        self.matchoutput(out, "hs21-8853", command)
 
         # CPU: xeon_5150
         self.matchoutput(out, "utlarge", command)
@@ -154,7 +154,7 @@ class TestSearchModel(TestBrokerCommand):
     def test_200_search_cpu_count(self):
         command = ["search_model", "--cpunum", "2"]
         out = self.commandtest(command)
-        self.matchoutput(out, "hs21-8853l5u", command)
+        self.matchoutput(out, "hs21-8853", command)
         self.matchoutput(out, "bl260c", command)
         self.matchclean(out, "poweredge_6650", command)
         self.matchclean(out, "f5_model", command)
@@ -166,7 +166,7 @@ class TestSearchModel(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "poweredge_6650", command)
         self.matchoutput(out, "utlarge", command)
-        self.matchclean(out, "hs21-8853l5u", command)
+        self.matchclean(out, "hs21-8853", command)
         self.matchclean(out, "bl260c", command)
         self.matchclean(out, "f5_model", command)
         self.matchclean(out, "uttorswitch", command)
@@ -177,7 +177,7 @@ class TestSearchModel(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "utmedium", command)
         self.matchoutput(out, "utlarge", command)
-        self.matchclean(out, "hs21-8853l5u", command)
+        self.matchclean(out, "hs21-8853", command)
         self.matchclean(out, "bl260c", command)
         self.matchclean(out, "f5_model", command)
         self.matchclean(out, "uttorswitch", command)
@@ -189,7 +189,7 @@ class TestSearchModel(TestBrokerCommand):
         self.matchoutput(out, "utlarge", command)
         self.matchoutput(out, "utmedium", command)
         self.matchclean(out, "utccissmodel", command)
-        self.matchclean(out, "hs21-8853l5u", command)
+        self.matchclean(out, "hs21-8853", command)
         self.matchclean(out, "bl260c", command)
         self.matchclean(out, "f5_model", command)
         self.matchclean(out, "uttorswitch", command)
@@ -203,7 +203,7 @@ class TestSearchModel(TestBrokerCommand):
         self.matchclean(out, "utlarge", command)
         self.matchclean(out, "utmedium", command)
         self.matchclean(out, "utccissmodel", command)
-        self.matchclean(out, "hs21-8853l5u", command)
+        self.matchclean(out, "hs21-8853", command)
         self.matchclean(out, "f5_model", command)
         self.matchclean(out, "utchassis", command)
 
