@@ -58,7 +58,6 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
         self.matchoutput(out, "Config override: enabled", command)
         self.matchoutput(out, "Environment: dev", command)
         self.matchoutput(out, "Comments: Some personality comments", command)
-        self.matchclean(out, "Threshold:", command)
         self.matchclean(out, "Personality: inventory Archetype: aquilon",
                         command)
         self.matchclean(out,
@@ -77,16 +76,15 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
         # The basic parameter set needs to be initialized for further tests
         self.setup_personality("aquilon", "eaitools")
 
-    def testverifyutpersonalitynothreshold(self):
-        command = ["show_personality", "--sandbox=%s/changetest1" % self.user,
-                   "--archetype=aquilon", "--personality=utpersonality/dev"]
+    def testverifyutpersonality(self):
+        command = ["show_personality", "--archetype=aquilon",
+                   "--personality=utpersonality/dev"]
         out = self.commandtest(command)
         self.matchoutput(out, "Personality: utpersonality/dev Archetype: aquilon",
                          command)
         self.matchoutput(out,
                          "Template: aquilon/personality/utpersonality/dev/config",
                          command)
-        self.matchoutput(out, "Threshold: None", command)
         self.matchclean(out, "Personality: inventory Archetype: aquilon",
                         command)
         self.matchclean(out,
@@ -94,53 +92,6 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
                         command)
         self.matchoutput(out, "Owned by GRN: %s" % GRN, command)
         self.matchoutput(out, "Used by GRN: %s" % GRN, command)
-
-    def testverifyshowpersonalityallnothreshold(self):
-        command = "show_personality --all --sandbox %s/changetest1" % self.user
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Personality: utpersonality/dev Archetype: aquilon",
-                         command)
-        self.matchoutput(out,
-                         "Template: aquilon/personality/utpersonality/dev/config",
-                         command)
-        self.matchoutput(out, "Threshold: None", command)
-        self.matchoutput(out, "Personality: generic Archetype: aurora",
-                         command)
-        self.matchoutput(out,
-                         "Template: aurora/personality/generic/config",
-                         command)
-
-    def testverifyutpersonalitythreshold(self):
-        command = ["show_personality", "--domain=unittest",
-                   "--archetype=aquilon", "--personality=utpersonality/dev"]
-        out = self.commandtest(command)
-        self.matchoutput(out, "Personality: utpersonality/dev Archetype: aquilon",
-                         command)
-        self.matchoutput(out,
-                         "Template: "
-                         "aquilon/personality/utpersonality/dev/config",
-                         command)
-        self.matchoutput(out, "Threshold: 50", command)
-        self.matchclean(out, "Personality: inventory Archetype: aquilon",
-                        command)
-        self.matchclean(out,
-                        "Template: aquilon/personality/inventory/config",
-                        command)
-
-    def testverifyshowpersonalityallthreshold(self):
-        command = "show_personality --all --domain unittest"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Personality: utpersonality/dev Archetype: aquilon",
-                         command)
-        self.matchoutput(out,
-                         "Template: aquilon/personality/utpersonality/dev/config",
-                         command)
-        self.matchoutput(out, "Threshold: 50", command)
-        self.matchoutput(out, "Personality: generic Archetype: aurora",
-                         command)
-        self.matchoutput(out,
-                         "Template: aurora/personality/generic/config",
-                         command)
 
     def testverifyshowpersonalityall(self):
         command = "show_personality --all"
@@ -156,7 +107,6 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
         self.matchoutput(out,
                          "Template: aurora/personality/generic/config",
                          command)
-        self.matchclean(out, "Threshold:", command)
 
     def testverifyshowutpersonalityproto(self):
         command = ["show_personality", "--archetype=aquilon",
@@ -166,7 +116,6 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
         personality = pl.personalities[0]
         self.failUnlessEqual(personality.archetype.name, "aquilon")
         self.failUnlessEqual(personality.name, "utpersonality/dev")
-        self.failUnlessEqual(personality.threshold, -1)
         self.failUnlessEqual(personality.config_override, True)
         self.failUnlessEqual(personality.cluster_required, False)
         self.failUnlessEqual(personality.comments, "Some personality comments")
@@ -178,89 +127,6 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
         out = self.commandtest(command.split(" "))
         pl = self.parse_personality_msg(out)
         archetypes = {}
-        found_threshold = False
-        for personality in pl.personalities:
-            archetype = personality.archetype.name
-            if archetype in archetypes:
-                archetypes[archetype][personality.name] = personality
-            else:
-                archetypes[archetype] = {personality.name: personality}
-            if personality.threshold >= 0:
-                found_threshold = True
-        self.failUnless("aquilon" in archetypes,
-                        "No personality with archetype aquilon in list.")
-        self.failUnless("utpersonality/dev" in archetypes["aquilon"],
-                        "No aquilon/utpersonality/dev in personality list.")
-        self.failUnless("aurora" in archetypes,
-                        "No personality with archetype aurora")
-        self.failUnless("generic" in archetypes["aurora"],
-                        "No aurora/generic in personality list.")
-        self.failUnlessEqual(archetypes["aquilon"]["utpersonality/dev"].threshold,
-                             -1,
-                             "Got threshold %s for aquilon/utpersonality/dev" %
-                             archetypes["aquilon"]["utpersonality/dev"].threshold)
-        self.failIf(found_threshold,
-                    "Found a threshold defined when none expected.")
-
-    def testverifyshowutpersonalityprotonothreshold(self):
-        command = ["show_personality", "--sandbox=%s/changetest1" % self.user,
-                   "--archetype=aquilon", "--personality=utpersonality/dev",
-                   "--format=proto"]
-        out = self.commandtest(command)
-        pl = self.parse_personality_msg(out, 1)
-        personality = pl.personalities[0]
-        self.failUnlessEqual(personality.archetype.name, "aquilon")
-        self.failUnlessEqual(personality.name, "utpersonality/dev")
-        self.failUnlessEqual(personality.threshold, -1)
-        self.failUnlessEqual(personality.config_override, True)
-        self.failUnlessEqual(personality.cluster_required, False)
-        self.failUnlessEqual(personality.comments, "Some personality comments")
-        self.failUnlessEqual(personality.owner_eonid, self.grns[GRN])
-
-    def testverifyshowpersonalityallprotonothreshold(self):
-        command = ["show_personality", "--all",
-                   "--sandbox=%s/changetest1" % self.user, "--format=proto"]
-        out = self.commandtest(command)
-        pl = self.parse_personality_msg(out)
-        archetypes = {}
-        found_threshold = False
-        for personality in pl.personalities:
-            archetype = personality.archetype.name
-            if archetype in archetypes:
-                archetypes[archetype][personality.name] = personality
-            else:
-                archetypes[archetype] = {personality.name: personality}
-            if personality.threshold >= 0:
-                found_threshold = True
-        self.failUnless("aquilon" in archetypes,
-                        "No personality with archetype aquilon in list.")
-        self.failUnless("utpersonality/dev" in archetypes["aquilon"],
-                        "No aquilon/utpersonality/dev in personality list.")
-        self.failUnless("aurora" in archetypes,
-                        "No personality with archetype aurora")
-        self.failUnless("generic" in archetypes["aurora"],
-                        "No aurora/generic in personality list.")
-
-    def testverifyshowutpersonalityprotothreshold(self):
-        command = ["show_personality", "--domain=unittest",
-                   "--archetype=aquilon", "--personality=utpersonality/dev",
-                   "--format=proto"]
-        out = self.commandtest(command)
-        pl = self.parse_personality_msg(out, 1)
-        personality = pl.personalities[0]
-        self.failUnlessEqual(personality.archetype.name, "aquilon")
-        self.failUnlessEqual(personality.name, "utpersonality/dev")
-        self.failUnlessEqual(personality.threshold, 50)
-        self.failUnlessEqual(personality.config_override, True)
-        self.failUnlessEqual(personality.cluster_required, False)
-        self.failUnlessEqual(personality.comments, "Some personality comments")
-        self.failUnlessEqual(personality.owner_eonid, self.grns[GRN])
-
-    def testverifyshowpersonalityallprotothreshold(self):
-        command = "show_personality --all --domain unittest --format=proto"
-        out = self.commandtest(command.split(" "))
-        pl = self.parse_personality_msg(out)
-        archetypes = {}
         for personality in pl.personalities:
             archetype = personality.archetype.name
             if archetype in archetypes:
@@ -275,10 +141,6 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
                         "No personality with archetype aurora")
         self.failUnless("generic" in archetypes["aurora"],
                         "No aurora/generic in personality list.")
-        self.failUnlessEqual(archetypes["aquilon"]["utpersonality/dev"].threshold,
-                             50,
-                             "Got threshold %s for aquilon/utpersonality/dev" %
-                             archetypes["aquilon"]["utpersonality/dev"].threshold)
 
     def testverifyshowpersonalityarchetype(self):
         command = "show_personality --archetype aquilon"
