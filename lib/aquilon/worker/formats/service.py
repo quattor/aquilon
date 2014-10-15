@@ -46,8 +46,7 @@ class ServiceFormatter(ObjectFormatter):
             details.append(self.redirect_raw(instance, indent + "  "))
         return "\n".join(details)
 
-    def format_proto(self, service, container):
-        skeleton = container.services.add()
+    def fill_proto(self, service, skeleton):
         self.add_service_data(skeleton, service)
 
 ObjectFormatter.handlers[Service] = ServiceFormatter()

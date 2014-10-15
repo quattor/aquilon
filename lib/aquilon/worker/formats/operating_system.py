@@ -31,8 +31,7 @@ class OSFormatter(ObjectFormatter):
 
         return "\n".join(details)
 
-    def format_proto(self, os, container):
-        skeleton = container.operating_systems.add()
+    def fill_proto(self, os, skeleton):
         self.add_os_data(skeleton, os)
 
 ObjectFormatter.handlers[OperatingSystem] = OSFormatter()

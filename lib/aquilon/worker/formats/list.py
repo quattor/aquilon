@@ -46,7 +46,8 @@ class ListFormatter(ObjectFormatter):
 
     def format_proto(self, result, container):
         for item in result:
-            self.redirect_proto(item, container)
+            skeleton = container.add()
+            ObjectFormatter.redirect_proto(item, skeleton)
 
 ObjectFormatter.handlers[list] = ListFormatter()
 ObjectFormatter.handlers[Query] = ListFormatter()

@@ -91,8 +91,7 @@ class PersonalityFormatter(ObjectFormatter):
                                info.vmhost_overcommit_memory)
         return "\n".join(details)
 
-    def format_proto(self, personality, container):
-        skeleton = container.personalities.add()
+    def fill_proto(self, personality, skeleton):
         self.add_personality_data(skeleton, personality)
 
         features = personality.features[:]
@@ -133,12 +132,10 @@ class SimplePersonalityListFormatter(ListFormatter):
     def csv_fields(self, obj):
         yield (obj.archetype.name, obj.name,)
 
-    def format_proto(self, tpl, container):
-        for personality in tpl:
-            skeleton = container.personalities.add()
-            skeleton.name = str(personality)
-            skeleton.archetype.name = str(personality.archetype.name)
-            skeleton.host_environment = str(personality.host_environment)
-            skeleton.owner_eonid = personality.owner_eon_id
+    def fill_proto(self, personality, skeleton):
+        skeleton.name = str(personality)
+        skeleton.archetype.name = str(personality.archetype.name)
+        skeleton.host_environment = str(personality.host_environment)
+        skeleton.owner_eonid = personality.owner_eon_id
 
 ObjectFormatter.handlers[SimplePersonalityList] = SimplePersonalityListFormatter()

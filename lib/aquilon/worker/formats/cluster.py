@@ -23,8 +23,7 @@ from aquilon.worker.formats.formatters import ObjectFormatter
 
 
 class ClusterFormatter(ObjectFormatter):
-    def format_proto(self, cluster, container):
-        skeleton = container.clusters.add()
+    def fill_proto(self, cluster, skeleton):
         skeleton.name = str(cluster.name)
         skeleton.status = str(cluster.status)
         self.add_personality_data(skeleton.personality, cluster.personality)
@@ -41,8 +40,7 @@ class ClusterFormatter(ObjectFormatter):
             self.add_host_data(skeleton.hosts.add(), host)
 
         if cluster.resholder and len(cluster.resholder.resources) > 0:
-            for resource in cluster.resholder.resources:
-                self.redirect_proto(resource, skeleton)
+            self.redirect_proto(cluster.resholder.resources, skeleton.resources)
 
         for dbsi in cluster.services_used:
             # Should be just 'services', but that would change the protocol.

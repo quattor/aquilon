@@ -255,8 +255,7 @@ class NetworkFormatter(ObjectFormatter):
             host_msg.dns_domain = str(dynhost.fqdn.dns_domain)
             host_msg.ip = str(dynhost.ip)
 
-    def format_proto(self, network, container):
-        skeleton = container.networks.add()
+    def fill_proto(self, network, skeleton):
         self.add_net_data(skeleton, network)
 
 ObjectFormatter.handlers[Network] = NetworkFormatter()

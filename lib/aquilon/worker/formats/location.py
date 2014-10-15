@@ -44,8 +44,7 @@ class LocationFormatter(ObjectFormatter):
                            location.default_dns_domain)
         return "\n".join(details)
 
-    def format_proto(self, loc, container):
-        skeleton = container.locations.add()
+    def fill_proto(self, loc, skeleton):
         skeleton.name = str(loc.name)
         skeleton.location_type = str(loc.location_type)
         skeleton.fullname = str(loc.fullname)

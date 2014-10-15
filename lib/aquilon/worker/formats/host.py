@@ -27,8 +27,7 @@ from aquilon.worker.dbwrappers.feature import (model_features,
 
 
 class HostFormatter(ObjectFormatter):
-    def format_proto(self, host, container):
-        skeleton = container.hosts.add()
+    def fill_proto(self, host, skeleton):
         self.add_host_data(skeleton, host)
         for si in host.services_used:
             srv_msg = skeleton.services_used.add()
@@ -147,7 +146,7 @@ class GrnHostListFormatter(ListFormatter):
 
     def format_proto(self, hostlist, container):
         for host in hostlist:
-            msg = container.hosts.add()
+            msg = container.add()
             msg.hostname = str(host.hardware_entity.primary_name)
             self.add_branch_data(msg.domain, host.branch)
             msg.status = str(host.status.name)

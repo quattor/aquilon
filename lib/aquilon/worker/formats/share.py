@@ -37,8 +37,7 @@ class ShareFormatter(ResourceFormatter):
 
         return details
 
-    def format_proto(self, share, container):
-        skeleton = container.resources.add()
+    def fill_proto(self, share, skeleton):
         self.add_resource_data(skeleton, share)
         if share.server:
             skeleton.share.server = share.server

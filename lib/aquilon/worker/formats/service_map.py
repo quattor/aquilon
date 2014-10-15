@@ -26,8 +26,7 @@ class ServiceMapFormatter(ObjectFormatter):
                 "Archetype: aquilon Service: %s Instance: %s Map: %s" % (
                 sm.service.name, sm.service_instance.name, format(sm.mapped_to))
 
-    def format_proto(self, sm, container):
-        skeleton = container.servicemaps.add()
+    def fill_proto(self, sm, skeleton):
         self.add_service_map_data(skeleton, sm)
 
 ObjectFormatter.handlers[ServiceMap] = ServiceMapFormatter()

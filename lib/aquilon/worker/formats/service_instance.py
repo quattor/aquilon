@@ -18,7 +18,6 @@
 
 from aquilon.worker.formats.formatters import ObjectFormatter
 from aquilon.aqdb.model import ServiceInstance, ServiceInstanceServer
-from aquilon.aqdb.data_sync.storage import StormapParser
 
 
 class ServiceInstanceServerFormatter(ObjectFormatter):
@@ -73,8 +72,7 @@ class ServiceInstanceFormatter(ObjectFormatter):
             details.append(indent + "  Comments: %s" % si.comments)
         return "\n".join(details)
 
-    def format_proto(self, si, container):
-        skeleton = container.services.add()
+    def fill_proto(self, si, skeleton):
         self.add_service_data(skeleton, si.service, si)
 
     # Applies to service_instance/share as well.

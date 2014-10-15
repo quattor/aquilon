@@ -28,8 +28,7 @@ class ServiceAddressFormatter(ResourceFormatter):
         details.append(indent + "  Interfaces: %s" % ", ".join(srv.interfaces))
         return details
 
-    def format_proto(self, srv, container):
-        skeleton = container.resources.add()
+    def fill_proto(self, srv, skeleton):
         self.add_resource_data(skeleton, srv)
         skeleton.service_address.ip = str(srv.dns_record.ip)
         skeleton.service_address.fqdn = str(srv.dns_record.fqdn)

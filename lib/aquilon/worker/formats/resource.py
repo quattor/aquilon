@@ -35,8 +35,7 @@ class ResourceFormatter(ObjectFormatter):
         details.extend(self.extra_details(resource, indent))
         return "\n".join(details)
 
-    def format_proto(self, resource, container):
-        skeleton = container.resources.add()
+    def fill_proto(self, resource, skeleton):
         self.add_resource_data(skeleton, resource)
 
 ObjectFormatter.handlers[Resource] = ResourceFormatter()

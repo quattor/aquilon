@@ -21,6 +21,9 @@ from six.moves import cStringIO as StringIO
 import sys
 from operator import attrgetter
 
+import google.protobuf.message
+from google.protobuf.descriptor import FieldDescriptor
+
 from aquilon.config import Config
 from aquilon.exceptions_ import ProtocolError, InternalError
 from aquilon.aqdb.model import Host, Machine, VirtualDisk, Domain, Sandbox
@@ -79,6 +82,21 @@ class ResponseFormatter(object):
         self.protobuf_container = getattr(self.loaded_protocols[module],
                                           msgclass)
 
+        # The formatter code assumes that the output message type has a single,
+        # repeated field only. Verify that assumption here, to ease the
+        # debugging of invalid protocol definitions.
+        descriptor = self.protobuf_container.DESCRIPTOR
+        if len(descriptor.fields) != 1:  # pragma: no cover
+            raise ProtocolError("%s: The formatter code needs a message type "
+                                "which has a single, repeated field only." %
+                                descriptor.full_name)
+
+        field = descriptor.fields[0]
+        if field.label != FieldDescriptor.LABEL_REPEATED:  # pragma: no cover
+            raise ProtocolError("%s: The single field inside the output "
+                                "message type must be repeated." %
+                                field.full_name)
+
     def format(self, style, result, request):
         """The main entry point - it is expected that any consumers call
             this method and let the magic happen.
@@ -103,8 +121,14 @@ class ResponseFormatter(object):
     def format_proto(self, result, request):
         if not self.protobuf_container:
             raise ProtocolError("Protobuf formatter is not available")
+
+        # Here, we rely on the message type returned by any commands being a
+        # list, which should always have just one, repeated field. These
+        # assumptions are verified in the config_proto() method when the
+        # protocol is loaded.
         container = self.protobuf_container()
-        ObjectFormatter.redirect_proto(result, container)
+        field_name = container.DESCRIPTOR.fields[0].name
+        ObjectFormatter.redirect_proto(result, getattr(container, field_name))
         return container.SerializeToString()
 
     def format_html(self, result, request):
@@ -177,7 +201,30 @@ class ObjectFormatter(object):
         # We get here if the command throws an exception
         return self.format_raw(result)
 
-    def format_proto(self, result, container):  # pylint: disable=W0613
+    def format_proto(self, result, container):
+        # Here, container can be either a repeated field, in which case we need
+        # to call .add() to instantiate a new message, or a singular (either
+        # required or optional) field, in which case it can be used as a message
+        # directly.
+        #
+        # The first case happens e.g. for all "show" commands that return a
+        # single object only. Since we always return a list of messages when
+        # protobuf format is used, we need the implicit object -> list
+        # conversion here.
+        #
+        # The second case happens all the time when self.redirect_proto() is
+        # used.
+        if isinstance(container, google.protobuf.message.Message):
+            # Singular field
+            skeleton = container
+        else:
+            # Repeated field; we're implicitly converting the result object to a
+            # list of length 1
+            skeleton = container.add()
+
+        self.fill_proto(result, skeleton)
+
+    def fill_proto(self, result, skeleton):  # pylint: disable=W0613
         # There's no default protobuf message type
         raise ProtocolError("{0:c} does not have a protobuf formatter."
                             .format(result))
@@ -347,9 +394,8 @@ class ObjectFormatter(object):
                 continue
             host_msg.mac = str(iface.mac)
 
-        if host.resholder and len(host.resholder.resources) > 0:
-            for resource in host.resholder.resources:
-                self.redirect_proto(resource, host_msg)
+        if host.resholder:
+            self.redirect_proto(host.resholder.resources, host_msg.resources)
 
         if host.cluster:
             host_msg.cluster = host.cluster.name
