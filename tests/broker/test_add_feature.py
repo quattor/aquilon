@@ -46,12 +46,14 @@ class TestAddFeature(TestBrokerCommand):
 
     def test_100_add_hw2(self):
         command = ["add", "feature", "--feature", "disable_ht",
-                   "--eon_id", 2, "--type", "hardware"]
+                   "--eon_id", 2, "--type", "hardware",
+                   "--visibility", "owner_approved"]
         self.noouttest(command)
 
     def test_100_add_iface(self):
         command = ["add", "feature", "--feature", "src_route",
-                   "--eon_id", 2, "--type", "interface"]
+                   "--eon_id", 2, "--type", "interface",
+                   "--visibility", "owner_only"]
         self.noouttest(command)
 
     def test_110_verify_pre(self):
@@ -124,7 +126,7 @@ class TestAddFeature(TestBrokerCommand):
         self.matchoutput(out, "Interface Feature: src_route", command)
         self.matchoutput(out, "Template: features/interface/src_route", command)
         self.matchclean(out, "Post Personality", command)
-        self.matchoutput(out, "Visibility: public", command)
+        self.matchoutput(out, "Visibility: owner_only", command)
         self.matchoutput(out, "Owned by GRN: grn:/ms/ei/aquilon/aqd", command)
         self.matchclean(out, "Comments", command)
         self.matchclean(out, "Bound to", command)
@@ -136,7 +138,7 @@ class TestAddFeature(TestBrokerCommand):
         self.failUnlessEqual(feature.name, "src_route")
         self.failUnlessEqual(feature.type, "interface")
         self.failUnlessEqual(feature.owner_eonid, 2)
-        self.failUnlessEqual(feature.visibility, feature.PUBLIC)
+        self.failUnlessEqual(feature.visibility, feature.OWNER_ONLY)
 
     def test_120_show_all(self):
         command = ["show", "feature", "--all"]
@@ -156,6 +158,7 @@ class TestAddFeature(TestBrokerCommand):
         self.failUnlessEqual(feature.visibility, feature.PUBLIC)
         feature = f1.features[1]
         self.failUnlessEqual(feature.name, "disable_ht")
+        self.failUnlessEqual(feature.visibility, feature.OWNER_APPROVED)
         feature = f1.features[2]
         self.failUnlessEqual(feature.name, "pre_host")
         self.failUnlessEqual(feature.type, "host")
@@ -170,7 +173,8 @@ class TestAddFeature(TestBrokerCommand):
         self.failUnlessEqual(feature.name, "src_route")
         self.failUnlessEqual(feature.type, "interface")
         self.failUnlessEqual(feature.owner_eonid, 2)
-        self.failUnlessEqual(feature.visibility, feature.PUBLIC)
+        self.failUnlessEqual(feature.visibility, feature.OWNER_ONLY)
+
 
     def test_200_post_hw(self):
         command = ["add", "feature", "--feature", "post_hw",

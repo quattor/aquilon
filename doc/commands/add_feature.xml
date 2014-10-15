@@ -162,7 +162,7 @@
 		</term>
 		<listitem>
 		    <para>
-			Scope of the feature values are public(default), restricted, owner-only, owner-approved.
+			Scope of the feature values are public(default), restricted, owner_only, owner_approved.
 		    </para>
 		</listitem>
 	    </varlistentry>
