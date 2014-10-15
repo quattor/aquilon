@@ -82,6 +82,7 @@ class TestAddAquilonHost(TestBrokerCommand):
         self.failUnlessEqual(host.operating_system.version,
                              self.config.get("archetype_aquilon",
                                              "default_osversion"))
+        self.failUnlessEqual(host.cluster, "")
 
     def test_110_add_unittest12(self):
         ip = self.net["unknown0"].usable[7]

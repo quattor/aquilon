@@ -349,6 +349,9 @@ class ObjectFormatter(object):
             for resource in host.resholder.resources:
                 self.redirect_proto(resource, host_msg)
 
+        if host.cluster:
+            host_msg.cluster = host.cluster.name
+
         host_msg.status = str(host.status.name)
         host_msg.owner_eonid = host.effective_owner_grn.eon_id
         self.add_branch_data(host_msg.domain, host.branch)
