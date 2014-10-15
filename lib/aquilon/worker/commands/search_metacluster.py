@@ -17,17 +17,15 @@
 """Contains the logic for `aq search cluster`."""
 
 from sqlalchemy.orm import aliased
-from sqlalchemy.sql import or_, null
+from sqlalchemy.sql import or_
 
 from aquilon.exceptions_ import NotFoundException
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.formats.list import StringAttributeList
-from aquilon.aqdb.model import (Cluster, EsxCluster, MetaCluster, Archetype,
-                                Personality, Machine, NetworkDevice,
+from aquilon.aqdb.model import (Cluster, MetaCluster, Archetype, Personality,
                                 ClusterLifecycle, Service, ServiceInstance,
-                                Share, ClusterResource, VirtualMachine,
-                                BundleResource, ResourceGroup, User)
-from aquilon.worker.dbwrappers.host import hostname_to_host
+                                Share, ClusterResource, BundleResource,
+                                ResourceGroup, User)
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
 from aquilon.worker.dbwrappers.location import get_location
 
@@ -36,42 +34,18 @@ class CommandSearchCluster(BrokerCommand):
 
     required_parameters = []
 
-    def render(self, session, logger,
-               archetype, cluster_type, personality,
+    def render(self, session, archetype, personality,
                domain, sandbox, branch, sandbox_author, buildstatus,
-               allowed_archetype, allowed_personality,
-               down_hosts_threshold, down_maint_threshold, max_members,
-               member_archetype, member_hostname, member_personality,
-               capacity_override, cluster, esx_guest, instance,
-               metacluster, esx_metacluster, service, share, esx_share,
-               esx_switch, esx_virtual_machine,
+               allowed_archetype, allowed_personality, max_members,
+               member_archetype, member_cluster, member_personality,
+               metacluster, service, instance, share,
                fullinfo, style, **arguments):
-
-        if esx_share:
-            self.deprecated_option("esx_share", "Please use --share instead.",
-                                   logger=logger, **arguments)
-            share = esx_share
-
-        if esx_metacluster:
-            self.deprecated_option("esx_metacluster", "Please use "
-                                   "--metacluster instead.", logger=logger,
-                                   **arguments)
-            metacluster = esx_metacluster
-
-        if cluster_type:
-            cls = Cluster.polymorphic_subclass(cluster_type,
-                                               "Unknown cluster type")
-        else:
-            cls = Cluster
 
         # Don't load full objects if we only want to show their name
         if fullinfo or style != 'raw':
-            q = session.query(cls)
+            q = session.query(MetaCluster)
         else:
-            q = session.query(cls.name)
-
-        if cls == Cluster:
-            q = q.filter(Cluster.cluster_type != 'meta')
+            q = session.query(MetaCluster.name)
 
         # The ORM automatically de-duplicates the result if we query full
         # objects, but not when we query just the names. Tell the DB to do so.
@@ -113,57 +87,35 @@ class CommandSearchCluster(BrokerCommand):
         # Go through the arguments and make special dicts for each
         # specific set of location arguments that are stripped of the
         # given prefix.
-        location_args = {'cluster_': {}, 'member_': {}}
-        for prefix, values in location_args.items():
-            for k, v in arguments.items():
+        location_args = {'metacluster_': {}, 'member_': {}}
+        for prefix in location_args.keys():
+            for (k, v) in arguments.items():
                 if k.startswith(prefix):
                     # arguments['cluster_building'] = 'dd'
                     # becomes
                     # location_args['cluster_']['building'] = 'dd'
-                    values[k.replace(prefix, '')] = v
+                    location_args[prefix][k.replace(prefix, '')] = v
 
-        dblocation = get_location(session, **location_args['cluster_'])
+        dblocation = get_location(session, **location_args['metacluster_'])
         if dblocation:
-            if location_args['cluster_']['exact_location']:
+            if location_args['metacluster_']['exact_location']:
                 q = q.filter_by(location_constraint=dblocation)
             else:
                 childids = dblocation.offspring_ids()
-                q = q.filter(Cluster.location_constraint_id.in_(childids))
+                q = q.filter(MetaCluster.location_constraint_id.in_(childids))
         dblocation = get_location(session, **location_args['member_'])
         if dblocation:
-            q = q.join('_hosts', 'host', 'hardware_entity')
+            CAlias = aliased(Cluster)
+            q = q.join(CAlias, MetaCluster.members)
             if location_args['member_']['exact_location']:
-                q = q.filter_by(location=dblocation)
+                q = q.filter_by(location_constraint=dblocation)
             else:
                 childids = dblocation.offspring_ids()
-                q = q.filter(Machine.location_id.in_(childids))
+                q = q.filter(CAlias.location_constraint_id.in_(childids))
             q = q.reset_joinpoint()
 
-        # esx stuff
-        if cluster:
-            q = q.filter_by(name=cluster)
         if metacluster:
-            dbmetacluster = MetaCluster.get_unique(session, metacluster,
-                                                   compel=True)
-            q = q.filter_by(metacluster=dbmetacluster)
-            q = q.reset_joinpoint()
-        if esx_virtual_machine:
-            dbvm = Machine.get_unique(session, esx_virtual_machine, compel=True)
-            # TODO: support VMs inside resource groups?
-            q = q.join(ClusterResource, VirtualMachine)
-            q = q.filter_by(machine=dbvm)
-            q = q.reset_joinpoint()
-        if esx_guest:
-            dbguest = hostname_to_host(session, esx_guest)
-            # TODO: support VMs inside resource groups?
-            q = q.join(ClusterResource, VirtualMachine, Machine)
-            q = q.filter_by(host=dbguest)
-            q = q.reset_joinpoint()
-        if capacity_override:
-            q = q.filter(EsxCluster.memory_capacity != null())
-        if esx_switch:
-            dbnetdev = NetworkDevice.get_unique(session, esx_switch, compel=True)
-            q = q.filter_by(network_device=dbnetdev)
+            q = q.filter_by(name=metacluster)
 
         if service:
             dbservice = Service.get_unique(session, name=service, compel=True)
@@ -171,7 +123,7 @@ class CommandSearchCluster(BrokerCommand):
                 dbsi = ServiceInstance.get_unique(session, name=instance,
                                                   service=dbservice,
                                                   compel=True)
-                q = q.filter(Cluster.services_used.contains(dbsi))
+                q = q.filter(MetaCluster.services_used.contains(dbsi))
             else:
                 q = q.join('services_used')
                 q = q.filter_by(service=dbservice)
@@ -202,17 +154,7 @@ class CommandSearchCluster(BrokerCommand):
             q = q.reset_joinpoint()
 
         if max_members:
-            q = q.filter_by(max_hosts=max_members)
-
-        if down_hosts_threshold:
-            (pct, dht) = Cluster.parse_threshold(down_hosts_threshold)
-            q = q.filter_by(down_hosts_percent=pct)
-            q = q.filter_by(down_hosts_threshold=dht)
-
-        if down_maint_threshold:
-            (pct, dmt) = Cluster.parse_threshold(down_maint_threshold)
-            q = q.filter_by(down_maint_percent=pct)
-            q = q.filter_by(down_maint_threshold=dmt)
+            q = q.filter_by(max_clusters=max_members)
 
         if allowed_archetype:
             # Added to the searches as appropriate below.
@@ -222,7 +164,7 @@ class CommandSearchCluster(BrokerCommand):
             dbap = Personality.get_unique(session, archetype=dbaa,
                                           name=allowed_personality,
                                           compel=True)
-            q = q.filter(Cluster.allowed_personalities.contains(dbap))
+            q = q.filter(MetaCluster.allowed_personalities.contains(dbap))
         elif allowed_personality:
             q = q.join('allowed_personalities')
             q = q.filter_by(name=allowed_personality)
@@ -232,31 +174,36 @@ class CommandSearchCluster(BrokerCommand):
             q = q.filter_by(archetype=dbaa)
             q = q.reset_joinpoint()
 
-        if member_hostname:
-            dbhost = hostname_to_host(session, member_hostname)
-            q = q.join('_hosts')
-            q = q.filter_by(host=dbhost)
-            q = q.reset_joinpoint()
+        if member_cluster:
+            dbcluster = Cluster.get_unique(session, member_cluster, compel=True)
+            q = q.filter(MetaCluster.members.contains(dbcluster))
 
         if member_archetype:
             # Added to the searches as appropriate below.
             dbma = Archetype.get_unique(session, member_archetype, compel=True)
         if member_personality and member_archetype:
-            q = q.join('_hosts', 'host')
+            CAlias = aliased(Cluster)
+            q = q.join(CAlias, MetaCluster.members)
             dbmp = Personality.get_unique(session, archetype=dbma,
                                           name=member_personality, compel=True)
             q = q.filter_by(personality=dbmp)
             q = q.reset_joinpoint()
         elif member_personality:
-            q = q.join('_hosts', 'host', 'personality')
+            CAlias = aliased(Cluster)
+            PersAlias = aliased(Personality)
+            q = q.join(CAlias, MetaCluster.members)
+            q = q.join(PersAlias, CAlias.personality)
             q = q.filter_by(name=member_personality)
             q = q.reset_joinpoint()
         elif member_archetype:
-            q = q.join('_hosts', 'host', 'personality')
+            CAlias = aliased(Cluster)
+            PersAlias = aliased(Personality)
+            q = q.join(CAlias, MetaCluster.members)
+            q = q.join(PersAlias, CAlias.personality)
             q = q.filter_by(archetype=dbma)
             q = q.reset_joinpoint()
 
-        q = q.order_by(cls.name)
+        q = q.order_by(MetaCluster.name)
 
         if fullinfo or style != "raw":
             return q.all()

@@ -174,6 +174,7 @@ from .test_search_host import TestSearchHost
 from .test_search_esx_cluster import TestSearchESXCluster
 from .test_search_cluster_esx import TestSearchClusterESX
 from .test_search_cluster import TestSearchCluster
+from .test_search_metacluster import TestSearchMetaCluster
 from .test_search_observed_mac import TestSearchObservedMac
 from .test_search_next import TestSearchNext
 from .test_search_network import TestSearchNetwork
@@ -371,6 +372,7 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestSearchPersonality,
                      TestSearchSystem, TestSearchHost, TestSearchESXCluster,
                      TestSearchClusterESX, TestSearchCluster,
+                     TestSearchMetaCluster,
                      TestSearchObservedMac, TestSearchNext, TestSearchNetwork,
                      TestSearchModel,
                      TestUpdateInterface, TestUpdateMachine, TestUpdateModel,
