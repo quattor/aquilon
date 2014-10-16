@@ -338,27 +338,19 @@ class ObjectFormatter(object):
                 int_msg.device = str(iface.name)
                 add_iface_data(int_msg, iface)
 
-    def add_archetype_data(self, msg, archetype):
-        msg.name = str(archetype.name)
-        msg.compileable = archetype.is_compileable
-        msg.cluster_type = str(archetype.cluster_type)
-        for service in archetype.services:
-            si = msg.required_services.add()
-            si.service = service.name
-
     def add_personality_data(self, msg, personality):
         msg.name = str(personality)
         for service in personality.services:
             si = msg.required_services.add()
             si.service = service.name
-        self.add_archetype_data(msg.archetype, personality.archetype)
+        self.redirect_proto(personality.archetype, msg.archetype)
         msg.host_environment = str(personality.host_environment)
         msg.owner_eonid = personality.owner_eon_id
 
     def add_os_data(self, msg, operating_system):
         msg.name = str(operating_system.name)
         msg.version = str(operating_system.version)
-        # We don't need the services here, so don't call add_archetype_data()
+        # We don't need the services here, so don't call redirect_proto()
         msg.archetype.name = str(operating_system.archetype.name)
 
     def add_branch_data(self, msg, branch):
@@ -404,7 +396,7 @@ class ObjectFormatter(object):
         host_msg.owner_eonid = host.effective_owner_grn.eon_id
         self.add_branch_data(host_msg.domain, host.branch)
         self.add_personality_data(host_msg.personality, host.personality)
-        self.add_archetype_data(host_msg.archetype, host.archetype)
+        self.redirect_proto(host.archetype, host_msg.archetype)
         self.add_os_data(host_msg.operating_system, host.operating_system)
         self.add_hardware_data(host_msg.machine, dbhw_ent)
 

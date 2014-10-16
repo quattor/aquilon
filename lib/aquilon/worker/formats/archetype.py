@@ -25,6 +25,11 @@ class ArchetypeFormatter(ObjectFormatter):
     template_raw = "archetype.mako"
 
     def fill_proto(self, archetype, skeleton):
-        self.add_archetype_data(skeleton, archetype)
+        skeleton.name = str(archetype.name)
+        skeleton.compileable = archetype.is_compileable
+        skeleton.cluster_type = str(archetype.cluster_type)
+        for service in archetype.services:
+            si = skeleton.required_services.add()
+            si.service = service.name
 
 ObjectFormatter.handlers[Archetype] = ArchetypeFormatter()
