@@ -44,6 +44,8 @@ class ModelFormatter(ObjectFormatter):
         return "\n".join(details)
 
     def fill_proto(self, model, skeleton):
-        self.add_model_data(skeleton, model)
+        skeleton.name = str(model.name)
+        skeleton.vendor = str(model.vendor.name)
+        skeleton.model_type = str(model.model_type)
 
 ObjectFormatter.handlers[Model] = ModelFormatter()
