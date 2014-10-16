@@ -88,6 +88,7 @@ typemap = {
     "parameter": aqdparameters_pb2.ParameterList(),
     "parameter_definition": aqdparamdefinitions_pb2.ParamDefinitionList(),
     "resource": aqdsystems_pb2.ResourceList(),
+    "feature": aqdsystems_pb2.FeatureList(),
 }
 
 input = sys.stdin
