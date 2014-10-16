@@ -32,6 +32,9 @@ class OSFormatter(ObjectFormatter):
         return "\n".join(details)
 
     def fill_proto(self, os, skeleton):
-        self.add_os_data(skeleton, os)
+        skeleton.name = str(os.name)
+        skeleton.version = str(os.version)
+        # We don't need the services here, so don't call redirect_proto()
+        skeleton.archetype.name = str(os.archetype.name)
 
 ObjectFormatter.handlers[OperatingSystem] = OSFormatter()
