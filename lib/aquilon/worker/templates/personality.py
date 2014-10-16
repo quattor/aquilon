@@ -20,7 +20,6 @@ from collections import defaultdict
 from six import iteritems
 
 from sqlalchemy.inspection import inspect
-from sqlalchemy.orm import object_session
 
 from aquilon.aqdb.model import Personality, Parameter
 from aquilon.worker.locks import NoLockKey, PlenaryKey
@@ -29,8 +28,7 @@ from aquilon.worker.templates.base import (Plenary, StructurePlenary,
 from aquilon.worker.templates.panutils import (pan_include, pan_variable,
                                                pan_assign, pan_append,
                                                pan_include_if_exists)
-from aquilon.worker.dbwrappers.parameter import (validate_value,
-                                                 get_parameters)
+from aquilon.worker.dbwrappers.parameter import validate_value
 
 LOGGER = logging.getLogger(__name__)
 
@@ -42,13 +40,11 @@ def string_to_list(data):
 def get_parameters_by_feature(dbpersonality, dbfeaturelink):
     ret = {}
     paramdef_holder = dbfeaturelink.feature.paramdef_holder
-    if not paramdef_holder:
+    if not paramdef_holder or not dbpersonality.paramholder:
         return ret
 
-    param_definitions = paramdef_holder.param_definitions
-    parameters = get_parameters(dbpersonality)
-
-    for param_def in param_definitions:
+    parameters = dbpersonality.paramholder.parameters
+    for param_def in paramdef_holder.param_definitions:
         value = None
         for param in parameters:
             value = param.get_feature_path(dbfeaturelink,
@@ -95,16 +91,16 @@ def get_path_under_top(path, value, ret):
 
 def get_parameters_by_tmpl(dbpersonality):
     ret = defaultdict(dict)
-
-    session = object_session(dbpersonality)
     paramdef_holder = dbpersonality.archetype.paramdef_holder
     if not paramdef_holder:
         return ret
 
-    param_definitions = paramdef_holder.param_definitions
-    parameters = get_parameters(dbpersonality)
+    if dbpersonality.paramholder:
+        parameters = dbpersonality.paramholder.parameters
+    else:
+        parameters = []
 
-    for param_def in param_definitions:
+    for param_def in paramdef_holder.param_definitions:
         value = None
         for param in parameters:
             value = param.get_path(param_def.path, compel=False)

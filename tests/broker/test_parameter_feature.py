@@ -94,8 +94,8 @@ class TestParameterFeature(TestBrokerCommand):
     def test_090_verify_feature_proto_noerr(self):
         cmd = ["show", "parameter", "--personality", "utpersonality/dev", "--format=proto"]
         out = self.notfoundtest(cmd)
-        self.matchoutput(out, "Not Found: No parameters found for personality utpersonality/dev",
-                         cmd)
+        self.matchoutput(out, "Not Found: No parameters found for personality "
+                         "aquilon/utpersonality/dev", cmd)
 
     def load_paramdefs(self, feature, feature_type):
         for p in PARAM_DEFS:

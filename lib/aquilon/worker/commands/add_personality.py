@@ -23,8 +23,7 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import (Archetype, Personality, PersonalityGrnMap,
                                 Parameter, HostEnvironment,
                                 PersonalityServiceMap, PersonalityParameter)
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.dbwrappers.parameter import get_parameters
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.feature import add_link
 from aquilon.worker.dbwrappers.grn import lookup_grn
 from aquilon.worker.templates import Plenary
@@ -88,14 +87,14 @@ class CommandAddPersonality(BrokerCommand):
                                                     name=copy_from,
                                                     compel=True)
 
-            src_parameters = get_parameters(dbfrom_persona)
-            db_param_holder = PersonalityParameter(personality=dbpersona)
+            if dbfrom_persona.paramholder:
+                dbpersona.paramholder = PersonalityParameter()
 
-            for param in src_parameters:
-                dbparameter = Parameter(value=param.value,
-                                        comments=param.comments,
-                                        holder=db_param_holder)
-                session.add(dbparameter)
+                for param in dbfrom_persona.paramholder.parameters:
+                    dbparameter = Parameter(value=param.value,
+                                            comments=param.comments,
+                                            holder=dbpersona.paramholder)
+                    session.add(dbparameter)
 
             for link in dbfrom_persona.features:
                 params = {}

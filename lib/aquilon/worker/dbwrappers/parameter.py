@@ -101,39 +101,21 @@ def del_parameter(session, path, param_holder, feature=None, model=None, interfa
 
 
 def del_all_feature_parameter(session, dblink):
-
-    if not dblink:
-        return
-
-    paramdef_holder = None
-    param_definitions = None
-    if dblink:
-        paramdef_holder = dblink.feature.paramdef_holder
-        if paramdef_holder:
-            param_definitions = paramdef_holder.param_definitions
-
-    if not param_definitions:
-        return
-
     # TODO: if the feature is bound to the whole archetype, then we should clean
     # up all personalities here
-    if not dblink.personality:
+    if not dblink or not dblink.personality or \
+       not dblink.personality.paramholder or \
+       not dblink.feature.paramdef_holder:
         return
 
-    dbparams = get_parameters(dblink.personality)
-
-    if not dbparams:
-        return
-
-    for paramdef in param_definitions:
-        for dbparam in dbparams:
+    parameters = dblink.personality.paramholder.parameters
+    for paramdef in dblink.feature.paramdef_holder.param_definitions:
+        for dbparam in parameters:
             if paramdef.rebuild_required:
                 validate_rebuild_required(session, paramdef.path, dbparam.holder)
 
             dbparam.del_path(Parameter.feature_path(dblink, paramdef.path),
                              compel=False)
-
-    return
 
 
 def validate_value(label, value_type, value):
@@ -207,13 +189,6 @@ def validate_rebuild_required(session, path, param_holder):
                             "and 'aq search host --personality %s --buildstatus almostready' to "
                             "get the list of the affected hosts." %
                             (path, personality, personality))
-
-
-def get_parameters(personality):
-    param_holder = personality.paramholder
-    if param_holder is None:
-        return []
-    return param_holder.parameters
 
 
 def get_paramdef_for_parameter(session, path, param_holder, dbfeaturelink=None):
@@ -322,7 +297,12 @@ def validate_personality_config(session, archetype, personality):
     error = []
     # validate parameters
     param_definitions = []
-    parameters = get_parameters(dbpersonality)
+
+    if dbpersonality.paramholder:
+        parameters = dbpersonality.paramholder.parameters
+    else:
+        parameters = []
+
     if dbarchetype.paramdef_holder:
         param_definitions = dbarchetype.paramdef_holder.param_definitions
         error += validate_required_parameter(param_definitions, parameters)

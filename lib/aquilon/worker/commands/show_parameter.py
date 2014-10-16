@@ -18,7 +18,6 @@
 from aquilon.exceptions_ import NotFoundException
 from aquilon.aqdb.model import Personality
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.dbwrappers.parameter import get_parameters
 
 
 class CommandShowParameterPersonality(BrokerCommand):
@@ -28,11 +27,9 @@ class CommandShowParameterPersonality(BrokerCommand):
     def render(self, session, personality, archetype, **arguments):
         dbpersonality = Personality.get_unique(session, name=personality,
                                                archetype=archetype, compel=True)
+        if not dbpersonality.paramholder or \
+           not dbpersonality.paramholder.parameters:
+            raise NotFoundException("No parameters found for {0:l}."
+                                    .format(dbpersonality))
 
-        parameters = get_parameters(dbpersonality)
-
-        if parameters:
-            return parameters
-
-        raise NotFoundException("No parameters found for personality %s." %
-                                personality)
+        return dbpersonality.paramholder.parameters
