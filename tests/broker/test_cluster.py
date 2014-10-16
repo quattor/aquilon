@@ -62,6 +62,14 @@ class TestCluster(TestBrokerCommand):
             self.matchoutput(out, "Member: evh%d.aqd-unittest.ms.com "
                              "[node_index: %d]" % (i, i - 1), command)
 
+    def testverifyevh1proto(self):
+        command = ["show_host", "--hostname", "evh1.aqd-unittest.ms.com",
+                   "--format", "proto"]
+        out = self.commandtest(command)
+        hostlist = self.parse_hostlist_msg(out, expect=1)
+        host = hostlist.hosts[0]
+        self.failUnlessEqual(host.cluster, "utecl1")
+
     def testverifycat(self):
         cat_cluster_command = "cat --cluster utecl1"
         cat_cluster_out = self.commandtest(cat_cluster_command.split())
