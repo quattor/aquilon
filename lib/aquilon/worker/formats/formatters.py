@@ -26,7 +26,7 @@ from google.protobuf.descriptor import FieldDescriptor
 
 from aquilon.config import Config
 from aquilon.exceptions_ import ProtocolError, InternalError
-from aquilon.aqdb.model import Host, Machine, VirtualDisk, Domain, Sandbox
+from aquilon.aqdb.model import Host, Machine, VirtualDisk
 from aquilon.worker.processes import build_mako_lookup
 
 # Note: the built-in "excel" dialect uses '\r\n' for line ending and that breaks
@@ -353,18 +353,6 @@ class ObjectFormatter(object):
         # We don't need the services here, so don't call redirect_proto()
         msg.archetype.name = str(operating_system.archetype.name)
 
-    def add_branch_data(self, msg, branch):
-        msg.name = str(branch.name)
-        msg.owner = str(branch.owner)
-
-        if isinstance(branch, Domain):
-            msg.type = msg.DOMAIN
-            msg.allow_manage = branch.allow_manage
-            if branch.tracked_branch:
-                msg.tracked_branch = str(branch.tracked_branch.name)
-        elif isinstance(branch, Sandbox):
-            msg.type = msg.SANDBOX
-
     def add_host_data(self, host_msg, host):
         """ Return a host message.
 
@@ -394,7 +382,7 @@ class ObjectFormatter(object):
 
         host_msg.status = str(host.status.name)
         host_msg.owner_eonid = host.effective_owner_grn.eon_id
-        self.add_branch_data(host_msg.domain, host.branch)
+        self.redirect_proto(host.branch, host_msg.domain)
         self.add_personality_data(host_msg.personality, host.personality)
         self.redirect_proto(host.archetype, host_msg.archetype)
         self.add_os_data(host_msg.operating_system, host.operating_system)

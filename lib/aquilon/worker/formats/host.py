@@ -148,7 +148,7 @@ class GrnHostListFormatter(ListFormatter):
         for host in hostlist:
             msg = container.add()
             msg.hostname = str(host.hardware_entity.primary_name)
-            self.add_branch_data(msg.domain, host.branch)
+            self.redirect_proto(host.branch, msg.domain)
             msg.status = str(host.status.name)
             msg.owner_eonid = host.effective_owner_grn.eon_id
 
