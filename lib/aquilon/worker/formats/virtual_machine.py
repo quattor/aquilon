@@ -34,7 +34,4 @@ class VirtualMachineFormatter(ResourceFormatter):
         return indent + "%s: %s (%s, %d MB)" % (
             vm._get_class_label(), dbmachine.label, name, dbmachine.memory)
 
-    def fill_proto(self, vm, skeleton):
-        self.add_resource_data(skeleton, vm)
-
 ObjectFormatter.handlers[VirtualMachine] = VirtualMachineFormatter()

@@ -36,6 +36,7 @@ class ResourceFormatter(ObjectFormatter):
         return "\n".join(details)
 
     def fill_proto(self, resource, skeleton):
-        self.add_resource_data(skeleton, resource)
+        skeleton.name = str(resource.name)
+        skeleton.type = str(resource.resource_type)
 
 ObjectFormatter.handlers[Resource] = ResourceFormatter()

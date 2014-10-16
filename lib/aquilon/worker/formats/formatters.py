@@ -305,10 +305,10 @@ class ObjectFormatter(object):
                 if isinstance(disk, VirtualDisk):
                     if disk.snapshotable is not None:
                         disk_msg.snapshotable = disk.snapshotable
-                    self.add_resource_data(disk_msg.backing_store,
-                                           disk.backing_store)
                     if disk.iops_limit is not None:
                         disk_msg.iops_limit = disk.iops_limit
+                    self.redirect_proto(disk.backing_store,
+                                        disk_msg.backing_store)
 
         def add_iface_data(int_msg, iface):
             if iface.mac:
@@ -444,10 +444,6 @@ class ObjectFormatter(object):
         feat_msg.owner_eonid = feature.owner_eon_id
         desc = feat_msg.DESCRIPTOR
         feat_msg.visibility = desc.enum_values_by_name[feature.visibility.upper()].number
-
-    def add_resource_data(self, resource_msg, resource):
-        resource_msg.name = str(resource.name)
-        resource_msg.type = str(resource.resource_type)
 
 ObjectFormatter.default_handler = ObjectFormatter()
 

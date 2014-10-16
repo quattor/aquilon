@@ -39,7 +39,7 @@ class InterventionFormatter(ResourceFormatter):
         return details
 
     def fill_proto(self, resource, skeleton):
-        self.add_resource_data(skeleton, resource)
+        super(InterventionFormatter, self).fill_proto(resource, skeleton)
         skeleton.ivdata.expiry = timegm(resource.expiry_date.utctimetuple())
         skeleton.ivdata.start = timegm(resource.start_date.utctimetuple())
         if resource.users is not None:

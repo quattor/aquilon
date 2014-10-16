@@ -30,7 +30,7 @@ class RebootInterventionFormatter(ResourceFormatter):
         return details
 
     def fill_proto(self, rs, skeleton):
-        self.add_resource_data(skeleton, rs)
+        super(RebootInterventionFormatter, self).fill_proto(rs, skeleton)
         # XXX: The protocol does not have an rsdata field, and even if it
         # did, why would reboot intervention fill it in?  Could use ivdata,
         # not sure if we want a separate rivdata.

@@ -35,7 +35,7 @@ class FilesystemFormatter(ResourceFormatter):
         return details
 
     def fill_proto(self, fs, skeleton):
-        self.add_resource_data(skeleton, fs)
+        super(FilesystemFormatter, self).fill_proto(fs, skeleton)
         skeleton.fsdata.mount = fs.mount
         skeleton.fsdata.fstype = str(fs.fstype)
         skeleton.fsdata.blockdevice = str(fs.blockdev)

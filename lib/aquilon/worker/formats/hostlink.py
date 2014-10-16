@@ -31,7 +31,7 @@ class HostlinkFormatter(ResourceFormatter):
         return details
 
     def fill_proto(self, hostlink, skeleton):
-        self.add_resource_data(skeleton, hostlink)
+        super(HostlinkFormatter, self).fill_proto(hostlink, skeleton)
         skeleton.hostlink.target = hostlink.target
         skeleton.hostlink.owner_user = hostlink.owner_user
         if hostlink.owner_group:

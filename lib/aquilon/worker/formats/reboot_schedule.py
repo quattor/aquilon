@@ -30,7 +30,7 @@ class RebootScheduleFormatter(ResourceFormatter):
         return details
 
     def fill_proto(self, rs, skeleton):
-        self.add_resource_data(skeleton, rs)
+        super(RebootScheduleFormatter, self).fill_proto(rs, skeleton)
         skeleton.reboot_schedule.week = str(rs.week)
         skeleton.reboot_schedule.day = str(rs.day)
         skeleton.reboot_schedule.time = str(rs.time)
