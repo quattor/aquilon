@@ -388,9 +388,6 @@ class ObjectFormatter(object):
         self.add_os_data(host_msg.operating_system, host.operating_system)
         self.add_hardware_data(host_msg.machine, dbhw_ent)
 
-    def add_dns_domain_data(self, dns_domain_msg, dns_domain):
-        dns_domain_msg.name = str(dns_domain.name)
-
     def add_service_data(self, service_msg, service, service_instance=None):
         """Adds a service message, will either nest the given service_instance in the message,
         or will add all the service instances which are available as a backref from a service object"""

@@ -40,6 +40,6 @@ class DnsDomainFormatter(ObjectFormatter):
         yield (dns_domain.name, dns_domain.comments)
 
     def fill_proto(self, dns_domain, skeleton):
-        self.add_dns_domain_data(skeleton, dns_domain)
+        skeleton.name = str(dns_domain.name)
 
 ObjectFormatter.handlers[DnsDomain] = DnsDomainFormatter()
