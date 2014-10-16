@@ -100,7 +100,12 @@ class PersonalityFormatter(ObjectFormatter):
                                      "feature.name"))
 
         for link in features:
-            self.add_featurelink_data(skeleton.features.add(), link)
+            feat_msg = skeleton.features.add()
+            self.redirect_proto(link.feature, feat_msg)
+            if link.model:
+                self.redirect_proto(link.model, feat_msg.model)
+            if link.interface_name:
+                feat_msg.interface_name = str(link.interface_name)
 
         for service in personality.services:
             rsvc_msg = skeleton.required_services.add()

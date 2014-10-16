@@ -419,21 +419,6 @@ class ObjectFormatter(object):
         else:
             sm_msg.personality.archetype.name = 'aquilon'
 
-    def add_featurelink_data(self, feat_msg, featlink):
-        self.add_feature_data(feat_msg, featlink.feature)
-        if featlink.model:
-            self.redirect_proto(featlink.model, feat_msg.model)
-        if featlink.interface_name:
-            feat_msg.interface_name = str(featlink.interface_name)
-
-    def add_feature_data(self, feat_msg, feature):
-        feat_msg.name = str(feature.name)
-        feat_msg.type = str(feature.feature_type)
-        feat_msg.post_personality = feature.post_personality
-        feat_msg.owner_eonid = feature.owner_eon_id
-        desc = feat_msg.DESCRIPTOR
-        feat_msg.visibility = desc.enum_values_by_name[feature.visibility.upper()].number
-
 ObjectFormatter.default_handler = ObjectFormatter()
 
 

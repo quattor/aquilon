@@ -55,7 +55,12 @@ class FeatureFormatter(ObjectFormatter):
         return "\n".join(details)
 
     def fill_proto(self, feature, skeleton):
-        self.add_feature_data(skeleton, feature)
+        skeleton.name = str(feature.name)
+        skeleton.type = str(feature.feature_type)
+        skeleton.post_personality = feature.post_personality
+        skeleton.owner_eonid = feature.owner_eon_id
+        desc = skeleton.DESCRIPTOR
+        skeleton.visibility = desc.enum_values_by_name[feature.visibility.upper()].number
 
 ObjectFormatter.handlers[Feature] = FeatureFormatter()
 ObjectFormatter.handlers[HostFeature] = FeatureFormatter()
