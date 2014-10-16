@@ -147,14 +147,14 @@ class PlenaryPersonality(PlenaryCollection):
 
         self.dbobj = dbpersonality
 
-        self.plenaries.append(PlenaryPersonalityBase.get_plenary(dbpersonality))
-        self.plenaries.append(PlenaryPersonalityPreFeature.get_plenary(dbpersonality))
-        self.plenaries.append(PlenaryPersonalityPostFeature.get_plenary(dbpersonality))
+        self.append(PlenaryPersonalityBase.get_plenary(dbpersonality))
+        self.append(PlenaryPersonalityPreFeature.get_plenary(dbpersonality))
+        self.append(PlenaryPersonalityPostFeature.get_plenary(dbpersonality))
 
         # mulitple structure templates for parameters
         for path, values in get_parameters_by_tmpl(dbpersonality).items():
             ptmpl = ParameterTemplate(dbpersonality, path, values)
-            self.plenaries.append(PlenaryPersonalityParameter.get_plenary(ptmpl))
+            self.append(PlenaryPersonalityParameter.get_plenary(ptmpl))
 
         self.name = dbpersonality.name
 

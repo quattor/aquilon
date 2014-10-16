@@ -87,8 +87,8 @@ class PlenaryHost(PlenaryCollection):
             raise InternalError("PlenaryHost called with %s instead of Host" %
                                 dbhost.__class__.name)
         self.dbobj = dbhost
-        self.plenaries.append(PlenaryHostObject.get_plenary(dbhost))
-        self.plenaries.append(PlenaryHostData.get_plenary(dbhost))
+        self.append(PlenaryHostObject.get_plenary(dbhost))
+        self.append(PlenaryHostData.get_plenary(dbhost))
 
     def write(self, locked=False):
         # Don't bother writing plenary files non-compilable archetypes.
