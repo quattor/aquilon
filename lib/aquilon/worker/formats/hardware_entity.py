@@ -64,13 +64,9 @@ class HardwareEntityFormatter(ObjectFormatter):
         skeleton.name = str(hwent.label)
         if hwent.host:
             skeleton.host = str(hwent.primary_name)
-        if hwent.location:
-            skeleton.location.name = str(hwent.location.name)
-            skeleton.location.location_type = str(hwent.location.location_type)
-            for parent in hwent.location.parents:
-                p = skeleton.location.parents.add()
-                p.name = str(parent.name)
-                p.location_type = str(parent.location_type)
+
+        self.redirect_proto(hwent.location, skeleton.location)
+
         if hwent.serial_no:
             skeleton.serial_no = str(hwent.serial_no)
 
