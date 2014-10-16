@@ -308,48 +308,6 @@ class ObjectFormatter(object):
         self.redirect_proto(host.operating_system, host_msg.operating_system)
         self.redirect_proto(dbhw_ent, host_msg.machine)
 
-    def add_service_data(self, service_msg, service, service_instance=None):
-        """Adds a service message, will either nest the given service_instance in the message,
-        or will add all the service instances which are available as a backref from a service object"""
-        service_msg.name = str(service.name)
-        if service_instance:
-            msg = service_msg.serviceinstances.add()
-            self.add_service_instance_data(msg, service_instance)
-        else:
-            for si in service.instances:
-                msg = service_msg.serviceinstances.add()
-                self.add_service_instance_data(msg, si)
-
-    def add_service_instance_data(self, si_msg, service_instance):
-        si_msg.name = str(service_instance.name)
-        for srv in service_instance.servers:
-            if srv.host:
-                self.add_host_data(si_msg.servers.add(), srv.host)
-            # TODO: extra IP address/service address information
-            # TODO: cluster-provided services
-        # TODO: make this conditional to avoid performance problems
-        # for client in service_instance.clients:
-        #    self.add_host_data(si_msg.clients.add(), client.host)
-
-    def add_service_map_data(self, sm_msg, service_map):
-        if service_map.location:
-            sm_msg.location.name = str(service_map.location.name)
-            sm_msg.location.location_type = \
-                str(service_map.location.location_type)
-        else:
-            sm_msg.network.ip = str(service_map.network.ip)
-            sm_msg.network.env_name = \
-                service_map.network.network_environment.name
-
-        self.add_service_data(sm_msg.service, service_map.service,
-                              service_map.service_instance)
-        if hasattr(service_map, "personality"):
-            sm_msg.personality.name = str(service_map.personality)
-            sm_msg.personality.archetype.name = \
-                str(service_map.personality.archetype.name)
-        else:
-            sm_msg.personality.archetype.name = 'aquilon'
-
 ObjectFormatter.default_handler = ObjectFormatter()
 
 

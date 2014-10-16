@@ -26,8 +26,24 @@ class ServiceMapFormatter(ObjectFormatter):
                 "Archetype: aquilon Service: %s Instance: %s Map: %s" % (
                 sm.service.name, sm.service_instance.name, format(sm.mapped_to))
 
-    def fill_proto(self, sm, skeleton):
-        self.add_service_map_data(skeleton, sm)
+    def fill_proto(self, service_map, skeleton):
+        if service_map.location:
+            skeleton.location.name = str(service_map.location.name)
+            skeleton.location.location_type = \
+                str(service_map.location.location_type)
+        else:
+            skeleton.network.ip = str(service_map.network.ip)
+            skeleton.network.env_name = \
+                service_map.network.network_environment.name
+
+        self.redirect_proto(service_map.service_instance, skeleton.service)
+
+        if hasattr(service_map, "personality"):
+            skeleton.personality.name = str(service_map.personality)
+            skeleton.personality.archetype.name = \
+                str(service_map.personality.archetype.name)
+        else:
+            skeleton.personality.archetype.name = 'aquilon'
 
 ObjectFormatter.handlers[ServiceMap] = ServiceMapFormatter()
 

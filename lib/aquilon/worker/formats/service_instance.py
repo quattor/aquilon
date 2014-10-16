@@ -73,7 +73,17 @@ class ServiceInstanceFormatter(ObjectFormatter):
         return "\n".join(details)
 
     def fill_proto(self, si, skeleton):
-        self.add_service_data(skeleton, si.service, si)
+        skeleton.name = si.service.name
+        si_msg = skeleton.serviceinstances.add()
+        si_msg.name = str(si.name)
+        for srv in si.servers:
+            if srv.host:
+                self.add_host_data(si_msg.servers.add(), srv.host)
+            # TODO: extra IP address/service address information
+            # TODO: cluster-provided services
+        # TODO: make this conditional to avoid performance problems
+        # for client in si.clients:
+        #    self.add_host_data(si_msg.clients.add(), client.host)
 
     # Applies to service_instance/share as well.
     @classmethod
