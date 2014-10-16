@@ -32,7 +32,7 @@ class CommandAddDisk(BrokerCommand):
 
     def render(self, session, logger, machine, disk, controller, share,
                filesystem, resourcegroup, address, comments, size, boot,
-               snapshot, wwn, bus_address, **kw):
+               snapshot, wwn, bus_address, iops_limit, **kw):
         if controller not in controller_types:
             raise ArgumentError("%s is not a valid controller type, use one "
                                 "of: %s." % (controller,
@@ -75,6 +75,7 @@ class CommandAddDisk(BrokerCommand):
                                   resourcegroup, res_name)
             extra_params["backing_store"] = dbres
             extra_params["snapshotable"] = snapshot
+            extra_params["iops_limit"] = iops_limit
             cls = VirtualDisk
 
         dbdisk = cls(device_name=disk, controller_type=controller,

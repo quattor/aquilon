@@ -34,6 +34,7 @@
 	    <arg choice="opt"><option>--address <replaceable>[H:]C:T[:L]</replaceable></option></arg>
 	    <arg choice="opt"><option>--wwn <replaceable>WWN</replaceable></option></arg>
 	    <arg choice="opt"><option>--bus_address <replaceable>URI</replaceable></option></arg>
+	    <arg choice="opt"><option>--iops_limit <replaceable>IOPS_LIMIT</replaceable></option></arg>
 	    <group choice="opt">
 		<arg choice="plain"><option>--boot</option></arg>
 		<arg choice="plain"><option>--noboot</option></arg>
@@ -203,6 +204,16 @@
 		<listitem>
 		    <para>
 			Free form comments for this disk.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--iops_limit <replaceable>IOPS_LIMIT</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			The iops limit on virtual disk.
 		    </para>
 		</listitem>
 	    </varlistentry>

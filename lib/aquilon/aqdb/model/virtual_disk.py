@@ -18,7 +18,7 @@
 
 import re
 
-from sqlalchemy import Column, Boolean, ForeignKey
+from sqlalchemy import Column, Boolean, ForeignKey, Integer
 from sqlalchemy.orm import relation, column_property, validates
 from sqlalchemy.sql import select, func
 
@@ -32,6 +32,8 @@ class VirtualDisk(Disk):
 
     snapshotable = Column(Boolean(name="%s_snapshotable_ck" % _TN),
                           nullable=True)
+
+    iops_limit = Column(Integer, nullable=True)
 
     backing_store_id = Column(ForeignKey(Resource.id,
                                          name='%s_backing_store_fk' % _TN),
@@ -61,6 +63,14 @@ class VirtualDisk(Disk):
         if not isinstance(value, Share) and \
            not isinstance(value, Filesystem):
             raise ValueError("The backing store must be a Share or Filesystem.")
+        return value
+
+    @validates('iops_limit')
+    def validate_iops_limit(self, key, value):
+        if value:
+            value = int(value)
+            if value < 16:
+                raise ValueError("The value of %s must be 16 or greater." % key)
         return value
 
 # The formatter code is interested in the count of disks/machines, and it is

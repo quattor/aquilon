@@ -31,7 +31,7 @@ class CommandUpdateDisk(BrokerCommand):
 
     def render(self, session, logger, machine, disk, controller, share,
                filesystem, resourcegroup, address, comments, size, boot,
-               snapshot, rename_to, wwn, bus_address, **kw):
+               snapshot, rename_to, wwn, bus_address, iops_limit, **kw):
         dbmachine = Machine.get_unique(session, machine, compel=True)
         dbdisk = Disk.get_unique(session, device_name=disk, machine=dbmachine,
                                  compel=True)
@@ -82,6 +82,11 @@ class CommandUpdateDisk(BrokerCommand):
                 raise ArgumentError("Snapshot capability can only be set for "
                                     "virtual disks.")
             dbdisk.snapshotable = snapshot
+
+        if iops_limit is not None:
+            if not isinstance(dbdisk, VirtualDisk):
+                raise ArgumentError("Iops limit can only be set for virtual disks.")
+            dbdisk.iops_limit = iops_limit
 
         if share or filesystem:
             if not isinstance(dbdisk, VirtualDisk):

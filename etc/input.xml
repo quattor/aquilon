@@ -845,6 +845,7 @@
 	    <option name="snapshot" type="boolean">Mark the disk as snapshotable</option>
 	    <option name="wwn" type="string">World Wide Name of the disk</option>
 	    <option name="bus_address" type="string">Hardware bus address of the controller hosting the disk</option>
+	    <option name="iops_limit" type="int">IOPS limit on disks.</option>
 	</optgroup>
 	<transport method="put" path="machine/%(machine)s/disk/%(disk)s"/>
     </command>
@@ -884,6 +885,7 @@
 	    <option name="snapshot" type="boolean">Mark the disk as snapshotable</option>
 	    <option name="wwn" type="string">World Wide Name of the disk</option>
 	    <option name="bus_address" type="string">Hardware bus address of the controller hosting the disk</option>
+	    <option name="iops_limit" type="int">IOPS limit on disks</option>
 	</optgroup>
 	<transport method="post" path="machine/%(machine)s/disk/%(disk)s"/>
     </command>
