@@ -15,10 +15,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.dbwrappers.parameter import get_parameters
 from aquilon.exceptions_ import NotFoundException
+from aquilon.aqdb.model import Personality
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.dbwrappers.parameter import get_parameters
 
 
 class CommandShowParameterPersonality(BrokerCommand):
@@ -26,10 +26,10 @@ class CommandShowParameterPersonality(BrokerCommand):
     required_parameters = ['personality']
 
     def render(self, session, personality, archetype, **arguments):
+        dbpersonality = Personality.get_unique(session, name=personality,
+                                               archetype=archetype, compel=True)
 
-        parameters = get_parameters(session,
-                                    archetype=archetype,
-                                    personality=personality)
+        parameters = get_parameters(dbpersonality)
 
         if parameters:
             return parameters

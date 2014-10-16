@@ -53,7 +53,7 @@ class CommandShowDiff(BrokerCommand):
         # parameters
         params = {}
 
-        dbpersona_parameters = get_parameters(session, personality=dbpersona)
+        dbpersona_parameters = get_parameters(dbpersona)
 
         for param in dbpersona_parameters:
             params.update(Parameter.flatten(param.value))

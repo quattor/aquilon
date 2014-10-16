@@ -16,10 +16,9 @@
 # limitations under the License.
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.aqdb.model import Personality
-from aquilon.worker.dbwrappers.parameter import (get_parameter_holder,
-                                                 set_parameter)
+from aquilon.aqdb.model import Personality, PersonalityParameter
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.dbwrappers.parameter import set_parameter
 from aquilon.worker.dbwrappers.personality import validate_personality_justification
 from aquilon.worker.templates import Plenary
 
@@ -28,10 +27,11 @@ class CommandAddParameter(BrokerCommand):
 
     required_parameters = ['personality', 'path']
 
-    def process_parameter(self, session, param_holder, feature, model, interface, path, value, comments):
-
-        dbparameter = set_parameter(session, param_holder, feature, model, interface, path, value,
-                                    compel=False, preclude=True)
+    def process_parameter(self, session, param_holder, feature, model,
+                          interface, path, value, comments):
+        dbparameter = set_parameter(session, param_holder, feature, model,
+                                    interface, path, value, compel=False,
+                                    preclude=True)
         if comments:
             dbparameter.comments = comments
 
@@ -40,21 +40,22 @@ class CommandAddParameter(BrokerCommand):
     def render(self, session, logger, archetype, personality, feature, model,
                interface, path, user, value=None, comments=None,
                justification=None, reason=None, **arguments):
+        dbpersonality = Personality.get_unique(session, name=personality,
+                                               archetype=archetype, compel=True)
+        if not dbpersonality.paramholder:
+            dbpersonality.paramholder = PersonalityParameter()
 
-        param_holder = get_parameter_holder(session, archetype, personality,
-                                            auto_include=True)
+        if not dbpersonality.archetype.is_compileable:
+            raise ArgumentError("{0} is not compileable."
+                                .format(dbpersonality.archetype))
 
-        if isinstance(param_holder.holder_object, Personality):
-            if not param_holder.holder_object.archetype.is_compileable:
-                raise ArgumentError("{0} is not compileable."
-                                    .format(param_holder.holder_object.archetype))
-            validate_personality_justification(param_holder.personality,
-                                               user, justification, reason)
+        validate_personality_justification(dbpersonality, user, justification, reason)
 
-        dbparameter = self.process_parameter(session, param_holder, feature, model, interface,
-                                             path, value, comments)
+        dbparameter = self.process_parameter(session, dbpersonality.paramholder,
+                                             feature, model, interface, path,
+                                             value, comments)
         session.add(dbparameter)
         session.flush()
 
-        plenary = Plenary.get_plenary(param_holder.personality, logger=logger)
+        plenary = Plenary.get_plenary(dbpersonality, logger=logger)
         plenary.write()

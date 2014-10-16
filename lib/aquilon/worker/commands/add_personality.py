@@ -88,8 +88,7 @@ class CommandAddPersonality(BrokerCommand):
                                                     name=copy_from,
                                                     compel=True)
 
-            src_parameters = get_parameters(session,
-                                            personality=dbfrom_persona)
+            src_parameters = get_parameters(dbfrom_persona)
             db_param_holder = PersonalityParameter(personality=dbpersona)
 
             for param in src_parameters:

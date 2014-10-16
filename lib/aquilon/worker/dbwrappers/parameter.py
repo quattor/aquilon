@@ -30,24 +30,6 @@ from aquilon.aqdb.model.hostlifecycle import Ready, Almostready
 from aquilon.worker.formats.parameter_definition import ParamDefinitionFormatter
 
 
-def get_parameter_holder(session, archetype=None, personality=None,
-                         auto_include=False):
-    db_param_holder = None
-    dbpersonality = None
-    if isinstance(personality, Personality):
-        dbpersonality = personality
-    else:
-        dbpersonality = Personality.get_unique(session, name=personality,
-                                               archetype=archetype, compel=True)
-    db_param_holder = dbpersonality.paramholder
-
-    if db_param_holder is None and auto_include:
-        db_param_holder = PersonalityParameter(personality=dbpersonality)
-        session.add(db_param_holder)
-
-    return db_param_holder
-
-
 def get_feature_link(session, feature, model, interface_name, personality):
     dblink = None
     dbmodel = None
@@ -138,8 +120,7 @@ def del_all_feature_parameter(session, dblink):
     if not dblink.personality:
         return
 
-    dbparams = get_parameters(session, archetype=None,
-                              personality=dblink.personality)
+    dbparams = get_parameters(dblink.personality)
 
     if not dbparams:
         return
@@ -228,10 +209,8 @@ def validate_rebuild_required(session, path, param_holder):
                             (path, personality, personality))
 
 
-def get_parameters(session, archetype=None, personality=None):
-    param_holder = get_parameter_holder(session, archetype=archetype,
-                                        personality=personality,
-                                        auto_include=False)
+def get_parameters(personality):
+    param_holder = personality.paramholder
     if param_holder is None:
         return []
     return param_holder.parameters
@@ -343,7 +322,7 @@ def validate_personality_config(session, archetype, personality):
     error = []
     # validate parameters
     param_definitions = []
-    parameters = get_parameters(session, personality=dbpersonality)
+    parameters = get_parameters(dbpersonality)
     if dbarchetype.paramdef_holder:
         param_definitions = dbarchetype.paramdef_holder.param_definitions
         error += validate_required_parameter(param_definitions, parameters)

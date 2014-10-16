@@ -46,8 +46,7 @@ def get_parameters_by_feature(dbpersonality, dbfeaturelink):
         return ret
 
     param_definitions = paramdef_holder.param_definitions
-    parameters = get_parameters(object_session(dbfeaturelink),
-                                personality=dbpersonality)
+    parameters = get_parameters(dbpersonality)
 
     for param_def in param_definitions:
         value = None
@@ -103,7 +102,7 @@ def get_parameters_by_tmpl(dbpersonality):
         return ret
 
     param_definitions = paramdef_holder.param_definitions
-    parameters = get_parameters(session, personality=dbpersonality)
+    parameters = get_parameters(dbpersonality)
 
     for param_def in param_definitions:
         value = None
