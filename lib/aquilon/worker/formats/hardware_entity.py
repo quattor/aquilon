@@ -60,6 +60,50 @@ class HardwareEntityFormatter(ObjectFormatter):
 
         return "\n".join(details)
 
+    def fill_proto(self, hwent, skeleton):
+        skeleton.name = str(hwent.label)
+        if hwent.host:
+            skeleton.host = str(hwent.primary_name)
+        if hwent.location:
+            skeleton.location.name = str(hwent.location.name)
+            skeleton.location.location_type = str(hwent.location.location_type)
+            for parent in hwent.location.parents:
+                p = skeleton.location.parents.add()
+                p.name = str(parent.name)
+                p.location_type = str(parent.location_type)
+        if hwent.serial_no:
+            skeleton.serial_no = str(hwent.serial_no)
+
+        self.redirect_proto(hwent.model, skeleton.model)
+
+        def add_iface_data(int_msg, iface):
+            if iface.mac:
+                int_msg.mac = str(iface.mac)
+            if iface.bus_address:
+                int_msg.bus_address = str(iface.bus_address)
+            int_msg.bootable = iface.bootable
+            self.redirect_proto(iface.model, int_msg.model)
+
+        for iface in sorted(hwent.interfaces, key=attrgetter('name')):
+            has_addrs = False
+            for addr in iface.assignments:
+                has_addrs = True
+                int_msg = skeleton.interfaces.add()
+                int_msg.device = str(addr.logical_name)
+                add_iface_data(int_msg, iface)
+                int_msg.ip = str(addr.ip)
+                int_msg.fqdn = str(addr.fqdns[0])
+                for dns_record in addr.dns_records:
+                    if dns_record.alias_cnt:
+                        int_msg.aliases.extend(str(a.fqdn) for a in
+                                               dns_record.all_aliases)
+
+            # Add entries for interfaces that do not have any addresses
+            if not has_addrs:
+                int_msg = skeleton.interfaces.add()
+                int_msg.device = str(iface.name)
+                add_iface_data(int_msg, iface)
+
     @staticmethod
     def redirect_raw_host_details(result, indent=""):
         # A given hardware entity formatter may call this method, if/when it
@@ -67,6 +111,5 @@ class HardwareEntityFormatter(ObjectFormatter):
         handler = ObjectFormatter.handlers.get(result.__class__,
                                                ObjectFormatter.default_handler)
         return handler.format_raw_host_details(result, indent)
-
 
 ObjectFormatter.handlers[HardwareEntity] = HardwareEntityFormatter()

@@ -19,14 +19,13 @@
 import csv
 from six.moves import cStringIO as StringIO
 import sys
-from operator import attrgetter
 
 import google.protobuf.message
 from google.protobuf.descriptor import FieldDescriptor
 
 from aquilon.config import Config
 from aquilon.exceptions_ import ProtocolError, InternalError
-from aquilon.aqdb.model import Host, Machine, VirtualDisk
+from aquilon.aqdb.model import Host
 from aquilon.worker.processes import build_mako_lookup
 
 # Note: the built-in "excel" dialect uses '\r\n' for line ending and that breaks
@@ -265,74 +264,6 @@ class ObjectFormatter(object):
                                                ObjectFormatter.default_handler)
         handler.format_proto(result, container)
 
-    def add_hardware_data(self, hw_msg, hwent):
-        hw_msg.name = str(hwent.label)
-        if hwent.location:
-            hw_msg.location.name = str(hwent.location.name)
-            hw_msg.location.location_type = str(hwent.location.location_type)
-            for parent in hwent.location.parents:
-                p = hw_msg.location.parents.add()
-                p.name = str(parent.name)
-                p.location_type = str(parent.location_type)
-        if hwent.serial_no:
-            hw_msg.serial_no = str(hwent.serial_no)
-
-        self.redirect_proto(hwent.model, hw_msg.model)
-
-        if isinstance(hwent, Machine):
-            hw_msg.cpu = str(hwent.cpu.name)
-            hw_msg.cpu_count = hwent.cpu_quantity
-            hw_msg.memory = hwent.memory
-            if hwent.uri:
-                hw_msg.uri = hwent.uri
-
-            for disk in sorted(hwent.disks, key=attrgetter('device_name')):
-                disk_msg = hw_msg.disks.add()
-                disk_msg.device_name = str(disk.device_name)
-                disk_msg.capacity = disk.capacity
-                disk_msg.disk_type = str(disk.controller_type)
-                if disk.wwn:
-                    disk_msg.wwn = str(disk.wwn)
-                if disk.address:
-                    disk_msg.address = str(disk.address)
-                if disk.bus_address:
-                    disk_msg.bus_address = str(disk.bus_address)
-                if isinstance(disk, VirtualDisk):
-                    if disk.snapshotable is not None:
-                        disk_msg.snapshotable = disk.snapshotable
-                    if disk.iops_limit is not None:
-                        disk_msg.iops_limit = disk.iops_limit
-                    self.redirect_proto(disk.backing_store,
-                                        disk_msg.backing_store)
-
-        def add_iface_data(int_msg, iface):
-            if iface.mac:
-                int_msg.mac = str(iface.mac)
-            if iface.bus_address:
-                int_msg.bus_address = str(iface.bus_address)
-            int_msg.bootable = iface.bootable
-            self.redirect_proto(iface.model, int_msg.model)
-
-        for iface in sorted(hwent.interfaces, key=attrgetter('name')):
-            has_addrs = False
-            for addr in iface.assignments:
-                has_addrs = True
-                int_msg = hw_msg.interfaces.add()
-                int_msg.device = str(addr.logical_name)
-                add_iface_data(int_msg, iface)
-                int_msg.ip = str(addr.ip)
-                int_msg.fqdn = str(addr.fqdns[0])
-                for dns_record in addr.dns_records:
-                    if dns_record.alias_cnt:
-                        int_msg.aliases.extend(str(a.fqdn) for a in
-                                               dns_record.all_aliases)
-
-            # Add entries for interfaces that do not have any addresses
-            if not has_addrs:
-                int_msg = hw_msg.interfaces.add()
-                int_msg.device = str(iface.name)
-                add_iface_data(int_msg, iface)
-
     def add_personality_data(self, msg, personality):
         msg.name = str(personality)
         for service in personality.services:
@@ -375,7 +306,7 @@ class ObjectFormatter(object):
         self.add_personality_data(host_msg.personality, host.personality)
         self.redirect_proto(host.archetype, host_msg.archetype)
         self.redirect_proto(host.operating_system, host_msg.operating_system)
-        self.add_hardware_data(host_msg.machine, dbhw_ent)
+        self.redirect_proto(dbhw_ent, host_msg.machine)
 
     def add_service_data(self, service_msg, service, service_instance=None):
         """Adds a service message, will either nest the given service_instance in the message,
