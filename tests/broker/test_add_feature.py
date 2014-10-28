@@ -34,6 +34,11 @@ class TestAddFeature(TestBrokerCommand):
                    "--type", "host", "--comment", "Test comment"]
         self.noouttest(command)
 
+    def test_100_add_host_pre_param(self):
+        command = ["add", "feature", "--feature", "pre_host_param", "--eon_id", 2,
+                   "--type", "host"]
+        self.noouttest(command)
+
     def test_100_add_host_post(self):
         command = ["add", "feature", "--feature", "post_host", "--eon_id", 2,
                    "--type", "host", "--post_personality"]
@@ -165,16 +170,20 @@ class TestAddFeature(TestBrokerCommand):
         self.failUnlessEqual(feature.post_personality, False)
         self.failUnlessEqual(feature.owner_eonid, 2)
         feature = f1.features[3]
+        self.failUnlessEqual(feature.name, "pre_host_param")
+        self.failUnlessEqual(feature.type, "host")
+        self.failUnlessEqual(feature.post_personality, False)
+        self.failUnlessEqual(feature.owner_eonid, 2)
+        feature = f1.features[4]
         self.failUnlessEqual(feature.name, "post_host")
         self.failUnlessEqual(feature.type, "host")
         self.failUnlessEqual(feature.post_personality, True)
         self.failUnlessEqual(feature.owner_eonid, 2)
-        feature = f1.features[4]
+        feature = f1.features[5]
         self.failUnlessEqual(feature.name, "src_route")
         self.failUnlessEqual(feature.type, "interface")
         self.failUnlessEqual(feature.owner_eonid, 2)
         self.failUnlessEqual(feature.visibility, feature.OWNER_ONLY)
-
 
     def test_200_post_hw(self):
         command = ["add", "feature", "--feature", "post_hw",

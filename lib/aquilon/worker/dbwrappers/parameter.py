@@ -133,6 +133,11 @@ def del_all_feature_parameter(session, dblink):
     if not param_definitions:
         return
 
+    # TODO: if the feature is bound to the whole archetype, then we should clean
+    # up all personalities here
+    if not dblink.personality:
+        return
+
     dbparams = get_parameters(session, archetype=None,
                               personality=dblink.personality)
 

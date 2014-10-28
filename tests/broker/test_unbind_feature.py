@@ -56,7 +56,7 @@ class TestUnbindFeature(TestBrokerCommand):
     def test_101_verify_archetype(self):
         command = ["show", "archetype", "--archetype", "aquilon"]
         out = self.commandtest(command)
-        self.matchclean(out, "Host Feature: pre_host", command)
+        self.searchclean(out, "pre_host$", command)
 
     def test_101_verify_feature(self):
         command = ["show", "feature", "--feature", "pre_host", "--type", "host"]
@@ -73,7 +73,16 @@ class TestUnbindFeature(TestBrokerCommand):
     def test_101_verify_cat_personality(self):
         command = ["cat", "--personality", "inventory", "--pre_feature"]
         out = self.commandtest(command)
-        self.matchclean(out, "pre_host", command)
+        self.matchclean(out, "pre_host/config", command)
+
+    def test_105_unbind_archetype_param(self):
+        command = ["unbind", "feature", "--feature", "pre_host_param",
+                   "--archetype", "aquilon",
+                   "--justification", "tcm=12345678"]
+        err = self.statustest(command)
+        self.verify_personality_flush(err, command)
+
+        # TODO: verify that the parameter got deleted from all personalities
 
     def test_110_unbind_personality(self):
         command = ["unbind", "feature", "--feature", "post_host",

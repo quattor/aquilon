@@ -39,7 +39,7 @@ def string_to_list(data):
     return [item.strip() for item in data.split(',') if item]
 
 
-def get_parameters_by_feature(dbfeaturelink):
+def get_parameters_by_feature(dbpersonality, dbfeaturelink):
     ret = {}
     paramdef_holder = dbfeaturelink.feature.paramdef_holder
     if not paramdef_holder:
@@ -47,7 +47,7 @@ def get_parameters_by_feature(dbfeaturelink):
 
     param_definitions = paramdef_holder.param_definitions
     parameters = get_parameters(object_session(dbfeaturelink),
-                                personality=dbfeaturelink.personality)
+                                personality=dbpersonality)
 
     for param_def in param_definitions:
         value = None
@@ -64,9 +64,8 @@ def get_parameters_by_feature(dbfeaturelink):
     return ret
 
 
-def helper_feature_template(featuretemplate, dbfeaturelink, lines):
-
-    params = get_parameters_by_feature(dbfeaturelink)
+def helper_feature_template(dbpersonality, featuretemplate, dbfeaturelink, lines):
+    params = get_parameters_by_feature(dbpersonality, dbfeaturelink)
     for path in params:
         pan_assign(lines, "/system/%s/%s" % (dbfeaturelink.cfg_path_escaped, path), params[path])
     lines.append(featuretemplate.format_raw(dbfeaturelink))
@@ -267,7 +266,7 @@ class PlenaryPersonalityPreFeature(Plenary):
 
         # hardware features should precede host features
         for link in model_feat + interface_feat + pre_feat:
-            helper_feature_template(feat_tmpl, link, lines)
+            helper_feature_template(self.dbobj, feat_tmpl, link, lines)
 
 
 class PlenaryPersonalityPostFeature(Plenary):
@@ -285,7 +284,7 @@ class PlenaryPersonalityPostFeature(Plenary):
         feat_tmpl = FeatureTemplate()
         for link in self.dbobj.archetype.features + self.dbobj.features:
             if link.feature.post_personality:
-                helper_feature_template(feat_tmpl, link, lines)
+                helper_feature_template(self.dbobj, feat_tmpl, link, lines)
 
 
 class PlenaryPersonalityParameter(StructurePlenary):
