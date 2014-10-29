@@ -35,6 +35,10 @@ class CommandAddAuxiliary(BrokerCommand):
 
     def render(self, session, logger, hostname, machine, auxiliary, interface,
                mac, comments, **arguments):
+        self.deprecated_command("Command add_auxiliary is deprecated.  Please "
+                                "use add_interface_address instead.", logger,
+                                **arguments)
+
         if machine:
             dbmachine = Machine.get_unique(session, machine, compel=True)
         if hostname:

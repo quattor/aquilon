@@ -35,7 +35,7 @@ class TestDelAuxiliary(TestBrokerCommand):
         self.dsdb_verify()
 
     def testverifydelunittest00e1(self):
-        command = "show auxiliary --auxiliary unittest00-e1.one-nyp.ms.com"
+        command = "show address --fqdn unittest00-e1.one-nyp.ms.com"
         self.notfoundtest(command.split(" "))
 
 

@@ -1062,6 +1062,8 @@
     </command>
 
     <command name="add_auxiliary">
+	This command is DEPRECATED. Please use add_interface_address instead.
+	<p/>
 	Add an auxiliary entry for a host to the database.  Requires a
 	machine with a non-bootable public interface (generally eth1) and a
 	valid IP address.
@@ -1110,18 +1112,9 @@
 	<transport method="put" path="auxiliary/%(auxiliary)s"/>
     </command>
 
-    <command name="show_auxiliary">
-	Shows the information for auxiliary systems (like
-	igrid123-e1.subdomain.ms.com)
-	<optgroup mandatory="True" fields="one">
-	    <option name="auxiliary" type="string">Auxiliary name</option>
-	    <option name="all" type="flag">Select all auxiliaries</option>
-	</optgroup>
-	<transport trigger="all" method="get" path="auxiliary"/>
-	<transport trigger="auxiliary" method="get" path="auxiliary/%(auxiliary)s"/>
-    </command>
-
     <command name="del_auxiliary">
+	This command is DEPRECATED. Please use del_interface_address instead.
+	<p/>
 	Delete an auxiliary entry for a host from the database.
 	<p/>
 	For a host like igrid123.subdomain.ms.com, an example auxiliary name

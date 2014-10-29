@@ -52,10 +52,16 @@ class TestDel10GigHardware(TestBrokerCommand):
     def test_300_delaux(self):
         for i in range(1, 25):
             hostname = "evh%d-e1.aqd-unittest.ms.com" % (i + 50)
+            if i < 13:
+                port = i
+                machine = "ut11s01p%d" % port
+            else:
+                port = i - 12
+                machine = "ut12s02p%d" % port
             self.dsdb_expect_delete(self.net["vm_storage_net"].usable[i - 1])
-            command = ["del", "auxiliary", "--auxiliary", hostname]
-            (out, err) = self.successtest(command)
-            self.assertEmptyOut(out, command)
+            command = ["del_interface_address", "--fqdn", hostname,
+                       "--machine", machine, "--interface", "eth1"]
+            self.statustest(command)
         self.dsdb_verify()
 
     def test_700_delmachines(self):
