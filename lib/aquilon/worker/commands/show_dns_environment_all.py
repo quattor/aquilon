@@ -14,7 +14,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-""" Provides show_dns_environment """
+"""Contains the logic for `aq show dns environment --all`."""
 
 from sqlalchemy.orm import undefer
 
