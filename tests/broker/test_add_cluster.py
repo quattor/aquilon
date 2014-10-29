@@ -42,8 +42,8 @@ class TestAddCluster(PersonalityTestMixin, TestBrokerCommand):
     def test_11_verify_utvcs1(self):
         command = "show cluster --cluster utvcs1"
         out = self.commandtest(command.split(" "))
-        default_max = self.config.get("archetype_hacluster",
-                                      "max_members_default")
+        default_max = self.config.getint("archetype_hacluster",
+                                         "max_members_default")
         self.matchoutput(out, "High Availability Cluster: utvcs1", command)
         self.matchoutput(out, "Building: ut", command)
         self.matchoutput(out, "Max members: %s" % default_max, command)
@@ -151,8 +151,20 @@ class TestAddCluster(PersonalityTestMixin, TestBrokerCommand):
         cluster = self.protobuftest(command, expect=1)[0]
         self.assertEqual(cluster.name, "utgrid1")
         self.assertEqual(cluster.personality.archetype.name, "gridcluster")
+        self.assertEqual(cluster.personality.archetype.cluster_type, "compute")
+        self.assertEqual(cluster.domain.name, 'unittest')
+        self.assertEqual(cluster.domain.type, cluster.domain.DOMAIN)
+        self.assertEqual(cluster.sandbox_author, "")
+        self.assertEqual(cluster.status, "build")
+        self.assertEqual(cluster.location_constraint.name, "ut")
+        self.assertEqual(cluster.location_constraint.location_type, "building")
+        self.assertEqual(cluster.max_members, 0)
         self.assertEqual(cluster.threshold, 5)
         self.assertEqual(cluster.threshold_is_percent, True)
+        self.assertEqual(cluster.maint_threshold, 6)
+        self.assertEqual(cluster.maint_threshold_is_percent, True)
+        self.assertEqual(cluster.metacluster, "")
+        self.assertEqual(cluster.virtual_switch.name, "")
 
     def test_44_verifyshowall(self):
         command = "show cluster --all"

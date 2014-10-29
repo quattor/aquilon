@@ -20,15 +20,14 @@ from operator import attrgetter
 from aquilon.aqdb.model import (Cluster, EsxCluster, ComputeCluster,
                                 StorageCluster)
 from aquilon.worker.formats.formatters import ObjectFormatter
+from aquilon.worker.formats.compileable import CompileableFormatter
 
 
-class ClusterFormatter(ObjectFormatter):
+class ClusterFormatter(CompileableFormatter):
     def fill_proto(self, cluster, skeleton):
-        skeleton.name = str(cluster.name)
-        skeleton.status = str(cluster.status)
-        self.redirect_proto(cluster.personality, skeleton.personality)
-        self.redirect_proto(cluster.branch, skeleton.domain)
+        super(ClusterFormatter, self).fill_proto(cluster, skeleton)
 
+        skeleton.name = str(cluster.name)
         skeleton.threshold = cluster.down_hosts_threshold
         skeleton.threshold_is_percent = cluster.down_hosts_percent
         if cluster.down_maint_threshold is not None:
@@ -37,6 +36,14 @@ class ClusterFormatter(ObjectFormatter):
                 cluster.down_maint_percent
 
         self.redirect_proto(cluster.hosts, skeleton.hosts)
+        self.redirect_proto(cluster.location_constraint,
+                            skeleton.location_constraint)
+
+        if cluster.max_hosts is not None:
+            skeleton.max_members = cluster.max_hosts
+
+        if cluster.metacluster:
+            skeleton.metacluster = str(cluster.metacluster.name)
 
         if cluster.resholder and len(cluster.resholder.resources) > 0:
             self.redirect_proto(cluster.resholder.resources, skeleton.resources)
@@ -70,8 +77,9 @@ class ClusterFormatter(ObjectFormatter):
                     u.name = name
                     u.value = value
 
-        if cluster.max_hosts is not None:
-            skeleton.max_members = cluster.max_hosts
+        if cluster.virtual_switch:
+            self.redirect_proto(cluster.virtual_switch,
+                                skeleton.virtual_switch)
 
     def format_raw(self, cluster, indent=""):
         details = [indent + "{0:c}: {0.name}".format(cluster)]

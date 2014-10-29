@@ -70,11 +70,24 @@ class TestAddAllowedPersonality(TestBrokerCommand):
         self.matchoutput(out, "Allowed Personality: Personality vmhost/vulcan-1g-desktop-prod", command)
         self.matchoutput(out, "Allowed Personality: Personality vmhost/generic", command)
 
-        command = ["show_cluster", "--cluster=utmc1"]
+        command = ["show_cluster", "--cluster=utecl1", "--format", "proto"]
+        cluster = self.protobuftest(command, expect=1)[0]
+        self.assertEqual(len(cluster.allowed_personalities), 2)
+        self.assertEqual(set([pers.name for pers in
+                              cluster.allowed_personalities]),
+                         set(["generic", "vulcan-1g-desktop-prod"]))
+
+        command = ["show_metacluster", "--metacluster=utmc1"]
         out = self.commandtest(command)
         self.matchoutput(out,
                          "Allowed Personality: Personality esx_cluster/vulcan-1g-desktop-prod",
                          command)
+
+        command = ["show_metacluster", "--metacluster=utmc1", "--format", "proto"]
+        mc = self.protobuftest(command, expect=1)[0]
+        self.assertEqual(len(mc.allowed_personalities), 1)
+        self.assertEqual(mc.allowed_personalities[0].name,
+                         "vulcan-1g-desktop-prod")
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddAllowedPersonality)

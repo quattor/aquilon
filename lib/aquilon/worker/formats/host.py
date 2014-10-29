@@ -21,13 +21,15 @@ from six import iteritems
 
 from aquilon.aqdb.model import Host
 from aquilon.worker.formats.formatters import ObjectFormatter
+from aquilon.worker.formats.compileable import CompileableFormatter
 from aquilon.worker.formats.list import ListFormatter
 from aquilon.worker.dbwrappers.feature import (model_features,
                                                personality_features)
 
 
-class HostFormatter(ObjectFormatter):
+class HostFormatter(CompileableFormatter):
     def fill_proto(self, host, skeleton):
+        super(HostFormatter, self).fill_proto(host, skeleton)
         skeleton.type = "host"  # Deprecated
         dbhw_ent = host.hardware_entity
         skeleton.hostname = str(dbhw_ent.primary_name.fqdn.name)
@@ -47,11 +49,8 @@ class HostFormatter(ObjectFormatter):
         if host.cluster:
             skeleton.cluster = host.cluster.name
 
-        skeleton.status = str(host.status.name)
         skeleton.owner_eonid = host.effective_owner_grn.eon_id
-        self.redirect_proto(host.branch, skeleton.domain)
-        self.redirect_proto(host.personality, skeleton.personality)
-        self.redirect_proto(host.archetype, skeleton.archetype)
+        self.redirect_proto(host.archetype, skeleton.archetype)  # Deprecated
         self.redirect_proto(host.operating_system, skeleton.operating_system)
         self.redirect_proto(dbhw_ent, skeleton.machine)
 
@@ -64,6 +63,15 @@ class HostFormatter(ObjectFormatter):
             srv_msg = skeleton.services_provided.add()
             srv_msg.service = si.service.name
             srv_msg.instance = si.name
+
+        for target, eon_id_set in iteritems(host.effective_grns):
+            for grn_rec in eon_id_set:
+                map = skeleton.eonid_maps.add()
+                map.target = target
+                map.eonid = grn_rec.eon_id
+
+        if host.virtual_switch:
+            self.redirect_proto(host.virtual_switch, skeleton.virtual_switch)
 
     def format_raw(self, host, indent=""):
         # The 'aq show host' command returns a host object; however, we
@@ -191,7 +199,7 @@ class GrnHostListFormatter(ListFormatter):
                 map.eonid = grn_rec.eon_id
 
             for target, eon_id_set in iteritems(host.effective_grns):
-                for grn_rec in list(eon_id_set):
+                for grn_rec in eon_id_set:
                     map = msg.eonid_maps.add()
                     map.target = target
                     map.eonid = grn_rec.eon_id

@@ -88,6 +88,13 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, MachineTestMixin,
             self.noouttest(["update_cluster", "--cluster", self.cluster[i],
                             "--virtual_switch", "utvswitch"])
 
+    def test_035_show_cluster0_proto(self):
+        command = ["show_cluster", "--cluster", self.cluster[0],
+                   "--format", "proto"]
+        cluster = self.protobuftest(command, expect=1)[0]
+        self.assertEqual(cluster.name, self.cluster[0])
+        self.assertEqual(cluster.virtual_switch.name, "utvswitch")
+
     def test_050_add_vmhost(self):
         for i in range(0, 2):
             ip = self.net["autopg2"].usable[i]

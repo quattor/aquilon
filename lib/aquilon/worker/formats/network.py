@@ -133,7 +133,6 @@ class NetworkFormatter(ObjectFormatter):
 
     def add_net_data(self, net_msg, net):
         net_msg.name = str(net.name)
-        net_msg.id = net.id
         net_msg.ip = str(net.ip)
         net_msg.cidr = net.cidr
         net_msg.bcast = str(net.broadcast)
@@ -143,6 +142,7 @@ class NetworkFormatter(ObjectFormatter):
         net_msg.location.name = str(net.location.name)
         net_msg.location.location_type = str(net.location.location_type)
         net_msg.type = str(net.network_type)
+        net_msg.env_name = str(net.network_environment.name)
 
         # Bulk load information about anything having a network address on this
         # network

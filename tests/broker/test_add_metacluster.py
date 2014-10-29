@@ -41,8 +41,8 @@ class TestAddMetaCluster(PersonalityTestMixin, TestBrokerCommand):
     def testverifyutmc1(self):
         command = "show metacluster --metacluster utmc1"
         out = self.commandtest(command.split(" "))
-        default_members = self.config.get("archetype_metacluster",
-                                          "max_members_default")
+        default_members = self.config.getint("archetype_metacluster",
+                                             "max_members_default")
         self.matchoutput(out, "MetaCluster: utmc1", command)
         self.matchoutput(out, "Max members: %s" % default_members, command)
         self.matchclean(out, "Comments", command)
@@ -50,6 +50,21 @@ class TestAddMetaCluster(PersonalityTestMixin, TestBrokerCommand):
         self.matchclean(out, "Share:", command)
         self.matchoutput(out, "Domain: unittest", command)
         self.matchoutput(out, "Build Status: build", command)
+
+    def testverifyutmc1proto(self):
+        command = "show metacluster --metacluster utmc1 --format proto"
+        mc = self.protobuftest(command.split(" "), expect=1)[0]
+        default_members = self.config.getint("archetype_metacluster",
+                                             "max_members_default")
+        self.assertEqual(mc.name, "utmc1")
+        self.assertEqual(mc.max_members, default_members)
+        self.assertEqual(mc.domain.name, "unittest")
+        self.assertEqual(mc.domain.type, mc.domain.DOMAIN)
+        self.assertEqual(mc.sandbox_author, "")
+        self.assertEqual(mc.personality.archetype.name, "metacluster")
+        self.assertEqual(mc.personality.name, "metacluster")
+        self.assertEqual(mc.status, "build")
+        self.assertEqual(mc.virtual_switch.name, "")
 
     def testfailaddexisting(self):
         command = ["add_metacluster", "--metacluster=utmc1",
@@ -70,6 +85,13 @@ class TestAddMetaCluster(PersonalityTestMixin, TestBrokerCommand):
         self.matchoutput(out, "MetaCluster: utmc2", command)
         self.matchoutput(out, "Max members: 99", command)
         self.matchoutput(out, "Comments: MetaCluster with a comment", command)
+
+    def testverifyutmc2proto(self):
+        command = "show metacluster --metacluster utmc2 --format proto"
+        mc = self.protobuftest(command.split(" "), expect=1)[0]
+        self.assertEqual(mc.max_members, 99)
+        self.assertEqual(mc.location_constraint.name, "ut")
+        self.assertEqual(mc.location_constraint.location_type, "building")
 
     def testaddutmc3(self):
         command = ["add_metacluster", "--metacluster=utmc3",

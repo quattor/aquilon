@@ -67,6 +67,8 @@ class TestMake(TestBrokerCommand):
                    "--networkip=%s" % ip, "--format=proto"]
         service_map = self.protobuftest(command, expect=1)[0]
         self.assertEqual(service_map.network.ip, str(ip))
+        self.assertEqual(service_map.network.cidr, 27)
+        self.assertEqual(service_map.network.type, "unknown")
         self.assertEqual(service_map.network.env_name, 'internal')
         self.assertEqual(service_map.service.name, 'afs')
         self.assertEqual(service_map.service.serviceinstances[0].name,
@@ -157,6 +159,8 @@ class TestMake(TestBrokerCommand):
                    "--archetype", "aquilon", "--format=proto"]
         service_map = self.protobuftest(command, expect=1)[0]
         self.assertEqual(service_map.network.ip, str(ip))
+        self.assertEqual(service_map.network.cidr, 27)
+        self.assertEqual(service_map.network.type, "unknown")
         self.assertEqual(service_map.network.env_name, 'internal')
         self.assertEqual(service_map.service.name, 'netmap')
         self.assertEqual(service_map.service.serviceinstances[0].name,

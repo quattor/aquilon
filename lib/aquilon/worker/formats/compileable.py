@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2013,2014  Contributor
+# Copyright (C) 2014  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,22 +14,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Archetype formatter."""
 
-from aquilon.aqdb.model import Archetype
 from aquilon.worker.formats.formatters import ObjectFormatter
 
 
-class ArchetypeFormatter(ObjectFormatter):
-    template_raw = "archetype.mako"
-
-    def fill_proto(self, archetype, skeleton):
-        skeleton.name = str(archetype.name)
-        skeleton.compileable = archetype.is_compileable
-        if archetype.cluster_type:
-            skeleton.cluster_type = str(archetype.cluster_type)
-        for service in archetype.services:
-            si = skeleton.required_services.add()
-            si.service = service.name
-
-ObjectFormatter.handlers[Archetype] = ArchetypeFormatter()
+class CompileableFormatter(ObjectFormatter):
+    def fill_proto(self, object, skeleton):
+        skeleton.status = str(object.status)
+        self.redirect_proto(object.personality, skeleton.personality)
+        self.redirect_proto(object.branch, skeleton.domain)
+        if object.sandbox_author:
+            skeleton.sandbox_author = str(object.sandbox_author)

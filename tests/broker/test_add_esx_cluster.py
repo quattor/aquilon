@@ -87,8 +87,8 @@ class TestAddESXCluster(PersonalityTestMixin, TestBrokerCommand):
     def testverifyutecl1(self):
         command = "show esx_cluster --cluster utecl1"
         out = self.commandtest(command.split(" "))
-        default_max = self.config.get("archetype_esx_cluster",
-                                      "max_members_default")
+        default_max = self.config.getint("archetype_esx_cluster",
+                                         "max_members_default")
         self.matchoutput(out, "ESX Cluster: utecl1", command)
         self.matchoutput(out, "Metacluster: utmc1", command)
         self.matchoutput(out, "Building: ut", command)
@@ -106,7 +106,13 @@ class TestAddESXCluster(PersonalityTestMixin, TestBrokerCommand):
         command = "show esx_cluster --cluster utecl1 --format proto"
         cluster = self.protobuftest(command.split(" "), expect=1)[0]
         self.assertEqual(cluster.name, "utecl1")
+        self.assertEqual(cluster.metacluster, "utmc1")
+        self.assertEqual(cluster.location_constraint.name, "ut")
+        self.assertEqual(cluster.location_constraint.location_type, "building")
         self.assertEqual(cluster.personality.archetype.name, "esx_cluster")
+        self.assertEqual(cluster.personality.name, "vulcan-1g-desktop-prod")
+        self.assertEqual(cluster.domain.name, "unittest")
+        self.assertEqual(cluster.domain.type, cluster.domain.DOMAIN)
         self.assertEqual(cluster.threshold, 2)
         self.assertEqual(cluster.threshold_is_percent, False)
         self.assertEqual(cluster.max_members,
@@ -250,6 +256,14 @@ class TestAddESXCluster(PersonalityTestMixin, TestBrokerCommand):
         self.matchoutput(out, "Member: ESX Cluster utecl2", command)
         self.matchclean(out, "Member: ESX Cluster utecl3", command)
 
+    def testverifyshowmetaclusterproto(self):
+        command = "show metacluster --metacluster utmc1 --format proto"
+        mc = self.protobuftest(command.split(" "), expect=1)[0]
+        self.assertEqual(mc.name, "utmc1")
+        self.assertEqual(len(mc.clusters), 2)
+        self.assertEqual(set([cluster.name for cluster in mc.clusters]),
+                         set(["utecl1", "utecl2"]))
+
     def testnotfoundesx_cluster(self):
         command = "show esx_cluster --cluster esx_cluster-does-not-exist"
         self.notfoundtest(command.split(" "))
@@ -291,8 +305,8 @@ class TestAddESXCluster(PersonalityTestMixin, TestBrokerCommand):
     def testverifyutecl4(self):
         command = "show esx_cluster --cluster utecl4"
         out = self.commandtest(command.split(" "))
-        default_max = self.config.get("archetype_esx_cluster",
-                                      "max_members_default")
+        default_max = self.config.getint("archetype_esx_cluster",
+                                         "max_members_default")
         self.matchoutput(out, "ESX Cluster: utecl4", command)
         self.matchoutput(out, "Metacluster: utmc2", command)
         self.matchoutput(out, "Building: ut", command)

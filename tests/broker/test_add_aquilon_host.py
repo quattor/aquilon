@@ -66,6 +66,8 @@ class TestAddAquilonHost(TestBrokerCommand):
         self.assertEqual(host.archetype.name, 'aquilon')
         self.assertEqual(host.dns_domain, 'one-nyp.ms.com')
         self.assertEqual(host.domain.name, 'unittest')
+        self.assertEqual(host.domain.type, host.domain.DOMAIN)
+        self.assertEqual(host.sandbox_author, "")
         self.assertEqual(host.status, 'blind')
         self.assertEqual(host.machine.name, 'ut3c1n3')
         self.assertEqual(host.sysloc, 'ut.ny.na')

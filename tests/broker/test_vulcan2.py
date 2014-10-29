@@ -154,6 +154,19 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
                          '"system/metacluster/virtual_switch" = "utvswitch";',
                          command)
 
+    def test_105_show_utmc8_proto(self):
+        net = self.net["autopg1"]
+        command = ["show_metacluster", "--metacluster", "utmc8",
+                   "--format", "proto"]
+        mc = self.protobuftest(command, expect=1)[0]
+        self.assertEqual(mc.name, "utmc8")
+        self.assertEqual(mc.virtual_switch.name, "utvswitch")
+        self.assertEqual(len(mc.virtual_switch.portgroups), 1)
+        self.assertEqual(mc.virtual_switch.portgroups[0].ip, str(net.ip))
+        self.assertEqual(mc.virtual_switch.portgroups[0].cidr, 29)
+        self.assertEqual(mc.virtual_switch.portgroups[0].network_tag, 710)
+        self.assertEqual(mc.virtual_switch.portgroups[0].usage, "user")
+
     def test_110_addstorageips(self):
         # storage IPs
         for i in range(0, 2):

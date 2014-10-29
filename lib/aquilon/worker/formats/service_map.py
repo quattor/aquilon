@@ -33,6 +33,9 @@ class ServiceMapFormatter(ObjectFormatter):
                 str(service_map.location.location_type)
         else:
             skeleton.network.ip = str(service_map.network.ip)
+            skeleton.network.cidr = service_map.network.cidr
+            skeleton.network.netmask = str(service_map.network.netmask)
+            skeleton.network.type = service_map.network.network_type
             skeleton.network.env_name = \
                 service_map.network.network_environment.name
 

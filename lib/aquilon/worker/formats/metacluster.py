@@ -21,9 +21,10 @@ from sqlalchemy.orm.session import object_session
 
 from aquilon.aqdb.model import Cluster, ClusterResource, MetaCluster, Share
 from aquilon.worker.formats.formatters import ObjectFormatter
+from aquilon.worker.formats.compileable import CompileableFormatter
 
 
-class MetaClusterFormatter(ObjectFormatter):
+class MetaClusterFormatter(CompileableFormatter):
     def format_raw(self, metacluster, indent=""):
         details = [indent + "MetaCluster: %s" % metacluster.name]
         details.append(self.redirect_raw(metacluster.location_constraint,
@@ -80,5 +81,34 @@ class MetaClusterFormatter(ObjectFormatter):
         if metacluster.comments:
             details.append(indent + "  Comments: %s" % metacluster.comments)
         return "\n".join(details)
+
+    def fill_proto(self, metacluster, skeleton):
+        super(MetaClusterFormatter, self).fill_proto(metacluster, skeleton)
+
+        skeleton.name = str(metacluster.name)
+        self.redirect_proto(metacluster.members, skeleton.clusters)
+        self.redirect_proto(metacluster.location_constraint,
+                            skeleton.location_constraint)
+
+        if metacluster.max_clusters is not None:
+            skeleton.max_members = metacluster.max_clusters
+
+        if metacluster.resholder and len(metacluster.resholder.resources) > 0:
+            self.redirect_proto(metacluster.resholder.resources,
+                                skeleton.resources)
+
+        for dbsi in metacluster.services_used:
+            si = skeleton.services_used.add()
+            si.service = dbsi.service.name
+            si.instance = dbsi.name
+
+        for personality in metacluster.allowed_personalities:
+            p = skeleton.allowed_personalities.add()
+            p.name = str(personality.name)
+            p.archetype.name = str(personality.archetype.name)
+
+        if metacluster.virtual_switch:
+            self.redirect_proto(metacluster.virtual_switch,
+                                skeleton.virtual_switch)
 
 ObjectFormatter.handlers[MetaCluster] = MetaClusterFormatter()
