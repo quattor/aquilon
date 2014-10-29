@@ -633,6 +633,25 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
         self.matchoutput(out, "filer1.ms.com", command)
         self.matchoutput(out, "f5test.aqd-unittest.ms.com", command)
 
+    def test_800_verify_host_all_proto(self):
+        command = ["show", "host", "--all", "--format", "proto"]
+        hostlist = self.protobuftest(command)
+        hostnames = set([host_msg.hostname for host_msg in hostlist])
+        for hostname in ("afs-by-net.aqd-unittest.ms.com",
+                         "unittest02.one-nyp.ms.com",
+                         "unittest15.aqd-unittest.ms.com",
+                         "unittest16.aqd-unittest.ms.com",
+                         "unittest17.aqd-unittest.ms.com",
+                         "server1.aqd-unittest.ms.com",
+                         "aquilon61.aqd-unittest.ms.com",
+                         "evh1.aqd-unittest.ms.com",
+                         "evh51.aqd-unittest.ms.com",
+                         "test-aurora-default-os.ms.com",
+                         "test-windows-default-os.msad.ms.com",
+                         "filer1.ms.com",
+                         "f5test.aqd-unittest.ms.com"):
+            self.assertTrue(hostname in hostnames)
+
     def test_800_verify_host_list(self):
         hosts = ["unittest15.aqd-unittest.ms.com",
                  "unittest16.aqd-unittest.ms.com",

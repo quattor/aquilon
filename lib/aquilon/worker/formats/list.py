@@ -91,4 +91,19 @@ class StringAttributeListFormatter(ListFormatter):
         for obj in objects:
             writer.writerow((str(objects.getter(obj)),))
 
+    def format_proto(self, objects, container):
+        # This method always populates the first field of the protobuf message,
+        # regardless of how that field is called.
+
+        field_name = None
+        for obj in objects:
+            msg = container.add()
+            if not field_name:
+                field_name = msg.DESCRIPTOR.fields[0].name
+            setattr(msg, field_name, str(objects.getter(obj)))
+            # TODO: if obj is really the full DB object rather than just a
+            # string, and it has other attributes already loaded, then we could
+            # add those attributes to the protobuf message "for free". Let's see
+            # if a usecase comes up.
+
 ObjectFormatter.handlers[StringAttributeList] = StringAttributeListFormatter()

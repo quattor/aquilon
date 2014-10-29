@@ -41,6 +41,18 @@ class TestShowMachine(TestBrokerCommand):
         self.matchclean(out, "ut3s01p1a", command)
         self.matchclean(out, "ut3s01p1b", command)
 
+    def testverifymachineallproto(self):
+        command = ["show", "machine", "--all", "--format", "proto"]
+        machines = self.protobuftest(command)
+        machine_names = set([msg.name for msg in machines])
+        for machine in ("ut3c5n10", "ut3c1n3", "ut3c1n4", "ut3s01p1",
+                        "ut8s02p1", "ut9s03p1", "ut10s04p1", "ut11s01p1",
+                        "f5test"):
+            self.assertTrue(machine in machine_names)
+
+        for machine in ("ut3s01p1a", "ut3s01p1b"):
+            self.assertFalse(machine in machine_names)
+
     def testverifyut3c1n3interfacescsv(self):
         command = "show machine --machine ut3c1n3 --format csv"
         out = self.commandtest(command.split(" "))
