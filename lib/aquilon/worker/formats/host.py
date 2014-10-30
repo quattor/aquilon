@@ -181,7 +181,11 @@ class GrnHostListFormatter(ListFormatter):
     def format_proto(self, hostlist, container):
         for host in hostlist:
             msg = container.add()
-            msg.hostname = str(host.hardware_entity.primary_name)
+            dbhw_ent = host.hardware_entity
+            # FIXME: this is wrong, hostname should be the short name
+            msg.hostname = str(dbhw_ent.primary_name)
+            msg.fqdn = str(dbhw_ent.primary_name)
+            msg.dns_domain = str(dbhw_ent.primary_name.fqdn.dns_domain.name)
             self.redirect_proto(host.branch, msg.domain)
             msg.status = str(host.status.name)
             msg.owner_eonid = host.effective_owner_grn.eon_id

@@ -111,10 +111,14 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
         command = ["show_host", "--format=proto", "--grns",
                    "--hostname=unittest02.one-nyp.ms.com"]
         host = self.protobuftest(command, expect=1)[0]
+        # FIXME: this is not correct, .hostname should be the short name
         self.assertEqual(host.hostname, "unittest02.one-nyp.ms.com")
+        self.assertEqual(host.dns_domain, "one-nyp.ms.com")
+        self.assertEqual(host.fqdn, "unittest02.one-nyp.ms.com")
         self.assertEqual(host.personality.archetype.name, "aquilon")
         self.assertEqual(host.personality.name, "compileserver")
         self.assertEqual(host.personality.host_environment, "dev")
+        self.assertEqual(host.status, "build")
         self.assertEqual(host.domain.name, "unittest")
         self.assertEqual(host.owner_eonid, 3)
         self.assertEqual(host.eonid_maps[0].target, 'esp')
