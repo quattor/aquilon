@@ -263,12 +263,12 @@ class TestMapService(TestBrokerCommand):
         out = self.commandtest(command)
         servicemaplist = self.parse_servicemap_msg(out, expect=1)
         map = servicemaplist.servicemaps[0]
-        self.failUnlessEqual(map.location.name, 'ms')
-        self.failUnlessEqual(map.location.location_type, 'company')
-        self.failUnlessEqual(map.service.name, 'utsvc')
-        self.failUnlessEqual(map.service.serviceinstances[0].name, 'utsi2')
-        self.failUnlessEqual(map.personality.name, 'lemon-collector-oracle')
-        self.failUnlessEqual(map.personality.archetype.name, 'aquilon')
+        self.assertEqual(map.location.name, 'ms')
+        self.assertEqual(map.location.location_type, 'company')
+        self.assertEqual(map.service.name, 'utsvc')
+        self.assertEqual(map.service.serviceinstances[0].name, 'utsi2')
+        self.assertEqual(map.personality.name, 'lemon-collector-oracle')
+        self.assertEqual(map.personality.archetype.name, 'aquilon')
 
     def testmapwindowsfail(self):
         command = ["map", "service", "--organization", "ms",

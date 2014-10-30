@@ -291,8 +291,8 @@ class TestUsecaseHACluster(TestBrokerCommand):
             self.check_plenary_gone(*path, directory_gone=True)
 
         # The directory should be gone as well
-        self.failIf(os.path.exists(rg_dir),
-                    "Plenary directory '%s' still exists" % rg_dir)
+        self.assertFalse(os.path.exists(rg_dir),
+                         "Plenary directory '%s' still exists" % rg_dir)
 
     def test_310_del_hacl2g1(self):
         self.noouttest(["del", "resourcegroup", "--resourcegroup", "hacl2g1",

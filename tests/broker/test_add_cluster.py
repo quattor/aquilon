@@ -151,10 +151,10 @@ class TestAddCluster(PersonalityTestMixin, TestBrokerCommand):
         out = self.commandtest(command)
         clus_list = self.parse_clusters_msg(out, 1)
         cluster = clus_list.clusters[0]
-        self.failUnlessEqual(cluster.name, "utgrid1")
-        self.failUnlessEqual(cluster.personality.archetype.name, "gridcluster")
-        self.failUnlessEqual(cluster.threshold, 5)
-        self.failUnlessEqual(cluster.threshold_is_percent, True)
+        self.assertEqual(cluster.name, "utgrid1")
+        self.assertEqual(cluster.personality.archetype.name, "gridcluster")
+        self.assertEqual(cluster.threshold, 5)
+        self.assertEqual(cluster.threshold_is_percent, True)
 
     def test_44_verifyshowall(self):
         command = "show cluster --all"
@@ -206,11 +206,10 @@ class TestAddCluster(PersonalityTestMixin, TestBrokerCommand):
         out = self.commandtest(command)
         clus_list = self.parse_clusters_msg(out, 1)
         cluster = clus_list.clusters[0]
-        self.failUnlessEqual(cluster.name, "utstorage1")
-        self.failUnlessEqual(cluster.personality.archetype.name,
-                             "storagecluster")
-        self.failUnlessEqual(cluster.threshold, 0)
-        self.failUnlessEqual(cluster.threshold_is_percent, False)
+        self.assertEqual(cluster.name, "utstorage1")
+        self.assertEqual(cluster.personality.archetype.name, "storagecluster")
+        self.assertEqual(cluster.threshold, 0)
+        self.assertEqual(cluster.threshold_is_percent, False)
 
     def test_54_addutstorage2(self):
         command = ["add_cluster", "--cluster=utstorage2",

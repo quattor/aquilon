@@ -64,10 +64,10 @@ class TestAddHostlink(TestBrokerCommand):
         hostlinkfound = False
         for resource in host.resources:
             if resource.name == "app1" and resource.type == "hostlink":
-                self.failUnlessEqual(resource.hostlink.target,
-                                     "/var/spool/hostlinks/app1")
-                self.failUnlessEqual(resource.hostlink.owner_user, "user1")
-                self.failUnlessEqual(resource.hostlink.owner_group, "")
+                self.assertEqual(resource.hostlink.target,
+                                 "/var/spool/hostlinks/app1")
+                self.assertEqual(resource.hostlink.owner_user, "user1")
+                self.assertEqual(resource.hostlink.owner_group, "")
                 hostlinkfound = True
         self.assertTrue(hostlinkfound,
                         "Hostlink app1 not found in the resources. "

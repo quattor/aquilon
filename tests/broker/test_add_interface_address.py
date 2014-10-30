@@ -97,12 +97,12 @@ class TestAddInterfaceAddress(TestBrokerCommand):
                 ut20 = host
                 break
 
-        self.failUnless(ut20 is not None,
+        self.assertTrue(ut20 is not None,
                         "%s is missing from network protobuf output" % e0ip)
-        self.failUnless(ut20.archetype.name == "aquilon",
+        self.assertTrue(ut20.archetype.name == "aquilon",
                         "archetype is '%s' instead of aquilon in protobuf output" %
                         ut20.archetype.name)
-        self.failUnless(str(ut20.mac) == str(e0ip.mac),
+        self.assertTrue(str(ut20.mac) == str(e0ip.mac),
                         "MAC is '%s' instead of %s in protobuf output" %
                         (ut20.mac, e0ip.mac))
 

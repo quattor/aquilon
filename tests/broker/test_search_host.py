@@ -177,14 +177,14 @@ class TestSearchHost(TestBrokerCommand):
             out = self.commandtest(command.split(" "))
             self.matchoutput(out, "unittest00.one-nyp.ms.com", command)
 
-        self.assert_deprecation(TestSearchHost.MAC_DEPR_STR, testfunc)
+        self.assertTruedeprecation(TestSearchHost.MAC_DEPR_STR, testfunc)
 
     def testmacunavailable(self):
         def testfunc():
             command = "search host --mac 02:02:c7:62:10:04"
             self.noouttest(command.split(" "))
 
-        self.assert_deprecation(TestSearchHost.MAC_DEPR_STR, testfunc)
+        self.assertTruedeprecation(TestSearchHost.MAC_DEPR_STR, testfunc)
 
     def testall(self):
         command = "show host --all"
@@ -476,14 +476,14 @@ class TestSearchHost(TestBrokerCommand):
             out = self.commandtest(command.split(" "))
             self.matchoutput(out, "unittest02.one-nyp.ms.com", command)
 
-        self.assert_deprecation(TestSearchHost.SERIAL_DEPR_STR, testfunc)
+        self.assertTruedeprecation(TestSearchHost.SERIAL_DEPR_STR, testfunc)
 
     def testserialunavailable(self):
         def testfunc():
             command = "search host --serial serial-does-not-exist"
             self.noouttest(command.split(" "))
 
-        self.assert_deprecation(TestSearchHost.SERIAL_DEPR_STR, testfunc)
+        self.assertTruedeprecation(TestSearchHost.SERIAL_DEPR_STR, testfunc)
 
     def testlocationavailable(self):
         command = "search host --rack ut3"

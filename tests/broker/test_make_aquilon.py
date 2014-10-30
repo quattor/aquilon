@@ -67,15 +67,15 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
 
         # The .dep file should not get copied into the web directory
         profilesdir = self.config.get("broker", "profilesdir")
-        self.failIf(os.path.exists(os.path.join(profilesdir,
-                                                "unittest02.one-nyp.ms.com.dep")))
+        self.assertFalse(os.path.exists(os.path.join(profilesdir,
+                                                     "unittest02.one-nyp.ms.com.dep")))
 
         servicedir = os.path.join(self.config.get("broker", "plenarydir"),
                                   "servicedata")
         results = self.grepcommand(["-rl", "unittest02.one-nyp.ms.com",
                                     servicedir])
-        self.failUnless(results, "No service plenary data that includes"
-                                 "unittest02.one-nyp.ms.com")
+        self.assertTrue(results, "No service plenary data that includes"
+                        "unittest02.one-nyp.ms.com")
 
     def testverifycatunittest02(self):
         command = "cat --hostname unittest02.one-nyp.ms.com --data"
@@ -183,7 +183,7 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
         self.matchoutput(err, "Index rebuild and notifications will happen in "
                          "the background.", command)
         self.wait_notification(basetime, 1)
-        self.assert_(os.path.exists(os.path.join(
+        self.assertTrue(os.path.exists(os.path.join(
             self.config.get("broker", "profilesdir"),
             "unittest00.one-nyp.ms.com%s" % self.xml_suffix)))
 
@@ -213,24 +213,24 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
         out = self.commandtest(command)
         hostlist = self.parse_hostlist_msg(out, expect=1)
         host = hostlist.hosts[0]
-        self.failUnlessEqual(host.hostname, 'unittest00')
-        self.failUnlessEqual(host.personality.name, 'compileserver')
-        self.failUnlessEqual(host.personality.archetype.name, 'aquilon')
-        self.failUnlessEqual(host.archetype.name, 'aquilon')
-        self.failUnlessEqual(host.fqdn, 'unittest00.one-nyp.ms.com')
-        self.failUnlessEqual(host.mac, self.net["unknown0"].usable[2].mac)
-        self.failUnlessEqual(host.ip, str(self.net["unknown0"].usable[2]))
-        self.failUnlessEqual(host.dns_domain, 'one-nyp.ms.com')
-        self.failUnlessEqual(host.domain.name, 'unittest')
-        self.failUnlessEqual(host.status, 'build')
-        self.failUnlessEqual(host.machine.name, 'ut3c1n3')
-        self.failUnlessEqual(host.sysloc, 'ut.ny.na')
-        self.failUnlessEqual(host.type, 'host')
+        self.assertEqual(host.hostname, 'unittest00')
+        self.assertEqual(host.personality.name, 'compileserver')
+        self.assertEqual(host.personality.archetype.name, 'aquilon')
+        self.assertEqual(host.archetype.name, 'aquilon')
+        self.assertEqual(host.fqdn, 'unittest00.one-nyp.ms.com')
+        self.assertEqual(host.mac, self.net["unknown0"].usable[2].mac)
+        self.assertEqual(host.ip, str(self.net["unknown0"].usable[2]))
+        self.assertEqual(host.dns_domain, 'one-nyp.ms.com')
+        self.assertEqual(host.domain.name, 'unittest')
+        self.assertEqual(host.status, 'build')
+        self.assertEqual(host.machine.name, 'ut3c1n3')
+        self.assertEqual(host.sysloc, 'ut.ny.na')
+        self.assertEqual(host.type, 'host')
         services = set()
         for svc_msg in host.services_used:
             services.add("%s/%s" % (svc_msg.service, svc_msg.instance))
         for binding in ("dns/unittest", "afs/q.ny.ms.com", "aqd/ny-prod"):
-            self.failUnless(binding in services,
+            self.assertTrue(binding in services,
                             "Service binding %s is missing from protobuf "
                             "message. All bindings: %s" %
                             (binding, ",".join(list(services))))
@@ -384,15 +384,15 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
                    "--personality", "badpersonality"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "'/system/personality/function' does not have an associated value", command)
-        self.failIf(os.path.exists(
+        self.assertFalse(os.path.exists(
             self.build_profile_name("aquilon93.aqd-unittest.ms.com",
                                     domain="unittest")))
         servicedir = os.path.join(self.config.get("broker", "plenarydir"),
                                   "servicedata")
         results = self.grepcommand(["-rl", "aquilon93.aqd-unittest.ms.com",
                                     servicedir])
-        self.failIf(results, "Found service plenary data that includes "
-                             "aquilon93.aqd-unittest.ms.com")
+        self.assertFalse(results, "Found service plenary data that includes "
+                         "aquilon93.aqd-unittest.ms.com")
 
     def testmakecardedhost(self):
         command = ["make", "--archetype", "aquilon",
@@ -456,16 +456,16 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
    #    chooser2_uta = self.commandtest(command).splitlines()
    #    command = ["search_host", "--service=chooser3", "--instance=ut.a"]
    #    chooser3_uta = self.commandtest(command).splitlines()
-   #    self.failUnless(chooser1_uta,
+   #    self.assertTrue(chooser1_uta,
    #                    "Expected host list, got '%s'" % chooser1_uta)
    #    # 2 and 3 will have extra entries...
    #    # Ideally they wouldn't (choosing them would force the algorithm
    #    # to go back and choose ut.a for chooser1), but the code is not
    #    # that sophisticated.
    #    for host in chooser1_uta:
-   #        self.failUnless(host in chooser2_uta,
+   #        self.assertTrue(host in chooser2_uta,
    #                        "Host %s not in %s" % (host, chooser2_uta))
-   #        self.failUnless(host in chooser3_uta,
+   #        self.assertTrue(host in chooser3_uta,
    #                        "Host %s not in %s" % (host, chooser3_uta))
 
     def testverifyleastloadalgorithm(self):
@@ -478,16 +478,16 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
         command = "show_service --service=chooser1"
         out = self.commandtest(command.split(" "))
         counts = [int(c) for c in count_re.findall(out)]
-        self.failUnless(len(counts) > 2,
+        self.assertTrue(len(counts) > 2,
                         "Not enough client counts in output '%s'" % out)
         # This test is too non-deterministic, and fails randomly.
         # Until there's something better, the final does-each-instance-
         # at-least-have-one?-test will have to suffice.
         #counts.sort()
-        #self.failUnless(abs(counts[0]-counts[1]) <= 1,
+        #self.assertTrue(abs(counts[0]-counts[1]) <= 1,
         #                "Client counts vary by more than 1 %s" % counts)
-        self.failIf(counts[0] < 1,
-                    "One of the instances was never bound:\n%s" % out)
+        self.assertFalse(counts[0] < 1,
+                         "One of the instances was never bound:\n%s" % out)
 
 
 if __name__ == '__main__':

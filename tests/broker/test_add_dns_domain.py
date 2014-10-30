@@ -80,7 +80,7 @@ class TestAddDnsDomain(TestBrokerCommand):
                    "--format=proto"]
         out = self.commandtest(command)
         domain = self.parse_dns_domainlist_msg(out, expect=1).dns_domains[0]
-        self.failUnlessEqual(domain.name, 'aqd-unittest.ms.com')
+        self.assertEqual(domain.name, 'aqd-unittest.ms.com')
 
     def testaddtoolongdomain(self):
         command = ['add', 'dns_domain', '--dns_domain',
@@ -113,7 +113,7 @@ class TestAddDnsDomain(TestBrokerCommand):
         dns_domains = self.parse_dns_domainlist_msg(out).dns_domains
         dns_names = [d.name for d in dns_domains]
         for domain in ['ms.com', 'aqd-unittest.ms.com', 'aqd-unittest-ut-env.ms.com']:
-            self.failUnless(domain in dns_names,
+            self.assertTrue(domain in dns_names,
                             "Domain %s not in list %s" % (domain, dns_names))
 
     def testaddtd1(self):

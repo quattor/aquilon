@@ -100,8 +100,8 @@ class TestParameter(TestBrokerCommand):
         p = self.parse_parameters_msg(out, 1)
         params = p.parameters
 
-        self.failUnlessEqual(params[0].path, 'action')
-        self.failUnlessEqual(params[0].value, '{"testaction": {"command": "/bin/testaction", "user": "user1"}}')
+        self.assertEqual(params[0].path, 'action')
+        self.assertEqual(params[0].value, '{"testaction": {"command": "/bin/testaction", "user": "user1"}}')
 
     def test_140_update_existing_re_path(self):
         action = "testaction"
@@ -225,20 +225,20 @@ class TestParameter(TestBrokerCommand):
         for param in p.parameters:
             params[param.path] = param.value
 
-        self.failUnless('espinfo/function' in params)
-        self.failUnlessEqual(params['espinfo/function'], 'production')
+        self.assertTrue('espinfo/function' in params)
+        self.assertEqual(params['espinfo/function'], 'production')
 
-        self.failUnless('espinfo/class' in params)
-        self.failUnlessEqual(params['espinfo/class'], 'INFRASTRUCTURE')
+        self.assertTrue('espinfo/class' in params)
+        self.assertEqual(params['espinfo/class'], 'INFRASTRUCTURE')
 
-        self.failUnless('espinfo/users' in params)
-        self.failUnlessEqual(params['espinfo/users'], 'someusers, otherusers')
+        self.assertTrue('espinfo/users' in params)
+        self.assertEqual(params['espinfo/users'], 'someusers, otherusers')
 
-        self.failUnless('action' in params)
-        self.failUnlessEqual(params['action'], u'{"testaction": {"command": "/bin/testaction", "user": "user2"}, "testaction2": {"command": "/bin/testaction2", "user": "user1", "timeout": 100}}')
+        self.assertTrue('action' in params)
+        self.assertEqual(params['action'], u'{"testaction": {"command": "/bin/testaction", "user": "user2"}, "testaction2": {"command": "/bin/testaction2", "user": "user1", "timeout": 100}}')
 
-        self.failUnless('monitoring/metric' in params)
-        self.failUnlessEqual(params['monitoring/metric'], u'{"_20003": {"name": "SwapUsed", "descr": "Swap space used [%]", "smooth": {"maxdiff": 3.0, "typeString": false, "maxtime": 3600}, "latestonly": false, "period": 300, "active": false, "class": "system.swapUsed"}}')
+        self.assertTrue('monitoring/metric' in params)
+        self.assertEqual(params['monitoring/metric'], u'{"_20003": {"name": "SwapUsed", "descr": "Swap space used [%]", "smooth": {"maxdiff": 3.0, "typeString": false, "maxtime": 3600}, "latestonly": false, "period": 300, "active": false, "class": "system.swapUsed"}}')
 
     def test_250_verify_actions(self):
         ACT_CAT_CMD = CAT_CMD + ["--param_tmpl=actions"]

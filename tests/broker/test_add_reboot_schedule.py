@@ -106,9 +106,9 @@ class TestAddRebootSchedule(TestBrokerCommand):
             if resource.name == "reboot_schedule" and \
                resource.type == "reboot_schedule":
                 found = True
-                self.failUnlessEqual(resource.reboot_schedule.week, "All")
-                self.failUnlessEqual(resource.reboot_schedule.day, "Sun")
-                self.failUnlessEqual(resource.reboot_schedule.time, "08:00")
+                self.assertEqual(resource.reboot_schedule.week, "All")
+                self.assertEqual(resource.reboot_schedule.day, "Sun")
+                self.assertEqual(resource.reboot_schedule.time, "08:00")
         self.assertTrue(found,
                         "Reboot schedule not found in the resources. "
                         "Existing resources: %s" %

@@ -252,28 +252,28 @@ class TestParameterFeature(TestBrokerCommand):
         for param in params:
             param_values[param.path] = param.value
 
-        self.failUnless('features/hostfeature/teststring' in param_values)
-        self.failUnlessEqual(param_values['features/hostfeature/teststring'],
-                             'host_feature')
-        self.failUnless('features/hostfeature/testlist' in param_values)
-        self.failUnlessEqual(param_values['features/hostfeature/testlist'],
-                             'host1,host2')
-        self.failUnless('features/hardware/hardwarefeature/hs21-8853/teststring'
+        self.assertTrue('features/hostfeature/teststring' in param_values)
+        self.assertEqual(param_values['features/hostfeature/teststring'],
+                         'host_feature')
+        self.assertTrue('features/hostfeature/testlist' in param_values)
+        self.assertEqual(param_values['features/hostfeature/testlist'],
+                         'host1,host2')
+        self.assertTrue('features/hardware/hardwarefeature/hs21-8853/teststring'
                         in param_values)
-        self.failUnlessEqual(param_values['features/hardware/hardwarefeature/hs21-8853/teststring'],
-                             'hardware_feature')
-        self.failUnless('features/hardware/hardwarefeature/hs21-8853/testlist'
+        self.assertEqual(param_values['features/hardware/hardwarefeature/hs21-8853/teststring'],
+                         'hardware_feature')
+        self.assertTrue('features/hardware/hardwarefeature/hs21-8853/testlist'
                         in param_values)
-        self.failUnlessEqual(param_values['features/hardware/hardwarefeature/hs21-8853/testlist'],
-                             'hardware1,hardware2')
-        self.failUnless('features/interface/interfacefeature/eth0/teststring'
+        self.assertEqual(param_values['features/hardware/hardwarefeature/hs21-8853/testlist'],
+                         'hardware1,hardware2')
+        self.assertTrue('features/interface/interfacefeature/eth0/teststring'
                         in param_values)
-        self.failUnlessEqual(param_values['features/interface/interfacefeature/eth0/teststring'],
-                             'interface_feature')
-        self.failUnless('features/interface/interfacefeature/eth0/testlist' in
+        self.assertEqual(param_values['features/interface/interfacefeature/eth0/teststring'],
+                         'interface_feature')
+        self.assertTrue('features/interface/interfacefeature/eth0/testlist' in
                         param_values)
-        self.failUnlessEqual(param_values['features/interface/interfacefeature/eth0/testlist'],
-                             'intf1,intf2')
+        self.assertEqual(param_values['features/interface/interfacefeature/eth0/testlist'],
+                         'intf1,intf2')
 
     def test_320_verify_cat_hardware_feature(self):
         cmd = CAT_CMD + ["--pre_feature"]

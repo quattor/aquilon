@@ -115,13 +115,13 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
         out = self.commandtest(command)
         pl = self.parse_personality_msg(out, 1)
         personality = pl.personalities[0]
-        self.failUnlessEqual(personality.archetype.name, "aquilon")
-        self.failUnlessEqual(personality.name, "utpersonality/dev")
-        self.failUnlessEqual(personality.config_override, True)
-        self.failUnlessEqual(personality.cluster_required, False)
-        self.failUnlessEqual(personality.comments, "Some personality comments")
-        self.failUnlessEqual(personality.owner_eonid, self.grns[GRN])
-        self.failUnlessEqual(personality.host_environment, "dev")
+        self.assertEqual(personality.archetype.name, "aquilon")
+        self.assertEqual(personality.name, "utpersonality/dev")
+        self.assertEqual(personality.config_override, True)
+        self.assertEqual(personality.cluster_required, False)
+        self.assertEqual(personality.comments, "Some personality comments")
+        self.assertEqual(personality.owner_eonid, self.grns[GRN])
+        self.assertEqual(personality.host_environment, "dev")
 
     def testverifyshowpersonalityallproto(self):
         command = "show_personality --all --format=proto"
@@ -134,13 +134,13 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
                 archetypes[archetype][personality.name] = personality
             else:
                 archetypes[archetype] = {personality.name: personality}
-        self.failUnless("aquilon" in archetypes,
+        self.assertTrue("aquilon" in archetypes,
                         "No personality with archetype aquilon in list.")
-        self.failUnless("utpersonality/dev" in archetypes["aquilon"],
+        self.assertTrue("utpersonality/dev" in archetypes["aquilon"],
                         "No aquilon/utpersonality/dev in personality list.")
-        self.failUnless("aurora" in archetypes,
+        self.assertTrue("aurora" in archetypes,
                         "No personality with archetype aurora")
-        self.failUnless("generic" in archetypes["aurora"],
+        self.assertTrue("generic" in archetypes["aurora"],
                         "No aurora/generic in personality list.")
 
     def testverifyshowpersonalityarchetype(self):

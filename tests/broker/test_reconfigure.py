@@ -340,8 +340,8 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
         buildfile = self.build_profile_name("aquilon62.aqd-unittest.ms.com",
                                             domain="utsandbox")
         results = self.grepcommand(["-l", "badpersonality", buildfile])
-        self.failIf(results, "Found bad personality data in plenary "
-                             "template for aquilon62.aqd-unittest.ms.com")
+        self.assertFalse(results, "Found bad personality data in plenary "
+                         "template for aquilon62.aqd-unittest.ms.com")
 
     def testmissingpersonalitytemplatehostlist(self):
         hosts = ["aquilon93.aqd-unittest.ms.com"]
@@ -350,15 +350,15 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
                    "--archetype", "aquilon", "--personality", "badpersonality"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "'/system/personality/function' does not have an associated value", command)
-        self.failIf(os.path.exists(
+        self.assertFalse(os.path.exists(
             self.build_profile_name("aquilon93.aqd-unittest.ms.com",
                                     domain="utsandbox")))
         servicedir = os.path.join(self.config.get("broker", "plenarydir"),
                                   "servicedata")
         results = self.grepcommand(["-rl", "aquilon93.aqd-unittest.ms.com",
                                     servicedir])
-        self.failIf(results, "Found service plenary data that includes "
-                             "aquilon93.aqd-unittest.ms.com")
+        self.assertFalse(results, "Found service plenary data that includes "
+                         "aquilon93.aqd-unittest.ms.com")
 
     def testmissingpersonality(self):
         command = ["reconfigure",
@@ -499,7 +499,7 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
         out = self.commandtest(command.split(" "))
         m = re.search(r'Member Alignment: Service esx_management_server '
                       r'Instance (\S+)', out)
-        self.failUnless(m, "Aligned instance not found in output:\n%s" % out)
+        self.assertTrue(m, "Aligned instance not found in output:\n%s" % out)
         instance = m.group(1)
         # A better test might be to search for all hosts in the cluster
         # and make sure they're all in this list.  That search command

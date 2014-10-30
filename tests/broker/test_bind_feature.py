@@ -149,12 +149,12 @@ class TestBindFeature(TestBrokerCommand):
         pl = self.parse_personality_msg(out, 1)
         personality = pl.personalities[0]
         feature = personality.features[0]
-        self.failUnlessEqual(feature.name, "post_host")
-        self.failUnlessEqual(feature.type, "host")
-        self.failUnlessEqual(feature.post_personality, True)
-        self.failUnlessEqual(feature.interface_name, "")
-        self.failUnlessEqual(feature.model.name, "")
-        self.failUnlessEqual(feature.model.vendor, "")
+        self.assertEqual(feature.name, "post_host")
+        self.assertEqual(feature.type, "host")
+        self.assertEqual(feature.post_personality, True)
+        self.assertEqual(feature.interface_name, "")
+        self.assertEqual(feature.model.name, "")
+        self.assertEqual(feature.model.vendor, "")
 
     def test_111_verify_show_feature(self):
         command = ["show", "feature", "--feature", "post_host", "--type", "host"]
@@ -332,12 +332,12 @@ class TestBindFeature(TestBrokerCommand):
         pl = self.parse_personality_msg(out, 1)
         personality = pl.personalities[0]
         feature = personality.features[0]
-        self.failUnlessEqual(feature.name, "src_route")
-        self.failUnlessEqual(feature.type, "interface")
-        self.failUnlessEqual(feature.post_personality, False)
-        self.failUnlessEqual(feature.interface_name, "eth1")
-        self.failUnlessEqual(feature.model.name, "e1000")
-        self.failUnlessEqual(feature.model.vendor, "intel")
+        self.assertEqual(feature.name, "src_route")
+        self.assertEqual(feature.type, "interface")
+        self.assertEqual(feature.post_personality, False)
+        self.assertEqual(feature.interface_name, "eth1")
+        self.assertEqual(feature.model.name, "e1000")
+        self.assertEqual(feature.model.vendor, "intel")
 
     def test_141_verify_show_feature(self):
         command = ["show", "feature", "--feature", "src_route",
@@ -413,19 +413,19 @@ class TestBindFeature(TestBrokerCommand):
                     for feature in personality.features}
         self.assertEqual(sorted(features.keys()), ["bond0", "eth1"])
         feature = features["eth1"]
-        self.failUnlessEqual(feature.name, "src_route")
-        self.failUnlessEqual(feature.type, "interface")
-        self.failUnlessEqual(feature.post_personality, False)
-        self.failUnlessEqual(feature.interface_name, "eth1")
-        self.failUnlessEqual(feature.model.name, "e1000")
-        self.failUnlessEqual(feature.model.vendor, "intel")
+        self.assertEqual(feature.name, "src_route")
+        self.assertEqual(feature.type, "interface")
+        self.assertEqual(feature.post_personality, False)
+        self.assertEqual(feature.interface_name, "eth1")
+        self.assertEqual(feature.model.name, "e1000")
+        self.assertEqual(feature.model.vendor, "intel")
         feature = features["bond0"]
-        self.failUnlessEqual(feature.name, "src_route")
-        self.failUnlessEqual(feature.type, "interface")
-        self.failUnlessEqual(feature.post_personality, False)
-        self.failUnlessEqual(feature.interface_name, "bond0")
-        self.failUnlessEqual(feature.model.name, "")
-        self.failUnlessEqual(feature.model.vendor, "")
+        self.assertEqual(feature.name, "src_route")
+        self.assertEqual(feature.type, "interface")
+        self.assertEqual(feature.post_personality, False)
+        self.assertEqual(feature.interface_name, "bond0")
+        self.assertEqual(feature.model.name, "")
+        self.assertEqual(feature.model.vendor, "")
 
     def test_161_verify_show_feature(self):
         command = ["show", "feature", "--feature", "src_route",

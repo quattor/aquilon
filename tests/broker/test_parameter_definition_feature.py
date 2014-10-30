@@ -171,38 +171,38 @@ class TestParameterDefinitionFeature(TestBrokerCommand):
         param_defs = p.param_definitions[:]
         param_defs.sort(key=lambda x: x.path)
 
-        self.failUnlessEqual(param_defs[0].path, 'test_rebuild_required')
-        self.failUnlessEqual(param_defs[0].value_type, 'string')
-        self.failUnlessEqual(param_defs[0].rebuild_required, True)
+        self.assertEqual(param_defs[0].path, 'test_rebuild_required')
+        self.assertEqual(param_defs[0].value_type, 'string')
+        self.assertEqual(param_defs[0].rebuild_required, True)
 
-        self.failUnlessEqual(param_defs[1].path, 'testboolean')
-        self.failUnlessEqual(param_defs[1].value_type, 'boolean')
-        self.failUnlessEqual(param_defs[1].default, 'yes')
+        self.assertEqual(param_defs[1].path, 'testboolean')
+        self.assertEqual(param_defs[1].value_type, 'boolean')
+        self.assertEqual(param_defs[1].default, 'yes')
 
-        self.failUnlessEqual(param_defs[2].path, 'testdefault')
-        self.failUnlessEqual(param_defs[2].value_type, 'string')
-        self.failUnlessEqual(param_defs[2].default, '')
+        self.assertEqual(param_defs[2].path, 'testdefault')
+        self.assertEqual(param_defs[2].value_type, 'string')
+        self.assertEqual(param_defs[2].default, '')
 
-        self.failUnlessEqual(param_defs[3].path, 'testfloat')
-        self.failUnlessEqual(param_defs[3].value_type, 'float')
-        self.failUnlessEqual(param_defs[3].default, '100.100')
+        self.assertEqual(param_defs[3].path, 'testfloat')
+        self.assertEqual(param_defs[3].value_type, 'float')
+        self.assertEqual(param_defs[3].default, '100.100')
 
-        self.failUnlessEqual(param_defs[4].path, 'testint')
-        self.failUnlessEqual(param_defs[4].value_type, 'int')
-        self.failUnlessEqual(param_defs[4].default, '60')
+        self.assertEqual(param_defs[4].path, 'testint')
+        self.assertEqual(param_defs[4].value_type, 'int')
+        self.assertEqual(param_defs[4].default, '60')
 
-        self.failUnlessEqual(param_defs[5].path, 'testjson')
-        self.failUnlessEqual(param_defs[5].value_type, 'json')
-        self.failUnlessEqual(param_defs[5].default, u'"{\'val1\':\'val2\'}"')
+        self.assertEqual(param_defs[5].path, 'testjson')
+        self.assertEqual(param_defs[5].value_type, 'json')
+        self.assertEqual(param_defs[5].default, u'"{\'val1\':\'val2\'}"')
 
-        self.failUnlessEqual(param_defs[6].path, 'testlist')
-        self.failUnlessEqual(param_defs[6].value_type, 'list')
-        self.failUnlessEqual(param_defs[6].default, "val1,val2")
+        self.assertEqual(param_defs[6].path, 'testlist')
+        self.assertEqual(param_defs[6].value_type, 'list')
+        self.assertEqual(param_defs[6].default, "val1,val2")
 
-        self.failUnlessEqual(param_defs[7].path, 'testpath')
-        self.failUnlessEqual(param_defs[7].value_type, 'string')
-        self.failUnlessEqual(param_defs[7].default, 'default')
-        self.failUnlessEqual(param_defs[7].is_required, True)
+        self.assertEqual(param_defs[7].path, 'testpath')
+        self.assertEqual(param_defs[7].value_type, 'string')
+        self.assertEqual(param_defs[7].default, 'default')
+        self.assertEqual(param_defs[7].is_required, True)
 
     def test_146_update(self):
         cmd = ["update_parameter_definition", "--feature", FEATURE, "--type=host",

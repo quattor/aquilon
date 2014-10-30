@@ -68,7 +68,7 @@ class TestCluster(TestBrokerCommand):
         out = self.commandtest(command)
         hostlist = self.parse_hostlist_msg(out, expect=1)
         host = hostlist.hosts[0]
-        self.failUnlessEqual(host.cluster, "utecl1")
+        self.assertEqual(host.cluster, "utecl1")
 
     def testverifycat(self):
         cat_cluster_command = "cat --cluster utecl1"

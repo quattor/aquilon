@@ -42,7 +42,7 @@ class TestManageList(TestBrokerCommand):
         for h in hosts:
             self.verify_buildfiles("utsandbox", h, want_exist=False)
             plen = self.build_profile_name(h, domain="managetest1")
-            self.failUnless(os.path.exists(plen), "%s does not exit." % plen)
+            self.assertTrue(os.path.exists(plen), "%s does not exit." % plen)
 
     def test_101_verify_forced_manage_list(self):
         command = "show host --hostname aquilon65.aqd-unittest.ms.com"
@@ -71,7 +71,7 @@ class TestManageList(TestBrokerCommand):
         for h in hosts:
             self.verify_buildfiles("managetest1", h, want_exist=False)
             plen = self.build_profile_name(h, domain="managetest2")
-            self.failUnless(os.path.exists(plen), "%s does not exit." % plen)
+            self.assertTrue(os.path.exists(plen), "%s does not exit." % plen)
 
     def test_103_verify_manage_list(self):
         command = "show host --hostname aquilon65.aqd-unittest.ms.com"

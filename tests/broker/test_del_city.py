@@ -53,8 +53,8 @@ class TestDelCity(TestBrokerCommand):
         self.dsdb_verify()
         dir = os.path.join(self.config.get("broker", "plenarydir"),
                            "site", "americas", "ex")
-        self.failIf(os.path.exists(dir),
-                    "Plenary directory '%s' still exists" % dir)
+        self.assertFalse(os.path.exists(dir),
+                         "Plenary directory '%s' still exists" % dir)
 
     def test_200_del_notexist(self):
         command = ["del_city", "--city", "city-does-not-exist"]

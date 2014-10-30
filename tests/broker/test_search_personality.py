@@ -100,10 +100,10 @@ class TestSearchPersonality(VerifyGrnsMixin, TestBrokerCommand):
         out = self.commandtest(command)
         pl = self.parse_personality_msg(out, 11)
         personality = pl.personalities[0]
-        self.failUnlessEqual(personality.archetype.name, "aquilon")
-        self.failUnlessEqual(personality.name, "badpersonality")
-        self.failUnlessEqual(personality.owner_eonid, 2)
-        self.failUnlessEqual(personality.host_environment, "dev")
+        self.assertEqual(personality.archetype.name, "aquilon")
+        self.assertEqual(personality.name, "badpersonality")
+        self.assertEqual(personality.owner_eonid, 2)
+        self.assertEqual(personality.host_environment, "dev")
 
     def test_100_non_unique_name(self):
         command = ["search", "personality", "--personality", "vulcan-1g-desktop-prod"]

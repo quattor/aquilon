@@ -107,13 +107,13 @@ class TestAddESXCluster(PersonalityTestMixin, TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         clusterlist = self.parse_clusters_msg(out, expect=1)
         cluster = clusterlist.clusters[0]
-        self.failUnlessEqual(cluster.name, "utecl1")
-        self.failUnlessEqual(cluster.personality.archetype.name, "esx_cluster")
-        self.failUnlessEqual(cluster.threshold, 2)
-        self.failUnlessEqual(cluster.threshold_is_percent, False)
-        self.failUnlessEqual(cluster.max_members,
-                             self.config.getint("archetype_esx_cluster",
-                                                "max_members_default"))
+        self.assertEqual(cluster.name, "utecl1")
+        self.assertEqual(cluster.personality.archetype.name, "esx_cluster")
+        self.assertEqual(cluster.threshold, 2)
+        self.assertEqual(cluster.threshold_is_percent, False)
+        self.assertEqual(cluster.max_members,
+                         self.config.getint("archetype_esx_cluster",
+                                            "max_members_default"))
 
     def testverifycatutecl1(self):
         obj_cmd, obj, data_cmd, data = self.verify_cat_clusters("utecl1",

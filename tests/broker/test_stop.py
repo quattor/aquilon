@@ -40,7 +40,7 @@ class TestBrokerStop(unittest.TestCase):
     def teststop(self):
         config = Config()
         pidfile = os.path.join(config.get("broker", "rundir"), "aqd.pid")
-        self.assert_(os.path.exists(pidfile))
+        self.assertTrue(os.path.exists(pidfile))
         f = open(pidfile)
         pid = f.readline()
         self.assertNotEqual(pid, "")
@@ -60,7 +60,7 @@ class TestBrokerStop(unittest.TestCase):
             sleep(1)
 
         # Verify that the broker is down
-        self.failUnlessRaises(OSError, os.kill, pid, 0)
+        self.assertRaises(OSError, os.kill, pid, 0)
 
 
 if __name__ == '__main__':

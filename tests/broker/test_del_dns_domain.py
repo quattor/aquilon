@@ -58,8 +58,9 @@ class TestDelDnsDomain(TestBrokerCommand):
         dns_domains = self.parse_dns_domainlist_msg(out).dns_domains
         dns_names = [d.name for d in dns_domains]
         for domain in ['aqd-unittest.ms.com']:
-            self.failIf(domain in dns_names,
-                        "Domain %s appears in list %s" % (domain, dns_names))
+            self.assertFalse(domain in dns_names,
+                             "Domain %s appears in list %s" %
+                             (domain, dns_names))
 
     def testdeltd1(self):
         self.dsdb_expect("delete_dns_domain -domain_name td1.aqd-unittest.ms.com")

@@ -32,7 +32,7 @@ class TestDelDomain(TestBrokerCommand):
     def test_100_del_utprod(self):
         command = ["del_domain", "--domain=ut-prod"]
         self.successtest(command)
-        self.failIf(os.path.exists(os.path.join(
+        self.assertFalse(os.path.exists(os.path.join(
             self.config.get("broker", "domainsdir"), "ut-prod")))
 
     def test_101_verify_utprod(self):
@@ -42,7 +42,7 @@ class TestDelDomain(TestBrokerCommand):
     def test_110_del_unittest(self):
         command = ["del_domain", "--domain=unittest"]
         self.successtest(command)
-        self.failIf(os.path.exists(os.path.join(
+        self.assertFalse(os.path.exists(os.path.join(
             self.config.get("broker", "domainsdir"), "unittest")))
 
     def test_111_verify_unittest(self):
@@ -69,7 +69,7 @@ class TestDelDomain(TestBrokerCommand):
         command = ["del_domain", "--domain=deployable",
                    "--justification=tcm=123456"]
         self.successtest(command)
-        self.failIf(os.path.exists(os.path.join(
+        self.assertFalse(os.path.exists(os.path.join(
             self.config.get("broker", "domainsdir"), "deployable")))
 
     def test_124_verify_trash(self):

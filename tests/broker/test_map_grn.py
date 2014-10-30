@@ -77,8 +77,8 @@ class TestMapGrn(VerifyGrnsMixin, PersonalityTestMixin, TestBrokerCommand):
         out = self.commandtest(command)
         pl = self.parse_personality_msg(out, 1)
         personality = pl.personalities[0]
-        self.failUnlessEqual(personality.archetype.name, "aquilon")
-        self.failUnlessEqual(personality.name, "compileserver")
+        self.assertEqual(personality.archetype.name, "aquilon")
+        self.assertEqual(personality.name, "compileserver")
         self.assertEqual(personality.eonid_maps[0].target, 'atarget')
         self.assertEqual(personality.eonid_maps[0].eonid, 6)
         self.assertEqual(personality.eonid_maps[1].target, 'esp')

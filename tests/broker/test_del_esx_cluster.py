@@ -88,20 +88,20 @@ class TestDelESXCluster(TestBrokerCommand):
             cluster = "utecl%s" % i
             dir = os.path.join(self.config.get("broker", "plenarydir"),
                                "cluster", cluster)
-            self.failIf(os.path.exists(dir),
-                        "Plenary directory '%s' still exists" % dir)
+            self.assertFalse(os.path.exists(dir),
+                             "Plenary directory '%s' still exists" % dir)
             plenary = self.build_profile_name("clusters", cluster,
                                               domain="unittest")
-            self.failIf(os.path.exists(plenary),
-                        "Plenary file '%s' still exists" % plenary)
+            self.assertFalse(os.path.exists(plenary),
+                             "Plenary file '%s' still exists" % plenary)
 
     def verifyprofileclusterclient(self):
         profilesdir = self.config.get("broker", "profilesdir")
         for i in range(1, 5):
             cluster = "utecl%s" % i
             profile = os.path.join(profilesdir, "clusters", cluster + ".xml")
-            self.failIf(os.path.exists(profile),
-                        "Profile file '%s' still exists" % profile)
+            self.assertFalse(os.path.exists(profile),
+                             "Profile file '%s' still exists" % profile)
 
 
 if __name__ == '__main__':

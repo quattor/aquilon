@@ -72,7 +72,7 @@ class TestAddDynamicRange(TestBrokerCommand):
             subcommand = ["search_dns", "--ip", ip, "--fqdn", self.dynname(ip)]
             subout = self.commandtest(subcommand)
             self.matchoutput(subout, self.dynname(ip), command)
-        self.failUnless(checked, "Problem with test algorithm or data.")
+        self.assertTrue(checked, "Problem with test algorithm or data.")
 
     def test_105_show_range(self):
         net = self.net["dyndhcp0"]
@@ -111,7 +111,7 @@ class TestAddDynamicRange(TestBrokerCommand):
         end = self.net["dyndhcp0"].usable[-3]
         for i in range(int(start), int(end) + 1):
             ip = IPv4Address(i)
-            self.failUnless(self.dynname(ip) in hosts, "%s is missing from network"
+            self.assertTrue(self.dynname(ip) in hosts, "%s is missing from network"
                             "protobuf output" % self.dynname(ip))
 
     def test_110_add_end_in_grange(self):

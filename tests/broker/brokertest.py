@@ -122,7 +122,7 @@ class TestBrokerCommand(unittest.TestCase):
             dir = os.path.join(self.config.get("broker", "domainsdir"),
                                args.get("domain"))
         else:
-            self.assert_(0, "template_name() called without domain or sandbox")
+            self.assertTrue(0, "template_name() called without domain or sandbox")
         return os.path.join(dir, *template) + self.template_extension
 
     def plenary_name(self, *template):
@@ -131,24 +131,24 @@ class TestBrokerCommand(unittest.TestCase):
 
     def check_plenary_exists(self, *path):
         plenary = self.plenary_name(*path)
-        self.failUnless(os.path.exists(plenary),
+        self.assertTrue(os.path.exists(plenary),
                         "Plenary '%s' does not exist." % plenary)
 
     def check_plenary_gone(self, *path, **kw):
         plenary = self.plenary_name(*path)
-        self.failIf(os.path.exists(plenary),
-                    "Plenary '%s' was not expected to exist." % plenary)
+        self.assertFalse(os.path.exists(plenary),
+                         "Plenary '%s' was not expected to exist." % plenary)
         if kw.get("directory_gone", False):
             dir = os.path.dirname(plenary)
-            self.failIf(os.path.exists(dir),
-                        "Plenary directory '%s' still exists" % dir)
+            self.assertFalse(os.path.exists(dir),
+                             "Plenary directory '%s' still exists" % dir)
 
     def check_plenary_contents(self, *path, **kwargs):
         # Passing lists as a keyword arg triggrest a type error
         contains = kwargs.pop('contains', None)
         clean = kwargs.pop('clean', None)
         if not contains and not clean:
-            self.assert_(0, "check_plenary_contents called without "
+            self.assertTrue(0, "check_plenary_contents called without "
                             "contains or clean")
 
         self.check_plenary_exists(*path)
@@ -176,14 +176,14 @@ class TestBrokerCommand(unittest.TestCase):
             dir = os.path.join(self.config.get("broker", "domainsdir"),
                                args.get("domain"))
         else:
-            self.assert_(0, "find_template() called without domain or sandbox")
+            self.assertTrue(0, "find_template() called without domain or sandbox")
 
         base = os.path.join(dir, *template)
 
         for extension in [".tpl", ".pan"]:
             if os.path.exists(base + extension):
                 return base + extension
-        self.assert_(0, "template %s does not exist with any extension" % base)
+        self.assertTrue(0, "template %s does not exist with any extension" % base)
 
     def build_profile_name(self, *template, **args):
         base = os.path.join(self.config.get("broker", "cfgdir"),
@@ -313,7 +313,7 @@ class TestBrokerCommand(unittest.TestCase):
             self.assertEqual(out, "",
                              "STDOUT for %s was not empty:\n@@@\n'%s'\n@@@\n" %
                              (command, out))
-            self.failUnless(err.find("Not Found") >= 0,
+            self.assertTrue(err.find("Not Found") >= 0,
                             "STDERR for %s did not include Not Found:"
                             "\n@@@\n'%s'\n@@@\n" %
                             (command, err))
@@ -326,7 +326,7 @@ class TestBrokerCommand(unittest.TestCase):
                          "\nSTDOUT:\n@@@\n'%s'\n@@@"
                          "\nSTDERR:\n@@@\n'%s'\n@@@" %
                          (command, p.returncode, 4, out, err))
-        self.failUnless(err.find("Bad Request") >= 0,
+        self.assertTrue(err.find("Bad Request") >= 0,
                         "STDERR for %s did not include Bad Request:"
                         "\n@@@\n'%s'\n@@@\n" %
                         (command, err))
@@ -346,7 +346,7 @@ class TestBrokerCommand(unittest.TestCase):
         self.assertEqual(out, "",
                          "STDOUT for %s was not empty:\n@@@\n'%s'\n@@@\n" %
                          (command, out))
-        self.failUnless(err.find("Unauthorized:") >= 0,
+        self.assertTrue(err.find("Unauthorized:") >= 0,
                         "STDERR for %s did not include Unauthorized:"
                         "\n@@@\n'%s'\n@@@\n" %
                         (command, err))
@@ -406,21 +406,21 @@ class TestBrokerCommand(unittest.TestCase):
         return self.badoptiontest(command, **kwargs)
 
     def matchoutput(self, out, s, command):
-        self.assert_(out.find(s) >= 0,
-                     "output for %s did not include '%s':\n@@@\n'%s'\n@@@\n" %
-                     (command, s, out))
+        self.assertTrue(out.find(s) >= 0,
+                        "output for %s did not include '%s':\n@@@\n'%s'\n@@@\n" %
+                        (command, s, out))
 
     def matchclean(self, out, s, command):
-        self.assert_(out.find(s) < 0,
-                     "output for %s includes '%s':\n@@@\n'%s'\n@@@\n" %
-                     (command, s, out))
+        self.assertTrue(out.find(s) < 0,
+                        "output for %s includes '%s':\n@@@\n'%s'\n@@@\n" %
+                        (command, s, out))
 
     def searchoutput(self, out, r, command):
         if isinstance(r, str):
             m = re.search(r, out, re.MULTILINE)
         else:
             m = re.search(r, out)
-        self.failUnless(m,
+        self.assertTrue(m,
                         "output for %s did not match '%s':\n@@@\n'%s'\n@@@\n"
                         % (command, r, out))
         return m
@@ -430,22 +430,22 @@ class TestBrokerCommand(unittest.TestCase):
             m = re.search(r, out, re.MULTILINE)
         else:
             m = re.search(r, out)
-        self.failIf(m,
-                    "output for %s matches '%s':\n@@@\n'%s'\n@@@\n" %
-                    (command, r, out))
+        self.assertFalse(m,
+                         "output for %s matches '%s':\n@@@\n'%s'\n@@@\n" %
+                         (command, r, out))
 
     def parse_proto_msg(self, listclass, attr, msg, expect=None):
         protolist = listclass()
         protolist.ParseFromString(msg)
         received = len(getattr(protolist, attr))
         if expect is None:
-            self.failUnless(received > 0,
+            self.assertTrue(received > 0,
                             "No %s listed in %s protobuf message\n" %
                             (attr, listclass))
         else:
-            self.failUnlessEqual(received, expect,
-                                 "%d %s expected, got %d\n" %
-                                 (expect, attr, received))
+            self.assertEqual(received, expect,
+                             "%d %s expected, got %d\n" %
+                             (expect, attr, received))
         return protolist
 
     def parse_netlist_msg(self, msg, expect=None):
@@ -592,11 +592,11 @@ class TestBrokerCommand(unittest.TestCase):
         p = self.gitcommand_raw(command, **kwargs)
         # Ignore out/err unless we get a non-zero return code, then log it.
         (out, err) = p.communicate()
-        self.failIfEqual(p.returncode, 0,
-                         "Zero return code for %s, "
-                         "STDOUT:\n@@@\n'%s'\n@@@\n"
-                         "STDERR:\n@@@\n'%s'\n@@@\n"
-                         % (command, out, err))
+        self.assertNotEqual(p.returncode, 0,
+                            "Zero return code for %s, "
+                            "STDOUT:\n@@@\n'%s'\n@@@\n"
+                            "STDERR:\n@@@\n'%s'\n@@@\n"
+                            % (command, out, err))
         return (out, err)
 
     def check_git_merge_health(self, repo):
@@ -799,18 +799,18 @@ class TestBrokerCommand(unittest.TestCase):
 
         for f in buildfiles:
             if want_exist:
-                self.failUnless(os.path.exists(f),
+                self.assertTrue(os.path.exists(f),
                                 "Expecting %s to exist before running %s." %
                                 (f, command))
             else:
-                self.failIf(os.path.exists(f),
-                            "Not expecting %s to exist after running %s." %
-                            (f, command))
+                self.assertFalse(os.path.exists(f),
+                                 "Not expecting %s to exist after running %s." %
+                                 (f, command))
 
         for f in exemptfiles:
-            self.failIf(os.path.exists(f),
-                        "Not expecting %s to exist after running %s." %
-                        (f, command))
+            self.assertFalse(os.path.exists(f),
+                             "Not expecting %s to exist after running %s." %
+                             (f, command))
 
     def demote_current_user(self, role="nobody"):
         command = ["permission", "--role", role,
@@ -828,7 +828,7 @@ class TestBrokerCommand(unittest.TestCase):
                          "Failed to restore admin privs '%s', '%s'." %
                          (out, err))
 
-    def assert_deprecation(self, depr_str, testfunc):
+    def assertTruedeprecation(self, depr_str, testfunc):
         with open(self.config.get("broker", "logfile"), "r") as logfile:
             # Let's seek to the end of it, matching only against the relevant part.
             logfile.seek(0, 2)

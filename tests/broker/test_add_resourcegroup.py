@@ -131,13 +131,13 @@ class TestAddResourceGroup(TestBrokerCommand):
         for resource in rg_msg.resourcegroup.resources:
             if resource.name == "fs1" and resource.type == "filesystem":
                 fs_found = True
-                self.failUnlessEqual(resource.fsdata.fstype, "ext3")
-                self.failUnlessEqual(resource.fsdata.mountpoint, "/mnt")
-                self.failUnlessEqual(resource.fsdata.mount, True)
-                self.failUnlessEqual(resource.fsdata.blockdevice, "/dev/foo/bar")
-                self.failUnlessEqual(resource.fsdata.opts, "ro")
-                self.failUnlessEqual(resource.fsdata.freq, 1)
-                self.failUnlessEqual(resource.fsdata.passno, 3)
+                self.assertEqual(resource.fsdata.fstype, "ext3")
+                self.assertEqual(resource.fsdata.mountpoint, "/mnt")
+                self.assertEqual(resource.fsdata.mount, True)
+                self.assertEqual(resource.fsdata.blockdevice, "/dev/foo/bar")
+                self.assertEqual(resource.fsdata.opts, "ro")
+                self.assertEqual(resource.fsdata.freq, 1)
+                self.assertEqual(resource.fsdata.passno, 3)
         self.assertTrue(fs_found,
                         "Filesystem fs1 not found in the resourcegroup. "
                         "Existing resources: %s" %

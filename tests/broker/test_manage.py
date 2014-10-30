@@ -118,7 +118,7 @@ class TestManage(PersonalityTestMixin, TestBrokerCommand):
         self.verify_buildfiles("unittest", "clusters/utecl1", want_exist=True)
         command = ["search_host", "--cluster", "utecl1"]
         hosts = self.commandtest(command).splitlines()
-        self.failUnless(hosts, "No hosts in cluster utecl1, bad test.")
+        self.assertTrue(hosts, "No hosts in cluster utecl1, bad test.")
         for host in hosts:
             self.verify_buildfiles("unittest", host, want_exist=True)
 
@@ -154,15 +154,15 @@ class TestManage(PersonalityTestMixin, TestBrokerCommand):
         command = ["search_host", "--cluster=utecl1"]
         out = self.commandtest(command)
         members = sorted(out.splitlines())
-        self.failUnless(members, "No hosts in output of %s." % command)
+        self.assertTrue(members, "No hosts in output of %s." % command)
 
         command = ["search_host", "--cluster=utecl1",
                    "--sandbox=%s/utsandbox" % self.user]
         out = self.commandtest(command)
         aligned = sorted(out.splitlines())
-        self.failUnlessEqual(members, aligned,
-                             "Not all utecl1 cluster members (%s) are in "
-                             "sandbox utsandbox (%s)." % (members, aligned))
+        self.assertEqual(members, aligned,
+                         "Not all utecl1 cluster members (%s) are in "
+                         "sandbox utsandbox (%s)." % (members, aligned))
 
     def test_140_xml_profiles(self):
         self.noouttest(["manage", "--domain", "unittest-xml", "--force",

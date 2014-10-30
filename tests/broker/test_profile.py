@@ -34,7 +34,7 @@ class TestProfile(TestBrokerCommand):
     def load_profile(self, name):
         path = os.path.join(self.config.get("broker", "profilesdir"),
                             name + self.xml_suffix)
-        self.failUnless(os.path.exists(path))
+        self.assertTrue(os.path.exists(path))
         if self.gzip_profiles:
             path = gzip.open(path)
         tree = etree.parse(path)
@@ -48,13 +48,13 @@ class TestProfile(TestBrokerCommand):
         sysloc = sysloc[0]
 
         campus = sysloc.xpath("string[@name='campus']")
-        self.failUnless(campus, "No campus in sysloc")
+        self.assertTrue(campus, "No campus in sysloc")
         campus = campus[0]
         self.assertEqual(campus.text, "ny", "Campus value was '%s' instead of ny"
                          % campus.text)
 
         domains = sysloc.xpath("list[@name='dns_search_domains']/string")
-        self.failUnless(domains, "No DNS search domains set")
+        self.assertTrue(domains, "No DNS search domains set")
         searchlist = [e.text for e in domains]
         # DNS maps:
         # - aqd-unittest.ms.com comes from rack ut3
@@ -76,7 +76,7 @@ class TestProfile(TestBrokerCommand):
         sysloc = sysloc[0]
 
         domains = sysloc.xpath("list[@name='dns_search_domains']/string")
-        self.failUnless(domains, "No DNS search domains set")
+        self.assertTrue(domains, "No DNS search domains set")
         searchlist = [e.text for e in domains]
         # Not in utroom1, so no (td[12].)?aqd-unittest.ms.com
         expect = ['new-york.ms.com']

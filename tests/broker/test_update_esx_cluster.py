@@ -157,7 +157,7 @@ class TestUpdateESXCluster(TestBrokerCommand):
         command = ["search_host", "--cluster=utecl1",
                    "--personality=vulcan-1g-desktop-prod"]
         original_hosts = sorted(self.commandtest(command).splitlines())
-        self.failUnless(original_hosts, "No hosts found using %s" % command)
+        self.assertTrue(original_hosts, "No hosts found using %s" % command)
 
         # Also test that the host plenary will be re-written correctly.
         command = ["cat", "--hostname", original_hosts[0]]
@@ -174,12 +174,12 @@ class TestUpdateESXCluster(TestBrokerCommand):
         command = ["search_host", "--cluster=utecl1",
                    "--osversion=4.1.0-u1"]
         updated_hosts = sorted(self.commandtest(command).splitlines())
-        self.failUnless(updated_hosts, "No hosts found using %s" % command)
+        self.assertTrue(updated_hosts, "No hosts found using %s" % command)
 
-        self.failUnlessEqual(original_hosts, updated_hosts,
-                             "Expected only/all updated hosts %s to match the "
-                             "list of original hosts %s" %
-                             (updated_hosts, original_hosts))
+        self.assertEqual(original_hosts, updated_hosts,
+                         "Expected only/all updated hosts %s to match the "
+                         "list of original hosts %s" %
+                         (updated_hosts, original_hosts))
 
         command = ["cat", "--hostname", updated_hosts[0]]
         out = self.commandtest(command)
