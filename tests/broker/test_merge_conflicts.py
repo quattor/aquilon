@@ -208,8 +208,8 @@ class TestMergeConflicts(TestBrokerCommand):
         self.matchoutput(out, "non-fast-forward", command)
         # Should this try to verify template-king's changetest3 branch?
         # Can't check merge health on king because it's a bare repo.
-        #kingdir = self.config.get("broker", "kingdir")
-        #self.check_git_merge_health(kingdir)
+        # kingdir = self.config.get("broker", "kingdir")
+        # self.check_git_merge_health(kingdir)
 
     def test_010_publishchangetest4sandbox(self):
         sandboxdir = os.path.join(self.sandboxdir, "changetest4")

@@ -54,7 +54,7 @@ class TestClientFailure(TestBrokerCommand):
         # This might be either 'Connection refused.' or 'Connection timed out.'.
         # There may also be variations in the output, like using the short or
         # full hostname.
-        pattern = "Failed to connect to %s(\.%s)? port %d: " % (short, domain, port)
+        pattern = r"Failed to connect to %s(\.%s)? port %d: " % (short, domain, port)
         self.assertTrue(re.match(pattern, err),
                         "Expected '%s' to start with '%s'" % (err, pattern))
         self.assertEqual(out, "",

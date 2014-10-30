@@ -84,7 +84,7 @@ class TestDeprecatedSwitch(TestBrokerCommand):
     def test_300_show_switch(self):
         command = ["show_switch", "--switch", self.fqdn_pri]
         (out, err) = self.successtest(command)
-        #self.matchoutput(err, "Command show_switch is deprecated.", command)
+        # self.matchoutput(err, "Command show_switch is deprecated.", command)
         self.matchoutput(out, "Switch: ut3gd1r03", command)
         self.matchoutput(out, "Primary Name: %s [%s]" %
                               (self.fqdn_pri, self.ip_pri), command)
@@ -102,13 +102,13 @@ class TestDeprecatedSwitch(TestBrokerCommand):
     def test_400_search_switch(self):
         command = ["search_switch", "--ip", self.ip_pri]
         (out, err) = self.successtest(command)
-        #self.matchoutput(err, "Command show_switch is deprecated.", command)
+        # self.matchoutput(err, "Command show_switch is deprecated.", command)
         self.matchoutput(out, self.fqdn_pri, command)
 
     def test_500_cat(self):
         command = ["cat", "--switch", self.fqdn_pri]
         (out, err) = self.successtest(command)
-        #self.matchoutput(err, "Command show_switch is deprecated.", command)
+        # self.matchoutput(err, "Command show_switch is deprecated.", command)
         self.matchoutput(out, "structure template switchdata/%s;" %
                               self.fqdn_pri, command)
 

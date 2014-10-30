@@ -17,7 +17,6 @@
 # limitations under the License.
 """Module for testing the appliance related commands."""
 
-import os
 from datetime import datetime
 
 if __name__ == "__main__":

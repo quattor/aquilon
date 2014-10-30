@@ -244,8 +244,8 @@ class TestParameter(TestBrokerCommand):
         ACT_CAT_CMD = CAT_CMD + ["--param_tmpl=actions"]
         out = self.commandtest(ACT_CAT_CMD)
 
-        match_str1 = '"testaction" = nlist\(\s*"command", "/bin/testaction",\s*"user", "user2"\s*\)'
-        match_str2 = '"testaction2" = nlist\(\s*"command", "/bin/testaction2",\s*"timeout", 100,\s*"user", "user1"\s*\)\s*'
+        match_str1 = r'"testaction" = nlist\(\s*"command", "/bin/testaction",\s*"user", "user2"\s*\)'
+        match_str2 = r'"testaction2" = nlist\(\s*"command", "/bin/testaction2",\s*"timeout", 100,\s*"user", "user1"\s*\)\s*'
 
         self.searchoutput(out, match_str1, ACT_CAT_CMD)
         self.searchoutput(out, match_str2, ACT_CAT_CMD)
@@ -476,8 +476,8 @@ class TestParameter(TestBrokerCommand):
         ACT_CAT_CMD = CAT_CMD + ["--param_tmpl=actions"]
         out = self.commandtest(ACT_CAT_CMD)
 
-        match_str1 = '"testaction" = nlist\(\s*"command", "/bin/testaction",\s*"user", "user2"\s*\)'
-        match_str2 = '"testaction2" = nlist\(\s*"command", "/bin/testaction2",\s*"timeout", 100,\s*"user", "user1"\s*\)\s*'
+        match_str1 = r'"testaction" = nlist\(\s*"command", "/bin/testaction",\s*"user", "user2"\s*\)'
+        match_str2 = r'"testaction2" = nlist\(\s*"command", "/bin/testaction2",\s*"timeout", 100,\s*"user", "user1"\s*\)\s*'
 
         self.searchoutput(out, match_str1, ACT_CAT_CMD)
         self.searchoutput(out, match_str2, ACT_CAT_CMD)
@@ -492,7 +492,7 @@ class TestParameter(TestBrokerCommand):
         self.searchoutput(out, r'"users" = list\(\s*"someusers",\s*"otherusers"\s*\);', ESP_CAT_CMD)
 
     def test_560_verify_default(self):
-        ##included by default
+        # included by default
         SEC_CAT_CMD = CAT_CMD + ["--param_tmpl=windows"]
         out = self.commandtest(SEC_CAT_CMD)
         self.searchoutput(out, r'structure template personality/testpersona/dev/windows;\s*'
@@ -531,7 +531,7 @@ class TestParameter(TestBrokerCommand):
         self.check_match_clean(out, 'testaction2', SHOW_CMD)
 
     def test_640_verify_actions(self):
-        ## cat commands
+        # cat commands
         ACT_CAT_CMD = CAT_CMD + ["--param_tmpl=actions"]
         out = self.commandtest(ACT_CAT_CMD)
 
@@ -544,7 +544,7 @@ class TestParameter(TestBrokerCommand):
         self.searchclean(err, r'"function" = "production";', ESP_CAT_CMD)
 
     def test_660_verify_default(self):
-        ##included by default
+        # included by default
         SEC_CAT_CMD = CAT_CMD + ["--param_tmpl=windows"]
         out = self.commandtest(SEC_CAT_CMD)
         self.searchoutput(out, r'structure template personality/testpersona/dev/windows;\s*'

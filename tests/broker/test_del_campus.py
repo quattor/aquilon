@@ -38,7 +38,7 @@ class TestDelCampus(TestBrokerCommand):
         self.notfoundtest(command.split(" "))
 
     def testdelbunotindsdb(self):
-        ## add campus
+        # add campus
 
         test_campus = "bz"
         self.dsdb_expect_add_campus(test_campus)

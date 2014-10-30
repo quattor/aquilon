@@ -195,8 +195,8 @@ class TestAddCluster(PersonalityTestMixin, TestBrokerCommand):
 
     def test_52_verifycatutstorage1(self):
         # This archetype is non-compilable and should not have a plenary!
-        #self.verify_cat_clusters("utstorage1", "storagecluster",
-        #                         "metrocluster", "storage")
+        # self.verify_cat_clusters("utstorage1", "storagecluster",
+        #                          "metrocluster", "storage")
         command = ["cat", "--cluster", "utstorage1"]
         err = self.notfoundtest(command)
         self.matchoutput(err, "not found", command)
@@ -236,8 +236,8 @@ class TestAddCluster(PersonalityTestMixin, TestBrokerCommand):
 
     def test_56_verifycatutstorage2(self):
         # This archetype is non-compilable and should not have a plenary!
-        #self.verify_cat_clusters("utstorage2", "storagecluster",
-        #                         "metrocluster", "storage")
+        # self.verify_cat_clusters("utstorage2", "storagecluster",
+        #                          "metrocluster", "storage")
         command = ["cat", "--cluster", "utstorage2"]
         err = self.notfoundtest(command)
         self.matchoutput(err, "not found", command)

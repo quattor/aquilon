@@ -71,7 +71,7 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
                          "the background.", command)
         self.wait_notification(basetime, 1)
 
-    ## verify status before reconfigure
+    # verify status before reconfigure
     def testreconfigureunittest02_0(self):
         command = "cat --hostname unittest02.one-nyp.ms.com --data"
         out = self.commandtest(command.split(" "))

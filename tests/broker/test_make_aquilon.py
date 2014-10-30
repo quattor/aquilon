@@ -425,7 +425,7 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
         hostlist = self.parse_hostlist_msg(out, expect=1)
         host = hostlist.hosts[0]
         self.assertEqual(host.fqdn, "unittest17.aqd-unittest.ms.com")
-        #still fails, but it's checked below in the for loop
+        # still fails, but it's checked below in the for loop
         self.assertEqual(host.ip, str(self.net["tor_net_0"].usable[3]))
         self.assertEqual(host.mac, self.net["tor_net_0"].usable[3].mac)
         self.assertEqual(host.machine.name, "ut8s02p3")
@@ -447,26 +447,26 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
     # If chooser1 was always bound first (as I originally assumed it
     # wuld work out), any time it had ut.a chooser2 and chooser3 would
     # as well.
-   #def testverifyaffinityalgorithm(self):
-   #    # To a large extent, this test is bogus... this was more
-   #    # thoroughly checked by hand and with the coverage module.
-   #    command = ["search_host", "--service=chooser1", "--instance=ut.a"]
-   #    chooser1_uta = self.commandtest(command).splitlines()
-   #    command = ["search_host", "--service=chooser2", "--instance=ut.a"]
-   #    chooser2_uta = self.commandtest(command).splitlines()
-   #    command = ["search_host", "--service=chooser3", "--instance=ut.a"]
-   #    chooser3_uta = self.commandtest(command).splitlines()
-   #    self.assertTrue(chooser1_uta,
-   #                    "Expected host list, got '%s'" % chooser1_uta)
-   #    # 2 and 3 will have extra entries...
-   #    # Ideally they wouldn't (choosing them would force the algorithm
-   #    # to go back and choose ut.a for chooser1), but the code is not
-   #    # that sophisticated.
-   #    for host in chooser1_uta:
-   #        self.assertTrue(host in chooser2_uta,
-   #                        "Host %s not in %s" % (host, chooser2_uta))
-   #        self.assertTrue(host in chooser3_uta,
-   #                        "Host %s not in %s" % (host, chooser3_uta))
+    # def testverifyaffinityalgorithm(self):
+    #    # To a large extent, this test is bogus... this was more
+    #    # thoroughly checked by hand and with the coverage module.
+    #    command = ["search_host", "--service=chooser1", "--instance=ut.a"]
+    #    chooser1_uta = self.commandtest(command).splitlines()
+    #    command = ["search_host", "--service=chooser2", "--instance=ut.a"]
+    #    chooser2_uta = self.commandtest(command).splitlines()
+    #    command = ["search_host", "--service=chooser3", "--instance=ut.a"]
+    #    chooser3_uta = self.commandtest(command).splitlines()
+    #    self.assertTrue(chooser1_uta,
+    #                    "Expected host list, got '%s'" % chooser1_uta)
+    #    # 2 and 3 will have extra entries...
+    #    # Ideally they wouldn't (choosing them would force the algorithm
+    #    # to go back and choose ut.a for chooser1), but the code is not
+    #    # that sophisticated.
+    #    for host in chooser1_uta:
+    #        self.assertTrue(host in chooser2_uta,
+    #                        "Host %s not in %s" % (host, chooser2_uta))
+    #        self.assertTrue(host in chooser3_uta,
+    #                        "Host %s not in %s" % (host, chooser3_uta))
 
     def testverifyleastloadalgorithm(self):
         # This is bogus too... again checked more manually with
@@ -483,8 +483,8 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
         # This test is too non-deterministic, and fails randomly.
         # Until there's something better, the final does-each-instance-
         # at-least-have-one?-test will have to suffice.
-        #counts.sort()
-        #self.assertTrue(abs(counts[0]-counts[1]) <= 1,
+        # counts.sort()
+        # self.assertTrue(abs(counts[0]-counts[1]) <= 1,
         #                "Client counts vary by more than 1 %s" % counts)
         self.assertFalse(counts[0] < 1,
                          "One of the instances was never bound:\n%s" % out)

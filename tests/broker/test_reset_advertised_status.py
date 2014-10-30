@@ -38,7 +38,7 @@ class TestResetAdvertisedStatus(TestBrokerCommand):
             self.successtest(["change_status", "--hostname", hostname,
                               "--buildstatus", status])
 
-            ## reset advertised state to build
+            # reset advertised state to build
             command = ["reset_advertised_status", "--hostname", hostname]
 
             if status == "ready":
@@ -76,7 +76,7 @@ class TestResetAdvertisedStatus(TestBrokerCommand):
             self.successtest(["change_status", "--hostname", hostname,
                              "--buildstatus", status])
 
-            ## reset advertised state to build
+            # reset advertised state to build
             command = ["reset_advertised_status", "--list", scratchfile]
 
             if status == "ready":
@@ -110,7 +110,7 @@ class TestResetAdvertisedStatus(TestBrokerCommand):
             self.successtest(["change_status", "--hostname", hostname,
                               "--buildstatus", status])
 
-            ## reset advertised state to build
+            # reset advertised state to build
             command = ["reset_advertised_status", "--hostname", hostname]
 
             if status == "ready":
@@ -147,7 +147,7 @@ class TestResetAdvertisedStatus(TestBrokerCommand):
             self.successtest(["change_status", "--hostname", hostname,
                               "--buildstatus", status])
 
-            ## reset advertised state to build
+            # reset advertised state to build
             command = ["reset_advertised_status", "--list", scratchfile]
 
             if status == "ready":
@@ -184,7 +184,7 @@ class TestResetAdvertisedStatus(TestBrokerCommand):
             self.successtest(["change_status", "--hostname", host,
                               "--buildstatus", "rebuild"])
 
-        ## reset advertised state to build
+        # reset advertised state to build
         command = ["reset_advertised_status", "--list", scratchfile]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Bad Request: All hosts must be in the same domain or sandbox:",

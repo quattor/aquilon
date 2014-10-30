@@ -433,8 +433,8 @@ class TestUpdateInterface(TestBrokerCommand):
         self.matchclean(out, str(self.net["unknown0"].usable[0]), command)
 
     def test_300_verify_cat_ut3c5n10_interfaces(self):
-        #FIX ME: this doesn't really test anything at the moment: needs to be
-        #statefully parsing the interface output
+        # FIXME: this doesn't really test anything at the moment: needs to be
+        # statefully parsing the interface output
         command = "cat --machine ut3c5n10"
         out = self.commandtest(command.split(" "))
         self.searchoutput(out,

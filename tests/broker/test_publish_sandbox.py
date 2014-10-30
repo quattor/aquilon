@@ -42,10 +42,10 @@ class TestPublishSandbox(TestBrokerCommand):
                       cwd=testdir, env=cls.gitenv(env={'PATH': '/bin:/usr/bin'}),
                       stdout=PIPE, stderr=PIPE)
             (out, err) = p.communicate()
-            self.assertEqual(p.returncode, 0,
-                             "Non-zero return code running make clean in sandbox,"
-                             " STDOUT:\n@@@'%s'\n@@@\nSTDERR:\n@@@'%s'@@@\n"
-                             % (out, err))
+            cls.assertEqual(p.returncode, 0,
+                            "Non-zero return code running make clean in sandbox,"
+                            " STDOUT:\n@@@'%s'\n@@@\nSTDERR:\n@@@'%s'@@@\n"
+                            % (out, err))
 
     def testmakechange(self):
         sandboxdir = os.path.join(self.sandboxdir, "changetest1")

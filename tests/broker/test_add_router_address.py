@@ -163,5 +163,5 @@ class TestAddRouterAddress(TestBrokerCommand):
 
 
 if __name__ == '__main__':
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestAddRouter)
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestAddRouterAddress)
     unittest.TextTestRunner(verbosity=2).run(suite)

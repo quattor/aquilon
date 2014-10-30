@@ -401,7 +401,7 @@ class TestSearchHost(TestBrokerCommand):
 
         self.noouttest(command.split(" "))
 
-        ## cleanup
+        # cleanup
         self.noouttest(["del", "service", "--service",
                         "foo", "--instance", "fooinst1"])
 

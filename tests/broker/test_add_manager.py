@@ -204,9 +204,9 @@ class TestAddManager(TestBrokerCommand):
                          "Manager: unittest12r.aqd-unittest.ms.com [%s]" %
                          self.net["unknown0"].usable[8],
                          command)
-        self.searchoutput(out, "Interface: eth0 %s \[boot, default_route\]" %
+        self.searchoutput(out, r"Interface: eth0 %s \[boot, default_route\]" %
                           self.net["unknown0"].usable[7].mac.lower(), command)
-        self.searchoutput(out, "Interface: bmc %s$" %
+        self.searchoutput(out, r"Interface: bmc %s$" %
                           self.net["unknown0"].usable[8].mac.lower(), command)
 
     def testverifymanagerall(self):

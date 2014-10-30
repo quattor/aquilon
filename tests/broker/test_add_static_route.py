@@ -170,7 +170,7 @@ class TestAddStaticRoute(TestBrokerCommand, MachineTestMixin):
                           r'"address", "192.168.250.0",\s*'
                           r'"gateway", "%s",\s*'
                           r'"netmask", "255.255.254.0"\s*\)\s*'
-                          '\)\s*\)' %
+                          r'\)\s*\)' %
                           (eth1_net.broadcast, eth1_net.gateway, eth1_ip,
                            eth1_net.netmask, eth1_gw),
                           command)

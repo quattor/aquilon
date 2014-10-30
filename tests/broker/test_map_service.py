@@ -163,7 +163,7 @@ class TestMapService(TestBrokerCommand):
         self.noouttest(["map", "service", "--building", "ut",
                         "--service", "utsvc", "--instance", "utsi2"])
         # Do NOT bind utsi2 to "np" to keep test_compile results consistent
-        #self.noouttest(["map", "service", "--building", "np",
+        # self.noouttest(["map", "service", "--building", "np",
         #                "--service", "utsvc", "--instance", "utsi2"])
 
     def testverifymaputsvc(self):
@@ -186,7 +186,7 @@ class TestMapService(TestBrokerCommand):
                          "Instance: utsi1 Map: Building np",
                          command)
         # See testmaputsi2
-        #self.matchoutput(out,
+        # self.matchoutput(out,
         #                 "Archetype: aquilon Service: utsvc "
         #                 "Instance: utsi2 Map: Building np",
         #                 command)

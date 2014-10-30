@@ -31,7 +31,7 @@ HARDWAREFEATURE = 'hardwarefeature'
 INTERFACEFEATURE = 'interfacefeature'
 OTHER_PERSONALITY = 'eaitools'
 
-## validation parameters by templates
+# validation parameters by templates
 PARAM_DEFS = [
     {"path": "teststring", "value_type": "string", "description": "test string"},
     {"path": "testlist", "value_type": "list", "description": "test list"},
