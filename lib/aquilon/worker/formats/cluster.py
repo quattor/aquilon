@@ -26,7 +26,7 @@ class ClusterFormatter(ObjectFormatter):
     def fill_proto(self, cluster, skeleton):
         skeleton.name = str(cluster.name)
         skeleton.status = str(cluster.status)
-        self.add_personality_data(skeleton.personality, cluster.personality)
+        self.redirect_proto(cluster.personality, skeleton.personality)
         self.redirect_proto(cluster.branch, skeleton.domain)
 
         skeleton.threshold = cluster.down_hosts_threshold
@@ -36,8 +36,7 @@ class ClusterFormatter(ObjectFormatter):
             skeleton.maint_threshold_is_percent = \
                 cluster.down_maint_percent
 
-        for host in sorted(cluster.hosts, key=attrgetter("fqdn")):
-            self.add_host_data(skeleton.hosts.add(), host)
+        self.redirect_proto(cluster.hosts, skeleton.hosts)
 
         if cluster.resholder and len(cluster.resholder.resources) > 0:
             self.redirect_proto(cluster.resholder.resources, skeleton.resources)

@@ -92,7 +92,14 @@ class PersonalityFormatter(ObjectFormatter):
         return "\n".join(details)
 
     def fill_proto(self, personality, skeleton):
-        self.add_personality_data(skeleton, personality)
+        skeleton.name = str(personality)
+        for service in personality.services:
+            si = skeleton.required_services.add()
+            si.service = service.name
+
+        self.redirect_proto(personality.archetype, skeleton.archetype)
+        skeleton.host_environment = str(personality.host_environment)
+        skeleton.owner_eonid = personality.owner_eon_id
 
         features = personality.features[:]
         features.sort(key=attrgetter("feature.feature_type",
@@ -106,10 +113,6 @@ class PersonalityFormatter(ObjectFormatter):
                 self.redirect_proto(link.model, feat_msg.model)
             if link.interface_name:
                 feat_msg.interface_name = str(link.interface_name)
-
-        for service in personality.services:
-            rsvc_msg = skeleton.required_services.add()
-            rsvc_msg.service = service.name
 
         if personality.comments:
             skeleton.comments = personality.comments

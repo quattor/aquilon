@@ -28,7 +28,33 @@ from aquilon.worker.dbwrappers.feature import (model_features,
 
 class HostFormatter(ObjectFormatter):
     def fill_proto(self, host, skeleton):
-        self.add_host_data(skeleton, host)
+        skeleton.type = "host"  # Deprecated
+        dbhw_ent = host.hardware_entity
+        skeleton.hostname = str(dbhw_ent.primary_name.fqdn.name)
+        skeleton.fqdn = str(dbhw_ent.primary_name.fqdn)
+        skeleton.dns_domain = str(dbhw_ent.primary_name.fqdn.dns_domain.name)
+        skeleton.sysloc = str(dbhw_ent.location.sysloc())
+        if dbhw_ent.primary_ip:
+            skeleton.ip = str(dbhw_ent.primary_ip)
+        for iface in dbhw_ent.interfaces:
+            if iface.interface_type != 'public' or not iface.bootable:
+                continue
+            skeleton.mac = str(iface.mac)
+
+        if host.resholder:
+            self.redirect_proto(host.resholder.resources, skeleton.resources)
+
+        if host.cluster:
+            skeleton.cluster = host.cluster.name
+
+        skeleton.status = str(host.status.name)
+        skeleton.owner_eonid = host.effective_owner_grn.eon_id
+        self.redirect_proto(host.branch, skeleton.domain)
+        self.redirect_proto(host.personality, skeleton.personality)
+        self.redirect_proto(host.archetype, skeleton.archetype)
+        self.redirect_proto(host.operating_system, skeleton.operating_system)
+        self.redirect_proto(dbhw_ent, skeleton.machine)
+
         for si in host.services_used:
             srv_msg = skeleton.services_used.add()
             srv_msg.service = si.service.name

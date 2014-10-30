@@ -24,8 +24,7 @@ import google.protobuf.message
 from google.protobuf.descriptor import FieldDescriptor
 
 from aquilon.config import Config
-from aquilon.exceptions_ import ProtocolError, InternalError
-from aquilon.aqdb.model import Host
+from aquilon.exceptions_ import ProtocolError
 from aquilon.worker.processes import build_mako_lookup
 
 # Note: the built-in "excel" dialect uses '\r\n' for line ending and that breaks
@@ -263,50 +262,6 @@ class ObjectFormatter(object):
         handler = ObjectFormatter.handlers.get(result.__class__,
                                                ObjectFormatter.default_handler)
         handler.format_proto(result, container)
-
-    def add_personality_data(self, msg, personality):
-        msg.name = str(personality)
-        for service in personality.services:
-            si = msg.required_services.add()
-            si.service = service.name
-        self.redirect_proto(personality.archetype, msg.archetype)
-        msg.host_environment = str(personality.host_environment)
-        msg.owner_eonid = personality.owner_eon_id
-
-    def add_host_data(self, host_msg, host):
-        """ Return a host message.
-
-            Hosts used to be systems, which makes this method name a bit odd
-        """
-        if not isinstance(host, Host):  # pragma: no cover
-            raise InternalError("add_host_data was called with {0} instead of "
-                                "a Host.".format(host))
-        host_msg.type = "host"  # FIXME: is hardcoding this ok?
-        dbhw_ent = host.hardware_entity
-        host_msg.hostname = str(dbhw_ent.primary_name.fqdn.name)
-        host_msg.fqdn = str(dbhw_ent.primary_name.fqdn)
-        host_msg.dns_domain = str(dbhw_ent.primary_name.fqdn.dns_domain.name)
-        host_msg.sysloc = str(dbhw_ent.location.sysloc())
-        if dbhw_ent.primary_ip:
-            host_msg.ip = str(dbhw_ent.primary_ip)
-        for iface in dbhw_ent.interfaces:
-            if iface.interface_type != 'public' or not iface.bootable:
-                continue
-            host_msg.mac = str(iface.mac)
-
-        if host.resholder:
-            self.redirect_proto(host.resholder.resources, host_msg.resources)
-
-        if host.cluster:
-            host_msg.cluster = host.cluster.name
-
-        host_msg.status = str(host.status.name)
-        host_msg.owner_eonid = host.effective_owner_grn.eon_id
-        self.redirect_proto(host.branch, host_msg.domain)
-        self.add_personality_data(host_msg.personality, host.personality)
-        self.redirect_proto(host.archetype, host_msg.archetype)
-        self.redirect_proto(host.operating_system, host_msg.operating_system)
-        self.redirect_proto(dbhw_ent, host_msg.machine)
 
 ObjectFormatter.default_handler = ObjectFormatter()
 

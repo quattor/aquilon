@@ -55,11 +55,10 @@ class ServiceFormatter(ObjectFormatter):
             si_msg.name = str(si.name)
             for srv in si.servers:
                 if srv.host:
-                    self.add_host_data(si_msg.servers.add(), srv.host)
+                    self.redirect_proto(srv.host, si_msg.servers.add())
                 # TODO: extra IP address/service address information
                 # TODO: cluster-provided services
             # TODO: make this conditional to avoid performance problems
-            # for client in si.clients:
-            #    self.add_host_data(si_msg.clients.add(), client.host)
+            # self.redirect_proto(client.hosts, si_msg.clients)
 
 ObjectFormatter.handlers[Service] = ServiceFormatter()
