@@ -127,9 +127,7 @@ class TestBindServer(TestBrokerCommand):
 
     def test_300_show_utsi1_proto(self):
         command = "show service --service utsvc --instance utsi1 --format proto"
-        out = self.commandtest(command.split(" "))
-        msg = self.parse_service_msg(out, 1)
-        svc = msg.services[0]
+        svc = self.protobuftest(command.split(" "), expect=1)[0]
         self.assertEqual(svc.name, "utsvc",
                          "Service name mismatch: %s instead of utsvc\n" %
                          svc.name)
@@ -243,9 +241,7 @@ class TestBindServer(TestBrokerCommand):
 
     def test_300_show_unittest00_proto(self):
         command = "show host --hostname unittest00.one-nyp.ms.com --format proto"
-        out = self.commandtest(command.split(" "))
-        hostlist = self.parse_hostlist_msg(out, expect=1)
-        host = hostlist.hosts[0]
+        host = self.protobuftest(command.split(" "), expect=1)[0]
         self.assertEqual(len(host.services_provided), 4)
         services = set()
         for svc_msg in host.services_provided:

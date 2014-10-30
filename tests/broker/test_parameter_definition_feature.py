@@ -166,9 +166,7 @@ class TestParameterDefinitionFeature(TestBrokerCommand):
 
     def test_145_verify_add(self):
         cmd = ["search_parameter_definition", "--feature", FEATURE, "--format=proto", "--type=host"]
-        out = self.commandtest(cmd)
-        p = self.parse_paramdefinition_msg(out, 8)
-        param_defs = p.param_definitions[:]
+        param_defs = self.protobuftest(cmd, expect=8)[:]
         param_defs.sort(key=lambda x: x.path)
 
         self.assertEqual(param_defs[0].path, 'test_rebuild_required')

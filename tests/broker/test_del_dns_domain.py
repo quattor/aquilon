@@ -54,8 +54,7 @@ class TestDelDnsDomain(TestBrokerCommand):
 
     def testverifyshowallproto(self):
         command = "show dns_domain --all --format=proto"
-        out = self.commandtest(command.split(" "))
-        dns_domains = self.parse_dns_domainlist_msg(out).dns_domains
+        dns_domains = self.protobuftest(command.split(" "))
         dns_names = [d.name for d in dns_domains]
         for domain in ['aqd-unittest.ms.com']:
             self.assertFalse(domain in dns_names,

@@ -100,9 +100,7 @@ class TestUpdateInterface(TestBrokerCommand):
 
     def test_121_verify_show_ut3c5n10_interfaces_proto(self):
         command = ["show_machine", "--machine", "ut3c5n10", "--format", "proto"]
-        out = self.commandtest(command)
-        machinelist = self.parse_machine_msg(out, expect=1)
-        machine = machinelist.machines[0]
+        machine = self.protobuftest(command, expect=1)[0]
         self.assertEqual(machine.name, "ut3c5n10")
         self.assertEqual(len(machine.interfaces), 4)
         self.assertEqual(machine.interfaces[0].device, "eth0")

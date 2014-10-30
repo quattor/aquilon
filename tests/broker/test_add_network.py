@@ -237,8 +237,7 @@ class TestAddNetwork(TestBrokerCommand):
 
     def testshownetworkproto(self):
         command = "show network --building ut --format proto"
-        out = self.commandtest(command.split(" "))
-        self.parse_netlist_msg(out)
+        self.protobuftest(command.split(" "))
 
     def testaddlocalnet(self):
         command = ["add", "network", "--network", "localnet", "--ip",

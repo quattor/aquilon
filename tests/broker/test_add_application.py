@@ -59,9 +59,7 @@ class TestAddApplication(TestBrokerCommand):
 
         command = ["show_host", "--hostname=server1.aqd-unittest.ms.com",
                    "--format=proto"]
-        out = self.commandtest(command)
-        hostlist = self.parse_hostlist_msg(out, expect=1)
-        host = hostlist.hosts[0]
+        host = self.protobuftest(command, expect=1)[0]
         for resource in host.resources:
             if resource.name == "app1" and resource.type == "application":
                 self.assertEqual(resource.appdata.eonid, 42)

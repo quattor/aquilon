@@ -65,9 +65,7 @@ class TestMake(TestBrokerCommand):
 
         command = ["show_map", "--service=afs", "--instance=afs-by-net",
                    "--networkip=%s" % ip, "--format=proto"]
-        out = self.commandtest(command)
-        servicemaplist = self.parse_servicemap_msg(out, expect=1)
-        service_map = servicemaplist.servicemaps[0]
+        service_map = self.protobuftest(command, expect=1)[0]
         self.assertEqual(service_map.network.ip, str(ip))
         self.assertEqual(service_map.network.env_name, 'internal')
         self.assertEqual(service_map.service.name, 'afs')
@@ -157,9 +155,7 @@ class TestMake(TestBrokerCommand):
         command = ["show_map", "--service=netmap", "--instance=netmap-pers",
                    "--networkip=%s" % ip, "--personality", "eaitools",
                    "--archetype", "aquilon", "--format=proto"]
-        out = self.commandtest(command)
-        servicemaplist = self.parse_servicemap_msg(out, expect=1)
-        service_map = servicemaplist.servicemaps[0]
+        service_map = self.protobuftest(command, expect=1)[0]
         self.assertEqual(service_map.network.ip, str(ip))
         self.assertEqual(service_map.network.env_name, 'internal')
         self.assertEqual(service_map.service.name, 'netmap')

@@ -404,9 +404,7 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
         self.searchoutput(out, r"IOPS Limit: 20", command)
 
         command = ["show_machine", "--machine", "utpgm0", "--format", "proto"]
-        out = self.commandtest(command)
-        machinelist = self.parse_machine_msg(out, expect=1)
-        machine = machinelist.machines[0]
+        machine = self.protobuftest(command, expect=1)[0]
         self.assertEqual(machine.name, "utpgm0")
         self.assertEqual(len(machine.disks), 1)
         self.assertEqual(machine.disks[0].device_name, "sda")

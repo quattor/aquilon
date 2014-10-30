@@ -97,9 +97,8 @@ class TestSearchPersonality(VerifyGrnsMixin, TestBrokerCommand):
     def test_100_proto(self):
         command = ["search_personality", "--host_environment", "dev",
                    "--eon_id", 2, "--format=proto"]
-        out = self.commandtest(command)
-        pl = self.parse_personality_msg(out, 11)
-        personality = pl.personalities[0]
+        personalities = self.protobuftest(command, expect=11)
+        personality = personalities[0]
         self.assertEqual(personality.archetype.name, "aquilon")
         self.assertEqual(personality.name, "badpersonality")
         self.assertEqual(personality.owner_eonid, 2)

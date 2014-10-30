@@ -193,8 +193,7 @@ class TestMapService(TestBrokerCommand):
 
     def testverifyutmapproto(self):
         command = "show map --building ut --format proto"
-        out = self.commandtest(command.split(" "))
-        self.parse_servicemap_msg(out)
+        self.protobuftest(command.split(" "))
 
     def testmapchooser(self):
         for service in ["chooser1", "chooser2", "chooser3"]:
@@ -260,9 +259,7 @@ class TestMapService(TestBrokerCommand):
     def testverifypersonalitymapproto(self):
         command = ["show_map", "--format=proto", "--archetype=aquilon",
                    "--personality=lemon-collector-oracle", "--service=utsvc"]
-        out = self.commandtest(command)
-        servicemaplist = self.parse_servicemap_msg(out, expect=1)
-        map = servicemaplist.servicemaps[0]
+        map = self.protobuftest(command, expect=1)[0]
         self.assertEqual(map.location.name, 'ms')
         self.assertEqual(map.location.location_type, 'company')
         self.assertEqual(map.service.name, 'utsvc')

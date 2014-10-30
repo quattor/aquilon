@@ -114,9 +114,7 @@ class TestAddResourceGroup(TestBrokerCommand):
 
     def test_130_show_cluster_proto(self):
         command = ["show", "cluster", "--cluster", "utvcs1", "--format", "proto"]
-        out = self.commandtest(command)
-        clusterlist = self.parse_clusters_msg(out, expect=1)
-        cluster = clusterlist.clusters[0]
+        cluster = self.protobuftest(command, expect=1)[0]
         rg_msg = None
         for resource in cluster.resources:
             if resource.name == "utvcs1as1" and \

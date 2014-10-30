@@ -63,12 +63,11 @@ class TestAddCity(TestBrokerCommand):
 
     def test_115_verify_exampe_proto(self):
         command = "show city --city ex --format proto"
-        out = self.commandtest(command.split(" "))
-        locs = self.parse_location_msg(out, 1)
-        self.matchoutput(locs.locations[0].name, "ex", command)
-        self.matchoutput(locs.locations[0].location_type, "city", command)
-        self.matchoutput(locs.locations[0].fullname, "New Exampleton", command)
-        self.matchoutput(locs.locations[0].timezone, "EDT", command)
+        loc = self.protobuftest(command.split(" "), expect=1)[0]
+        self.matchoutput(loc.name, "ex", command)
+        self.matchoutput(loc.location_type, "city", command)
+        self.matchoutput(loc.fullname, "New Exampleton", command)
+        self.matchoutput(loc.timezone, "EDT", command)
 
     def test_115_verify_example_plenary(self):
         command = ["cat", "--city", "ex"]

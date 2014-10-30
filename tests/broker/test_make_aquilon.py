@@ -210,9 +210,7 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
     def testverifyproto(self):
         command = ["show", "host", "--hostname=unittest00.one-nyp.ms.com",
                    "--format=proto"]
-        out = self.commandtest(command)
-        hostlist = self.parse_hostlist_msg(out, expect=1)
-        host = hostlist.hosts[0]
+        host = self.protobuftest(command, expect=1)[0]
         self.assertEqual(host.hostname, 'unittest00')
         self.assertEqual(host.personality.name, 'compileserver')
         self.assertEqual(host.personality.archetype.name, 'aquilon')
@@ -420,10 +418,7 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
     def testverifyunittest17proto(self):
         command = ["show_host", "--format=proto",
                    "--hostname=unittest17.aqd-unittest.ms.com"]
-        (out, err) = self.successtest(command)
-        self.assertEmptyErr(err, command)
-        hostlist = self.parse_hostlist_msg(out, expect=1)
-        host = hostlist.hosts[0]
+        host = self.protobuftest(command, expect=1)[0]
         self.assertEqual(host.fqdn, "unittest17.aqd-unittest.ms.com")
         # still fails, but it's checked below in the for loop
         self.assertEqual(host.ip, str(self.net["tor_net_0"].usable[3]))

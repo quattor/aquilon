@@ -37,9 +37,8 @@ class TestUnbindFeature(TestBrokerCommand):
         if aquilon_personalities is None:
             command = ["search", "personality", "--archetype", "aquilon",
                        "--format", "proto"]
-            out = self.commandtest(command)
-            perslist = self.parse_personality_msg(out)
-            aquilon_personalities = len(perslist.personalities)
+            perslist = self.protobuftest(command)
+            aquilon_personalities = len(perslist)
 
     def verify_personality_flush(self, err, command):
         self.matchoutput(err, "Flushed %d/%d templates" %

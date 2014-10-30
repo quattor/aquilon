@@ -20,9 +20,10 @@ import os
 import sys
 import unittest2 as unittest
 from subprocess import Popen, PIPE
+from lxml import etree
 import re
 
-from aquilon.config import Config
+from aquilon.config import Config, lookup_file_path
 from aquilon.worker import depends  # pylint: disable=W0611
 
 from networktest import DummyNetworks
@@ -89,6 +90,8 @@ class TestBrokerCommand(unittest.TestCase):
         cls.json_suffix = ".json" + compress_suffix
         cls.json_default = cls.config.getboolean("panc", "json_profiles")
 
+        cls.input_xml = etree.parse(lookup_file_path("input.xml"))
+
         # Need to import protocol buffers after we have the config
         # object all squared away and we can set the sys.path
         # variable appropriately.
@@ -98,10 +101,11 @@ class TestBrokerCommand(unittest.TestCase):
         protodir = cls.config.get("protocols", "directory")
         if protodir not in sys.path:
             sys.path.append(protodir)
+        cls.protocols = {}
         for m in ['aqdsystems_pb2', 'aqdnetworks_pb2', 'aqdservices_pb2',
                   'aqddnsdomains_pb2', 'aqdlocations_pb2', 'aqdaudit_pb2',
                   'aqdparamdefinitions_pb2', 'aqdparameters_pb2']:
-            globals()[m] = __import__(m)
+            cls.protocols[m] = __import__(m)
 
     def setUp(self):
         for name in [DSDB_EXPECT_SUCCESS_FILE, DSDB_EXPECT_FAILURE_FILE,
@@ -446,94 +450,42 @@ class TestBrokerCommand(unittest.TestCase):
             self.assertEqual(received, expect,
                              "%d %s expected, got %d\n" %
                              (expect, attr, received))
-        return protolist
+        return getattr(protolist, attr)
 
-    def parse_netlist_msg(self, msg, expect=None):
-        return self.parse_proto_msg(aqdnetworks_pb2.NetworkList,
-                                    'networks',
-                                    msg, expect)
+    def protobuftest(self, command, expect=None, **kwargs):
+        self.assertTrue(isinstance(command, list),
+                        "protobuftest() needs the command passed as a list")
 
-    def parse_hostlist_msg(self, msg, expect=None):
-        return self.parse_proto_msg(aqdsystems_pb2.HostList,
-                                    'hosts',
-                                    msg, expect)
+        # Extract the command name
+        cmd_name = command[0]
+        for part in command[1:]:
+            if part.startswith("-"):
+                break
+            cmd_name += "_" + part
 
-    def parse_machine_msg(self, msg, expect=None):
-        return self.parse_proto_msg(aqdsystems_pb2.MachineList,
-                                    'machines',
-                                    msg, expect)
+        nodelist = self.input_xml.xpath("/commandline/command[@name='%s']" %
+                                        cmd_name)
+        self.assertTrue(nodelist and len(nodelist) == 1,
+                        "Command '%s' was not found in input.xml" % cmd_name)
+        cmd_node = nodelist[0]
+        msg_node = None
+        for fmt_node in cmd_node.getiterator("format"):
+            if fmt_node.attrib["name"] != "proto":
+                continue
+            msg_node = fmt_node.find("message_class")
+            break
 
-    def parse_clusters_msg(self, msg, expect=None):
-        return self.parse_proto_msg(aqdsystems_pb2.ClusterList,
-                                    'clusters',
-                                    msg, expect)
+        self.assertTrue(msg_node is not None,
+                        "Command %s does not have protobuf support" % cmd_name)
 
-    def parse_location_msg(self, msg, expect=None):
-        return self.parse_proto_msg(aqdlocations_pb2.LocationList,
-                                    'locations',
-                                    msg, expect)
+        module_name = msg_node.attrib["module"]
+        cls_name = msg_node.attrib["name"]
 
-    def parse_dns_domainlist_msg(self, msg, expect=None):
-        return self.parse_proto_msg(aqddnsdomains_pb2.DNSDomainList,
-                                    'dns_domains',
-                                    msg, expect)
+        msg_cls = getattr(self.protocols[module_name], cls_name)
+        field = msg_cls.DESCRIPTOR.fields[0]
 
-    def parse_service_msg(self, msg, expect=None):
-        return self.parse_proto_msg(aqdservices_pb2.ServiceList,
-                                    'services',
-                                    msg, expect)
-
-    def parse_servicemap_msg(self, msg, expect=None):
-        return self.parse_proto_msg(aqdservices_pb2.ServiceMapList,
-                                    'servicemaps',
-                                    msg, expect)
-
-    def parse_archetype_msg(self, msg, expect=None):
-        return self.parse_proto_msg(aqdsystems_pb2.ArchetypeList,
-                                    'archetypes',
-                                    msg, expect)
-
-    def parse_personality_msg(self, msg, expect=None):
-        return self.parse_proto_msg(aqdsystems_pb2.PersonalityList,
-                                    'personalities',
-                                    msg, expect)
-
-    def parse_feature_msg(self, msg, expect=None):
-        return self.parse_proto_msg(aqdsystems_pb2.FeatureList,
-                                    'features',
-                                    msg, expect)
-
-    def parse_os_msg(self, msg, expect=None):
-        return self.parse_proto_msg(aqdsystems_pb2.OperatingSystemList,
-                                    'operating_systems',
-                                    msg, expect)
-
-    def parse_audit_msg(self, msg, expect=None):
-        return self.parse_proto_msg(aqdaudit_pb2.TransactionList,
-                                    'transactions', msg, expect)
-
-    def parse_resourcelist_msg(self, msg, expect=None):
-        return self.parse_proto_msg(aqdsystems_pb2.ResourceList,
-                                    'resources',
-                                    msg, expect)
-
-    def parse_paramdefinition_msg(self, msg, expect=None):
-        return self.parse_proto_msg(aqdparamdefinitions_pb2.ParamDefinitionList,
-                                    'param_definitions', msg, expect)
-
-    def parse_parameters_msg(self, msg, expect=None):
-        return self.parse_proto_msg(aqdparameters_pb2.ParameterList,
-                                    'parameters', msg, expect)
-
-    def parse_domain_msg(self, msg, expect=None):
-        return self.parse_proto_msg(aqdsystems_pb2.DomainList,
-                                    'domains',
-                                    msg, expect)
-
-    def parse_model_msg(self, msg, expect=None):
-        return self.parse_proto_msg(aqdsystems_pb2.ModelList,
-                                    'models',
-                                    msg, expect)
+        out = self.commandtest(command, **kwargs)
+        return self.parse_proto_msg(msg_cls, field.name, out, expect=expect)
 
     @classmethod
     def gitenv(cls, env=None):

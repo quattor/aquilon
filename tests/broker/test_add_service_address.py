@@ -69,9 +69,7 @@ class TestAddServiceAddress(TestBrokerCommand):
         command = ["show", "host",
                    "--hostname", "unittest20.aqd-unittest.ms.com",
                    "--format", "proto"]
-        out = self.commandtest(command)
-        hostlist = self.parse_hostlist_msg(out, expect=1)
-        host = hostlist.hosts[0]
+        host = self.protobuftest(command, expect=1)[0]
         found = False
         for resource in host.resources:
             if resource.name == "zebra2" and resource.type == "service_address":

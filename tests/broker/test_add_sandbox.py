@@ -98,9 +98,7 @@ class TestAddSandbox(TestBrokerCommand):
 
     def test_115_verify_utsandbox_proto(self):
         command = ["show_sandbox", "--sandbox", "utsandbox", "--format", "proto"]
-        out = self.commandtest(command)
-        domainlist = self.parse_domain_msg(out, expect=1)
-        domain = domainlist.domains[0]
+        domain = self.protobuftest(command, expect=1)[0]
         self.assertEqual(domain.name, "utsandbox")
         self.assertEqual(domain.owner, "%s@%s" % (self.user, self.realm))
         self.assertEqual(domain.type, domain.SANDBOX)

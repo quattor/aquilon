@@ -58,9 +58,7 @@ class TestUpdateCluster(TestBrokerCommand, PersonalityTestMixin):
         self.noouttest(command)
 
         command = "show cluster --cluster utgrid1 --format proto"
-        out = self.commandtest(command.split(" "))
-        cluslist = self.parse_clusters_msg(out)
-        cluster = cluslist.clusters[0]
+        cluster = self.protobuftest(command.split(" "), expect=1)[0]
         self.assertEqual(cluster.name, "utgrid1")
         self.assertEqual(cluster.threshold, 2)
         self.assertEqual(cluster.threshold_is_percent, False)

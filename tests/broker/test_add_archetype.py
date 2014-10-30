@@ -64,9 +64,7 @@ class TestAddArchetype(TestBrokerCommand):
 
         command = ["show_archetype", "--archetype", "gridcluster",
                    "--format", "proto"]
-        out = self.commandtest(command)
-        archlist = self.parse_archetype_msg(out, expect=1)
-        arch = archlist.archetypes[0]
+        arch = self.protobuftest(command, expect=1)[0]
         self.assertEqual(arch.name, "gridcluster")
         self.assertEqual(arch.compileable, True)
         self.assertEqual(arch.cluster_type, "compute")
@@ -118,9 +116,7 @@ class TestAddArchetype(TestBrokerCommand):
     def testverifyutappliance1(self):
         command = ["show_archetype", "--archetype", "utappliance",
                    "--format", "proto"]
-        out = self.commandtest(command)
-        archlist = self.parse_archetype_msg(out, expect=1)
-        arch = archlist.archetypes[0]
+        arch = self.protobuftest(command, expect=1)[0]
         self.assertEqual(arch.name, "utappliance")
         self.assertEqual(arch.compileable, False)
 

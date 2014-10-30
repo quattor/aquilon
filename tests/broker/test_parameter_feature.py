@@ -244,9 +244,7 @@ class TestParameterFeature(TestBrokerCommand):
 
     def test_310_verify_feature_proto(self):
         cmd = SHOW_CMD + ["--format=proto"]
-        out = self.commandtest(cmd)
-        p = self.parse_parameters_msg(out, 10)
-        params = p.parameters
+        params = self.protobuftest(cmd, expect=10)
 
         param_values = {}
         for param in params:

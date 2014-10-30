@@ -560,8 +560,7 @@ class TestSearchHost(TestBrokerCommand):
 
     def testprotobuf(self):
         command = "search host --hostname unittest02.one-nyp.ms.com --format proto"
-        out = self.commandtest(command.split(" "))
-        self.parse_hostlist_msg(out, expect=1)
+        self.protobuftest(command.split(" "), expect=1)
 
     def testip(self):
         ip = self.net["unknown0"].usable[2]

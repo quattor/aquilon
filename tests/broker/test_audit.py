@@ -137,10 +137,9 @@ class TestAudit(TestBrokerCommand):
         my_start_time = datetime.fromtimestamp(int(time()), tz=tzutc())
         command = ["search_audit", "--username", self.user,
                    "--command", "search_audit", "--format", "proto"]
-        out = self.commandtest(command)
+        outlist = self.protobuftest(command)
         my_end_time = datetime.fromtimestamp(int(time()), tz=tzutc())
-        outlist = self.parse_audit_msg(out)
-        for tran in outlist.transactions:
+        for tran in outlist:
             tran_start_time = datetime.fromtimestamp(tran.start_time,
                                                      tz=tzutc())
             tran_end_time = datetime.fromtimestamp(tran.end_time, tz=tzutc())
@@ -176,9 +175,7 @@ class TestAudit(TestBrokerCommand):
         """Test protobuf output for nobody and writeable."""
         command = ["search_audit", "--username=nobody", "--limit=1",
                    "--format=proto"]
-        out = self.commandtest(command)
-        outlist = self.parse_audit_msg(out, 1)
-        tran = outlist.transactions[0]
+        tran = self.protobuftest(command, expect=1)[0]
         tran_start_time = datetime.fromtimestamp(tran.start_time, tz=tzutc())
         tran_end_time = datetime.fromtimestamp(tran.end_time, tz=tzutc())
         self.assertTrue(tran_start_time >= start_time)
@@ -204,9 +201,8 @@ class TestAudit(TestBrokerCommand):
         cmd2 = ["search_audit", "--username", self.user,
                 "--command", "search_audit", "--format", "proto",
                 "--limit", "2"]
-        out = self.commandtest(cmd2)
-        outlist = self.parse_audit_msg(out)
-        unit = outlist.transactions[1]
+        outlist = self.protobuftest(cmd2)
+        unit = outlist[1]
         start = unit.start_time
         end = unit.end_time
 
@@ -375,8 +371,7 @@ class TestAudit(TestBrokerCommand):
         # number of replies
         cmd = ["search_audit", "--command", "all", "--limit", 1000, "--format",
                "proto"]
-        out = self.commandtest(cmd)
-        self.parse_audit_msg(out, 1000)
+        self.protobuftest(cmd, expect=1000)
 
     def test_810_max_limit(self):
         """ test the maximum is checked properly """
@@ -394,7 +389,7 @@ class TestAudit(TestBrokerCommand):
 
         cmd2 = ["search_audit", "--command", "reconfigure", "--limit", "1",
                 "--format", "proto"]
-        out = self.parse_audit_msg(self.commandtest(cmd2)).transactions[0]
+        out = self.protobuftest(cmd2, expect=1)[0]
         values = [arg.value for arg in out.arguments]
         self.assertEqual(len(values), 2,
                          "Expected 2 arguments and got %s" % values)
@@ -415,7 +410,7 @@ class TestAudit(TestBrokerCommand):
         cmd2 = ["search_audit", "--command", "reconfigure",
                 "--keyword", "list-test-1999.aqd-unittest.ms.com",
                 "--format", "proto"]
-        out = self.parse_audit_msg(self.commandtest(cmd2)).transactions[0]
+        out = self.protobuftest(cmd2)[0]
         values = [arg.value for arg in out.arguments]
         self.assertEqual(len(values), len(hosts),
                          "Expected %d arguments and got %d" %
@@ -423,7 +418,6 @@ class TestAudit(TestBrokerCommand):
         for host in hosts:
             self.assertTrue(host in values,
                             "'%s' missing from '%s'" % (host, values))
-
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAudit)

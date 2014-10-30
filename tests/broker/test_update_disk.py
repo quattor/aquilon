@@ -56,9 +56,7 @@ class TestUpdateDisk(TestBrokerCommand):
 
     def test_105_show_ut3c1n3_proto(self):
         command = ["show_machine", "--machine", "ut3c1n3", "--format", "proto"]
-        out = self.commandtest(command)
-        machinelist = self.parse_machine_msg(out, expect=1)
-        machine = machinelist.machines[0]
+        machine = self.protobuftest(command, expect=1)[0]
         self.assertEqual(machine.name, "ut3c1n3")
         self.assertEqual(len(machine.disks), 2)
         self.assertEqual(machine.disks[0].device_name, "c0d1")

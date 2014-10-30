@@ -128,9 +128,7 @@ class TestAddFilesystem(TestBrokerCommand):
 
         command = ["show_host", "--hostname=server1.aqd-unittest.ms.com",
                    "--format=proto"]
-        out = self.commandtest(command)
-        hostlist = self.parse_hostlist_msg(out, expect=1)
-        host = hostlist.hosts[0]
+        host = self.protobuftest(command, expect=1)[0]
         for resource in host.resources:
             if resource.name == "fs1" and resource.type == "filesystem":
                 self.assertEqual(resource.fsdata.mountpoint, "/mnt")
@@ -169,8 +167,7 @@ class TestAddFilesystem(TestBrokerCommand):
 
     def test_60_show_all_proto(self):
         command = ["show", "filesystem", "--all", "--format", "proto"]
-        out = self.commandtest(command)
-        self.parse_resourcelist_msg(out, expect=3)
+        self.protobuftest(command, expect=3)
 
     def test_del_filesystem(self):
         command = ["del_filesystem", "--filesystem=fs2",

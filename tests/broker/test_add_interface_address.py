@@ -87,10 +87,7 @@ class TestAddInterfaceAddress(TestBrokerCommand):
         e0net = self.net["zebra_eth0"]
         e0ip = e0net.usable[0]
         command = ["show", "network", "--ip", e0net.ip, "--format", "proto"]
-        out = self.commandtest(command)
-
-        msg = self.parse_netlist_msg(out, expect=1)
-        network = msg.networks[0]
+        network = self.protobuftest(command, expect=1)[0]
         ut20 = None
         for host in network.hosts:
             if host.ip == str(e0ip):

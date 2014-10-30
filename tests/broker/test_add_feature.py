@@ -73,9 +73,7 @@ class TestAddFeature(TestBrokerCommand):
         self.matchclean(out, "Bound to", command)
 
         command = ["show", "feature", "--feature", "pre_host", "--type", "host", "--format", "proto"]
-        out = self.commandtest(command)
-        f1 = self.parse_feature_msg(out)
-        feature = f1.features[0]
+        feature = self.protobuftest(command, expect=1)[0]
         self.assertEqual(feature.name, "pre_host")
         self.assertEqual(feature.type, "host")
         self.assertEqual(feature.post_personality, False)
@@ -94,9 +92,7 @@ class TestAddFeature(TestBrokerCommand):
         self.matchclean(out, "Bound to", command)
 
         command = ["show", "feature", "--feature", "post_host", "--type", "host", "--format", "proto"]
-        out = self.commandtest(command)
-        f1 = self.parse_feature_msg(out)
-        feature = f1.features[0]
+        feature = self.protobuftest(command, expect=1)[0]
         self.assertEqual(feature.name, "post_host")
         self.assertEqual(feature.type, "host")
         self.assertEqual(feature.post_personality, True)
@@ -116,9 +112,7 @@ class TestAddFeature(TestBrokerCommand):
         self.matchclean(out, "Bound to", command)
 
         command = ["show", "feature", "--feature", "bios_setup", "--type", "hardware", "--format", "proto"]
-        out = self.commandtest(command)
-        f1 = self.parse_feature_msg(out)
-        feature = f1.features[0]
+        feature = self.protobuftest(command, expect=1)[0]
         self.assertEqual(feature.name, "bios_setup")
         self.assertEqual(feature.type, "hardware")
         self.assertEqual(feature.owner_eonid, 2)
@@ -137,9 +131,7 @@ class TestAddFeature(TestBrokerCommand):
         self.matchclean(out, "Bound to", command)
 
         command = ["show", "feature", "--feature", "src_route", "--type", "interface", "--format", "proto"]
-        out = self.commandtest(command)
-        f1 = self.parse_feature_msg(out)
-        feature = f1.features[0]
+        feature = self.protobuftest(command, expect=1)[0]
         self.assertEqual(feature.name, "src_route")
         self.assertEqual(feature.type, "interface")
         self.assertEqual(feature.owner_eonid, 2)
@@ -154,32 +146,31 @@ class TestAddFeature(TestBrokerCommand):
         self.matchoutput(out, "Interface Feature: src_route", command)
 
         command = ["show", "feature", "--all", "--format", "proto"]
-        out = self.commandtest(command)
-        f1 = self.parse_feature_msg(out)
-        feature = f1.features[0]
+        features = self.protobuftest(command)
+        feature = features[0]
         self.assertEqual(feature.name, "bios_setup")
         self.assertEqual(feature.type, "hardware")
         self.assertEqual(feature.owner_eonid, 2)
         self.assertEqual(feature.visibility, feature.PUBLIC)
-        feature = f1.features[1]
+        feature = features[1]
         self.assertEqual(feature.name, "disable_ht")
         self.assertEqual(feature.visibility, feature.OWNER_APPROVED)
-        feature = f1.features[2]
+        feature = features[2]
         self.assertEqual(feature.name, "pre_host")
         self.assertEqual(feature.type, "host")
         self.assertEqual(feature.post_personality, False)
         self.assertEqual(feature.owner_eonid, 2)
-        feature = f1.features[3]
+        feature = features[3]
         self.assertEqual(feature.name, "pre_host_param")
         self.assertEqual(feature.type, "host")
         self.assertEqual(feature.post_personality, False)
         self.assertEqual(feature.owner_eonid, 2)
-        feature = f1.features[4]
+        feature = features[4]
         self.assertEqual(feature.name, "post_host")
         self.assertEqual(feature.type, "host")
         self.assertEqual(feature.post_personality, True)
         self.assertEqual(feature.owner_eonid, 2)
-        feature = f1.features[5]
+        feature = features[5]
         self.assertEqual(feature.name, "src_route")
         self.assertEqual(feature.type, "interface")
         self.assertEqual(feature.owner_eonid, 2)

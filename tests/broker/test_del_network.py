@@ -60,8 +60,7 @@ class TestDelNetwork(TestBrokerCommand):
 
     def testshownetworkproto(self):
         command = "show network --building ut --format proto"
-        out = self.commandtest(command.split(" "))
-        self.parse_netlist_msg(out, expect=0)
+        self.protobuftest(command.split(" "), expect=0)
 
     def testdelnetworkcards(self):
         command = ["del_network", "--ip=192.168.1.0"]

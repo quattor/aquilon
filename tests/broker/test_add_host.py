@@ -75,8 +75,19 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
 
     def test_105_verify_unittest02_proto(self):
         command = "show host --hostname unittest02.one-nyp.ms.com --format proto"
-        out = self.commandtest(command.split(" "))
-        self.parse_hostlist_msg(out)
+        host = self.protobuftest(command.split(" "), expect=1)[0]
+        self.assertEqual(host.hostname, "unittest02")
+        self.assertEqual(host.fqdn, "unittest02.one-nyp.ms.com")
+        self.assertEqual(host.dns_domain, "one-nyp.ms.com")
+        self.assertEqual(host.machine.name, "ut3c5n10")
+        self.assertEqual(host.personality.archetype.name, "aquilon")
+        self.assertEqual(host.personality.name, "compileserver")
+        self.assertEqual(host.personality.host_environment, "dev")
+        self.assertEqual(host.domain.name, "unittest")
+        self.assertEqual(host.owner_eonid, 3)
+        self.assertEqual(host.personality.owner_eonid, 3)
+        self.assertEqual(host.personality.eonid_maps[0].target, 'esp')
+        self.assertEqual(host.personality.eonid_maps[0].eonid, 3)
 
     def test_105_cat_fail(self):
         # The plenary should not be there before make/reconfigure was run
@@ -96,10 +107,7 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
     def test_106_verify_show_host_grns_proto(self):
         command = ["show_host", "--format=proto", "--grns",
                    "--hostname=unittest02.one-nyp.ms.com"]
-        (out, err) = self.successtest(command)
-        self.assertEmptyErr(err, command)
-        hostlist = self.parse_hostlist_msg(out, expect=1)
-        host = hostlist.hosts[0]
+        host = self.protobuftest(command, expect=1)[0]
         self.assertEqual(host.hostname, "unittest02.one-nyp.ms.com")
         self.assertEqual(host.personality.archetype.name, "aquilon")
         self.assertEqual(host.personality.name, "compileserver")
@@ -495,10 +503,7 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
         # assigned would cause show host --format=proto to fail...
         command = ["show_host", "--format=proto",
                    "--hostname=evh1.aqd-unittest.ms.com"]
-        (out, err) = self.successtest(command)
-        self.assertEmptyErr(err, command)
-        hostlist = self.parse_hostlist_msg(out, expect=1)
-        host = hostlist.hosts[0]
+        host = self.protobuftest(command, expect=1)[0]
         self.assertEqual(host.fqdn, "evh1.aqd-unittest.ms.com")
         self.assertEqual(host.archetype.name, "vmhost")
         self.assertEqual(host.operating_system.archetype.name, "vmhost")

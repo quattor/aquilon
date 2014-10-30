@@ -232,9 +232,7 @@ class TestAddAlias(TestBrokerCommand):
 
         command = ["show", "host", "--hostname", "unittest20.aqd-unittest.ms.com",
                    "--format", "proto"]
-        out = self.commandtest(command)
-        hostlist = self.parse_hostlist_msg(out, expect=1)
-        host = hostlist.hosts[0]
+        host = self.protobuftest(command, expect=1)[0]
         self.assertEqual(host.hostname, 'unittest20')
         int = host.machine.interfaces[0]
         self.assertEqual(int.aliases[0], 'alias0.aqd-unittest.ms.com')
@@ -265,9 +263,7 @@ class TestAddAlias(TestBrokerCommand):
 
         command = ["show", "host", "--hostname", "unittest20.aqd-unittest.ms.com",
                    "--format", "proto"]
-        out = self.commandtest(command)
-        hostlist = self.parse_hostlist_msg(out, expect=1)
-        host = hostlist.hosts[0]
+        host = self.protobuftest(command, expect=1)[0]
         self.assertEqual(host.hostname, 'unittest20')
         int = host.machine.interfaces[5]
         self.assertEqual(int.aliases[0], 'alias1.aqd-unittest.ms.com')

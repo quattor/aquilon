@@ -56,9 +56,7 @@ class TestAddAquilonHost(TestBrokerCommand):
     def test_105_show_unittest00_proto(self):
         command = ["show", "host", "--hostname=unittest00.one-nyp.ms.com",
                    "--format=proto"]
-        out = self.commandtest(command)
-        hostlist = self.parse_hostlist_msg(out, expect=1)
-        host = hostlist.hosts[0]
+        host = self.protobuftest(command, expect=1)[0]
         self.assertEqual(host.hostname, 'unittest00')
         self.assertEqual(host.personality.name, 'inventory')
         self.assertEqual(host.personality.archetype.name, 'aquilon')
@@ -195,9 +193,7 @@ class TestAddAquilonHost(TestBrokerCommand):
         eth1_ip = self.net["zebra_eth1"].usable[0]
         command = ["show", "host", "--hostname",
                    "unittest20.aqd-unittest.ms.com", "--format", "proto"]
-        out = self.commandtest(command)
-        hostlist = self.parse_hostlist_msg(out, expect=1)
-        host = hostlist.hosts[0]
+        host = self.protobuftest(command, expect=1)[0]
         found = False
         for resource in host.resources:
             if resource.name == "hostname" and resource.type == "service_address":
@@ -250,10 +246,7 @@ class TestAddAquilonHost(TestBrokerCommand):
         net = self.net["zebra_eth0"]
         ip = net.usable[1]
         command = ["show", "network", "--ip", net.ip, "--format", "proto"]
-        out = self.commandtest(command)
-
-        msg = self.parse_netlist_msg(out, expect=1)
-        network = msg.networks[0]
+        network = self.protobuftest(command, expect=1)[0]
         seen = False
         macs = [ip.mac]  # , self.net["zebra_eth1"].usable[1].mac]
         for host in network.hosts:
@@ -285,10 +278,7 @@ class TestAddAquilonHost(TestBrokerCommand):
         net = self.net["zebra_eth0"]
         ip = net.usable[2]
         command = ["show", "network", "--ip", net.ip, "--format", "proto"]
-        out = self.commandtest(command)
-
-        msg = self.parse_netlist_msg(out, expect=1)
-        network = msg.networks[0]
+        network = self.protobuftest(command, expect=1)[0]
         seen = False
         macs = [ip.mac]  # , self.net["zebra_eth1"].usable[2].mac]
         for host in network.hosts:

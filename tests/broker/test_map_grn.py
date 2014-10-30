@@ -74,9 +74,7 @@ class TestMapGrn(VerifyGrnsMixin, PersonalityTestMixin, TestBrokerCommand):
 
         command = ["show_personality", "--archetype=aquilon",
                    "--personality=compileserver", "--format=proto"]
-        out = self.commandtest(command)
-        pl = self.parse_personality_msg(out, 1)
-        personality = pl.personalities[0]
+        personality = self.protobuftest(command, expect=1)[0]
         self.assertEqual(personality.archetype.name, "aquilon")
         self.assertEqual(personality.name, "compileserver")
         self.assertEqual(personality.eonid_maps[0].target, 'atarget')

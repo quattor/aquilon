@@ -112,9 +112,7 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
     def testverifyshowutpersonalityproto(self):
         command = ["show_personality", "--archetype=aquilon",
                    "--personality=utpersonality/dev", "--format=proto"]
-        out = self.commandtest(command)
-        pl = self.parse_personality_msg(out, 1)
-        personality = pl.personalities[0]
+        personality = self.protobuftest(command, expect=1)[0]
         self.assertEqual(personality.archetype.name, "aquilon")
         self.assertEqual(personality.name, "utpersonality/dev")
         self.assertEqual(personality.config_override, True)
@@ -125,10 +123,9 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
 
     def testverifyshowpersonalityallproto(self):
         command = "show_personality --all --format=proto"
-        out = self.commandtest(command.split(" "))
-        pl = self.parse_personality_msg(out)
+        personalities = self.protobuftest(command.split(" "))
         archetypes = {}
-        for personality in pl.personalities:
+        for personality in personalities:
             archetype = personality.archetype.name
             if archetype in archetypes:
                 archetypes[archetype][personality.name] = personality

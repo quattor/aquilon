@@ -56,9 +56,7 @@ class TestAddDomain(TestBrokerCommand):
 
     def test_115_verify_unittest_proto(self):
         command = ["show_domain", "--domain=unittest", "--format", "proto"]
-        out = self.commandtest(command)
-        domainlist = self.parse_domain_msg(out, expect=1)
-        domain = domainlist.domains[0]
+        domain = self.protobuftest(command, expect=1)[0]
         self.assertEqual(domain.name, "unittest")
         self.assertEqual(domain.owner, "%s@%s" % (self.user, self.realm))
         self.assertEqual(domain.tracked_branch, "utsandbox")

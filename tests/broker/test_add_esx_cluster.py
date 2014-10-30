@@ -104,9 +104,7 @@ class TestAddESXCluster(PersonalityTestMixin, TestBrokerCommand):
 
     def testverifyutecl1proto(self):
         command = "show esx_cluster --cluster utecl1 --format proto"
-        out = self.commandtest(command.split(" "))
-        clusterlist = self.parse_clusters_msg(out, expect=1)
-        cluster = clusterlist.clusters[0]
+        cluster = self.protobuftest(command.split(" "), expect=1)[0]
         self.assertEqual(cluster.name, "utecl1")
         self.assertEqual(cluster.personality.archetype.name, "esx_cluster")
         self.assertEqual(cluster.threshold, 2)

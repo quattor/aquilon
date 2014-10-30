@@ -137,10 +137,7 @@ class TestAddAuroraHost(TestBrokerCommand):
         if not fqdn.endswith(".ms.com"):
             fqdn = "%s.ms.com" % fqdn
         command = ["show_host", "--hostname", fqdn, "--format=proto"]
-        (out, err) = self.successtest(command)
-        self.assertEmptyErr(err, command)
-        hostlist = self.parse_hostlist_msg(out, expect=1)
-        host = hostlist.hosts[0]
+        host = self.protobuftest(command, expect=1)[0]
         self.assertEqual(host.fqdn, fqdn)
         self.assertEqual(host.ip, "")
 

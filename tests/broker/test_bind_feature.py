@@ -54,30 +54,26 @@ class TestBindFeature(TestBrokerCommand):
         if aquilon_hosts is None:
             command = ["search", "host", "--archetype", "aquilon",
                        "--format", "proto"]
-            out = self.commandtest(command)
-            hostlist = self.parse_hostlist_msg(out)
-            aquilon_hosts = len(hostlist.hosts)
+            hostlist = self.protobuftest(command)
+            aquilon_hosts = len(hostlist)
 
         if inventory_hosts is None:
             command = ["search", "host", "--personality", "inventory",
                        "--format", "proto"]
-            out = self.commandtest(command)
-            hostlist = self.parse_hostlist_msg(out)
-            inventory_hosts = len(hostlist.hosts)
+            hostlist = self.protobuftest(command)
+            inventory_hosts = len(hostlist)
 
         if hs21_hosts is None:
             command = ["search", "host", "--archetype", "aquilon",
                        "--model", "hs21-8853", "--format", "proto"]
-            out = self.commandtest(command)
-            hostlist = self.parse_hostlist_msg(out)
-            hs21_hosts = len(hostlist.hosts)
+            hostlist = self.protobuftest(command)
+            hs21_hosts = len(hostlist)
 
         if aquilon_personalities is None:
             command = ["search", "personality", "--archetype", "aquilon",
                        "--format", "proto"]
-            out = self.commandtest(command)
-            perslist = self.parse_personality_msg(out)
-            aquilon_personalities = len(perslist.personalities)
+            perslist = self.protobuftest(command)
+            aquilon_personalities = len(perslist)
 
     def verify_personality_flush(self, err, command):
         self.matchoutput(err, "Flushed %d/%d templates" %
@@ -145,9 +141,7 @@ class TestBindFeature(TestBrokerCommand):
 
     def test_111_verify_show_personality_proto(self):
         command = ["show", "personality", "--personality", "inventory", "--format=proto"]
-        out = self.commandtest(command)
-        pl = self.parse_personality_msg(out, 1)
-        personality = pl.personalities[0]
+        personality = self.protobuftest(command, expect=1)[0]
         feature = personality.features[0]
         self.assertEqual(feature.name, "post_host")
         self.assertEqual(feature.type, "host")
@@ -328,9 +322,7 @@ class TestBindFeature(TestBrokerCommand):
 
     def test_141_verify_show_personality_proto(self):
         command = ["show", "personality", "--personality", "compileserver", "--format=proto"]
-        out = self.commandtest(command)
-        pl = self.parse_personality_msg(out, 1)
-        personality = pl.personalities[0]
+        personality = self.protobuftest(command, expect=1)[0]
         feature = personality.features[0]
         self.assertEqual(feature.name, "src_route")
         self.assertEqual(feature.type, "interface")
@@ -406,9 +398,7 @@ class TestBindFeature(TestBrokerCommand):
 
     def test_161_verify_show_personality_proto(self):
         command = ["show", "personality", "--personality", "compileserver", "--format=proto"]
-        out = self.commandtest(command)
-        pl = self.parse_personality_msg(out, 1)
-        personality = pl.personalities[0]
+        personality = self.protobuftest(command, expect=1)[0]
         features = {feature.interface_name: feature
                     for feature in personality.features}
         self.assertEqual(sorted(features.keys()), ["bond0", "eth1"])

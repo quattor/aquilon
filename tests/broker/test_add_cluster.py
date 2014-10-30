@@ -148,9 +148,7 @@ class TestAddCluster(PersonalityTestMixin, TestBrokerCommand):
 
     def test_43_verifyshowutgrid1proto(self):
         command = ["show_cluster", "--cluster=utgrid1", "--format=proto"]
-        out = self.commandtest(command)
-        clus_list = self.parse_clusters_msg(out, 1)
-        cluster = clus_list.clusters[0]
+        cluster = self.protobuftest(command, expect=1)[0]
         self.assertEqual(cluster.name, "utgrid1")
         self.assertEqual(cluster.personality.archetype.name, "gridcluster")
         self.assertEqual(cluster.threshold, 5)
@@ -203,9 +201,7 @@ class TestAddCluster(PersonalityTestMixin, TestBrokerCommand):
 
     def test_53_verifyshowutstorage1proto(self):
         command = ["show_cluster", "--cluster=utstorage1", "--format=proto"]
-        out = self.commandtest(command)
-        clus_list = self.parse_clusters_msg(out, 1)
-        cluster = clus_list.clusters[0]
+        cluster = self.protobuftest(command, expect=1)[0]
         self.assertEqual(cluster.name, "utstorage1")
         self.assertEqual(cluster.personality.archetype.name, "storagecluster")
         self.assertEqual(cluster.threshold, 0)

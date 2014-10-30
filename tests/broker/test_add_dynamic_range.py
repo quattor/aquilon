@@ -103,9 +103,7 @@ class TestAddDynamicRange(TestBrokerCommand):
 
     def test_105_verify_network_proto(self):
         command = "show network --ip %s --format proto" % self.net["dyndhcp0"].ip
-        out = self.commandtest(command.split(" "))
-        msg = self.parse_netlist_msg(out, expect=1)
-        network = msg.networks[0]
+        network = self.protobuftest(command.split(" "), expect=1)[0]
         hosts = set([host.fqdn for host in network.hosts])
         start = self.net["dyndhcp0"].usable[2]
         end = self.net["dyndhcp0"].usable[-3]

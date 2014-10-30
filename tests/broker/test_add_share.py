@@ -57,9 +57,7 @@ class TestAddShare(TestBrokerCommand):
     def test_105_show_test_share_1_proto(self):
         command = ["show_share", "--cluster=utecl1", "--share=test_share_1",
                    "--format", "proto"]
-        out = self.commandtest(command)
-        reslist = self.parse_resourcelist_msg(out, expect=1)
-        resource = reslist.resources[0]
+        resource = self.protobuftest(command, expect=1)[0]
         self.assertEqual(resource.name, "test_share_1")
         self.assertEqual(resource.type, "share")
         self.assertEqual(resource.share.server, "lnn30f1")
@@ -93,9 +91,7 @@ class TestAddShare(TestBrokerCommand):
     def test_115_verify_not_in_nasobjects_proto(self):
         command = ["show_share", "--cluster", "utecl1",
                    "--share", "not_in_nasobjects", "--format", "proto"]
-        out = self.commandtest(command)
-        reslist = self.parse_resourcelist_msg(out, expect=1)
-        resource = reslist.resources[0]
+        resource = self.protobuftest(command, expect=1)[0]
         self.assertEqual(resource.name, "not_in_nasobjects")
         self.assertEqual(resource.type, "share")
         self.assertFalse(hasattr(resource, 'server'))

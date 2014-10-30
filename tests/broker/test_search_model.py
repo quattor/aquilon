@@ -67,9 +67,7 @@ class TestSearchModel(TestBrokerCommand):
 
     def test_200_verify_utchassis_proto(self):
         command = "show model --model utchassis --format proto"
-        out = self.commandtest(command.split(" "))
-        modellist = self.parse_model_msg(out, expect=1)
-        model = modellist.models[0]
+        model = self.protobuftest(command.split(" "), expect=1)[0]
         self.assertEqual(model.name, "utchassis")
         self.assertEqual(model.vendor, "aurora_vendor")
         self.assertEqual(model.model_type, "chassis")
@@ -82,9 +80,7 @@ class TestSearchModel(TestBrokerCommand):
 
     def test_200_verify_utblade_proto(self):
         command = "show model --model utblade --format proto"
-        out = self.commandtest(command.split(" "))
-        modellist = self.parse_model_msg(out, expect=1)
-        model = modellist.models[0]
+        model = self.protobuftest(command.split(" "), expect=1)[0]
         self.assertEqual(model.name, "utblade")
         self.assertEqual(model.vendor, "aurora_vendor")
         self.assertEqual(model.model_type, "blade")
@@ -98,9 +94,7 @@ class TestSearchModel(TestBrokerCommand):
 
     def test_200_verify_utmedium_proto(self):
         command = "show model --model utmedium --format proto"
-        out = self.commandtest(command.split(" "))
-        modellist = self.parse_model_msg(out, expect=1)
-        model = modellist.models[0]
+        model = self.protobuftest(command.split(" "), expect=1)[0]
         self.assertEqual(model.name, "utmedium")
         self.assertEqual(model.vendor, "utvendor")
         self.assertEqual(model.model_type, "virtual_machine")

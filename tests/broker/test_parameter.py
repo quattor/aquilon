@@ -96,10 +96,7 @@ class TestParameter(TestBrokerCommand):
 
     def test_132_verify_proto(self):
         cmd = SHOW_CMD + ["--format=proto"]
-        out = self.commandtest(cmd)
-        p = self.parse_parameters_msg(out, 1)
-        params = p.parameters
-
+        params = self.protobuftest(cmd, expect=1)
         self.assertEqual(params[0].path, 'action')
         self.assertEqual(params[0].value, '{"testaction": {"command": "/bin/testaction", "user": "user1"}}')
 
@@ -218,11 +215,10 @@ class TestParameter(TestBrokerCommand):
 
     def test_245_verify_path_proto(self):
         cmd = SHOW_CMD + ["--format=proto"]
-        out = self.commandtest(cmd)
-        p = self.parse_parameters_msg(out, 5)
+        parameters = self.protobuftest(cmd, expect=5)
 
         params = {}
-        for param in p.parameters:
+        for param in parameters:
             params[param.path] = param.value
 
         self.assertTrue('espinfo/function' in params)
