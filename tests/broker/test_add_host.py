@@ -33,15 +33,17 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
         ip = self.net["unknown0"].usable[0]
         self.dsdb_expect_add("unittest02.one-nyp.ms.com", ip, "eth0", ip.mac,
                              comments="Some machine comments")
+        osver = self.config.get("unittest", "linux_version_prev")
         self.noouttest(["add", "host",
                         "--hostname", "unittest02.one-nyp.ms.com", "--ip", ip,
                         "--machine", "ut3c5n10", "--domain", "unittest",
                         "--buildstatus", "build", "--archetype", "aquilon",
-                        "--osname", "linux", "--osversion", "5.0.1-x86_64",
+                        "--osname", "linux", "--osversion", osver,
                         "--personality", "compileserver"])
         self.dsdb_verify()
 
     def test_105_verify_unittest02(self):
+        osver = self.config.get("unittest", "linux_version_prev")
         command = "show host --hostname unittest02.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
@@ -55,7 +57,7 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
         self.matchoutput(out, "Domain: unittest", command)
         self.matchoutput(out, "Build Status: build", command)
         self.matchoutput(out, "Operating System: linux", command)
-        self.matchoutput(out, "Version: 5.0.1-x86_64", command)
+        self.matchoutput(out, "Version: %s" % osver, command)
         self.matchoutput(out, "Advertise Status: False", command)
 
     def test_105_verify_unittest02_machine(self):
@@ -307,9 +309,10 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
                             eth0_mac=net.usable[0].mac)
 
     def test_171_host_prefix_no_domain(self):
+        osver = self.config.get("unittest", "linux_version_curr")
         command = ["add_host", "--machine", "cardsmachine", "--domain", "unittest",
                    "--archetype", "aquilon", "--personality", "inventory",
-                   "--osname", "linux", "--osversion", "5.0.2-x86_64",
+                   "--osname", "linux", "--osversion", osver,
                    "--grn", "grn:/ms/ei/aquilon/aqd",
                    "--ip", self.net["cards_net"].usable[0],
                    "--prefix", "cardshost"]

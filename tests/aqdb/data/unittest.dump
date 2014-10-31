@@ -70,11 +70,10 @@ DnsDomain(name="new-york.ms.com")
 User(name="otheruser", uid=1001, gid=1001, full_name="Other user", home_dir="/tmp")
 
 Domain(name="prod", owner=UserPrincipal(name="cdb"),
-       compiler="/ms/dist/elfms/PROJ/panc/prod/lib/panc.jar",
+       compiler="/none/panc.jar",
        comments="Production source domain.")
-
 Sandbox(name="othersandbox", owner=UserPrincipal(name="otheruser"),
-	compiler="/ms/dist/elfms/PROJ/panc/prod/lib/panc.jar",
+	compiler="/none/panc.jar",
         comments="Test if owner is deleted",
 	base_commit='0000000000')
 
@@ -96,9 +95,6 @@ Archetype(name="f5")
 @esxcluster Archetype(name="esx_cluster")
 @windows Archetype(name="windows")
 
-OperatingSystem(archetype=@aquilon, name="linux", version="5.0.1-x86_64")
-OperatingSystem(archetype=@aquilon, name="linux", version="5.0.2-x86_64")
-OperatingSystem(archetype=@aurora, name="linux", version="5.0.1-x86_64")
 OperatingSystem(archetype=@aurora, name="linux", version="generic")
 OperatingSystem(archetype=@windows, name="windows", version="generic")
 OperatingSystem(archetype=@windows, name="windows", version="nt61e")

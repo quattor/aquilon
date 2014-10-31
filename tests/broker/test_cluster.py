@@ -193,9 +193,10 @@ class TestCluster(TestBrokerCommand):
                    "--hostname=aquilon61.aqd-unittest.ms.com", "--force"]
         out = self.commandtest(command)
 
+        osver = self.config.get("unittest", "linux_version_prev")
         command = ["reconfigure", "--hostname=aquilon61.aqd-unittest.ms.com",
                    "--personality=inventory", "--archetype=aquilon",
-                   "--osname=linux", "--osversion=5.0.1-x86_64",
+                   "--osname=linux", "--osversion=%s" % osver,
                    "--buildstatus=build"]
         self.successtest(command)
 

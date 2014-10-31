@@ -15,7 +15,7 @@
 # limitations under the License.
 
 # remove debug option if present
-[ $1 == "--debug" ] && shift;
+[ "$1" = "--debug" ] && shift;
 
 DATADIR=$(dirname "$0")/macdata.d
 ARGSTR=`echo $* | sed -e 's![ /]!_!g'`

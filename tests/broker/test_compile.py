@@ -342,8 +342,14 @@ class TestCompile(VerifyNotificationsMixin, TestBrokerCommand):
         basedir = self.config.get("broker", "quattordir")
         templates = os.path.join(self.sandboxdir, "utsandbox")
         swrep = self.config.get("broker", "swrepdir")
-        args = [aqcompile, "--basedir", basedir, "--domain", "utsandbox",
-                "--templates", templates, "--swrep", swrep,
+        # Make sure aq_compile uses the same panc.jar as the rest of the tests
+        panc = self.config.get("panc", "pan_compiler")
+        args = [aqcompile,
+                "--basedir", basedir,
+                "--domain", "utsandbox",
+                "--templates", templates,
+                "--swrep", swrep,
+                "--panc_jar", panc,
                 "--batch_size", "10"]
         if self.config.getboolean('panc', 'gzip_output'):
             args.append("--compress_output")
@@ -355,7 +361,6 @@ class TestCompile(VerifyNotificationsMixin, TestBrokerCommand):
                          "STDERR:\n@@@\n'%s'\n@@@\n"
                          % (p.returncode, args, out, err))
         self.matchoutput(out, "BUILD SUCCESSFUL", args)
-
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestCompile)

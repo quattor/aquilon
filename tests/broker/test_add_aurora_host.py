@@ -26,12 +26,18 @@ from brokertest import TestBrokerCommand
 
 
 class TestAddAuroraHost(TestBrokerCommand):
+    linux_version_prev = None
+
+    @classmethod
+    def setUpClass(cls):
+        super(TestAddAuroraHost, cls).setUpClass()
+        cls.linux_version_prev = cls.config.get("unittest", "linux_version_prev")
 
     def testaddaurorawithnode(self):
         self.dsdb_expect("show_host -host_name %s" % self.aurora_with_node)
         self.dsdb_expect("show_rack -rack_name oy604")
         self.noouttest(["add", "aurora", "host",
-                        "--osname", "linux", "--osversion", "5.0.1-x86_64",
+                        "--osname", "linux", "--osversion", self.linux_version_prev,
                         "--hostname", self.aurora_with_node])
         self.dsdb_verify()
 
@@ -45,7 +51,9 @@ class TestAddAuroraHost(TestBrokerCommand):
         self.matchoutput(out, "Slot: 6", command)
         self.matchoutput(out, "Archetype: aurora", command)
         self.matchoutput(out, "Personality: generic", command)
-        self.matchoutput(out, "Domain: ut-prod", command)
+        self.matchoutput(out, "Domain: %s" % self.config.get("archetype_aurora",
+                                                             "default_domain"),
+                         command)
         self.matchoutput(out, "Status: ready", command)
 
         # Rack data from DSDB supported.
@@ -55,7 +63,7 @@ class TestAddAuroraHost(TestBrokerCommand):
     def testaddaurorawithoutnode(self):
         self.dsdb_expect("show_host -host_name %s" % self.aurora_without_node)
         self.noouttest(["add", "aurora", "host",
-                        "--osname", "linux", "--osversion", "5.0.1-x86_64",
+                        "--osname", "linux", "--osversion", self.linux_version_prev,
                         "--hostname", self.aurora_without_node])
         self.dsdb_verify()
 
@@ -69,13 +77,15 @@ class TestAddAuroraHost(TestBrokerCommand):
         self.matchoutput(out, "Building: ", command)
         self.matchoutput(out, "Archetype: aurora", command)
         self.matchoutput(out, "Personality: generic", command)
-        self.matchoutput(out, "Domain: ut-prod", command)
+        self.matchoutput(out, "Domain: %s" % self.config.get("archetype_aurora",
+                                                             "default_domain"),
+                         command)
         self.matchoutput(out, "Status: ready", command)
 
     def testdsdbmissing(self):
         self.dsdb_expect("show_host -host_name not-in-dsdb", fail=True)
         command = ["add", "aurora", "host", "--hostname", "not-in-dsdb",
-                   "--osname", "linux", "--osversion", "5.0.1-x86_64"]
+                   "--osname", "linux", "--osversion", self.linux_version_prev]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Could not find not-in-dsdb in DSDB", command)
         self.dsdb_verify()
@@ -85,7 +95,7 @@ class TestAddAuroraHost(TestBrokerCommand):
         self.dsdb_expect("show_rack -rack_name oy605", fail=True)
         command = ["add", "aurora", "host",
                    "--hostname", self.aurora_without_rack,
-                   "--osname", "linux", "--osversion", "5.0.1-x86_64"]
+                   "--osname", "linux", "--osversion", self.linux_version_prev]
         out = self.statustest(command)
         self.matchoutput(out, "Rack oy605 not defined in DSDB.", command)
         self.dsdb_verify()
@@ -98,7 +108,8 @@ class TestAddAuroraHost(TestBrokerCommand):
     def testaddnyaqd1(self):
         self.dsdb_expect("show_host -host_name nyaqd1")
         self.noouttest(["add", "aurora", "host", "--hostname", "nyaqd1",
-                        "--osname", "linux", "--osversion", "5.0.1-x86_64"])
+                        "--osname", "linux",
+                        "--osversion", self.linux_version_prev])
         self.dsdb_verify()
 
     def testverifyaddnyaqd1(self):

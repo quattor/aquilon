@@ -34,8 +34,19 @@ from broker.notificationtest import VerifyNotificationsMixin
 
 class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
                       TestBrokerCommand):
+    linux_version_prev = None
+    linux_version_curr = None
+
     # Note that some tests for reconfigure --list appear in
     # test_make_aquilon.py.
+
+    @classmethod
+    def setUpClass(cls):
+        super(TestReconfigure, cls).setUpClass()
+        cls.linux_version_prev = cls.config.get("unittest",
+                                                  "linux_version_prev")
+        cls.linux_version_curr = cls.config.get("unittest",
+                                                  "linux_version_curr")
 
     # The unbind test has removed the service bindings for dns,
     # it should now be set again.
@@ -126,7 +137,8 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
                          """\"/\" = create(\"hostdata/unittest02.one-nyp.ms.com\"""",
                          command)
         self.matchoutput(out,
-                         """include { "os/linux/5.0.1-x86_64/config" };""",
+                         'include { "os/linux/%s/config" };' %
+                         self.linux_version_prev,
                          command)
         self.matchoutput(out,
                          """include { "service/afs/q.ny.ms.com/client/config" };""",
@@ -223,7 +235,8 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
                          """\"/\" = create(\"hostdata/unittest00.one-nyp.ms.com\"""",
                          command)
         self.matchoutput(out,
-                         """include { "os/linux/5.0.1-x86_64/config" };""",
+                         'include { "os/linux/%s/config" };' %
+                         self.linux_version_prev,
                          command)
         self.matchoutput(out,
                          """include { "service/afs/q.ny.ms.com/client/config" };""",
@@ -261,11 +274,11 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
 
     def testreconfigurewindowswrongos(self):
         command = ["reconfigure", "--hostname", "unittest01.one-nyp.ms.com",
-                   "--osname", "linux", "--osversion", "5.0.1-x86_64"]
+                   "--osname", "linux", "--osversion", self.linux_version_prev]
         err = self.notfoundtest(command)
         self.matchoutput(err,
-                         "Operating System linux, version 5.0.1-x86_64, "
-                         "archetype windows not found.",
+                         "Operating System linux, version %s, archetype "
+                         "windows not found." % self.linux_version_prev,
                          command)
 
     def testreconfigurewindowswrongarch(self):
@@ -303,7 +316,7 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
     def testreconfigureos(self):
         command = ["reconfigure",
                    "--hostname", "aquilon61.aqd-unittest.ms.com",
-                   "--osname", "linux", "--osversion", "5.0.2-x86_64"]
+                   "--osname", "linux", "--osversion", self.linux_version_curr]
         (out, err) = self.successtest(command)
         self.matchoutput(err, "1/1 object template", command)
         self.matchclean(err, "removing binding", command)
@@ -312,13 +325,13 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
     def testreconfigureossplitargs(self):
         command = ["reconfigure",
                    "--hostname", "unittest17.aqd-unittest.ms.com",
-                   "--osname", "linux", "--osversion", "5.0.2-x86_64"]
+                   "--osname", "linux", "--osversion", self.linux_version_curr]
         (out, err) = self.successtest(command)
         self.matchoutput(err, "1/1 object template", command)
         self.matchclean(err, "removing binding", command)
         self.matchclean(err, "adding binding", command)
 
-    def testmissingpersonalitytemplate(self):
+    def testmissingrequiredparams(self):
         command = ["reconfigure",
                    "--hostname", "aquilon62.aqd-unittest.ms.com",
                    "--personality", "badpersonality"]
@@ -526,14 +539,14 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
         hosts = ["aquilon91.aqd-unittest.ms.com"]
         scratchfile = self.writescratch("missingosname", "\n".join(hosts))
         command = ["reconfigure", "--list", scratchfile,
-                   "--osversion=5.0.1-x86_64"]
+                   "--osversion=%s" % self.linux_version_prev]
         self.successtest(command)
 
     def testhostlistnoosarchetype(self):
         hosts = ["aquilon91.aqd-unittest.ms.com"]
         scratchfile = self.writescratch("missingosarchetype", "\n".join(hosts))
         command = ["reconfigure", "--list", scratchfile,
-                   "--osname=linux", "--osversion=5.0.1-x86_64"]
+                   "--osname=linux", "--osversion=%s" % self.linux_version_prev]
         self.successtest(command)
 
     def testhostlistpersonalitynoarchetype(self):
