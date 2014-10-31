@@ -22,7 +22,7 @@ import ms.version
 import getopt
 
 ms.version.addpkg('setuptools', '0.6c11')
-ms.version.addpkg('protobuf', '2.4.1')
+ms.version.addpkg('protobuf', '2.5.0')
 
 from google.protobuf.text_format import PrintMessage
 
