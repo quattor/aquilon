@@ -62,16 +62,12 @@ class TestRefreshNetwork(TestBrokerCommand):
     # 100 sync up building np
     def test_100_syncfirst(self):
         command = "refresh network --building np"
-        (out, err) = self.successtest(command.split(" "))
-        self.assertEmptyOut(out, command)
-        # There may be output here if the networks have changed between
-        # populating the database and now.
+        self.statustest(command.split(" "))
 
     # 110 sync up building np expecting no output
     def test_110_syncclean(self):
         command = "refresh network --building np"
-        (out, err) = self.successtest(command.split(" "))
-        self.assertEmptyOut(out, command)
+        err = self.statustest(command.split(" "))
         # Technically this could have changed in the last few seconds,
         # but the test seems worth the risk. :)
         err = self.striplock(err)
@@ -80,8 +76,7 @@ class TestRefreshNetwork(TestBrokerCommand):
     # 120 sync up building np dryrun expecting no output
     def test_120_dryrun(self):
         command = "refresh network --building np --dryrun"
-        (out, err) = self.successtest(command.split(" "))
-        self.assertEmptyOut(out, command)
+        err = self.statustest(command.split(" "))
         # Technically this also could have changed in the last few seconds,
         # but the test again seems worth the risk. :)
         err = self.striplock(err)
@@ -97,7 +92,7 @@ class TestRefreshNetwork(TestBrokerCommand):
 
     def test_135_syncagain(self):
         command = "refresh network --building np"
-        (out, err) = self.successtest(command.split(" "))
+        err = self.statustest(command.split(" "))
         self.matchoutput(err, "Setting network wrong-params [172.31.29.0/25] "
                          "name to nplab-vlan1", command)
 
@@ -116,8 +111,7 @@ class TestRefreshNetwork(TestBrokerCommand):
     # 150 test adds with the sync of another building
     def test_150_addhq(self):
         command = "refresh network --building hq"
-        (out, err) = self.successtest(command.split(" "))
-        self.assertEmptyOut(out, command)
+        err = self.statustest(command.split(" "))
         err = self.striplock(err)
         self.matchoutput(err, "Adding", command)
         self.matchclean(err, "Setting", command)
@@ -164,7 +158,7 @@ class TestRefreshNetwork(TestBrokerCommand):
 
     def test_260_test_split_merge(self):
         command = ["refresh", "network", "--building", "nettest"]
-        (out, err) = self.successtest(command)
+        err = self.statustest(command)
         # 0.1.2.x
         self.matchoutput(err, "Setting network 0.1.2.0 [0.1.2.0/25] "
                          "name to merge_1", command)
@@ -220,13 +214,20 @@ class TestRefreshNetwork(TestBrokerCommand):
             self.dsdb_expect_add(self.dynname(IPv4Address(ip)), IPv4Address(ip))
         command = ["add_dynamic_range", "--startip=0.1.1.4", "--endip=0.1.1.8",
                    "--dns_domain=aqd-unittest.ms.com"]
-        self.successtest(command)
+        self.statustest(command)
         self.dsdb_verify()
 
     def test_310_verifynetwork(self):
         command = "show network --ip 0.1.1.0"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Dynamic Ranges: 0.1.1.4-0.1.1.8", command)
+
+    def test_310_verifynetwork_proto(self):
+        command = "show network --ip 0.1.1.0 --format proto"
+        net = self.protobuftest(command.split(" "), expect=1)[0]
+        self.assertEqual(len(net.dynamic_ranges), 1)
+        self.assertEqual(net.dynamic_ranges[0].start, "0.1.1.4")
+        self.assertEqual(net.dynamic_ranges[0].end, "0.1.1.8")
 
     def failsync(self, command):
         """Common code for the two tests below."""
@@ -280,7 +281,7 @@ class TestRefreshNetwork(TestBrokerCommand):
                         int(IPv4Address("0.1.1.8")) + 1):
             self.dsdb_expect_delete(IPv4Address(ip))
         command = ["del_dynamic_range", "--startip=0.1.1.4", "--endip=0.1.1.8"]
-        self.successtest(command)
+        self.statustest(command)
         self.dsdb_verify()
 
     def test_670_cleanup_addresses(self):
@@ -304,8 +305,7 @@ class TestRefreshNetwork(TestBrokerCommand):
     # One last time to clean up the dummy network
     def test_700_syncclean(self):
         command = "refresh network --building np"
-        (out, err) = self.successtest(command.split(" "))
-        self.assertEmptyOut(out, command)
+        err = self.statustest(command.split(" "))
         err = self.striplock(err)
         self.matchoutput(err, "Deleting network 0.1.1.0", command)
         self.matchoutput(err, "Removing router 0.1.1.1", command)

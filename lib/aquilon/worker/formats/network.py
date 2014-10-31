@@ -245,7 +245,20 @@ class NetworkFormatter(ObjectFormatter):
                     if iface.mac:
                         int_msg.mac = str(iface.mac)
 
-        # Add dynamic DHCP records
+        # Look for dynamic DHCP ranges
+        range_msg = None
+        last_ip = None
+        for dynhost in net.dynamic_stubs:
+            if not last_ip or dynhost.ip != last_ip + 1:
+                if last_ip:
+                    range_msg.end = str(last_ip)
+                range_msg = net_msg.dynamic_ranges.add()
+                range_msg.start = str(dynhost.ip)
+            last_ip = dynhost.ip
+        if last_ip:
+            range_msg.end = str(last_ip)
+
+        # Add dynamic DHCP records - to be deprecated
         for dynhost in net.dynamic_stubs:
             host_msg = net_msg.hosts.add()
             # aqdhcpd uses the type

@@ -105,8 +105,12 @@ class TestDelDynamicRange(TestBrokerCommand):
 
     def test_220_clearnetwork(self):
         messages = []
-        for ip in range(int(self.net["dyndhcp3"].usable[0]),
-                        int(self.net["dyndhcp3"].usable[-1]) + 1):
+        net = self.net["dyndhcp3"]
+        for ip in range(int(net.usable[0]), int(net.usable[-1]) + 1):
+            # One IP is missing in the middle
+            if ip == int(net.usable[5]):
+                continue
+
             address = IPv4Address(ip)
             self.dsdb_expect_delete(address)
             messages.append("DSDB: delete_host -ip_address %s" % address)
