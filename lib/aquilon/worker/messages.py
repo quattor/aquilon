@@ -16,17 +16,14 @@
 # limitations under the License.
 """Pub/sub mechanism for status messages."""
 
-
 from threading import Lock
 from collections import deque
 from logging import DEBUG
+import uuid
 
 from twisted.internet import reactor
 
 from aquilon.exceptions_ import InternalError
-from aquilon.python_patches import load_uuid_quickly
-
-uuid = load_uuid_quickly()  # pylint: disable=C0103
 
 
 # Some requests can generate many debug messages.  After this limit is

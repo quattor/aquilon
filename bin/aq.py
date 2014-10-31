@@ -384,7 +384,7 @@ if __name__ == "__main__":
         commandOptions["debug"] = str(globalOptions["debug"])
     if command != "show_request" and globalOptions.get("verbose"):
         uuid = load_uuid_quickly()
-        commandOptions["requestid"] = str(uuid.uuid1())
+        commandOptions["requestid"] = str(uuid.uuid4())
 
     # Quote options so that they can be safely included in the URI
     cleanOptions = {}
