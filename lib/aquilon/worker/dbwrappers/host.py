@@ -49,8 +49,9 @@ def create_host(session, logger, config, dbhw, dbarchetype, domain=None,
     section = "archetype_" + dbarchetype.name
 
     # Pick a default domain if not specified or impled by the sandbox
-    if not domain and not sandbox:
-        domain = config.get(section, "host_domain")
+    if not domain and not sandbox and \
+       config.has_option(section, "default_domain"):
+        domain = config.get(section, "default_domain")
 
     dbbranch, dbauthor = get_branch_and_author(session, domain=domain,
                                                sandbox=sandbox, compel=True)
@@ -68,8 +69,10 @@ def create_host(session, logger, config, dbhw, dbarchetype, domain=None,
     if not personality:
         if config.has_option(section, "default_personality"):
             personality = config.get(section, "default_personality")
-        else:
-            personality = 'generic'
+    if not personality:
+        raise ArgumentError("There is no default personality configured "
+                            "for {0:l}, please specify --personality."
+                            .format(dbarchetype))
 
     dbpersonality = Personality.get_unique(session, name=personality,
                                            archetype=dbarchetype,

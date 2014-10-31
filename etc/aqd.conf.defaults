@@ -212,7 +212,8 @@ host_grn_targets = esp
 personality_grn_targets = esp,invited
 
 [archetype_aurora]
-host_domain = ny-prod
+default_personality = generic
+default_domain = ny-prod
 default_osname = linux
 default_osversion = generic
 
@@ -227,29 +228,31 @@ allow_cascaded_deco = False
 max_members_default = 2
 
 [archetype_metacluster]
-host_domain = ny-prod
+default_domain = ny-prod
+default_personality = metacluster
 location_type = company
 location_name = ms
 max_members_default = 32
 
+[archetype_netinfra]
+default_domain = netinfra
+default_personality = generic
+default_osname = generic
+default_osversion = generic
+
 [archetype_storagecluster]
 max_members_default = 2
-
-[archetype_windows]
-host_domain = ny-prod
-default_osname = windows
-default_osversion = generic
 
 [archetype_vmhost]
 default_grn_target = esp
 host_grn_targets = esp
 personality_grn_targets = esp
 
-[archetype_netinfra]
+[archetype_windows]
+default_domain = ny-prod
 default_personality = generic
-default_osname = generic
+default_osname = windows
 default_osversion = generic
-host_domain = netinfra
 
 [network_unknown]
 # Default offset of the gateway's IP address, if there are no explicit router

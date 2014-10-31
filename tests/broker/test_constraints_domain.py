@@ -42,15 +42,15 @@ class TestDomainConstraints(TestBrokerCommand):
         self.matchoutput(out, "Sandbox: utsandbox", command)
 
     def testdeldomainwithhost(self):
-        command = "del domain --domain ny-prod"
+        command = "del domain --domain ut-prod"
         self.badrequesttest(command.split(" "))
         domainsdir = self.config.get("broker", "domainsdir")
-        self.assert_(os.path.exists(os.path.join(domainsdir, "ny-prod")))
+        self.assert_(os.path.exists(os.path.join(domainsdir, "ut-prod")))
 
     def testverifydeldomainwithhostfailed(self):
-        command = "show domain --domain ny-prod"
+        command = "show domain --domain ut-prod"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Domain: ny-prod", command)
+        self.matchoutput(out, "Domain: ut-prod", command)
 
     def testupdatedomainformat(self):
         command = ["update_domain", "--domain", "unittest",

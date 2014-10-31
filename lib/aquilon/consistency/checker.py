@@ -18,25 +18,24 @@
 
 from __future__ import print_function
 
-from aquilon.config import Config
-from aquilon.aqdb.db_factory import DbFactory
+from aquilon.exceptions_ import InternalError
 
 
 class ConsistencyChecker(object):
     """Consistency Checker Base Class"""
-    def __init__(self):
-        db = DbFactory()
-        self.session = db.Session()
-        self.config = Config()
+    def __init__(self, config, session, logger):
+        self.session = session
+        self.config = config
+        self.logger = logger
         self._failures = dict()
 
-    def check(self):
+    def check(self, repair=False):  # pylint: disable=W0613
         """Perform the consistancy check
 
         This method should be overridden to implement the class.
         """
-        self.failure("The check method of %s is unimplemented" %
-                     self.__class__.__name__)
+        raise InternalError("The check method of %s is unimplemented" %
+                            self.__class__.__name__)
 
     def failure(self, key, item, problem):
         """Record a failuer

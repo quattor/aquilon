@@ -15,14 +15,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 from aquilon.exceptions_ import ArgumentError, AquilonError
 from aquilon.utils import validate_nlist_key
+from aquilon.aqdb.model import Cluster, MetaCluster, NetworkDevice
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.dbwrappers.branch import get_branch_and_author
+from aquilon.worker.dbwrappers.cluster import parse_cluster_arguments
 from aquilon.worker.dbwrappers.location import get_location
-from aquilon.aqdb.model import (Personality, ClusterLifecycle, MetaCluster,
-                                NetworkDevice, Cluster)
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
 
 
@@ -37,26 +35,14 @@ class CommandAddCluster(BrokerCommand):
         if vm_to_host_ratio:
             self.deprecated_option("vm_to_host_ratio", "It has no effect.",
                                    logger=logger, **arguments)
+
         validate_nlist_key("cluster", cluster)
-        dbpersonality = Personality.get_unique(session, name=personality,
-                                               archetype=archetype, compel=True)
-        if not dbpersonality.is_cluster:
-            raise ArgumentError("%s is not a cluster personality." %
-                                personality)
+        Cluster.get_unique(session, cluster, preclude=True)
 
-        ctype = dbpersonality.archetype.cluster_type
-        section = "archetype_" + dbpersonality.archetype.name
-
-        if not buildstatus:
-            buildstatus = "build"
-        dbstatus = ClusterLifecycle.get_instance(session, buildstatus)
-
-        dbbranch, dbauthor = get_branch_and_author(session, domain=domain,
-                                                   sandbox=sandbox, compel=True)
-
-        if hasattr(dbbranch, "allow_manage") and not dbbranch.allow_manage:
-            raise ArgumentError("Adding clusters to {0:l} is not allowed."
-                                .format(dbbranch))
+        kw = parse_cluster_arguments(session, self.config, archetype,
+                                     personality, domain, sandbox, buildstatus,
+                                     max_members)
+        max_hosts = kw.pop('max_members')
 
         dbloc = get_location(session, **arguments)
         if not dbloc:
@@ -65,48 +51,36 @@ class CommandAddCluster(BrokerCommand):
         if not dbloc.campus:
             raise ArgumentError("{0} is not within a campus.".format(dbloc))
 
-        if max_members is None:
-            if self.config.has_option(section, "max_members_default"):
-                max_members = self.config.getint(section, "max_members_default")
-
-        Cluster.get_unique(session, cluster, preclude=True)
         # Not finding the cluster type is an internal consistency issue, so make
         # that show up in the logs by using AquilonError
+        ctype = kw['personality'].archetype.cluster_type
         clus_type = Cluster.polymorphic_subclass(ctype, "Unknown cluster type",
                                                  error=AquilonError)
 
-        (down_hosts_pct, dht) = Cluster.parse_threshold(down_hosts_threshold)
-
-        kw = {'name': cluster,
-              'location_constraint': dbloc,
-              'personality': dbpersonality,
-              'max_hosts': max_members,
-              'branch': dbbranch,
-              'sandbox_author': dbauthor,
-              'down_hosts_threshold': dht,
-              'down_hosts_percent': down_hosts_pct,
-              'status': dbstatus,
-              'comments': comments}
+        dht_pct, dht = Cluster.parse_threshold(down_hosts_threshold)
 
         if switch and hasattr(clus_type, 'network_device'):
-            kw['network_device'] = NetworkDevice.get_unique(session,
-                                                            switch,
+            kw['network_device'] = NetworkDevice.get_unique(session, switch,
                                                             compel=True)
 
         if maint_threshold is not None:
-            (down_hosts_pct, dht) = Cluster.parse_threshold(maint_threshold)
-            kw['down_maint_threshold'] = dht
-            kw['down_maint_percent'] = down_hosts_pct
+            dmt_pct, dmt = Cluster.parse_threshold(maint_threshold)
+        else:
+            dmt_pct = dmt = None
 
-        dbcluster = clus_type(**kw)
+        dbcluster = clus_type(name=cluster, location_constraint=dbloc,
+                              max_hosts=max_hosts,
+                              down_hosts_threshold=dht,
+                              down_hosts_percent=dht_pct,
+                              down_maint_threshold=dmt,
+                              down_maint_percent=dmt_pct,
+                              comments=comments, **kw)
 
         plenaries = PlenaryCollection(logger=logger)
 
         if metacluster:
-            dbmetacluster = MetaCluster.get_unique(session,
-                                                   metacluster,
+            dbmetacluster = MetaCluster.get_unique(session, metacluster,
                                                    compel=True)
-
             dbmetacluster.members.append(dbcluster)
             dbmetacluster.validate()
 

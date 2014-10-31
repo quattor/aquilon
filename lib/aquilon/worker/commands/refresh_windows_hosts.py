@@ -124,7 +124,7 @@ class CommandRefreshWindowsHosts(BrokerCommand):
 
         dbdomain = Domain.get_unique(session,
                                      self.config.get("archetype_windows",
-                                                     "host_domain"),
+                                                     "default_domain"),
                                      compel=InternalError)
         dbarchetype = Archetype.get_unique(session, "windows",
                                            compel=InternalError)

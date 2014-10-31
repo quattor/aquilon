@@ -105,8 +105,8 @@ def run_command(args, env=None, path="/", logger=LOGGER, loglevel=logging.INFO,
         command_args[0] = config.lookup_tool(command_args[0])
 
     simple_command = " ".join(command_args)
-    logger.info("run_command: %s (CWD: %s)", simple_command,
-                os.path.abspath(path))
+    logger.log(loglevel, "run_command: %s (CWD: %s)", simple_command,
+               os.path.abspath(path))
 
     if input:
         proc_stdin = PIPE
@@ -128,19 +128,19 @@ def run_command(args, env=None, path="/", logger=LOGGER, loglevel=logging.INFO,
     err_thread.join()
     p.wait()
     if p.returncode >= 0:
-        logger.info("command `%s` exited with return code %d", simple_command,
-                    p.returncode)
+        logger.log(loglevel, "command `%s` exited with return code %d",
+                   simple_command, p.returncode)
     else:  # pragma: no cover
-        logger.info("command `%s` exited with signal %d", simple_command,
-                    -p.returncode)
+        logger.log(loglevel, "command `%s` exited with signal %d",
+                   simple_command, -p.returncode)
     out = "".join(out_thread.buffer)
     if out:
         filter_msg = "filtered " if filterre else ""
-        logger.info("command `%s` %sstdout: %s", simple_command,
-                    filter_msg, out)
+        logger.log(loglevel, "command `%s` %sstdout: %s", simple_command,
+                   filter_msg, out)
     err = "".join(err_thread.buffer)
     if err:
-        logger.info("command `%s` stderr: %s", simple_command, err)
+        logger.log(loglevel, "command `%s` stderr: %s", simple_command, err)
 
     if p.returncode != 0:
         raise ProcessException(command=simple_command, out=out, err=err,
@@ -199,7 +199,7 @@ def cache_version(config, logger=LOGGER):
                       path=config.get("broker", "srcdir"))
         config.set("broker", "version", out.strip())
     except ProcessException as e:
-        logger.info("Could not run git describe to get version: %s" % e)
+        logger.info("Could not run git describe to get version: %s", e)
         config.set("broker", "version", "Unknown")
 
 

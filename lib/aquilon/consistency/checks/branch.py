@@ -15,128 +15,65 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import os
+
+import logging
 
 from aquilon.consistency.checker import ConsistencyChecker
 from aquilon.aqdb.model.branch import Branch
 from aquilon.worker.processes import run_git
+from aquilon.worker.dbwrappers.branch import merge_into_trash
 
 
 class BranchChecker(ConsistencyChecker):
-    """Branch Consistancy Checker
+    """
+    Branch Consistancy Checker
 
-    Branches exist in three places, the database (as domains/sandboxes),
-    git (as branches) and in the fileling system.  This checker attempts
-    to ensure that all three sources of information are consistant.
-
-    We always use the database (gold!) as a point of comparison.
+    This module performs validation that is common for all branches (both
+    domains and sandboxes) in template-king.
     """
 
-    def check(self):
+    def check(self, repair=False):
         # Find all of the branchs that are listed in the database
-        db_branches = set()
-        db_domains = set()
-        db_sandboxs = set()
-        branch_type = dict()
+        db_branches = {}
         for branch in self.session.query(Branch):
-            if branch.branch_type == 'domain':
-                db_domains.add(branch.name)
-                branch_type[branch.name] = 'Domain'
-            elif branch.branch_type == 'sandbox':
-                db_sandboxs.add(branch.name)
-                branch_type[branch.name] = 'Sandbox'
-            else:
-                self.failure(1, "Branch type", "%s is unknonwn for %s."
-                             % (branch.branch_type, branch.name))
-                continue
-            db_branches.add(branch.name)
+            db_branches[branch.name] = branch
 
         # Find all of the branches that are in the template king, this
         # includes both domains and sandbox's
         kingdir = self.config.get("broker", "kingdir")
-        out = run_git(['git', 'for-each-ref', '--format=%(refname:short)',
-                       'refs/heads'], path=kingdir)
+        out = run_git(['for-each-ref', '--format=%(refname:short)',
+                       'refs/heads'], path=kingdir, loglevel=logging.DEBUG)
         git_branches = set(out.splitlines())
 
-        # Find all of the checked out sanbox's
-        fs_sandboxs = set()
-        fsinfo = {}
-        templatesdir = self.config.get("broker", "templatesdir")
-        for (root, dirs, files) in os.walk(templatesdir):
-            if root is templatesdir:
-                if files:
-                    self.failure(1, "Template dir", "%s contains files" % root)
-            else:
-                if files:
-                    self.failure(1, "Template dir", "%s contains files" % root)
-                user = os.path.split(root)[-1]
-                for dir in dirs:
-                    fs_sandboxs.add(dir)
-                    fsinfo[dir] = os.path.join(root, dir)
-                # Prevent any furher recursion
-                dirs[:] = []
-
-        # Find all of the domains
-        fs_domains = set()
-        domainsdir = self.config.get("broker", "domainsdir")
-        for (root, dirs, files) in os.walk(domainsdir):
-            if files:
-                self.failure(1, "Domains dir", "%s contains files" % root)
-            for dir in dirs:
-                fs_domains.add(dir)
-                fsinfo[dir] = os.path.join(root, dir)
-            # Prevent any furher recursion
-            dirs[:] = []
-
-        #######################################################################
-        #
-        # Database (domains+sandbox's) == Git (domains+sandbox's)
-        #
+        # The trash branch is special
+        if self.config.has_option("broker", "trash_branch"):
+            git_branches.remove(self.config.get("broker", "trash_branch"))
 
         # Branches in the database and not in the template-king
-        for branch in db_branches.difference(git_branches):
-            self.failure(branch, "%s %s" % (branch_type[branch], branch),
-                         "found in database and not template-king")
+        for branch in set(db_branches.keys()).difference(git_branches):
+            self.failure(branch, format(db_branches[branch]),
+                         "found in the database but not in template-king")
+            # No repair mode. We consider AQDB more canonical than
+            # template-king, so we should not delete the DB object, and we don't
+            # have any information how to restore the branch in template-king.
 
         # Branches in the template-king and not in the database
-        for branch in git_branches.difference(db_branches):
-            self.failure(branch, "Branch %s" % branch,
-                         "found in template-king and not database")
+        for branch in git_branches.difference(db_branches.keys()):
+            if repair:
+                self.logger.info("Deleting branch %s", branch)
 
-        #######################################################################
-        #
-        # Database (sandbox) == Filesystem (sandbox)
-        #
+                merge_msg = []
+                merge_msg.append("Delete orphaned branch %s" % branch)
+                merge_msg.append("")
+                merge_msg.append("The consistency checker found this branch to be ")
+                merge_msg.append("orphaned.")
 
-        # Branches in the database and not in the fileing system
-        for branch in db_sandboxs.difference(fs_sandboxs):
-            self.failure(branch, "Sandbox %s" % branch,
-                         "found in database but not on filesystem")
-
-        # Note to future self:
-        #   The following check is techncally not needed as we do not delete
-        #   the sandbox from the fileing system when the del_sanbox command
-        #   is run.  However, the following has been left just in case we
-        #   decide to have a change of heart about this practice.
-        #
-        # Branchs on fileing system but not in the database
-        # for branch in fs_sandboxs.difference(db_sandboxs):
-        #    self.failure(branch, "Sandbox %s" % branch,
-        #                 "found on filesystem (%s) but not in database"
-        #                 % fsinfo[branch])
-
-        #######################################################################
-        #
-        # Database (domains) == Filesystem (domains)
-        #
-
-        # Branches in the database and not in the fileing system
-        for branch in db_domains.difference(fs_domains):
-            self.failure(branch, "Domain %s" % branch,
-                         "found in database but not on filesystem")
-
-        # Branchs on fileing system but not in the database
-        for branch in fs_domains.difference(db_domains):
-            self.failure(branch, "Domain %s" % branch,
-                         "found on filesystem (%s) but not in database" %
-                         fsinfo[branch])
+                if self.config.has_option("broker", "trash_branch"):
+                    merge_into_trash(self.config, self.logger, branch,
+                                     "\n".join(merge_msg),
+                                     loglevel=logging.DEBUG)
+                run_git(['branch', '-D', branch], path=kingdir,
+                        loglevel=logging.DEBUG)
+            else:
+                self.failure(branch, "Branch %s" % branch,
+                             "found in template-king but not in the database")
