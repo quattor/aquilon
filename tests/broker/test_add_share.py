@@ -104,6 +104,17 @@ class TestAddShare(TestBrokerCommand):
         self.failUnlessEqual(resource.share.disk_count, 0)
         self.failUnlessEqual(resource.share.machine_count, 0)
 
+    def test_115_cat_not_in_nasobjects(self):
+        command = ["cat", "--cluster=utecl1", "--share=not_in_nasobjects"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "structure template resource/cluster/utecl1/"
+                         "share/not_in_nasobjects/config;",
+                         command)
+        self.matchoutput(out, '"name" = "not_in_nasobjects";', command)
+        self.matchoutput(out, '"server" = null;', command)
+        self.matchoutput(out, '"mountpoint" = null;',
+                         command)
+
     def test_130_add_10gig_shares(self):
         for i in range(5, 11):
             self.noouttest(["add_share", "--cluster=utecl%d" % i,
@@ -198,6 +209,12 @@ class TestAddShare(TestBrokerCommand):
                          command)
         self.matchoutput(out, "Disk Count: 0", command)
         self.matchoutput(out, "Machine Count: 0", command)
+
+    def test_800_cleanup(self):
+        # Having a share without a server would blow up compilation, so we need
+        # to remove it here
+        self.noouttest(["del_share", "--cluster", "utecl1",
+                        "--share", "not_in_nasobjects"])
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddShare)

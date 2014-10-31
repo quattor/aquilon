@@ -76,6 +76,9 @@ def pan(obj, indent=0):
         accumulator[-1] = accumulator[-1].rstrip(",")
         accumulator.append("%s)" % ("  " * indent))
 
+    elif obj is None:
+        accumulator.append("null")
+
     else:
         accumulator.append(pan(str(obj)))
 
