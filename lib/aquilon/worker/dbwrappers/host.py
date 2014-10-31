@@ -17,6 +17,7 @@
 """Wrappers to make getting and using hosts simpler."""
 
 from collections import defaultdict
+from six import itervalues
 from types import ListType
 
 from sqlalchemy.orm import (joinedload, contains_eager, with_polymorphic,
@@ -192,17 +193,17 @@ def hostlist_to_hosts(session, hostlist, query_options=None,
 
     def look_up_dns_domains():
         q = session.query(DnsDomain)
-        q = q.filter(DnsDomain.name.in_(parsed_fqdns.keys()))
+        q = q.filter(DnsDomain.name.in_(parsed_fqdns))
         for dbdns_domain in q:
             dns_domains[dbdns_domain.name] = dbdns_domain
 
-        missing = set(parsed_fqdns.iterkeys())
-        missing.difference_update(dns_domains.iterkeys())
+        missing = set(parsed_fqdns)
+        missing.difference_update(dns_domains)
         for item in missing:
             failed.append("DNS Domain %s not found." % item)
 
     def look_up_dns_records():
-        for dbdns_domain in dns_domains.itervalues():
+        for dbdns_domain in itervalues(dns_domains):
             short_names = parsed_fqdns[dbdns_domain.name]
             for name_chunk in chunk(short_names, 1000):
                 q = session.query(DnsRecord)
@@ -217,7 +218,7 @@ def hostlist_to_hosts(session, hostlist, query_options=None,
                     dns_records_by_id[dbdns_rec.id] = dbdns_rec
 
         missing = set(hostlist)
-        missing.difference_update(dns_records_by_name.iterkeys())
+        missing.difference_update(dns_records_by_name)
         for item in missing:
             failed.append("Host %s not found." % item)
 
@@ -225,10 +226,7 @@ def hostlist_to_hosts(session, hostlist, query_options=None,
         hosts_by_fqdn = {}
         for dns_rec_chunk in chunk(dns_records_by_name.values(), 1000):
             q = session.query(Host)
-            # TODO: SQLAlchemy 0.8 needs drop aliased=True, remove it after
-            # upgrading to 0.9
-            HWAlias = with_polymorphic(HardwareEntity, [Machine, NetworkDevice],
-                                       aliased=True)
+            HWAlias = with_polymorphic(HardwareEntity, [Machine, NetworkDevice])
             q = q.join(HWAlias)
             q = q.filter(HWAlias.primary_name_id.in_(rec.id for rec in
                                                      dns_rec_chunk))
@@ -244,8 +242,8 @@ def hostlist_to_hosts(session, hostlist, query_options=None,
 
         # Don't report bad hostnames twice - start from dns_records_by_name
         # rather than from hostlist
-        missing = set(dns_records_by_name.iterkeys())
-        missing.difference_update(hosts_by_fqdn.iterkeys())
+        missing = set(dns_records_by_name)
+        missing.difference_update(hosts_by_fqdn)
         for item in missing:
             failed.append("Host %s not found." % item)
 
@@ -351,13 +349,13 @@ def validate_branch_author(dbhosts):
         authors[dbhost.sandbox_author].append(dbhost)
 
     if len(branches) > 1:
-        keys = sorted(branches.keys(), key=lambda x: len(branches[x]))
+        keys = sorted(branches, key=lambda x: len(branches[x]))
         stats = ["{0:d} hosts in {1:l}".format(len(branches[branch]), branch)
                  for branch in keys]
         raise ArgumentError("All hosts must be in the same domain or "
                             "sandbox:\n%s" % "\n".join(stats))
     if len(authors) > 1:
-        keys = sorted(authors.keys(), key=lambda x: len(authors[x]))
+        keys = sorted(authors, key=lambda x: len(authors[x]))
         stats = ["%s hosts with sandbox author %s" %
                  (len(authors[author]), author.name) for author in keys]
         raise ArgumentError("All hosts must be managed by the same "

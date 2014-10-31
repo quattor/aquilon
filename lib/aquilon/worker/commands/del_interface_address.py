@@ -16,8 +16,6 @@
 # limitations under the License.
 """Contains the logic for `aq del interface address`."""
 
-from functools import partial
-
 from aquilon.worker.broker import BrokerCommand
 from aquilon.exceptions_ import ArgumentError, IncompleteError
 from aquilon.aqdb.model import (HardwareEntity, Interface, AddressAssignment,
@@ -115,7 +113,8 @@ class CommandDelInterfaceAddress(BrokerCommand):
             q = q.filter_by(network=dbnetwork, ip=ip)
             q = q.join(ARecord.fqdn)
             q = q.filter_by(dns_environment=dbnet_env.dns_environment)
-            map(partial(delete_dns_record, locked=True), q.all())
+            for dns_rec in q:
+                delete_dns_record(dns_rec, locked=True)
 
         session.flush()
 

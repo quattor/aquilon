@@ -501,7 +501,7 @@ def get_or_create_interface(session, dbhw_ent, name=None, mac=None,
         extra_args["parent"] = dbparent
         extra_args["vlan_id"] = vlan_id
 
-    for key in extra_args.keys():
+    for key in extra_args:
         if key not in cls.extra_fields:
             raise InternalError("Parameter %s is not valid for %s "
                                 "interfaces." % (key, interface_type))

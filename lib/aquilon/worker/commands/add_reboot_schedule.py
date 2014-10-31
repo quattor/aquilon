@@ -16,8 +16,8 @@
 # limitations under the License.
 
 import re
-
 from dateutil.parser import parse
+from six import iteritems
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import RebootSchedule
@@ -60,7 +60,7 @@ class CommandAddRebootSchedule(BrokerCommand):
     def _validate_args(self, **arguments):
         """ Validate arguments used for adding a new record"""
         regexps = CommandAddRebootSchedule.REGEXP_VALIDATION
-        for key, validator in regexps.iteritems():
+        for key, validator in iteritems(regexps):
             if key in arguments:
                 data = str(arguments.get(key))
                 if not validator.match(data):

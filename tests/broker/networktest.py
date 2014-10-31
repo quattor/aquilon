@@ -18,7 +18,8 @@
 
 import os
 from csv import DictReader
-import cPickle as pickle
+import six.moves.cPickle as pickle
+from six import itervalues
 from ipaddr import IPv4Network, IPv4Address
 
 # Ranges for dynamic network allocation. The idea is to allocate a /N network
@@ -115,12 +116,12 @@ class DummyNetworks(object):
                 if row["name"] in self.networks:
                     raise KeyError("Duplicate name '%s' in %s" % (row["name"],
                                                                   filename))
-                for existing in self.networks.itervalues():
+                for existing in itervalues(self.networks):
                     if n in existing or existing in n:
                         raise ValueError("Overlapping networks %s and %s in %s"
                                          % (existing, n, filename))
 
-                for dynrange in SUBNET_RANGE.itervalues():
+                for dynrange in itervalues(SUBNET_RANGE):
                     if n in dynrange or dynrange in n:
                         raise ValueError("Range %s is reserved for dynamic "
                                          "allocation" % dynrange)
@@ -140,7 +141,7 @@ class DummyNetworks(object):
         return self.networks[name]
 
     def __iter__(self):
-        for net in self.networks.itervalues():
+        for net in itervalues(self.networks):
             yield net
 
     def allocate_network(self, testsuite, name, prefixlength, network_type,

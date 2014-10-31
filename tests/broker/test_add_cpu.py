@@ -52,6 +52,10 @@ class TestAddCpu(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Cpu: intel utcpu_1500 1500 MHz", command)
 
+    def testaddunusedcpu(self):
+        # A CPU model that should not be used by any machines
+        self.noouttest(["add_cpu", "--cpu", "unused", "--vendor", "utvendor",
+                        "--speed", "3000"])
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddCpu)

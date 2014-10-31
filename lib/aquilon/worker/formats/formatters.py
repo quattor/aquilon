@@ -17,7 +17,7 @@
 """Base classes for formatting objects."""
 
 import csv
-from cStringIO import StringIO
+from six.moves import cStringIO as StringIO
 import sys
 from operator import attrgetter
 

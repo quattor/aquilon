@@ -27,7 +27,7 @@ import logging
 import os
 import re
 import signal
-from cStringIO import StringIO
+from six.moves import cStringIO as StringIO
 from itertools import islice
 from tempfile import mkstemp
 
@@ -134,7 +134,7 @@ def force_mac(label, value):
 
     try:
         return MACAddress(value)
-    except ValueError, err:
+    except ValueError as err:
         raise ArgumentError("Expected a MAC address for %s: %s" % (label, err))
 
 

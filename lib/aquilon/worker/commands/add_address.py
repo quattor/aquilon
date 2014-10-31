@@ -14,21 +14,43 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+"""Contains the logic for `aq add address`."""
 
+from aquilon.aqdb.model.network_environment import get_net_dns_env
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.commands.add_address_dns_environment \
-    import CommandAddAddressDNSEnvironment
+from aquilon.worker.dbwrappers.dns import (grab_address,
+                                           set_reverse_ptr)
+from aquilon.worker.dbwrappers.interface import generate_ip
+from aquilon.worker.processes import DSDBRunner
 
 
-class CommandAddAddress(CommandAddAddressDNSEnvironment):
+class CommandAddAddress(BrokerCommand):
 
     required_parameters = ["fqdn"]
 
-    def render(self, dns_environment, network_environment, **kwargs):
+    def render(self, session, logger, fqdn, dns_environment,
+               network_environment, reverse_ptr, comments, **arguments):
+        dbnet_env, dbdns_env = get_net_dns_env(session, network_environment,
+                                               dns_environment)
+        audit_results = []
+        ip = generate_ip(session, logger, compel=True, dbinterface=None,
+                         network_environment=dbnet_env,
+                         audit_results=audit_results, **arguments)
+        # TODO: add allow_multi=True
+        dbdns_rec, newly_created = grab_address(session, fqdn, ip, dbnet_env,
+                                                dbdns_env, comments=comments,
+                                                preclude=True)
 
-        if not (network_environment or dns_environment):
-            dns_environment = self.config.get("site", "default_dns_environment")
-        return CommandAddAddressDNSEnvironment.render(self,
-                                                      dns_environment=dns_environment,
-                                                      network_environment=network_environment,
-                                                      **kwargs)
+        if reverse_ptr:
+            set_reverse_ptr(session, logger, dbdns_rec, reverse_ptr)
+
+        session.flush()
+
+        if dbdns_rec.fqdn.dns_environment.is_default:
+            dsdb_runner = DSDBRunner(logger=logger)
+            dsdb_runner.add_host_details(dbdns_rec.fqdn, ip, comments=comments)
+            dsdb_runner.commit_or_rollback("Could not add address to DSDB")
+
+        for name, value in audit_results:
+            self.audit_result(session, name, value, **arguments)
+        return

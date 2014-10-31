@@ -4307,8 +4307,7 @@
 	    <option name="comments" type="string">Comments</option>
 	    <option name="reverse_ptr" type="string">Where the reverse record should point to</option>
 	</optgroup>
-	<transport method="post" path="address_default/%(fqdn)s"/>
-	<transport method="post" trigger="dns_environment" path="address/%(dns_environment)s/%(fqdn)s"/>
+	<transport method="post" path="address/%(fqdn)s"/>
     </command>
 
     <command name="del_address">
@@ -4321,8 +4320,7 @@
 	    <option name="dns_environment" type="string">The name of the environment the address is in (defaults to 'internal')</option>
 	    <option name="network_environment" type="string">Name of the environment</option>
 	</optgroup>
-	<transport method="delete" path="address_default"/>
-	<transport method="delete" trigger="dns_environment" path="address/%(dns_environment)s"/>
+	<transport method="delete" path="address"/>
     </command>
 
     <command name="show_address">
@@ -4334,8 +4332,7 @@
 	    <option name="dns_environment" type="string">The name of the environment the address is in (defaults to 'internal')</option>
 	    <option name="network_environment" type="string">Name of the environment</option>
 	</optgroup>
-	<transport method="get" path="address_default/%(fqdn)s"/>
-	<transport method="get" trigger="dns_environment" path="address/%(dns_environment)s/%(fqdn)s"/>
+	<transport method="get" path="address/%(fqdn)s"/>
     </command>
 
     <command name="update_address">

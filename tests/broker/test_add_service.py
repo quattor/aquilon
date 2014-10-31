@@ -161,6 +161,19 @@ class TestAddService(TestBrokerCommand):
         self.noouttest(["add", "service", "--service", service,
                         "--instance", "unittest"])
 
+    def test_160_add_camelcase(self):
+        self.noouttest(["add_service", "--service", "CaMeLcAsE"])
+        self.check_plenary_exists("servicedata", "camelcase", "config")
+        self.check_plenary_gone("servicedata", "CaMeLcAsE", "config")
+
+    def test_161_add_camelcase_instance(self):
+        self.noouttest(["add_service", "--service", "camelcase",
+                        "--instance", "CaMeLcAsE"])
+        self.check_plenary_exists("servicedata", "camelcase", "camelcase", "config")
+        self.check_plenary_gone("servicedata", "camelcase", "CaMeLcAsE", "config")
+        self.check_plenary_gone("servicedata", "CaMeLcAsE", "camelcase", "config")
+        self.check_plenary_gone("servicedata", "CaMeLcAsE", "CaMeLcAsE", "config")
+
     def test_200_add_duplicate_service(self):
         command = "add service --service afs"
         out = self.badrequesttest(command.split(" "))

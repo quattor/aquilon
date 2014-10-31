@@ -178,8 +178,8 @@ def build_index(config, session, logger=LOGGER):
         compress = 'gzip'
     write_file(index_path, "\n".join(content), logger=logger, compress=compress)
 
-    logger.debug("Updated %s, %d objects modified", index_path,
-                 len(modified_index))
+    logger.info("Updated %s, %d objects modified", index_path,
+                len(modified_index))
 
     for filename in cleanup:
         logger.debug("Cleaning up %s" % filename)
@@ -270,7 +270,7 @@ def trigger_notifications(config, logger=LOGGER, loglevel=logging.INFO):
         logger.error("Failed to connect to notification socket: %s", err)
 
     try:
-        sd.send("update")
+        sd.send("update\n")
     except socket.error as err:
         logger.error("Failed to send to notification socket: %s", err)
 

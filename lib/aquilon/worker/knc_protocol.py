@@ -17,6 +17,7 @@
 """Wrappers for using knc with the stock twisted server implementations."""
 
 import logging
+from six import iteritems
 from twisted.web import http
 
 from aquilon.exceptions_ import ArgumentError
@@ -71,7 +72,7 @@ class KNCHTTPChannel(http.HTTPChannel):
             elif line == 'END':
                 # Check that we have now recieved all of the metadata
                 # that we are expecting...
-                for field, checker in self.__KNC_fields.iteritems():
+                for field, checker in iteritems(self.__KNC_fields):
                     if field not in self.kncinfo:
                         raise KNCProtocolException('Missing %s' % field)
                 self.__need_knc_data = 0

@@ -127,7 +127,7 @@ def process_input_xml(file, commands, default_options):
 
 
 def check_errors(commands, default_options):
-    for cmd in sorted(commands.keys()):
+    for cmd in sorted(commands):
         for option, flags in sorted(commands[cmd].items()):
             if "docbook" not in flags and "body" in flags:
                 error("Command %s, option %s is documented but not mentioned "
@@ -155,7 +155,7 @@ def check_errors(commands, default_options):
                 error("Command %s, option %s has an argument in the "
                       "description, but not in the synopsis." % (cmd, option))
 
-            if "inputxml_has_arg" in flags and not "synopsis_has_arg" in flags \
+            if "inputxml_has_arg" in flags and "synopsis_has_arg" not in flags \
                and option not in default_options:
                 error("Command %s, option %s has an argument in input.xml, "
                       "but not in the documentation." % (cmd, option))

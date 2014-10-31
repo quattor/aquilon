@@ -45,7 +45,7 @@ class CommandShowActiveCommands(BrokerCommand):
             # normally gets...
             loglevel = INFO
         # These could be streamed like show_request...
-        for auditid in sorted(catalog.status_by_auditid.keys(), key=int):
+        for auditid in sorted(catalog.status_by_auditid, key=int):
             status = catalog.get_request_status(auditid=auditid)
             if not status:
                 continue

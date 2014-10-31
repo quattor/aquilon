@@ -139,7 +139,8 @@ def discover_network_device(session, logger, config, dbnetdev, dryrun):
                 q = session.query(ARecord)
                 q = q.filter_by(network=addr.network)
                 q = q.filter_by(ip=addr.ip)
-                map(delete_dns_record, q.all())
+                for dns_rec in q:
+                    delete_dns_record(dns_rec)
 
     def del_interface(iface):
         """ Helper for deleting an interface, honouring dryrun """

@@ -18,6 +18,7 @@
 
 import os
 from csv import DictReader
+from six import iteritems
 
 
 class VerifyGrnsMixin(object):
@@ -48,7 +49,7 @@ class VerifyGrnsMixin(object):
                               command)
 
         check_grn_for_key(grn_list, "system/eon_ids")
-        for (target, target_list) in grn_maps.iteritems():
+        for (target, target_list) in iteritems(grn_maps):
             check_grn_for_key(target_list, "system/eon_id_maps/%s" % target)
 
     def check_personality_grns(self, out, grn_list, grn_maps, command):
@@ -60,5 +61,5 @@ class VerifyGrnsMixin(object):
                                   command)
 
         check_grn_for_key(grn_list, "/system/eon_ids")
-        for (target, target_list) in grn_maps.iteritems():
+        for target, target_list in iteritems(grn_maps):
             check_grn_for_key(target_list, "/system/eon_id_maps/%s" % target)

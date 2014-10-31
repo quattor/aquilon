@@ -68,7 +68,7 @@ class PlenaryNetworkDeviceInfo(StructurePlenary):
             if interface.mac:
                 ifinfo["hwaddr"] = interface.mac
             interfaces[interface.name] = ifinfo
-        for name in sorted(interfaces.keys()):
+        for name in sorted(interfaces):
             # This is ugly. We can't blindly escape, because that would affect
             # e.g. VLAN interfaces. Calling unescape() for a non-escaped VLAN
             # interface name is safe though, so we can hopefully get rid of this

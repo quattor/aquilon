@@ -95,7 +95,7 @@ class QIPRefresh(object):
             self.aqnetworks[item.ip] = item
 
         # Save how many networks we had initially
-        self.networks_before = len(self.aqnetworks.keys())
+        self.networks_before = len(self.aqnetworks)
 
     def error(self, msg):
         self.logger.error(msg)
@@ -255,7 +255,8 @@ class QIPRefresh(object):
         for router in del_routers:
             self.logger.client_info("Removing router {0:s} from "
                                     "{1:l}".format(router.ip, dbnetwork))
-            map(delete_dns_record, router.dns_records)
+            for dns_rec in router.dns_records:
+                delete_dns_record(dns_rec)
             dbnetwork.routers.remove(router)
 
         for ip in new_rtrs - old_rtrs:
@@ -296,7 +297,8 @@ class QIPRefresh(object):
             for router in dbnetwork.routers:
                 self.logger.client_info("Removing router {0:s} from "
                                         "{1:l}".format(router.ip, dbnetwork))
-                map(delete_dns_record, router.dns_records)
+                for dns_rec in router.dns_records:
+                    delete_dns_record(dns_rec)
             dbnetwork.routers = []
             self.logger.client_info("Deleting network {0:a}".format(dbnetwork))
             self.session.delete(dbnetwork)
@@ -345,7 +347,7 @@ class QIPRefresh(object):
 
         # Check/update network attributes that do not affect other objects. Do
         # this in a single transaction, even in incremental mode
-        ips = self.aqnetworks.keys()
+        ips = list(self.aqnetworks.keys())[:]
         for ip in ips:
             if ip not in qipnetworks:
                 # "Forget" networks not inside the requested building to prevent

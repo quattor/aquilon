@@ -137,6 +137,12 @@ class TestAddModel(TestBrokerCommand):
                    "--diskcontroller=sata", "--disksize=0", "--nics=0"]
         self.noouttest(command)
 
+    def test_181_add_unusedcpu(self):
+        self.noouttest(["add_model", "--model", "unusedcpu", "--vendor", "utvendor",
+                        "--type", "rackmount", "--cpuname", "unused",
+                        "--cpunum", 0, "--memory", 0, "--disktype", "local",
+                        "--diskcontroller", "sata", "--disksize", 0, "--nics", 0])
+
     def test_200_search_type_switch(self):
         command = "search model --machine_type switch"
         out = self.commandtest(command.split(" "))

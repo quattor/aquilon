@@ -16,9 +16,9 @@
 # limitations under the License.
 """Contains the logic for `aq flush`."""
 
-
 from collections import defaultdict
 import gc
+from six import iteritems
 
 from sqlalchemy.orm import (joinedload, subqueryload, lazyload, contains_eager,
                             undefer)
@@ -113,7 +113,7 @@ class CommandFlush(BrokerCommand):
         for addr in q:
             addrs_by_iface[addr.interface_id].append(addr)
 
-        for iface_id, iface in interfaces_by_id.iteritems():
+        for iface_id, iface in iteritems(interfaces_by_id):
             set_committed_value(iface, "assignments",
                                 addrs_by_iface.get(iface_id, None))
             set_committed_value(iface, "slaves",

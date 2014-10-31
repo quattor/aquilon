@@ -30,8 +30,11 @@ from brokertest import TestBrokerCommand
 class TestDelMachine(TestBrokerCommand):
 
     def testdelut3c5n10(self):
+        self.check_plenary_exists("machine", "americas", "ut", "ut3",
+                                  "ut3c5n10")
         command = "del machine --machine ut3c5n10"
         self.noouttest(command.split(" "))
+        self.check_plenary_gone("machine", "americas", "ut", "ut3", "ut3c5n10")
 
     def testverifydelut3c5n10(self):
         command = "show machine --machine ut3c5n10"

@@ -183,14 +183,18 @@ def integrate_logging(config):
     rootlog = logging.getLogger()
     rootlog.addHandler(BridgeLogHandler())
     rootlog.setLevel(logging.NOTSET)
-    for logname in config.options("logging"):
-        logvalue = config.get("logging", logname)
-        # Complain if a config value is out of whack...
-        if logvalue not in logging._levelNames:
+    for logname, level in config.items("logging"):
+        try:
+            # TODO: Drop the translation from str to int when moving the min.
+            # Python version to 2.7
+            levelno = logging._levelNames[level]
+            logging.getLogger(logname).setLevel(levelno)
+        except (ValueError, KeyError):
+            # Complain if a config value is out of whack...
             # ...but ignore it if it is a default (accidently
             # polluting the section).
-            if logname not in config.defaults():
-                log.msg("For config [logging]/%s, "
-                        "%s not a valid log level." % (logname, logvalue))
-            continue
-        logging.getLogger(logname).setLevel(logging._levelNames[logvalue])
+            if logname in config.defaults():
+                continue
+
+            rootlog.error("Error: [logging] contains an invalid level (%s) "
+                          "for %s.", level, logname)

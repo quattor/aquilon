@@ -45,6 +45,9 @@ class TestDelCpu(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchclean(out, "Cpu: intel utcpu_1500 1500 MHz", command)
 
+    def testdelunused(self):
+        self.noouttest(["del_cpu", "--cpu", "unused", "--vendor", "utvendor",
+                        "--speed", "3000"])
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelCpu)

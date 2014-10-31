@@ -114,11 +114,11 @@ def ref_constraint_name(local_table, remote_table=None, column=None, suffix=None
 
 def multi_col_constraint_name(table_name, columns, suffix):
     col_names = []
-    for name in columns.keys():
+    for name, col in columns.items():
         # If the column looks like a reference to a remote table, then use the
         # name of the remote object. It's not really a table name in all cases,
         # but that's not a problem.
-        if name.endswith('_id') and columns[name].foreign_keys:
+        if name.endswith('_id') and col.foreign_keys:
             col_names.append(name[:-3])
         else:
             col_names.append(name)
@@ -129,10 +129,10 @@ def multi_col_constraint_name(table_name, columns, suffix):
 
     # Try to abbreviate column names
     col_names = []
-    for name in columns.keys():
+    for name, col in columns.items():
         # If the column looks like a reference to another table, then try to
         # abbreviate the remote table name.
-        if name.endswith('_id') and columns[name].foreign_keys:
+        if name.endswith('_id') and col.foreign_keys:
             rtable = name[:-3]
             col_names.append(_table_abbrev.get(rtable, rtable))
         else:
@@ -149,7 +149,7 @@ def multi_col_constraint_name(table_name, columns, suffix):
         return name
 
     raise AquilonError("Cannot abbreviate (%s, %s)" %
-                       (table_name, ", ".join(columns.keys())))
+                       (table_name, ", ".join(list(columns.keys))))
 
 
 def rename_non_null_check_constraints(db):

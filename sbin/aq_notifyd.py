@@ -18,16 +18,15 @@
 
 import sys
 import os
-import socket
 import logging
 from logging.handlers import WatchedFileHandler
 from threading import Thread, Condition
-import signal
-import errno
 
 # -- begin path_setup --
 import ms.version
 ms.version.addpkg('argparse', '1.2.1')
+ms.version.addpkg('twisted', '12.0.0')
+ms.version.addpkg('zope.interface', '3.6.1')
 
 BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
 LIBDIR = os.path.join(BINDIR, "..", "lib")
@@ -37,15 +36,39 @@ if LIBDIR not in sys.path:
 # -- end path_setup --
 
 import argparse
+from twisted.internet.protocol import Factory
+from twisted.protocols.basic import LineReceiver
+from twisted.internet import reactor
 
-import aquilon.aqdb.depends  # pylit: disable=W0611
+import aquilon.aqdb.depends  # pylint: disable=W0611
 
 from aquilon.config import Config
 from aquilon.exceptions_ import AquilonError
 
-do_exit = False
 worker_thread = None
-worker_notify = None
+worker_notify = Condition()
+
+
+class NotifyProtocol(LineReceiver):
+    delimiter = "\n"
+
+    def lineReceived(self, line):
+        logger = logging.getLogger("aq_notifyd")
+
+        if line == "update":
+            # Wake up the worker thread
+            worker_notify.acquire()
+            worker_thread.update_queued = True
+            worker_notify.notify()
+            worker_notify.release()
+
+            logger.debug("Update queued")
+        else:
+            logger.warn("Unknown command: %s", line)
+
+
+class NotifyFactory(Factory):
+    protocol = NotifyProtocol
 
 
 def update_index_and_notify(config, logger, db):
@@ -63,103 +86,71 @@ def update_index_and_notify(config, logger, db):
 
 class UpdaterThread(Thread):
 
-    def __init__(self, config, logger, db, cond):
+    def __init__(self, config, logger, db):
         self.config = config
         self.logger = logger
         self.db = db
-        self.cond = cond
         self.update_queued = False
+        self.do_exit = False
         super(UpdaterThread, self).__init__()
 
     def run(self):
-        while True:
-            self.cond.acquire()
-            if not self.update_queued:
-                self.cond.wait(10.0)
+        self.logger.info("Worker thread starting")
 
-            if do_exit:
+        while True:
+            worker_notify.acquire()
+            if not self.update_queued:
+                worker_notify.wait(10.0)
+
+            if self.do_exit:
                 break
             if not self.update_queued:
                 continue
 
             self.update_queued = False
-            self.cond.release()
+            worker_notify.release()
 
             self.logger.debug("Worker woken up")
             update_index_and_notify(self.config, self.logger, self.db)
 
-            self.cond.acquire()
+            worker_notify.acquire()
 
-        self.cond.release()
+        worker_notify.release()
         self.logger.info("Worker thread finished")
 
 
-def run_loop(config, logger, db):
-    global worker_thread, worker_notify
+def stop_worker():
+    # Tell the worker thread to stop, and wait until it does
+    worker_notify.acquire()
+    worker_thread.do_exit = True
+    worker_notify.notify()
+    worker_notify.release()
+    worker_thread.join()
 
-    listener = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+
+def start_worker(config, logger, db):
+    global worker_thread
+
+    worker_thread = UpdaterThread(config, logger, db)
+    worker_thread.start()
+
+
+def run_loop(config, logger, db):
     sockname = os.path.join(config.get("broker", "sockdir"), "notifysock")
     if os.path.exists(sockname):
         logger.info("Removing old socket " + sockname)
         try:
             os.unlink(sockname)
         except OSError as err:
-            logger.error("Failed to remove %s: %s" % (sockname, err))
-    listener.bind(sockname)
-    listener.listen(5)
-    logger.info("Listening on " + sockname)
+            logger.error("Failed to remove %s: %s", sockname, err)
 
-    worker_notify = Condition()
-
-    worker_thread = UpdaterThread(config, logger, db, worker_notify)
-    worker_thread.start()
-
-    while not do_exit:
-        try:
-            sd, addr = listener.accept()
-        except IOError as err:
-            if err.errno == errno.EINTR:
-                continue
-            raise
-
-        logger.debug("Connection received")
-
-        command = None
-        try:
-            command = sd.recv(128)
-        except IOError:
-            pass
-        sd.close()
-
-        command = command.strip()
-        logger.debug("Command: '%s'" % command)
-
-        if command == "update":
-            # Wake up the worker thread
-            worker_notify.acquire()
-            worker_thread.update_queued = True
-            worker_notify.notify()
-            worker_notify.release()
-
-            logger.debug("Update queued")
+    reactor.listenUNIX(sockname, NotifyFactory())
+    reactor.addSystemEventTrigger("before", "startup", start_worker, config,
+                                  logger, db)
+    reactor.addSystemEventTrigger("after", "shutdown", stop_worker)
+    reactor.run()
 
     logger.info("Shutting down")
-    listener.close()
-    os.unlink(sockname)
-    worker_thread.join()
-
-
-def exit_handler(signum, frame):
-    global do_exit
-    do_exit = True
-
-    logger = logging.getLogger("aq_notifyd")
-    logger.info("Received signal %d", signum)
-
-    # Wake up the worker thread
-    worker_notify.acquire()
-    worker_notify.notify()
-    worker_notify.release()
 
 
 def main():
@@ -195,9 +186,13 @@ def main():
 
     # Apply configured log settings
     for logname, level in config.items("logging"):
-        if level not in logging._levelNames:
-            continue
-        logging.getLogger(logname).setLevel(logging._levelNames[level])
+        try:
+            # TODO: Drop the translation from str to int when moving the min.
+            # Python version to 2.7
+            levelno = logging._levelNames[level]
+            logging.getLogger(logname).setLevel(levelno)
+        except (ValueError, KeyError):
+            pass
 
     logger = logging.getLogger("aq_notifyd")
 
@@ -210,9 +205,6 @@ def main():
     if opts.one_shot:
         update_index_and_notify(config, logger, db)
     else:
-        signal.signal(signal.SIGTERM, exit_handler)
-        signal.signal(signal.SIGINT, exit_handler)
-
         run_loop(config, logger, db)
 
 

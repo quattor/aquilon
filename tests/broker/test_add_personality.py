@@ -40,6 +40,7 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
         self.noouttest(command)
         self.verifycatforpersonality("aquilon", "utpersonality/dev", True,
                                      "dev", grn=GRN)
+
     def testaddnetinfrapersonality(self):
         command = ["add_personality", "--personality=generic",
                    "--archetype=netinfra", "--eon_id=10",
@@ -319,6 +320,15 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
         out = self.badrequesttest(command)
         self.matchoutput(out, "Personality inventory, archetype aquilon "
                          "already exists.", command)
+
+    def testaddcamelcase(self):
+        self.noouttest(["add_personality", "--personality", "CaMeLcAsE",
+                        "--host_environment=dev", "--archetype", "aquilon",
+                        "--eon_id=2"])
+        self.check_plenary_exists("aquilon", "personality", "camelcase",
+                                  "config")
+        self.check_plenary_gone("aquilon", "personality", "CaMeLcAsE", "config",
+                                directory_gone=True)
 
     def testaddesxserver(self):
         command = ["add_personality", "--cluster_required", "--eon_id=2",

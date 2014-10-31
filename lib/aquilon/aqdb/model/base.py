@@ -374,7 +374,7 @@ class Base(object):
         value = value.strip().lower()
         mapper = inspect(cls)
         if value not in mapper.polymorphic_map:
-            valid_values = ", ".join(sorted(mapper.polymorphic_map.keys()))
+            valid_values = ", ".join(sorted(mapper.polymorphic_map))
             raise error("%s '%s'. The valid values are: %s." %
                         (msg, value, valid_values))
         return mapper.polymorphic_map[value].class_
@@ -385,7 +385,7 @@ class Base(object):
             return
 
         # Sorting is for beautification only
-        names = sorted(inspect(cls).polymorphic_map.keys())
+        names = sorted(inspect(cls).polymorphic_map)
         stmt = table.insert()
         for name in names:
             try:

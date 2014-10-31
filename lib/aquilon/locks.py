@@ -15,11 +15,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 import logging
 from threading import Condition
 from collections import defaultdict
 from itertools import chain
+from six import iteritems, itervalues
 
 from aquilon.exceptions_ import InternalError
 
@@ -102,10 +102,10 @@ class LockKey(object):
     def __str__(self):
         exc_items = []
         shared_items = []
-        for name, items in self.exclusive.iteritems():
+        for name, items in iteritems(self.exclusive):
             exc_items.extend(["%s/%s" % (name, item) for item in items])
 
-        for name, items in self.shared.iteritems():
+        for name, items in iteritems(self.shared):
             shared_items.extend(["%s/%s" % (name, item) for item in items])
 
         exc_items.sort()
@@ -132,8 +132,8 @@ class LockKey(object):
         # underlying DB connection from the wrong thread, which in turn leads to
         # very "interesting" errors. So make sure only strings are used.
         if state == "initialized":
-            for keys in chain(self.exclusive.itervalues(),
-                              self.shared.itervalues()):
+            for keys in chain(itervalues(self.exclusive),
+                              itervalues(self.shared)):
                 for key in keys:
                     if not isinstance(key, basestring):
                         raise ValueError("Lock key contains %r" % key)
@@ -151,7 +151,7 @@ class LockKey(object):
 
         blockers = set()
 
-        for name, items in self.exclusive.iteritems():
+        for name, items in iteritems(self.exclusive):
             if name in key.exclusive:
                 blockers.update(["%s/%s" % (name, item)
                                  for item in items & key.exclusive[name]])
@@ -159,7 +159,7 @@ class LockKey(object):
                 blockers.update(["%s/%s" % (name, item)
                                  for item in items & key.shared[name]])
 
-        for name, items in self.shared.iteritems():
+        for name, items in iteritems(self.shared):
             if name in key.exclusive and items & key.exclusive[name]:
                 blockers.update(["%s/%s" % (name, item)
                                  for item in items & key.exclusive[name]])
@@ -182,14 +182,14 @@ class LockKey(object):
         merged = LockKey(logger=logger, loglevel=loglevel,
                          lock_queue=lock_queue)
         for key in keylist:
-            for name, items in key.exclusive.iteritems():
+            for name, items in iteritems(key.exclusive):
                 merged.exclusive[name] |= items
-            for name, items in key.shared.iteritems():
+            for name, items in iteritems(key.shared):
                 merged.shared[name] |= items
 
         # Normalization. If something is locked exclusively, then it makes no
         # sense to have the same item in the shared set as well.
-        for name, items in merged.shared.iteritems():
+        for name, items in iteritems(merged.shared):
             if name in merged.exclusive:
                 items -= merged.exclusive[name]
         return merged

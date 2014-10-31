@@ -18,7 +18,7 @@
 
 from csv import DictReader, Error as CSVError
 from json import JSONDecoder
-from StringIO import StringIO
+from six.moves import cStringIO as StringIO
 from datetime import datetime
 
 from aquilon.exceptions_ import (AquilonError, ArgumentError, InternalError,

@@ -15,6 +15,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from six import iteritems
+
 from aquilon.aqdb.model import ParamDefinition, Archetype
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.parameter import search_path_in_personas
@@ -37,4 +39,4 @@ class CommandSearchParameter(BrokerCommand):
             return
 
         params = search_path_in_personas(session, path, db_paramdef.holder)
-        return SimpleParameterList(params.iteritems())
+        return SimpleParameterList(iteritems(params))

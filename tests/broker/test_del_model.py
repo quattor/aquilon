@@ -75,6 +75,10 @@ class TestDelModel(TestBrokerCommand):
         self.noouttest(["del_model", "--vendor", "utvendor",
                         "--model", "utrackmount"])
 
+    def test_165_del_unusedcpu(self):
+        self.noouttest(["del_model", "--vendor", "utvendor",
+                        "--model", "unusedcpu"])
+
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelModel)
     unittest.TextTestRunner(verbosity=2).run(suite)

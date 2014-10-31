@@ -15,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from httplib import HTTPResponse, HTTPConnection
+from six.moves.http_client import HTTPResponse, HTTPConnection
 
 
 class ChunkedHTTPResponse(HTTPResponse):

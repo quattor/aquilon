@@ -48,6 +48,10 @@ class VirtualSwitch(Base):
 
     __table_args__ = {'info': {'unique_fields': ['name']}}
 
+    def __init__(self, name=None, **kwargs):
+        name = AqStr.normalize(name)
+        super(VirtualSwitch, self).__init__(name=name, **kwargs)
+
 
 class __VSwitchClusterAssignment(Base):
     __tablename__ = _VSC

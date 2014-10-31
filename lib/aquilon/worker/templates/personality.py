@@ -17,6 +17,7 @@
 
 import logging
 from collections import defaultdict
+from six import iteritems
 
 from sqlalchemy.inspection import inspect
 from sqlalchemy.orm import object_session
@@ -192,7 +193,7 @@ class PlenaryPersonalityBase(Plenary):
         for grn_rec in self.dbobj._grns:
             eon_id_map[grn_rec.target].add(grn_rec.grn.eon_id)
 
-        for target, eon_id_set in eon_id_map.iteritems():
+        for target, eon_id_set in iteritems(eon_id_map):
             for eon_id in sorted(eon_id_set):
                 pan_append(lines, "/system/eon_id_maps/%s" % target, eon_id)
 

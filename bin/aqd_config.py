@@ -23,11 +23,11 @@ from __future__ import print_function
 
 import sys
 import os
-from ConfigParser import NoSectionError, NoOptionError
 
 # -- begin path_setup --
 import ms.version
 ms.version.addpkg('argparse', '1.2.1')
+ms.version.addpkg('six', '1.7.3')
 
 BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
 LIBDIR = os.path.join(BINDIR, "..", "lib")
@@ -36,6 +36,7 @@ if LIBDIR not in sys.path:
     sys.path.append(LIBDIR)
 # -- end path_setup --
 
+from six.moves.configparser import NoSectionError, NoOptionError
 import argparse
 
 from aquilon.config import Config
@@ -46,7 +47,7 @@ def list_all(config):
     for name, value in config.items("DEFAULT"):
         defaults[name] = value
 
-    for name in sorted(defaults.keys()):
+    for name in sorted(defaults):
         value = config.get("DEFAULT", name)
         print("DEFAULT.%s=%s" % (name, value))
 

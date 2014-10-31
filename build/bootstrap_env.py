@@ -15,6 +15,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 import os
 import virtualenv
 import textwrap
@@ -45,7 +46,6 @@ def gather_deps(dir):
 def bootstrap(dependencies, dir):
     extra = textwrap.dedent("""
     import os, subprocess
-    import urllib
     from tempfile import mkdtemp
     def extend_parser(optparse_parser):
         pass
@@ -54,7 +54,7 @@ def bootstrap(dependencies, dir):
     def after_install(options, home_dir):
         easy_install = join(home_dir, 'bin', 'easy_install')
     """)
-    for package in sorted(dependencies.keys()):
+    for package in sorted(dependencies):
         if package == 'protobuf':
             continue
         extra += "    if subprocess.call([easy_install, '%s==%s']) != 0:\n" % (
@@ -62,8 +62,6 @@ def bootstrap(dependencies, dir):
         extra += "        subprocess.call([easy_install, '%s'])\n" % package
     extra += "    subprocess.call([easy_install, '.'], cwd='%s')\n" % (
         os.path.join(dir, 'bootstrap_ms'))
-    extra += "    subprocess.call([easy_install, '.'], cwd='%s')\n" % (
-        os.path.join(dir, 'bootstrap_Sybase'))
     print virtualenv.create_bootstrap_script(extra)
 
 

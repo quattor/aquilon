@@ -16,10 +16,10 @@
 # limitations under the License.
 """Pub/sub mechanism for status messages."""
 
-
 from threading import Lock
 from collections import deque
 from logging import DEBUG
+from six import iteritems
 
 from twisted.internet import reactor
 
@@ -89,7 +89,7 @@ class RequestStatus(object):
             user = 'nobody'
 
         massaged = []
-        for key, value in kwargs.iteritems():
+        for key, value in iteritems(kwargs):
             # Skip ignored and empty arguments
             if key in ignored:
                 continue

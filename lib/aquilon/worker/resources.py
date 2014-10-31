@@ -46,6 +46,7 @@ ToDo:
 """
 
 import re
+from six import iteritems
 from xml.etree import ElementTree
 
 from twisted.web import server, resource, http
@@ -122,7 +123,7 @@ class ResponsePage(resource.Resource):
 
     def extractArguments(self, request):
         result = {}
-        for arg, values in request.args.iteritems():
+        for arg, values in iteritems(request.args):
             if not isinstance(values, list):  # pragma: no cover
                 raise ProtocolError("Expected list for %s, got '%s'"
                                     % (arg, str(values)))

@@ -16,7 +16,6 @@
 # limitations under the License.
 """Contains the logic for `aq del srv record`."""
 
-
 from aquilon.exceptions_ import NotFoundException
 from aquilon.aqdb.model import SrvRecord, Fqdn
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
@@ -58,7 +57,8 @@ class CommandDelSrvRecord(BrokerCommand):
                                     (SrvRecord._get_class_label(), service,
                                      protocol, dns_domain, msg))
 
-        map(delete_dns_record, rrs)
+        for dns_rec in rrs:
+            delete_dns_record(dns_rec)
         session.flush()
 
         return

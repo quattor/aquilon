@@ -19,8 +19,9 @@
 
 import os
 import gzip
-from cStringIO import StringIO
-from cPickle import Pickler, Unpickler
+from six.moves import cStringIO as StringIO
+from six.moves.cPickle import Pickler, Unpickler
+from six import itervalues
 from shutil import rmtree
 from subprocess import Popen, PIPE
 from datetime import datetime
@@ -89,7 +90,7 @@ class TestCompile(VerifyNotificationsMixin, TestBrokerCommand):
                             "host %s missing from profiles-info" % host)
 
         # Make sure some time is spent before we check if the mtime was updated
-        last_update = max(stashed_mtimes.itervalues())
+        last_update = max(itervalues(stashed_mtimes))
         if time.time() < last_update + 1:
             time.sleep(1)
 

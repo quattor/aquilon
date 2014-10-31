@@ -71,6 +71,10 @@ class Personality(Base):
     __table_args__ = (UniqueConstraint(archetype_id, name),
                       {'info': {'unique_fields': ['name', 'archetype']}},)
 
+    def __init__(self, name=None, **kwargs):
+        name = AqStr.normalize(name)
+        super(Personality, self).__init__(name=name, **kwargs)
+
     @property
     def is_cluster(self):
         return self.archetype.cluster_type is not None
@@ -83,7 +87,7 @@ class Personality(Base):
     def validate_env_in_name(cls, name, host_environment):
         env_mapper = inspect(HostEnvironment)
         persona_env = re.search("[-/](" +
-                                "|".join(env_mapper.polymorphic_map.keys()) +
+                                "|".join(env_mapper.polymorphic_map) +
                                 ")$", name, re.IGNORECASE)
         if persona_env and (persona_env.group(1) != host_environment):
             raise ArgumentError("Environment value in personality name '{0}' "

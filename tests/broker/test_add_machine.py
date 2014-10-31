@@ -143,6 +143,8 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
     def test_131_add_np3c5n5(self):
         self.create_machine_hs21("np3C5N5", chassis="np3c5", slot=5,
                                  eth0_mac=self.net["vpls"].usable[2].mac)
+        self.check_plenary_exists("machine", "americas", "np", "np3", "np3c5n5")
+        self.check_plenary_gone("machine", "americas", "np", "np3", "np3C5N5")
 
     def test_135_verify_normalization(self):
         command = "show machine --machine NP3c5N5"

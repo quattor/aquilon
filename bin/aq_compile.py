@@ -31,6 +31,7 @@ from subprocess import call
 # -- begin path_setup --
 import ms.version
 ms.version.addpkg('argparse', '1.2.1')
+ms.version.addpkg('six', '1.7.3')
 
 BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
 LIBDIR = os.path.join(BINDIR, "..", "lib")

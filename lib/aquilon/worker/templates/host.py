@@ -18,6 +18,7 @@
 
 import logging
 from operator import attrgetter
+from six import iteritems
 
 from sqlalchemy.inspection import inspect
 
@@ -218,7 +219,7 @@ class PlenaryHostData(StructurePlenary):
         pan_assign(lines, "hardware", StructureTemplate(path))
 
         lines.append("")
-        for name in sorted(interfaces.keys()):
+        for name in sorted(interfaces):
             # This is ugly. We can't blindly escape, because that would affect
             # e.g. VLAN interfaces. Calling unescape() for a non-escaped VLAN
             # interface name is safe though, so we can hopefully get rid of this
@@ -249,7 +250,7 @@ class PlenaryHostData(StructurePlenary):
         # process grns
         eon_id_map = self.dbobj.effective_grns
 
-        for target, eon_id_set in eon_id_map.iteritems():
+        for target, eon_id_set in iteritems(eon_id_map):
             eon_id_list = sorted(grn.eon_id for grn in eon_id_set)
             pan_assign(lines, "system/eon_id_maps/%s" % target, eon_id_list)
 

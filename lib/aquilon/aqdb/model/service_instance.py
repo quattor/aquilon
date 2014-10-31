@@ -18,6 +18,7 @@
 
 from collections import defaultdict
 from datetime import datetime
+from six import itervalues
 from sys import maxsize
 
 from sqlalchemy import (Column, Integer, Sequence, String, DateTime,
@@ -54,6 +55,10 @@ class ServiceInstance(Base):
 
     __table_args__ = (UniqueConstraint(service_id, name),
                       {'info': {'unique_fields': ['name', 'service']}},)
+
+    def __init__(self, name=None, **kwargs):
+        name = AqStr.normalize(name)
+        super(ServiceInstance, self).__init__(name=name, **kwargs)
 
     def __format__(self, format_spec):
         instance = "%s/%s" % (self.service.name, self.name)
@@ -100,7 +105,7 @@ class ServiceInstance(Base):
         for name, max_host in q.all():
             clusters[name] = max_host
 
-        adjusted_count = sum(clusters.itervalues())
+        adjusted_count = sum(itervalues(clusters))
 
         q = session.query(Host)
         q = q.filter(Host.services_used.contains(self))
