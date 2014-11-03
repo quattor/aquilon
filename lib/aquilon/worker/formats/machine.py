@@ -83,6 +83,8 @@ class MachineFormatter(HardwareEntityFormatter):
             if d.bus_address:
                 details.append(indent + "    Controller Bus Address: %s" %
                                d.bus_address)
+            if isinstance(d, VirtualDisk) and d.iops_limit:
+                details.append(indent + "    IOPS Limit: %s" % d.iops_limit)
             if d.comments:
                 details.append(indent + "    Comments: %s" % d.comments)
 

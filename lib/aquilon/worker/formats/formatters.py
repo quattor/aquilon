@@ -260,6 +260,8 @@ class ObjectFormatter(object):
                         disk_msg.snapshotable = disk.snapshotable
                     self.add_resource_data(disk_msg.backing_store,
                                            disk.backing_store)
+                    if disk.iops_limit is not None:
+                        disk_msg.iops_limit = disk.iops_limit
 
         def add_iface_data(int_msg, iface):
             if iface.mac:

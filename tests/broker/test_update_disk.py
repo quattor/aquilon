@@ -106,6 +106,16 @@ class TestUpdateDisk(TestBrokerCommand):
                    "--snapshot"]
         self.noouttest(command)
 
+    def test_111_update_iops(self):
+        command = ["update_disk", "--machine", "evm10", "--disk", "sda",
+                   "--iops_limit", "15"]
+        out = self.internalerrortest(command)
+        self.matchoutput(out, "The value of iops_limit must be 16 or greater.", command)
+
+        command = ["update_disk", "--machine", "evm10", "--disk", "sda",
+                   "--iops_limit", "30"]
+        self.statustest(command)
+
     def test_112_verify_utecl5_share(self):
         command = ["search_machine", "--share", "utecl5_share"]
         out = self.commandtest(command)
@@ -166,6 +176,7 @@ class TestUpdateDisk(TestBrokerCommand):
                          "Disk: sda 45 GB scsi (virtual_disk stored on "
                          "share utecl5_share) [boot]",
                          command)
+        self.matchoutput(out, "IOPS Limit: 30", command)
         self.matchclean(out, "disk_update_test", command)
 
     def test_114_cat_evm10(self):
@@ -270,6 +281,12 @@ class TestUpdateDisk(TestBrokerCommand):
         out = self.badrequesttest(command)
         self.matchoutput(out, "Snapshot capability can only be set for "
                          "virtual disks.", command)
+
+    def test_300_iops(self):
+        command = ["update_disk", "--machine", "ut3c1n3", "--disk", "sda",
+                   "--iops_limit", "100"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "IOPS limit can only be set for virtual disks.", command)
 
     def test_300_share_localdisk(self):
         command = ["update_disk", "--machine", "ut3c1n3", "--disk", "sda",

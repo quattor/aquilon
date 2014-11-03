@@ -386,7 +386,7 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
                             "--disk", "sda", "--controller", "scsi",
                             "--snapshot", "--share", "test_v2_share",
                             "--size", "34", "--resourcegroup", "utmc8as1",
-                            "--address", "0:0"])
+                            "--address", "0:0", "--iops_limit", "20"])
 
     def test_305_search_machine_by_share(self):
         command = ["search_machine", "--share=test_v2_share"]
@@ -401,6 +401,7 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
         self.searchoutput(out, r"Disk: sda 34 GB scsi "
                           r"\(virtual_disk stored on share test_v2_share\) "
                           r"\[boot, snapshot\]$", command)
+        self.searchoutput(out, r"IOPS Limit: 20", command)
 
         command = ["show_machine", "--machine", "utpgm0", "--format", "proto"]
         out = self.commandtest(command)
@@ -417,6 +418,7 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
         self.assertEqual(machine.disks[0].snapshotable, True)
         self.assertEqual(machine.disks[0].backing_store.name, "test_v2_share")
         self.assertEqual(machine.disks[0].backing_store.type, "share")
+        self.assertEqual(machine.disks[0].iops_limit, 20)
 
         command = ["show_share", "--resourcegroup=utmc8as1",
                    "--metacluster=utmc8", "--share=test_v2_share"]
