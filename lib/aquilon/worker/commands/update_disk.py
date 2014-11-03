@@ -85,7 +85,7 @@ class CommandUpdateDisk(BrokerCommand):
 
         if iops_limit is not None:
             if not isinstance(dbdisk, VirtualDisk):
-                raise ArgumentError("Iops limit can only be set for virtual disks.")
+                raise ArgumentError("IOPS limit can only be set for virtual disks.")
             dbdisk.iops_limit = iops_limit
 
         if share or filesystem:

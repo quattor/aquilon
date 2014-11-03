@@ -219,7 +219,7 @@
 		</term>
 		<listitem>
 		    <para>
-			Change the iops limit on the virtual disk.
+			Change the IOPS limit on the virtual disk.
 		    </para>
 		</listitem>
 	    </varlistentry>

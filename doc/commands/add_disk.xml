@@ -213,7 +213,7 @@
 		</term>
 		<listitem>
 		    <para>
-			The iops limit on virtual disk.
+			The IOPS limit on virtual disk.
 		    </para>
 		</listitem>
 	    </varlistentry>
