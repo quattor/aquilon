@@ -20,7 +20,6 @@ from collections import defaultdict
 from six import iteritems
 
 from sqlalchemy.inspection import inspect
-from sqlalchemy.orm import object_session
 
 from aquilon.aqdb.model import Personality, Parameter
 from aquilon.worker.locks import NoLockKey, PlenaryKey
@@ -29,8 +28,7 @@ from aquilon.worker.templates.base import (Plenary, StructurePlenary,
 from aquilon.worker.templates.panutils import (pan_include, pan_variable,
                                                pan_assign, pan_append,
                                                pan_include_if_exists)
-from aquilon.worker.dbwrappers.parameter import (validate_value,
-                                                 get_parameters)
+from aquilon.worker.dbwrappers.parameter import validate_value
 
 LOGGER = logging.getLogger(__name__)
 
@@ -39,18 +37,14 @@ def string_to_list(data):
     return [item.strip() for item in data.split(',') if item]
 
 
-def get_parameters_by_feature(dbfeaturelink):
+def get_parameters_by_feature(dbpersonality, dbfeaturelink):
     ret = {}
     paramdef_holder = dbfeaturelink.feature.paramdef_holder
-    if not paramdef_holder:
+    if not paramdef_holder or not dbpersonality.paramholder:
         return ret
 
-    param_definitions = paramdef_holder.param_definitions
-    parameters = get_parameters(object_session(dbfeaturelink),
-                                personality=dbfeaturelink.personality)
-
-    for param_def in param_definitions:
-        value = None
+    parameters = dbpersonality.paramholder.parameters
+    for param_def in paramdef_holder.param_definitions:
         for param in parameters:
             value = param.get_feature_path(dbfeaturelink,
                                            param_def.path, compel=False)
@@ -64,9 +58,8 @@ def get_parameters_by_feature(dbfeaturelink):
     return ret
 
 
-def helper_feature_template(featuretemplate, dbfeaturelink, lines):
-
-    params = get_parameters_by_feature(dbfeaturelink)
+def helper_feature_template(dbpersonality, featuretemplate, dbfeaturelink, lines):
+    params = get_parameters_by_feature(dbpersonality, dbfeaturelink)
     for path in params:
         pan_assign(lines, "/system/%s/%s" % (dbfeaturelink.cfg_path_escaped, path), params[path])
     lines.append(featuretemplate.format_raw(dbfeaturelink))
@@ -97,16 +90,16 @@ def get_path_under_top(path, value, ret):
 
 def get_parameters_by_tmpl(dbpersonality):
     ret = defaultdict(dict)
-
-    session = object_session(dbpersonality)
     paramdef_holder = dbpersonality.archetype.paramdef_holder
     if not paramdef_holder:
         return ret
 
-    param_definitions = paramdef_holder.param_definitions
-    parameters = get_parameters(session, personality=dbpersonality)
+    if dbpersonality.paramholder:
+        parameters = dbpersonality.paramholder.parameters
+    else:
+        parameters = []
 
-    for param_def in param_definitions:
+    for param_def in paramdef_holder.param_definitions:
         value = None
         for param in parameters:
             value = param.get_path(param_def.path, compel=False)
@@ -147,14 +140,14 @@ class PlenaryPersonality(PlenaryCollection):
 
         self.dbobj = dbpersonality
 
-        self.plenaries.append(PlenaryPersonalityBase.get_plenary(dbpersonality))
-        self.plenaries.append(PlenaryPersonalityPreFeature.get_plenary(dbpersonality))
-        self.plenaries.append(PlenaryPersonalityPostFeature.get_plenary(dbpersonality))
+        self.append(PlenaryPersonalityBase.get_plenary(dbpersonality))
+        self.append(PlenaryPersonalityPreFeature.get_plenary(dbpersonality))
+        self.append(PlenaryPersonalityPostFeature.get_plenary(dbpersonality))
 
         # mulitple structure templates for parameters
         for path, values in get_parameters_by_tmpl(dbpersonality).items():
             ptmpl = ParameterTemplate(dbpersonality, path, values)
-            self.plenaries.append(PlenaryPersonalityParameter.get_plenary(ptmpl))
+            self.append(PlenaryPersonalityParameter.get_plenary(ptmpl))
 
         self.name = dbpersonality.name
 
@@ -190,7 +183,7 @@ class PlenaryPersonalityBase(Plenary):
         eon_id_map = defaultdict(set)
 
         # own == pers level
-        for grn_rec in self.dbobj._grns:
+        for grn_rec in self.dbobj.grns:
             eon_id_map[grn_rec.target].add(grn_rec.grn.eon_id)
 
         for target, eon_id_set in iteritems(eon_id_map):
@@ -267,7 +260,7 @@ class PlenaryPersonalityPreFeature(Plenary):
 
         # hardware features should precede host features
         for link in model_feat + interface_feat + pre_feat:
-            helper_feature_template(feat_tmpl, link, lines)
+            helper_feature_template(self.dbobj, feat_tmpl, link, lines)
 
 
 class PlenaryPersonalityPostFeature(Plenary):
@@ -285,7 +278,7 @@ class PlenaryPersonalityPostFeature(Plenary):
         feat_tmpl = FeatureTemplate()
         for link in self.dbobj.archetype.features + self.dbobj.features:
             if link.feature.post_personality:
-                helper_feature_template(feat_tmpl, link, lines)
+                helper_feature_template(self.dbobj, feat_tmpl, link, lines)
 
 
 class PlenaryPersonalityParameter(StructurePlenary):

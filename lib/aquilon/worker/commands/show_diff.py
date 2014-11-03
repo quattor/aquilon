@@ -15,13 +15,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from collections import defaultdict
 
-from aquilon.worker.formats.parameter import DiffData
 from aquilon.aqdb.model import (Parameter, Personality,
                                 PersonalityServiceMap)
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.dbwrappers.parameter import get_parameters
-from collections import defaultdict
+from aquilon.worker.formats.parameter import DiffData
 
 
 class CommandShowDiff(BrokerCommand):
@@ -53,10 +52,9 @@ class CommandShowDiff(BrokerCommand):
         # parameters
         params = {}
 
-        dbpersona_parameters = get_parameters(session, personality=dbpersona)
-
-        for param in dbpersona_parameters:
-            params.update(Parameter.flatten(param.value))
+        if dbpersona.paramholder:
+            for param in dbpersona.paramholder.parameters:
+                params.update(Parameter.flatten(param.value))
         ret["Parameters"][dtype] = params
 
         # process features
@@ -75,7 +73,7 @@ class CommandShowDiff(BrokerCommand):
         ret["ServiceMap"][dtype] = smaps
 
         # grns
-        grns = dict((grn, True) for grn in dbpersona.grns)
+        grns = dict((grn_rec.grn, True) for grn_rec in dbpersona.grns)
         ret["Grns"][dtype] = grns
 
         # options

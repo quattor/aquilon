@@ -37,9 +37,9 @@ class PlenaryService(PlenaryCollection):
         super(PlenaryService, self).__init__(logger=logger)
 
         self.dbobj = dbservice
-        self.plenaries.append(PlenaryServiceToplevel.get_plenary(dbservice))
-        self.plenaries.append(PlenaryServiceClientDefault.get_plenary(dbservice))
-        self.plenaries.append(PlenaryServiceServerDefault.get_plenary(dbservice))
+        self.append(PlenaryServiceToplevel.get_plenary(dbservice))
+        self.append(PlenaryServiceClientDefault.get_plenary(dbservice))
+        self.append(PlenaryServiceServerDefault.get_plenary(dbservice))
 
 
 Plenary.handlers[Service] = PlenaryService
@@ -124,10 +124,10 @@ class PlenaryServiceInstance(SIHelperMixin, PlenaryCollection):
         super(PlenaryServiceInstance, self).__init__(logger=logger)
         self.dbobj = dbinstance
 
-        self.plenaries.append(PlenaryServiceInstanceToplevel.get_plenary(dbinstance))
-        self.plenaries.append(PlenaryServiceInstanceClientDefault.get_plenary(dbinstance))
-        self.plenaries.append(PlenaryServiceInstanceServer.get_plenary(dbinstance))
-        self.plenaries.append(PlenaryServiceInstanceServerDefault.get_plenary(dbinstance))
+        self.append(PlenaryServiceInstanceToplevel.get_plenary(dbinstance))
+        self.append(PlenaryServiceInstanceClientDefault.get_plenary(dbinstance))
+        self.append(PlenaryServiceInstanceServer.get_plenary(dbinstance))
+        self.append(PlenaryServiceInstanceServerDefault.get_plenary(dbinstance))
 
 Plenary.handlers[ServiceInstance] = PlenaryServiceInstance
 

@@ -31,6 +31,10 @@ class TestDelFeature(TestBrokerCommand):
         command = ["del", "feature", "--feature", "pre_host", "--type", "host"]
         self.noouttest(command)
 
+    def test_100_del_host_pre_param(self):
+        command = ["del", "feature", "--feature", "pre_host_param", "--type", "host"]
+        self.noouttest(command)
+
     def test_100_del_host_post(self):
         command = ["del", "feature", "--feature", "post_host", "--type", "host"]
         self.noouttest(command)

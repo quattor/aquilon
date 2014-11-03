@@ -16,11 +16,11 @@
 # limitations under the License.
 """Parameter formatter."""
 
-
 import json
+
+from aquilon.aqdb.model import Parameter
 from aquilon.worker.formats.formatters import ObjectFormatter
 from aquilon.worker.formats.list import ListFormatter
-from aquilon.aqdb.model import Parameter
 
 
 class ParameterFormatter(ObjectFormatter):
@@ -31,40 +31,24 @@ class ParameterFormatter(ObjectFormatter):
             details.append(indent + "{0}: {1}".format(k, str_value))
         return "\n".join(details)
 
-    def format_proto(self, param, container):
-        param_definitions = None
-        paramdef_holder = None
-        dbpersonality = param.holder.personality
-        paramdef_holder = dbpersonality.archetype.paramdef_holder
-
-        if paramdef_holder:
-            param_definitions = paramdef_holder.param_definitions
-            for param_def in param_definitions:
-                value = param.get_path(param_def.path, compel=False)
-                if value:
-                    skeleton = container.parameters.add()
-                    skeleton.path = str(param_def.path)
-                    if param_def.value_type == 'json':
-                        skeleton.value = json.dumps(value)
-                    else:
-                        skeleton.value = str(value)
-        for link in dbpersonality.features:
-            if not link.feature.paramdef_holder:
-                continue
-            param_definitions = link.feature.paramdef_holder.param_definitions
-            for param_def in param_definitions:
-                value = param.get_feature_path(link, param_def.path,
-                                               compel=False)
-                if value:
-                    skeleton = container.parameters.add()
-                    skeleton.path = str(Parameter.feature_path(link, param_def.path))
-                    if param_def.value_type == 'json':
-                        skeleton.value = json.dumps(value)
-                    else:
-                        skeleton.value = str(value)
-
-
 ObjectFormatter.handlers[Parameter] = ParameterFormatter()
+
+
+class PersonalityProtoParameter(list):
+    pass
+
+
+class ParameterProtoFormatter(ListFormatter):
+    def format_proto(self, params, container):
+        for path, param_def, value in params:
+            skeleton = container.parameters.add()
+            skeleton.path = str(path)
+            if param_def.value_type == 'json':
+                skeleton.value = json.dumps(value)
+            else:
+                skeleton.value = str(value)
+
+ObjectFormatter.handlers[PersonalityProtoParameter] = ParameterProtoFormatter()
 
 
 class DiffData(dict):

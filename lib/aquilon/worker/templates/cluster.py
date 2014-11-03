@@ -44,9 +44,9 @@ class PlenaryCluster(PlenaryCollection):
         super(PlenaryCluster, self).__init__(logger=logger)
 
         self.dbobj = dbcluster
-        self.plenaries.append(PlenaryClusterObject.get_plenary(dbcluster))
-        self.plenaries.append(PlenaryClusterData.get_plenary(dbcluster))
-        self.plenaries.append(PlenaryClusterClient.get_plenary(dbcluster))
+        self.append(PlenaryClusterObject.get_plenary(dbcluster))
+        self.append(PlenaryClusterData.get_plenary(dbcluster))
+        self.append(PlenaryClusterClient.get_plenary(dbcluster))
 
 
 Plenary.handlers[Cluster] = PlenaryCluster

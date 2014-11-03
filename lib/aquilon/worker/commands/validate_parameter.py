@@ -15,10 +15,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.dbwrappers.parameter import validate_personality_config
 from aquilon.exceptions_ import ArgumentError
+from aquilon.aqdb.model import Personality
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.dbwrappers.parameter import validate_personality_config
 
 
 class CommandValidateParameter(BrokerCommand):
@@ -26,9 +26,10 @@ class CommandValidateParameter(BrokerCommand):
     required_parameters = ["personality"]
 
     def render(self, session, logger, personality, archetype, **arguments):
+        dbpersonality = Personality.get_unique(session, name=personality,
+                                               archetype=archetype, compel=True)
 
-        errors = validate_personality_config(session, archetype, personality)
-
+        errors = validate_personality_config(dbpersonality)
         if errors:
             raise ArgumentError("Following required parameters have not been "
                                 "specified:\n" +

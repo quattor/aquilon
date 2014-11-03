@@ -22,11 +22,12 @@ from aquilon.worker.commands.map_grn import CommandMapGrn
 
 class CommandUnMapGrn(CommandMapGrn):
 
-    def _update_dbobj(self, obj, target, grn):
-        # Don't allow removing a non-existing tuple
-        for grn_rec in obj._grns:
-            if (obj == grn_rec.mapped_object and
-                grn == grn_rec.grn and
-                target == grn_rec.target):
-                obj._grns.remove(grn_rec)
-                return
+    def _update_dbobj(self, obj, target, grn, cls):
+        found = None
+        for grn_rec in obj.grns:
+            if grn == grn_rec.grn and target == grn_rec.target:
+                found = grn_rec
+                break
+
+        if found:
+            obj.grns.remove(found)

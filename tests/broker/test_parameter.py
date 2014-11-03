@@ -61,7 +61,8 @@ class TestParameter(TestBrokerCommand):
 
         err = self.notfoundtest(SHOW_CMD)
         self.matchoutput(err,
-                         "No parameters found for personality %s." % PERSONALITY, SHOW_CMD)
+                         "No parameters found for personality %s/%s." %
+                         (ARCHETYPE, PERSONALITY), SHOW_CMD)
 
     def test_100_add_re_path(self):
         action = "testaction"

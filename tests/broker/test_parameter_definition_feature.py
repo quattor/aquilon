@@ -247,6 +247,11 @@ class TestParameterDefinitionFeature(TestBrokerCommand):
         cmd = ["del_personality", "--archetype=aquilon", "--personality=paramtest"]
         self.noouttest(cmd)
 
+    def test_160_add_pre_host_param(self):
+        cmd = ["add_parameter_definition", "--feature", "pre_host_param", "--type=host",
+               "--path=testpath", "--value_type=string", "--description=blaah"]
+        self.noouttest(cmd)
+
     def test_200_del(self):
         for path in ['testpath', 'testdefault', 'testint', 'testlist',
                      'testjson', 'testboolean', 'testfloat', 'test_rebuild_required']:

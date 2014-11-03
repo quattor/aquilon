@@ -22,7 +22,6 @@ from sqlalchemy import (Column, Integer, Boolean, DateTime, Sequence, String,
                         ForeignKey, UniqueConstraint, PrimaryKeyConstraint)
 from sqlalchemy.orm import relation, backref, deferred
 from sqlalchemy.inspection import inspect
-from sqlalchemy.ext.associationproxy import association_proxy
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.column_types.aqstr import AqStr
@@ -33,10 +32,6 @@ _TN = 'personality'
 _PGN = 'personality_grn_map'
 _PRU = 'personality_rootuser'
 _PRNG = 'personality_rootnetgroup'
-
-
-def _pgm_creator(tuple):
-    return PersonalityGrnMap(personality=tuple[0], grn=tuple[1], target=tuple[2])
 
 
 class Personality(Base):
@@ -64,7 +59,6 @@ class Personality(Base):
 
     archetype = relation(Archetype, innerjoin=True)
     owner_grn = relation(Grn, innerjoin=True)
-    grns = association_proxy('_grns', 'grn', creator=_pgm_creator)
 
     host_environment = relation(HostEnvironment, innerjoin=True)
 
@@ -105,20 +99,12 @@ class PersonalityGrnMap(Base):
 
     target = Column(AqStr(32), nullable=False)
 
-    personality = relation(Personality, innerjoin=True,
-                           backref=backref('_grns',
-                                           cascade='all, delete-orphan',
-                                           passive_deletes=True))
-
-    grn = relation(Grn, lazy=False, innerjoin=True,
-                   backref=backref('_personalities', passive_deletes=True))
+    grn = relation(Grn, lazy=False, innerjoin=True)
 
     __table_args__ = (PrimaryKeyConstraint(personality_id, eon_id, target),)
 
-    # used by unmap
-    @property
-    def mapped_object(self):
-        return self.personality
+Personality.grns = relation(PersonalityGrnMap, cascade='all, delete-orphan',
+                            passive_deletes=True)
 
 
 class __PersonalityRootUser(Base):

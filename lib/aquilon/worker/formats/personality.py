@@ -34,7 +34,7 @@ class PersonalityFormatter(ObjectFormatter):
                        .format(personality.host_environment))
         details.append(indent + "  Owned by {0:c}: {0.grn}"
                        .format(personality.owner_grn))
-        for grn_rec in sorted(personality._grns, key=attrgetter("target", "eon_id")):
+        for grn_rec in sorted(personality.grns, key=attrgetter("target", "eon_id")):
             details.append(indent + "  Used by {0.grn:c}: {0.grn.grn} "
                            "[target: {0.target}]".format(grn_rec))
 
@@ -112,7 +112,7 @@ class PersonalityFormatter(ObjectFormatter):
 
         skeleton.config_override = personality.config_override
         skeleton.cluster_required = personality.cluster_required
-        for grn_rec in sorted(personality._grns,
+        for grn_rec in sorted(personality.grns,
                               key=attrgetter("target", "eon_id")):
             map = skeleton.eonid_maps.add()
             map.target = grn_rec.target
