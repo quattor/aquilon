@@ -17,7 +17,7 @@
 """Contains the logic for `aq search network`."""
 
 from sqlalchemy.sql import exists
-from sqlalchemy.orm import undefer
+from sqlalchemy.orm import undefer, joinedload, subqueryload
 
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.exceptions_ import ArgumentError
@@ -114,7 +114,13 @@ class CommandSearchNetwork(BrokerCommand):
                          .where(Network.id == DynamicStub.network_id))
         q = q.order_by(Network.ip)
         if fullinfo or style != 'raw':
-            q = q.options(undefer('comments'))
+            q = q.options([undefer('comments'),
+                           joinedload('location'),
+                           subqueryload("assignments"),
+                           joinedload("assignments.interface"),
+                           joinedload("assignments.interface.hardware_entity"),
+                           joinedload("assignments.dns_records"),
+                           subqueryload("dynamic_stubs")])
             return q.all()
         return StringAttributeList(q.all(),
                                    lambda n: "%s/%s" % (n.ip, n.cidr))
