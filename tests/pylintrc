@@ -30,6 +30,7 @@ good-names = e,i,ip,j,k,pg,q
 [TYPECHECK]
 
 generated-members = __mapper__, __table__
+ignored-modules = six, six.moves, _MovedItems
 ignored-classes = RelationshipProperty, KeyedTuple
 
 [REPORTS]
