@@ -43,8 +43,9 @@ class ModelFormatter(ObjectFormatter):
             details.append(self.redirect_raw(model.machine_specs, indent + "  "))
         return "\n".join(details)
 
-    def format_proto(self, model, container):
-        skeleton = container.models.add()
-        self.add_model_data(skeleton, model)
+    def fill_proto(self, model, skeleton):
+        skeleton.name = str(model.name)
+        skeleton.vendor = str(model.vendor.name)
+        skeleton.model_type = str(model.model_type)
 
 ObjectFormatter.handlers[Model] = ModelFormatter()

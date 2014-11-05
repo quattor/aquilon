@@ -32,8 +32,7 @@ from six.moves import range
 
 from broker.brokertest import TestBrokerCommand
 
-
-#2011-06-03 18:33:39+0000 wesleyhe@is1.morgan - aq search_audit --command='all'
+# 2011-06-03 18:33:39+0000 wesleyhe@is1.morgan - aq search_audit --command='all'
 AUDIT_RAW_RE = re.compile(r'^(?P<datetime>(?P<date>'
                           r'(?P<year>\d{4,})-(?P<month>\d{2})-(?P<day>\d{2})) '
                           r'(?P<hour>\d{2}):(?P<minute>\d{2}):'
@@ -42,6 +41,11 @@ AUDIT_RAW_RE = re.compile(r'^(?P<datetime>(?P<date>'
                           r'(?:@(?P<realm>[\w\.]+))?) '
                           r'(?P<returncode>\d+|-) '
                           r'aq (?P<command>\w+)\b(?P<args>.*)$', re.M)
+
+# Global variables used to pass data between testcases
+start_time = None
+end_time = None
+midpoint = None
 
 
 class TestAudit(TestBrokerCommand):
@@ -59,7 +63,7 @@ class TestAudit(TestBrokerCommand):
 
     def test_101_get_end(self):
         """ get the newest row of xtn table, calcluate midpoint """
-        global start_time, midpoint, end_time
+        global midpoint, end_time
         command = ["search_audit", "--command", "all", "--limit", "1"]
         out = self.commandtest(command)
         m = self.searchoutput(out, AUDIT_RAW_RE, command)
@@ -129,15 +133,13 @@ class TestAudit(TestBrokerCommand):
 
     def test_220_cmd_protobuf(self):
         """ test search audit by command with protobuf output """
-        global start_time
         # Need to truncate time to seconds.
         my_start_time = datetime.fromtimestamp(int(time()), tz=tzutc())
         command = ["search_audit", "--username", self.user,
                    "--command", "search_audit", "--format", "proto"]
-        out = self.commandtest(command)
+        outlist = self.protobuftest(command)
         my_end_time = datetime.fromtimestamp(int(time()), tz=tzutc())
-        outlist = self.parse_audit_msg(out)
-        for tran in outlist.transactions:
+        for tran in outlist:
             tran_start_time = datetime.fromtimestamp(tran.start_time,
                                                      tz=tzutc())
             tran_end_time = datetime.fromtimestamp(tran.end_time, tz=tzutc())
@@ -171,12 +173,9 @@ class TestAudit(TestBrokerCommand):
 
     def test_225_cmd_protobuf(self):
         """Test protobuf output for nobody and writeable."""
-        global start_time, end_time
         command = ["search_audit", "--username=nobody", "--limit=1",
                    "--format=proto"]
-        out = self.commandtest(command)
-        outlist = self.parse_audit_msg(out, 1)
-        tran = outlist.transactions[0]
+        tran = self.protobuftest(command, expect=1)[0]
         tran_start_time = datetime.fromtimestamp(tran.start_time, tz=tzutc())
         tran_end_time = datetime.fromtimestamp(tran.end_time, tz=tzutc())
         self.assertTrue(tran_start_time >= start_time)
@@ -202,9 +201,8 @@ class TestAudit(TestBrokerCommand):
         cmd2 = ["search_audit", "--username", self.user,
                 "--command", "search_audit", "--format", "proto",
                 "--limit", "2"]
-        out = self.commandtest(cmd2)
-        outlist = self.parse_audit_msg(out)
-        unit = outlist.transactions[1]
+        outlist = self.protobuftest(cmd2)
+        unit = outlist[1]
         start = unit.start_time
         end = unit.end_time
 
@@ -232,41 +230,38 @@ class TestAudit(TestBrokerCommand):
 
     def test_300_before(self):
         """ test audit 'before' functionality """
-        global midpoint
         command = ["search_audit", "--before", midpoint]
         out = self.commandtest(command)
         self.searchoutput(out, self.user, command)
         for line in out.splitlines():
             m = self.searchoutput(line, AUDIT_RAW_RE, command)
-            start_time = parse(m.group('datetime'))
-            self.assertTrue(start_time < midpoint)
+            start = parse(m.group('datetime'))
+            self.assertTrue(start < midpoint)
 
     def test_310_after(self):
         """ test audit 'after' functionality """
-        global midpoint
         command = ["search_audit", "--after", midpoint]
         out = self.commandtest(command)
         self.searchoutput(out, self.user, command)
         for line in out.splitlines():
             m = self.searchoutput(line, AUDIT_RAW_RE, command)
-            start_time = parse(m.group('datetime'))
+            start = parse(m.group('datetime'))
             # This should be strictly '>' for Oracle, where we do not store
             # microseconds.  However, sqlite *does* store microseconds.
             # Since we do not print the microseconds, this test can't know
             # if the result is strictly after the request time.
-            self.assertTrue(start_time >= midpoint,
-                            "Expected start_time %s >= midpoint %s in '%s'" %
-                            (start_time, midpoint, line))
+            self.assertTrue(start >= midpoint,
+                            "Expected start %s >= midpoint %s in '%s'" %
+                            (start, midpoint, line))
 
     def test_320_before_and_after(self):
         """ test audit 'before' and 'after' simultaneously """
-        global midpoint, end_time
         command = ["search_audit", "--before", end_time, "--after", midpoint]
         out = self.commandtest(command)
         self.searchoutput(out, self.user, command)
         for line in out.splitlines():
             m = self.searchoutput(line, AUDIT_RAW_RE, command)
-            start_time = parse(m.group('datetime'))
+            start = parse(m.group('datetime'))
             # This should be strictly '>' for Oracle, where we do not store
             # microseconds.  However, sqlite *does* store microseconds.
             # Since we do not print the microseconds, this test can't know
@@ -274,10 +269,10 @@ class TestAudit(TestBrokerCommand):
             # We do not have the same problem with end_time, since all
             # the boundary is 0 microseconds.  (Any recorded time before
             # the second we ask for will be a different second.)
-            self.assertTrue(start_time >= midpoint,
-                            "Expected start_time %s >= midpoint %s in '%s'" %
-                            (start_time, midpoint, line))
-            self.assertTrue(start_time < end_time)
+            self.assertTrue(start >= midpoint,
+                            "Expected start %s >= midpoint %s in '%s'" %
+                            (start, midpoint, line))
+            self.assertTrue(start < end_time)
 
     def test_400_missing_timezone(self):
         """Test behavior of a missing timezone."""
@@ -376,8 +371,7 @@ class TestAudit(TestBrokerCommand):
         # number of replies
         cmd = ["search_audit", "--command", "all", "--limit", 1000, "--format",
                "proto"]
-        out = self.commandtest(cmd)
-        outlist = self.parse_audit_msg(out, 1000)
+        self.protobuftest(cmd, expect=1000)
 
     def test_810_max_limit(self):
         """ test the maximum is checked properly """
@@ -391,11 +385,11 @@ class TestAudit(TestBrokerCommand):
         hosts = ["no_such_host.ut.com", "   ", "another_non_host.ut.com"]
         scratchfile = self.writescratch("audit_hostlist", "\n".join(hosts))
         cmd1 = ["reconfigure", "--list", scratchfile]
-        err = self.badrequesttest(cmd1)
+        self.badrequesttest(cmd1)
 
         cmd2 = ["search_audit", "--command", "reconfigure", "--limit", "1",
                 "--format", "proto"]
-        out = self.parse_audit_msg(self.commandtest(cmd2)).transactions[0]
+        out = self.protobuftest(cmd2, expect=1)[0]
         values = [arg.value for arg in out.arguments]
         self.assertEqual(len(values), 2,
                          "Expected 2 arguments and got %s" % values)
@@ -411,12 +405,12 @@ class TestAudit(TestBrokerCommand):
                  for i in range(1000, 2000)]
         scratchfile = self.writescratch("audit_hostlist", "\n".join(hosts))
         cmd1 = ["reconfigure", "--list", scratchfile]
-        err = self.badrequesttest(cmd1)
+        self.badrequesttest(cmd1)
 
         cmd2 = ["search_audit", "--command", "reconfigure",
                 "--keyword", "list-test-1999.aqd-unittest.ms.com",
                 "--format", "proto"]
-        out = self.parse_audit_msg(self.commandtest(cmd2)).transactions[0]
+        out = self.protobuftest(cmd2)[0]
         values = [arg.value for arg in out.arguments]
         self.assertEqual(len(values), len(hosts),
                          "Expected %d arguments and got %d" %
@@ -424,7 +418,6 @@ class TestAudit(TestBrokerCommand):
         for host in hosts:
             self.assertTrue(host in values,
                             "'%s' missing from '%s'" % (host, values))
-
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAudit)

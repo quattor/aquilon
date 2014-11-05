@@ -44,19 +44,19 @@ class TestGet(TestBrokerCommand):
 
     def testgetchangetest1domain(self):
         (out, err) = self.successtest(["get", "--sandbox", "changetest1"])
-        self.failUnless(os.path.exists(os.path.join(self.sandboxdir,
+        self.assertTrue(os.path.exists(os.path.join(self.sandboxdir,
                                                     "changetest1")))
 
     def testgetchangetest2domain(self):
         (out, err) = self.successtest(["get",
                                        "--sandbox=%s/changetest2" % self.user])
-        self.failUnless(os.path.exists(os.path.join(self.sandboxdir,
+        self.assertTrue(os.path.exists(os.path.join(self.sandboxdir,
                                                     "changetest2")))
 
     def testgetutsandbox(self):
         # This one was added with --noget
         self.successtest(["get", "--sandbox", "utsandbox"])
-        self.failUnless(os.path.exists(os.path.join(self.sandboxdir,
+        self.assertTrue(os.path.exists(os.path.join(self.sandboxdir,
                                                     "utsandbox")))
 
     def testgetunauthorized(self):

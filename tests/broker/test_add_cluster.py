@@ -42,8 +42,8 @@ class TestAddCluster(PersonalityTestMixin, TestBrokerCommand):
     def test_11_verify_utvcs1(self):
         command = "show cluster --cluster utvcs1"
         out = self.commandtest(command.split(" "))
-        default_max = self.config.get("archetype_hacluster",
-                                      "max_members_default")
+        default_max = self.config.getint("archetype_hacluster",
+                                         "max_members_default")
         self.matchoutput(out, "High Availability Cluster: utvcs1", command)
         self.matchoutput(out, "Building: ut", command)
         self.matchoutput(out, "Max members: %s" % default_max, command)
@@ -148,13 +148,23 @@ class TestAddCluster(PersonalityTestMixin, TestBrokerCommand):
 
     def test_43_verifyshowutgrid1proto(self):
         command = ["show_cluster", "--cluster=utgrid1", "--format=proto"]
-        out = self.commandtest(command)
-        clus_list = self.parse_clusters_msg(out, 1)
-        cluster = clus_list.clusters[0]
-        self.failUnlessEqual(cluster.name, "utgrid1")
-        self.failUnlessEqual(cluster.personality.archetype.name, "gridcluster")
-        self.failUnlessEqual(cluster.threshold, 5)
-        self.failUnlessEqual(cluster.threshold_is_percent, True)
+        cluster = self.protobuftest(command, expect=1)[0]
+        self.assertEqual(cluster.name, "utgrid1")
+        self.assertEqual(cluster.personality.archetype.name, "gridcluster")
+        self.assertEqual(cluster.personality.archetype.cluster_type, "compute")
+        self.assertEqual(cluster.domain.name, 'unittest')
+        self.assertEqual(cluster.domain.type, cluster.domain.DOMAIN)
+        self.assertEqual(cluster.sandbox_author, "")
+        self.assertEqual(cluster.status, "build")
+        self.assertEqual(cluster.location_constraint.name, "ut")
+        self.assertEqual(cluster.location_constraint.location_type, "building")
+        self.assertEqual(cluster.max_members, 0)
+        self.assertEqual(cluster.threshold, 5)
+        self.assertEqual(cluster.threshold_is_percent, True)
+        self.assertEqual(cluster.maint_threshold, 6)
+        self.assertEqual(cluster.maint_threshold_is_percent, True)
+        self.assertEqual(cluster.metacluster, "")
+        self.assertEqual(cluster.virtual_switch.name, "")
 
     def test_44_verifyshowall(self):
         command = "show cluster --all"
@@ -195,22 +205,19 @@ class TestAddCluster(PersonalityTestMixin, TestBrokerCommand):
 
     def test_52_verifycatutstorage1(self):
         # This archetype is non-compilable and should not have a plenary!
-        #self.verify_cat_clusters("utstorage1", "storagecluster",
-        #                         "metrocluster", "storage")
+        # self.verify_cat_clusters("utstorage1", "storagecluster",
+        #                          "metrocluster", "storage")
         command = ["cat", "--cluster", "utstorage1"]
         err = self.notfoundtest(command)
         self.matchoutput(err, "not found", command)
 
     def test_53_verifyshowutstorage1proto(self):
         command = ["show_cluster", "--cluster=utstorage1", "--format=proto"]
-        out = self.commandtest(command)
-        clus_list = self.parse_clusters_msg(out, 1)
-        cluster = clus_list.clusters[0]
-        self.failUnlessEqual(cluster.name, "utstorage1")
-        self.failUnlessEqual(cluster.personality.archetype.name,
-                             "storagecluster")
-        self.failUnlessEqual(cluster.threshold, 0)
-        self.failUnlessEqual(cluster.threshold_is_percent, False)
+        cluster = self.protobuftest(command, expect=1)[0]
+        self.assertEqual(cluster.name, "utstorage1")
+        self.assertEqual(cluster.personality.archetype.name, "storagecluster")
+        self.assertEqual(cluster.threshold, 0)
+        self.assertEqual(cluster.threshold_is_percent, False)
 
     def test_54_addutstorage2(self):
         command = ["add_cluster", "--cluster=utstorage2",
@@ -237,8 +244,8 @@ class TestAddCluster(PersonalityTestMixin, TestBrokerCommand):
 
     def test_56_verifycatutstorage2(self):
         # This archetype is non-compilable and should not have a plenary!
-        #self.verify_cat_clusters("utstorage2", "storagecluster",
-        #                         "metrocluster", "storage")
+        # self.verify_cat_clusters("utstorage2", "storagecluster",
+        #                          "metrocluster", "storage")
         command = ["cat", "--cluster", "utstorage2"]
         err = self.notfoundtest(command)
         self.matchoutput(err, "not found", command)

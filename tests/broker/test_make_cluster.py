@@ -44,11 +44,11 @@ class TestMakeCluster(VerifyNotificationsMixin, TestBrokerCommand):
                          "the background.", command)
         self.wait_notification(basetime, 1)
 
-        self.assert_(os.path.exists(os.path.join(
+        self.assertTrue(os.path.exists(os.path.join(
             self.config.get("broker", "profilesdir"), "clusters",
             "utecl1%s" % self.xml_suffix)))
 
-        self.failUnless(os.path.exists(
+        self.assertTrue(os.path.exists(
             self.build_profile_name("clusters", "utecl1", domain="unittest")))
 
     def testverifycatsvc(self):
@@ -162,11 +162,11 @@ class TestMakeCluster(VerifyNotificationsMixin, TestBrokerCommand):
                          "the background.", command)
         self.wait_notification(basetime, 1)
 
-        self.assert_(os.path.exists(os.path.join(
+        self.assertTrue(os.path.exists(os.path.join(
             self.config.get("broker", "profilesdir"), "clusters",
             "utecl2%s" % self.xml_suffix)))
 
-        self.failUnless(os.path.exists(
+        self.assertTrue(os.path.exists(
             self.build_profile_name("clusters", "utecl2", domain="unittest")))
 
     def testverifycatutecl2(self):

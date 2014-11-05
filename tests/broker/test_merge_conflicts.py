@@ -54,13 +54,13 @@ class TestMergeConflicts(TestBrokerCommand):
 
     def test_001_getchangetest3sandbox(self):
         self.successtest(["get", "--sandbox", "changetest3"])
-        self.assert_(os.path.exists(os.path.join(self.sandboxdir,
-                                                 "changetest3")))
+        self.assertTrue(os.path.exists(os.path.join(self.sandboxdir,
+                                                    "changetest3")))
 
     def test_001_getchangetest4sandbox(self):
         self.successtest(["get", "--sandbox", "changetest4"])
-        self.assert_(os.path.exists(os.path.join(self.sandboxdir,
-                                                 "changetest4")))
+        self.assertTrue(os.path.exists(os.path.join(self.sandboxdir,
+                                                    "changetest4")))
 
     def test_001_trackchangetest4(self):
         self.commandtest(["add_domain", "--domain", "changetest4-tracker",
@@ -208,8 +208,8 @@ class TestMergeConflicts(TestBrokerCommand):
         self.matchoutput(out, "non-fast-forward", command)
         # Should this try to verify template-king's changetest3 branch?
         # Can't check merge health on king because it's a bare repo.
-        #kingdir = self.config.get("broker", "kingdir")
-        #self.check_git_merge_health(kingdir)
+        # kingdir = self.config.get("broker", "kingdir")
+        # self.check_git_merge_health(kingdir)
 
     def test_010_publishchangetest4sandbox(self):
         sandboxdir = os.path.join(self.sandboxdir, "changetest4")
@@ -228,7 +228,7 @@ class TestMergeConflicts(TestBrokerCommand):
                                       domain="changetarget-tracker")
         with open(template) as f:
             contents = f.readlines()
-        self.failUnlessEqual(contents[-1], "#Added by changetest4\n")
+        self.assertEqual(contents[-1], "#Added by changetest4\n")
 
     def test_012_rollback(self):
         command = "rollback --domain changetarget-tracker --lastsync"
@@ -237,7 +237,7 @@ class TestMergeConflicts(TestBrokerCommand):
                                       domain="changetarget-tracker")
         with open(template) as f:
             contents = f.readlines()
-        self.failIfEqual(contents[-1], "#Added by changetest4\n")
+        self.assertNotEqual(contents[-1], "#Added by changetest4\n")
 
     def test_013_failreverserollback(self):
         command = "sync --domain changetarget-tracker"
@@ -250,7 +250,7 @@ class TestMergeConflicts(TestBrokerCommand):
                                       domain="changetarget-tracker")
         with open(template) as f:
             contents = f.readlines()
-        self.failIfEqual(contents[-1], "#Added by changetest4\n")
+        self.assertNotEqual(contents[-1], "#Added by changetest4\n")
 
     def test_014_validate(self):
         command = "validate --branch changetarget"
@@ -263,7 +263,7 @@ class TestMergeConflicts(TestBrokerCommand):
                                       domain="changetarget-tracker")
         with open(template) as f:
             contents = f.readlines()
-        self.failUnlessEqual(contents[-1], "#Added by changetest4\n")
+        self.assertEqual(contents[-1], "#Added by changetest4\n")
 
 #   FIXME: Should test a true merge here...
 #   def test_012_mergechangetest3(self):
@@ -273,7 +273,7 @@ class TestMergeConflicts(TestBrokerCommand):
 #                                     domain="ut-qa")
 #       with open(template) as f:
 #           contents = f.readlines()
-#       self.failUnlessEqual(contents[-1], "#Added by changetest3\n")
+#       self.assertEqual(contents[-1], "#Added by changetest3\n")
 
 #   def test_013_mergechangetest4(self):
 #       command = ["merge", "--sandbox=changetest4", "--domain=ut-qa"]
@@ -282,8 +282,8 @@ class TestMergeConflicts(TestBrokerCommand):
 #                                     domain="ut-qa")
 #       with open(template) as f:
 #           contents = f.readlines()
-#       self.failUnlessEqual(contents[-2], "#Added by changetest3\n")
-#       self.failUnlessEqual(contents[-1], "#Added by changetest4\n")
+#       self.assertEqual(contents[-2], "#Added by changetest3\n")
+#       self.assertEqual(contents[-1], "#Added by changetest4\n")
 
     def test_017_faildeltrackedsandbox(self):
         command = "del sandbox --sandbox changetest4"
@@ -315,7 +315,7 @@ class TestMergeConflicts(TestBrokerCommand):
         self.successtest(command.split(" "))
         # This just deletes the branch, so the directory should still be there.
         sandboxdir = os.path.join(self.sandboxdir, "changetest3")
-        self.assert_(os.path.exists(sandboxdir))
+        self.assertTrue(os.path.exists(sandboxdir))
         rmtree(sandboxdir)
 
     def test_021_verifydelchangetest3sandbox(self):
@@ -327,7 +327,7 @@ class TestMergeConflicts(TestBrokerCommand):
         self.successtest(command.split(" "))
         # This just deletes the branch, so the directory should still be there.
         sandboxdir = os.path.join(self.sandboxdir, "changetest4")
-        self.assert_(os.path.exists(sandboxdir))
+        self.assertTrue(os.path.exists(sandboxdir))
         rmtree(sandboxdir)
 
     def test_023_verifydelchangetest4sandbox(self):
@@ -338,7 +338,7 @@ class TestMergeConflicts(TestBrokerCommand):
         self.noouttest(["update_domain", "--domain=changetarget", "--archived"])
         command = "del domain --domain changetarget --justification=tcm=123456"
         self.successtest(command.split(" "))
-        self.failIf(os.path.exists(os.path.join(
+        self.assertFalse(os.path.exists(os.path.join(
             self.config.get("broker", "domainsdir"), "changetest")))
 
     def test_025_verifydelchangetarget(self):

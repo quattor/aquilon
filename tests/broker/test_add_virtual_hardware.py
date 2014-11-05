@@ -106,11 +106,11 @@ class TestAddVirtualHardware(TestBrokerCommand):
         (out, err) = self.successtest(command)
 
     # Resource definitions are generated even if the VM definition is incomplete
-    #def test_096_clusterplenary(self):
-    #    # The cluster plenary should not have VMs.
-    #    command = ["cat", "--cluster=utecl1", "--data"]
-    #    out = self.commandtest(command)
-    #    self.matchclean(out, "resources/virtual_machine", command)
+    # def test_096_clusterplenary(self):
+    #     # The cluster plenary should not have VMs.
+    #     command = ["cat", "--cluster=utecl1", "--data"]
+    #     out = self.commandtest(command)
+    #     self.matchclean(out, "resources/virtual_machine", command)
 
     def test_100_addinterfaces(self):
         for i in range(1, 8):
@@ -132,11 +132,11 @@ class TestAddVirtualHardware(TestBrokerCommand):
         (out, err) = self.successtest(command)
 
     # Resource definitions are generated even if the VM definition is incomplete
-    #def test_127_clusterplenary(self):
-    #    # The cluster plenary should not have VMs.
-    #    command = ["cat", "--cluster=utecl1", "--data"]
-    #    out = self.commandtest(command)
-    #    self.matchclean(out, "resources/virtual_machine", command)
+    # def test_127_clusterplenary(self):
+    #     # The cluster plenary should not have VMs.
+    #     command = ["cat", "--cluster=utecl1", "--data"]
+    #     out = self.commandtest(command)
+    #     self.matchclean(out, "resources/virtual_machine", command)
 
     def test_130_adddisks(self):
         # The first 8 shares should work...
@@ -414,14 +414,14 @@ class TestAddVirtualHardware(TestBrokerCommand):
 
     # FIXME: we need a more generic test to check if a host/cluster may contain
     # VMs. Perhaps an attribute of Archetype or Personality?
-    #def testfailaddnonvirtualcluster(self):
-    #    command = ["add", "machine", "--machine", "ut9s03p51",
-    #               "--cluster", "utgrid1", "--model", "utmedium"]
-    #    out = self.badrequesttest(command)
-    #    self.matchoutput(out,
-    #                     "Can only add virtual machines to "
-    #                     "clusters with archetype esx_cluster.",
-    #                     command)
+    # def testfailaddnonvirtualcluster(self):
+    #     command = ["add", "machine", "--machine", "ut9s03p51",
+    #                "--cluster", "utgrid1", "--model", "utmedium"]
+    #     out = self.badrequesttest(command)
+    #     self.matchoutput(out,
+    #                      "Can only add virtual machines to "
+    #                      "clusters with archetype esx_cluster.",
+    #                      command)
 
     def testfailaddmissingcluster(self):
         command = ["add_machine", "--machine=ut9s03p51",

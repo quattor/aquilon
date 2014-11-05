@@ -69,18 +69,16 @@ class TestAddServiceAddress(TestBrokerCommand):
         command = ["show", "host",
                    "--hostname", "unittest20.aqd-unittest.ms.com",
                    "--format", "proto"]
-        out = self.commandtest(command)
-        hostlist = self.parse_hostlist_msg(out, expect=1)
-        host = hostlist.hosts[0]
+        host = self.protobuftest(command, expect=1)[0]
         found = False
         for resource in host.resources:
             if resource.name == "zebra2" and resource.type == "service_address":
                 found = True
-                self.failUnlessEqual(resource.service_address.ip, str(ip))
-                self.failUnlessEqual(resource.service_address.fqdn,
-                                     "zebra2.aqd-unittest.ms.com")
+                self.assertEqual(resource.service_address.ip, str(ip))
+                self.assertEqual(resource.service_address.fqdn,
+                                 "zebra2.aqd-unittest.ms.com")
                 ifaces = ",".join(sorted(resource.service_address.interfaces))
-                self.failUnlessEqual(ifaces, "eth0,eth1")
+                self.assertEqual(ifaces, "eth0,eth1")
         self.assertTrue(found,
                         "Service address zebra2 not found in the resources. "
                         "Existing resources: %s" %

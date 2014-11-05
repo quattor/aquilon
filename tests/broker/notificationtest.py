@@ -60,9 +60,9 @@ class VerifyNotificationsMixin(object):
 
             match = _server_notify_re.search(line)
             if match:
-                self.failUnlessEqual(int(count), int(match.group(1)),
-                                     "Expected to send %s notifications, "
-                                     "sent %s" % (count, match.group(1)))
+                self.assertEqual(int(count), int(match.group(1)),
+                                 "Expected to send %s notifications, "
+                                 "sent %s" % (count, match.group(1)))
                 found = True
                 break
 

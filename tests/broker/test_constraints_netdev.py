@@ -39,9 +39,9 @@ class TestNetworkDeviceConstraints(TestBrokerCommand):
         self.matchoutput(out, "Model Type: blade", command)
 
     # This test doesn't make sense right now.
-    #def testdeltor_switchasmachine(self):
-    #    command = "del machine --machine ut3gd1r01.aqd-unittest.ms.com"
-    #    self.badrequesttest(command.split(" "))
+    # def testdeltor_switchasmachine(self):
+    #     command = "del machine --machine ut3gd1r01.aqd-unittest.ms.com"
+    #     self.badrequesttest(command.split(" "))
 
     def testverifydeltor_switchasmachinefailed(self):
         # Deprecated usage.

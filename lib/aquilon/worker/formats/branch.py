@@ -45,9 +45,13 @@ class DomainFormatter(ObjectFormatter):
             details.append(indent + "  Comments: %s" % domain.comments)
         return "\n".join(details)
 
-    def format_proto(self, domain, container):
-        skeleton = container.domains.add()
-        self.add_branch_data(skeleton, domain)
+    def fill_proto(self, domain, skeleton):
+        skeleton.name = str(domain.name)
+        skeleton.owner = str(domain.owner)
+        skeleton.type = skeleton.DOMAIN
+        skeleton.allow_manage = domain.allow_manage
+        if domain.tracked_branch:
+            skeleton.tracked_branch = str(domain.tracked_branch.name)
 
 ObjectFormatter.handlers[Domain] = DomainFormatter()
 
@@ -78,9 +82,10 @@ class SandboxFormatter(ObjectFormatter):
             details.append(indent + "  Comments: %s" % sandbox.comments)
         return "\n".join(details)
 
-    def format_proto(self, domain, container):
-        skeleton = container.domains.add()
-        self.add_branch_data(skeleton, domain)
+    def fill_proto(self, sandbox, skeleton):
+        skeleton.name = str(sandbox.name)
+        skeleton.owner = str(sandbox.owner)
+        skeleton.type = skeleton.SANDBOX
 
 ObjectFormatter.handlers[Sandbox] = SandboxFormatter()
 ObjectFormatter.handlers[AuthoredSandbox] = SandboxFormatter()

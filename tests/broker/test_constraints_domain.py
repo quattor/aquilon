@@ -34,7 +34,7 @@ class TestDomainConstraints(TestBrokerCommand):
         self.badrequesttest(command.split(" "))
         # This wouldn't get deleted anyway, but doesn't hurt to verify.
         sandboxdir = os.path.join(self.sandboxdir, "utsandbox")
-        self.assert_(os.path.exists(sandboxdir))
+        self.assertTrue(os.path.exists(sandboxdir))
 
     def testverifydelsandboxwithhostfailed(self):
         command = "show sandbox --sandbox utsandbox"
@@ -45,7 +45,7 @@ class TestDomainConstraints(TestBrokerCommand):
         command = "del domain --domain ut-prod"
         self.badrequesttest(command.split(" "))
         domainsdir = self.config.get("broker", "domainsdir")
-        self.assert_(os.path.exists(os.path.join(domainsdir, "ut-prod")))
+        self.assertTrue(os.path.exists(os.path.join(domainsdir, "ut-prod")))
 
     def testverifydeldomainwithhostfailed(self):
         command = "show domain --domain ut-prod"

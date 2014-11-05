@@ -127,24 +127,22 @@ class TestBindServer(TestBrokerCommand):
 
     def test_300_show_utsi1_proto(self):
         command = "show service --service utsvc --instance utsi1 --format proto"
-        out = self.commandtest(command.split(" "))
-        msg = self.parse_service_msg(out, 1)
-        svc = msg.services[0]
-        self.failUnlessEqual(svc.name, "utsvc",
-                             "Service name mismatch: %s instead of utsvc\n" %
-                             svc.name)
+        svc = self.protobuftest(command.split(" "), expect=1)[0]
+        self.assertEqual(svc.name, "utsvc",
+                         "Service name mismatch: %s instead of utsvc\n" %
+                         svc.name)
         si = svc.serviceinstances[0]
-        self.failUnlessEqual(si.name, "utsi1",
-                             "Service name mismatch: %s instead of utsi1\n" %
-                             si.name)
+        self.assertEqual(si.name, "utsi1",
+                         "Service name mismatch: %s instead of utsi1\n" %
+                         si.name)
         servers = [srv.fqdn for srv in si.servers]
         expected = ["unittest02.one-nyp.ms.com",
                     "server1.aqd-unittest.ms.com",
                     "unittest00.one-nyp.ms.com"]
-        self.failUnlessEqual(servers, expected,
-                             "Wrong list of servers for service utsvc "
-                             "instance utsi1: %s\n" %
-                             " ".join(list(servers)))
+        self.assertEqual(servers, expected,
+                         "Wrong list of servers for service utsvc "
+                         "instance utsi1: %s\n" %
+                         " ".join(list(servers)))
 
     def test_300_cat_utsi2(self):
         command = "cat --service utsvc --instance utsi2"
@@ -243,15 +241,13 @@ class TestBindServer(TestBrokerCommand):
 
     def test_300_show_unittest00_proto(self):
         command = "show host --hostname unittest00.one-nyp.ms.com --format proto"
-        out = self.commandtest(command.split(" "))
-        hostlist = self.parse_hostlist_msg(out, expect=1)
-        host = hostlist.hosts[0]
-        self.failUnlessEqual(len(host.services_provided), 4)
+        host = self.protobuftest(command.split(" "), expect=1)[0]
+        self.assertEqual(len(host.services_provided), 4)
         services = set()
         for svc_msg in host.services_provided:
             services.add("%s/%s" % (svc_msg.service, svc_msg.instance))
         for binding in ("utsvc/utsi1", "utsvc/utsi2"):
-            self.failUnless(binding in services,
+            self.assertTrue(binding in services,
                             "Service binding %s is missing from protobuf "
                             "message. All bindings: %s" %
                             (binding, ",".join(list(services))))

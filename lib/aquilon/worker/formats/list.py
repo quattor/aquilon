@@ -20,6 +20,7 @@ from operator import attrgetter
 
 from sqlalchemy.orm.collections import InstrumentedList
 from sqlalchemy.orm.query import Query
+from sqlalchemy.ext.associationproxy import _AssociationList
 
 from aquilon.worker.formats.formatters import ObjectFormatter
 
@@ -46,11 +47,13 @@ class ListFormatter(ObjectFormatter):
 
     def format_proto(self, result, container):
         for item in result:
-            self.redirect_proto(item, container)
+            skeleton = container.add()
+            ObjectFormatter.redirect_proto(item, skeleton)
 
 ObjectFormatter.handlers[list] = ListFormatter()
 ObjectFormatter.handlers[Query] = ListFormatter()
 ObjectFormatter.handlers[InstrumentedList] = ListFormatter()
+ObjectFormatter.handlers[_AssociationList] = ListFormatter()
 
 
 class StringList(list):

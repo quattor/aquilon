@@ -69,7 +69,7 @@ class TestAddAuxiliary(TestBrokerCommand):
 
     # TODO: can't check this with the aq client since it detects the conflict
     # itself. Move this check to test_client_bypass once that can use knc
-    #def testhostmachinemismatch(self):
+    # def testhostmachinemismatch(self):
     #    command = ["add", "auxiliary", "--ip", self.net["unknown0"].usable[-1],
     #               "--auxiliary", "unittest00-e2.one-nyp.ms.com",
     #               "--hostname", "unittest00.one-nyp.ms.com",

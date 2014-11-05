@@ -41,7 +41,7 @@ class PersonalityProtoParameter(list):
 class ParameterProtoFormatter(ListFormatter):
     def format_proto(self, params, container):
         for path, param_def, value in params:
-            skeleton = container.parameters.add()
+            skeleton = container.add()
             skeleton.path = str(path)
             if param_def.value_type == 'json':
                 skeleton.value = json.dumps(value)

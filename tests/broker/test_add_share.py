@@ -57,16 +57,13 @@ class TestAddShare(TestBrokerCommand):
     def test_105_show_test_share_1_proto(self):
         command = ["show_share", "--cluster=utecl1", "--share=test_share_1",
                    "--format", "proto"]
-        out = self.commandtest(command)
-        reslist = self.parse_resourcelist_msg(out, expect=1)
-        resource = reslist.resources[0]
-        self.failUnlessEqual(resource.name, "test_share_1")
-        self.failUnlessEqual(resource.type, "share")
-        self.failUnlessEqual(resource.share.server, "lnn30f1")
-        self.failUnlessEqual(resource.share.mount,
-                             "/vol/lnn30f1v1/test_share_1")
-        self.failUnlessEqual(resource.share.disk_count, 0)
-        self.failUnlessEqual(resource.share.machine_count, 0)
+        resource = self.protobuftest(command, expect=1)[0]
+        self.assertEqual(resource.name, "test_share_1")
+        self.assertEqual(resource.type, "share")
+        self.assertEqual(resource.share.server, "lnn30f1")
+        self.assertEqual(resource.share.mount, "/vol/lnn30f1v1/test_share_1")
+        self.assertEqual(resource.share.disk_count, 0)
+        self.assertEqual(resource.share.machine_count, 0)
 
     def test_105_cat_test_share_1(self):
         command = ["cat", "--cluster=utecl1", "--share=test_share_1"]
@@ -94,15 +91,13 @@ class TestAddShare(TestBrokerCommand):
     def test_115_verify_not_in_nasobjects_proto(self):
         command = ["show_share", "--cluster", "utecl1",
                    "--share", "not_in_nasobjects", "--format", "proto"]
-        out = self.commandtest(command)
-        reslist = self.parse_resourcelist_msg(out, expect=1)
-        resource = reslist.resources[0]
-        self.failUnlessEqual(resource.name, "not_in_nasobjects")
-        self.failUnlessEqual(resource.type, "share")
-        self.failIf(hasattr(resource, 'server'))
-        self.failIf(hasattr(resource, 'mount'))
-        self.failUnlessEqual(resource.share.disk_count, 0)
-        self.failUnlessEqual(resource.share.machine_count, 0)
+        resource = self.protobuftest(command, expect=1)[0]
+        self.assertEqual(resource.name, "not_in_nasobjects")
+        self.assertEqual(resource.type, "share")
+        self.assertFalse(hasattr(resource, 'server'))
+        self.assertFalse(hasattr(resource, 'mount'))
+        self.assertEqual(resource.share.disk_count, 0)
+        self.assertEqual(resource.share.machine_count, 0)
 
     def test_115_cat_not_in_nasobjects(self):
         command = ["cat", "--cluster=utecl1", "--share=not_in_nasobjects"]

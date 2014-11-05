@@ -23,8 +23,7 @@ from aquilon.aqdb.model import Xtn
 
 
 class TransactionFormatter(ObjectFormatter):
-    def format_proto(self, xtn, container):
-        skeleton = container.transactions.add()
+    def fill_proto(self, xtn, skeleton):
         skeleton.start_time = calendar.timegm(xtn.start_time.utctimetuple())
         skeleton.username = str(xtn.username)
         skeleton.command = str(xtn.command)

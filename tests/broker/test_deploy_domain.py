@@ -40,7 +40,7 @@ class TestDeployDomain(TestBrokerCommand):
                                       domain="deployable")
         with open(template) as f:
             contents = f.readlines()
-        self.failUnlessEqual(contents[-1], "#Added by unittest\n")
+        self.assertEqual(contents[-1], "#Added by unittest\n")
 
     def test_110_verifydeploylog(self):
         kingdir = self.config.get("broker", "kingdir")
@@ -96,13 +96,13 @@ class TestDeployDomain(TestBrokerCommand):
                                       domain="prod")
         with open(template) as f:
             contents = f.readlines()
-        self.failUnlessEqual(contents[-1], "#Added by unittest\n")
+        self.assertEqual(contents[-1], "#Added by unittest\n")
         # ...but not in the ut-prod tracking domain.
         template = self.find_template("aquilon", "archetype", "base",
                                       domain="ut-prod")
         with open(template) as f:
             contents = f.readlines()
-        self.failIfEqual(contents[-1], "#Added by unittest\n")
+        self.assertNotEqual(contents[-1], "#Added by unittest\n")
 
     def test_210_verifynosynclog(self):
         kingdir = self.config.get("broker", "kingdir")

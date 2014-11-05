@@ -28,9 +28,8 @@ class ApplicationFormatter(ResourceFormatter):
 
         return details
 
-    def format_proto(self, app, container):
-        skeleton = container.resources.add()
-        self.add_resource_data(skeleton, app)
+    def fill_proto(self, app, skeleton):
+        super(ApplicationFormatter, self).fill_proto(app, skeleton)
         skeleton.appdata.eonid = app.eonid
 
 ObjectFormatter.handlers[Application] = ApplicationFormatter()

@@ -39,8 +39,8 @@ class DnsDomainFormatter(ObjectFormatter):
     def csv_fields(self, dns_domain):
         yield (dns_domain.name, dns_domain.comments)
 
-    def format_proto(self, dns_domain, container):
-        skeleton = container.dns_domains.add()
-        self.add_dns_domain_data(skeleton, dns_domain)
+    def fill_proto(self, dns_domain, skeleton):
+        skeleton.name = str(dns_domain.name)
+        skeleton.restricted = dns_domain.restricted
 
 ObjectFormatter.handlers[DnsDomain] = DnsDomainFormatter()

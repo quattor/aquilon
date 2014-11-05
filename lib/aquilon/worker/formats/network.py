@@ -133,7 +133,6 @@ class NetworkFormatter(ObjectFormatter):
 
     def add_net_data(self, net_msg, net):
         net_msg.name = str(net.name)
-        net_msg.id = net.id
         net_msg.ip = str(net.ip)
         net_msg.cidr = net.cidr
         net_msg.bcast = str(net.broadcast)
@@ -143,6 +142,7 @@ class NetworkFormatter(ObjectFormatter):
         net_msg.location.name = str(net.location.name)
         net_msg.location.location_type = str(net.location.location_type)
         net_msg.type = str(net.network_type)
+        net_msg.env_name = str(net.network_environment.name)
 
         # Bulk load information about anything having a network address on this
         # network
@@ -245,7 +245,20 @@ class NetworkFormatter(ObjectFormatter):
                     if iface.mac:
                         int_msg.mac = str(iface.mac)
 
-        # Add dynamic DHCP records
+        # Look for dynamic DHCP ranges
+        range_msg = None
+        last_ip = None
+        for dynhost in net.dynamic_stubs:
+            if not last_ip or dynhost.ip != last_ip + 1:
+                if last_ip:
+                    range_msg.end = str(last_ip)
+                range_msg = net_msg.dynamic_ranges.add()
+                range_msg.start = str(dynhost.ip)
+            last_ip = dynhost.ip
+        if last_ip:
+            range_msg.end = str(last_ip)
+
+        # Add dynamic DHCP records - to be deprecated
         for dynhost in net.dynamic_stubs:
             host_msg = net_msg.hosts.add()
             # aqdhcpd uses the type
@@ -255,8 +268,7 @@ class NetworkFormatter(ObjectFormatter):
             host_msg.dns_domain = str(dynhost.fqdn.dns_domain)
             host_msg.ip = str(dynhost.ip)
 
-    def format_proto(self, network, container):
-        skeleton = container.networks.add()
+    def fill_proto(self, network, skeleton):
         self.add_net_data(skeleton, network)
 
 ObjectFormatter.handlers[Network] = NetworkFormatter()

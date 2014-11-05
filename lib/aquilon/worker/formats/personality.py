@@ -91,9 +91,15 @@ class PersonalityFormatter(ObjectFormatter):
                                info.vmhost_overcommit_memory)
         return "\n".join(details)
 
-    def format_proto(self, personality, container):
-        skeleton = container.personalities.add()
-        self.add_personality_data(skeleton, personality)
+    def fill_proto(self, personality, skeleton):
+        skeleton.name = str(personality)
+        for service in personality.services:
+            si = skeleton.required_services.add()
+            si.service = service.name
+
+        self.redirect_proto(personality.archetype, skeleton.archetype)
+        skeleton.host_environment = str(personality.host_environment)
+        skeleton.owner_eonid = personality.owner_eon_id
 
         features = personality.features[:]
         features.sort(key=attrgetter("feature.feature_type",
@@ -101,11 +107,12 @@ class PersonalityFormatter(ObjectFormatter):
                                      "feature.name"))
 
         for link in features:
-            self.add_featurelink_data(skeleton.features.add(), link)
-
-        for service in personality.services:
-            rsvc_msg = skeleton.required_services.add()
-            rsvc_msg.service = service.name
+            feat_msg = skeleton.features.add()
+            self.redirect_proto(link.feature, feat_msg)
+            if link.model:
+                self.redirect_proto(link.model, feat_msg.model)
+            if link.interface_name:
+                feat_msg.interface_name = str(link.interface_name)
 
         if personality.comments:
             skeleton.comments = personality.comments
@@ -133,12 +140,10 @@ class SimplePersonalityListFormatter(ListFormatter):
     def csv_fields(self, obj):
         yield (obj.archetype.name, obj.name,)
 
-    def format_proto(self, tpl, container):
-        for personality in tpl:
-            skeleton = container.personalities.add()
-            skeleton.name = str(personality)
-            skeleton.archetype.name = str(personality.archetype.name)
-            skeleton.host_environment = str(personality.host_environment)
-            skeleton.owner_eonid = personality.owner_eon_id
+    def fill_proto(self, personality, skeleton):
+        skeleton.name = str(personality)
+        skeleton.archetype.name = str(personality.archetype.name)
+        skeleton.host_environment = str(personality.host_environment)
+        skeleton.owner_eonid = personality.owner_eon_id
 
 ObjectFormatter.handlers[SimplePersonalityList] = SimplePersonalityListFormatter()

@@ -78,8 +78,8 @@ class TestAddSandbox(TestBrokerCommand):
                         "--comments", "Sandbox used for aqd unit tests",
                         "--noget", "--start=prod"])
         sandboxdir = os.path.join(self.sandboxdir, "utsandbox")
-        self.failIf(os.path.exists(sandboxdir),
-                    "Did not expect directory '%s' to exist" % sandboxdir)
+        self.assertFalse(os.path.exists(sandboxdir),
+                         "Did not expect directory '%s' to exist" % sandboxdir)
 
     def test_115_verify_utsandbox(self):
         kingdir = self.config.get("broker", "kingdir")
@@ -98,9 +98,7 @@ class TestAddSandbox(TestBrokerCommand):
 
     def test_115_verify_utsandbox_proto(self):
         command = ["show_sandbox", "--sandbox", "utsandbox", "--format", "proto"]
-        out = self.commandtest(command)
-        domainlist = self.parse_domain_msg(out, expect=1)
-        domain = domainlist.domains[0]
+        domain = self.protobuftest(command, expect=1)[0]
         self.assertEqual(domain.name, "utsandbox")
         self.assertEqual(domain.owner, "%s@%s" % (self.user, self.realm))
         self.assertEqual(domain.type, domain.SANDBOX)
@@ -125,7 +123,7 @@ class TestAddSandbox(TestBrokerCommand):
         self.matchoutput(err, "Creating %s" % self.sandboxdir, command)
         sandboxdir = os.path.join(self.sandboxdir, "changetest1")
         self.matchoutput(out, "Created sandbox: %s" % sandboxdir, command)
-        self.failUnless(os.path.exists(sandboxdir),
+        self.assertTrue(os.path.exists(sandboxdir),
                         "Expected directory '%s' to exist" % sandboxdir)
 
     def test_125_verify_changetest1(self):
@@ -142,7 +140,7 @@ class TestAddSandbox(TestBrokerCommand):
         out, err = self.successtest(command)
         sandboxdir = os.path.join(self.sandboxdir, "changetest2")
         self.matchoutput(out, "Created sandbox: %s" % sandboxdir, command)
-        self.failUnless(os.path.exists(sandboxdir),
+        self.assertTrue(os.path.exists(sandboxdir),
                         "Expected directory '%s' to exist" % sandboxdir)
 
     def test_135_verify_changetest2(self):
@@ -157,7 +155,7 @@ class TestAddSandbox(TestBrokerCommand):
         out, err = self.successtest(command)
         sandboxdir = os.path.join(self.sandboxdir, "camelcasetest1")
         self.matchoutput(out, "Created sandbox: %s" % sandboxdir, command)
-        self.failUnless(os.path.exists(sandboxdir),
+        self.assertTrue(os.path.exists(sandboxdir),
                         "Expected directory '%s' to exist" % sandboxdir)
 
     def test_150_uppercase2(self):
@@ -167,7 +165,7 @@ class TestAddSandbox(TestBrokerCommand):
         out, err = self.successtest(command)
         sandboxdir = os.path.join(self.sandboxdir, "camelcasetest2")
         self.matchoutput(out, "Created sandbox: %s" % sandboxdir, command)
-        self.failUnless(os.path.exists(sandboxdir),
+        self.assertTrue(os.path.exists(sandboxdir),
                         "Expected directory '%s' to exist" % sandboxdir)
 
     def test_160_verify_lower_branchname(self):

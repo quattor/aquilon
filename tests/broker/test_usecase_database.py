@@ -209,10 +209,10 @@ class TestUsecaseDatabase(TestBrokerCommand):
             self.check_plenary_gone(*path, directory_gone=True)
 
         # The directories should be gone as well
-        self.failIf(os.path.exists(cluster_res_dir),
-                    "Plenary directory '%s' still exists" % cluster_res_dir)
-        self.failIf(os.path.exists(cluster_dir),
-                    "Plenary directory '%s' still exists" % cluster_dir)
+        self.assertFalse(os.path.exists(cluster_res_dir),
+                         "Plenary directory '%s' still exists" % cluster_res_dir)
+        self.assertFalse(os.path.exists(cluster_dir),
+                         "Plenary directory '%s' still exists" % cluster_dir)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUsecaseDatabase)

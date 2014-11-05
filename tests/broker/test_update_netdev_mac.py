@@ -81,10 +81,10 @@ class TestUpdateNetworkDeviceMac(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         r = re.compile(r'created:\s*(.*?),\s*last seen:\s*(.*?)\s*$', re.M)
         m = self.searchoutput(out, r, command)
-        self.failIf(m.group(1) == m.group(2),
-                    "Expected creation date '%s' to be different from "
-                    "last seen '%s' in output:\n%s" %
-                    (m.group(1), m.group(2), out))
+        self.assertFalse(m.group(1) == m.group(2),
+                         "Expected creation date '%s' to be different from "
+                         "last seen '%s' in output:\n%s" %
+                         (m.group(1), m.group(2), out))
 
         colon_re = re.compile(r"([0-9a-f]{2})(?=.)")
 
@@ -109,10 +109,10 @@ class TestUpdateNetworkDeviceMac(TestBrokerCommand):
         self.searchoutput(out, r"Port: 49\s*MAC: 00:15:2c:1f:40:00,", command)
         r = re.compile(r'created:\s*(.*?),\s*last seen:\s*(.*?)\s*$', re.M)
         m = self.searchoutput(out, r, command)
-        self.failIf(m.group(1) != m.group(2),
-                    "Expected creation date '%s' to be the same as "
-                    "last seen '%s' in output:\n%s" %
-                    (m.group(1), m.group(2), out))
+        self.assertFalse(m.group(1) != m.group(2),
+                         "Expected creation date '%s' to be the same as "
+                         "last seen '%s' in output:\n%s" %
+                         (m.group(1), m.group(2), out))
 
     # Currently done by test_poll_network_device, update_network_device does not implement
     # --vlan yet.

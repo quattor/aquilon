@@ -50,8 +50,8 @@ class TestDelCluster(TestBrokerCommand):
 
         profile = os.path.join(self.config.get("broker", "profilesdir"),
                                "clusters", "utvcs1.xml")
-        self.failIf(os.path.exists(profile),
-                    "Profile file '%s' still exists" % profile)
+        self.assertFalse(os.path.exists(profile),
+                         "Profile file '%s' still exists" % profile)
 
     def test_120_delutstorage1(self):
         command = ["del_cluster", "--cluster=utstorage1"]

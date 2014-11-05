@@ -147,13 +147,13 @@ class TestConsistency(TestBrokerCommand):
         dir = os.path.join(self.config.get("broker", "domainsdir"),
                            "filesystem-only")
         self.matchoutput(out, "Removing %s" % dir, command)
-        self.failIf(os.path.exists(dir))
+        self.assertFalse(os.path.exists(dir))
 
         dir = os.path.join(self.config.get("broker", "domainsdir"),
                            "domain-no-filesystem")
         self.matchoutput(out, "Checking out domain domain-no-filesystem",
                          command)
-        self.failUnless(os.path.exists(dir))
+        self.assertTrue(os.path.exists(dir))
 
     def test_800_cleanup(self):
         self.noouttest(["update_domain", "--domain", "domain-no-filesystem",

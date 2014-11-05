@@ -63,12 +63,11 @@ class TestAddCity(TestBrokerCommand):
 
     def test_115_verify_exampe_proto(self):
         command = "show city --city ex --format proto"
-        out = self.commandtest(command.split(" "))
-        locs = self.parse_location_msg(out, 1)
-        self.matchoutput(locs.locations[0].name, "ex", command)
-        self.matchoutput(locs.locations[0].location_type, "city", command)
-        self.matchoutput(locs.locations[0].fullname, "New Exampleton", command)
-        self.matchoutput(locs.locations[0].timezone, "EDT", command)
+        loc = self.protobuftest(command.split(" "), expect=1)[0]
+        self.matchoutput(loc.name, "ex", command)
+        self.matchoutput(loc.location_type, "city", command)
+        self.matchoutput(loc.fullname, "New Exampleton", command)
+        self.matchoutput(loc.timezone, "EDT", command)
 
     def test_115_verify_example_plenary(self):
         command = ["cat", "--city", "ex"]
@@ -144,7 +143,7 @@ class TestAddCity(TestBrokerCommand):
         self.matchclean(out, "e2", command)
 
     def test_400_update_city_campus(self):
-        ## add city
+        # add city
         self.dsdb_expect("add_city_aq -city_symbol e4 " +
                          "-country_symbol us -city_name Exampleby")
         command = ["add", "city", "--city", "e4", "--country", "us",
@@ -152,7 +151,7 @@ class TestAddCity(TestBrokerCommand):
         self.noouttest(command)
         self.dsdb_verify()
 
-        ## add building
+        # add building
         self.dsdb_expect("add_building_aq -building_name bx -city e4 "
                          "-building_addr Nowhere")
         command = ["add", "building", "--building", "bx", "--city", "e4",
@@ -160,7 +159,7 @@ class TestAddCity(TestBrokerCommand):
         self.noouttest(command)
         self.dsdb_verify()
 
-        ## add campus
+        # add campus
         self.dsdb_expect_add_campus("na")
         command = ["add", "campus", "--campus", "na", "--country", "us",
                    "--fullname", "test campus"]
@@ -206,7 +205,7 @@ class TestAddCity(TestBrokerCommand):
                          "Continent na, Country us, Campus na]", command)
 
     def test_430_update_city_30_bad_campus(self):
-        ## add city
+        # add city
         self.dsdb_expect("add_city_aq -city_symbol e6 " +
                          "-country_symbol gb -city_name ExampleSix")
 
@@ -215,7 +214,7 @@ class TestAddCity(TestBrokerCommand):
         self.noouttest(command)
         self.dsdb_verify()
 
-        ## update city bad campus
+        # update city bad campus
         command = ["update", "city", "--city", "e6", "--campus", "na"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Cannot change campus.  Campus na is in hub ny, while city e6 is in hub ln", command)

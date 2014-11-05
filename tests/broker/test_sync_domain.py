@@ -33,7 +33,7 @@ class TestSyncDomain(TestBrokerCommand):
                                       domain="ut-prod")
         with open(template) as f:
             contents = f.readlines()
-        self.failUnlessEqual(contents[-1], "#Added by unittest\n")
+        self.assertEqual(contents[-1], "#Added by unittest\n")
 
     def testverifygitlog(self):
         kingdir = self.config.get("broker", "kingdir")

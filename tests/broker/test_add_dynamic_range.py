@@ -72,7 +72,7 @@ class TestAddDynamicRange(TestBrokerCommand):
             subcommand = ["search_dns", "--ip", ip, "--fqdn", self.dynname(ip)]
             subout = self.commandtest(subcommand)
             self.matchoutput(subout, self.dynname(ip), command)
-        self.failUnless(checked, "Problem with test algorithm or data.")
+        self.assertTrue(checked, "Problem with test algorithm or data.")
 
     def test_105_show_range(self):
         net = self.net["dyndhcp0"]
@@ -103,16 +103,17 @@ class TestAddDynamicRange(TestBrokerCommand):
 
     def test_105_verify_network_proto(self):
         command = "show network --ip %s --format proto" % self.net["dyndhcp0"].ip
-        out = self.commandtest(command.split(" "))
-        msg = self.parse_netlist_msg(out, expect=1)
-        network = msg.networks[0]
+        network = self.protobuftest(command.split(" "), expect=1)[0]
         hosts = set([host.fqdn for host in network.hosts])
         start = self.net["dyndhcp0"].usable[2]
         end = self.net["dyndhcp0"].usable[-3]
         for i in range(int(start), int(end) + 1):
             ip = IPv4Address(i)
-            self.failUnless(self.dynname(ip) in hosts, "%s is missing from network"
+            self.assertTrue(self.dynname(ip) in hosts, "%s is missing from network"
                             "protobuf output" % self.dynname(ip))
+        self.assertEqual(len(network.dynamic_ranges), 1)
+        self.assertEqual(network.dynamic_ranges[0].start, str(start))
+        self.assertEqual(network.dynamic_ranges[0].end, str(end))
 
     def test_110_add_end_in_grange(self):
         # Set up a network that has its final IP address taken.
@@ -144,7 +145,7 @@ class TestAddDynamicRange(TestBrokerCommand):
             self.matchoutput(err, message, command)
         self.dsdb_verify()
 
-    def test_125_verify_fillnetwork(self):
+    def test_121_verify_fillnetwork(self):
         # Check that the network has only dynamic entries
         checkip = self.net["dyndhcp3"].ip
         while checkip < self.net["dyndhcp3"].usable[0]:
@@ -160,6 +161,48 @@ class TestAddDynamicRange(TestBrokerCommand):
         broadcast = self.net["dyndhcp3"].broadcast
         command = ['search_dns', '--ip', broadcast]
         self.noouttest(command)
+
+    def test_121_show_net(self):
+        net = self.net["dyndhcp3"]
+        command = ["show_network", "--ip", net.ip]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Dynamic Ranges: %s-%s" %
+                         (net.usable[0], net.usable[-1]),
+                         command)
+
+    def test_121_show_net_proto(self):
+        net = self.net["dyndhcp3"]
+        command = ["show_network", "--ip", net.ip, "--format", "proto"]
+        network = self.protobuftest(command, expect=1)[0]
+        self.assertEqual(len(network.dynamic_ranges), 1)
+        self.assertEqual(network.dynamic_ranges[0].start, str(net.usable[0]))
+        self.assertEqual(network.dynamic_ranges[0].end, str(net.usable[-1]))
+
+    def test_125_delete_address_in_middle(self):
+        net = self.net["dyndhcp3"]
+        self.dsdb_expect_delete(net.usable[5])
+        self.statustest(["del_dynamic_range", "--start", net.usable[5],
+                         "--end", net.usable[5]])
+        self.dsdb_verify()
+
+    def test_126_show_net(self):
+        net = self.net["dyndhcp3"]
+        command = ["show_network", "--ip", net.ip]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Dynamic Ranges: %s-%s, %s-%s" %
+                         (net.usable[0], net.usable[4],
+                          net.usable[6], net.usable[-1]),
+                         command)
+
+    def test_126_show_net_proto(self):
+        net = self.net["dyndhcp3"]
+        command = ["show_network", "--ip", net.ip, "--format", "proto"]
+        network = self.protobuftest(command, expect=1)[0]
+        self.assertEqual(len(network.dynamic_ranges), 2)
+        self.assertEqual(network.dynamic_ranges[0].start, str(net.usable[0]))
+        self.assertEqual(network.dynamic_ranges[0].end, str(net.usable[4]))
+        self.assertEqual(network.dynamic_ranges[1].start, str(net.usable[6]))
+        self.assertEqual(network.dynamic_ranges[1].end, str(net.usable[-1]))
 
     def test_130_dsdb_rollback(self):
         for ip in range(int(self.net["dyndhcp2"].usable[2]),

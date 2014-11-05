@@ -65,9 +65,7 @@ class TestAddOS(TestBrokerCommand):
     def test_121_show_utos_proto(self):
         command = ["show_os", "--archetype=utarchetype1", "--osname=utos",
                    "--osversion=1.0", "--format=proto"]
-        out = self.commandtest(command)
-        oslist = self.parse_os_msg(out, 1)
-        utos = oslist.operating_systems[0]
+        utos = self.protobuftest(command, expect=1)[0]
         self.assertEqual(utos.archetype.name, "utarchetype1")
         self.assertEqual(utos.name, "utos")
         self.assertEqual(utos.version, "1.0")
@@ -127,11 +125,10 @@ class TestAddOS(TestBrokerCommand):
 
     def test_310_verify_all_proto(self):
         command = "show os --all --format=proto"
-        out = self.commandtest(command.split(" "))
-        oslist = self.parse_os_msg(out)
+        oslist = self.protobuftest(command.split(" "))
         found_aquilon_new = False
         found_ut = False
-        for os in oslist.operating_systems:
+        for os in oslist:
             if os.archetype.name == 'aquilon' and \
                os.name == 'linux' and os.version == self.linux_version_curr:
                 found_aquilon_new = True

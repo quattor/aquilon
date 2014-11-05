@@ -20,9 +20,10 @@ import os
 import sys
 import unittest2 as unittest
 from subprocess import Popen, PIPE
+from lxml import etree
 import re
 
-from aquilon.config import Config
+from aquilon.config import Config, lookup_file_path
 from aquilon.worker import depends  # pylint: disable=W0611
 
 from networktest import DummyNetworks
@@ -89,6 +90,8 @@ class TestBrokerCommand(unittest.TestCase):
         cls.json_suffix = ".json" + compress_suffix
         cls.json_default = cls.config.getboolean("panc", "json_profiles")
 
+        cls.input_xml = etree.parse(lookup_file_path("input.xml"))
+
         # Need to import protocol buffers after we have the config
         # object all squared away and we can set the sys.path
         # variable appropriately.
@@ -98,10 +101,11 @@ class TestBrokerCommand(unittest.TestCase):
         protodir = cls.config.get("protocols", "directory")
         if protodir not in sys.path:
             sys.path.append(protodir)
+        cls.protocols = {}
         for m in ['aqdsystems_pb2', 'aqdnetworks_pb2', 'aqdservices_pb2',
                   'aqddnsdomains_pb2', 'aqdlocations_pb2', 'aqdaudit_pb2',
                   'aqdparamdefinitions_pb2', 'aqdparameters_pb2']:
-            globals()[m] = __import__(m)
+            cls.protocols[m] = __import__(m)
 
     def setUp(self):
         for name in [DSDB_EXPECT_SUCCESS_FILE, DSDB_EXPECT_FAILURE_FILE,
@@ -122,7 +126,7 @@ class TestBrokerCommand(unittest.TestCase):
             dir = os.path.join(self.config.get("broker", "domainsdir"),
                                args.get("domain"))
         else:
-            self.assert_(0, "template_name() called without domain or sandbox")
+            self.assertTrue(0, "template_name() called without domain or sandbox")
         return os.path.join(dir, *template) + self.template_extension
 
     def plenary_name(self, *template):
@@ -131,24 +135,24 @@ class TestBrokerCommand(unittest.TestCase):
 
     def check_plenary_exists(self, *path):
         plenary = self.plenary_name(*path)
-        self.failUnless(os.path.exists(plenary),
+        self.assertTrue(os.path.exists(plenary),
                         "Plenary '%s' does not exist." % plenary)
 
     def check_plenary_gone(self, *path, **kw):
         plenary = self.plenary_name(*path)
-        self.failIf(os.path.exists(plenary),
-                    "Plenary '%s' was not expected to exist." % plenary)
+        self.assertFalse(os.path.exists(plenary),
+                         "Plenary '%s' was not expected to exist." % plenary)
         if kw.get("directory_gone", False):
             dir = os.path.dirname(plenary)
-            self.failIf(os.path.exists(dir),
-                        "Plenary directory '%s' still exists" % dir)
+            self.assertFalse(os.path.exists(dir),
+                             "Plenary directory '%s' still exists" % dir)
 
     def check_plenary_contents(self, *path, **kwargs):
         # Passing lists as a keyword arg triggrest a type error
         contains = kwargs.pop('contains', None)
         clean = kwargs.pop('clean', None)
         if not contains and not clean:
-            self.assert_(0, "check_plenary_contents called without "
+            self.assertTrue(0, "check_plenary_contents called without "
                             "contains or clean")
 
         self.check_plenary_exists(*path)
@@ -176,14 +180,14 @@ class TestBrokerCommand(unittest.TestCase):
             dir = os.path.join(self.config.get("broker", "domainsdir"),
                                args.get("domain"))
         else:
-            self.assert_(0, "find_template() called without domain or sandbox")
+            self.assertTrue(0, "find_template() called without domain or sandbox")
 
         base = os.path.join(dir, *template)
 
         for extension in [".tpl", ".pan"]:
             if os.path.exists(base + extension):
                 return base + extension
-        self.assert_(0, "template %s does not exist with any extension" % base)
+        self.assertTrue(0, "template %s does not exist with any extension" % base)
 
     def build_profile_name(self, *template, **args):
         base = os.path.join(self.config.get("broker", "cfgdir"),
@@ -313,7 +317,7 @@ class TestBrokerCommand(unittest.TestCase):
             self.assertEqual(out, "",
                              "STDOUT for %s was not empty:\n@@@\n'%s'\n@@@\n" %
                              (command, out))
-            self.failUnless(err.find("Not Found") >= 0,
+            self.assertTrue(err.find("Not Found") >= 0,
                             "STDERR for %s did not include Not Found:"
                             "\n@@@\n'%s'\n@@@\n" %
                             (command, err))
@@ -326,7 +330,7 @@ class TestBrokerCommand(unittest.TestCase):
                          "\nSTDOUT:\n@@@\n'%s'\n@@@"
                          "\nSTDERR:\n@@@\n'%s'\n@@@" %
                          (command, p.returncode, 4, out, err))
-        self.failUnless(err.find("Bad Request") >= 0,
+        self.assertTrue(err.find("Bad Request") >= 0,
                         "STDERR for %s did not include Bad Request:"
                         "\n@@@\n'%s'\n@@@\n" %
                         (command, err))
@@ -346,7 +350,7 @@ class TestBrokerCommand(unittest.TestCase):
         self.assertEqual(out, "",
                          "STDOUT for %s was not empty:\n@@@\n'%s'\n@@@\n" %
                          (command, out))
-        self.failUnless(err.find("Unauthorized:") >= 0,
+        self.assertTrue(err.find("Unauthorized:") >= 0,
                         "STDERR for %s did not include Unauthorized:"
                         "\n@@@\n'%s'\n@@@\n" %
                         (command, err))
@@ -406,21 +410,21 @@ class TestBrokerCommand(unittest.TestCase):
         return self.badoptiontest(command, **kwargs)
 
     def matchoutput(self, out, s, command):
-        self.assert_(out.find(s) >= 0,
-                     "output for %s did not include '%s':\n@@@\n'%s'\n@@@\n" %
-                     (command, s, out))
+        self.assertTrue(out.find(s) >= 0,
+                        "output for %s did not include '%s':\n@@@\n'%s'\n@@@\n" %
+                        (command, s, out))
 
     def matchclean(self, out, s, command):
-        self.assert_(out.find(s) < 0,
-                     "output for %s includes '%s':\n@@@\n'%s'\n@@@\n" %
-                     (command, s, out))
+        self.assertTrue(out.find(s) < 0,
+                        "output for %s includes '%s':\n@@@\n'%s'\n@@@\n" %
+                        (command, s, out))
 
     def searchoutput(self, out, r, command):
         if isinstance(r, str):
             m = re.search(r, out, re.MULTILINE)
         else:
             m = re.search(r, out)
-        self.failUnless(m,
+        self.assertTrue(m,
                         "output for %s did not match '%s':\n@@@\n'%s'\n@@@\n"
                         % (command, r, out))
         return m
@@ -430,110 +434,58 @@ class TestBrokerCommand(unittest.TestCase):
             m = re.search(r, out, re.MULTILINE)
         else:
             m = re.search(r, out)
-        self.failIf(m,
-                    "output for %s matches '%s':\n@@@\n'%s'\n@@@\n" %
-                    (command, r, out))
+        self.assertFalse(m,
+                         "output for %s matches '%s':\n@@@\n'%s'\n@@@\n" %
+                         (command, r, out))
 
     def parse_proto_msg(self, listclass, attr, msg, expect=None):
         protolist = listclass()
         protolist.ParseFromString(msg)
         received = len(getattr(protolist, attr))
         if expect is None:
-            self.failUnless(received > 0,
+            self.assertTrue(received > 0,
                             "No %s listed in %s protobuf message\n" %
                             (attr, listclass))
         else:
-            self.failUnlessEqual(received, expect,
-                                 "%d %s expected, got %d\n" %
-                                 (expect, attr, received))
-        return protolist
+            self.assertEqual(received, expect,
+                             "%d %s expected, got %d\n" %
+                             (expect, attr, received))
+        return getattr(protolist, attr)
 
-    def parse_netlist_msg(self, msg, expect=None):
-        return self.parse_proto_msg(aqdnetworks_pb2.NetworkList,
-                                    'networks',
-                                    msg, expect)
+    def protobuftest(self, command, expect=None, **kwargs):
+        self.assertTrue(isinstance(command, list),
+                        "protobuftest() needs the command passed as a list")
 
-    def parse_hostlist_msg(self, msg, expect=None):
-        return self.parse_proto_msg(aqdsystems_pb2.HostList,
-                                    'hosts',
-                                    msg, expect)
+        # Extract the command name
+        cmd_name = command[0]
+        for part in command[1:]:
+            if part.startswith("-"):
+                break
+            cmd_name += "_" + part
 
-    def parse_machine_msg(self, msg, expect=None):
-        return self.parse_proto_msg(aqdsystems_pb2.MachineList,
-                                    'machines',
-                                    msg, expect)
+        nodelist = self.input_xml.xpath("/commandline/command[@name='%s']" %
+                                        cmd_name)
+        self.assertTrue(nodelist and len(nodelist) == 1,
+                        "Command '%s' was not found in input.xml" % cmd_name)
+        cmd_node = nodelist[0]
+        msg_node = None
+        for fmt_node in cmd_node.getiterator("format"):
+            if fmt_node.attrib["name"] != "proto":
+                continue
+            msg_node = fmt_node.find("message_class")
+            break
 
-    def parse_clusters_msg(self, msg, expect=None):
-        return self.parse_proto_msg(aqdsystems_pb2.ClusterList,
-                                    'clusters',
-                                    msg, expect)
+        self.assertTrue(msg_node is not None,
+                        "Command %s does not have protobuf support" % cmd_name)
 
-    def parse_location_msg(self, msg, expect=None):
-        return self.parse_proto_msg(aqdlocations_pb2.LocationList,
-                                    'locations',
-                                    msg, expect)
+        module_name = msg_node.attrib["module"]
+        cls_name = msg_node.attrib["name"]
 
-    def parse_dns_domainlist_msg(self, msg, expect=None):
-        return self.parse_proto_msg(aqddnsdomains_pb2.DNSDomainList,
-                                    'dns_domains',
-                                    msg, expect)
+        msg_cls = getattr(self.protocols[module_name], cls_name)
+        field = msg_cls.DESCRIPTOR.fields[0]
 
-    def parse_service_msg(self, msg, expect=None):
-        return self.parse_proto_msg(aqdservices_pb2.ServiceList,
-                                    'services',
-                                    msg, expect)
-
-    def parse_servicemap_msg(self, msg, expect=None):
-        return self.parse_proto_msg(aqdservices_pb2.ServiceMapList,
-                                    'servicemaps',
-                                    msg, expect)
-
-    def parse_archetype_msg(self, msg, expect=None):
-        return self.parse_proto_msg(aqdsystems_pb2.ArchetypeList,
-                                    'archetypes',
-                                    msg, expect)
-
-    def parse_personality_msg(self, msg, expect=None):
-        return self.parse_proto_msg(aqdsystems_pb2.PersonalityList,
-                                    'personalities',
-                                    msg, expect)
-
-    def parse_feature_msg(self, msg, expect=None):
-        return self.parse_proto_msg(aqdsystems_pb2.FeatureList,
-                                    'features',
-                                    msg, expect)
-
-    def parse_os_msg(self, msg, expect=None):
-        return self.parse_proto_msg(aqdsystems_pb2.OperatingSystemList,
-                                    'operating_systems',
-                                    msg, expect)
-
-    def parse_audit_msg(self, msg, expect=None):
-        return self.parse_proto_msg(aqdaudit_pb2.TransactionList,
-                                    'transactions', msg, expect)
-
-    def parse_resourcelist_msg(self, msg, expect=None):
-        return self.parse_proto_msg(aqdsystems_pb2.ResourceList,
-                                    'resources',
-                                    msg, expect)
-
-    def parse_paramdefinition_msg(self, msg, expect=None):
-        return self.parse_proto_msg(aqdparamdefinitions_pb2.ParamDefinitionList,
-                                    'param_definitions', msg, expect)
-
-    def parse_parameters_msg(self, msg, expect=None):
-        return self.parse_proto_msg(aqdparameters_pb2.ParameterList,
-                                    'parameters', msg, expect)
-
-    def parse_domain_msg(self, msg, expect=None):
-        return self.parse_proto_msg(aqdsystems_pb2.DomainList,
-                                    'domains',
-                                    msg, expect)
-
-    def parse_model_msg(self, msg, expect=None):
-        return self.parse_proto_msg(aqdsystems_pb2.ModelList,
-                                    'models',
-                                    msg, expect)
+        out = self.commandtest(command, **kwargs)
+        return self.parse_proto_msg(msg_cls, field.name, out, expect=expect)
 
     @classmethod
     def gitenv(cls, env=None):
@@ -592,11 +544,11 @@ class TestBrokerCommand(unittest.TestCase):
         p = self.gitcommand_raw(command, **kwargs)
         # Ignore out/err unless we get a non-zero return code, then log it.
         (out, err) = p.communicate()
-        self.failIfEqual(p.returncode, 0,
-                         "Zero return code for %s, "
-                         "STDOUT:\n@@@\n'%s'\n@@@\n"
-                         "STDERR:\n@@@\n'%s'\n@@@\n"
-                         % (command, out, err))
+        self.assertNotEqual(p.returncode, 0,
+                            "Zero return code for %s, "
+                            "STDOUT:\n@@@\n'%s'\n@@@\n"
+                            "STDERR:\n@@@\n'%s'\n@@@\n"
+                            % (command, out, err))
         return (out, err)
 
     def check_git_merge_health(self, repo):
@@ -799,18 +751,18 @@ class TestBrokerCommand(unittest.TestCase):
 
         for f in buildfiles:
             if want_exist:
-                self.failUnless(os.path.exists(f),
+                self.assertTrue(os.path.exists(f),
                                 "Expecting %s to exist before running %s." %
                                 (f, command))
             else:
-                self.failIf(os.path.exists(f),
-                            "Not expecting %s to exist after running %s." %
-                            (f, command))
+                self.assertFalse(os.path.exists(f),
+                                 "Not expecting %s to exist after running %s." %
+                                 (f, command))
 
         for f in exemptfiles:
-            self.failIf(os.path.exists(f),
-                        "Not expecting %s to exist after running %s." %
-                        (f, command))
+            self.assertFalse(os.path.exists(f),
+                             "Not expecting %s to exist after running %s." %
+                             (f, command))
 
     def demote_current_user(self, role="nobody"):
         command = ["permission", "--role", role,
@@ -828,7 +780,7 @@ class TestBrokerCommand(unittest.TestCase):
                          "Failed to restore admin privs '%s', '%s'." %
                          (out, err))
 
-    def assert_deprecation(self, depr_str, testfunc):
+    def assertTruedeprecation(self, depr_str, testfunc):
         with open(self.config.get("broker", "logfile"), "r") as logfile:
             # Let's seek to the end of it, matching only against the relevant part.
             logfile.seek(0, 2)

@@ -65,14 +65,14 @@ class TestMake(TestBrokerCommand):
 
         command = ["show_map", "--service=afs", "--instance=afs-by-net",
                    "--networkip=%s" % ip, "--format=proto"]
-        out = self.commandtest(command)
-        servicemaplist = self.parse_servicemap_msg(out, expect=1)
-        service_map = servicemaplist.servicemaps[0]
-        self.failUnlessEqual(service_map.network.ip, str(ip))
-        self.failUnlessEqual(service_map.network.env_name, 'internal')
-        self.failUnlessEqual(service_map.service.name, 'afs')
-        self.failUnlessEqual(service_map.service.serviceinstances[0].name,
-                             'afs-by-net')
+        service_map = self.protobuftest(command, expect=1)[0]
+        self.assertEqual(service_map.network.ip, str(ip))
+        self.assertEqual(service_map.network.cidr, 27)
+        self.assertEqual(service_map.network.type, "unknown")
+        self.assertEqual(service_map.network.env_name, 'internal')
+        self.assertEqual(service_map.service.name, 'afs')
+        self.assertEqual(service_map.service.serviceinstances[0].name,
+                         'afs-by-net')
 
     def testmakeafsbynet_4_make(self):
         command = ["make", "--hostname", "afs-by-net.aqd-unittest.ms.com"]
@@ -157,16 +157,16 @@ class TestMake(TestBrokerCommand):
         command = ["show_map", "--service=netmap", "--instance=netmap-pers",
                    "--networkip=%s" % ip, "--personality", "eaitools",
                    "--archetype", "aquilon", "--format=proto"]
-        out = self.commandtest(command)
-        servicemaplist = self.parse_servicemap_msg(out, expect=1)
-        service_map = servicemaplist.servicemaps[0]
-        self.failUnlessEqual(service_map.network.ip, str(ip))
-        self.failUnlessEqual(service_map.network.env_name, 'internal')
-        self.failUnlessEqual(service_map.service.name, 'netmap')
-        self.failUnlessEqual(service_map.service.serviceinstances[0].name,
-                             'netmap-pers')
-        self.failUnlessEqual(service_map.personality.name, 'eaitools')
-        self.failUnlessEqual(service_map.personality.archetype.name, 'aquilon')
+        service_map = self.protobuftest(command, expect=1)[0]
+        self.assertEqual(service_map.network.ip, str(ip))
+        self.assertEqual(service_map.network.cidr, 27)
+        self.assertEqual(service_map.network.type, "unknown")
+        self.assertEqual(service_map.network.env_name, 'internal')
+        self.assertEqual(service_map.service.name, 'netmap')
+        self.assertEqual(service_map.service.serviceinstances[0].name,
+                         'netmap-pers')
+        self.assertEqual(service_map.personality.name, 'eaitools')
+        self.assertEqual(service_map.personality.archetype.name, 'aquilon')
 
     def testmakenetmappers_6_make(self):
         command = ["make", "--hostname", "netmap-pers.aqd-unittest.ms.com"]
@@ -185,11 +185,11 @@ class TestMake(TestBrokerCommand):
             (out, err) = self.successtest(command)
             self.matchclean(err, "removing binding", command)
 
-            self.assert_(os.path.exists(os.path.join(
+            self.assertTrue(os.path.exists(os.path.join(
                 self.config.get("broker", "profilesdir"),
                 "evh1.aqd-unittest.ms.com%s" % self.xml_suffix)))
 
-            self.failUnless(os.path.exists(
+            self.assertTrue(os.path.exists(
                 self.build_profile_name("evh1.aqd-unittest.ms.com",
                                         domain="unittest")))
 
@@ -197,8 +197,8 @@ class TestMake(TestBrokerCommand):
                                       "servicedata")
             results = self.grepcommand(["-rl", "evh%s.aqd-unittest.ms.com" % i,
                                         servicedir])
-            self.failUnless(results, "No service plenary data that includes"
-                                     "evh%s.aqd-unittest.ms.com" % i)
+            self.assertTrue(results, "No service plenary data that includes"
+                            "evh%s.aqd-unittest.ms.com" % i)
 
     def testmake10gighosts(self):
         for i in range(51, 75):

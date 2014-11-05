@@ -37,8 +37,8 @@ class TestDelPersonality(TestBrokerCommand):
     def testverifyplenarydir(self):
         dir = os.path.join(self.config.get("broker", "plenarydir"),
                            "aquilon", "personality", "utpersonality")
-        self.failIf(os.path.exists(dir),
-                    "Plenary directory '%s' still exists" % dir)
+        self.assertFalse(os.path.exists(dir),
+                         "Plenary directory '%s' still exists" % dir)
 
     def testdeleaipersonality(self):
         command = ["del_personality", "--personality=eaitools",

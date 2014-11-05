@@ -43,6 +43,14 @@ class TestAddRack(TestBrokerCommand):
         self.matchoutput(out, "Row: a", command)
         self.matchoutput(out, "Column: 3", command)
 
+    def testverifyaddut3proto(self):
+        command = "show rack --rack ut3 --format proto"
+        loc = self.protobuftest(command.split(" "), expect=1)[0]
+        self.assertEqual(loc.name, "ut3")
+        self.assertEqual(loc.location_type, "rack")
+        self.assertEqual(loc.row, "a")
+        self.assertEqual(loc.col, "3")
+
     def testaddcards1(self):
         command = "add rack --rackid 1 --building cards --row a --column 1"
         self.noouttest(command.split(" "))

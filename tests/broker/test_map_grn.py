@@ -74,11 +74,9 @@ class TestMapGrn(VerifyGrnsMixin, PersonalityTestMixin, TestBrokerCommand):
 
         command = ["show_personality", "--archetype=aquilon",
                    "--personality=compileserver", "--format=proto"]
-        out = self.commandtest(command)
-        pl = self.parse_personality_msg(out, 1)
-        personality = pl.personalities[0]
-        self.failUnlessEqual(personality.archetype.name, "aquilon")
-        self.failUnlessEqual(personality.name, "compileserver")
+        personality = self.protobuftest(command, expect=1)[0]
+        self.assertEqual(personality.archetype.name, "aquilon")
+        self.assertEqual(personality.name, "compileserver")
         self.assertEqual(personality.eonid_maps[0].target, 'atarget')
         self.assertEqual(personality.eonid_maps[0].eonid, 6)
         self.assertEqual(personality.eonid_maps[1].target, 'esp')
@@ -351,7 +349,6 @@ class TestMapGrn(VerifyGrnsMixin, PersonalityTestMixin, TestBrokerCommand):
         out = self.commandtest(command)
         self.matchclean(out, "^  Used by GRN", command)
 
-
     def test_700_map_cluster(self):
         cluster = "utecl13"
         for grn in self.grn_list:
@@ -360,14 +357,13 @@ class TestMapGrn(VerifyGrnsMixin, PersonalityTestMixin, TestBrokerCommand):
             self.statustest(command)
 
         command = ["search_host", "--cluster", cluster]
-	hosts = sorted(self.commandtest(command).splitlines())
+        hosts = sorted(self.commandtest(command).splitlines())
 
         for host in hosts:
-	    command = ["show_host", "--hostname", host, "--grns"]
+            command = ["show_host", "--hostname", host, "--grns"]
             out = self.commandtest(command)
             self.matchoutput(out, "Used by GRN: grn:/ms/ei/aquilon/unittest [target: esp]", command)
             self.matchoutput(out, "Used by GRN: grn:/ms/ei/aquilon/aqd [target: esp]", command)
-
 
     def test_701_unmap_cluster(self):
         cluster = "utecl13"
@@ -376,10 +372,10 @@ class TestMapGrn(VerifyGrnsMixin, PersonalityTestMixin, TestBrokerCommand):
         self.statustest(command)
 
         command = ["search_host", "--cluster", cluster]
-	hosts = sorted(self.commandtest(command).splitlines())
+        hosts = sorted(self.commandtest(command).splitlines())
 
         for host in hosts:
-	    command = ["show_host", "--hostname", host, "--grns"]
+            command = ["show_host", "--hostname", host, "--grns"]
             out = self.commandtest(command)
             self.matchoutput(out, "Used by GRN: grn:/ms/ei/aquilon/unittest [target: esp]", command)
             self.matchclean(out, "Used by GRN: grn:/ms/ei/aquilon/aqd", command)

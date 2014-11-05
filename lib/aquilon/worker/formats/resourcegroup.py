@@ -36,13 +36,13 @@ class ResourceGroupFormatter(ResourceFormatter):
 
         return details
 
-    def format_proto(self, rg, container):
-        skeleton = container.resources.add()
-        self.add_resource_data(skeleton, rg)
+    def fill_proto(self, rg, skeleton):
+        super(ResourceGroupFormatter, self).fill_proto(rg, skeleton)
         if rg.required_type:
             skeleton.resourcegroup.required_type = rg.required_type
-        if rg.resholder and rg.resholder.resources:
-            for resource in rg.resholder.resources:
-                self.redirect_proto(resource, skeleton.resourcegroup)
+
+        if rg.resholder:
+            self.redirect_proto(rg.resholder.resources,
+                                skeleton.resourcegroup.resources)
 
 ObjectFormatter.handlers[ResourceGroup] = ResourceGroupFormatter()

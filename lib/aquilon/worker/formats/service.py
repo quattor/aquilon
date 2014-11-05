@@ -46,8 +46,19 @@ class ServiceFormatter(ObjectFormatter):
             details.append(self.redirect_raw(instance, indent + "  "))
         return "\n".join(details)
 
-    def format_proto(self, service, container):
-        skeleton = container.services.add()
-        self.add_service_data(skeleton, service)
+    def fill_proto(self, service, skeleton):
+        skeleton.name = str(service.name)
+        for si in service.instances:
+            # We can't call redirect_proto(), because ServiceInstanceFormatter
+            # produces a Service message rather than a ServiceInstance message.
+            si_msg = skeleton.serviceinstances.add()
+            si_msg.name = str(si.name)
+            for srv in si.servers:
+                if srv.host:
+                    self.redirect_proto(srv.host, si_msg.servers.add())
+                # TODO: extra IP address/service address information
+                # TODO: cluster-provided services
+            # TODO: make this conditional to avoid performance problems
+            # self.redirect_proto(client.hosts, si_msg.clients)
 
 ObjectFormatter.handlers[Service] = ServiceFormatter()

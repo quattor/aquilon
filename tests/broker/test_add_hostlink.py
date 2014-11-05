@@ -58,16 +58,14 @@ class TestAddHostlink(TestBrokerCommand):
     def test_110_show_host_proto(self):
         command = ["show_host", "--hostname=server1.aqd-unittest.ms.com",
                    "--format=proto"]
-        out = self.commandtest(command)
-        hostlist = self.parse_hostlist_msg(out, expect=1)
-        host = hostlist.hosts[0]
+        host = self.protobuftest(command, expect=1)[0]
         hostlinkfound = False
         for resource in host.resources:
             if resource.name == "app1" and resource.type == "hostlink":
-                self.failUnlessEqual(resource.hostlink.target,
-                                     "/var/spool/hostlinks/app1")
-                self.failUnlessEqual(resource.hostlink.owner_user, "user1")
-                self.failUnlessEqual(resource.hostlink.owner_group, "")
+                self.assertEqual(resource.hostlink.target,
+                                 "/var/spool/hostlinks/app1")
+                self.assertEqual(resource.hostlink.owner_user, "user1")
+                self.assertEqual(resource.hostlink.owner_group, "")
                 hostlinkfound = True
         self.assertTrue(hostlinkfound,
                         "Hostlink app1 not found in the resources. "

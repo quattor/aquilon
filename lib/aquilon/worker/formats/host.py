@@ -21,15 +21,39 @@ from six import iteritems
 
 from aquilon.aqdb.model import Host
 from aquilon.worker.formats.formatters import ObjectFormatter
+from aquilon.worker.formats.compileable import CompileableFormatter
 from aquilon.worker.formats.list import ListFormatter
 from aquilon.worker.dbwrappers.feature import (model_features,
                                                personality_features)
 
 
-class HostFormatter(ObjectFormatter):
-    def format_proto(self, host, container):
-        skeleton = container.hosts.add()
-        self.add_host_data(skeleton, host)
+class HostFormatter(CompileableFormatter):
+    def fill_proto(self, host, skeleton):
+        super(HostFormatter, self).fill_proto(host, skeleton)
+        skeleton.type = "host"  # Deprecated
+        dbhw_ent = host.hardware_entity
+        skeleton.hostname = str(dbhw_ent.primary_name.fqdn.name)
+        skeleton.fqdn = str(dbhw_ent.primary_name.fqdn)
+        skeleton.dns_domain = str(dbhw_ent.primary_name.fqdn.dns_domain.name)
+        skeleton.sysloc = str(dbhw_ent.location.sysloc())
+        if dbhw_ent.primary_ip:
+            skeleton.ip = str(dbhw_ent.primary_ip)
+        for iface in dbhw_ent.interfaces:
+            if iface.interface_type != 'public' or not iface.bootable:
+                continue
+            skeleton.mac = str(iface.mac)
+
+        if host.resholder:
+            self.redirect_proto(host.resholder.resources, skeleton.resources)
+
+        if host.cluster:
+            skeleton.cluster = host.cluster.name
+
+        skeleton.owner_eonid = host.effective_owner_grn.eon_id
+        self.redirect_proto(host.archetype, skeleton.archetype)  # Deprecated
+        self.redirect_proto(host.operating_system, skeleton.operating_system)
+        self.redirect_proto(dbhw_ent, skeleton.machine)
+
         for si in host.services_used:
             srv_msg = skeleton.services_used.add()
             srv_msg.service = si.service.name
@@ -39,6 +63,15 @@ class HostFormatter(ObjectFormatter):
             srv_msg = skeleton.services_provided.add()
             srv_msg.service = si.service.name
             srv_msg.instance = si.name
+
+        for target, eon_id_set in iteritems(host.effective_grns):
+            for grn_rec in eon_id_set:
+                map = skeleton.eonid_maps.add()
+                map.target = target
+                map.eonid = grn_rec.eon_id
+
+        if host.virtual_switch:
+            self.redirect_proto(host.virtual_switch, skeleton.virtual_switch)
 
     def format_raw(self, host, indent=""):
         # The 'aq show host' command returns a host object; however, we
@@ -147,9 +180,9 @@ class GrnHostListFormatter(ListFormatter):
 
     def format_proto(self, hostlist, container):
         for host in hostlist:
-            msg = container.hosts.add()
+            msg = container.add()
             msg.hostname = str(host.hardware_entity.primary_name)
-            self.add_branch_data(msg.domain, host.branch)
+            self.redirect_proto(host.branch, msg.domain)
             msg.status = str(host.status.name)
             msg.owner_eonid = host.effective_owner_grn.eon_id
 
@@ -166,7 +199,7 @@ class GrnHostListFormatter(ListFormatter):
                 map.eonid = grn_rec.eon_id
 
             for target, eon_id_set in iteritems(host.effective_grns):
-                for grn_rec in list(eon_id_set):
+                for grn_rec in eon_id_set:
                     map = msg.eonid_maps.add()
                     map.target = target
                     map.eonid = grn_rec.eon_id

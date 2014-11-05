@@ -66,6 +66,13 @@ class TestManage(PersonalityTestMixin, TestBrokerCommand):
         self.matchoutput(out, "Primary Name: unittest02.one-nyp.ms.com", command)
         self.matchoutput(out, "Sandbox: %s/changetest1" % self.user, command)
 
+    def test_105_show_unittest02_proto(self):
+        command = "show host --hostname unittest02.one-nyp.ms.com --format proto"
+        host = self.protobuftest(command.split(" "), expect=1)[0]
+        self.assertEqual(host.sandbox_author, self.user)
+        self.assertEqual(host.domain.name, "changetest1")
+        self.assertEqual(host.domain.type, host.domain.SANDBOX)
+
     def test_108_manage_unittest02_again(self):
         self.noouttest(["manage", "--hostname", "unittest02.one-nyp.ms.com",
                         "--sandbox", "%s/changetest1" % self.user])
@@ -118,7 +125,7 @@ class TestManage(PersonalityTestMixin, TestBrokerCommand):
         self.verify_buildfiles("unittest", "clusters/utecl1", want_exist=True)
         command = ["search_host", "--cluster", "utecl1"]
         hosts = self.commandtest(command).splitlines()
-        self.failUnless(hosts, "No hosts in cluster utecl1, bad test.")
+        self.assertTrue(hosts, "No hosts in cluster utecl1, bad test.")
         for host in hosts:
             self.verify_buildfiles("unittest", host, want_exist=True)
 
@@ -154,15 +161,29 @@ class TestManage(PersonalityTestMixin, TestBrokerCommand):
         command = ["search_host", "--cluster=utecl1"]
         out = self.commandtest(command)
         members = sorted(out.splitlines())
-        self.failUnless(members, "No hosts in output of %s." % command)
+        self.assertTrue(members, "No hosts in output of %s." % command)
 
         command = ["search_host", "--cluster=utecl1",
                    "--sandbox=%s/utsandbox" % self.user]
         out = self.commandtest(command)
         aligned = sorted(out.splitlines())
-        self.failUnlessEqual(members, aligned,
-                             "Not all utecl1 cluster members (%s) are in "
-                             "sandbox utsandbox (%s)." % (members, aligned))
+        self.assertEqual(members, aligned,
+                         "Not all utecl1 cluster members (%s) are in "
+                         "sandbox utsandbox (%s)." % (members, aligned))
+
+    def test_135_show_utecl1_proto(self):
+        command = ["show_esx_cluster", "--cluster=utecl1", "--format", "proto"]
+        cluster = self.protobuftest(command, expect=1)[0]
+        self.assertEqual(cluster.sandbox_author, self.user)
+        self.assertEqual(cluster.domain.name, "utsandbox")
+        self.assertEqual(cluster.domain.type, cluster.domain.SANDBOX)
+
+    def test_135_show_utmc1_proto(self):
+        command = ["show_metacluster", "--metacluster=utmc1", "--format", "proto"]
+        mc = self.protobuftest(command, expect=1)[0]
+        self.assertEqual(mc.sandbox_author, self.user)
+        self.assertEqual(mc.domain.name, "utsandbox")
+        self.assertEqual(mc.domain.type, mc.domain.SANDBOX)
 
     def test_140_xml_profiles(self):
         self.noouttest(["manage", "--domain", "unittest-xml", "--force",
@@ -181,7 +202,7 @@ class TestManage(PersonalityTestMixin, TestBrokerCommand):
     def test_150_setup_featuretest(self):
         self.create_personality("aquilon", "featuretest")
         self.noouttest(["add_feature", "--feature", "notemplate",
-                        "--type", "host", "--eon_id", 2 ])
+                        "--type", "host", "--eon_id", 2])
         self.noouttest(["manage", "--hostname", "aquilon68.aqd-unittest.ms.com",
                         "--domain", "unittest", "--force"])
         self.statustest(["reconfigure", "--hostname", "aquilon68.aqd-unittest.ms.com",

@@ -48,7 +48,7 @@ class TestChangeClusterStatus(TestBrokerCommand):
         # FIXME: the number of changed templates is not deterministic, we have
         # to figure out why. Until then make the check less strict to allow
         # unrelated changes to be tested.
-        #self.matchoutput(err, "5/5 object template", command)
+        # self.matchoutput(err, "5/5 object template", command)
         self.searchoutput(err, r'[1-5]/[1-5] object template', command)
 
         # the almostready host should now be promoted
@@ -91,7 +91,7 @@ class TestChangeClusterStatus(TestBrokerCommand):
         # FIXME: the number of changed templates is not deterministic, we have
         # to figure out why. Until then make the check less strict to allow
         # unrelated changes to be tested.
-        #self.matchoutput(err, "5/5 object template", command)
+        # self.matchoutput(err, "5/5 object template", command)
         self.searchoutput(err, r'[1-5]/[1-5] object template', command)
 
         # the ready host should be demoted

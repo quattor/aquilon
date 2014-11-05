@@ -98,17 +98,15 @@ class TestAddRebootSchedule(TestBrokerCommand):
     def test_120_show_host_proto(self):
         command = ["show_host", "--hostname=server1.aqd-unittest.ms.com",
                    "--format=proto"]
-        out = self.commandtest(command)
-        hostlist = self.parse_hostlist_msg(out, expect=1)
-        host = hostlist.hosts[0]
+        host = self.protobuftest(command, expect=1)[0]
         found = False
         for resource in host.resources:
             if resource.name == "reboot_schedule" and \
                resource.type == "reboot_schedule":
                 found = True
-                self.failUnlessEqual(resource.reboot_schedule.week, "All")
-                self.failUnlessEqual(resource.reboot_schedule.day, "Sun")
-                self.failUnlessEqual(resource.reboot_schedule.time, "08:00")
+                self.assertEqual(resource.reboot_schedule.week, "All")
+                self.assertEqual(resource.reboot_schedule.day, "Sun")
+                self.assertEqual(resource.reboot_schedule.time, "08:00")
         self.assertTrue(found,
                         "Reboot schedule not found in the resources. "
                         "Existing resources: %s" %

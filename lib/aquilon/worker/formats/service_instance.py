@@ -18,7 +18,6 @@
 
 from aquilon.worker.formats.formatters import ObjectFormatter
 from aquilon.aqdb.model import ServiceInstance, ServiceInstanceServer
-from aquilon.aqdb.data_sync.storage import StormapParser
 
 
 class ServiceInstanceServerFormatter(ObjectFormatter):
@@ -73,9 +72,17 @@ class ServiceInstanceFormatter(ObjectFormatter):
             details.append(indent + "  Comments: %s" % si.comments)
         return "\n".join(details)
 
-    def format_proto(self, si, container):
-        skeleton = container.services.add()
-        self.add_service_data(skeleton, si.service, si)
+    def fill_proto(self, si, skeleton):
+        skeleton.name = si.service.name
+        si_msg = skeleton.serviceinstances.add()
+        si_msg.name = str(si.name)
+        for srv in si.servers:
+            if srv.host:
+                self.redirect_proto(srv.host, si_msg.servers.add())
+            # TODO: extra IP address/service address information
+            # TODO: cluster-provided services
+        # TODO: make this conditional to avoid performance problems
+        # self.redirect_proto(client.hosts, si_msg.clients)
 
     # Applies to service_instance/share as well.
     @classmethod

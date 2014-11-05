@@ -39,8 +39,7 @@ class ParamDefinitionFormatter(ObjectFormatter):
         details.append(indent + "  Rebuild Required: %s" % paramdef.rebuild_required)
         return "\n".join(details)
 
-    def format_proto(self, paramdef, container):
-        skeleton = container.param_definitions.add()
+    def fill_proto(self, paramdef, skeleton):
         skeleton.path = str(paramdef.path)
         skeleton.value_type = str(paramdef.value_type)
         skeleton.is_required = paramdef.required

@@ -88,6 +88,13 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, MachineTestMixin,
             self.noouttest(["update_cluster", "--cluster", self.cluster[i],
                             "--virtual_switch", "utvswitch"])
 
+    def test_035_show_cluster0_proto(self):
+        command = ["show_cluster", "--cluster", self.cluster[0],
+                   "--format", "proto"]
+        cluster = self.protobuftest(command, expect=1)[0]
+        self.assertEqual(cluster.name, self.cluster[0])
+        self.assertEqual(cluster.virtual_switch.name, "utvswitch")
+
     def test_050_add_vmhost(self):
         for i in range(0, 2):
             ip = self.net["autopg2"].usable[i]
@@ -191,9 +198,7 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, MachineTestMixin,
 
     def test_141_verify_proto(self):
         command = ["show_machine", "--machine", "utpgm0", "--format", "proto"]
-        out = self.commandtest(command)
-        machinelist = self.parse_machine_msg(out, expect=1)
-        machine = machinelist.machines[0]
+        machine = self.protobuftest(command, expect=1)[0]
         self.assertEqual(machine.name, "utpgm0")
         self.assertEqual(len(machine.disks), 1)
         self.assertEqual(machine.disks[0].device_name, "sda")

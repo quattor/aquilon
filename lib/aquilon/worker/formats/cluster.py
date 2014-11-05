@@ -20,16 +20,14 @@ from operator import attrgetter
 from aquilon.aqdb.model import (Cluster, EsxCluster, ComputeCluster,
                                 StorageCluster)
 from aquilon.worker.formats.formatters import ObjectFormatter
+from aquilon.worker.formats.compileable import CompileableFormatter
 
 
-class ClusterFormatter(ObjectFormatter):
-    def format_proto(self, cluster, container):
-        skeleton = container.clusters.add()
+class ClusterFormatter(CompileableFormatter):
+    def fill_proto(self, cluster, skeleton):
+        super(ClusterFormatter, self).fill_proto(cluster, skeleton)
+
         skeleton.name = str(cluster.name)
-        skeleton.status = str(cluster.status)
-        self.add_personality_data(skeleton.personality, cluster.personality)
-        self.add_branch_data(skeleton.domain, cluster.branch)
-
         skeleton.threshold = cluster.down_hosts_threshold
         skeleton.threshold_is_percent = cluster.down_hosts_percent
         if cluster.down_maint_threshold is not None:
@@ -37,12 +35,18 @@ class ClusterFormatter(ObjectFormatter):
             skeleton.maint_threshold_is_percent = \
                 cluster.down_maint_percent
 
-        for host in sorted(cluster.hosts, key=attrgetter("fqdn")):
-            self.add_host_data(skeleton.hosts.add(), host)
+        self.redirect_proto(cluster.hosts, skeleton.hosts)
+        self.redirect_proto(cluster.location_constraint,
+                            skeleton.location_constraint)
+
+        if cluster.max_hosts is not None:
+            skeleton.max_members = cluster.max_hosts
+
+        if cluster.metacluster:
+            skeleton.metacluster = str(cluster.metacluster.name)
 
         if cluster.resholder and len(cluster.resholder.resources) > 0:
-            for resource in cluster.resholder.resources:
-                self.redirect_proto(resource, skeleton)
+            self.redirect_proto(cluster.resholder.resources, skeleton.resources)
 
         for dbsi in cluster.services_used:
             # Should be just 'services', but that would change the protocol.
@@ -73,8 +77,9 @@ class ClusterFormatter(ObjectFormatter):
                     u.name = name
                     u.value = value
 
-        if cluster.max_hosts is not None:
-            skeleton.max_members = cluster.max_hosts
+        if cluster.virtual_switch:
+            self.redirect_proto(cluster.virtual_switch,
+                                skeleton.virtual_switch)
 
     def format_raw(self, cluster, indent=""):
         details = [indent + "{0:c}: {0.name}".format(cluster)]

@@ -42,10 +42,10 @@ class TestPublishSandbox(TestBrokerCommand):
                       cwd=testdir, env=cls.gitenv(env={'PATH': '/bin:/usr/bin'}),
                       stdout=PIPE, stderr=PIPE)
             (out, err) = p.communicate()
-            self.assertEqual(p.returncode, 0,
-                             "Non-zero return code running make clean in sandbox,"
-                             " STDOUT:\n@@@'%s'\n@@@\nSTDERR:\n@@@'%s'@@@\n"
-                             % (out, err))
+            cls.assertEqual(p.returncode, 0,
+                            "Non-zero return code running make clean in sandbox,"
+                            " STDOUT:\n@@@'%s'\n@@@\nSTDERR:\n@@@'%s'@@@\n"
+                            % (out, err))
 
     def testmakechange(self):
         sandboxdir = os.path.join(self.sandboxdir, "changetest1")
@@ -76,14 +76,14 @@ class TestPublishSandbox(TestBrokerCommand):
         p = Popen(["/bin/rm", "-rf", sandboxdir], stdout=1, stderr=2)
         rc = p.wait()
         self.successtest(["get", "--sandbox", "changetest1"])
-        self.failUnless(os.path.exists(sandboxdir))
+        self.assertTrue(os.path.exists(sandboxdir))
         template = self.find_template("aquilon", "archetype", "base",
                                       sandbox="changetest1")
-        self.failUnless(os.path.exists(template),
+        self.assertTrue(os.path.exists(template),
                         "aq get did not retrive '%s'" % template)
         with open(template) as f:
             contents = f.readlines()
-        self.failUnlessEqual(contents[-1], "#Added by unittest\n")
+        self.assertEqual(contents[-1], "#Added by unittest\n")
 
     def testaddutfiles(self):
         src_dir = os.path.join(self.config.get("unittest", "datadir"),

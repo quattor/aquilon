@@ -232,15 +232,13 @@ class TestAddAlias(TestBrokerCommand):
 
         command = ["show", "host", "--hostname", "unittest20.aqd-unittest.ms.com",
                    "--format", "proto"]
-        out = self.commandtest(command)
-        hostlist = self.parse_hostlist_msg(out, expect=1)
-        host = hostlist.hosts[0]
-        self.failUnlessEqual(host.hostname, 'unittest20')
+        host = self.protobuftest(command, expect=1)[0]
+        self.assertEqual(host.hostname, 'unittest20')
         int = host.machine.interfaces[0]
-        self.failUnlessEqual(int.aliases[0], 'alias0.aqd-unittest.ms.com')
-        self.failUnlessEqual(int.aliases[1], 'alias01.aqd-unittest.ms.com')
-        self.failUnlessEqual(int.ip, '4.2.12.5')
-        self.failUnlessEqual(int.fqdn, 'unittest20-e0.aqd-unittest.ms.com')
+        self.assertEqual(int.aliases[0], 'alias0.aqd-unittest.ms.com')
+        self.assertEqual(int.aliases[1], 'alias01.aqd-unittest.ms.com')
+        self.assertEqual(int.ip, '4.2.12.5')
+        self.assertEqual(int.fqdn, 'unittest20-e0.aqd-unittest.ms.com')
 
         command = ["del", "alias", "--fqdn", "alias01.aqd-unittest.ms.com"]
         out = self.commandtest(command)
@@ -265,15 +263,13 @@ class TestAddAlias(TestBrokerCommand):
 
         command = ["show", "host", "--hostname", "unittest20.aqd-unittest.ms.com",
                    "--format", "proto"]
-        out = self.commandtest(command)
-        hostlist = self.parse_hostlist_msg(out, expect=1)
-        host = hostlist.hosts[0]
-        self.failUnlessEqual(host.hostname, 'unittest20')
+        host = self.protobuftest(command, expect=1)[0]
+        self.assertEqual(host.hostname, 'unittest20')
         int = host.machine.interfaces[5]
-        self.failUnlessEqual(int.aliases[0], 'alias1.aqd-unittest.ms.com')
-        self.failUnlessEqual(int.aliases[1], 'alias11.aqd-unittest.ms.com')
-        self.failUnlessEqual(int.ip, '4.2.12.72')
-        self.failUnlessEqual(int.fqdn, 'unittest20-e1-1.aqd-unittest.ms.com')
+        self.assertEqual(int.aliases[0], 'alias1.aqd-unittest.ms.com')
+        self.assertEqual(int.aliases[1], 'alias11.aqd-unittest.ms.com')
+        self.assertEqual(int.ip, '4.2.12.72')
+        self.assertEqual(int.fqdn, 'unittest20-e1-1.aqd-unittest.ms.com')
 
         command = ["del", "alias", "--fqdn", "alias11.aqd-unittest.ms.com"]
         out = self.commandtest(command)

@@ -100,9 +100,7 @@ class TestUpdateInterface(TestBrokerCommand):
 
     def test_121_verify_show_ut3c5n10_interfaces_proto(self):
         command = ["show_machine", "--machine", "ut3c5n10", "--format", "proto"]
-        out = self.commandtest(command)
-        machinelist = self.parse_machine_msg(out, expect=1)
-        machine = machinelist.machines[0]
+        machine = self.protobuftest(command, expect=1)[0]
         self.assertEqual(machine.name, "ut3c5n10")
         self.assertEqual(len(machine.interfaces), 4)
         self.assertEqual(machine.interfaces[0].device, "eth0")
@@ -433,8 +431,8 @@ class TestUpdateInterface(TestBrokerCommand):
         self.matchclean(out, str(self.net["unknown0"].usable[0]), command)
 
     def test_300_verify_cat_ut3c5n10_interfaces(self):
-        #FIX ME: this doesn't really test anything at the moment: needs to be
-        #statefully parsing the interface output
+        # FIXME: this doesn't really test anything at the moment: needs to be
+        # statefully parsing the interface output
         command = "cat --machine ut3c5n10"
         out = self.commandtest(command.split(" "))
         self.searchoutput(out,

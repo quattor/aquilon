@@ -24,7 +24,7 @@ if __name__ == "__main__":
 import unittest2 as unittest
 from broker.brokertest import TestBrokerCommand
 
-## validation parameters by templates
+# validation parameters by templates
 AQUILON_PARAM_DEFS = {
     "access": [
         {
@@ -40,17 +40,17 @@ AQUILON_PARAM_DEFS = {
     ],
     "actions": [
         {
-            "path": "action/\w+/user",
+            "path": r"action/\w+/user",
             "value_type": "string",
             "description": "action user"
         },
         {
-            "path": "action/\w+/command",
+            "path": r"action/\w+/command",
             "value_type": "string",
             "description": "action command"
         },
         {
-            "path": "action/\w+",
+            "path": r"action/\w+",
             "value_type": "json",
             "description": "per action block"
         },

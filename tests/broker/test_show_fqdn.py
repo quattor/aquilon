@@ -31,7 +31,7 @@ class TestShowFqdn(TestBrokerCommand):
         command = "show fqdn --all"
         (out, err) = self.successtest(command.split(" "))
         # The aq client does not ask for this...
-        #self.matchoutput(err, "The show_fqdn command is deprecated.", command)
+        # self.matchoutput(err, "The show_fqdn command is deprecated.", command)
 
         # Chassis
         self.matchoutput(out, "ut3c1.aqd-unittest.ms.com", command)

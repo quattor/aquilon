@@ -52,6 +52,18 @@ class TestAddVirtualSwitch(TestBrokerCommand):
         self.matchoutput(out, "Network: %s" % net.ip, command)
         self.matchclean(out, "Comments", command)
 
+    def test_115_show_utvswitch_proto(self):
+        net = self.net["autopg1"]
+        command = ["show_virtual_switch", "--virtual_switch", "utvswitch",
+                   "--format", "proto"]
+        vswitch = self.protobuftest(command, expect=1)[0]
+        self.assertEqual(vswitch.name, "utvswitch")
+        self.assertEqual(len(vswitch.portgroups), 1)
+        self.assertEqual(vswitch.portgroups[0].ip, str(net.ip))
+        self.assertEqual(vswitch.portgroups[0].cidr, 29)
+        self.assertEqual(vswitch.portgroups[0].network_tag, 710)
+        self.assertEqual(vswitch.portgroups[0].usage, "user")
+
     def test_115_cat_utvswitch(self):
         net = self.net["autopg1"]
         command = ["cat", "--virtual_switch", "utvswitch", "--data"]

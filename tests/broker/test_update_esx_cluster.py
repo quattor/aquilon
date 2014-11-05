@@ -34,8 +34,8 @@ class TestUpdateESXCluster(TestBrokerCommand):
     def test_110_verifynoop(self):
         command = "show esx_cluster --cluster utecl4"
         out = self.commandtest(command.split(" "))
-        default_max = self.config.get("archetype_esx_cluster",
-                                      "max_members_default")
+        default_max = self.config.getint("archetype_esx_cluster",
+                                         "max_members_default")
         self.matchoutput(out, "ESX Cluster: utecl4", command)
         self.matchoutput(out, "Metacluster: utmc2", command)
         self.matchoutput(out, "Building: ut", command)
@@ -157,7 +157,7 @@ class TestUpdateESXCluster(TestBrokerCommand):
         command = ["search_host", "--cluster=utecl1",
                    "--personality=vulcan-1g-desktop-prod"]
         original_hosts = sorted(self.commandtest(command).splitlines())
-        self.failUnless(original_hosts, "No hosts found using %s" % command)
+        self.assertTrue(original_hosts, "No hosts found using %s" % command)
 
         # Also test that the host plenary will be re-written correctly.
         command = ["cat", "--hostname", original_hosts[0]]
@@ -174,12 +174,12 @@ class TestUpdateESXCluster(TestBrokerCommand):
         command = ["search_host", "--cluster=utecl1",
                    "--osversion=4.1.0-u1"]
         updated_hosts = sorted(self.commandtest(command).splitlines())
-        self.failUnless(updated_hosts, "No hosts found using %s" % command)
+        self.assertTrue(updated_hosts, "No hosts found using %s" % command)
 
-        self.failUnlessEqual(original_hosts, updated_hosts,
-                             "Expected only/all updated hosts %s to match the "
-                             "list of original hosts %s" %
-                             (updated_hosts, original_hosts))
+        self.assertEqual(original_hosts, updated_hosts,
+                         "Expected only/all updated hosts %s to match the "
+                         "list of original hosts %s" %
+                         (updated_hosts, original_hosts))
 
         command = ["cat", "--hostname", updated_hosts[0]]
         out = self.commandtest(command)
@@ -218,8 +218,8 @@ class TestUpdateESXCluster(TestBrokerCommand):
         self.matchoutput(out, "cannot support VMs", command)
 
     def test_450_verifyutecl1(self):
-        default_max = self.config.get("archetype_esx_cluster",
-                                      "max_members_default")
+        default_max = self.config.getint("archetype_esx_cluster",
+                                         "max_members_default")
         command = "show esx_cluster --cluster utecl1"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "ESX Cluster: utecl1", command)
@@ -254,13 +254,13 @@ class TestUpdateESXCluster(TestBrokerCommand):
                    "--maint_threshold=50%"]
         out = self.successtest(command)
 
-        ## verify show
+        # verify show
         command = "show esx_cluster --cluster %s" % cname
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Down Hosts Threshold: 0 (1%)", command)
         self.matchoutput(out, "Maintenance Threshold: 2 (50%)", command)
 
-        ## verify cat
+        # verify cat
         command = "cat --cluster=%s --data" % cname
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, '"system/cluster/down_hosts_threshold" = 0;',

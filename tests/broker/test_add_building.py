@@ -60,10 +60,9 @@ class TestAddBuilding(TestBrokerCommand):
 
     def testverifyaddbuproto(self):
         command = "show building --building bu --format proto"
-        out = self.commandtest(command.split(" "))
-        locs = self.parse_location_msg(out, 1)
-        self.matchoutput(locs.locations[0].name, "bu", command)
-        self.matchoutput(locs.locations[0].location_type, "building", command)
+        loc = self.protobuftest(command.split(" "), expect=1)[0]
+        self.matchoutput(loc.name, "bu", command)
+        self.matchoutput(loc.location_type, "building", command)
 
     def testverifybuildingall(self):
         command = ["show", "building", "--all"]

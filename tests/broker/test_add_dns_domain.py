@@ -75,12 +75,21 @@ class TestAddDnsDomain(TestBrokerCommand):
         self.matchoutput(out, "DNS Domain: restrict.aqd-unittest.ms.com", command)
         self.matchoutput(out, "Restricted: True", command)
 
+    def testverifyaddrestricteddomainproto(self):
+        command = ["show_dns_domain",
+                   "--dns_domain", "restrict.aqd-unittest.ms.com",
+                   "--format", "proto"]
+        domain = self.protobuftest(command, expect=1)[0]
+        self.assertEqual(domain.name, "restrict.aqd-unittest.ms.com")
+        self.assertEqual(domain.restricted, True)
+
     def testverifyaddaqdunittestdomainproto(self):
         command = ["show", "dns_domain", "--dns_domain=aqd-unittest.ms.com",
                    "--format=proto"]
-        out = self.commandtest(command)
-        domain = self.parse_dns_domainlist_msg(out, expect=1).dns_domains[0]
-        self.failUnlessEqual(domain.name, 'aqd-unittest.ms.com')
+        msgs = self.protobuftest(command, expect=1)
+        domain = msgs[0]
+        self.assertEqual(domain.name, 'aqd-unittest.ms.com')
+        self.assertEqual(domain.restricted, False)
 
     def testaddtoolongdomain(self):
         command = ['add', 'dns_domain', '--dns_domain',
@@ -109,11 +118,10 @@ class TestAddDnsDomain(TestBrokerCommand):
 
     def testverifyshowallproto(self):
         command = "show dns_domain --all --format=proto"
-        out = self.commandtest(command.split(" "))
-        dns_domains = self.parse_dns_domainlist_msg(out).dns_domains
+        dns_domains = self.protobuftest(command.split(" "))
         dns_names = [d.name for d in dns_domains]
         for domain in ['ms.com', 'aqd-unittest.ms.com', 'aqd-unittest-ut-env.ms.com']:
-            self.failUnless(domain in dns_names,
+            self.assertTrue(domain in dns_names,
                             "Domain %s not in list %s" % (domain, dns_names))
 
     def testaddtd1(self):

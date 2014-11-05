@@ -65,10 +65,8 @@ class TestCluster(TestBrokerCommand):
     def testverifyevh1proto(self):
         command = ["show_host", "--hostname", "evh1.aqd-unittest.ms.com",
                    "--format", "proto"]
-        out = self.commandtest(command)
-        hostlist = self.parse_hostlist_msg(out, expect=1)
-        host = hostlist.hosts[0]
-        self.failUnlessEqual(host.cluster, "utecl1")
+        host = self.protobuftest(command, expect=1)[0]
+        self.assertEqual(host.cluster, "utecl1")
 
     def testverifycat(self):
         cat_cluster_command = "cat --cluster utecl1"

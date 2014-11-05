@@ -87,22 +87,19 @@ class TestAddInterfaceAddress(TestBrokerCommand):
         e0net = self.net["zebra_eth0"]
         e0ip = e0net.usable[0]
         command = ["show", "network", "--ip", e0net.ip, "--format", "proto"]
-        out = self.commandtest(command)
-
-        msg = self.parse_netlist_msg(out, expect=1)
-        network = msg.networks[0]
+        network = self.protobuftest(command, expect=1)[0]
         ut20 = None
         for host in network.hosts:
             if host.ip == str(e0ip):
                 ut20 = host
                 break
 
-        self.failUnless(ut20 is not None,
+        self.assertTrue(ut20 is not None,
                         "%s is missing from network protobuf output" % e0ip)
-        self.failUnless(ut20.archetype.name == "aquilon",
+        self.assertTrue(ut20.archetype.name == "aquilon",
                         "archetype is '%s' instead of aquilon in protobuf output" %
                         ut20.archetype.name)
-        self.failUnless(str(ut20.mac) == str(e0ip.mac),
+        self.assertTrue(str(ut20.mac) == str(e0ip.mac),
                         "MAC is '%s' instead of %s in protobuf output" %
                         (ut20.mac, e0ip.mac))
 

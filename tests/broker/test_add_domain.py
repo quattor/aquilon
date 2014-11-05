@@ -40,7 +40,7 @@ class TestAddDomain(TestBrokerCommand):
                    "--comments", "aqd unit test tracking domain",
                    "--disallow_manage"]
         self.successtest(command)
-        self.failUnless(os.path.exists(os.path.join(
+        self.assertTrue(os.path.exists(os.path.join(
             self.config.get("broker", "domainsdir"), "unittest")))
 
     def test_115_verify_unittest(self):
@@ -56,9 +56,7 @@ class TestAddDomain(TestBrokerCommand):
 
     def test_115_verify_unittest_proto(self):
         command = ["show_domain", "--domain=unittest", "--format", "proto"]
-        out = self.commandtest(command)
-        domainlist = self.parse_domain_msg(out, expect=1)
-        domain = domainlist.domains[0]
+        domain = self.protobuftest(command, expect=1)[0]
         self.assertEqual(domain.name, "unittest")
         self.assertEqual(domain.owner, "%s@%s" % (self.user, self.realm))
         self.assertEqual(domain.tracked_branch, "utsandbox")
@@ -68,7 +66,7 @@ class TestAddDomain(TestBrokerCommand):
     def test_110_add_utprod(self):
         command = ["add_domain", "--domain=ut-prod", "--track=prod"]
         self.successtest(command)
-        self.failUnless(os.path.exists(os.path.join(
+        self.assertTrue(os.path.exists(os.path.join(
             self.config.get("broker", "domainsdir"), "ut-prod")))
 
     def test_115_verify_utprod(self):
@@ -81,7 +79,7 @@ class TestAddDomain(TestBrokerCommand):
     def test_120_add_deployable(self):
         command = ["add_domain", "--domain=deployable", "--start=prod"]
         self.successtest(command)
-        self.failUnless(os.path.exists(os.path.join(
+        self.assertTrue(os.path.exists(os.path.join(
             self.config.get("broker", "domainsdir"), "deployable")))
 
     def test_125_verifydeployable(self):

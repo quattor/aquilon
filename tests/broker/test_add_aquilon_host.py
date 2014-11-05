@@ -56,33 +56,33 @@ class TestAddAquilonHost(TestBrokerCommand):
     def test_105_show_unittest00_proto(self):
         command = ["show", "host", "--hostname=unittest00.one-nyp.ms.com",
                    "--format=proto"]
-        out = self.commandtest(command)
-        hostlist = self.parse_hostlist_msg(out, expect=1)
-        host = hostlist.hosts[0]
-        self.failUnlessEqual(host.hostname, 'unittest00')
-        self.failUnlessEqual(host.personality.name, 'inventory')
-        self.failUnlessEqual(host.personality.archetype.name, 'aquilon')
-        self.failUnlessEqual(host.fqdn, 'unittest00.one-nyp.ms.com')
-        self.failUnlessEqual(host.mac, self.net["unknown0"].usable[2].mac)
-        self.failUnlessEqual(host.ip, str(self.net["unknown0"].usable[2]))
-        self.failUnlessEqual(host.archetype.name, 'aquilon')
-        self.failUnlessEqual(host.dns_domain, 'one-nyp.ms.com')
-        self.failUnlessEqual(host.domain.name, 'unittest')
-        self.failUnlessEqual(host.status, 'blind')
-        self.failUnlessEqual(host.machine.name, 'ut3c1n3')
-        self.failUnlessEqual(host.sysloc, 'ut.ny.na')
-        self.failUnlessEqual(host.type, 'host')
-        self.failUnlessEqual(len(host.resources), 0)
-        self.failUnlessEqual(len(host.services_used), 0)
-        self.failUnlessEqual(len(host.services_provided), 0)
-        self.failUnlessEqual(host.operating_system.archetype.name, 'aquilon')
-        self.failUnlessEqual(host.operating_system.name,
-                             self.config.get("archetype_aquilon",
-                                             "default_osname"))
-        self.failUnlessEqual(host.operating_system.version,
-                             self.config.get("archetype_aquilon",
-                                             "default_osversion"))
-        self.failUnlessEqual(host.cluster, "")
+        host = self.protobuftest(command, expect=1)[0]
+        self.assertEqual(host.hostname, 'unittest00')
+        self.assertEqual(host.personality.name, 'inventory')
+        self.assertEqual(host.personality.archetype.name, 'aquilon')
+        self.assertEqual(host.fqdn, 'unittest00.one-nyp.ms.com')
+        self.assertEqual(host.mac, self.net["unknown0"].usable[2].mac)
+        self.assertEqual(host.ip, str(self.net["unknown0"].usable[2]))
+        self.assertEqual(host.archetype.name, 'aquilon')
+        self.assertEqual(host.dns_domain, 'one-nyp.ms.com')
+        self.assertEqual(host.domain.name, 'unittest')
+        self.assertEqual(host.domain.type, host.domain.DOMAIN)
+        self.assertEqual(host.sandbox_author, "")
+        self.assertEqual(host.status, 'blind')
+        self.assertEqual(host.machine.name, 'ut3c1n3')
+        self.assertEqual(host.sysloc, 'ut.ny.na')
+        self.assertEqual(host.type, 'host')
+        self.assertEqual(len(host.resources), 0)
+        self.assertEqual(len(host.services_used), 0)
+        self.assertEqual(len(host.services_provided), 0)
+        self.assertEqual(host.operating_system.archetype.name, 'aquilon')
+        self.assertEqual(host.operating_system.name,
+                         self.config.get("archetype_aquilon",
+                                         "default_osname"))
+        self.assertEqual(host.operating_system.version,
+                         self.config.get("archetype_aquilon",
+                                         "default_osversion"))
+        self.assertEqual(host.cluster, "")
 
     def test_110_add_unittest12(self):
         ip = self.net["unknown0"].usable[7]
@@ -195,18 +195,16 @@ class TestAddAquilonHost(TestBrokerCommand):
         eth1_ip = self.net["zebra_eth1"].usable[0]
         command = ["show", "host", "--hostname",
                    "unittest20.aqd-unittest.ms.com", "--format", "proto"]
-        out = self.commandtest(command)
-        hostlist = self.parse_hostlist_msg(out, expect=1)
-        host = hostlist.hosts[0]
+        host = self.protobuftest(command, expect=1)[0]
         found = False
         for resource in host.resources:
             if resource.name == "hostname" and resource.type == "service_address":
                 found = True
-                self.failUnlessEqual(resource.service_address.ip, str(ip))
-                self.failUnlessEqual(resource.service_address.fqdn,
-                                     "unittest20.aqd-unittest.ms.com")
+                self.assertEqual(resource.service_address.ip, str(ip))
+                self.assertEqual(resource.service_address.fqdn,
+                                 "unittest20.aqd-unittest.ms.com")
                 ifaces = ",".join(sorted(resource.service_address.interfaces))
-                self.failUnlessEqual(ifaces, "eth0,eth1")
+                self.assertEqual(ifaces, "eth0,eth1")
         self.assertTrue(found,
                         "Service address hostname not found in the resources. "
                         "Existing resources: %s" %
@@ -250,10 +248,7 @@ class TestAddAquilonHost(TestBrokerCommand):
         net = self.net["zebra_eth0"]
         ip = net.usable[1]
         command = ["show", "network", "--ip", net.ip, "--format", "proto"]
-        out = self.commandtest(command)
-
-        msg = self.parse_netlist_msg(out, expect=1)
-        network = msg.networks[0]
+        network = self.protobuftest(command, expect=1)[0]
         seen = False
         macs = [ip.mac]  # , self.net["zebra_eth1"].usable[1].mac]
         for host in network.hosts:
@@ -261,16 +256,15 @@ class TestAddAquilonHost(TestBrokerCommand):
                 continue
 
             seen = True
-            self.failUnless(host.archetype.name == "aquilon",
+            self.assertTrue(host.archetype.name == "aquilon",
                             "archetype is '%s' instead of aquilon" %
                             host.archetype.name)
-            self.failUnless(host.mac in macs,
+            self.assertTrue(host.mac in macs,
                             "MAC is '%s' instead of %r" %
                             (host.mac, macs))
             macs.remove(host.mac)
 
-        self.failUnless(seen,
-                        "%s is missing from network protobuf output" % ip)
+        self.assertTrue(seen, "%s is missing from network protobuf output" % ip)
 
     def test_150_add_unittest22(self):
         ip = self.net["zebra_eth0"].usable[2]
@@ -286,10 +280,7 @@ class TestAddAquilonHost(TestBrokerCommand):
         net = self.net["zebra_eth0"]
         ip = net.usable[2]
         command = ["show", "network", "--ip", net.ip, "--format", "proto"]
-        out = self.commandtest(command)
-
-        msg = self.parse_netlist_msg(out, expect=1)
-        network = msg.networks[0]
+        network = self.protobuftest(command, expect=1)[0]
         seen = False
         macs = [ip.mac]  # , self.net["zebra_eth1"].usable[2].mac]
         for host in network.hosts:
@@ -297,16 +288,15 @@ class TestAddAquilonHost(TestBrokerCommand):
                 continue
 
             seen = True
-            self.failUnless(host.archetype.name == "aquilon",
+            self.assertTrue(host.archetype.name == "aquilon",
                             "archetype is '%s' instead of aquilon" %
                             host.archetype.name)
-            self.failUnless(host.mac in macs,
+            self.assertTrue(host.mac in macs,
                             "MAC is '%s' instead of %r" %
                             (host.mac, macs))
             macs.remove(host.mac)
 
-        self.failUnless(seen,
-                        "%s is missing from network protobuf output" % ip)
+        self.assertTrue(seen, "%s is missing from network protobuf output" % ip)
 
     def test_160_add_unittest23(self):
         ip = self.net["vpls"].usable[1]

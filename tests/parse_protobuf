@@ -77,6 +77,7 @@ typemap = {
     "machine": aqdsystems_pb2.MachineList(),
     "model": aqdsystems_pb2.ModelList(),
     "cluster": aqdsystems_pb2.ClusterList(),
+    "metacluster": aqdsystems_pb2.MetaClusterList(),
     "archetype": aqdsystems_pb2.ArchetypeList(),
     "personality": aqdsystems_pb2.PersonalityList(),
     "operating_system": aqdsystems_pb2.OperatingSystemList(),
@@ -89,6 +90,7 @@ typemap = {
     "parameter_definition": aqdparamdefinitions_pb2.ParamDefinitionList(),
     "resource": aqdsystems_pb2.ResourceList(),
     "feature": aqdsystems_pb2.FeatureList(),
+    "virtual_switch": aqdsystems_pb2.VirtualSwitchList(),
 }
 
 input = sys.stdin

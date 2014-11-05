@@ -80,10 +80,10 @@ class TestPollNetworkDevice(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         r = re.compile(r'created:\s*(.*?),\s*last seen:\s*(.*?)\s*$', re.M)
         m = self.searchoutput(out, r, command)
-        self.failIf(m.group(1) == m.group(2),
-                    "Expected creation date '%s' to be different from "
-                    "last seen '%s' in output:\n%s" %
-                    (m.group(1), m.group(2), out))
+        self.assertFalse(m.group(1) == m.group(2),
+                         "Expected creation date '%s' to be different from "
+                         "last seen '%s' in output:\n%s" %
+                         (m.group(1), m.group(2), out))
 
         colon_re = re.compile(r"([0-9a-f]{2})(?=.)")
 
@@ -108,10 +108,10 @@ class TestPollNetworkDevice(TestBrokerCommand):
         self.searchoutput(out, r"Port: 49$\s+MAC: 00:15:2c:1f:40:00", command)
         r = re.compile(r'created:\s*(.*?),\s*last seen:\s*(.*?)\s*$', re.M)
         m = self.searchoutput(out, r, command)
-        self.failIf(m.group(1) != m.group(2),
-                    "Expected creation date '%s' to be the same as "
-                    "last seen '%s' in output:\n%s" %
-                    (m.group(1), m.group(2), out))
+        self.assertFalse(m.group(1) != m.group(2),
+                         "Expected creation date '%s' to be the same as "
+                         "last seen '%s' in output:\n%s" %
+                         (m.group(1), m.group(2), out))
 
     def testpollut01ga2s01(self):
         # Issues deprecated warning.
@@ -167,7 +167,7 @@ class TestPollNetworkDevice(TestBrokerCommand):
             self.searchoutput(out,
                               r"Port: %d\s+MAC: %s" %
                               (i - 12, self.net["vmotion_net"].usable[i + 1].mac),
-                             command)
+                              command)
         self.matchoutput(out, "VLAN 701: %s" % self.net["vm_storage_net"].ip,
                          command)
         # I was lazy... really this should be some separate non-routeable

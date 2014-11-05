@@ -77,8 +77,8 @@ class TestDelMachine(TestBrokerCommand):
         # should be gone
         dir = os.path.join(self.config.get("broker", "plenarydir"),
                            "machine", "americas", "cards")
-        self.failIf(os.path.exists(dir),
-                    "Plenary directory '%s' still exists" % dir)
+        self.assertFalse(os.path.exists(dir),
+                         "Plenary directory '%s' still exists" % dir)
 
     def testdelut3c5n6(self):
         self.noouttest(["del", "machine", "--machine", "ut3c5n6"])

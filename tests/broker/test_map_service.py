@@ -163,7 +163,7 @@ class TestMapService(TestBrokerCommand):
         self.noouttest(["map", "service", "--building", "ut",
                         "--service", "utsvc", "--instance", "utsi2"])
         # Do NOT bind utsi2 to "np" to keep test_compile results consistent
-        #self.noouttest(["map", "service", "--building", "np",
+        # self.noouttest(["map", "service", "--building", "np",
         #                "--service", "utsvc", "--instance", "utsi2"])
 
     def testverifymaputsvc(self):
@@ -186,15 +186,14 @@ class TestMapService(TestBrokerCommand):
                          "Instance: utsi1 Map: Building np",
                          command)
         # See testmaputsi2
-        #self.matchoutput(out,
+        # self.matchoutput(out,
         #                 "Archetype: aquilon Service: utsvc "
         #                 "Instance: utsi2 Map: Building np",
         #                 command)
 
     def testverifyutmapproto(self):
         command = "show map --building ut --format proto"
-        out = self.commandtest(command.split(" "))
-        self.parse_servicemap_msg(out)
+        self.protobuftest(command.split(" "))
 
     def testmapchooser(self):
         for service in ["chooser1", "chooser2", "chooser3"]:
@@ -260,15 +259,13 @@ class TestMapService(TestBrokerCommand):
     def testverifypersonalitymapproto(self):
         command = ["show_map", "--format=proto", "--archetype=aquilon",
                    "--personality=lemon-collector-oracle", "--service=utsvc"]
-        out = self.commandtest(command)
-        servicemaplist = self.parse_servicemap_msg(out, expect=1)
-        map = servicemaplist.servicemaps[0]
-        self.failUnlessEqual(map.location.name, 'ms')
-        self.failUnlessEqual(map.location.location_type, 'company')
-        self.failUnlessEqual(map.service.name, 'utsvc')
-        self.failUnlessEqual(map.service.serviceinstances[0].name, 'utsi2')
-        self.failUnlessEqual(map.personality.name, 'lemon-collector-oracle')
-        self.failUnlessEqual(map.personality.archetype.name, 'aquilon')
+        map = self.protobuftest(command, expect=1)[0]
+        self.assertEqual(map.location.name, 'ms')
+        self.assertEqual(map.location.location_type, 'company')
+        self.assertEqual(map.service.name, 'utsvc')
+        self.assertEqual(map.service.serviceinstances[0].name, 'utsi2')
+        self.assertEqual(map.personality.name, 'lemon-collector-oracle')
+        self.assertEqual(map.personality.archetype.name, 'aquilon')
 
     def testmapwindowsfail(self):
         command = ["map", "service", "--organization", "ms",
