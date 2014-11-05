@@ -57,6 +57,7 @@ def parse_cli(*args, **kw):
 
     return parser.parse_args()
 
+
 def parse_klist():
     """Run klist and return a (principal, realm) tuple."""
 

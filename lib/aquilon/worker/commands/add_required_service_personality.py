@@ -16,12 +16,10 @@
 # limitations under the License.
 """Contains the logic for `aq add required service --personality`."""
 
-
 from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.aqdb.model import Personality, Service
 from aquilon.worker.dbwrappers.personality import validate_personality_justification
-
 
 
 class CommandAddRequiredServicePersonality(BrokerCommand):

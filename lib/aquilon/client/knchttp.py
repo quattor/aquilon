@@ -15,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from six.moves.http_client import NotConnected
+from six.moves.http_client import NotConnected  # pylint: disable=F0401
 import subprocess
 import os
 

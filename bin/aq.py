@@ -42,7 +42,7 @@ if LIBDIR not in sys.path:
     sys.path.append(LIBDIR)
 # -- end path_setup --
 
-from aquilon.client import depends
+from aquilon.client import depends  # pylint: disable=W0611
 from aquilon.config import lookup_file_path
 from aquilon.exceptions_ import AquilonError
 from aquilon.client.knchttp import KNCHTTPConnection
@@ -50,8 +50,8 @@ from aquilon.client.chunked import ChunkedHTTPConnection
 from aquilon.client.optparser import OptParser, ParsingError
 from aquilon.python_patches import load_uuid_quickly
 
-from six.moves.urllib_parse import urlencode, quote
-import six.moves.http_client as httplib
+from six.moves.urllib_parse import urlencode, quote  # pylint: disable=F0401
+import six.moves.http_client as httplib  # pylint: disable=F0401
 from six import iteritems
 
 # Stolen from aquilon.worker.formats.fomatters
@@ -352,7 +352,7 @@ if __name__ == "__main__":
     else:
         default_aqhost = socket.gethostname()
 
-    if globalOptions.get('auth') == False:
+    if not globalOptions.get('auth'):
         default_aqport = 6901
     else:
         default_aqport = 6900
@@ -378,7 +378,7 @@ if __name__ == "__main__":
     if 'AQSLOWSTATUS' in os.environ and not globalOptions.get('slowstatus'):
         serial = str(os.environ['AQSLOWSTATUS']).strip().lower()
         false_values = ['false', 'f', 'no', 'n', '0', '']
-        globalOptions['slowstatus'] = not serial in false_values
+        globalOptions['slowstatus'] = serial not in false_values
 
     # Save these in case there are errors...
     globalOptions["aqhost"] = host

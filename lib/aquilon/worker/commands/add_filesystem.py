@@ -56,7 +56,6 @@ class CommandAddFilesystem(BrokerCommand):
                           fstype=type,
                           passno=fsckpass,
                           dumpfreq=dumpfreq,
-                          comments=comments
-                          )
+                          comments=comments)
 
         return add_resource(session, logger, holder, dbfs)

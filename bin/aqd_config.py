@@ -36,7 +36,7 @@ if LIBDIR not in sys.path:
     sys.path.append(LIBDIR)
 # -- end path_setup --
 
-from six.moves.configparser import NoSectionError, NoOptionError
+from six.moves.configparser import NoSectionError, NoOptionError  # pylint: disable=F0401
 import argparse
 
 from aquilon.config import Config

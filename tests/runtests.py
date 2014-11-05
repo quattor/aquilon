@@ -22,7 +22,7 @@ from __future__ import print_function
 import os
 import re
 import sys
-from subprocess import Popen
+from subprocess import call
 
 import depends  # pylint: disable=W0611
 import unittest2 as unittest
@@ -34,7 +34,7 @@ SRCDIR = os.path.join(BINDIR, "..")
 sys.path.append(os.path.join(SRCDIR, "lib"))
 
 from aquilon.config import Config
-from aquilon.utils  import kill_from_pid_file
+from aquilon.utils import kill_from_pid_file
 from verbose_text_test import VerboseTextTestRunner
 
 from broker.orderedsuite import BrokerTestSuite
@@ -91,8 +91,8 @@ if not os.path.exists(opts.config):
     print("configfile %s does not exist" % opts.config, file=sys.stderr)
     sys.exit(1)
 
-if os.environ.get("AQDCONF") and (os.path.realpath(opts.config)
-        != os.path.realpath(os.environ["AQDCONF"])):
+if os.environ.get("AQDCONF") and \
+   os.path.realpath(opts.config) != os.path.realpath(os.environ["AQDCONF"]):
     force_yes("""Will ignore AQDCONF variable value:
 %s
 and use
@@ -127,12 +127,10 @@ if opts.mirror:
     mirrordir = config.get('unittest', 'mirrordir')
     if not os.path.exists(mirrordir):
         os.makedirs(mirrordir)
-    p = Popen(['rsync', '-avP', '-e', 'ssh -q -o StrictHostKeyChecking=no " \
-              + "-o UserKnownHostsFile=/dev/null -o BatchMode=yes',
-              '--delete', srcdir + '/', mirrordir],
-              stdout=1, stderr=2)
-    p.communicate()
-    if p.returncode != 0:
+    retcode = call(['rsync', '-avP', '-e', 'ssh -q -o StrictHostKeyChecking=no '
+                    '-o UserKnownHostsFile=/dev/null -o BatchMode=yes',
+                    '--delete', srcdir + '/', mirrordir])
+    if retcode:
         print("Rsync failed!", file=sys.stderr)
         sys.exit(1)
     args = [sys.executable, os.path.join(mirrordir, 'tests', 'runtests.py')]
@@ -161,8 +159,7 @@ if prod_python and sys.executable.find(prod_python) < 0:
 
 # Execute this every run... the man page says that it should do the right
 # thing in terms of not contacting the kdc very often.
-p = Popen(config.lookup_tool("krb5_keytab"), stdout=1, stderr=2)
-rc = p.wait()
+call(config.lookup_tool("krb5_keytab"))
 
 pid_file = os.path.join(config.get('broker', 'rundir'), 'aqd.pid')
 kill_from_pid_file(pid_file)
@@ -183,9 +180,7 @@ if existing_dirs:
 
 for dirname in existing_dirs:
     print("Removing %s" % dirname)
-    p = Popen(("/bin/rm", "-rf", dirname), stdout=1, stderr=2)
-    rc = p.wait()
-    # FIXME: check rc
+    call(("/bin/rm", "-rf", dirname))
 
 for dirname in dirs:
     try:

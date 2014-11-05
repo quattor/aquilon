@@ -21,7 +21,6 @@ if __name__ == "__main__":
     import utils
     utils.import_depends()
 
-
 import unittest2 as unittest
 from broker.brokertest import TestBrokerCommand
 from broker.personalitytest import PersonalityTestMixin

@@ -32,6 +32,7 @@ LIBDIR = os.path.join(BINDIR, "..", "lib")
 if LIBDIR not in sys.path:
     sys.path.append(LIBDIR)
 
+from aquilon.worker import depends  # pylint: disable=W0611
 from aquilon.config import Config, lookup_file_path
 
 if not os.environ.get("AQDCONF"):

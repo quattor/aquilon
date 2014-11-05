@@ -37,6 +37,7 @@ from sqlalchemy.exc import IntegrityError
 import aquilon.aqdb.model
 from aquilon.aqdb.db_factory import DbFactory
 
+
 # Add a nice error reporting function to shlex
 class Lexer(shlex):
     def __init__(self, filename):
@@ -48,6 +49,7 @@ class Lexer(shlex):
 
     def error(self, message):
         raise ValueError("%s %s" % (self.error_leader(self.filename), message))
+
 
 def parse_object(session, lexer, lookup=False, verbose=False):
     """
@@ -110,6 +112,7 @@ def parse_object(session, lexer, lookup=False, verbose=False):
         lexer.error(err)
     return obj
 
+
 def parse_params(session, lexer, verbose=False):
     """ Parse an object parameter list """
 
@@ -166,6 +169,7 @@ def parse_params(session, lexer, verbose=False):
         else:
             lexer.error("',' or ')' expected.")
     return params
+
 
 def load_from_file(session, filename, verbose=False):
     lexer = Lexer(filename)

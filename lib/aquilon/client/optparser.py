@@ -25,7 +25,7 @@ from optparse import OptionParser, OptionValueError
 from lxml import etree
 import re
 from subprocess import Popen
-from six.moves import range
+from six.moves import range  # pylint: disable=F0401
 import textwrap
 
 # The code is not exactly pretty. If you want to improve it, here are some

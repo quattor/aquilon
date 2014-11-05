@@ -18,7 +18,7 @@
 
 import os
 from csv import DictReader
-import six.moves.cPickle as pickle
+import six.moves.cPickle as pickle  # pylint: disable=F0401
 from six import itervalues
 from ipaddr import IPv4Network, IPv4Address
 

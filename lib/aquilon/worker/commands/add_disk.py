@@ -17,7 +17,7 @@
 """Contains the logic for `aq add disk`."""
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import (Machine, Disk, LocalDisk, VirtualDisk, Share,
+from aquilon.aqdb.model import (Machine, LocalDisk, VirtualDisk, Share,
                                 Filesystem)
 from aquilon.aqdb.model.disk import controller_types
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611

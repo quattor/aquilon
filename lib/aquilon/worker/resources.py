@@ -368,8 +368,8 @@ class CommandRegistry(object):
             name = command.attrib['name']
 
             for transport in command.getiterator("transport"):
-                if ("method" not in transport.attrib or
-                    "path" not in transport.attrib):
+                if "method" not in transport.attrib or \
+                   "path" not in transport.attrib:
                     log.msg("Warning: incorrect transport specification "
                             "for %s." % name)
                     continue
@@ -387,8 +387,8 @@ class CommandRegistry(object):
                     continue
 
                 for option in command.getiterator("option"):
-                    if ('name' not in option.attrib or
-                        'type' not in option.attrib):
+                    if 'name' not in option.attrib or \
+                       'type' not in option.attrib:
                         log.msg("Warning: incorrect options specification "
                                 "for %s." % fullname)
                         continue

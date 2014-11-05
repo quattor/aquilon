@@ -175,7 +175,7 @@ class GrnHostListFormatter(ListFormatter):
                 for grn_rec in sorted(eon_id_set):
                     details.append(indent + "  Used by {0:c}: {0.grn} "
                                             "[target: {1}]{2}"
-                                            .format(grn_rec, target, inherited))
+                                   .format(grn_rec, target, inherited))
         return "\n".join(details)
 
     def format_proto(self, hostlist, container):

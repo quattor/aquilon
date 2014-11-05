@@ -74,7 +74,7 @@ class TestResetAdvertisedStatus(TestBrokerCommand):
         # should be valid
         for status in ['failed', 'rebuild', 'ready']:
             self.successtest(["change_status", "--hostname", hostname,
-                             "--buildstatus", status])
+                              "--buildstatus", status])
 
             # reset advertised state to build
             command = ["reset_advertised_status", "--list", scratchfile]

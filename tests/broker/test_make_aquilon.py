@@ -39,7 +39,7 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
     def setUpClass(cls):
         super(TestMakeAquilon, cls).setUpClass()
         cls.linux_version_prev = cls.config.get("unittest",
-                                                  "linux_version_prev")
+                                                "linux_version_prev")
 
     def testmakeinfra(self):
         command = ["make", "--hostname", "infra1.one-nyp.ms.com"]

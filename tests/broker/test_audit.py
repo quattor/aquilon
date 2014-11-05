@@ -28,7 +28,7 @@ if __name__ == "__main__":
 import unittest2 as unittest
 from dateutil.parser import parse
 from dateutil.tz import tzutc
-from six.moves import range
+from six.moves import range  # pylint: disable=F0401
 
 from broker.brokertest import TestBrokerCommand
 

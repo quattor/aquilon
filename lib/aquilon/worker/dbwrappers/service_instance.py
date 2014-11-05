@@ -26,8 +26,8 @@ from aquilon.aqdb.model import ServiceInstance
 
 def get_service_instance(session, dbservice, instance):
     try:
-        dbsi = session.query(ServiceInstance).filter_by(
-                service=dbservice, name=instance).one()
+        dbsi = session.query(ServiceInstance).filter_by(service=dbservice,
+                                                        name=instance).one()
     except NoResultFound:
         raise NotFoundException("Service %s, instance %s not found.  Try `aq "
                                 "add service --service %s --instance %s` to "

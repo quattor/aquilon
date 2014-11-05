@@ -44,9 +44,9 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
     def setUpClass(cls):
         super(TestReconfigure, cls).setUpClass()
         cls.linux_version_prev = cls.config.get("unittest",
-                                                  "linux_version_prev")
+                                                "linux_version_prev")
         cls.linux_version_curr = cls.config.get("unittest",
-                                                  "linux_version_curr")
+                                                "linux_version_curr")
 
     # The unbind test has removed the service bindings for dns,
     # it should now be set again.

@@ -27,6 +27,7 @@ import unittest
 from subprocess import Popen
 from aquilon.config import Config
 
+
 class TestRebuild(unittest.TestCase):
     def testrebuild(self):
         env = {}
@@ -47,6 +48,7 @@ class TestRebuild(unittest.TestCase):
 
     def runTest(self):
         self.testrebuild()
+
 
 class DatabaseTestSuite(unittest.TestSuite):
     def __init__(self, *args, **kwargs):

@@ -21,9 +21,9 @@ if __name__ == "__main__":
     import utils
     utils.import_depends()
 
-from six.moves.urllib_parse import urlencode, quote
-from six.moves.urllib_request import urlopen
-from six.moves.urllib_error import HTTPError
+from six.moves.urllib_parse import urlencode, quote  # pylint: disable=F0401
+from six.moves.urllib_request import urlopen  # pylint: disable=F0401
+from six.moves.urllib_error import HTTPError  # pylint: disable=F0401
 
 import unittest2 as unittest
 from brokertest import TestBrokerCommand

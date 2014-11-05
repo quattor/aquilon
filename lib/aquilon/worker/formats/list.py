@@ -39,8 +39,7 @@ class ListFormatter(ObjectFormatter):
         if hasattr(self, "template_html"):
             return ObjectFormatter.format_html(self, result)
         return "<ul>\n<li>" + "<li>\n<li>".join(
-                [self.redirect_html(item) for item in result]
-                ) + "</li>\n</ul>\n"
+            [self.redirect_html(item) for item in result]) + "</li>\n</ul>\n"
 
     def format_djb(self, result):
         return "\n".join([self.redirect_djb(item) for item in result])

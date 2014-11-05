@@ -20,8 +20,7 @@ from sqlalchemy.orm import contains_eager
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 
 from aquilon.worker.broker import BrokerCommand
-from aquilon.aqdb.model import (ARecord, DynamicStub, DnsEnvironment,
-                                NetworkEnvironment)
+from aquilon.aqdb.model import ARecord, DynamicStub
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.aqdb.model.network_environment import get_net_dns_env
 from aquilon.exceptions_ import ArgumentError, NotFoundException

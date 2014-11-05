@@ -18,7 +18,7 @@
 
 from csv import DictReader, Error as CSVError
 from json import JSONDecoder
-from six.moves import cStringIO as StringIO
+from six.moves import cStringIO as StringIO  # pylint: disable=F0401
 from datetime import datetime
 
 from aquilon.exceptions_ import (AquilonError, ArgumentError, InternalError,

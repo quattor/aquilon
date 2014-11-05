@@ -64,5 +64,5 @@ class TestDelRouterAddress(TestBrokerCommand):
 
 
 if __name__ == '__main__':
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestDelRouter)
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestDelRouterAddress)
     unittest.TextTestRunner(verbosity=2).run(suite)

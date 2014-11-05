@@ -79,8 +79,8 @@ class CommandUpdatePersonality(BrokerCommand):
                 raise ArgumentError("The memory overcommit factor must be >= 1.")
             dbpersona.cluster_infos["esx"].vmhost_overcommit_memory = vmhost_overcommit_memory
 
-        if (cluster_required is not None and
-            dbpersona.cluster_required != cluster_required):
+        if cluster_required is not None and \
+           dbpersona.cluster_required != cluster_required:
             if dbpersona.is_cluster:
                 q = session.query(Cluster)
             else:

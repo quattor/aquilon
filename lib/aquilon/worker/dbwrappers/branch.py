@@ -243,7 +243,7 @@ def merge_into_trash(config, logger, branch, merge_msg, loglevel=logging.INFO):
     try:
         run_git(["clone", "--shared", "--branch", trash_branch, "--",
                  kingdir, trash_branch], path=tempdir, logger=logger,
-                 loglevel=loglevel)
+                loglevel=loglevel)
 
         temprepo = os.path.join(tempdir, trash_branch)
 

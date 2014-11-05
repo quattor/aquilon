@@ -212,7 +212,7 @@ def build_index(config, session, logger=LOGGER):
         logger.info("sent %d server notifications", count)
 
     if (config.has_option("broker", "client_notifications")
-        and config.getboolean("broker", "client_notifications")):  # pragma: no cover
+            and config.getboolean("broker", "client_notifications")):  # pragma: no cover
         count = send_notification(CCM_NOTIF, modified_index.keys(), sock=sock,
                                   logger=logger)
         logger.info("sent %d client notifications", count)

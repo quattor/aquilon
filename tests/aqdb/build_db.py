@@ -95,7 +95,7 @@ def main(*args, **kw):
     if opts.verbose:
         db.engine.echo = True
 
-    if opts.delete_db == True:
+    if opts.delete_db:
         log.debug('Dropping database')
         db.drop_all_tables_and_sequences()
 
@@ -121,7 +121,7 @@ def main(*args, **kw):
 
     # CONSTRAINTS
     if db.engine.dialect.name == 'oracle':
-        #TODO: rename should be able to dump DDL to a file
+        # TODO: rename should be able to dump DDL to a file
         log.debug('renaming constraints...')
         cnst.rename_non_null_check_constraints(db)
 

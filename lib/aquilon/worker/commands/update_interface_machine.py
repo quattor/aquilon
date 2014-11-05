@@ -125,9 +125,9 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
             # (default_route is None); there was an existing bootable
             # interface (old_default_route is not None); the new default
             # route setting differs from the old - then produce a warning.
-            if (default_route is None and
-                old_default_route is not None and
-                dbinterface.default_route != old_default_route):
+            if default_route is None and \
+               old_default_route is not None and \
+               dbinterface.default_route != old_default_route:
                 if old_default_route:
                     logger.client_info("Warning: New boot interface {0} is no "
                                        "longer provides the default route; it "

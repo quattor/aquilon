@@ -15,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from six.moves.http_client import HTTPResponse, HTTPConnection
+from six.moves.http_client import HTTPResponse, HTTPConnection  # pylint: disable=F0401
 
 
 class ChunkedHTTPResponse(HTTPResponse):

@@ -32,6 +32,7 @@ TCM_RE = re.compile(r"^tcm=([0-9]+)$", re.IGNORECASE)
 SN_RE = re.compile(r"^sn=([a-z]+[0-9]+)$", re.IGNORECASE)
 EMERG_RE = re.compile("emergency")
 
+
 # TODO: move this to an external class
 def validate_justification(principal, justification, reason):
     result = None
@@ -44,7 +45,7 @@ def validate_justification(principal, justification, reason):
                             "tcm=NNNNNNNNN or sn=XXXNNNNN.")
     if justification == 'emergency' and not reason:
         raise AuthorizationException(
-              "Justification of 'emergency' requires --reason to be specified.")
+            "Justification of 'emergency' requires --reason to be specified.")
 
     # TODO: EDM validation
     # edm_validate(result.group(0))
