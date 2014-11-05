@@ -16,13 +16,10 @@
 # limitations under the License.
 """ A platform independant GUID """
 
+import uuid
 
 from sqlalchemy.types import TypeDecorator, CHAR
 from sqlalchemy.dialects.postgresql import UUID
-
-from aquilon.python_patches import load_uuid_quickly
-
-uuid = load_uuid_quickly()  # pylint: disable=C0103
 
 
 class GUID(TypeDecorator):

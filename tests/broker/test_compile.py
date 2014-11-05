@@ -327,7 +327,8 @@ class TestCompile(VerifyNotificationsMixin, TestBrokerCommand):
     def test_575_compile_personality_no_host(self):
         command = ['compile', '--personality=utpersonality/dev', '--archetype=aquilon',
                    '--domain=ut-prod']
-        self.noouttest(command)
+        out = self.statustest(command)
+        self.matchoutput(out, "No object profiles: nothing to do.", command)
 
     def test_580_reset_data(self):
         self.statustest(['manage', '--hostname=unittest02.one-nyp.ms.com',

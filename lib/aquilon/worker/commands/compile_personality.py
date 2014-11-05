@@ -54,6 +54,7 @@ class CommandCompilePersonality(BrokerCommand):
         host_list = q.all()
 
         if not host_list:
+            logger.client_info('No object profiles: nothing to do.')
             return
 
         # If the domain was not specified, set it to the domain of first host
