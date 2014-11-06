@@ -47,7 +47,7 @@ class CommandUpdateCluster(BrokerCommand):
                                 plenaries, **arguments)
 
         if personality:
-            archetype = dbcluster.personality.archetype.name
+            archetype = dbcluster.archetype.name
             dbpersonality = Personality.get_unique(session, name=personality,
                                                    archetype=archetype,
                                                    compel=True)

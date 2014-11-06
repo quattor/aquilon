@@ -117,8 +117,7 @@ class HostFormatter(CompileableFormatter):
             details.append(indent + "  {0:c}: {0!s}".format(host.virtual_switch))
 
         for feature in sorted(model_features(host.hardware_entity.model,
-                                             host.personality.archetype,
-                                             host.personality),
+                                             host.archetype, host.personality),
                               key=attrgetter('name')):
             details.append(indent + "  {0:c}: {0.name}".format(feature))
         (pre, post) = personality_features(host.personality)

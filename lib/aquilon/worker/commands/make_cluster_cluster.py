@@ -39,10 +39,10 @@ class CommandMakeClusterCluster(BrokerCommand):
             dbcluster = MetaCluster.get_unique(session, metacluster,
                                                compel=True)
 
-        if not dbcluster.personality.archetype.is_compileable:
+        if not dbcluster.archetype.is_compileable:
             raise ArgumentError("{0} is not a compilable archetype "
                                 "({1!s}).".format(dbcluster,
-                                                  dbcluster.personality.archetype))
+                                                  dbcluster.archetype))
 
         # TODO: this duplicates the logic from reconfigure_list.py; it should be
         # refactored later

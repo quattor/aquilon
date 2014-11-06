@@ -192,7 +192,7 @@ def get_paramdef_for_parameter(path, param_holder, dbfeaturelink):
     if dbfeaturelink:
         paramdef_holder = dbfeaturelink.feature.paramdef_holder
     else:
-        paramdef_holder = param_holder.personality.archetype.paramdef_holder
+        paramdef_holder = param_holder.archetype.paramdef_holder
 
     if not paramdef_holder:
         return None

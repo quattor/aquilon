@@ -121,9 +121,9 @@ class Cluster(CompileableMixin, Base):
 
     @property
     def title(self):
-        if self.personality.archetype.outputdesc is not None:
-            return self.personality.archetype.outputdesc
-        return self.personality.archetype.name.capitalize() + " Cluster"
+        if self.archetype.outputdesc is not None:
+            return self.archetype.outputdesc
+        return self.archetype.name.capitalize() + " Cluster"
 
     @property
     def dht_value(self):
