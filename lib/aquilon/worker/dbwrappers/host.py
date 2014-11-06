@@ -121,7 +121,7 @@ def create_host(session, logger, config, dbhw, dbarchetype, domain=None,
     return dbhost
 
 
-def remove_host(session, logger, dbhw, plenaries, remove_plenaries):
+def remove_host(logger, dbhw, plenaries, remove_plenaries):
     if not dbhw.host:
         raise NotFoundException("Hardware entity %s has no host." % dbhw.label)
     dbhost = dbhw.host
