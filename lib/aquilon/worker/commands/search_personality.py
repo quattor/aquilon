@@ -52,7 +52,7 @@ class CommandSearchPersonality(BrokerCommand):
         if grn or eon_id:
             dbgrn = lookup_grn(session, grn, eon_id, autoupdate=False,
                                usable_only=False)
-            q = q.outerjoin(PersonalityGrnMap, aliased=True)
+            q = q.outerjoin(PersonalityStage, PersonalityGrnMap, aliased=True)
             q = q.filter(or_(Personality.owner_eon_id == dbgrn.eon_id,
                              PersonalityGrnMap.eon_id == dbgrn.eon_id))
             q = q.reset_joinpoint()
@@ -69,8 +69,7 @@ class CommandSearchPersonality(BrokerCommand):
         if fullinfo or style != 'raw':
             q = q.options(# FIXME: Undo when required services are staged
                           subqueryload('personality.services'),
-                          # FIXME: Undo when GRNs are staged
-                          subqueryload('personality.grns'),
+                          subqueryload('grns'),
                           # FIXME: Undo when feature bindings are staged
                           subqueryload('personality.features'),
                           joinedload('personality.features.feature'),

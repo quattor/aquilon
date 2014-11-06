@@ -45,13 +45,12 @@ class CommandShowPersonality(BrokerCommand):
         if personality:
             q = q.filter_by(name=personality)
         q = q.join(Archetype)
-        q = q.order_by(Archetype.name, Personality.name)
+        q = q.order_by(Archetype.name, Personality.name, PersonalityStage.name)
         q = q.options(contains_eager('personality'),
                       contains_eager('personality.archetype'),
                       # FIXME: Undo when required services are staged
                       subqueryload('personality.services'),
-                      # FIXME: Undo when GRNs are staged
-                      subqueryload('personality.grns'),
+                      subqueryload('grns'),
                       # FIXME: Undo when feature bindings are staged
                       subqueryload('personality.features'),
                       joinedload('personality.features.feature'),

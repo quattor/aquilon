@@ -30,8 +30,7 @@ class CommandShowHostList(BrokerCommand):
                    joinedload('personality_stage'),
                    joinedload('personality_stage.personality'),
                    undefer('personality_stage.personality.archetype.comments'),
-                   # FIXME: Undo this when GRNs are staged
-                   subqueryload('personality_stage.personality.grns'),
+                   subqueryload('personality_stage.grns'),
                    subqueryload('grns'),
                    subqueryload('services_used'),
                    subqueryload('services_provided'),

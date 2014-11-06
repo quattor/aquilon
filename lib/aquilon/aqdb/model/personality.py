@@ -168,11 +168,6 @@ class PersonalityStage(Base):
     def services(self):
         return self.personality.services
 
-    # FIXME: Drop this property when GRNs are staged
-    @property
-    def grns(self):
-        return self.personality.grns
-
     # FIXME: Drop this property when cluster_infos is staged
     @property
     def cluster_infos(self):
@@ -189,13 +184,16 @@ class PersonalityStage(Base):
                 new.paramholder.parameters.extend(param.copy()
                                                   for param in self.paramholder.parameters)
 
+            new.grns.extend(grn_link.copy() for grn_link in self.grns)
+
         return new
 
 class PersonalityGrnMap(Base):
     __tablename__ = _PGN
 
-    personality_id = Column(ForeignKey(Personality.id, ondelete='CASCADE'),
-                            nullable=False)
+    personality_stage_id = Column(ForeignKey(PersonalityStage.id,
+                                             ondelete='CASCADE'),
+                                  nullable=False)
 
     eon_id = Column(ForeignKey(Grn.eon_id), nullable=False)
 
@@ -203,13 +201,15 @@ class PersonalityGrnMap(Base):
 
     grn = relation(Grn, lazy=False, innerjoin=True)
 
-    __table_args__ = (PrimaryKeyConstraint(personality_id, eon_id, target),)
+    __table_args__ = (PrimaryKeyConstraint(personality_stage_id, eon_id,
+                                           target),)
 
     def copy(self):
         return type(self)(eon_id=self.eon_id, target=self.target)
 
-Personality.grns = relation(PersonalityGrnMap, cascade='all, delete-orphan',
-                            passive_deletes=True)
+PersonalityStage.grns = relation(PersonalityGrnMap,
+                                 cascade='all, delete-orphan',
+                                 passive_deletes=True)
 
 
 class __PersonalityRootUser(Base):

@@ -250,8 +250,7 @@ class CommandFlush(BrokerCommand):
 
                 q = session.query(PersonalityStage)
                 q = q.options(joinedload('personality'),
-                              # FIXME: undo when GRNs are staged
-                              subqueryload('personality.grns'),
+                              subqueryload('grns'),
                               # FIXME: undo when feature bindings are staged
                               subqueryload('personality.features'),
                               joinedload('paramholder'),
@@ -328,8 +327,7 @@ class CommandFlush(BrokerCommand):
                               subqueryload("_cluster"),
                               subqueryload("personality_stage"),
                               joinedload("personality_stage.personality"),
-                              # FIXME: undo this when GRNs are staged
-                              subqueryload("personality_stage.personality.grns"))
+                              subqueryload("personality_stage.grns"))
 
                 progress = ProgressReport(logger, q.count(), "host")
                 for h in q:

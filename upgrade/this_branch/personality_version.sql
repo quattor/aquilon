@@ -12,6 +12,7 @@ CREATE TABLE personality_stage (
 ALTER TABLE host ADD personality_stage_id INTEGER;
 ALTER TABLE clstr ADD personality_stage_id INTEGER;
 ALTER TABLE param_holder ADD personality_stage_id INTEGER;
+ALTER TABLE personality_grn_map ADD personality_stage_id INTEGER;
 
 DECLARE
 	CURSOR pers_curs IS SELECT id FROM personality;
@@ -25,6 +26,7 @@ BEGIN
 		UPDATE host SET personality_stage_id = vers_id WHERE personality_id = pers_rec.id;
 		UPDATE clstr SET personality_stage_id = vers_id WHERE personality_id = pers_rec.id;
 		UPDATE param_holder SET personality_stage_id = vers_id WHERE personality_id = pers_rec.id;
+		UPDATE personality_grn_map SET personality_stage_id = vers_id WHERE personality_id = pers_rec.id;
 	END LOOP;
 END;
 /
@@ -47,5 +49,13 @@ ALTER TABLE param_holder ADD CONSTRAINT param_holder_pers_st_fk
 	FOREIGN KEY (personality_stage_id) REFERENCES personality_stage (id) ON DELETE CASCADE;
 ALTER TABLE param_holder ADD CONSTRAINT param_holder_pers_st_uk UNIQUE (personality_stage_id);
 ALTER TABLE param_holder DROP COLUMN personality_id;
+
+ALTER TABLE personality_grn_map MODIFY (personality_stage_id INTEGER CONSTRAINT pers_grn_map_pers_st_id_nn NOT NULL);
+ALTER TABLE personality_grn_map DROP CONSTRAINT personality_grn_map_pk;
+ALTER TABLE personality_grn_map DROP COLUMN personality_id;
+ALTER TABLE personality_grn_map ADD CONSTRAINT personality_grn_map_pers_st_fk
+	FOREIGN KEY (personality_stage_id) REFERENCES personality_stage (id) ON DELETE CASCADE;
+ALTER TABLE personality_grn_map ADD CONSTRAINT personality_grn_map_pk
+	PRIMARY KEY (personality_stage_id, eon_id, target);
 
 QUIT;

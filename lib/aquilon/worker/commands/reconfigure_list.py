@@ -42,8 +42,7 @@ class CommandReconfigureList(BrokerCommand):
         check_hostlist_size(self.command, self.config, list)
         options = [joinedload('personality_stage'),
                    joinedload('personality_stage.personality'),
-                   # FIXME: Undo this when GRNs are staged
-                   subqueryload('personality_stage.personality.grns'),
+                   subqueryload('personality_stage.grns'),
                    subqueryload('grns'),
                    subqueryload('services_used'),
                    undefer('services_used._client_count'),

@@ -254,27 +254,23 @@ class CommandSearchHost(BrokerCommand):
             dbgrn = lookup_grn(session, grn, eon_id, autoupdate=False,
                                usable_only=False)
 
-            PersStages = aliased(PersonalityStage)
-            HostGrnAlias = aliased(HostGrnMap)
-
-            persq = session.query(Personality.id)
+            persq = session.query(PersonalityStage.id)
+            persq = persq.join(Personality)
             persq = persq.outerjoin(PersonalityGrnMap)
             persq = persq.filter(or_(Personality.owner_eon_id == dbgrn.eon_id,
                                      PersonalityGrnMap.eon_id == dbgrn.eon_id))
 
-            q = q.join(PersStages, Host.personality_stage)
-            q = q.outerjoin(HostGrnAlias, Host.grns)
+            q = q.outerjoin(Host.grns, aliased=True)
             q = q.filter(or_(Host.owner_eon_id == dbgrn.eon_id,
                              HostGrnMap.eon_id == dbgrn.eon_id,
-                             PersStages.personality_id.in_(persq.subquery())))
+                             Host.personality_stage_id.in_(persq.subquery())))
             q = q.reset_joinpoint()
 
         if fullinfo or style != "raw":
             q = q.options(joinedload('personality_stage'),
                           joinedload('personality_stage.personality'),
                           undefer('personality_stage.personality.archetype.comments'),
-                          # FIXME: Undo this when GRNs are staged
-                          subqueryload('personality_stage.personality.grns'),
+                          subqueryload('personality_stage.grns'),
                           subqueryload('grns'),
                           subqueryload('services_used'),
                           subqueryload('services_provided'),

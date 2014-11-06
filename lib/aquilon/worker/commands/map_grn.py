@@ -64,12 +64,14 @@ class CommandMapGrn(BrokerCommand):
             mapcls = HostGrnMap
             config_key = "host_grn_targets"
         elif personality:
-            objs = [Personality.get_unique(session, name=personality,
-                                           archetype=archetype, compel=True)]
+            dbpersonality = Personality.get_unique(session, name=personality,
+                                                   archetype=archetype,
+                                                   compel=True)
+            objs = [dbpersonality.active_stage]
             mapcls = PersonalityGrnMap
             config_key = "personality_grn_targets"
-            validate_personality_justification(objs[0].active_stage, user,
-                                               justification, reason)
+            validate_personality_justification(objs[0], user, justification,
+                                               reason)
         for obj in objs:
             section = "archetype_" + obj.archetype.name
 
@@ -86,11 +88,7 @@ class CommandMapGrn(BrokerCommand):
                                     (target, obj.archetype.name,
                                      ", ".join(valid_targets)))
 
-            # FIXME: Remove this split once GRNs are bound to PersonalityStage
-            if hasattr(obj, "stages"):
-                plenaries.append(Plenary.get_plenary(obj.stages["current"]))
-            else:
-                plenaries.append(Plenary.get_plenary(obj))
+            plenaries.append(Plenary.get_plenary(obj))
             self._update_dbobj(obj, target, dbgrn, mapcls)
 
         session.flush()

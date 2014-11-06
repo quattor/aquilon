@@ -38,7 +38,7 @@ class CommandDelGrn(BrokerCommand):
 
         q1 = session.query(Personality.id)
         q1 = q1.filter_by(owner_eon_id=dbgrn.eon_id)
-        q2 = session.query(PersonalityGrnMap.personality_id)
+        q2 = session.query(PersonalityGrnMap.personality_stage_id)
         q2 = q2.filter_by(eon_id=dbgrn.eon_id)
         if q1.count() or q2.count():
             raise ArgumentError("GRN %s is still used by personalities, "

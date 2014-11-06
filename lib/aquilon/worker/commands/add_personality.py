@@ -118,9 +118,6 @@ class CommandAddPersonality(BrokerCommand):
 
             dbpersona.services.extend(dbfrom_persona.services)
 
-            for grn_link in dbfrom_persona.grns:
-                dbpersona.grns.append(grn_link.copy())
-
             for cluster_type, info in dbfrom_persona.cluster_infos.items():
                 dbpersona.cluster_infos[cluster_type] = info.copy()
 
@@ -143,7 +140,7 @@ class CommandAddPersonality(BrokerCommand):
 
             if self.config.has_option(section, "default_grn_target"):
                 target = self.config.get(section, "default_grn_target")
-                dbpersona.grns.append(PersonalityGrnMap(grn=dbgrn, target=target))
+                dbstage.grns.append(PersonalityGrnMap(grn=dbgrn, target=target))
 
         session.flush()
 
