@@ -82,7 +82,7 @@ def create_host(session, logger, config, dbhw, dbarchetype, domain=None,
     if isinstance(dbbranch, Domain):
         pre, post = personality_features(dbpersonality)
         hw_features = model_features(dbhw.model, dbarchetype, dbpersonality)
-        for dbfeature in pre + post + hw_features:
+        for dbfeature in pre | post | hw_features:
             check_feature_template(config, dbarchetype, dbfeature, dbbranch)
 
     if not osname:

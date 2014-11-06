@@ -119,7 +119,8 @@ class InterfaceFormatter(ObjectFormatter):
             if route.comments:
                 details.append(indent + "    Comments: %s" % route.comments)
 
-        for feature in interface_features(interface, dbarch, dbpers):
+        for feature in sorted(interface_features(interface, dbarch, dbpers),
+                              key=attrgetter('name')):
             details.append(indent + "  Template: %s" % feature.cfg_path)
 
         if interface.comments:
