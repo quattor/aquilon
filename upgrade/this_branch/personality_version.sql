@@ -13,6 +13,7 @@ ALTER TABLE host ADD personality_stage_id INTEGER;
 ALTER TABLE clstr ADD personality_stage_id INTEGER;
 ALTER TABLE param_holder ADD personality_stage_id INTEGER;
 ALTER TABLE personality_grn_map ADD personality_stage_id INTEGER;
+ALTER TABLE personality_service_list_item ADD personality_stage_id INTEGER;
 
 DECLARE
 	CURSOR pers_curs IS SELECT id FROM personality;
@@ -27,6 +28,7 @@ BEGIN
 		UPDATE clstr SET personality_stage_id = vers_id WHERE personality_id = pers_rec.id;
 		UPDATE param_holder SET personality_stage_id = vers_id WHERE personality_id = pers_rec.id;
 		UPDATE personality_grn_map SET personality_stage_id = vers_id WHERE personality_id = pers_rec.id;
+		UPDATE personality_service_list_item SET personality_stage_id = vers_id WHERE personality_id = pers_rec.id;
 	END LOOP;
 END;
 /
@@ -57,5 +59,14 @@ ALTER TABLE personality_grn_map ADD CONSTRAINT personality_grn_map_pers_st_fk
 	FOREIGN KEY (personality_stage_id) REFERENCES personality_stage (id) ON DELETE CASCADE;
 ALTER TABLE personality_grn_map ADD CONSTRAINT personality_grn_map_pk
 	PRIMARY KEY (personality_stage_id, eon_id, target);
+
+ALTER TABLE personality_service_list_item MODIFY (personality_stage_id INTEGER CONSTRAINT psli_personality_stage_id_nn NOT NULL);
+ALTER TABLE personality_service_list_item DROP CONSTRAINT psli_pk;
+ALTER TABLE personality_service_list_item DROP COLUMN personality_id;
+ALTER TABLE personality_service_list_item ADD CONSTRAINT psli_personality_stage_fk
+	FOREIGN KEY (personality_stage_id) REFERENCES personality_stage (id) ON DELETE CASCADE;
+ALTER TABLE personality_service_list_item ADD CONSTRAINT psli_pk
+	PRIMARY KEY (service_id, personality_stage_id);
+CREATE INDEX psli_pers_st_idx ON personality_service_list_item (personality_stage_id);
 
 QUIT;

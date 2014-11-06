@@ -59,7 +59,7 @@ class CommandSearchPersonality(BrokerCommand):
 
         if required_service:
             dbsrv = Service.get_unique(session, required_service, compel=True)
-            q = q.filter(Personality.services.contains(dbsrv))
+            q = q.filter(PersonalityStage.services.contains(dbsrv))
 
         q = q.join(Archetype)
         q = q.order_by(Archetype.name, Personality.name, PersonalityStage.name)
@@ -67,8 +67,7 @@ class CommandSearchPersonality(BrokerCommand):
                       contains_eager('personality.archetype'))
 
         if fullinfo or style != 'raw':
-            q = q.options(# FIXME: Undo when required services are staged
-                          subqueryload('personality.services'),
+            q = q.options(subqueryload('services'),
                           subqueryload('grns'),
                           # FIXME: Undo when feature bindings are staged
                           subqueryload('personality.features'),

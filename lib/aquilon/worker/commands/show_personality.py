@@ -48,8 +48,7 @@ class CommandShowPersonality(BrokerCommand):
         q = q.order_by(Archetype.name, Personality.name, PersonalityStage.name)
         q = q.options(contains_eager('personality'),
                       contains_eager('personality.archetype'),
-                      # FIXME: Undo when required services are staged
-                      subqueryload('personality.services'),
+                      subqueryload('services'),
                       subqueryload('grns'),
                       # FIXME: Undo when feature bindings are staged
                       subqueryload('personality.features'),

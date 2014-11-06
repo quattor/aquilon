@@ -29,7 +29,7 @@ from sqlalchemy.orm import (relation, contains_eager, column_property, backref,
 from sqlalchemy.sql import select, func, or_, null
 
 from aquilon.aqdb.model import (Base, Service, Host, DnsRecord, DnsDomain,
-                                HardwareEntity, Fqdn, PersonalityStage)
+                                HardwareEntity, Fqdn)
 from aquilon.aqdb.column_types.aqstr import AqStr
 
 _TN = 'service_instance'
@@ -76,8 +76,8 @@ class ServiceInstance(Base):
         from aquilon.aqdb.model import Cluster, MetaCluster
 
         # Check if the service instance is used by any cluster-bound personality
-        personality_ids = self.service.cluster_aligned_personalities
-        if not personality_ids:
+        persst_ids = self.service.cluster_aligned_personalities
+        if not persst_ids:
             # By far, the common case.
             return self._client_count
 
@@ -87,13 +87,11 @@ class ServiceInstance(Base):
 
         # Meta
         McAlias = aliased(MetaCluster)
-        PersStage = aliased(PersonalityStage)
         q = session.query(Cluster.name, Cluster.max_hosts)
         # Force orm to look for mc - service relation
         q = q.join(McAlias, Cluster.metacluster)
         q = q.filter(McAlias.services_used.contains(self))
-        q = q.join(PersStage, McAlias.personality_stage)
-        q = q.filter(PersStage.personality_id.in_(personality_ids))
+        q = q.filter(McAlias.personality_stage_id.in_(persst_ids))
 
         for name, max_host in q.all():
             clusters[name] = max_host
@@ -102,21 +100,18 @@ class ServiceInstance(Base):
         q = session.query(Cluster.name, Cluster.max_hosts)
         q = q.filter(Cluster.cluster_type != 'meta')
         q = q.filter(Cluster.services_used.contains(self))
-        q = q.join(PersonalityStage)
-        q = q.filter(PersonalityStage.personality_id.in_(personality_ids))
+        q = q.filter(Cluster.personality_stage_id.in_(persst_ids))
 
         for name, max_host in q.all():
             clusters[name] = max_host
 
         adjusted_count = sum(itervalues(clusters))
 
-        PersStage = aliased(PersonalityStage)
         q = session.query(Host)
         q = q.filter(Host.services_used.contains(self))
         q = q.outerjoin('_cluster', 'cluster')
-        q = q.outerjoin(PersStage, Cluster.personality_stage)
         q = q.filter(or_(Cluster.id == null(),
-                         ~PersStage.personality_id.in_(personality_ids)))
+                         ~Cluster.personality_stage_id.in_(persst_ids)))
         adjusted_count += q.count()
         return adjusted_count
 
@@ -195,7 +190,7 @@ class ServiceInstance(Base):
             q = session.query(map_type.location_id, ServiceInstance)
             q = q.filter(map_type.service_instance_id == ServiceInstance.id)
             if map_type == PersonalityServiceMap:
-                q = q.filter_by(personality=dbstage)
+                q = q.filter_by(personality=dbstage.personality)
             q = q.filter(ServiceInstance.service_id.in_(missing_ids))
             q = q.options(defer(ServiceInstance.comments),
                           undefer(ServiceInstance._client_count),

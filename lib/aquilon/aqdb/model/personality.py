@@ -163,11 +163,6 @@ class PersonalityStage(Base):
     def features(self):
         return self.personality.features
 
-    # FIXME: Drop this property when required services are staged
-    @property
-    def services(self):
-        return self.personality.services
-
     # FIXME: Drop this property when cluster_infos is staged
     @property
     def cluster_infos(self):
@@ -184,6 +179,7 @@ class PersonalityStage(Base):
                 new.paramholder.parameters.extend(param.copy()
                                                   for param in self.paramholder.parameters)
 
+            new.services.extend(self.services)
             new.grns.extend(grn_link.copy() for grn_link in self.grns)
 
         return new

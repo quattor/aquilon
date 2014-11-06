@@ -116,8 +116,6 @@ class CommandAddPersonality(BrokerCommand):
                                                 personality=dbpersona)
                 session.add(dst_map)
 
-            dbpersona.services.extend(dbfrom_persona.services)
-
             for cluster_type, info in dbfrom_persona.cluster_infos.items():
                 dbpersona.cluster_infos[cluster_type] = info.copy()
 
