@@ -28,7 +28,7 @@ from broker.personalitytest import PersonalityTestMixin
 GRN = "grn:/ms/ei/aquilon/aqd"
 PPROD = "justify-prod"
 QPROD = "justify-qa"
-AUTHERR = "Personality aquilon/%s is marked production and is under change management control. Please specify --justification or --justification='emergency' and reason."
+AUTHERR = "Personality aquilon/%s@current is marked production and is under change management control. Please specify --justification or --justification='emergency' and reason."
 AUTHERR2 = "Justification of 'emergency' requires --reason to be specified."
 AUTHERR3 = "Changing feature bindings for a owner_only feature where owner grns do not match requires --justification."
 

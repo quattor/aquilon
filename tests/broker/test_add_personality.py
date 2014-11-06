@@ -74,6 +74,7 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
                          command)
         self.matchoutput(out, "Config override: enabled", command)
         self.matchoutput(out, "Environment: dev", command)
+        self.matchoutput(out, "Stage: current", command)
         self.matchoutput(out, "Comments: Some personality comments", command)
         self.matchoutput(out, "Owned by GRN: %s" % GRN, command)
         self.matchoutput(out, "Used by GRN: %s" % GRN, command)
@@ -85,6 +86,8 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
         personality = self.protobuftest(command, expect=1)[0]
         self.assertEqual(personality.archetype.name, "aquilon")
         self.assertEqual(personality.name, "utpersonality/dev")
+        # FIXME
+        # self.assertEqual(personality.version, "current")
         self.assertEqual(personality.config_override, True)
         self.assertEqual(personality.cluster_required, False)
         self.assertEqual(personality.comments, "Some personality comments")
@@ -105,6 +108,7 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
         self.matchoutput(out, "Personality: utpersonality-clone/dev Archetype: aquilon",
                          command)
         self.matchoutput(out, "Environment: dev", command)
+        self.matchoutput(out, "Stage: current", command)
         self.matchoutput(out, "Comments: Some personality comments", command)
         self.matchoutput(out, "Owned by GRN: %s" % GRN, command)
         self.matchoutput(out, "Used by GRN: %s" % GRN, command)

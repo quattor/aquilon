@@ -23,8 +23,30 @@ from aquilon.worker.formats.formatters import ObjectFormatter
 
 
 class PersonalityFormatter(ObjectFormatter):
-    def format_raw(self, personality, indent="", embedded=True,
+    def fill_proto(self, personality, skeleton, embedded=True,
                    indirect_attrs=True):
+        skeleton.name = str(personality)
+        self.redirect_proto(personality.archetype, skeleton.archetype,
+                            indirect_attrs=indirect_attrs)
+        skeleton.host_environment = str(personality.host_environment)
+        skeleton.owner_eonid = personality.owner_eon_id
+
+        if personality.comments:
+            skeleton.comments = personality.comments
+
+        skeleton.config_override = personality.config_override
+        skeleton.cluster_required = personality.cluster_required
+
+    def csv_fields(self, obj):
+        yield (obj.archetype.name, obj.name,)
+
+ObjectFormatter.handlers[Personality] = PersonalityFormatter()
+
+
+class PersonalityStageFormatter(PersonalityFormatter):
+    def format_raw(self, persst, indent="", embedded=True,
+                   indirect_attrs=True):
+        personality = persst.personality
         details = []
         if personality.is_cluster:
             description = "Cluster"
@@ -33,11 +55,12 @@ class PersonalityFormatter(ObjectFormatter):
 
         details.append(indent + "{0} {1:c}: {1.name} {2:c}: {2.name}"
                        .format(description, personality, personality.archetype))
+        details.append(indent + "  Stage: {0.name}".format(persst))
         details.append(indent + "  Environment: {0.name}"
                        .format(personality.host_environment))
         details.append(indent + "  Owned by {0:c}: {0.grn}"
                        .format(personality.owner_grn))
-        for grn_rec in sorted(personality.grns, key=attrgetter("target", "eon_id")):
+        for grn_rec in sorted(persst.grns, key=attrgetter("target", "eon_id")):
             details.append(indent + "  Used by {0.grn:c}: {0.grn.grn} "
                            "[target: {0.target}]".format(grn_rec))
 
@@ -46,7 +69,7 @@ class PersonalityFormatter(ObjectFormatter):
 
         if personality.cluster_required:
             details.append(indent + "  Requires clustered hosts")
-        for service in personality.services:
+        for service in persst.services:
             details.append(indent + "  Required Service: {0.name}"
                            .format(service))
 
@@ -56,7 +79,7 @@ class PersonalityFormatter(ObjectFormatter):
         for ng in personality.root_netgroups:
             details.append(indent + "  Root Access Netgroup: %s" % ng)
 
-        features = personality.features[:]
+        features = persst.features[:]
         features.sort(key=attrgetter("feature.feature_type",
                                      "feature.post_personality",
                                      "feature.name"))
@@ -82,7 +105,7 @@ class PersonalityFormatter(ObjectFormatter):
             details.append(indent + "  Comments: {0.comments}"
                            .format(personality))
 
-        for cltype, info in personality.cluster_infos.items():
+        for cltype, info in persst.cluster_infos.items():
             details.append(indent + "  Extra settings for %s clusters:" % cltype)
             if cltype == "esx":
                 details.append(indent + "    VM host capacity function: %s" %
@@ -91,26 +114,21 @@ class PersonalityFormatter(ObjectFormatter):
                                info.vmhost_overcommit_memory)
         return "\n".join(details)
 
-    def fill_proto(self, personality, skeleton, embedded=True,
-                   indirect_attrs=True):
-        skeleton.name = str(personality)
-        self.redirect_proto(personality.archetype, skeleton.archetype,
-                            indirect_attrs=indirect_attrs)
-        skeleton.host_environment = str(personality.host_environment)
-        skeleton.owner_eonid = personality.owner_eon_id
+    def fill_proto(self, persst, skeleton, embedded=True, indirect_attrs=True):
+        super(PersonalityStageFormatter, self).fill_proto(persst.personality,
+                                                          skeleton,
+                                                          embedded=embedded,
+                                                          indirect_attrs=indirect_attrs)
 
-        if personality.comments:
-            skeleton.comments = personality.comments
-
-        skeleton.config_override = personality.config_override
-        skeleton.cluster_required = personality.cluster_required
+        # FIXME
+        # skeleton.version = str(persst.name)
 
         if indirect_attrs:
-            self.redirect_proto(personality.services,
+            self.redirect_proto(persst.services,
                                 skeleton.required_services,
                                 indirect_attrs=False)
 
-            for link in personality.features:
+            for link in persst.features:
                 feat_msg = skeleton.features.add()
                 self.redirect_proto(link.feature, feat_msg)
                 if link.model:
@@ -118,35 +136,16 @@ class PersonalityFormatter(ObjectFormatter):
                 if link.interface_name:
                     feat_msg.interface_name = str(link.interface_name)
 
-            for grn_rec in sorted(personality.grns,
+            for grn_rec in sorted(persst.grns,
                                   key=attrgetter("target", "eon_id")):
                 map = skeleton.eonid_maps.add()
                 map.target = grn_rec.target
                 map.eonid = grn_rec.eon_id
 
-        for cltype, info in personality.cluster_infos.items():
+        for cltype, info in persst.cluster_infos.items():
             if cltype == "esx":
                 skeleton.vmhost_capacity_function = info.vmhost_capacity_function
                 skeleton.vmhost_overcommit_memory = info.vmhost_overcommit_memory
-
-    def csv_fields(self, obj):
-        yield (obj.archetype.name, obj.name,)
-
-ObjectFormatter.handlers[Personality] = PersonalityFormatter()
-
-
-class PersonalityStageFormatter(ObjectFormatter):
-    def format_raw(self, personality_stage, indent="", embedded=True,
-                   indirect_attrs=True):
-        return self.redirect_raw(personality_stage.personality, indent=indent,
-                                 embedded=embedded,
-                                 indirect_attrs=indirect_attrs)
-
-    def format_proto(self, personality_stage, container, embedded=True,
-                     indirect_attrs=True):
-        return self.redirect_proto(personality_stage.personality, container,
-                                   embedded=embedded,
-                                   indirect_attrs=indirect_attrs)
 
     def csv_fields(self, obj):
         yield (obj.archetype.name, obj.personality.name, obj.name)

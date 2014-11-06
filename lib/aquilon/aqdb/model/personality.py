@@ -108,6 +108,7 @@ class Personality(Base):
 
 class PersonalityStage(Base):
     __tablename__ = _PS
+    _class_label = "Personality"
 
     id = Column(Integer, Sequence('%s_id_seq' % _PS), primary_key=True)
 
@@ -125,12 +126,9 @@ class PersonalityStage(Base):
     __table_args__ = (UniqueConstraint(personality_id, name,
                                        name='%s_uk' % _PS),)
 
-    def __format__(self, format_spec):
-        return format(self.personality, format_spec)
-
     @property
     def qualified_name(self):
-        return self.personality.qualified_name
+        return self.personality.qualified_name + "@" + self.name
 
     @property
     def cluster_required(self):

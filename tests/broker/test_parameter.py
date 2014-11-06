@@ -61,7 +61,7 @@ class TestParameter(TestBrokerCommand):
 
         err = self.notfoundtest(SHOW_CMD)
         self.matchoutput(err,
-                         "No parameters found for personality %s/%s." %
+                         "No parameters found for personality %s/%s@current." %
                          (ARCHETYPE, PERSONALITY), SHOW_CMD)
 
     def test_100_add_re_path(self):
@@ -410,7 +410,7 @@ class TestParameter(TestBrokerCommand):
         out = self.commandtest(cmd)
         self.searchoutput(out,
                           r'Differences for Parameters:\s*'
-                          r'missing Parameters in Personality aquilon/eaitools:\s*'
+                          r'missing Parameters in Personality aquilon/eaitools@current:\s*'
                           r'//action/testaction/command\s*'
                           r'//action/testaction/user\s*'
                           r'//action/testaction2/command\s*'

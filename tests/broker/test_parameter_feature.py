@@ -354,19 +354,19 @@ class TestParameterFeature(TestBrokerCommand):
 
         out = self.commandtest(cmd)
         self.searchoutput(out, r'Differences for Required Services:\s*'
-                               r'missing Required Services in Personality aquilon/%s:\s*'
+                               r'missing Required Services in Personality aquilon/%s@current:\s*'
                                r'netmap\s*'
-                               r'missing Required Services in Personality aquilon/eaitools:\s*'
+                               r'missing Required Services in Personality aquilon/eaitools@current:\s*'
                                r'chooser1\s*chooser2\s*chooser3' % PERSONALITY,
                           cmd)
         self.searchoutput(out, r'Differences for Features:\s*'
-                               r'missing Features in Personality aquilon/eaitools:\s*'
+                               r'missing Features in Personality aquilon/eaitools@current:\s*'
                                r'hardwarefeature\s*'
                                r'hostfeature\s*'
                                r'interfacefeature\s*',
                           cmd)
         self.searchoutput(out, r'Differences for Parameters:\s*'
-                               r'missing Parameters in Personality aquilon/eaitools:\s*'
+                               r'missing Parameters in Personality aquilon/eaitools@current:\s*'
                                r'//features/hardware/hardwarefeature/hs21-8853/testlist\s*'
                                r'//features/hardware/hardwarefeature/hs21-8853/teststring\s*'
                                r'//features/hostfeature/testboolean\s*'

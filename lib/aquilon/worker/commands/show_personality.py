@@ -18,7 +18,7 @@
 
 from sqlalchemy.orm import joinedload, subqueryload, contains_eager
 
-from aquilon.aqdb.model import Archetype, Personality
+from aquilon.aqdb.model import Archetype, Personality, PersonalityStage
 from aquilon.worker.broker import BrokerCommand
 
 
@@ -36,22 +36,28 @@ class CommandShowPersonality(BrokerCommand):
             dbpersonality = Personality.get_unique(session, name=personality,
                                                    archetype=dbarchetype,
                                                    compel=True)
-            return dbpersonality
+            return dbpersonality.default_stage
 
-        q = session.query(Personality)
+        q = session.query(PersonalityStage)
+        q = q.join(Personality)
         if archetype:
             q = q.filter_by(archetype=dbarchetype)
         if personality:
             q = q.filter_by(name=personality)
         q = q.join(Archetype)
         q = q.order_by(Archetype.name, Personality.name)
-        q = q.options(contains_eager('archetype'),
-                      subqueryload('services'),
-                      subqueryload('grns'),
-                      subqueryload('features'),
-                      joinedload('features.feature'),
-                      joinedload('cluster_infos'),
-                      subqueryload('root_users'),
-                      subqueryload('root_netgroups'))
+        q = q.options(contains_eager('personality'),
+                      contains_eager('personality.archetype'),
+                      # FIXME: Undo when required services are staged
+                      subqueryload('personality.services'),
+                      # FIXME: Undo when GRNs are staged
+                      subqueryload('personality.grns'),
+                      # FIXME: Undo when feature bindings are staged
+                      subqueryload('personality.features'),
+                      joinedload('personality.features.feature'),
+                      # FIXME: Undo when cluster_infos is staged
+                      joinedload('personality.cluster_infos'),
+                      subqueryload('personality.root_users'),
+                      subqueryload('personality.root_netgroups'))
 
         return q.all()

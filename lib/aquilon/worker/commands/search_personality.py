@@ -19,8 +19,8 @@
 from sqlalchemy.orm import joinedload, subqueryload, contains_eager
 from sqlalchemy.sql import or_
 
-from aquilon.aqdb.model import (Archetype, Personality, HostEnvironment,
-                                PersonalityGrnMap, Service)
+from aquilon.aqdb.model import (Archetype, Personality, PersonalityStage,
+                                HostEnvironment, PersonalityGrnMap, Service)
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.grn import lookup_grn
 from aquilon.worker.formats.list import StringAttributeList
@@ -33,7 +33,8 @@ class CommandSearchPersonality(BrokerCommand):
     def render(self, session, personality, archetype, grn, eon_id,
                host_environment, config_override, required_service, fullinfo,
                style, **arguments):
-        q = session.query(Personality)
+        q = session.query(PersonalityStage)
+        q = q.join(Personality)
         if archetype:
             dbarchetype = Archetype.get_unique(session, archetype, compel=True)
             q = q.filter_by(archetype=dbarchetype)
@@ -61,15 +62,20 @@ class CommandSearchPersonality(BrokerCommand):
             q = q.filter(Personality.services.contains(dbsrv))
 
         q = q.join(Archetype)
-        q = q.order_by(Archetype.name, Personality.name)
-        q = q.options(contains_eager('archetype'))
+        q = q.order_by(Archetype.name, Personality.name, PersonalityStage.name)
+        q = q.options(contains_eager('personality'),
+                      contains_eager('personality.archetype'))
 
         if fullinfo or style != 'raw':
-            q = q.options(subqueryload('services'),
-                          subqueryload('grns'),
-                          subqueryload('features'),
-                          joinedload('features.feature'),
-                          joinedload('cluster_infos'))
+            q = q.options(# FIXME: Undo when required services are staged
+                          subqueryload('personality.services'),
+                          # FIXME: Undo when GRNs are staged
+                          subqueryload('personality.grns'),
+                          # FIXME: Undo when feature bindings are staged
+                          subqueryload('personality.features'),
+                          joinedload('personality.features.feature'),
+                          # FIXME: Undo when cluster_infos is staged
+                          joinedload('personality.cluster_infos'))
             return q.all()
         else:
             return StringAttributeList(q.all(), "qualified_name")
