@@ -38,7 +38,8 @@ class CommandAddRequiredServicePersonality(BrokerCommand):
                reason, user, **arguments):
         dbpersonality = Personality.get_unique(session, name=personality,
                                                archetype=archetype, compel=True)
-        validate_personality_justification(dbpersonality, user, justification, reason)
+        validate_personality_justification(dbpersonality.active_stage, user,
+                                           justification, reason)
         dbservice = Service.get_unique(session, service, compel=True)
 
         self._update_dbobj(archetype, dbpersonality, dbservice)

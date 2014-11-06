@@ -29,7 +29,7 @@ class CommandValidateParameter(BrokerCommand):
         dbpersonality = Personality.get_unique(session, name=personality,
                                                archetype=archetype, compel=True)
 
-        errors = validate_personality_config(dbpersonality)
+        errors = validate_personality_config(dbpersonality.active_stage)
         if errors:
             raise ArgumentError("Following required parameters have not been "
                                 "specified:\n" +

@@ -43,10 +43,12 @@ class CommandAddParameter(BrokerCommand):
                                 .format(dbpersonality.archetype))
 
         dbstage = dbpersonality.active_stage
+
+        validate_personality_justification(dbstage, user, justification,
+                                           reason)
+
         if not dbpersonality.paramholder:
             dbpersonality.paramholder = PersonalityParameter()
-
-        validate_personality_justification(dbpersonality, user, justification, reason)
 
         dbparameter = self.process_parameter(session, dbpersonality.paramholder,
                                              feature, model, interface, path,

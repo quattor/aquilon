@@ -280,26 +280,27 @@ def search_path_in_personas(session, path, paramdef_holder):
     return holder
 
 
-def validate_personality_config(dbpersonality):
+def validate_personality_config(dbstage):
     """
         Validates all the parameters on personality to validate
         if all required parameters have been set. All feature
         parameters are also validated.
     """
-    dbarchetype = dbpersonality.archetype
+    dbarchetype = dbstage.personality.archetype
 
-    if dbpersonality.paramholder:
-        parameters = dbpersonality.paramholder.parameters
+    if dbstage.paramholder:
+        parameters = dbstage.paramholder.parameters
     else:
         parameters = []
 
     error = []
+
     if dbarchetype.paramdef_holder:
         param_definitions = dbarchetype.paramdef_holder.param_definitions
         error += validate_required_parameter(param_definitions, parameters)
 
     # features for personalities
-    for link in dbarchetype.features + dbpersonality.features:
+    for link in dbarchetype.features + dbstage.features:
         param_definitions = []
         if link.feature.paramdef_holder:
             param_definitions = link.feature.paramdef_holder.param_definitions

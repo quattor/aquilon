@@ -102,8 +102,8 @@ class CommandBindFeature(BrokerCommand):
                                                  "do not match requires --justification.")
                 validate_justification(user, justification, reason)
             else:
-                validate_personality_justification(dbpersonality, user,
-                                                   justification, reason)
+                validate_personality_justification(dbpersonality.active_stage,
+                                                   user, justification, reason)
         elif cnt:
             if not justification:
                 raise AuthorizationException("Changing feature bindings for "

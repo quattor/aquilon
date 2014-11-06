@@ -78,10 +78,11 @@ def create_host(session, logger, config, dbhw, dbarchetype, domain=None,
     dbpersonality = Personality.get_unique(session, name=personality,
                                            archetype=dbarchetype,
                                            compel=True)
+    dbstage = dbpersonality.default_stage
 
     if isinstance(dbbranch, Domain):
-        pre, post = personality_features(dbpersonality)
-        hw_features = model_features(dbhw.model, dbarchetype, dbpersonality)
+        pre, post = personality_features(dbstage)
+        hw_features = model_features(dbhw.model, dbarchetype, dbstage)
         for dbfeature in pre | post | hw_features:
             check_feature_template(config, dbarchetype, dbfeature, dbbranch)
 
@@ -110,8 +111,8 @@ def create_host(session, logger, config, dbhw, dbarchetype, domain=None,
 
     dbhost = Host(hardware_entity=dbhw, branch=dbbranch, owner_grn=dbgrn,
                   sandbox_author=dbauthor, status=dbstatus,
-                  personality_stage=dbpersonality.default_stage,
-                  operating_system=dbos, comments=comments)
+                  personality_stage=dbstage, operating_system=dbos,
+                  comments=comments)
     session.add(dbhost)
 
     if dbgrn and config.has_option(section, "default_grn_target"):

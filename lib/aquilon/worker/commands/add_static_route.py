@@ -75,8 +75,8 @@ class CommandAddStaticRoute(BrokerCommand):
                                                    name=personality,
                                                    archetype=archetype,
                                                    compel=True)
-            validate_personality_justification(dbpersonality, user,
-                                               justification, reason)
+            validate_personality_justification(dbpersonality.active_stage,
+                                               user, justification, reason)
         else:
             dbpersonality = None
 

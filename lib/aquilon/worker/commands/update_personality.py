@@ -40,8 +40,9 @@ class CommandUpdatePersonality(BrokerCommand):
         dbpersona = Personality.get_unique(session, name=personality,
                                            archetype=archetype, compel=True)
 
-        validate_personality_justification(dbpersona, user,
-                                           justification, reason)
+        for ver in dbpersona.stages.values():
+            validate_personality_justification(ver, user, justification,
+                                               reason)
 
         if vmhost_capacity_function is not None or \
                 vmhost_overcommit_memory is not None:

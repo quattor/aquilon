@@ -163,19 +163,19 @@ class CommandManageList(BrokerCommand):
 
             if isinstance(dbbranch, Domain):
                 features = defaultdict(set)
-                personalities = set()
+                personality_stages = set()
                 for dbobj in objects:
-                    pers = dbobj.personality_stage
-                    arch = pers.archetype
+                    dbstage = dbobj.personality_stage
+                    arch = dbstage.archetype
 
-                    personalities.add(pers)
+                    personality_stages.add(dbstage)
                     if hasattr(dbobj, 'hardware_entity'):
                         features[arch].update(model_features(dbobj.hardware_entity.model,
-                                                             arch, pers))
-                for pers in personalities:
-                    pre, post = personality_features(pers)
-                    features[pers.archetype].update(pre)
-                    features[pers.archetype].update(post)
+                                                             arch, dbstage))
+                for dbstage in personality_stages:
+                    pre, post = personality_features(dbstage)
+                    features[dbstage.archetype].update(pre)
+                    features[dbstage.archetype].update(post)
 
                 for dbarch, featureset in features.items():
                     for dbfeature in featureset:
