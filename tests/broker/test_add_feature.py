@@ -31,22 +31,25 @@ class TestAddFeature(TestBrokerCommand):
 
     def test_100_add_host_pre(self):
         command = ["add", "feature", "--feature", "pre_host", "--eon_id", 2,
-                   "--type", "host", "--comment", "Test comment"]
+                   "--type", "host", "--comment", "Test comment",
+                   "--visibility", "public"]
         self.noouttest(command)
 
     def test_100_add_host_pre_param(self):
         command = ["add", "feature", "--feature", "pre_host_param", "--eon_id", 2,
-                   "--type", "host"]
+                   "--type", "host", "--visibility", "public"]
         self.noouttest(command)
 
     def test_100_add_host_post(self):
         command = ["add", "feature", "--feature", "post_host", "--eon_id", 2,
-                   "--type", "host", "--post_personality"]
+                   "--type", "host", "--post_personality",
+                   "--visibility", "public"]
         self.noouttest(command)
 
     def test_100_add_hw(self):
         command = ["add", "feature", "--feature", "bios_setup",
-                   "--eon_id", 2, "--type", "hardware"]
+                   "--eon_id", 2, "--type", "hardware",
+                   "--visibility", "public"]
         self.noouttest(command)
 
     def test_100_add_hw2(self):
@@ -286,6 +289,16 @@ class TestAddFeature(TestBrokerCommand):
         out = self.badrequesttest(command)
         self.matchoutput(out, "Unknown feature type 'no-such-type'. The "
                          "valid values are: hardware, host, interface.",
+                         command)
+
+    def test_250_bad_visibility(self):
+        command = ["add", "feature", "--feature", "bad_visibility",
+                   "--eon_id", 2, "--type", "hardware",
+                   "--visibility", "bad_visibility"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Unknown visibility. Valid values are: "
+                         "owner_approved, owner_only, public, restricted.",
                          command)
 
     def test_300_update_feature(self):

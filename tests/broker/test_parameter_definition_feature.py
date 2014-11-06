@@ -30,7 +30,8 @@ FEATURE = 'myfeature'
 class TestParameterDefinitionFeature(TestBrokerCommand):
 
     def test_00_add_feature(self):
-        cmd = ["add_feature", "--feature", FEATURE, "--type=host", "--eon_id=2"]
+        cmd = ["add_feature", "--feature", FEATURE, "--type=host", "--eon_id=2",
+               "--visibility", "public"]
         self.noouttest(cmd)
 
     def test_100_add(self):

@@ -55,8 +55,8 @@ VAL_CMD = ["validate_parameter", "--personality", PERSONALITY]
 class TestParameterFeature(TestBrokerCommand):
 
     def test_000_add_host_feature(self):
-        type = "host"
-        cmd = ["add_feature", "--feature", HOSTFEATURE, "--type", type, "--post_personality", "--eon_id", 2]
+        cmd = ["add_feature", "--feature", HOSTFEATURE, "--type", "host",
+               "--post_personality", "--eon_id", 2, "--visibility", "public"]
         self.ignoreoutputtest(cmd)
 
     def test_010_bind_host_feature(self):
@@ -65,8 +65,8 @@ class TestParameterFeature(TestBrokerCommand):
         self.load_paramdefs(HOSTFEATURE, 'host')
 
     def test_030_add_hardware_feature(self):
-        type = "hardware"
-        cmd = ["add_feature", "--feature", HARDWAREFEATURE, "--type", type, "--eon_id", 2]
+        cmd = ["add_feature", "--feature", HARDWAREFEATURE,
+               "--type", "hardware", "--eon_id", 2, "--visibility", "public"]
         self.ignoreoutputtest(cmd)
 
     def test_040_bind_hardware_feature(self):
@@ -76,8 +76,8 @@ class TestParameterFeature(TestBrokerCommand):
         self.load_paramdefs(HARDWAREFEATURE, 'hardware')
 
     def test_060_add_interface_feature(self):
-        type = "interface"
-        cmd = ["add_feature", "--feature", INTERFACEFEATURE, "--type", type, "--eon_id", 2]
+        cmd = ["add_feature", "--feature", INTERFACEFEATURE,
+               "--type", "interface", "--eon_id", 2, "--visibility", "public"]
         self.ignoreoutputtest(cmd)
 
     def test_070_bind_interface_feature(self):
@@ -350,7 +350,8 @@ class TestParameterFeature(TestBrokerCommand):
     def test_600_add_same_name_feature(self):
         feature = "shinynew"
         for type in ["host", "hardware", "interface"]:
-            cmd = ["add_feature", "--feature", feature, "--type", type, "--eon_id", 2]
+            cmd = ["add_feature", "--feature", feature, "--type", type,
+                   "--eon_id", 2, "--visibility", "public"]
             self.ignoreoutputtest(cmd)
 
             cmd = ["add_parameter_definition", "--feature", feature, "--type", type,
