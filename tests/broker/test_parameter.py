@@ -446,27 +446,35 @@ class TestParameter(TestBrokerCommand):
         cmd = ["search_parameter", "--archetype", ARCHETYPE, "--path", "espinfo/function"]
         out = self.commandtest(cmd)
         self.searchoutput(out,
-                          r'Personality aquilon/compileserver:\s*espinfo/function: "development"',
+                          r'Host Personality: compileserver Archetype: aquilon\s*'
+                          r'espinfo/function: "development"',
                           cmd)
         self.searchoutput(out,
-                          r'Personality aquilon/inventory:\s*espinfo/function: "development"',
+                          r'Host Personality: inventory Archetype: aquilon\s*'
+                          r'espinfo/function: "development"',
                           cmd)
         self.searchoutput(out,
-                          r'Personality aquilon/unixeng-test:\s*espinfo/function: "development"',
+                          r'Host Personality: unixeng-test Archetype: aquilon\s*'
+                          r'espinfo/function: "development"',
                           cmd)
         self.searchoutput(out,
-                          r'Personality aquilon/testpersona/dev:\s*espinfo/function: "production"',
+                          r'Host Personality: testpersona/dev Archetype: aquilon\s*'
+                          r'espinfo/function: "production"',
                           cmd)
         self.searchoutput(out,
-                          r'Personality aquilon/eaitools:\s*espinfo/function: "development"',
+                          r'Host Personality: eaitools Archetype: aquilon\s*'
+                          r'espinfo/function: "development"',
                           cmd)
 
     def test_535_search_parameter(self):
         cmd = ["search_parameter", "--archetype", ARCHETYPE, "--path", "action"]
         out = self.commandtest(cmd)
-        self.searchoutput(out, r'Personality aquilon/testpersona/dev:\s*'
-                               r'action: {"testaction": {"command": "/bin/testaction", "user": "user2"}, '
-                               r'"testaction2": {"command": "/bin/testaction2", "user": "user1", "timeout": 100}}', cmd)
+        self.searchoutput(out,
+                          r'Host Personality: testpersona/dev Archetype: aquilon\s*'
+                          r'action: {\s*'
+                          r'"testaction": {\s*"command": "/bin/testaction",\s*"user": "user2"\s*},\s*'
+                          r'"testaction2": {\s*"command": "/bin/testaction2",\s*"user": "user1",\s*"timeout": 100\s*}\s*}',
+                          cmd)
 
     def test_550_verify_actions(self):
         ACT_CAT_CMD = CAT_CMD + ["--param_tmpl=actions"]
