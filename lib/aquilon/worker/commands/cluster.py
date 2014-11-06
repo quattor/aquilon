@@ -54,8 +54,8 @@ class CommandCluster(BrokerCommand):
                                                    name=personality,
                                                    archetype=dbhost.archetype,
                                                    compel=True)
-            if dbhost.personality != dbpersonality:
-                dbhost.personality = dbpersonality
+            if dbhost.personality_stage != dbpersonality:
+                dbhost.personality_stage = dbpersonality
                 personality_change = True
 
         # Now that we've changed the personality, we can check

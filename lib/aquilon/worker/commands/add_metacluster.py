@@ -53,7 +53,7 @@ class CommandAddMetaCluster(BrokerCommand):
 
         # This should be reverted when virtbuild supports this option
         if not dbloc:
-            section = "archetype_" + kw['personality'].archetype.name
+            section = "archetype_" + kw['personality_stage'].archetype.name
             dbloc = Location.get_unique(session,
                                         name=self.config.get(section,
                                                              "location_name"),

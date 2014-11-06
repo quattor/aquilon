@@ -54,7 +54,7 @@ class CommandUpdateCluster(BrokerCommand):
             if not dbpersonality.is_cluster:
                 raise ArgumentError("Personality {0} is not a cluster " +
                                     "personality".format(dbpersonality))
-            dbcluster.personality = dbpersonality
+            dbcluster.personality_stage = dbpersonality
 
         if max_members is not None:
             # Allow removing the restriction

@@ -190,7 +190,7 @@ class PlenaryHostData(StructurePlenary):
                     else:
                         ifdesc["aliases"] = {addr.label: aliasdesc}
 
-                static_routes |= set(net.personality_static_routes(self.dbobj.personality))
+                static_routes |= set(net.personality_static_routes(self.dbobj.personality_stage))
 
             if static_routes:
                 if "route" not in ifdesc:
@@ -294,7 +294,7 @@ class PlenaryHostObject(ObjectPlenary):
 
         if not inspect(self.dbobj).deleted:
             keylist.append(PlenaryKey(exclusive=False,
-                                      personality=self.dbobj.personality,
+                                      personality=self.dbobj.personality_stage,
                                       logger=self.logger))
             keylist.extend(PlenaryKey(exclusive=False, service_instance=si,
                                       logger=self.logger)
@@ -327,7 +327,7 @@ class PlenaryHostObject(ObjectPlenary):
         return self.old_content != self.new_content
 
     def body(self, lines):
-        pers = self.dbobj.personality
+        pers = self.dbobj.personality_stage
         arch = pers.archetype
 
         # FIXME: Enforce that one of the interfaces is marked boot?

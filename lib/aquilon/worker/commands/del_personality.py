@@ -34,7 +34,7 @@ class CommandDelPersonality(BrokerCommand):
             q = session.query(Cluster.id)
         else:
             q = session.query(Host.hardware_entity_id)
-        q = q.filter_by(personality=dbpersona)
+        q = q.filter_by(personality_stage=dbpersona)
         if q.count():
             raise ArgumentError("{0} is still in use and cannot be deleted."
                                 .format(dbpersona))

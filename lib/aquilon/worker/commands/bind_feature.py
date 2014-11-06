@@ -138,7 +138,7 @@ class CommandBindFeature(BrokerCommand):
             q = session.query(Domain)
             q = q.join(cls_)
             if dbpersonality:
-                q = q.filter_by(personality=dbpersonality)
+                q = q.filter_by(personality_stage=dbpersonality)
             else:
                 q = q.join(Personality)
                 q = q.filter_by(archetype=dbarchetype)

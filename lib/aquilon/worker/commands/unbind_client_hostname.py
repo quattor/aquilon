@@ -42,10 +42,10 @@ class CommandUnbindClientHostname(BrokerCommand):
             raise ArgumentError("{0} is required for {1:l}, the binding cannot "
                                 "be removed."
                                 .format(dbservice, dbhost.archetype))
-        if dbservice in dbhost.personality.services:
+        if dbservice in dbhost.personality_stage.services:
             raise ArgumentError("{0} is required for {1:l}, the binding cannot "
                                 "be removed."
-                                .format(dbservice, dbhost.personality))
+                                .format(dbservice, dbhost.personality_stage))
 
         dbhost.services_used.remove(dbinstance)
         session.flush()

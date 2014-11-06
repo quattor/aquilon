@@ -264,9 +264,9 @@ class CommandSearchHost(BrokerCommand):
             q = q.reset_joinpoint()
 
         if fullinfo or style != "raw":
-            q = q.options(joinedload('personality'),
-                          undefer('personality.archetype.comments'),
-                          subqueryload('personality.grns'),
+            q = q.options(joinedload('personality_stage'),
+                          undefer('personality_stage.archetype.comments'),
+                          subqueryload('personality_stage.grns'),
                           subqueryload('grns'),
                           subqueryload('services_used'),
                           subqueryload('services_provided'),

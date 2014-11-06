@@ -103,7 +103,7 @@ class Host(CompileableMixin, Base):
         if self.owner_grn:
             return self.owner_grn
         else:
-            return self.personality.owner_grn
+            return self.personality_stage.owner_grn
 
     @property
     def effective_grns(self):
@@ -114,7 +114,7 @@ class Host(CompileableMixin, Base):
         # own
         for grn_rec in self.grns:
             eon_id_map[grn_rec.target].add(grn_rec.grn)
-        for grn_rec in self.personality.grns:
+        for grn_rec in self.personality_stage.grns:
             pers_eon_id_map[grn_rec.target].add(grn_rec.grn)
 
         for target in pers_eon_id_map:

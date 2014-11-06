@@ -162,7 +162,7 @@ class NetworkFormatter(ObjectFormatter):
             q = q.filter(HardwareEntity.id.in_(hw_ids))
             q = q.options(subqueryload('interfaces'),
                           subqueryload('host'),
-                          subqueryload('host.personality'))
+                          subqueryload('host.personality_stage'))
             hwent_by_id = {}
             for dbhwent in q.all():
                 hwent_by_id[dbhwent.id] = dbhwent
@@ -223,7 +223,7 @@ class NetworkFormatter(ObjectFormatter):
                         self.redirect_proto(hwent.host.archetype,
                                             host_msg.archetype,
                                             indirect_attrs=False)
-                        self.redirect_proto(hwent.host.personality,
+                        self.redirect_proto(hwent.host.personality_stage,
                                             host_msg.personality,
                                             indirect_attrs=False)
 

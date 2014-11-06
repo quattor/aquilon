@@ -309,7 +309,7 @@ class CommandFlush(BrokerCommand):
                 q = session.query(Cluster)
                 q = q.options(subqueryload("metacluster"),
                               lazyload("location_constraint"),
-                              lazyload("personality"),
+                              lazyload("personality_stage"),
                               lazyload("branch"))
                 cluster_cache = q.all()  # pylint: disable=W0612
 
@@ -323,8 +323,8 @@ class CommandFlush(BrokerCommand):
                               subqueryload("services_used"),
                               subqueryload("services_provided"),
                               subqueryload("_cluster"),
-                              subqueryload("personality"),
-                              subqueryload("personality.grns"))
+                              subqueryload("personality_stage"),
+                              subqueryload("personality_stage.grns"))
 
                 progress = ProgressReport(logger, q.count(), "host")
                 for h in q:

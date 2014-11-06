@@ -108,10 +108,9 @@ def create_host(session, logger, config, dbhw, dbarchetype, domain=None,
         dbgrn = lookup_grn(session, grn, eon_id, logger=logger,
                            config=config)
 
-    dbhost = Host(hardware_entity=dbhw, branch=dbbranch,
-                  owner_grn=dbgrn, sandbox_author=dbauthor,
-                  personality=dbpersonality, status=dbstatus,
-                  operating_system=dbos, comments=comments)
+    dbhost = Host(hardware_entity=dbhw, branch=dbbranch, owner_grn=dbgrn,
+                  sandbox_author=dbauthor, personality_stage=dbpersonality,
+                  status=dbstatus, operating_system=dbos, comments=comments)
     session.add(dbhost)
 
     if dbgrn and config.has_option(section, "default_grn_target"):

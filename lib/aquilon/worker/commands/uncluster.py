@@ -45,7 +45,7 @@ class CommandUncluster(BrokerCommand):
                 raise ArgumentError("Cannot switch host to personality %s "
                                     "because that personality requires a "
                                     "cluster" % personality)
-            dbhost.personality = dbpersonality
+            dbhost.personality_stage = dbpersonality
         elif dbhost.personality.cluster_required:
             raise ArgumentError("Host personality %s requires a cluster, "
                                 "use --personality to change personality "

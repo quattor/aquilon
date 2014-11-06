@@ -227,11 +227,11 @@ class Network(Base):
     def is_internal(self):
         return self.network_environment.is_default
 
-    def personality_static_routes(self, personality):
-        if personality:
+    def personality_static_routes(self, dbstage):
+        if dbstage:
             return [route for route in self.static_routes
                     if route.personality is None or
-                    route.personality == personality]
+                    route.personality == dbstage]
         else:
             return [route for route in self.static_routes
                     if route.personality is None]

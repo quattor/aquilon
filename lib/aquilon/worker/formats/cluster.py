@@ -146,7 +146,8 @@ class ClusterFormatter(CompileableFormatter):
                 usagestr = None
             details.append(indent + "  Resources used by VMs: %s" % usagestr)
         details.append(self.redirect_raw(cluster.status, indent + "  "))
-        details.append(self.redirect_raw(cluster.personality, indent + "  "))
+        details.append(self.redirect_raw(cluster.personality_stage,
+                                         indent + "  "))
         details.append(indent + "  {0:c}: {1}"
                        .format(cluster.branch, cluster.authored_branch))
         for dbsi in cluster.services_used:

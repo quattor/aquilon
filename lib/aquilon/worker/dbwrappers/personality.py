@@ -29,7 +29,7 @@ def is_prod_personality_used(dbpersona):
         q = session.query(Cluster.id)
     else:
         q = session.query(Host.hardware_entity_id)
-    q = q.filter_by(personality=dbpersona)
+    q = q.filter_by(personality_stage=dbpersona)
 
     if dbpersona.host_environment.name == 'prod' and q.count():
         return True

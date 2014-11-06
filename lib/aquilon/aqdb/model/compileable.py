@@ -39,7 +39,7 @@ class CompileableMixin(object):
         return Column(ForeignKey(Personality.id), nullable=False, index=True)
 
     @declared_attr
-    def personality(cls):  # pylint: disable=E0213
+    def personality_stage(cls):  # pylint: disable=E0213
         return relation(Personality, lazy=False, innerjoin=True)
 
     @declared_attr
@@ -52,8 +52,11 @@ class CompileableMixin(object):
 
     @property
     def archetype(self):
-        """ proxy in our archetype attr """
         return self.personality.archetype
+
+    @property
+    def personality(self):
+        return self.personality_stage
 
     @property
     def authored_branch(self):
@@ -66,6 +69,6 @@ class CompileableMixin(object):
 
     @property
     def required_services(self):
-        rqs = set(self.personality.services)
+        rqs = set(self.personality_stage.services)
         rqs.update(self.archetype.services)
         return rqs

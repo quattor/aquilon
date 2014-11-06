@@ -51,7 +51,7 @@ class CommandAddCluster(BrokerCommand):
 
         # Not finding the cluster type is an internal consistency issue, so make
         # that show up in the logs by using AquilonError
-        ctype = kw['personality'].archetype.cluster_type
+        ctype = kw['personality_stage'].archetype.cluster_type
         clus_type = Cluster.polymorphic_subclass(ctype, "Unknown cluster type",
                                                  error=AquilonError)
 

@@ -165,7 +165,7 @@ class CommandManageList(BrokerCommand):
                 features = defaultdict(set)
                 personalities = set()
                 for dbobj in objects:
-                    pers = dbobj.personality
+                    pers = dbobj.personality_stage
                     arch = pers.archetype
 
                     personalities.add(pers)

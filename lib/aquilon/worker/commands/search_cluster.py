@@ -97,7 +97,7 @@ class CommandSearchCluster(BrokerCommand):
                                                    archetype=dbarchetype,
                                                    name=personality,
                                                    compel=True)
-            q = q.filter_by(personality=dbpersonality)
+            q = q.filter_by(personality_stage=dbpersonality)
         elif personality:
             q = q.join(Personality, aliased=True)
             q = q.filter_by(name=personality)
@@ -246,7 +246,7 @@ class CommandSearchCluster(BrokerCommand):
             q = q.join(Cluster._hosts, Host, aliased=True)
             dbmp = Personality.get_unique(session, archetype=dbma,
                                           name=member_personality, compel=True)
-            q = q.filter_by(personality=dbmp)
+            q = q.filter_by(personality_stage=dbmp)
             q = q.reset_joinpoint()
         elif member_personality:
             q = q.join(Cluster._hosts, Host, Personality, aliased=True)

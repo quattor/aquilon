@@ -94,7 +94,8 @@ class HostFormatter(CompileableFormatter):
                 details.append(self.redirect_raw(resource, indent + "    "))
 
         # TODO: supress features when redirecting personality/archetype
-        details.append(self.redirect_raw(host.personality, indent + "  "))
+        details.append(self.redirect_raw(host.personality_stage,
+                                         indent + "  "))
         details.append(self.redirect_raw(host.archetype, indent + "  "))
 
         details.append(self.redirect_raw(host.operating_system, indent + "  "))
@@ -116,10 +117,11 @@ class HostFormatter(CompileableFormatter):
                                              indent + "  "))
 
         for feature in sorted(model_features(host.hardware_entity.model,
-                                             host.archetype, host.personality),
+                                             host.archetype,
+                                             host.personality_stage),
                               key=attrgetter('name')):
             details.append(indent + "  {0:c}: {0.name}".format(feature))
-        (pre, post) = personality_features(host.personality)
+        (pre, post) = personality_features(host.personality_stage)
         for feature in sorted(pre, key=attrgetter('name')):
             details.append(indent + "  {0:c}: {0.name} [pre_personality]"
                            .format(feature))
@@ -191,11 +193,11 @@ class GrnHostListFormatter(ListFormatter):
             msg.status = str(host.status.name)
             msg.owner_eonid = host.effective_owner_grn.eon_id
 
-            self.redirect_proto(host.personality, msg.personality,
+            self.redirect_proto(host.personality_stage, msg.personality,
                                 indirect_attrs=False)
 
             # eon id maps TBD need both effective and actual
-            for grn_rec in sorted(host.personality.grns,
+            for grn_rec in sorted(host.personality_stage.grns,
                                   key=attrgetter("target", "eon_id")):
                 map = msg.personality.eonid_maps.add()
                 map.target = grn_rec.target

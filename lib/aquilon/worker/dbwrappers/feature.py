@@ -24,21 +24,21 @@ from aquilon.aqdb.model import FeatureLink, Personality
 from aquilon.worker.templates.domain import template_branch_basedir
 
 
-def model_features(dbmodel, dbarch, dbpers, interface_name=None):
+def model_features(dbmodel, dbarch, dbstage, interface_name=None):
     features = set()
     for link in dbmodel.features:
         if (link.archetype is None or link.archetype == dbarch) and \
-           (link.personality is None or link.personality == dbpers) and \
+           (link.personality is None or link.personality == dbstage) and \
            (link.interface_name is None or link.interface_name == interface_name):
             features.add(link.feature)
 
     return features
 
 
-def personality_features(dbpersonality):
+def personality_features(dbstage):
     pre = set()
     post = set()
-    for link in dbpersonality.archetype.features:
+    for link in dbstage.archetype.features:
         if link.model or link.interface_name:
             continue
         if link.feature.post_personality:
@@ -46,7 +46,7 @@ def personality_features(dbpersonality):
         else:
             pre.add(link.feature)
 
-    for link in dbpersonality.features:
+    for link in dbstage.features:
         if link.model or link.interface_name:
             continue
         if link.feature.post_personality:
@@ -57,17 +57,17 @@ def personality_features(dbpersonality):
     return (pre, post)
 
 
-def interface_features(dbinterface, dbarch, dbpers):
+def interface_features(dbinterface, dbarch, dbstage):
     features = set()
 
     if dbinterface.model_allowed:
         # Add features bound to the model
-        features.update(model_features(dbinterface.model, dbarch, dbpers,
+        features.update(model_features(dbinterface.model, dbarch, dbstage,
                                        dbinterface.name))
 
-    if dbpers:
+    if dbstage:
         # Add features bound to the personality, if the interface name matches
-        for link in dbpers.features:
+        for link in dbstage.features:
             # Model features were handled above
             if link.model:
                 continue

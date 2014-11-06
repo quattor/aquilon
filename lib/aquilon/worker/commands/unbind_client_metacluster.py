@@ -41,10 +41,10 @@ class CommandUnbindClientMetacluster(BrokerCommand):
             raise ArgumentError("{0} is required for {1:l}, the binding cannot "
                                 "be removed."
                                 .format(dbservice, dbmeta.archetype))
-        if dbservice in dbmeta.personality.services:
+        if dbservice in dbmeta.personality_stage.services:
             raise ArgumentError("{0} is required for {1:l}, the binding cannot "
                                 "be removed."
-                                .format(dbservice, dbmeta.personality))
+                                .format(dbservice, dbmeta.personality_stage))
 
         dbmeta.services_used.remove(dbinstance)
 

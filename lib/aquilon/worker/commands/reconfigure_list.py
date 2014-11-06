@@ -40,8 +40,8 @@ class CommandReconfigureList(BrokerCommand):
 
     def get_hostlist(self, session, list, **arguments):   # pylint: disable=W0613
         check_hostlist_size(self.command, self.config, list)
-        options = [joinedload('personality'),
-                   subqueryload('personality.grns'),
+        options = [joinedload('personality_stage'),
+                   subqueryload('personality_stage.grns'),
                    subqueryload('grns'),
                    subqueryload('services_used'),
                    undefer('services_used._client_count'),
@@ -126,7 +126,7 @@ class CommandReconfigureList(BrokerCommand):
                                           dbhost.cluster, ", ".join(allowed)))
                     continue
 
-                dbhost.personality = dbpersonality
+                dbhost.personality_stage = dbpersonality
 
             if osname or osversion or old_archetype != dbarchetype:
                 if not osname:

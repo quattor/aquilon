@@ -32,8 +32,8 @@ class CommandShowHostHostname(BrokerCommand):
         options = [undefer('comments'),
                    joinedload('host'),
                    undefer('host.comments'),
-                   undefer('host.personality.comments'),
-                   undefer('host.personality.archetype.comments'),
+                   undefer('host.personality_stage.comments'),
+                   undefer('host.personality_stage.archetype.comments'),
                    joinedload('model'),
                    joinedload('model.vendor')]
         return hostname_to_host(session, hostname, query_options=options)

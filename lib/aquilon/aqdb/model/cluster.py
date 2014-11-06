@@ -148,8 +148,8 @@ class Cluster(CompileableMixin, Base):
 
     @property
     def personality_info(self):
-        if self.cluster_type in self.personality.cluster_infos:
-            return self.personality.cluster_infos[self.cluster_type]
+        if self.cluster_type in self.personality_stage.cluster_infos:
+            return self.personality_stage.cluster_infos[self.cluster_type]
         else:
             return None
 

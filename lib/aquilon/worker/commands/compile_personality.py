@@ -45,7 +45,7 @@ class CommandCompilePersonality(BrokerCommand):
             pancexclude = r'components/spma/functions'
 
         q = session.query(Host)
-        q = q.filter_by(personality=dbpersonality)
+        q = q.filter_by(personality_stage=dbpersonality)
         if dbdomain:
             q = q.filter_by(branch=dbdomain)
         if dbauthor:

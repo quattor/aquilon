@@ -181,7 +181,7 @@ def validate_rebuild_required(session, path, param_holder):
     q = session.query(Host.hardware_entity_id)
     q = q.filter(or_(Host.status == dbready, Host.status == dbalmostready))
     if isinstance(param_holder, PersonalityParameter):
-        q = q.filter_by(personality=personality)
+        q = q.filter_by(personality_stage=personality)
     if q.count():
         raise ArgumentError("Modifying parameter %s value needs a host rebuild. "
                             "There are hosts associated to the personality in non-ready state. "

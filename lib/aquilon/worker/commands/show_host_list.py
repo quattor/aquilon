@@ -27,9 +27,9 @@ class CommandShowHostList(BrokerCommand):
 
     def render(self, session, list, **arguments):
         options = [undefer('comments'),
-                   joinedload('personality'),
-                   undefer('personality.archetype.comments'),
-                   subqueryload('personality.grns'),
+                   joinedload('personality_stage'),
+                   undefer('personality_stage.archetype.comments'),
+                   subqueryload('personality_stage.grns'),
                    subqueryload('grns'),
                    subqueryload('services_used'),
                    subqueryload('services_provided'),

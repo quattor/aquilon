@@ -35,7 +35,7 @@ class CommandSearchHardware(BrokerCommand):
             q = q.options(undefer('comments'),
                           subqueryload('host'),
                           undefer('host.comments'),
-                          joinedload('host.personality'),
+                          joinedload('host.personality_stage'),
                           joinedload('location'),
                           subqueryload('interfaces'),
                           joinedload('interfaces.assignments'),

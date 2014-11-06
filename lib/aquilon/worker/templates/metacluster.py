@@ -100,7 +100,7 @@ class PlenaryMetaClusterObject(ObjectPlenary):
 
         if not inspect(self.dbobj).deleted:
             keylist.append(PlenaryKey(exclusive=False,
-                                      personality=self.dbobj.personality,
+                                      personality=self.dbobj.personality_stage,
                                       logger=self.logger))
             keylist.extend(PlenaryKey(exclusive=False, service_instance=si,
                                       logger=self.logger)

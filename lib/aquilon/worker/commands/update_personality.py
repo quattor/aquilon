@@ -85,7 +85,7 @@ class CommandUpdatePersonality(BrokerCommand):
                 q = session.query(Cluster.id)
             else:
                 q = session.query(Host.hardware_entity_id)
-            q = q.filter_by(personality=dbpersona)
+            q = q.filter_by(personality_stage=dbpersona)
             # XXX: Ideally, filter based on hosts/clusters that are/arenot in
             # cluster/metacluster
             if q.count():
@@ -116,7 +116,7 @@ class CommandUpdatePersonality(BrokerCommand):
                 # various GRNs inside the personality, so make sure we preserve
                 # those GRNs by filtering on the original GRN of the personality
                 q = session.query(Host)
-                q = q.filter_by(personality=dbpersona, owner_grn=old_grn)
+                q = q.filter_by(personality_stage=dbpersona, owner_grn=old_grn)
                 for dbhost in q.all():
                     dbhost.owner_grn = dbgrn
                     plenaries.append(Plenary.get_plenary(dbhost))
@@ -141,7 +141,7 @@ class CommandUpdatePersonality(BrokerCommand):
                       joinedload('resholder'),
                       subqueryload('resholder.resources'))
         # TODO: preload virtual machines
-        q = q.filter_by(personality=dbpersona)
+        q = q.filter_by(personality_stage=dbpersona)
         clusters = q.all()
         failures = []
         for cluster in clusters:
