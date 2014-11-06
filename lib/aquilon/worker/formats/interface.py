@@ -31,9 +31,12 @@ class InterfaceFormatter(ObjectFormatter):
     def format_raw(self, interface, indent=""):
         details = ''
 
-        personality = None
         if interface.hardware_entity.host:
-            personality = interface.hardware_entity.host.personality
+            dbpers = interface.hardware_entity.host.personality
+            dbarch = dbpers.archetype
+        else:
+            dbpers = None
+            dbarch = None
 
         flags = []
         if interface.bootable:
@@ -100,7 +103,7 @@ class InterfaceFormatter(ObjectFormatter):
                 tagstr = ""
             details.append(indent + "  Provides: %s [%s]%s" %
                            (names, addr.ip, tagstr))
-            static_routes |= set(addr.network.personality_static_routes(personality))
+            static_routes |= set(addr.network.personality_static_routes(dbpers))
 
             for dns_record in addr.dns_records:
                 if dns_record.alias_cnt:
@@ -116,15 +119,7 @@ class InterfaceFormatter(ObjectFormatter):
             if route.comments:
                 details.append(indent + "    Comments: %s" % route.comments)
 
-        if hasattr(interface.hardware_entity, 'host') and \
-           interface.hardware_entity.host:
-            pers = interface.hardware_entity.host.personality
-            arch = pers.archetype
-        else:
-            pers = None
-            arch = None
-
-        for feature in interface_features(interface, arch, pers):
+        for feature in interface_features(interface, dbarch, dbpers):
             details.append(indent + "  Template: %s" % feature.cfg_path)
 
         if interface.comments:

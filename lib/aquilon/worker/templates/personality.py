@@ -149,8 +149,6 @@ class PlenaryPersonality(PlenaryCollection):
             ptmpl = ParameterTemplate(dbpersonality, path, values)
             self.append(PlenaryPersonalityParameter.get_plenary(ptmpl))
 
-        self.name = dbpersonality.name
-
     def get_key(self, exclusive=True):
         if inspect(self.dbobj).deleted:
             return NoLockKey(logger=self.logger)
