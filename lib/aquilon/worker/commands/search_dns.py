@@ -16,11 +16,10 @@
 # limitations under the License.
 """Contains the logic for `aq search dns `."""
 
-
 from aquilon.aqdb.model import (DnsRecord, ARecord, Alias, SrvRecord, Fqdn,
                                 DnsDomain, DnsEnvironment, Network,
                                 NetworkEnvironment, AddressAssignment)
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.formats.list import StringAttributeList
 
 from sqlalchemy.orm import (contains_eager, undefer, subqueryload, lazyload,
@@ -82,13 +81,11 @@ class CommandSearchDns(BrokerCommand):
         q = q.options(contains_eager('fqdn.dns_domain'))
         q = q.order_by(Fqdn.name, DnsDomain.name)
 
-        q = q.reset_joinpoint()
-
         if ip:
-            q = q.join(Network)
+            q = q.filter(ARecord.ip == ip)
+            q = q.join(Network, aliased=True)
             q = q.filter_by(network_environment=dbnet_env)
             q = q.reset_joinpoint()
-            q = q.filter(ARecord.ip == ip)
         if network:
             dbnetwork = Network.get_unique(session, network,
                                            network_environment=dbnet_env, compel=True)
@@ -114,11 +111,13 @@ class CommandSearchDns(BrokerCommand):
             if used:
                 q = q.join(AddressAssignment,
                            and_(ARecord.network_id == AddressAssignment.network_id,
-                                ARecord.ip == AddressAssignment.ip))
+                                ARecord.ip == AddressAssignment.ip),
+                           aliased=True)
             else:
                 q = q.outerjoin(AddressAssignment,
                                 and_(ARecord.network_id == AddressAssignment.network_id,
-                                     ARecord.ip == AddressAssignment.ip))
+                                     ARecord.ip == AddressAssignment.ip),
+                                aliased=True)
                 q = q.filter(AddressAssignment.id == null())
             q = q.reset_joinpoint()
         if reverse_override is not None:

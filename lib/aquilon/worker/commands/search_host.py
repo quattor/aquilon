@@ -104,19 +104,20 @@ class CommandSearchHost(BrokerCommand):
             # Inner joins are cheaper than outer joins, so make some effort to
             # use inner joins when possible
             if mac or ip or networkip:
-                q = q.join(Interface)
+                q = q.join(Interface, aliased=True)
             else:
-                q = q.outerjoin(Interface)
-            if ip or networkip:
-                q = q.join(AddressAssignment, Network, from_joinpoint=True)
-            else:
-                q = q.outerjoin(AddressAssignment, Network, from_joinpoint=True)
-
+                q = q.outerjoin(Interface, aliased=True)
             if mac:
                 self.deprecated_option("mac", "Please use search machine "
                                        "--mac instead.", logger=logger,
                                        **arguments)
                 q = q.filter(Interface.mac == mac)
+
+            if ip or networkip:
+                q = q.join(AddressAssignment, Network, from_joinpoint=True)
+            else:
+                q = q.outerjoin(AddressAssignment, Network, from_joinpoint=True)
+
             if ip:
                 q = q.filter(AddressAssignment.ip == ip)
                 q = q.filter(Network.network_environment == dbnet_env)
@@ -164,8 +165,7 @@ class CommandSearchHost(BrokerCommand):
             dbarchetype = None
 
         if archetype or personality or host_environment:
-            PersAlias = aliased(Personality)
-            q = q.join(PersAlias)
+            q = q.join(Personality, aliased=True)
 
             if archetype:
                 q = q.filter_by(archetype=dbarchetype)
@@ -173,7 +173,7 @@ class CommandSearchHost(BrokerCommand):
                 subq = Personality.get_matching_query(session, name=personality,
                                                       archetype=dbarchetype,
                                                       compel=True)
-                q = q.filter(PersAlias.id.in_(subq))
+                q = q.filter(Personality.id.in_(subq))
             if host_environment:
                 dbhost_env = HostEnvironment.get_instance(session,
                                                           host_environment)
@@ -196,9 +196,8 @@ class CommandSearchHost(BrokerCommand):
             subq = ServiceInstance.get_matching_query(session, name=instance,
                                                       service=service,
                                                       compel=True)
-            SIAlias = aliased(ServiceInstance)
-            q = q.join(SIAlias, Host.services_used)
-            q = q.filter(SIAlias.id.in_(subq))
+            q = q.join(Host.services_used, aliased=True)
+            q = q.filter(ServiceInstance.id.in_(subq))
             q = q.reset_joinpoint()
 
         if server_of_service or server_of_instance:
@@ -206,14 +205,14 @@ class CommandSearchHost(BrokerCommand):
                                                       name=server_of_instance,
                                                       service=server_of_service,
                                                       compel=True)
-            q = q.join(Host.services_provided)
+            q = q.join(Host.services_provided, aliased=True)
             q = q.filter(ServiceInstanceServer.service_instance_id.in_(subq))
             q = q.reset_joinpoint()
 
         if cluster:
             dbcluster = Cluster.get_unique(session, cluster, compel=True)
             if isinstance(dbcluster, MetaCluster):
-                q = q.join('_cluster', 'cluster')
+                q = q.join('_cluster', 'cluster', aliased=True)
                 q = q.filter_by(metacluster=dbcluster)
             else:
                 q = q.filter_by(cluster=dbcluster)
@@ -224,7 +223,7 @@ class CommandSearchHost(BrokerCommand):
             dbcluster = Cluster.get_unique(session, guest_on_cluster,
                                            compel=True)
             q = q.join(Host.hardware_entity.of_type(Machine),
-                       VirtualMachine, ClusterResource)
+                       VirtualMachine, ClusterResource, aliased=True)
             q = q.filter_by(cluster=dbcluster)
             q = q.reset_joinpoint()
 
@@ -235,7 +234,7 @@ class CommandSearchHost(BrokerCommand):
                                         .format(guest_on_share))
 
             q = q.join(Host.hardware_entity.of_type(Machine),
-                       Machine.disks.of_type(VirtualDisk))
+                       Machine.disks.of_type(VirtualDisk), aliased=True)
             q = q.filter(VirtualDisk.backing_store_id.in_(v2shares.subquery()))
             q = q.reset_joinpoint()
 
@@ -245,8 +244,8 @@ class CommandSearchHost(BrokerCommand):
                 raise NotFoundException("No shares found with name {0}."
                                         .format(guest_on_share))
 
-            q = q.join('_cluster', 'cluster', 'resholder', VirtualMachine,
-                       'machine', Machine.disks.of_type(VirtualDisk))
+            q = q.join('_cluster', 'cluster', ClusterResource, VirtualMachine,
+                       Machine, Machine.disks.of_type(VirtualDisk), aliased=True)
             q = q.filter(VirtualDisk.backing_store_id.in_(v2shares.subquery()))
             q = q.reset_joinpoint()
 
@@ -257,7 +256,7 @@ class CommandSearchHost(BrokerCommand):
             persq = persq.outerjoin(PersonalityGrnMap)
             persq = persq.filter(or_(Personality.owner_eon_id == dbgrn.eon_id,
                                      PersonalityGrnMap.eon_id == dbgrn.eon_id))
-            q = q.outerjoin(HostGrnMap)
+            q = q.outerjoin(HostGrnMap, aliased=True)
             q = q.filter(or_(Host.owner_eon_id == dbgrn.eon_id,
                              HostGrnMap.eon_id == dbgrn.eon_id,
                              Host.personality_id.in_(persq.subquery())))

@@ -77,7 +77,8 @@ class Service(Base):
         q = session.query(Personality.id)
         q = q.outerjoin(PersService, Personality.services)
         q = q.reset_joinpoint()
-        q = q.join(Archetype).filter(Archetype.cluster_type != null())
+        q = q.join(Archetype)
+        q = q.filter(Archetype.cluster_type != null())
         q = q.outerjoin(ArchService, Archetype.services)
         q = q.filter(or_(PersService.id == self.id, ArchService.id == self.id))
         return [pers.id for pers in q]

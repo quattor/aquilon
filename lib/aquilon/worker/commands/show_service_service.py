@@ -16,8 +16,10 @@
 # limitations under the License.
 """Contains the logic for `aq show service --service`."""
 
+from sqlalchemy.orm import contains_eager
+
 from aquilon.aqdb.model import Service, ServiceInstance
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.host import hostname_to_host
 from aquilon.worker.dbwrappers.service_instance import get_service_instance
 
@@ -34,9 +36,11 @@ class CommandShowServiceService(BrokerCommand):
         if dbserver:
             q = session.query(ServiceInstance)
             q = q.filter_by(service=dbservice)
-            q = q.join('servers')
+            q = q.join(Service)  # Needed for ordering only
+            q = q.options(contains_eager('service'))
+            q = q.join(ServiceInstance.servers)
             q = q.filter_by(host=dbserver)
-            q = q.order_by(ServiceInstance.name)
+            q = q.order_by(Service.name, ServiceInstance.name)
             return q.all()
         elif dbclient:
             service_instances = dbclient.services_used

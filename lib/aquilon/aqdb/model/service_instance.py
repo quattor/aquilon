@@ -109,7 +109,7 @@ class ServiceInstance(Base):
 
         q = session.query(Host)
         q = q.filter(Host.services_used.contains(self))
-        q = q.outerjoin('_cluster', 'cluster', from_joinpoint=True)
+        q = q.outerjoin('_cluster', 'cluster')
         q = q.filter(or_(Cluster.id == null(),
                          ~Cluster.personality_id.in_(personality_ids)))
         adjusted_count += q.count()

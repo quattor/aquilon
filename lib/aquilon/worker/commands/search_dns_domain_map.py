@@ -16,12 +16,11 @@
 # limitations under the License.
 """Contains the logic for `aq search dns domain map`."""
 
+from sqlalchemy.orm import contains_eager, undefer
 
 from aquilon.aqdb.model import DnsDomain, DnsMap, Location
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.location import get_location
-
-from sqlalchemy.orm import contains_eager, undefer
 
 
 class CommandSearchDnsDomainMap(BrokerCommand):
@@ -31,7 +30,7 @@ class CommandSearchDnsDomainMap(BrokerCommand):
     def render(self, session, dns_domain, include_parents, **kwargs):
         dblocation = get_location(session, **kwargs)
         q = session.query(DnsMap)
-        q = q.options(undefer('comments'))
+        q = q.options(undefer(DnsMap.comments))
         if dblocation:
             if include_parents:
                 location_ids = [parent.id for parent in dblocation.parents]
@@ -45,9 +44,9 @@ class CommandSearchDnsDomainMap(BrokerCommand):
             q = q.filter_by(dns_domain=dbdns_domain)
 
         q = q.join(DnsDomain)
-        q = q.options(contains_eager('dns_domain'))
-        q = q.join((Location, DnsMap.location_id == Location.id))
-        q = q.options(contains_eager('location'))
+        q = q.options(contains_eager(DnsMap.dns_domain))
+        q = q.join(DnsMap.location)
+        q = q.options(contains_eager(DnsMap.location))
         q = q.order_by(Location.location_type, Location.name, DnsMap.position)
 
         return q.all()

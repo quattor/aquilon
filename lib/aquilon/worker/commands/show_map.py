@@ -16,12 +16,10 @@
 # limitations under the License.
 """Contains the logic for `aq show map`."""
 
-
 from aquilon.exceptions_ import NotFoundException
-from aquilon.aqdb.model import (Personality, Service, ServiceMap,
-                                PersonalityServiceMap,
-                                NetworkEnvironment)
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.aqdb.model import (Archetype, Personality, Service, ServiceMap,
+                                PersonalityServiceMap, NetworkEnvironment)
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.dbwrappers.network import get_network_byip
 
@@ -39,22 +37,28 @@ class CommandShowMap(BrokerCommand):
         # The current logic basically shoots for exact match when given
         # (like exact personality maps only or exact archetype maps
         # only), or "any" if an exact spec isn't given.
+        if archetype:
+            dbarchetype = Archetype.get_unique(session, archetype, compel=True)
+        else:
+            dbarchetype = None
         if archetype and personality:
             dbpersona = Personality.get_unique(session, name=personality,
-                                               archetype=archetype, compel=True)
+                                               archetype=dbarchetype, compel=True)
             q = session.query(PersonalityServiceMap)
             q = q.filter_by(personality=dbpersona)
             queries.append(q)
         elif personality:
             # Alternately, this could throw an error and ask for archetype.
             q = session.query(PersonalityServiceMap)
-            q = q.join('personality').filter_by(name=personality)
+            q = q.join(Personality, aliased=True)
+            q = q.filter_by(name=personality)
             q = q.reset_joinpoint()
             queries.append(q)
         elif archetype:
             # Alternately, this could throw an error and ask for personality.
             q = session.query(PersonalityServiceMap)
-            q = q.join('personality', 'archetype').filter_by(name=archetype)
+            q = q.join(Personality, aliased=True)
+            q = q.filter_by(archetype=dbarchetype)
             q = q.reset_joinpoint()
             queries.append(q)
         else:
@@ -62,12 +66,12 @@ class CommandShowMap(BrokerCommand):
             queries.append(session.query(PersonalityServiceMap))
         if dbservice:
             for i in range(len(queries)):
-                queries[i] = queries[i].join('service_instance')
+                queries[i] = queries[i].join('service_instance', aliased=True)
                 queries[i] = queries[i].filter_by(service=dbservice)
                 queries[i] = queries[i].reset_joinpoint()
         if instance:
             for i in range(len(queries)):
-                queries[i] = queries[i].join('service_instance')
+                queries[i] = queries[i].join('service_instance', aliased=True)
                 queries[i] = queries[i].filter_by(name=instance)
                 queries[i] = queries[i].reset_joinpoint()
         # Nothing fancy for now - just show any relevant explicit bindings.

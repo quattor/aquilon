@@ -19,15 +19,14 @@
 from sqlalchemy.sql import exists
 from sqlalchemy.orm import undefer, joinedload, subqueryload
 
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import (Network, Machine, VlanInfo, PortGroup, Cluster,
-                                NetworkDevice, ARecord, DynamicStub,
-                                NetworkEnvironment)
+                                ARecord, DynamicStub, NetworkEnvironment)
 from aquilon.aqdb.model.dns_domain import parse_fqdn
+from aquilon.aqdb.model.network import get_net_id_from_ip
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.formats.list import StringAttributeList
-from aquilon.aqdb.model.network import get_net_id_from_ip
 
 
 class CommandSearchNetwork(BrokerCommand):
@@ -86,8 +85,7 @@ class CommandSearchNetwork(BrokerCommand):
         if cluster:
             dbcluster = Cluster.get_unique(session, cluster, compel=True)
             if dbcluster.network_device:
-                q = q.join(PortGroup,
-                           (NetworkDevice, PortGroup.network_devices),
+                q = q.join(Network.port_group, PortGroup.network_devices,
                            aliased=True)
                 q = q.filter_by(id=dbcluster.network_device_id)
                 q = q.reset_joinpoint()
@@ -98,7 +96,7 @@ class CommandSearchNetwork(BrokerCommand):
                 q = q.filter(Network.id.in_(net_ids))
         if pg:
             dbvi = VlanInfo.get_by_pg(session, pg, compel=ArgumentError)
-            q = q.join(PortGroup, Network.port_group, aliased=True)
+            q = q.join(Network.port_group, aliased=True)
             q = q.filter_by(network_tag=dbvi.vlan_id, usage=dbvi.vlan_type)
             q = q.reset_joinpoint()
         dblocation = get_location(session, **arguments)

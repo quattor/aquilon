@@ -16,9 +16,8 @@
 # limitations under the License.
 """Wrapper to make getting a machine simpler."""
 
-
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import Cpu, LocalDisk, Machine
+from aquilon.aqdb.model import Cpu, LocalDisk, Machine, Vendor
 
 
 def create_machine(session, machine, dblocation, dbmodel, cpuname=None,
@@ -41,7 +40,8 @@ def create_machine(session, machine, dblocation, dbmodel, cpuname=None,
         if cpuspeed is not None:
             q = q.filter_by(speed=cpuspeed)
         if cpuvendor:
-            q = q.join('vendor').filter_by(name=cpuvendor.lower())
+            dbvendor = Vendor.get_unique(session, cpuvendor, compel=True)
+            q = q.filter_by(vendor=dbvendor)
         cpulist = q.all()
         if not cpulist:
             raise ArgumentError("Could not find a CPU with the given "
