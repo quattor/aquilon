@@ -59,7 +59,8 @@ class DnsMap(Base):
                         backref=backref('dns_maps',
                                         collection_class=ordering_list('position'),
                                         order_by=[position],
-                                        cascade='all, delete-orphan'))
+                                        cascade='all, delete-orphan',
+                                        passive_deletes=True))
 
     dns_domain = relation(DnsDomain, lazy=False, innerjoin=True,
                           backref=backref('dns_maps', cascade='all'))

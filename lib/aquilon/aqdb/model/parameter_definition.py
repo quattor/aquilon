@@ -69,7 +69,8 @@ class ArchetypeParamDef(ParamDefHolder):
 
     archetype = relation(Archetype,
                          backref=backref('paramdef_holder', uselist=False,
-                                         cascade='all, delete-orphan'))
+                                         cascade='all, delete-orphan',
+                                         passive_deletes=True))
 
     @property
     def holder_name(self):
@@ -88,7 +89,8 @@ class FeatureParamDef(ParamDefHolder):
 
     feature = relation(Feature,
                        backref=backref('paramdef_holder', uselist=False,
-                                       cascade='all, delete-orphan'))
+                                       cascade='all, delete-orphan',
+                                       passive_deletes=True))
 
     __mapper_args__ = {'polymorphic_identity': 'feature'}
 

@@ -229,7 +229,8 @@ class __BuildItem(Base):
 
 ServiceInstance.clients = relation(Host, secondary=__BuildItem.__table__,
                                    backref=backref("services_used",
-                                                   cascade="all"))
+                                                   cascade="all",
+                                                   passive_deletes=True))
 
 # Make this a column property so it can be undeferred on bulk loads
 ServiceInstance._client_count = column_property(

@@ -177,15 +177,18 @@ class FeatureLink(Base):
 
     model = relation(Model,
                      backref=backref('features',
-                                     cascade='all, delete-orphan'))
+                                     cascade='all, delete-orphan',
+                                     passive_deletes=True))
 
     archetype = relation(Archetype,
                          backref=backref('features',
-                                         cascade='all, delete-orphan'))
+                                         cascade='all, delete-orphan',
+                                         passive_deletes=True))
 
     personality = relation(Personality,
                            backref=backref('features',
-                                           cascade='all, delete-orphan'))
+                                           cascade='all, delete-orphan',
+                                           passive_deletes=True))
 
     # The behavior of UNIQUE constraints in the presence of NULL columns is not
     # universal. We need the Oracle compatible behavior, meaning:

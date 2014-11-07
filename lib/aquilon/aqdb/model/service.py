@@ -93,8 +93,7 @@ class __ServiceListItem(Base):
     __tablename__ = _SLI
     _class_label = 'Required Service'
 
-    service_id = Column(ForeignKey(Service.id, ondelete='CASCADE'),
-                        nullable=False)
+    service_id = Column(ForeignKey(Service.id), nullable=False)
 
     archetype_id = Column(ForeignKey(Archetype.id, ondelete='CASCADE'),
                           nullable=False, index=True)
@@ -102,7 +101,7 @@ class __ServiceListItem(Base):
     __table_args__ = (PrimaryKeyConstraint(service_id, archetype_id),)
 
 Service.archetypes = relation(Archetype, secondary=__ServiceListItem.__table__,
-                              backref=backref("services"))
+                              backref=backref("services", passive_deletes=True))
 
 
 class __PersonalityServiceListItem(Base):
@@ -113,8 +112,7 @@ class __PersonalityServiceListItem(Base):
 
     __tablename__ = _PSLI
 
-    service_id = Column(ForeignKey(Service.id, ondelete='CASCADE'),
-                        nullable=False)
+    service_id = Column(ForeignKey(Service.id), nullable=False)
 
     personality_id = Column(ForeignKey(Personality.id, ondelete='CASCADE'),
                             nullable=False, index=True)
@@ -123,4 +121,5 @@ class __PersonalityServiceListItem(Base):
 
 Service.personalities = relation(Personality,
                                  secondary=__PersonalityServiceListItem.__table__,
-                                 backref=backref("services"))
+                                 backref=backref("services",
+                                                 passive_deletes=True))

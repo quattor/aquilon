@@ -55,7 +55,8 @@ class ServiceMap(Base):
     location = relation(Location)
     service_instance = relation(ServiceInstance, innerjoin=True,
                                 backref=backref('service_map',
-                                                cascade="all, delete-orphan"))
+                                                cascade="all, delete-orphan",
+                                                passive_deletes=True))
     network = relation(Network)
 
     __table_args__ = (UniqueConstraint(service_instance_id, location_id,
