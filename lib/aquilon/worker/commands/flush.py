@@ -38,6 +38,7 @@ from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.templates.base import Plenary
 from aquilon.worker.templates.switchdata import PlenarySwitchData
 from aquilon.worker.locks import CompileKey
+from aquilon.utils import ProgressReport
 
 
 class CommandFlush(BrokerCommand):
@@ -209,7 +210,9 @@ class CommandFlush(BrokerCommand):
                 q = q.options(subqueryload("instances"),
                               lazyload("instances.service"),
                               subqueryload("instances.servers"))
+                progress = ProgressReport(logger, q.count(), "service")
                 for dbservice in q:
+                    progress.step()
                     try:
                         plenary_info = Plenary.get_plenary(dbservice,
                                                            logger=logger)
@@ -253,7 +256,9 @@ class CommandFlush(BrokerCommand):
                               subqueryload('paramholder.parameters'),
                               subqueryload('root_users'),
                               subqueryload('root_netgroups'))
+                progress = ProgressReport(logger, q.count(), "personality")
                 for persona in q:
+                    progress.step()
                     try:
                         plenary_info = Plenary.get_plenary(persona,
                                                            logger=logger)
@@ -282,13 +287,9 @@ class CommandFlush(BrokerCommand):
                 q = q.options(lazyload("primary_name"),
                               subqueryload("chassis_slot"))
 
-                cnt = q.count()
-                idx = 0
+                progress = ProgressReport(logger, q.count(), "machine")
                 for machine in q:
-                    idx += 1
-                    if idx % 1000 == 0:  # pragma: no cover
-                        logger.client_info("Processing machine %d of %d..." %
-                                           (idx, cnt))
+                    progress.step()
 
                     set_committed_value(machine, 'disks',
                                         disks_by_machine.get(machine.id, None))
@@ -313,8 +314,6 @@ class CommandFlush(BrokerCommand):
                               lazyload("branch"))
                 cluster_cache = q.all()  # pylint: disable=W0612
 
-                cnt = session.query(Host).count()
-                idx = 0
                 q = session.query(Host)
                 q = q.options(joinedload("hardware_entity"),
                               joinedload("hardware_entity.primary_name"),
@@ -328,11 +327,9 @@ class CommandFlush(BrokerCommand):
                               subqueryload("personality"),
                               subqueryload("personality.grns"))
 
+                progress = ProgressReport(logger, q.count(), "host")
                 for h in q:
-                    idx += 1
-                    if idx % 1000 == 0:  # pragma: no cover
-                        logger.client_info("Processing host %d of %d..." %
-                                           (idx, cnt))
+                    progress.step()
 
                     if not h.archetype.is_compileable:
                         continue
@@ -363,13 +360,9 @@ class CommandFlush(BrokerCommand):
                               subqueryload('resholder.resources'),
                               subqueryload('services_used'),
                               subqueryload('allowed_personalities'))
-                cnt = q.count()
-                idx = 0
+                progress = ProgressReport(logger, q.count(), "cluster")
                 for clus in q:
-                    idx += 1
-                    if idx % 50 == 0:  # pragma: no cover
-                        logger.client_info("Processing cluster %d of %d..." %
-                                           (idx, cnt))
+                    progress.step()
                     try:
                         plenary = Plenary.get_plenary(clus, logger=logger)
                         written += plenary.write(locked=True)
@@ -380,13 +373,9 @@ class CommandFlush(BrokerCommand):
                 logger.client_info("Flushing resources.")
 
                 q = session.query(Resource)
-                cnt = q.count()
-                idx = 0
+                progress = ProgressReport(logger, q.count(), "resource")
                 for dbresource in q:
-                    idx += 1
-                    if idx % 1000 == 0:  # pragma: no cover
-                        logger.client_info("Processing resource %d of %d..." %
-                                           (idx, cnt))
+                    progress.step()
                     try:
                         plenary = Plenary.get_plenary(dbresource, logger=logger)
                         written += plenary.write(locked=True)
@@ -398,7 +387,9 @@ class CommandFlush(BrokerCommand):
                 q = session.query(NetworkDevice)
                 q = q.options(subqueryload('port_groups'),
                               joinedload('port_groups.network'))
+                progress = ProgressReport(logger, q.count(), "network device")
                 for dbnetdev in q:
+                    progress.step()
                     try:
                         plenary = PlenarySwitchData.get_plenary(dbnetdev, logger=logger)
                         written += plenary.write(locked=True)

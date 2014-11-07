@@ -28,6 +28,7 @@ import os
 import re
 import signal
 from six.moves import cStringIO as StringIO
+import time
 from itertools import islice
 from tempfile import mkstemp
 
@@ -312,3 +313,21 @@ def remove_file(filename, cleanup_directory=False, logger=LOGGER):
             os.removedirs(os.path.dirname(filename))
         except OSError:
             pass
+
+
+class ProgressReport(object):
+    def __init__(self, logger, total, item_name, interval=10.0):
+        self.logger = logger
+        self.total = total
+        self.item_name = item_name
+        self.interval = interval
+        self.count = 0
+        self.last_report = time.time()
+
+    def step(self):
+        self.count += 1
+        now = time.time()
+        if now - self.last_report >= self.interval:  # pragma: no cover
+            self.last_report = now
+            self.logger.client_info("Processing %s %d of %d..." %
+                                    (self.item_name, self.count, self.total))
