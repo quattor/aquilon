@@ -162,7 +162,51 @@
 		</term>
 		<listitem>
 		    <para>
-			Scope of the feature values are public(default), restricted, owner_only, owner_approved.
+			Atrribute for controlling who is allowed to use the feature. Possible values of
+			<replaceable>VISIBILITY</replaceable> are:
+		    </para>
+		    <variablelist>
+			<varlistentry>
+			    <term><literal>public</literal></term>
+			    <listitem>
+				<para>
+				    No restrictions.
+				</para>
+			    </listitem>
+			</varlistentry>
+			<varlistentry>
+			    <term><literal>owner_only</literal></term>
+			    <listitem>
+				<para>
+				    The feature is available for self-service, but only people
+				    having appropriate roles on the feature's GRN can use it.
+				</para>
+			    </listitem>
+			</varlistentry>
+			<varlistentry>
+			    <term><literal>owner_approved</literal></term>
+			    <listitem>
+				<para>
+				    The feature is available for self-servie, but using it requires
+				    explicit approval from the feature's owner.
+				</para>
+			    </listitem>
+			</varlistentry>
+			<varlistentry>
+			    <term><literal>restricted</literal></term>
+			    <listitem>
+				<para>
+				    The feature is not available for self-service.
+				</para>
+			    </listitem>
+			</varlistentry>
+		    </variablelist>
+		    <para>
+			The default value is <literal>restricted</literal>.
+		    </para>
+		    <para>
+			Currently, the broker does not enforce the above rules itself, but relies on
+			external tools and procedures doing so.
 		    </para>
 		</listitem>
 	    </varlistentry>
