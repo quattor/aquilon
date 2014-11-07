@@ -17,10 +17,11 @@
 
 import re
 
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.aqdb.model import Feature
-from aquilon.worker.dbwrappers.grn import lookup_grn
 from aquilon.exceptions_ import ArgumentError, UnimplementedError
+from aquilon.aqdb.model import Feature
+from aquilon.aqdb.model.feature import _VISIBILITY
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.dbwrappers.grn import lookup_grn
 
 # Do not allow path components to start with '.' to avoid games like "../foo" or
 # hidden directories like ".foo/bar"
@@ -51,6 +52,13 @@ class CommandAddFeature(BrokerCommand):
 
         dbgrn = lookup_grn(session, grn, eon_id, logger=logger,
                            config=self.config)
+
+        if not visibility:
+            visibility = "restricted"
+
+        if visibility not in _VISIBILITY:
+            raise ArgumentError("Unknown visibility. Valid values are: %s."
+                                % ", ".join(sorted(_VISIBILITY)))
 
         dbfeature = cls(name=feature, post_personality=post_personality,
                         owner_grn=dbgrn, visibility=visibility,

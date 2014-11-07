@@ -45,8 +45,7 @@ class Feature(Base):
                               nullable=False, default=False)
     owner_eon_id = Column(ForeignKey(Grn.eon_id, name='%s_owner_grn_fk' % _TN),
                           nullable=False)
-    visibility = Column(Enum(16, _VISIBILITY), nullable=False,
-                        default = 'public')
+    visibility = Column(Enum(16, _VISIBILITY), nullable=False)
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
     comments = deferred(Column(String(255), nullable=True))
