@@ -187,8 +187,8 @@ class ObjectFormatter(object):
         return indent + str(result)
 
     def csv_fields(self, result):
-        raise ProtocolError("{0:c} does not have a CSV formatter."
-                            .format(result))
+        raise ProtocolError("{0!r} does not have a CSV formatter."
+                            .format(type(result)))
 
     def format_csv(self, result, writer):
         for fields in self.csv_fields(result):
@@ -224,8 +224,8 @@ class ObjectFormatter(object):
 
     def fill_proto(self, result, skeleton):  # pylint: disable=W0613
         # There's no default protobuf message type
-        raise ProtocolError("{0:c} does not have a protobuf formatter."
-                            .format(result))
+        raise ProtocolError("{0!r} does not have a protobuf formatter."
+                            .format(type(result)))
 
     def format_html(self, result):
         if hasattr(self, "template_html"):
