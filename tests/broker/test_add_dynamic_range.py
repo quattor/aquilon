@@ -104,13 +104,9 @@ class TestAddDynamicRange(TestBrokerCommand):
     def test_105_verify_network_proto(self):
         command = "show network --ip %s --format proto" % self.net["dyndhcp0"].ip
         network = self.protobuftest(command.split(" "), expect=1)[0]
-        hosts = set([host.fqdn for host in network.hosts])
         start = self.net["dyndhcp0"].usable[2]
         end = self.net["dyndhcp0"].usable[-3]
-        for i in range(int(start), int(end) + 1):
-            ip = IPv4Address(i)
-            self.assertTrue(self.dynname(ip) in hosts, "%s is missing from network"
-                            "protobuf output" % self.dynname(ip))
+        self.assertEqual(len(network.hosts), 0)
         self.assertEqual(len(network.dynamic_ranges), 1)
         self.assertEqual(network.dynamic_ranges[0].start, str(start))
         self.assertEqual(network.dynamic_ranges[0].end, str(end))

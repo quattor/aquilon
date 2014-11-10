@@ -159,7 +159,9 @@ class NetworkFormatter(ObjectFormatter):
             session = object_session(net)
             q = session.query(HardwareEntity)
             q = q.filter(HardwareEntity.id.in_(hw_ids))
-            q = q.options(subqueryload('interfaces'))
+            q = q.options(subqueryload('interfaces'),
+                          subqueryload('host'),
+                          subqueryload('host.personality'))
             hwent_by_id = {}
             for dbhwent in q.all():
                 hwent_by_id[dbhwent.id] = dbhwent
@@ -179,15 +181,6 @@ class NetworkFormatter(ObjectFormatter):
                     set_committed_value(iface, "master",
                                         iface_by_id.get(iface.master_id, None))
                     set_committed_value(iface, "slaves", slaves_by_id[iface.id])
-
-            # TODO: once we refactor Host to be an FK to HardwareEntity instead
-            # of Machine, this could be converted to a single joinedload('host')
-            q = session.query(Host)
-            q = q.filter(Host.hardware_entity_id.in_(hw_ids))
-            for host in q.all():
-                set_committed_value(hwent_by_id[host.hardware_entity_id], "host", host)
-                set_committed_value(host, "hardware_entity",
-                                    hwent_by_id[host.hardware_entity_id])
 
         # Add interfaces that have addresses in this network
         for addr in net.assignments:
@@ -223,19 +216,15 @@ class NetworkFormatter(ObjectFormatter):
                 if addr.interface.interface_type == 'management':
                     host_msg.type = 'manager'
                 else:
-                    if hwent.hardware_type == 'machine':
-                        host_msg.type = 'host'
-                        if hwent.host:
-                            # TODO: We should be populating host_msg.personality
-                            # instead
-                            self.redirect_proto(hwent.host.archetype,
-                                                host_msg.archetype,
-                                                indirect_attrs=False)
-                    elif hwent.hardware_type == 'switch':
-                        # aqdhcpd uses the type
-                        host_msg.type = 'tor_switch'
-                    else:
-                        host_msg.type = hwent.hardware_type
+                    host_msg.type = hwent.hardware_type
+                    if hwent.host:
+                        # TODO: deprecate host_msg.archetype
+                        self.redirect_proto(hwent.host.archetype,
+                                            host_msg.archetype,
+                                            indirect_attrs=False)
+                        self.redirect_proto(hwent.host.personality,
+                                            host_msg.personality,
+                                            indirect_attrs=False)
 
                 host_msg.hostname = str(addr.dns_records[0].fqdn.name)
                 host_msg.fqdn = str(addr.dns_records[0].fqdn)
@@ -268,16 +257,6 @@ class NetworkFormatter(ObjectFormatter):
             last_ip = dynhost.ip
         if last_ip:
             range_msg.end = str(last_ip)
-
-        # Add dynamic DHCP records - to be deprecated
-        for dynhost in net.dynamic_stubs:
-            host_msg = skeleton.hosts.add()
-            # aqdhcpd uses the type
-            host_msg.type = 'dynamic_stub'
-            host_msg.hostname = str(dynhost.fqdn.name)
-            host_msg.fqdn = str(dynhost.fqdn)
-            host_msg.dns_domain = str(dynhost.fqdn.dns_domain)
-            host_msg.ip = str(dynhost.ip)
 
 ObjectFormatter.handlers[Network] = NetworkFormatter()
 
