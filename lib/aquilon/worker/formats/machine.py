@@ -18,7 +18,7 @@
 
 from operator import attrgetter
 
-from aquilon.aqdb.model import Machine, VirtualDisk
+from aquilon.aqdb.model import Machine, VirtualDisk, Host, Cluster
 from aquilon.worker.formats.formatters import ObjectFormatter
 from aquilon.worker.formats.hardware_entity import HardwareEntityFormatter
 
@@ -149,5 +149,14 @@ class MachineFormatter(HardwareEntityFormatter):
                         disk_msg.iops_limit = disk.iops_limit
                     self.redirect_proto(disk.backing_store,
                                         disk_msg.backing_store)
+
+        if machine.vm_container and not embedded:
+            holder = machine.vm_container.holder.holder_object
+            if isinstance(holder, Host):
+                self.redirect_proto(holder, skeleton.vm_host,
+                                    indirect_attrs=False)
+            elif isinstance(holder, Cluster):
+                self.redirect_proto(holder, skeleton.vm_cluster,
+                                    indirect_attrs=False)
 
 ObjectFormatter.handlers[Machine] = MachineFormatter()

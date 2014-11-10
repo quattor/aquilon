@@ -148,6 +148,9 @@ class NetworkFormatter(ObjectFormatter):
         if not indirect_attrs:
             return
 
+        for router in net.routers:
+            skeleton.routers.append(str(router.ip))
+
         # Bulk load information about anything having a network address on this
         # network
         hw_ids = set([addr.interface.hardware_entity_id for addr in

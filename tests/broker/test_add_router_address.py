@@ -110,6 +110,20 @@ class TestAddRouterAddress(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "Routers: %s (Building ut)" % net.gateway, command)
 
+    def testshownetworkproto(self):
+        net = self.net["verari_eth1"]
+        command = ["show", "network", "--ip", net.ip, "--format", "proto"]
+        netmsg = self.protobuftest(command)[0]
+        self.assertEqual(len(netmsg.routers), 1)
+        self.assertEqual(netmsg.routers[0], str(net.gateway))
+
+    def testshowzebra0proto(self):
+        net = self.net["zebra_eth0"]
+        command = ["show", "network", "--ip", net.ip, "--format", "proto"]
+        netmsg = self.protobuftest(command)[0]
+        self.assertEqual(len(netmsg.routers), 2)
+        self.assertEqual(set(netmsg.routers), set([str(net[1]), str(net[2])]))
+
     def testshowbadip(self):
         ip = self.net["tor_net_0"].gateway
         command = ["show", "router", "address", "--ip", ip]

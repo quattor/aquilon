@@ -210,6 +210,10 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, MachineTestMixin,
         self.assertEqual(machine.disks[0].snapshotable, False)
         self.assertEqual(machine.disks[0].backing_store.name, "utfs1")
         self.assertEqual(machine.disks[0].backing_store.type, "filesystem")
+        self.assertEqual(machine.vm_cluster.name, "")
+        self.assertEqual(machine.vm_host.hostname, "utpgh0")
+        self.assertEqual(machine.vm_host.fqdn, "utpgh0.aqd-unittest.ms.com")
+        self.assertEqual(machine.vm_host.dns_domain, "aqd-unittest.ms.com")
 
     def test_145_search_machine_filesystem(self):
         command = ["search_machine", "--disk_filesystem", "utfs1"]
