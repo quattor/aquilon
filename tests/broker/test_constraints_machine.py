@@ -29,7 +29,10 @@ class TestMachineConstraints(TestBrokerCommand):
 
     def testdelmachinewithhost(self):
         command = "del machine --machine ut3c5n10"
-        self.badrequesttest(command.split(" "))
+        out = self.badrequesttest(command.split(" "))
+        self.matchoutput(out, "Host unittest02.one-nyp.ms.com is still using "
+                         "the machine, so the machine cannot be deleted.",
+                         command)
 
     def testverifydelmachinewithhostfailed(self):
         command = "show machine --machine ut3c5n10"

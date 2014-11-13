@@ -41,8 +41,8 @@ class CommandDelMachine(BrokerCommand):
             plenaries.append(Plenary.get_plenary(holder))
 
         if dbmachine.host:
-            raise ArgumentError("{0} is still in use by {1:l} and cannot be "
-                                "deleted.".format(dbmachine, dbmachine.host))
+            raise ArgumentError("{0} is still using the machine, so the "
+                                "machine cannot be deleted.".format(dbmachine.host))
         check_only_primary_ip(dbmachine)
 
         session.delete(dbmachine)
