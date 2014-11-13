@@ -72,21 +72,13 @@ class HardwareEntityFormatter(ObjectFormatter):
 
         self.redirect_proto(hwent.model, skeleton.model)
 
-        def add_iface_data(int_msg, iface):
-            if iface.mac:
-                int_msg.mac = str(iface.mac)
-            if iface.bus_address:
-                int_msg.bus_address = str(iface.bus_address)
-            int_msg.bootable = iface.bootable
-            self.redirect_proto(iface.model, int_msg.model)
-
         for iface in sorted(hwent.interfaces, key=attrgetter('name')):
             has_addrs = False
             for addr in iface.assignments:
                 has_addrs = True
                 int_msg = skeleton.interfaces.add()
                 int_msg.device = str(addr.logical_name)
-                add_iface_data(int_msg, iface)
+                self.redirect_proto(iface, int_msg)
                 int_msg.ip = str(addr.ip)
                 int_msg.fqdn = str(addr.fqdns[0])
                 for dns_record in addr.dns_records:
@@ -98,7 +90,7 @@ class HardwareEntityFormatter(ObjectFormatter):
             if not has_addrs:
                 int_msg = skeleton.interfaces.add()
                 int_msg.device = str(iface.name)
-                add_iface_data(int_msg, iface)
+                self.redirect_proto(iface, int_msg)
 
     @staticmethod
     def redirect_raw_host_details(result, indent=""):

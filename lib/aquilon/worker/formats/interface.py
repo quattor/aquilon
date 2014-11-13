@@ -127,6 +127,14 @@ class InterfaceFormatter(ObjectFormatter):
             details.append(indent + "  Comments: %s" % interface.comments)
         return "\n".join(details)
 
+    def fill_proto(self, interface, skeleton):
+        if interface.mac:
+            skeleton.mac = str(interface.mac)
+        if interface.bus_address:
+            skeleton.bus_address = str(interface.bus_address)
+        skeleton.bootable = interface.bootable
+        self.redirect_proto(interface.model, skeleton.model)
+
 ObjectFormatter.handlers[Interface] = InterfaceFormatter()
 ObjectFormatter.handlers[PublicInterface] = InterfaceFormatter()
 ObjectFormatter.handlers[ManagementInterface] = InterfaceFormatter()
