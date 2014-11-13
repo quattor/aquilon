@@ -120,8 +120,8 @@ class ClusterFormatter(CompileableFormatter):
                 details.append(self.redirect_raw(resource, indent + "    "))
 
         if cluster.virtual_switch:
-            details.append(indent + "  {0:c}: {0!s}"
-                           .format(cluster.virtual_switch))
+            details.append(self.redirect_raw(cluster.virtual_switch,
+                                             indent + "  "))
 
         if isinstance(cluster, EsxCluster):
             details.append(indent + "  Virtual Machine count: %s" %

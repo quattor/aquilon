@@ -25,7 +25,8 @@ class OSFormatter(ObjectFormatter):
         details = []
         details.append(indent + "{0:c}: {0.name}".format(os))
         details.append(indent + "  Version: %s" % os.version)
-        details.append(indent + "  Archetype: %s" % os.archetype)
+        if not embedded:
+            details.append(indent + "  Archetype: %s" % os.archetype)
         if os.comments:
             details.append(indent + "  Comments: %s" % os.comments)
 

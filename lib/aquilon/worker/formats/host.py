@@ -46,7 +46,7 @@ class HostFormatter(CompileableFormatter):
         if host.resholder:
             self.redirect_proto(host.resholder.resources, skeleton.resources)
 
-        if host.cluster:
+        if host.cluster and not embedded:
             skeleton.cluster = host.cluster.name
 
         skeleton.owner_eonid = host.effective_owner_grn.eon_id
@@ -115,7 +115,8 @@ class HostFormatter(CompileableFormatter):
                            "[target: {0.target}]".format(grn_rec))
 
         if host.virtual_switch:
-            details.append(indent + "  {0:c}: {0!s}".format(host.virtual_switch))
+            details.append(self.redirect_raw(host.virtual_switch,
+                                             indent + "  "))
 
         for feature in sorted(model_features(host.hardware_entity.model,
                                              host.archetype, host.personality),

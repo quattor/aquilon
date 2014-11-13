@@ -26,7 +26,7 @@ from aquilon.worker.formats.hardware_entity import HardwareEntityFormatter
 class MachineFormatter(HardwareEntityFormatter):
     def header_raw(self, machine, details, indent="", embedded=True,
                    indirect_attrs=True):
-        if machine.vm_container:
+        if machine.vm_container and not embedded:
             details.append(indent + "  Hosted by: {0}"
                            .format(machine.vm_container.holder.holder_object))
 
@@ -50,7 +50,9 @@ class MachineFormatter(HardwareEntityFormatter):
 
     def format_raw(self, machine, indent="", embedded=True,
                    indirect_attrs=True):
-        details = [super(MachineFormatter, self).format_raw(machine, indent)]
+        details = [super(MachineFormatter, self)
+                   .format_raw(machine, indent, embedded=embedded,
+                               indirect_attrs=indirect_attrs)]
 
         for slot in machine.chassis_slot:
             details.append(indent + "  {0:c}: {0!s}".format(slot.chassis))

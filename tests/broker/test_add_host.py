@@ -227,8 +227,7 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
                          command)
         self.searchoutput(out,
                           r'Operating System: linux\s*'
-                          r'Version: %s\s*'
-                          r'Archetype: aquilon' % osversion,
+                          r'Version: %s$' % osversion,
                           command)
         self.matchoutput(out, "Personality: inventory", command)
 
@@ -250,8 +249,7 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
         self.matchoutput(out, "Domain: ut-prod", command)
         self.searchoutput(out,
                           r'Operating System: linux\s*'
-                          r'Version: generic\s*'
-                          r'Archetype: aurora',
+                          r'Version: generic$',
                           command)
 
     def test_145_add_windows_default_os(self):
@@ -273,8 +271,7 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
         self.matchoutput(out, "Domain: ut-prod", command)
         self.searchoutput(out,
                           r'Operating System: windows\s*'
-                          r'Version: generic\s*'
-                          r'Archetype: windows',
+                          r'Version: generic$',
                           command)
 
     def test_150_add_cciss_host(self):

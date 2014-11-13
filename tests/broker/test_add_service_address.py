@@ -126,19 +126,16 @@ class TestAddServiceAddress(TestBrokerCommand):
 
         self.searchoutput(out,
                           r"Service Address: hostname$"
-                          r"\s+Bound to: Host unittest20\.aqd-unittest\.ms\.com$"
                           r"\s+Address: unittest20\.aqd-unittest\.ms\.com \[%s\]$"
                           r"\s+Interfaces: eth0, eth1$" % ip,
                           command)
         self.searchoutput(out,
                           r"Service Address: zebra2$"
-                          r"\s+Bound to: Host unittest20\.aqd-unittest\.ms\.com$"
                           r"\s+Address: zebra2\.aqd-unittest\.ms\.com \[%s\]$"
                           r"\s+Interfaces: eth0, eth1$" % zebra2_ip,
                           command)
         self.searchoutput(out,
                           r"Service Address: zebra3$"
-                          r"\s+Bound to: Host unittest20\.aqd-unittest\.ms\.com$"
                           r"\s+Address: zebra3\.aqd-unittest\.ms\.com \[%s\]$"
                           r"\s+Interfaces: eth0, eth1$" % zebra3_ip,
                           command)

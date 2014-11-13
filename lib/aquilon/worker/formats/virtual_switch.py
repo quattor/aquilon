@@ -31,11 +31,12 @@ class VirtualSwitchFormatter(ObjectFormatter):
             details.append(indent + "  Port Group: %s" % pg.name)
             details.append(indent + "    Network: %s" % pg.network.ip)
 
-        for host in sorted(vswitch.hosts, key=attrgetter("fqdn")):
-            details.append(indent + "  Bound to {0:c}: {0!s}".format(host))
+        if not embedded:
+            for host in sorted(vswitch.hosts, key=attrgetter("fqdn")):
+                details.append(indent + "  Bound to {0:c}: {0!s}".format(host))
 
-        for cluster in sorted(vswitch.clusters, key=attrgetter("name")):
-            details.append(indent + "  Bound to {0:c}: {0!s}".format(cluster))
+            for cluster in sorted(vswitch.clusters, key=attrgetter("name")):
+                details.append(indent + "  Bound to {0:c}: {0!s}".format(cluster))
 
         return "\n".join(details)
 

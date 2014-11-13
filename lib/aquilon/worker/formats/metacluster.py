@@ -51,8 +51,8 @@ class MetaClusterFormatter(CompileableFormatter):
                        .format(metacluster.branch, metacluster.authored_branch))
 
         if metacluster.virtual_switch:
-            details.append(indent + "  {0:c}: {0!s}"
-                           .format(metacluster.virtual_switch))
+            details.append(self.redirect_raw(metacluster.virtual_switch,
+                                             indent + "  "))
 
         for dbsi in metacluster.services_used:
             details.append(indent +
