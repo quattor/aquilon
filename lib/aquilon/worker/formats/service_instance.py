@@ -73,16 +73,30 @@ class ServiceInstanceFormatter(ObjectFormatter):
         return "\n".join(details)
 
     def fill_proto(self, si, skeleton, embedded=True, indirect_attrs=True):
-        skeleton.name = si.service.name
-        si_msg = skeleton.serviceinstances.add()
+        # skeleton can be either NamedServiceInstance, ServiceInstance or
+        # Service, depending on the caller
+        if skeleton.DESCRIPTOR.name == 'NamedServiceInstance':
+            skeleton.service = str(si.service.name)
+            skeleton.instance = str(si.name)
+            return
+
+        if skeleton.DESCRIPTOR.name == 'ServiceInstance':
+            si_msg = skeleton
+        else:
+            skeleton.name = str(si.service.name)
+            si_msg = skeleton.serviceinstances.add()
+
         si_msg.name = str(si.name)
-        for srv in si.servers:
-            if srv.host:
-                self.redirect_proto(srv.host, si_msg.servers.add())
-            # TODO: extra IP address/service address information
-            # TODO: cluster-provided services
-        # TODO: make this conditional to avoid performance problems
-        # self.redirect_proto(client.hosts, si_msg.clients)
+
+        if indirect_attrs:
+            for srv in si.servers:
+                if srv.host:
+                    self.redirect_proto(srv.host, si_msg.servers.add(),
+                                        indirect_attrs=False)
+                # TODO: extra IP address/service address information
+                # TODO: cluster-provided services
+            # TODO: make this conditional to avoid performance problems
+            # self.redirect_proto(client.hosts, si_msg.clients)
 
     # Applies to service_instance/share as well.
     @classmethod

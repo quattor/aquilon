@@ -54,15 +54,10 @@ class HostFormatter(CompileableFormatter):
         self.redirect_proto(host.operating_system, skeleton.operating_system)
         self.redirect_proto(dbhw_ent, skeleton.machine)
 
-        for si in host.services_used:
-            srv_msg = skeleton.services_used.add()
-            srv_msg.service = si.service.name
-            srv_msg.instance = si.name
-        for srv in host.services_provided:
-            si = srv.service_instance
-            srv_msg = skeleton.services_provided.add()
-            srv_msg.service = si.service.name
-            srv_msg.instance = si.name
+        self.redirect_proto(host.services_used, skeleton.services_used,
+                            indirect_attrs=False)
+        self.redirect_proto([srv.service_instance for srv in host.services_provided],
+                            skeleton.services_provided, indirect_attrs=False)
 
         for target, eon_id_set in iteritems(host.effective_grns):
             for grn_rec in eon_id_set:
@@ -194,10 +189,8 @@ class GrnHostListFormatter(ListFormatter):
             msg.status = str(host.status.name)
             msg.owner_eonid = host.effective_owner_grn.eon_id
 
-            msg.personality.archetype.name = str(host.archetype)
-            msg.personality.name = str(host.personality)
-            msg.personality.host_environment = str(host.personality.host_environment)
-            msg.personality.owner_eonid = host.personality.owner_eon_id
+            self.redirect_proto(host.personality, msg.personality,
+                                indirect_attrs=False)
 
             # eon id maps TBD need both effective and actual
             for grn_rec in sorted(host.personality.grns,

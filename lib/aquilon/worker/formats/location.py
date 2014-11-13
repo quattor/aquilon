@@ -55,10 +55,11 @@ class LocationFormatter(ObjectFormatter):
         if hasattr(loc, "timezone"):
             skeleton.timezone = loc.timezone
 
-        for p in loc.parents:
-            parent = skeleton.parents.add()
-            parent.name = p.name
-            parent.location_type = p.location_type
+        if indirect_attrs:
+            for p in loc.parents:
+                parent = skeleton.parents.add()
+                parent.name = p.name
+                parent.location_type = p.location_type
 
     def csv_fields(self, location):
         details = [location.location_type, location.name]

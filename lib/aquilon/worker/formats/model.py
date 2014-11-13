@@ -22,25 +22,28 @@ from aquilon.worker.formats.formatters import ObjectFormatter
 
 class ModelFormatter(ObjectFormatter):
     def format_raw(self, model, indent="", embedded=True, indirect_attrs=True):
-        details = [indent + "Vendor: %s Model: %s" %
-                   (model.vendor.name, model.name)]
-        details.append(indent + "  Type: %s" % str(model.model_type))
-        for link in model.features:
-            details.append(indent + "  {0:c}: {0.name}".format(link.feature))
-            if link.archetype:
-                details.append(indent + "    {0:c}: {0.name}"
-                               .format(link.archetype))
-            if link.personality:
-                details.append(indent + "    {0:c}: {0.name} {1:c}: {1.name}"
-                               .format(link.personality,
-                                       link.personality.archetype))
-            if link.interface_name:
-                details.append(indent + "    Interface: %s" %
-                               link.interface_name)
+        details = [indent + "{0:c}: {0.name} {1:c}: {1.name}"
+                   .format(model.vendor, model)]
+        details.append(indent + "  Model Type: %s" % str(model.model_type))
+
         if model.comments:
             details.append(indent + "  Comments: %s" % model.comments)
-        if model.machine_specs:
-            details.append(self.redirect_raw(model.machine_specs, indent + "  "))
+
+        if indirect_attrs:
+            for link in model.features:
+                details.append(indent + "  {0:c}: {0.name}".format(link.feature))
+                if link.archetype:
+                    details.append(indent + "    {0:c}: {0.name}"
+                                   .format(link.archetype))
+                if link.personality:
+                    details.append(indent + "    {0:c}: {0.name} {1:c}: {1.name}"
+                                   .format(link.personality,
+                                           link.personality.archetype))
+                if link.interface_name:
+                    details.append(indent + "    Interface: %s" %
+                                   link.interface_name)
+            if model.machine_specs:
+                details.append(self.redirect_raw(model.machine_specs, indent + "  "))
         return "\n".join(details)
 
     def fill_proto(self, model, skeleton, embedded=True, indirect_attrs=True):

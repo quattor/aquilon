@@ -510,6 +510,7 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
         host = self.protobuftest(command, expect=1)[0]
         self.assertEqual(host.fqdn, "evh1.aqd-unittest.ms.com")
         self.assertEqual(host.archetype.name, "vmhost")
+        self.assertEqual(host.personality.archetype.name, "vmhost")
         self.assertEqual(host.operating_system.archetype.name, "vmhost")
         self.assertEqual(host.operating_system.name, "esxi")
         self.assertEqual(host.operating_system.version, "4.0.0")

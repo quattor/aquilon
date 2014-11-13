@@ -29,8 +29,9 @@ class ArchetypeFormatter(ObjectFormatter):
         skeleton.compileable = archetype.is_compileable
         if archetype.cluster_type:
             skeleton.cluster_type = str(archetype.cluster_type)
-        for service in archetype.services:
-            si = skeleton.required_services.add()
-            si.service = service.name
+
+        if indirect_attrs:
+            self.redirect_proto(archetype.services, skeleton.required_services,
+                                indirect_attrs=False)
 
 ObjectFormatter.handlers[Archetype] = ArchetypeFormatter()

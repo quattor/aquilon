@@ -99,15 +99,11 @@ class MetaClusterFormatter(CompileableFormatter):
             self.redirect_proto(metacluster.resholder.resources,
                                 skeleton.resources)
 
-        for dbsi in metacluster.services_used:
-            si = skeleton.services_used.add()
-            si.service = dbsi.service.name
-            si.instance = dbsi.name
-
-        for personality in metacluster.allowed_personalities:
-            p = skeleton.allowed_personalities.add()
-            p.name = str(personality.name)
-            p.archetype.name = str(personality.archetype.name)
+        self.redirect_proto(metacluster.services_used, skeleton.services_used,
+                            indirect_attrs=False)
+        self.redirect_proto(metacluster.allowed_personalities,
+                            skeleton.allowed_personalities,
+                            indirect_attrs=False)
 
         if metacluster.virtual_switch:
             self.redirect_proto(metacluster.virtual_switch,

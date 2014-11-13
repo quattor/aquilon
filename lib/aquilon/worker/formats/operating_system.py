@@ -36,6 +36,7 @@ class OSFormatter(ObjectFormatter):
         skeleton.name = str(os.name)
         skeleton.version = str(os.version)
         # We don't need the services here, so don't call redirect_proto()
-        skeleton.archetype.name = str(os.archetype.name)
+        self.redirect_proto(os.archetype, skeleton.archetype,
+                            indirect_attrs=False)
 
 ObjectFormatter.handlers[OperatingSystem] = OSFormatter()

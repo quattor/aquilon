@@ -35,7 +35,7 @@ class TestAddModel(TestBrokerCommand):
         command = "show model --model uttorswitch"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Vendor: hp Model: uttorswitch", command)
-        self.matchoutput(out, "Type: switch", command)
+        self.matchoutput(out, "Model Type: switch", command)
         self.matchoutput(out, "Comments: Some model comments", command)
 
     def test_110_add_utchassis(self):
@@ -46,7 +46,7 @@ class TestAddModel(TestBrokerCommand):
         command = "show model --model utchassis"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Vendor: aurora_vendor Model: utchassis", command)
-        self.matchoutput(out, "Type: chassis", command)
+        self.matchoutput(out, "Model Type: chassis", command)
 
     def test_120_add_utblade(self):
         command = "add model --model utblade --vendor aurora_vendor --type blade"
@@ -56,7 +56,7 @@ class TestAddModel(TestBrokerCommand):
         command = "show model --model utblade"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Vendor: aurora_vendor Model: utblade", command)
-        self.matchoutput(out, "Type: blade", command)
+        self.matchoutput(out, "Model Type: blade", command)
 
     def test_130_add_utrackmount(self):
         self.noouttest(["add_model", "--model", "utrackmount",
@@ -70,7 +70,7 @@ class TestAddModel(TestBrokerCommand):
         command = ["show_model", "--model", "utrackmount"]
         out = self.commandtest(command)
         self.matchoutput(out, "Vendor: utvendor Model: utrackmount", command)
-        self.matchoutput(out, "Type: rackmount", command)
+        self.matchoutput(out, "Model Type: rackmount", command)
         self.matchoutput(out, "MachineSpecs for utvendor utrackmount:", command)
         self.matchoutput(out, "Cpu: utcpu x 2", command)
         self.matchoutput(out, "Memory: 65536 MB", command)
@@ -100,7 +100,7 @@ class TestAddModel(TestBrokerCommand):
         command = "show model --model utmedium"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Vendor: utvendor Model: utmedium", command)
-        self.matchoutput(out, "Type: virtual_machine", command)
+        self.matchoutput(out, "Model Type: virtual_machine", command)
         self.matchoutput(out, "NIC Vendor: utvirt Model: default", command)
 
     def test_160_add_utlarge(self):
@@ -122,7 +122,7 @@ class TestAddModel(TestBrokerCommand):
         command = "show model --model utccissmodel"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Vendor: hp Model: utccissmodel", command)
-        self.matchoutput(out, "Type: rackmount", command)
+        self.matchoutput(out, "Model Type: rackmount", command)
         self.matchoutput(out, "MachineSpecs for hp utccissmodel", command)
         self.matchoutput(out, "Cpu: xeon_2500 x 2", command)
         self.matchoutput(out, "Memory: 49152 MB", command)

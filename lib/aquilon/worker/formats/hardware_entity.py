@@ -47,10 +47,8 @@ class HardwareEntityFormatter(ObjectFormatter):
                     details.append(indent + "    Column: %s" %
                                    hwe.location.rack.rack_column)
 
-        details.append(indent + "  {0:c}: {0.name} {1:c}: {1.name}"
-                       .format(hwe.model.vendor, hwe.model))
-        details.append(indent + "    Model Type: %s" %
-                       str(hwe.model.model_type))
+        details.append(self.redirect_raw(hwe.model, indent + "  ",
+                                         indirect_attrs=False))
 
         if hwe.serial_no:
             details.append(indent + "  Serial: %s" % hwe.serial_no)
@@ -72,27 +70,28 @@ class HardwareEntityFormatter(ObjectFormatter):
         if hwent.serial_no:
             skeleton.serial_no = str(hwent.serial_no)
 
-        self.redirect_proto(hwent.model, skeleton.model)
+        self.redirect_proto(hwent.model, skeleton.model, indirect_attrs=False)
 
-        for iface in sorted(hwent.interfaces, key=attrgetter('name')):
-            has_addrs = False
-            for addr in iface.assignments:
-                has_addrs = True
-                int_msg = skeleton.interfaces.add()
-                int_msg.device = str(addr.logical_name)
-                self.redirect_proto(iface, int_msg)
-                int_msg.ip = str(addr.ip)
-                int_msg.fqdn = str(addr.fqdns[0])
-                for dns_record in addr.dns_records:
-                    if dns_record.alias_cnt:
-                        int_msg.aliases.extend(str(a.fqdn) for a in
-                                               dns_record.all_aliases)
+        if indirect_attrs:
+            for iface in sorted(hwent.interfaces, key=attrgetter('name')):
+                has_addrs = False
+                for addr in iface.assignments:
+                    has_addrs = True
+                    int_msg = skeleton.interfaces.add()
+                    int_msg.device = str(addr.logical_name)
+                    self.redirect_proto(iface, int_msg)
+                    int_msg.ip = str(addr.ip)
+                    int_msg.fqdn = str(addr.fqdns[0])
+                    for dns_record in addr.dns_records:
+                        if dns_record.alias_cnt:
+                            int_msg.aliases.extend(str(a.fqdn) for a in
+                                                   dns_record.all_aliases)
 
-            # Add entries for interfaces that do not have any addresses
-            if not has_addrs:
-                int_msg = skeleton.interfaces.add()
-                int_msg.device = str(iface.name)
-                self.redirect_proto(iface, int_msg)
+                # Add entries for interfaces that do not have any addresses
+                if not has_addrs:
+                    int_msg = skeleton.interfaces.add()
+                    int_msg.device = str(iface.name)
+                    self.redirect_proto(iface, int_msg)
 
     @staticmethod
     def redirect_raw_host_details(result, indent=""):

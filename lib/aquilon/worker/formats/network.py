@@ -140,10 +140,13 @@ class NetworkFormatter(ObjectFormatter):
         skeleton.netmask = str(net.netmask)
         skeleton.side = str(net.side)
         skeleton.sysloc = str(net.location.sysloc())
-        skeleton.location.name = str(net.location.name)
-        skeleton.location.location_type = str(net.location.location_type)
+        self.redirect_proto(net.location, skeleton.location,
+                            indirect_attrs=False)
         skeleton.type = str(net.network_type)
         skeleton.env_name = str(net.network_environment.name)
+
+        if not indirect_attrs:
+            return
 
         # Bulk load information about anything having a network address on this
         # network
@@ -220,7 +223,11 @@ class NetworkFormatter(ObjectFormatter):
                     if hwent.hardware_type == 'machine':
                         host_msg.type = 'host'
                         if hwent.host:
-                            host_msg.archetype.name = str(hwent.host.archetype.name)
+                            # TODO: We should be populating host_msg.personality
+                            # instead
+                            self.redirect_proto(hwent.host.archetype,
+                                                host_msg.archetype,
+                                                indirect_attrs=False)
                     elif hwent.hardware_type == 'switch':
                         # aqdhcpd uses the type
                         host_msg.type = 'tor_switch'
