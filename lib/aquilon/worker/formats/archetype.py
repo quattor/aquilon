@@ -23,7 +23,8 @@ from aquilon.worker.formats.formatters import ObjectFormatter
 class ArchetypeFormatter(ObjectFormatter):
     template_raw = "archetype.mako"
 
-    def fill_proto(self, archetype, skeleton):
+    def fill_proto(self, archetype, skeleton, embedded=True,
+                   indirect_attrs=True):
         skeleton.name = str(archetype.name)
         skeleton.compileable = archetype.is_compileable
         if archetype.cluster_type:

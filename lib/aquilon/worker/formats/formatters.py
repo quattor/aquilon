@@ -103,8 +103,8 @@ class ResponseFormatter(object):
         m = getattr(self, "format_" + str(style).lower(), self.format_raw)
         return str(m(result, request))
 
-    def format_raw(self, result, request, indent=""):
-        return ObjectFormatter.redirect_raw(result)
+    def format_raw(self, result, request):
+        return ObjectFormatter.redirect_raw(result, embedded=False)
 
     def format_csv(self, result, request):
         strbuf = StringIO()
@@ -126,7 +126,8 @@ class ResponseFormatter(object):
         # protocol is loaded.
         container = self.protobuf_container()
         field_name = container.DESCRIPTOR.fields[0].name
-        ObjectFormatter.redirect_proto(result, getattr(container, field_name))
+        ObjectFormatter.redirect_proto(result, getattr(container, field_name),
+                                       embedded=False)
         return container.SerializeToString()
 
     def format_html(self, result, request):
@@ -179,7 +180,11 @@ class ObjectFormatter(object):
                                    default_filters=['unicode', 'rstrip'])
     lookup_html = build_mako_lookup(config, "html")
 
-    def format_raw(self, result, indent=""):
+    # Pass embedded=False if this is the top-level object being rendered.
+    # Pass indirect_attrs=False to prevent loading expensive collection-based
+    # attributes.
+    def format_raw(self, result, indent="", embedded=True,
+                   indirect_attrs=True):
         if hasattr(self, "template_raw"):
             template = self.lookup_raw.get_template(self.template_raw)
             return shift(template.render(record=result, formatter=self),
@@ -199,7 +204,11 @@ class ObjectFormatter(object):
         # We get here if the command throws an exception
         return self.format_raw(result)
 
-    def format_proto(self, result, container):
+    # Pass embedded=False if this is the top-level object being rendered.
+    # Pass indirect_attrs=False to prevent loading expensive collection-based
+    # attributes.
+    def format_proto(self, result, container, embedded=True,
+                     indirect_attrs=True):
         # Here, container can be either a repeated field, in which case we need
         # to call .add() to instantiate a new message, or a singular (either
         # required or optional) field, in which case it can be used as a message
@@ -220,10 +229,11 @@ class ObjectFormatter(object):
             # list of length 1
             skeleton = container.add()
 
-        self.fill_proto(result, skeleton)
+        self.fill_proto(result, skeleton, embedded=embedded,
+                        indirect_attrs=indirect_attrs)
 
-    def fill_proto(self, result, skeleton):  # pragma: no cover
-                                             # pylint: disable=W0613
+    def fill_proto(self, result, skeleton, embedded=True, indirect_attrs=True): # pragma: no cover
+        # pylint: disable=W0613
         # There's no default protobuf message type
         raise ProtocolError("{0!r} does not have a protobuf formatter."
                             .format(type(result)))
@@ -235,10 +245,11 @@ class ObjectFormatter(object):
         return "<pre>%s</pre>" % result
 
     @staticmethod
-    def redirect_raw(result, indent=""):
+    def redirect_raw(result, indent="", embedded=True, indirect_attrs=True):
         handler = ObjectFormatter.handlers.get(result.__class__,
                                                ObjectFormatter.default_handler)
-        return handler.format_raw(result, indent)
+        return handler.format_raw(result, indent, embedded=embedded,
+                                  indirect_attrs=indirect_attrs)
 
     @staticmethod
     def redirect_csv(result, writer):
@@ -259,10 +270,11 @@ class ObjectFormatter(object):
         return handler.format_html(result)
 
     @staticmethod
-    def redirect_proto(result, container):
+    def redirect_proto(result, container, embedded=True, indirect_attrs=True):
         handler = ObjectFormatter.handlers.get(result.__class__,
                                                ObjectFormatter.default_handler)
-        handler.format_proto(result, container)
+        handler.format_proto(result, container, embedded=embedded,
+                             indirect_attrs=indirect_attrs)
 
 ObjectFormatter.default_handler = ObjectFormatter()
 

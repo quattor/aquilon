@@ -25,7 +25,8 @@ from aquilon.worker.formats.compileable import CompileableFormatter
 
 
 class MetaClusterFormatter(CompileableFormatter):
-    def format_raw(self, metacluster, indent=""):
+    def format_raw(self, metacluster, indent="", embedded=True,
+                   indirect_attrs=True):
         details = [indent + "MetaCluster: %s" % metacluster.name]
         details.append(self.redirect_raw(metacluster.location_constraint,
                                          indent + "  "))
@@ -82,7 +83,8 @@ class MetaClusterFormatter(CompileableFormatter):
             details.append(indent + "  Comments: %s" % metacluster.comments)
         return "\n".join(details)
 
-    def fill_proto(self, metacluster, skeleton):
+    def fill_proto(self, metacluster, skeleton, embedded=True,
+                   indirect_attrs=True):
         super(MetaClusterFormatter, self).fill_proto(metacluster, skeleton)
 
         skeleton.name = str(metacluster.name)

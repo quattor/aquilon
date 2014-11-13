@@ -23,7 +23,8 @@ from aquilon.aqdb.model import RouterAddress
 
 class RouterAddressFormatter(ObjectFormatter):
 
-    def format_raw(self, router, indent=""):
+    def format_raw(self, router, indent="", embedded=True,
+                   indirect_attrs=True):
         details = []
         if router.dns_records:
             names = ", ".join([str(dnsrec.fqdn) for dnsrec in router.dns_records])

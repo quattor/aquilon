@@ -91,7 +91,8 @@ def possible_mac_addresses(interface):
 
 
 class NetworkFormatter(ObjectFormatter):
-    def format_raw(self, network, indent=""):
+    def format_raw(self, network, indent="", embedded=True,
+                   indirect_attrs=True):
         netmask = network.netmask
         sysloc = network.location.sysloc()
         details = [indent + "Network: %s" % network.name]
@@ -131,7 +132,7 @@ class NetworkFormatter(ObjectFormatter):
                network.location.sysloc(), network.location.country,
                network.side, network.network_type, network.comments)
 
-    def fill_proto(self, net, skeleton):
+    def fill_proto(self, net, skeleton, embedded=True, indirect_attrs=True):
         skeleton.name = str(net.name)
         skeleton.ip = str(net.ip)
         skeleton.cidr = net.cidr
@@ -280,7 +281,8 @@ class NetworkHostList(list):
 class NetworkHostListFormatter(ListFormatter):
     protocol = "aqdnetworks_pb2"
 
-    def format_raw(self, netlist, indent=""):
+    def format_raw(self, netlist, indent="", embedded=True,
+                   indirect_attrs=True):
         details = []
 
         for network in netlist:
@@ -314,7 +316,7 @@ class SimpleNetworkListFormatter(ListFormatter):
     protocol = "aqdnetworks_pb2"
     fields = ["Network", "IP", "Netmask", "Sysloc", "Country", "Side", "Network Type", "Discoverable", "Discovered", "Comments"]
 
-    def format_raw(self, nlist, indent=""):
+    def format_raw(self, nlist, indent="", embedded=True, indirect_attrs=True):
         details = [indent + "\t".join(self.fields)]
         for network in nlist:
             details.append(indent + str("\t".join([network.name,

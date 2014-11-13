@@ -21,7 +21,8 @@ from aquilon.aqdb.model import DnsDomain
 
 
 class DnsDomainFormatter(ObjectFormatter):
-    def format_raw(self, dns_domain, indent=""):
+    def format_raw(self, dns_domain, indent="", embedded=True,
+                   indirect_attrs=True):
         details = [indent + "DNS Domain: %s" % dns_domain.name]
         details.append(indent + "  Restricted: %s" % dns_domain.restricted)
 
@@ -39,7 +40,8 @@ class DnsDomainFormatter(ObjectFormatter):
     def csv_fields(self, dns_domain):
         yield (dns_domain.name, dns_domain.comments)
 
-    def fill_proto(self, dns_domain, skeleton):
+    def fill_proto(self, dns_domain, skeleton, embedded=True,
+                   indirect_attrs=True):
         skeleton.name = str(dns_domain.name)
         skeleton.restricted = dns_domain.restricted
 

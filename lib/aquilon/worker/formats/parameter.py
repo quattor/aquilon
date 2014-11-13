@@ -24,7 +24,7 @@ from aquilon.worker.formats.list import ListFormatter
 
 
 class ParameterFormatter(ObjectFormatter):
-    def format_raw(self, param, indent=""):
+    def format_raw(self, param, indent="", embedded=True, indirect_attrs=True):
         details = []
         for k in param.value:
             str_value = json.dumps(param.value[k], indent=4)
@@ -39,7 +39,8 @@ class PersonalityProtoParameter(list):
 
 
 class ParameterProtoFormatter(ListFormatter):
-    def format_proto(self, params, container):
+    def format_proto(self, params, container, embedded=True,
+                     indirect_attrs=True):
         for path, param_def, value in params:
             skeleton = container.add()
             skeleton.path = str(path)
@@ -60,7 +61,7 @@ class DiffData(dict):
 
 class DiffFormatter(ObjectFormatter):
 
-    def format_raw(self, diff, indent=""):
+    def format_raw(self, diff, indent="", embedded=True, indirect_attrs=True):
         ret = []
 
         for key, value in diff.items():
@@ -114,7 +115,7 @@ class SimpleParameterList(list):
 
 
 class SimpleParameterListFormatter(ListFormatter):
-    def format_raw(self, hlist, indent=""):
+    def format_raw(self, hlist, indent="", embedded=True, indirect_attrs=True):
         ret = []
         for k, v in hlist:
             ret.append(indent + "{0.holder_object}:".format(k))
@@ -122,7 +123,8 @@ class SimpleParameterListFormatter(ListFormatter):
                 ret.append(indent + "  {0}: {1}".format(ikey, json.dumps(ivalue)))
         return "\n".join(ret)
 
-    def format_proto(self, hostlist, container):
+    def format_proto(self, hostlist, container, embedded=True,
+                     indirect_attrs=True):
         pass
 
 ObjectFormatter.handlers[SimpleParameterList] = SimpleParameterListFormatter()

@@ -23,7 +23,8 @@ from aquilon.worker.formats.formatters import ObjectFormatter
 
 
 class PersonalityFormatter(ObjectFormatter):
-    def format_raw(self, personality, indent=""):
+    def format_raw(self, personality, indent="", embedded=True,
+                   indirect_attrs=True):
         description = "Host"
         if personality.is_cluster:
             description = "Cluster"
@@ -87,7 +88,8 @@ class PersonalityFormatter(ObjectFormatter):
                                info.vmhost_overcommit_memory)
         return "\n".join(details)
 
-    def fill_proto(self, personality, skeleton):
+    def fill_proto(self, personality, skeleton, embedded=True,
+                   indirect_attrs=True):
         skeleton.name = str(personality)
         for service in personality.services:
             si = skeleton.required_services.add()

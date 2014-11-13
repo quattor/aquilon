@@ -21,7 +21,8 @@ from aquilon.worker.formats.formatters import ObjectFormatter
 
 
 class LocationFormatter(ObjectFormatter):
-    def format_raw(self, location, indent=""):
+    def format_raw(self, location, indent="", embedded=True,
+                   indirect_attrs=True):
         details = [indent + "{0:c}: {0.name}".format(location)]
         if location.fullname:
             details.append(indent + "  Fullname: %s" % location.fullname)
@@ -44,7 +45,7 @@ class LocationFormatter(ObjectFormatter):
                            location.default_dns_domain)
         return "\n".join(details)
 
-    def fill_proto(self, loc, skeleton):
+    def fill_proto(self, loc, skeleton, embedded=True, indirect_attrs=True):
         skeleton.name = str(loc.name)
         skeleton.location_type = str(loc.location_type)
         skeleton.fullname = str(loc.fullname)

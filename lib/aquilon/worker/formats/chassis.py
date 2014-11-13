@@ -22,7 +22,8 @@ from aquilon.worker.formats.hardware_entity import HardwareEntityFormatter
 
 
 class ChassisFormatter(HardwareEntityFormatter):
-    def format_raw(self, chassis, indent=""):
+    def format_raw(self, chassis, indent="", embedded=True,
+                   indirect_attrs=True):
         details = [super(ChassisFormatter, self).format_raw(chassis, indent)]
 
         for slot in chassis.slots:

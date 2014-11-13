@@ -22,7 +22,8 @@ from aquilon.aqdb.model import MachineSpecs
 
 
 class MachineSpecsFormatter(ObjectFormatter):
-    def format_raw(self, machine_specs, indent=""):
+    def format_raw(self, machine_specs, indent="", embedded=True,
+                   indirect_attrs=True):
         details = [indent + "MachineSpecs for %s %s:" %
                    (machine_specs.model.vendor.name, machine_specs.model.name)]
         details.append(indent + "  Cpu: %s x %d" %

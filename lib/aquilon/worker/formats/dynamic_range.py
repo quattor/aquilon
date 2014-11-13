@@ -29,7 +29,7 @@ class DynamicRange(object):
 
 class DynamicRangeFormatter(ObjectFormatter):
 
-    def format_raw(self, range, indent=""):
+    def format_raw(self, range, indent="", embedded=True, indirect_attrs=True):
         details = [indent + "Dynamic Range: %s - %s" % (range.start, range.end)]
         details.append(indent + "  Size: %d" %
                        (int(range.end) - int(range.start) + 1))

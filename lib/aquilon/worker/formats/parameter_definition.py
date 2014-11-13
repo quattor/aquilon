@@ -21,7 +21,8 @@ from aquilon.aqdb.model import ParamDefinition
 
 
 class ParamDefinitionFormatter(ObjectFormatter):
-    def format_raw(self, paramdef, indent=""):
+    def format_raw(self, paramdef, indent="", embedded=True,
+                   indirect_attrs=True):
         details = []
         if paramdef.required:
             reqstr = " [required]"
@@ -39,7 +40,8 @@ class ParamDefinitionFormatter(ObjectFormatter):
         details.append(indent + "  Rebuild Required: %s" % paramdef.rebuild_required)
         return "\n".join(details)
 
-    def fill_proto(self, paramdef, skeleton):
+    def fill_proto(self, paramdef, skeleton, embedded=True,
+                   indirect_attrs=True):
         skeleton.path = str(paramdef.path)
         skeleton.value_type = str(paramdef.value_type)
         skeleton.is_required = paramdef.required

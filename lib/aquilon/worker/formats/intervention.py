@@ -38,7 +38,8 @@ class InterventionFormatter(ResourceFormatter):
             details.append("  Disabled Actions: %s" % intervention.disabled)
         return details
 
-    def fill_proto(self, resource, skeleton):
+    def fill_proto(self, resource, skeleton, embedded=True,
+                   indirect_attrs=True):
         super(InterventionFormatter, self).fill_proto(resource, skeleton)
         skeleton.ivdata.expiry = timegm(resource.expiry_date.utctimetuple())
         skeleton.ivdata.start = timegm(resource.start_date.utctimetuple())

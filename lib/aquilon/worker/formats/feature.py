@@ -23,7 +23,8 @@ from aquilon.aqdb.model import (Feature, HostFeature, HardwareFeature,
 
 class FeatureFormatter(ObjectFormatter):
 
-    def format_raw(self, feature, indent=""):
+    def format_raw(self, feature, indent="", embedded=True,
+                   indirect_attrs=True):
         details = []
         details.append(indent + "{0:c}: {0.name}".format(feature))
         if feature.post_personality_allowed:
@@ -54,7 +55,8 @@ class FeatureFormatter(ObjectFormatter):
 
         return "\n".join(details)
 
-    def fill_proto(self, feature, skeleton):
+    def fill_proto(self, feature, skeleton, embedded=True,
+                   indirect_attrs=True):
         skeleton.name = str(feature.name)
         skeleton.type = str(feature.feature_type)
         skeleton.post_personality = feature.post_personality

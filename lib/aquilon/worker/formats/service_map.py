@@ -21,12 +21,13 @@ from aquilon.aqdb.model import ServiceMap, PersonalityServiceMap
 
 
 class ServiceMapFormatter(ObjectFormatter):
-    def format_raw(self, sm, indent=""):
+    def format_raw(self, sm, indent="", embedded=True, indirect_attrs=True):
         return indent + \
             "Archetype: aquilon Service: %s Instance: %s Map: %s" % (
                 sm.service.name, sm.service_instance.name, format(sm.mapped_to))
 
-    def fill_proto(self, service_map, skeleton):
+    def fill_proto(self, service_map, skeleton, embedded=True,
+                   indirect_attrs=True):
         if service_map.location:
             skeleton.location.name = str(service_map.location.name)
             skeleton.location.location_type = \
@@ -52,7 +53,7 @@ ObjectFormatter.handlers[ServiceMap] = ServiceMapFormatter()
 
 
 class PersonalityServiceMapFormatter(ServiceMapFormatter):
-    def format_raw(self, sm, indent=""):
+    def format_raw(self, sm, indent="", embedded=True, indirect_attrs=True):
         return "%sArchetype: %s Personality: %s " \
                "Service: %s Instance: %s Map: %s" % (
                    indent, sm.personality.archetype.name, sm.personality.name,

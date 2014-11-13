@@ -23,7 +23,8 @@ from aquilon.worker.formats.formatters import ObjectFormatter
 
 
 class ServiceFormatter(ObjectFormatter):
-    def format_raw(self, service, indent=""):
+    def format_raw(self, service, indent="", embedded=True,
+                   indirect_attrs=True):
         details = [indent + "Service: %s" % service.name]
         max_clients = service.max_clients
         if max_clients is None:
@@ -46,7 +47,8 @@ class ServiceFormatter(ObjectFormatter):
             details.append(self.redirect_raw(instance, indent + "  "))
         return "\n".join(details)
 
-    def fill_proto(self, service, skeleton):
+    def fill_proto(self, service, skeleton, embedded=True,
+                   indirect_attrs=True):
         skeleton.name = str(service.name)
         for si in service.instances:
             # We can't call redirect_proto(), because ServiceInstanceFormatter

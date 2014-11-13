@@ -36,7 +36,7 @@ class ResourceGroupFormatter(ResourceFormatter):
 
         return details
 
-    def fill_proto(self, rg, skeleton):
+    def fill_proto(self, rg, skeleton, embedded=True, indirect_attrs=True):
         super(ResourceGroupFormatter, self).fill_proto(rg, skeleton)
         if rg.required_type:
             skeleton.resourcegroup.required_type = rg.required_type

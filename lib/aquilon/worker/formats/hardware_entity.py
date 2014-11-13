@@ -23,17 +23,19 @@ from aquilon.worker.formats.formatters import ObjectFormatter
 
 
 class HardwareEntityFormatter(ObjectFormatter):
-    def header_raw(self, hwe, details, indent=""):
+    def header_raw(self, hwe, details, indent="", embedded=True,
+                   indirect_attrs=True):
         pass
 
-    def format_raw(self, hwe, indent=""):
+    def format_raw(self, hwe, indent="", embedded=True, indirect_attrs=True):
         details = [indent + "{0:c}: {0.label}".format(hwe)]
 
         if hwe.primary_name:
             details.append(indent + "  Primary Name: "
                            "{0:a}".format(hwe.primary_name))
 
-        self.header_raw(hwe, details, indent)
+        self.header_raw(hwe, details, indent, embedded=embedded,
+                        indirect_attrs=indirect_attrs)
 
         for location_type in sorted(Location.__mapper__.polymorphic_map):
             if getattr(hwe.location, location_type, None) is not None:
@@ -60,7 +62,7 @@ class HardwareEntityFormatter(ObjectFormatter):
 
         return "\n".join(details)
 
-    def fill_proto(self, hwent, skeleton):
+    def fill_proto(self, hwent, skeleton, embedded=True, indirect_attrs=True):
         skeleton.name = str(hwent.label)
         if hwent.host:
             skeleton.host = str(hwent.primary_name)

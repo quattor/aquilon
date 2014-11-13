@@ -21,7 +21,7 @@ from aquilon.aqdb.model import ServiceInstance, ServiceInstanceServer
 
 
 class ServiceInstanceServerFormatter(ObjectFormatter):
-    def format_raw(self, srv, indent=""):
+    def format_raw(self, srv, indent="", embedded=True, indirect_attrs=True):
         msg = str(srv.fqdn)
         attrs = []
 
@@ -51,7 +51,7 @@ ObjectFormatter.handlers[ServiceInstanceServer] = ServiceInstanceServerFormatter
 
 
 class ServiceInstanceFormatter(ObjectFormatter):
-    def format_raw(self, si, indent=""):
+    def format_raw(self, si, indent="", embedded=True, indirect_attrs=True):
         details = [indent + "Service: %s Instance: %s" % (si.service.name,
                                                           si.name)]
         for srv in si.servers:
@@ -72,7 +72,7 @@ class ServiceInstanceFormatter(ObjectFormatter):
             details.append(indent + "  Comments: %s" % si.comments)
         return "\n".join(details)
 
-    def fill_proto(self, si, skeleton):
+    def fill_proto(self, si, skeleton, embedded=True, indirect_attrs=True):
         skeleton.name = si.service.name
         si_msg = skeleton.serviceinstances.add()
         si_msg.name = str(si.name)

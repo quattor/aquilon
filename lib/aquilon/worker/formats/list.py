@@ -26,10 +26,15 @@ from aquilon.worker.formats.formatters import ObjectFormatter
 
 
 class ListFormatter(ObjectFormatter):
-    def format_raw(self, result, indent=""):
+    def format_raw(self, result, indent="", embedded=True,
+                   indirect_attrs=True):
         if hasattr(self, "template_raw"):
-            return ObjectFormatter.format_raw(self, result, indent)
-        return "\n".join([self.redirect_raw(item, indent) for item in result])
+            return ObjectFormatter.format_raw(self, result, indent,
+                                              embedded=embedded,
+                                              indirect_attrs=indirect_attrs)
+        return "\n".join([self.redirect_raw(item, indent, embedded=embedded,
+                                            indirect_attrs=indirect_attrs)
+                          for item in result])
 
     def format_csv(self, result, writer):
         for item in result:
@@ -44,10 +49,11 @@ class ListFormatter(ObjectFormatter):
     def format_djb(self, result):
         return "\n".join([self.redirect_djb(item) for item in result])
 
-    def format_proto(self, result, container):
+    def format_proto(self, result, container, embedded=True, indirect_attrs=True):
         for item in result:
             skeleton = container.add()
-            ObjectFormatter.redirect_proto(item, skeleton)
+            ObjectFormatter.redirect_proto(item, skeleton, embedded=embedded,
+                                           indirect_attrs=indirect_attrs)
 
 ObjectFormatter.handlers[list] = ListFormatter()
 ObjectFormatter.handlers[Query] = ListFormatter()
@@ -62,7 +68,7 @@ class StringList(list):
 class StringListFormatter(ListFormatter):
     """ Format a list of object as strings, regardless of type """
 
-    def format_raw(self, objects, indent=""):
+    def format_raw(self, objects, indent="", embedded=True, indirect_attrs=True):
         return "\n".join([indent + str(obj) for obj in objects])
 
     def format_csv(self, objects, writer):
@@ -84,14 +90,14 @@ class StringAttributeList(list):
 class StringAttributeListFormatter(ListFormatter):
     """ Format a single attribute of every object as a string """
 
-    def format_raw(self, objects, indent=""):
+    def format_raw(self, objects, indent="", embedded=True, indirect_attrs=True):
         return "\n".join([indent + str(objects.getter(obj)) for obj in objects])
 
     def format_csv(self, objects, writer):
         for obj in objects:
             writer.writerow((str(objects.getter(obj)),))
 
-    def format_proto(self, objects, container):
+    def format_proto(self, objects, container, embedded=True, indirect_attrs=True):
         # This method always populates the first field of the protobuf message,
         # regardless of how that field is called.
 

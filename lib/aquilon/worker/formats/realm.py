@@ -22,7 +22,7 @@ from aquilon.aqdb.model import Realm
 
 
 class RealmFormatter(ObjectFormatter):
-    def format_raw(self, realm, indent=""):
+    def format_raw(self, realm, indent="", embedded=True, indirect_attrs=True):
         details = []
         details.append(indent + "Realm: %s" % realm.name)
         details.append(indent + "  Trusted: %s" % realm.trusted)

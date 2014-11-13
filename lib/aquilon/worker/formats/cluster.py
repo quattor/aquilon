@@ -24,7 +24,8 @@ from aquilon.worker.formats.compileable import CompileableFormatter
 
 
 class ClusterFormatter(CompileableFormatter):
-    def fill_proto(self, cluster, skeleton):
+    def fill_proto(self, cluster, skeleton, embedded=True,
+                   indirect_attrs=True):
         super(ClusterFormatter, self).fill_proto(cluster, skeleton)
 
         skeleton.name = str(cluster.name)
@@ -81,7 +82,8 @@ class ClusterFormatter(CompileableFormatter):
             self.redirect_proto(cluster.virtual_switch,
                                 skeleton.virtual_switch)
 
-    def format_raw(self, cluster, indent=""):
+    def format_raw(self, cluster, indent="", embedded=True,
+                   indirect_attrs=True):
         details = [indent + "{0:c}: {0.name}".format(cluster)]
         if cluster.metacluster:
             details.append(indent +

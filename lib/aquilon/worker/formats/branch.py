@@ -23,7 +23,8 @@ from aquilon.worker.templates.domain import template_branch_basedir
 
 
 class DomainFormatter(ObjectFormatter):
-    def format_raw(self, domain, indent=""):
+    def format_raw(self, domain, indent="", embedded=True,
+                   indirect_attrs=True):
         flags = " [autosync]" if domain.autosync else ""
         details = [indent + "Domain: %s%s" % (domain.name, flags)]
         if domain.tracked_branch:
@@ -45,7 +46,7 @@ class DomainFormatter(ObjectFormatter):
             details.append(indent + "  Comments: %s" % domain.comments)
         return "\n".join(details)
 
-    def fill_proto(self, domain, skeleton):
+    def fill_proto(self, domain, skeleton, embedded=True, indirect_attrs=True):
         skeleton.name = str(domain.name)
         skeleton.owner = str(domain.owner)
         skeleton.type = skeleton.DOMAIN
@@ -67,7 +68,8 @@ class AuthoredSandbox(object):
 
 
 class SandboxFormatter(ObjectFormatter):
-    def format_raw(self, sandbox, indent=""):
+    def format_raw(self, sandbox, indent="", embedded=True,
+                   indirect_attrs=True):
         flags = " [autosync]" if sandbox.autosync else ""
         details = [indent + "Sandbox: %s%s" % (sandbox.name, flags)]
         details.append(indent + "  Validated: %s" % sandbox.is_sync_valid)
@@ -82,7 +84,8 @@ class SandboxFormatter(ObjectFormatter):
             details.append(indent + "  Comments: %s" % sandbox.comments)
         return "\n".join(details)
 
-    def fill_proto(self, sandbox, skeleton):
+    def fill_proto(self, sandbox, skeleton, embedded=True,
+                   indirect_attrs=True):
         skeleton.name = str(sandbox.name)
         skeleton.owner = str(sandbox.owner)
         skeleton.type = skeleton.SANDBOX

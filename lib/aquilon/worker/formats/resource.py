@@ -24,7 +24,8 @@ class ResourceFormatter(ObjectFormatter):
     def extra_details(self, share, indent=""):  # pylint: disable=W0613
         return []
 
-    def format_raw(self, resource, indent=""):
+    def format_raw(self, resource, indent="", embedded=True,
+                   indirect_attrs=True):
         details = []
         details.append(indent + "{0:c}: {0.name}".format(resource))
         if resource.comments:
@@ -35,7 +36,8 @@ class ResourceFormatter(ObjectFormatter):
         details.extend(self.extra_details(resource, indent))
         return "\n".join(details)
 
-    def fill_proto(self, resource, skeleton):
+    def fill_proto(self, resource, skeleton, embedded=True,
+                   indirect_attrs=True):
         skeleton.name = str(resource.name)
         skeleton.type = str(resource.resource_type)
 

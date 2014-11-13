@@ -21,7 +21,8 @@ from aquilon.worker.formats.formatters import ObjectFormatter
 
 
 class NetworkEnvironmentFormatter(ObjectFormatter):
-    def format_raw(self, netenv, indent=""):
+    def format_raw(self, netenv, indent="", embedded=True,
+                   indirect_attrs=True):
         details = [indent + "{0:c}: {0.name}".format(netenv)]
         details.append(self.redirect_raw(netenv.dns_environment, indent + "  "))
         if netenv.location:

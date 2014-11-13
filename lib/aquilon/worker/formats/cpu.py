@@ -22,7 +22,7 @@ from aquilon.aqdb.model import Cpu
 
 
 class CpuFormatter(ObjectFormatter):
-    def format_raw(self, cpu, indent=""):
+    def format_raw(self, cpu, indent="", embedded=True, indirect_attrs=True):
         details = [indent + "Cpu: %s %s %d MHz" % (cpu.vendor.name, cpu.name,
                                                    cpu.speed)]
         if cpu.comments:

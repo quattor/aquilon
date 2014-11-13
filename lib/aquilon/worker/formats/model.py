@@ -21,7 +21,7 @@ from aquilon.worker.formats.formatters import ObjectFormatter
 
 
 class ModelFormatter(ObjectFormatter):
-    def format_raw(self, model, indent=""):
+    def format_raw(self, model, indent="", embedded=True, indirect_attrs=True):
         details = [indent + "Vendor: %s Model: %s" %
                    (model.vendor.name, model.name)]
         details.append(indent + "  Type: %s" % str(model.model_type))
@@ -43,7 +43,7 @@ class ModelFormatter(ObjectFormatter):
             details.append(self.redirect_raw(model.machine_specs, indent + "  "))
         return "\n".join(details)
 
-    def fill_proto(self, model, skeleton):
+    def fill_proto(self, model, skeleton, embedded=True, indirect_attrs=True):
         skeleton.name = str(model.name)
         skeleton.vendor = str(model.vendor.name)
         skeleton.model_type = str(model.model_type)

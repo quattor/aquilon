@@ -22,7 +22,8 @@ from aquilon.aqdb.model import UserPrincipal
 
 
 class UserPrincipalFormatter(ObjectFormatter):
-    def format_raw(self, user_principal, indent=""):
+    def format_raw(self, user_principal, indent="", embedded=True,
+                   indirect_attrs=True):
         details = [indent + "User Principal: %s [role: %s]" %
                    (user_principal, user_principal.role.name)]
         if user_principal.comments:

@@ -96,7 +96,7 @@ class DnsDumpFormatter(ObjectFormatter):
     # always enough to decide how to dump it, so we don't use the individual
     # record formatters.
 
-    def format_raw(self, dump, indent=""):
+    def format_raw(self, dump, indent="", embedded=True, indirect_attrs=True):
         result = []
         # The output is not the most readable as we don't make use of $ORIGIN,
         # but BIND should be able to digest it
