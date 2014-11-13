@@ -22,6 +22,7 @@ from sqlalchemy import Column, Boolean, ForeignKey, Integer
 from sqlalchemy.orm import relation, column_property, validates
 from sqlalchemy.sql import select, func
 
+from aquilon.exceptions_ import AquilonError
 from aquilon.aqdb.model import Disk, Resource, Share, Filesystem
 
 _TN = 'disk'
@@ -45,9 +46,9 @@ class VirtualDisk(Disk):
 
     def __init__(self, address=None, backing_store=None, **kw):
         if not address:
-            raise ValueError("Address is mandatory for virtual disks.")
+            raise AquilonError("Address is mandatory for virtual disks.")
         if not backing_store:
-            raise ValueError("Backing store is mandatory for virtual disks.")
+            raise AquilonError("Backing store is mandatory for virtual disks.")
         super(VirtualDisk, self).__init__(address=address,
                                           backing_store=backing_store, **kw)
 
@@ -62,7 +63,7 @@ class VirtualDisk(Disk):
     def validate_backing_store(self, key, value):  # pylint: disable=W0613
         if not isinstance(value, Share) and \
            not isinstance(value, Filesystem):
-            raise ValueError("The backing store must be a Share or Filesystem.")
+            raise AquilonError("The backing store must be a Share or Filesystem.")
         return value
 
     @validates('iops_limit')

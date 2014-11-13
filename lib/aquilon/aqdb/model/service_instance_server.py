@@ -24,6 +24,7 @@ from sqlalchemy import (Column, Integer, String, DateTime, Sequence, ForeignKey,
 from sqlalchemy.orm import relation, deferred, backref
 from sqlalchemy.ext.orderinglist import ordering_list
 
+from aquilon.exceptions_ import AquilonError
 from aquilon.aqdb.model import (Base, ServiceInstance, Host, Cluster,
                                 AddressAssignment, ServiceAddress, Alias)
 
@@ -82,17 +83,17 @@ class ServiceInstanceServer(Base):
                  address_assignment=None, alias=None, **kwargs):
         # Check for the combinations of target parameters we allow/disallow
         if cluster and host:
-            raise ValueError("Only one of cluster and host can be specified.")
+            raise AquilonError("Only one of cluster and host can be specified.")
         if cluster and not service_address:
-            raise ValueError("Cluster needs a service_address.")
+            raise AquilonError("Cluster needs a service_address.")
         if service_address and address_assignment:
-            raise ValueError("Only one of service_address and "
-                             "address_assignment can be specified.")
+            raise AquilonError("Only one of service_address and "
+                               "address_assignment can be specified.")
         if alias and (service_address or address_assignment):
-            raise ValueError("No IP-specific option can be specified together "
-                             "with alias.")
+            raise AquilonError("No IP-specific option can be specified together "
+                               "with alias.")
         if address_assignment and not host:
-            raise ValueError("Specifying address_assignment requires host.")
+            raise AquilonError("Specifying address_assignment requires host.")
         super(ServiceInstanceServer, self).__init__(host=host, cluster=cluster,
                                                     service_address=service_address,
                                                     address_assignment=address_assignment,

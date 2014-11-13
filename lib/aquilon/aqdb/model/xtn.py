@@ -82,7 +82,8 @@ class Xtn(Base):
                str(self.username), str(return_code), 'aq', str(self.command)]
         results = []
         for arg in self.args:
-            if arg.name == "__RESULT__":
+            if arg.name == "__RESULT__":  # pragma: no cover
+                # We no longer generate this form, but it exists in the DB
                 results.append(arg.value)
                 continue
             elif arg.name.startswith("__RESULT__:"):

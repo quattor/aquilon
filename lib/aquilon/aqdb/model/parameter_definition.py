@@ -131,10 +131,6 @@ class ParamDefinition(Base):
     __table_args__ = ({'oracle_compress': True,
                        'info': {'unique_fields': ['path', 'holder']}},)
 
-    @property
-    def template_base(self, base_object):
-        return "%s/%s" % (base_object.name, self.template)
-
     @classmethod
     def validate_type(cls, value_type):
         """ Utility function for validating the value type """

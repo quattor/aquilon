@@ -39,7 +39,8 @@ from sqlalchemy.dialects.oracle.base import OracleDDLCompiler
 
 # Add support for Oracle-specific index extensions
 @compiles(CreateIndex, 'oracle')
-def visit_create_index(create, compiler, **kw):  # pylint: disable=W0613
+def visit_create_index(create, compiler, **kw):  # pragma: no cover
+                                                 # pylint: disable=W0613
     index = create.element
     compiler._verify_index_table(index)
     preparer = compiler.preparer
@@ -69,7 +70,8 @@ def visit_create_index(create, compiler, **kw):  # pylint: disable=W0613
 
 # Add support for table compression
 @monkeypatch(OracleDDLCompiler)
-def post_create_table(self, table):  # pylint: disable=W0613
+def post_create_table(self, table):  # pragma: no cover
+                                     # pylint: disable=W0613
     text = ""  # pylint: disable=W0621
     compress = table.kwargs.get("oracle_compress", False)
     if compress:
@@ -230,7 +232,7 @@ class DbFactory(object):
         else:
             raise AquilonError('Failed to connect to %s' % raw_dsn)
 
-    def get_sequences(self):
+    def get_sequences(self):  # pragma: no cover
         """ return a list of the sequence names from the current databases
             public schema  """
 

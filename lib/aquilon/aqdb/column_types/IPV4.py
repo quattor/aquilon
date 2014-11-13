@@ -42,7 +42,7 @@ class IPV4(TypeDecorator):
                 return str(value)  # pragma: no cover
             else:
                 return int(value)
-        raise TypeError("Unknown input type for IPv4 column: %s" % repr(value))
+        raise TypeError("Unknown input type for IPv4 column: %s" % repr(value))  # pragma: no cover
 
     def process_result_value(self, value, dialect):
         if value is None:

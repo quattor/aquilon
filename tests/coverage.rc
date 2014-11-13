@@ -10,6 +10,7 @@ exclude_lines =
 
 	# The unittest shoult not cause internal errors...
 	raise InternalError
+	raise AquilonError
 
 	# No good way to test these
 	except IOError

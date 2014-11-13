@@ -17,9 +17,9 @@
 
 from sqlalchemy import Column, ForeignKey
 
+from aquilon.exceptions_ import ArgumentError, AquilonError
 from aquilon.aqdb.model import Resource, ResourceHolder
 from aquilon.aqdb.column_types.aqstr import AqStr
-from aquilon.exceptions_ import ArgumentError
 from sqlalchemy.orm import relation, backref
 
 
@@ -46,13 +46,9 @@ class ResourceGroup(Resource):
 
     def validate_holder(self, key, value):
         if isinstance(value, BundleResource):
-            raise ValueError("ResourceGroups must not be held by other " +
-                             "ResourceGroups")
+            raise AquilonError("ResourceGroups must not be held by other "
+                               "ResourceGroups")
         return value
-
-    @property
-    def branch(self):
-        return self.holder.holder_object.branch
 
 
 class BundleResource(ResourceHolder):

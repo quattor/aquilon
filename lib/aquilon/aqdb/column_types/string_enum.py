@@ -23,7 +23,7 @@ class StringEnumColumn(sqlalchemy.types.TypeDecorator):
     impl = sqlalchemy.types.String
 
     def __init__(self, cls, size, permissive_reads=False):
-        if not issubclass(cls, StringEnum):
+        if not issubclass(cls, StringEnum):  # pragma: no cover
             raise ValueError("StringEnumColumn column's wrap StringEnum classes")
         self._wrapped_class = cls
         self._permissive_reads = permissive_reads

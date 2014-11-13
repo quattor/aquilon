@@ -118,7 +118,7 @@ class MetaCluster(Cluster):
                                 .format(self, len(self.members),
                                         self.max_clusters))
 
-        if self.metacluster:
+        if self.metacluster:  # pragma: no cover
             raise ArgumentError("Metaclusters can't contain other "
                                 "metaclusters.")
         return

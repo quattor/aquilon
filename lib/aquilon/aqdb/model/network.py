@@ -197,7 +197,7 @@ class Network(Base):
 
     @network.setter
     def network(self, value):
-        if not isinstance(value, IPv4Network):
+        if not isinstance(value, IPv4Network):  # pragma: no cover
             raise InternalError("Expected an IPv4Network, got: %s" %
                                 type(value))
         self._network = value
