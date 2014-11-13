@@ -239,11 +239,16 @@ def sync_domain(dbdomain, logger=LOGGER, locked=False):
     kingdir = config.get("broker", "kingdir")
     domaindir = os.path.join(config.get("broker", "domainsdir"), dbdomain.name)
     git_env = {"PATH": os.environ.get("PATH", "")}
+
     if dbdomain.tracked_branch:
         # Might need to revisit if using this helper from rollback...
         run_command(["git", "push", ".",
                      "%s:%s" % (dbdomain.tracked_branch.name, dbdomain.name)],
                     path=kingdir, env=git_env, logger=logger)
+
+    logger.client_info("Updating the checked out copy of {0:l}..."
+                       .format(dbdomain))
+
     run_command(["git", "fetch", "--prune"], path=domaindir, env=git_env, logger=logger)
     if dbdomain.tracked_branch:
         out = run_command(["git", "rev-list", "-n", "1", "HEAD"],

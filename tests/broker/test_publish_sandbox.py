@@ -103,8 +103,14 @@ class TestPublishSandbox(TestBrokerCommand):
 
     def testpublishutsandbox(self):
         sandboxdir = os.path.join(self.sandboxdir, "utsandbox")
-        self.ignoreoutputtest(["publish", "--sandbox", "utsandbox"],
-                              env=self.gitenv(), cwd=sandboxdir)
+        command = ["publish", "--sandbox", "utsandbox"]
+        out, err = self.successtest(command, env=self.gitenv(), cwd=sandboxdir)
+        self.matchoutput(err, "Updating the checked out copy of domain "
+                         "unittest...", command)
+        self.matchoutput(err, "Updating the checked out copy of domain "
+                         "unittest-json...", command)
+        self.matchoutput(err, "Updating the checked out copy of domain "
+                         "unittest-xml...", command)
         # FIXME: verify that changes made it to unittest
 
     def testpublishutsandboxuser(self):

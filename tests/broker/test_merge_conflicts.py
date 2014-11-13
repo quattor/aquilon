@@ -116,8 +116,12 @@ class TestMergeConflicts(TestBrokerCommand):
                          env=self.gitenv(), cwd=sandboxdir)
 
     def test_004_deploychangetest3sandbox(self):
-        self.successtest(["deploy", "--source", "changetest3",
-                          "--target", "changetarget"])
+        command = ["deploy", "--source", "changetest3", "--target", "changetarget"]
+        out = self.statustest(command)
+        self.matchoutput(out, "Updating the checked out copy of domain "
+                         "changetarget...", command)
+        self.matchoutput(out, "Updating the checked out copy of domain "
+                         "changetarget-tracker...", command)
         template = self.find_template("aquilon", "archetype", "base",
                                       domain="changetarget")
         f = open(template)
@@ -258,7 +262,9 @@ class TestMergeConflicts(TestBrokerCommand):
 
     def test_015_reverserollback(self):
         command = "sync --domain changetarget-tracker"
-        out = self.commandtest(command.split(" "))
+        out = self.statustest(command.split(" "))
+        self.matchoutput(out, "Updating the checked out copy of domain "
+                         "changetarget-tracker...", command)
         template = self.find_template("aquilon", "archetype", "base",
                                       domain="changetarget-tracker")
         with open(template) as f:
