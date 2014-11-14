@@ -447,22 +447,27 @@ class TestParameter(TestBrokerCommand):
         out = self.commandtest(cmd)
         self.searchoutput(out,
                           r'Host Personality: compileserver Archetype: aquilon\s*'
+                          r'Stage: current\s*'
                           r'espinfo/function: "development"',
                           cmd)
         self.searchoutput(out,
                           r'Host Personality: inventory Archetype: aquilon\s*'
+                          r'Stage: current\s*'
                           r'espinfo/function: "development"',
                           cmd)
         self.searchoutput(out,
                           r'Host Personality: unixeng-test Archetype: aquilon\s*'
+                          r'Stage: current\s*'
                           r'espinfo/function: "development"',
                           cmd)
         self.searchoutput(out,
                           r'Host Personality: testpersona/dev Archetype: aquilon\s*'
+                          r'Stage: current\s*'
                           r'espinfo/function: "production"',
                           cmd)
         self.searchoutput(out,
                           r'Host Personality: eaitools Archetype: aquilon\s*'
+                          r'Stage: current\s*'
                           r'espinfo/function: "development"',
                           cmd)
 
@@ -471,6 +476,7 @@ class TestParameter(TestBrokerCommand):
         out = self.commandtest(cmd)
         self.searchoutput(out,
                           r'Host Personality: testpersona/dev Archetype: aquilon\s*'
+                          r'Stage: current\s*'
                           r'action: {\s*'
                           r'"testaction": {\s*"command": "/bin/testaction",\s*"user": "user2"\s*},\s*'
                           r'"testaction2": {\s*"command": "/bin/testaction2",\s*"user": "user1",\s*"timeout": 100\s*}\s*}',

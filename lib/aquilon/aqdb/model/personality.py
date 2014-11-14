@@ -21,7 +21,7 @@ import re
 from sqlalchemy import (Column, Integer, Boolean, DateTime, Sequence, String,
                         ForeignKey, UniqueConstraint, PrimaryKeyConstraint)
 from sqlalchemy.inspection import inspect
-from sqlalchemy.orm import relation, backref, deferred
+from sqlalchemy.orm import relation, backref, deferred, object_session
 from sqlalchemy.orm.collections import column_mapped_collection
 
 from aquilon.exceptions_ import ArgumentError
@@ -180,13 +180,16 @@ class PersonalityStage(Base):
     def cluster_infos(self):
         return self.personality.cluster_infos
 
-    # FIXME: Drop this property when parameters are staged
-    @property
-    def paramholder(self):
-        return self.personality.paramholder
-
     def copy(self, name="current"):
+        session = object_session(self)
+
         new = self.__class__(name=name)
+
+        with session.no_autoflush:
+            if self.paramholder:
+                new.paramholder = self.paramholder.copy()
+                new.paramholder.parameters.extend(param.copy()
+                                                  for param in self.paramholder.parameters)
 
         return new
 

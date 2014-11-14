@@ -21,9 +21,8 @@ from six.moves.configparser import NoSectionError, NoOptionError  # pylint: disa
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import (Archetype, Personality, PersonalityStage,
-                                PersonalityGrnMap, Parameter, HostEnvironment,
-                                StaticRoute, PersonalityServiceMap,
-                                PersonalityParameter)
+                                PersonalityGrnMap, HostEnvironment, StaticRoute,
+                                PersonalityServiceMap)
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.grn import lookup_grn
 from aquilon.worker.templates import Plenary
@@ -104,15 +103,6 @@ class CommandAddPersonality(BrokerCommand):
         if copy_from:
             dbstage = dbfrom_vers.copy()
             dbpersona.stages["current"] = dbstage
-
-            if dbfrom_persona.paramholder:
-                dbpersona.paramholder = PersonalityParameter()
-
-                for param in dbfrom_persona.paramholder.parameters:
-                    dbparameter = Parameter(value=param.value,
-                                            comments=param.comments,
-                                            holder=dbpersona.paramholder)
-                    session.add(dbparameter)
 
             for link in dbfrom_persona.features:
                 dbpersona.features.append(link.copy())

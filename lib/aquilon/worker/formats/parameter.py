@@ -126,15 +126,16 @@ class SimpleParameterListFormatter(ListFormatter):
     def format_raw(self, hlist, indent="", embedded=True, indirect_attrs=True):
         details = []
         for k, v in hlist:
-            dbpersonality = k.holder_object
-            if dbpersonality.is_cluster:
+            dbstage = k.holder_object
+            if dbstage.personality.is_cluster:
                 description = "Cluster"
             else:
                 description = "Host"
 
             details.append(indent + "{0} {1:c}: {1.name} {2:c}: {2.name}"
-                           .format(description, dbpersonality,
-                                   dbpersonality.archetype))
+                           .format(description, dbstage.personality,
+                                   dbstage.archetype))
+            details.append(indent + "  Stage: {0.name}".format(dbstage))
             for ikey, ivalue in v.items():
                 details.extend(indented_value(indent + "  ", ikey, ivalue))
         return "\n".join(details)

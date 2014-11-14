@@ -254,9 +254,8 @@ class CommandFlush(BrokerCommand):
                               subqueryload('personality.grns'),
                               # FIXME: undo when feature bindings are staged
                               subqueryload('personality.features'),
-                              # FIXME: undo when parameters are staged
-                              joinedload('personality.paramholder'),
-                              subqueryload('personality.paramholder.parameters'),
+                              joinedload('paramholder'),
+                              subqueryload('paramholder.parameters'),
                               subqueryload('personality.root_users'),
                               subqueryload('personality.root_netgroups'))
                 progress = ProgressReport(logger, q.count(), "personality")

@@ -37,13 +37,13 @@ def string_to_list(data):
     return [item.strip() for item in data.split(',') if item]
 
 
-def get_parameters_by_feature(dbpersonality, dbfeaturelink):
+def get_parameters_by_feature(dbstage, dbfeaturelink):
     ret = {}
     paramdef_holder = dbfeaturelink.feature.paramdef_holder
-    if not paramdef_holder or not dbpersonality.paramholder:
+    if not paramdef_holder or not dbstage.paramholder:
         return ret
 
-    parameters = dbpersonality.paramholder.parameters
+    parameters = dbstage.paramholder.parameters
     for param_def in paramdef_holder.param_definitions:
         for param in parameters:
             value = param.get_feature_path(dbfeaturelink,
@@ -58,8 +58,8 @@ def get_parameters_by_feature(dbpersonality, dbfeaturelink):
     return ret
 
 
-def helper_feature_template(dbpersonality, featuretemplate, dbfeaturelink, lines):
-    params = get_parameters_by_feature(dbpersonality, dbfeaturelink)
+def helper_feature_template(dbstage, featuretemplate, dbfeaturelink, lines):
+    params = get_parameters_by_feature(dbstage, dbfeaturelink)
     for path in params:
         pan_assign(lines, "/system/%s/%s" % (dbfeaturelink.cfg_path_escaped, path), params[path])
     lines.append(featuretemplate.format_raw(dbfeaturelink))
@@ -96,8 +96,8 @@ def get_parameters_by_tmpl(dbstage):
     if not paramdef_holder:
         return ret
 
-    if dbpersonality.paramholder:
-        parameters = dbpersonality.paramholder.parameters
+    if dbstage.paramholder:
+        parameters = dbstage.paramholder.parameters
     else:
         parameters = []
 

@@ -23,14 +23,15 @@ from sqlalchemy.sql import or_
 from aquilon.exceptions_ import NotFoundException, ArgumentError
 from aquilon.utils import (force_json_dict, force_int, force_float,
                            force_boolean)
-from aquilon.aqdb.model import (Personality, Parameter, Feature, FeatureLink,
-                                Host, Model, ParamDefinition, ArchetypeParamDef,
+from aquilon.aqdb.model import (Personality, PersonalityStage, Parameter,
+                                Feature, FeatureLink, Host, Model,
+                                ParamDefinition, ArchetypeParamDef,
                                 PersonalityParameter)
 from aquilon.aqdb.model.hostlifecycle import Ready, Almostready
 from aquilon.worker.formats.parameter_definition import ParamDefinitionFormatter
 
 
-def get_feature_link(session, feature, model, interface_name, personality):
+def get_feature_link(session, feature, model, interface_name, dbstage):
     dbmodel = None
     feature_type = 'host'
     if interface_name:
@@ -44,7 +45,7 @@ def get_feature_link(session, feature, model, interface_name, personality):
                                    feature_type=feature_type, compel=True)
     dblink = FeatureLink.get_unique(session, feature=dbfeature,
                                     interface_name=interface_name,
-                                    model=dbmodel, personality=personality,
+                                    model=dbmodel, personality=dbstage.personality,
                                     compel=True)
     return dblink
 
@@ -71,7 +72,7 @@ def set_parameter(session, param_holder, feature, model, interface_name,
     dblink = None
     if feature:
         dblink = get_feature_link(session, feature, model, interface_name,
-                                  param_holder.personality)
+                                  param_holder.personality_stage)
 
     retval, param_def = validate_parameter(session, path, value, param_holder, dblink)
 
@@ -89,7 +90,7 @@ def del_parameter(session, path, param_holder, feature=None, model=None, interfa
     dblink = None
     if feature:
         dblink = get_feature_link(session, feature, model, interface_name,
-                                  param_holder.personality)
+                                  param_holder.personality_stage)
 
     match = get_paramdef_for_parameter(path, param_holder, dblink)
 
@@ -106,11 +107,11 @@ def del_all_feature_parameter(session, dblink):
     # TODO: if the feature is bound to the whole archetype, then we should clean
     # up all personalities here
     if not dblink or not dblink.personality or \
-       not dblink.personality.paramholder or \
+       not dblink.personality.active_stage.paramholder or \
        not dblink.feature.paramdef_holder:
         return
 
-    parameters = dblink.personality.paramholder.parameters
+    parameters = dblink.personality.active_stage.paramholder.parameters
     for paramdef in dblink.feature.paramdef_holder.param_definitions:
         for dbparam in parameters:
             if paramdef.rebuild_required:
@@ -176,12 +177,12 @@ def validate_rebuild_required(session, path, param_holder):
     """
     dbready = Ready.get_instance(session)
     dbalmostready = Almostready.get_instance(session)
-    personality = param_holder.personality
+    dbstage = param_holder.personality_stage
 
     q = session.query(Host.hardware_entity_id)
     q = q.filter(or_(Host.status == dbready, Host.status == dbalmostready))
     if isinstance(param_holder, PersonalityParameter):
-        q = q.filter_by(personality_stage=personality)
+        q = q.filter_by(personality_stage=dbstage)
     if q.count():
         raise ArgumentError("Modifying parameter %s value needs a host rebuild. "
                             "There are hosts associated to the personality in non-ready state. "
@@ -189,7 +190,7 @@ def validate_rebuild_required(session, path, param_holder):
                             "Run 'aq search host --personality %s --buildstatus ready' "
                             "and 'aq search host --personality %s --buildstatus almostready' to "
                             "get the list of the affected hosts." %
-                            (path, personality, personality))
+                            (path, dbstage, dbstage))
 
 
 def get_paramdef_for_parameter(path, param_holder, dbfeaturelink):
@@ -248,10 +249,12 @@ def validate_required_parameter(param_definitions, parameters, dbfeaturelink=Non
 
 def search_path_in_personas(session, path, paramdef_holder):
     q = session.query(PersonalityParameter)
-    q = q.join(Personality)
+    q = q.join(PersonalityStage)
     if isinstance(paramdef_holder, ArchetypeParamDef):
+        q = q.join(Personality)
         q = q.filter_by(archetype=paramdef_holder.archetype)
     else:
+        q = q.join(Personality)  # FIXME: Undo when features are staged
         q = q.join(FeatureLink)
         q = q.filter_by(feature=paramdef_holder.feature)
 
@@ -265,7 +268,7 @@ def search_path_in_personas(session, path, paramdef_holder):
                 trypath = []
                 q = session.query(FeatureLink)
                 q = q.filter_by(feature=paramdef_holder.feature,
-                                personality=param_holder.personality)
+                                personality=param_holder.personality_stage.personality)
 
                 for link in q.all():
                     trypath.append(Parameter.feature_path(link, path))

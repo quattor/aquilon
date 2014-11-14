@@ -28,10 +28,11 @@ class CommandShowParameterPersonality(BrokerCommand):
     def render(self, session, personality, archetype, style, **arguments):
         dbpersonality = Personality.get_unique(session, name=personality,
                                                archetype=archetype, compel=True)
-        if not dbpersonality.paramholder or \
-           not dbpersonality.paramholder.parameters:
+        dbstage = dbpersonality.default_stage
+        if not dbstage.paramholder or \
+           not dbstage.paramholder.parameters:
             raise NotFoundException("No parameters found for {0:l}."
-                                    .format(dbpersonality))
+                                    .format(dbstage))
 
         # Unfortunately, the raw and the protobuf formatters operate on
         # different data: the protobuf formatter groups the values per parameter
@@ -43,7 +44,7 @@ class CommandShowParameterPersonality(BrokerCommand):
             param_definitions = None
             paramdef_holder = dbpersonality.archetype.paramdef_holder
 
-            for param in dbpersonality.paramholder.parameters:
+            for param in dbstage.paramholder.parameters:
                 if paramdef_holder:
                     param_definitions = paramdef_holder.param_definitions
                     for param_def in param_definitions:
@@ -64,4 +65,4 @@ class CommandShowParameterPersonality(BrokerCommand):
 
             return params
         else:
-            return dbpersonality.paramholder.parameters
+            return dbstage.paramholder.parameters

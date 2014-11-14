@@ -32,6 +32,7 @@ class CommandShowDiff(BrokerCommand):
 
         dbpersona = Personality.get_unique(session, name=personality,
                                            archetype=archetype, compel=True)
+        dbstage = dbpersona.default_stage
 
         if not other_archetype:
             other_archetype = archetype
@@ -39,21 +40,23 @@ class CommandShowDiff(BrokerCommand):
         db_other_persona = Personality.get_unique(session, name=other,
                                                   archetype=other_archetype,
                                                   compel=True)
+        db_other_ver = db_other_persona.default_stage
 
         ret = defaultdict(dict)
-        self.populate_data(session, dbpersona, "my", ret)
-        self.populate_data(session, db_other_persona, "other", ret)
+        self.populate_data(session, dbstage, "my", ret)
+        self.populate_data(session, db_other_ver, "other", ret)
 
-        return DiffData(dbpersona, db_other_persona, ret)
+        return DiffData(dbstage, db_other_ver, ret)
 
-    def populate_data(self, session, dbpersona, dtype, ret):
+    def populate_data(self, session, dbstage, dtype, ret):
         """ pouplate data we are interesetd in seeing as part of diff """
+        dbpersona = dbstage.personality
 
         # parameters
         params = {}
 
-        if dbpersona.paramholder:
-            for param in dbpersona.paramholder.parameters:
+        if dbstage.paramholder:
+            for param in dbstage.paramholder.parameters:
                 params.update(Parameter.flatten(param.value))
         ret["Parameters"][dtype] = params
 

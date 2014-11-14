@@ -28,8 +28,8 @@ def model_features(dbmodel, dbarch, dbstage, interface_name=None):
     features = set()
     for link in dbmodel.features:
         if (link.archetype is None or link.archetype == dbarch) and \
-           (link.personality is None or link.personality ==
-            dbstage.personality) and \
+           (link.personality is None or
+            link.personality == dbstage.personality) and \
            (link.interface_name is None or link.interface_name == interface_name):
             features.add(link.feature)
 

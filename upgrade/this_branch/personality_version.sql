@@ -11,6 +11,7 @@ CREATE TABLE personality_stage (
 
 ALTER TABLE host ADD personality_stage_id INTEGER;
 ALTER TABLE clstr ADD personality_stage_id INTEGER;
+ALTER TABLE param_holder ADD personality_stage_id INTEGER;
 
 DECLARE
 	CURSOR pers_curs IS SELECT id FROM personality;
@@ -23,6 +24,7 @@ BEGIN
 			RETURNING id INTO vers_id;
 		UPDATE host SET personality_stage_id = vers_id WHERE personality_id = pers_rec.id;
 		UPDATE clstr SET personality_stage_id = vers_id WHERE personality_id = pers_rec.id;
+		UPDATE param_holder SET personality_stage_id = vers_id WHERE personality_id = pers_rec.id;
 	END LOOP;
 END;
 /
@@ -40,5 +42,10 @@ ALTER TABLE clstr ADD CONSTRAINT clstr_personality_stage_fk
 	FOREIGN KEY (personality_stage_id) REFERENCES personality_stage (id);
 ALTER TABLE clstr DROP COLUMN personality_id;
 CREATE INDEX clstr_personality_stage_idx ON clstr (personality_stage_id);
+
+ALTER TABLE param_holder ADD CONSTRAINT param_holder_pers_st_fk
+	FOREIGN KEY (personality_stage_id) REFERENCES personality_stage (id) ON DELETE CASCADE;
+ALTER TABLE param_holder ADD CONSTRAINT param_holder_pers_st_uk UNIQUE (personality_stage_id);
+ALTER TABLE param_holder DROP COLUMN personality_id;
 
 QUIT;
