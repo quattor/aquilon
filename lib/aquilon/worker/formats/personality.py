@@ -41,9 +41,6 @@ class PersonalityFormatter(ObjectFormatter):
         if personality.config_override:
             details.append(indent + "  Config override: enabled")
 
-        details.append(indent + "  Template: {0.archetype.name}/personality/{0.name}/config"
-                       .format(personality))
-
         if personality.cluster_required:
             details.append(indent + "  Requires clustered hosts")
         for service in personality.services:
