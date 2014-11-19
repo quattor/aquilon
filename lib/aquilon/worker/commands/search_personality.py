@@ -14,15 +14,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Contains the logic for `aq show personality`."""
+"""Contains the logic for `aq search personality`."""
 
 from sqlalchemy.orm import joinedload, subqueryload, contains_eager
 from sqlalchemy.sql import or_
 
 from aquilon.aqdb.model import (Archetype, Personality, HostEnvironment,
                                 PersonalityGrnMap, Service)
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.grn import lookup_grn
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.formats.personality import SimplePersonalityList
 
 
@@ -50,7 +50,7 @@ class CommandSearchPersonality(BrokerCommand):
 
         if grn or eon_id:
             dbgrn = lookup_grn(session, grn, eon_id, autoupdate=False)
-            q = q.outerjoin(PersonalityGrnMap)
+            q = q.outerjoin(PersonalityGrnMap, aliased=True)
             q = q.filter(or_(Personality.owner_eon_id == dbgrn.eon_id,
                              PersonalityGrnMap.eon_id == dbgrn.eon_id))
             q = q.reset_joinpoint()

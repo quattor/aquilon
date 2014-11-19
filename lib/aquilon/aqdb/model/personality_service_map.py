@@ -40,8 +40,7 @@ class PersonalityServiceMap(Base):
 
     id = Column(Integer, Sequence('%s_id_seq' % _ABV), primary_key=True)
 
-    service_instance_id = Column(ForeignKey(ServiceInstance.id,
-                                            ondelete='CASCADE'),
+    service_instance_id = Column(ForeignKey(ServiceInstance.id),
                                  nullable=False, index=True)
 
     location_id = Column(ForeignKey(Location.id, ondelete='CASCADE'),

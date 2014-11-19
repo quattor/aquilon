@@ -25,51 +25,45 @@ from aquilon.worker.templates.domain import template_branch_basedir
 
 
 def model_features(dbmodel, dbarch, dbpers, interface_name=None):
-    features = []
+    features = set()
     for link in dbmodel.features:
         if (link.archetype is None or link.archetype == dbarch) and \
            (link.personality is None or link.personality == dbpers) and \
            (link.interface_name is None or link.interface_name == interface_name):
-            features.append(link.feature)
+            features.add(link.feature)
 
     return features
 
 
 def personality_features(dbpersonality):
-    pre = []
-    post = []
+    pre = set()
+    post = set()
     for link in dbpersonality.archetype.features:
         if link.model or link.interface_name:
             continue
         if link.feature.post_personality:
-            post.append(link.feature)
+            post.add(link.feature)
         else:
-            pre.append(link.feature)
+            pre.add(link.feature)
 
     for link in dbpersonality.features:
         if link.model or link.interface_name:
             continue
         if link.feature.post_personality:
-            if link.feature in post:
-                continue
-            post.append(link.feature)
+            post.add(link.feature)
         else:
-            if link.feature in pre:
-                continue
-            pre.append(link.feature)
+            pre.add(link.feature)
 
     return (pre, post)
 
 
 def interface_features(dbinterface, dbarch, dbpers):
-    features = []
+    features = set()
 
     if dbinterface.model_allowed:
         # Add features bound to the model
-        for feature in model_features(dbinterface.model, dbarch, dbpers,
-                                      dbinterface.name):
-            if feature not in features:
-                features.append(feature)
+        features.update(model_features(dbinterface.model, dbarch, dbpers,
+                                       dbinterface.name))
 
     if dbpers:
         # Add features bound to the personality, if the interface name matches
@@ -79,8 +73,7 @@ def interface_features(dbinterface, dbarch, dbpers):
                 continue
             if link.interface_name != dbinterface.name:
                 continue
-            if link.feature not in features:
-                features.append(link.feature)
+            features.add(link.feature)
 
     return features
 

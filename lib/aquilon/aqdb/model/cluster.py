@@ -121,9 +121,9 @@ class Cluster(CompileableMixin, Base):
 
     @property
     def title(self):
-        if self.personality.archetype.outputdesc is not None:
-            return self.personality.archetype.outputdesc
-        return self.personality.archetype.name.capitalize() + " Cluster"
+        if self.archetype.outputdesc is not None:
+            return self.archetype.outputdesc
+        return self.archetype.name.capitalize() + " Cluster"
 
     @property
     def dht_value(self):
@@ -476,12 +476,14 @@ class HostClusterMember(Base):
     # cascade='all' on the forward mapper here, else deletion of
     # clusters and their links also causes deleteion of hosts (BAD)
     cluster = relation(Cluster, innerjoin=True,
-                       backref=backref('_hosts', cascade='all, delete-orphan'))
+                       backref=backref('_hosts', cascade='all, delete-orphan',
+                                       passive_deletes=True))
 
     # This is a one-to-one relation, so we need uselist=False on the backref
     host = relation(Host, innerjoin=True,
                     backref=backref('_cluster', uselist=False,
-                                    cascade='all, delete-orphan'))
+                                    cascade='all, delete-orphan',
+                                    passive_deletes=True))
 
     __table_args__ = (PrimaryKeyConstraint(cluster_id, host_id),
                       UniqueConstraint(cluster_id, node_index,
@@ -497,13 +499,14 @@ class __ClusterAllowedPersonality(Base):
     cluster_id = Column(ForeignKey(Cluster.id, ondelete='CASCADE'),
                         nullable=False)
 
-    personality_id = Column(ForeignKey(Personality.id, ondelete='CASCADE'),
-                            nullable=False, index=True)
+    personality_id = Column(ForeignKey(Personality.id), nullable=False,
+                            index=True)
 
     __table_args__ = (PrimaryKeyConstraint(cluster_id, personality_id),)
 
 Cluster.allowed_personalities = relation(Personality,
-                                         secondary=__ClusterAllowedPersonality.__table__)
+                                         secondary=__ClusterAllowedPersonality.__table__,
+                                         passive_deletes=True)
 
 
 class __ClusterServiceBinding(Base):
@@ -523,4 +526,5 @@ class __ClusterServiceBinding(Base):
 
 Cluster.services_used = relation(ServiceInstance,
                                  secondary=__ClusterServiceBinding.__table__,
+                                 passive_deletes=True,
                                  backref=backref("cluster_clients"))

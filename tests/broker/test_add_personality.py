@@ -53,19 +53,12 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
         out = self.commandtest(command)
         self.matchoutput(out, "Personality: utpersonality/dev Archetype: aquilon",
                          command)
-        self.matchoutput(out,
-                         "Template: aquilon/personality/utpersonality/dev/config",
-                         command)
         self.matchoutput(out, "Config override: enabled", command)
         self.matchoutput(out, "Environment: dev", command)
         self.matchoutput(out, "Comments: Some personality comments", command)
-        self.matchclean(out, "Personality: inventory Archetype: aquilon",
-                        command)
-        self.matchclean(out,
-                        "Template: aquilon/personality/inventory/config",
-                        command)
         self.matchoutput(out, "Owned by GRN: %s" % GRN, command)
         self.matchoutput(out, "Used by GRN: %s" % GRN, command)
+        self.matchclean(out, "inventory", command)
 
     def testaddeaipersonality(self):
         command = ["add_personality", "--personality=eaitools",
@@ -83,30 +76,16 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
         out = self.commandtest(command)
         self.matchoutput(out, "Personality: utpersonality/dev Archetype: aquilon",
                          command)
-        self.matchoutput(out,
-                         "Template: aquilon/personality/utpersonality/dev/config",
-                         command)
-        self.matchclean(out, "Personality: inventory Archetype: aquilon",
-                        command)
-        self.matchclean(out,
-                        "Template: aquilon/personality/inventory/config",
-                        command)
         self.matchoutput(out, "Owned by GRN: %s" % GRN, command)
         self.matchoutput(out, "Used by GRN: %s" % GRN, command)
+        self.matchclean(out, "inventory", command)
 
     def testverifyshowpersonalityall(self):
         command = "show_personality --all"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Personality: utpersonality/dev Archetype: aquilon",
                          command)
-        self.matchoutput(out,
-                         "Template: "
-                         "aquilon/personality/utpersonality/dev/config",
-                         command)
         self.matchoutput(out, "Personality: generic Archetype: aurora",
-                         command)
-        self.matchoutput(out,
-                         "Template: aurora/personality/generic/config",
                          command)
 
     def testverifyshowutpersonalityproto(self):
@@ -145,18 +124,9 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Personality: utpersonality/dev Archetype: aquilon",
                          command)
-        self.matchoutput(out,
-                         "Template: aquilon/personality/utpersonality/dev/config",
-                         command)
         self.matchoutput(out, "Personality: inventory Archetype: aquilon",
                          command)
-        self.matchoutput(out,
-                         "Template: aquilon/personality/inventory/config",
-                         command)
-        self.matchclean(out, "Personality: generic Archetype: aurora",
-                        command)
-        self.matchclean(out, "Template: aurora/personality/generic/config",
-                        command)
+        self.matchclean(out, "aurora", command)
 
     def testshowarchetypeunavailable(self):
         command = "show_personality --archetype archetype-does-not-exist"
@@ -187,13 +157,7 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Personality: generic Archetype: aurora",
                          command)
-        self.matchoutput(out,
-                         "Template: aurora/personality/generic/config",
-                         command)
         self.matchoutput(out, "Personality: generic Archetype: windows",
-                         command)
-        self.matchoutput(out,
-                         "Template: windows/personality/generic/config",
                          command)
 
     def testaddwindowsdesktop(self):
@@ -207,9 +171,6 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
         command = "show_personality --personality desktop --archetype windows"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Personality: desktop Archetype: windows",
-                         command)
-        self.matchoutput(out,
-                         "Template: windows/personality/desktop/config",
                          command)
 
     def testaddbadaquilonpersonality(self):
@@ -226,10 +187,6 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
         out = self.commandtest(command)
         self.matchoutput(out, "Personality: badpersonality Archetype: aquilon",
                          command)
-        self.matchoutput(out,
-                         "Template: "
-                         "aquilon/personality/badpersonality/config",
-                         command)
 
     def testaddbadaquilonpersonality2(self):
         # This personality is double 'bad'... there will be a required
@@ -245,10 +202,6 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
         out = self.commandtest(command)
         self.matchoutput(out,
                          "Personality: badpersonality2 Archetype: aquilon",
-                         command)
-        self.matchoutput(out,
-                         "Template: "
-                         "aquilon/personality/badpersonality2/config",
                          command)
 
     def testaddinvalidpersonalityname(self):

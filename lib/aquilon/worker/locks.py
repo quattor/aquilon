@@ -99,17 +99,17 @@ class PlenaryKey(LockKey):
             lockset = self.shared
 
         if personality:
-            if isinstance(personality, Personality):
-                key = "%s/%s" % (personality.archetype.name, personality.name)
-            else:
-                key = str(personality)
+            if not isinstance(personality, Personality):
+                raise InternalError("PlenaryKey got %r instead of Personality"
+                                    % type(personality))
+            key = "%s/%s" % (personality.archetype.name, personality.name)
             lockset["personality"].add(key)
         if service_instance:
-            if isinstance(service_instance, ServiceInstance):
-                key = "%s/%s" % (service_instance.service.name,
-                                 service_instance.name)
-            else:
-                key = str(service_instance)
+            if not isinstance(service_instance, ServiceInstance):
+                raise InternalError("PlenaryKey got %r instead of ServiceInstance"
+                                    % type(service_instance))
+            key = "%s/%s" % (service_instance.service.name,
+                             service_instance.name)
             lockset["service"].add(key)
         if cluster_member:
             lockset["cluster_member"].add(str(cluster_member))

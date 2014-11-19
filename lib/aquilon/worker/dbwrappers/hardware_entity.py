@@ -64,7 +64,8 @@ def search_hardware_entity_query(session, hardware_type=HardwareEntity,
         q = q.filter(HardwareEntity.model_id.in_(subq))
     if ip or networkip or mac or pg or interface_name or interface_vendor \
        or interface_model or interface_bus_address:
-        q = q.join('interfaces')
+        IfaceAlias = aliased(Interface)
+        q = q.join(IfaceAlias, HardwareEntity.interfaces)
         if mac:
             q = q.filter_by(mac=mac)
         if interface_name:
@@ -73,20 +74,19 @@ def search_hardware_entity_query(session, hardware_type=HardwareEntity,
             q = q.filter_by(bus_address=interface_bus_address)
         if pg:
             dbvi = VlanInfo.get_by_pg(session, pg, compel=ArgumentError)
-            PGAlias = aliased(PortGroup)
-            q = q.join(PGAlias)
-            q = q.filter(or_(Interface.port_group_name == pg,
-                             and_(PGAlias.network_tag == dbvi.vlan_id,
-                                  PGAlias.usage == dbvi.vlan_type)))
+            q = q.join(PortGroup, aliased=True, from_joinpoint=True)
+            q = q.filter(or_(IfaceAlias.port_group_name == pg,
+                             and_(PortGroup.network_tag == dbvi.vlan_id,
+                                  PortGroup.usage == dbvi.vlan_type)))
         if interface_model or interface_vendor:
             subq = Model.get_matching_query(session, name=interface_model,
                                             vendor=interface_vendor,
                                             model_type='nic', compel=True)
-            q = q.filter(Interface.model_id.in_(subq))
+            q = q.filter(IfaceAlias.model_id.in_(subq))
         if ip:
             dbnet_env = NetworkEnvironment.get_unique_or_default(session,
                                                                  network_environment)
-            q = q.join(AddressAssignment, aliased=True)
+            q = q.join(AddressAssignment, aliased=True, from_joinpoint=True)
             q = q.filter_by(ip=ip)
             q = q.join(Network, aliased=True, from_joinpoint=True)
             q = q.filter_by(network_environment=dbnet_env)
@@ -96,8 +96,8 @@ def search_hardware_entity_query(session, hardware_type=HardwareEntity,
             dbnetwork = get_network_byip(session, networkip, dbnet_env)
             PGAlias = aliased(PortGroup)
             AAAlias = aliased(AddressAssignment)
-            q = q.outerjoin(PGAlias, Interface.port_group)
-            q = q.outerjoin(AAAlias, Interface.assignments)
+            q = q.outerjoin(PGAlias, IfaceAlias.port_group)
+            q = q.outerjoin(AAAlias, IfaceAlias.assignments)
             q = q.filter(or_(PGAlias.network == dbnetwork,
                              AAAlias.network == dbnetwork))
         q = q.reset_joinpoint()

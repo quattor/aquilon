@@ -39,7 +39,8 @@ class CommandSearchNetworkDevice(BrokerCommand):
             q = q.filter_by(id=dbnetdev.id)
 
         if vlan:
-            q = q.join("port_groups").filter_by(network_tag=vlan)
+            q = q.join(NetworkDevice.port_groups, aliased=True)
+            q = q.filter_by(network_tag=vlan)
             q = q.reset_joinpoint()
 
         # Prefer the primary name for ordering

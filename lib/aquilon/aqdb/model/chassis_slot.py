@@ -38,10 +38,10 @@ class ChassisSlot(Base):
 
     # TODO: Code constraint that these are Blades...
     machine_id = Column(ForeignKey(Machine.machine_id), nullable=True)
-    # TODO: need a unique key against this, but what if it takes 2 slots?
-    # TODO: remove delete-orphan?
+
     chassis = relation(Chassis, innerjoin=True,
                        backref=backref('slots', cascade='delete, delete-orphan',
+                                       passive_deletes=True,
                                        order_by=[slot_number]))
 
     # No delete-orphan here, it's fine to leave the slot in place even if the

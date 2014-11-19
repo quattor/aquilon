@@ -20,13 +20,14 @@ from sqlalchemy.orm import aliased
 from sqlalchemy.sql import or_, null
 
 from aquilon.exceptions_ import NotFoundException
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.formats.list import StringAttributeList
 from aquilon.aqdb.model import (Cluster, EsxCluster, MetaCluster, Archetype,
-                                Personality, Machine, NetworkDevice,
-                                ClusterLifecycle, Service, ServiceInstance,
-                                Share, ClusterResource, VirtualMachine,
-                                BundleResource, ResourceGroup, User)
+                                Personality, Machine, Host, NetworkDevice,
+                                HardwareEntity, ClusterLifecycle, Service,
+                                ServiceInstance, Share, ClusterResource,
+                                VirtualMachine, BundleResource, ResourceGroup,
+                                User)
 from aquilon.worker.dbwrappers.host import hostname_to_host
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
 from aquilon.worker.dbwrappers.location import get_location
@@ -95,12 +96,12 @@ class CommandSearchCluster(BrokerCommand):
                                                    compel=True)
             q = q.filter_by(personality=dbpersonality)
         elif personality:
-            PersAlias = aliased(Personality)
-            q = q.join(PersAlias).filter_by(name=personality)
+            q = q.join(Personality, aliased=True)
+            q = q.filter_by(name=personality)
             q = q.reset_joinpoint()
         elif archetype:
-            PersAlias = aliased(Personality)
-            q = q.join(PersAlias).filter_by(archetype=dbarchetype)
+            q = q.join(Personality, aliased=True)
+            q = q.filter_by(archetype=dbarchetype)
             q = q.reset_joinpoint()
 
         if buildstatus:
@@ -128,12 +129,12 @@ class CommandSearchCluster(BrokerCommand):
                 q = q.filter(Cluster.location_constraint_id.in_(childids))
         dblocation = get_location(session, **location_args['member_'])
         if dblocation:
-            q = q.join('_hosts', 'host', 'hardware_entity')
+            q = q.join(Cluster._hosts, Host, HardwareEntity, aliased=True)
             if location_args['member_']['exact_location']:
                 q = q.filter_by(location=dblocation)
             else:
                 childids = dblocation.offspring_ids()
-                q = q.filter(Machine.location_id.in_(childids))
+                q = q.filter(HardwareEntity.location_id.in_(childids))
             q = q.reset_joinpoint()
 
         # esx stuff
@@ -147,13 +148,13 @@ class CommandSearchCluster(BrokerCommand):
         if esx_virtual_machine:
             dbvm = Machine.get_unique(session, esx_virtual_machine, compel=True)
             # TODO: support VMs inside resource groups?
-            q = q.join(ClusterResource, VirtualMachine)
+            q = q.join(ClusterResource, VirtualMachine, aliased=True)
             q = q.filter_by(machine=dbvm)
             q = q.reset_joinpoint()
         if esx_guest:
             dbguest = hostname_to_host(session, esx_guest)
             # TODO: support VMs inside resource groups?
-            q = q.join(ClusterResource, VirtualMachine, Machine)
+            q = q.join(ClusterResource, VirtualMachine, Machine, aliased=True)
             q = q.filter_by(host=dbguest)
             q = q.reset_joinpoint()
         if capacity_override:
@@ -170,11 +171,11 @@ class CommandSearchCluster(BrokerCommand):
                                                   compel=True)
                 q = q.filter(Cluster.services_used.contains(dbsi))
             else:
-                q = q.join('services_used')
+                q = q.join(Cluster.services_used, aliased=True)
                 q = q.filter_by(service=dbservice)
                 q = q.reset_joinpoint()
         elif instance:
-            q = q.join('services_used')
+            q = q.join(Cluster.services_used, aliased=True)
             q = q.filter_by(name=instance)
             q = q.reset_joinpoint()
 
@@ -221,17 +222,17 @@ class CommandSearchCluster(BrokerCommand):
                                           compel=True)
             q = q.filter(Cluster.allowed_personalities.contains(dbap))
         elif allowed_personality:
-            q = q.join('allowed_personalities')
+            q = q.join(Cluster.allowed_personalities, aliased=True)
             q = q.filter_by(name=allowed_personality)
             q = q.reset_joinpoint()
         elif allowed_archetype:
-            q = q.join('allowed_personalities')
+            q = q.join(Cluster.allowed_personalities, aliased=True)
             q = q.filter_by(archetype=dbaa)
             q = q.reset_joinpoint()
 
         if member_hostname:
             dbhost = hostname_to_host(session, member_hostname)
-            q = q.join('_hosts')
+            q = q.join(Cluster._hosts, aliased=True)
             q = q.filter_by(host=dbhost)
             q = q.reset_joinpoint()
 
@@ -239,17 +240,17 @@ class CommandSearchCluster(BrokerCommand):
             # Added to the searches as appropriate below.
             dbma = Archetype.get_unique(session, member_archetype, compel=True)
         if member_personality and member_archetype:
-            q = q.join('_hosts', 'host')
+            q = q.join(Cluster._hosts, Host, aliased=True)
             dbmp = Personality.get_unique(session, archetype=dbma,
                                           name=member_personality, compel=True)
             q = q.filter_by(personality=dbmp)
             q = q.reset_joinpoint()
         elif member_personality:
-            q = q.join('_hosts', 'host', 'personality')
+            q = q.join(Cluster._hosts, Host, Personality, aliased=True)
             q = q.filter_by(name=member_personality)
             q = q.reset_joinpoint()
         elif member_archetype:
-            q = q.join('_hosts', 'host', 'personality')
+            q = q.join(Cluster._hosts, Host, Personality, aliased=True)
             q = q.filter_by(archetype=dbma)
             q = q.reset_joinpoint()
 

@@ -82,7 +82,7 @@ def create_host(session, logger, config, dbhw, dbarchetype, domain=None,
     if isinstance(dbbranch, Domain):
         pre, post = personality_features(dbpersonality)
         hw_features = model_features(dbhw.model, dbarchetype, dbpersonality)
-        for dbfeature in pre + post + hw_features:
+        for dbfeature in pre | post | hw_features:
             check_feature_template(config, dbarchetype, dbfeature, dbbranch)
 
     if not osname:
@@ -121,7 +121,7 @@ def create_host(session, logger, config, dbhw, dbarchetype, domain=None,
     return dbhost
 
 
-def remove_host(session, logger, dbhw, plenaries, remove_plenaries):
+def remove_host(logger, dbhw, plenaries, remove_plenaries):
     if not dbhw.host:
         raise NotFoundException("Hardware entity %s has no host." % dbhw.label)
     dbhost = dbhw.host

@@ -57,7 +57,8 @@ class StaticRoute(Base):
 
     network = relation(Network, innerjoin=True,
                        backref=backref("static_routes",
-                                       cascade="all, delete-orphan"))
+                                       cascade="all, delete-orphan",
+                                       passive_deletes=True))
 
     personality = relation('Personality')
 

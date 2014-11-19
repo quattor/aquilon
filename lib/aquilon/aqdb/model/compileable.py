@@ -67,5 +67,5 @@ class CompileableMixin(object):
     @property
     def required_services(self):
         rqs = set(self.personality.services)
-        rqs.update(self.personality.archetype.services)
+        rqs.update(self.archetype.services)
         return rqs

@@ -120,7 +120,9 @@ class __PersonalityRootUser(Base):
 
     __table_args__ = (PrimaryKeyConstraint(personality_id, user_id),)
 
-Personality.root_users = relation(User, secondary=__PersonalityRootUser.__table__)
+Personality.root_users = relation(User,
+                                  secondary=__PersonalityRootUser.__table__,
+                                  passive_deletes=True)
 
 
 class __PersonalityRootNetGroup(Base):
@@ -138,4 +140,5 @@ class __PersonalityRootNetGroup(Base):
     __table_args__ = (PrimaryKeyConstraint(personality_id, netgroup_id),)
 
 Personality.root_netgroups = relation(NetGroupWhiteList,
-                                      secondary=__PersonalityRootNetGroup.__table__)
+                                      secondary=__PersonalityRootNetGroup.__table__,
+                                      passive_deletes=True)

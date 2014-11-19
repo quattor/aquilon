@@ -109,7 +109,7 @@ class ServiceInstance(Base):
 
         q = session.query(Host)
         q = q.filter(Host.services_used.contains(self))
-        q = q.outerjoin('_cluster', 'cluster', from_joinpoint=True)
+        q = q.outerjoin('_cluster', 'cluster')
         q = q.filter(or_(Cluster.id == null(),
                          ~Cluster.personality_id.in_(personality_ids)))
         adjusted_count += q.count()
@@ -229,7 +229,8 @@ class __BuildItem(Base):
 
 ServiceInstance.clients = relation(Host, secondary=__BuildItem.__table__,
                                    backref=backref("services_used",
-                                                   cascade="all"))
+                                                   cascade="all",
+                                                   passive_deletes=True))
 
 # Make this a column property so it can be undeferred on bulk loads
 ServiceInstance._client_count = column_property(

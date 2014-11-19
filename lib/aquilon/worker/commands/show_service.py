@@ -16,11 +16,10 @@
 # limitations under the License.
 """Contains the logic for `aq show service`."""
 
-
 from sqlalchemy.orm import joinedload, subqueryload, undefer, contains_eager
 
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.aqdb.model import Service, ServiceInstance
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.host import hostname_to_host
 
 
@@ -35,8 +34,8 @@ class CommandShowService(BrokerCommand):
             if instance:
                 q = q.filter_by(name=instance)
             q = q.join(Service)
-            q = q.reset_joinpoint()
-            q = q.join('servers')
+            q = q.options(contains_eager('service'))
+            q = q.join(ServiceInstance.servers)
             q = q.filter_by(host=dbserver)
             q = q.order_by(Service.name, ServiceInstance.name)
             return q.all()

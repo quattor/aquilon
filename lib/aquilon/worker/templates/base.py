@@ -176,7 +176,7 @@ class Plenary(object):
         if self.template_type == "object" and \
            hasattr(self.dbobj, "personality") and \
            self.dbobj.personality and \
-           not self.dbobj.personality.archetype.is_compileable:
+           not self.dbobj.archetype.is_compileable:
             return 0
 
         # This is a hack to handle the case when the DB object has been deleted,
@@ -379,7 +379,7 @@ class ObjectPlenary(Plenary):
     @classmethod
     def loadpath(cls, dbobj):
         """ Return the default LOADPATH for this object profile """
-        return dbobj.personality.archetype.name
+        return dbobj.archetype.name
 
     @classmethod
     def base_dir(cls, dbobj):

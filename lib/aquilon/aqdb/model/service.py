@@ -77,7 +77,8 @@ class Service(Base):
         q = session.query(Personality.id)
         q = q.outerjoin(PersService, Personality.services)
         q = q.reset_joinpoint()
-        q = q.join(Archetype).filter(Archetype.cluster_type != null())
+        q = q.join(Archetype)
+        q = q.filter(Archetype.cluster_type != null())
         q = q.outerjoin(ArchService, Archetype.services)
         q = q.filter(or_(PersService.id == self.id, ArchService.id == self.id))
         return [pers.id for pers in q]
@@ -92,8 +93,7 @@ class __ServiceListItem(Base):
     __tablename__ = _SLI
     _class_label = 'Required Service'
 
-    service_id = Column(ForeignKey(Service.id, ondelete='CASCADE'),
-                        nullable=False)
+    service_id = Column(ForeignKey(Service.id), nullable=False)
 
     archetype_id = Column(ForeignKey(Archetype.id, ondelete='CASCADE'),
                           nullable=False, index=True)
@@ -101,7 +101,7 @@ class __ServiceListItem(Base):
     __table_args__ = (PrimaryKeyConstraint(service_id, archetype_id),)
 
 Service.archetypes = relation(Archetype, secondary=__ServiceListItem.__table__,
-                              backref=backref("services"))
+                              backref=backref("services", passive_deletes=True))
 
 
 class __PersonalityServiceListItem(Base):
@@ -112,8 +112,7 @@ class __PersonalityServiceListItem(Base):
 
     __tablename__ = _PSLI
 
-    service_id = Column(ForeignKey(Service.id, ondelete='CASCADE'),
-                        nullable=False)
+    service_id = Column(ForeignKey(Service.id), nullable=False)
 
     personality_id = Column(ForeignKey(Personality.id, ondelete='CASCADE'),
                             nullable=False, index=True)
@@ -122,4 +121,5 @@ class __PersonalityServiceListItem(Base):
 
 Service.personalities = relation(Personality,
                                  secondary=__PersonalityServiceListItem.__table__,
-                                 backref=backref("services"))
+                                 backref=backref("services",
+                                                 passive_deletes=True))

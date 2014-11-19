@@ -17,7 +17,7 @@
 """Contains the logic for `aq del network_device`."""
 
 from aquilon.aqdb.model import NetworkDevice
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.dns import delete_dns_record
 from aquilon.worker.dbwrappers.hardware_entity import check_only_primary_ip
 from aquilon.worker.dbwrappers.host import remove_host
@@ -41,7 +41,7 @@ class CommandDelNetworkDevice(BrokerCommand):
         plenaries = PlenaryCollection(logger=logger)
         remove_plenaries = PlenaryCollection(logger=logger)
 
-        remove_host(session, logger, dbnetdev, plenaries, remove_plenaries)
+        remove_host(logger, dbnetdev, plenaries, remove_plenaries)
 
         # Update cluster plenaries connected to this network device
         for dbcluster in dbnetdev.esx_clusters:

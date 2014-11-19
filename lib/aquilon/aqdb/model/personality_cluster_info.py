@@ -46,7 +46,8 @@ class PersonalityClusterInfo(Base):
                            innerjoin=True,
                            backref=backref("cluster_infos",
                                            collection_class=column_mapped_collection(cluster_type),
-                                           cascade="all"))
+                                           cascade="all, delete-orphan",
+                                           passive_deletes=True))
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))

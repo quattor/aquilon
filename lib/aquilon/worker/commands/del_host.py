@@ -19,8 +19,8 @@
 from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.logger import CLIENT_INFO
 from aquilon.notify.index import trigger_notifications
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.dbwrappers.host import (hostname_to_host, remove_host)
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.dbwrappers.host import hostname_to_host, remove_host
 from aquilon.worker.dbwrappers.dns import delete_dns_record
 from aquilon.worker.processes import DSDBRunner
 from aquilon.worker.templates import (Plenary, PlenaryCollection)
@@ -49,7 +49,7 @@ class CommandDelHost(BrokerCommand):
         if dbhost.archetype.name != 'aurora':
             oldinfo = DSDBRunner.snapshot_hw(dbmachine)
 
-        remove_host(session, logger, dbmachine, plenaries, remove_plenaries)
+        remove_host(logger, dbmachine, plenaries, remove_plenaries)
 
         if dbmachine.vm_container:
             plenaries.append(Plenary.get_plenary(dbmachine.vm_container))

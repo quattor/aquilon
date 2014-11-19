@@ -192,7 +192,7 @@ def get_paramdef_for_parameter(path, param_holder, dbfeaturelink):
     if dbfeaturelink:
         paramdef_holder = dbfeaturelink.feature.paramdef_holder
     else:
-        paramdef_holder = param_holder.personality.archetype.paramdef_holder
+        paramdef_holder = param_holder.archetype.paramdef_holder
 
     if not paramdef_holder:
         return None
@@ -287,16 +287,9 @@ def validate_personality_config(dbpersonality):
     if dbpersonality.paramholder:
         parameters = dbpersonality.paramholder.parameters
     else:
-        parameters = None
-
-    error = []
-    param_definitions = []
-
-    if dbpersonality.paramholder:
-        parameters = dbpersonality.paramholder.parameters
-    else:
         parameters = []
 
+    error = []
     if dbarchetype.paramdef_holder:
         param_definitions = dbarchetype.paramdef_holder.param_definitions
         error += validate_required_parameter(param_definitions, parameters)

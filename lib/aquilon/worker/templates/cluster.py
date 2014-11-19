@@ -212,17 +212,12 @@ class PlenaryClusterClient(Plenary):
 
     prefix = "cluster"
 
-    def __init__(self, dbcluster, logger=LOGGER):
-        super(PlenaryClusterClient, self).__init__(dbcluster, logger=logger)
-
-        self.name = dbcluster.name
-
     @classmethod
     def template_name(cls, dbcluster):
         return "%s/%s/client" % (cls.prefix, dbcluster.name)
 
     def get_key(self, exclusive=True):
-        return PlenaryKey(cluster_member=self.name, logger=self.logger,
+        return PlenaryKey(cluster_member=self.dbobj.name, logger=self.logger,
                           exclusive=exclusive)
 
     def body(self, lines):
@@ -238,5 +233,4 @@ class PlenaryClusterClient(Plenary):
                 pan_append(lines, "/system/cluster/resources/" +
                            resource.resource_type, StructureTemplate(res_path))
         lines.append("include { if_exists('features/' + value('/system/archetype/name') + '/%s/%s/config') };"
-                     % (self.dbobj.personality.archetype.name,
-                        self.dbobj.personality.name))
+                     % (self.dbobj.archetype.name, self.dbobj.personality.name))

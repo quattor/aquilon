@@ -18,11 +18,11 @@
 
 from sqlalchemy.orm import object_session, contains_eager
 
-from aquilon.aqdb.types import NicType
 from aquilon.exceptions_ import ArgumentError, UnimplementedError
+from aquilon.aqdb.types import NicType
 from aquilon.aqdb.model import (Vendor, Model, Cpu, MachineSpecs, Machine, Disk,
                                 HardwareEntity, Interface)
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.templates import Plenary, PlenaryCollection
 
 
@@ -199,7 +199,7 @@ class CommandUpdateModel(BrokerCommand):
             filters = {disk_attr: oldattr}
             q = session.query(Disk)
             q = q.filter_by(**filters)
-            q = q.join('machine')
+            q = q.join(Machine)
             q = q.filter_by(model=model)
             for dbdisk in q.all():
                 setattr(dbdisk, disk_attr, value)

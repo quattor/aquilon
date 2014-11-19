@@ -80,19 +80,12 @@ class TestSearchPersonality(VerifyGrnsMixin, TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "Personality: utpersonality/dev Archetype: aquilon",
                          command)
-        self.matchoutput(out,
-                         "Template: aquilon/personality/utpersonality/dev/config",
-                         command)
         self.matchoutput(out, "Config override: enabled", command)
         self.matchoutput(out, "Environment: dev", command)
         self.matchoutput(out, "Comments: Some personality comments", command)
-        self.matchclean(out, "Personality: inventory Archetype: aquilon",
-                        command)
-        self.matchclean(out,
-                        "Template: aquilon/personality/inventory/config",
-                        command)
         self.matchoutput(out, "Owned by GRN: %s" % self.eon_ids[2], command)
         self.matchoutput(out, "Used by GRN: %s" % self.eon_ids[2], command)
+        self.matchclean(out, "inventory", command)
 
     def test_100_proto(self):
         command = ["search_personality", "--host_environment", "dev",

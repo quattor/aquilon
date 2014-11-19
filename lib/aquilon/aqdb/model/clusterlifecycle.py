@@ -97,7 +97,7 @@ class Decommissioned(ClusterLifecycle):
                                                     compel=True)
 
         config = Config()
-        archetype = dbcluster.personality.archetype
+        archetype = dbcluster.archetype
         section = "archetype_" + archetype.name
         opt = "allow_cascaded_deco"
 

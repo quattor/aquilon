@@ -479,7 +479,7 @@ class Chooser(object):
 
         for dbobj in changed_servers:
             # Skip servers that do not have a profile
-            if not dbobj.personality.archetype.is_compileable:
+            if not dbobj.archetype.is_compileable:
                 continue
 
             # Skip servers that are in a different domain/sandbox

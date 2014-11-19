@@ -42,7 +42,7 @@ class CommandChangeClusterStatus(BrokerCommand):
         if not dbcluster.status.transition(dbcluster, dbstatus):
             return
 
-        if not dbcluster.personality.archetype.is_compileable:
+        if not dbcluster.archetype.is_compileable:
             return
 
         session.flush()

@@ -45,7 +45,7 @@ class CommandSearchModel(BrokerCommand):
         if cpuname or cpuvendor or cpuspeed or cpunum or \
            nicmodel or nicvendor or \
            memory or disktype or diskcontroller or disksize:
-            q = q.join((MachineSpecs, MachineSpecs.model_id == Model.id))
+            q = q.join(Model.machine_specs)
             q = q.options(contains_eager('machine_specs'))
 
             if cpuname or cpuvendor or cpuspeed is not None:
