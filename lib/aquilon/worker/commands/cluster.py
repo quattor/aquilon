@@ -16,7 +16,7 @@
 # limitations under the License.
 """Yes, we're using cluster as a verb."""
 
-from six.moves import range
+from six.moves import range  # pylint: disable=F0401
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Cluster, Personality, ServiceAddress

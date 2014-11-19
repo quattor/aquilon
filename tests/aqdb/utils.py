@@ -20,6 +20,7 @@
 import os
 import sys
 
+
 def load_classpath():
     """ Sets up the class path for aquilon """
 

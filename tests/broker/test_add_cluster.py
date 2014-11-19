@@ -172,6 +172,13 @@ class TestAddCluster(PersonalityTestMixin, TestBrokerCommand):
         self.matchoutput(out, "utgrid1", command)
         self.matchoutput(out, "utvcs1", command)
 
+    def test_45_verifyshowallproto(self):
+        command = "show cluster --all --format proto"
+        clusters = self.protobuftest(command.split(" "))
+        clusternames = set([msg.name for msg in clusters])
+        for clustername in ("utgrid1", "utvcs1"):
+            self.assertTrue(clustername in clusternames)
+
     def test_45_verifyplenary_grid_clusterclient(self):
         plenary = self.plenary_name("cluster", "utgrid1", "client")
         with open(plenary) as f:

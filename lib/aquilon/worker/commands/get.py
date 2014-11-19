@@ -69,4 +69,3 @@ class CommandGet(BrokerCommand):
 
         return RemoteSandbox(self.config.get("broker", "git_templates_url"),
                              dbsandbox.name, userdir)
-

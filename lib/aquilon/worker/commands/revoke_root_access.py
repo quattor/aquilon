@@ -16,7 +16,7 @@
 # limitations under the License.
 """Contains the logic for `aq revoke root access`."""
 
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.commands.grant_root_access import CommandGrantRootAccess
 
 

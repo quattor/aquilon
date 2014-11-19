@@ -96,9 +96,9 @@ class CommandBindFeature(BrokerCommand):
             if dbpersonality.owner_grn != dbfeature.owner_grn and \
                dbfeature.visibility != 'public':
                 if not justification:
-                   raise AuthorizationException("Changing feature bindings for "
-                                                "a non public feature where owner grns "
-                                                "do not match requires --justification.")
+                    raise AuthorizationException("Changing feature bindings for "
+                                                 "a non public feature where owner grns "
+                                                 "do not match requires --justification.")
                 validate_justification(user, justification, reason)
             else:
                 validate_personality_justification(dbpersonality, user,

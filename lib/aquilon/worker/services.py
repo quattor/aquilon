@@ -483,8 +483,8 @@ class Chooser(object):
                 continue
 
             # Skip servers that are in a different domain/sandbox
-            if (dbobj.branch != self.dbobj.branch or
-                dbobj.sandbox_author_id != self.dbobj.sandbox_author_id):
+            if dbobj.branch != self.dbobj.branch or \
+               dbobj.sandbox_author_id != self.dbobj.sandbox_author_id:
                 continue
 
             self.plenaries.append(Plenary.get_plenary(dbobj))
@@ -533,6 +533,7 @@ class HostChooser(Chooser):
         # attribute
         if hasattr(dbhost.hardware_entity.primary_name, 'network'):
             self.network = dbhost.hardware_entity.primary_name.network
+
 
 class ClusterChooser(Chooser):
     """Choose services for a cluster."""

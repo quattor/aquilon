@@ -387,10 +387,13 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Share: test_v2_share", command)
 
-    def test_260_search_cluster_by_share(self):
-        command = ["search_cluster", "--share", "test_v2_share"]
+    def test_260_search_metacluster_by_share(self):
+        command = ["search_metacluster", "--share", "test_v2_share"]
         out = self.commandtest(command)
         self.matchoutput(out, "utmc8", command)
+
+    def test_265_search_cluster_by_share(self):
+        self.noouttest(["search_cluster", "--share", "test_v2_share"])
 
     # disk tests
     def test_300_add_disk_to_share(self):

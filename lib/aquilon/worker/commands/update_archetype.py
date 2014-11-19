@@ -46,7 +46,7 @@ class CommandUpdateArchetype(BrokerCommand):
             cluster_type = inspect(cls).polymorphic_identity
 
         if cluster_type is not None and \
-            dbarchetype.cluster_type != cluster_type:
+           dbarchetype.cluster_type != cluster_type:
 
             if dbarchetype.cluster_type is None:
                 q = session.query(Host.hardware_entity_id)

@@ -96,6 +96,13 @@ class TestAddVirtualSwitch(TestBrokerCommand):
         self.searchoutput(out, "^utvswitch$", command)
         self.searchoutput(out, "^utvswitch2$", command)
 
+    def test_125_verify_all_proto(self):
+        command = ["show_virtual_switch", "--all", "--format", "proto"]
+        vswitches = self.protobuftest(command)
+        vswitch_names = set([msg.name for msg in vswitches])
+        for vswitch_name in ("utvswitch", "utvswitch2"):
+            self.assertTrue(vswitch_name in vswitch_names)
+
     def test_130_add_camelcase(self):
         self.noouttest(["add_virtual_switch", "--virtual_switch", "CaMeLcAsE"])
         self.check_plenary_exists("virtualswitchdata", "camelcase")

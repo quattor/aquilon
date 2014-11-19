@@ -18,7 +18,7 @@
 import logging
 from datetime import datetime
 from dateutil.tz import tzutc
-from six.moves.urllib_parse import quote
+from six.moves.urllib_parse import quote  # pylint: disable=F0401
 from six import iteritems
 
 from sqlalchemy import (Column, String, Integer, Boolean, ForeignKey,

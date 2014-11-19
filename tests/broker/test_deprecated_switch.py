@@ -87,16 +87,16 @@ class TestDeprecatedSwitch(TestBrokerCommand):
         # self.matchoutput(err, "Command show_switch is deprecated.", command)
         self.matchoutput(out, "Switch: ut3gd1r03", command)
         self.matchoutput(out, "Primary Name: %s [%s]" %
-                              (self.fqdn_pri, self.ip_pri), command)
+                         (self.fqdn_pri, self.ip_pri), command)
         self.matchoutput(out, "Switch Type: tor", command)
         self.matchoutput(out, "Rack: ut3", command)
         self.matchoutput(out, "  Interface: vlan980 (no MAC addr)", command)
         self.matchoutput(out, "    Provides: %s [%s]" %
-                              (self.fqdn_vlan, self.ip_vlan), command)
+                         (self.fqdn_vlan, self.ip_vlan), command)
         self.matchoutput(out, "  Interface: xge48 %s" %
-                              self.ip_pri.mac, command)
+                         self.ip_pri.mac, command)
         self.matchoutput(out, "    Provides: %s [%s]" %
-                              (self.fqdn_pri, self.ip_pri), command)
+                         (self.fqdn_pri, self.ip_pri), command)
         self.matchoutput(out, "  Comments: LANWAN", command)
 
     def test_400_search_switch(self):
@@ -110,7 +110,7 @@ class TestDeprecatedSwitch(TestBrokerCommand):
         (out, err) = self.successtest(command)
         # self.matchoutput(err, "Command show_switch is deprecated.", command)
         self.matchoutput(out, "structure template switchdata/%s;" %
-                              self.fqdn_pri, command)
+                         self.fqdn_pri, command)
 
     def test_600_del_interface_address(self):
         self.dsdb_expect_delete(self.ip_vlan)

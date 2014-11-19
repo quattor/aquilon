@@ -19,8 +19,8 @@
 
 import os
 import gzip
-from six.moves import cStringIO as StringIO
-from six.moves.cPickle import Pickler, Unpickler
+from six.moves import cStringIO as StringIO  # pylint: disable=F0401
+from six.moves.cPickle import Pickler, Unpickler  # pylint: disable=F0401
 from six import itervalues
 from shutil import rmtree
 from subprocess import Popen, PIPE

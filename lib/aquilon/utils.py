@@ -27,7 +27,7 @@ import logging
 import os
 import re
 import signal
-from six.moves import cStringIO as StringIO
+from six.moves import cStringIO as StringIO  # pylint: disable=F0401
 import time
 from itertools import islice
 from tempfile import mkstemp

@@ -16,7 +16,6 @@
 # limitations under the License.
 """Contains the logic for `aq show switch --all`."""
 
-
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.commands.show_network_device_all import CommandShowNetworkDeviceAll
 

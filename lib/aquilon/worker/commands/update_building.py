@@ -17,8 +17,8 @@
 """Contains the logic for `aq update building`."""
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import (HardwareEntity, Machine, NetworkDevice,
-                                ServiceMap, PersonalityServiceMap)
+from aquilon.aqdb.model import (HardwareEntity, ServiceMap,
+                                PersonalityServiceMap)
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.location import get_location, update_location
 from aquilon.worker.processes import DSDBRunner

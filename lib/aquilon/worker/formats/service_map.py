@@ -23,7 +23,7 @@ from aquilon.aqdb.model import ServiceMap, PersonalityServiceMap
 class ServiceMapFormatter(ObjectFormatter):
     def format_raw(self, sm, indent=""):
         return indent + \
-                "Archetype: aquilon Service: %s Instance: %s Map: %s" % (
+            "Archetype: aquilon Service: %s Instance: %s Map: %s" % (
                 sm.service.name, sm.service_instance.name, format(sm.mapped_to))
 
     def fill_proto(self, service_map, skeleton):

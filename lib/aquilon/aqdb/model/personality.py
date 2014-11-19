@@ -20,7 +20,7 @@ import re
 
 from sqlalchemy import (Column, Integer, Boolean, DateTime, Sequence, String,
                         ForeignKey, UniqueConstraint, PrimaryKeyConstraint)
-from sqlalchemy.orm import relation, backref, deferred
+from sqlalchemy.orm import relation, deferred
 from sqlalchemy.inspection import inspect
 
 from aquilon.exceptions_ import ArgumentError

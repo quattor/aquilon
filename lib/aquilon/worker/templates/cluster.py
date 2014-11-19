@@ -136,6 +136,7 @@ class PlenaryClusterData(StructurePlenary):
             pan_assign(lines, "system/cluster/switch",
                        self.dbobj.network_device.primary_name)
 
+
 class PlenaryClusterObject(ObjectPlenary):
     """
     A cluster has its own output profile, so the plenary cluster template

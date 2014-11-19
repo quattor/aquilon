@@ -108,9 +108,9 @@ class StormapParser(object):
 
         # Final sanity checks
         if (not headers or len(fields) < len(headers) or
-            "server" not in headers or
-            "dg" not in headers or
-            "pshare" not in headers):
+                "server" not in headers or
+                "dg" not in headers or
+                "pshare" not in headers):
             return ShareInfo(server=None, mount=None)
 
         return ShareInfo(server=fields[headers["server"]],

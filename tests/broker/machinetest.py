@@ -310,7 +310,7 @@ class MachineTestMixin(object):
             if nic_ip and nic_ip != ip:
                 self.dsdb_expect_delete(nic_ip)
                 self.noouttest(["del_interface_address", "--machine", machine,
-                               "--interface", nic_name, "--ip", nic_ip])
+                                "--interface", nic_name, "--ip", nic_ip])
                 self.dsdb_verify()
 
         self.dsdb_expect_delete(ip)

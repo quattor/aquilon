@@ -17,7 +17,7 @@
 """Contains the logic for `aq add personality`."""
 
 import re
-from six.moves.configparser import NoSectionError, NoOptionError
+from six.moves.configparser import NoSectionError, NoOptionError  # pylint: disable=F0401
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import (Archetype, Personality, PersonalityGrnMap,

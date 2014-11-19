@@ -18,7 +18,7 @@
 
 from sqlalchemy.orm import joinedload, undefer
 
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import Sandbox
 
 

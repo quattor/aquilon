@@ -33,6 +33,7 @@ _LINK = 'feature_link'
 
 _VISIBILITY = ('public', 'restricted', 'owner_approved', 'owner_only')
 
+
 class Feature(Base):
     __tablename__ = _TN
 
@@ -76,6 +77,7 @@ class Feature(Base):
         valid_visibility = ", ".join(sorted(_VISIBILITY))
         raise ArgumentError("Unknown value for visibility '%s'.  The valid values are: "
                             "%s." % (visibility, valid_visibility))
+
 
 class HostFeature(Feature):
     _class_label = "Host Feature"
@@ -228,14 +230,16 @@ class FeatureLink(Base):
         try:
             result = q.one()
             if preclude:
-                msg = "{0} is already bound to {1}.".format(feature,
-                    _error_msg(archetype, personality, model, interface_name))
+                msg = "{0} is already bound to {1}.".format(
+                    feature, _error_msg(archetype, personality, model,
+                                        interface_name))
                 _raise_custom(preclude, ArgumentError, msg)
         except NoResultFound:
             if not compel:
                 return None
-            msg = "{0} is not bound to {1}.".format(feature,
-                _error_msg(archetype, personality, model, interface_name))
+            msg = "{0} is not bound to {1}.".format(
+                feature, _error_msg(archetype, personality, model,
+                                    interface_name))
             _raise_custom(compel, NotFoundException, msg)
 
         return result

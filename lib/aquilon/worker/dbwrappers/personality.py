@@ -16,29 +16,29 @@
 # limitations under the License.
 """ Helper functions for personality """
 
+from sqlalchemy.orm.session import object_session
 
 from aquilon.exceptions_ import AuthorizationException
-from aquilon.aqdb.model import Personality, Host, HostEnvironment
+from aquilon.aqdb.model import Host
 from aquilon.worker.commands.deploy import validate_justification
-from sqlalchemy.orm.session import object_session
 
 
 def is_prod_personality_used(dbpersona):
+    session = object_session(dbpersona)
+    q = session.query(Host.hardware_entity_id).filter_by(personality=dbpersona)
 
-     session = object_session(dbpersona)
-     q = session.query(Host.hardware_entity_id).filter_by(personality=dbpersona)
-
-     if dbpersona.host_environment.name == 'prod' and q.count() > 0:
+    if dbpersona.host_environment.name == 'prod' and q.count() > 0:
         return True
 
-     return False
+    return False
+
 
 def validate_personality_justification(dbpersona, user, justification, reason):
-     if is_prod_personality_used(dbpersona):
-         if not justification:
-             raise AuthorizationException(
-                   "{0} is marked production and is under "
-                   "change management control. Please specify "
-                   "--justification or --justification='emergency' and reason.".format(dbpersona))
+    if is_prod_personality_used(dbpersona):
+        if not justification:
+            raise AuthorizationException(
+                "{0} is marked production and is under "
+                "change management control. Please specify "
+                "--justification or --justification='emergency' and reason.".format(dbpersona))
 
-         validate_justification(user, justification, reason)
+        validate_justification(user, justification, reason)

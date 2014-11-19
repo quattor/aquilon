@@ -23,7 +23,7 @@ from aquilon.aqdb.model import (Archetype, Personality, HostEnvironment,
                                 PersonalityGrnMap, Service)
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.grn import lookup_grn
-from aquilon.worker.formats.personality import SimplePersonalityList
+from aquilon.worker.formats.list import StringAttributeList
 
 
 class CommandSearchPersonality(BrokerCommand):
@@ -32,7 +32,7 @@ class CommandSearchPersonality(BrokerCommand):
 
     def render(self, session, personality, archetype, grn, eon_id,
                host_environment, config_override, required_service, fullinfo,
-               **arguments):
+               style, **arguments):
         q = session.query(Personality)
         if archetype:
             dbarchetype = Archetype.get_unique(session, archetype, compel=True)
@@ -63,7 +63,7 @@ class CommandSearchPersonality(BrokerCommand):
         q = q.order_by(Archetype.name, Personality.name)
         q = q.options(contains_eager('archetype'))
 
-        if fullinfo:
+        if fullinfo or style != 'raw':
             q = q.options(subqueryload('services'),
                           subqueryload('grns'),
                           subqueryload('features'),
@@ -71,4 +71,6 @@ class CommandSearchPersonality(BrokerCommand):
                           joinedload('cluster_infos'))
             return q.all()
         else:
-            return SimplePersonalityList(q.all())
+            return StringAttributeList(q.all(),
+                                       lambda x: "%s/%s" % (x.archetype.name,
+                                                            x.name))

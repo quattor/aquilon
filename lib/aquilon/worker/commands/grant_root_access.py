@@ -36,7 +36,7 @@ class CommandGrantRootAccess(BrokerCommand):
     def render(self, session, logger, username, netgroup, personality,
                archetype, justification, user, reason, **arguments):
 
-	validate_justification(user, justification, reason)
+        validate_justification(user, justification, reason)
         dbobj = Personality.get_unique(session, name=personality,
                                        archetype=archetype, compel=True)
 

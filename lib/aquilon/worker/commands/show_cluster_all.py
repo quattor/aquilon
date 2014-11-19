@@ -14,9 +14,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+"""Contains the logic for `aq show city --all`."""
 
 from aquilon.aqdb.model import Cluster
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.formats.list import StringAttributeList
 
 
@@ -26,4 +27,6 @@ class CommandShowClusterAll(BrokerCommand):
 
     def render(self, session, **arguments):
         q = session.query(self.query_class.name).order_by(self.query_class.name)
+        if self.query_class == Cluster:
+            q = q.filter(Cluster.cluster_type != 'meta')
         return StringAttributeList(q.all(), "name")

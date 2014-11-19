@@ -20,7 +20,7 @@
 import os
 import socket
 import pwd
-from six.moves.configparser import SafeConfigParser
+from six.moves.configparser import SafeConfigParser  # pylint: disable=F0401
 
 from aquilon.exceptions_ import AquilonError
 

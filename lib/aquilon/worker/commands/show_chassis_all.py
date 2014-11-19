@@ -14,10 +14,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Contains the logic for `aq show chassis`."""
+"""Contains the logic for `aq show chassis --all`."""
 
-
-from sqlalchemy.orm import subqueryload, joinedload, lazyload, contains_eager
+from sqlalchemy.orm import contains_eager
 
 from aquilon.aqdb.model import Chassis, DnsRecord, DnsDomain, Fqdn
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
@@ -28,23 +27,8 @@ class CommandShowChassisAll(BrokerCommand):
 
     required_parameters = []
 
-    def render(self, session, fullinfo, **arguments):
+    def render(self, session, **arguments):
         q = session.query(Chassis)
-
-        if fullinfo:
-            q = q.options(subqueryload('model'),
-                          joinedload('model.machine_specs'),
-                          subqueryload('location'),
-                          joinedload('slots'),
-                          subqueryload('slots.machine'),
-
-                          # A rare case when we don't need primary name/host
-                          lazyload('slots.machine.primary_name'),
-
-                          subqueryload('interfaces'),
-                          joinedload('interfaces.assignments'),
-                          joinedload('interfaces.assignments.network'),
-                          joinedload('interfaces.assignments.dns_records'))
 
         # Prefer the primary name for ordering
         q = q.outerjoin(DnsRecord, (Fqdn, DnsRecord.fqdn_id == Fqdn.id),
@@ -53,7 +37,4 @@ class CommandShowChassisAll(BrokerCommand):
                       contains_eager('primary_name.fqdn'),
                       contains_eager('primary_name.fqdn.dns_domain'))
         q = q.order_by(Fqdn.name, DnsDomain.name, Chassis.label)
-        if fullinfo:
-            return q.all()
-        else:
-            return StringAttributeList(q.all(), "fqdn")
+        return StringAttributeList(q.all(), "fqdn")

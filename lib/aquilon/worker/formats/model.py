@@ -23,7 +23,7 @@ from aquilon.worker.formats.formatters import ObjectFormatter
 class ModelFormatter(ObjectFormatter):
     def format_raw(self, model, indent=""):
         details = [indent + "Vendor: %s Model: %s" %
-                            (model.vendor.name, model.name)]
+                   (model.vendor.name, model.name)]
         details.append(indent + "  Type: %s" % str(model.model_type))
         for link in model.features:
             details.append(indent + "  {0:c}: {0.name}".format(link.feature))

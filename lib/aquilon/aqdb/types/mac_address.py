@@ -102,5 +102,3 @@ class MACAddress(object):
 
     def __repr__(self):
         return "<MAC %s>" % self
-
-

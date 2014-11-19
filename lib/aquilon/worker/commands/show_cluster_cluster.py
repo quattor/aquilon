@@ -19,7 +19,7 @@ from sqlalchemy.orm import joinedload, subqueryload
 
 from aquilon.exceptions_ import NotFoundException
 from aquilon.aqdb.model import Cluster, VirtualMachine, ClusterResource
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 
 
 class CommandShowClusterCluster(BrokerCommand):
@@ -29,6 +29,8 @@ class CommandShowClusterCluster(BrokerCommand):
 
     def render(self, session, cluster, **arguments):
         q = session.query(self.query_class)
+        if self.query_class == Cluster:
+            q = q.filter(Cluster.cluster_type != 'meta')
         vm_q = session.query(VirtualMachine)
         vm_q = vm_q.join(ClusterResource, Cluster)
 

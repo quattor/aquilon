@@ -52,7 +52,7 @@ class CommandAddHost(BrokerCommand):
         dbmachine = Machine.get_unique(session, machine, compel=True)
 
         if (dbmachine.model.model_type.isAuroraNode() and
-            dbarchetype.name != 'aurora'):
+                dbarchetype.name != 'aurora'):
             raise ArgumentError("Machines of type aurora_node can only be "
                                 "added with archetype aurora.")
 

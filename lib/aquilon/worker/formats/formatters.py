@@ -17,7 +17,7 @@
 """Base classes for formatting objects."""
 
 import csv
-from six.moves import cStringIO as StringIO
+from six.moves import cStringIO as StringIO  # pylint: disable=F0401
 import sys
 
 import google.protobuf.message

@@ -111,10 +111,14 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
         command = ["show_host", "--format=proto", "--grns",
                    "--hostname=unittest02.one-nyp.ms.com"]
         host = self.protobuftest(command, expect=1)[0]
+        # FIXME: this is not correct, .hostname should be the short name
         self.assertEqual(host.hostname, "unittest02.one-nyp.ms.com")
+        self.assertEqual(host.dns_domain, "one-nyp.ms.com")
+        self.assertEqual(host.fqdn, "unittest02.one-nyp.ms.com")
         self.assertEqual(host.personality.archetype.name, "aquilon")
         self.assertEqual(host.personality.name, "compileserver")
         self.assertEqual(host.personality.host_environment, "dev")
+        self.assertEqual(host.status, "build")
         self.assertEqual(host.domain.name, "unittest")
         self.assertEqual(host.owner_eonid, 3)
         self.assertEqual(host.eonid_maps[0].target, 'esp')
@@ -632,6 +636,25 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
         self.matchoutput(out, "test-windows-default-os.msad.ms.com", command)
         self.matchoutput(out, "filer1.ms.com", command)
         self.matchoutput(out, "f5test.aqd-unittest.ms.com", command)
+
+    def test_800_verify_host_all_proto(self):
+        command = ["show", "host", "--all", "--format", "proto"]
+        hostlist = self.protobuftest(command)
+        hostnames = set([host_msg.hostname for host_msg in hostlist])
+        for hostname in ("afs-by-net.aqd-unittest.ms.com",
+                         "unittest02.one-nyp.ms.com",
+                         "unittest15.aqd-unittest.ms.com",
+                         "unittest16.aqd-unittest.ms.com",
+                         "unittest17.aqd-unittest.ms.com",
+                         "server1.aqd-unittest.ms.com",
+                         "aquilon61.aqd-unittest.ms.com",
+                         "evh1.aqd-unittest.ms.com",
+                         "evh51.aqd-unittest.ms.com",
+                         "test-aurora-default-os.ms.com",
+                         "test-windows-default-os.msad.ms.com",
+                         "filer1.ms.com",
+                         "f5test.aqd-unittest.ms.com"):
+            self.assertTrue(hostname in hostnames)
 
     def test_800_verify_host_list(self):
         hosts = ["unittest15.aqd-unittest.ms.com",

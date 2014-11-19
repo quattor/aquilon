@@ -20,7 +20,6 @@ from operator import attrgetter
 
 from aquilon.aqdb.model import Personality
 from aquilon.worker.formats.formatters import ObjectFormatter
-from aquilon.worker.formats.list import ListFormatter
 
 
 class PersonalityFormatter(ObjectFormatter):
@@ -122,25 +121,7 @@ class PersonalityFormatter(ObjectFormatter):
             map.target = grn_rec.target
             map.eonid = grn_rec.eon_id
 
-ObjectFormatter.handlers[Personality] = PersonalityFormatter()
-
-
-class SimplePersonalityList(list):
-    """Holds a list of personalities for which a list will be formatted
-       in a simple (name-only) manner."""
-
-
-class SimplePersonalityListFormatter(ListFormatter):
-    def format_raw(self, result, indent=""):
-        return str("\n".join([indent + "{0.archetype.name}/{0.name}".format(obj) for obj in result]))
-
     def csv_fields(self, obj):
         yield (obj.archetype.name, obj.name,)
 
-    def fill_proto(self, personality, skeleton):
-        skeleton.name = str(personality)
-        skeleton.archetype.name = str(personality.archetype.name)
-        skeleton.host_environment = str(personality.host_environment)
-        skeleton.owner_eonid = personality.owner_eon_id
-
-ObjectFormatter.handlers[SimplePersonalityList] = SimplePersonalityListFormatter()
+ObjectFormatter.handlers[Personality] = PersonalityFormatter()

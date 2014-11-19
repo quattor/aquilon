@@ -36,8 +36,8 @@ class CommandUncluster(BrokerCommand):
         if not dbhost.cluster:
             raise ArgumentError("{0} is not bound to a cluster.".format(dbhost))
         if dbhost.cluster != dbcluster:
-            raise ArgumentError("{0} is bound to {1:l}, not {2:l}.".format(
-                                dbhost, dbhost.cluster, dbcluster))
+            raise ArgumentError("{0} is bound to {1:l}, not {2:l}."
+                                .format(dbhost, dbhost.cluster, dbcluster))
 
         if personality:
             dbpersonality = Personality.get_unique(session, name=personality,
@@ -64,7 +64,7 @@ class CommandUncluster(BrokerCommand):
         host_plenary = Plenary.get_plenary(dbhost, logger=logger)
         cluster_plenary = Plenary.get_plenary(dbcluster, logger=logger)
         with CompileKey.merge([host_plenary.get_key(),
-                              cluster_plenary.get_key()]):
+                               cluster_plenary.get_key()]):
             try:
                 cluster_plenary.write(locked=True)
                 try:
