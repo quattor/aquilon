@@ -28,7 +28,10 @@ from brokertest import TestBrokerCommand
 class TestSyncDomain(TestBrokerCommand):
 
     def testsyncdomain(self):
-        self.successtest(["sync", "--domain", "ut-prod"])
+        command = ["sync", "--domain", "ut-prod"]
+        out = self.statustest(command)
+        self.matchoutput(out, "Updating the checked out copy of domain "
+                         "ut-prod...", command)
         template = self.find_template("aquilon", "archetype", "base",
                                       domain="ut-prod")
         with open(template) as f:

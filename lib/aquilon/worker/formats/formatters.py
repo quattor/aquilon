@@ -49,14 +49,14 @@ class ResponseFormatter(object):
     def config_proto(self, node, command):
         desc_node = node.find("message_class")
         if desc_node is None or "name" not in desc_node.attrib or \
-           "module" not in desc_node.attrib:
+           "module" not in desc_node.attrib:  # pragma: no cover
             raise ProtocolError("Invalid protobuf definition for %s." % command)
 
         module = desc_node.attrib["module"]
         msgclass = desc_node.attrib["name"]
 
         if module in self.loaded_protocols and \
-           self.loaded_protocols[module] is False:
+           self.loaded_protocols[module] is False:  # pragma: no cover
             raise ProtocolError("Protocol %s: previous import attempt was "
                                 "unsuccessful" % module)
 
@@ -117,7 +117,7 @@ class ResponseFormatter(object):
         return ObjectFormatter.redirect_djb(result)
 
     def format_proto(self, result, request):
-        if not self.protobuf_container:
+        if not self.protobuf_container:  # pragma: no cover
             raise ProtocolError("Protobuf formatter is not available")
 
         # Here, we rely on the message type returned by any commands being a
@@ -186,9 +186,9 @@ class ObjectFormatter(object):
                          indent=indent).rstrip()
         return indent + str(result)
 
-    def csv_fields(self, result):
-        raise ProtocolError("{0:c} does not have a CSV formatter."
-                            .format(result))
+    def csv_fields(self, result):  # pragma: no cover
+        raise ProtocolError("{0!r} does not have a CSV formatter."
+                            .format(type(result)))
 
     def format_csv(self, result, writer):
         for fields in self.csv_fields(result):
@@ -222,10 +222,11 @@ class ObjectFormatter(object):
 
         self.fill_proto(result, skeleton)
 
-    def fill_proto(self, result, skeleton):  # pylint: disable=W0613
+    def fill_proto(self, result, skeleton):  # pragma: no cover
+                                             # pylint: disable=W0613
         # There's no default protobuf message type
-        raise ProtocolError("{0:c} does not have a protobuf formatter."
-                            .format(result))
+        raise ProtocolError("{0!r} does not have a protobuf formatter."
+                            .format(type(result)))
 
     def format_html(self, result):
         if hasattr(self, "template_html"):

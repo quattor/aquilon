@@ -361,6 +361,13 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
         self.noouttest(["add", "machine", "--machine", "utnorack",
                         "--desk", "utdesk1", "--model", "poweredge_6650"])
 
+    def test_192_show_utnorack(self):
+        command = ["show_machine", "--machine", "utnorack"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Desk: utdesk1", command)
+        self.matchoutput(out, "Room: utroom1", command)
+        self.matchclean(out, "Rack", command)
+
     def test_193_add_f5test(self):
         ip = DummyIP(self.net["f5test"].ip)
         self.create_machine("f5test", "f5_model", rack="ut3", eth0_mac=ip.mac)

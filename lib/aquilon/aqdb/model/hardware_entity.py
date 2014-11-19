@@ -26,7 +26,7 @@ from sqlalchemy.orm import relation, backref, lazyload, validates, deferred
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.orm.attributes import set_committed_value
 
-from aquilon.exceptions_ import ArgumentError, NotFoundException
+from aquilon.exceptions_ import AquilonError, ArgumentError, NotFoundException
 from aquilon.aqdb.model import Base, Location, Model, DnsRecord
 from aquilon.aqdb.column_types import AqStr
 
@@ -92,7 +92,7 @@ class HardwareEntity(Base):
     def __init__(self, label=None, **kwargs):
         label = AqStr.normalize(label)
         if not label:
-            raise ArgumentError("HardwareEntity needs a label.")
+            raise AquilonError("HardwareEntity needs a label.")
         super(HardwareEntity, self).__init__(label=label, **kwargs)
 
     @property

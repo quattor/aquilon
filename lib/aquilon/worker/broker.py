@@ -176,7 +176,7 @@ class BrokerCommand(object):
             self.badmode = False
         self._update_render(self.render)
         if not self.defer_to_thread:
-            if self.requires_azcheck or self.requires_transaction:
+            if self.requires_azcheck or self.requires_transaction:  # pragma: no cover
                 self.defer_to_thread = True
                 log.msg("Forcing defer_to_thread to True because of "
                         "required authorization or transaction for %s" %
@@ -234,7 +234,7 @@ class BrokerCommand(object):
                     # Force connecting to the DB
                     try:
                         conn = session.connection()
-                    except DatabaseError as err:
+                    except DatabaseError as err:  # pragma: no cover
                         raise TransientError("Failed to connect to the "
                                              "database: %s" % err)
 
@@ -397,7 +397,7 @@ class BrokerCommand(object):
                 return False
             if item != cls and item != BrokerCommand and \
                issubclass(item, BrokerCommand):
-                if item.__module__ not in sys.modules:
+                if item.__module__ not in sys.modules:  # pragma: no cover
                     log.msg("Cannot evaluate %s, too early." % cls)
                     return False
                 if item._is_lock_free is not None:

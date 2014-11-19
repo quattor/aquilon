@@ -76,7 +76,8 @@ class CommandPublish(BrokerCommand):
             command = ["pull", filename, ref]
             if rebase:
                 command.append("--force")
-            run_git(command, path=temprepo, logger=logger, loglevel=CLIENT_INFO)
+            run_git(command, path=temprepo, logger=logger,
+                    stream_level=CLIENT_INFO)
 
             # Using --force above allows rewriting any history, even before the
             # start of the sandbox. We don't want to allow that, so verify that

@@ -39,7 +39,7 @@ class Enum(sqlalchemy.types.TypeDecorator):
            code.
         """
 
-        if values is None or len(values) is 0:
+        if values is None or len(values) is 0:  # pragma: no cover
             raise ValueError('Enum requires a list of values')
         self.empty_to_none = empty_to_none
         self.strict = strict
@@ -52,7 +52,7 @@ class Enum(sqlalchemy.types.TypeDecorator):
             value = None
         if value is None:
             return value
-        if value not in self.values:
+        if value not in self.values:  # pragma: no cover
             raise ArgumentError('"%s" not a valid value. Valid values are: %s'
                                 % (value, self.values))
         return str(value).strip().lower()
@@ -60,7 +60,7 @@ class Enum(sqlalchemy.types.TypeDecorator):
     def process_result_value(self, value, dialect):
         if value is None:
             return value
-        if self.strict and value not in self.values:
+        if self.strict and value not in self.values:  # pragma: no cover
             raise ArgumentError('"%s" not a valid value. Valid values are: %s'
                                 % (value, self.values))
         return value

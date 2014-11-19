@@ -242,7 +242,7 @@ class TemplateDomain(object):
                 start_time = time.time()
                 run_command(args, env=panc_env, logger=self.logger,
                             path=config.get("broker", "quattordir"),
-                            loglevel=CLIENT_INFO)
+                            stream_level=CLIENT_INFO)
                 end_time = time.time()
             except ProcessException:
                 raise ArgumentError("Compilation failed, see the compiler "

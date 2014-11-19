@@ -30,6 +30,8 @@ from subprocess import Popen, PIPE
 from threading import Thread
 
 from mako.lookup import TemplateLookup
+from twisted.python import context
+from twisted.python.log import callWithContext, ILogContext
 
 from aquilon.exceptions_ import (ProcessException, AquilonError, ArgumentError,
                                  InternalError)
@@ -41,12 +43,14 @@ LOGGER = logging.getLogger(__name__)
 
 class StreamLoggerThread(Thread):
     """Helper class for streaming output as it becomes available."""
-    def __init__(self, logger, loglevel, process, stream, filterre=None):
+    def __init__(self, logger, loglevel, process, stream, filterre=None,
+                 context=None):
         self.logger = logger
         self.loglevel = loglevel
         self.process = process
         self.stream = stream
         self.filterre = filterre
+        self.context = context
         self.buffer = []
         Thread.__init__(self)
 
@@ -60,14 +64,16 @@ class StreamLoggerThread(Thread):
                 if self.filterre and not self.filterre.search(data):
                     continue
                 self.buffer.append(data)
-                # This log output will appear in the server logs without
-                # correct channel information.  We will re-log it separately
-                # and with the correct info.
-                self.logger.log(self.loglevel, data.rstrip())
+
+                if self.context:
+                    callWithContext(self.context, self.logger.log,
+                                    self.loglevel, data.rstrip())
+                else:
+                    self.logger.log(self.loglevel, data.rstrip())
 
 
 def run_command(args, env=None, path="/", logger=LOGGER, loglevel=logging.INFO,
-                filterre=None, input=None):
+                stream_level=None, filterre=None, input=None):
     '''Run the specified command (args should be a list corresponding to ARGV).
 
     Returns any output (stdout only).  If the command fails, then
@@ -115,42 +121,58 @@ def run_command(args, env=None, path="/", logger=LOGGER, loglevel=logging.INFO,
     else:
         proc_stdin = None
 
+    # The context contains the log prefix
+    ctx = (context.get(ILogContext) or {}).copy()
+
     p = Popen(args=command_args, stdin=proc_stdin, stdout=PIPE, stderr=PIPE,
               cwd=path, env=shell_env)
-    out_thread = StreamLoggerThread(logger, loglevel, p, p.stdout,
-                                    filterre=filterre)
-    err_thread = StreamLoggerThread(logger, loglevel, p, p.stderr)
-    out_thread.start()
-    err_thread.start()
-    if proc_stdin:
-        p.stdin.write(input)
-        p.stdin.close()
-    out_thread.join()
-    err_thread.join()
-    p.wait()
+
+    # If we want to stream the command's output back to the client while the
+    # command is still executing, then we have to doit ourselves. Otherwise,
+    # p.communicate() does everything.
+    if stream_level is None:
+        out, err = p.communicate(input=input)
+        if filterre:
+            out = "\n".join([line for line in out.splitlines()
+                             if filterre.search(line)])
+    else:
+        out_thread = StreamLoggerThread(logger, stream_level, p, p.stdout,
+                                        filterre=filterre, context=ctx)
+        err_thread = StreamLoggerThread(logger, stream_level, p, p.stderr, context=ctx)
+        out_thread.start()
+        err_thread.start()
+        if proc_stdin:
+            p.stdin.write(input)
+            p.stdin.close()
+        out_thread.join()
+        err_thread.join()
+        p.wait()
+
+        out = "".join(out_thread.buffer)
+        err = "".join(err_thread.buffer)
+
     if p.returncode >= 0:
         logger.log(loglevel, "command `%s` exited with return code %d",
                    simple_command, p.returncode)
+        retcode = p.returncode
+        signal_num = None
     else:  # pragma: no cover
         logger.log(loglevel, "command `%s` exited with signal %d",
                    simple_command, -p.returncode)
-    out = "".join(out_thread.buffer)
-    if out:
-        filter_msg = "filtered " if filterre else ""
-        logger.log(loglevel, "command `%s` %sstdout: %s", simple_command,
-                   filter_msg, out)
-    err = "".join(err_thread.buffer)
+        retcode = None
+        signal_num = -p.returncode
     if err:
         logger.log(loglevel, "command `%s` stderr: %s", simple_command, err)
 
     if p.returncode != 0:
         raise ProcessException(command=simple_command, out=out, err=err,
-                               code=p.returncode, filtered=bool(filterre))
+                               code=retcode, signalNum=signal_num,
+                               filtered=bool(filterre))
     return out
 
 
-def run_git(args, env=None, path=".",
-            logger=LOGGER, loglevel=logging.INFO, filterre=None):
+def run_git(args, env=None, path=".", logger=LOGGER, loglevel=logging.INFO,
+            filterre=None, stream_level=None):
     config = Config()
     if env:
         git_env = env.copy()
@@ -172,8 +194,9 @@ def run_git(args, env=None, path=".",
     else:
         git_args = ["git", args]
 
-    return run_command(git_args, env=git_env, path=path,
-                       logger=logger, loglevel=loglevel, filterre=filterre)
+    return run_command(git_args, env=git_env, path=path, logger=logger,
+                       loglevel=loglevel, filterre=filterre,
+                       stream_level=stream_level)
 
 
 def cache_version(config, logger=LOGGER):
@@ -216,11 +239,16 @@ def sync_domain(dbdomain, logger=LOGGER, locked=False):
     kingdir = config.get("broker", "kingdir")
     domaindir = os.path.join(config.get("broker", "domainsdir"), dbdomain.name)
     git_env = {"PATH": os.environ.get("PATH", "")}
+
     if dbdomain.tracked_branch:
         # Might need to revisit if using this helper from rollback...
         run_command(["git", "push", ".",
                      "%s:%s" % (dbdomain.tracked_branch.name, dbdomain.name)],
                     path=kingdir, env=git_env, logger=logger)
+
+    logger.client_info("Updating the checked out copy of {0:l}..."
+                       .format(dbdomain))
+
     run_command(["git", "fetch", "--prune"], path=domaindir, env=git_env, logger=logger)
     if dbdomain.tracked_branch:
         out = run_command(["git", "rev-list", "-n", "1", "HEAD"],

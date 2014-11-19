@@ -133,7 +133,7 @@ class CommandDeploy(BrokerCommand):
             try:
                 run_git(["merge", "--no-ff", "origin/%s" % dbsource.name,
                          "-m", "\n".join(merge_msg)],
-                        path=temprepo, logger=logger, loglevel=CLIENT_INFO)
+                        path=temprepo, logger=logger, stream_level=CLIENT_INFO)
             except ProcessException as e:
                 # No need to re-print e, output should have gone to client
                 # immediately via the logger.

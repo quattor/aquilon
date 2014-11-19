@@ -16,7 +16,7 @@
 # limitations under the License.
 from sqlalchemy.orm.session import Session, object_session
 
-from aquilon.exceptions_ import ArgumentError, NotFoundException
+from aquilon.exceptions_ import ArgumentError, NotFoundException, AquilonError
 from aquilon.aqdb.model import SingleInstanceMixin
 
 
@@ -44,7 +44,7 @@ class StateEngine(SingleInstanceMixin):
             return False
 
         if target_state.name not in self.__class__.transitions:
-            raise ArgumentError("status of %s is invalid" % target_state.name)
+            raise AquilonError("status of %s is invalid" % target_state.name)
 
         targets = sorted(self.__class__.transitions[self.name])
         if target_state.name not in targets:

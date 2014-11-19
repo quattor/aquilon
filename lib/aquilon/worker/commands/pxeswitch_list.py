@@ -110,4 +110,4 @@ class CommandPXESwitchList(BrokerCommand):
                                            servers]))
 
                 # it would be nice to parallelize this....
-                run_command(groupargs, logger=logger, loglevel=CLIENT_INFO)
+                run_command(groupargs, logger=logger, stream_level=CLIENT_INFO)

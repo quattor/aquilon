@@ -31,9 +31,11 @@ from brokertest import TestBrokerCommand
 class TestDeployDomain(TestBrokerCommand):
 
     def test_100_deploychangetest1domain(self):
-        self.successtest(["deploy", "--source", "changetest1",
-                          "--target", "deployable",
-                          "--reason", "Test reason"])
+        command = ["deploy", "--source", "changetest1",
+                   "--target", "deployable", "--reason", "Test reason"]
+        out = self.statustest(command)
+        self.matchoutput(out, "Updating the checked out copy of domain "
+                         "deployable...", command)
 
     def test_110_verifydeploy(self):
         template = self.find_template("aquilon", "archetype", "base",
@@ -85,10 +87,13 @@ class TestDeployDomain(TestBrokerCommand):
         self.matchoutput(out, "Failed to parse the justification", command)
 
     def test_130_deploynosync(self):
-        self.successtest(["deploy", "--source", "changetest1",
-                          "--target", "prod", "--nosync",
-                          "--justification", "tcm=12345678",
-                          "--reason", "Just because"])
+        command = ["deploy", "--source", "changetest1", "--target", "prod",
+                   "--nosync", "--justification", "tcm=12345678",
+                   "--reason", "Just because"]
+        out = self.statustest(command)
+        self.matchoutput(out, "Updating the checked out copy of domain prod...",
+                         command)
+        self.matchclean(out, "ut-prod", command)
 
     def test_200_verifynosync(self):
         # The change should be in prod...

@@ -84,20 +84,14 @@ class DnsDomain(Base):
         if not cls._name_check.match(label):
             raise ArgumentError("Illegal DNS name format '%s'." % label)
 
-    def __init__(self, *args, **kwargs):
-
-        if 'name' not in kwargs:
-            raise KeyError('DNS domain name missing.')
-
-        domain = kwargs['name']
-
+    def __init__(self, name=None, **kwargs):
         # The limit for DNS name length is 255, assuming wire format. This
         # translates to 253 for simple ASCII text; see:
         # http://www.ops.ietf.org/lists/namedroppers/namedroppers.2003/msg00964.html
-        if len(domain) > 253:
+        if len(name) > 253:
             raise ArgumentError('The DNS domain name is too long.')
 
-        parts = domain.split('.')
+        parts = name.split('.')
         if len(parts) < 2:
             raise ArgumentError('Top-level DNS domains cannot be added.')
         # The limit of max. 127 parts mentioned at various documents about DNS
@@ -105,4 +99,4 @@ class DnsDomain(Base):
         for part in parts:
             self.check_label(part)
 
-        super(DnsDomain, self).__init__(*args, **kwargs)
+        super(DnsDomain, self).__init__(name=name, **kwargs)

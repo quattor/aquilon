@@ -58,52 +58,19 @@ class Location(Base):
                       {'info': {'unique_fields': ['name', 'location_type']}},)
     __mapper_args__ = {'polymorphic_on': location_type}
 
+    def __getattr__(self, name):
+        if name in self.__mapper__.polymorphic_map:
+            return self.get_p_dict(name)
+
+        raise AttributeError("'%s' object has no attribute '%s'" %
+                             (self.__class__.__name__, name))  # pragma: no cover
+
     def get_p_dict(self, loc_type):
         if self._parent_dict is None:
             self._parent_dict = {str(self.location_type): self}
             for node in self.parents:
                 self._parent_dict[str(node.location_type)] = node
         return self._parent_dict.get(loc_type, None)
-
-    @property
-    def hub(self):
-        return self.get_p_dict('hub')
-
-    @property
-    def continent(self):
-        return self.get_p_dict('continent')
-
-    @property
-    def country(self):
-        return self.get_p_dict('country')
-
-    @property
-    def campus(self):
-        return self.get_p_dict('campus')
-
-    @property
-    def city(self):
-        return self.get_p_dict('city')
-
-    @property
-    def building(self):
-        return self.get_p_dict('building')
-
-    @property
-    def bunker(self):
-        return self.get_p_dict('bunker')
-
-    @property
-    def room(self):
-        return self.get_p_dict('room')
-
-    @property
-    def rack(self):
-        return self.get_p_dict('rack')
-
-    @property
-    def chassis(self):
-        return self.get_p_dict('chassis')
 
     def offspring_ids(self):
         session = object_session(self)

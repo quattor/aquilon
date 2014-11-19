@@ -173,10 +173,6 @@ class Base(object):
         for attr in ['name', 'type']:
             if hasattr(self, attr):
                 return getattr(self, attr)
-        # These might not be necessary any more...
-        for attr in ['service', 'system']:
-            if hasattr(self, attr):
-                return getattr(self, attr).name
         return 'instance'
 
     @classmethod
