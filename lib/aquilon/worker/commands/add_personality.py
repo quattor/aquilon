@@ -116,9 +116,6 @@ class CommandAddPersonality(BrokerCommand):
                                                 personality=dbpersona)
                 session.add(dst_map)
 
-            for cluster_type, info in dbfrom_persona.cluster_infos.items():
-                dbpersona.cluster_infos[cluster_type] = info.copy()
-
             q = session.query(StaticRoute)
             q = q.filter_by(personality=dbfrom_persona)
             for src_route in q:

@@ -72,8 +72,7 @@ class CommandSearchPersonality(BrokerCommand):
                           # FIXME: Undo when feature bindings are staged
                           subqueryload('personality.features'),
                           joinedload('personality.features.feature'),
-                          # FIXME: Undo when cluster_infos is staged
-                          joinedload('personality.cluster_infos'))
+                          joinedload('cluster_infos'))
             return q.all()
         else:
             return StringAttributeList(q.all(), "qualified_name")

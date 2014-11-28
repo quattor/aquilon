@@ -39,15 +39,24 @@ class CommandUpdatePersonality(BrokerCommand):
                justification, reason, comments, user, **arguments):
         dbpersona = Personality.get_unique(session, name=personality,
                                            archetype=archetype, compel=True)
+        dbstage = dbpersona.active_stage
 
-        for ver in dbpersona.stages.values():
-            validate_personality_justification(ver, user, justification,
+        # It's a bit ugly. If any of the non-staged attributes are touched,
+        # then we need to check for prod hosts for all stages
+        if (cluster_required is not None or config_override is not None or
+                host_environment or grn or eon_id or
+                leave_existing is not None or comments is not None):
+            for ver in dbpersona.stages.values():
+                validate_personality_justification(ver, user, justification,
+                                                   reason)
+        else:
+            validate_personality_justification(dbstage, user, justification,
                                                reason)
 
         if vmhost_capacity_function is not None or \
                 vmhost_overcommit_memory is not None:
-            if "esx" not in dbpersona.cluster_infos:
-                dbpersona.cluster_infos["esx"] = PersonalityESXClusterInfo()
+            if "esx" not in dbstage.cluster_infos:
+                dbstage.cluster_infos["esx"] = PersonalityESXClusterInfo()
 
         if vmhost_capacity_function:
             # Basic sanity tests to see if the function works
@@ -72,14 +81,14 @@ class CommandUpdatePersonality(BrokerCommand):
                 raise ArgumentError("The memory constraint is missing from "
                                     "the returned dictionary.")
 
-            dbpersona.cluster_infos["esx"].vmhost_capacity_function = vmhost_capacity_function
+            dbstage.cluster_infos["esx"].vmhost_capacity_function = vmhost_capacity_function
         elif vmhost_capacity_function == "":
-            dbpersona.cluster_infos["esx"].vmhost_capacity_function = None
+            dbstage.cluster_infos["esx"].vmhost_capacity_function = None
 
         if vmhost_overcommit_memory:
             if vmhost_overcommit_memory < 1:
                 raise ArgumentError("The memory overcommit factor must be >= 1.")
-            dbpersona.cluster_infos["esx"].vmhost_overcommit_memory = vmhost_overcommit_memory
+            dbstage.cluster_infos["esx"].vmhost_overcommit_memory = vmhost_overcommit_memory
 
         if cluster_required is not None and \
            dbpersona.cluster_required != cluster_required:
@@ -147,8 +156,7 @@ class CommandUpdatePersonality(BrokerCommand):
                       joinedload('resholder'),
                       subqueryload('resholder.resources'))
         # TODO: preload virtual machines
-        q = q.join(PersonalityStage)
-        q = q.filter_by(personality=dbpersona)
+        q = q.filter_by(personality_stage=dbstage)
         clusters = q.all()
         failures = []
         for cluster in clusters:

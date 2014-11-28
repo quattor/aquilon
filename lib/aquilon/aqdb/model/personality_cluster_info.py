@@ -20,10 +20,10 @@ from datetime import datetime
 
 from sqlalchemy import (Column, Integer, DateTime, Sequence, String, ForeignKey,
                         Float, UniqueConstraint)
-from sqlalchemy.orm import relation, backref, reconstructor, deferred
+from sqlalchemy.orm import relation, reconstructor, deferred
 from sqlalchemy.orm.collections import column_mapped_collection
 
-from aquilon.aqdb.model import Base, Personality
+from aquilon.aqdb.model import Base, PersonalityStage
 from aquilon.aqdb.column_types.aqstr import AqStr
 
 _PCI = "personality_cluster_info"
@@ -38,21 +38,15 @@ class PersonalityClusterInfo(Base):
 
     id = Column(Integer, Sequence("%s_id_seq" % _PCIABV), primary_key=True)
 
-    personality_id = Column(ForeignKey(Personality.id, ondelete="CASCADE"),
-                            nullable=False)
+    personality_stage_id = Column(ForeignKey(PersonalityStage.id,
+                                             ondelete="CASCADE"),
+                                  nullable=False)
     cluster_type = Column(AqStr(16), nullable=False)
-
-    personality = relation(Personality, lazy=False,
-                           innerjoin=True,
-                           backref=backref("cluster_infos",
-                                           collection_class=column_mapped_collection(cluster_type),
-                                           cascade="all, delete-orphan",
-                                           passive_deletes=True))
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
 
-    __table_args__ = (UniqueConstraint(personality_id, cluster_type,
+    __table_args__ = (UniqueConstraint(personality_stage_id, cluster_type,
                                        name="%s_pc_uk" % _PCIABV),)
     __mapper_args__ = {'polymorphic_on': cluster_type}
 
@@ -60,6 +54,11 @@ class PersonalityClusterInfo(Base):
         # Copying personality does not make sense, because we cannot attach
         # the copy to the same personality anyway
         return type(self)(cluster_type=self.cluster_type)
+
+PersonalityStage.cluster_infos = relation(PersonalityClusterInfo,
+                                          collection_class=column_mapped_collection(PersonalityClusterInfo.cluster_type),
+                                          cascade="all, delete-orphan",
+                                          passive_deletes=True)
 
 
 class PersonalityESXClusterInfo(PersonalityClusterInfo):

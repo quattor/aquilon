@@ -163,11 +163,6 @@ class PersonalityStage(Base):
     def features(self):
         return self.personality.features
 
-    # FIXME: Drop this property when cluster_infos is staged
-    @property
-    def cluster_infos(self):
-        return self.personality.cluster_infos
-
     def copy(self, name="current"):
         session = object_session(self)
 
@@ -182,7 +177,11 @@ class PersonalityStage(Base):
             new.services.extend(self.services)
             new.grns.extend(grn_link.copy() for grn_link in self.grns)
 
+            for cluster_type, info in self.cluster_infos.items():
+                new.cluster_infos[cluster_type] = info.copy()
+
         return new
+
 
 class PersonalityGrnMap(Base):
     __tablename__ = _PGN
