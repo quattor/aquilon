@@ -133,7 +133,7 @@ class MetaCluster(Cluster):
     def validate_membership(self, cluster):
         if self.allowed_personalities and \
                 cluster.personality not in self.allowed_personalities:
-            allowed = sorted("%s/%s" % (pers.archetype, pers.name)
+            allowed = sorted(pers.qualified_name
                              for pers in self.allowed_personalities)
             raise ArgumentError("{0} is not allowed by the metacluster.  "
                                 "Allowed personalities are: {1!s}"

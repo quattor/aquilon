@@ -88,6 +88,4 @@ class CommandSearchModel(BrokerCommand):
         if fullinfo or style != 'raw':
             return q.all()
         else:
-            return StringAttributeList(q.all(),
-                                       lambda x: "%s/%s" % (x.vendor.name,
-                                                            x.name))
+            return StringAttributeList(q.all(), "qualified_name")

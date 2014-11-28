@@ -71,6 +71,4 @@ class CommandSearchPersonality(BrokerCommand):
                           joinedload('cluster_infos'))
             return q.all()
         else:
-            return StringAttributeList(q.all(),
-                                       lambda x: "%s/%s" % (x.archetype.name,
-                                                            x.name))
+            return StringAttributeList(q.all(), "qualified_name")

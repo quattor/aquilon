@@ -42,8 +42,7 @@ class CommandDelCpu(BrokerCommand):
         q = q.join((Model, MachineSpecs.model_id == Model.id), Vendor)
         q = q.order_by(Vendor.name, Model.name)
         if q.count():
-            models = ", ".join(["%s/%s" % (spec.model.vendor.name,
-                                           spec.model.name) for spec in q])
+            models = ", ".join(sorted(spec.model.qualified_name for spec in q))
             raise ArgumentError("{0} is still used by the following models, "
                                 "and cannot be deleted: {1!s}."
                                 .format(dbcpu, models))

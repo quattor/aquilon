@@ -139,7 +139,10 @@ class Base(object):
         - specifying the 'c' flag will return the pretty printed class name
         """
 
-        return self.format_helper(format_spec, self._get_instance_label())
+        if hasattr(self, "qualified_name"):
+            return self.format_helper(format_spec, self.qualified_name)
+        else:
+            return self.format_helper(format_spec, self._get_instance_label())
 
     @classmethod
     def _get_class_label(cls, tolower=False):

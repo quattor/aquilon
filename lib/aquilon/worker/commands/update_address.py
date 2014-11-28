@@ -43,9 +43,8 @@ class CommandUpdateAddress(BrokerCommand):
                                     "cannot be changed.".format(dbdns_rec))
 
             if dbdns_rec.assignments:
-                ifaces = ", ".join(["%s/%s" % (addr.interface.hardware_entity,
-                                               addr.interface)
-                                    for addr in dbdns_rec.assignments])
+                ifaces = ", ".join(sorted(addr.interface.qualified_name
+                                          for addr in dbdns_rec.assignments))
                 raise ArgumentError("{0} is already used by the following "
                                     "interfaces, and its IP address cannot be "
                                     "changed: {1!s}."

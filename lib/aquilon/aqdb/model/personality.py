@@ -73,9 +73,9 @@ class Personality(Base):
     def is_cluster(self):
         return self.archetype.cluster_type is not None
 
-    def __format__(self, format_spec):
-        instance = "%s/%s" % (self.archetype.name, self.name)
-        return self.format_helper(format_spec, instance)
+    @property
+    def qualified_name(self):
+        return self.archetype.name + "/" + self.name
 
     @classmethod
     def validate_env_in_name(cls, name, host_environment):

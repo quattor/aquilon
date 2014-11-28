@@ -153,11 +153,8 @@ class CommandShowBunkerViolations(BrokerCommand):
             for bucket in sorted(buckets):
                 if bucket == rack_bucket:
                     continue
-                hws = ["%s/%s" % (addr.interface.hardware_entity.printable_name,
-                                  addr.interface.name)
-                       for addr in buckets[bucket]]
-                hws = list(set(hws))
-                hws.sort()
+                hws = sorted(set(addr.interface.qualified_name
+                                 for addr in buckets[bucket]))
                 names = ", ".join(hws)
                 if bucket is None:
                     bucket = "(No bucket)"

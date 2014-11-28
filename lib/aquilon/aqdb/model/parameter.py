@@ -73,8 +73,7 @@ class PersonalityParameter(ParameterHolder):
 
     @property
     def holder_name(self):
-        return "%s/%s" % (self.archetype.name,  # pylint: disable=C0103
-                          self.personality.name)  # pylint: disable=C0103
+        return self.personality.qualified_name  # pylint: disable=C0103
 
     @property
     def holder_object(self):
