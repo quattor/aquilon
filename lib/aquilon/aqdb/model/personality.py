@@ -103,6 +103,9 @@ class PersonalityGrnMap(Base):
 
     __table_args__ = (PrimaryKeyConstraint(personality_id, eon_id, target),)
 
+    def copy(self):
+        return type(self)(eon_id=self.eon_id, target=self.target)
+
 Personality.grns = relation(PersonalityGrnMap, cascade='all, delete-orphan',
                             passive_deletes=True)
 

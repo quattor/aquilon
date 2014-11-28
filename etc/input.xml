@@ -3124,16 +3124,18 @@
 	<optgroup mandatory="True" fields="all">
 	    <option name="personality" type="string">The name to create</option>
 	    <option name="archetype" type="string">Which archetype to use</option>
-	    <optgroup fields="one">
-		<option name="grn" type="string">GRN as string</option>
-		<option name="eon_id" type="int">Numeric EON ID</option>
+	    <optgroup>
+		<option name="copy_from" type="string">Personality to copy parameters,features, service maps and required services</option>
+		<optgroup fields="one">
+		    <option name="grn" type="string">GRN as string</option>
+		    <option name="eon_id" type="int">Numeric EON ID</option>
+		</optgroup>
 	    </optgroup>
 	</optgroup>
 	<optgroup>
-	    <option name="host_environment" type="string">Environment for Hosts assigned to this personality [dev|qa|uat|prod|infra]</option>
+	    <option name="host_environment" type="string">Environment for hosts assigned to this personality [dev|qa|uat|prod|infra]</option>
 	    <option name="cluster_required" type="boolean" default='False'>Does this personality require hosts to be clustered?</option>
 	    <option name="comments" type="string">Comments</option>
-	    <option name="copy_from" type="string">Personality to copy parameters,features, service maps and required services</option>
 	    <option name="config_override" type="boolean" default='False'>Include external personality config override template</option>
 	</optgroup>
 	<transport method="put" path="personality/archetype/%(archetype)s/personality/%(personality)s"/>

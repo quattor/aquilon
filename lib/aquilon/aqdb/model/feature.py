@@ -265,3 +265,11 @@ class FeatureLink(Base):
             return format_str % (self.feature.cfg_path, self.interface_name)
 
         return self.feature.cfg_path
+
+    def copy(self):
+        # We have two foreign keys: feature and personality. Since we want to
+        # use this method for cloning personalities, we copy the feature_id, but
+        # not the personality_id.
+        return type(self)(feature=self.feature, model=self.model,
+                          archetype=self.archetype,
+                          interface_name=self.interface_name)

@@ -56,6 +56,11 @@ class PersonalityClusterInfo(Base):
                                        name="%s_pc_uk" % _PCIABV),)
     __mapper_args__ = {'polymorphic_on': cluster_type}
 
+    def copy(self):
+        # Copying personality does not make sense, because we cannot attach
+        # the copy to the same personality anyway
+        return type(self)(cluster_type=self.cluster_type)
+
 
 class PersonalityESXClusterInfo(PersonalityClusterInfo):
     """ Extra personality data specific to ESX clusters """
@@ -102,3 +107,9 @@ class PersonalityESXClusterInfo(PersonalityClusterInfo):
     def __init__(self, **kwargs):
         super(PersonalityESXClusterInfo, self).__init__(**kwargs)
         self._compiled_vmhost = None
+
+    def copy(self):
+        result = super(PersonalityESXClusterInfo, self).copy()
+        result.vmhost_overcommit_memory = self.vmhost_overcommit_memory
+        result.vmhost_capacity_function = self.vmhost_capacity_function
+        return result
