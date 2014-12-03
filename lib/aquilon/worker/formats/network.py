@@ -121,7 +121,9 @@ class NetworkFormatter(ObjectFormatter):
             details.append(indent + "  Static Route: %s gateway %s" %
                            (route.destination, route.gateway_ip))
             if route.personality:
-                details.append(indent + "    Personality: {0}".format(route.personality))
+                details.append(indent + "    {0:c}: {0.name} {1:c}: {1.name}"
+                               .format(route.personality,
+                                       route.personality.archetype))
             if route.comments:
                 details.append(indent + "    Comments: %s" % route.comments)
 

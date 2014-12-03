@@ -67,8 +67,8 @@ class TestAddAllowedPersonality(TestBrokerCommand):
     def test_20_checkconstraint(self):
         command = ["show_cluster", "--cluster=utecl1"]
         out = self.commandtest(command)
-        self.matchoutput(out, "Allowed Personality: Personality vmhost/vulcan-10g-server-prod", command)
-        self.matchoutput(out, "Allowed Personality: Personality vmhost/generic", command)
+        self.matchoutput(out, "Allowed Personality: vulcan-10g-server-prod Archetype: vmhost", command)
+        self.matchoutput(out, "Allowed Personality: generic Archetype: vmhost", command)
 
         command = ["show_cluster", "--cluster=utecl1", "--format", "proto"]
         cluster = self.protobuftest(command, expect=1)[0]
@@ -80,7 +80,7 @@ class TestAddAllowedPersonality(TestBrokerCommand):
         command = ["show_metacluster", "--metacluster=utmc1"]
         out = self.commandtest(command)
         self.matchoutput(out,
-                         "Allowed Personality: Personality esx_cluster/vulcan-10g-server-prod",
+                         "Allowed Personality: vulcan-10g-server-prod Archetype: esx_cluster",
                          command)
 
         command = ["show_metacluster", "--metacluster=utmc1", "--format", "proto"]

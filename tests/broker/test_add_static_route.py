@@ -123,11 +123,11 @@ class TestAddStaticRoute(TestBrokerCommand, MachineTestMixin):
         out = self.commandtest(command)
         self.searchoutput(out,
                           r'Static Route: 192\.168\.248\.0/24 gateway %s'
-                          r'\s*Personality: Personality aquilon/inventory$' % gw,
+                          r'\s*Personality: inventory Archetype: aquilon$' % gw,
                           command)
         self.searchoutput(out,
                           r'Static Route: 192\.168\.248\.0/24 gateway %s'
-                          r'\s*Personality: Personality aquilon/inventory-clone$' % gw,
+                          r'\s*Personality: inventory-clone Archetype: aquilon$' % gw,
                           command)
         self.searchoutput(out,
                           r'Static Route: 192\.168\.250\.0/23 gateway %s'

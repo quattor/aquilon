@@ -161,7 +161,8 @@ class ClusterFormatter(CompileableFormatter):
                               srv.service_instance.name))
             details.append(self.redirect_raw(srv, indent + "    "))
         for personality in cluster.allowed_personalities:
-            details.append(indent + "  Allowed Personality: {0}".format(personality))
+            details.append(indent + "  Allowed {0:c}: {0.name} {1:c}: {1.name}"
+                           .format(personality, personality.archetype))
         for member in sorted(cluster._hosts, key=attrgetter("host.fqdn")):
             details.append(indent + "  Member: %s [node_index: %d]" %
                            (member.host.fqdn, member.node_index))

@@ -62,9 +62,8 @@ class TestDelAllowedPersonality(TestBrokerCommand):
     def test_20_checkconstraint(self):
         command = ["show_cluster", "--cluster=utecl1"]
         out = self.commandtest(command)
-        self.matchoutput(out, "Allowed Personality: Personality vmhost/vulcan-10g-server-prod", command)
-        self.matchclean(out, "Allowed Personality: Personality vmhost/generic", command)
-
+        self.matchoutput(out, "Allowed Personality: vulcan-10g-server-prod Archetype: vmhost", command)
+        self.matchclean(out, "generic", command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelAllowedPersonality)
