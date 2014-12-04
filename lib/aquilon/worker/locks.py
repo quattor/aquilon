@@ -102,15 +102,12 @@ class PlenaryKey(LockKey):
             if not isinstance(personality, Personality):
                 raise InternalError("PlenaryKey got %r instead of Personality"
                                     % type(personality))
-            key = "%s/%s" % (personality.archetype.name, personality.name)
-            lockset["personality"].add(key)
+            lockset["personality"].add(personality.qualified_name)
         if service_instance:
             if not isinstance(service_instance, ServiceInstance):
                 raise InternalError("PlenaryKey got %r instead of ServiceInstance"
                                     % type(service_instance))
-            key = "%s/%s" % (service_instance.service.name,
-                             service_instance.name)
-            lockset["service"].add(key)
+            lockset["service"].add(service_instance.qualified_name)
         if cluster_member:
             lockset["cluster_member"].add(str(cluster_member))
         if network_device:

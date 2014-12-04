@@ -21,10 +21,9 @@ from six.moves.configparser import NoSectionError, NoOptionError  # pylint: disa
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import (Archetype, Personality, PersonalityGrnMap,
-                                Parameter, HostEnvironment,
+                                Parameter, HostEnvironment, StaticRoute,
                                 PersonalityServiceMap, PersonalityParameter)
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.dbwrappers.feature import add_link
 from aquilon.worker.dbwrappers.grn import lookup_grn
 from aquilon.worker.templates import Plenary
 
@@ -41,12 +40,34 @@ class CommandAddPersonality(BrokerCommand):
         if not VALID_PERSONALITY_RE.match(personality):
             raise ArgumentError("Personality name '%s' is not valid." %
                                 personality)
-        if not (grn or eon_id):
-            raise ArgumentError("GRN or EON ID is required for adding a "
-                                "personality.")
 
         dbarchetype = Archetype.get_unique(session, archetype, compel=True)
         section = "archetype_" + dbarchetype.name
+
+        # If we're cloning a personality, read defaults from the cloned
+        # object
+        if copy_from:
+            dbfrom_persona = Personality.get_unique(session,
+                                                    archetype=dbarchetype,
+                                                    name=copy_from, compel=True)
+            if not grn and not eon_id:
+                eon_id = dbfrom_persona.owner_grn.eon_id
+            if not host_environment:
+                host_environment = dbfrom_persona.host_environment.name
+            if not cluster_required:
+                cluster_required = dbfrom_persona.cluster_required
+            if not comments:
+                comments = dbfrom_persona.comments
+
+            if dbfrom_persona.config_override:
+                logger.warn("{0} has config_override set. This setting will "
+                            "not be copied, you will need to set it separately "
+                            "on the new personality if needed."
+                            .format(dbfrom_persona))
+
+        if not grn and not eon_id:
+            raise ArgumentError("GRN or EON ID is required for adding a "
+                                "personality.")
 
         if not host_environment:
             try:
@@ -57,6 +78,8 @@ class CommandAddPersonality(BrokerCommand):
                                     "for {0:l}, please specify "
                                     "--host_environment.".format(dbarchetype))
 
+        # Placing this check here means legacy personalities cannot be cloned,
+        # which is fine.
         if host_environment == 'legacy':
             raise ArgumentError("Legacy is not a valid environment for a new personality.")
 
@@ -76,17 +99,7 @@ class CommandAddPersonality(BrokerCommand):
                                 config_override=config_override)
         session.add(dbpersona)
 
-        if self.config.has_option(section, "default_grn_target"):
-            target = self.config.get(section, "default_grn_target")
-            dbpersona.grns.append(PersonalityGrnMap(grn=dbgrn, target=target))
-
         if copy_from:
-            # copy config data
-            dbfrom_persona = Personality.get_unique(session,
-                                                    archetype=dbarchetype,
-                                                    name=copy_from,
-                                                    compel=True)
-
             if dbfrom_persona.paramholder:
                 dbpersona.paramholder = PersonalityParameter()
 
@@ -97,27 +110,42 @@ class CommandAddPersonality(BrokerCommand):
                     session.add(dbparameter)
 
             for link in dbfrom_persona.features:
-                params = {}
-                params["personality"] = dbpersona
-                if link.model:
-                    params["model"] = link.model
-                if link.interface_name:
-                    params["interface_name"] = link.interface_name
+                dbpersona.features.append(link.copy())
 
-                add_link(session, logger, link.feature, params)
+            q = session.query(PersonalityServiceMap)
+            q = q.filter_by(personality=dbfrom_persona)
+            for src_map in q:
+                dst_map = PersonalityServiceMap(service_instance=src_map.service_instance,
+                                                location=src_map.location,
+                                                network=src_map.network,
+                                                personality=dbpersona)
+                session.add(dst_map)
 
-            # service maps
-            q = session.query(PersonalityServiceMap).filter_by(personality=dbfrom_persona)
-
-            for sm in q.all():
-                dbmap = PersonalityServiceMap(service_instance=sm.service_instance,
-                                              location=sm.location,
-                                              network=sm.network,
-                                              personality=dbpersona)
-                session.add(dbmap)
-
-            # required services
             dbpersona.services.extend(dbfrom_persona.services)
+
+            for grn_link in dbfrom_persona.grns:
+                dbpersona.grns.append(grn_link.copy())
+
+            for cluster_type, info in dbfrom_persona.cluster_infos.items():
+                dbpersona.cluster_infos[cluster_type] = info.copy()
+
+            q = session.query(StaticRoute)
+            q = q.filter_by(personality=dbfrom_persona)
+            for src_route in q:
+                dst_route = StaticRoute(network=src_route.network,
+                                        dest_ip=src_route.dest_ip,
+                                        dest_cidr=src_route.dest_cidr,
+                                        gateway_ip=src_route.gateway_ip,
+                                        comments=src_route.comments,
+                                        personality=dbpersona)
+                session.add(dst_route)
+
+            # TODO: should we copy root users and netgroups? Not doing so is
+            # safer.
+        else:
+            if self.config.has_option(section, "default_grn_target"):
+                target = self.config.get(section, "default_grn_target")
+                dbpersona.grns.append(PersonalityGrnMap(grn=dbgrn, target=target))
 
         session.flush()
 

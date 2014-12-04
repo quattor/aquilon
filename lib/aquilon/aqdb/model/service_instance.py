@@ -60,9 +60,9 @@ class ServiceInstance(Base):
         name = AqStr.normalize(name)
         super(ServiceInstance, self).__init__(name=name, **kwargs)
 
-    def __format__(self, format_spec):
-        instance = "%s/%s" % (self.service.name, self.name)
-        return self.format_helper(format_spec, instance)
+    @property
+    def qualified_name(self):
+        return self.service.name + "/" + self.name
 
     @property
     def client_count(self):

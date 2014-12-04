@@ -104,6 +104,10 @@ class TestAddStaticRoute(TestBrokerCommand, MachineTestMixin):
                          "did you mean 192.168.95.0.",
                          command)
 
+    def test_140_clone_personality(self):
+        self.noouttest(["add_personality", "--personality", "inventory-clone",
+                        "--archetype", "aquilon", "--copy_from", "inventory"])
+
     def test_200_show_host(self):
         gw = self.net["routing1"].usable[-1]
         command = ["show", "host", "--hostname", "unittest26.aqd-unittest.ms.com"]
@@ -117,9 +121,18 @@ class TestAddStaticRoute(TestBrokerCommand, MachineTestMixin):
         gw = self.net["routing1"].usable[-1]
         command = ["show", "network", "--ip", self.net["routing1"].ip]
         out = self.commandtest(command)
-        self.matchoutput(out, "Static Route: 192.168.250.0/23 gateway %s" % gw,
-                         command)
-        self.matchoutput(out, "Comments: Route comments", command)
+        self.searchoutput(out,
+                          r'Static Route: 192\.168\.248\.0/24 gateway %s'
+                          r'\s*Personality: Personality aquilon/inventory$' % gw,
+                          command)
+        self.searchoutput(out,
+                          r'Static Route: 192\.168\.248\.0/24 gateway %s'
+                          r'\s*Personality: Personality aquilon/inventory-clone$' % gw,
+                          command)
+        self.searchoutput(out,
+                          r'Static Route: 192\.168\.250\.0/23 gateway %s'
+                          r'\s*Comments: Route comments' % gw,
+                          command)
         self.matchclean(out, "192.168.252.0", command)
 
     def test_210_make_unittest26(self):
@@ -259,6 +272,10 @@ class TestAddStaticRoute(TestBrokerCommand, MachineTestMixin):
                           (net.broadcast, net.gateway,
                            eth0_ip, net.netmask, net.gateway),
                           command)
+
+    def test_800_cleanup_clone(self):
+        self.noouttest(["del_personality", "--archetype", "aquilon",
+                        "--personality", "inventory-clone"])
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddStaticRoute)

@@ -188,8 +188,8 @@ class Cluster(CompileableMixin, Base):
     def validate_membership(self, host):
         if self.allowed_personalities and \
                 host.personality not in self.allowed_personalities:
-            allowed = sorted("%s/%s" % (pers.archetype, pers.name)
-                             for pers in self.allowed_personalities)
+            allowed = sorted(pers.qualified_name for pers in
+                             self.allowed_personalities)
             raise ArgumentError("{0} is not allowed by the cluster.  Allowed "
                                 "personalities are: {1!s}"
                                 .format(host.personality, ", ".join(allowed)))

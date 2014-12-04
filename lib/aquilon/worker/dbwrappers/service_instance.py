@@ -43,8 +43,7 @@ def check_no_provided_service(dbobject):
                          dbobject.services_provided])
         instances = sorted(instances, key=attrgetter("service.name", "name"))
 
-        msg = ", ".join(["%s/%s" % (si.service.name, si.name)
-                         for si in instances])
+        msg = ", ".join(sorted(si.qualified_name for si in instances))
         raise ArgumentError("{0} still provides the following services, "
                             "and cannot be deleted: {1!s}."
                             .format(dbobject, msg))

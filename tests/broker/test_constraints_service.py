@@ -50,7 +50,7 @@ class TestServiceConstraints(TestBrokerCommand):
         command = "del service --service chooser1"
         out = self.badrequesttest(command.split(" "))
         self.matchoutput(out, "Service chooser1 is still required by the "
-                         "following personalities: unixeng-test (aquilon).",
+                         "following personalities: aquilon/unixeng-test.",
                          command)
 
     def testverifydelservicewithinstances(self):

@@ -134,6 +134,10 @@ class Interface(DeviceLinkMixin, Base):
         instance = "{0.name} of {1:l}".format(self, self.hardware_entity)
         return self.format_helper(format_spec, instance)
 
+    @property
+    def qualified_name(self):
+        return self.hardware_entity.printable_name + "/" + self.name
+
     @validates('mac')
     def _validate_mac(self, key, value):
         # Due to how decorators work, we have to do a level of indirection to

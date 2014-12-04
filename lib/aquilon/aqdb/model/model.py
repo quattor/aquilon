@@ -52,9 +52,9 @@ class Model(Base):
                       {'info': {'unique_fields': ['name', 'vendor'],
                                 'extra_search_fields': ['model_type']}})
 
-    def __format__(self, format_spec):
-        instance = "%s/%s" % (self.vendor.name, self.name)
-        return self.format_helper(format_spec, instance)
+    @property
+    def qualified_name(self):
+        return self.vendor.name + "/" + self.name
 
     @classmethod
     def default_nic_model(cls, session):

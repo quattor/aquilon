@@ -55,8 +55,8 @@ class CommandMake(BrokerCommand):
 
             if dbhost.cluster and dbhost.cluster.allowed_personalities and \
                dbpersonality not in dbhost.cluster.allowed_personalities:
-                allowed = ["%s/%s" % (p.archetype.name, p.name) for p in
-                           dbhost.cluster.allowed_personalities]
+                allowed = sorted(pers.qualified_name for pers in
+                                 dbhost.cluster.allowed_personalities)
                 raise ArgumentError("{0} is not allowed by {1}.  "
                                     "Specify one of: {2}."
                                     .format(dbpersonality, dbhost.cluster,

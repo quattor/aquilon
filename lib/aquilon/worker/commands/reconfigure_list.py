@@ -118,8 +118,8 @@ class CommandReconfigureList(BrokerCommand):
 
                 if dbhost.cluster and dbhost.cluster.allowed_personalities and \
                    dbpersonality not in dbhost.cluster.allowed_personalities:
-                    allowed = ["%s/%s" % (p.archetype.name, p.name) for p in
-                               dbhost.cluster.allowed_personalities]
+                    allowed = sorted(p.qualified_name for p in
+                                     dbhost.cluster.allowed_personalities)
                     failed.append("{0}: {1} is not allowed by {2}.  "
                                   "Specify one of: {3}."
                                   .format(dbhost.fqdn, dbpersonality,

@@ -73,9 +73,9 @@ class Personality(Base):
     def is_cluster(self):
         return self.archetype.cluster_type is not None
 
-    def __format__(self, format_spec):
-        instance = "%s/%s" % (self.archetype.name, self.name)
-        return self.format_helper(format_spec, instance)
+    @property
+    def qualified_name(self):
+        return self.archetype.name + "/" + self.name
 
     @classmethod
     def validate_env_in_name(cls, name, host_environment):
@@ -102,6 +102,9 @@ class PersonalityGrnMap(Base):
     grn = relation(Grn, lazy=False, innerjoin=True)
 
     __table_args__ = (PrimaryKeyConstraint(personality_id, eon_id, target),)
+
+    def copy(self):
+        return type(self)(eon_id=self.eon_id, target=self.target)
 
 Personality.grns = relation(PersonalityGrnMap, cascade='all, delete-orphan',
                             passive_deletes=True)

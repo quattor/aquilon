@@ -175,7 +175,6 @@ class BrokerCommand(object):
             self.badmode = 'readonly'
         else:
             self.badmode = False
-        self._update_render(self.render)
         if not self.defer_to_thread:
             if self.requires_azcheck or self.requires_transaction:  # pragma: no cover
                 self.defer_to_thread = True
@@ -200,7 +199,7 @@ class BrokerCommand(object):
         """ Implement this method to create a functional broker command.
 
         The base __init__ method wraps all implementations using
-        _update_render() to enforce the class requires_* flags.
+        invoke_render() to enforce the class requires_* flags.
 
         """
         if self.__class__.__module__ == 'aquilon.worker.broker':
@@ -209,122 +208,107 @@ class BrokerCommand(object):
         raise UnimplementedError("%s has not been implemented" %
                                  self.__class__.__module__)
 
-    def _update_render(self, command):
-        """ Wrap the render method using the requires_* attributes.
+    def invoke_render(self, user=None, request=None, requestid=None,
+                      logger=None, session=None, **kwargs):
+        raising_exception = None
+        rollback_failed = False
+        dbuser = None
+        try:
+            if self.requires_transaction or self.requires_azcheck:
+                # Set up a session...
+                if not session:
+                    if self.is_lock_free:
+                        session = self.dbf.NLSession()
+                    else:
+                        session = self.dbf.Session()
 
-        An alternate implementation would be to just have a
-        wrap_rendor() method or similar that got called instead
-        of rendor().
+                # Force connecting to the DB
+                try:
+                    conn = session.connection()
+                except DatabaseError as err:  # pragma: no cover
+                    raise TransientError("Failed to connect to the "
+                                         "database: %s" % err)
 
-        """
+                if session.bind.dialect.name == "oracle":
+                    # Make the name of the command and the request ID
+                    # available in v$session. Trying to set a value longer
+                    # than the allowed length will generate ORA-24960, so
+                    # do an explicit truncation.
+                    dbapi_con = conn.connection.connection
+                    dbapi_con.action = str(self.action)[:32]
+                    # TODO: we should include the command number as well,
+                    # since that is easier to find in the logs
+                    dbapi_con.clientinfo = str(requestid)[:64]
 
-        def updated_render(self, user=None, request=None, requestid=None,
-                           logger=None, session=None, **kwargs):
-            raising_exception = None
-            rollback_failed = False
-            dbuser = None
-            try:
-                if self.requires_transaction or self.requires_azcheck:
-                    # Set up a session...
-                    if not session:
-                        if self.is_lock_free:
-                            session = self.dbf.NLSession()
-                        else:
-                            session = self.dbf.Session()
+                # This does a COMMIT, which in turn invalidates the session.
+                # We should therefore avoid looking up anything in the DB
+                # before this point which might be used later.
+                status = request.status
+                start_xtn(session, status.requestid, status.user,
+                          status.command, self.requires_readonly,
+                          kwargs, _IGNORED_AUDIT_ARGS)
 
-                    # Force connecting to the DB
-                    try:
-                        conn = session.connection()
-                    except DatabaseError as err:  # pragma: no cover
-                        raise TransientError("Failed to connect to the "
-                                             "database: %s" % err)
+                dbuser = get_or_create_user_principal(session, user,
+                                                      commitoncreate=True,
+                                                      logger=logger)
 
-                    if session.bind.dialect.name == "oracle":
-                        # Make the name of the command and the request ID
-                        # available in v$session. Trying to set a value longer
-                        # than the allowed length will generate ORA-24960, so
-                        # do an explicit truncation.
-                        dbapi_con = conn.connection.connection
-                        dbapi_con.action = str(self.action)[:32]
-                        # TODO: we should include the command number as well,
-                        # since that is easier to find in the logs
-                        dbapi_con.clientinfo = str(requestid)[:64]
+                if self.requires_azcheck:
+                    self.az.check(principal=user, dbuser=dbuser,
+                                  action=self.action, resource=request.path)
 
-                    # This does a COMMIT, which in turn invalidates the session.
-                    # We should therefore avoid looking up anything in the DB
-                    # before this point which might be used later.
-                    status = request.status
-                    start_xtn(session, status.requestid, status.user,
-                              status.command, self.requires_readonly,
-                              kwargs, _IGNORED_AUDIT_ARGS)
-
-                    dbuser = get_or_create_user_principal(session, user,
-                                                          commitoncreate=True,
-                                                          logger=logger)
-
-                    if self.requires_azcheck:
-                        self.az.check(principal=user, dbuser=dbuser,
-                                      action=self.action, resource=request.path)
-
-                    if self.requires_readonly:
-                        self._set_readonly(session)
-                    # begin() is only required if session transactional=False
-                    # session.begin()
-                if self.badmode:  # pragma: no cover
-                    raise UnimplementedError("Command %s not available on "
-                                             "a %s broker." %
-                                             (self.command, self.badmode))
-                # Command is an instance method already having self...
-                retval = command(user=user, dbuser=dbuser, request=request,
+                if self.requires_readonly:
+                    self._set_readonly(session)
+                # begin() is only required if session transactional=False
+                # session.begin()
+            if self.badmode:  # pragma: no cover
+                raise UnimplementedError("Command %s not available on "
+                                         "a %s broker." %
+                                         (self.command, self.badmode))
+            retval = self.render(user=user, dbuser=dbuser, request=request,
                                  requestid=requestid, logger=logger,
                                  session=session, **kwargs)
-                if self.requires_format:
-                    style = kwargs.get("style", None)
-                    retval = self.formatter.format(style, retval, request)
-                if session:
-                    session.commit()
-                return retval
-            except Exception as e:
-                raising_exception = e
-                # Need to close after the rollback, or the next time session
-                # is accessed it tries to commit the transaction... (?)
-                if session:
-                    try:
-                        session.rollback()
-                    except:  # pragma: no cover
-                        rollback_failed = True
-                        raise
-                    session.close()
-                if logger:
-                    # Knowing which exception class was thrown might be useful
-                    logger.info("%s: %s", type(e).__name__, e)
-                raise
-            finally:
-                # Obliterating the scoped_session - next call to session()
-                # will create a new one.
-                if session:
-                    # Complete the transaction. We really want to get rid of the
-                    # session, even if end_xtn() fails
-                    try:
-                        if not rollback_failed:
-                            # If session.rollback() failed for whatever reason,
-                            # our best bet is to avoid touching the session
-                            end_xtn(session, requestid,
-                                    get_code_for_error_class(
-                                        raising_exception.__class__),
-                                    getattr(request, '_audit_result', None))
-                    finally:
-                        if self.is_lock_free:
-                            self.dbf.NLSession.remove()
-                        else:
-                            self.dbf.Session.remove()
-                if logger:
-                    self._cleanup_logger(logger)
-        updated_render.__name__ = command.__name__
-        updated_render.__dict__ = command.__dict__
-        updated_render.__doc__ = command.__doc__
-        instancemethod = type(BrokerCommand.render)
-        self.render = instancemethod(updated_render, self, BrokerCommand)
+            if self.requires_format:
+                style = kwargs.get("style", None)
+                retval = self.formatter.format(style, retval, request)
+            if session:
+                session.commit()
+            return retval
+        except Exception as e:
+            raising_exception = e
+            # Need to close after the rollback, or the next time session
+            # is accessed it tries to commit the transaction... (?)
+            if session:
+                try:
+                    session.rollback()
+                except:  # pragma: no cover
+                    rollback_failed = True
+                    raise
+                session.close()
+            if logger:
+                # Knowing which exception class was thrown might be useful
+                logger.info("%s: %s", type(e).__name__, e)
+            raise
+        finally:
+            # Obliterating the scoped_session - next call to session()
+            # will create a new one.
+            if session:
+                # Complete the transaction. We really want to get rid of the
+                # session, even if end_xtn() fails
+                try:
+                    if not rollback_failed:
+                        # If session.rollback() failed for whatever reason,
+                        # our best bet is to avoid touching the session
+                        end_xtn(session, requestid,
+                                get_code_for_error_class(
+                                    raising_exception.__class__),
+                                getattr(request, '_audit_result', None))
+                finally:
+                    if self.is_lock_free:
+                        self.dbf.NLSession.remove()
+                    else:
+                        self.dbf.Session.remove()
+            if logger:
+                self._cleanup_logger(logger)
 
     def _set_readonly(self, session):
         if session.bind.dialect.name == "oracle" or \
@@ -332,9 +316,9 @@ class BrokerCommand(object):
             session.commit()
             session.execute(text("set transaction read only"))
 
-    # This is meant to be called before calling render() in order to
+    # This is meant to be called before calling invoke_render() in order to
     # add a logger into the argument list.  It returns the arguments
-    # that will be passed into render().
+    # that will be passed into invoke_render().
     def add_logger(self, request, **command_kwargs):
         if self.command != "show_request":
             # For the show_request requestid is the UUID of the comamnd we
