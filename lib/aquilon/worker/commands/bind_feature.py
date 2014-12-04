@@ -40,8 +40,10 @@ class CommandBindFeature(BrokerCommand):
             raise ArgumentError("Binding to a named interface needs "
                                 "a personality.")
 
-        q = session.query(Personality)
-        dbarchetype = None
+        if archetype:
+            dbarchetype = Archetype.get_unique(session, archetype, compel=True)
+        else:
+            dbarchetype = None
 
         feature_type = "host"
 
@@ -50,19 +52,22 @@ class CommandBindFeature(BrokerCommand):
         if personality:
             dbpersonality = Personality.get_unique(session,
                                                    name=personality,
-                                                   archetype=archetype,
+                                                   archetype=dbarchetype,
                                                    compel=True)
+            if not dbarchetype:
+                dbarchetype = dbpersonality.archetype
+            personalities = [dbpersonality]
+
             params["personality"] = dbpersonality
             if interface:
                 params["interface_name"] = interface
                 feature_type = "interface"
-            dbarchetype = dbpersonality.archetype
-            q = q.filter_by(archetype=dbarchetype)
-            q = q.filter_by(name=personality)
         elif archetype:
-            dbarchetype = Archetype.get_unique(session, archetype, compel=True)
             params["archetype"] = dbarchetype
+
+            q = session.query(Personality)
             q = q.filter_by(archetype=dbarchetype)
+            personalities = q.all()
         else:
             # It's highly unlikely that a feature template would work for
             # _any_ archetype, so disallow this case for now. As I can't
@@ -92,7 +97,6 @@ class CommandBindFeature(BrokerCommand):
         dbfeature = Feature.get_unique(session, name=feature,
                                        feature_type=feature_type, compel=True)
 
-        cnt = q.count()
         if personality:
             if dbpersonality.owner_grn != dbfeature.owner_grn and \
                dbfeature.visibility == 'owner_only':
@@ -104,8 +108,8 @@ class CommandBindFeature(BrokerCommand):
             else:
                 validate_personality_justification(dbpersonality.active_stage,
                                                    user, justification, reason)
-        elif cnt:
-            if not justification:
+        else:
+            if personalities and not justification:
                 raise AuthorizationException("Changing feature bindings for "
                                              "more than just a personality "
                                              "requires --justification.")
@@ -115,7 +119,7 @@ class CommandBindFeature(BrokerCommand):
         session.flush()
 
         plenaries = PlenaryCollection(logger=logger)
-        for dbpersonality in q:
+        for dbpersonality in personalities:
             plenaries.append(Plenary.get_plenary(dbpersonality.active_stage))
 
         written = plenaries.write()
