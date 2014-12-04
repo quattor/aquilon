@@ -69,9 +69,8 @@ class CommandSearchPersonality(BrokerCommand):
         if fullinfo or style != 'raw':
             q = q.options(subqueryload('services'),
                           subqueryload('grns'),
-                          # FIXME: Undo when feature bindings are staged
-                          subqueryload('personality.features'),
-                          joinedload('personality.features.feature'),
+                          subqueryload('features'),
+                          joinedload('features.feature'),
                           joinedload('cluster_infos'))
             return q.all()
         else:

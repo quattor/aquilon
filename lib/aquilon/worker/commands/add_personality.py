@@ -104,9 +104,6 @@ class CommandAddPersonality(BrokerCommand):
             dbstage = dbfrom_vers.copy()
             dbpersona.stages["current"] = dbstage
 
-            for link in dbfrom_persona.features:
-                dbpersona.features.append(link.copy())
-
             q = session.query(PersonalityServiceMap)
             q = q.filter_by(personality=dbfrom_persona)
             for src_map in q:

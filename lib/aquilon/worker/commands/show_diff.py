@@ -61,7 +61,7 @@ class CommandShowDiff(BrokerCommand):
         ret["Parameters"][dtype] = params
 
         # process features
-        features = dict((fl.feature.name, True) for fl in dbpersona.features)
+        features = dict((fl.feature.name, True) for fl in dbstage.features)
         ret["Features"][dtype] = features
 
         # process required_services

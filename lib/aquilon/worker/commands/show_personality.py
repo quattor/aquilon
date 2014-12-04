@@ -50,9 +50,8 @@ class CommandShowPersonality(BrokerCommand):
                       contains_eager('personality.archetype'),
                       subqueryload('services'),
                       subqueryload('grns'),
-                      # FIXME: Undo when feature bindings are staged
-                      subqueryload('personality.features'),
-                      joinedload('personality.features.feature'),
+                      subqueryload('features'),
+                      joinedload('features.feature'),
                       joinedload('cluster_infos'),
                       subqueryload('personality.root_users'),
                       subqueryload('personality.root_netgroups'))

@@ -45,8 +45,8 @@ def get_feature_link(session, feature, model, interface_name, dbstage):
                                    feature_type=feature_type, compel=True)
     dblink = FeatureLink.get_unique(session, feature=dbfeature,
                                     interface_name=interface_name,
-                                    model=dbmodel, personality=dbstage.personality,
-                                    compel=True)
+                                    model=dbmodel,
+                                    personality_stage=dbstage, compel=True)
     return dblink
 
 
@@ -106,12 +106,12 @@ def del_parameter(session, path, param_holder, feature=None, model=None, interfa
 def del_all_feature_parameter(session, dblink):
     # TODO: if the feature is bound to the whole archetype, then we should clean
     # up all personalities here
-    if not dblink or not dblink.personality or \
-       not dblink.personality.active_stage.paramholder or \
+    if not dblink or not dblink.personality_stage or \
+       not dblink.personality_stage.paramholder or \
        not dblink.feature.paramdef_holder:
         return
 
-    parameters = dblink.personality.active_stage.paramholder.parameters
+    parameters = dblink.personality_stage.paramholder.parameters
     for paramdef in dblink.feature.paramdef_holder.param_definitions:
         for dbparam in parameters:
             if paramdef.rebuild_required:
@@ -254,7 +254,6 @@ def search_path_in_personas(session, path, paramdef_holder):
         q = q.join(Personality)
         q = q.filter_by(archetype=paramdef_holder.archetype)
     else:
-        q = q.join(Personality)  # FIXME: Undo when features are staged
         q = q.join(FeatureLink)
         q = q.filter_by(feature=paramdef_holder.feature)
 
@@ -268,7 +267,7 @@ def search_path_in_personas(session, path, paramdef_holder):
                 trypath = []
                 q = session.query(FeatureLink)
                 q = q.filter_by(feature=paramdef_holder.feature,
-                                personality=param_holder.personality_stage.personality)
+                                personality_stage=param_holder.personality_stage)
 
                 for link in q.all():
                     trypath.append(Parameter.feature_path(link, path))

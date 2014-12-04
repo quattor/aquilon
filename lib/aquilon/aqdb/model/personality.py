@@ -158,11 +158,6 @@ class PersonalityStage(Base):
     def root_netgroups(self):
         return self.personality.root_netgroups
 
-    # FIXME: Drop this property when features are staged
-    @property
-    def features(self):
-        return self.personality.features
-
     def copy(self, name="current"):
         session = object_session(self)
 
@@ -174,6 +169,7 @@ class PersonalityStage(Base):
                 new.paramholder.parameters.extend(param.copy()
                                                   for param in self.paramholder.parameters)
 
+            new.features.extend(link.copy() for link in self.features)
             new.services.extend(self.services)
             new.grns.extend(grn_link.copy() for grn_link in self.grns)
 

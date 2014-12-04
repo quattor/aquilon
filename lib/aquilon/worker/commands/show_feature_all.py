@@ -32,7 +32,7 @@ class CommandShowFeatureAll(BrokerCommand):
                       subqueryload('owner_grn'),
                       subqueryload('links'),
                       subqueryload('links.archetype'),
-                      subqueryload('links.personality'),
+                      subqueryload('links.personality_stage'),
                       subqueryload('links.model'))
         q = q.order_by(Feature.feature_type, Feature.post_personality,
                        Feature.name)

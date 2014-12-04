@@ -15,6 +15,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from sqlalchemy.orm import contains_eager
+
 from aquilon.exceptions_ import (ArgumentError, InternalError,
                                  AuthorizationException, UnimplementedError)
 from aquilon.aqdb.model import (Feature, Archetype, Personality,
@@ -56,16 +58,20 @@ class CommandBindFeature(BrokerCommand):
                                                    compel=True)
             if not dbarchetype:
                 dbarchetype = dbpersonality.archetype
-            personalities = [dbpersonality]
+            dbstage = dbpersonality.active_stage
 
-            params["personality"] = dbpersonality
+            personalities = [dbstage]
+
+            params["personality_stage"] = dbstage
             if interface:
                 params["interface_name"] = interface
                 feature_type = "interface"
         elif archetype:
             params["archetype"] = dbarchetype
 
-            q = session.query(Personality)
+            q = session.query(PersonalityStage)
+            q = q.join(Personality)
+            q = q.options(contains_eager('personality'))
             q = q.filter_by(archetype=dbarchetype)
             personalities = q.all()
         else:
@@ -106,8 +112,8 @@ class CommandBindFeature(BrokerCommand):
                                                  "do not match requires --justification.")
                 validate_justification(user, justification, reason)
             else:
-                validate_personality_justification(dbpersonality.active_stage,
-                                                   user, justification, reason)
+                validate_personality_justification(dbstage, user,
+                                                   justification, reason)
         else:
             if personalities and not justification:
                 raise AuthorizationException("Changing feature bindings for "
@@ -119,8 +125,7 @@ class CommandBindFeature(BrokerCommand):
         session.flush()
 
         plenaries = PlenaryCollection(logger=logger)
-        for dbpersonality in personalities:
-            plenaries.append(Plenary.get_plenary(dbpersonality.active_stage))
+        plenaries.extend(map(Plenary.get_plenary, personalities))
 
         written = plenaries.write()
         logger.client_info("Flushed %d/%d templates." %
@@ -131,21 +136,21 @@ class CommandBindFeature(BrokerCommand):
         # Check that the feature templates exist in all affected domains. We
         # don't care about sandboxes, it's the job of sandbox owners to fix
         # them if they break.
-        if "personality" in params:
-            dbpersonality = params["personality"]
-            dbarchetype = dbpersonality.archetype
+        if "personality_stage" in params:
+            dbstage = params["personality_stage"]
+            dbarchetype = dbstage.archetype
         else:
-            dbpersonality = None
+            dbstage = None
             dbarchetype = params["archetype"]
 
         queries = []
         for cls_ in (Host, Cluster):
             q = session.query(Domain)
-            q = q.join(cls_, PersonalityStage)
-            if dbpersonality:
-                q = q.filter_by(personality=dbpersonality)
+            q = q.join(cls_)
+            if dbstage:
+                q = q.filter_by(personality_stage=dbstage)
             else:
-                q = q.join(Personality)
+                q = q.join(PersonalityStage, Personality)
                 q = q.filter_by(archetype=dbarchetype)
             queries.append(q)
 

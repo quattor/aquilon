@@ -251,8 +251,7 @@ class CommandFlush(BrokerCommand):
                 q = session.query(PersonalityStage)
                 q = q.options(joinedload('personality'),
                               subqueryload('grns'),
-                              # FIXME: undo when feature bindings are staged
-                              subqueryload('personality.features'),
+                              subqueryload('features'),
                               joinedload('paramholder'),
                               subqueryload('paramholder.parameters'),
                               subqueryload('personality.root_users'),

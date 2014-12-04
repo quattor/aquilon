@@ -52,7 +52,7 @@ class CommandShowParameterPersonality(BrokerCommand):
                         if value:
                             params.append((param_def.path, param_def, value))
 
-                for link in dbpersonality.features:
+                for link in dbstage.features:
                     if not link.feature.paramdef_holder:
                         continue
                     param_definitions = link.feature.paramdef_holder.param_definitions

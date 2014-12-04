@@ -43,8 +43,8 @@ class FeatureFormatter(ObjectFormatter):
                 opts.append(format(link.model))
             if link.archetype:
                 opts.append(format(link.archetype))
-            if link.personality:
-                opts.append(format(link.personality))
+            if link.personality_stage:
+                opts.append(format(link.personality_stage))
             if link.interface_name:
                 opts.append("Interface %s" % link.interface_name)
 

@@ -154,7 +154,7 @@ class TestBindFeature(TestBrokerCommand):
     def test_111_verify_show_feature(self):
         command = ["show", "feature", "--feature", "post_host", "--type", "host"]
         out = self.commandtest(command)
-        self.matchoutput(out, "Bound to: Personality aquilon/inventory", command)
+        self.matchoutput(out, "Bound to: Personality aquilon/inventory@current", command)
 
     def test_111_verify_show_unittest17(self):
         command = ["show", "host", "--hostname", "unittest17.aqd-unittest.ms.com"]
@@ -189,7 +189,7 @@ class TestBindFeature(TestBrokerCommand):
         self.matchoutput(err,
                          "Warning: host feature pre_host is already bound to "
                          "archetype aquilon; binding it to personality "
-                         "aquilon/inventory is redundant.",
+                         "aquilon/inventory@current is redundant.",
                          command)
         self.matchoutput(err, "Flushed 1/1 templates.", command)
 
@@ -197,7 +197,7 @@ class TestBindFeature(TestBrokerCommand):
         command = ["show", "feature", "--feature", "pre_host", "--type", "host"]
         out = self.commandtest(command)
         self.matchoutput(out, "Bound to: Archetype aquilon", command)
-        self.matchoutput(out, "Bound to: Personality aquilon/inventory", command)
+        self.matchoutput(out, "Bound to: Personality aquilon/inventory@current", command)
 
     def test_122_undo_redundant_personality(self):
         command = ["unbind", "feature", "--feature", "pre_host",
@@ -217,7 +217,7 @@ class TestBindFeature(TestBrokerCommand):
         err = self.statustest(command)
         self.matchoutput(err,
                          "Warning: host feature post_host is bound to "
-                         "personality aquilon/inventory which is now "
+                         "personality aquilon/inventory@current which is now "
                          "redundant; consider removing it.",
                          command)
         self.verify_personality_flush(err, command)
@@ -226,7 +226,7 @@ class TestBindFeature(TestBrokerCommand):
         command = ["show", "feature", "--feature", "post_host", "--type", "host"]
         out = self.commandtest(command)
         self.matchoutput(out, "Bound to: Archetype aquilon", command)
-        self.matchoutput(out, "Bound to: Personality aquilon/inventory", command)
+        self.matchoutput(out, "Bound to: Personality aquilon/inventory@current", command)
 
     def test_127_undo_redundant_archetype(self):
         command = ["unbind", "feature", "--feature", "post_host",
@@ -238,7 +238,7 @@ class TestBindFeature(TestBrokerCommand):
     def test_128_verify_undo(self):
         command = ["show", "feature", "--feature", "post_host", "--type", "host"]
         out = self.commandtest(command)
-        self.matchoutput(out, "Bound to: Personality aquilon/inventory", command)
+        self.matchoutput(out, "Bound to: Personality aquilon/inventory@current", command)
         self.matchclean(out, "Bound to: Archetype aquilon", command)
 
     def test_130_bind_model(self):
@@ -304,7 +304,7 @@ class TestBindFeature(TestBrokerCommand):
         out = self.commandtest(command)
         self.searchoutput(out,
                           r'Interface Feature: src_route$\n'
-                          r'^    Personality: compileserver Archetype: aquilon$\n'
+                          r'^    Personality: compileserver Archetype: aquilon Stage: current$\n'
                           r'^    Interface: eth1$',
                           command)
 
@@ -334,7 +334,7 @@ class TestBindFeature(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out,
                          "Bound to: Model intel/e1000, "
-                         "Personality aquilon/compileserver, "
+                         "Personality aquilon/compileserver@current, "
                          "Interface eth1",
                          command)
 
@@ -414,7 +414,8 @@ class TestBindFeature(TestBrokerCommand):
         command = ["show", "feature", "--feature", "src_route",
                    "--type", "interface"]
         out = self.commandtest(command)
-        self.matchoutput(out, 'Bound to: Personality aquilon/compileserver, '
+        self.matchoutput(out,
+                         'Bound to: Personality aquilon/compileserver@current, '
                          'Interface bond0', command)
 
     def test_161_verify_show_host(self):
@@ -461,9 +462,9 @@ class TestBindFeature(TestBrokerCommand):
     def test_171_verify_show_feature(self):
         command = ["show", "feature", "--feature", "post_host", "--type", "host"]
         out = self.commandtest(command)
-        self.searchoutput(out, r"Bound to: Personality aquilon/inventory$",
+        self.searchoutput(out, r"Bound to: Personality aquilon/inventory@current$",
                           command)
-        self.searchoutput(out, r"Bound to: Personality aquilon/inventory-clone$",
+        self.searchoutput(out, r"Bound to: Personality aquilon/inventory-clone@current$",
                           command)
 
     def test_179_cleanup_clone(self):
