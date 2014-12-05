@@ -499,8 +499,8 @@ class __ClusterAllowedPersonality(Base):
     cluster_id = Column(ForeignKey(Cluster.id, ondelete='CASCADE'),
                         nullable=False)
 
-    personality_id = Column(ForeignKey(Personality.id), nullable=False,
-                            index=True)
+    personality_id = Column(ForeignKey(Personality.id, ondelete='CASCADE'),
+                            nullable=False, index=True)
 
     __table_args__ = (PrimaryKeyConstraint(cluster_id, personality_id),)
 

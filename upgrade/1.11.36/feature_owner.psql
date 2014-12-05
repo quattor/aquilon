@@ -1,0 +1,7 @@
+ALTER TABLE feature ADD owner_eon_id INTEGER;
+ALTER TABLE feature ADD visibility VARCHAR(16);
+ALTER TABLE feature ADD CONSTRAINT feature_owner_grn_fk FOREIGN KEY (owner_eon_id) REFERENCES grn (eon_id);
+UPDATE feature SET owner_eon_id = (SELECT eon_id FROM grn LIMIT 1);
+UPDATE feature set visibility = 'public';
+ALTER TABLE feature ALTER COLUMN owner_eon_id SET NOT NULL;
+ALTER TABLE feature ALTER COLUMN visibility SET NOT NULL;
