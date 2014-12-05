@@ -26,7 +26,7 @@ class DomainFormatter(ObjectFormatter):
     def format_raw(self, domain, indent="", embedded=True,
                    indirect_attrs=True):
         flags = " [autosync]" if domain.autosync else ""
-        details = [indent + "Domain: %s%s" % (domain.name, flags)]
+        details = [indent + "{0:c}: {0.name}{1!s}".format(domain, flags)]
         if domain.tracked_branch:
             details.append(indent +
                            "  Tracking: {0:l}".format(domain.tracked_branch))
@@ -66,12 +66,15 @@ class AuthoredSandbox(object):
     def __getattr__(self, attr):
         return getattr(self.dbsandbox, attr)
 
+    def __format__(self, format_spec):
+        return format(self.dbsandbox, format_spec)
+
 
 class SandboxFormatter(ObjectFormatter):
     def format_raw(self, sandbox, indent="", embedded=True,
                    indirect_attrs=True):
         flags = " [autosync]" if sandbox.autosync else ""
-        details = [indent + "Sandbox: %s%s" % (sandbox.name, flags)]
+        details = [indent + "{0:c}: {0.name}{1!s}".format(sandbox, flags)]
         details.append(indent + "  Validated: %s" % sandbox.is_sync_valid)
         details.append(indent + "  Owner: %s" % sandbox.owner)
         details.append(indent + "  Compiler: %s" % sandbox.compiler)

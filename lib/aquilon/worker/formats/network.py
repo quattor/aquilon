@@ -95,7 +95,7 @@ class NetworkFormatter(ObjectFormatter):
                    indirect_attrs=True):
         netmask = network.netmask
         sysloc = network.location.sysloc()
-        details = [indent + "Network: %s" % network.name]
+        details = [indent + "{0:c}: {0.name}".format(network)]
         details.append(indent + "  {0:c}: {0.name}".format(network.network_environment))
         details.append(indent + "  IP: %s" % network.ip)
         details.append(indent + "  Netmask: %s" % netmask)
@@ -118,8 +118,8 @@ class NetworkFormatter(ObjectFormatter):
 
         for route in sorted(network.static_routes,
                             key=attrgetter('destination', 'gateway_ip')):
-            details.append(indent + "  Static Route: %s gateway %s" %
-                           (route.destination, route.gateway_ip))
+            details.append(indent + "  {0:c}: {0.destination} gateway {0.gateway_ip}"
+                           .format(route))
             if route.personality:
                 details.append(indent + "    {0:c}: {0.name} {1:c}: {1.name}"
                                .format(route.personality,
