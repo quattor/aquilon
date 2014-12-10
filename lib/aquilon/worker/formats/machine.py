@@ -18,14 +18,15 @@
 
 from operator import attrgetter
 
-from aquilon.aqdb.model import Machine, VirtualDisk
+from aquilon.aqdb.model import Machine, VirtualDisk, Host, Cluster
 from aquilon.worker.formats.formatters import ObjectFormatter
 from aquilon.worker.formats.hardware_entity import HardwareEntityFormatter
 
 
 class MachineFormatter(HardwareEntityFormatter):
-    def header_raw(self, machine, details, indent=""):
-        if machine.vm_container:
+    def header_raw(self, machine, details, indent="", embedded=True,
+                   indirect_attrs=True):
+        if machine.vm_container and not embedded:
             details.append(indent + "  Hosted by: {0}"
                            .format(machine.vm_container.holder.holder_object))
 
@@ -47,8 +48,11 @@ class MachineFormatter(HardwareEntityFormatter):
             details.append(indent + "  Auxiliary: %s [%s]" %
                            (", ".join(aux[0]), aux[1]))
 
-    def format_raw(self, machine, indent=""):
-        details = [super(MachineFormatter, self).format_raw(machine, indent)]
+    def format_raw(self, machine, indent="", embedded=True,
+                   indirect_attrs=True):
+        details = [super(MachineFormatter, self)
+                   .format_raw(machine, indent, embedded=embedded,
+                               indirect_attrs=indirect_attrs)]
 
         for slot in machine.chassis_slot:
             details.append(indent + "  {0:c}: {0!s}".format(slot.chassis))
@@ -116,7 +120,8 @@ class MachineFormatter(HardwareEntityFormatter):
                 details.extend([None, None, None])
             yield details
 
-    def fill_proto(self, machine, skeleton):
+    def fill_proto(self, machine, skeleton, embedded=True,
+                   indirect_attrs=True):
         super(MachineFormatter, self).fill_proto(machine, skeleton)
 
         skeleton.cpu = str(machine.cpu.name)
@@ -125,23 +130,33 @@ class MachineFormatter(HardwareEntityFormatter):
         if machine.uri:
             skeleton.uri = machine.uri
 
-        for disk in sorted(machine.disks, key=attrgetter('device_name')):
-            disk_msg = skeleton.disks.add()
-            disk_msg.device_name = str(disk.device_name)
-            disk_msg.capacity = disk.capacity
-            disk_msg.disk_type = str(disk.controller_type)
-            if disk.wwn:
-                disk_msg.wwn = str(disk.wwn)
-            if disk.address:
-                disk_msg.address = str(disk.address)
-            if disk.bus_address:
-                disk_msg.bus_address = str(disk.bus_address)
-            if isinstance(disk, VirtualDisk):
-                if disk.snapshotable is not None:
-                    disk_msg.snapshotable = disk.snapshotable
-                if disk.iops_limit is not None:
-                    disk_msg.iops_limit = disk.iops_limit
-                self.redirect_proto(disk.backing_store,
-                                    disk_msg.backing_store)
+        if indirect_attrs:
+            for disk in sorted(machine.disks, key=attrgetter('device_name')):
+                disk_msg = skeleton.disks.add()
+                disk_msg.device_name = str(disk.device_name)
+                disk_msg.capacity = disk.capacity
+                disk_msg.disk_type = str(disk.controller_type)
+                if disk.wwn:
+                    disk_msg.wwn = str(disk.wwn)
+                if disk.address:
+                    disk_msg.address = str(disk.address)
+                if disk.bus_address:
+                    disk_msg.bus_address = str(disk.bus_address)
+                if isinstance(disk, VirtualDisk):
+                    if disk.snapshotable is not None:
+                        disk_msg.snapshotable = disk.snapshotable
+                    if disk.iops_limit is not None:
+                        disk_msg.iops_limit = disk.iops_limit
+                    self.redirect_proto(disk.backing_store,
+                                        disk_msg.backing_store)
+
+        if machine.vm_container and not embedded:
+            holder = machine.vm_container.holder.holder_object
+            if isinstance(holder, Host):
+                self.redirect_proto(holder, skeleton.vm_host,
+                                    indirect_attrs=False)
+            elif isinstance(holder, Cluster):
+                self.redirect_proto(holder, skeleton.vm_cluster,
+                                    indirect_attrs=False)
 
 ObjectFormatter.handlers[Machine] = MachineFormatter()

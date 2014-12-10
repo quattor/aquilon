@@ -23,7 +23,8 @@ from aquilon.worker.formats.formatters import ObjectFormatter
 
 
 class ServiceFormatter(ObjectFormatter):
-    def format_raw(self, service, indent=""):
+    def format_raw(self, service, indent="", embedded=True,
+                   indirect_attrs=True):
         details = [indent + "Service: %s" % service.name]
         max_clients = service.max_clients
         if max_clients is None:
@@ -46,19 +47,16 @@ class ServiceFormatter(ObjectFormatter):
             details.append(self.redirect_raw(instance, indent + "  "))
         return "\n".join(details)
 
-    def fill_proto(self, service, skeleton):
-        skeleton.name = str(service.name)
-        for si in service.instances:
-            # We can't call redirect_proto(), because ServiceInstanceFormatter
-            # produces a Service message rather than a ServiceInstance message.
-            si_msg = skeleton.serviceinstances.add()
-            si_msg.name = str(si.name)
-            for srv in si.servers:
-                if srv.host:
-                    self.redirect_proto(srv.host, si_msg.servers.add())
-                # TODO: extra IP address/service address information
-                # TODO: cluster-provided services
-            # TODO: make this conditional to avoid performance problems
-            # self.redirect_proto(client.hosts, si_msg.clients)
+    def fill_proto(self, service, skeleton, embedded=True,
+                   indirect_attrs=True):
+        # skeleton can be either NamedServiceInstance or Service, depending on
+        # the caller
+        if skeleton.DESCRIPTOR.name == 'NamedServiceInstance':
+            skeleton.service = str(service.name)
+        else:
+            skeleton.name = str(service.name)
+
+            if indirect_attrs:
+                self.redirect_proto(service.instances, skeleton.serviceinstances)
 
 ObjectFormatter.handlers[Service] = ServiceFormatter()

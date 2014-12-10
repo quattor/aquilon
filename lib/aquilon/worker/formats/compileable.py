@@ -19,7 +19,7 @@ from aquilon.worker.formats.formatters import ObjectFormatter
 
 
 class CompileableFormatter(ObjectFormatter):
-    def fill_proto(self, object, skeleton):
+    def fill_proto(self, object, skeleton, embedded=True, indirect_attrs=True):
         skeleton.status = str(object.status)
         self.redirect_proto(object.personality, skeleton.personality)
         self.redirect_proto(object.branch, skeleton.domain)

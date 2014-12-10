@@ -28,7 +28,8 @@ from aquilon.worker.dbwrappers.feature import interface_features
 
 
 class InterfaceFormatter(ObjectFormatter):
-    def format_raw(self, interface, indent=""):
+    def format_raw(self, interface, indent="", embedded=True,
+                   indirect_attrs=True):
         details = ''
 
         if interface.hardware_entity.host:
@@ -126,6 +127,15 @@ class InterfaceFormatter(ObjectFormatter):
         if interface.comments:
             details.append(indent + "  Comments: %s" % interface.comments)
         return "\n".join(details)
+
+    def fill_proto(self, interface, skeleton, embedded=True,
+                   indirect_attrs=True):
+        if interface.mac:
+            skeleton.mac = str(interface.mac)
+        if interface.bus_address:
+            skeleton.bus_address = str(interface.bus_address)
+        skeleton.bootable = interface.bootable
+        self.redirect_proto(interface.model, skeleton.model)
 
 ObjectFormatter.handlers[Interface] = InterfaceFormatter()
 ObjectFormatter.handlers[PublicInterface] = InterfaceFormatter()

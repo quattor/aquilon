@@ -23,7 +23,8 @@ from aquilon.worker.formats.formatters import ObjectFormatter
 
 
 class PersonalityFormatter(ObjectFormatter):
-    def format_raw(self, personality, indent=""):
+    def format_raw(self, personality, indent="", embedded=True,
+                   indirect_attrs=True):
         description = "Host"
         if personality.is_cluster:
             description = "Cluster"
@@ -87,39 +88,38 @@ class PersonalityFormatter(ObjectFormatter):
                                info.vmhost_overcommit_memory)
         return "\n".join(details)
 
-    def fill_proto(self, personality, skeleton):
+    def fill_proto(self, personality, skeleton, embedded=True,
+                   indirect_attrs=True):
         skeleton.name = str(personality)
-        for service in personality.services:
-            si = skeleton.required_services.add()
-            si.service = service.name
-
-        self.redirect_proto(personality.archetype, skeleton.archetype)
+        self.redirect_proto(personality.archetype, skeleton.archetype,
+                            indirect_attrs=indirect_attrs)
         skeleton.host_environment = str(personality.host_environment)
         skeleton.owner_eonid = personality.owner_eon_id
-
-        features = personality.features[:]
-        features.sort(key=attrgetter("feature.feature_type",
-                                     "feature.post_personality",
-                                     "feature.name"))
-
-        for link in features:
-            feat_msg = skeleton.features.add()
-            self.redirect_proto(link.feature, feat_msg)
-            if link.model:
-                self.redirect_proto(link.model, feat_msg.model)
-            if link.interface_name:
-                feat_msg.interface_name = str(link.interface_name)
 
         if personality.comments:
             skeleton.comments = personality.comments
 
         skeleton.config_override = personality.config_override
         skeleton.cluster_required = personality.cluster_required
-        for grn_rec in sorted(personality.grns,
-                              key=attrgetter("target", "eon_id")):
-            map = skeleton.eonid_maps.add()
-            map.target = grn_rec.target
-            map.eonid = grn_rec.eon_id
+
+        if indirect_attrs:
+            self.redirect_proto(personality.services,
+                                skeleton.required_services,
+                                indirect_attrs=False)
+
+            for link in personality.features:
+                feat_msg = skeleton.features.add()
+                self.redirect_proto(link.feature, feat_msg)
+                if link.model:
+                    self.redirect_proto(link.model, feat_msg.model)
+                if link.interface_name:
+                    feat_msg.interface_name = str(link.interface_name)
+
+            for grn_rec in sorted(personality.grns,
+                                  key=attrgetter("target", "eon_id")):
+                map = skeleton.eonid_maps.add()
+                map.target = grn_rec.target
+                map.eonid = grn_rec.eon_id
 
     def csv_fields(self, obj):
         yield (obj.archetype.name, obj.name,)

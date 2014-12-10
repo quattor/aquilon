@@ -21,30 +21,26 @@ from aquilon.aqdb.model import ServiceMap, PersonalityServiceMap
 
 
 class ServiceMapFormatter(ObjectFormatter):
-    def format_raw(self, sm, indent=""):
+    def format_raw(self, sm, indent="", embedded=True, indirect_attrs=True):
         return indent + \
             "Archetype: aquilon Service: %s Instance: %s Map: %s" % (
                 sm.service.name, sm.service_instance.name, format(sm.mapped_to))
 
-    def fill_proto(self, service_map, skeleton):
+    def fill_proto(self, service_map, skeleton, embedded=True,
+                   indirect_attrs=True):
         if service_map.location:
-            skeleton.location.name = str(service_map.location.name)
-            skeleton.location.location_type = \
-                str(service_map.location.location_type)
+            self.redirect_proto(service_map.location, skeleton.location,
+                                indirect_attrs=False)
         else:
-            skeleton.network.ip = str(service_map.network.ip)
-            skeleton.network.cidr = service_map.network.cidr
-            skeleton.network.netmask = str(service_map.network.netmask)
-            skeleton.network.type = service_map.network.network_type
-            skeleton.network.env_name = \
-                service_map.network.network_environment.name
+            self.redirect_proto(service_map.network, skeleton.network,
+                                indirect_attrs=False)
 
-        self.redirect_proto(service_map.service_instance, skeleton.service)
+        self.redirect_proto(service_map.service_instance, skeleton.service,
+                            indirect_attrs=False)
 
         if hasattr(service_map, "personality"):
-            skeleton.personality.name = str(service_map.personality)
-            skeleton.personality.archetype.name = \
-                str(service_map.personality.archetype.name)
+            self.redirect_proto(service_map.personality, skeleton.personality,
+                                indirect_attrs=False)
         else:
             skeleton.personality.archetype.name = 'aquilon'
 
@@ -52,7 +48,7 @@ ObjectFormatter.handlers[ServiceMap] = ServiceMapFormatter()
 
 
 class PersonalityServiceMapFormatter(ServiceMapFormatter):
-    def format_raw(self, sm, indent=""):
+    def format_raw(self, sm, indent="", embedded=True, indirect_attrs=True):
         return "%sArchetype: %s Personality: %s " \
                "Service: %s Instance: %s Map: %s" % (
                    indent, sm.personality.archetype.name, sm.personality.name,

@@ -91,7 +91,8 @@ def possible_mac_addresses(interface):
 
 
 class NetworkFormatter(ObjectFormatter):
-    def format_raw(self, network, indent=""):
+    def format_raw(self, network, indent="", embedded=True,
+                   indirect_attrs=True):
         netmask = network.netmask
         sysloc = network.location.sysloc()
         details = [indent + "Network: %s" % network.name]
@@ -131,18 +132,24 @@ class NetworkFormatter(ObjectFormatter):
                network.location.sysloc(), network.location.country,
                network.side, network.network_type, network.comments)
 
-    def add_net_data(self, net_msg, net):
-        net_msg.name = str(net.name)
-        net_msg.ip = str(net.ip)
-        net_msg.cidr = net.cidr
-        net_msg.bcast = str(net.broadcast)
-        net_msg.netmask = str(net.netmask)
-        net_msg.side = str(net.side)
-        net_msg.sysloc = str(net.location.sysloc())
-        net_msg.location.name = str(net.location.name)
-        net_msg.location.location_type = str(net.location.location_type)
-        net_msg.type = str(net.network_type)
-        net_msg.env_name = str(net.network_environment.name)
+    def fill_proto(self, net, skeleton, embedded=True, indirect_attrs=True):
+        skeleton.name = str(net.name)
+        skeleton.ip = str(net.ip)
+        skeleton.cidr = net.cidr
+        skeleton.bcast = str(net.broadcast)
+        skeleton.netmask = str(net.netmask)
+        skeleton.side = str(net.side)
+        skeleton.sysloc = str(net.location.sysloc())
+        self.redirect_proto(net.location, skeleton.location,
+                            indirect_attrs=False)
+        skeleton.type = str(net.network_type)
+        skeleton.env_name = str(net.network_environment.name)
+
+        if not indirect_attrs:
+            return
+
+        for router in net.routers:
+            skeleton.routers.append(str(router.ip))
 
         # Bulk load information about anything having a network address on this
         # network
@@ -152,7 +159,9 @@ class NetworkFormatter(ObjectFormatter):
             session = object_session(net)
             q = session.query(HardwareEntity)
             q = q.filter(HardwareEntity.id.in_(hw_ids))
-            q = q.options(subqueryload('interfaces'))
+            q = q.options(subqueryload('interfaces'),
+                          subqueryload('host'),
+                          subqueryload('host.personality'))
             hwent_by_id = {}
             for dbhwent in q.all():
                 hwent_by_id[dbhwent.id] = dbhwent
@@ -172,15 +181,6 @@ class NetworkFormatter(ObjectFormatter):
                     set_committed_value(iface, "master",
                                         iface_by_id.get(iface.master_id, None))
                     set_committed_value(iface, "slaves", slaves_by_id[iface.id])
-
-            # TODO: once we refactor Host to be an FK to HardwareEntity instead
-            # of Machine, this could be converted to a single joinedload('host')
-            q = session.query(Host)
-            q = q.filter(Host.hardware_entity_id.in_(hw_ids))
-            for host in q.all():
-                set_committed_value(hwent_by_id[host.hardware_entity_id], "host", host)
-                set_committed_value(host, "hardware_entity",
-                                    hwent_by_id[host.hardware_entity_id])
 
         # Add interfaces that have addresses in this network
         for addr in net.assignments:
@@ -211,20 +211,20 @@ class NetworkFormatter(ObjectFormatter):
                 mac_addrs = [mac_addrs[0]]
 
             for mac in mac_addrs:
-                host_msg = net_msg.hosts.add()
+                host_msg = skeleton.hosts.add()
 
                 if addr.interface.interface_type == 'management':
                     host_msg.type = 'manager'
                 else:
-                    if hwent.hardware_type == 'machine':
-                        host_msg.type = 'host'
-                        if hwent.host:
-                            host_msg.archetype.name = str(hwent.host.archetype.name)
-                    elif hwent.hardware_type == 'switch':
-                        # aqdhcpd uses the type
-                        host_msg.type = 'tor_switch'
-                    else:
-                        host_msg.type = hwent.hardware_type
+                    host_msg.type = hwent.hardware_type
+                    if hwent.host:
+                        # TODO: deprecate host_msg.archetype
+                        self.redirect_proto(hwent.host.archetype,
+                                            host_msg.archetype,
+                                            indirect_attrs=False)
+                        self.redirect_proto(hwent.host.personality,
+                                            host_msg.personality,
+                                            indirect_attrs=False)
 
                 host_msg.hostname = str(addr.dns_records[0].fqdn.name)
                 host_msg.fqdn = str(addr.dns_records[0].fqdn)
@@ -252,24 +252,11 @@ class NetworkFormatter(ObjectFormatter):
             if not last_ip or dynhost.ip != last_ip + 1:
                 if last_ip:
                     range_msg.end = str(last_ip)
-                range_msg = net_msg.dynamic_ranges.add()
+                range_msg = skeleton.dynamic_ranges.add()
                 range_msg.start = str(dynhost.ip)
             last_ip = dynhost.ip
         if last_ip:
             range_msg.end = str(last_ip)
-
-        # Add dynamic DHCP records - to be deprecated
-        for dynhost in net.dynamic_stubs:
-            host_msg = net_msg.hosts.add()
-            # aqdhcpd uses the type
-            host_msg.type = 'dynamic_stub'
-            host_msg.hostname = str(dynhost.fqdn.name)
-            host_msg.fqdn = str(dynhost.fqdn)
-            host_msg.dns_domain = str(dynhost.fqdn.dns_domain)
-            host_msg.ip = str(dynhost.ip)
-
-    def fill_proto(self, network, skeleton):
-        self.add_net_data(skeleton, network)
 
 ObjectFormatter.handlers[Network] = NetworkFormatter()
 
@@ -283,7 +270,8 @@ class NetworkHostList(list):
 class NetworkHostListFormatter(ListFormatter):
     protocol = "aqdnetworks_pb2"
 
-    def format_raw(self, netlist, indent=""):
+    def format_raw(self, netlist, indent="", embedded=True,
+                   indirect_attrs=True):
         details = []
 
         for network in netlist:
@@ -317,7 +305,7 @@ class SimpleNetworkListFormatter(ListFormatter):
     protocol = "aqdnetworks_pb2"
     fields = ["Network", "IP", "Netmask", "Sysloc", "Country", "Side", "Network Type", "Discoverable", "Discovered", "Comments"]
 
-    def format_raw(self, nlist, indent=""):
+    def format_raw(self, nlist, indent="", embedded=True, indirect_attrs=True):
         details = [indent + "\t".join(self.fields)]
         for network in nlist:
             details.append(indent + str("\t".join([network.name,

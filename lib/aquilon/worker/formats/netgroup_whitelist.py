@@ -22,7 +22,8 @@ from aquilon.aqdb.model import NetGroupWhiteList
 
 class NetGroupWhiteListFormatter(ObjectFormatter):
 
-    def format_raw(self, netgroup, indent=""):
+    def format_raw(self, netgroup, indent="", embedded=True,
+                   indirect_attrs=True):
         details = [indent + "Netgroup: %s" % netgroup]
         return "\n".join(details)
 

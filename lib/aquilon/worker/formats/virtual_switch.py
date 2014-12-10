@@ -22,7 +22,8 @@ from aquilon.aqdb.model import VirtualSwitch
 
 
 class VirtualSwitchFormatter(ObjectFormatter):
-    def format_raw(self, vswitch, indent=""):
+    def format_raw(self, vswitch, indent="", embedded=True,
+                   indirect_attrs=True):
         details = [indent + "{0:c}: {0.name}".format(vswitch)]
         if vswitch.comments:
             details.append(indent + "  Comments: %s" % vswitch.comments)
@@ -30,15 +31,17 @@ class VirtualSwitchFormatter(ObjectFormatter):
             details.append(indent + "  Port Group: %s" % pg.name)
             details.append(indent + "    Network: %s" % pg.network.ip)
 
-        for host in sorted(vswitch.hosts, key=attrgetter("fqdn")):
-            details.append(indent + "  Bound to {0:c}: {0!s}".format(host))
+        if not embedded:
+            for host in sorted(vswitch.hosts, key=attrgetter("fqdn")):
+                details.append(indent + "  Bound to {0:c}: {0!s}".format(host))
 
-        for cluster in sorted(vswitch.clusters, key=attrgetter("name")):
-            details.append(indent + "  Bound to {0:c}: {0!s}".format(cluster))
+            for cluster in sorted(vswitch.clusters, key=attrgetter("name")):
+                details.append(indent + "  Bound to {0:c}: {0!s}".format(cluster))
 
         return "\n".join(details)
 
-    def fill_proto(self, vswitch, skeleton):
+    def fill_proto(self, vswitch, skeleton, embedded=True,
+                   indirect_attrs=True):
         skeleton.name = str(vswitch.name)
         for pg in vswitch.port_groups:
             pg_msg = skeleton.portgroups.add()

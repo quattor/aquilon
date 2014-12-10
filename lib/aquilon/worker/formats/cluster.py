@@ -24,7 +24,8 @@ from aquilon.worker.formats.compileable import CompileableFormatter
 
 
 class ClusterFormatter(CompileableFormatter):
-    def fill_proto(self, cluster, skeleton):
+    def fill_proto(self, cluster, skeleton, embedded=True,
+                   indirect_attrs=True):
         super(ClusterFormatter, self).fill_proto(cluster, skeleton)
 
         skeleton.name = str(cluster.name)
@@ -48,16 +49,11 @@ class ClusterFormatter(CompileableFormatter):
         if cluster.resholder and len(cluster.resholder.resources) > 0:
             self.redirect_proto(cluster.resholder.resources, skeleton.resources)
 
-        for dbsi in cluster.services_used:
-            # Should be just 'services', but that would change the protocol.
-            si = skeleton.aligned_services.add()
-            si.service = dbsi.service.name
-            si.instance = dbsi.name
-
-        for personality in cluster.allowed_personalities:
-            p = skeleton.allowed_personalities.add()
-            p.name = str(personality.name)
-            p.archetype.name = str(personality.archetype.name)
+        self.redirect_proto(cluster.services_used, skeleton.aligned_services,
+                            indirect_attrs=False)
+        self.redirect_proto(cluster.allowed_personalities,
+                            skeleton.allowed_personalities,
+                            indirect_attrs=False)
 
         if isinstance(cluster, EsxCluster):
             caps = cluster.get_total_capacity()
@@ -81,7 +77,8 @@ class ClusterFormatter(CompileableFormatter):
             self.redirect_proto(cluster.virtual_switch,
                                 skeleton.virtual_switch)
 
-    def format_raw(self, cluster, indent=""):
+    def format_raw(self, cluster, indent="", embedded=True,
+                   indirect_attrs=True):
         details = [indent + "{0:c}: {0.name}".format(cluster)]
         if cluster.metacluster:
             details.append(indent +
@@ -118,8 +115,8 @@ class ClusterFormatter(CompileableFormatter):
                 details.append(self.redirect_raw(resource, indent + "    "))
 
         if cluster.virtual_switch:
-            details.append(indent + "  {0:c}: {0!s}"
-                           .format(cluster.virtual_switch))
+            details.append(self.redirect_raw(cluster.virtual_switch,
+                                             indent + "  "))
 
         if isinstance(cluster, EsxCluster):
             details.append(indent + "  Virtual Machine count: %s" %

@@ -28,7 +28,7 @@ from aquilon.worker.dbwrappers.feature import (model_features,
 
 
 class HostFormatter(CompileableFormatter):
-    def fill_proto(self, host, skeleton):
+    def fill_proto(self, host, skeleton, embedded=True, indirect_attrs=True):
         super(HostFormatter, self).fill_proto(host, skeleton)
         skeleton.type = "host"  # Deprecated
         dbhw_ent = host.hardware_entity
@@ -46,7 +46,7 @@ class HostFormatter(CompileableFormatter):
         if host.resholder:
             self.redirect_proto(host.resholder.resources, skeleton.resources)
 
-        if host.cluster:
+        if host.cluster and not embedded:
             skeleton.cluster = host.cluster.name
 
         skeleton.owner_eonid = host.effective_owner_grn.eon_id
@@ -54,15 +54,10 @@ class HostFormatter(CompileableFormatter):
         self.redirect_proto(host.operating_system, skeleton.operating_system)
         self.redirect_proto(dbhw_ent, skeleton.machine)
 
-        for si in host.services_used:
-            srv_msg = skeleton.services_used.add()
-            srv_msg.service = si.service.name
-            srv_msg.instance = si.name
-        for srv in host.services_provided:
-            si = srv.service_instance
-            srv_msg = skeleton.services_provided.add()
-            srv_msg.service = si.service.name
-            srv_msg.instance = si.name
+        self.redirect_proto(host.services_used, skeleton.services_used,
+                            indirect_attrs=False)
+        self.redirect_proto([srv.service_instance for srv in host.services_provided],
+                            skeleton.services_provided, indirect_attrs=False)
 
         for target, eon_id_set in iteritems(host.effective_grns):
             for grn_rec in eon_id_set:
@@ -73,7 +68,7 @@ class HostFormatter(CompileableFormatter):
         if host.virtual_switch:
             self.redirect_proto(host.virtual_switch, skeleton.virtual_switch)
 
-    def format_raw(self, host, indent=""):
+    def format_raw(self, host, indent="", embedded=True, indirect_attrs=True):
         # The 'aq show host' command returns a host object; however, we
         # want to display the information about the hardware entity
         # (machine or network_device) first, so we redirect.  The
@@ -81,7 +76,8 @@ class HostFormatter(CompileableFormatter):
         # redirect_raw_host_details to display the actual host details.
         return self.redirect_raw(host.hardware_entity, indent)
 
-    def format_raw_host_details(self, host, indent=""):
+    def format_raw_host_details(self, host, indent="", embedded=True,
+                                indirect_attrs=True):
         # Subclasses of HardwareEntityFormatter that have an associated
         # host object can call redirect_raw_host_details, which will in
         # turn invoke this method.
@@ -114,7 +110,8 @@ class HostFormatter(CompileableFormatter):
                            "[target: {0.target}]".format(grn_rec))
 
         if host.virtual_switch:
-            details.append(indent + "  {0:c}: {0!s}".format(host.virtual_switch))
+            details.append(self.redirect_raw(host.virtual_switch,
+                                             indent + "  "))
 
         for feature in sorted(model_features(host.hardware_entity.model,
                                              host.archetype, host.personality),
@@ -154,7 +151,8 @@ class GrnHostList(list):
 
 
 class GrnHostListFormatter(ListFormatter):
-    def format_raw(self, shlist, indent=""):
+    def format_raw(self, shlist, indent="", embedded=True,
+                   indirect_attrs=True):
         details = []
         for host in shlist:
             if host.hardware_entity.primary_name:
@@ -178,7 +176,8 @@ class GrnHostListFormatter(ListFormatter):
                                    .format(grn_rec, target, inherited))
         return "\n".join(details)
 
-    def format_proto(self, hostlist, container):
+    def format_proto(self, hostlist, container, embedded=True,
+                     indirect_attrs=True):
         for host in hostlist:
             msg = container.add()
             dbhw_ent = host.hardware_entity
@@ -190,10 +189,8 @@ class GrnHostListFormatter(ListFormatter):
             msg.status = str(host.status.name)
             msg.owner_eonid = host.effective_owner_grn.eon_id
 
-            msg.personality.archetype.name = str(host.archetype)
-            msg.personality.name = str(host.personality)
-            msg.personality.host_environment = str(host.personality.host_environment)
-            msg.personality.owner_eonid = host.personality.owner_eon_id
+            self.redirect_proto(host.personality, msg.personality,
+                                indirect_attrs=False)
 
             # eon id maps TBD need both effective and actual
             for grn_rec in sorted(host.personality.grns,

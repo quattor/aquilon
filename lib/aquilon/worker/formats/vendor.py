@@ -21,7 +21,8 @@ from aquilon.aqdb.model import Vendor
 
 
 class VendorFormatter(ObjectFormatter):
-    def format_raw(self, vendor, indent=""):
+    def format_raw(self, vendor, indent="", embedded=True,
+                   indirect_attrs=True):
         details = [indent + "Vendor: %s" % vendor.name]
         if vendor.comments:
             details.append(indent + "  Comments: %s" % vendor.comments)

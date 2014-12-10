@@ -22,7 +22,7 @@ from aquilon.aqdb.model import User
 
 
 class UserFormatter(ObjectFormatter):
-    def format_raw(self, user, indent=""):
+    def format_raw(self, user, indent="", embedded=True, indirect_attrs=True):
         details = [indent + "User: %s" % user.name]
         details.append(indent + "  UID: %s" % user.uid)
         details.append(indent + "  GID: %s" % user.gid)

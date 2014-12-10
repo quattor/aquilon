@@ -21,7 +21,8 @@ from aquilon.aqdb.model import DnsEnvironment
 
 
 class DnsEnvironmentFormatter(ObjectFormatter):
-    def format_raw(self, dns_environment, indent=""):
+    def format_raw(self, dns_environment, indent="", embedded=True,
+                   indirect_attrs=True):
         details = [indent + "{0:c}: {0!s}".format(dns_environment)]
         if dns_environment.comments:
             details.append(indent + "  Comments: %s" % dns_environment.comments)

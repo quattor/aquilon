@@ -118,6 +118,7 @@ class CommandSearchNetwork(BrokerCommand):
                            joinedload("assignments.interface"),
                            joinedload("assignments.interface.hardware_entity"),
                            joinedload("assignments.dns_records"),
+                           subqueryload("routers"),
                            subqueryload("dynamic_stubs")])
             return q.all()
         return StringAttributeList(q.all(),

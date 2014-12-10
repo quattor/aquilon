@@ -54,8 +54,7 @@ class TestAddWindowsHost(TestBrokerCommand):
         self.matchoutput(out, "Version: generic", command)
         self.searchoutput(out,
                           r'Operating System: windows\s*'
-                          r'Version: generic\s*'
-                          r'Archetype: windows',
+                          r'Version: generic$',
                           command)
 
 

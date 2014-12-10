@@ -25,10 +25,12 @@ from aquilon.worker.formats.hardware_entity import HardwareEntityFormatter
 
 
 class NetworkDeviceFormatter(HardwareEntityFormatter):
-    def header_raw(self, device, details, indent=""):
+    def header_raw(self, device, details, indent="", embedded=True,
+                   indirect_attrs=True):
         details.append(indent + "  Switch Type: %s" % device.switch_type)
 
-    def format_raw(self, device, indent=""):
+    def format_raw(self, device, indent="", embedded=True,
+                   indirect_attrs=True):
         details = [super(NetworkDeviceFormatter, self).format_raw(device, indent)]
 
         ports = defaultdict(list)

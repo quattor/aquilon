@@ -149,31 +149,38 @@ class TestAddFeature(TestBrokerCommand):
         self.matchoutput(out, "Interface Feature: src_route", command)
 
         command = ["show", "feature", "--all", "--format", "proto"]
-        features = self.protobuftest(command)
-        feature = features[0]
+        features = dict((feature.name, feature)
+                        for feature in self.protobuftest(command))
+        self.assertTrue("bios_setup" in features)
+        feature = features["bios_setup"]
         self.assertEqual(feature.name, "bios_setup")
         self.assertEqual(feature.type, "hardware")
         self.assertEqual(feature.owner_eonid, 2)
         self.assertEqual(feature.visibility, feature.PUBLIC)
-        feature = features[1]
+        self.assertTrue("disable_ht" in features)
+        feature = features["disable_ht"]
         self.assertEqual(feature.name, "disable_ht")
         self.assertEqual(feature.visibility, feature.OWNER_APPROVED)
-        feature = features[2]
+        self.assertTrue("pre_host" in features)
+        feature = features["pre_host"]
         self.assertEqual(feature.name, "pre_host")
         self.assertEqual(feature.type, "host")
         self.assertEqual(feature.post_personality, False)
         self.assertEqual(feature.owner_eonid, 2)
-        feature = features[3]
+        self.assertTrue("pre_host_param" in features)
+        feature = features["pre_host_param"]
         self.assertEqual(feature.name, "pre_host_param")
         self.assertEqual(feature.type, "host")
         self.assertEqual(feature.post_personality, False)
         self.assertEqual(feature.owner_eonid, 2)
-        feature = features[4]
+        self.assertTrue("post_host" in features)
+        feature = features["post_host"]
         self.assertEqual(feature.name, "post_host")
         self.assertEqual(feature.type, "host")
         self.assertEqual(feature.post_personality, True)
         self.assertEqual(feature.owner_eonid, 2)
-        feature = features[5]
+        self.assertTrue("src_route" in features)
+        feature = features["src_route"]
         self.assertEqual(feature.name, "src_route")
         self.assertEqual(feature.type, "interface")
         self.assertEqual(feature.owner_eonid, 2)

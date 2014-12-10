@@ -30,7 +30,8 @@ class HostlinkFormatter(ResourceFormatter):
             details.append(indent + "  Group: %s" % hostlink.owner_group)
         return details
 
-    def fill_proto(self, hostlink, skeleton):
+    def fill_proto(self, hostlink, skeleton, embedded=True,
+                   indirect_attrs=True):
         super(HostlinkFormatter, self).fill_proto(hostlink, skeleton)
         skeleton.hostlink.target = hostlink.target
         skeleton.hostlink.owner_user = hostlink.owner_user

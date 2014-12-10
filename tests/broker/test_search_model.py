@@ -63,7 +63,7 @@ class TestSearchModel(TestBrokerCommand):
         command = "show model --model utchassis"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Vendor: aurora_vendor Model: utchassis", command)
-        self.matchoutput(out, "Type: chassis", command)
+        self.matchoutput(out, "Model Type: chassis", command)
 
     def test_200_verify_utchassis_proto(self):
         command = "show model --model utchassis --format proto"
@@ -76,7 +76,7 @@ class TestSearchModel(TestBrokerCommand):
         command = "show model --model utblade"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Vendor: aurora_vendor Model: utblade", command)
-        self.matchoutput(out, "Type: blade", command)
+        self.matchoutput(out, "Model Type: blade", command)
 
     def test_200_verify_utblade_proto(self):
         command = "show model --model utblade --format proto"
@@ -89,7 +89,7 @@ class TestSearchModel(TestBrokerCommand):
         command = "show model --model utmedium"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Vendor: utvendor Model: utmedium", command)
-        self.matchoutput(out, "Type: virtual_machine", command)
+        self.matchoutput(out, "Model Type: virtual_machine", command)
         self.matchoutput(out, "NIC Vendor: utvirt Model: default", command)
 
     def test_200_verify_utmedium_proto(self):
@@ -103,7 +103,7 @@ class TestSearchModel(TestBrokerCommand):
         command = "show model --model utccissmodel"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Vendor: hp Model: utccissmodel", command)
-        self.matchoutput(out, "Type: rackmount", command)
+        self.matchoutput(out, "Model Type: rackmount", command)
         self.matchoutput(out, "MachineSpecs for hp utccissmodel", command)
         self.matchoutput(out, "Cpu: xeon_2500 x 2", command)
         self.matchoutput(out, "Memory: 49152 MB", command)
@@ -122,7 +122,7 @@ class TestSearchModel(TestBrokerCommand):
         command = ["search_model", "--diskcontroller", "cciss", "--fullinfo"]
         out = self.commandtest(command)
         self.matchoutput(out, "Vendor: hp Model: utccissmodel", command)
-        self.matchoutput(out, "Type: rackmount", command)
+        self.matchoutput(out, "Model Type: rackmount", command)
         self.matchoutput(out, "MachineSpecs for hp utccissmodel", command)
         self.matchoutput(out, "Cpu: xeon_2500 x 2", command)
         self.matchoutput(out, "Memory: 49152 MB", command)

@@ -28,7 +28,7 @@ class ApplicationFormatter(ResourceFormatter):
 
         return details
 
-    def fill_proto(self, app, skeleton):
+    def fill_proto(self, app, skeleton, embedded=True, indirect_attrs=True):
         super(ApplicationFormatter, self).fill_proto(app, skeleton)
         skeleton.appdata.eonid = app.eonid
 

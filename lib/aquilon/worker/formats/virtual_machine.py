@@ -22,7 +22,7 @@ from aquilon.aqdb.model import VirtualMachine
 
 
 class VirtualMachineFormatter(ResourceFormatter):
-    def format_raw(self, vm, indent=""):
+    def format_raw(self, vm, indent="", embedded=True, indirect_attrs=True):
         # There will be a lot of VMs attached to a cluster, so be terse.
         dbmachine = vm.machine
         if dbmachine.primary_name:

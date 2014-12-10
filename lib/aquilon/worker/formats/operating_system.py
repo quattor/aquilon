@@ -21,20 +21,22 @@ from aquilon.worker.formats.formatters import ObjectFormatter
 
 
 class OSFormatter(ObjectFormatter):
-    def format_raw(self, os, indent=""):
+    def format_raw(self, os, indent="", embedded=True, indirect_attrs=True):
         details = []
         details.append(indent + "{0:c}: {0.name}".format(os))
         details.append(indent + "  Version: %s" % os.version)
-        details.append(indent + "  Archetype: %s" % os.archetype)
+        if not embedded:
+            details.append(indent + "  Archetype: %s" % os.archetype)
         if os.comments:
             details.append(indent + "  Comments: %s" % os.comments)
 
         return "\n".join(details)
 
-    def fill_proto(self, os, skeleton):
+    def fill_proto(self, os, skeleton, embedded=True, indirect_attrs=True):
         skeleton.name = str(os.name)
         skeleton.version = str(os.version)
         # We don't need the services here, so don't call redirect_proto()
-        skeleton.archetype.name = str(os.archetype.name)
+        self.redirect_proto(os.archetype, skeleton.archetype,
+                            indirect_attrs=False)
 
 ObjectFormatter.handlers[OperatingSystem] = OSFormatter()

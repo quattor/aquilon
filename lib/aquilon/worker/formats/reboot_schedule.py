@@ -29,7 +29,7 @@ class RebootScheduleFormatter(ResourceFormatter):
         details.append(indent + "  Time: {0.time}".format(rs))
         return details
 
-    def fill_proto(self, rs, skeleton):
+    def fill_proto(self, rs, skeleton, embedded=True, indirect_attrs=True):
         super(RebootScheduleFormatter, self).fill_proto(rs, skeleton)
         skeleton.reboot_schedule.week = str(rs.week)
         skeleton.reboot_schedule.day = str(rs.day)

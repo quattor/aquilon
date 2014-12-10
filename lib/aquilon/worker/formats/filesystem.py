@@ -34,7 +34,7 @@ class FilesystemFormatter(ResourceFormatter):
         details.append(indent + "  Virtual Disk Count: %d" % fs.virtual_disk_count)
         return details
 
-    def fill_proto(self, fs, skeleton):
+    def fill_proto(self, fs, skeleton, embedded=True, indirect_attrs=True):
         super(FilesystemFormatter, self).fill_proto(fs, skeleton)
         skeleton.fsdata.mount = fs.mount
         skeleton.fsdata.fstype = str(fs.fstype)

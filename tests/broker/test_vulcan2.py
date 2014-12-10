@@ -433,6 +433,9 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
         self.assertEqual(machine.disks[0].backing_store.name, "test_v2_share")
         self.assertEqual(machine.disks[0].backing_store.type, "share")
         self.assertEqual(machine.disks[0].iops_limit, 20)
+        self.assertEqual(machine.vm_host.fqdn, "")
+        self.assertEqual(machine.vm_cluster.name, "utpgcl0")
+        self.assertEqual(machine.vm_cluster.metacluster, "utmc8")
 
         command = ["show_share", "--resourcegroup=utmc8as1",
                    "--metacluster=utmc8", "--share=test_v2_share"]

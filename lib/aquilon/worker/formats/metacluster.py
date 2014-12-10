@@ -25,7 +25,8 @@ from aquilon.worker.formats.compileable import CompileableFormatter
 
 
 class MetaClusterFormatter(CompileableFormatter):
-    def format_raw(self, metacluster, indent=""):
+    def format_raw(self, metacluster, indent="", embedded=True,
+                   indirect_attrs=True):
         details = [indent + "MetaCluster: %s" % metacluster.name]
         details.append(self.redirect_raw(metacluster.location_constraint,
                                          indent + "  "))
@@ -50,8 +51,8 @@ class MetaClusterFormatter(CompileableFormatter):
                        .format(metacluster.branch, metacluster.authored_branch))
 
         if metacluster.virtual_switch:
-            details.append(indent + "  {0:c}: {0!s}"
-                           .format(metacluster.virtual_switch))
+            details.append(self.redirect_raw(metacluster.virtual_switch,
+                                             indent + "  "))
 
         for dbsi in metacluster.services_used:
             details.append(indent +
@@ -82,7 +83,8 @@ class MetaClusterFormatter(CompileableFormatter):
             details.append(indent + "  Comments: %s" % metacluster.comments)
         return "\n".join(details)
 
-    def fill_proto(self, metacluster, skeleton):
+    def fill_proto(self, metacluster, skeleton, embedded=True,
+                   indirect_attrs=True):
         super(MetaClusterFormatter, self).fill_proto(metacluster, skeleton)
 
         skeleton.name = str(metacluster.name)
@@ -97,15 +99,11 @@ class MetaClusterFormatter(CompileableFormatter):
             self.redirect_proto(metacluster.resholder.resources,
                                 skeleton.resources)
 
-        for dbsi in metacluster.services_used:
-            si = skeleton.services_used.add()
-            si.service = dbsi.service.name
-            si.instance = dbsi.name
-
-        for personality in metacluster.allowed_personalities:
-            p = skeleton.allowed_personalities.add()
-            p.name = str(personality.name)
-            p.archetype.name = str(personality.archetype.name)
+        self.redirect_proto(metacluster.services_used, skeleton.services_used,
+                            indirect_attrs=False)
+        self.redirect_proto(metacluster.allowed_personalities,
+                            skeleton.allowed_personalities,
+                            indirect_attrs=False)
 
         if metacluster.virtual_switch:
             self.redirect_proto(metacluster.virtual_switch,

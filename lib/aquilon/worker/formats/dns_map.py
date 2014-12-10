@@ -22,7 +22,8 @@ from aquilon.aqdb.model import DnsMap
 
 
 class DnsMapFormatter(ObjectFormatter):
-    def format_raw(self, dns_map, indent=""):
+    def format_raw(self, dns_map, indent="", embedded=True,
+                   indirect_attrs=True):
         details = []
         details.append(indent + "{0:c}: {0.name} Map: "
                        "{1}".format(dns_map.dns_domain, dns_map.location))

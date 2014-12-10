@@ -390,8 +390,7 @@ class TestAddVirtualHardware(TestBrokerCommand):
         self.searchoutput(out, r"^  Comments: Windows Virtual Desktop", command)
         self.searchoutput(out,
                           r'Operating System: windows\s*'
-                          r'Version: nt61e\s*'
-                          r'Archetype: windows',
+                          r'Version: nt61e$',
                           command)
         self.searchoutput(out, r"^    Comments: Windows 7 Enterprise \(x86\)",
                           command)
