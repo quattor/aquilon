@@ -205,6 +205,29 @@ class TestUpdatePersonality(VerifyGrnsMixin, TestBrokerCommand):
         self.noouttest(["del_personality", "--personality", "vulcan-1g-clone",
                         "--archetype", "esx_cluster"])
 
+    def test_160_update_comments(self):
+        self.noouttest(["update_personality", "--personality", "utpersonality/dev",
+                        "--archetype", "aquilon",
+                        "--comments", "New personality comments"])
+
+    def test_161_verify_update(self):
+        command = ["show_personality", "--personality=utpersonality/dev",
+                   "--archetype=aquilon"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Personality: utpersonality/dev Archetype: aquilon",
+                         command)
+        self.matchoutput(out, "Comments: New personality comments", command)
+
+    def test_165_clear_comments(self):
+        self.noouttest(["update_personality", "--personality", "utpersonality/dev",
+                        "--archetype", "aquilon", "--comments", ""])
+
+    def test_166_verify_clear(self):
+        command = ["show_personality", "--personality=utpersonality/dev",
+                   "--archetype=aquilon"]
+        out = self.commandtest(command)
+        self.matchclean(out, "Comments", command)
+
     def test_200_invalid_function(self):
         """ Verify that the list of built-in functions is restricted """
         command = ["update_personality", "--personality", "vulcan-1g-desktop-prod",

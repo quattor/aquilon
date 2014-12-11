@@ -189,7 +189,8 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
     def test_1051_reconfigure_unittest02(self):
         basetime = datetime.now()
         command = ["reconfigure", "--hostname", "unittest02.one-nyp.ms.com",
-                   "--buildstatus", "ready", "--grn", "grn:/ms/ei/aquilon/aqd"]
+                   "--buildstatus", "ready", "--grn", "grn:/ms/ei/aquilon/aqd",
+                   "--comments", "New host comments"]
         (out, err) = self.successtest(command)
         self.matchoutput(err,
                          "unittest02.one-nyp.ms.com adding binding for "
@@ -209,6 +210,7 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
         self.matchoutput(out, "Build Status: ready", command)
         self.matchoutput(out, "Advertise Status: True", command)
         self.matchoutput(out, "Owned by GRN: grn:/ms/ei/aquilon/aqd", command)
+        self.matchoutput(out, "Host Comments: New host comments", command)
 
     def test_1055_cat_unittest02_data(self):
         command = "cat --hostname unittest02.one-nyp.ms.com --data"
@@ -282,6 +284,16 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
         self.matchoutput(out,
                          """include { "archetype/final" };""",
                          command)
+
+    def test_1056_clear_comments(self):
+        command = ["reconfigure", "--hostname", "unittest02.one-nyp.ms.com",
+                   "--comments", ""]
+        (out, err) = self.successtest(command)
+
+    def test_1057_verify_comments(self):
+        command = ["show_host", "--hostname", "unittest02.one-nyp.ms.com"]
+        out = self.commandtest(command)
+        self.matchclean(out, "Host Comments", command)
 
     # These settings have not changed - the command should still succeed.
     def test_1060_reconfigur_eunittest00(self):

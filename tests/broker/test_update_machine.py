@@ -66,7 +66,8 @@ class TestUpdateMachine(TestBrokerCommand):
     def test_1010_update_ut3c5n10(self):
         self.noouttest(["update", "machine",
                         "--hostname", "unittest02.one-nyp.ms.com",
-                        "--chassis", "ut3c5.aqd-unittest.ms.com", "--slot", "20"])
+                        "--chassis", "ut3c5.aqd-unittest.ms.com", "--slot", "20",
+                        "--comments", "New machine comments"])
 
     def test_1015_search_slot(self):
         command = "search machine --slot 20 --fullinfo"
@@ -91,6 +92,7 @@ class TestUpdateMachine(TestBrokerCommand):
         self.matchoutput(out, "Cpu: xeon_2660 x 2", command)
         self.matchoutput(out, "Memory: 8192 MB", command)
         self.matchoutput(out, "Serial: 99C5553", command)
+        self.searchoutput(out, "^  Comments: New machine comments", command)
 
     def test_1015_cat_ut3c5n10(self):
         command = "cat --machine ut3c5n10"
@@ -112,6 +114,14 @@ class TestUpdateMachine(TestBrokerCommand):
                           command)
         self.matchoutput(out, '"chassis" = "ut3c5.aqd-unittest.ms.com";', command)
         self.matchoutput(out, '"slot" = 20;', command)
+
+    def test_1016_clear_comments(self):
+        self.noouttest(["update_machine", "--machine", "ut3c5n10", "--comments", ""])
+
+    def test_1017_verify_comments(self):
+        command = ["show_machine", "--machine", "ut3c5n10"]
+        out = self.commandtest(command)
+        self.searchclean(out, "^  Comments", command)
 
     def test_1020_update_ut3c1n4_serial(self):
         self.noouttest(["update", "machine", "--machine", "ut3c1n4",

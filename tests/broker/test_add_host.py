@@ -31,6 +31,7 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
 
     def test_100_add_unittest02(self):
         ip = self.net["unknown0"].usable[0]
+        # DSDB sync uses the machine comments, not the host comments
         self.dsdb_expect_add("unittest02.one-nyp.ms.com", ip, "eth0", ip.mac,
                              comments="Some machine comments")
         osver = self.config.get("unittest", "linux_version_prev")
@@ -39,7 +40,8 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
                         "--machine", "ut3c5n10", "--domain", "unittest",
                         "--buildstatus", "build", "--archetype", "aquilon",
                         "--osname", "linux", "--osversion", osver,
-                        "--personality", "compileserver"])
+                        "--personality", "compileserver",
+                        "--comments", "Some host comments"])
         self.dsdb_verify()
 
     def test_105_verify_unittest02(self):
@@ -59,6 +61,7 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
         self.matchoutput(out, "Operating System: linux", command)
         self.matchoutput(out, "Version: %s" % osver, command)
         self.matchoutput(out, "Advertise Status: False", command)
+        self.matchoutput(out, "Host Comments: Some host comments", command)
 
     def test_105_verify_unittest02_machine(self):
         command = "show machine --machine ut3c5n10"

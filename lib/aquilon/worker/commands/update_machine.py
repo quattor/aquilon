@@ -81,7 +81,7 @@ class CommandUpdateMachine(BrokerCommand):
                chassis, slot, clearchassis, multislot,
                vmhost, cluster, metacluster, allow_metacluster_change,
                cpuname, cpuvendor, cpuspeed, cpucount, memory, ip, uri,
-               remap_disk, **arguments):
+               remap_disk, comments, **arguments):
         dbmachine = Machine.get_unique(session, machine, compel=True)
         oldinfo = DSDBRunner.snapshot_hw(dbmachine)
         old_location = dbmachine.location
@@ -179,6 +179,8 @@ class CommandUpdateMachine(BrokerCommand):
             dbmachine.memory = memory
         if serial is not None:
             dbmachine.serial_no = serial
+        if comments is not None:
+            dbmachine.comments = comments
 
         if ip:
             update_primary_ip(session, logger, dbmachine, ip)

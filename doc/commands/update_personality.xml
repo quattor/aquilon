@@ -45,6 +45,7 @@
 	    <arg choice="opt"><option>--vmhost_capacity_function <replaceable>VMHOST_CAPACITY_FUNCTION</replaceable></option></arg>
 	    <arg choice="opt"><option>--vmhost_overcommit_memory <replaceable>VMHOST_iOVERCOMMIT_MEMORY</replaceable></option></arg>
 	    <arg choice="opt"><option>--host_environment <replaceable>HOST_ENVIRONMENT</replaceable></option></arg>
+	    <arg choice="opt"><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
 	    <arg choice="opt"><option>--justification <replaceable>REASON</replaceable></option></arg>
 	    <arg choice="opt"><option>--reason <replaceable>REASON</replaceable></option></arg>
 	    <xi:include href="../common/global_options.xml"/>
@@ -146,6 +147,17 @@
 		<listitem>
 		    <para>
                         Memory overcommit factor for VM hosts.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--comments <replaceable>COMMENTS</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Change the personality's comments. If <replaceable>COMMENTS</replaceable> is the empty string,
+			then the existing comments are removed.
 		    </para>
 		</listitem>
 	    </varlistentry>

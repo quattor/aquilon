@@ -76,6 +76,12 @@ class TestAddCampus(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "Campus: ta", command)
 
+    def test_200_add_ta_again(self):
+        command = ["add", "campus", "--campus", "ta", "--country", "us",
+                   "--fullname", "Test Campus"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Campus ta already exists.", command)
+
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddCampus)
     unittest.TextTestRunner(verbosity=2).run(suite)

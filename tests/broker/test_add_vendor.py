@@ -63,6 +63,24 @@ class TestAddVendor(TestBrokerCommand):
         self.matchoutput(out, "Vendor: utvendor", command)
         self.matchoutput(out, "Vendor: intel", command)
 
+    def test_400_update_comments(self):
+        self.noouttest(["update_vendor", "--vendor", "utvendor",
+                        "--comments", "New vendor comments"])
+
+    def test_400_verify_update(self):
+        command = "show vendor --vendor utvendor"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Vendor: utvendor", command)
+        self.matchoutput(out, "Comments: New vendor comments", command)
+
+    def test_410_clear_comments(self):
+        self.noouttest(["update_vendor", "--vendor", "utvendor", "--comments", ""])
+
+    def test_415_verify_comments(self):
+        command = "show vendor --vendor utvendor"
+        out = self.commandtest(command.split(" "))
+        self.matchclean(out, "Comments", command)
+
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddVendor)
     unittest.TextTestRunner(verbosity=2).run(suite)

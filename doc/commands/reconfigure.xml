@@ -35,6 +35,7 @@
 	    <arg choice="opt"><option>--archetype <replaceable>ARCHETYPE</replaceable></option></arg>
 	    <arg choice="opt"><option>--personality <replaceable>PERSONALITY</replaceable></option></arg>
 	    <arg choice="opt"><option>--buildstatus <replaceable>BUILDSTATUS</replaceable></option></arg>
+	    <arg choice="opt"><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
 	    <group choice="opt">
 		<arg choice="plain"><option>--grn <replaceable>GRN</replaceable></option></arg>
 		<arg choice="plain"><option>--eon_id <replaceable>EON_ID</replaceable></option></arg>
@@ -236,6 +237,16 @@
 		    <para>
 			This option will not change the behavior of enforcing the
 			service maps for required services.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+		<term>
+		    <option>--comments <replaceable>COMMENTS</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Update the comments field of the host.
 		    </para>
 		</listitem>
 	    </varlistentry>

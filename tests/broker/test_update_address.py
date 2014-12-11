@@ -55,6 +55,19 @@ class TestUpdateAddress(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "arecord15.aqd-unittest.ms.com", command)
 
+    def test_108_clear_comments(self):
+        self.dsdb_expect_update("arecord15.aqd-unittest.ms.com",
+                                comments="")
+        self.noouttest(["update_address",
+                        "--fqdn", "arecord15.aqd-unittest.ms.com",
+                        "--comments", ""])
+        self.dsdb_verify()
+
+    def test_109_verify_comments(self):
+        command = ["show", "fqdn", "--fqdn", "arecord15.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchclean(out, "Comments", command)
+
     def test_110_clear_ptr_override(self):
         command = ["update", "address",
                    "--fqdn", "arecord15.aqd-unittest.ms.com",

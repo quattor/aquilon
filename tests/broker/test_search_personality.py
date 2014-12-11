@@ -82,7 +82,6 @@ class TestSearchPersonality(VerifyGrnsMixin, TestBrokerCommand):
                          command)
         self.matchoutput(out, "Config override: enabled", command)
         self.matchoutput(out, "Environment: dev", command)
-        self.matchoutput(out, "Comments: Some personality comments", command)
         self.matchoutput(out, "Owned by GRN: %s" % self.eon_ids[2], command)
         self.matchoutput(out, "Used by GRN: %s" % self.eon_ids[2], command)
         self.matchclean(out, "inventory", command)
