@@ -131,15 +131,11 @@ class TestAddSrvRecord(TestBrokerCommand):
                          command)
 
     def test_340_reservedname(self):
-        command = ["add", "srv", "record", "--service", "ldap",
-                   "--protocol", "badproto", "--dns_domain", "aqd-unittest.ms.com",
+        command = ["add", "srv", "record", "--service", "ldap-reserved",
+                   "--protocol", "udp", "--dns_domain", "aqd-unittest.ms.com",
                    "--target", "nyaqd1.ms.com",
                    "--port", 389, "--priority", 10, "--weight", 20]
-        out = self.badrequesttest(command)
-        self.matchoutput(out,
-                         "The target of an SRV record must resolve to one or "
-                         "more addresses.",
-                         command)
+        self.noouttest(command)
 
     def test_350_restricted(self):
         command = ["add", "srv", "record", "--service", "ldap",
@@ -162,6 +158,17 @@ class TestAddSrvRecord(TestBrokerCommand):
                          "tcp in DNS domain aqd-unittest.ms.com not found.",
                          command)
 
+    def test_370_restricted_target(self):
+        command = ["add", "srv", "record", "--service", "ldap-restrict",
+                   "--protocol", "tcp",
+                   "--dns_domain", "aqd-unittest.ms.com",
+                   "--target", "ldap.restrict.aqd-unittest.ms.com",
+                   "--port", 389, "--priority", 10, "--weight", 20]
+        out = self.statustest(command)
+        self.matchoutput(out,
+                         "WARNING: Will create a reference to "
+                         "ldap.restrict.aqd-unittest.ms.com, but ",
+                         command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddSrvRecord)

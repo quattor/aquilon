@@ -60,6 +60,21 @@ class TestDelSrvRecord(TestBrokerCommand):
                    "--protocol", "tcp", "--dns_domain", "aqd-unittest.ms.com"]
         self.noouttest(command)
 
+    def test_145_del_restricted_target(self):
+        command = ["del", "srv", "record", "--service", "ldap-restrict",
+                   "--protocol", "tcp", "--dns_domain", "aqd-unittest.ms.com"]
+        self.noouttest(command)
+
+    def test_146_verify_target_gone(self):
+        command = ["search", "dns", "--fullinfo",
+                   "--fqdn", "ldap.restrict.aqd-unittest.ms.com"]
+        self.notfoundtest(command)
+
+    def test_147_del_reserved_target(self):
+        command = ["del", "srv", "record", "--service", "ldap-reserved",
+                   "--protocol", "udp", "--dns_domain", "aqd-unittest.ms.com"]
+        self.noouttest(command)
+
     def test_150_verify_allgone(self):
         command = ["search", "dns", "--record_type", "srv"]
         self.noouttest(command)

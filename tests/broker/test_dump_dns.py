@@ -64,6 +64,12 @@ class TestDumpDns(TestBrokerCommand):
         self.matchoutput(out,
                          r":_kerberos._tcp.aqd-unittest.ms.com:33:\000\012\000\024\000\130\011arecord15\014aqd-unittest\002ms\003com\000",
                          command)
+        self.matchoutput(out,
+                         r":_ldap-restrict._tcp.aqd-unittest.ms.com:33:\000\012\000\024\001\205\004ldap\010restrict\014aqd-unittest\002ms\003com\000",
+                         command)
+        self.matchoutput(out,
+                         r":_ldap-reserved._udp.aqd-unittest.ms.com:33:\000\012\000\024\001\205\006nyaqd1\002ms\003com\000",
+                         command)
         self.matchclean(out, "utcolo", command)
 
     def test_djb_domain(self):
@@ -122,6 +128,14 @@ class TestDumpDns(TestBrokerCommand):
         self.matchoutput(out,
                          "_kerberos._tcp.aqd-unittest.ms.com.\tIN\tSRV\t"
                          "10 20 88 arecord15.aqd-unittest.ms.com.",
+                         command)
+        self.matchoutput(out,
+                         "_ldap-restrict._tcp.aqd-unittest.ms.com.\tIN\tSRV\t"
+                         "10 20 389 ldap.restrict.aqd-unittest.ms.com.",
+                         command)
+        self.matchoutput(out,
+                         "_ldap-reserved._udp.aqd-unittest.ms.com.\tIN\tSRV\t"
+                         "10 20 389 nyaqd1.ms.com.",
                          command)
         self.matchclean(out, "utcolo", command)
 
