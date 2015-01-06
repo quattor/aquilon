@@ -151,14 +151,14 @@ class TestAddRebootSchedule(TestBrokerCommand):
                    "--week=1,3,5", "--day=Sun", "--time=08:00",
                    "--hostname=server1.aqd-unittest.ms.com"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "Key 'week' contains an invalid value. Valid values are (1|2|3|4).", command)
+        self.matchoutput(out, "Key 'week' contains an invalid value. Valid values are (1|2|3|4|all).", command)
 
     def test_250_add_schedule_fail(self):
         command = ["add_reboot_schedule",
                    "--week=5", "--day=Sun", "--time=08:00",
                    "--hostname=server1.aqd-unittest.ms.com"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "Key 'week' contains an invalid value. Valid values are (1|2|3|4).", command)
+        self.matchoutput(out, "Key 'week' contains an invalid value. Valid values are (1|2|3|4|all).", command)
 
     def test_260_add_schedule_fail(self):
         command = ["add_reboot_schedule",
