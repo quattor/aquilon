@@ -30,6 +30,7 @@ from aquilon.worker.templates import Plenary, PlenaryCollection
 class CommandMapGrn(BrokerCommand):
 
     required_parameters = ["target"]
+    require_usable_grn = True
 
     def _update_dbobj(self, obj, target, grn, mapcls):
         # Don't add twice the same tuple
@@ -43,7 +44,8 @@ class CommandMapGrn(BrokerCommand):
                membersof, personality, archetype, justification, reason,
                user, **arguments):
         dbgrn = lookup_grn(session, grn, eon_id, logger=logger,
-                           config=self.config)
+                           config=self.config,
+                           usable_only=self.require_usable_grn)
 
         plenaries = PlenaryCollection(logger=logger)
 
