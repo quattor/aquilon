@@ -26,7 +26,7 @@ from aquilon.exceptions_ import ArgumentError, AquilonError, NotFoundException
 from aquilon.aqdb.model import (Fqdn, DnsDomain, DnsRecord, ARecord,
                                 DynamicStub, Alias, ReservedName, SrvRecord,
                                 DnsEnvironment, AddressAssignment,
-                                NetworkEnvironment)
+                                NetworkEnvironment, AddressAlias)
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.worker.dbwrappers.interface import check_ip_restrictions
@@ -380,9 +380,10 @@ def delete_target_if_needed(session, dbtarget):
     # Check if the FQDN is still the target of an existing alias, service record
     # or reverse PTR record
     q = session.query(DnsRecord)
-    q = q.with_polymorphic([ARecord, Alias, SrvRecord])
+    q = q.with_polymorphic([ARecord, Alias, AddressAlias, SrvRecord])
     q = q.filter(or_(ARecord.reverse_ptr_id == dbtarget.id,
                      Alias.target_id == dbtarget.id,
+                     AddressAlias.target_id == dbtarget.id,
                      SrvRecord.target_id == dbtarget.id))
     q = q.options(lazyload('fqdn'))
     if not q.count():
