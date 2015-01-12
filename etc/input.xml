@@ -4473,6 +4473,48 @@
 	<transport method="delete" path="alias/%(fqdn)s"/>
     </command>
 
+    <command name="add_address_alias">
+	Add DNS address aliases to one or multiple addresses.
+	<optgroup mandatory="True" fields="all">
+	    <option name="fqdn" type="string">A fully qualified domain name</option>
+	    <option name="target" type="string">The target of the A-Record</option>
+	</optgroup>
+	<optgroup>
+	    <option name="comments" type="string">Comments</option>
+	    <option name="dns_environment" type="string">The name of the environment the address is in (defaults to 'internal')</option>
+	    <option name="target_environment" type="string">The name of the environment the target is in (defaults to be the same as the alias environment)</option>
+	</optgroup>
+	<transport method="put" path="address_alias/%(fqdn)s"/>
+    </command>
+
+    <command name="del_address_alias">
+	Delete DNS address aliases.
+	<optgroup mandatory="True" fields="all">
+	    <option name="fqdn" type="string">The fully qualified domain name</option>
+	</optgroup>
+	<optgroup>
+	    <option name="target" type="string">The target of the A-Record</option>
+	    <option name="dns_environment" type="string">The name of the environment the address is in (defaults to 'internal')</option>
+	    <option name="target_environment" type="string">The name of the environment the target is in (defaults to be the same as the alias environment)</option>
+	</optgroup>
+	<transport method="delete" path="address_alias/%(fqdn)s"/>
+    </command>
+
+    <command name="update_address_alias">
+	Update DNS address aliases.
+	<optgroup mandatory="True" fields="all">
+	    <option name="fqdn" type="string">The fully qualified domain name</option>
+	    <option name="target" type="string">The target of the A-Record</option>
+	</optgroup>
+	<optgroup>
+	    <option name="comments" type="string">Comments</option>
+	    <option name="dns_environment" type="string">The name of the environment the address is in (defaults to 'internal')</option>
+	    <option name="target_environment" type="string">The name of the environment the target is in (defaults to be the same as the alias environment)</option>
+	</optgroup>
+	<transport method="post" path="address_alias/%(fqdn)s"/>
+    </command>
+
+
     <command name="show_alias">
 	Show an alias in the DNS.
 	<optgroup mandatory="True" fields="all">

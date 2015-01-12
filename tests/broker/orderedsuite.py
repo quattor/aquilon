@@ -96,6 +96,7 @@ from .test_add_interface import TestAddInterface
 from .test_add_address import TestAddAddress
 from .test_add_alias import TestAddAlias
 from .test_add_srv_record import TestAddSrvRecord
+from .test_add_address_alias import TestAddAddressAlias
 from .test_add_dynamic_range import TestAddDynamicRange
 from .test_add_host import TestAddHost
 from .test_add_aquilon_host import TestAddAquilonHost
@@ -184,6 +185,7 @@ from .test_split_merge_network import TestSplitMergeNetwork
 from .test_update_alias import TestUpdateAlias
 from .test_update_address import TestUpdateAddress
 from .test_update_srv_record import TestUpdateSrvRecord
+from .test_update_address_alias import TestUpdateAddressAlias
 from .test_update_interface import TestUpdateInterface
 from .test_update_machine import TestUpdateMachine
 from .test_update_model import TestUpdateModel
@@ -210,6 +212,7 @@ from .test_del_static_route import TestDelStaticRoute
 from .test_del_dynamic_range import TestDelDynamicRange
 from .test_del_alias import TestDelAlias
 from .test_del_srv_record import TestDelSrvRecord
+from .test_del_address_alias import TestDelAddressAlias
 from .test_del_address import TestDelAddress
 from .test_del_city import TestDelCity
 from .test_del_campus import TestDelCampus
@@ -327,6 +330,7 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestAddServiceAddress,
                      TestRenameNetworkDevice, TestDiscoverNetworkDevice,
                      TestAddAlias, TestAddSrvRecord,
+                     TestAddAddressAlias,
                      TestMapService, TestBindClient, TestPrebindServer,
                      TestServiceConstraints,
                      TestVulcanLocalDisk,
@@ -379,6 +383,7 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestUpdateDisk,
                      TestUpdateRack,
                      TestUpdateAlias, TestUpdateSrvRecord, TestUpdateAddress,
+                     TestUpdateAddressAlias,
                      TestBindFeature, TestUnbindFeature,
                      TestRefreshNetwork, TestUpdateNetwork, TestSplitMergeNetwork,
                      TestNetworkConstraints,
@@ -400,6 +405,7 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestDelStaticRoute,
                      TestDelServiceAddress, TestDelInterfaceAddress,
                      TestDelDynamicRange, TestDelAlias, TestDelSrvRecord,
+                     TestDelAddressAlias,
                      TestDelAddress, TestDelNSRecord,
                      TestDelManager, TestDelAuxiliary, TestDelWindowsHost, TestDelHost,
                      TestDelInterface, TestDelDisk, TestDelMachine, TestDelChassis,

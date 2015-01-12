@@ -74,6 +74,10 @@ def delete_dns_record(dbdns_rec, locked=False, verify_assignments=False):
         raise ArgumentError("{0} is still in use by SRV records, delete them "
                             "first.".format(dbdns_rec))
 
+    if dbdns_rec.address_aliases:
+        raise ArgumentError("{0} still has address aliases, delete them "
+                            "first.".format(dbdns_rec))
+
     # Do not allow deleting the DNS record if the IP address is still in
     # use - except if there are other DNS records having the same
     # address. Don't perform the test though if the caller is about to change
