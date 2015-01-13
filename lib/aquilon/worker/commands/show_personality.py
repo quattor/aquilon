@@ -50,6 +50,8 @@ class CommandShowPersonality(BrokerCommand):
                       subqueryload('grns'),
                       subqueryload('features'),
                       joinedload('features.feature'),
-                      joinedload('cluster_infos'))
+                      joinedload('cluster_infos'),
+                      subqueryload('root_users'),
+                      subqueryload('root_netgroups'))
 
         return q.all()

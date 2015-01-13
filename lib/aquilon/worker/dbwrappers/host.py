@@ -153,15 +153,18 @@ def remove_host(logger, dbhw, plenaries, remove_plenaries):
     dbhw.host = None
 
 
-def hostname_to_host(session, hostname):
+def hostname_to_host(session, hostname, query_options=None):
     # When the user asked for a host, returning "machine not found" does not
     # feel to be the right error message, even if it is technically correct.
     # It's a little tricky though: we don't want to suppress "dns domain not
     # found"
     parse_fqdn(session, hostname)
     try:
+        if not query_options:
+            query_options = [joinedload('host'),
+                             undefer('host.comments')]
         dbmachine = HardwareEntity.get_unique(session, hostname, compel=True,
-                                              query_options=[joinedload('host')])
+                                              query_options=query_options)
     except NotFoundException:
         raise NotFoundException("Host %s not found." % hostname)
 

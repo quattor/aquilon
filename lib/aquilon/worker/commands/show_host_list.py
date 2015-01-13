@@ -26,7 +26,8 @@ from aquilon.worker.dbwrappers.host import (hostlist_to_hosts,
 class CommandShowHostList(BrokerCommand):
 
     def render(self, session, list, **arguments):
-        options = [joinedload('personality'),
+        options = [undefer('comments'),
+                   joinedload('personality'),
                    undefer('personality.archetype.comments'),
                    subqueryload('personality.grns'),
                    subqueryload('grns'),

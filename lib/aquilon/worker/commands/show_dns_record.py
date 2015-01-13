@@ -16,6 +16,8 @@
 # limitations under the License.
 """Contains the logic for `aq show dns record`."""
 
+from sqlalchemy.orm import undefer, lazyload
+from sqlalchemy.orm.attributes import set_committed_value
 
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.exceptions_ import NotFoundException
@@ -63,6 +65,8 @@ class CommandShowDnsRecord(BrokerCommand):
         # query(DnsRecord).filter_by(record_type='a_record'), because the former
         # works for DynamicStub as well
         q = session.query(cls)
+        q = q.options(undefer('comments'),
+                      lazyload('fqdn'))
         if cls == DnsRecord:
             q = q.with_polymorphic('*')
         q = q.filter_by(fqdn=dbfqdn)
@@ -70,4 +74,7 @@ class CommandShowDnsRecord(BrokerCommand):
         if not result:
             raise NotFoundException("%s %s not found." %
                                     (cls._get_class_label(), fqdn))
+
+        for res in result:
+            set_committed_value(res, 'fqdn', dbfqdn)
         return result

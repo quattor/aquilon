@@ -46,7 +46,8 @@ class CommandShowMachineMachine(BrokerCommand):
                    joinedload('chassis_slot.chassis'),
                    subqueryload('disks'),
                    undefer('disks.comments'),
-                   joinedload('host')]
+                   joinedload('host'),
+                   undefer('host.comments')]
         dbmachine = Machine.get_unique(session, machine, compel=True,
                                        query_options=options)
         return dbmachine

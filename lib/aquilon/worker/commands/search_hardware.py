@@ -16,7 +16,7 @@
 # limitations under the License.
 """Contains the logic for `aq search hardware`."""
 
-from sqlalchemy.orm import subqueryload, joinedload
+from sqlalchemy.orm import subqueryload, joinedload, undefer
 
 from aquilon.aqdb.model import HardwareEntity
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
@@ -32,7 +32,11 @@ class CommandSearchHardware(BrokerCommand):
     def render(self, session, fullinfo, style, **arguments):
         if fullinfo or style != "raw":
             q = search_hardware_entity_query(session, HardwareEntity, **arguments)
-            q = q.options(joinedload('location'),
+            q = q.options(undefer('comments'),
+                          subqueryload('host'),
+                          undefer('host.comments'),
+                          joinedload('host.personality'),
+                          joinedload('location'),
                           subqueryload('interfaces'),
                           joinedload('interfaces.assignments'),
                           joinedload('interfaces.assignments.dns_records'))
