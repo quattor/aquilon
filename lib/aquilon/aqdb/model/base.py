@@ -23,6 +23,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm.session import Session, object_session
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
+from sqlalchemy.orm.attributes import set_committed_value
 from sqlalchemy.inspection import inspect
 
 from aquilon.exceptions_ import InternalError, NotFoundException, ArgumentError
@@ -223,6 +224,7 @@ class Base(object):
         fields = table.info['unique_fields'][:]
         if 'extra_search_fields' in table.info:
             fields.extend(table.info['extra_search_fields'])
+        attr_cache = {}
         for field in fields:
             value = kwargs.pop(field, None)
             if value is None:
@@ -235,6 +237,7 @@ class Base(object):
                 if not isinstance(value, rel.argument):
                     value = rel.argument.get_unique(session, value,
                                                     compel=compel)
+                attr_cache[field] = value
 
             # filter_by() would be simpler but it would not allow querying just
             # one column
@@ -259,7 +262,7 @@ class Base(object):
         if kwargs:
             raise InternalError("Class %s: Extra arguments to %s(): %s." %
                                 (cls.__name__, caller, kwargs))
-        return (query, clslabel, desc)
+        return (query, attr_cache, clslabel, desc)
 
     @classmethod
     def get_unique(cls, session, *args, **kwargs):
@@ -270,8 +273,10 @@ class Base(object):
         query = session.query(cls)
         if options:
             query = query.options(*options)
-        (query, clslabel, desc) = cls._selection_helper(session, query, *args,
-                                                        **kwargs)
+        (query, attr_cache, clslabel, desc) = cls._selection_helper(session,
+                                                                    query,
+                                                                    *args,
+                                                                    **kwargs)
         try:
             obj = query.one()
             if preclude:
@@ -280,6 +285,11 @@ class Base(object):
                 msg = "%s %s already exists." % (obj._get_class_label(),
                                                  ", ".join(desc))
                 _raise_custom(preclude, ArgumentError, msg)
+
+            # If we've looked up an attribute recursively, then don't throw it
+            # away
+            for rel, value in attr_cache.items():
+                set_committed_value(obj, rel, value)
             return obj
         except NoResultFound:
             if not compel:
@@ -298,8 +308,10 @@ class Base(object):
         query = session.query(cls.__table__.c.id)
         if options:
             query = query.options(*options)
-        (query, clslabel, desc) = cls._selection_helper(session, query, *args,
-                                                        **kwargs)
+        (query, attr_cache, clslabel, desc) = cls._selection_helper(session,
+                                                                    query,
+                                                                    *args,
+                                                                    **kwargs)
         if compel:
             obj = query.first()
             if obj is None:
