@@ -1,0 +1,1 @@
+ALTER TABLE dns_domain MODIFY name VARCHAR(64);
