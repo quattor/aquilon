@@ -30,7 +30,7 @@ PPROD = "justify-prod"
 QPROD = "justify-qa"
 AUTHERR = "Personality aquilon/%s is marked production and is under change management control. Please specify --justification or --justification='emergency' and reason."
 AUTHERR2 = "Justification of 'emergency' requires --reason to be specified."
-AUTHERR3 = "Changing feature bindings for a non public feature where owner grns do not match requires --justification."
+AUTHERR3 = "Changing feature bindings for a owner_only feature where owner grns do not match requires --justification."
 
 
 class TestJustification(PersonalityTestMixin, TestBrokerCommand):
@@ -589,24 +589,17 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
     def test_810_bind_feature_restricted_qa(self):
         command = ["bind", "feature", "--feature", "nonpublicfeature",
                    "--archetype", "aquilon", "--personality", QPROD]
-        out = self.unauthorizedtest(command, auth=True, msgcheck=False)
-        self.matchoutput(out, AUTHERR3, command)
-
-        command = ["bind", "feature", "--feature", "nonpublicfeature",
-                   "--archetype", "aquilon", "--personality", QPROD,
-                   "--justification", "tcm=12345678"]
         out = self.successtest(command)
 
         command = ["unbind", "feature", "--feature", "nonpublicfeature",
-                   "--archetype", "aquilon", "--personality", QPROD,
-                   "--justification", "tcm=12345678"]
+                   "--archetype", "aquilon", "--personality", QPROD]
         out = self.successtest(command)
 
     def test_820_bind_feature_restricted_prod(self):
         command = ["bind", "feature", "--feature", "nonpublicfeature",
                    "--archetype", "aquilon", "--personality", PPROD]
         out = self.unauthorizedtest(command, auth=True, msgcheck=False)
-        self.matchoutput(out, AUTHERR3, command)
+        self.matchoutput(out, AUTHERR % PPROD, command)
 
         command = ["bind", "feature", "--feature", "nonpublicfeature",
                    "--archetype", "aquilon", "--personality", PPROD,

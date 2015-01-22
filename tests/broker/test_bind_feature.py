@@ -28,6 +28,7 @@ aquilon_hosts = None
 aquilon_personalities = None
 inventory_hosts = None
 hs21_hosts = None
+AUTHERR = "Changing feature bindings for a owner_only feature where owner grns do not match requires --justification."
 
 hardware_feature_str = r'include {\n'
 r'\s*if ((value("/hardware/manufacturer") == "ibm") &&\n'
@@ -289,11 +290,7 @@ class TestBindFeature(TestBrokerCommand):
                    "--model", "e1000", "--vendor", "intel",
                    "--personality", "compileserver", "--interface", "eth1"]
         out = self.unauthorizedtest(command, auth=True, msgcheck=False)
-        self.matchoutput(out,
-                         "Unauthorized: Changing feature bindings for a "
-                         "non public feature where owner grns do not "
-                         "match requires --justification.",
-                         command)
+        self.matchoutput(out, AUTHERR, command)
 
         command = ["bind", "feature", "--feature", "src_route",
                    "--model", "e1000", "--vendor", "intel",
@@ -376,11 +373,7 @@ class TestBindFeature(TestBrokerCommand):
         command = ["bind", "feature", "--feature", "src_route",
                    "--personality", "compileserver", "--interface", "bond0"]
         out = self.unauthorizedtest(command, auth=True, msgcheck=False)
-        self.matchoutput(out,
-                         "Unauthorized: Changing feature bindings for a "
-                         "non public feature where owner grns do not "
-                         "match requires --justification.",
-                         command)
+        self.matchoutput(out, AUTHERR, command)
 
         command = ["bind", "feature", "--feature", "src_route",
                    "--personality", "compileserver", "--interface", "bond0",
