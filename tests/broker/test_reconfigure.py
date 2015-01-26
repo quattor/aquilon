@@ -511,17 +511,18 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
         self.matchoutput(out, "evh3.aqd-unittest.ms.com", command)
         self.matchoutput(out, "evh4.aqd-unittest.ms.com", command)
 
-    # This doesn't work since the manage test comes after this one.
-    # Note that these are template domains and not dns domains.
-#   def testhostlistdomains(self):
-#       hosts = ["unittest02.one-nyp.ms.com",
-#                "aquilon91.aqd-unittest.ms.com"]
-#       scratchfile = self.writescratch("diffdomains", "\n".join(hosts))
-#       command = ["reconfigure", "--list", scratchfile]
-#       out = self.badrequesttest(command)
-#       self.matchoutput(out, "All hosts must be in the same domain:", command)
-#       self.matchoutput(out, "1 hosts in domain changetest1", command)
-#       self.matchoutput(out, "1 hosts in domain unittest", command)
+    def testhostlistdomains(self):
+        hosts = ["unittest02.one-nyp.ms.com",
+                 "server1.aqd-unittest.ms.com",
+                 "server2.aqd-unittest.ms.com",
+                 "evh1.aqd-unittest.ms.com",
+                 "aquilon91.aqd-unittest.ms.com"]
+        scratchfile = self.writescratch("diffdomains", "\n".join(hosts))
+        command = ["reconfigure", "--list", scratchfile]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "All hosts must be in the same domain or sandbox:", command)
+        self.matchoutput(out, "3 hosts in sandbox %s/utsandbox" % self.user, command)
+        self.matchoutput(out, "2 hosts in domain unittest", command)
 
     def testhostlistcamelcase(self):
         hosts = ["Aquilon91.Aqd-Unittest.ms.com"]
