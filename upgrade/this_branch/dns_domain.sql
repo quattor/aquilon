@@ -1,0 +1,4 @@
+ALTER TABLE dns_domain MODIFY name VARCHAR2(64);
+
+COMMIT;
+QUIT;

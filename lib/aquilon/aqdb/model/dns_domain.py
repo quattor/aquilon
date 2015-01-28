@@ -60,7 +60,7 @@ class DnsDomain(Base):
     _name_check = re.compile('^[a-zA-Z]([-a-zA-Z0-9]*[a-zA-Z0-9])?$')
 
     id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
-    name = Column(AqStr(32), nullable=False, unique=True)
+    name = Column(AqStr(64), nullable=False, unique=True)
 
     restricted = Column(Boolean(name="%s_restricted_ck" % _TN),
                         nullable=False, default=False)
