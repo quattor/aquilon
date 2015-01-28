@@ -19,6 +19,7 @@
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Fqdn, SrvRecord, DnsDomain, DnsEnvironment
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.dbwrappers.dns import create_target_if_needed
 
 
 class CommandAddSrvRecord(BrokerCommand):
@@ -26,8 +27,8 @@ class CommandAddSrvRecord(BrokerCommand):
     required_parameters = ["service", "protocol", "dns_domain",
                            "priority", "weight", "target", "port"]
 
-    def render(self, session, service, protocol, dns_domain, priority, weight,
-               target, port, dns_environment, comments, **kwargs):
+    def render(self, session, logger, service, protocol, dns_domain, priority,
+               weight, target, port, dns_environment, comments, **kwargs):
         dbdns_env = DnsEnvironment.get_unique_or_default(session,
                                                          dns_environment)
         dbdns_domain = DnsDomain.get_unique(session, dns_domain, compel=True)
@@ -45,7 +46,7 @@ class CommandAddSrvRecord(BrokerCommand):
         service = service.strip().lower()
         target = target.strip().lower()
 
-        dbtarget = Fqdn.get_unique(session, target, compel=True)
+        dbtarget = create_target_if_needed(session, logger, target, dbdns_env)
         dbsrv_rec = SrvRecord(service=service, protocol=protocol,
                               priority=priority, weight=weight, target=dbtarget,
                               port=port, dns_domain=dbdns_domain,
