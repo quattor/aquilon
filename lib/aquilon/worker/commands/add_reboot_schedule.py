@@ -66,7 +66,10 @@ class CommandAddRebootSchedule(BrokerCommand):
                 if not validator.match(data):
                     err = "Key '%s' contains an invalid value." % key
                     if key in self.required_parameters:
-                        err += " Valid values are (%s)." % '|'.join(self.COMPONENTS[key])
+                        validvals = '|'.join(self.COMPONENTS[key])
+                        if key == 'week':
+                            validvals += '|all'
+                        err += " Valid values are (%s)." % validvals
                     raise ArgumentError(err)
 
                 if re.search(',', data):
