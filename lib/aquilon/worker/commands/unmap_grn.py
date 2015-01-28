@@ -22,6 +22,8 @@ from aquilon.worker.commands.map_grn import CommandMapGrn
 
 class CommandUnMapGrn(CommandMapGrn):
 
+    require_usable_grn = False
+
     def _update_dbobj(self, obj, target, grn, cls):
         found = None
         for grn_rec in obj.grns:

@@ -250,7 +250,8 @@ class CommandSearchHost(BrokerCommand):
             q = q.reset_joinpoint()
 
         if grn or eon_id:
-            dbgrn = lookup_grn(session, grn, eon_id, autoupdate=False)
+            dbgrn = lookup_grn(session, grn, eon_id, autoupdate=False,
+                               usable_only=False)
 
             persq = session.query(Personality.id)
             persq = persq.outerjoin(PersonalityGrnMap)

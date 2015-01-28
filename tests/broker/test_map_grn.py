@@ -128,6 +128,24 @@ class TestMapGrn(VerifyGrnsMixin, PersonalityTestMixin, TestBrokerCommand):
         self.matchoutput(out, "GRN grn:/ms/ei/aquilon is not usable for new "
                          "systems.", command)
 
+    def test_151_enable_grn(self):
+        self.noouttest(["update_grn", "--grn", "grn:/ms/ei/aquilon",
+                        "--nodisabled"])
+        command = ["map", "grn", "--grn", "grn:/ms/ei/aquilon",
+                   "--hostname", "unittest20.aqd-unittest.ms.com",
+                   "--target", "esp"]
+        self.noouttest(command)
+
+    def test_152_disable_again(self):
+        self.noouttest(["update_grn", "--grn", "grn:/ms/ei/aquilon",
+                        "--disabled"])
+
+    def test_153_unmap_disabled(self):
+        command = ["unmap", "grn", "--grn", "grn:/ms/ei/aquilon",
+                   "--hostname", "unittest20.aqd-unittest.ms.com",
+                   "--target", "esp"]
+        self.noouttest(command)
+
     def test_160_map_missing_eonid(self):
         command = ["map", "grn", "--eon_id", "987654321", "--target", "esp",
                    "--hostname", "unittest20.aqd-unittest.ms.com"]

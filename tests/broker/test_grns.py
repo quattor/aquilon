@@ -42,6 +42,12 @@ class TestGrns(VerifyGrnsMixin, TestBrokerCommand):
         self.matchoutput(out, "EON ID: 1", command)
         self.matchoutput(out, "Disabled: True", command)
 
+    def test_105_search_disabled_grn(self):
+        command = ["search_host", "--eon_id", 1]
+        # The only thing we care about here is that the command should not
+        # complain about the GRN being disabled
+        self.commandtest(command)
+
     def test_110_add_test2(self):
         self.assertTrue("grn:/ms/test2" not in self.grns)
         command = ["add", "grn", "--grn", "grn:/ms/test2",

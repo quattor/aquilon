@@ -49,7 +49,8 @@ class CommandSearchPersonality(BrokerCommand):
             q = q.filter_by(host_environment=dbhost_env)
 
         if grn or eon_id:
-            dbgrn = lookup_grn(session, grn, eon_id, autoupdate=False)
+            dbgrn = lookup_grn(session, grn, eon_id, autoupdate=False,
+                               usable_only=False)
             q = q.outerjoin(PersonalityGrnMap, aliased=True)
             q = q.filter(or_(Personality.owner_eon_id == dbgrn.eon_id,
                              PersonalityGrnMap.eon_id == dbgrn.eon_id))
