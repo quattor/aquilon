@@ -50,6 +50,7 @@
 	    </group>
 	    <arg choice="opt"><option>--dns_environment <replaceable>DNSENV</replaceable></option></arg>
 	    <arg choice="opt"><option>--network_environment <replaceable>NETENV</replaceable></option></arg>
+	    <arg choice="opt"><option>--target_environment <replaceable>DNSENV</replaceable></option></arg>
 	    <arg choice="opt"><option>--fullinfo</option></arg>
 	    <xi:include href="../common/global_options.xml"/>
 	</cmdsynopsis>
@@ -225,6 +226,18 @@
 			<command>search_dns</command> command will never contain entries from multiple
 			DNS environments. The default is the DNS environment associated with the
 			network environment <replaceable>NETENV</replaceable>.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--target_environment <replaceable>DNSENV</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Matches targets in the given dns environment. The default value is the same
+			as the <literal>dns_environment</literal> argument. The target_environment is
+			used only if there are other search criteria based on targets.
 		    </para>
 		</listitem>
 	    </varlistentry>

@@ -90,6 +90,18 @@ class TestSearchDns(TestBrokerCommand):
         self.matchoutput(out, "Address Alias: addralias1.aqd-unittest.ms.com",
                          command)
 
+    def testbytarget_environment(self):
+        command = ["search", "dns",
+                   "--dns_environment", "ut-env",
+                   "--target", "arecord13.aqd-unittest.ms.com",
+                   "--target_environment", "internal",
+                   "--fullinfo"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Address Alias: addralias1.aqd-unittest-ut-env.ms.com",
+                         command)
+        self.matchclean(out, "Address Alias: addralias1.aqd-unittest.ms.com",
+                        command)
+
     def testbytargetdomain(self):
         command = ["search", "dns", "--target_domain", "aqd-unittest.ms.com",
                    "--fullinfo"]

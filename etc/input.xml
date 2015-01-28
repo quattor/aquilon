@@ -4631,6 +4631,7 @@
 	<optgroup>
 	    <option name="dns_environment" type="string" conflicts="network_environment">The name of an environment the address is in (default: internal)</option>
 	    <option name="network_environment" type="string" conflicts="dns_environment"> The network environment for A records (default: internal)</option>
+	    <option name="target_environment" type="string">The name of an environment the record's target lives in (default is the same as the record's dns environment)</option>
 	    <option name="fullinfo" type="flag">Show full information for the matching records</option>
 	</optgroup>
 	<transport method="get" path="find/dns_record"/>

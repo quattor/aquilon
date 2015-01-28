@@ -38,8 +38,8 @@ class CommandSearchDns(BrokerCommand):
 
     def render(self, session, fqdn, dns_environment, dns_domain, shortname,
                record_type, ip, network, network_environment, target,
-               target_domain, primary_name, used, reverse_override, reverse_ptr,
-               fullinfo, style, **kwargs):
+               target_domain, target_environment, primary_name, used,
+               reverse_override, reverse_ptr, fullinfo, style, **kwargs):
         if record_type:
             record_type = record_type.strip().lower()
             if record_type in DNS_RRTYPE_MAP:
@@ -91,8 +91,14 @@ class CommandSearchDns(BrokerCommand):
                                            network_environment=dbnet_env, compel=True)
             q = q.filter(ARecord.network == dbnetwork)
         if target:
+            if target_environment:
+                dbtgt_env = DnsEnvironment.get_unique_or_default(session,
+                                                                 target_environment)
+            else:
+                dbtgt_env = dbdns_env
+
             dbtarget = Fqdn.get_unique(session, fqdn=target,
-                                       dns_environment=dbdns_env, compel=True)
+                                       dns_environment=dbtgt_env, compel=True)
             q = q.filter(or_(Alias.target == dbtarget,
                              SrvRecord.target == dbtarget,
                              AddressAlias.target == dbtarget))
