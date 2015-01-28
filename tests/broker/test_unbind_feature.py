@@ -25,6 +25,7 @@ import unittest2 as unittest
 from brokertest import TestBrokerCommand
 
 aquilon_personalities = None
+AUTHERR = "Changing feature bindings for a owner_only feature where owner grns do not match requires --justification."
 
 
 class TestUnbindFeature(TestBrokerCommand):
@@ -126,11 +127,7 @@ class TestUnbindFeature(TestBrokerCommand):
                    "--personality", "compileserver",
                    "--interface", "eth1"]
         out = self.unauthorizedtest(command, auth=True, msgcheck=False)
-        self.matchoutput(out,
-                         "Unauthorized: Changing feature bindings for a "
-                         "non public feature where owner grns do not "
-                         "match requires --justification.",
-                         command)
+        self.matchoutput(out, AUTHERR, command)
         command = ["unbind", "feature", "--feature", "src_route",
                    "--model", "e1000", "--vendor", "intel",
                    "--personality", "compileserver",
