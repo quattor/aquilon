@@ -216,7 +216,7 @@ class PublicInterface(Interface):
 
     extra_fields = ['bootable', 'port_group_name', 'port_group']
 
-    name_check = re.compile(r"^[a-z]+\d+[a-z]?$")
+    name_check = re.compile(r"^[a-z]+\d+[a-z]?\d?$")
 
     model_allowed = True
 
