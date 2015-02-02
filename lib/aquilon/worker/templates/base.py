@@ -606,6 +606,7 @@ class PlenaryCollection(object):
     def set_logger(self, logger):
         for plen in self.plenaries:
             plen.set_logger(logger)
+        self.logger = logger
 
     def append(self, plenary):
         plenary.set_logger(self.logger)
