@@ -16,41 +16,15 @@
 # limitations under the License.
 """Contains the logic for `aq unbind client --metacluster`."""
 
-from aquilon.exceptions_ import ArgumentError, NotFoundException
-from aquilon.aqdb.model import MetaCluster, Service
-from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.templates import (Plenary, PlenaryCollection,
-                                      PlenaryServiceInstanceServer)
-from aquilon.utils import first_of
+from aquilon.aqdb.model import MetaCluster
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.commands.unbind_client_hostname import \
+        CommandUnbindClientHostname
 
 
-class CommandUnbindClientMetacluster(BrokerCommand):
+class CommandUnbindClientMetacluster(CommandUnbindClientHostname):
 
     required_parameters = ["metacluster", "service"]
 
-    def render(self, session, logger, metacluster, service, **arguments):
-        dbservice = Service.get_unique(session, service, compel=True)
-        dbmeta = MetaCluster.get_unique(session, metacluster, compel=True)
-        dbinstance = first_of(dbmeta.services_used,
-                              lambda x: x.service == dbservice)
-
-        if not dbinstance:
-            raise NotFoundException("{0} is not bound to {1:l}."
-                                    .format(dbservice, dbmeta))
-
-        for dbobj in (dbmeta.archetype, dbmeta.personality_stage):
-            if dbservice in dbobj.required_services:
-                raise ArgumentError("{0} is required for {1:l}, the binding "
-                                    "cannot be removed."
-                                    .format(dbservice, dbobj))
-
-        dbmeta.services_used.remove(dbinstance)
-
-        session.flush()
-
-        plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(Plenary.get_plenary(dbmeta))
-        plenaries.append(PlenaryServiceInstanceServer.get_plenary(dbinstance))
-        plenaries.write()
-
-        return
+    def get_dbobj(self, session, metacluster=None, **arguments):
+        return MetaCluster.get_unique(session, metacluster, compel=True)
