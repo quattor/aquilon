@@ -202,6 +202,21 @@ class TestAddRequiredService(TestBrokerCommand):
                          "Version: 11.1-x86_64 Archetype: aquilon",
                          command)
 
+    def test_176_copy_os(self):
+        command = ["add_os", "--archetype", "aquilon", "--osname", "solaris",
+                   "--osversion", "11.2-x86_64", "--copy_version", "11.1-x86_64"]
+        self.noouttest(command)
+
+    def test_177_verify_copy(self):
+        command = ["show_os", "--archetype", "aquilon", "--osname", "solaris",
+                   "--osversion", "11.2-x86_64"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Required Service: ips", command)
+
+    def test_178_del_copy(self):
+        self.noouttest(["del_os", "--archetype", "aquilon", "--osname", "solaris",
+                        "--osversion", "11.2-x86_64"])
+
     def test_200_archetype_duplicate(self):
         command = "add required service --service afs --archetype aquilon"
         command += " --justification tcm=12345678"

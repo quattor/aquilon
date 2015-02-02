@@ -24,8 +24,8 @@ class CommandAddOS(BrokerCommand):
 
     required_parameters = ["osname", "osversion", "archetype"]
 
-    def render(self, session, osname, osversion, archetype, comments,
-               **arguments):
+    def render(self, session, osname, osversion, archetype, copy_version,
+               comments, **arguments):
         validate_nlist_key("--osname", osname)
         validate_template_name("--osversion", osversion)
 
@@ -33,8 +33,21 @@ class CommandAddOS(BrokerCommand):
         OperatingSystem.get_unique(session, name=osname, version=osversion,
                                    archetype=dbarchetype, preclude=True)
 
+        if copy_version:
+            dbprev_os = OperatingSystem.get_unique(session, name=osname,
+                                                   version=copy_version,
+                                                   archetype=dbarchetype,
+                                                   compel=True)
+
+            if comments is None:
+                comments = dbprev_os.comments
+
         dbos = OperatingSystem(name=osname, version=osversion,
                                archetype=dbarchetype, comments=comments)
         session.add(dbos)
 
+        if copy_version:
+            dbos.required_services.extend(dbprev_os.required_services)
+
+        session.flush()
         return
