@@ -90,6 +90,10 @@ class TestAddOS(TestBrokerCommand):
         command = "add os --archetype utappliance --osname utos --osversion 1.0"
         self.noouttest(command.split(" "))
 
+    def test_140_add_solaris(self):
+        self.noouttest(["add_os", "--archetype", "aquilon", "--osname", "solaris",
+                        "--osversion", "11.1-x86_64"])
+
     def test_200_add_existing(self):
         command = ["add_os", "--archetype", "aquilon", "--osname", "linux",
                    "--osversion", self.linux_version_prev]

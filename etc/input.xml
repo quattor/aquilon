@@ -2195,13 +2195,20 @@
 	    <option name="archetype" type="string" mandatory="True">archetype name</option>
 	</optgroup>
 	<optgroup>
-	    <option name="personality" type="string">personality name</option>
+	    <optgroup fields="one">
+		<option name="personality" type="string">personality name</option>
+		<optgroup fields="all">
+		    <option name="osname" type="string">OS name</option>
+		    <option name="osversion" type="string">OS version</option>
+		</optgroup>
+	    </optgroup>
 	    <option name="personality_stage" requires="personality" type="string">Personality stage to use, defaults to 'next'.</option>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
 	    <option name="reason" type="string">String to be specified if justification='emergency'</option>
 	</optgroup>
 	<transport method="put" path="service/%(service)s/required_for/archetype/%(archetype)s"/>
 	<transport trigger="personality" method="put" path="service/%(service)s/required_for/personality/%(archetype)s/%(personality)s"/>
+	<transport trigger="osname" method="put" path="service/%(service)s/required_for/operating_system/%(archetype)s/%(osname)s"/>
     </command>
 
     <command name="show_archetype">
@@ -2227,13 +2234,20 @@
 	    <option name="archetype" type="string" mandatory="True">archetype name</option>
 	</optgroup>
 	<optgroup>
-	    <option name="personality" type="string" mandatory="True">personality name</option>
+	    <optgroup fields="one">
+		<option name="personality" type="string">personality name</option>
+		<optgroup fields="all">
+		    <option name="osname" type="string">OS name</option>
+		    <option name="osversion" type="string">OS version</option>
+		</optgroup>
+	    </optgroup>
 	    <option name="personality_stage" requires="personality" type="string">Personality stage to use, defaults to 'next'.</option>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
 	    <option name="reason" type="string">String to be specified if justification='emergency'</option>
 	</optgroup>
 	<transport method="delete" path="service/%(service)s/required_for/archetype/%(archetype)s"/>
 	<transport trigger="personality" method="delete" path="service/%(service)s/required_for/personality/%(archetype)s/%(personality)s"/>
+	<transport trigger="osname" method="delete" path="service/%(service)s/required_for/operating_system/%(archetype)s/%(osname)s"/>
     </command>
 
     <command name="map_service">

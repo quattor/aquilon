@@ -123,6 +123,12 @@ class Host(CompileableMixin, Base):
 
         return eon_id_map
 
+    @property
+    def required_services(self):
+        rqs = super(Host, self).required_services
+        rqs.update(self.operating_system.required_services)
+        return rqs
+
 
 class HostGrnMap(Base):
     __tablename__ = _HOSTGRN

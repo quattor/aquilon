@@ -65,7 +65,8 @@ from aquilon.aqdb.utils import schema2dot
 
 from aquilon.aqdb.model.location import LocationLink
 from aquilon.aqdb.model.service import (__ServiceListItem,
-                                        __PersonalityServiceListItem)
+                                        __PersonalityServiceListItem,
+                                        __OSServiceListItem)
 from aquilon.aqdb.model.service_instance import __BuildItem
 from aquilon.aqdb.model.service_address import __ServiceAddressInterface
 from aquilon.aqdb.model.personality import (__PersonalityRootUser,
@@ -120,8 +121,9 @@ model_group = {
     'services': {
         'title': 'Services',
         'classes': [Service, __PersonalityServiceListItem, __ServiceListItem,
-                    ServiceInstance, __BuildItem, ServiceInstanceServer,
-                    __ClusterServiceBinding, PersonalityServiceMap, ServiceMap],
+                    __OSServiceListItem, ServiceInstance, __BuildItem,
+                    ServiceInstanceServer, __ClusterServiceBinding,
+                    PersonalityServiceMap, ServiceMap],
     },
     'dns': {
         'title': 'DNS',

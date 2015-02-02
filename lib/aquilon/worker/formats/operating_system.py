@@ -16,6 +16,8 @@
 # limitations under the License.
 """ Operating System formatter """
 
+from operator import attrgetter
+
 from aquilon.aqdb.model import OperatingSystem
 from aquilon.worker.formats.formatters import ObjectFormatter
 
@@ -27,6 +29,8 @@ class OSFormatter(ObjectFormatter):
         details.append(indent + "  Version: %s" % os.version)
         if not embedded:
             details.append(indent + "  Archetype: %s" % os.archetype)
+        for dbsrv in sorted(os.required_services, key=attrgetter("name")):
+            details.append(indent + "  Required Service: %s" % dbsrv.name)
         if os.comments:
             details.append(indent + "  Comments: %s" % os.comments)
 

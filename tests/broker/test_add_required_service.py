@@ -183,6 +183,25 @@ class TestAddRequiredService(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "Service: badservice", command)
 
+    def test_170_add_solaris(self):
+        command = ["add_required_service", "--service", "ips",
+                   "--archetype", "aquilon", "--osname", "solaris",
+                   "--osversion", "11.1-x86_64"]
+        self.noouttest(command)
+
+    def test_175_show_os(self):
+        command = ["show_os", "--archetype", "aquilon", "--osname", "solaris",
+                   "--osversion", "11.1-x86_64"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Required Service: ips", command)
+
+    def test_175_show_service(self):
+        command = ["show_service", "--service", "ips"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Required for Operating System: solaris "
+                         "Version: 11.1-x86_64 Archetype: aquilon",
+                         command)
+
     def test_200_archetype_duplicate(self):
         command = "add required service --service afs --archetype aquilon"
         command += " --justification tcm=12345678"
@@ -194,6 +213,16 @@ class TestAddRequiredService(TestBrokerCommand):
         out = self.badrequesttest(command)
         self.matchoutput(out, "Service chooser1 is already required by "
                          "personality aquilon/unixeng-test@next.",
+                         command)
+
+    def test_200_os_duplicate(self):
+        command = ["add_required_service", "--service", "ips",
+                   "--archetype", "aquilon", "--osname", "solaris",
+                   "--osversion", "11.1-x86_64"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Service ips is already required by operating system "
+                         "aquilon/solaris-11.1-x86_64.",
                          command)
 
     def test_200_missing_service(self):

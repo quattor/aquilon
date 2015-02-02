@@ -53,6 +53,11 @@ default_maps = {
             "building": ["np"],
         },
     },
+    "ips": {
+        "northamerica": {
+            "building": ["ut"],
+        },
+    },
     "lemon": {
         "ny-prod": {
             "campus": ["ny"],

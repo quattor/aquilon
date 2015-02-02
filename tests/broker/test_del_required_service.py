@@ -126,6 +126,12 @@ class TestDelRequiredService(TestBrokerCommand):
                    "--service=utsvc", "--archetype=aquilon"]
         self.noouttest(command)
 
+    def test_180_del_required_os(self):
+        command = ["del_required_service", "--service", "ips",
+                   "--archetype", "aquilon", "--osname", "solaris",
+                   "--osversion", "11.1-x86_64"]
+        self.noouttest(command)
+
     def test_200_del_required_afs_again(self):
         command = "del required service --service afs --archetype aquilon"
         command += " --justification tcm=12345678"
@@ -136,6 +142,15 @@ class TestDelRequiredService(TestBrokerCommand):
                    "--archetype=aquilon", "--personality=unixeng-test"]
         self.notfoundtest(command)
 
+    def test_200_del_required_os_again(self):
+        command = ["del_required_service", "--service", "ips",
+                   "--archetype", "aquilon", "--osname", "solaris",
+                   "--osversion", "11.1-x86_64"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out,
+                         "Service ips required for operating system "
+                         "aquilon/solaris-11.1-x86_64 not found.",
+                         command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelRequiredService)
