@@ -38,14 +38,12 @@ class CommandUnbindClientHostname(BrokerCommand):
         if not dbinstance:
             raise NotFoundException("{0} is not bound to {1:l}."
                                     .format(dbservice, dbhost))
-        if dbservice in dbhost.archetype.services:
-            raise ArgumentError("{0} is required for {1:l}, the binding cannot "
-                                "be removed."
-                                .format(dbservice, dbhost.archetype))
-        if dbservice in dbhost.personality_stage.services:
-            raise ArgumentError("{0} is required for {1:l}, the binding cannot "
-                                "be removed."
-                                .format(dbservice, dbhost.personality_stage))
+
+        for dbobj in (dbhost.archetype, dbhost.personality_stage):
+            if dbservice in dbobj.required_services:
+                raise ArgumentError("{0} is required for {1:l}, the binding "
+                                    "cannot be removed."
+                                    .format(dbservice, dbobj))
 
         dbhost.services_used.remove(dbinstance)
         session.flush()

@@ -37,14 +37,12 @@ class CommandUnbindClientMetacluster(BrokerCommand):
         if not dbinstance:
             raise NotFoundException("{0} is not bound to {1:l}."
                                     .format(dbservice, dbmeta))
-        if dbservice in dbmeta.archetype.services:
-            raise ArgumentError("{0} is required for {1:l}, the binding cannot "
-                                "be removed."
-                                .format(dbservice, dbmeta.archetype))
-        if dbservice in dbmeta.personality_stage.services:
-            raise ArgumentError("{0} is required for {1:l}, the binding cannot "
-                                "be removed."
-                                .format(dbservice, dbmeta.personality_stage))
+
+        for dbobj in (dbmeta.archetype, dbmeta.personality_stage):
+            if dbservice in dbobj.required_services:
+                raise ArgumentError("{0} is required for {1:l}, the binding "
+                                    "cannot be removed."
+                                    .format(dbservice, dbobj))
 
         dbmeta.services_used.remove(dbinstance)
 

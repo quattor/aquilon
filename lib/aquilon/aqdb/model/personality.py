@@ -212,7 +212,7 @@ class PersonalityStage(Base):
                                                   for param in self.paramholder.parameters)
 
             new.features.extend(link.copy() for link in self.features)
-            new.services.extend(self.services)
+            new.required_services.extend(self.required_services)
             new.grns.extend(grn_link.copy() for grn_link in self.grns)
 
             for cluster_type, info in self.cluster_infos.items():

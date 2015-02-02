@@ -12,7 +12,7 @@
         desc = "Host"
 %>\
 ${desc} Archetype: ${record.name}${flagstr}
-% for service in record.services:
+% for service in record.required_services:
   Required Service: ${service.name}
 % endfor
 % for link in record.features:

@@ -69,6 +69,6 @@ class CompileableMixin(object):
 
     @property
     def required_services(self):
-        rqs = set(self.personality_stage.services)
-        rqs.update(self.archetype.services)
+        rqs = set(self.personality_stage.required_services)
+        rqs.update(self.archetype.required_services)
         return rqs

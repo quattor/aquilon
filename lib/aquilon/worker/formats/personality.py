@@ -70,7 +70,7 @@ class PersonalityStageFormatter(PersonalityFormatter):
 
         if personality.cluster_required:
             details.append(indent + "  Requires clustered hosts")
-        for service in persst.services:
+        for service in persst.required_services:
             details.append(indent + "  Required Service: {0.name}"
                            .format(service))
 
@@ -125,7 +125,7 @@ class PersonalityStageFormatter(PersonalityFormatter):
             skeleton.stage = str(persst.name)
 
         if indirect_attrs:
-            self.redirect_proto(persst.services,
+            self.redirect_proto(persst.required_services,
                                 skeleton.required_services,
                                 indirect_attrs=False)
 
