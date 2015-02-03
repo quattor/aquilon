@@ -91,6 +91,9 @@ class PlenaryMachineInfo(StructurePlenary):
             if hasattr(disk, "snapshotable") and disk.snapshotable is not None:
                 params["snapshot"] = disk.snapshotable
 
+            if hasattr(disk, "iops_limit") and disk.iops_limit is not None:
+                params["iopslimit"] = disk.iops_limit
+
             if isinstance(disk, LocalDisk):
                 tpl = StructureTemplate("hardware/harddisk/generic/%s" %
                                         disk.controller_type, params)

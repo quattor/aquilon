@@ -144,6 +144,7 @@ class TestUpdateDisk(TestBrokerCommand):
                           r'"capacity", 45\*GB,\s*'
                           r'"filesystemname", "disk_update_test",\s*'
                           r'"interface", "scsi",\s*'
+                          r'"iopslimit", 30,\s*'
                           r'"mountpoint", "/backend",\s*'
                           r'"path", "evm10/sda\.vmdk",\s*'
                           r'"snapshot", true\s*\);',
@@ -186,6 +187,7 @@ class TestUpdateDisk(TestBrokerCommand):
                           r'"boot", true,\s*'
                           r'"capacity", 45\*GB,\s*'
                           r'"interface", "scsi",\s*'
+                          r'"iopslimit", 30,\s*'
                           r'"mountpoint", "/vol/lnn30f1v1/utecl5_share",\s*'
                           r'"path", "evm10/sda.vmdk",\s*'
                           r'"server", "lnn30f1",\s*'
