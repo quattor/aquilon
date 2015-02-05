@@ -4,9 +4,9 @@ QACOMMENT = -comment cmrs=qa
 QCELLS = q.ny,q.ln,q.hk,q.tk
 TCM_COMMENT = "-comment tcm FILL IT IN NOW"
 PYTHON_DEFAULT = /usr/bin/env python
-#PYTHON = /ms/dist/python/PROJ/core/2.7.3/bin/python
-PYTHON_CLIENT_PROD = /ms/dist/python/PROJ/core/2.7.3/bin/python -E
-PYTHON_SERVER_PROD = /ms/dist/python/PROJ/core/2.7.3-64/bin/python -E
+#PYTHON = /ms/dist/python/PROJ/core/2.7.9/bin/python
+PYTHON_CLIENT_PROD = /ms/dist/python/PROJ/core/2.7.9/bin/python -E
+PYTHON_SERVER_PROD = /ms/dist/python/PROJ/core/2.7.9-64/bin/python -E
 
 MPR    := $(shell echo $(PWD) | awk -F/ '{print $$(NF-3), $$(NF-2), $$(NF-1)}')
 META   = $(word 1,$(MPR))
