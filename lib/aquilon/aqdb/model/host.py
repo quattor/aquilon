@@ -69,7 +69,7 @@ class Host(CompileableMixin, Base):
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
 
-    comments = Column(String(255), nullable=True)
+    comments = deferred(Column(String(255), nullable=True))
 
     # This is a one-to-one relation, so we need uselist=False on the backref
     hardware_entity = relation(HardwareEntity, innerjoin=True,

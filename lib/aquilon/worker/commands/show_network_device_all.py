@@ -27,7 +27,9 @@ class CommandShowNetworkDeviceAll(BrokerCommand):
     def render(self, session, **arguments):
         q = session.query(NetworkDevice)
 
-        q = q.options(subqueryload('location'),
+        q = q.options(undefer('comments'),
+                      undefer('host.comments'),
+                      subqueryload('location'),
                       subqueryload('interfaces'),
                       joinedload('interfaces.assignments'),
                       joinedload('interfaces.assignments.dns_records'),

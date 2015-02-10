@@ -16,7 +16,7 @@
 # limitations under the License.
 """Contains the logic for `aq show host --all`."""
 
-from sqlalchemy.orm import contains_eager, lazyload
+from sqlalchemy.orm import contains_eager, lazyload, undefer
 
 from aquilon.aqdb.model import Host, HardwareEntity, DnsRecord, DnsDomain, Fqdn
 from aquilon.worker.broker import BrokerCommand
@@ -31,7 +31,11 @@ class CommandShowHostAll(BrokerCommand):
                    DnsDomain)
         q = q.options(lazyload('branch'),
                       lazyload('personality'),
+                      undefer('comments'),
+                      undefer('personality.comments'),
+                      undefer('personality.archetype.comments'),
                       contains_eager('hardware_entity'),
+                      undefer('hardware_entity.comments'),
                       contains_eager('hardware_entity.primary_name'),
                       contains_eager('hardware_entity.primary_name.fqdn'),
                       contains_eager('hardware_entity.primary_name.fqdn.dns_domain'))

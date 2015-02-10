@@ -29,6 +29,7 @@ class CommandShowFeatureAll(BrokerCommand):
     def render(self, session, **arguments):
         q = session.query(Feature)
         q = q.options(undefer(Feature.comments),
+                      subqueryload('owner_grn'),
                       subqueryload('links'),
                       subqueryload('links.archetype'),
                       subqueryload('links.personality'),

@@ -27,7 +27,7 @@ from sqlalchemy.orm.attributes import set_committed_value
 from aquilon.exceptions_ import NotFoundException, ArgumentError
 from aquilon.aqdb.column_types import AqStr
 from aquilon.aqdb.model import (HardwareEntity, DnsEnvironment, DnsDomain, Fqdn,
-                                DnsRecord, ARecord, ReservedName, Host,
+                                DnsRecord, ARecord, ReservedName, Sandbox, Host,
                                 HostGrnMap, OperatingSystem, HostLifecycle,
                                 Personality, Domain, Machine, NetworkDevice,
                                 Disk, ChassisSlot, VirtualMachine)
@@ -153,15 +153,18 @@ def remove_host(logger, dbhw, plenaries, remove_plenaries):
     dbhw.host = None
 
 
-def hostname_to_host(session, hostname):
+def hostname_to_host(session, hostname, query_options=None):
     # When the user asked for a host, returning "machine not found" does not
     # feel to be the right error message, even if it is technically correct.
     # It's a little tricky though: we don't want to suppress "dns domain not
     # found"
     parse_fqdn(session, hostname)
     try:
+        if not query_options:
+            query_options = [joinedload('host'),
+                             undefer('host.comments')]
         dbmachine = HardwareEntity.get_unique(session, hostname, compel=True,
-                                              query_options=[joinedload('host')])
+                                              query_options=query_options)
     except NotFoundException:
         raise NotFoundException("Host %s not found." % hostname)
 
@@ -345,13 +348,19 @@ def validate_branch_author(dbhosts):
     branches = defaultdict(ListType)
     authors = defaultdict(ListType)
     for dbhost in dbhosts:
-        branches[dbhost.branch].append(dbhost)
+        branches[(dbhost.branch, dbhost.sandbox_author)].append(dbhost)
         authors[dbhost.sandbox_author].append(dbhost)
 
     if len(branches) > 1:
-        keys = sorted(branches, key=lambda x: len(branches[x]))
-        stats = ["{0:d} hosts in {1:l}".format(len(branches[branch]), branch)
-                 for branch in keys]
+        stats = []
+        for branch, sandbox_author in sorted(branches,
+                                             key=lambda x: -len(branches[x])):
+            cnt = len(branches[(branch, sandbox_author)])
+            if isinstance(branch, Sandbox):
+                stats.append("%d hosts in sandbox %s/%s" %
+                             (cnt, sandbox_author, branch))
+            else:
+                stats.append("{0:d} hosts in {1:l}".format(cnt, branch))
         raise ArgumentError("All hosts must be in the same domain or "
                             "sandbox:\n%s" % "\n".join(stats))
     if len(authors) > 1:
@@ -361,4 +370,4 @@ def validate_branch_author(dbhosts):
         raise ArgumentError("All hosts must be managed by the same "
                             "sandbox author:\n%s" % "\n".join(stats))
 
-    return (branches.popitem()[0], authors.popitem()[0])
+    return (branches.popitem()[0][0], authors.popitem()[0])

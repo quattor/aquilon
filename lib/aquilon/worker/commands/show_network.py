@@ -32,7 +32,10 @@ class CommandShowNetwork(BrokerCommand):
 
     def render(self, session, network, ip, network_environment, all, style,
                hosts, exact_location, **arguments):
-        options = [undefer('comments'), joinedload('location')]
+        options = [undefer('comments'),
+                   joinedload('location'),
+                   undefer('routers.comments'),
+                   undefer('static_routes.comments')]
         if hosts or style == "proto":
             options.extend([subqueryload("assignments"),
                             joinedload("assignments.interface"),

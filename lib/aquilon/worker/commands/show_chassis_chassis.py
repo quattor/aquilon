@@ -16,6 +16,7 @@
 # limitations under the License.
 """Contains the logic for `aq show chassis --chassis`."""
 
+from sqlalchemy.orm import undefer
 
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.aqdb.model import Chassis
@@ -26,4 +27,5 @@ class CommandShowChassisChassis(BrokerCommand):
     required_parameters = ["chassis"]
 
     def render(self, session, chassis, **arguments):
-        return Chassis.get_unique(session, chassis, compel=True)
+        return Chassis.get_unique(session, chassis, compel=True,
+                                  query_options=[undefer('comments')])

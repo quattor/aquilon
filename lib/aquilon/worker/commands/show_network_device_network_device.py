@@ -32,7 +32,11 @@ class CommandShowNetworkDevice(BrokerCommand):
         if discover:
             options = []
         else:
-            options = [subqueryload('port_groups'),
+            options = [undefer('comments'),
+                       joinedload('host'),
+                       undefer('host.comments'),
+                       undefer('host.personality.archetype.comments'),
+                       subqueryload('port_groups'),
                        undefer('port_groups.creation_date'),
                        joinedload('port_groups.network'),
                        subqueryload('observed_macs'),

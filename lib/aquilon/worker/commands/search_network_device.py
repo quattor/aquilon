@@ -53,7 +53,10 @@ class CommandSearchNetworkDevice(BrokerCommand):
         q = q.order_by(Fqdn.name, DnsDomain.name, NetworkDevice.label)
 
         if fullinfo or style != 'raw':
-            q = q.options(joinedload('location'),
+            q = q.options(undefer('comments'),
+                          joinedload('location'),
+                          joinedload('host'),
+                          undefer('host.comments'),
                           subqueryload('interfaces'),
                           joinedload('interfaces.assignments'),
                           joinedload('interfaces.assignments.dns_records'),
