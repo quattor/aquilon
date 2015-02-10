@@ -58,7 +58,7 @@ class StreamLoggerThread(Thread):
         while True:
             data = self.stream.readline()
             if data == '' and (self.stream.closed or
-                               self.process.poll() is not None):
+                               self.process.returncode is not None):
                 break
             if data != '':
                 if self.filterre and not self.filterre.search(data):
@@ -144,9 +144,9 @@ def run_command(args, env=None, path="/", logger=LOGGER, loglevel=logging.INFO,
         if proc_stdin:
             p.stdin.write(input)
             p.stdin.close()
+        p.wait()
         out_thread.join()
         err_thread.join()
-        p.wait()
 
         out = "".join(out_thread.buffer)
         err = "".join(err_thread.buffer)
