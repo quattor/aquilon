@@ -121,6 +121,11 @@ class PersonalityFormatter(ObjectFormatter):
                 map.target = grn_rec.target
                 map.eonid = grn_rec.eon_id
 
+        for cltype, info in personality.cluster_infos.items():
+            if cltype == "esx":
+                skeleton.vmhost_capacity_function = info.vmhost_capacity_function
+                skeleton.vmhost_overcommit_memory = info.vmhost_overcommit_memory
+
     def csv_fields(self, obj):
         yield (obj.archetype.name, obj.name,)
 

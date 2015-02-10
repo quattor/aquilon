@@ -191,6 +191,16 @@ class TestUpdatePersonality(VerifyGrnsMixin, TestBrokerCommand):
                          command)
         self.matchoutput(out, "VM host overcommit factor: 1.04", command)
 
+        command = ["show_personality", "--personality", "vulcan-1g-clone",
+                   "--archetype", "esx_cluster", "--format=proto"]
+        personality = self.protobuftest(command, expect=1)[0]
+        self.assertEqual(personality.archetype.name, "esx_cluster")
+        self.assertEqual(personality.name, "vulcan-1g-clone")
+        self.assertEqual(personality.owner_eonid, self.grns["grn:/ms/ei/aquilon/aqd"])
+        self.assertEqual(personality.host_environment, "prod")
+        self.assertEqual(personality.vmhost_capacity_function, "{'memory': (memory - 1500) * 0.94}")
+        self.assertEqual(personality.vmhost_overcommit_memory, 1.04)
+
     def test_159_cleanup_clone(self):
         self.noouttest(["del_personality", "--personality", "vulcan-1g-clone",
                         "--archetype", "esx_cluster"])
