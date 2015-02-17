@@ -174,9 +174,6 @@ def update_cluster_location(session, logger, dbcluster,
                                 "the host locations.")
     if dblocation:
         errors = []
-        if not dblocation.campus:
-            errors.append("{0} is not within a campus.".format(dblocation))
-
         if not isinstance(dbcluster, MetaCluster):
             for host in dbcluster.hosts:
                 if host.hardware_entity.location != dblocation and \

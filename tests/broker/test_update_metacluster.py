@@ -120,7 +120,6 @@ class TestUpdateMetaCluster(TestBrokerCommand, PersonalityTestMixin):
         command = ["update_metacluster", "--metacluster", "utmc1",
                    "--building", "cards"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "Building cards is not within a campus.", command)
         self.matchoutput(out, "ESX Cluster utecl1 has location Building ut.",
                          command)
         self.matchoutput(out, "ESX Cluster utecl2 has location Building ut.",

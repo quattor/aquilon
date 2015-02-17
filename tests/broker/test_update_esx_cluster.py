@@ -147,12 +147,6 @@ class TestUpdateESXCluster(TestBrokerCommand):
                          "to Rack ut3:",
                          command)
 
-    def test_360_failupdatenoncampus(self):
-        command = ["update_esx_cluster", "--cluster=utecl1", "--country=us"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out, "Country us is not within a campus",
-                         command)
-
     def test_370_updatepersonality(self):
         command = ["search_host", "--cluster=utecl1",
                    "--personality=vulcan-1g-desktop-prod"]

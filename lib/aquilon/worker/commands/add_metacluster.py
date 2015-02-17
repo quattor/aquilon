@@ -59,8 +59,6 @@ class CommandAddMetaCluster(BrokerCommand):
                                                              "location_name"),
                                         location_type=self.config.get(section,
                                                                       "location_type"))
-        elif not dbloc.campus:
-            raise ArgumentError("{0} is not within a campus.".format(dbloc))
 
         dbcluster = MetaCluster(name=metacluster, location_constraint=dbloc,
                                 max_clusters=max_clusters, comments=comments,

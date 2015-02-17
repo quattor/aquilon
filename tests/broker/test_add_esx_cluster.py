@@ -178,15 +178,6 @@ class TestAddESXCluster(PersonalityTestMixin, TestBrokerCommand):
         out = self.badrequesttest(command)
         self.matchoutput(out, "Cluster utecl1 already exists", command)
 
-    def testfailaddnoncampus(self):
-        command = ["add_esx_cluster", "--cluster=uteclfail",
-                   "--metacluster=utmc1", "--country=us",
-                   "--domain=unittest", "--down_hosts_threshold=2",
-                   "--archetype=esx_cluster",
-                   "--personality=vulcan-1g-desktop-prod"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out, "Country us is not within a campus", command)
-
     def testfailmetaclusternotfound(self):
         command = ["add_esx_cluster", "--cluster=utecl999",
                    "--domain=unittest", "--down_hosts_threshold=2",
