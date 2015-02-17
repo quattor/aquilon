@@ -15,10 +15,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from sqlalchemy import Column, ForeignKey
+from sqlalchemy import Column, ForeignKey, PrimaryKeyConstraint
 from sqlalchemy.orm import relation, backref
 
-from aquilon.aqdb.model import Resource, AddressAssignment, ARecord
+from aquilon.aqdb.model import Base, Resource, ARecord, Interface
 
 _TN = 'service_address'
 
@@ -30,14 +30,8 @@ class ServiceAddress(Resource):
 
     resource_id = Column(ForeignKey(Resource.id), primary_key=True)
 
-    # This is not normalized, as we could get the same object by
-    # self.assignments[0].dns_records[0], but this way it's faster
     dns_record_id = Column(ForeignKey(ARecord.dns_record_id),
-                           nullable=False, index=True)
-
-    assignments = relation(AddressAssignment, cascade="all, delete-orphan",
-                           passive_deletes=True,
-                           backref=backref('service_address'))
+                           nullable=False, unique=True)
 
     dns_record = relation(ARecord, innerjoin=True,
                           backref=backref('service_address', uselist=False,
@@ -45,16 +39,6 @@ class ServiceAddress(Resource):
 
     __table_args__ = ({'info': {'unique_fields': ['name', 'holder']}},)
     __mapper_args__ = {'polymorphic_identity': _TN}
-
-    @property
-    def interfaces(self):
-        ifaces = []
-        for addr in self.assignments:
-            if addr.interface.name not in ifaces:
-                ifaces.append(addr.interface.name)
-
-        ifaces.sort()
-        return ifaces
 
     @property
     def ip(self):
@@ -67,3 +51,20 @@ class ServiceAddress(Resource):
     @property
     def network_environment(self):
         return self.dns_record.network.network_environment
+
+
+class __ServiceAddressInterface(Base):
+    __tablename__ = 'service_address_interface'
+
+    service_address_id = Column(ForeignKey(ServiceAddress.resource_id,
+                                           ondelete='CASCADE'),
+                                nullable=False)
+
+    interface_id = Column(ForeignKey(Interface.id), nullable=False, index=True)
+
+    __table_args__ = (PrimaryKeyConstraint(service_address_id, interface_id),)
+
+ServiceAddress.interfaces = relation(Interface,
+                                     secondary=__ServiceAddressInterface.__table__,
+                                     passive_deletes=True,
+                                     backref=backref('service_addresses'))

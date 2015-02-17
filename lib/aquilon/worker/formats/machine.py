@@ -34,7 +34,7 @@ class MachineFormatter(HardwareEntityFormatter):
         managers = []
         auxiliaries = []
         for addr in machine.all_addresses():
-            if addr.ip == machine.primary_ip or addr.service_address_id:
+            if addr.ip == machine.primary_ip:
                 continue
             elif addr.interface.interface_type == 'management':
                 managers.append(([str(fqdn) for fqdn in addr.fqdns], addr.ip))

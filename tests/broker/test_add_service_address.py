@@ -111,14 +111,8 @@ class TestAddServiceAddress(TestBrokerCommand):
         command = ["show", "host", "--hostname",
                    "unittest20.aqd-unittest.ms.com"]
         out = self.commandtest(command)
-        self.matchoutput(out,
-                         "Provides: zebra2.aqd-unittest.ms.com [%s] "
-                         "(label: zebra2, service_holder: host)" % zebra2_ip,
-                         command)
-        self.matchoutput(out,
-                         "Provides: zebra3.aqd-unittest.ms.com [%s] "
-                         "(label: zebra3, service_holder: host)" % zebra3_ip,
-                         command)
+        self.matchclean(out, "Provides: zebra2.aqd-unittest.ms.com", command)
+        self.matchclean(out, "Provides: zebra3.aqd-unittest.ms.com", command)
         self.matchclean(out, "Auxiliary: zebra2.aqd-unittest.ms.com", command)
         self.matchclean(out, "Auxiliary: zebra3.aqd-unittest.ms.com", command)
 
@@ -181,7 +175,6 @@ class TestAddServiceAddress(TestBrokerCommand):
                          "address from network environment internal.  Network "
                          "environments cannot be mixed.",
                          command)
-
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddServiceAddress)

@@ -214,6 +214,8 @@ class Interface(DeviceLinkMixin, Base):
     def network_environment(self):
         if self.assignments:
             return self.assignments[0].network.network_environment
+        if self.service_addresses:
+            return self.service_addresses[0].network_environment
         return None
 
     def validate_network(self, dbnetwork):

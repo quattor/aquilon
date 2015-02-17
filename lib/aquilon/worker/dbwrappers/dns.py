@@ -322,6 +322,10 @@ def grab_address(session, fqdn, ip, network_environment=None,
             raise ArgumentError("IP address {0} is already in use by "
                                 "{1:l}.".format(ip, addr.interface))
 
+        if existing_record.service_address:
+            raise ArgumentError("{0} is already being used as a service address."
+                                .format(existing_record))
+
     return (existing_record, newly_created)
 
 

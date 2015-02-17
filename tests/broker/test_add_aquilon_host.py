@@ -181,10 +181,11 @@ class TestAddAquilonHost(TestBrokerCommand):
                           eth0_ip.mac, command)
         self.searchoutput(out, r"Interface: eth1 %s \[default_route\]" %
                           eth1_ip.mac, command)
-        self.matchoutput(out,
-                         "Provides: unittest20.aqd-unittest.ms.com [%s] "
-                         "(label: hostname, service_holder: host)" % ip,
-                         command)
+        self.searchoutput(out,
+                          r"Service Address: hostname\s*"
+                          r"Address: unittest20.aqd-unittest.ms.com \[%s\]\s*"
+                          r"Interfaces: eth0, eth1" % ip,
+                          command)
         self.matchoutput(out,
                          "Provides: unittest20-e1.aqd-unittest.ms.com [%s]" % eth1_ip,
                          command)

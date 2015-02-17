@@ -25,13 +25,17 @@ class ServiceAddressFormatter(ResourceFormatter):
     def extra_details(self, srv, indent=""):
         details = []
         details.append(indent + "  Address: {0:a}".format(srv.dns_record))
-        details.append(indent + "  Interfaces: %s" % ", ".join(srv.interfaces))
+        if srv.interfaces:
+            details.append(indent + "  Interfaces: %s" %
+                           ", ".join(sorted(iface.name for iface in
+                                            srv.interfaces)))
         return details
 
     def fill_proto(self, srv, skeleton, embedded=True, indirect_attrs=True):
         super(ServiceAddressFormatter, self).fill_proto(srv, skeleton)
         skeleton.service_address.ip = str(srv.ip)
         skeleton.service_address.fqdn = str(srv.dns_record)
-        skeleton.service_address.interfaces.extend(srv.interfaces)
+        skeleton.service_address.interfaces.extend(iface.name for iface in
+                                                   srv.interfaces)
 
 ObjectFormatter.handlers[ServiceAddress] = ServiceAddressFormatter()

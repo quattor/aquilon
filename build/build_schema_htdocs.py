@@ -67,6 +67,7 @@ from aquilon.aqdb.model.location import LocationLink
 from aquilon.aqdb.model.service import (__ServiceListItem,
                                         __PersonalityServiceListItem)
 from aquilon.aqdb.model.service_instance import __BuildItem
+from aquilon.aqdb.model.service_address import __ServiceAddressInterface
 from aquilon.aqdb.model.personality import (__PersonalityRootUser,
                                             __PersonalityRootNetGroup)
 from aquilon.aqdb.model.cluster import (__ClusterServiceBinding,
@@ -97,7 +98,8 @@ model_group = {
         'title': 'Resources',
         'classes': [Resource, ResourceHolder, Application, Filesystem, Hostlink,
                     Intervention, RebootIntervention, RebootSchedule,
-                    ResourceGroup, ServiceAddress, Share, VirtualMachine],
+                    ResourceGroup, ServiceAddress, __ServiceAddressInterface,
+                    Share, VirtualMachine],
     },
     'host': {
         'title': 'Hosts',
@@ -124,7 +126,8 @@ model_group = {
     'dns': {
         'title': 'DNS',
         'classes': [DnsDomain, DnsRecord, ARecord, SrvRecord, NsRecord, Alias,
-                    ReservedName, Fqdn, DynamicStub, DnsEnvironment, DnsMap],
+                    AddressAlias, ReservedName, Fqdn, DynamicStub,
+                    DnsEnvironment, DnsMap],
     },
     'cluster': {
         'title': 'Clusters',

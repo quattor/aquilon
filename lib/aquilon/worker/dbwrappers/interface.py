@@ -571,8 +571,7 @@ def enforce_bucket_alignment(dbrack, dbnetwork, logger):
                     .format(dbrack, rack_bunker, dbnetwork, expected_bunker))
 
 
-def assign_address(dbinterface, ip, dbnetwork, label=None, resource=None,
-                   logger=None):
+def assign_address(dbinterface, ip, dbnetwork, label=None, logger=None):
     assert isinstance(dbinterface, Interface)
 
     dns_environment = dbnetwork.network_environment.dns_environment
@@ -602,7 +601,6 @@ def assign_address(dbinterface, ip, dbnetwork, label=None, resource=None,
 
     dbinterface.assignments.append(AddressAssignment(ip=ip, network=dbnetwork,
                                                      label=label,
-                                                     service_address=resource,
                                                      dns_environment=dns_environment))
 
 

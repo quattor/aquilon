@@ -567,10 +567,6 @@ class DSDBRunner(object):
             if not addr.fqdns:
                 continue
 
-            # Handle service addresses separately
-            if addr.service_address:
-                continue
-
             # In AQDB there may be multiple domain names associated with
             # an address, in DSDB there can only be one.  Thus we pick
             # the first address to propergate.

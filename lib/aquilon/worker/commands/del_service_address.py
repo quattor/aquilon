@@ -16,7 +16,7 @@
 # limitations under the License.
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import ServiceAddress, AddressAssignment
+from aquilon.aqdb.model import ServiceAddress
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.dns import delete_dns_record
 from aquilon.worker.dbwrappers.resources import (del_resource,
@@ -51,26 +51,11 @@ class CommandDelServiceAddress(BrokerCommand):
 
         dbdns_rec = dbsrv.dns_record
 
-        for addr in dbsrv.assignments:
-            addr.interface.assignments.remove(addr)
-        session.expire(dbsrv, ['assignments'])
-
-        session.flush()
-
-        # Check if the address was assigned to multiple interfaces, and remove
-        # the DNS entries if this was the last use
-        q = session.query(AddressAssignment)
-        q = q.filter_by(network=dbdns_rec.network)
-        q = q.filter_by(ip=dbdns_rec.ip)
-        other_uses = q.all()
-
         dsdb_runner = DSDBRunner(logger=logger)
-        del_resource(session, logger, dbsrv,
-                     dsdb_callback=del_srv_dsdb_callback,
-                     dsdb_runner=dsdb_runner,
-                     keep_dns=other_uses or keep_dns)
+        del_resource(session, logger, dbsrv, dsdb_runner=dsdb_runner,
+                     dsdb_callback=del_srv_dsdb_callback, keep_dns=keep_dns)
 
-        if not other_uses and not keep_dns:
+        if not keep_dns:
             delete_dns_record(dbdns_rec)
 
         return

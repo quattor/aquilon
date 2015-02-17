@@ -64,6 +64,13 @@ class CommandDelInterface(BrokerCommand):
                                 "interfaces, delete them first: "
                                 "{1}.".format(dbinterface, slaves))
 
+        if dbinterface.service_addresses:
+            srvs = ", ".join(srv.name for srv in
+                             dbinterface.service_addresses)
+            raise ArgumentError("{0} still has the following service "
+                                "addresses bound to it, delete them first: "
+                                "{1}.".format(dbinterface, srvs))
+
         for addr in dbinterface.assignments:
             if addr.ip != dbhw_ent.primary_ip:
                 continue

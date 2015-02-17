@@ -147,7 +147,9 @@ class PlenaryResource(StructurePlenary):
     def body_service_address(self, lines):
         pan_assign(lines, "ip", str(self.dbobj.ip))
         pan_assign(lines, "fqdn", str(self.dbobj.dns_record))
-        pan_assign(lines, "interfaces", self.dbobj.interfaces)
+        if self.dbobj.interfaces:
+            pan_assign(lines, "interfaces", [iface.name for iface in
+                                             self.dbobj.interfaces])
 
     def body_virtual_machine(self, lines):
         machine = self.dbobj.machine

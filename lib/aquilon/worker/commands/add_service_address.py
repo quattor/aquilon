@@ -15,13 +15,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
-from aquilon.exceptions_ import ArgumentError, UnimplementedError
-from aquilon.aqdb.model import ServiceAddress, Cluster, Host
-from aquilon.utils import validate_nlist_key
+from aquilon.exceptions_ import ArgumentError
+from aquilon.aqdb.model import ServiceAddress, Host
+from aquilon.utils import validate_nlist_key, first_of
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.dbwrappers.interface import assign_address
 from aquilon.worker.dbwrappers.dns import grab_address
+from aquilon.worker.dbwrappers.interface import get_interfaces
 from aquilon.worker.dbwrappers.resources import (add_resource,
                                                  get_resource_holder)
 from aquilon.worker.processes import DSDBRunner
@@ -38,7 +37,7 @@ def add_srv_dsdb_callback(dbsrv, dsdb_runner=None, newly_created=None,
 
 class CommandAddServiceAddress(BrokerCommand):
 
-    required_parameters = ["service_address", "name", "interfaces"]
+    required_parameters = ["service_address", "name"]
 
     def render(self, session, logger, service_address, ip, name, interfaces,
                hostname, cluster, metacluster, resourcegroup,
@@ -54,10 +53,6 @@ class CommandAddServiceAddress(BrokerCommand):
                                 "option when calling add_host if you want the "
                                 "primary name of the host to be managed by "
                                 "Zebra.")
-
-        ifnames = [ifname.strip().lower() for ifname in interfaces.split(",")]
-        if not ifnames:
-            raise ArgumentError("Please specify at least one interface name.")
 
         holder = get_resource_holder(session, logger, hostname, cluster,
                                      metacluster, resourcegroup, compel=False)
@@ -77,6 +72,16 @@ class CommandAddServiceAddress(BrokerCommand):
                                     "for host-based service addresses.")
             dbdns_rec.reverse_ptr = toplevel_holder.hardware_entity.primary_name.fqdn
 
+        dbifaces = []
+        if interfaces:
+            if isinstance(toplevel_holder, Host):
+                dbifaces = get_interfaces(toplevel_holder.hardware_entity,
+                                          interfaces, dbdns_rec.network)
+            else:
+                logger.client_info("The --interfaces option is only valid for "
+                                   "host-bound service addresses, and is "
+                                   "ignored otherwise.")
+
         # Disable autoflush, since the ServiceAddress object won't be complete
         # until add_resource() is called
         dsdb_runner = DSDBRunner(logger=logger)
@@ -84,21 +89,8 @@ class CommandAddServiceAddress(BrokerCommand):
             dbsrv = ServiceAddress(name=name, dns_record=dbdns_rec,
                                    comments=comments)
             holder.resources.append(dbsrv)
-
-            if isinstance(toplevel_holder, Cluster):
-                if not toplevel_holder.hosts:
-                    # The interface names are only stored in the
-                    # AddressAssignment objects, so we can't handle a cluster
-                    # with no hosts and thus no interfaces
-                    raise ArgumentError("Cannot assign a service address to a "
-                                        "cluster that has no members.")
-                for host in toplevel_holder.hosts:
-                    apply_service_address(host, ifnames, dbsrv, logger)
-            elif isinstance(toplevel_holder, Host):
-                apply_service_address(toplevel_holder, ifnames, dbsrv, logger)
-            else:  # pragma: no cover
-                raise UnimplementedError("{0} as a resource holder is not "
-                                         "implemented.".format(toplevel_holder))
+            if dbifaces:
+                dbsrv.interfaces = dbifaces
 
         add_resource(session, logger, holder, dbsrv,
                      dsdb_callback=add_srv_dsdb_callback,
@@ -106,18 +98,3 @@ class CommandAddServiceAddress(BrokerCommand):
                      newly_created=newly_created, comments=comments)
 
         return
-
-
-def apply_service_address(dbhost, ifnames, srv_addr, logger):
-    for ifname in ifnames:
-        dbinterface = None
-        for iface in dbhost.hardware_entity.interfaces:
-            if iface.name == ifname:
-                dbinterface = iface
-                break
-        if not dbinterface:
-            raise ArgumentError("{0} does not have an interface named "
-                                "{1}.".format(dbhost.hardware_entity, ifname))
-
-        assign_address(dbinterface, srv_addr.ip, srv_addr.network,
-                       label=srv_addr.name, resource=srv_addr, logger=logger)

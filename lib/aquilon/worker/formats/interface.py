@@ -95,9 +95,6 @@ class InterfaceFormatter(ObjectFormatter):
             tags = []
             if addr.label:
                 tags.append("label: %s" % addr.label)
-            if addr.service_address:
-                tags.append("service_holder: %s" %
-                            addr.service_address.holder.holder_type)
             if tags:
                 tagstr = " (%s)" % ", ".join(tags)
             else:

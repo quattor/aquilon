@@ -114,8 +114,6 @@ class CommandAddHost(BrokerCommand):
             for addr in dbmachine.all_addresses():
                 if addr.interface.interface_type == "management":
                     continue
-                if addr.service_address_id:  # pragma: no cover
-                    continue
                 for rec in addr.dns_records:
                     if rec.fqdn.dns_environment == dns_env:
                         rec.reverse_ptr = dbdns_rec.fqdn
@@ -124,7 +122,7 @@ class CommandAddHost(BrokerCommand):
             if not ip:
                 raise ArgumentError("Zebra configuration requires an IP address.")
             dbsrv_addr = self.assign_zebra_address(session, dbmachine, dbdns_rec,
-                                                   zebra_interfaces, logger)
+                                                   zebra_interfaces)
         else:
             if ip:
                 if not dbinterface:
@@ -158,7 +156,7 @@ class CommandAddHost(BrokerCommand):
         return
 
     def assign_zebra_address(self, session, dbmachine, dbdns_rec,
-                             zebra_interfaces, logger):
+                             zebra_interfaces):
         """ Assign a Zebra-managed address to multiple interfaces """
 
         # Reset the routing configuration
@@ -187,10 +185,6 @@ class CommandAddHost(BrokerCommand):
             session.add(resholder)
             dbsrv_addr = ServiceAddress(name="hostname", dns_record=dbdns_rec)
             resholder.resources.append(dbsrv_addr)
-
-            for dbinterface in dbifaces:
-                assign_address(dbinterface, dbdns_rec.ip, dbdns_rec.network,
-                               label="hostname", resource=dbsrv_addr,
-                               logger=logger)
+            dbsrv_addr.interfaces = dbifaces
 
         return dbsrv_addr

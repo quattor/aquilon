@@ -125,17 +125,6 @@ class TestAddInterfaceAddress(TestBrokerCommand):
                          "as the primary name of machine ut3c1n4.",
                          command)
 
-    def testrejecthostnamelabel(self):
-        command = ["add", "interface", "address", "--machine", "ut3c1n3",
-                   "--interface", "eth1", "--label", "hostname",
-                   "--fqdn", "hostname-label.one-nyp.ms.com",
-                   "--ip", self.net["unknown0"].usable[-1]]
-        out = self.badrequesttest(command)
-        self.matchoutput(out,
-                         "The 'hostname' label can only be managed by "
-                         "add_host/del_host.",
-                         command)
-
     def testrejectnumericlabel(self):
         command = ["add", "interface", "address", "--machine", "ut3c5n2",
                    "--interface", "eth1", "--label", "1",
