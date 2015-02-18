@@ -36,7 +36,10 @@ class TestAddNetwork(TestBrokerCommand):
                        "--ip=%s" % network.ip,
                        "--netmask=%s" % network.netmask,
                        "--" + network.loc_type, network.loc_name,
-                       "--type=%s" % network.nettype]
+                       "--type=%s" % network.nettype,
+                       "--side=%s" % network.side]
+            if network.comments:
+                command.extend(["--comments", network.comments])
             self.noouttest(command)
 
     def testaddauroranetwork(self):
@@ -229,8 +232,9 @@ class TestAddNetwork(TestBrokerCommand):
             if not network.autocreate:
                 continue
             if network.loc_type == "building" and network.loc_name == "ut":
-                self.matchoutput(out, "%s,%s,%s,ut.ny.na,us,a,%s,\n" % (
-                    network.name, network.ip, network.netmask, network.nettype),
+                self.matchoutput(out, "%s,%s,%s,ut.ny.na,us,a,%s,%s\n" % (
+                    network.name, network.ip, network.netmask, network.nettype,
+                    network.comments or ""),
                     command)
             else:
                 self.matchclean(out, str(network.ip), command)
