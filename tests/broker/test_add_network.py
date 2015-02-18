@@ -42,44 +42,22 @@ class TestAddNetwork(TestBrokerCommand):
                 command.extend(["--comments", network.comments])
             self.noouttest(command)
 
-    def testaddauroranetwork(self):
-        self.noouttest(["add_network", "--ip", "144.14.174.0",
-                        "--network", "pissp1_aur",
-                        "--netmask", "255.255.255.0",
-                        "--building", "ut", "--side", "a", "--type", "unknown",
-                        "--comments", "Test aurora net"])
-        self.noouttest(["add_network", "--ip", "10.184.155.0",
-                        "--network", "ny00l4as01_aur",
-                        "--netmask", "255.255.255.0",
-                        "--building", "np", "--side", "a", "--type", "unknown",
-                        "--comments", "Test aurora net"])
-
     def testverifyauroranetwork(self):
-        command = ["show", "network", "--ip", "10.184.155.0"]
+        net = self.net["aurora2"]
+        command = ["show", "network", "--ip", net.ip]
         out = self.commandtest(command)
-        self.matchoutput(out, "Network: ny00l4as01_aur", command)
-        self.matchoutput(out, "IP: 10.184.155.0", command)
-        self.matchoutput(out, "Network Type: unknown", command)
-        self.matchoutput(out, "Comments: Test aurora net", command)
+        self.matchoutput(out, "Network: aurora2", command)
+        self.matchoutput(out, "IP: %s" % net.ip, command)
+        self.matchoutput(out, "Network Type: %s" % net.nettype, command)
+        self.matchoutput(out, "Comments: %s" % net.comments, command)
         self.matchoutput(out, "Building: np", command)
 
-    def testaddextranetwork(self):
-        # These were previously pulled from DSDB
-        self.noouttest(["add_network", "--ip", "172.31.64.64",
-                        "--network", "np06bals03_v103",
-                        "--netmask", "255.255.255.192",
-                        "--bunker", "nyb10.np", "--side", "b", "--type", "unknown",
-                        "--comments", "Some network comments"])
-        self.noouttest(["add_network", "--ip", "172.31.88.0",
-                        "--network", "nyp_hpl_2960_verari_mnmt",
-                        "--netmask", "255.255.255.192",
-                        "--building", "np", "--side", "b", "--type", "unknown"])
-
     def testverifybunker(self):
-        command = ["show", "network", "--ip", "172.31.64.64"]
+        net = self.net["np06bals03_v103"]
+        command = ["show", "network", "--ip", net.ip]
         out = self.commandtest(command)
         self.matchoutput(out, "Network: np06bals03_v103", command)
-        self.matchoutput(out, "IP: 172.31.64.64", command)
+        self.matchoutput(out, "IP: %s" % net.ip, command)
         self.matchoutput(out, "Bunker: nyb10.np", command)
 
     def testaddnetworkdup(self):

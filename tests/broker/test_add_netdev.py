@@ -134,14 +134,15 @@ class TestAddNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
         self.check_plenary_exists('hostdata', 'switchinbuilding.aqd-unittest.ms.com')
 
     def test_130_add_np06bals03(self):
-        self.dsdb_expect_add("np06bals03.ms.com", "172.31.64.69",
+        ip = self.net["np06bals03_v103"][5]
+        self.dsdb_expect_add("np06bals03.ms.com", ip,
                              "gigabitethernet0_1", "00:18:b1:89:86:00")
         command = ["add", "network_device", "--type", "tor",
                    "--network_device", "np06bals03.ms.com",
                    "--rack", "np7", "--model", "rs g8000",
                    "--interface", "gigabitethernet0/1",
                    "--iftype", "physical",
-                   "--mac", "0018b1898600", "--ip", "172.31.64.69"]
+                   "--mac", "0018b1898600", "--ip", ip]
         err = self.statustest(command)
         self.dsdb_verify()
         self.matchoutput(err,
@@ -153,22 +154,23 @@ class TestAddNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
 
         self.verifynetdev("np06bals03.ms.com",
                           "bnt", "rs g8000", "np7", "g", "1",
-                          ip="172.31.64.69", mac="00:18:b1:89:86:00",
+                          ip=ip, mac="00:18:b1:89:86:00",
                           interface="gigabitethernet0/1")
 
     def test_135_add_np06fals01(self):
-        self.dsdb_expect_add("np06fals01.ms.com", "172.31.88.5", "xge49",
+        ip = self.net["notbunkerized"][5]
+        self.dsdb_expect_add("np06fals01.ms.com", ip, "xge49",
                              "00:1c:f6:99:e5:c1")
         command = ["add", "network_device", "--type", "tor",
                    "--network_device", "np06fals01.ms.com",
                    "--rack", "np7", "--model", "ws-c2960-48tt-l",
                    "--interface", "xge49", "--iftype", "physical",
-                   "--mac", "001cf699e5c1", "--ip", "172.31.88.5"]
+                   "--mac", "001cf699e5c1", "--ip", ip]
         err = self.statustest(command)
         self.dsdb_verify()
         self.matchoutput(err,
                          "Bunker violation: rack np7 is inside bunker "
-                         "nyb10.np, but network nyp_hpl_2960_verari_mnmt is "
+                         "nyb10.np, but network notbunkerized is "
                          "not bunkerized.",
                          command)
         self.check_plenary_exists('network_device', 'americas', 'np', 'np06fals01')
@@ -176,7 +178,7 @@ class TestAddNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
 
         self.verifynetdev("np06fals01.ms.com",
                           "cisco", "ws-c2960-48tt-l", "np7", "g", "1",
-                          ip="172.31.88.5", mac="00:1c:f6:99:e5:c1",
+                          ip=ip, mac="00:1c:f6:99:e5:c1",
                           interface="xge49")
 
     def test_140_add_ut01ga1s02(self):

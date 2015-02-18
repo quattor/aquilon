@@ -118,10 +118,10 @@ class TestPrebindServer(TestBrokerCommand):
                           r'"servers" = list\(\s*"infra1\.aqd-unittest\.ms\.com",\s*'
                           r'"nyaqd1\.ms\.com"\s*\);',
                           command)
-        # The IP address comes from fakebin/dsdb.d, not from the real DNS.
         self.searchoutput(out,
-                          r'"server_ips" = list\(\s*"%s",\s*"10\.184\.155\.249"\s*\);' %
-                          self.net["zebra_vip"].usable[3],
+                          r'"server_ips" = list\(\s*"%s",\s*"%s"\s*\);' %
+                          (self.net["zebra_vip"].usable[3],
+                           self.net["aurora2"].usable[244]),
                           command)
 
 
