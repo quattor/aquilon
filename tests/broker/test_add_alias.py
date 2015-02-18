@@ -216,6 +216,7 @@ class TestAddAlias(TestBrokerCommand):
                          cmd)
 
     def test_700_show_alias_host(self):
+        ip = self.net["zebra_eth0"].usable[0]
         command = ["add", "alias", "--fqdn", "alias0.aqd-unittest.ms.com",
                    "--target", "unittest20-e0.aqd-unittest.ms.com"]
         out = self.commandtest(command)
@@ -226,19 +227,22 @@ class TestAddAlias(TestBrokerCommand):
 
         command = ["show", "host", "--hostname", "unittest20.aqd-unittest.ms.com"]
         out = self.commandtest(command)
-        self.searchoutput(out, r'Provides: unittest20-e0.aqd-unittest.ms.com \[4.2.12.5\]\s*'
-                               r'Aliases: alias0.aqd-unittest.ms.com, alias01.aqd-unittest.ms.com',
+        self.searchoutput(out,
+                          r'Provides: unittest20-e0.aqd-unittest.ms.com \[%s\]\s*'
+                          r'Aliases: alias0.aqd-unittest.ms.com, alias01.aqd-unittest.ms.com'
+                          % ip,
                           command)
 
         command = ["show", "host", "--hostname", "unittest20.aqd-unittest.ms.com",
                    "--format", "proto"]
         host = self.protobuftest(command, expect=1)[0]
         self.assertEqual(host.hostname, 'unittest20')
-        int = host.machine.interfaces[0]
-        self.assertEqual(int.aliases[0], 'alias0.aqd-unittest.ms.com')
-        self.assertEqual(int.aliases[1], 'alias01.aqd-unittest.ms.com')
-        self.assertEqual(int.ip, '4.2.12.5')
-        self.assertEqual(int.fqdn, 'unittest20-e0.aqd-unittest.ms.com')
+        interfaces = {iface.device: iface for iface in host.machine.interfaces}
+        self.assertTrue("eth0" in interfaces)
+        self.assertEqual(interfaces["eth0"].aliases[0], 'alias0.aqd-unittest.ms.com')
+        self.assertEqual(interfaces["eth0"].aliases[1], 'alias01.aqd-unittest.ms.com')
+        self.assertEqual(interfaces["eth0"].ip, str(ip))
+        self.assertEqual(interfaces["eth0"].fqdn, 'unittest20-e0.aqd-unittest.ms.com')
 
         command = ["del", "alias", "--fqdn", "alias01.aqd-unittest.ms.com"]
         out = self.commandtest(command)
@@ -247,6 +251,7 @@ class TestAddAlias(TestBrokerCommand):
         out = self.commandtest(command)
 
     def test_710_show_alias_host(self):
+        ip = self.net["zebra_eth1"].usable[3]
         command = ["add", "alias", "--fqdn", "alias1.aqd-unittest.ms.com",
                    "--target", "unittest20-e1-1.aqd-unittest.ms.com"]
         out = self.commandtest(command)
@@ -257,19 +262,22 @@ class TestAddAlias(TestBrokerCommand):
 
         command = ["show", "host", "--hostname", "unittest20.aqd-unittest.ms.com"]
         out = self.commandtest(command)
-        self.searchoutput(out, r'Provides: unittest20-e1-1.aqd-unittest.ms.com \[4.2.12.72\] \(label: e1\)\s*'
-                               r'Aliases: alias1.aqd-unittest.ms.com, alias11.aqd-unittest.ms.com',
+        self.searchoutput(out,
+                          r'Provides: unittest20-e1-1.aqd-unittest.ms.com \[%s\] \(label: e1\)\s*'
+                          r'Aliases: alias1.aqd-unittest.ms.com, alias11.aqd-unittest.ms.com'
+                          % ip,
                           command)
 
         command = ["show", "host", "--hostname", "unittest20.aqd-unittest.ms.com",
                    "--format", "proto"]
         host = self.protobuftest(command, expect=1)[0]
         self.assertEqual(host.hostname, 'unittest20')
-        int = host.machine.interfaces[5]
-        self.assertEqual(int.aliases[0], 'alias1.aqd-unittest.ms.com')
-        self.assertEqual(int.aliases[1], 'alias11.aqd-unittest.ms.com')
-        self.assertEqual(int.ip, '4.2.12.72')
-        self.assertEqual(int.fqdn, 'unittest20-e1-1.aqd-unittest.ms.com')
+        interfaces = {iface.device: iface for iface in host.machine.interfaces}
+        self.assertTrue("eth1:e1" in interfaces)
+        self.assertEqual(interfaces["eth1:e1"].aliases[0], 'alias1.aqd-unittest.ms.com')
+        self.assertEqual(interfaces["eth1:e1"].aliases[1], 'alias11.aqd-unittest.ms.com')
+        self.assertEqual(interfaces["eth1:e1"].ip, str(ip))
+        self.assertEqual(interfaces["eth1:e1"].fqdn, 'unittest20-e1-1.aqd-unittest.ms.com')
 
         command = ["del", "alias", "--fqdn", "alias11.aqd-unittest.ms.com"]
         out = self.commandtest(command)
