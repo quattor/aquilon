@@ -265,7 +265,7 @@ class MachineTestMixin(object):
             command.extend(["--" + arg, value])
 
         if zebra:
-            self.dsdb_expect_add(hostname, ip, "le0", comments=machdef.comments)
+            self.dsdb_expect_add(hostname, ip, "vip", comments=machdef.comments)
             command.extend(["--zebra_interfaces", ",".join(interfaces)])
         else:
             # FIXME: do not hardcode eth0?
