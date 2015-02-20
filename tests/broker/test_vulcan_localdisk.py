@@ -267,10 +267,9 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, MachineTestMixin,
         self.statustest(command)
         self.wait_notification(basetime, 1)
 
-        # TODO what to test here?
-        # command = ["show", "host", "--hostname", "utpgm0.aqd-unittest.ms.com"]
-        # out = self.commandtest(command)
-        # self.matchclean(out, "Template: service/vcenter/ut", command)
+        command = ["show", "host", "--hostname", "utpgm0.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Hosted by: Host %s" % self.vmhost[0], command)
 
     def test_200_make_host(self):
         basetime = datetime.now()

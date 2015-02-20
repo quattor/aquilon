@@ -74,7 +74,9 @@ class HostFormatter(CompileableFormatter):
         # (machine or network_device) first, so we redirect.  The
         # formatters should subclass HardwareEntityFormatter, then call
         # redirect_raw_host_details to display the actual host details.
-        return self.redirect_raw(host.hardware_entity, indent)
+        return self.redirect_raw(host.hardware_entity, indent,
+                                 embedded=embedded,
+                                 indirect_attrs=indirect_attrs)
 
     def format_raw_host_details(self, host, indent="", embedded=True,
                                 indirect_attrs=True):
