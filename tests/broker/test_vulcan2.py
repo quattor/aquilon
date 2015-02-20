@@ -347,7 +347,7 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
                    "--share=test_v2_share"]
         err = self.badrequesttest(command)
         self.matchoutput(err, "Share test_v2_share, "
-                         "bundleresource instance already exists.", command)
+                         "resource group utmc8as2 already exists.", command)
 
     def test_220_cat_resourcegroup(self):
         command = ["cat", "--resourcegroup=utmc8as1", "--metacluster=utmc8",

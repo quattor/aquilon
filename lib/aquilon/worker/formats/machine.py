@@ -28,7 +28,7 @@ class MachineFormatter(HardwareEntityFormatter):
                    indirect_attrs=True):
         if machine.vm_container and not embedded:
             details.append(indent + "  Hosted by: {0}"
-                           .format(machine.vm_container.holder.holder_object))
+                           .format(machine.vm_container.holder))
 
         # FIXME: This is now somewhat redundant
         managers = []

@@ -39,8 +39,10 @@ class TestDelServiceAddress(TestBrokerCommand):
         command = ["del", "service", "address", "--name", "zebra2",
                    "--hostname", "unittest20.aqd-unittest.ms.com"]
         out = self.notfoundtest(command)
-        self.matchoutput(out, "Service Address zebra2, hostresource instance "
-                         "not found.", command)
+        self.matchoutput(out,
+                         "Service Address zebra2, host "
+                         "unittest20.aqd-unittest.ms.com not found.",
+                         command)
         self.dsdb_verify(empty=True)
 
     def testverifyzebra2(self):
@@ -73,8 +75,10 @@ class TestDelServiceAddress(TestBrokerCommand):
         command = ["del", "service", "address", "--name", "zebra3",
                    "--hostname", "unittest20.aqd-unittest.ms.com"]
         out = self.notfoundtest(command)
-        self.matchoutput(out, "Service Address zebra3, hostresource instance "
-                         "not found.", command)
+        self.matchoutput(out,
+                         "Service Address zebra3, host "
+                         "unittest20.aqd-unittest.ms.com not found.",
+                         command)
         self.dsdb_verify(empty=True)
 
     def testfailhostname(self):

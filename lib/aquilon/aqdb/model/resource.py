@@ -66,6 +66,9 @@ class ResourceHolder(Base):
     def validate_resources(self, key, value):  # pylint: disable=W0613
         return value
 
+    def __format__(self, fmt):
+        return format(self.holder_object, fmt)
+
 
 class HostResource(ResourceHolder):
     host_id = Column(ForeignKey(Host.hardware_entity_id, ondelete='CASCADE'),
