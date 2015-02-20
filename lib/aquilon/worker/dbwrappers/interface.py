@@ -587,6 +587,8 @@ def assign_address(dbinterface, ip, dbnetwork, label=None, resource=None,
     if dbrack and not isinstance(dbinterface, ManagementInterface):
         enforce_bucket_alignment(dbrack, dbnetwork, logger)
 
+    dbinterface.validate_network(dbnetwork)
+
     for addr in dbinterface.assignments:
         if not label and not addr.label:
             raise ArgumentError("{0} already has an IP "
@@ -594,11 +596,6 @@ def assign_address(dbinterface, ip, dbnetwork, label=None, resource=None,
         if label and addr.label == label:
             raise ArgumentError("{0} already has an alias named "
                                 "{1}.".format(dbinterface, label))
-        if addr.network.network_environment != dbnetwork.network_environment:
-            raise ArgumentError("{0} already has an IP address from "
-                                "{1:l}.  Network environments cannot be "
-                                "mixed.".format(dbinterface,
-                                                addr.network.network_environment))
         if addr.ip == ip:
             raise ArgumentError("{0} already has IP address {1} "
                                 "configured.".format(dbinterface, ip))
