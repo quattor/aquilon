@@ -34,12 +34,18 @@ _TN = "dns_record"
 # True, "y in _rr_conflict_map[x]" must also be true.
 _rr_conflict_map = {
     'a_record': frozenset(['alias', 'dynamic_stub', 'reserved_name',
+                           'address_alias',
                            'srv_record']),
+    'address_alias': frozenset(['a_record', 'alias', 'dynamic_stub',
+                                'reserved_name']),
     'alias': frozenset(['a_record', 'alias', 'dynamic_stub', 'reserved_name',
+                        'address_alias',
                         'srv_record']),
     'dynamic_stub': frozenset(['a_record', 'alias', 'dynamic_stub',
+                               'address_alias',
                                'reserved_name', 'srv_record']),
     'reserved_name': frozenset(['a_record', 'alias', 'dynamic_stub',
+                                'address_alias',
                                 'reserved_name', 'srv_record']),
     'srv_record': frozenset(['alias', 'dynamic_stub', 'reserved_name',
                              'a_record']),
@@ -68,6 +74,7 @@ class DnsRecord(Base):
 
     aliases = association_proxy('fqdn', 'aliases')
     srv_records = association_proxy('fqdn', 'srv_records')
+    address_aliases = association_proxy('fqdn', 'address_aliases')
 
     __table_args__ = ({'info': {'unique_fields': ['fqdn'],
                                 'extra_search_fields': ['dns_environment']}},)
@@ -144,6 +151,11 @@ class DnsRecord(Base):
 
         # Ensure a deterministic order of the returned values
         return sorted(found.values(), key=lambda x: str(x.fqdn))
+
+    @property
+    def all_address_aliases(self):
+        # Ensure a deterministic order of all address aliases
+        return sorted(self.address_aliases, key=lambda x: str(x.fqdn))
 
     def __init__(self, fqdn=None, **kwargs):
         if not fqdn:  # pragma: no cover

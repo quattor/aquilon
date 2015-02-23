@@ -54,6 +54,7 @@ from aquilon.aqdb.model.fqdn import Fqdn
 from aquilon.aqdb.model.dns_record import DnsRecord
 from aquilon.aqdb.model.a_record import ARecord, DynamicStub
 from aquilon.aqdb.model.reserved_name import ReservedName
+from aquilon.aqdb.model.address_alias import AddressAlias
 from aquilon.aqdb.model.alias import Alias
 from aquilon.aqdb.model.srv_record import SrvRecord
 from aquilon.aqdb.model.ns_record import NsRecord

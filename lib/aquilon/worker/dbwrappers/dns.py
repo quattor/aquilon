@@ -26,7 +26,7 @@ from aquilon.exceptions_ import ArgumentError, AquilonError, NotFoundException
 from aquilon.aqdb.model import (Fqdn, DnsDomain, DnsRecord, ARecord,
                                 DynamicStub, Alias, ReservedName, SrvRecord,
                                 DnsEnvironment, AddressAssignment,
-                                NetworkEnvironment)
+                                NetworkEnvironment, AddressAlias)
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.worker.dbwrappers.interface import check_ip_restrictions
@@ -72,6 +72,10 @@ def delete_dns_record(dbdns_rec, locked=False, verify_assignments=False):
                             "first.".format(dbdns_rec))
     if dbdns_rec.srv_records:
         raise ArgumentError("{0} is still in use by SRV records, delete them "
+                            "first.".format(dbdns_rec))
+
+    if dbdns_rec.address_aliases:
+        raise ArgumentError("{0} still has address aliases, delete them "
                             "first.".format(dbdns_rec))
 
     # Do not allow deleting the DNS record if the IP address is still in
@@ -380,9 +384,10 @@ def delete_target_if_needed(session, dbtarget):
     # Check if the FQDN is still the target of an existing alias, service record
     # or reverse PTR record
     q = session.query(DnsRecord)
-    q = q.with_polymorphic([ARecord, Alias, SrvRecord])
+    q = q.with_polymorphic([ARecord, Alias, AddressAlias, SrvRecord])
     q = q.filter(or_(ARecord.reverse_ptr_id == dbtarget.id,
                      Alias.target_id == dbtarget.id,
+                     AddressAlias.target_id == dbtarget.id,
                      SrvRecord.target_id == dbtarget.id))
     q = q.options(lazyload('fqdn'))
     if not q.count():
@@ -400,11 +405,10 @@ def set_reverse_ptr(session, logger, dbdns_rec, reverse_ptr):
         dbreverse = create_target_if_needed(session, logger, reverse_ptr,
                                             dbdns_rec.fqdn.dns_environment)
     # Technically the reverse PTR could point to other types, not just
-    # ARecord, but there are no use cases for that, so better avoid
-    # confusion
+    # the types listed below, but there are no use cases for that, so
+    # better avoid confusion
     for rec in dbreverse.dns_records:
-        if not isinstance(rec, ARecord) and \
-           not isinstance(rec, ReservedName):
+        if not isinstance(rec, (ARecord, AddressAlias, ReservedName)):
             raise ArgumentError("The reverse PTR cannot point "
                                 "to {0:lc}.".format(rec))
     if dbreverse != dbdns_rec.fqdn:

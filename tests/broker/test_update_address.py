@@ -138,6 +138,21 @@ class TestUpdateAddress(TestBrokerCommand):
         self.matchclean(out, "reverse.restrict", command)
         self.matchoutput(out, "reverse2.restrict.aqd-unittest.ms.com", command)
 
+    def test150_address_alias_reverse(self):
+        command = ["update", "address",
+                   "--fqdn", "arecord17.aqd-unittest.ms.com",
+                   "--reverse_ptr", "addralias1.aqd-unittest.ms.com"]
+        self.noouttest(command)
+
+    def test151_verify_reverse(self):
+        command = ["search", "dns", "--fullinfo",
+                   "--fqdn", "arecord17.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out,
+                         "Reverse PTR: addralias1.aqd-unittest.ms.com",
+                         command)
+        self.matchclean(out, "alias2host.aqd-unittest.ms.com", command)
+
     def test_200_update_dyndhcp(self):
         ip = self.net["dyndhcp0"].usable[12]
         command = ["update", "address", "--fqdn", self.dynname(ip),

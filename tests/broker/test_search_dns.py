@@ -87,6 +87,20 @@ class TestSearchDns(TestBrokerCommand):
         self.matchoutput(out, "Aliases: alias2alias.aqd-unittest.ms.com",
                          command)
         self.matchoutput(out, "Target: arecord13.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "Address Alias: addralias1.aqd-unittest.ms.com",
+                         command)
+
+    def testbytarget_environment(self):
+        command = ["search", "dns",
+                   "--dns_environment", "ut-env",
+                   "--target", "arecord13.aqd-unittest.ms.com",
+                   "--target_environment", "internal",
+                   "--fullinfo"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Address Alias: addralias1.aqd-unittest-ut-env.ms.com",
+                         command)
+        self.matchclean(out, "Address Alias: addralias1.aqd-unittest.ms.com",
+                        command)
 
     def testbytargetdomain(self):
         command = ["search", "dns", "--target_domain", "aqd-unittest.ms.com",
@@ -100,6 +114,8 @@ class TestSearchDns(TestBrokerCommand):
         self.matchoutput(out, "SRV Record: _kerberos._tcp.aqd-unittest.ms.com",
                          command)
         self.matchoutput(out, "SRV Record: _ldap._tcp.aqd-unittest.ms.com",
+                         command)
+        self.matchoutput(out, "Address Alias: addralias1.aqd-unittest.ms.com",
                          command)
 
     def testbynetwork(self):
@@ -152,6 +168,15 @@ class TestSearchDns(TestBrokerCommand):
                          "alias2host.aqd-unittest.ms.com,internal,CNAME,"
                          "arecord13.aqd-unittest.ms.com",
                          command)
+        self.matchoutput(out,
+                         "addralias1.aqd-unittest.ms.com,internal,A,%s" %
+                         self.net["unknown0"].usable[13], command)
+        self.matchoutput(out,
+                         "addralias1.aqd-unittest.ms.com,internal,A,%s" %
+                         self.net["unknown0"].usable[14], command)
+        self.matchoutput(out,
+                         "addralias1.aqd-unittest.ms.com,internal,A,%s" %
+                         self.net["unknown0"].usable[15], command)
         self.matchclean(out, "utcolo", command)
 
     def testused(self):

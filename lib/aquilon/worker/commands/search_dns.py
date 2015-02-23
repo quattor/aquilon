@@ -17,8 +17,8 @@
 """Contains the logic for `aq search dns `."""
 
 from aquilon.aqdb.model import (DnsRecord, ARecord, Alias, SrvRecord, Fqdn,
-                                DnsDomain, DnsEnvironment, Network,
-                                NetworkEnvironment, AddressAssignment)
+                                AddressAlias, DnsDomain, DnsEnvironment,
+                                Network, NetworkEnvironment, AddressAssignment)
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.formats.list import StringAttributeList
 
@@ -38,8 +38,8 @@ class CommandSearchDns(BrokerCommand):
 
     def render(self, session, fqdn, dns_environment, dns_domain, shortname,
                record_type, ip, network, network_environment, target,
-               target_domain, primary_name, used, reverse_override, reverse_ptr,
-               fullinfo, style, **kwargs):
+               target_domain, target_environment, primary_name, used,
+               reverse_override, reverse_ptr, fullinfo, style, **kwargs):
         if record_type:
             record_type = record_type.strip().lower()
             if record_type in DNS_RRTYPE_MAP:
@@ -91,16 +91,24 @@ class CommandSearchDns(BrokerCommand):
                                            network_environment=dbnet_env, compel=True)
             q = q.filter(ARecord.network == dbnetwork)
         if target:
+            if target_environment:
+                dbtgt_env = DnsEnvironment.get_unique_or_default(session,
+                                                                 target_environment)
+            else:
+                dbtgt_env = dbdns_env
+
             dbtarget = Fqdn.get_unique(session, fqdn=target,
-                                       dns_environment=dbdns_env, compel=True)
+                                       dns_environment=dbtgt_env, compel=True)
             q = q.filter(or_(Alias.target == dbtarget,
-                             SrvRecord.target == dbtarget))
+                             SrvRecord.target == dbtarget,
+                             AddressAlias.target == dbtarget))
         if target_domain:
             dbdns_domain = DnsDomain.get_unique(session, target_domain,
                                                 compel=True)
             TargetFqdn = aliased(Fqdn)
             q = q.join((TargetFqdn, or_(Alias.target_id == TargetFqdn.id,
-                                        SrvRecord.target_id == TargetFqdn.id)))
+                                        SrvRecord.target_id == TargetFqdn.id,
+                                        AddressAlias.target_id == TargetFqdn.id)))
             q = q.filter(TargetFqdn.dns_domain == dbdns_domain)
         if primary_name is not None:
             if primary_name:
@@ -134,7 +142,8 @@ class CommandSearchDns(BrokerCommand):
             q = q.options(undefer('comments'),
                           subqueryload('hardware_entity'),
                           lazyload('hardware_entity.primary_name'),
-                          undefer('alias_cnt'))
+                          undefer('alias_cnt'),
+                          undefer('address_alias_cnt'))
             return q.all()
         else:
             return StringAttributeList(q.all(), 'fqdn')
