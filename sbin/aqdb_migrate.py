@@ -142,10 +142,7 @@ if __name__ == '__main__':
                 sys.stdout.flush()
                 signalled = 0
 
-            data = dict(
-                [(str(colname), getattr(record, colname))
-                 for colname in table.columns]
-            )
+            data = {col.key: getattr(record, col.key) for col in table.columns}
 
             # insert() is faster, but using .merge() is restartable
             # dest_session.merge(NewRecord(**data))
