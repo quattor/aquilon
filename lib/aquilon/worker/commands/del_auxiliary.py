@@ -28,6 +28,10 @@ class CommandDelAuxiliary(CommandDelInterfaceAddress):
     required_parameters = ["auxiliary"]
 
     def render(self, session, logger, auxiliary, **arguments):
+        self.deprecated_command("Command del_auxiliary is deprecated.  Please "
+                                "use del_interface_address instead.", logger,
+                                **arguments)
+
         # Check dependencies, translate into user-friendly message
         dbauxiliary = ARecord.get_unique(session, fqdn=auxiliary, compel=True)
 

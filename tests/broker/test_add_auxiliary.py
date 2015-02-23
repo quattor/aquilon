@@ -31,14 +31,14 @@ class TestAddAuxiliary(TestBrokerCommand):
         ip = self.net["unknown0"].usable[3]
         self.dsdb_expect_add("unittest00-e1.one-nyp.ms.com", ip, "eth1", ip.mac,
                              "unittest00.one-nyp.ms.com")
-        self.noouttest(["add", "auxiliary", "--ip", ip,
-                        "--auxiliary", "unittest00-e1.one-nyp.ms.com",
-                        "--machine", "ut3c1n3", "--interface", "eth1"])
+        self.statustest(["add", "auxiliary", "--ip", ip,
+                         "--auxiliary", "unittest00-e1.one-nyp.ms.com",
+                         "--machine", "ut3c1n3", "--interface", "eth1"])
         self.dsdb_verify()
 
     def testverifyaddunittest00e1(self):
-        command = "show auxiliary --auxiliary unittest00-e1.one-nyp.ms.com"
-        out = self.commandtest(command.split(" "))
+        command = ["show_host", "--hostname", "unittest00.one-nyp.ms.com"]
+        out = self.commandtest(command)
         self.matchoutput(out,
                          "Auxiliary: unittest00-e1.one-nyp.ms.com [%s]" %
                          self.net["unknown0"].usable[3],
@@ -49,11 +49,6 @@ class TestAddAuxiliary(TestBrokerCommand):
                           command)
         self.matchoutput(out, "Machine: ut3c1n3", command)
         self.matchoutput(out, "Model Type: blade", command)
-
-    def testverifyauxiliaryall(self):
-        command = ["show", "auxiliary", "--all"]
-        out = self.commandtest(command)
-        self.matchoutput(out, "unittest00-e1.one-nyp.ms.com", command)
 
     def testrejectmultipleaddress(self):
         command = ["add", "auxiliary", "--ip", self.net["unknown0"].usable[-1],
