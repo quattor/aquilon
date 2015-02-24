@@ -6,5 +6,6 @@ CREATE TABLE address_alias (
         CONSTRAINT address_alias_target_fk FOREIGN KEY(target_id) REFERENCES fqdn (id)
 );
 
-COMMIT;
+CREATE INDEX address_alias_target_idx ON address_alias (target_id);
+
 QUIT;
