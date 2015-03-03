@@ -48,7 +48,7 @@ def get_parameters_by_feature(dbpersonality, dbfeaturelink):
         for param in parameters:
             value = param.get_feature_path(dbfeaturelink,
                                            param_def.path, compel=False)
-            if not value and param_def.default:
+            if value is None and param_def.default:
                 value = validate_value("default for path=%s" % param_def.path,
                                        param_def.value_type, param_def.default)
             if value is not None:
