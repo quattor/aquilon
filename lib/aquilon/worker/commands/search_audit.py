@@ -61,7 +61,7 @@ class CommandSearchAudit(BrokerCommand):
         if before is not None:
             try:
                 end = parse(before)
-            except ValueError:
+            except (ValueError, TypeError):
                 raise ArgumentError("Unable to parse date string '%s'" %
                                     before)
             if not end.tzinfo:
@@ -71,7 +71,7 @@ class CommandSearchAudit(BrokerCommand):
         if after is not None:
             try:
                 start = parse(after)
-            except ValueError:
+            except (ValueError, TypeError):
                 raise ArgumentError("Unable to parse date string '%s'" % after)
             if not start.tzinfo:
                 start = start.replace(tzinfo=tzutc())
