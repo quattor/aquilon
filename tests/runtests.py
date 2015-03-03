@@ -22,6 +22,7 @@ from __future__ import print_function
 import os
 import re
 import sys
+from shutil import rmtree
 from subprocess import call
 
 import depends  # pylint: disable=W0611
@@ -127,10 +128,13 @@ if opts.mirror:
     mirrordir = config.get('unittest', 'mirrordir')
     if not os.path.exists(mirrordir):
         os.makedirs(mirrordir)
-    retcode = call(['rsync', '-avP', '-e', 'ssh -q -o StrictHostKeyChecking=no '
-                    '-o UserKnownHostsFile=/dev/null -o BatchMode=yes',
-                    '--delete', srcdir + '/', mirrordir])
-    if retcode:
+    ssh_args = [config.lookup_tool("ssh"), "-q",
+                "-o", "StrictHostKeyChecking=no",
+                "-o", "UserKnownHostsFile=/dev/null",
+                "-o", "BatchMode=yes"]
+    rc = call(['rsync', '-avP', '-e', " ".join(ssh_args),
+               '--delete', srcdir + '/', mirrordir])
+    if rc != 0:
         print("Rsync failed!", file=sys.stderr)
         sys.exit(1)
     args = [sys.executable, os.path.join(mirrordir, 'tests', 'runtests.py')]
@@ -158,8 +162,12 @@ if prod_python and sys.executable.find(prod_python) < 0:
     force_yes("Running with %s but prod is %s" % (sys.executable, prod_python))
 
 # Execute this every run... the man page says that it should do the right
-# thing in terms of not contacting the kdc very often.
-call(config.lookup_tool("krb5_keytab"))
+# thing in terms of not contacting the kdc very often. Don't abort the tests if
+# this fails, the keytab may be there.
+try:
+    call(config.lookup_tool("krb5_keytab"))
+except OSError:
+    pass
 
 pid_file = os.path.join(config.get('broker', 'rundir'), 'aqd.pid')
 kill_from_pid_file(pid_file)
@@ -179,8 +187,9 @@ if existing_dirs:
               "\n\t".join(existing_dirs))
 
 for dirname in existing_dirs:
-    print("Removing %s" % dirname)
-    call(("/bin/rm", "-rf", dirname))
+    if os.path.exists(dirname):
+        print("Removing %s" % dirname)
+        rmtree(dirname, ignore_errors=True)
 
 for dirname in dirs:
     try:
