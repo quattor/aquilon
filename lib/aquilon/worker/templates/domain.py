@@ -142,7 +142,7 @@ class TemplateDomain(object):
                 # Need to restrict to the subset of the sandbox managed
                 # by this author.
                 only = [row.hostname for row in hostnames]
-                only.extend(["cluster/%s" % c.name for c in clusternames])
+                only.extend(["clusters/%s" % c.name for c in clusternames])
                 nothing_to_do = not bool(only)
             else:
                 nothing_to_do = not hostnames.count() and not clusternames.count()
