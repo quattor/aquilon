@@ -57,7 +57,6 @@ class MachineSpecs(Base):
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
-    comments = deferred(Column(String(255), nullable=True))
 
     # This is a one-to-one relation, so we need uselist=False on the backref
     model = relation(Model, innerjoin=True, foreign_keys=model_id,

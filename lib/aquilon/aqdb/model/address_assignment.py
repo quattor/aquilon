@@ -19,7 +19,7 @@
 from datetime import datetime
 import re
 
-from sqlalchemy import (Column, Integer, String, DateTime, ForeignKey, Sequence,
+from sqlalchemy import (Column, Integer, DateTime, ForeignKey, Sequence,
                         UniqueConstraint, Index)
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import relation, backref, deferred
@@ -75,8 +75,6 @@ class AddressAssignment(Base):
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
-
-    comments = deferred(Column(String(255), nullable=True))
 
     interface = relation(Interface, innerjoin=True,
                          backref=backref('assignments', order_by=[_label],

@@ -19,7 +19,7 @@
 from datetime import datetime
 import socket
 
-from sqlalchemy import (Column, Integer, String, DateTime, Sequence, ForeignKey,
+from sqlalchemy import (Column, Integer, DateTime, Sequence, ForeignKey,
                         UniqueConstraint)
 from sqlalchemy.orm import relation, deferred, backref
 from sqlalchemy.ext.orderinglist import ordering_list
@@ -58,7 +58,6 @@ class ServiceInstanceServer(Base):
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
-    comments = deferred(Column(String(255), nullable=True))
 
     service_instance = relation(ServiceInstance, innerjoin=True,
                                 backref=backref("servers",
