@@ -50,7 +50,7 @@ def get_feature_link(session, feature, model, interface_name, personality):
 
 
 def set_parameter(session, param_holder, feature, model, interface_name,
-                  path, value, compel=False, preclude=False):
+                  path, value, comments=None, compel=False, preclude=False):
     """
         Handles add parameter as well as update parameter. Parmeters for features
         will be stored as part of personality as features/<feature_name>/<path>
@@ -64,6 +64,9 @@ def set_parameter(session, param_holder, feature, model, interface_name,
             raise NotFoundException("No parameter of path=%s defined." % path)
 
         dbparameter = Parameter(holder=param_holder, value={})
+
+    if comments is not None:
+        dbparameter.comments = comments
 
     dblink = None
     if feature:

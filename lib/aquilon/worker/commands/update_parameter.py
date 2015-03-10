@@ -26,10 +26,5 @@ class CommandUpdateParameter(CommandAddParameter):
 
     def process_parameter(self, session, param_holder, feature, model, interface,
                           path, value, comments):
-
-        dbparameter = set_parameter(session, param_holder, feature, model, interface,
-                                    path, value, compel=True)
-        if comments is not None:
-            dbparameter.comments = comments
-
-        return dbparameter
+        return set_parameter(session, param_holder, feature, model, interface,
+                             path, value, comments=comments, compel=True)
