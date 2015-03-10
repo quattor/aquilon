@@ -385,7 +385,7 @@ class TestUpdateMachine(TestBrokerCommand):
         # Initially the VM is on utecl1, test_share_1 is not used on utecl13
         self.searchoutput(out,
                           r'Share: test_share_1\s*'
-                          r'Comments: updated comment\s*'
+                          r'Comments: New share comments\s*'
                           r'Bound to: ESX Cluster utecl1\s*'
                           r'Latency threshold: 30\s*'
                           r'Server: lnn30f1\s*'
@@ -395,7 +395,7 @@ class TestUpdateMachine(TestBrokerCommand):
                           command)
         self.searchoutput(out,
                           r'Share: test_share_1\s*'
-                          r'Comments: updated comment\s*'
+                          r'Comments: New share comments\s*'
                           r'Bound to: ESX Cluster utecl13\s*'
                           r'Latency threshold: 30\s*'
                           r'Server: lnn30f1\s*'
@@ -417,7 +417,7 @@ class TestUpdateMachine(TestBrokerCommand):
         # utecl1
         self.searchoutput(out,
                           r'Share: test_share_1\s*'
-                          r'Comments: updated comment\s*'
+                          r'Comments: New share comments\s*'
                           r'Bound to: ESX Cluster utecl1\s*'
                           r'Latency threshold: 30\s*'
                           r'Server: lnn30f1\s*'
@@ -427,7 +427,7 @@ class TestUpdateMachine(TestBrokerCommand):
                           command)
         self.searchoutput(out,
                           r'Share: test_share_1\s*'
-                          r'Comments: updated comment\s*'
+                          r'Comments: New share comments\s*'
                           r'Bound to: ESX Cluster utecl13\s*'
                           r'Latency threshold: 30\s*'
                           r'Server: lnn30f1\s*'

@@ -39,7 +39,7 @@ class TestUpdateNetworkEnvironment(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "Network Environment: utcolo", command)
         self.matchoutput(out, "Building: ut", command)
-        self.matchoutput(out, "Comments: Unit test colo environment", command)
+        self.matchoutput(out, "Comments: Some other netenv comments", command)
 
     def test_110_clear_location(self):
         command = ["update", "network", "environment",
@@ -53,7 +53,7 @@ class TestUpdateNetworkEnvironment(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "Network Environment: excx", command)
         self.matchclean(out, "Building:", command)
-        self.matchoutput(out, "Comments: Exchange X", command)
+        self.matchoutput(out, "Comments: Some netenv comments", command)
 
     def test_200_del_excx(self):
         command = ["del", "network", "environment",

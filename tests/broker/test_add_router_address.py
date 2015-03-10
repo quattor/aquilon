@@ -31,7 +31,8 @@ class TestAddRouterAddress(TestBrokerCommand):
         net = self.net["verari_eth1"]
         command = ["add", "router", "address", "--ip", net.gateway,
                    "--fqdn", "ut3gd1r04-v109-hsrp.aqd-unittest.ms.com",
-                   "--building", "ut", "--comments", "Test router"]
+                   "--building", "ut",
+                   "--comments", "Some router address comments"]
         self.noouttest(command)
 
     def test_105_show_router(self):
@@ -44,7 +45,7 @@ class TestAddRouterAddress(TestBrokerCommand):
                          command)
         self.matchoutput(out, "Network: %s [%s]" % (net.name, net), command)
         self.matchoutput(out, "Network Environment: internal", command)
-        self.matchoutput(out, "Comments: Test router", command)
+        self.matchoutput(out, "Comments: Some router address comments", command)
 
     def test_105_show_network(self):
         net = self.net["verari_eth1"]
@@ -64,7 +65,8 @@ class TestAddRouterAddress(TestBrokerCommand):
         ip = net[3]
         command = ["add", "router", "address", "--ip", ip,
                    "--fqdn", "ut3gd1r01-v111-hsrp.aqd-unittest.ms.com",
-                   "--building", "ut", "--comments", "Test router"]
+                   "--building", "ut",
+                   "--comments", "Some other router address comments"]
         self.noouttest(command)
 
     def test_120_add_zebra_routers(self):

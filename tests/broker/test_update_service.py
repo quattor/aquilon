@@ -29,12 +29,12 @@ class TestUpdateService(TestBrokerCommand):
 
     def test_100_updateafsservice(self):
         command = ["update_service", "--service", "afs", "--max_clients", 2500,
-                   "--comments", "Global AFS comments"]
+                   "--comments", "New service comments"]
         self.noouttest(command)
 
     def test_101_update_instance_comments(self):
         command = ["update_service", "--service", "afs", "--instance", "q.ny.ms.com",
-                   "--comments", "Other instance comments"]
+                   "--comments", "New instance comments"]
         self.noouttest(command)
 
     def test_105_verifyupdateafsservice(self):
@@ -44,18 +44,18 @@ class TestUpdateService(TestBrokerCommand):
         self.matchoutput(out, "Default Maximum Client Count: 2500", command)
         self.matchoutput(out, "Service: afs Instance: q.ny", command)
         self.matchoutput(out, "Maximum Client Count: Default (2500)", command)
-        self.searchoutput(out, "^  Comments: Global AFS comments", command)
+        self.searchoutput(out, "^  Comments: New service comments", command)
         self.searchoutput(out,
                           r'Service: afs Instance: q\.ny\.ms\.com$\n'
                           r'(    .*$\n)+'
-                          r'^    Comments: Other instance comments',
+                          r'^    Comments: New instance comments',
                           command)
 
     def test_105_verify_instance_comment(self):
         command = ["show_service", "--service", "afs", "--instance", "q.ny.ms.com"]
         out = self.commandtest(command)
-        self.matchoutput(out, "Other instance comments", command)
-        self.matchclean(out, "Global AFS comments", command)
+        self.matchoutput(out, "New instance comments", command)
+        self.matchclean(out, "New service comments", command)
 
     def test_110_preverifybootserverservice(self):
         command = "show service --service bootserver"

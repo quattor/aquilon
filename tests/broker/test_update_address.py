@@ -29,18 +29,18 @@ class TestUpdateAddress(TestBrokerCommand):
 
     def test_100_update_reverse(self):
         self.dsdb_expect_update("arecord15.aqd-unittest.ms.com",
-                                comments="Test comment")
+                                comments="Some address comments")
         command = ["update", "address",
                    "--fqdn", "arecord15.aqd-unittest.ms.com",
                    "--reverse_ptr", "arecord14.aqd-unittest.ms.com",
-                   "--comments", "Test comment"]
+                   "--comments", "Some address comments"]
         self.noouttest(command)
         self.dsdb_verify()
 
     def test_105_verify_arecord15(self):
         command = ["show", "fqdn", "--fqdn", "arecord15.aqd-unittest.ms.com"]
         out = self.commandtest(command)
-        self.matchoutput(out, "Comments: Test comment", command)
+        self.matchoutput(out, "Comments: Some address comments", command)
         self.matchoutput(out, "Reverse PTR: arecord14.aqd-unittest.ms.com",
                          command)
 

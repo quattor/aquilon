@@ -29,14 +29,14 @@ class TestAddCpu(TestBrokerCommand):
 
     def test_100_add_utcpu(self):
         command = ["add", "cpu", "--cpu", "utcpu", "--vendor", "intel",
-                   "--speed", "1000", "--comments", "unit test cpu"]
+                   "--speed", "1000", "--comments", "Some CPU comments"]
         self.noouttest(command)
 
     def test_105_show_utcpu(self):
         command = "show cpu --cpu utcpu --speed 1000 --vendor intel"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Cpu: intel utcpu 1000 MHz", command)
-        self.matchoutput(out, "Comments: unit test cpu", command)
+        self.matchoutput(out, "Comments: Some CPU comments", command)
 
     def test_110_add_utcpu_1500(self):
         command = "add cpu --cpu utcpu_1500 --vendor intel --speed 1500"
@@ -54,7 +54,7 @@ class TestAddCpu(TestBrokerCommand):
 
     def test_200_add_utcpu_again(self):
         command = ["add", "cpu", "--cpu", "utcpu", "--vendor", "intel",
-                   "--speed", "1000", "--comments", "unit test cpu"]
+                   "--speed", "1000", "--comments", "Some CPU comments"]
         self.badrequesttest(command)
 
 if __name__ == '__main__':

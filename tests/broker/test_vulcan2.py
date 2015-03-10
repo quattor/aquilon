@@ -461,7 +461,6 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
                    "--mountpoint=/mnt", "--blockdevice=/dev/foo/bar",
                    "--bootmount",
                    "--dumpfreq=1", "--fsckpass=3", "--options=ro",
-                   "--comments=testing",
                    "--resourcegroup=utmc8as1"]
         err = self.badrequesttest(command)
         self.matchoutput(err, "Resource's filesystem type "

@@ -34,10 +34,10 @@ class TestUpdateInterface(TestBrokerCommand):
         oldmac = self.net["unknown0"].usable[0].mac
         mac = self.net["unknown0"].usable[11].mac
         self.dsdb_expect_update(self.badhost, "eth0", mac=mac, fail=True,
-                                comments="Updated interface comments")
+                                comments="New interface comments")
         command = ["update", "interface", "--interface", "eth0",
                    "--machine", "ut3c5n10", "--mac", mac,
-                   "--comments", "Updated interface comments"]
+                   "--comments", "New interface comments"]
         out = self.badrequesttest(command)
         self.dsdb_verify()
         self.matchoutput(out, "DSDB update failed", command)
@@ -48,10 +48,10 @@ class TestUpdateInterface(TestBrokerCommand):
     def test_105_update_ut3c5n10_eth0_mac_good(self):
         mac = self.net["unknown0"].usable[11].mac
         self.dsdb_expect_update("unittest02.one-nyp.ms.com", "eth0", mac=mac,
-                                comments="Updated interface comments")
+                                comments="New interface comments")
         self.noouttest(["update", "interface", "--interface", "eth0",
                         "--machine", "ut3c5n10", "--mac", mac,
-                        "--comments", "Updated interface comments"])
+                        "--comments", "New interface comments"])
         self.dsdb_verify()
 
     def test_110_update_ut3c5n10_eth0_ip_bad(self):
@@ -198,10 +198,10 @@ class TestUpdateInterface(TestBrokerCommand):
     def test_130_update_chassis(self):
         mac = self.net["unknown0"].usable[24].mac
         self.dsdb_expect_update("ut3c5.aqd-unittest.ms.com", "oa", mac=mac,
-                                comments="Chassis interface comments")
+                                comments="New chassis interface comments")
         command = ["update", "interface", "--chassis", "ut3c5",
                    "--interface", "oa", "--mac", mac,
-                   "--comments", "Chassis interface comments"]
+                   "--comments", "New chassis interface comments"]
         self.noouttest(command)
         self.dsdb_verify()
 
@@ -418,7 +418,7 @@ class TestUpdateInterface(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Machine: ut3c5n10", command)
         self.matchoutput(out, "Model Type: blade", command)
-        self.matchoutput(out, "Comments: Updated interface comments", command)
+        self.matchoutput(out, "Comments: New interface comments", command)
         self.searchoutput(out, r"Interface: eth0 %s$" %
                           self.net["unknown0"].usable[11].mac.lower(), command)
         self.matchoutput(out, "Provides: unittest02.one-nyp.ms.com [%s]" %
@@ -522,7 +522,7 @@ class TestUpdateInterface(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "Interface: oa %s" % new_mac, command)
         self.matchclean(out, old_mac, command)
-        self.matchoutput(out, "Comments: Chassis interface comments", command)
+        self.matchoutput(out, "Comments: New chassis interface comments", command)
 
     def test_300_verify_rename(self):
         command = ["show", "network_device", "--network_device", "ut3gd1r04"]

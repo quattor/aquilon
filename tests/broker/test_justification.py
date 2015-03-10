@@ -45,8 +45,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
             self.create_personality("aquilon", personality, **kwargs)
 
         command = ["add", "feature", "--feature", "testfeature",
-                   "--type", "host", "--comment", "Test comment",
-                   "--grn", GRN, "--visibility", "public"]
+                   "--type", "host", "--grn", GRN, "--visibility", "public"]
         self.noouttest(command)
 
     def test_110_host_setup(self):
@@ -582,8 +581,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
 
     def test_800_bind_feature_restricted(self):
         command = ["add", "feature", "--feature", "nonpublicfeature",
-                   "--type", "host", "--comment", "Test comment",
-                   "--grn", "grn:/ms/ei/aquilon/unittest"]
+                   "--type", "host", "--grn", "grn:/ms/ei/aquilon/unittest"]
         self.noouttest(command)
 
     def test_810_bind_feature_restricted_qa(self):

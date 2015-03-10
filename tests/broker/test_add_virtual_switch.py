@@ -81,13 +81,13 @@ class TestAddVirtualSwitch(TestBrokerCommand):
 
     def test_120_add_utvswitch2(self):
         self.noouttest(["add_virtual_switch", "--virtual_switc", "utvswitch2",
-                        "--comments", "Virtual switch comments"])
+                        "--comments", "Some virtual switch comments"])
 
     def test_125_verify_utvswitch2(self):
         command = ["show_virtual_switch", "--virtual_switch", "utvswitch2"]
         out = self.commandtest(command)
         self.matchoutput(out, "Virtual Switch: utvswitch2", command)
-        self.matchoutput(out, "Comments: Virtual switch comments", command)
+        self.matchoutput(out, "Comments: Some virtual switch comments", command)
         self.matchclean(out, "Port Group", command)
 
     def test_125_verify_all(self):
@@ -158,13 +158,13 @@ class TestAddVirtualSwitch(TestBrokerCommand):
     def test_300_update_utvswitch2(self):
         self.noouttest(["update_virtual_switch",
                         "--virtual_switch", "utvswitch2",
-                        "--comments", "Other vswitch comments"])
+                        "--comments", "Some other vswitch comments"])
 
     def test_305_verify_update_utvswitch2(self):
         command = ["show_virtual_switch", "--virtual_switch", "utvswitch2"]
         out = self.commandtest(command)
         self.matchoutput(out, "Virtual Switch: utvswitch2", command)
-        self.matchoutput(out, "Comments: Other vswitch comments", command)
+        self.matchoutput(out, "Comments: Some other vswitch comments", command)
         self.matchclean(out, "Port Group", command)
 
     def test_310_clear_comments(self):

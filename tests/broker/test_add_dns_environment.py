@@ -29,14 +29,14 @@ class TestAddDnsEnvironment(TestBrokerCommand):
 
     def test_100_add_utenv(self):
         command = ["add", "dns", "environment", "--dns_environment", "ut-env",
-                   "--comment", "Unit test environment"]
+                   "--comments", "Some DNS env comments"]
         self.noouttest(command)
 
     def test_105_show_utenv(self):
         command = ["show", "dns", "environment", "--dns_environment", "ut-env"]
         out = self.commandtest(command)
         self.matchoutput(out, "DNS Environment: ut-env", command)
-        self.matchoutput(out, "Comments: Unit test environment", command)
+        self.matchoutput(out, "Comments: Some DNS env comments", command)
 
     def test_110_add_excx(self):
         command = ["add", "dns", "environment", "--dns_environment", "excx"]
@@ -60,7 +60,7 @@ class TestAddDnsEnvironment(TestBrokerCommand):
         self.matchoutput(out, "DNS Environment: internal", command)
         self.matchoutput(out, "DNS Environment: external", command)
         self.matchoutput(out, "DNS Environment: ut-env", command)
-        self.matchoutput(out, "Comments: Unit test environment", command)
+        self.matchoutput(out, "Comments: Some DNS env comments", command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddDnsEnvironment)

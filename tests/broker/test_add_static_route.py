@@ -43,7 +43,7 @@ class TestAddStaticRoute(TestBrokerCommand, MachineTestMixin):
         gw = self.net["routing1"].usable[-1]
         command = ["add", "static", "route", "--gateway", gw,
                    "--ip", "192.168.250.0", "--prefixlen", "23",
-                   "--comments", "Route comments"]
+                   "--comments", "Some route comments"]
         self.noouttest(command)
 
     def test_100_add_route1_personality(self):
@@ -114,7 +114,7 @@ class TestAddStaticRoute(TestBrokerCommand, MachineTestMixin):
         out = self.commandtest(command)
         self.matchoutput(out, "Static Route: 192.168.250.0/23 gateway %s" % gw,
                          command)
-        self.matchoutput(out, "Comments: Route comments", command)
+        self.matchoutput(out, "Comments: Some route comments", command)
         self.matchclean(out, "192.168.252.0", command)
 
     def test_200_show_network(self):
@@ -131,7 +131,7 @@ class TestAddStaticRoute(TestBrokerCommand, MachineTestMixin):
                           command)
         self.searchoutput(out,
                           r'Static Route: 192\.168\.250\.0/23 gateway %s'
-                          r'\s*Comments: Route comments' % gw,
+                          r'\s*Comments: Some route comments' % gw,
                           command)
         self.matchclean(out, "192.168.252.0", command)
 

@@ -233,7 +233,7 @@ class TestAddCluster(PersonalityTestMixin, TestBrokerCommand):
                    "--archetype=storagecluster", "--personality=metrocluster",
                    "--domain=unittest", "--down_hosts_threshold=1",
                    "--max_members=2",
-                   "--comments=Another test storage cluster"]
+                   "--comments=Some storage cluster comments"]
         self.noouttest(command)
 
     def test_55_verifyutstorage2(self):
@@ -247,7 +247,7 @@ class TestAddCluster(PersonalityTestMixin, TestBrokerCommand):
         self.matchoutput(out, "Personality: metrocluster Archetype: storagecluster",
                          command)
         self.matchoutput(out, "Domain: unittest", command)
-        self.matchoutput(out, "Comments: Another test storage cluster", command)
+        self.matchoutput(out, "Comments: Some storage cluster comments", command)
 
     def test_56_verifycatutstorage2(self):
         # This archetype is non-compilable and should not have a plenary!

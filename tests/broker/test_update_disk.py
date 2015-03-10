@@ -29,7 +29,7 @@ class TestUpdateDisk(TestBrokerCommand):
 
     def test_100_update_ut3c1n3_sda(self):
         command = ["update_disk", "--machine", "ut3c1n3", "--disk", "sda",
-                   "--size", "50", "--comments", "Other disk comments",
+                   "--size", "50", "--comments", "New disk comments",
                    "--controller", "sata", "--address", "0:0:0:0",
                    "--bus_address", "pci:0000:02:00.0"]
         self.noouttest(command)
@@ -46,7 +46,7 @@ class TestUpdateDisk(TestBrokerCommand):
                           r'Disk: sda 50 GB sata \(local\)\s*'
                           r'Address: 0:0:0:0\s*'
                           r'Controller Bus Address: pci:0000:02:00.0\s*'
-                          r'Comments: Other disk comments$',
+                          r'Comments: New disk comments$',
                           command)
         self.searchoutput(out,
                           r'Disk: c0d1 34 GB cciss \(local\) \[boot\]\s*'

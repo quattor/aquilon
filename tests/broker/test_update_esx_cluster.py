@@ -47,7 +47,7 @@ class TestUpdateESXCluster(TestBrokerCommand):
     def test_200_updateutecl2(self):
         command = ["update_esx_cluster", "--cluster=utecl2",
                    "--max_members=97",
-                   "--comments", "ESX Cluster with a new comment",
+                   "--comments", "New ESX cluster comments",
                    "--memory_capacity", 16384,
                    "--down_hosts_threshold=0"]
         out = self.statustest(command)
@@ -66,7 +66,7 @@ class TestUpdateESXCluster(TestBrokerCommand):
                          command)
         self.matchoutput(out, "Personality: vulcan-1g-desktop-prod Archetype: esx_cluster",
                          command)
-        self.matchoutput(out, "Comments: ESX Cluster with a new comment",
+        self.matchoutput(out, "Comments: New ESX cluster comments",
                          command)
 
     def test_220_verifysearchoverride(self):

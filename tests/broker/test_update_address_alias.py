@@ -31,7 +31,7 @@ class TestUpdateAddressAlias(TestBrokerCommand):
         command = ["update", "address",  "alias",
                    "--fqdn", "addralias1.aqd-unittest.ms.com",
                    "--target", "arecord13.aqd-unittest.ms.com",
-                   "--comments", "add a comment"]
+                   "--comments", "New address alias comments"]
         self.noouttest(command)
 
     def test_120_verify_add_comment(self):
@@ -39,13 +39,13 @@ class TestUpdateAddressAlias(TestBrokerCommand):
                    "--fqdn", "addralias1.aqd-unittest.ms.com",
                    "--target", "arecord13.aqd-unittest.ms.com"]
         out = self.commandtest(command)
-        self.matchoutput(out, "Comments: add a comment", command)
+        self.matchoutput(out, "Comments: New address alias comments", command)
 
     def test_130_update_to_change_comment(self):
         command = ["update", "address",  "alias",
                    "--fqdn", "addralias1.aqd-unittest.ms.com",
                    "--target", "arecord14.aqd-unittest.ms.com",
-                   "--comments", "update a comment"]
+                   "--comments", "New other address alias comments"]
         self.noouttest(command)
 
     def test_140_verify_update_to_change_comment(self):
@@ -53,7 +53,7 @@ class TestUpdateAddressAlias(TestBrokerCommand):
                    "--fqdn", "addralias1.aqd-unittest.ms.com",
                    "--target", "arecord14.aqd-unittest.ms.com"]
         out = self.commandtest(command)
-        self.matchoutput(out, "Comments: update a comment", command)
+        self.matchoutput(out, "Comments: New other address alias comments", command)
 
     def test_150_update_to_no_comment(self):
         command = ["update", "address", "alias",

@@ -38,7 +38,7 @@ class TestAddFilesystem(TestBrokerCommand):
                    "--mountpoint=/mnt", "--blockdevice=/dev/foo/bar",
                    "--bootmount",
                    "--dumpfreq=1", "--fsckpass=3", "--options=ro",
-                   "--comments=testing",
+                   "--comments=Some filesystem comments",
                    "--hostname=server1.aqd-unittest.ms.com"]
         self.successtest(command)
 
@@ -53,7 +53,7 @@ class TestAddFilesystem(TestBrokerCommand):
         self.matchoutput(out, "Mountpoint: /mnt", command)
         self.matchoutput(out, "Dump Freq: 1", command)
         self.matchoutput(out, "Fsck Pass: 3", command)
-        self.matchoutput(out, "Comments: testing", command)
+        self.matchoutput(out, "Comments: Some filesystem comments", command)
 
         command = ["cat", "--filesystem=fs1",
                    "--hostname=server1.aqd-unittest.ms.com"]
@@ -144,7 +144,7 @@ class TestAddFilesystem(TestBrokerCommand):
                    "--mountpoint=/mnt", "--blockdevice=/dev/foo/bar",
                    "--nobootmount",
                    "--dumpfreq=1", "--fsckpass=3", "--options=rw",
-                   "--comments=cluster testing",
+                   "--comments=Some cluster filesystem comments",
                    "--cluster=utvcs1"]
         self.successtest(command)
 
@@ -159,7 +159,7 @@ class TestAddFilesystem(TestBrokerCommand):
         self.matchoutput(out, "Mountpoint: /mnt", command)
         self.matchoutput(out, "Dump Freq: 1", command)
         self.matchoutput(out, "Fsck Pass: 3", command)
-        self.matchoutput(out, "Comments: cluster testing", command)
+        self.matchoutput(out, "Comments: Some cluster filesystem comments", command)
 
         command = ["show_filesystem", "--all"]
         out = self.commandtest(command)

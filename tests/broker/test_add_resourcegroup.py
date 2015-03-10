@@ -50,7 +50,7 @@ class TestAddResourceGroup(TestBrokerCommand):
                    "--mountpoint=/mnt", "--blockdevice=/dev/foo/bar",
                    "--bootmount",
                    "--dumpfreq=1", "--fsckpass=3", "--options=ro",
-                   "--comments=testing",
+                   "--comments=Some resourcegroup comments",
                    "--resourcegroup=utvcs1as1", "--cluster=utvcs1"]
         self.successtest(command)
 
@@ -65,7 +65,7 @@ class TestAddResourceGroup(TestBrokerCommand):
         self.matchoutput(out, "Mountpoint: /mnt", command)
         self.matchoutput(out, "Dump Freq: 1", command)
         self.matchoutput(out, "Fsck Pass: 3", command)
-        self.matchoutput(out, "Comments: testing", command)
+        self.matchoutput(out, "Comments: Some resourcegroup comments", command)
 
     def test_130_show_resourcegroup(self):
         command = ["show", "resourcegroup", "--resourcegroup", "utvcs1as1"]

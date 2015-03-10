@@ -70,7 +70,7 @@ class TestAddMetaCluster(PersonalityTestMixin, TestBrokerCommand):
         command = ["add_metacluster", "--metacluster=utmc2",
                    "--max_members=99", "--building=ut",
                    "--domain=unittest",
-                   "--comments", "MetaCluster with a comment"]
+                   "--comments", "Some metacluster comments"]
         self.noouttest(command)
 
     def test_115_show_utmc2(self):
@@ -78,7 +78,7 @@ class TestAddMetaCluster(PersonalityTestMixin, TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "MetaCluster: utmc2", command)
         self.matchoutput(out, "Max members: 99", command)
-        self.matchoutput(out, "Comments: MetaCluster with a comment", command)
+        self.matchoutput(out, "Comments: Some metacluster comments", command)
 
     def test_115_show_utmc2_proto(self):
         command = "show metacluster --metacluster utmc2 --format proto"

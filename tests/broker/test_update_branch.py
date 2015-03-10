@@ -31,7 +31,7 @@ class TestUpdateBranch(TestBrokerCommand):
 
     def test_100_update_deployable(self):
         self.noouttest(["update", "domain", "--domain", "deployable",
-                        "--comments", "Updated Comments",
+                        "--comments", "New domain comments",
                         "--compiler_version=utpanc"])
 
     def test_105_verify_deployable(self):
@@ -39,7 +39,7 @@ class TestUpdateBranch(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Domain: deployable", command)
         self.searchoutput(out, r"Compiler: .*/panc-utpanc.jar", command)
-        self.matchoutput(out, "Comments: Updated Comments", command)
+        self.matchoutput(out, "Comments: New domain comments", command)
 
     def test_110_update_prod(self):
         self.noouttest(["update", "domain", "--domain", "prod",

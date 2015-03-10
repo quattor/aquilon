@@ -30,7 +30,7 @@ class TestCountry(TestBrokerCommand):
     def test_100_add(self):
         command = ["add", "country", "--country", "ct", "--fullname",
                    "country example", "--continent", "na",
-                   "--comments", "test country"]
+                   "--comments", "Some country comments"]
         self.noouttest(command)
 
     def test_110_show_ct(self):
@@ -38,7 +38,7 @@ class TestCountry(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Country: ct", command)
         self.matchoutput(out, "  Fullname: country example", command)
-        self.matchoutput(out, "  Comments: test country", command)
+        self.matchoutput(out, "  Comments: Some country comments", command)
         self.matchoutput(out,
                          "  Location Parents: [Organization ms, Hub ny, "
                          "Continent na]",

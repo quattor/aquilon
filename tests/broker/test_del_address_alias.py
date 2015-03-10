@@ -43,7 +43,8 @@ class TestDelAddressAlias(TestBrokerCommand):
         self.matchoutput(out, "DNS Environment: internal", command)
         self.matchoutput(out, "Target: arecord14.aqd-unittest.ms.com", command)
         self.matchoutput(out, "Target: arecord15.aqd-unittest.ms.com", command)
-        self.matchoutput(out, "Comments: address alias record", command)
+        self.matchoutput(out, "Comments: Some other address alias comments",
+                         command)
 
     def test_200_del_addralias_with_nonexistent_target(self):
         command = ["del", "address", "alias",
