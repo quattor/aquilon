@@ -26,11 +26,11 @@ from brokertest import TestBrokerCommand
 
 
 class TestUpdateMachine(TestBrokerCommand):
-    def test_100_updateut3c1n3(self):
+    def test_1000_update_ut3c1n3(self):
         self.noouttest(["update", "machine", "--machine", "ut3c1n3",
                         "--slot", "10", "--serial", "USN99C5553"])
 
-    def testverifyupdateut3c1n3(self):
+    def test_1005_show_ut3c1n3(self):
         command = "show machine --machine ut3c1n3"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Machine: ut3c1n3", command)
@@ -42,7 +42,7 @@ class TestUpdateMachine(TestBrokerCommand):
         self.matchoutput(out, "Memory: 8192 MB", command)
         self.matchoutput(out, "Serial: USN99C5553", command)
 
-    def testverifycatut3c1n3(self):
+    def test_1005_cat_ut3c1n3(self):
         command = "cat --machine ut3c1n3"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, '"location" = "ut.ny.na";', command)
@@ -63,24 +63,24 @@ class TestUpdateMachine(TestBrokerCommand):
         self.matchoutput(out, '"chassis" = "ut3c1.aqd-unittest.ms.com";', command)
         self.matchoutput(out, '"slot" = 10;', command)
 
-    def testupdateut3c5n10(self):
+    def test_1010_update_ut3c5n10(self):
         self.noouttest(["update", "machine",
                         "--hostname", "unittest02.one-nyp.ms.com",
                         "--chassis", "ut3c5.aqd-unittest.ms.com", "--slot", "20"])
 
-    def testverifyshowslot(self):
+    def test_1015_search_slot(self):
         command = "search machine --slot 20 --fullinfo"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Machine: ut3c5n10", command)
         self.matchoutput(out, "Model Type: blade", command)
 
-    def testverifyshowchassisslot(self):
+    def test_1015_search_chassis_slot(self):
         command = "search machine --chassis ut3c5.aqd-unittest.ms.com --slot 20 --fullinfo"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Machine: ut3c5n10", command)
         self.matchoutput(out, "Model Type: blade", command)
 
-    def testverifyupdateut3c5n10(self):
+    def test_1015_show_ut3c5n10(self):
         command = "show machine --machine ut3c5n10"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Machine: ut3c5n10", command)
@@ -92,7 +92,7 @@ class TestUpdateMachine(TestBrokerCommand):
         self.matchoutput(out, "Memory: 8192 MB", command)
         self.matchoutput(out, "Serial: 99C5553", command)
 
-    def testverifycatut3c5n10(self):
+    def test_1015_cat_ut3c5n10(self):
         command = "cat --machine ut3c5n10"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, '"location" = "ut.ny.na";', command)
@@ -113,29 +113,21 @@ class TestUpdateMachine(TestBrokerCommand):
         self.matchoutput(out, '"chassis" = "ut3c5.aqd-unittest.ms.com";', command)
         self.matchoutput(out, '"slot" = 20;', command)
 
-    def testupdateut3c1n4(self):
+    def test_1020_update_ut3c1n4_serial(self):
         self.noouttest(["update", "machine", "--machine", "ut3c1n4",
                         "--serial", "USNKPDZ407"])
 
-    def testupdateut3c1n4cpubadvendor(self):
-        self.notfoundtest(["update", "machine", "--machine", "ut3c1n4",
-                           "--cpuvendor", "no-such-vendor"])
-
-    def testupdateut3c1n4cpubadname(self):
-        self.notfoundtest(["update", "machine", "--machine", "ut3c1n4",
-                           "--cpuname", "no-such-cpu"])
-
-    def testupdateut3c1n4cpureal(self):
+    def test_1021_update_ut3c1n4_cpu(self):
         self.noouttest(["update", "machine", "--machine", "ut3c1n4",
                         "--cpuname", "xeon_3000"])
 
-    def testupdateut3c1n4rack(self):
+    def test_1022_update_ut3c1n4_rack(self):
         # Changing the rack will change the location of the plenary, so we
         # can test if the host profile gets written
         self.noouttest(["update", "machine", "--machine", "ut3c1n4",
                         "--rack", "ut4"])
 
-    def testverifyupdateut3c1n4(self):
+    def test_1025_show_ut3c1n4(self):
         command = "show machine --machine ut3c1n4"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Machine: ut3c1n4", command)
@@ -146,7 +138,7 @@ class TestUpdateMachine(TestBrokerCommand):
         self.matchoutput(out, "Memory: 8192 MB", command)
         self.matchoutput(out, "Serial: USNKPDZ407", command)
 
-    def testverifycatut3c1n4(self):
+    def test_1025_cat_ut3c1n4(self):
         command = "cat --machine ut3c1n4"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, '"location" = "ut.ny.na";', command)
@@ -165,14 +157,14 @@ class TestUpdateMachine(TestBrokerCommand):
                           r'create\("hardware/cpu/intel/xeon_3000"\s*\)\s*\);',
                           command)
 
-    def testverifycatunittest01(self):
+    def test_1025_cat_unittest01(self):
         # There should be no host template present after the update_machine
         # command
         command = ["cat", "--hostname", "unittest01.one-nyp.ms.com"]
         out = self.notfoundtest(command)
         self.matchoutput(out, "not found", command)
 
-    def testclearchassis(self):
+    def test_1030_clearchassis(self):
         command = ["update", "machine", "--machine", "ut9s03p1",
                    "--chassis", "ut9c1.aqd-unittest.ms.com", "--slot", "1"]
         self.noouttest(command)
@@ -180,14 +172,14 @@ class TestUpdateMachine(TestBrokerCommand):
                    "--clearchassis"]
         self.noouttest(command)
 
-    def testverifyclearchassis(self):
+    def test_1031_verify_clearchassis(self):
         command = ["show", "machine", "--machine", "ut9s03p1"]
         out = self.commandtest(command)
         self.matchoutput(out, "Machine: ut9s03p1", command)
         self.matchoutput(out, "Model Type: blade", command)
         self.matchclean(out, "Chassis: ", command)
 
-    def testclearchassisplusnew(self):
+    def test_1032_clearchassis_plus_new(self):
         command = ["update", "machine", "--machine", "ut9s03p2",
                    "--chassis", "ut9c5.aqd-unittest.ms.com", "--slot", "1"]
         self.noouttest(command)
@@ -196,7 +188,7 @@ class TestUpdateMachine(TestBrokerCommand):
                    "--chassis", "ut9c1.aqd-unittest.ms.com", "--slot", "2"]
         self.noouttest(command)
 
-    def testverifyclearchassisplusnew(self):
+    def test_1033_verify_clearchassis_plus_new(self):
         command = ["show", "machine", "--machine", "ut9s03p2"]
         out = self.commandtest(command)
         self.matchoutput(out, "Machine: ut9s03p2", command)
@@ -204,7 +196,7 @@ class TestUpdateMachine(TestBrokerCommand):
         self.matchoutput(out, "Chassis: ut9c1.aqd-unittest.ms.com", command)
         self.matchoutput(out, "Slot: 2", command)
 
-    def testtruechassisupdate(self):
+    def test_1034_true_chassis_update(self):
         command = ["update", "machine", "--machine", "ut9s03p3",
                    "--chassis", "ut9c5.aqd-unittest.ms.com", "--slot", "2"]
         self.noouttest(command)
@@ -212,7 +204,7 @@ class TestUpdateMachine(TestBrokerCommand):
                    "--chassis", "ut9c1.aqd-unittest.ms.com", "--slot", "3"]
         self.noouttest(command)
 
-    def testverifytruechassisupdate(self):
+    def test_1035_verify_true_chassis_update(self):
         command = ["show", "machine", "--machine", "ut9s03p3"]
         out = self.commandtest(command)
         self.matchoutput(out, "Machine: ut9s03p3", command)
@@ -220,12 +212,12 @@ class TestUpdateMachine(TestBrokerCommand):
         self.matchoutput(out, "Chassis: ut9c1.aqd-unittest.ms.com", command)
         self.matchoutput(out, "Slot: 3", command)
 
-    def testsimplechassisupdate(self):
+    def test_1040_simple_chassis_update(self):
         command = ["update", "machine", "--machine", "ut9s03p4",
                    "--chassis", "ut9c1.aqd-unittest.ms.com", "--slot", "4"]
         self.noouttest(command)
 
-    def testverifysimplechassisupdate(self):
+    def test_1041_verify_simple_chassis_update(self):
         command = ["show", "machine", "--machine", "ut9s03p4"]
         out = self.commandtest(command)
         self.matchoutput(out, "Machine: ut9s03p4", command)
@@ -233,12 +225,12 @@ class TestUpdateMachine(TestBrokerCommand):
         self.matchoutput(out, "Chassis: ut9c1.aqd-unittest.ms.com", command)
         self.matchoutput(out, "Slot: 4", command)
 
-    def testsimplechassisupdate2(self):
+    def test_1042_simple_chassis_update2(self):
         command = ["update", "machine", "--machine", "ut9s03p5",
                    "--chassis", "ut9c1.aqd-unittest.ms.com", "--slot", "5"]
         self.noouttest(command)
 
-    def testverifysimplechassisupdate2(self):
+    def test_1043_verify_simple_chassis_update2(self):
         command = ["show", "machine", "--machine", "ut9s03p5"]
         out = self.commandtest(command)
         self.matchoutput(out, "Machine: ut9s03p5", command)
@@ -246,12 +238,12 @@ class TestUpdateMachine(TestBrokerCommand):
         self.matchoutput(out, "Chassis: ut9c1.aqd-unittest.ms.com", command)
         self.matchoutput(out, "Slot: 5", command)
 
-    def testsimplechassisupdate3(self):
+    def test_1044_simple_chassis_update3(self):
         command = ["update", "machine", "--machine", "ut9s03p6",
                    "--chassis", "ut9c1.aqd-unittest.ms.com", "--slot", "6"]
         self.noouttest(command)
 
-    def testverifsimplechassisupdate3(self):
+    def test_1045_verify_simple_chassis_update3(self):
         command = ["show", "machine", "--machine", "ut9s03p6"]
         out = self.commandtest(command)
         self.matchoutput(out, "Machine: ut9s03p6", command)
@@ -259,37 +251,7 @@ class TestUpdateMachine(TestBrokerCommand):
         self.matchoutput(out, "Chassis: ut9c1.aqd-unittest.ms.com", command)
         self.matchoutput(out, "Slot: 6", command)
 
-    def testmissingslot(self):
-        command = ["update", "machine", "--machine", "ut9s03p7",
-                   "--chassis", "ut9c1.aqd-unittest.ms.com"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out, "Option --chassis requires --slot information",
-                         command)
-
-    def testverifymissingslot(self):
-        command = ["show", "machine", "--machine", "ut9s03p7"]
-        out = self.commandtest(command)
-        self.matchoutput(out, "Machine: ut9s03p7", command)
-        self.matchoutput(out, "Model Type: blade", command)
-        self.matchclean(out, "Chassis: ", command)
-        self.matchclean(out, "Slot: ", command)
-
-    def testmissingchassis(self):
-        command = ["update", "machine", "--machine", "ut9s03p8",
-                   "--slot", "8"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out, "Option --slot requires --chassis information",
-                         command)
-
-    def testverifymissingchassis(self):
-        command = ["show", "machine", "--machine", "ut9s03p8"]
-        out = self.commandtest(command)
-        self.matchoutput(out, "Machine: ut9s03p8", command)
-        self.matchoutput(out, "Model Type: blade", command)
-        self.matchclean(out, "Chassis: ", command)
-        self.matchclean(out, "Slot: ", command)
-
-    def testdifferentrack(self):
+    def test_1050_different_rack(self):
         command = ["update", "machine", "--machine", "ut9s03p9",
                    "--chassis", "ut9c1.aqd-unittest.ms.com", "--slot", "9"]
         self.noouttest(command)
@@ -297,7 +259,7 @@ class TestUpdateMachine(TestBrokerCommand):
                    "--rack", "ut8"]
         self.noouttest(command)
 
-    def testverifydifferentrack(self):
+    def test_1055_verify_different_rack(self):
         command = ["show", "machine", "--machine", "ut9s03p9"]
         out = self.commandtest(command)
         self.matchoutput(out, "Machine: ut9s03p9", command)
@@ -306,7 +268,7 @@ class TestUpdateMachine(TestBrokerCommand):
         self.matchclean(out, "Slot: ", command)
         self.matchoutput(out, "Model Type: blade", command)
 
-    def testreuseslot(self):
+    def test_1060_reuse_slot(self):
         command = ["update", "machine", "--machine", "ut9s03p10",
                    "--chassis", "ut9c1.aqd-unittest.ms.com", "--slot", "10"]
         self.noouttest(command)
@@ -317,7 +279,7 @@ class TestUpdateMachine(TestBrokerCommand):
                    "--chassis", "ut9c1.aqd-unittest.ms.com", "--slot", "10"]
         self.noouttest(command)
 
-    def testverifyreuseslot(self):
+    def test_1065_verify_reuse_slot(self):
         command = ["show", "machine", "--machine", "ut9s03p10"]
         out = self.commandtest(command)
         self.matchoutput(out, "Machine: ut9s03p10", command)
@@ -325,7 +287,7 @@ class TestUpdateMachine(TestBrokerCommand):
         self.matchoutput(out, "Chassis: ut9c1.aqd-unittest.ms.com", command)
         self.matchoutput(out, "Slot: 10", command)
 
-    def testtakenslot(self):
+    def test_1070_taken_slot(self):
         command = ["update", "machine", "--machine", "ut9s03p11",
                    "--chassis", "ut9c1.aqd-unittest.ms.com", "--slot", "11"]
         self.noouttest(command)
@@ -335,7 +297,7 @@ class TestUpdateMachine(TestBrokerCommand):
         self.matchoutput(out, "Chassis ut9c1.aqd-unittest.ms.com slot 11 "
                               "already has machine ut9s03p11", command)
 
-    def testverifytakenslot(self):
+    def test_1075_verify_taken_slot(self):
         command = ["show", "machine", "--machine", "ut9s03p11"]
         out = self.commandtest(command)
         self.matchoutput(out, "Machine: ut9s03p11", command)
@@ -349,7 +311,7 @@ class TestUpdateMachine(TestBrokerCommand):
         self.matchclean(out, "Chassis: ", command)
         self.matchclean(out, "Slot: ", command)
 
-    def testmultislotclear(self):
+    def test_1080_multislot_clear(self):
         command = ["update", "machine", "--machine", "ut9s03p13",
                    "--chassis", "ut9c1.aqd-unittest.ms.com", "--slot", "13"]
         self.noouttest(command)
@@ -361,7 +323,7 @@ class TestUpdateMachine(TestBrokerCommand):
                    "--clearchassis"]
         self.noouttest(command)
 
-    def testverifymultislotclear(self):
+    def test_1085_verify_multislot_clear(self):
         command = ["show", "machine", "--machine", "ut9s03p13"]
         out = self.commandtest(command)
         self.matchoutput(out, "Machine: ut9s03p13", command)
@@ -369,7 +331,7 @@ class TestUpdateMachine(TestBrokerCommand):
         self.matchclean(out, "Chassis: ", command)
         self.matchclean(out, "Slot: ", command)
 
-    def testmultislotadd(self):
+    def test_1090_multislot_add(self):
         command = ["update", "machine", "--machine", "ut9s03p15",
                    "--multislot",
                    "--chassis", "ut9c2.aqd-unittest.ms.com", "--slot", "1"]
@@ -383,7 +345,7 @@ class TestUpdateMachine(TestBrokerCommand):
                    "--chassis", "ut9c2.aqd-unittest.ms.com", "--slot", "3"]
         self.noouttest(command)
 
-    def testverifymultislotadd(self):
+    def test_1095_verify_multislot_add(self):
         command = ["show", "machine", "--machine", "ut9s03p15"]
         out = self.commandtest(command)
         self.matchoutput(out, "Machine: ut9s03p15", command)
@@ -393,7 +355,7 @@ class TestUpdateMachine(TestBrokerCommand):
         self.matchoutput(out, "Slot: 2", command)
         self.matchoutput(out, "Slot: 3", command)
 
-    def testmultislotupdatefail(self):
+    def test_1100_multislot_update_fail(self):
         command = ["update", "machine", "--machine", "ut9s03p19",
                    "--chassis", "ut9c2.aqd-unittest.ms.com", "--slot", "4"]
         self.noouttest(command)
@@ -407,7 +369,7 @@ class TestUpdateMachine(TestBrokerCommand):
         self.matchoutput(out, "Use --multislot to support a machine in more "
                               "than one slot", command)
 
-    def testverifymultislotupdatefail(self):
+    def test_1105_verify_multislot_update_fail(self):
         command = ["show", "machine", "--machine", "ut9s03p19"]
         out = self.commandtest(command)
         self.matchoutput(out, "Machine: ut9s03p19", command)
@@ -417,23 +379,7 @@ class TestUpdateMachine(TestBrokerCommand):
         self.matchoutput(out, "Slot: 5", command)
         self.matchclean(out, "Slot: 6", command)
 
-    def testfailmissingcluster(self):
-        command = ["update_machine", "--machine=evm1",
-                   "--cluster=cluster-does-not-exist"]
-        out = self.notfoundtest(command)
-        self.matchoutput(out,
-                         "Cluster cluster-does-not-exist not found.",
-                         command)
-
-    def testfailchangemetacluster(self):
-        command = ["update_machine", "--machine=evm1", "--cluster=utecl13"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out,
-                         "Moving VMs between metaclusters is disabled by "
-                         "default.",
-                         command)
-
-    def testallowchangemetacluster_05(self):
+    def test_1110_metacluster_change_pre(self):
         command = ["show_share", "--all"]
         out = self.commandtest(command)
         # Initially the VM is on utecl1, test_share_1 is not used on utecl13
@@ -458,12 +404,12 @@ class TestUpdateMachine(TestBrokerCommand):
                           r'Machine Count: 0\s*',
                           command)
 
-    def testallowchangemetacluster_10(self):
+    def test_1111_metacluster_change(self):
         command = ["update_machine", "--machine=evm1", "--cluster=utecl13",
                    "--allow_metacluster_change"]
         self.noouttest(command)
 
-    def testallowchangemetacluster_15(self):
+    def test_1115_verify_shares(self):
         command = ["show_share", "--all"]
         out = self.commandtest(command)
 
@@ -490,18 +436,52 @@ class TestUpdateMachine(TestBrokerCommand):
                           r'Machine Count: 1\s*',
                           command)
 
-    def testallowchangemetacluster_20(self):
+    def test_1115_verify_search_machine(self):
         command = ["search_machine", "--machine=evm1", "--cluster=utecl13"]
         out = self.commandtest(command)
         self.matchoutput(out, "evm1", command)
 
-    def testallowchangemetacluster_30(self):
+    def test_1119_revert_metacluster_change(self):
         command = ["update_machine", "--machine=evm1", "--cluster=utecl1",
                    "--allow_metacluster_change"]
         # restore
         self.noouttest(command)
 
-    def testfailfullcluster(self):
+    def test_1120_update_ut3s01p2(self):
+        self.noouttest(["update", "machine", "--machine", "ut3s01p2",
+                        "--model", "hs21-8853", "--vendor", "ibm"])
+
+    def test_1125_show_ut3s01p2(self):
+        command = "show machine --machine ut3s01p2"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Machine: ut3s01p2", command)
+        self.matchoutput(out, "Model Type: blade", command)
+
+    def test_2000_bad_cpu_vendor(self):
+        self.notfoundtest(["update", "machine", "--machine", "ut3c1n4",
+                           "--cpuvendor", "no-such-vendor"])
+
+    def test_2000_bad_cpu_name(self):
+        self.notfoundtest(["update", "machine", "--machine", "ut3c1n4",
+                           "--cpuname", "no-such-cpu"])
+
+    def test_2000_missing_cluster(self):
+        command = ["update_machine", "--machine=evm1",
+                   "--cluster=cluster-does-not-exist"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out,
+                         "Cluster cluster-does-not-exist not found.",
+                         command)
+
+    def test_2000_change_metacluster(self):
+        command = ["update_machine", "--machine=evm1", "--cluster=utecl13"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Moving VMs between metaclusters is disabled by "
+                         "default.",
+                         command)
+
+    def test_2000_cluster_full(self):
         command = ["update_machine", "--machine=evm1", "--cluster=utecl3"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
@@ -509,37 +489,13 @@ class TestUpdateMachine(TestBrokerCommand):
                          "0 vmhosts and a down_hosts_threshold of 2",
                          command)
 
-    def testfailaddreadmachinetocluster(self):
+    def test_2000_phys_to_cluster(self):
         command = ["update_machine", "--machine=ut9s03p19", "--cluster=utecl1"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Cannot convert a physical machine to virtual.",
                          command)
 
-    def testrejectmachineuri(self):
-        command = ["update", "machine", "--machine", "ut3c1n9",
-                   "--uri", "file:///somepath/to/ovf"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out, "URI can be specified only for virtual "
-                         "appliances and the model's type is blade",
-                         command)
-
-    def testverifyrejectmachineuri(self):
-        command = ["show", "machine", "--machine", "ut3c1n9"]
-        out = self.commandtest(command)
-
-        self.searchclean(out, r"URI: file:///somepath/to/ovf", command)
-
-    def testupdateut3s01p2(self):
-        self.noouttest(["update", "machine", "--machine", "ut3s01p2",
-                        "--model", "hs21-8853", "--vendor", "ibm"])
-
-    def testverifyupdateut3s01p2(self):
-        command = "show machine --machine ut3s01p2"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Machine: ut3s01p2", command)
-        self.matchoutput(out, "Model Type: blade", command)
-
-    def testfailstealip(self):
+    def test_2000_steal_ip(self):
         ip = self.net["unknown0"].usable[2]
         command = ["update_machine", "--machine", "ut3c1n3", "--ip", ip]
         out = self.badrequesttest(command)
@@ -547,6 +503,49 @@ class TestUpdateMachine(TestBrokerCommand):
                          "IP address %s is already in use by public interface "
                          "eth0 of machine unittest00.one-nyp.ms.com" % ip,
                          command)
+
+    def test_2010_missing_slot(self):
+        command = ["update", "machine", "--machine", "ut9s03p7",
+                   "--chassis", "ut9c1.aqd-unittest.ms.com"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Option --chassis requires --slot information",
+                         command)
+
+    def test_2015_verify_missing_slot(self):
+        command = ["show", "machine", "--machine", "ut9s03p7"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Machine: ut9s03p7", command)
+        self.matchoutput(out, "Model Type: blade", command)
+        self.matchclean(out, "Chassis: ", command)
+        self.matchclean(out, "Slot: ", command)
+
+    def test_2020_missing_chassis(self):
+        command = ["update", "machine", "--machine", "ut9s03p8",
+                   "--slot", "8"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Option --slot requires --chassis information",
+                         command)
+
+    def test_2025_verify_missing_chassis(self):
+        command = ["show", "machine", "--machine", "ut9s03p8"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Machine: ut9s03p8", command)
+        self.matchoutput(out, "Model Type: blade", command)
+        self.matchclean(out, "Chassis: ", command)
+        self.matchclean(out, "Slot: ", command)
+
+    def test_2030_reject_machine_uri(self):
+        command = ["update", "machine", "--machine", "ut3c1n9",
+                   "--uri", "file:///somepath/to/ovf"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "URI can be specified only for virtual "
+                         "appliances and the model's type is blade",
+                         command)
+
+    def test_2035_verify_reject_machine_uri(self):
+        command = ["show", "machine", "--machine", "ut3c1n9"]
+        out = self.commandtest(command)
+        self.matchclean(out, "URI:", command)
 
     # These tests would be nice, but twisted just ignores the permission
     # on the files since we're still the owner.  Which is good, but means

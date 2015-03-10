@@ -27,40 +27,31 @@ from broker.brokertest import TestBrokerCommand
 
 class TestDelArchetype(TestBrokerCommand):
 
-    def testdelutarchetype1(self):
+    def test_100_del_utarchetype1(self):
         command = ["del_archetype", "--archetype=utarchetype1"]
         self.noouttest(command)
 
-    def testdelutarchetype2(self):
+    def test_100_del_utarchetype2(self):
         command = ["del_archetype", "--archetype=utarchetype2"]
         self.noouttest(command)
 
-    def testdelutarchetype3(self):
+    def test_100_del_utarchetype3(self):
         command = ["del_archetype", "--archetype=utarchetype3"]
         self.noouttest(command)
 
-    def testdelutappliance(self):
-        command = ["del_archetype", "--archetype=utappliance"]
-        self.noouttest(command)
-
-    def testverifydelutarchetype1(self):
+    def test_105_verif_utarchetype1(self):
         command = ["show_archetype", "--archetype=utarchetype1"]
         self.notfoundtest(command)
 
-    def testverifydelutarchetype2(self):
-        command = ["show_archetype", "--archetype=utarchetype2"]
-        self.notfoundtest(command)
+    def test_110_del_utappliance(self):
+        command = ["del_archetype", "--archetype=utappliance"]
+        self.noouttest(command)
 
-    def testverifydelutarchetype3(self):
-        command = ["show_archetype", "--archetype=utarchetype3"]
-        self.notfoundtest(command)
-
-    def testverifyall(self):
+    def test_300_verify_all(self):
         command = ["show_archetype", "--all"]
         out = self.commandtest(command)
-        self.matchclean(out, "Archetype: utarchetype", command)
-        self.matchclean(out, "Archetype: utappliance", command)
-
+        self.matchclean(out, "utarchetype", command)
+        self.matchclean(out, "utappliance", command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelArchetype)

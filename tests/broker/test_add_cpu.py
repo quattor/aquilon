@@ -27,35 +27,35 @@ from brokertest import TestBrokerCommand
 
 class TestAddCpu(TestBrokerCommand):
 
-    def testaddutcpu(self):
+    def test_100_add_utcpu(self):
         command = ["add", "cpu", "--cpu", "utcpu", "--vendor", "intel",
                    "--speed", "1000", "--comments", "unit test cpu"]
         self.noouttest(command)
 
-    def testaddutcpuagain(self):
-        command = ["add", "cpu", "--cpu", "utcpu", "--vendor", "intel",
-                   "--speed", "1000", "--comments", "unit test cpu"]
-        self.badrequesttest(command)
-
-    def testverifyaddutcpu(self):
+    def test_105_show_utcpu(self):
         command = "show cpu --cpu utcpu --speed 1000 --vendor intel"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Cpu: intel utcpu 1000 MHz", command)
         self.matchoutput(out, "Comments: unit test cpu", command)
 
-    def testaddutcpu2(self):
+    def test_110_add_utcpu_1500(self):
         command = "add cpu --cpu utcpu_1500 --vendor intel --speed 1500"
         self.noouttest(command.split(" "))
 
-    def testverifyaddutcpu2(self):
+    def test_115_show_utcpu_1500(self):
         command = "show cpu --cpu utcpu_1500"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Cpu: intel utcpu_1500 1500 MHz", command)
 
-    def testaddunusedcpu(self):
+    def test_120_add_unused_cpu(self):
         # A CPU model that should not be used by any machines
         self.noouttest(["add_cpu", "--cpu", "unused", "--vendor", "utvendor",
                         "--speed", "3000"])
+
+    def test_200_add_utcpu_again(self):
+        command = ["add", "cpu", "--cpu", "utcpu", "--vendor", "intel",
+                   "--speed", "1000", "--comments", "unit test cpu"]
+        self.badrequesttest(command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddCpu)

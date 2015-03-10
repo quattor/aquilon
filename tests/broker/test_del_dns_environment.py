@@ -27,28 +27,27 @@ from brokertest import TestBrokerCommand
 
 class TestDelDnsEnvironment(TestBrokerCommand):
 
-    def testdelutenv(self):
+    def test_100_del_utenv(self):
         command = ["del", "dns", "environment", "--dns_environment", "ut-env"]
         self.noouttest(command)
 
-    def testdelnonexistant(self):
+    def test_105_show_utenv(self):
+        command = ["show", "dns", "environment", "--dns_environment", "ut-env"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out, "DNS Environment ut-env not found.", command)
+
+    def test_200_del_nonexistant(self):
         command = ["del", "dns", "environment", "--dns_environment", "no-such-env"]
         out = self.notfoundtest(command)
         self.matchoutput(out, "DNS Environment no-such-env not found.", command)
 
-    def testdelinternal(self):
+    def test_200_del_internal(self):
         command = ["del", "dns", "environment", "--dns_environment", "internal"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "DNS Environment internal is the default DNS "
                          "environment, therefore it cannot be deleted.",
                          command)
-
-    def testshowutenv(self):
-        command = ["show", "dns", "environment", "--dns_environment", "ut-env"]
-        out = self.notfoundtest(command)
-        self.matchoutput(out, "DNS Environment ut-env not found.", command)
-
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelDnsEnvironment)

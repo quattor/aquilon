@@ -27,41 +27,18 @@ from brokertest import TestBrokerCommand
 
 class TestAddArchetype(TestBrokerCommand):
 
-    def testaddreservedname(self):
-        command = "add archetype --archetype hardware"
-        out = self.badrequesttest(command.split(" "))
-        self.matchoutput(out, "Archetype name hardware is reserved.", command)
-
-    def testaddexisting(self):
-        command = "add archetype --archetype aquilon"
-        out = self.badrequesttest(command.split(" "))
-        self.matchoutput(out, "Archetype aquilon already exists.", command)
-
-    def testaddbadname(self):
-        command = "add archetype --archetype oops@!"
-        out = self.badrequesttest(command.split(" "))
-        self.matchoutput(out, "'oops@!' is not a valid value for --archetype.",
-                         command)
-
-    def testaddbadcluster(self):
-        command = ["add_archetype", "--archetype", "bad-cluster",
-                   "--cluster_type", "bad-cluster-type"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out,
-                         "Unknown cluster type 'bad-cluster-type'. The valid "
-                         "values are: compute, esx, meta, storage.",
-                         command)
-
-    def testaddgridarchetype(self):
+    def test_100_add_gridcluster(self):
         command = ["add_archetype", "--archetype=gridcluster", "--cluster=compute",
                    "--compilable", "--description=Grid"]
         self.noouttest(command)
 
+    def test_105_show_gridcluster(self):
         command = "show archetype --archetype gridcluster"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Cluster Archetype: gridcluster", command)
         self.matchoutput(out, "compilable", command)
 
+    def test_105_show_gridcluster_proto(self):
         command = ["show_archetype", "--archetype", "gridcluster",
                    "--format", "proto"]
         arch = self.protobuftest(command, expect=1)[0]
@@ -69,30 +46,32 @@ class TestAddArchetype(TestBrokerCommand):
         self.assertEqual(arch.compileable, True)
         self.assertEqual(arch.cluster_type, "compute")
 
-    def testaddhaarchetype(self):
+    def test_110_add_hacluster(self):
         command = ["add_archetype", "--archetype=hacluster",
                    "--cluster=compute", "--compilable",
                    "--description=High Availability"]
         self.noouttest(command)
+
+    def test_115_show_hacluster(self):
         command = "show archetype --archetype hacluster"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Cluster Archetype: hacluster", command)
         self.matchoutput(out, "compilable", command)
 
-    def testaddutarchetype1(self):
+    def test_120_add_utarchetype1(self):
         command = "add archetype --archetype utarchetype1"
         self.noouttest(command.split(" "))
 
-    def testaddutarchetype2(self):
+    def test_120_add_utarchetype2(self):
         command = ["add_archetype", "--archetype", "utarchetype2",
                    "--comments", "Some arch comments"]
         self.noouttest(command)
 
-    def testaddutarchetype3(self):
+    def test_120_add_utarchetype3(self):
         command = "add archetype --archetype utarchetype3"
         self.noouttest(command.split(" "))
 
-    def testverifyutarchetype1(self):
+    def test_125_show_utarchetype1(self):
         command = "show archetype --archetype utarchetype1"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Archetype: utarchetype1", command)
@@ -100,7 +79,7 @@ class TestAddArchetype(TestBrokerCommand):
         self.matchclean(out, "[", command)
         self.matchclean(out, "Required Service", command)
 
-    def testverifyutarchetype2(self):
+    def test_125_show_utarchetype2(self):
         command = "show archetype --archetype utarchetype2"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Archetype: utarchetype2", command)
@@ -109,28 +88,52 @@ class TestAddArchetype(TestBrokerCommand):
         self.matchclean(out, "[", command)
         self.matchclean(out, "Required Service", command)
 
-    def testaddutappliance1(self):
+    def test_130_add_utappliance(self):
         command = "add archetype --archetype utappliance --nocompilable"
         self.noouttest(command.split(" "))
 
-    def testverifyutappliance1(self):
+    def test_135_show_utappliance_proto(self):
         command = ["show_archetype", "--archetype", "utappliance",
                    "--format", "proto"]
         arch = self.protobuftest(command, expect=1)[0]
         self.assertEqual(arch.name, "utappliance")
         self.assertEqual(arch.compileable, False)
 
-    def testverifyutarchetypeall(self):
+    def test_200_add_reserved_name(self):
+        command = "add archetype --archetype hardware"
+        out = self.badrequesttest(command.split(" "))
+        self.matchoutput(out, "Archetype name hardware is reserved.", command)
+
+    def test_200_add_existing(self):
+        command = "add archetype --archetype aquilon"
+        out = self.badrequesttest(command.split(" "))
+        self.matchoutput(out, "Archetype aquilon already exists.", command)
+
+    def test_200_add_bad_name(self):
+        command = "add archetype --archetype oops@!"
+        out = self.badrequesttest(command.split(" "))
+        self.matchoutput(out, "'oops@!' is not a valid value for --archetype.",
+                         command)
+
+    def test_200_add_bad_cluster(self):
+        command = ["add_archetype", "--archetype", "bad-cluster",
+                   "--cluster_type", "bad-cluster-type"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Unknown cluster type 'bad-cluster-type'. The valid "
+                         "values are: compute, esx, meta, storage.",
+                         command)
+
+    def test_200_show_nonexistant(self):
+        command = "show archetype --archetype archetype-does-not-exist"
+        self.notfoundtest(command.split(" "))
+
+    def test_300_verify_all(self):
         command = "show archetype --all"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Archetype: utarchetype1", command)
         self.matchoutput(out, "Archetype: utarchetype2", command)
         self.matchoutput(out, "Archetype: aquilon [compilable]", command)
-
-    def testnotfoundarchetype(self):
-        command = "show archetype --archetype archetype-does-not-exist"
-        self.notfoundtest(command.split(" "))
-
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddArchetype)

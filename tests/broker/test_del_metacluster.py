@@ -30,71 +30,67 @@ from notificationtest import VerifyNotificationsMixin
 
 class TestDelMetaCluster(VerifyNotificationsMixin, TestBrokerCommand):
 
-    def testdelutmc1(self):
+    def test_100_del_utmc1(self):
         basetime = datetime.now()
         command = ["del_metacluster", "--metacluster=utmc1"]
         self.statustest(command)
         self.wait_notification(basetime, 0)
 
-    def testverifydelutmc1(self):
+    def test_105_verify_utmc1(self):
         command = ["show_metacluster", "--metacluster=utmc1"]
         self.notfoundtest(command)
 
-    def testdelutmc2(self):
+    def test_110_del_utmc2(self):
         basetime = datetime.now()
         command = ["del_metacluster", "--metacluster=utmc2"]
         self.statustest(command)
         self.wait_notification(basetime, 0)
 
-    def testverifydelutmc2(self):
+    def test_115_verify_utmc2(self):
         command = ["show_metacluster", "--metacluster=utmc2"]
         self.notfoundtest(command)
 
-    def testdelutmc3(self):
+    def test_120_del_utmc3(self):
         basetime = datetime.now()
         command = ["del_metacluster", "--metacluster=utmc3"]
         self.statustest(command)
         self.wait_notification(basetime, 0)
 
-    def testverifydelutmc3(self):
-        command = ["show_metacluster", "--metacluster=utmc3"]
-        self.notfoundtest(command)
-
-    def testdelutmc4(self):
+    def test_130_del_utmc4(self):
         basetime = datetime.now()
         command = ["del_metacluster", "--metacluster=utmc4"]
         self.statustest(command)
         self.wait_notification(basetime, 0)
 
-    def testdelutmc7(self):
+    def test_140_del_utmc7(self):
         basetime = datetime.now()
         command = ["del_metacluster", "--metacluster=utmc7"]
         self.statustest(command)
         self.wait_notification(basetime, 0)
 
-    def testdelutsandbox(self):
+    def test_150_del_sandboxmc(self):
         # Test moving machines between metaclusters
         basetime = datetime.now()
         command = ["del_metacluster", "--metacluster=sandboxmc"]
         self.statustest(command)
         self.wait_notification(basetime, 0)
 
-    def testdelvulcan1(self):
+    def test_160_del_vulcan1(self):
         basetime = datetime.now()
         command = ["del_metacluster", "--metacluster=vulcan1"]
         self.statustest(command)
         self.wait_notification(basetime, 0)
 
-    def testverifyall(self):
-        command = ["show_metacluster", "--all"]
-        out = self.commandtest(command)
-        self.matchclean(out, "Metacluster: utmc", command)
-
-    def testdelnotfound(self):
+    def test_200_del_nonexistant(self):
         command = ["del_metacluster",
                    "--metacluster=metacluster-does-not-exist"]
         self.notfoundtest(command)
 
+    def test_300_show_all(self):
+        command = ["show_metacluster", "--all"]
+        out = self.commandtest(command)
+        self.matchclean(out, "utmc", command)
+        self.matchclean(out, "sandboxmc", command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelMetaCluster)

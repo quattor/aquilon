@@ -27,14 +27,13 @@ from brokertest import TestBrokerCommand
 
 class TestDelDesk(TestBrokerCommand):
 
-    def testdelutdesk1(self):
+    def test_100_del_utdesk1(self):
         command = "del desk --desk utdesk1"
         self.noouttest(command.split(" "))
 
-    def testverifydelutdesk1(self):
+    def test_105_verify_utdesk1(self):
         command = "show desk --desk utdesk1"
         self.notfoundtest(command.split(" "))
-
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelDesk)

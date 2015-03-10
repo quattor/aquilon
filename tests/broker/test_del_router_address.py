@@ -27,41 +27,40 @@ from brokertest import TestBrokerCommand
 
 class TestDelRouterAddress(TestBrokerCommand):
 
-    def testdelrouterbyip(self):
+    def test_100_del_router_by_ip(self):
         net = self.net["verari_eth1"]
         command = ["del", "router", "address", "--ip", net.gateway]
         self.noouttest(command)
 
-    def testdelrouterbyname(self):
+    def test_110_del_router_by_name(self):
         command = ["del", "router", "address",
                    "--fqdn", "ut3gd1r01-v109-hsrp.aqd-unittest.ms.com"]
         self.noouttest(command)
 
-    def testdelmissingrouter(self):
+    def test_120_del_excx(self):
+        net = self.net["unknown0"].subnet()[0]
+        command = ["del", "router", "address", "--ip", net[-2],
+                   "--network_environment", "excx"]
+        self.noouttest(command)
+
+    def test_130_del_utcolo(self):
+        net = self.net["unknown1"]
+        command = ["del", "router", "address", "--ip", net[2],
+                   "--network_environment", "utcolo"]
+        self.noouttest(command)
+
+    def test_200_del_missing_router(self):
         net = self.net["unknown0"]
         command = ["del", "router", "address", "--ip", net.gateway]
         out = self.notfoundtest(command)
         self.matchoutput(out, "IP address %s is not a router on network %s." %
                          (net.gateway, net.name), command)
 
-    def testverifyrouter(self):
+    def test_300_verify_all(self):
         command = ["show", "router", "address", "--all"]
         out = self.commandtest(command)
         self.matchclean(out, str(self.net["tor_net_12"].gateway), command)
         self.matchclean(out, str(self.net["verari_eth1"].gateway), command)
-
-    def testdelexcx(self):
-        net = self.net["unknown0"].subnet()[0]
-        command = ["del", "router", "address", "--ip", net[-2],
-                   "--network_environment", "excx"]
-        self.noouttest(command)
-
-    def testdelutcolo(self):
-        net = self.net["unknown1"]
-        command = ["del", "router", "address", "--ip", net[2],
-                   "--network_environment", "utcolo"]
-        self.noouttest(command)
-
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelRouterAddress)

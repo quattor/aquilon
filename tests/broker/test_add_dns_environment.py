@@ -27,41 +27,40 @@ from brokertest import TestBrokerCommand
 
 class TestAddDnsEnvironment(TestBrokerCommand):
 
-    def testaddutenv(self):
+    def test_100_add_utenv(self):
         command = ["add", "dns", "environment", "--dns_environment", "ut-env",
                    "--comment", "Unit test environment"]
         self.noouttest(command)
 
-    def testaddexcx(self):
+    def test_105_show_utenv(self):
+        command = ["show", "dns", "environment", "--dns_environment", "ut-env"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "DNS Environment: ut-env", command)
+        self.matchoutput(out, "Comments: Unit test environment", command)
+
+    def test_110_add_excx(self):
         command = ["add", "dns", "environment", "--dns_environment", "excx"]
         self.noouttest(command)
 
-    def testaddutenvagain(self):
+    def test_200_add_utenv_again(self):
         command = ["add", "dns", "environment", "--dns_environment", "ut-env"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "DNS Environment ut-env already exists.", command)
 
-    def testaddbadname(self):
+    def test_200_add_badname(self):
         command = ["add", "dns", "environment", "--dns_environment", "<badname>"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "'<badname>' is not a valid value for DNS environment",
                          command)
 
-    def testshowenv(self):
-        command = ["show", "dns", "environment", "--dns_environment", "ut-env"]
-        out = self.commandtest(command)
-        self.matchoutput(out, "DNS Environment: ut-env", command)
-        self.matchoutput(out, "Comments: Unit test environment", command)
-
-    def testshowall(self):
+    def test_300_show_all(self):
         command = ["show", "dns", "environment", "--all"]
         out = self.commandtest(command)
         self.matchoutput(out, "DNS Environment: internal", command)
         self.matchoutput(out, "DNS Environment: external", command)
         self.matchoutput(out, "DNS Environment: ut-env", command)
         self.matchoutput(out, "Comments: Unit test environment", command)
-
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddDnsEnvironment)

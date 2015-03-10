@@ -28,17 +28,17 @@ from personalitytest import PersonalityTestMixin
 
 class TestAddMetaCluster(PersonalityTestMixin, TestBrokerCommand):
 
-    def testaddpersonality(self):
+    def test_000_add_personality(self):
         # The broker currently assumes this personality to exist
         self.create_personality("metacluster", "metacluster",
                                 grn="grn:/ms/ei/aquilon/aqd")
 
-    def testaddutmc1(self):
+    def test_100_add_utmc1(self):
         command = ["add_metacluster", "--metacluster=utmc1",
                    "--domain=unittest", "--building=ut"]
         self.noouttest(command)
 
-    def testverifyutmc1(self):
+    def test_105_show_utmc1(self):
         command = "show metacluster --metacluster utmc1"
         out = self.commandtest(command.split(" "))
         default_members = self.config.getint("archetype_metacluster",
@@ -51,7 +51,7 @@ class TestAddMetaCluster(PersonalityTestMixin, TestBrokerCommand):
         self.matchoutput(out, "Domain: unittest", command)
         self.matchoutput(out, "Build Status: build", command)
 
-    def testverifyutmc1proto(self):
+    def test_105_show_utmc1_proto(self):
         command = "show metacluster --metacluster utmc1 --format proto"
         mc = self.protobuftest(command.split(" "), expect=1)[0]
         default_members = self.config.getint("archetype_metacluster",
@@ -66,40 +66,34 @@ class TestAddMetaCluster(PersonalityTestMixin, TestBrokerCommand):
         self.assertEqual(mc.status, "build")
         self.assertEqual(mc.virtual_switch.name, "")
 
-    def testfailaddexisting(self):
-        command = ["add_metacluster", "--metacluster=utmc1",
-                   "--building=ut", "--domain=unittest"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out, "Metacluster utmc1 already exists.", command)
-
-    def testaddutmc2(self):
+    def test_110_add_utmc2(self):
         command = ["add_metacluster", "--metacluster=utmc2",
                    "--max_members=99", "--building=ut",
                    "--domain=unittest",
                    "--comments", "MetaCluster with a comment"]
         self.noouttest(command)
 
-    def testverifyutmc2(self):
+    def test_115_show_utmc2(self):
         command = "show metacluster --metacluster utmc2"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "MetaCluster: utmc2", command)
         self.matchoutput(out, "Max members: 99", command)
         self.matchoutput(out, "Comments: MetaCluster with a comment", command)
 
-    def testverifyutmc2proto(self):
+    def test_115_show_utmc2_proto(self):
         command = "show metacluster --metacluster utmc2 --format proto"
         mc = self.protobuftest(command.split(" "), expect=1)[0]
         self.assertEqual(mc.max_members, 99)
         self.assertEqual(mc.location_constraint.name, "ut")
         self.assertEqual(mc.location_constraint.location_type, "building")
 
-    def testaddutmc3(self):
+    def test_120_add_utmc3(self):
         command = ["add_metacluster", "--metacluster=utmc3",
                    "--max_members=0", "--building=ut", "--domain=unittest",
                    "--comments", "MetaCluster with no members allowed"]
         self.noouttest(command)
 
-    def testverifyutmc3(self):
+    def test_125_show_utmc3(self):
         command = "show metacluster --metacluster utmc3"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "MetaCluster: utmc3", command)
@@ -107,60 +101,66 @@ class TestAddMetaCluster(PersonalityTestMixin, TestBrokerCommand):
         self.matchoutput(out, "Comments: MetaCluster with no members allowed",
                          command)
 
-    def testaddutmc4(self):
+    def test_130_add_utmc4(self):
         # Sort of a mini-10 Gig design for port group testing...
         command = ["add_metacluster", "--metacluster=utmc4",
                    "--max_members=6", "--building=ut",
                    "--domain=unittest"]
         self.noouttest(command)
 
-    def testaddutmc7(self):
+    def test_140_add_utmc7(self):
         # Test moving machines between metaclusters
         command = ["add_metacluster", "--metacluster=utmc7", "--building=ut",
                    "--domain=unittest"]
         self.noouttest(command)
 
-    def testaddutsandbox(self):
+    def test_150_add_sandboxmc(self):
         # Test moving machines between metaclusters
         command = ["add_metacluster", "--metacluster=sandboxmc", "--building=ut",
                    "--sandbox=%s/utsandbox" % self.user]
         self.noouttest(command)
 
-    def testaddvulcan1(self):
+    def test_160_add_vulcan1(self):
         # this should be removed when virtbuild supports new options
         command = ["add_metacluster", "--metacluster=vulcan1"]
         self.noouttest(command)
 
-    def testverifyshowall(self):
+    def test_200_add_utmc1_again(self):
+        command = ["add_metacluster", "--metacluster=utmc1",
+                   "--building=ut", "--domain=unittest"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Metacluster utmc1 already exists.", command)
+
+    def test_200_nonexistant(self):
+        command = "show metacluster --metacluster metacluster-does-not-exist"
+        self.notfoundtest(command.split(" "))
+
+    def test_200_global_name(self):
+        command = ["add_metacluster", "--metacluster=global", "--building=ut",
+                   "--domain=unittest"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "name global is reserved", command)
+
+    def test_200_bad_location(self):
+        command = ["add_metacluster", "--metacluster=uscluster",
+                   "--country=us"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Country us is not within "
+                         "a campus.", command)
+
+    def test_300_show_all(self):
         command = "show metacluster --all"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "utmc1", command)
         self.matchoutput(out, "utmc2", command)
         self.matchoutput(out, "utmc3", command)
 
-    def testverifyshowallproto(self):
+    def test_300_show_all_proto(self):
         command = "show metacluster --all --format proto"
         mcs = self.protobuftest(command.split(" "))
         names = set([msg.name for msg in mcs])
         for name in ("utmc1", "utmc2", "utmc3"):
             self.assertTrue(name in names)
-
-    def testnotfoundmetacluster(self):
-        command = "show metacluster --metacluster metacluster-does-not-exist"
-        self.notfoundtest(command.split(" "))
-
-    def testfailglobal(self):
-        command = ["add_metacluster", "--metacluster=global", "--building=ut",
-                   "--domain=unittest"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out, "name global is reserved", command)
-
-    def testbadlocation(self):
-        command = ["add_metacluster", "--metacluster=uscluster",
-                   "--country=us"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out, "Country us is not within "
-                         "a campus.", command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddMetaCluster)
