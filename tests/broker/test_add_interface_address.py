@@ -106,8 +106,7 @@ class TestAddInterfaceAddress(TestBrokerCommand):
     def testaddbyip(self):
         ip = self.net["zebra_eth1"].usable[3]
         fqdn = "unittest20-e1-1.aqd-unittest.ms.com"
-        self.dsdb_expect_add(fqdn, ip, "eth1_e1",
-                             primary="unittest20.aqd-unittest.ms.com")
+        self.dsdb_expect_add(fqdn, ip, "eth1_e1")
         command = ["add", "interface", "address", "--machine", "ut3c5n2",
                    "--interface", "eth1", "--label", "e1",
                    "--fqdn", fqdn, "--ip", ip, "--nomap_to_primary"]

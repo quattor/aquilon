@@ -36,6 +36,7 @@ from twisted.python.log import callWithContext, ILogContext
 from aquilon.exceptions_ import (ProcessException, AquilonError, ArgumentError,
                                  InternalError)
 from aquilon.config import Config, running_from_source
+from aquilon.aqdb.model import Machine
 from aquilon.worker.locks import lock_queue, CompileKey
 
 LOGGER = logging.getLogger(__name__)
@@ -570,7 +571,7 @@ class DSDBRunner(object):
             # In AQDB there may be multiple domain names associated with
             # an address, in DSDB there can only be one.  Thus we pick
             # the first address to propergate.
-            fqdn = str(addr.fqdns[0])
+            dns_record = addr.dns_records[0]
 
             # By default we take the comments from the hardware_entity,
             # if an interface comment exists then this will be taken
@@ -589,19 +590,27 @@ class DSDBRunner(object):
 
             # Determine if we need to specify a primary name to DSDB.  By
             # doing so we are associating this record with another.
-            # Note, the existance of a primary hostname effects the order
+            # Note, the existence of a primary hostname affects the order
             # that entriers are processed in update_host()
             if addr.interface.interface_type == "management":
                 # Do not use -primary_host_name for the management address
                 # as we do not wish to associate them with the host currently
                 # on the machine (which may change).
                 primary = None
-            elif fqdn == real_primary:
-                # Do not set the 'primary' key for the real primary name.
+            elif str(dns_record.fqdn) == real_primary:
+                # Avoid circular dependency - do not set the 'primary' key for
+                # the real primary name
                 primary = None
-            else:
-                # In all other cases associate the record with the primary name.
+            elif not isinstance(dbhw_ent, Machine):
+                # Not a machine - we don't care about srvloc
                 primary = real_primary
+            elif dns_record.reverse_ptr and str(dns_record.reverse_ptr.fqdn) == real_primary:
+                # If the reverse PTR record points to the primary name in AQDB,
+                # then pass the -primary_name flag to DSDB
+                primary = real_primary
+            else:
+                # Avoid using -primary_name, to please srvloc
+                primary = None
 
             # Exclude the MAC address for aliases
             if addr.label:
@@ -612,7 +621,7 @@ class DSDBRunner(object):
             ifdata = {'iface': iface,
                       'ip': addr.ip,
                       'mac': mac,
-                      'fqdn': fqdn,
+                      'fqdn': str(dns_record.fqdn),
                       'primary': primary,
                       'comments': comments}
 
