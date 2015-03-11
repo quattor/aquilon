@@ -46,6 +46,15 @@ class TestUpdateCampus(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchclean(out, "Comments", command)
 
+    def test_120_set_default_dns_domain(self):
+        self.noouttest(["update_campus", "--campus", "ny",
+                        "--default_dns_domain", "new-york.ms.com"])
+
+    def test_125_verify_default_dns_domain(self):
+        command = ["show_campus", "--campus", "ny"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Default DNS Domain: new-york.ms.com", command)
+
     def test_200_update_nonexistent(self):
         command = ["update_campus", "--campus", "no-such-campus",
                    "--comments", "No such campus"]

@@ -2808,6 +2808,7 @@
 	</optgroup>
 	<optgroup>
 	    <option name="fullname" type="string">Full, descriptive name</option>
+	    <option name="default_dns_domain" type="string">Default DNS domain for new entries</option>
 	    <option name="comments" type="string">Comments</option>
 	</optgroup>
 	<transport method="post" path="location/campus/%(campus)s"/>
