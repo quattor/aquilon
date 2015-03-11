@@ -1603,8 +1603,11 @@
 	    <option name="ip" type="ipv4">IP address of the router</option>
 	</optgroup>
 	<optgroup>
+	    <option name="network_environment" type="string">Network environment (default: internal)</option>
+	    <option name="dns_environment" type="string">DNS environment (default: internal)</option>
 	    <option name="building" type="string">Building where the router is located</option>
 	    <option name="comments" type="string">Router comments</option>
+	    <option name="clear_location" type="flag" conflicts="building">Clear the location mapping</option>
 	</optgroup>
 	<transport method="post" path="router_address"/>
     </command>

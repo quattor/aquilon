@@ -71,6 +71,7 @@ from .test_add_network import TestAddNetwork
 from .test_add_network_environment import TestAddNetworkEnvironment
 from .test_add_ns_record import TestAddNSRecord
 from .test_add_router_address import TestAddRouterAddress
+from .test_update_router_address import TestUpdateRouterAddress
 from .test_add_metacluster import TestAddMetaCluster
 from .test_add_esx_cluster import TestAddESXCluster
 from .test_add_cluster import TestAddCluster
@@ -393,6 +394,7 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestNetworkConstraints,
                      TestUpdateService,
                      TestUpdateNetworkEnvironment, TestUpdateDnsEnvironment,
+                     TestUpdateRouterAddress,
                      TestUpdateArchetype,
                      TestUpdateMetaCluster, TestUpdateESXCluster,
                      TestUpdateCluster,

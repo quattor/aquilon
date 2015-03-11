@@ -17,25 +17,36 @@
 """Contains the logic for `aq update router address`."""
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.aqdb.model import RouterAddress, Building, ARecord
+from aquilon.aqdb.model.network_environment import get_net_dns_env
+from aquilon.aqdb.model.network import get_net_id_from_ip
+from aquilon.worker.broker import BrokerCommand
 
 
 class CommandUpdateRouterAddress(BrokerCommand):
 
-    def render(self, session, fqdn, ip, building, comments, **arguments):
+    def render(self, session, fqdn, ip, building, clear_location,
+               network_environment, dns_environment, comments, **arguments):
+        dbnet_env, dbdns_env = get_net_dns_env(session, network_environment,
+                                               dns_environment)
         if fqdn:
-            dbdns_rec = ARecord.get_unique(session, fqdn, compel=True)
+            dbdns_rec = ARecord.get_unique(session, fqdn=fqdn,
+                                           dns_environment=dbdns_env,
+                                           compel=True)
             ip = dbdns_rec.ip
         if not ip:
             raise ArgumentError("Please specify either --ip or --fqdn.")
 
-        router = RouterAddress.get_unique(session, ip=ip, compel=True)
+        dbnetwork = get_net_id_from_ip(session, ip, dbnet_env)
+        router = RouterAddress.get_unique(session, ip=ip, network=dbnetwork,
+                                          compel=True)
 
         if building:
             dbbuilding = Building.get_unique(session, name=building,
                                              compel=True)
             router.location = dbbuilding
+        elif clear_location:
+            router.location = None
 
         if comments is not None:
             router.comments = comments
