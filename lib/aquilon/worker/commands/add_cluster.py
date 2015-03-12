@@ -48,8 +48,6 @@ class CommandAddCluster(BrokerCommand):
         if not dbloc:
             raise ArgumentError("Adding a cluster requires a location "
                                 "constraint.")
-        if not dbloc.campus:
-            raise ArgumentError("{0} is not within a campus.".format(dbloc))
 
         # Not finding the cluster type is an internal consistency issue, so make
         # that show up in the logs by using AquilonError
