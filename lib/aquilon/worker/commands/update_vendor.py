@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2009,2010,2011,2012,2013,2014  Contributor
+# Copyright (C) 2015  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,16 +15,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.commands.add_parameter import CommandAddParameter
-from aquilon.worker.dbwrappers.parameter import set_parameter
+from aquilon.aqdb.model import Vendor
+from aquilon.worker.broker import BrokerCommand
 
 
-class CommandUpdateParameter(CommandAddParameter):
+class CommandUpdateVendor(BrokerCommand):
 
-    required_parameters = ['personality', 'path']
+    required_parameters = ["vendor"]
 
-    def process_parameter(self, session, param_holder, feature, model, interface,
-                          path, value, comments):
-        return set_parameter(session, param_holder, feature, model, interface,
-                             path, value, comments=comments, compel=True)
+    def render(self, session, vendor, comments, **arguments):
+        dbvendor = Vendor.get_unique(session, vendor, compel=True)
+
+        if comments is not None:
+            dbvendor.comments = comments
+
+        session.flush()
+        return

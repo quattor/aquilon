@@ -27,42 +27,59 @@ from brokertest import TestBrokerCommand
 
 class TestAddVendor(TestBrokerCommand):
 
-    def testaddexisting(self):
-        command = "add vendor --vendor intel"
-        out = self.badrequesttest(command.split(" "))
-        self.matchoutput(out, "Vendor intel already exists", command)
-
-    def testaddbadname(self):
-        command = "add vendor --vendor oops@!"
-        out = self.badrequesttest(command.split(" "))
-        self.matchoutput(out, "'oops@!' is not a valid value for --vendor.",
-                         command)
-
-    def testaddutvendor(self):
+    def test_100_add_utvendor(self):
         command = ["add", "vendor", "--vendor", "utvendor",
                    "--comments", "Some vendor comments"]
         self.noouttest(command)
 
-    def testverifyutvendor(self):
+    def test_105_show_utvendor(self):
         command = "show vendor --vendor utvendor"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Vendor: utvendor", command)
         self.matchoutput(out, "Comments: Some vendor comments", command)
 
-    def testverifyutvendorall(self):
+    def test_110_add_utvirt(self):
+        command = ["add", "vendor", "--vendor", "utvirt"]
+        self.noouttest(command)
+
+    def test_200_add_existing(self):
+        command = "add vendor --vendor intel"
+        out = self.badrequesttest(command.split(" "))
+        self.matchoutput(out, "Vendor intel already exists", command)
+
+    def test_200_add_bad_name(self):
+        command = "add vendor --vendor oops@!"
+        out = self.badrequesttest(command.split(" "))
+        self.matchoutput(out, "'oops@!' is not a valid value for --vendor.",
+                         command)
+
+    def test_200_show_nonexistant(self):
+        command = "show vendor --vendor vendor-does-not-exist"
+        self.notfoundtest(command.split(" "))
+
+    def test_300_show_all(self):
         command = "show vendor --all"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Vendor: utvendor", command)
         self.matchoutput(out, "Vendor: intel", command)
 
-    def testnotfoundvendor(self):
-        command = "show vendor --vendor vendor-does-not-exist"
-        self.notfoundtest(command.split(" "))
+    def test_400_update_comments(self):
+        self.noouttest(["update_vendor", "--vendor", "utvendor",
+                        "--comments", "New vendor comments"])
 
-    def testaddutvirt(self):
-        command = ["add", "vendor", "--vendor", "utvirt"]
-        self.noouttest(command)
+    def test_400_verify_update(self):
+        command = "show vendor --vendor utvendor"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Vendor: utvendor", command)
+        self.matchoutput(out, "Comments: New vendor comments", command)
 
+    def test_410_clear_comments(self):
+        self.noouttest(["update_vendor", "--vendor", "utvendor", "--comments", ""])
+
+    def test_415_verify_comments(self):
+        command = "show vendor --vendor utvendor"
+        out = self.commandtest(command.split(" "))
+        self.matchclean(out, "Comments", command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddVendor)

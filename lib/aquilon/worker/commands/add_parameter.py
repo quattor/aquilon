@@ -29,13 +29,9 @@ class CommandAddParameter(BrokerCommand):
 
     def process_parameter(self, session, param_holder, feature, model,
                           interface, path, value, comments):
-        dbparameter = set_parameter(session, param_holder, feature, model,
-                                    interface, path, value, compel=False,
-                                    preclude=True)
-        if comments:
-            dbparameter.comments = comments
-
-        return dbparameter
+        return set_parameter(session, param_holder, feature, model, interface,
+                             path, value, comments=comments, compel=False,
+                             preclude=True)
 
     def render(self, session, logger, archetype, personality, feature, model,
                interface, path, user, value=None, comments=None,

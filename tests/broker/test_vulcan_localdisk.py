@@ -147,7 +147,6 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, MachineTestMixin,
                    "--mountpoint=/mnt", "--blockdevice=/dev/foo/bar",
                    "--bootmount",
                    "--dumpfreq=1", "--fsckpass=3", "--options=ro",
-                   "--comments=testing",
                    "--hostname=%s" % self.vmhost[0]]
         self.noouttest(command)
 

@@ -117,7 +117,7 @@ class TestAddShare(TestBrokerCommand):
 
     def test_140_update_no_latency(self):
         command = ["update_share", "--share=test_share_1", "--latency_threshold=0",
-                   "--comments=updated comment"]
+                   "--comments=New share comments"]
         out = self.commandtest(command)
 
     def test_141_verify_no_latency(self):
@@ -139,7 +139,7 @@ class TestAddShare(TestBrokerCommand):
 
     def test_143_set_latency(self):
         command = ["update_share", "--share=test_share_1", "--latency_threshold=20",
-                   "--comments=updated comment"]
+                   "--comments=New share comments"]
         out = self.commandtest(command)
 
     def test_144_verify_test_share_1(self):
@@ -149,7 +149,7 @@ class TestAddShare(TestBrokerCommand):
 
     def test_145_update_latency(self):
         self.noouttest(["update_share", "--share=test_share_1", "--latency_threshold=30",
-                        "--comments=updated comment"])
+                        "--comments=New share comments"])
 
     def test_146_verify_updated_latency(self):
         for cluster in ("utecl1", "utecl2", "utecl3", "utecl13"):
@@ -157,7 +157,7 @@ class TestAddShare(TestBrokerCommand):
             out = self.commandtest(command)
             self.matchoutput(out, "Share: test_share_1", command)
             self.matchoutput(out, "Bound to: ESX Cluster %s" % cluster, command)
-            self.matchoutput(out, "Comments: updated comment", command)
+            self.matchoutput(out, "Comments: New share comments", command)
             self.matchoutput(out, "Latency threshold: 30", command)
 
             command = ["cat", "--share=test_share_1", "--cluster=%s" % cluster,
@@ -168,14 +168,14 @@ class TestAddShare(TestBrokerCommand):
 
     def test_200_update_nonexistant(self):
         command = ["update_share", "--share=doesnotexist", "--latency_threshold=10",
-                   "--comments=updated comment"]
+                   "--comments=New share comments"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Share doesnotexist is not used on any resource"
                          " and cannot be modified", command)
 
     def test_200_update_bad_latency(self):
         command = ["update_share", "--share=test_share_1", "--latency_threshold=10",
-                   "--comments=updated comment"]
+                   "--comments=New share comments"]
         out = self.badrequesttest(command)
         self.matchoutput(out, 'The value of latency_threshold must be either zero, or at least 20.', command)
 

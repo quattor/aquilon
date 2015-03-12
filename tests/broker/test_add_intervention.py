@@ -38,8 +38,7 @@ class TestAddIntervention(TestBrokerCommand):
                    "--expiry=long long ago",
                    "--justification=no-good-reason",
                    "--hostname=server1.aqd-unittest.ms.com",
-                   "--allowusers=njw",
-                   "--comments=testing"]
+                   "--allowusers=testuser1"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "the expiry value 'long long ago' "
                          "could not be interpreted", command)
@@ -49,8 +48,7 @@ class TestAddIntervention(TestBrokerCommand):
                    "--start=long long ago",
                    "--justification=no-good-reason",
                    "--hostname=server1.aqd-unittest.ms.com",
-                   "--allowusers=njw",
-                   "--comments=testing"]
+                   "--allowusers=testuser1"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "the start time 'long long ago' "
                          "could not be interpreted", command)
@@ -62,8 +60,7 @@ class TestAddIntervention(TestBrokerCommand):
                    "--start='%s'" % too_late,
                    "--justification=no-good-reason",
                    "--hostname=server1.aqd-unittest.ms.com",
-                   "--allowusers=njw",
-                   "--comments=testing"]
+                   "--allowusers=testuser1"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "the start time is later than the expiry time",
                          command)
@@ -73,8 +70,8 @@ class TestAddIntervention(TestBrokerCommand):
                    "--expiry='%s'" % when,
                    "--justification=no-good-reason",
                    "--hostname=server1.aqd-unittest.ms.com",
-                   "--allowusers=njw",
-                   "--comments=testing"]
+                   "--allowusers=testuser1",
+                   "--comments=Some intervention comments"]
         self.successtest(command)
 
         command = ["show_intervention", "--intervention=i1",
@@ -86,17 +83,16 @@ class TestAddIntervention(TestBrokerCommand):
                          command)
         self.matchoutput(out, "Expires: %s" % when, command)
         self.matchoutput(out, "Start:", command)
-        self.matchoutput(out, "Allow Users: njw", command)
+        self.matchoutput(out, "Allow Users: testuser1", command)
         self.matchoutput(out, "Justification: no-good-reason", command)
-        self.matchoutput(out, "Comments: testing", command)
+        self.matchoutput(out, "Comments: Some intervention comments", command)
 
     def test_10_addexisting(self):
         command = ["add_intervention", "--intervention=i1",
                    "--expiry='%s'" % when,
                    "--justification=no-good-reason",
                    "--hostname=server1.aqd-unittest.ms.com",
-                   "--allowusers=njw",
-                   "--comments=testing"]
+                   "--allowusers=testuser1"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "already exists", command)
 
@@ -104,8 +100,7 @@ class TestAddIntervention(TestBrokerCommand):
         command = ["add_intervention", "--intervention=blank",
                    "--expiry='%s'" % when,
                    "--justification=no-good-reason",
-                   "--hostname=server1.aqd-unittest.ms.com",
-                   "--comments=testing"]
+                   "--hostname=server1.aqd-unittest.ms.com"]
         self.successtest(command)
 
         lookfor = "group1,group2"
@@ -113,16 +108,14 @@ class TestAddIntervention(TestBrokerCommand):
                    "--expiry='%s'" % when,
                    "--justification=no-good-reason",
                    "--hostname=server1.aqd-unittest.ms.com",
-                   "--allowgroups=%s" % lookfor,
-                   "--comments=testing"]
+                   "--allowgroups=%s" % lookfor]
         self.successtest(command)
 
         command = ["add_intervention", "--intervention=disable",
                    "--expiry='%s'" % when,
                    "--justification=no-good-reason",
                    "--hostname=server1.aqd-unittest.ms.com",
-                   "--disabled_actions=startup",
-                   "--comments=testing"]
+                   "--disabled_actions=startup"]
         self.successtest(command)
 
         command = ["show_intervention", "--intervention=blank",

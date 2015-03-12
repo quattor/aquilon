@@ -56,7 +56,7 @@ class CommandAddPersonality(BrokerCommand):
                 host_environment = dbfrom_persona.host_environment.name
             if not cluster_required:
                 cluster_required = dbfrom_persona.cluster_required
-            if not comments:
+            if comments is None:
                 comments = dbfrom_persona.comments
 
             if dbfrom_persona.config_override:

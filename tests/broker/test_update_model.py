@@ -82,6 +82,15 @@ class TestUpdateModel(TestBrokerCommand):
         self.matchoutput(out, '"capacity", 45*GB,', command)
         self.matchoutput(out, '"interface", "scsi",', command)
 
+    def test_130_clear_comments(self):
+        self.noouttest(["update_model", "--vendor", "utvendor",
+                        "--model", "utmedium", "--comments", ""])
+
+    def test_135_verify_comments(self):
+        command = ["show_model", "--vendor", "utvendor", "--model", "utmedium"]
+        out = self.commandtest(command)
+        self.matchclean(out, "Comments", command)
+
     def test_200_faildisktype(self):
         command = ["update_model", "--model=utmedium", "--vendor=utvendor",
                    "--cpuname=utcpu", "--cpuvendor=intel",

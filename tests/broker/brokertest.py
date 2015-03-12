@@ -648,7 +648,7 @@ class TestBrokerCommand(unittest.TestCase):
             command.extend(["-ip_address", str(ip)])
         if mac:
             command.extend(["-ethernet_address", str(mac)])
-        if comments:
+        if comments is not None:
             command.extend(["-comments", comments])
         self.dsdb_expect(" ".join(command), fail=fail)
 

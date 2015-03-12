@@ -50,7 +50,7 @@ class TestUpdateMetaCluster(TestBrokerCommand, PersonalityTestMixin):
     def test_100_updateutmc2(self):
         command = ["update_metacluster", "--metacluster=utmc2",
                    "--max_members=98",
-                   "--comments", "MetaCluster with a new comment"]
+                   "--comments", "New metacluster comments"]
         self.noouttest(command)
 
     def test_100_verifyutmc2(self):
@@ -58,7 +58,7 @@ class TestUpdateMetaCluster(TestBrokerCommand, PersonalityTestMixin):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "MetaCluster: utmc2", command)
         self.matchoutput(out, "Max members: 98", command)
-        self.matchoutput(out, "Comments: MetaCluster with a new comment",
+        self.matchoutput(out, "Comments: New metacluster comments",
                          command)
 
     def test_100_failmetaclustermissing(self):

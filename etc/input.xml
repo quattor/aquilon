@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<commandline xmlns:xi='http://www.w3.org/2001/XInclude'>
+<commandline xmlns:xi="http://www.w3.org/2001/XInclude">
     %prog command [subcommand] options
     <command name="*">
 	<optgroup>
@@ -886,6 +886,19 @@
 	<transport method="delete" path="vendor/%(vendor)s/cpu/%(cpu)s/%(speed)s"/>
     </command>
 
+    <command name="update_cpu">
+	Update a CPU type in the database
+	<optgroup mandatory="True" fields="all">
+	    <option name="cpu" type="string">CPU type name</option>
+	    <option name="vendor" type="string">name of the vendor</option>
+	    <option name="speed" type="int">CPU speed</option>
+	</optgroup>
+	<optgroup>
+	    <option name="comments" type="string">Comments</option>
+	</optgroup>
+	<transport method="post" path="vendor/%(vendor)s/cpu/%(cpu)s/%(speed)s"/>
+    </command>
+
     <command name="add_disk">
 	Add a new disk to a machine.
 	<p/>
@@ -1555,7 +1568,7 @@
 	    <option name="ip" type="ipv4">IP address of the router</option>
 	    <option name="comments" type="string">Comments</option>
 	</optgroup>
-	<transport method="post" path="router_address"/>
+	<transport method="put" path="router_address"/>
     </command>
 
     <command name="del_router_address">
@@ -1590,10 +1603,13 @@
 	    <option name="ip" type="ipv4">IP address of the router</option>
 	</optgroup>
 	<optgroup>
+	    <option name="network_environment" type="string">Network environment (default: internal)</option>
+	    <option name="dns_environment" type="string">DNS environment (default: internal)</option>
 	    <option name="building" type="string">Building where the router is located</option>
 	    <option name="comments" type="string">Router comments</option>
+	    <option name="clear_location" type="flag" conflicts="building">Clear the location mapping</option>
 	</optgroup>
-	<transport method="put" path="router_address"/>
+	<transport method="post" path="router_address"/>
     </command>
 
     <command name="add_static_route">
@@ -1916,7 +1932,7 @@
 	    <option name="resourcegroup" type="string">Resourcegroup containing the service address</option>
 	    <option name="position" type="int">Position in the list</option>
 	</optgroup>
-	<transport method="post" path="service/%(service)s/instance/%(instance)s/bind"/>
+	<transport method="put" path="service/%(service)s/instance/%(instance)s/bind"/>
     </command>
 
     <command name="unbind_server">
@@ -2171,6 +2187,7 @@
 	    <option name="buildstatus" type="string">Update host buildstatus to 'build' or 'ready'</option>
 	    <option name="keepbindings" type="boolean">Preserve service bindings that are not required</option>
 	    <option name="cleargrn" type="flag" conflicts="grn eon_id">Clear owner grn</option>
+	    <option name="comments" type="string">Update comments</option>
 	</optgroup>
 	<optgroup fields="one">
 	    <option name="grn" type="string">GRN as string</option>
@@ -2200,9 +2217,9 @@
 	    </optgroup>
 	    <option name="buildstatus" type="string">The new value of the buildstatus</option>
 	</optgroup>
-	<transport method="put" path="host/%(hostname)s/buildstatus/%(buildstatus)s"/>
-	<transport method="put" trigger="cluster" path="cluster/%(cluster)s/buildstatus/%(buildstatus)s"/>
-	<transport method="put" trigger="metacluster" path="metacluster/%(metacluster)s/buildstatus/%(buildstatus)s"/>
+	<transport method="post" path="host/%(hostname)s/buildstatus/%(buildstatus)s"/>
+	<transport method="post" trigger="cluster" path="cluster/%(cluster)s/buildstatus/%(buildstatus)s"/>
+	<transport method="post" trigger="metacluster" path="metacluster/%(metacluster)s/buildstatus/%(buildstatus)s"/>
     </command>
 
     <command name="reset_advertised_status">
@@ -2787,6 +2804,19 @@
 	<transport method="delete" path="location/campus/%(campus)s"/>
     </command>
 
+    <command name="update_campus">
+	Update campus parameters
+	<optgroup mandatory="True" fields="all">
+	    <option name="campus" type="string">Name of the campus</option>
+	</optgroup>
+	<optgroup>
+	    <option name="fullname" type="string">Full, descriptive name</option>
+	    <option name="default_dns_domain" type="string">Default DNS domain for new entries</option>
+	    <option name="comments" type="string">Comments</option>
+	</optgroup>
+	<transport method="post" path="location/campus/%(campus)s"/>
+    </command>
+
     <command name="add_room">
 	Add a new room to the database.
 	<optgroup mandatory="True" fields="all">
@@ -3163,6 +3193,17 @@
 	<transport trigger="all" method="get" path="vendor"/>
   </command>
 
+  <command name="update_vendor">
+	Update a vendor definition.
+	<optgroup mandatory="True" fields="all">
+	    <option name="vendor" type="string">The name of the vendor</option>
+	</optgroup>
+	<optgroup>
+	    <option name="comments" type="string">Comments</option>
+	</optgroup>
+	<transport method="post" path="vendor/%(vendor)s"/>
+  </command>
+
   <command name="add_os">
 	Create an operating system definition.
 	<optgroup mandatory="True" fields="all">
@@ -3236,6 +3277,7 @@
 	    <option name="leave_existing" type="flag">Do not propagate GRN changes to hosts in the personality</option>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
 	    <option name="reason" type="string">String to be specified if justification='emergency'</option>
+	    <option name="comments" type="string">Comments</option>
 	</optgroup>
 	<optgroup fields="one">
 	    <option name="grn" type="string">GRN as string</option>
@@ -3305,6 +3347,7 @@
 	    <option name="buildstatus" type="string">Build Status can be updated to 'build' or 'ready'.</option>
 	    <option name="keepbindings" type="boolean">Preserve service bindings that are not required</option>
 	    <option name="cleargrn" type="flag" conflicts="grn eon_id">Clear owner grn</option>
+	    <option name="comments" type="string">Update comments</option>
 	</optgroup>
 	<optgroup fields="one">
 	    <option name="grn" type="string">GRN as string</option>
@@ -3421,6 +3464,7 @@
 	    <option name="ip" type="ipv4">New primary IP address</option>
 	    <option name="uri" type="string">URI to point to a template describing the virtual appliance</option>
 	    <option name="remap_disk" type="string">Vitual disk backend remapping definitions</option>
+	    <option name="comments" type="string">Update comments</option>
 	</optgroup>
 	<transport method="post" trigger="hostname" path="host/%(hostname)s/command/update_machine"/>
 	<transport method="post" path="machine/%(machine)s/command/update"/>
@@ -3801,7 +3845,7 @@
 	    <option name="createrealm" type="boolean">Create an entry for the realm if one does not exist (implies --createuser)</option>
 	    <option name="comments" type="string">Comments</option>
 	</optgroup>
-	<transport method="put" path="principal/%(principal)s/role"/>
+	<transport method="put" path="principal/%(principal)s/role/%(role)s"/>
     </command>
 
     <command name="add_dns_environment">
@@ -3831,6 +3875,17 @@
 	    <option name="dns_environment" type="string">The DNS environment name</option>
 	</optgroup>
 	<transport method="delete" path="dns_environment/%(dns_environment)s"/>
+    </command>
+
+    <command name="update_dns_environment">
+	Update a DNS Environment
+	<optgroup mandatory="True" fields="all">
+	    <option name="dns_environment" type="string">The DNS environment name</option>
+	</optgroup>
+	<optgroup>
+	    <option name="comments" type="string">Comments</option>
+	</optgroup>
+	<transport method="post" path="dns_environment/%(dns_environment)s"/>
     </command>
 
     <command name="add_dns_domain">
@@ -4362,7 +4417,7 @@
 	    <option name="comments" type="string">Comments</option>
 	    <option name="reverse_ptr" type="string">Where the reverse record should point to</option>
 	</optgroup>
-	<transport method="post" path="address/%(fqdn)s"/>
+	<transport method="put" path="address/%(fqdn)s"/>
     </command>
 
     <command name="del_address">
@@ -4402,7 +4457,7 @@
 	    <option name="dns_environment" type="string">The name of the environment the address is in (defaults to 'internal')</option>
 	    <option name="network_environment" type="string">Network environment (default: internal)</option>
 	</optgroup>
-	<transport method="put" path="address"/>
+	<transport method="post" path="address"/>
     </command>
 
     <command name="show_ns_record">
@@ -4596,7 +4651,7 @@
 	<transport method="post" path="srv_record/%(dns_domain)s/%(protocol)s/%(service)s"/>
     </command>
 
-    <command name='search_dns'>
+    <command name="search_dns">
 	Search DNS records in the database.
 	<p/>
 	If you specify multiple search criteria then only records matching all of them
@@ -4628,7 +4683,7 @@
 	<transport method="get" path="find/dns_record"/>
     </command>
 
-    <command name='search_rack'>
+    <command name="search_rack">
 	Search Rack records in the database.
 	<optgroup mandatory="True">
 	    <optgroup fields="one">
@@ -4852,7 +4907,7 @@
 	    <option name="comments" type="string">Comments</option>
 	    <option name="start_time" type="string">when to start this intervention (default=now)</option>
 	</optgroup>
-	<transport method="post" path="resource/reboot_intervention"/>
+	<transport method="put" path="resource/reboot_intervention"/>
     </command>
 
     <command name="del_reboot_intervention">
@@ -4883,8 +4938,8 @@
 	    <option name="bootmount" type="boolean">immediately mount on boot</option>
 	</optgroup>
 	<optgroup>
-	    <option name="dumpfreq" type="int" default='0'>dump frequency</option>
-	    <option name="fsckpass" type="int" default='2'>fsck passno</option>
+	    <option name="dumpfreq" type="int" default="0">dump frequency</option>
+	    <option name="fsckpass" type="int" default="2">fsck passno</option>
 	    <option name="options" type="string">mountoptions</option>
 	    <option name="comments" type="string">Comments</option>
 	</optgroup>
@@ -5110,7 +5165,7 @@
 	    <option name="disabled_actions" type="string">Disabled actions</option>
 	    <option name="start_time" type="string">when to start this intervention (default=now)</option>
 	</optgroup>
-	<transport method="post" path="resource/intervention/%(intervention)s"/>
+	<transport method="put" path="resource/intervention/%(intervention)s"/>
     </command>
 
     <command name="show_intervention">
@@ -5508,7 +5563,7 @@
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
 	    <option name="reason" type="string">String to be specified if justification='emergency'</option>
 	</optgroup>
-	<transport method="put" path="command/add_parameter"/>
+	<transport method="post" path="command/add_parameter"/>
     </command>
 
     <command name="update_parameter">
@@ -5527,7 +5582,7 @@
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
 	    <option name="reason" type="string">String to be specified if justification='emergency'</option>
 	</optgroup>
-	<transport method="put" path="command/update_parameter"/>
+	<transport method="post" path="command/update_parameter"/>
     </command>
 
     <command name="del_parameter">
@@ -5544,7 +5599,7 @@
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
 	    <option name="reason" type="string">String to be specified if justification='emergency'</option>
 	</optgroup>
-	<transport method="put" path="command/del_parameter"/>
+	<transport method="post" path="command/del_parameter"/>
     </command>
 
     <command name="show_diff">

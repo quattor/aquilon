@@ -27,26 +27,25 @@ from brokertest import TestBrokerCommand
 
 class TestDelVendor(TestBrokerCommand):
 
-    def testdelinvalidvendor(self):
+    def test_100_del_utvendor(self):
+        command = ["del_vendor", "--vendor=utvendor"]
+        self.noouttest(command)
+
+    def test_105_verify_utvendor(self):
+        command = ["show_vendor", "--vendor=utvendor"]
+        self.notfoundtest(command)
+
+    def test_200_del_nonexistant(self):
         command = ["del_vendor", "--vendor=vendor-does-not-exist"]
         out = self.notfoundtest(command)
         self.matchoutput(out,
                          "Vendor vendor-does-not-exist not found",
                          command)
 
-    def testdelutvendor(self):
-        command = ["del_vendor", "--vendor=utvendor"]
-        self.noouttest(command)
-
-    def testverifydelutvendor(self):
-        command = ["show_vendor", "--vendor=utvendor"]
-        self.notfoundtest(command)
-
-    def testverifyall(self):
+    def test_300_show_all(self):
         command = ["show_vendor", "--all"]
         out = self.commandtest(command)
-        self.matchclean(out, "Vendor: utvendor", command)
-
+        self.matchclean(out, "utvendor", command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelVendor)

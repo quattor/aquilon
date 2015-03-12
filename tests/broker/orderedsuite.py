@@ -36,6 +36,7 @@ from .test_permission import TestPermission
 from .test_add_dns_domain import TestAddDnsDomain
 from .test_map_dns_domain import TestMapDnsDomain
 from .test_add_dns_environment import TestAddDnsEnvironment
+from .test_update_dns_environment import TestUpdateDnsEnvironment
 from .test_add_sandbox import TestAddSandbox
 from .test_add_domain import TestAddDomain
 from .test_update_branch import TestUpdateBranch
@@ -70,6 +71,7 @@ from .test_add_network import TestAddNetwork
 from .test_add_network_environment import TestAddNetworkEnvironment
 from .test_add_ns_record import TestAddNSRecord
 from .test_add_router_address import TestAddRouterAddress
+from .test_update_router_address import TestUpdateRouterAddress
 from .test_add_metacluster import TestAddMetaCluster
 from .test_add_esx_cluster import TestAddESXCluster
 from .test_add_cluster import TestAddCluster
@@ -188,6 +190,7 @@ from .test_update_srv_record import TestUpdateSrvRecord
 from .test_update_address_alias import TestUpdateAddressAlias
 from .test_update_interface import TestUpdateInterface
 from .test_update_machine import TestUpdateMachine
+from .test_update_cpu import TestUpdateCpu
 from .test_update_model import TestUpdateModel
 from .test_update_rack import TestUpdateRack
 from .test_update_network import TestUpdateNetwork
@@ -242,6 +245,7 @@ from .test_del_rack import TestDelRack
 from .test_del_room import TestDelRoom
 from .test_del_bunker import TestDelBunker
 from .test_update_building import TestUpdateBuilding
+from .test_update_campus import TestUpdateCampus
 from .test_del_building import TestDelBuilding
 from .test_del_required_service import TestDelRequiredService
 from .test_del_service import TestDelService
@@ -344,7 +348,7 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestAddStaticRoute,
                      TestMapGrn,
                      TestRebindMetaCluster,
-                     TestUpdateBuilding,
+                     TestUpdateCampus, TestUpdateBuilding,
                      TestAddVirtualHardware, TestAdd10GigHardware,
                      TestAppliance,
                      TestUnbindClient, TestRebindClient, TestReconfigure,
@@ -379,7 +383,8 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestSearchMetaCluster,
                      TestSearchObservedMac, TestSearchNext, TestSearchNetwork,
                      TestSearchModel,
-                     TestUpdateInterface, TestUpdateMachine, TestUpdateModel,
+                     TestUpdateInterface, TestUpdateMachine,
+                     TestUpdateModel, TestUpdateCpu,
                      TestUpdateDisk,
                      TestUpdateRack,
                      TestUpdateAlias, TestUpdateSrvRecord, TestUpdateAddress,
@@ -388,7 +393,8 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestRefreshNetwork, TestUpdateNetwork, TestSplitMergeNetwork,
                      TestNetworkConstraints,
                      TestUpdateService,
-                     TestUpdateNetworkEnvironment,
+                     TestUpdateNetworkEnvironment, TestUpdateDnsEnvironment,
+                     TestUpdateRouterAddress,
                      TestUpdateArchetype,
                      TestUpdateMetaCluster, TestUpdateESXCluster,
                      TestUpdateCluster,

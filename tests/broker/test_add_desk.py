@@ -27,16 +27,15 @@ from brokertest import TestBrokerCommand
 
 class TestAddDesk(TestBrokerCommand):
 
-    def testaddutdesk1(self):
+    def test_100_add_utdesk1(self):
         command = ["add", "desk", "--desk", "utdesk1", "--room", "utroom1",
                    "--fullname", "Desk utroom1/1"]
         self.noouttest(command)
 
-    def testverifyaddutdesk1(self):
+    def test_105_show_utdesk1(self):
         command = "show desk --desk utdesk1"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Desk: utdesk1", command)
-
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddDesk)

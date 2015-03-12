@@ -30,7 +30,7 @@ class TestAddApplication(TestBrokerCommand):
     def test_00_basic_application(self):
         command = ["add_application", "--application=app1", "--eonid=42",
                    "--host=server1.aqd-unittest.ms.com",
-                   "--comments=testing"]
+                   "--comments=Some application comments"]
         self.successtest(command)
 
         command = ["show_application", "--application=app1",
@@ -40,7 +40,7 @@ class TestAddApplication(TestBrokerCommand):
         self.matchoutput(out, "Bound to: Host server1.aqd-unittest.ms.com",
                          command)
         self.matchoutput(out, "EON id: 42", command)
-        self.matchoutput(out, "Comments: testing", command)
+        self.matchoutput(out, "Comments: Some application comments", command)
 
     def test_10_addexisting(self):
         command = ["add_application", "--application=app1", "--eonid=43",

@@ -27,28 +27,44 @@ from brokertest import TestBrokerCommand
 
 class TestAddNetworkEnvironment(TestBrokerCommand):
 
-    def testaddexcx(self):
+    def test_100_add_excx(self):
         command = ["add", "network", "environment",
                    "--network_environment", "excx", "--building", "np",
                    "--dns_environment", "excx",
-                   "--comments", "Exchange X"]
+                   "--comments", "Some netenv comments"]
         self.noouttest(command)
 
-    def testaddutcolo(self):
+    def test_105_show_excx(self):
+        command = ["show", "network", "environment",
+                   "--network_environment", "excx"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Network Environment: excx", command)
+        self.matchoutput(out, "Building: np", command)
+        self.matchoutput(out, "Comments: Some netenv comments", command)
+
+    def test_110_add_utcolo(self):
         command = ["add", "network", "environment",
                    "--network_environment", "utcolo",
                    "--dns_environment", "ut-env",
-                   "--comments", "Unit test colo environment"]
+                   "--comments", "Some other netenv comments"]
         self.noouttest(command)
 
-    def testaddcardenv(self):
+    def test_115_show_utcolo(self):
+        command = ["show", "network", "environment",
+                   "--network_environment", "utcolo"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Network Environment: utcolo", command)
+        self.matchclean(out, "Building:", command)
+        self.matchoutput(out, "Comments: Some other netenv comments", command)
+
+    def test_120_add_cardenv(self):
         command = ["add", "network", "environment",
                    "--network_environment", "cardenv",
                    "--dns_environment", "ut-env",
                    "--comments", "Card network environment"]
         self.noouttest(command)
 
-    def testaddbadname(self):
+    def test_200_bad_name(self):
         command = ["add", "network", "environment",
                    "--dns_environment", "ut-env",
                    "--network_environment", "<badname>"]
@@ -57,30 +73,7 @@ class TestAddNetworkEnvironment(TestBrokerCommand):
                          "'<badname>' is not a valid value for network environment",
                          command)
 
-    def testverifyexcx(self):
-        command = ["show", "network", "environment",
-                   "--network_environment", "excx"]
-        out = self.commandtest(command)
-        self.matchoutput(out, "Network Environment: excx", command)
-        self.matchoutput(out, "Building: np", command)
-        self.matchoutput(out, "Comments: Exchange X", command)
-
-    def testverifyutcolo(self):
-        command = ["show", "network", "environment",
-                   "--network_environment", "utcolo"]
-        out = self.commandtest(command)
-        self.matchoutput(out, "Network Environment: utcolo", command)
-        self.matchclean(out, "Building:", command)
-        self.matchoutput(out, "Comments: Unit test colo environment", command)
-
-    def testshowall(self):
-        command = ["show", "network", "environment", "--all"]
-        out = self.commandtest(command)
-        self.matchoutput(out, "Network Environment: internal", command)
-        self.matchoutput(out, "Network Environment: excx", command)
-        self.matchoutput(out, "Network Environment: utcolo", command)
-
-    def testinternal(self):
+    def test_200_use_internal(self):
         command = ["add", "network", "environment",
                    "--network_environment", "not-internal",
                    "--dns_environment", "internal"]
@@ -89,6 +82,12 @@ class TestAddNetworkEnvironment(TestBrokerCommand):
                          "associated with the default DNS environment.",
                          command)
 
+    def test_300_show_all(self):
+        command = ["show", "network", "environment", "--all"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Network Environment: internal", command)
+        self.matchoutput(out, "Network Environment: excx", command)
+        self.matchoutput(out, "Network Environment: utcolo", command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddNetworkEnvironment)

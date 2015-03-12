@@ -29,7 +29,7 @@ class TestHub(TestBrokerCommand):
 
     def test_100_add_hub1_default_org(self):
         command = ["add", "hub", "--hub", "hub1", "--fullname",
-                   "hub1 example", "--comments", "test hub1"]
+                   "hub1 example", "--comments", "Some hub comments"]
         self.noouttest(command)
 
     def test_110_add_hubtest_org(self):
@@ -39,7 +39,7 @@ class TestHub(TestBrokerCommand):
 
     def test_115_add_hub2(self):
         command = ["add", "hub", "--hub", "hub2", "--fullname", "hub2 example",
-                   "--organization", "hubtest", "--comments", "test hub2"]
+                   "--organization", "hubtest", "--comments", "Some other hub comments"]
         self.noouttest(command)
 
     def test_120_add_hk(self):
@@ -59,7 +59,7 @@ class TestHub(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Hub: hub1", command)
         self.matchoutput(out, "  Fullname: hub1 example", command)
-        self.matchoutput(out, "  Comments: test hub1", command)
+        self.matchoutput(out, "  Comments: Some hub comments", command)
         self.matchoutput(out, "  Location Parents: [Organization ms]", command)
 
     def test_130_verify_hub2(self):
@@ -67,7 +67,7 @@ class TestHub(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Hub: hub2", command)
         self.matchoutput(out, "  Fullname: hub2 example", command)
-        self.matchoutput(out, "  Comments: test hub2", command)
+        self.matchoutput(out, "  Comments: Some other hub comments", command)
         self.matchoutput(out, "  Location Parents: [Organization hubtest]",
                          command)
 

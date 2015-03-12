@@ -62,7 +62,7 @@ class CommandReconfigureList(BrokerCommand):
         return dbhosts
 
     def render(self, session, logger, archetype, personality, keepbindings,
-               buildstatus, osname, osversion, grn, eon_id, cleargrn,
+               buildstatus, osname, osversion, grn, eon_id, cleargrn, comments,
                **arguments):
         dbhosts = self.get_hostlist(session, **arguments)
 
@@ -157,6 +157,9 @@ class CommandReconfigureList(BrokerCommand):
 
             if buildstatus:
                 dbhost.status.transition(dbhost, dbstatus)
+
+            if comments is not None:
+                dbhost.comments = comments
 
         if failed:
             raise ArgumentError("Cannot modify the following hosts:\n%s" %

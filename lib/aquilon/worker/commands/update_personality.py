@@ -35,7 +35,7 @@ class CommandUpdatePersonality(BrokerCommand):
     def render(self, session, logger, personality, archetype, vmhost_capacity_function,
                vmhost_overcommit_memory, cluster_required, config_override,
                host_environment, grn, eon_id, leave_existing,
-               justification, reason, user, **arguments):
+               justification, reason, comments, user, **arguments):
         dbpersona = Personality.get_unique(session, name=personality,
                                            archetype=archetype, compel=True)
 
@@ -123,6 +123,9 @@ class CommandUpdatePersonality(BrokerCommand):
         if config_override is not None and \
            dbpersona.config_override != config_override:
             dbpersona.config_override = config_override
+
+        if comments is not None:
+            dbpersona.comments = comments
 
         plenaries.append(Plenary.get_plenary(dbpersona))
         session.flush()

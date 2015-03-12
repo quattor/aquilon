@@ -18,7 +18,7 @@
 
 from datetime import datetime
 
-from sqlalchemy import (Column, Integer, Sequence, String, DateTime, ForeignKey,
+from sqlalchemy import (Column, Integer, Sequence, DateTime, ForeignKey,
                         UniqueConstraint)
 from sqlalchemy.orm import relation, deferred, backref
 
@@ -50,7 +50,6 @@ class ServiceMap(Base):
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
-    comments = deferred(Column(String(255), nullable=True))
 
     location = relation(Location)
     service_instance = relation(ServiceInstance, innerjoin=True,

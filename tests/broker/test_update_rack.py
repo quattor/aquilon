@@ -38,7 +38,7 @@ class TestUpdateRack(TestBrokerCommand):
     def testupdateut9(self):
         self.noouttest(["update", "rack", "--rack", "ut9", "--row", "h",
                         "--column", "9", "--fullname", "My Rack",
-                        "--comments", "Testing a rack update"])
+                        "--comments", "New rack comments"])
 
     def testverifyupdateut9(self):
         command = "show rack --rack ut9"
@@ -47,13 +47,13 @@ class TestUpdateRack(TestBrokerCommand):
         self.matchoutput(out, "Fullname: My Rack", command)
         self.matchoutput(out, "Row: h", command)
         self.matchoutput(out, "Column: 9", command)
-        self.matchoutput(out, "Comments: Testing a rack update", command)
+        self.matchoutput(out, "Comments: New rack comments", command)
 
     # Was row zz column 99
     def testupdatenp997(self):
         self.noouttest(["update", "rack", "--rack", "np997", "--row", "xx",
                         "--column", "77", "--fullname", "My Other Rack",
-                        "--comments", "Testing another rack update"])
+                        "--comments", "New other rack comments"])
 
     def testverifyupdatenp997(self):
         command = "show rack --rack np997"
@@ -62,7 +62,7 @@ class TestUpdateRack(TestBrokerCommand):
         self.matchoutput(out, "Fullname: My Other Rack", command)
         self.matchoutput(out, "Row: xx", command)
         self.matchoutput(out, "Column: 77", command)
-        self.matchoutput(out, "Comments: Testing another rack update", command)
+        self.matchoutput(out, "Comments: New other rack comments", command)
 
     # Was row yy column 88
     def testupdatenp998(self):

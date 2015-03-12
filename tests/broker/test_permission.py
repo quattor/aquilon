@@ -243,7 +243,7 @@ class TestPermission(TestBrokerCommand):
         message = self.config.get("broker", "authorization_error")
         self.matchoutput(err,
                          "Unauthorized access attempt by %s to permission on "
-                         "/principal/%s%%40%s/role.  %s" %
+                         "/principal/%s%%40%s/role/aqd_admin.  %s" %
                          (principal, self.user, self.realm, message),
                          command)
 

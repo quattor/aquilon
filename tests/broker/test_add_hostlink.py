@@ -32,7 +32,7 @@ class TestAddHostlink(TestBrokerCommand):
                    "--target=/var/spool/hostlinks/app1",
                    "--hostname=server1.aqd-unittest.ms.com",
                    "--owner=user1",
-                   "--comments=testing"]
+                   "--comments=Some hostlink comments"]
         self.successtest(command)
 
     def test_105_make(self):
@@ -44,7 +44,7 @@ class TestAddHostlink(TestBrokerCommand):
                    "--hostname=server1.aqd-unittest.ms.com"]
         out = self.commandtest(command)
         self.matchoutput(out, "Hostlink: app1", command)
-        self.matchoutput(out, "Comments: testing", command)
+        self.matchoutput(out, "Comments: Some hostlink comments", command)
         self.matchoutput(out, "Bound to: Host server1.aqd-unittest.ms.com",
                          command)
         self.matchoutput(out, "Target Path: /var/spool/hostlinks/app1", command)

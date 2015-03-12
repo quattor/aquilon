@@ -27,22 +27,28 @@ from brokertest import TestBrokerCommand
 
 class TestDelNetworkEnvironment(TestBrokerCommand):
 
-    def testdelexcx(self):
+    def test_100_del_excx(self):
         command = ["del", "network", "environment",
                    "--network_environment", "excx"]
         self.noouttest(command)
 
-    def testdelutcolo(self):
+    def test_105_verify_excx(self):
+        command = ["show", "network", "environment",
+                   "--network_environment", "excx"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out, "Network Environment excx not found.", command)
+
+    def test_110_del_utcolo(self):
         command = ["del", "network", "environment",
                    "--network_environment", "utcolo"]
         self.noouttest(command)
 
-    def testdelcardenv(self):
+    def test_120_del_cardenv(self):
         command = ["del", "network", "environment",
                    "--network_environment", "cardenv"]
         self.noouttest(command)
 
-    def testdelinternal(self):
+    def test_200_del_internal(self):
         command = ["del", "network", "environment",
                    "--network_environment", "internal"]
         out = self.badrequesttest(command)
@@ -51,18 +57,11 @@ class TestDelNetworkEnvironment(TestBrokerCommand):
                          "environment, therefore it cannot be deleted.",
                          command)
 
-    def testverifyexcx(self):
-        command = ["show", "network", "environment",
-                   "--network_environment", "excx"]
-        out = self.notfoundtest(command)
-        self.matchoutput(out, "Network Environment excx not found.", command)
-
-    def testverifyall(self):
+    def test_300_verify_all(self):
         command = ["show", "network", "environment", "--all"]
         out = self.commandtest(command)
         self.matchclean(out, "excx", command)
         self.matchclean(out, "utcolo", command)
-
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelNetworkEnvironment)

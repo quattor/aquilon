@@ -31,7 +31,7 @@ class TestAddDisk(TestBrokerCommand):
         self.noouttest(["add", "disk", "--machine", "ut3c5n10",
                         "--disk", "sdb", "--controller", "scsi",
                         "--address", "0:0:1:0",
-                        "--size", "34", "--comments", "Disk comments"])
+                        "--size", "34", "--comments", "Some disk comments"])
 
     def test_110_add_ut3c1n3_disk(self):
         command = ["add", "disk", "--machine", "ut3c1n3", "--disk", "c0d0",
@@ -80,7 +80,7 @@ class TestAddDisk(TestBrokerCommand):
         self.searchoutput(out,
                           r"Disk: sdb 34 GB scsi \(local\)\s*"
                           r"Address: 0:0:1:0\s*"
-                          r"Comments: Disk comments",
+                          r"Comments: Some disk comments",
                           command)
 
     def test_300_cat_ut3c5n10(self):

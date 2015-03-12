@@ -40,13 +40,13 @@ class TestUpdateArchetype(TestBrokerCommand):
 
     def test_101_set_comments(self):
         self.noouttest(["update_archetype", "--archetype=utarchetype1",
-                        "--comments", "Other arch comments"])
+                        "--comments", "New archetype comments"])
 
     def test_105_verify_compilable(self):
         command = "show archetype --archetype utarchetype1"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Archetype: utarchetype1 [compilable]", command)
-        self.matchoutput(out, "Comments: Other arch comments", command)
+        self.matchoutput(out, "Comments: New archetype comments", command)
 
     def test_110_reset_compilable(self):
         self.noouttest(["update_archetype", "--archetype=utarchetype1",

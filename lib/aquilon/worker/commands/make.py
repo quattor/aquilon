@@ -33,7 +33,7 @@ class CommandMake(BrokerCommand):
 
     def render(self, session, logger, hostname, osname, osversion, archetype,
                personality, buildstatus, keepbindings, grn, eon_id, cleargrn,
-               **arguments):
+               comments, **arguments):
         dbhost = hostname_to_host(session, hostname)
         old_archetype = dbhost.archetype
 
@@ -88,6 +88,9 @@ class CommandMake(BrokerCommand):
 
         if cleargrn:
             dbhost.owner_grn = None
+
+        if comments is not None:
+            dbhost.comments = comments
 
         session.flush()
 

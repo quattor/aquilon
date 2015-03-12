@@ -28,13 +28,13 @@ from brokertest import TestBrokerCommand
 class TestAddAddressAlias(TestBrokerCommand):
 
     def test_100_add_addralias(self):
-        command = ["add", "address",  "alias",
+        command = ["add", "address", "alias",
                    "--fqdn", "addralias1.aqd-unittest.ms.com",
                    "--target", "arecord13.aqd-unittest.ms.com"]
         self.noouttest(command)
 
     def test_110_add_addralias_dupliate(self):
-        command = ["add", "address",  "alias",
+        command = ["add", "address", "alias",
                    "--fqdn", "addralias1.aqd-unittest.ms.com",
                    "--target", "arecord13.aqd-unittest.ms.com"]
         out = self.badrequesttest(command)
@@ -56,19 +56,19 @@ class TestAddAddressAlias(TestBrokerCommand):
                          self.net["unknown0"].usable[13], command)
 
     def test_200_add_new_addralias_with_comment(self):
-        command = ["add", "address",  "alias",
+        command = ["add", "address", "alias",
                    "--fqdn", "addralias1.aqd-unittest.ms.com",
                    "--target", "arecord14.aqd-unittest.ms.com",
                    "--dns_environment", "internal",
-                   "--comments", "address alias record"]
+                   "--comments", "Some address alias comments"]
         self.noouttest(command)
 
     def test_200_add_new_addralias_with_comment2(self):
-        command = ["add", "address",  "alias",
+        command = ["add", "address", "alias",
                    "--fqdn", "addralias1.aqd-unittest.ms.com",
                    "--target", "arecord15.aqd-unittest.ms.com",
                    "--target_environment", "internal",
-                   "--comments", "address alias record"]
+                   "--comments", "Some other address alias comments"]
         self.noouttest(command)
 
     def test_250_verify_addralias(self):
@@ -88,7 +88,8 @@ class TestAddAddressAlias(TestBrokerCommand):
         self.matchoutput(out,
                          "Target: arecord15.aqd-unittest.ms.com [%s]" %
                          self.net["unknown0"].usable[15], command)
-        self.matchoutput(out, "Comments: address alias record", command)
+        self.matchoutput(out, "Comments: Some address alias comments", command)
+        self.matchoutput(out, "Comments: Some other address alias comments", command)
 
     def test_300_add_restricted(self):
         command = ["add", "address", "alias",

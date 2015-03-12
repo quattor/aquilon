@@ -29,18 +29,18 @@ class TestUpdateAddress(TestBrokerCommand):
 
     def test_100_update_reverse(self):
         self.dsdb_expect_update("arecord15.aqd-unittest.ms.com",
-                                comments="Test comment")
+                                comments="Some address comments")
         command = ["update", "address",
                    "--fqdn", "arecord15.aqd-unittest.ms.com",
                    "--reverse_ptr", "arecord14.aqd-unittest.ms.com",
-                   "--comments", "Test comment"]
+                   "--comments", "Some address comments"]
         self.noouttest(command)
         self.dsdb_verify()
 
     def test_105_verify_arecord15(self):
         command = ["show", "fqdn", "--fqdn", "arecord15.aqd-unittest.ms.com"]
         out = self.commandtest(command)
-        self.matchoutput(out, "Comments: Test comment", command)
+        self.matchoutput(out, "Comments: Some address comments", command)
         self.matchoutput(out, "Reverse PTR: arecord14.aqd-unittest.ms.com",
                          command)
 
@@ -54,6 +54,19 @@ class TestUpdateAddress(TestBrokerCommand):
         command = ["search", "dns", "--reverse_override"]
         out = self.commandtest(command)
         self.matchoutput(out, "arecord15.aqd-unittest.ms.com", command)
+
+    def test_108_clear_comments(self):
+        self.dsdb_expect_update("arecord15.aqd-unittest.ms.com",
+                                comments="")
+        self.noouttest(["update_address",
+                        "--fqdn", "arecord15.aqd-unittest.ms.com",
+                        "--comments", ""])
+        self.dsdb_verify()
+
+    def test_109_verify_comments(self):
+        command = ["show", "fqdn", "--fqdn", "arecord15.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchclean(out, "Comments", command)
 
     def test_110_clear_ptr_override(self):
         command = ["update", "address",

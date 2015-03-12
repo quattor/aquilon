@@ -141,7 +141,7 @@ class TestAddESXCluster(PersonalityTestMixin, TestBrokerCommand):
                    "--personality=vulcan-1g-desktop-prod",
                    "--domain=unittest", "--down_hosts_threshold=1",
                    "--max_members=101", "--vm_to_host_ratio=1:1",
-                   "--comments=Another test ESX cluster"]
+                   "--comments=Some ESX cluster comments"]
         err = self.statustest(command)
         self.matchoutput(err, "The --vm_to_host_ratio option is deprecated.",
                          command)
@@ -159,7 +159,7 @@ class TestAddESXCluster(PersonalityTestMixin, TestBrokerCommand):
         self.matchoutput(out, "Personality: vulcan-1g-desktop-prod Archetype: esx_cluster",
                          command)
         self.matchoutput(out, "Domain: unittest", command)
-        self.matchoutput(out, "Comments: Another test ESX cluster", command)
+        self.matchoutput(out, "Comments: Some ESX cluster comments", command)
 
     def testverifycatutecl2(self):
         obj_cmd, obj, data_cmd, data = self.verify_cat_clusters("utecl2",

@@ -32,7 +32,7 @@ class TestUpdateSrvRecord(TestBrokerCommand):
                    "--protocol", "tcp", "--dns_domain", "aqd-unittest.ms.com",
                    "--target", "arecord14.aqd-unittest.ms.com",
                    "--weight", 15, "--priority", 25, "--port", "8888",
-                   "--comments", "SRV comments"]
+                   "--comments", "New SRV record comments"]
         self.noouttest(command)
 
     def test_200_verify(self):
@@ -42,14 +42,14 @@ class TestUpdateSrvRecord(TestBrokerCommand):
         self.matchoutput(out, "Weight: 15", command)
         self.matchoutput(out, "Priority: 25", command)
         self.matchoutput(out, "Port: 8888", command)
-        self.matchoutput(out, "Comments: SRV comments", command)
+        self.matchoutput(out, "Comments: New SRV record comments", command)
 
     def test_300_missing(self):
         command = ["update", "srv", "record", "--service", "no-such-service",
                    "--protocol", "tcp", "--dns_domain", "aqd-unittest.ms.com",
                    "--target", "arecord14.aqd-unittest.ms.com",
                    "--weight", 15, "--priority", 25, "--port", "8888",
-                   "--comments", "SRV comments"]
+                   "--comments", "New SRV record comments"]
         out = self.notfoundtest(command)
         self.matchoutput(out,
                          "SRV Record _no-such-service._tcp.aqd-unittest.ms.com, "

@@ -32,7 +32,7 @@ class TestAddCity(TestBrokerCommand):
                          "-country_symbol us -city_name Exampleton")
         command = ["add", "city", "--city", "ex", "--country", "us",
                    "--fullname", "Exampleton", "--timezone",
-                   "US/Eastern", "--comments", "Example city comment"]
+                   "US/Eastern", "--comments", "Some city comments"]
         self.noouttest(command)
         self.dsdb_verify()
 
@@ -45,12 +45,12 @@ class TestAddCity(TestBrokerCommand):
                          command)
         self.matchoutput(out, "Fullname: Exampleton", command)
         self.matchoutput(out, "Timezone: US/Eastern", command)
-        self.matchoutput(out, "Comments: Example city comment", command)
+        self.matchoutput(out, "Comments: Some city comments", command)
 
     def test_110_update_example(self):
         command = ["update", "city", "--city", "ex",
                    "--timezone", "EDT", "--fullname", "New Exampleton",
-                   "--comments", "Exampleton city comment"]
+                   "--comments", "Some other city comments"]
         out = self.statustest(command)
         self.matchoutput(out, "Flushed 1 templates.", command)
 
@@ -59,7 +59,7 @@ class TestAddCity(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Fullname: New Exampleton", command)
         self.matchoutput(out, "Timezone: EDT", command)
-        self.matchoutput(out, "Comments: Exampleton city comment", command)
+        self.matchoutput(out, "Comments: Some other city comments", command)
 
     def test_115_verify_exampe_proto(self):
         command = "show city --city ex --format proto"

@@ -36,7 +36,7 @@ class CommandAddFeature(BrokerCommand):
             dbgrn = lookup_grn(session, grn, eon_id, logger=logger,
                                config=self.config)
             dbfeature.owner_grn = dbgrn
-        if comments:
+        if comments is not None:
             dbfeature.comments = comments
 
         session.flush()

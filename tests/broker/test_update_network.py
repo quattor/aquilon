@@ -31,14 +31,14 @@ class TestUpdateNetwork(TestBrokerCommand):
         command = ["update", "network", "--network", "excx-net",
                    "--network_environment", "excx",
                    "--building", "ut", "--type", "dmz-net",
-                   "--side", "b", "--comments", "Test comments"]
+                   "--side", "b", "--comments", "New network comments"]
         self.noouttest(command)
 
     def test_110_verify(self):
         command = ["show", "network", "--network", "excx-net",
                    "--network_environment", "excx"]
         out = self.commandtest(command)
-        self.matchoutput(out, "Comments: Test comments", command)
+        self.matchoutput(out, "Comments: New network comments", command)
         self.matchoutput(out, "Sysloc: ut.ny.na", command)
         self.matchoutput(out, "Network Type: dmz-net", command)
         self.matchoutput(out, "Side: b", command)

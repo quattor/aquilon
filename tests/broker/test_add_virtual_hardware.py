@@ -387,7 +387,7 @@ class TestAddVirtualHardware(TestBrokerCommand):
         self.searchoutput(out, r"^    Model Type: virtual_machine", command)
         self.searchoutput(out, r"^  Primary Name: aqddesk1.msad.ms.com",
                           command)
-        self.searchoutput(out, r"^  Comments: Windows Virtual Desktop", command)
+        self.searchoutput(out, r"^  Host Comments: Windows Virtual Desktop", command)
         self.searchoutput(out,
                           r'Operating System: windows\s*'
                           r'Version: nt61e$',

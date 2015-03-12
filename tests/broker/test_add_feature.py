@@ -31,7 +31,7 @@ class TestAddFeature(TestBrokerCommand):
 
     def test_100_add_host_pre(self):
         command = ["add", "feature", "--feature", "pre_host", "--eon_id", 2,
-                   "--type", "host", "--comment", "Test comment",
+                   "--type", "host", "--comments", "Some feature comments",
                    "--visibility", "public"]
         self.noouttest(command)
 
@@ -69,7 +69,7 @@ class TestAddFeature(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "Host Feature: pre_host", command)
         self.matchoutput(out, "Template: features/pre_host", command)
-        self.matchoutput(out, "Comments: Test comment", command)
+        self.matchoutput(out, "Comments: Some feature comments", command)
         self.matchoutput(out, "Post Personality: False", command)
         self.matchoutput(out, "Visibility: public", command)
         self.matchoutput(out, "Owned by GRN: grn:/ms/ei/aquilon/aqd", command)
@@ -310,14 +310,15 @@ class TestAddFeature(TestBrokerCommand):
 
     def test_300_update_feature(self):
         command = ["update", "feature", "--feature", "pre_host", "--eon_id", 3,
-                   "--type", "host", "--comment", "New comment", "--visibility", "restricted"]
+                   "--type", "host", "--comments", "New feature comments",
+                   "--visibility", "restricted"]
         self.noouttest(command)
 
         command = ["show", "feature", "--feature", "pre_host", "--type", "host"]
         out = self.commandtest(command)
         self.matchoutput(out, "Host Feature: pre_host", command)
         self.matchoutput(out, "Template: features/pre_host", command)
-        self.matchoutput(out, "Comments: New comment", command)
+        self.matchoutput(out, "Comments: New feature comments", command)
         self.matchoutput(out, "Post Personality: False", command)
         self.matchoutput(out, "Visibility: restricted", command)
         self.matchoutput(out, "Owned by GRN: grn:/ms/ei/aquilon/unittest", command)
