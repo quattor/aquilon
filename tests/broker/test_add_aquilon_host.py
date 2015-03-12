@@ -159,7 +159,7 @@ class TestAddAquilonHost(TestBrokerCommand):
     def test_132_add_unittest20_good(self):
         ip = self.net["zebra_vip"].usable[2]
         eth1_ip = self.net["zebra_eth1"].usable[0]
-        self.dsdb_expect_add("unittest20.aqd-unittest.ms.com", ip, "le0")
+        self.dsdb_expect_add("unittest20.aqd-unittest.ms.com", ip, "vip")
         self.dsdb_expect_delete(eth1_ip)
         self.dsdb_expect_add("unittest20-e1.aqd-unittest.ms.com", eth1_ip, "eth1",
                              eth1_ip.mac, primary="unittest20.aqd-unittest.ms.com")

@@ -42,7 +42,7 @@ class DummyIP(IPv4Address):
 
 class NetworkInfo(IPv4Network):
     def __init__(self, name, cidr, nettype, loc_type, loc_name, side="a",
-                 autocreate=False):
+                 autocreate=False, comments=None):
         super(NetworkInfo, self).__init__(cidr)
 
         self.name = name
@@ -52,6 +52,7 @@ class NetworkInfo(IPv4Network):
         self.loc_type = loc_type
         self.loc_name = loc_name
         self.side = side
+        self.comments = comments
 
         if isinstance(autocreate, bool):
             self.autocreate = autocreate
@@ -110,7 +111,8 @@ class DummyNetworks(object):
             for row in reader:
                 n = NetworkInfo(row["name"], row["cidr"], row["type"],
                                 row["loc_type"], row["loc_name"],
-                                side=row["side"], autocreate=row["autocreate"])
+                                side=row["side"], autocreate=row["autocreate"],
+                                comments=row["comments"])
 
                 # Sanity checks
                 if row["name"] in self.networks:

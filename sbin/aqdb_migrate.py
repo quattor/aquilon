@@ -48,26 +48,17 @@ import argparse
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, configure_mappers
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.sql import text
 
 from aquilon.aqdb.db_factory import DbFactory
 from aquilon.aqdb.model import Base
+from aquilon.utils import chunk
 
 signalled = 0
 
 
-def dummy_mapper(table):
-    Base = declarative_base()
-
-    class DummyMapper(Base):
-        __table__ = table
-
-    return DummyMapper
-
-
-def signal_handler(signum, frame):
-    global signalled
+def signal_handler(signum, frame):  # pylint: disable=W0613
+    global signalled  # pylint: disable=W0603
     signalled = 1
 
 
@@ -133,23 +124,19 @@ if __name__ == '__main__':
         sys.stdout.flush()
         cnt = 0
 
-        NewRecord = dummy_mapper(table)
         signal.setitimer(signal.ITIMER_REAL, 5, 5)
-        for record in src_session.execute(table.select()):
-            cnt = cnt + 1
+        for rows in chunk(src_session.execute(table.select()), 1000):
+            cnt = cnt + len(rows)
             if signalled:
                 print("... %d" % cnt, end=' ')
                 sys.stdout.flush()
                 signalled = 0
 
-            data = dict(
-                [(str(colname), getattr(record, colname))
-                 for colname in table.columns]
-            )
+            data = [{col.key: getattr(record, col.key)
+                     for col in table.columns}
+                    for row in rows]
 
-            # insert() is faster, but using .merge() is restartable
-            # dest_session.merge(NewRecord(**data))
-            dest_session.execute(table.insert().values(**data))
+            dest_session.execute(table.insert().values(data))
 
         signal.setitimer(signal.ITIMER_REAL, 0)
         dest_session.flush()

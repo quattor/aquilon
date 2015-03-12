@@ -83,26 +83,28 @@ class TestRefreshNetwork(TestBrokerCommand):
         self.assertEmptyErr(err, command)
 
     def test_130_updates(self):
-        self.noouttest(["del", "network", "--ip", "172.31.29.0"])
+        net = self.net["refreshtest1"]
+        self.noouttest(["del", "network", "--ip", net.ip])
         self.noouttest(["add", "network", "--network", "wrong-params",
-                        "--ip", "172.31.29.0", "--netmask", "255.255.255.128",
+                        "--ip", net.ip, "--netmask", net.netmask,
                         "--side", "a", "--type", "transit", "--building", "ut"])
-        self.noouttest(["add", "router", "address", "--ip", "172.31.29.3",
+        self.noouttest(["add", "router", "address", "--ip", net[3],
                         "--fqdn", "extrartr.aqd-unittest.ms.com"])
 
     def test_135_syncagain(self):
+        net = self.net["refreshtest1"]
         command = "refresh network --building np"
         err = self.statustest(command.split(" "))
-        self.matchoutput(err, "Setting network wrong-params [172.31.29.0/25] "
-                         "name to nplab-vlan1", command)
+        self.matchoutput(err, "Setting network wrong-params [%s/25] "
+                         "name to refreshtest1" % net.ip, command)
 
-        msg = "Setting network nplab-vlan1 [172.31.29.0/25] "
+        msg = "Setting network refreshtest1 [%s/25] " % net.ip
         self.matchoutput(err, msg + "type to unknown", command)
         self.matchoutput(err, msg + "side to b", command)
         self.matchoutput(err, msg + "location to building np", command)
 
-        self.matchoutput(err, "Removing router 172.31.29.3 from network "
-                         "nplab-vlan1", command)
+        self.matchoutput(err, "Removing router %s from network "
+                         "refreshtest1" % net[3], command)
 
     def test_138_router_gone(self):
         command = "search system --fqdn extrartr.aqd-unittest.ms.com"
@@ -315,21 +317,22 @@ class TestRefreshNetwork(TestBrokerCommand):
         self.noouttest(command)
 
     def test_800_bunker_added(self):
-        command = ["show", "network", "--ip", "10.184.155.0"]
+        net = self.net["aurora2"]
+        command = ["show", "network", "--ip", net.ip]
         out = self.commandtest(command)
-        self.matchoutput(out, "Network: ny00l4as01_aur", command)
-        self.matchoutput(out, "IP: 10.184.155.0", command)
+        self.matchoutput(out, "Network: aurora2", command)
+        self.matchoutput(out, "IP: %s" % net.ip, command)
         self.matchoutput(out, "Network Type: transit", command)
         self.matchoutput(out, "Comments: Test aurora net", command)
         self.matchoutput(out, "Bunker: nyb10.np", command)
 
     def test_800_bunker_cleared(self):
-        command = ["show", "network", "--ip", "172.31.64.64"]
+        net = self.net["np06bals03_v103"]
+        command = ["show", "network", "--ip", net.ip]
         out = self.commandtest(command)
         self.matchoutput(out, "Network: np06bals03_v103", command)
-        self.matchoutput(out, "IP: 172.31.64.64", command)
+        self.matchoutput(out, "IP: %s" % net.ip, command)
         self.matchoutput(out, "Building: np", command)
-
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestRefreshNetwork)

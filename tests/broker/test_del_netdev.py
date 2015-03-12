@@ -87,7 +87,8 @@ class TestDelNetworkDevice(TestBrokerCommand):
                                 'switchinbuilding.aqd-unittest.ms.com')
 
     def test_130_del_np06bals03(self):
-        self.dsdb_expect_delete("172.31.64.69")
+        ip = self.net["np06bals03_v103"][5]
+        self.dsdb_expect_delete(ip)
         command = "del network_device --network_device np06bals03.ms.com"
         self.noouttest(command.split(" "))
         self.dsdb_verify()
@@ -99,7 +100,8 @@ class TestDelNetworkDevice(TestBrokerCommand):
         self.notfoundtest(command.split(" "))
 
     def test_135_del_np06fals01(self):
-        self.dsdb_expect_delete("172.31.88.5")
+        ip = self.net["notbunkerized"][5]
+        self.dsdb_expect_delete(ip)
         command = "del network_device --network_device np06fals01.ms.com"
         self.noouttest(command.split(" "))
         self.dsdb_verify()

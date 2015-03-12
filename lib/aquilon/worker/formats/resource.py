@@ -32,8 +32,7 @@ class ResourceFormatter(ObjectFormatter):
             details.append(indent + "  Comments: %s" % resource.comments)
 
         if not embedded:
-            details.append(indent + "  Bound to: {0}"
-                           .format(resource.holder.holder_object))
+            details.append(indent + "  Bound to: {0}".format(resource.holder))
         details.extend(self.extra_details(resource, indent))
         return "\n".join(details)
 

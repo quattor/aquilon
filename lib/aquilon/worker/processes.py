@@ -556,24 +556,6 @@ class DSDBRunner(object):
                   "by-fqdn": {},
                   "primary": real_primary}
 
-        # We need a stable index for generating virtual interface names for
-        # DSDB. Sort the Zebra IPs and use the list index for this purpose.
-        # There is an exception though: while renumbering and thus
-        # deleting/re-adding the virtual interfaces is generally fine, we do not
-        # want to remove the primary IP address. So make sure the primary IP is
-        # always the first one.
-        zebra_ips = []
-        for addr in dbhw_ent.all_addresses():
-            if addr.network.is_internal and \
-               addr.service_address and \
-               addr.service_address.holder.holder_type == 'host' and \
-               addr.ip not in zebra_ips:
-                    zebra_ips.append(addr.ip)
-        zebra_ips.sort()
-        if dbhw_ent.primary_ip and dbhw_ent.primary_ip in zebra_ips:
-            zebra_ips.remove(dbhw_ent.primary_ip)
-            zebra_ips.insert(0, dbhw_ent.primary_ip)
-
         # For each of the addresses held by this hardware_entity we need to
         # create an entry in DSDB.  The following loop makes a snapshot of
         # expected state of the information in DSDB.
@@ -601,14 +583,12 @@ class DSDBRunner(object):
                 comments = None
 
             # Determine the interface name and comments used by this address.
-            if addr.ip in zebra_ips:
-                # Zebra: in AQDB the address is assigned to multiple existing
-                # interfaces. In DSDB however, we need just a single virtual
-                # interface
-                iface = "le%d" % zebra_ips.index(addr.ip)
-            elif addr.service_address:
-                # Skip cluster-bound service addresses
-                continue
+            if addr.service_address:
+                if addr.service_address.holder.holder_type == 'host':
+                    iface = "vip"
+                else:
+                    # Skip cluster-bound service addresses
+                    continue
             else:
                 iface = addr.logical_name
                 if addr.interface.comments and not \
