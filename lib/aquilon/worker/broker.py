@@ -369,7 +369,7 @@ class BrokerCommand(object):
     @classmethod
     def is_class_lock_free(cls):
         # log.msg("Checking %s" % cls.__module__)
-        for (key, item) in sys.modules[cls.__module__].__dict__.items():
+        for item in sys.modules[cls.__module__].__dict__.values():
             # log.msg("  Checking %s" % item)
             if item in [sync_domain, TemplateDomain,
                         add_resource, del_resource]:

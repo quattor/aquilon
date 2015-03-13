@@ -185,10 +185,8 @@ def discover_network_device(session, logger, config, dbnetdev, dryrun):
         else:
             # Doing the DSDB update if the address existed before would be
             # tricky, so prevent that case by passing preclude=True
-            dbdns_rec, newly_created = grab_address(session, fqdn, ip,
-                                                    dbnet_env,
-                                                    relaxed=relaxed,
-                                                    preclude=True)
+            dbdns_rec, _ = grab_address(session, fqdn, ip, dbnet_env,
+                                        relaxed=relaxed, preclude=True)
             assign_address(iface, ip, dbdns_rec.network, label=label,
                            logger=logger)
 

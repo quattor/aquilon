@@ -67,9 +67,8 @@ class CommandAddAuxiliary(BrokerCommand):
         ip = generate_ip(session, logger, dbinterface, compel=True,
                          audit_results=audit_results, **arguments)
 
-        dbdns_rec, newly_created = grab_address(session, auxiliary, ip,
-                                                comments=comments,
-                                                preclude=True)
+        dbdns_rec, _ = grab_address(session, auxiliary, ip, comments=comments,
+                                    preclude=True)
 
         if dbmachine.primary_name:
             # This command cannot use a non-default DNS environment, so no extra

@@ -118,7 +118,7 @@ def build_index(config, session, logger=LOGGER):
     # Old profiles that should be cleaned up, if the profile extension changes
     cleanup = []
 
-    for root, _dirs, files in os.walk(profilesdir):
+    for root, _, files in os.walk(profilesdir):
         for profile in files:
             if profile == profile_index:
                 continue
@@ -182,7 +182,7 @@ def build_index(config, session, logger=LOGGER):
                 len(modified_index))
 
     for filename in cleanup:
-        logger.debug("Cleaning up %s" % filename)
+        logger.debug("Cleaning up %s", filename)
         remove_file(filename, logger=logger)
 
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -236,7 +236,7 @@ def send_notification(ntype, modified, sock=None, logger=LOGGER):
         # be namespaced. This (in effect) globalizes
         # all names. Perhaps we might want to do some
         # checks based on the namespace. Not for now.
-        (_ns, _sep, host) = obj.rpartition('/')
+        (_, _, host) = obj.rpartition('/')
 
         try:
             # If you think it would be a good idea to look up the IP address

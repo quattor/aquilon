@@ -49,10 +49,9 @@ class CommandAddNetworkDevice(BrokerCommand):
 
         dblocation = get_location(session, compel=True, **arguments)
 
-        dbdns_rec, newly_created = grab_address(session, network_device, ip,
-                                                allow_restricted_domain=True,
-                                                allow_reserved=True,
-                                                preclude=True)
+        dbdns_rec, _ = grab_address(session, network_device, ip,
+                                    allow_restricted_domain=True,
+                                    allow_reserved=True, preclude=True)
         if not label:
             label = dbdns_rec.fqdn.name
             try:

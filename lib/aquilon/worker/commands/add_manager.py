@@ -56,9 +56,8 @@ class CommandAddManager(BrokerCommand):
         ip = generate_ip(session, logger, dbinterface, compel=True,
                          audit_results=audit_results, **arguments)
 
-        dbdns_rec, newly_created = grab_address(session, manager, ip,
-                                                comments=comments,
-                                                preclude=True)
+        dbdns_rec, _ = grab_address(session, manager, ip, comments=comments,
+                                    preclude=True)
 
         assign_address(dbinterface, ip, dbdns_rec.network, logger=logger)
 

@@ -540,7 +540,7 @@ def enforce_bucket_alignment(dbrack, dbnetwork, logger):
         # If a network spans buildings, we pretend it's in the bunker local to
         # the rack's building, even if it was registered to the other side. This
         # hack could be removed if we had buckets as a Location subclass.
-        bucket, building = net_bunker.name.split(".", 1)
+        bucket, _ = net_bunker.name.split(".", 1)
         expected_bunker = Bunker.get_unique(session, bucket + "." +
                                             dbrack.building.name, compel=True)
     else:

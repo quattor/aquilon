@@ -210,7 +210,7 @@ def write_schema_html():
             <th>Table</th><th>Documentation</th></tr>")
         for cls in classes:
             fh.write("<tr><td>%s</td><td>%s</td><td>%s</td></tr>"
-                % (cls.__name__, cls.__tablename__, cls.__doc__))
+                     % (cls.__name__, cls.__tablename__, cls.__doc__))
         fh.write("</table>")
     fh.write("</body></html>")
 

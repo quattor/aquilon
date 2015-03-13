@@ -102,10 +102,9 @@ class CommandAddHost(BrokerCommand):
         ip = generate_ip(session, logger, dbinterface,
                          audit_results=audit_results, **arguments)
 
-        dbdns_rec, newly_created = grab_address(session, hostname, ip,
-                                                allow_restricted_domain=True,
-                                                allow_reserved=True,
-                                                preclude=True)
+        dbdns_rec, _ = grab_address(session, hostname, ip,
+                                    allow_restricted_domain=True,
+                                    allow_reserved=True, preclude=True)
         dbmachine.primary_name = dbdns_rec
 
         # Fix up auxiliary addresses to point to the primary name by default

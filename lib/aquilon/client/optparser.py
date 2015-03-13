@@ -170,7 +170,7 @@ class Command(Element):
         result = {}
         for optgroup in self.optgroups:
             try:
-                (res, found) = optgroup.check(options)
+                res, _ = optgroup.check(options)
             except ParsingError as e:
                 e.help = self.recursiveHelp(0, width=get_term_width())
                 raise e

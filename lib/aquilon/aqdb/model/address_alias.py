@@ -18,7 +18,6 @@
 
 from sqlalchemy import Column, ForeignKey
 from sqlalchemy.orm import relation, backref, column_property, object_session
-from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.sql import select, func
 
 from aquilon.exceptions_ import AquilonError, ArgumentError
@@ -36,7 +35,7 @@ class AddressAlias(DnsRecord):
                            primary_key=True)
 
     target_id = Column(ForeignKey(Fqdn.id, name='%s_target_fk' % _TN),
-                                  nullable=False, index=True)
+                       nullable=False, index=True)
 
     target = relation(Fqdn, innerjoin=True, foreign_keys=target_id,
                       backref=backref('address_aliases'))
@@ -45,7 +44,6 @@ class AddressAlias(DnsRecord):
                                 'extra_search_fields': ['target',
                                                         'dns_environment']}},)
     __mapper_args__ = {'polymorphic_identity': _TN}
-
 
     @property
     def target_ip(self):

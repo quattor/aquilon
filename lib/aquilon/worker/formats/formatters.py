@@ -232,7 +232,7 @@ class ObjectFormatter(object):
         self.fill_proto(result, skeleton, embedded=embedded,
                         indirect_attrs=indirect_attrs)
 
-    def fill_proto(self, result, skeleton, embedded=True, indirect_attrs=True): # pragma: no cover
+    def fill_proto(self, result, skeleton, embedded=True, indirect_attrs=True):  # pragma: no cover
         # pylint: disable=W0613
         # There's no default protobuf message type
         raise ProtocolError("{0!r} does not have a protobuf formatter."

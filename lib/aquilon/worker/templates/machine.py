@@ -67,12 +67,10 @@ class PlenaryMachineInfo(StructurePlenary):
     def body(self, lines):
         ram = [StructureTemplate("hardware/ram/generic",
                                  {"size": PanMetric(self.dbobj.memory, "MB")})]
-        cpus = []
-        for cpu_num in range(self.dbobj.cpu_quantity):
-            cpu = StructureTemplate("hardware/cpu/%s/%s" %
-                                    (self.dbobj.cpu.vendor.name,
-                                     self.dbobj.cpu.name))
-            cpus.append(cpu)
+        cpu = StructureTemplate("hardware/cpu/%s/%s" %
+                                (self.dbobj.cpu.vendor.name,
+                                 self.dbobj.cpu.name))
+        cpus = [cpu] * self.dbobj.cpu_quantity
 
         disks = {}
         for disk in self.dbobj.disks:

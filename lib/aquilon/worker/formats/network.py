@@ -22,7 +22,7 @@ from operator import attrgetter
 from sqlalchemy.orm.attributes import set_committed_value
 from sqlalchemy.orm import object_session, subqueryload
 
-from aquilon.aqdb.model import Network, HardwareEntity, Host
+from aquilon.aqdb.model import Network, HardwareEntity
 from aquilon.worker.formats.formatters import ObjectFormatter
 from aquilon.worker.formats.list import ListFormatter
 
