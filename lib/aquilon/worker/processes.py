@@ -133,8 +133,8 @@ def run_command(args, env=None, path="/", logger=LOGGER, loglevel=logging.INFO,
     if stream_level is None:
         out, err = p.communicate(input=input)
         if filterre:
-            out = "\n".join([line for line in out.splitlines()
-                             if filterre.search(line)])
+            out = "\n".join(line for line in out.splitlines()
+                            if filterre.search(line))
     else:
         out_thread = StreamLoggerThread(logger, stream_level, p, p.stdout,
                                         filterre=filterre, context=ctx)
@@ -304,7 +304,7 @@ class DSDBRunner(object):
             try:
                 if verbose:
                     self.logger.client_info("DSDB: %s" %
-                                            " ".join([str(a) for a in args]))
+                                            " ".join(str(a) for a in args))
                 run_command(cmd, env=self.getenv(), logger=self.logger)
             except ProcessException as err:
                 if error_filter and err.out and error_filter.search(err.out):
@@ -323,7 +323,7 @@ class DSDBRunner(object):
             cmd.extend(args)
             try:
                 self.logger.client_info("DSDB: %s" %
-                                        " ".join([str(a) for a in args]))
+                                        " ".join(str(a) for a in args))
                 run_command(cmd, env=self.getenv(), logger=self.logger)
             except ProcessException as err:
                 rollback_failures.append(str(err))

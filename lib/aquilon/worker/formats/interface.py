@@ -88,7 +88,7 @@ class InterfaceFormatter(ObjectFormatter):
         static_routes = set()
         for addr in interface.assignments:
             if addr.fqdns:
-                names = ", ".join([str(fqdn) for fqdn in addr.fqdns])
+                names = ", ".join(str(fqdn) for fqdn in addr.fqdns)
             else:
                 names = "unknown"
 

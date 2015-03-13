@@ -432,10 +432,10 @@ class BrokerCommand(object):
         if args:
             # Take 'args' as the list of keys that we are going to check
             # exist in 'kwargs', we will ignore any addition 'kwargs'
-            count = sum([1 if kwargs.get(arg, None) else 0 for arg in args])
+            count = sum(1 if kwargs.get(arg, None) else 0 for arg in args)
         else:
             # Make sure only one of the supplied arguments is set
-            count = sum([1 if x else 0 for x in kwargs.values()])
+            count = sum(1 if x else 0 for x in kwargs.values())
         if count != 1:
             if args:
                 names = ["--%s" % arg for arg in args]

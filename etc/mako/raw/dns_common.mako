@@ -7,10 +7,10 @@ ${"{0:c}: {0.fqdn!s}".format(record)}
 ## The alias_cnt property can be loaded eagerly, so use it to check the
 ## presence of aliases before trying to query the alias table itself
 %if record.alias_cnt:
-  Aliases: ${", ".join([str(a.fqdn) + ("" if a.fqdn.dns_environment == record.fqdn.dns_environment else " [environment: " + a.fqdn.dns_environment.name + "]") for a in record.all_aliases])}
+  Aliases: ${", ".join(str(a.fqdn) + ("" if a.fqdn.dns_environment == record.fqdn.dns_environment else " [environment: " + a.fqdn.dns_environment.name + "]") for a in record.all_aliases)}
 %endif
 %if record.address_alias_cnt:
-  Address Aliases: ${", ".join([str(a.fqdn) + ("" if a.fqdn.dns_environment == record.fqdn.dns_environment else " [environment: " + a.fqdn.dns_environment.name + "]") for a in record.all_address_aliases])}
+  Address Aliases: ${", ".join(str(a.fqdn) + ("" if a.fqdn.dns_environment == record.fqdn.dns_environment else " [environment: " + a.fqdn.dns_environment.name + "]") for a in record.all_address_aliases)}
 %endif
 </%def>
 <%def name="dns_record_tail(record)">\

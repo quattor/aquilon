@@ -203,7 +203,7 @@ def build_index(config, session, logger=LOGGER):
                     # service may be unknown
                     srvinfo = Service.get_unique(session, service, compel=True)
                     for instance in srvinfo.instances:
-                        servers.update([srv.fqdn for srv in instance.servers])
+                        servers.update(srv.fqdn for srv in instance.servers)
                 except Exception as e:
                     logger.info("failed to lookup up server module %s: %s",
                                 service, e)

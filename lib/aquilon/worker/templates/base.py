@@ -522,8 +522,8 @@ class PlenaryCollection(object):
     def __str__(self):
         """For debug output."""
         return "%s(%s)" % (self.__class__.__name__,
-                           ", ".join([str(plenary)
-                                      for plenary in self.plenaries]))
+                           ", ".join(str(plenary)
+                                     for plenary in self.plenaries))
 
     def __iter__(self):
         for plen in self.plenaries:

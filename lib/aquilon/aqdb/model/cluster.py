@@ -245,8 +245,8 @@ class Cluster(CompileableMixin, Base):
             clsname = self.title + " Cluster"
 
         if lowercase:
-            clsname = " ".join([x if x[:-1].isupper() else x.lower()
-                                for x in clsname.split()])
+            clsname = " ".join(x if x[:-1].isupper() else x.lower()
+                               for x in clsname.split())
         if class_only:
             return clsname.__format__(passthrough)
         val = "%s %s" % (clsname, instance)

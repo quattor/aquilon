@@ -252,7 +252,7 @@ class TestAddESXCluster(PersonalityTestMixin, TestBrokerCommand):
         mc = self.protobuftest(command.split(" "), expect=1)[0]
         self.assertEqual(mc.name, "utmc1")
         self.assertEqual(len(mc.clusters), 2)
-        self.assertEqual(set([cluster.name for cluster in mc.clusters]),
+        self.assertEqual(set(cluster.name for cluster in mc.clusters),
                          set(["utecl1", "utecl2"]))
 
     def testnotfoundesx_cluster(self):

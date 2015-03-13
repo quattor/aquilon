@@ -33,7 +33,7 @@ class CommandValidateParameter(BrokerCommand):
         if errors:
             raise ArgumentError("Following required parameters have not been "
                                 "specified:\n" +
-                                "\n".join([error for error in errors]))
+                                "\n".join(error for error in errors))
 
         logger.client_info("All required parameters specified.")
         return

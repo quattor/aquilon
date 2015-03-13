@@ -135,7 +135,7 @@ class UserSync(object):
                     p.root_users.remove(dbuser)
                 personalities.add(p)
 
-        self.plenaries.extend([Plenary.get_plenary(p) for p in personalities])
+        self.plenaries.extend(Plenary.get_plenary(p) for p in personalities)
 
         for dbuser in userlist:
             self.session.delete(dbuser)

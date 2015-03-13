@@ -117,7 +117,7 @@ def generate_ip(session, logger, dbinterface, ip=None, ipfromip=None,
                 ipfromsystem=None, autoip=None, ipalgorithm=None, compel=False,
                 network_environment=None, audit_results=None, **kwargs):
     ip_options = [ip, ipfromip, ipfromsystem, autoip]
-    numopts = sum([1 if opt else 0 for opt in ip_options])
+    numopts = sum(1 if opt else 0 for opt in ip_options)
     if numopts > 1:
         raise ArgumentError("Only one of --ip, --ipfromip, --ipfromsystem "
                             "and --autoip can be specified.")
@@ -205,7 +205,7 @@ def generate_ip(session, logger, dbinterface, ip=None, ipfromip=None,
     used_ips = used_ips.filter(ARecord.ip >= startip)
 
     full_set = set(range(int(startip), int(dbnetwork.broadcast)))
-    used_set = set([int(item.ip) for item in used_ips])
+    used_set = set(int(item.ip) for item in used_ips)
     free_set = full_set - used_set
 
     if not free_set:
@@ -638,11 +638,11 @@ def rename_interface(session, dbinterface, rename_to):
             else:
                 old_name = "%s-%s" % (short, dbinterface.name)
                 new_name = "%s-%s" % (short, rename_to)
-            fqdn_changes.extend([(dns_rec.fqdn, new_name) for dns_rec
-                                 in addr.dns_records
-                                 if (dns_rec.fqdn.name == old_name and
-                                     dns_rec.fqdn.dns_domain == dbdns_domain and
-                                     dns_rec.fqdn != primary_fqdn)])
+            fqdn_changes.extend((dns_rec.fqdn, new_name) for dns_rec
+                                in addr.dns_records
+                                if (dns_rec.fqdn.name == old_name and
+                                    dns_rec.fqdn.dns_domain == dbdns_domain and
+                                    dns_rec.fqdn != primary_fqdn))
     else:
         dbdns_domain = dbdns_env = None
 

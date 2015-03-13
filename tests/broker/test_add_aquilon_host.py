@@ -208,8 +208,8 @@ class TestAddAquilonHost(TestBrokerCommand):
         self.assertTrue(found,
                         "Service address hostname not found in the resources. "
                         "Existing resources: %s" %
-                        ", ".join(["%s %s" % (res.type, res.name)
-                                   for res in host.resources]))
+                        ", ".join("%s %s" % (res.type, res.name)
+                                  for res in host.resources))
 
     def test_135_verify_unittest20_service(self):
         ip = self.net["zebra_vip"].usable[2]

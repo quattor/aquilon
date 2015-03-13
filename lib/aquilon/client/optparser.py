@@ -206,7 +206,7 @@ class Command(Element):
         return conflicts
 
     def shortHelp(self, width=None):
-        lines = textwrap.wrap(" ".join([o.shortHelp() for o in self.optgroups]),
+        lines = textwrap.wrap(" ".join(o.shortHelp() for o in self.optgroups),
                               width)
 
         if len(lines) > 0:
@@ -230,7 +230,7 @@ class Command(Element):
 
         formatted = []
         for para in paragraphs:
-            lines = "\n".join(["    " + l for l in textwrap.wrap(para, width - 4)])
+            lines = "\n".join("    " + l for l in textwrap.wrap(para, width - 4))
             formatted.append(lines)
         res += "\n\n".join(formatted) + "\n\n"
 
@@ -330,7 +330,7 @@ class OptGroup(Element):
         return conflicts
 
     def shortHelp(self):
-        return " ".join([o.shortHelp() for o in self.options])
+        return " ".join(o.shortHelp() for o in self.options)
 
     def recursiveHelp(self, indentlevel, width=None):
         if self.mandatory:
@@ -552,7 +552,7 @@ class OptParser(object):
                            for node in self.tree.getiterator("command")
                            if node.get("name") != "*"])
 
-        maxlen = max([len(s) for s in commands]) + 4
+        maxlen = max(len(s) for s in commands) + 4
         columns = (width - 4) / maxlen
         rows = len(commands) / columns + 1
 

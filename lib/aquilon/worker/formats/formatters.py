@@ -281,4 +281,4 @@ ObjectFormatter.default_handler = ObjectFormatter()
 
 # Convenience method for mako templates
 def shift(result, indent="  "):
-    return "\n".join(["%s%s" % (indent, line) for line in result.splitlines()])
+    return "\n".join("%s%s" % (indent, line) for line in result.splitlines())

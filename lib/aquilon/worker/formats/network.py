@@ -107,8 +107,8 @@ class NetworkFormatter(ObjectFormatter):
             details.append(indent + "  Comments: %s" % network.comments)
 
         if network.routers:
-            routers = ", ".join(["{0} ({1})".format(rtr.ip, rtr.location)
-                                 for rtr in network.routers])
+            routers = ", ".join("{0} ({1})".format(rtr.ip, rtr.location)
+                                for rtr in network.routers)
             details.append(indent + "  Routers: %s" % routers)
 
         # Look for dynamic DHCP ranges
@@ -153,8 +153,8 @@ class NetworkFormatter(ObjectFormatter):
 
         # Bulk load information about anything having a network address on this
         # network
-        hw_ids = set([addr.interface.hardware_entity_id for addr in
-                      net.assignments])
+        hw_ids = set(addr.interface.hardware_entity_id for addr in
+                     net.assignments)
         if hw_ids:
             session = object_session(net)
             q = session.query(HardwareEntity)
@@ -283,7 +283,7 @@ class NetworkHostListFormatter(ListFormatter):
                 iface = addr.interface
                 hw_ent = iface.hardware_entity
                 if addr.fqdns:
-                    names = ", ".join([str(fqdn) for fqdn in addr.fqdns])
+                    names = ", ".join(str(fqdn) for fqdn in addr.fqdns)
                 else:
                     names = "unknown"
                 details.append(indent + "  {0:c}: {0.printable_name}, "
@@ -326,8 +326,8 @@ class SimpleNetworkListFormatter(ListFormatter):
                network.side, network.network_type, network.comments)
 
     def format_html(self, nlist):
-        return "<ul>\n%s\n</ul>\n" % "\n".join([
+        return "<ul>\n%s\n</ul>\n" % "\n".join(
             """<li><a href="/network/%(ip)s.html">%(ip)s</a></li>"""
-            % {"ip": n.ip} for n in nlist])
+            % {"ip": n.ip} for n in nlist)
 
 ObjectFormatter.handlers[SimpleNetworkList] = SimpleNetworkListFormatter()
