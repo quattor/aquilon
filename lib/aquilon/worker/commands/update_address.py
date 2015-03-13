@@ -35,6 +35,12 @@ class CommandUpdateAddress(BrokerCommand):
         dbdns_rec = ARecord.get_unique(session, fqdn=fqdn,
                                        dns_environment=dbdns_env, compel=True)
 
+        # Updating a service address involves template changes
+        if dbdns_rec.service_address:
+            raise ArgumentError("{0} is a service address, use the "
+                                "update_service_address command to change it."
+                                .format(dbdns_rec))
+
         old_ip = dbdns_rec.ip
         old_comments = dbdns_rec.comments
 

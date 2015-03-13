@@ -660,6 +660,8 @@ def get_interfaces(dbhw_ent, interfaces, dbnetwork=None):
     ifnames = [ifname.strip().lower() for ifname in interfaces.split(",")]
     dbifaces = []
     for ifname in ifnames:
+        if not ifname:
+            continue
         dbinterface = first_of(dbhw_ent.interfaces,
                                lambda x, name=ifname: x.name == name)
         if not dbinterface:
@@ -668,5 +670,8 @@ def get_interfaces(dbhw_ent, interfaces, dbnetwork=None):
         if dbnetwork:
             dbinterface.validate_network(dbnetwork)
         dbifaces.append(dbinterface)
+
+    if not dbifaces:
+        raise ArgumentError("The interface list cannot be empty.")
 
     return dbifaces

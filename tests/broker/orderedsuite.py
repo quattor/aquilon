@@ -107,6 +107,7 @@ from .test_add_aurora_host import TestAddAuroraHost
 from .test_add_auxiliary import TestAddAuxiliary
 from .test_add_interface_address import TestAddInterfaceAddress
 from .test_add_service_address import TestAddServiceAddress
+from .test_update_service_address import TestUpdateServiceAddress
 from .test_add_manager import TestAddManager
 from .test_add_static_route import TestAddStaticRoute
 from .test_add_feature import TestAddFeature
@@ -392,6 +393,7 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestUpdateRack,
                      TestUpdateAlias, TestUpdateSrvRecord, TestUpdateAddress,
                      TestUpdateAddressAlias,
+                     TestUpdateServiceAddress,
                      TestBindFeature, TestUnbindFeature,
                      TestRefreshNetwork, TestUpdateNetwork, TestSplitMergeNetwork,
                      TestNetworkConstraints,
