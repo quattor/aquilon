@@ -132,7 +132,7 @@ if __name__ == '__main__':
                 sys.stdout.flush()
                 signalled = 0
 
-            data = [{col.key: getattr(record, col.key)
+            data = [{col.key: getattr(row, col.key)
                      for col in table.columns}
                     for row in rows]
 
