@@ -24,6 +24,7 @@ import gzip
 
 from xml.etree import ElementTree
 
+from aquilon.exceptions_ import AquilonError
 from aquilon.aqdb.model import Service
 from aquilon.utils import write_file, remove_file
 
@@ -176,7 +177,12 @@ def build_index(config, session, logger=LOGGER):
     compress = None
     if gzip_index:
         compress = 'gzip'
-    write_file(index_path, "\n".join(content), logger=logger, compress=compress)
+
+    try:
+        write_file(index_path, "\n".join(content), logger=logger,
+                   compress=compress)
+    except OSError as err:
+        raise AquilonError("Failed to write %s: %s" % (index_path, err))
 
     logger.info("Updated %s, %d objects modified", index_path,
                 len(modified_index))
@@ -188,12 +194,16 @@ def build_index(config, session, logger=LOGGER):
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
     if config.has_option("broker", "bind_address"):
-        bind_address = socket.gethostbyname(config.get("broker", "bind_address"))
-        if config.has_option("broker", "cdp_send_port"):  # pragma: no cover
-            port = config.get_int("broker", "cdp_send_port")
-        else:
-            port = 0
-        sock.bind((bind_address, port))
+        try:
+            bind_address = socket.gethostbyname(config.get("broker", "bind_address"))
+            if config.has_option("broker", "cdp_send_port"):  # pragma: no cover
+                port = config.get_int("broker", "cdp_send_port")
+            else:
+                port = 0
+            sock.bind((bind_address, port))
+        except socket.gaierror as err:
+            raise AquilonError("Failed to bind to the requested adress/port: %s"
+                               % err)
 
     if config.has_option("broker", "server_notifications"):
         servers = set()
@@ -263,6 +273,7 @@ def send_notification(ntype, modified, sock=None, logger=LOGGER):
 def trigger_notifications(config, logger=LOGGER, loglevel=logging.INFO):
     sockname = os.path.join(config.get("broker", "sockdir"), "notifysock")
     sd = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+    sd.settimeout(1.0)
     logger.debug("Attempting connection to notification socket: %s", sockname)
     try:
         sd.connect(sockname)
