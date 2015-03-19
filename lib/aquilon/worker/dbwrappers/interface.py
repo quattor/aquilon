@@ -656,3 +656,19 @@ def check_netdev_iftype(type):
     if type not in valid_interface_types:
         raise ArgumentError("Interface type %s is not allowed for "
                             "network devices." % str(type))
+
+
+def get_interfaces(dbhw_ent, interfaces, dbnetwork=None):
+    ifnames = [ifname.strip().lower() for ifname in interfaces.split(",")]
+    dbifaces = []
+    for ifname in ifnames:
+        dbinterface = first_of(dbhw_ent.interfaces,
+                               lambda x, name=ifname: x.name == name)
+        if not dbinterface:
+            raise ArgumentError("{0} does not have an interface named "
+                                "{1}.".format(dbhw_ent, ifname))
+        if dbnetwork:
+            dbinterface.validate_network(dbnetwork)
+        dbifaces.append(dbinterface)
+
+    return dbifaces
