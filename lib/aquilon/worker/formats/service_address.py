@@ -30,8 +30,8 @@ class ServiceAddressFormatter(ResourceFormatter):
 
     def fill_proto(self, srv, skeleton, embedded=True, indirect_attrs=True):
         super(ServiceAddressFormatter, self).fill_proto(srv, skeleton)
-        skeleton.service_address.ip = str(srv.dns_record.ip)
-        skeleton.service_address.fqdn = str(srv.dns_record.fqdn)
+        skeleton.service_address.ip = str(srv.ip)
+        skeleton.service_address.fqdn = str(srv.dns_record)
         skeleton.service_address.interfaces.extend(srv.interfaces)
 
 ObjectFormatter.handlers[ServiceAddress] = ServiceAddressFormatter()

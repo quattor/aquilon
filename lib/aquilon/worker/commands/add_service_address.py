@@ -27,18 +27,12 @@ from aquilon.worker.dbwrappers.resources import (add_resource,
 from aquilon.worker.processes import DSDBRunner
 
 
-def add_srv_dsdb_callback(session, logger, dbsrv, toplevel_holder=None,
-                          oldinfo=None, newly_created=None, comments=None):
-    dsdb_runner = DSDBRunner(logger=logger)
-
+def add_srv_dsdb_callback(dbsrv, dsdb_runner=None, newly_created=None,
+                          comments=None):
     if not newly_created:
-        dsdb_runner.delete_host_details(dbsrv.dns_record.fqdn, dbsrv.dns_record.ip)
-    if isinstance(toplevel_holder, Host):
-        dsdb_runner.update_host(toplevel_holder.hardware_entity, oldinfo)
-    else:
-        dsdb_runner.add_host_details(dbsrv.dns_record.fqdn,
-                                     dbsrv.dns_record.ip, comments=comments)
+        dsdb_runner.delete_host_details(dbsrv.dns_record, dbsrv.ip)
 
+    dsdb_runner.add_host_details(dbsrv.dns_record, dbsrv.ip, comments=comments)
     dsdb_runner.commit_or_rollback("Could not add host to DSDB")
 
 
@@ -85,12 +79,12 @@ class CommandAddServiceAddress(BrokerCommand):
 
         # Disable autoflush, since the ServiceAddress object won't be complete
         # until add_resource() is called
+        dsdb_runner = DSDBRunner(logger=logger)
         with session.no_autoflush:
             dbsrv = ServiceAddress(name=name, dns_record=dbdns_rec,
                                    comments=comments)
             holder.resources.append(dbsrv)
 
-            oldinfo = None
             if isinstance(toplevel_holder, Cluster):
                 if not toplevel_holder.hosts:
                     # The interface names are only stored in the
@@ -101,7 +95,6 @@ class CommandAddServiceAddress(BrokerCommand):
                 for host in toplevel_holder.hosts:
                     apply_service_address(host, ifnames, dbsrv, logger)
             elif isinstance(toplevel_holder, Host):
-                oldinfo = DSDBRunner.snapshot_hw(toplevel_holder.hardware_entity)
                 apply_service_address(toplevel_holder, ifnames, dbsrv, logger)
             else:  # pragma: no cover
                 raise UnimplementedError("{0} as a resource holder is not "
@@ -109,7 +102,7 @@ class CommandAddServiceAddress(BrokerCommand):
 
         add_resource(session, logger, holder, dbsrv,
                      dsdb_callback=add_srv_dsdb_callback,
-                     toplevel_holder=toplevel_holder, oldinfo=oldinfo,
+                     dsdb_runner=dsdb_runner,
                      newly_created=newly_created, comments=comments)
 
         return
@@ -126,6 +119,5 @@ def apply_service_address(dbhost, ifnames, srv_addr, logger):
             raise ArgumentError("{0} does not have an interface named "
                                 "{1}.".format(dbhost.hardware_entity, ifname))
 
-        assign_address(dbinterface, srv_addr.dns_record.ip,
-                       srv_addr.dns_record.network, label=srv_addr.name,
-                       resource=srv_addr, logger=logger)
+        assign_address(dbinterface, srv_addr.ip, srv_addr.network,
+                       label=srv_addr.name, resource=srv_addr, logger=logger)

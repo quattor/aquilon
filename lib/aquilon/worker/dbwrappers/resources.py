@@ -145,7 +145,7 @@ def del_resource(session, logger, dbresource, dsdb_callback=None, **arguments):
             remove_plenary.remove(locked=True)
 
             if dsdb_callback:
-                dsdb_callback(session, logger, holder, dbresource, **arguments)
+                dsdb_callback(dbresource, **arguments)
         except:
             holder_plenary.restore_stash()
             remove_plenary.restore_stash()
@@ -174,7 +174,7 @@ def add_resource(session, logger, holder, dbresource, dsdb_callback=None,
                 holder_plenary.remove(locked=True)
 
             if dsdb_callback:
-                dsdb_callback(session, logger, dbresource, **arguments)
+                dsdb_callback(dbresource, **arguments)
 
         except:
             res_plenary.restore_stash()

@@ -567,6 +567,10 @@ class DSDBRunner(object):
             if not addr.fqdns:
                 continue
 
+            # Handle service addresses separately
+            if addr.service_address:
+                continue
+
             # In AQDB there may be multiple domain names associated with
             # an address, in DSDB there can only be one.  Thus we pick
             # the first address to propergate.
@@ -582,18 +586,10 @@ class DSDBRunner(object):
             else:
                 comments = None
 
-            # Determine the interface name and comments used by this address.
-            if addr.service_address:
-                if addr.service_address.holder.holder_type == 'host':
-                    iface = "vip"
-                else:
-                    # Skip cluster-bound service addresses
-                    continue
-            else:
-                iface = addr.logical_name
-                if addr.interface.comments and not \
-                   addr.interface.comments.startswith("Created automatically"):
-                    comments = addr.interface.comments
+            iface = addr.logical_name
+            if addr.interface.comments and not \
+               addr.interface.comments.startswith("Created automatically"):
+                comments = addr.interface.comments
 
             # Determine if we need to specify a primary name to DSDB.  By
             # doing so we are associating this record with another.
@@ -603,10 +599,6 @@ class DSDBRunner(object):
                 # Do not use -primary_host_name for the management address
                 # as we do not wish to associate them with the host currently
                 # on the machine (which may change).
-                primary = None
-            elif addr.service_address:
-                # Do not use -primary_host_name for service addresses, because
-                # srvloc does not like that
                 primary = None
             elif fqdn == real_primary:
                 # Do not set the 'primary' key for the real primary name.
@@ -627,6 +619,21 @@ class DSDBRunner(object):
                       'fqdn': fqdn,
                       'primary': primary,
                       'comments': comments}
+
+            hwdata["by-ip"][ifdata["ip"]] = ifdata
+            hwdata["by-fqdn"][ifdata["fqdn"]] = ifdata
+
+        # The primary address of Zebra hosts needs extra care. Here, we cheat a
+        # bit - we do not check if the primary name is a service address, but
+        # instead check if it has an IP address and it was not handled above.
+        if dbhw_ent.primary_ip and \
+           str(dbhw_ent.primary_name.fqdn) not in hwdata["by-fqdn"]:
+            ifdata = {'iface': "vip",
+                      'ip': dbhw_ent.primary_ip,
+                      'mac': None,
+                      'fqdn': str(dbhw_ent.primary_name),
+                      'primary': None,
+                      'comments': None}
 
             hwdata["by-ip"][ifdata["ip"]] = ifdata
             hwdata["by-fqdn"][ifdata["fqdn"]] = ifdata

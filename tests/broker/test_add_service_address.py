@@ -43,7 +43,7 @@ class TestAddServiceAddress(TestBrokerCommand):
         # Use an address that is smaller than the primary IP to verify that the
         # primary IP is not removed
         ip = self.net["zebra_vip"].usable[1]
-        self.dsdb_expect_add("zebra2.aqd-unittest.ms.com", ip, "vip")
+        self.dsdb_expect_add("zebra2.aqd-unittest.ms.com", ip)
         command = ["add", "service", "address",
                    "--hostname", "unittest20.aqd-unittest.ms.com",
                    "--service_address", "zebra2.aqd-unittest.ms.com",
@@ -95,7 +95,7 @@ class TestAddServiceAddress(TestBrokerCommand):
         # Adding an even lower IP should cause zebra2 to be renumbered in DSDB
         zebra2_ip = self.net["zebra_vip"].usable[1]
         zebra3_ip = self.net["zebra_vip"].usable[0]
-        self.dsdb_expect_add("zebra3.aqd-unittest.ms.com", zebra3_ip, "vip")
+        self.dsdb_expect_add("zebra3.aqd-unittest.ms.com", zebra3_ip)
         command = ["add", "service", "address",
                    "--hostname", "unittest20.aqd-unittest.ms.com",
                    "--service_address", "zebra3.aqd-unittest.ms.com",

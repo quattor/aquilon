@@ -55,3 +55,15 @@ class ServiceAddress(Resource):
 
         ifaces.sort()
         return ifaces
+
+    @property
+    def ip(self):
+        return self.dns_record.ip
+
+    @property
+    def network(self):
+        return self.dns_record.network
+
+    @property
+    def network_environment(self):
+        return self.dns_record.network.network_environment
