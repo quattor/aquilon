@@ -180,7 +180,7 @@ def build_index(config, session, logger=LOGGER):
 
     try:
         write_file(index_path, "\n".join(content), logger=logger,
-                   compress=compress)
+                   compress=compress, create_directory=True)
     except OSError as err:
         raise AquilonError("Failed to write %s: %s" % (index_path, err))
 

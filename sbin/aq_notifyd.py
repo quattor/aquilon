@@ -163,13 +163,21 @@ def main():
 
     config = Config(configfile=opts.config)
 
+    if config.has_option("broker", "umask"):
+        os.umask(int(config.get("broker", "umask"), 8))
+
     if opts.debug:
         level = logging.DEBUG
         logging.basicConfig(level=level, stream=sys.stderr,
                             format='%(asctime)s [%(levelname)s] %(message)s')
     else:
         level = logging.INFO
-        logfile = os.path.join(config.get("broker", "logdir"), "aq_notifyd.log")
+
+        logdir = config.get("broker", "logdir")
+        if not os.path.exists(logdir):
+            os.makedirs(logdir)
+
+        logfile = os.path.join(logdir, "aq_notifyd.log")
 
         handler = WatchedFileHandler(logfile)
         handler.setLevel(level)
