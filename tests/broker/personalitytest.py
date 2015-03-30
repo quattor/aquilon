@@ -23,6 +23,9 @@ default_parameters = {
         "espinfo/users": "IT / TECHNOLOGY",
         "espinfo/threshold": 0
     },
+    'hacluster': {
+        "espinfo/class": "INFRASTRUCTURE",
+    },
     'vmhost': {
         "espinfo/function": "development",
         "espinfo/class": "INFRASTRUCTURE",

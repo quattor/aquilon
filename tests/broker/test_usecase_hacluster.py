@@ -33,7 +33,7 @@ class TestUsecaseHACluster(TestBrokerCommand):
         command = ["add", "cluster", "--cluster", "hacl1", "--campus", "ny",
                    "--down_hosts_threshold", 0, "--archetype", "hacluster",
                    "--sandbox", "%s/utsandbox" % self.user,
-                   "--personality", "vcs-msvcs"]
+                   "--personality", "hapersonality"]
         self.noouttest(command)
 
     def test_105_verify_hacl1_location(self):
@@ -48,7 +48,7 @@ class TestUsecaseHACluster(TestBrokerCommand):
                    "--down_hosts_threshold", 0, "--archetype", "hacluster",
                    "--max_members", 2,
                    "--sandbox", "%s/utsandbox" % self.user,
-                   "--personality", "vcs-msvcs"]
+                   "--personality", "hapersonality"]
         self.noouttest(command)
 
     def test_115_cat_hacl2(self):
@@ -191,7 +191,7 @@ class TestUsecaseHACluster(TestBrokerCommand):
 
     def test_161_add_allowed_personality(self):
         self.noouttest(["add_allowed_personality", "--archetype", "hacluster",
-                        "--personality", "vcs-msvcs", "--metacluster", "hamc1"])
+                        "--personality", "hapersonality", "--metacluster", "hamc1"])
 
     def test_162_add_clusters(self):
         self.noouttest(["update_cluster", "--cluster", "hacl1",
@@ -206,7 +206,7 @@ class TestUsecaseHACluster(TestBrokerCommand):
         self.matchoutput(out,
                          "Personality esx_cluster/vulcan-10g-server-prod is "
                          "not allowed by the metacluster.  Allowed "
-                         "personalities are: hacluster/vcs-msvcs",
+                         "personalities are: hacluster/hapersonality",
                          command)
 
     def test_164_show_hamc1(self):
@@ -215,7 +215,7 @@ class TestUsecaseHACluster(TestBrokerCommand):
         self.matchoutput(out, "Member: High Availability Cluster hacl1", command)
         self.matchoutput(out, "Member: High Availability Cluster hacl2", command)
         self.matchoutput(out,
-                         "Allowed Personality: Personality hacluster/vcs-msvcs",
+                         "Allowed Personality: Personality hacluster/hapersonality",
                          command)
         self.matchoutput(out, "Organization: ms", command)
 
