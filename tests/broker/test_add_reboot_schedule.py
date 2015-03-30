@@ -137,14 +137,14 @@ class TestAddRebootSchedule(TestBrokerCommand):
                    "--week=all", "--day=Sun", "--time=25:00",
                    "--hostname=server1.aqd-unittest.ms.com"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "the preferred time '25:00' could not be interpreted: hour must be in 0..23", command)
+        self.matchoutput(out, "The preferred time '25:00' could not be interpreted: hour must be in 0..23", command)
 
     def test_230_add_schedule_fail(self):
         command = ["add_reboot_schedule",
                    "--week=all", "--day=Sun", "--time=08:61",
                    "--hostname=server1.aqd-unittest.ms.com"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "the preferred time '08:61' could not be interpreted: minute must be in 0..59", command)
+        self.matchoutput(out, "The preferred time '08:61' could not be interpreted: minute must be in 0..59", command)
 
     def test_240_add_schedule_fail(self):
         command = ["add_reboot_schedule",

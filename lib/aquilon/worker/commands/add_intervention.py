@@ -20,7 +20,7 @@ from datetime import datetime
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Intervention
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.resources import (add_resource,
                                                  get_resource_holder)
 
@@ -36,21 +36,21 @@ class CommandAddIntervention(BrokerCommand):
 
         try:
             expire_when = parse(expiry)
-        except ValueError as e:
-            raise ArgumentError("the expiry value '%s' could not be "
-                                "interpreted: %s" % (expiry, e))
+        except (ValueError, TypeError) as err:
+            raise ArgumentError("The expiry value '%s' could not be "
+                                "interpreted: %s" % (expiry, err))
 
         if start_time is None:
             start_when = datetime.utcnow().replace(microsecond=0)
         else:
             try:
                 start_when = parse(start_time)
-            except ValueError as e:
-                raise ArgumentError("the start time '%s' could not be "
+            except (ValueError, TypeError) as e:
+                raise ArgumentError("The start time '%s' could not be "
                                     "interpreted: %s" % (start_time, e))
 
         if start_when > expire_when:
-            raise ArgumentError("the start time is later than the expiry time")
+            raise ArgumentError("The start time is later than the expiry time.")
 
         holder = get_resource_holder(session, logger, hostname, cluster,
                                      metacluster, compel=False)

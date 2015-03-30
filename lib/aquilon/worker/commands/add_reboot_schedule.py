@@ -77,11 +77,11 @@ class CommandAddRebootSchedule(BrokerCommand):
 
                     for sub in data.split(','):
                         if sub not in self.COMPONENTS[key]:
-                            raise ArgumentError("parameter %s is not valid %s"
+                            raise ArgumentError("Parameter %s is not valid %s."
                                                 % (sub, key))
 
                         if sub in dups:
-                            raise ArgumentError("parameter %s duplicated in %s"
+                            raise ArgumentError("Parameter %s duplicated in %s."
                                                 % (sub, key))
 
                         dups[sub] = 1
@@ -112,8 +112,8 @@ class CommandAddRebootSchedule(BrokerCommand):
         if time is not None:
             try:
                 parse(time)
-            except ValueError as e:
-                raise ArgumentError("the preferred time '%s' could not be "
+            except (ValueError, TypeError) as e:
+                raise ArgumentError("The preferred time '%s' could not be "
                                     "interpreted: %s" % (time, e))
         holder = get_resource_holder(session, logger, hostname, cluster,
                                      compel=False)

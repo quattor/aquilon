@@ -41,8 +41,8 @@ class CommandAddRebootIntervention(BrokerCommand):
 
         try:
             expire_when = parse(expiry)
-        except ValueError as e:
-            raise ArgumentError("the expiry value '%s' could not be "
+        except (ValueError, TypeError) as e:
+            raise ArgumentError("The expiry value '%s' could not be "
                                 "interpreted: %s" % (expiry, e))
 
         now = datetime.utcnow().replace(microsecond=0)
@@ -52,12 +52,12 @@ class CommandAddRebootIntervention(BrokerCommand):
             try:
                 start_when = parse(start_time)
 
-            except ValueError as e:
-                raise ArgumentError("the start time '%s' could not be "
+            except (ValueError, TypeError) as e:
+                raise ArgumentError("The start time '%s' could not be "
                                     "interpreted: %s" % (start_time, e))
 
         if start_when > expire_when:
-            raise ArgumentError("the start time is later than the expiry time")
+            raise ArgumentError("The start time is later than the expiry time.")
 
         if (start_when < now) or (expire_when < now):
             raise ArgumentError("The start time or expiry time are in the past.")
