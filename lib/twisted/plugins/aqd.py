@@ -50,7 +50,8 @@ class Options(usage.Options):
 
 
 def set_umask(config):
-    os.umask(int(config.get("broker", "umask"), 8))
+    if config.has_option("broker", "umask"):
+        os.umask(int(config.get("broker", "umask"), 8))
 
 
 def set_thread_pool_size(config):
@@ -68,7 +69,7 @@ def set_thread_pool_size(config):
 
 
 def make_required_dirs(config):
-    for d in ["basedir", "profilesdir", "plenarydir", "rundir"]:
+    for d in ["basedir", "profilesdir", "plenarydir", "rundir", "logdir"]:
         dir = config.get("broker", d)
         if os.path.exists(dir):
             continue

@@ -43,7 +43,6 @@ from twisted.internet import reactor
 import aquilon.aqdb.depends  # pylint: disable=W0611
 
 from aquilon.config import Config
-from aquilon.exceptions_ import AquilonError
 
 worker_thread = None
 worker_notify = Condition()
@@ -78,10 +77,10 @@ def update_index_and_notify(config, logger, db):
 
     try:
         build_index(config, session, logger)
-    except AquilonError as err:
+    except Exception as err:
         logger.error(err)
-
-    db.Session.remove()
+    finally:
+        db.Session.remove()
 
 
 class UpdaterThread(Thread):
@@ -112,8 +111,6 @@ class UpdaterThread(Thread):
 
             self.logger.debug("Worker woken up")
             update_index_and_notify(self.config, self.logger, self.db)
-
-            worker_notify.acquire()
 
         worker_notify.release()
         self.logger.info("Worker thread finished")
@@ -166,13 +163,21 @@ def main():
 
     config = Config(configfile=opts.config)
 
+    if config.has_option("broker", "umask"):
+        os.umask(int(config.get("broker", "umask"), 8))
+
     if opts.debug:
         level = logging.DEBUG
         logging.basicConfig(level=level, stream=sys.stderr,
                             format='%(asctime)s [%(levelname)s] %(message)s')
     else:
         level = logging.INFO
-        logfile = os.path.join(config.get("broker", "logdir"), "aq_notifyd.log")
+
+        logdir = config.get("broker", "logdir")
+        if not os.path.exists(logdir):
+            os.makedirs(logdir)
+
+        logfile = os.path.join(logdir, "aq_notifyd.log")
 
         handler = WatchedFileHandler(logfile)
         handler.setLevel(level)
