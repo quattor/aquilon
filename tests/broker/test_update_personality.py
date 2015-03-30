@@ -29,19 +29,19 @@ from broker.grntest import VerifyGrnsMixin
 class TestUpdatePersonality(VerifyGrnsMixin, TestBrokerCommand):
 
     def test_100_update_capacity(self):
-        command = ["update_personality", "--personality", "vulcan-1g-desktop-prod",
+        command = ["update_personality", "--personality", "vulcan-10g-server-prod",
                    "--archetype", "esx_cluster",
                    "--vmhost_capacity_function", "{'memory': (memory - 1500) * 0.94}"]
         self.noouttest(command)
 
     def test_110_update_overcommit(self):
-        command = ["update_personality", "--personality", "vulcan-1g-desktop-prod",
+        command = ["update_personality", "--personality", "vulcan-10g-server-prod",
                    "--archetype", "esx_cluster",
                    "--vmhost_overcommit_memory", 1.04]
         self.noouttest(command)
 
     def test_115_verify_update_capacity(self):
-        command = ["show_personality", "--personality", "vulcan-1g-desktop-prod",
+        command = ["show_personality", "--personality", "vulcan-10g-server-prod",
                    "--archetype", "esx_cluster"]
         out = self.commandtest(command)
         self.matchoutput(out,
@@ -179,7 +179,7 @@ class TestUpdatePersonality(VerifyGrnsMixin, TestBrokerCommand):
     def test_150_clone_attributes(self):
         self.noouttest(["add_personality", "--personality", "vulcan-1g-clone",
                         "--archetype", "esx_cluster",
-                        "--copy_from", "vulcan-1g-desktop-prod"])
+                        "--copy_from", "vulcan-10g-server-prod"])
 
         command = ["show_personality", "--personality", "vulcan-1g-clone",
                    "--archetype", "esx_cluster"]
@@ -230,21 +230,21 @@ class TestUpdatePersonality(VerifyGrnsMixin, TestBrokerCommand):
 
     def test_200_invalid_function(self):
         """ Verify that the list of built-in functions is restricted """
-        command = ["update_personality", "--personality", "vulcan-1g-desktop-prod",
+        command = ["update_personality", "--personality", "vulcan-10g-server-prod",
                    "--archetype", "esx_cluster",
                    "--vmhost_capacity_function", "locals()"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "name 'locals' is not defined", command)
 
     def test_200_invalid_type(self):
-        command = ["update_personality", "--personality", "vulcan-1g-desktop-prod",
+        command = ["update_personality", "--personality", "vulcan-10g-server-prod",
                    "--archetype", "esx_cluster",
                    "--vmhost_capacity_function", "memory - 100"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "The function should return a dictonary.", command)
 
     def test_200_invalid_dict(self):
-        command = ["update_personality", "--personality", "vulcan-1g-desktop-prod",
+        command = ["update_personality", "--personality", "vulcan-10g-server-prod",
                    "--archetype", "esx_cluster",
                    "--vmhost_capacity_function", "{'memory': 'bar'}"]
         out = self.badrequesttest(command)
@@ -254,7 +254,7 @@ class TestUpdatePersonality(VerifyGrnsMixin, TestBrokerCommand):
                          command)
 
     def test_200_missing_memory(self):
-        command = ["update_personality", "--personality", "vulcan-1g-desktop-prod",
+        command = ["update_personality", "--personality", "vulcan-10g-server-prod",
                    "--archetype", "esx_cluster",
                    "--vmhost_capacity_function", "{'foo': 5}"]
         out = self.badrequesttest(command)
@@ -263,7 +263,7 @@ class TestUpdatePersonality(VerifyGrnsMixin, TestBrokerCommand):
                          "dictionary.", command)
 
     def test_200_not_enough_memory(self):
-        command = ["update_personality", "--personality", "vulcan-1g-desktop-prod",
+        command = ["update_personality", "--personality", "vulcan-10g-server-prod",
                    "--archetype", "esx_cluster",
                    "--vmhost_capacity_function", "{'memory': memory / 4}"]
         out = self.badrequesttest(command)
@@ -275,11 +275,11 @@ class TestUpdatePersonality(VerifyGrnsMixin, TestBrokerCommand):
                          command)
 
     def test_200_update_cluster_inuse(self):
-        command = ["update_personality", "--personality=vulcan-1g-desktop-prod",
+        command = ["update_personality", "--personality=vulcan-10g-server-prod",
                    "--archetype=esx_cluster",
                    "--cluster"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "The personality vulcan-1g-desktop-prod is in use", command)
+        self.matchoutput(out, "The personality vulcan-10g-server-prod is in use", command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUpdatePersonality)

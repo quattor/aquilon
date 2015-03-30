@@ -221,27 +221,27 @@ class TestUnmapService(TestBrokerCommand):
         self.noouttest(["unmap", "service", "--building", "ut",
                         "--service", "esx_management_server",
                         "--instance", "ut.a", "--archetype", "vmhost",
-                        "--personality", "vulcan-1g-desktop-prod",
+                        "--personality", "vulcan-10g-server-prod",
                         "--justification", "tcm=12345678"])
         self.noouttest(["unmap", "service", "--building", "ut",
                         "--service", "esx_management_server",
                         "--instance", "ut.b", "--archetype", "vmhost",
-                        "--personality", "vulcan-1g-desktop-prod",
+                        "--personality", "vulcan-10g-server-prod",
                         "--justification", "tcm=12345678"])
         self.noouttest(["unmap", "service", "--building", "ut",
                         "--service", "vmseasoning", "--instance", "salt",
                         "--archetype", "vmhost",
-                        "--personality", "vulcan-1g-desktop-prod",
+                        "--personality", "vulcan-10g-server-prod",
                         "--justification", "tcm=12345678"])
         self.noouttest(["unmap", "service", "--building", "ut",
                         "--service", "vmseasoning", "--instance", "pepper",
                         "--archetype", "vmhost",
-                        "--personality", "vulcan-1g-desktop-prod",
+                        "--personality", "vulcan-10g-server-prod",
                         "--justification", "tcm=12345678"])
 
     def testverifyunmapesx(self):
         command = ["show_map", "--archetype=vmhost",
-                   "--personality=vulcan-1g-desktop-prod", "--building=ut"]
+                   "--personality=vulcan-10g-server-prod", "--building=ut"]
         out = self.commandtest(command)
         self.matchclean(out, "Service: esx_management_server Instance: ut.a ",
                         command)

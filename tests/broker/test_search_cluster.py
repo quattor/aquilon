@@ -132,7 +132,7 @@ class TestSearchCluster(TestBrokerCommand):
                          command)
 
     def testallowedpersonalityavailable(self):
-        command = "search cluster --allowed_personality vulcan-1g-desktop-prod"
+        command = "search cluster --allowed_personality vulcan-10g-server-prod"
         out = self.commandtest(command.split(" "))
 
         self.matchoutput(out, "utecl1", command)
@@ -207,14 +207,14 @@ class TestSearchCluster(TestBrokerCommand):
 
     def testmemberpersonalityandarchetypeunavailable(self):
         command = ['search', 'cluster', '--member_archetype', 'filer',
-                   '--member_personality', 'vulcan-1g-desktop-prod']
+                   '--member_personality', 'vulcan-10g-server-prod']
         out = self.notfoundtest(command)
         self.matchoutput(out,
-                         "Personality vulcan-1g-desktop-prod, archetype filer not found.",
+                         "Personality vulcan-10g-server-prod, archetype filer not found.",
                          command)
 
     def testmemberpersonality(self):
-        command = "search cluster --member_personality vulcan-1g-desktop-prod"
+        command = "search cluster --member_personality vulcan-10g-server-prod"
         out = self.commandtest(command.split(" "))
 
         self.matchoutput(out, "utecl1", command)

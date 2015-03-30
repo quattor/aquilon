@@ -622,7 +622,7 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
         self.matchoutput(out,
                          "Personality vmhost/esx_server is not allowed by "
                          "ESX Cluster utecl1.  Specify one of: "
-                         "vmhost/vulcan-1g-desktop-prod.",
+                         "vmhost/vulcan-10g-server-prod.",
                          command)
 
     def test_2000_personality_not_allowed_list(self):
@@ -634,7 +634,7 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
         self.matchoutput(out,
                          "evh2.aqd-unittest.ms.com: Personality "
                          "vmhost/esx_server is not allowed by ESX Cluster "
-                         "utecl1.  Specify one of: vmhost/vulcan-1g-desktop-prod.",
+                         "utecl1.  Specify one of: vmhost/vulcan-10g-server-prod.",
                          command)
 
     def test_2000_hostlist_multiple_domains(self):

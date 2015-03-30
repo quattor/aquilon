@@ -297,7 +297,7 @@ class TestAddVirtualHardware(TestBrokerCommand):
         self.matchoutput(out, "Down Hosts Threshold: 2", command)
         self.matchoutput(out, "Virtual Machine count: 8", command)
         self.matchoutput(out, "ESX VMHost count: 3", command)
-        self.matchoutput(out, "Personality: vulcan-1g-desktop-prod Archetype: esx_cluster",
+        self.matchoutput(out, "Personality: vulcan-10g-server-prod Archetype: esx_cluster",
                          command)
         self.matchoutput(out, "Domain: unittest", command)
         for i in range(1, 9):

@@ -110,7 +110,7 @@ class TestAudit(TestBrokerCommand):
 
     def test_200_argument_keyword(self):
         command = ["search_audit", "--argument", "member_personality",
-                   "--keyword", "vulcan-1g-desktop-prod", "--command", "all"]
+                   "--keyword", "vulcan-10g-server-prod", "--command", "all"]
         out = self.commandtest(command)
         self.matchoutput(out, "aq search_cluster", command)
         # No other commands should show up in the result

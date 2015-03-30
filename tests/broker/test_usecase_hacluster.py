@@ -204,7 +204,7 @@ class TestUsecaseHACluster(TestBrokerCommand):
                    "--metacluster", "hamc1"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
-                         "Personality esx_cluster/vulcan-1g-desktop-prod is "
+                         "Personality esx_cluster/vulcan-10g-server-prod is "
                          "not allowed by the metacluster.  Allowed "
                          "personalities are: hacluster/vcs-msvcs",
                          command)

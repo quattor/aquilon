@@ -40,7 +40,7 @@ class TestUpdateESXCluster(TestBrokerCommand):
         self.matchoutput(out, "Metacluster: utmc2", command)
         self.matchoutput(out, "Building: ut", command)
         self.matchoutput(out, "Max members: %s" % default_max, command)
-        self.matchoutput(out, "Personality: vulcan-1g-desktop-prod Archetype: esx_cluster",
+        self.matchoutput(out, "Personality: vulcan-10g-server-prod Archetype: esx_cluster",
                          command)
         self.matchclean(out, "Comments", command)
 
@@ -64,7 +64,7 @@ class TestUpdateESXCluster(TestBrokerCommand):
         self.matchoutput(out, "Down Hosts Threshold: 0", command)
         self.matchoutput(out, "Capacity limits: memory: 16384 [override]",
                          command)
-        self.matchoutput(out, "Personality: vulcan-1g-desktop-prod Archetype: esx_cluster",
+        self.matchoutput(out, "Personality: vulcan-10g-server-prod Archetype: esx_cluster",
                          command)
         self.matchoutput(out, "Comments: New ESX cluster comments",
                          command)
@@ -111,7 +111,7 @@ class TestUpdateESXCluster(TestBrokerCommand):
         # updated and that personality without archetype will assume
         # the current archetype.
         command = ["update_cluster", "--cluster=utecl3",
-                   "--personality=vulcan-1g-desktop-prod"]
+                   "--personality=vulcan-10g-server-prod"]
         self.noouttest(command)
 
     def test_310_verifyutecl3(self):
@@ -120,7 +120,7 @@ class TestUpdateESXCluster(TestBrokerCommand):
         self.matchoutput(out, "ESX Cluster: utecl3", command)
         self.matchoutput(out, "Metacluster: utmc1", command)
         self.matchoutput(out, "Building: ut", command)
-        self.matchoutput(out, "Personality: vulcan-1g-desktop-prod Archetype: esx_cluster",
+        self.matchoutput(out, "Personality: vulcan-10g-server-prod Archetype: esx_cluster",
                          command)
 
     def test_320_updateutecl1(self):
@@ -149,7 +149,7 @@ class TestUpdateESXCluster(TestBrokerCommand):
 
     def test_370_updatepersonality(self):
         command = ["search_host", "--cluster=utecl1",
-                   "--personality=vulcan-1g-desktop-prod"]
+                   "--personality=vulcan-10g-server-prod"]
         original_hosts = sorted(self.commandtest(command).splitlines())
         self.assertTrue(original_hosts, "No hosts found using %s" % command)
 
@@ -157,7 +157,7 @@ class TestUpdateESXCluster(TestBrokerCommand):
         command = ["cat", "--hostname", original_hosts[0]]
         out = self.commandtest(command)
         self.matchoutput(out,
-                         """include { "personality/vulcan-1g-desktop-prod/config" };""",
+                         """include { "personality/vulcan-10g-server-prod/config" };""",
                          command)
 
         command = ["reconfigure", "--membersof=utecl1",
@@ -193,7 +193,7 @@ class TestUpdateESXCluster(TestBrokerCommand):
                    "--archetype=windows"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
-                         "Personality vulcan-1g-desktop-prod, "
+                         "Personality vulcan-10g-server-prod, "
                          "archetype windows not found.",
                          command)
 
@@ -220,7 +220,7 @@ class TestUpdateESXCluster(TestBrokerCommand):
         self.matchoutput(out, "Metacluster: utmc1", command)
         self.matchoutput(out, "Rack: ut10", command)
         self.matchoutput(out, "Max members: %s" % default_max, command)
-        self.matchoutput(out, "Personality: vulcan-1g-desktop-prod Archetype: esx_cluster",
+        self.matchoutput(out, "Personality: vulcan-10g-server-prod Archetype: esx_cluster",
                          command)
         self.matchoutput(out, "Switch: ut01ga1s04.aqd-unittest.ms.com",
                          command)
