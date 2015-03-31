@@ -27,7 +27,7 @@ def clean_old(installdir):
             "for and removing stale files." % installdir
         return
     src = os.path.realpath(os.path.join(os.path.dirname(__file__), '..'))
-    for (dirpath, dirnames, filenames) in os.walk(installdir):
+    for (dirpath, _, filenames) in os.walk(installdir):
         relative_dirpath = dirpath.replace(installdir, '', 1)
         for f in filenames:
             # Can't compare with src, since we only have .py files there.

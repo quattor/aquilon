@@ -63,11 +63,7 @@ class AddressAssignment(Base):
 
     network_id = Column(ForeignKey(Network.id), nullable=False)
 
-    service_address_id = Column(ForeignKey('service_address.resource_id',
-                                           ondelete="CASCADE"),
-                                nullable=True, index=True)
-
-    # This should be the same as #
+    # This should be the same as
     # network.network_environment.dns_environment_id, but using that would mean
     # joining two extra tables in the dns_records relation
     dns_environment_id = Column(ForeignKey(DnsEnvironment.id), nullable=False,

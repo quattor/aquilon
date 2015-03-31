@@ -16,7 +16,7 @@
 # limitations under the License.
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import ServiceAddress, AddressAssignment, Host
+from aquilon.aqdb.model import ServiceAddress
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.dns import delete_dns_record
 from aquilon.worker.dbwrappers.resources import (del_resource,
@@ -25,20 +25,9 @@ from aquilon.worker.dbwrappers.service_instance import check_no_provided_service
 from aquilon.worker.processes import DSDBRunner
 
 
-def del_srv_dsdb_callback(session, logger, holder, dbsrv_addr, oldinfo,
-                          keep_dns):
-    dsdb_runner = DSDBRunner(logger=logger)
-
-    toplevel_holder = holder.toplevel_holder_object
-    if isinstance(toplevel_holder, Host):
-        dsdb_runner.update_host(toplevel_holder.hardware_entity, oldinfo)
-        if keep_dns:
-            dsdb_runner.add_host_details(dbsrv_addr.dns_record.fqdn,
-                                         dbsrv_addr.dns_record.ip,
-                                         comments=dbsrv_addr.dns_record.comments)
-    elif not keep_dns:
-        dsdb_runner.delete_host_details(str(dbsrv_addr.dns_record.fqdn),
-                                        dbsrv_addr.dns_record.ip)
+def del_srv_dsdb_callback(dbsrv_addr, dsdb_runner=None, keep_dns=False):
+    if not keep_dns:
+        dsdb_runner.delete_host_details(dbsrv_addr.dns_record, dbsrv_addr.ip)
     dsdb_runner.commit_or_rollback("Could not delete host from DSDB")
 
 
@@ -60,31 +49,13 @@ class CommandDelServiceAddress(BrokerCommand):
 
         check_no_provided_service(dbsrv)
 
-        if isinstance(holder.holder_object, Host):
-            oldinfo = DSDBRunner.snapshot_hw(holder.holder_object.hardware_entity)
-        else:
-            oldinfo = None
-
         dbdns_rec = dbsrv.dns_record
 
-        for addr in dbsrv.assignments:
-            addr.interface.assignments.remove(addr)
-        session.expire(dbsrv, ['assignments'])
+        dsdb_runner = DSDBRunner(logger=logger)
+        del_resource(session, logger, dbsrv, dsdb_runner=dsdb_runner,
+                     dsdb_callback=del_srv_dsdb_callback, keep_dns=keep_dns)
 
-        session.flush()
-
-        # Check if the address was assigned to multiple interfaces, and remove
-        # the DNS entries if this was the last use
-        q = session.query(AddressAssignment)
-        q = q.filter_by(network=dbdns_rec.network)
-        q = q.filter_by(ip=dbdns_rec.ip)
-        other_uses = q.all()
-
-        del_resource(session, logger, dbsrv,
-                     dsdb_callback=del_srv_dsdb_callback, oldinfo=oldinfo,
-                     keep_dns=other_uses or keep_dns)
-
-        if not other_uses and not keep_dns:
+        if not keep_dns:
             delete_dns_record(dbdns_rec)
 
         return

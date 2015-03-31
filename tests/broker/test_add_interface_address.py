@@ -106,8 +106,7 @@ class TestAddInterfaceAddress(TestBrokerCommand):
     def testaddbyip(self):
         ip = self.net["zebra_eth1"].usable[3]
         fqdn = "unittest20-e1-1.aqd-unittest.ms.com"
-        self.dsdb_expect_add(fqdn, ip, "eth1_e1",
-                             primary="unittest20.aqd-unittest.ms.com")
+        self.dsdb_expect_add(fqdn, ip, "eth1_e1")
         command = ["add", "interface", "address", "--machine", "ut3c5n2",
                    "--interface", "eth1", "--label", "e1",
                    "--fqdn", fqdn, "--ip", ip, "--nomap_to_primary"]
@@ -123,17 +122,6 @@ class TestAddInterfaceAddress(TestBrokerCommand):
         self.matchoutput(out,
                          "DNS Record unittest01.one-nyp.ms.com is already used "
                          "as the primary name of machine ut3c1n4.",
-                         command)
-
-    def testrejecthostnamelabel(self):
-        command = ["add", "interface", "address", "--machine", "ut3c1n3",
-                   "--interface", "eth1", "--label", "hostname",
-                   "--fqdn", "hostname-label.one-nyp.ms.com",
-                   "--ip", self.net["unknown0"].usable[-1]]
-        out = self.badrequesttest(command)
-        self.matchoutput(out,
-                         "The 'hostname' label can only be managed by "
-                         "add_host/del_host.",
                          command)
 
     def testrejectnumericlabel(self):

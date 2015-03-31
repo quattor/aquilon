@@ -57,8 +57,8 @@ class CommandAddAuxiliary(BrokerCommand):
 
         # Multiple addresses will only be allowed with the "add interface
         # address" command
-        addrs = ", ".join(["%s [%s]" % (addr.logical_name, addr.ip) for addr
-                           in dbinterface.assignments])
+        addrs = ", ".join("%s [%s]" % (addr.logical_name, addr.ip) for addr
+                          in dbinterface.assignments)
         if addrs:
             raise ArgumentError("{0} already has the following addresses: "
                                 "{1}.".format(dbinterface, addrs))
@@ -67,9 +67,8 @@ class CommandAddAuxiliary(BrokerCommand):
         ip = generate_ip(session, logger, dbinterface, compel=True,
                          audit_results=audit_results, **arguments)
 
-        dbdns_rec, newly_created = grab_address(session, auxiliary, ip,
-                                                comments=comments,
-                                                preclude=True)
+        dbdns_rec, _ = grab_address(session, auxiliary, ip, comments=comments,
+                                    preclude=True)
 
         if dbmachine.primary_name:
             # This command cannot use a non-default DNS environment, so no extra

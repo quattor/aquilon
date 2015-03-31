@@ -73,8 +73,8 @@ class TestAddAllowedPersonality(TestBrokerCommand):
         command = ["show_cluster", "--cluster=utecl1", "--format", "proto"]
         cluster = self.protobuftest(command, expect=1)[0]
         self.assertEqual(len(cluster.allowed_personalities), 2)
-        self.assertEqual(set([pers.name for pers in
-                              cluster.allowed_personalities]),
+        self.assertEqual(set(pers.name for pers in
+                             cluster.allowed_personalities),
                          set(["generic", "vulcan-1g-desktop-prod"]))
 
         command = ["show_metacluster", "--metacluster=utmc1"]

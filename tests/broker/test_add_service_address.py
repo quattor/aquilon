@@ -43,7 +43,7 @@ class TestAddServiceAddress(TestBrokerCommand):
         # Use an address that is smaller than the primary IP to verify that the
         # primary IP is not removed
         ip = self.net["zebra_vip"].usable[1]
-        self.dsdb_expect_add("zebra2.aqd-unittest.ms.com", ip, "vip")
+        self.dsdb_expect_add("zebra2.aqd-unittest.ms.com", ip)
         command = ["add", "service", "address",
                    "--hostname", "unittest20.aqd-unittest.ms.com",
                    "--service_address", "zebra2.aqd-unittest.ms.com",
@@ -82,8 +82,8 @@ class TestAddServiceAddress(TestBrokerCommand):
         self.assertTrue(found,
                         "Service address zebra2 not found in the resources. "
                         "Existing resources: %s" %
-                        ", ".join(["%s %s" % (res.type, res.name)
-                                   for res in host.resources]))
+                        ", ".join("%s %s" % (res.type, res.name)
+                                  for res in host.resources))
 
     def testverifyzebra2dns(self):
         ip = self.net["zebra_vip"].usable[1]
@@ -95,7 +95,7 @@ class TestAddServiceAddress(TestBrokerCommand):
         # Adding an even lower IP should cause zebra2 to be renumbered in DSDB
         zebra2_ip = self.net["zebra_vip"].usable[1]
         zebra3_ip = self.net["zebra_vip"].usable[0]
-        self.dsdb_expect_add("zebra3.aqd-unittest.ms.com", zebra3_ip, "vip")
+        self.dsdb_expect_add("zebra3.aqd-unittest.ms.com", zebra3_ip)
         command = ["add", "service", "address",
                    "--hostname", "unittest20.aqd-unittest.ms.com",
                    "--service_address", "zebra3.aqd-unittest.ms.com",
@@ -111,14 +111,8 @@ class TestAddServiceAddress(TestBrokerCommand):
         command = ["show", "host", "--hostname",
                    "unittest20.aqd-unittest.ms.com"]
         out = self.commandtest(command)
-        self.matchoutput(out,
-                         "Provides: zebra2.aqd-unittest.ms.com [%s] "
-                         "(label: zebra2, service_holder: host)" % zebra2_ip,
-                         command)
-        self.matchoutput(out,
-                         "Provides: zebra3.aqd-unittest.ms.com [%s] "
-                         "(label: zebra3, service_holder: host)" % zebra3_ip,
-                         command)
+        self.matchclean(out, "Provides: zebra2.aqd-unittest.ms.com", command)
+        self.matchclean(out, "Provides: zebra3.aqd-unittest.ms.com", command)
         self.matchclean(out, "Auxiliary: zebra2.aqd-unittest.ms.com", command)
         self.matchclean(out, "Auxiliary: zebra3.aqd-unittest.ms.com", command)
 
@@ -181,7 +175,6 @@ class TestAddServiceAddress(TestBrokerCommand):
                          "address from network environment internal.  Network "
                          "environments cannot be mixed.",
                          command)
-
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddServiceAddress)

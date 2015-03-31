@@ -37,9 +37,8 @@ class CommandAddAddress(BrokerCommand):
                          network_environment=dbnet_env,
                          audit_results=audit_results, **arguments)
         # TODO: add allow_multi=True
-        dbdns_rec, newly_created = grab_address(session, fqdn, ip, dbnet_env,
-                                                dbdns_env, comments=comments,
-                                                preclude=True)
+        dbdns_rec, _ = grab_address(session, fqdn, ip, dbnet_env, dbdns_env,
+                                    comments=comments, preclude=True)
 
         if reverse_ptr:
             set_reverse_ptr(session, logger, dbdns_rec, reverse_ptr)

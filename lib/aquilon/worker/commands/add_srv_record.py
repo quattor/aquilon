@@ -17,8 +17,8 @@
 """Contains the logic for `aq add srv record`."""
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import Fqdn, SrvRecord, DnsDomain, DnsEnvironment
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.aqdb.model import SrvRecord, DnsDomain, DnsEnvironment
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.dns import create_target_if_needed
 
 

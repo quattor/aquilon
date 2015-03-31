@@ -99,7 +99,7 @@ class TestAddVirtualSwitch(TestBrokerCommand):
     def test_125_verify_all_proto(self):
         command = ["show_virtual_switch", "--all", "--format", "proto"]
         vswitches = self.protobuftest(command)
-        vswitch_names = set([msg.name for msg in vswitches])
+        vswitch_names = set(msg.name for msg in vswitches)
         for vswitch_name in ("utvswitch", "utvswitch2"):
             self.assertTrue(vswitch_name in vswitch_names)
 

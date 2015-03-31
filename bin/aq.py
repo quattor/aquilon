@@ -213,7 +213,7 @@ def create_sandbox(pageData, noexec=False):
            template_king_url, sandbox_name)
     if noexec:
         print("cd '%s'" % user_base)
-        print(" ".join(["'%s'" % c for c in cmd]))
+        print(" ".join("'%s'" % c for c in cmd))
         return 0
     try:
         p = subprocess.Popen(cmd, cwd=user_base, stdin=None,
@@ -314,7 +314,7 @@ class StatusThread(Thread):
 
 
 def quoteOptions(options):
-    return "&".join([quote(k) + "=" + quote(v) for k, v in iteritems(options)])
+    return "&".join(quote(k) + "=" + quote(v) for k, v in iteritems(options))
 
 
 if __name__ == "__main__":

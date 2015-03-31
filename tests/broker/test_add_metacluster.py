@@ -151,7 +151,7 @@ class TestAddMetaCluster(PersonalityTestMixin, TestBrokerCommand):
     def test_300_show_all_proto(self):
         command = "show metacluster --all --format proto"
         mcs = self.protobuftest(command.split(" "))
-        names = set([msg.name for msg in mcs])
+        names = set(msg.name for msg in mcs)
         for name in ("utmc1", "utmc2", "utmc3"):
             self.assertTrue(name in names)
 

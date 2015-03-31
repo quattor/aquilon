@@ -95,8 +95,8 @@ class MACAddress(object):
     def __str__(self):
         if not self.address:
             addr = "%012x" % self.value
-            addr = ":".join(["".join(t) for t in zip(addr[0:len(addr):2],
-                                                     addr[1:len(addr):2])])
+            addr = ":".join("".join(t) for t in zip(addr[0:len(addr):2],
+                                                    addr[1:len(addr):2]))
             self.address = addr
         return self.address
 

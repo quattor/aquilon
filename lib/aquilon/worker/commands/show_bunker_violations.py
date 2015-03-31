@@ -110,8 +110,7 @@ class CommandShowBunkerViolations(BrokerCommand):
             q = q.filter(Interface.interface_type != 'management')
         q = q.join(HardwareEntity, Model)
         q = q.filter(Model.model_type != VirtualMachineType.VirtualMachine)
-        q = q.options(defer('service_address_id'),
-                      contains_eager('network'),
+        q = q.options(contains_eager('network'),
                       defer('network.cidr'),
                       defer('network.name'),
                       defer('network.ip'),

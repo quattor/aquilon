@@ -97,8 +97,8 @@ class TestPrebindServer(TestBrokerCommand):
                 out = self.commandtest(command)
                 self.searchoutput(out,
                                   r'"servers" = list\(\s*' +
-                                  r',\s*'.join(['"%s"' % server for server in
-                                                servers]) +
+                                  r',\s*'.join('"%s"' % server for server in
+                                               servers) +
                                   r'\s*\);',
                                   command)
 

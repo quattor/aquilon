@@ -308,10 +308,8 @@ class Base(object):
         query = session.query(cls.__table__.c.id)
         if options:
             query = query.options(*options)
-        (query, attr_cache, clslabel, desc) = cls._selection_helper(session,
-                                                                    query,
-                                                                    *args,
-                                                                    **kwargs)
+        (query, _, clslabel, desc) = cls._selection_helper(session, query,
+                                                           *args, **kwargs)
         if compel:
             obj = query.first()
             if obj is None:

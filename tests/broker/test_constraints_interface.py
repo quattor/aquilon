@@ -47,6 +47,16 @@ class TestInterfaceConstraints(TestBrokerCommand):
         self.matchoutput(out, "is the master of the following slave interfaces",
                          command)
 
+    def testdelserviceaddress(self):
+        command = ["del", "interface", "--interface", "eth1",
+                   "--machine", "ut3c5n2"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Public Interface eth1 of machine "
+                         "unittest20.aqd-unittest.ms.com still has the "
+                         "following service addresses bound to it, delete "
+                         "them first: hostname, zebra2, zebra3.",
+                         command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestInterfaceConstraints)

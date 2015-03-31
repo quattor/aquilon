@@ -80,12 +80,6 @@ class CommandAddInterfaceAddress(BrokerCommand):
 
         if label is None:
             label = ""
-        elif label == "hostname":
-            # When add_host sets up Zebra, it always uses the label 'hostname'.
-            # Due to the primary IP being special, add_interface_address cannot
-            # really emulate what add_host does, so tell the user where to look.
-            raise ArgumentError("The 'hostname' label can only be managed "
-                                "by add_host/del_host.")
 
         # The label will be used as an nlist key
         if label:

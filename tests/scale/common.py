@@ -81,7 +81,7 @@ class AQRunner(object):
 
     def run(self, args, **kwargs):
         full_args = [str(self.aq)]
-        full_args.extend([str(arg) for arg in args])
+        full_args.extend(str(arg) for arg in args)
         if self.host:
             full_args.append("--aqhost")
             full_args.append(str(self.host))

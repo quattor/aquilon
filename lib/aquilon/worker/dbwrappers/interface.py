@@ -117,7 +117,7 @@ def generate_ip(session, logger, dbinterface, ip=None, ipfromip=None,
                 ipfromsystem=None, autoip=None, ipalgorithm=None, compel=False,
                 network_environment=None, audit_results=None, **kwargs):
     ip_options = [ip, ipfromip, ipfromsystem, autoip]
-    numopts = sum([1 if opt else 0 for opt in ip_options])
+    numopts = sum(1 if opt else 0 for opt in ip_options)
     if numopts > 1:
         raise ArgumentError("Only one of --ip, --ipfromip, --ipfromsystem "
                             "and --autoip can be specified.")
@@ -205,7 +205,7 @@ def generate_ip(session, logger, dbinterface, ip=None, ipfromip=None,
     used_ips = used_ips.filter(ARecord.ip >= startip)
 
     full_set = set(range(int(startip), int(dbnetwork.broadcast)))
-    used_set = set([int(item.ip) for item in used_ips])
+    used_set = set(int(item.ip) for item in used_ips)
     free_set = full_set - used_set
 
     if not free_set:
@@ -540,7 +540,7 @@ def enforce_bucket_alignment(dbrack, dbnetwork, logger):
         # If a network spans buildings, we pretend it's in the bunker local to
         # the rack's building, even if it was registered to the other side. This
         # hack could be removed if we had buckets as a Location subclass.
-        bucket, building = net_bunker.name.split(".", 1)
+        bucket, _ = net_bunker.name.split(".", 1)
         expected_bunker = Bunker.get_unique(session, bucket + "." +
                                             dbrack.building.name, compel=True)
     else:
@@ -571,8 +571,7 @@ def enforce_bucket_alignment(dbrack, dbnetwork, logger):
                     .format(dbrack, rack_bunker, dbnetwork, expected_bunker))
 
 
-def assign_address(dbinterface, ip, dbnetwork, label=None, resource=None,
-                   logger=None):
+def assign_address(dbinterface, ip, dbnetwork, label=None, logger=None):
     assert isinstance(dbinterface, Interface)
 
     dns_environment = dbnetwork.network_environment.dns_environment
@@ -587,6 +586,8 @@ def assign_address(dbinterface, ip, dbnetwork, label=None, resource=None,
     if dbrack and not isinstance(dbinterface, ManagementInterface):
         enforce_bucket_alignment(dbrack, dbnetwork, logger)
 
+    dbinterface.validate_network(dbnetwork)
+
     for addr in dbinterface.assignments:
         if not label and not addr.label:
             raise ArgumentError("{0} already has an IP "
@@ -594,18 +595,12 @@ def assign_address(dbinterface, ip, dbnetwork, label=None, resource=None,
         if label and addr.label == label:
             raise ArgumentError("{0} already has an alias named "
                                 "{1}.".format(dbinterface, label))
-        if addr.network.network_environment != dbnetwork.network_environment:
-            raise ArgumentError("{0} already has an IP address from "
-                                "{1:l}.  Network environments cannot be "
-                                "mixed.".format(dbinterface,
-                                                addr.network.network_environment))
         if addr.ip == ip:
             raise ArgumentError("{0} already has IP address {1} "
                                 "configured.".format(dbinterface, ip))
 
     dbinterface.assignments.append(AddressAssignment(ip=ip, network=dbnetwork,
                                                      label=label,
-                                                     service_address=resource,
                                                      dns_environment=dns_environment))
 
 
@@ -638,11 +633,11 @@ def rename_interface(session, dbinterface, rename_to):
             else:
                 old_name = "%s-%s" % (short, dbinterface.name)
                 new_name = "%s-%s" % (short, rename_to)
-            fqdn_changes.extend([(dns_rec.fqdn, new_name) for dns_rec
-                                 in addr.dns_records
-                                 if (dns_rec.fqdn.name == old_name and
-                                     dns_rec.fqdn.dns_domain == dbdns_domain and
-                                     dns_rec.fqdn != primary_fqdn)])
+            fqdn_changes.extend((dns_rec.fqdn, new_name) for dns_rec
+                                in addr.dns_records
+                                if (dns_rec.fqdn.name == old_name and
+                                    dns_rec.fqdn.dns_domain == dbdns_domain and
+                                    dns_rec.fqdn != primary_fqdn))
     else:
         dbdns_domain = dbdns_env = None
 
@@ -659,3 +654,19 @@ def check_netdev_iftype(type):
     if type not in valid_interface_types:
         raise ArgumentError("Interface type %s is not allowed for "
                             "network devices." % str(type))
+
+
+def get_interfaces(dbhw_ent, interfaces, dbnetwork=None):
+    ifnames = [ifname.strip().lower() for ifname in interfaces.split(",")]
+    dbifaces = []
+    for ifname in ifnames:
+        dbinterface = first_of(dbhw_ent.interfaces,
+                               lambda x, name=ifname: x.name == name)
+        if not dbinterface:
+            raise ArgumentError("{0} does not have an interface named "
+                                "{1}.".format(dbhw_ent, ifname))
+        if dbnetwork:
+            dbinterface.validate_network(dbnetwork)
+        dbifaces.append(dbinterface)
+
+    return dbifaces

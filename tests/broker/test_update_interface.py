@@ -252,7 +252,7 @@ class TestUpdateInterface(TestBrokerCommand):
                    "--hostname", "ivirt11.aqd-unittest.ms.com",
                    "--interfaces", "eth0", "--name", "renametest",
                    "--service_address", "renametest-ivirt.aqd-unittest.ms.com"]
-        self.dsdb_expect_add("renametest-ivirt.aqd-unittest.ms.com", ip, "vip")
+        self.dsdb_expect_add("renametest-ivirt.aqd-unittest.ms.com", ip)
         self.noouttest(command)
         self.dsdb_verify()
 

@@ -80,13 +80,13 @@ class TestUsecaseHACluster(TestBrokerCommand):
         self.statustest(["add", "service", "address",
                          "--service_address", "hacl1.aqd-unittest.ms.com",
                          "--name", "hacl1", "--cluster", "hacl1",
-                         "--ip", ip1, "--interfaces", "eth0"])
+                         "--ip", ip1])
 
         self.dsdb_expect_add("hacl2.aqd-unittest.ms.com", ip2)
         self.statustest(["add", "service", "address",
                          "--service_address", "hacl2.aqd-unittest.ms.com",
                          "--name", "hacl2", "--cluster", "hacl2",
-                         "--ip", ip2, "--interfaces", "eth0"])
+                         "--ip", ip2])
         self.dsdb_verify()
 
     def test_130_add_resourcegroups(self):
@@ -143,7 +143,7 @@ class TestUsecaseHACluster(TestBrokerCommand):
                              "--resourcegroup", "hacl%dg1" % cl,
                              "--service_address", "hacl%dg1.aqd-unittest.ms.com" % cl,
                              "--name", "hacl%dg1addr" % cl,
-                             "--ip", ips[cl - 1], "--interfaces", "eth0"])
+                             "--ip", ips[cl - 1]])
             self.check_plenary_exists("resource",
                                       "cluster", "hacl%d" % cl,
                                       "resourcegroup", "hacl%dg1" % cl,
@@ -163,7 +163,7 @@ class TestUsecaseHACluster(TestBrokerCommand):
                              "--resourcegroup", "hacl%dg2" % cl,
                              "--service_address", "hashared.aqd-unittest.ms.com",
                              "--name", "hacl%dg2addr" % cl,
-                             "--ip", ips[cl - 1], "--interfaces", "eth0"])
+                             "--ip", ips[cl - 1]])
             self.check_plenary_exists("resource",
                                       "cluster", "hacl%d" % cl,
                                       "resourcegroup", "hacl%dg2" % cl,
@@ -336,17 +336,21 @@ class TestUsecaseHACluster(TestBrokerCommand):
         self.statustest(["uncluster", "--cluster", "hacl2",
                          "--hostname", "server3.aqd-unittest.ms.com"])
 
-    def test_345_uncluster_fail(self):
-        command = ["uncluster", "--cluster", "hacl1",
-                   "--hostname", "server4.aqd-unittest.ms.com"]
+    def test_350_uncluster_second(self):
+        self.statustest(["uncluster", "--cluster", "hacl1",
+                         "--hostname", "server4.aqd-unittest.ms.com"])
+        self.statustest(["uncluster", "--cluster", "hacl2",
+                         "--hostname", "server5.aqd-unittest.ms.com"])
+
+    def test_355_del_cluster(self):
+        command = ["del", "cluster", "--cluster", "hacl1"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "High Availability Cluster hacl1 still has service "
-                         "address hacl1 assigned, removing the last cluster "
-                         "member is not allowed.",
+                         "address hacl1 assigned, please delete it first.",
                          command)
 
-    def test_350_del_clustersrv(self):
+    def test_360_del_clustersrv(self):
         self.dsdb_expect_delete(self.net["unknown0"].usable[26])
         self.dsdb_expect_delete(self.net["unknown0"].usable[27])
         self.noouttest(["del", "service", "address", "--cluster", "hacl1",
@@ -354,12 +358,6 @@ class TestUsecaseHACluster(TestBrokerCommand):
         self.noouttest(["del", "service", "address", "--cluster", "hacl2",
                         "--name", "hacl2"])
         self.dsdb_verify()
-
-    def test_360_uncluster_second(self):
-        self.statustest(["uncluster", "--cluster", "hacl1",
-                         "--hostname", "server4.aqd-unittest.ms.com"])
-        self.statustest(["uncluster", "--cluster", "hacl2",
-                         "--hostname", "server5.aqd-unittest.ms.com"])
 
     def test_370_del_clusters(self):
         self.statustest(["del", "cluster", "--cluster", "hacl1"])

@@ -38,7 +38,7 @@ class CommandAddArchetype(BrokerCommand):
                     yield subsubcls
                 yield subcls
 
-        reserved_names = set([cls.prefix for cls in subclasses(Plenary)])
+        reserved_names = set(cls.prefix for cls in subclasses(Plenary))
         # There are also some top-level directories in the template repository
         reserved_names.update(["hardware", "pan", "t"])
 

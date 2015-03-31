@@ -88,8 +88,8 @@ def delete_dns_record(dbdns_rec, locked=False, verify_assignments=False):
             if len(addr.dns_records) == 1:
                 last_use.append(addr)
         if last_use:
-            users = " ,".join([format(addr.interface, "l") for addr in
-                               last_use])
+            users = " ,".join(format(addr.interface, "l") for addr in
+                              last_use)
             raise ArgumentError("IP address %s is still in use by %s." %
                                 (dbdns_rec.ip, users))
 
@@ -241,8 +241,8 @@ def grab_address(session, fqdn, ip, network_environment=None,
             # We're just trying to make sure this never happens
             raise AquilonError("IP address %s is referenced by multiple "
                                "DNS records: %s" %
-                               (ip, ", ".join([format(rec, "a")
-                                               for rec in dbrecords])))
+                               (ip, ", ".join(format(rec, "a")
+                                              for rec in dbrecords)))
         if dbrecords and dbrecords[0].fqdn != dbfqdn:
             raise ArgumentError("IP address {0} is already in use by {1:l}."
                                 .format(ip, dbrecords[0]))
@@ -321,6 +321,10 @@ def grab_address(session, fqdn, ip, network_environment=None,
         if addr:
             raise ArgumentError("IP address {0} is already in use by "
                                 "{1:l}.".format(ip, addr.interface))
+
+        if existing_record.service_address:
+            raise ArgumentError("{0} is already being used as a service address."
+                                .format(existing_record))
 
     return (existing_record, newly_created)
 

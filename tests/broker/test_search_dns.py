@@ -43,7 +43,6 @@ class TestSearchDns(TestBrokerCommand):
                    "--fullinfo"]
         out = self.commandtest(command)
         self.matchclean(out, "Primary Name", command)
-        self.matchoutput(out, "Assigned To: ut3c5n2/eth0, ut3c5n2/eth1", command)
         self.matchoutput(out, "Provides: Service Address zebra2", command)
         self.matchoutput(out, "Bound to: Host unittest20.aqd-unittest.ms.com",
                          command)

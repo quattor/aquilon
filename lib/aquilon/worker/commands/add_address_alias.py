@@ -18,17 +18,15 @@
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import AddressAlias, Fqdn
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.processes import DSDBRunner
+from aquilon.worker.broker import BrokerCommand
 
 
 class CommandAddAddressAlias(BrokerCommand):
 
     required_parameters = ["fqdn", "target"]
 
-    def render(self, session, logger, fqdn, dns_environment, target,
-               target_environment, comments,
-               **kwargs):
+    def render(self, session, fqdn, dns_environment, target, target_environment,
+               comments, **kwargs):
 
         if not target_environment:
             target_environment = dns_environment
@@ -42,7 +40,7 @@ class CommandAddAddressAlias(BrokerCommand):
                                 "environment %s is not allowed." %
                                 (AddressAlias._get_class_label(),
                                  dbfqdn.dns_environment.name))
- 
+
         if dbfqdn.dns_domain.restricted:
             raise ArgumentError("{0} is restricted, aliases are not allowed."
                                 .format(dbfqdn.dns_domain))

@@ -103,10 +103,10 @@ class LockKey(object):
         exc_items = []
         shared_items = []
         for name, items in iteritems(self.exclusive):
-            exc_items.extend(["%s/%s" % (name, item) for item in items])
+            exc_items.extend("%s/%s" % (name, item) for item in items)
 
         for name, items in iteritems(self.shared):
-            shared_items.extend(["%s/%s" % (name, item) for item in items])
+            shared_items.extend("%s/%s" % (name, item) for item in items)
 
         exc_items.sort()
         shared_items.sort()

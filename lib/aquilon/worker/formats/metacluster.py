@@ -33,15 +33,15 @@ class MetaClusterFormatter(CompileableFormatter):
         details.append(indent + "  Max members: %s" % metacluster.max_clusters)
         caps = metacluster.get_total_capacity()
         if caps:
-            capstr = ", ".join(["%s: %s" % (name, value) for name, value in
-                                caps.items()])
+            capstr = ", ".join("%s: %s" % (name, value) for name, value in
+                               caps.items())
         else:
             capstr = None
         details.append(indent + "  Capacity limits: %s" % capstr)
         usage = metacluster.get_total_usage()
         if usage:
-            usagestr = ", ".join(["%s: %s" % (name, value) for name, value
-                                  in usage.items()])
+            usagestr = ", ".join("%s: %s" % (name, value) for name, value
+                                 in usage.items())
         else:
             usagestr = None
         details.append(indent + "  Resources used by VMs: %s" % usagestr)
