@@ -218,10 +218,6 @@ class PlenaryPersonalityBase(Plenary):
             pan_assign(lines, "/system/personality/host_environment",
                        self.dbobj.host_environment, True)
 
-        # TODO: This is just to satisfy quattor schema
-        # needs to be removed as soon as the schema allows this
-        pan_assign(lines, "/system/personality/systemgrn", [])
-
         if self.dbobj.config_override:
             pan_include(lines, "features/personality/config_override/config")
 
