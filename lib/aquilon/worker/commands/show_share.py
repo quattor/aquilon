@@ -16,6 +16,7 @@
 # limitations under the License.
 
 from sqlalchemy.orm import undefer
+from sqlalchemy.orm.attributes import set_committed_value
 
 from aquilon.aqdb.model import Share
 from aquilon.aqdb.data_sync.storage import StormapParser
@@ -40,11 +41,15 @@ class CommandShowShare(BrokerCommand):
             who = get_resource_holder(session, logger, hostname, cluster,
                                       metacluster, resourcegroup)
             q = q.filter_by(holder=who)
+        else:
+            who = None
 
         shares = q.all()
 
         parser = StormapParser()
         for dbshare in shares:
+            if who:
+                set_committed_value(dbshare, 'holder', who)
             dbshare.populate_share_info(parser)
 
         return shares

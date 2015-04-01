@@ -171,6 +171,7 @@ def hostname_to_host(session, hostname, query_options=None):
     if not dbmachine.host:
         raise NotFoundException("{0} does not have a host "
                                 "assigned.".format(dbmachine))
+    set_committed_value(dbmachine.host, 'hardware_entity', dbmachine)
     return dbmachine.host
 
 

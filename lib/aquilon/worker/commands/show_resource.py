@@ -15,6 +15,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from sqlalchemy.orm.attributes import set_committed_value
+
 from aquilon.worker.dbwrappers.resources import get_resource_holder
 
 
@@ -27,5 +29,12 @@ def show_resource(session, logger, hostname, cluster, metacluster,
         who = get_resource_holder(session, logger, hostname, cluster,
                                   metacluster, resourcegroup)
         q = q.filter_by(holder=who)
+    else:
+        who = None
 
-    return q.all()
+    results = q.all()
+    if who:
+        for dbresource in results:
+            set_committed_value(dbresource, 'holder', who)
+
+    return results
