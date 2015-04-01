@@ -1,4 +1,4 @@
-structure template personality/vulcan-1g-desktop-prod/espinfo;
+structure template personality/vulcan-10g-server-prod/espinfo;
 
 "description" = "ESX Cluster for virtual desktops";
 "class" = "INFRASTRUCTURE";

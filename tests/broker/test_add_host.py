@@ -426,7 +426,7 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
                              model="vb1205xm", memory=81920, rack="ut10",
                              eth0_mac=eth0_mac, eth1_mac=eth1_mac,
                              archetype="vmhost",
-                             personality="vulcan-1g-desktop-prod",
+                             personality="vulcan-10g-server-prod",
                              osname="esxi", osversion="4.0.0")
 
     def test_320_add_10gig_racks(self):
@@ -475,7 +475,7 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
                        "--machine", machine,
                        "--domain", "unittest",
                        "--osname", "esxi", "--osversion", "4.0.0",
-                       "--archetype", "vmhost", "--personality", "vulcan-1g-desktop-prod"]
+                       "--archetype", "vmhost", "--personality", "vulcan-10g-server-prod"]
             self.noouttest(command)
         self.dsdb_verify()
 

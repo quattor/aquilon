@@ -109,7 +109,7 @@ class TestSearchMetaCluster(TestBrokerCommand):
                          command)
 
     def testallowedpersonalityavailable(self):
-        command = "search metacluster --allowed_personality vulcan-1g-desktop-prod"
+        command = "search metacluster --allowed_personality vulcan-10g-server-prod"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "utmc1", command)
         self.matchclean(out, "utmc2", command)
@@ -155,15 +155,15 @@ class TestSearchMetaCluster(TestBrokerCommand):
 
     def testmemberpersonalityandarchetypeunavailable(self):
         command = ['search', 'metacluster', '--member_archetype', 'hacluster',
-                   '--member_personality', 'vulcan-1g-desktop-prod']
+                   '--member_personality', 'vulcan-10g-server-prod']
         out = self.notfoundtest(command)
         self.matchoutput(out,
-                         "Personality vulcan-1g-desktop-prod, "
+                         "Personality vulcan-10g-server-prod, "
                          "archetype hacluster not found.",
                          command)
 
     def testmemberpersonality(self):
-        command = "search metacluster --member_personality vulcan-1g-desktop-prod"
+        command = "search metacluster --member_personality vulcan-10g-server-prod"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "utmc1", command)
         self.matchclean(out, "vulcan1", command)

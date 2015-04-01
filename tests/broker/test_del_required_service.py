@@ -97,15 +97,15 @@ class TestDelRequiredService(TestBrokerCommand):
 
     def test_160_del_required_esx(self):
         command = ["del_required_service", "--service=esx_management_server",
-                   "--archetype=vmhost", "--personality=vulcan-1g-desktop-prod"]
+                   "--archetype=vmhost", "--personality=vulcan-10g-server-prod"]
         self.noouttest(command)
         command = ["del_required_service", "--service=vmseasoning",
-                   "--archetype=vmhost", "--personality=vulcan-1g-desktop-prod"]
+                   "--archetype=vmhost", "--personality=vulcan-10g-server-prod"]
         self.noouttest(command)
 
     def test_165_verify_del_required_esx(self):
         command = ["show_personality",
-                   "--archetype=vmhost", "--personality=vulcan-1g-desktop-prod"]
+                   "--archetype=vmhost", "--personality=vulcan-10g-server-prod"]
         out = self.commandtest(command)
         self.matchclean(out, "Service: esx_management_server", command)
         self.matchclean(out, "Service: vmseasoning", command)

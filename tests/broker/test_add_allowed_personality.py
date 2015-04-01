@@ -33,13 +33,13 @@ class TestAddAllowedPersonality(TestBrokerCommand):
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "Member host evh1.aqd-unittest.ms.com has personality "
-                         "vmhost/vulcan-1g-desktop-prod, which is incompatible "
+                         "vmhost/vulcan-10g-server-prod, which is incompatible "
                          "with this constraint.",
                          command)
 
     def test_12_failmissingcluster(self):
         command = ["add_allowed_personality", "--archetype", "vmhost",
-                   "--personality=vulcan-1g-desktop-prod", "--cluster=does-not-exist"]
+                   "--personality=vulcan-10g-server-prod", "--cluster=does-not-exist"]
         out = self.notfoundtest(command)
         self.matchoutput(out,
                          "Cluster does-not-exist not found.",
@@ -56,18 +56,18 @@ class TestAddAllowedPersonality(TestBrokerCommand):
 
     def test_15_addconstraint(self):
         self.noouttest(["add_allowed_personality", "--archetype", "vmhost",
-                        "--personality=vulcan-1g-desktop-prod",
+                        "--personality=vulcan-10g-server-prod",
                         "--cluster", "utecl1"])
         self.noouttest(["add_allowed_personality", "--archetype", "vmhost",
                         "--personality=generic", "--cluster", "utecl1"])
         self.noouttest(["add_allowed_personality", "--archetype", "esx_cluster",
-                        "--personality=vulcan-1g-desktop-prod",
+                        "--personality=vulcan-10g-server-prod",
                         "--metacluster", "utmc1"])
 
     def test_20_checkconstraint(self):
         command = ["show_cluster", "--cluster=utecl1"]
         out = self.commandtest(command)
-        self.matchoutput(out, "Allowed Personality: Personality vmhost/vulcan-1g-desktop-prod", command)
+        self.matchoutput(out, "Allowed Personality: Personality vmhost/vulcan-10g-server-prod", command)
         self.matchoutput(out, "Allowed Personality: Personality vmhost/generic", command)
 
         command = ["show_cluster", "--cluster=utecl1", "--format", "proto"]
@@ -75,19 +75,19 @@ class TestAddAllowedPersonality(TestBrokerCommand):
         self.assertEqual(len(cluster.allowed_personalities), 2)
         self.assertEqual(set(pers.name for pers in
                              cluster.allowed_personalities),
-                         set(["generic", "vulcan-1g-desktop-prod"]))
+                         set(["generic", "vulcan-10g-server-prod"]))
 
         command = ["show_metacluster", "--metacluster=utmc1"]
         out = self.commandtest(command)
         self.matchoutput(out,
-                         "Allowed Personality: Personality esx_cluster/vulcan-1g-desktop-prod",
+                         "Allowed Personality: Personality esx_cluster/vulcan-10g-server-prod",
                          command)
 
         command = ["show_metacluster", "--metacluster=utmc1", "--format", "proto"]
         mc = self.protobuftest(command, expect=1)[0]
         self.assertEqual(len(mc.allowed_personalities), 1)
         self.assertEqual(mc.allowed_personalities[0].name,
-                         "vulcan-1g-desktop-prod")
+                         "vulcan-10g-server-prod")
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddAllowedPersonality)

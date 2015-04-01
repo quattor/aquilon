@@ -141,6 +141,22 @@ AQUILON_PARAM_DEFS = {
     ],
 }
 
+HACLUSTER_PARAM_DEFS = {
+    "espinfo": [
+        {
+            "path": "espinfo/class",
+            "value_type": "string",
+            "description": "espinfo class",
+            "required": True
+        },
+        {
+            "path": "espinfo/description",
+            "value_type": "string",
+            "description": "espinfo desc"
+        },
+    ],
+}
+
 VMHOST_PARAM_DEFS = {
     "espinfo": [
         {
@@ -183,6 +199,9 @@ class TestSetupParams(TestBrokerCommand):
         for template, paramlist in AQUILON_PARAM_DEFS.items():
             for params in paramlist:
                 self.add_param_def("aquilon", template, params)
+        for template, paramlist in HACLUSTER_PARAM_DEFS.items():
+            for params in paramlist:
+                self.add_param_def("hacluster", template, params)
         for template, paramlist in VMHOST_PARAM_DEFS.items():
             for params in paramlist:
                 self.add_param_def("vmhost", template, params)

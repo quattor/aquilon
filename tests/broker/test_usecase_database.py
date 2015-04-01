@@ -119,7 +119,7 @@ class TestUsecaseDatabase(TestBrokerCommand):
         command = ["add_cluster", "--cluster=nydb1",
                    "--campus=ny",
                    "--domain=unittest", "--down_hosts_threshold=0",
-                   "--archetype=hacluster", "--personality=vcs-msvcs"]
+                   "--archetype=hacluster", "--personality=hapersonality"]
         self.noouttest(command)
 
     def test_201_add_member(self):

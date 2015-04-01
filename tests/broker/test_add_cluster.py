@@ -36,7 +36,7 @@ class TestAddCluster(PersonalityTestMixin, TestBrokerCommand):
         command = ["add_cluster", "--cluster=utvcs1",
                    "--building=ut",
                    "--domain=unittest", "--down_hosts_threshold=0",
-                   "--archetype=hacluster", "--personality=vcs-msvcs"]
+                   "--archetype=hacluster", "--personality=hapersonality"]
         self.noouttest(command)
 
     def test_11_verify_utvcs1(self):
@@ -49,7 +49,7 @@ class TestAddCluster(PersonalityTestMixin, TestBrokerCommand):
         self.matchoutput(out, "Max members: %s" % default_max, command)
         self.matchoutput(out, "Down Hosts Threshold: 0", command)
         self.matchoutput(out, "Build Status: build", command)
-        self.matchoutput(out, "Personality: vcs-msvcs Archetype: hacluster",
+        self.matchoutput(out, "Personality: hapersonality Archetype: hacluster",
                          command)
         self.matchoutput(out, "Domain: unittest", command)
         self.matchclean(out, "Maintenance Threshold", command)
@@ -58,7 +58,7 @@ class TestAddCluster(PersonalityTestMixin, TestBrokerCommand):
     def test_11_verify_cat_utvcs1(self):
         obj_cmd, obj, data_cmd, data = self.verify_cat_clusters("utvcs1",
                                                                 "hacluster",
-                                                                "vcs-msvcs",
+                                                                "hapersonality",
                                                                 "compute")
 
         self.matchoutput(data, '"system/cluster/down_hosts_threshold" = 0;',
@@ -73,7 +73,7 @@ class TestAddCluster(PersonalityTestMixin, TestBrokerCommand):
         command = ["add_cluster", "--cluster=utvcs1",
                    "--building=ut",
                    "--domain=unittest", "--down_hosts_threshold=0",
-                   "--archetype=hacluster", "--personality=vcs-msvcs"]
+                   "--archetype=hacluster", "--personality=hapersonality"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Cluster utvcs1 already exists", command)
 
@@ -90,7 +90,7 @@ class TestAddCluster(PersonalityTestMixin, TestBrokerCommand):
         command = ["add_cluster", "--cluster=utvcs2",
                    "--building=ut",
                    "--domain=nomanage", "--down_hosts_threshold=0",
-                   "--archetype=hacluster", "--personality=vcs-msvcs"]
+                   "--archetype=hacluster", "--personality=hapersonality"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Adding clusters to domain nomanage "
                          "is not allowed.", command)
@@ -334,7 +334,7 @@ class TestAddCluster(PersonalityTestMixin, TestBrokerCommand):
         command = ["add_cluster", "--cluster=CaMeLcAsE",
                    "--building=ut",
                    "--domain=unittest", "--down_hosts_threshold=0",
-                   "--archetype=hacluster", "--personality=vcs-msvcs"]
+                   "--archetype=hacluster", "--personality=hapersonality"]
         self.noouttest(command)
         self.check_plenary_exists("clusterdata", "camelcase")
         self.check_plenary_gone("clusterdata", "CaMeLcAsE")

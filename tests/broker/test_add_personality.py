@@ -227,10 +227,9 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
         self.verifycatforpersonality("gridcluster", "hadoop")
 
     def test_171_add_ha_personality(self):
-        command = ["add_personality", "--eon_id=2", "--host_environment=dev",
-                   "--personality=vcs-msvcs", "--archetype=hacluster"]
-        self.noouttest(command)
-        self.verifycatforpersonality("hacluster", "vcs-msvcs")
+        self.create_personality("hacluster", "hapersonality",
+                                grn="grn:/ms/ei/aquilon/aqd")
+        self.verifycatforpersonality("hacluster", "hapersonality")
 
     def test_172_add_generic(self):
         for archetype in ["aurora", "f5", "filer", "vmhost", "windows"]:

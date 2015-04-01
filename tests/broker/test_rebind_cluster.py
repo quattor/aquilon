@@ -46,7 +46,7 @@ class TestRebindCluster(TestBrokerCommand):
 
     def test_111_rebind_evh2(self):
         command = ["cluster", "--hostname", "evh2.aqd-unittest.ms.com",
-                   "--personality", "vulcan-1g-desktop-prod",
+                   "--personality", "vulcan-10g-server-prod",
                    "--cluster", "utecl1"]
         self.successtest(command)
 

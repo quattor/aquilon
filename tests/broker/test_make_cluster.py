@@ -97,7 +97,7 @@ class TestMakeCluster(VerifyNotificationsMixin, TestBrokerCommand):
     def testverifycatutecl1_2(self):
         self.successtest(["add_allowed_personality",
                           "--archetype", "vmhost",
-                          "--personality=vulcan-1g-desktop-prod",
+                          "--personality=vulcan-10g-server-prod",
                           "--cluster", "utecl1"])
 
         self.successtest(["add_allowed_personality",
@@ -114,7 +114,7 @@ class TestMakeCluster(VerifyNotificationsMixin, TestBrokerCommand):
         self.searchoutput(out,
                           r'"system/cluster/allowed_personalities" = list\(\s*' +
                           '"vmhost/generic",' + r'\s*' +
-                          '"vmhost/vulcan-1g-desktop-prod"' + r'\s*\);',
+                          '"vmhost/vulcan-10g-server-prod"' + r'\s*\);',
                           command)
 
         self.successtest(["del_allowed_personality",
@@ -124,7 +124,7 @@ class TestMakeCluster(VerifyNotificationsMixin, TestBrokerCommand):
 
         self.successtest(["del_allowed_personality",
                           "--archetype", "vmhost",
-                          "--personality=vulcan-1g-desktop-prod",
+                          "--personality=vulcan-10g-server-prod",
                           "--cluster", "utecl1"])
 
     def testverifygridcluster(self):

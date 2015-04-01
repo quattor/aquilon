@@ -90,9 +90,9 @@ class TestClientBypass(TestBrokerCommand):
     # be used here.
 #   def testfloatarg(self):
 #       # update personality
-#       path = "/personality/vmhost/vulcan-1g-desktop-prod"
+#       path = "/personality/vmhost/vulcan-10g-server-prod"
 #       out = self.badrequesttest(path, post=True, archetype="vmhost",
-#                                 personality="vulcan-1g-desktop-prod",
+#                                 personality="vulcan-10g-server-prod",
 #                                 vmhost_overcommit_memory="not-a-float")
 #       self.matchoutput(out, "Expected an floating point", path)
 

@@ -33,7 +33,7 @@ class TestSearchPersonality(VerifyGrnsMixin, TestBrokerCommand):
         self.matchoutput(out, "aquilon/eaitools", command)
         self.matchoutput(out, "aquilon/utpersonality/dev", command)
         self.matchoutput(out, "esx_cluster/esx_server", command)
-        self.matchoutput(out, "esx_cluster/vulcan-1g-desktop-prod", command)
+        self.matchoutput(out, "esx_cluster/vulcan-10g-server-prod", command)
 
     def test_100_by_environment(self):
         command = ["search", "personality", "--host_environment", "prod"]
@@ -41,7 +41,7 @@ class TestSearchPersonality(VerifyGrnsMixin, TestBrokerCommand):
         self.matchoutput(out, "aurora/generic", command)
         self.matchoutput(out, "filer/generic", command)
         self.matchoutput(out, "f5/generic", command)
-        self.matchoutput(out, "esx_cluster/vulcan-1g-desktop-prod", command)
+        self.matchoutput(out, "esx_cluster/vulcan-10g-server-prod", command)
         self.matchoutput(out, "storagecluster/metrocluster", command)
         self.matchclean(out, "utpersonality/dev", command)
 
@@ -64,7 +64,7 @@ class TestSearchPersonality(VerifyGrnsMixin, TestBrokerCommand):
         self.matchoutput(out, "aquilon/eaitools", command)
         self.matchoutput(out, "aquilon/utpersonality/dev", command)
         self.matchoutput(out, "esx_cluster/esx_server", command)
-        self.matchoutput(out, "esx_cluster/vulcan-1g-desktop-prod", command)
+        self.matchoutput(out, "esx_cluster/vulcan-10g-server-prod", command)
         self.matchoutput(out, "gridcluster/hadoop", command)
         self.matchclean(out, "storagecluster/metrocluster", command)
 
@@ -72,7 +72,7 @@ class TestSearchPersonality(VerifyGrnsMixin, TestBrokerCommand):
         command = ["search", "personality", "--host_environment", "dev", "--eon_id", 2]
         out = self.commandtest(command)
         self.matchoutput(out, "aquilon/utpersonality/dev", command)
-        self.matchclean(out, "vulcan-1g-desktop-prod", command)
+        self.matchclean(out, "vulcan-10g-server-prod", command)
 
     def test_100_fullinfo(self):
         command = ["search", "personality", "--host_environment", "dev",
@@ -97,17 +97,17 @@ class TestSearchPersonality(VerifyGrnsMixin, TestBrokerCommand):
         self.assertEqual(personality.host_environment, "dev")
 
     def test_100_non_unique_name(self):
-        command = ["search", "personality", "--personality", "vulcan-1g-desktop-prod"]
+        command = ["search", "personality", "--personality", "vulcan-10g-server-prod"]
         out = self.commandtest(command)
-        self.matchoutput(out, "esx_cluster/vulcan-1g-desktop-prod", command)
-        self.matchoutput(out, "vmhost/vulcan-1g-desktop-prod", command)
+        self.matchoutput(out, "esx_cluster/vulcan-10g-server-prod", command)
+        self.matchoutput(out, "vmhost/vulcan-10g-server-prod", command)
 
     def test_100_by_name_arch(self):
-        command = ["search", "personality", "--personality", "vulcan-1g-desktop-prod",
+        command = ["search", "personality", "--personality", "vulcan-10g-server-prod",
                    "--archetype", "vmhost"]
         out = self.commandtest(command)
-        self.matchoutput(out, "vmhost/vulcan-1g-desktop-prod", command)
-        self.matchclean(out, "esx_cluster/vulcan-1g-desktop-prod", command)
+        self.matchoutput(out, "vmhost/vulcan-10g-server-prod", command)
+        self.matchclean(out, "esx_cluster/vulcan-10g-server-prod", command)
 
     def test_100_by_required_service(self):
         command = ["search_personality", "--required_service", "chooser2"]
@@ -129,7 +129,7 @@ class TestSearchPersonality(VerifyGrnsMixin, TestBrokerCommand):
 
     def test_110_show_diff_2(self):
         command = ["show_diff", "--personality=utpersonality/dev",
-                   "--archetype=aquilon", "--other=vulcan-1g-desktop-prod", "--other_archetype=vmhost"]
+                   "--archetype=aquilon", "--other=vulcan-10g-server-prod", "--other_archetype=vmhost"]
         out = self.commandtest(command)
         self.searchoutput(out,
                           r'missing Options in Personality aquilon/utpersonality/dev:\s+Cluster Required',
@@ -138,7 +138,7 @@ class TestSearchPersonality(VerifyGrnsMixin, TestBrokerCommand):
                           r'matching Options with different values:\s+Environment value=dev, othervalue=prod',
                           command)
         self.searchoutput(out,
-                          r'missing Options in Personality vmhost/vulcan-1g-desktop-prod:\s+ConfigOverride',
+                          r'missing Options in Personality vmhost/vulcan-10g-server-prod:\s+ConfigOverride',
                           command)
 
     def test_200_no_match(self):

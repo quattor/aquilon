@@ -84,7 +84,7 @@ class TestDelPersonality(TestBrokerCommand):
 
     def testdelv1personalities(self):
         command = ["del_personality",
-                   "--personality=vulcan-1g-desktop-prod", "--archetype=vmhost"]
+                   "--personality=vulcan-10g-server-prod", "--archetype=vmhost"]
         self.noouttest(command)
         command = ["del_personality",
                    "--personality=metacluster", "--archetype=metacluster"]
