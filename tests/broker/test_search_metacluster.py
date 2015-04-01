@@ -65,7 +65,6 @@ class TestSearchMetaCluster(TestBrokerCommand):
         self.matchoutput(out, "vulcan1", command)
 
     def testpersonalityunavailable1(self):
-        # Will only get this error if archetype is specified
         command = ['search', 'metacluster', '--archetype', 'metacluster',
                    '--personality', 'personality-does-not-exist']
         out = self.notfoundtest(command)
@@ -73,9 +72,10 @@ class TestSearchMetaCluster(TestBrokerCommand):
                          "archetype metacluster not found.", command)
 
     def testpersonalityunavailable2(self):
-        # Will only get an error if archetype is specified
         command = "search metacluster --personality personality-does-not-exist"
-        self.noouttest(command.split(" "))
+        out = self.notfoundtest(command.split(" "))
+        self.matchoutput(out, "Personality personality-does-not-exist "
+                         "not found.", command)
 
     def testsandboxavailable(self):
         command = ["search_metacluster", "--sandbox=%s/utsandbox" % self.user]

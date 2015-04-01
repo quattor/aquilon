@@ -146,7 +146,6 @@ class TestSearchESXCluster(TestBrokerCommand):
         self.matchoutput(out, "utecl4", command)
 
     def testpersonalityunavailable(self):
-        # Will only get this error if archetype is specified
         command = ["search_esx_cluster", "--archetype=vmhost",
                    "--personality=personality-does-not-exist"]
         out = self.notfoundtest(command)
@@ -154,9 +153,10 @@ class TestSearchESXCluster(TestBrokerCommand):
                          "archetype vmhost not found.", command)
 
     def testpersonalityunavailable2(self):
-        # Will only get an error if archetype is specified
         command = "search esx cluster --personality personality-does-not-exist"
-        self.noouttest(command.split(" "))
+        out = self.notfoundtest(command.split(" "))
+        self.matchoutput(out, "Personality personality-does-not-exist "
+                         "not found.", command)
 
     def testserviceavailable(self):
         command = "search esx cluster --service esx_management_server"

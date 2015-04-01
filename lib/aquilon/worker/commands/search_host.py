@@ -172,13 +172,14 @@ class CommandSearchHost(BrokerCommand):
                                                       compel=True)
                 q = q.filter(PersonalityStage.personality_id.in_(subq))
 
-            q = q.join(Personality, aliased=True, from_joinpoint=True)
-            if archetype:
-                q = q.filter_by(archetype=dbarchetype)
-            if host_environment:
-                dbhost_env = HostEnvironment.get_instance(session,
-                                                          host_environment)
-                q = q.filter_by(host_environment=dbhost_env)
+            if archetype or host_environment:
+                q = q.join(Personality, aliased=True, from_joinpoint=True)
+                if archetype:
+                    q = q.filter_by(archetype=dbarchetype)
+                if host_environment:
+                    dbhost_env = HostEnvironment.get_instance(session,
+                                                              host_environment)
+                    q = q.filter_by(host_environment=dbhost_env)
 
             q = q.reset_joinpoint()
 

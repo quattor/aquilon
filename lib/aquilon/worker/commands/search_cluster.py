@@ -92,21 +92,20 @@ class CommandSearchCluster(BrokerCommand):
         if archetype:
             # Added to the searches as appropriate below.
             dbarchetype = Archetype.get_unique(session, archetype, compel=True)
-        if personality and archetype:
-            dbpersonality = Personality.get_unique(session,
-                                                   archetype=dbarchetype,
-                                                   name=personality,
-                                                   compel=True)
+        else:
+            dbarchetype = None
+
+        if personality or archetype:
             q = q.join(PersonalityStage, aliased=True)
-            q = q.filter_by(personality=dbpersonality)
-            q = q.reset_joinpoint()
-        elif personality:
-            q = q.join(PersonalityStage, Personality, aliased=True)
-            q = q.filter_by(name=personality)
-            q = q.reset_joinpoint()
-        elif archetype:
-            q = q.join(PersonalityStage, Personality, aliased=True)
-            q = q.filter_by(archetype=dbarchetype)
+            if personality:
+                subq = Personality.get_matching_query(session, name=personality,
+                                                      archetype=dbarchetype,
+                                                      compel=True)
+                q = q.filter(PersonalityStage.personality_id.in_(subq))
+            elif archetype:
+                q = q.join(Personality, aliased=True, from_joinpoint=True)
+                q = q.filter_by(archetype=dbarchetype)
+
             q = q.reset_joinpoint()
 
         if buildstatus:
