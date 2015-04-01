@@ -34,9 +34,9 @@ class CommandAddPersonality(BrokerCommand):
 
     required_parameters = ["personality", "archetype"]
 
-    def render(self, session, logger, personality, archetype,
-               grn, eon_id, host_environment, comments,
-               cluster_required, copy_from, config_override, **arguments):
+    def render(self, session, logger, personality, archetype, grn, eon_id,
+               host_environment, comments, cluster_required, copy_from,
+               copy_stage, config_override, **arguments):
         if not VALID_PERSONALITY_RE.match(personality):
             raise ArgumentError("Personality name '%s' is not valid." %
                                 personality)
@@ -64,7 +64,7 @@ class CommandAddPersonality(BrokerCommand):
                             "not be copied, you will need to set it separately "
                             "on the new personality if needed."
                             .format(dbfrom_persona))
-            dbfrom_vers = dbfrom_persona.default_stage
+            dbfrom_vers = dbfrom_persona.default_stage(copy_stage)
 
         if not grn and not eon_id:
             raise ArgumentError("GRN or EON ID is required for adding a "

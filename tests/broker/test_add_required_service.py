@@ -157,7 +157,7 @@ class TestAddRequiredService(TestBrokerCommand):
                          "requires --justification.",
                          command)
 
-    def test_200_add_nonexistant(self):
+    def test_200_missing_service(self):
         command = ["add_required_service", "--service",
                    "service-does-not-exist", "--archetype", "aquilon",
                    "--justification", "tcm=12345678"]
@@ -165,6 +165,34 @@ class TestAddRequiredService(TestBrokerCommand):
         self.matchoutput(out,
                          "Service service-does-not-exist not found.",
                          command)
+
+    def test_200_missing_personality(self):
+        command = ["add_required_service", "--service", "afs",
+                   "--personality", "personality-does-not-exist",
+                   "--archetype", "aquilon"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out,
+                         "Personality personality-does-not-exist, "
+                         "archetype aquilon not found.",
+                         command)
+
+    def test_200_missing_personality_stage(self):
+        command = ["add_required_service", "--service", "afs",
+                   "--personality", "nostage", "--archetype", "aquilon",
+                   "--personality_stage", "previous"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out,
+                         "Personality aquilon/nostage does not have stage "
+                         "previous.",
+                         command)
+
+    def test_200_bad_personality_stage(self):
+        command = ["add_required_service", "--service", "afs",
+                   "--personality", "nostage", "--archetype", "aquilon",
+                   "--personality_stage", "no-such-stage"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "'no-such-stage' is not a valid personality "
+                         "stage.", command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddRequiredService)

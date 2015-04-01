@@ -337,6 +337,33 @@ class TestCompile(VerifyNotificationsMixin, TestBrokerCommand):
         # Make sure the build files exist - further tests depend on that
         self.statustest(['compile', '--hostname=unittest02.one-nyp.ms.com'])
 
+    def test_590_missing_personality(self):
+        command = ["compile", "--personality", "personality-does-not-exist",
+                   "--archetype", "aquilon"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out,
+                         "Personality personality-does-not-exist, "
+                         "archetype aquilon not found.",
+                         command)
+
+    def test_590_missing_personality_stage(self):
+        command = ["compile", "--personality", "nostage",
+                   "--archetype", "aquilon",
+                   "--personality_stage", "next"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out,
+                         "Personality aquilon/nostage does not have stage "
+                         "next.",
+                         command)
+
+    def test_590_bad_personality_stage(self):
+        command = ["compile", "--personality", "nostage",
+                   "--archetype", "aquilon",
+                   "--personality_stage", "no-such-stage"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "'no-such-stage' is not a valid personality "
+                         "stage.", command)
+
     def test_600_aqcompile(self):
         aqcompile = os.path.join(self.config.get("broker", "srcdir"),
                                  "bin", "aq_compile.py")

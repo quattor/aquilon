@@ -34,7 +34,7 @@ class CommandSearchCluster(BrokerCommand):
 
     required_parameters = []
 
-    def render(self, session, archetype, personality,
+    def render(self, session, archetype, personality, personality_stage,
                domain, sandbox, branch, sandbox_author, buildstatus,
                allowed_archetype, allowed_personality, max_members,
                member_archetype, member_cluster, member_personality,
@@ -70,6 +70,9 @@ class CommandSearchCluster(BrokerCommand):
 
         if personality or archetype:
             q = q.join(PersonalityStage, aliased=True)
+            if personality_stage:
+                Personality.force_valid_stage(personality_stage)
+                q = q.filter_by(name=personality_stage)
             if personality:
                 subq = Personality.get_matching_query(session, name=personality,
                                                       archetype=dbarchetype,

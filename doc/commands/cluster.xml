@@ -29,7 +29,10 @@
 	    </group>
 	    <arg choice="req"><option>--hostname <replaceable>HOSTNAME</replaceable></option></arg>
 	    <arg choice="req"><option>--cluster <replaceable>CLUSTER</replaceable></option></arg>
-	    <arg choice="opt"><option>--personality <replaceable>PERSONALITY</replaceable></option></arg>
+	    <group choice="opt">
+		<arg choice="plain"><option>--personality <replaceable>PERSONALITY</replaceable></option></arg>
+		<arg choice="opt"><option>--personality_stage <replaceable>STAGE</replaceable></option></arg>
+	    </group>
 	    <xi:include href="../common/global_options.xml"/>
 	</cmdsynopsis>
     </refsynopsisdiv>
@@ -64,14 +67,14 @@
 	    lifecycle status, a cluster also has a buildstatus.
 	    Adding a host into a cluster may change the
 	    buildstatus of the host to match the cluster.
-	    If the cluster is "ready" and the host is "almostready"
-	    then the host will be immediately promoted to "ready".
-	    If the cluster is not "ready" but the host is,
-	    then the host will be immediately demoted to "almostready".
+	    If the cluster is <literal>ready</literal> and the host is <literal>almostready</literal>,
+	    then the host will be immediately promoted to <literal>ready</literal>.
+	    If the cluster is not <literal>ready</literal> but the host is,
+	    then the host will be immediately demoted to <literal>almostready</literal>.
 	    This has the effect of making the cluster buildstatus
 	    as a barrier for promoting hosts -
 	    hosts will only be promoted when the cluster
-	    as a whole is marked "ready".
+	    as a whole is marked <literal>ready</literal>.
         </para>
     </refsect1>
 
@@ -115,10 +118,19 @@
 		</term>
 		<listitem>
 		    <para>
-			The name of the personality that should be given to
-			the host.
-			If the operation fails,
-			then the previous personality will remain on the host.
+			The name of the personality that should be given to the host.
+			If the operation fails, then the previous personality will remain on the
+			host.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+		<term>
+		    <option>--personality_stage <replaceable>STAGE</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Select the stage of the personality to use. Defaults to <literal>current</literal>.
 		    </para>
 		</listitem>
 	    </varlistentry>

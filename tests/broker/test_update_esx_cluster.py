@@ -241,6 +241,22 @@ class TestUpdateESXCluster(TestBrokerCommand):
         self.matchoutput(out, "Cluster cluster-does-not-exist not found",
                          command)
 
+    def test_500_missing_personality(self):
+        command = ["update_cluster", "--cluster", "utecl1",
+                   "--personality", "personality-does-not-exist"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out, "Personality personality-does-not-exist, "
+                         "archetype esx_cluster not found.", command)
+
+    def test_500_missing_personality_stage(self):
+        command = ["update_cluster", "--cluster", "utecl1",
+                   "--personality", "nostage", "--personality_stage", "next"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out,
+                         "Personality esx_cluster/nostage does not have stage "
+                         "next.",
+                         command)
+
     def test_600_updatethreshold(self):
         cname = "utecl7"
         command = ["update_esx_cluster", "--cluster=%s" % cname,

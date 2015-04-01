@@ -29,7 +29,10 @@
 	    </group>
 	    <arg choice="plain"><option>--hostname <replaceable>HOSTNAME</replaceable></option></arg>
 	    <arg choice="plain"><option>--cluster <replaceable>CLUSTER</replaceable></option></arg>
-	    <arg choice="opt"><option>--personality <replaceable>PERSONALITY</replaceable></option></arg>
+	    <group choice="opt">
+		<arg choice="plain"><option>--personality <replaceable>PERSONALITY</replaceable></option></arg>
+		<arg choice="opt"><option>--personality_stage <replaceable>STAGE</replaceable></option></arg>
+	    </group>
 	    <xi:include href="../common/global_options.xml"/>
 	</cmdsynopsis>
     </refsynopsisdiv>
@@ -95,6 +98,16 @@
 			the operation fails, then the previous personality will remain on
 			the host. This option is needed if the current personality of the
 			host requires a cluster.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+		<term>
+		    <option>--personality_stage <replaceable>STAGE</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Select the stage of the personality to use. Defaults to <literal>current</literal>.
 		    </para>
 		</listitem>
 	    </varlistentry>

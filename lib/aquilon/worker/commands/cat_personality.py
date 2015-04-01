@@ -17,7 +17,7 @@
 """Contains the logic for `aq cat --personality`."""
 
 from aquilon.aqdb.model import Personality
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.templates.personality import (PlenaryPersonalityPreFeature,
                                                   PlenaryPersonalityPostFeature,
                                                   PlenaryPersonalityParameter,
@@ -30,11 +30,12 @@ class CommandCatPersonality(BrokerCommand):
 
     required_parameters = ["personality"]
 
-    def render(self, generate, session, logger, personality, archetype,
-               pre_feature, post_feature, param_tmpl, **kwargs):
+    def render(self, generate, session, logger, personality,
+               personality_stage, archetype, pre_feature, post_feature,
+               param_tmpl, **kwargs):
         dbpersonality = Personality.get_unique(session, archetype=archetype,
                                                name=personality, compel=True)
-        dbstage = dbpersonality.default_stage
+        dbstage = dbpersonality.default_stage(personality_stage)
 
         if pre_feature:
             plenary = PlenaryPersonalityPreFeature.get_plenary(dbstage,

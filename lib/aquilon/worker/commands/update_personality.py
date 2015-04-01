@@ -33,13 +33,14 @@ class CommandUpdatePersonality(BrokerCommand):
 
     required_parameters = ["personality", "archetype"]
 
-    def render(self, session, logger, personality, archetype, vmhost_capacity_function,
-               vmhost_overcommit_memory, cluster_required, config_override,
-               host_environment, grn, eon_id, leave_existing,
-               justification, reason, comments, user, **arguments):
+    def render(self, session, logger, personality, personality_stage,
+               archetype, vmhost_capacity_function, vmhost_overcommit_memory,
+               cluster_required, config_override, host_environment, grn, eon_id,
+               leave_existing, justification, reason, comments, user,
+               **arguments):
         dbpersona = Personality.get_unique(session, name=personality,
                                            archetype=archetype, compel=True)
-        dbstage = dbpersona.active_stage
+        dbstage = dbpersona.active_stage(personality_stage)
 
         # It's a bit ugly. If any of the non-staged attributes are touched,
         # then we need to check for prod hosts for all stages

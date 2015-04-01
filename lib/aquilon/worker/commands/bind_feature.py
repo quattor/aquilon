@@ -22,7 +22,7 @@ from aquilon.exceptions_ import (ArgumentError, InternalError,
 from aquilon.aqdb.model import (Feature, Archetype, Personality,
                                 PersonalityStage, Model, Domain, Host,
                                 Cluster)
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.commands.deploy import validate_justification
 from aquilon.worker.dbwrappers.feature import add_link, check_feature_template
 from aquilon.worker.dbwrappers.personality import validate_personality_justification
@@ -33,8 +33,9 @@ class CommandBindFeature(BrokerCommand):
 
     required_parameters = ['feature']
 
-    def render(self, session, logger, feature, archetype, personality, model,
-               vendor, interface, justification, reason, user, **arguments):
+    def render(self, session, logger, feature, archetype, personality,
+               personality_stage, model, vendor, interface, justification,
+               reason, user, **arguments):
 
         # Binding a feature to a named interface makes sense in the scope of a
         # personality, but not for a whole archetype.
@@ -58,7 +59,7 @@ class CommandBindFeature(BrokerCommand):
                                                    compel=True)
             if not dbarchetype:
                 dbarchetype = dbpersonality.archetype
-            dbstage = dbpersonality.active_stage
+            dbstage = dbpersonality.active_stage(personality_stage)
 
             personalities = [dbstage]
 

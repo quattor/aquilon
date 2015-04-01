@@ -44,8 +44,8 @@ from aquilon.utils import chunk
 
 def create_host(session, logger, config, dbhw, dbarchetype, domain=None,
                 sandbox=None, buildstatus=None, personality=None,
-                osname=None, osversion=None, grn=None, eon_id=None,
-                comments=None, **kwargs):
+                personality_stage=None, osname=None, osversion=None, grn=None,
+                eon_id=None, comments=None, **kwargs):
     # Section in the config used to determin defaults for this archetype
     section = "archetype_" + dbarchetype.name
 
@@ -78,7 +78,7 @@ def create_host(session, logger, config, dbhw, dbarchetype, domain=None,
     dbpersonality = Personality.get_unique(session, name=personality,
                                            archetype=dbarchetype,
                                            compel=True)
-    dbstage = dbpersonality.default_stage
+    dbstage = dbpersonality.default_stage(personality_stage)
 
     if isinstance(dbbranch, Domain):
         pre, post = personality_features(dbstage)

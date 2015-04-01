@@ -33,16 +33,17 @@ class CommandAddParameter(BrokerCommand):
                              path, value, comments=comments, compel=False,
                              preclude=True)
 
-    def render(self, session, logger, archetype, personality, feature, model,
-               interface, path, user, value=None, comments=None,
-               justification=None, reason=None, **arguments):
+    def render(self, session, logger, archetype, personality,
+               personality_stage, feature, model, interface, path, user,
+               value=None, comments=None, justification=None, reason=None,
+               **arguments):
         dbpersonality = Personality.get_unique(session, name=personality,
                                                archetype=archetype, compel=True)
         if not dbpersonality.archetype.is_compileable:
             raise ArgumentError("{0} is not compileable."
                                 .format(dbpersonality.archetype))
 
-        dbstage = dbpersonality.active_stage
+        dbstage = dbpersonality.active_stage(personality_stage)
 
         validate_personality_justification(dbstage, user, justification,
                                            reason)

@@ -29,6 +29,7 @@
 	    </group>
 	    <arg choice="plain"><option>--personality <replaceable>PERSONALITY</replaceable></option></arg>
 	    <arg choice="plain"><option>--archetype <replaceable>ARCHETYPE</replaceable></option></arg>
+	    <arg choice="opt"><option>--personality_stage <replaceable>STAGE</replaceable></option></arg>
 	    <group choice="opt">
 		<arg choice="plain"><option>--grn <replaceable>GRN</replaceable></option></arg>
 		<arg choice="plain"><option>--eon_id <replaceable>EON_ID</replaceable></option></arg>
@@ -70,6 +71,17 @@
 		<listitem>
 		    <para>
 			The name of the personality to update.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+		<term>
+		    <option>--personality_stage <replaceable>STAGE</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Select the stage of the personality to use. Defaults to <literal>next</literal>.
+			Note that this parameter only affects updating staged properties.
 		    </para>
 		</listitem>
 	    </varlistentry>
@@ -123,7 +135,7 @@
 		</term>
 		<listitem>
 		    <para>
-			If this flag is specified a special feature 'personality/config_override' will
+			If this flag is specified a special template <filename>personality/config_override</filename> will
 			be included in the aqdb generated personality configuration template. This feature
 			effectively pulls in config_override.tpl from the personality templates in the
 			template domain, if it exists.

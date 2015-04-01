@@ -25,15 +25,17 @@ class CommandUpdateMetaCluster(CommandUpdateCluster):
 
     required_parameters = ["metacluster"]
 
-    def render(self, session, logger, metacluster, personality, max_members,
-               fix_location, virtual_switch, comments, **arguments):
+    def render(self, session, logger, metacluster, personality,
+               personality_stage, max_members, fix_location, virtual_switch,
+               comments, **arguments):
         dbmetacluster = MetaCluster.get_unique(session, metacluster,
                                                compel=True)
         plenaries = PlenaryCollection(logger=logger)
 
         self.update_cluster_common(session, logger, dbmetacluster, plenaries,
-                                   personality, max_members, fix_location,
-                                   virtual_switch, comments, **arguments)
+                                   personality, personality_stage,
+                                   max_members, fix_location, virtual_switch,
+                                   comments, **arguments)
 
         session.flush()
         dbmetacluster.validate()

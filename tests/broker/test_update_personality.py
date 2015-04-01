@@ -291,6 +291,23 @@ class TestUpdatePersonality(VerifyGrnsMixin, TestBrokerCommand):
         out = self.badrequesttest(command)
         self.matchoutput(out, "Personality esx_cluster/vulcan-10g-server-prod is in use", command)
 
+    def test_200_missing_personality(self):
+        command = ["update_personality", "--archetype", "aquilon",
+                   "--personality", "personality-does-not-exist"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out, "Personality personality-does-not-exist, "
+                         "archetype aquilon not found.", command)
+
+    def test_200_missing_personality_stage(self):
+        command = ["update_personality", "--archetype", "aquilon",
+                   "--personality", "nostage",
+                   "--personality_stage", "previous"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out,
+                         "Personality aquilon/nostage does not have stage "
+                         "previous.",
+                         command)
+
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUpdatePersonality)
     unittest.TextTestRunner(verbosity=2).run(suite)

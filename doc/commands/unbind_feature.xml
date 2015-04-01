@@ -30,7 +30,10 @@
 	    <arg choice="plain"><option>--feature <replaceable>FEATURE</replaceable></option></arg>
 	    <arg choice="opt"><option>--model <replaceable>MODEL</replaceable></option></arg>
 	    <arg choice="opt"><option>--vendor <replaceable>VENDOR</replaceable></option></arg>
-	    <arg choice="opt"><option>--personality <replaceable>PERS</replaceable></option></arg>
+	    <group choice="opt">
+		<arg choice="plain"><option>--personality <replaceable>PERS</replaceable></option></arg>
+		<arg choice="opt"><option>--personality_stage <replaceable>STAGE</replaceable></option></arg>
+	    </group>
 	    <arg choice="opt"><option>--archetype <replaceable>ARCH</replaceable></option></arg>
 	    <arg choice="opt"><option>--interface <replaceable>IFACE</replaceable></option></arg>
 	    <arg choice="opt"><option>--justification <replaceable>REASON</replaceable></option></arg>
@@ -97,6 +100,16 @@
 			Name of a personality. <replaceable>FEATURE</replaceable> must be a host feature,
 			unless <option>--model</option> or <option>--interface</option> is also specified,
 			in which case the rules for the respective option apply.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+		<term>
+		    <option>--personality_stage <replaceable>STAGE</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Select the stage of the personality to use. Defaults to <literal>next</literal>.
 		    </para>
 		</listitem>
 	    </varlistentry>

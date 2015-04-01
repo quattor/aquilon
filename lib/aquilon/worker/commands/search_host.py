@@ -44,14 +44,14 @@ class CommandSearchHost(BrokerCommand):
 
     required_parameters = []
 
-    def render(self, session, logger, hostname, machine, archetype,
-               buildstatus, personality, host_environment, osname, osversion,
+    def render(self, session, logger, hostname, machine, archetype, buildstatus,
+               personality, personality_stage, host_environment, osname, osversion,
                service, instance, model, machine_type, vendor, serial, cluster,
-               guest_on_cluster, guest_on_share, member_cluster_share,
-               domain, sandbox, branch, sandbox_author,
-               dns_domain, shortname, mac, ip, networkip, network_environment,
-               exact_location, server_of_service, server_of_instance, grn,
-               eon_id, fullinfo, style, **arguments):
+               guest_on_cluster, guest_on_share, member_cluster_share, domain,
+               sandbox, branch, sandbox_author, dns_domain, shortname, mac, ip,
+               networkip, network_environment, exact_location,
+               server_of_service, server_of_instance, grn, eon_id, fullinfo,
+               style, **arguments):
         dbnet_env = NetworkEnvironment.get_unique_or_default(session,
                                                              network_environment)
 
@@ -166,6 +166,9 @@ class CommandSearchHost(BrokerCommand):
 
         if archetype or personality or host_environment:
             q = q.join(PersonalityStage, aliased=True)
+            if personality_stage:
+                Personality.force_valid_stage(personality_stage)
+                q = q.filter_by(name=personality_stage)
             if personality:
                 subq = Personality.get_matching_query(session, name=personality,
                                                       archetype=dbarchetype,

@@ -224,6 +224,12 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
         out = self.commandtest(command)
         self.matchclean(out, "Requires clustered hosts", command)
 
+    def test_166_add_esx_nostage(self):
+        command = ["add_personality", "--personality", "nostage",
+                   "--archetype", "vmhost", "--cluster_required",
+                   "--eon_id", 2, "--host_environment", "dev"]
+        self.noouttest(command)
+
     def test_170_add_grid_personality(self):
         command = ["add_personality", "--eon_id=2", "--host_environment=dev",
                    "--personality=hadoop", "--archetype=gridcluster"]
@@ -249,6 +255,7 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
             'sybase-test': {},
             'lemon-collector-oracle': {},
             'unixeng-test': {},
+            'nostage': {},
             'infra': {'grn': 'grn:/ms/ei/aquilon/aqd',
                       'environment': 'infra'}
         }
@@ -401,6 +408,51 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
                    "--personality", "personality-does-not-exist"]
         self.noouttest(command)
 
+    def test_400_show_missing_stage(self):
+        command = ["show_personality", "--personality", "nostage",
+                   "--archetype", "aquilon",
+                   "--personality_stage", "next"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out, "Personality aquilon/nostage does not have "
+                         "stage next.", command)
+
+    def test_400_show_bad_stage(self):
+        command = ["show_personality", "--personality", "nostage",
+                   "--archetype", "aquilon",
+                   "--personality_stage", "no-such-stage"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "'no-such-stage' is not a valid personality "
+                         "stage.", command)
+
+    def test_400_cat_missing_stage(self):
+        command = ["cat", "--personality", "nostage", "--archetype", "aquilon",
+                   "--personality_stage", "next"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out, "Personality aquilon/nostage does not have "
+                         "stage next.", command)
+
+    def test_400_cat_bad_stage(self):
+        command = ["cat", "--personality", "nostage", "--archetype", "aquilon",
+                   "--personality_stage", "no-such-stage"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "'no-such-stage' is not a valid personality "
+                         "stage.", command)
+
+    def test_400_copy_missing_stage(self):
+        command = ["add_personality", "--personality", "copy-test",
+                   "--archetype", "aquilon", "--copy_from", "nostage",
+                   "--copy_stage", "next"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out, "Personality aquilon/nostage does not have "
+                         "stage next.", command)
+
+    def test_400_copy_bad_stage(self):
+        command = ["add_personality", "--personality", "copy-test",
+                   "--archetype", "aquilon", "--copy_from", "nostage",
+                   "--copy_stage", "no-such-stage"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "'no-such-stage' is not a valid personality "
+                         "stage.", command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddPersonality)

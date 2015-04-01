@@ -315,6 +315,7 @@
 	    <option name="buildstatus" type="string">buildstatus</option>
 	    <option name="cluster_type" type="string">cluster type of archetype (compute)</option>
 	    <option name="personality" type="string">personality</option>
+	    <option name="personality_stage" requires="personality" type="string">Personality stage</option>
 	    <option name="allowed_archetype" type="string">allowed_archetype</option>
 	    <option name="allowed_personality" type="string">allowed_personality</option>
 	    <option name="down_hosts_threshold" type="string">down_hosts_threshold</option>
@@ -386,6 +387,7 @@
 	<optgroup mandatory="True">
 	    <option name="archetype" type="string">archetype</option>
 	    <option name="personality" type="string">personality</option>
+	    <option name="personality_stage" requires="personality" type="string">Personality stage</option>
 	    <option name="buildstatus" type="string">buildstatus</option>
 	    <option name="allowed_archetype" type="string">allowed_archetype</option>
 	    <option name="allowed_personality" type="string">allowed_personality</option>
@@ -461,6 +463,7 @@
 	    <option name="network_environment" type="string">Network environment (default: internal)</option>
 	    <option name="mac" type="mac">[Deprecated] MAC address</option>
 	    <option name="personality" type="string">Personality</option>
+	    <option name="personality_stage" requires="personality" type="string">Personality stage</option>
 	    <option name="host_environment" type="string">Host environment</option>
 	    <option name="osname" type="string">OS name</option>
 	    <option name="osversion" type="string">OS version</option>
@@ -530,6 +533,7 @@
 	    <option name="guest" type="string">fully qualified host name of a virtual machine</option>
 	    <option name="archetype" type="string">archetype (vmhost)</option>
 	    <option name="personality" type="string">personality</option>
+	    <option name="personality_stage" requires="personality" type="string">Personality stage</option>
 	    <option name="service" type="string">client of service (single service only)</option>
 	    <option name="instance" type="string">client of service instance (single instance only)</option>
 	    <option name="share" type="string">share in use by an virtual machine on the cluster</option>
@@ -651,6 +655,7 @@
 	</optgroup>
 	<optgroup>
 	    <option name="archetype" type="string" requires="personality">archetype name</option>
+	    <option name="personality_stage" type="string" requires="personality">Personality stage</option>
 	    <option name="pancinclude" type="string" conflicts="pancdebug">Regex for templates to include in debug output (None included by default)</option>
 	    <option name="pancexclude" type="string" conflicts="pancdebug">Regex for templates to exclude in debug output (only useful if pancinclude has been given)</option>
 	    <option name="pancdebug" type="boolean" conflicts="pancinclude pancexclude">Alias for pancinclude=.* and pancexclude=components/spma/functions</option>
@@ -1006,7 +1011,8 @@
 	    <option name="osname" type="string">Operating system (e.g. linux)</option>
 	    <option name="osversion" type="string">Operating system version (e.g. 5.0-x86_64)</option>
 	    <option name="buildstatus" type="string">Build Status: defaults to build.  'blind' and 'ready' also valid.</option>
-	    <option name="personality" type="string">Personality name: defaults to 'inventory' for aquilon and 'generic' otherwise.</option>
+	    <option name="personality" requires="personality" type="string">Personality name: defaults to 'inventory' for aquilon and 'generic' otherwise.</option>
+	    <option name="personality_stage" type="string">Personality stage to use, defaults to 'current'.</option>
 	    <option name="ipalgorithm" type="string">Algorithm for automatically choosing an IP.</option>
 	    <option name="zebra_interfaces" type="string">Interfaces to configure Zebra on</option>
 	    <option name="comments" type="string">Comments</option>
@@ -1626,8 +1632,9 @@
 	    </optgroup>
 	</optgroup>
 	<optgroup>
-	    <option name="personality" type="string">personality name</option>
-	    <option name="archetype" requires="personality" type="string">archetype name</option>
+	    <option name="personality" type="string">Personality name</option>
+	    <option name="personality_stage" requires="personality" type="string">Personality stage to use, defaults to 'next'.</option>
+	    <option name="archetype" requires="personality" type="string">Archetype name</option>
 	    <option name="network_environment" type="string">Network environment (default: internal)</option>
 	    <option name="comments" type="string">Comments</option>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
@@ -1647,8 +1654,9 @@
 	    </optgroup>
 	</optgroup>
 	<optgroup>
-	    <option name="personality" type="string">personality name</option>
-	    <option name="archetype" requires="personality" type="string">archetype name</option>
+	    <option name="personality" type="string">Personality name</option>
+	    <option name="personality_stage" requires="personality" type="string">Personality stage to use, defaults to 'next'.</option>
+	    <option name="archetype" requires="personality" type="string">Archetype name</option>
 	    <option name="network_environment" type="string">Network environment (default: internal)</option>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
 	    <option name="reason" type="string">String to be specified if justification='emergency'</option>
@@ -1975,6 +1983,7 @@
 	</optgroup>
 	<optgroup>
 	    <option name="personality" type="string">personality name</option>
+	    <option name="personality_stage" requires="personality" type="string">Personality stage to use, defaults to 'next'.</option>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
 	    <option name="reason" type="string">String to be specified if justification='emergency'</option>
 	</optgroup>
@@ -2006,6 +2015,7 @@
 	</optgroup>
 	<optgroup>
 	    <option name="personality" type="string" mandatory="True">personality name</option>
+	    <option name="personality_stage" requires="personality" type="string">Personality stage to use, defaults to 'next'.</option>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
 	    <option name="reason" type="string">String to be specified if justification='emergency'</option>
 	</optgroup>
@@ -2185,6 +2195,7 @@
 	    <option name="osversion" type="string">version of the OS</option>
 	    <option name="archetype" type="string">Archetype of the personality</option>
 	    <option name="personality" type="string">Personality of the host</option>
+	    <option name="personality_stage" type="string">Personality stage to use, defaults to 'current'.</option>
 	    <option name="buildstatus" type="string">Update host buildstatus to 'build' or 'ready'</option>
 	    <option name="keepbindings" type="boolean">Preserve service bindings that are not required</option>
 	    <option name="cleargrn" type="flag" conflicts="grn eon_id">Clear owner grn</option>
@@ -2520,6 +2531,7 @@
 	</optgroup>
 	<optgroup>
 	    <option name="archetype" requires="personality" type="string">Archetype</option>
+	    <option name="personality_stage" requires="personality" type="string">Personality stage to use, defaults to 'current'.</option>
 	    <option name="pre_feature" requires="personality" conflicts="post_feature param_tmpl" type="flag">Pre feature template</option>
 	    <option name="post_feature" requires="personality" conflicts="pre_feature param_tmpl" type="flag">Post feature template</option>
 	    <option name="param_tmpl" requires="personality" conflicts="post_feature pre_feature" type="string">param templates</option>
@@ -3160,6 +3172,7 @@
 	    </optgroup>
 	</optgroup>
 	<optgroup>
+	    <option name="copy_stage" type="string">Personality stage to copy, defaults to 'current'.</option>
 	    <option name="host_environment" type="string">Environment for hosts assigned to this personality [dev|qa|uat|prod|infra]</option>
 	    <option name="cluster_required" type="boolean" default='False'>Does this personality require hosts to be clustered?</option>
 	    <option name="comments" type="string">Comments</option>
@@ -3273,6 +3286,7 @@
 	    <option name="archetype" type="string">Which archetype the personality belongs to</option>
 	</optgroup>
 	<optgroup>
+	    <option name="personality_stage" type="string">Personality stage to use, defaults to 'next'.</option>
 	    <option name="vmhost_capacity_function" type="string">Function for calculating VM host capacity units</option>
 	    <option name="vmhost_overcommit_memory" type="float">Memory overcommit factor for VM hosts</option>
 	    <option name="cluster_required" type="boolean" default='False'>Does this personality require hosts to be clustered?</option>
@@ -3301,6 +3315,9 @@
 	    <option name="archetype" type="string" conflicts="all">which archetype to use</option>
 	    <option name="all" type="flag" conflicts="personality archetype">all</option>
 	</optgroup>
+	<optgroup>
+	    <option name="personality_stage" requires="personality" type="string">Personality stage to use, defaults to 'current'.</option>
+	</optgroup>
 	<transport method="get" path="personality"/>
 	<format name="proto" >
 	    <message_class name="PersonalityList" module="aqdsystems_pb2"/>
@@ -3313,6 +3330,7 @@
 	<p/>
 	<optgroup mandatory="True">
 	    <option name="personality" type="string" >personality name (same name may be in multiple archetypes)</option>
+	    <option name="personality_stage" type="string">Personality stage</option>
 	    <option name="archetype" type="string" >which archetype to use</option>
 	    <option name="grn" type="string" >match by GRN</option>
 	    <option name="eon_id" type="int" >match by EON ID</option>
@@ -3348,6 +3366,7 @@
 	    <option name="osversion" type="string">version of the OS</option>
 	    <option name="archetype" type="string">Archetype of the host (defaults to aquilon)</option>
 	    <option name="personality" type="string">Personality of the host</option>
+	    <option name="personality_stage" type="string">Personality stage to use, defaults to 'current'.</option>
 	    <option name="buildstatus" type="string">Build Status can be updated to 'build' or 'ready'.</option>
 	    <option name="keepbindings" type="boolean">Preserve service bindings that are not required</option>
 	    <option name="cleargrn" type="flag" conflicts="grn eon_id">Clear owner grn</option>
@@ -3522,6 +3541,7 @@
 	<optgroup>
 	    <option name="archetype" type="string">Archetype name</option>
 	    <option name="personality" type="string">Personality name: defaults to 'generic'.</option>
+	    <option name="personality_stage" requires="personality" type="string">Personality stage to use, defaults to 'current'.</option>
 	    <option name="osname" type="string">Operating system (e.g. ios)</option>
 	    <option name="osversion" type="string">Operating system version</option>
 	    <option name="buildstatus" type="string">Build Status: defaults to build.  'blind' and 'ready' also valid.</option>
@@ -3978,6 +3998,7 @@
 	<optgroup>
 	    <option name="archetype" type="string">Archetype name</option>
 	    <option name="personality" type="string">Personality name</option>
+	    <option name="personality_stage" requires="personality" type="string">Personality stage to use, defaults to 'current'.</option>
 	    <option name="max_members" type="int">Comments</option>
 	    <option name="buildstatus" type="string">Build status of the metacluster (defaults to 'build')</option>
 	    <option name="comments" type="string">Comments</option>
@@ -4005,6 +4026,7 @@
 	</optgroup>
 	<optgroup>
 	    <option name="personality" type="string">Personality Name</option>
+	    <option name="personality_stage" type="string">Personality stage to use, defaults to 'current'.</option>
 	    <option name="max_members" type="int">Maximum number of clusters that can be members of this metacluster</option>
 	    <option name="comments" type="string">Comments</option>
 	    <option name="fix_location" type="flag">Sets the location of the metacluster based on the location of its member clusters.</option>
@@ -4087,6 +4109,7 @@
 	    </optgroup>
 	</optgroup>
 	<optgroup>
+	    <option name="personality_stage" type="string">Personality stage to use, defaults to 'current'.</option>
 	    <option name="maint_threshold" type="string">Down hosts threshold for maintenance windows</option>
 	    <option name="max_members" type="int">Comments</option>
 	    <option name="vm_to_host_ratio" type="string">Ratio of virtual machines to ESX servers</option>
@@ -4119,6 +4142,7 @@
 	</optgroup>
 	<optgroup>
 	    <option name="personality" type="string">Personality Name</option>
+	    <option name="personality_stage" type="string">Personality stage to use, defaults to 'current'.</option>
 	    <option name="down_hosts_threshold" type="string">Down hosts threshold</option>
 	    <option name="maint_threshold" type="string">Down hosts threshold for maintenance windows</option>
 	    <option name="max_members" type="int">Max allowed vmhost members</option>
@@ -4180,6 +4204,7 @@
 	</optgroup>
 	<optgroup>
 	    <option name="metacluster" type="string">Name of the metacluster containing this cluster</option>
+	    <option name="personality_stage" type="string">Personality stage to use, defaults to 'current'.</option>
 	    <option name="maint_threshold" type="string">Down hosts threshold for maintenance windows</option>
 	    <option name="max_members" type="int">Max allowed host members</option>
 	    <option name="vm_to_host_ratio" type="string">Ratio of virtual machines to ESX servers</option>
@@ -4197,6 +4222,7 @@
 	</optgroup>
 	<optgroup>
 	    <option name="personality" type="string">Personality Name</option>
+	    <option name="personality_stage" type="string">Personality stage to use, defaults to 'current'.</option>
 	    <option name="down_hosts_threshold" type="string">Down hosts threshold</option>
 	    <option name="maint_threshold" type="string">Down hosts threshold for maintenance windows</option>
 	    <option name="max_members" type="int">Max allowed host members</option>
@@ -4325,6 +4351,7 @@
 	</optgroup>
 	<optgroup>
 	    <option name="personality" type="string">New personality of host</option>
+	    <option name="personality_stage" requires="personality" type="string">Personality stage to use, defaults to 'current'.</option>
 	</optgroup>
 	<transport method="put" path="cluster/%(cluster)s/host/%(hostname)s"/>
     </command>
@@ -4338,6 +4365,7 @@
 	</optgroup>
 	<optgroup>
 	    <option name="personality" type="string">New personality of host</option>
+	    <option name="personality_stage" requires="personality" type="string">Personality stage to use, defaults to 'current'.</option>
 	</optgroup>
 	<transport method="delete" path="cluster/%(cluster)s/host/%(hostname)s"/>
     </command>
@@ -5340,6 +5368,7 @@
 	</optgroup>
 	<optgroup>
 	    <option name="archetype" requires="personality" type="string">Archetype of the personality</option>
+	    <option name="personality_stage" requires="personality" type="string">Personality stage to use, defaults to 'next'.</option>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
 	    <option name="reason" type="string">String to be specified if justification='emergency'</option>
 	</optgroup>
@@ -5365,6 +5394,7 @@
 	</optgroup>
 	<optgroup>
 	    <option name="archetype" requires="personality" type="string">Archetype of the personality</option>
+	    <option name="personality_stage" requires="personality" type="string">Personality stage to use, defaults to 'next'.</option>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
 	    <option name="reason" type="string">String to be specified if justification='emergency'</option>
 	</optgroup>
@@ -5502,6 +5532,7 @@
 	    </optgroup>
 	</optgroup>
 	<optgroup>
+	    <option name="personality_stage" requires="personality" type="string">Personality stage to use, defaults to 'next'.</option>
 	    <option name="vendor" requires="model" type="string">Vendor name, if the model name is not unique</option>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
 	    <option name="reason" type="string">String to be specified if justification='emergency'</option>
@@ -5528,6 +5559,7 @@
 	    </optgroup>
 	</optgroup>
 	<optgroup>
+	    <option name="personality_stage" requires="personality" type="string">Personality stage to use, defaults to 'next'.</option>
 	    <option name="vendor" requires="model" type="string">Vendor name, if the model name is not unique</option>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
 	    <option name="reason" type="string">String to be specified if justification='emergency'</option>
@@ -5544,6 +5576,7 @@
 	</optgroup>
 	<optgroup>
 	    <option name="archetype" type="string">Archetype</option>
+	    <option name="personality_stage" type="string">Personality stage to use, defaults to 'current'.</option>
 	</optgroup>
 	<transport method="get" path="personality/personality/%(personality)s/parameters"/>
 	<format name="proto" >
@@ -5559,6 +5592,7 @@
 	</optgroup>
 	<optgroup>
 	    <option name="archetype" type="string">Archetype</option>
+	    <option name="personality_stage" type="string">Personality stage to use, defaults to 'next'.</option>
 	</optgroup>
 	<transport method="post" path="command/validate_parameter"/>
     </command>
@@ -5572,6 +5606,7 @@
 	<optgroup>
 	    <option name="feature" type="string">Feature</option>
 	    <option name="archetype" type="string">Archetype</option>
+	    <option name="personality_stage" type="string">Personality stage to use, defaults to 'next'.</option>
 	    <option name="interface" type="string">Interface of a machine</option>
 	    <option name="model" type="string">Name of a hardware model</option>
 	    <option name="value" type="string">Value for the parameter, type depending on the parameter definition</option>
@@ -5592,6 +5627,7 @@
 	<optgroup>
 	    <option name="feature" type="string">Feature</option>
 	    <option name="archetype" type="string">Archetype</option>
+	    <option name="personality_stage" type="string">Personality stage to use, defaults to 'next'.</option>
 	    <option name="interface" type="string">Interface of a machine</option>
 	    <option name="model" type="string">Name of a hardware model</option>
 	    <option name="comments" type="string">Comments</option>
@@ -5610,6 +5646,7 @@
 	<optgroup>
 	    <option name="feature" type="string">Feature</option>
 	    <option name="archetype" type="string">Archetype</option>
+	    <option name="personality_stage" type="string">Personality stage to use, defaults to 'next'.</option>
 	    <option name="interface" type="string">Interface of a machine</option>
 	    <option name="model" type="string">Name of a hardware model</option>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
@@ -5629,6 +5666,8 @@
 	</optgroup>
 	<optgroup>
 	    <option name="other_archetype" type="string">Archetype</option>
+	    <option name="personality_stage" type="string">Personality stage to use, defaults to 'current'.</option>
+	    <option name="other_stage" type="string">Target personality stage to use, defaults to 'current'.</option>
 	</optgroup>
 	<transport method="get" path="diff"/>
     </command>

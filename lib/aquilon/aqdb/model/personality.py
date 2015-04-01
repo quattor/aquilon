@@ -24,7 +24,7 @@ from sqlalchemy.inspection import inspect
 from sqlalchemy.orm import relation, backref, deferred, object_session
 from sqlalchemy.orm.collections import column_mapped_collection
 
-from aquilon.exceptions_ import ArgumentError
+from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.aqdb.column_types import AqStr, Enum
 from aquilon.aqdb.model import (Base, Archetype, Grn, HostEnvironment,
                                 User, NetGroupWhiteList)
@@ -91,19 +91,37 @@ class Personality(Base):
                                 "does not match the host environment '{1}'"
                                 .format(name, host_environment))
 
-    @property
-    def default_stage(self):
+    @staticmethod
+    def force_valid_stage(stage):
+        if stage not in _ALLOWED_STAGES:
+            raise ArgumentError("'%s' is not a valid personality stage." %
+                                stage)
+
+    def force_existing_stage(self, stage):
+        self.force_valid_stage(stage)
+        if stage not in self.stages:
+            raise NotFoundException("{0} does not have stage {1!s}."
+                                    .format(self, stage))
+
+    def default_stage(self, stage=None):
         """
         Return the default stage to be used for non-update operations
         """
-        return self.stages["current"]
+        if stage:
+            self.force_existing_stage(stage)
+            return self.stages[stage]
+        else:
+            return self.stages["current"]
 
-    @property
-    def active_stage(self):
+    def active_stage(self, stage=None):
         """
         Return the default stage to be used for updates
         """
-        return self.stages["current"]
+        if stage:
+            self.force_existing_stage(stage)
+            return self.stages[stage]
+        else:
+            return self.stages["current"]
 
 
 class PersonalityStage(Base):

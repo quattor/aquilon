@@ -39,22 +39,27 @@ class CommandUpdateCluster(BrokerCommand):
                                         forbid._get_class_label(tolower=True)))
 
     def update_cluster_common(self, session, logger, dbcluster, plenaries,
-                              personality, max_members, fix_location,
+                              personality, personality_stage, max_members, fix_location,
                               virtual_switch, comments, **arguments):
         plenaries.append(Plenary.get_plenary(dbcluster))
 
         update_cluster_location(session, logger, dbcluster, fix_location,
                                 plenaries, **arguments)
 
-        if personality:
+        if personality or personality_stage:
             archetype = dbcluster.archetype.name
-            dbpersonality = Personality.get_unique(session, name=personality,
-                                                   archetype=archetype,
-                                                   compel=True)
+            if personality:
+                dbpersonality = Personality.get_unique(session,
+                                                       name=personality,
+                                                       archetype=archetype,
+                                                       compel=True)
+            else:
+                dbpersonality = dbcluster.personality
+
             if not dbpersonality.is_cluster:
                 raise ArgumentError("Personality {0} is not a cluster "
                                     "personality".format(dbpersonality))
-            dbcluster.personality_stage = dbpersonality.default_stage
+            dbcluster.personality_stage = dbpersonality.default_stage(personality_stage)
 
         if max_members is not None:
             # Allow removing the restriction
@@ -82,17 +87,18 @@ class CommandUpdateCluster(BrokerCommand):
         if comments is not None:
             dbcluster.comments = comments
 
-    def render(self, session, logger, cluster, personality, max_members,
-               fix_location, down_hosts_threshold, maint_threshold, comments,
-               switch, virtual_switch, memory_capacity, clear_overrides,
-               metacluster, **arguments):
+    def render(self, session, logger, cluster, personality, personality_stage,
+               max_members, fix_location, down_hosts_threshold, maint_threshold,
+               comments, switch, virtual_switch, memory_capacity,
+               clear_overrides, metacluster, **arguments):
         dbcluster = Cluster.get_unique(session, cluster, compel=True)
         self.check_cluster_type(dbcluster, forbid=MetaCluster)
         plenaries = PlenaryCollection(logger=logger)
 
         self.update_cluster_common(session, logger, dbcluster, plenaries,
-                                   personality, max_members, fix_location,
-                                   virtual_switch, comments, **arguments)
+                                   personality, personality_stage, max_members,
+                                   fix_location, virtual_switch, comments,
+                                   **arguments)
 
         if switch is not None:
             self.check_cluster_type(dbcluster, require=EsxCluster)

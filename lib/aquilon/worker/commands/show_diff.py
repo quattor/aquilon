@@ -27,12 +27,12 @@ class CommandShowDiff(BrokerCommand):
 
     required_parameters = ["archetype", "personality", "other"]
 
-    def render(self, session, archetype, personality, other,
-               other_archetype, **arguments):
+    def render(self, session, archetype, personality, personality_stage,
+               other, other_archetype, other_stage, **arguments):
 
         dbpersona = Personality.get_unique(session, name=personality,
                                            archetype=archetype, compel=True)
-        dbstage = dbpersona.default_stage
+        dbstage = dbpersona.default_stage(personality_stage)
 
         if not other_archetype:
             other_archetype = archetype
@@ -40,7 +40,7 @@ class CommandShowDiff(BrokerCommand):
         db_other_persona = Personality.get_unique(session, name=other,
                                                   archetype=other_archetype,
                                                   compel=True)
-        db_other_ver = db_other_persona.default_stage
+        db_other_ver = db_other_persona.default_stage(other_stage)
 
         ret = defaultdict(dict)
         self.populate_data(session, dbstage, "my", ret)

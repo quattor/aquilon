@@ -62,7 +62,7 @@ class CommandReconfigureList(BrokerCommand):
         preload_machine_data(session, dbhosts)
         return dbhosts
 
-    def render(self, session, logger, archetype, personality, keepbindings,
+    def render(self, session, logger, archetype, personality, personality_stage, keepbindings,
                buildstatus, osname, osversion, grn, eon_id, cleargrn, comments,
                **arguments):
         dbhosts = self.get_hostlist(session, **arguments)
@@ -99,7 +99,7 @@ class CommandReconfigureList(BrokerCommand):
             else:
                 dbarchetype = dbhost.archetype
 
-            if personality or old_archetype != dbarchetype:
+            if personality or personality_stage or old_archetype != dbarchetype:
                 if not personality:
                     personality = dbhost.personality.name
 
@@ -113,7 +113,7 @@ class CommandReconfigureList(BrokerCommand):
                         dbpersonality = Personality.get_unique(session, name=personality,
                                                                archetype=dbarchetype,
                                                                compel=True)
-                        dbstage = dbpersonality.default_stage
+                        dbstage = dbpersonality.default_stage(personality_stage)
                         personality_cache[dbarchetype][personality] = dbstage
                     except NotFoundException as err:
                         failed.append("%s: %s" % (dbhost.fqdn, err))

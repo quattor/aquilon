@@ -25,10 +25,11 @@ class CommandShowParameterPersonality(BrokerCommand):
 
     required_parameters = ['personality']
 
-    def render(self, session, personality, archetype, style, **arguments):
+    def render(self, session, personality, personality_stage, archetype,
+               style, **arguments):
         dbpersonality = Personality.get_unique(session, name=personality,
                                                archetype=archetype, compel=True)
-        dbstage = dbpersonality.default_stage
+        dbstage = dbpersonality.default_stage(personality_stage)
         if not dbstage.paramholder or \
            not dbstage.paramholder.parameters:
             raise NotFoundException("No parameters found for {0:l}."

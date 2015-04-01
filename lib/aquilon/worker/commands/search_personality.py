@@ -30,10 +30,13 @@ class CommandSearchPersonality(BrokerCommand):
 
     required_parameters = []
 
-    def render(self, session, personality, archetype, grn, eon_id,
-               host_environment, config_override, required_service, fullinfo,
-               style, **arguments):
+    def render(self, session, personality, personality_stage, archetype, grn,
+               eon_id, host_environment, config_override, required_service,
+               fullinfo, style, **arguments):
         q = session.query(PersonalityStage)
+        if personality_stage:
+            Personality.force_valid_stage(personality_stage)
+            q = q.filter_by(name=personality_stage)
         q = q.join(Personality)
         if archetype:
             dbarchetype = Archetype.get_unique(session, archetype, compel=True)

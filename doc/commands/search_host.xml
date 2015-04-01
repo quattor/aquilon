@@ -38,7 +38,10 @@
 		<arg choice="opt"><option>--networkip <replaceable>IP</replaceable></option></arg>
 		<arg choice="opt"><option>--network_environment <replaceable>NETENV</replaceable></option></arg>
 		<arg choice="opt"><option>--mac <replaceable>MAC</replaceable></option></arg>
-		<arg choice="opt"><option>--personality <replaceable>NAME</replaceable></option></arg>
+		<group choice="opt">
+		    <arg choice="plain"><option>--personality <replaceable>NAME</replaceable></option></arg>
+		    <arg choice="opt"><option>--personality_stage <replaceable>STAGE</replaceable></option></arg>
+		</group>
 		<arg choice="opt"><option>--host_environment <replaceable>HOSTENV</replaceable></option></arg>
 		<arg choice="opt"><option>--osname <replaceable>NAME</replaceable></option></arg>
 		<arg choice="opt"><option>--osversion <replaceable>VERSION</replaceable></option></arg>
@@ -204,6 +207,16 @@
 			Look for hosts in the named personality. Note that personality names are not
 			globally unique, so you may want to also specify the <option>--archetype</option> option
 			together with <option>--personality</option>.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+		<term>
+		    <option>--personality_stage <replaceable>STAGE</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Select the stage of the personality to filter for. If not specified, all stages are matched.
 		    </para>
 		</listitem>
 	    </varlistentry>

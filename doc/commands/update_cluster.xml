@@ -23,12 +23,13 @@
 
     <refsynopsisdiv>
 	<cmdsynopsis>
-	    <command>aq update service</command>
+	    <command>aq update cluster</command>
 	    <group>
 		<synopfragmentref linkend="global-options">Global options</synopfragmentref>
 	    </group>
 	    <arg choice="plain"><option>--cluster <replaceable>CLUSTER</replaceable></option></arg>
 	    <arg choice="opt"><option>--personality <replaceable>PERSONALITY</replaceable></option></arg>
+	    <arg choice="opt"><option>--personality_stage <replaceable>STAGE</replaceable></option></arg>
 	    <arg choice="opt"><option>--metacluster <replaceable>NAME</replaceable></option></arg>
 	    <arg choice="opt"><option>--down_hosts_threshold <replaceable>THRESHOLD</replaceable></option></arg>
 	    <arg choice="opt"><option>--maint_threshold <replaceable>THRESHOLD</replaceable></option></arg>
@@ -74,6 +75,18 @@
 		    <para>
 			Change the personality of the cluster to <replaceable>PERSONALITY</replaceable>. Changing the
 			archetype of a cluster is not supported.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+		<term>
+		    <option>--personality_stage <replaceable>STAGE</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			If used without <option>--personality</option>, then make the cluster use stage <replaceable>STAGE</replaceable>
+			of its current personality. If <option>--personality</option> is also specified, then select stage
+			<replaceable>STAGE</replaceable> of that personality.
 		    </para>
 		</listitem>
 	    </varlistentry>

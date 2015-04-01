@@ -20,7 +20,7 @@ from aquilon.exceptions_ import ArgumentError
 
 from aquilon.aqdb.model import (Archetype, HostLifecycle,
                                 OperatingSystem, Personality)
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.grn import lookup_grn
 from aquilon.worker.dbwrappers.host import hostname_to_host
 from aquilon.worker.templates.domain import TemplateDomain
@@ -32,8 +32,8 @@ class CommandMake(BrokerCommand):
     required_parameters = ["hostname"]
 
     def render(self, session, logger, hostname, osname, osversion, archetype,
-               personality, buildstatus, keepbindings, grn, eon_id, cleargrn,
-               comments, **arguments):
+               personality, personality_stage, buildstatus, keepbindings, grn,
+               eon_id, cleargrn, comments, **arguments):
         dbhost = hostname_to_host(session, hostname)
         old_archetype = dbhost.archetype
 
@@ -45,7 +45,7 @@ class CommandMake(BrokerCommand):
         else:
             dbarchetype = dbhost.archetype
 
-        if personality or old_archetype != dbarchetype:
+        if personality or personality_stage or old_archetype != dbarchetype:
             if not personality:
                 personality = dbhost.personality.name
 
@@ -62,7 +62,7 @@ class CommandMake(BrokerCommand):
                                     .format(dbpersonality, dbhost.cluster,
                                             ", ".join(allowed)))
 
-            dbhost.personality_stage = dbpersonality.default_stage
+            dbhost.personality_stage = dbpersonality.default_stage(personality_stage)
 
         if osname or osversion or old_archetype != dbarchetype:
             if not osname:

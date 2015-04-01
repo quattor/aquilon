@@ -90,7 +90,7 @@ class TestSearchPersonality(VerifyGrnsMixin, TestBrokerCommand):
     def test_100_proto(self):
         command = ["search_personality", "--host_environment", "dev",
                    "--eon_id", 2, "--format=proto"]
-        personalities = self.protobuftest(command, expect=11)
+        personalities = self.protobuftest(command, expect=12)
         personality = personalities[0]
         self.assertEqual(personality.archetype.name, "aquilon")
         self.assertEqual(personality.name, "badpersonality")

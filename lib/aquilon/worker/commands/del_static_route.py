@@ -32,8 +32,8 @@ class CommandDelStaticRoute(BrokerCommand):
     required_parameters = ["gateway", "ip"]
 
     def render(self, session, gateway, ip, netmask, prefixlen,
-               network_environment, archetype, personality, justification,
-               reason, user, **arguments):
+               network_environment, archetype, personality, personality_stage,
+               justification, reason, user, **arguments):
         dbnet_env = NetworkEnvironment.get_unique_or_default(session,
                                                              network_environment)
         dbnetwork = get_net_id_from_ip(session, gateway, dbnet_env)
@@ -47,7 +47,7 @@ class CommandDelStaticRoute(BrokerCommand):
             dbpersonality = Personality.get_unique(session, name=personality,
                                                    archetype=archetype,
                                                    compel=True)
-            dbstage = dbpersonality.active_stage
+            dbstage = dbpersonality.active_stage(personality_stage)
             validate_personality_justification(dbstage, user, justification,
                                                reason)
         else:

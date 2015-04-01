@@ -27,28 +27,14 @@ from brokertest import TestBrokerCommand
 
 class TestCluster(TestBrokerCommand):
 
-    def testbindutecl1(self):
+    def test_100_bind_utecl1(self):
         for i in range(1, 5):
             self.successtest(["cluster",
                               "--hostname", "evh%s.aqd-unittest.ms.com" % i,
                               "--personality=vulcan-10g-server-prod",
                               "--cluster", "utecl1"])
 
-    def testbindutecl2(self):
-        # test_rebind_esx_cluster will also bind evh1 to utecl2.
-        for i in [5]:
-            self.successtest(["cluster",
-                              "--hostname", "evh%s.aqd-unittest.ms.com" % i,
-                              "--personality=vulcan-10g-server-prod",
-                              "--cluster", "utecl2"])
-
-    def testduplicatebindutecl1(self):
-        self.successtest(["cluster",
-                          "--hostname", "evh1.aqd-unittest.ms.com",
-                          "--personality=vulcan-10g-server-prod",
-                          "--cluster", "utecl1"])
-
-    def testverifybindutecl1(self):
+    def test_105_verify_utecl1(self):
         for i in range(1, 5):
             command = "show host --hostname evh%s.aqd-unittest.ms.com" % i
             out = self.commandtest(command.split(" "))
@@ -62,13 +48,13 @@ class TestCluster(TestBrokerCommand):
             self.matchoutput(out, "Member: evh%d.aqd-unittest.ms.com "
                              "[node_index: %d]" % (i, i - 1), command)
 
-    def testverifyevh1proto(self):
+    def test_105_show_evh1_proto(self):
         command = ["show_host", "--hostname", "evh1.aqd-unittest.ms.com",
                    "--format", "proto"]
         host = self.protobuftest(command, expect=1)[0]
         self.assertEqual(host.cluster, "utecl1")
 
-    def testverifycat(self):
+    def test_105_verify_cat(self):
         cat_cluster_command = "cat --cluster utecl1"
         cat_cluster_out = self.commandtest(cat_cluster_command.split())
         m = self.searchoutput(cat_cluster_out,
@@ -106,15 +92,21 @@ class TestCluster(TestBrokerCommand):
                              '"system/cluster/metacluster/name" = "utmc1";',
                              command)
 
-    def testfailmissingcluster(self):
-        command = ["cluster", "--hostname=evh9.aqd-unittest.ms.com",
-                   "--cluster", "cluster-does-not-exist"]
-        out = self.notfoundtest(command)
-        self.matchoutput(out,
-                         "Cluster cluster-does-not-exist not found.",
-                         command)
+    def test_110_bind_utecl2(self):
+        # test_rebind_esx_cluster will also bind evh1 to utecl2.
+        for i in [5]:
+            self.successtest(["cluster",
+                              "--hostname", "evh%s.aqd-unittest.ms.com" % i,
+                              "--personality=vulcan-10g-server-prod",
+                              "--cluster", "utecl2"])
 
-    def test_switching_archetype(self):
+    def test_120_duplicate_bind_utecl1(self):
+        self.successtest(["cluster",
+                          "--hostname", "evh1.aqd-unittest.ms.com",
+                          "--personality=vulcan-10g-server-prod",
+                          "--cluster", "utecl1"])
+
+    def test_130_switching_archetype(self):
         command = ["cluster", "--cluster=utecl1",
                    "--hostname=aquilon61.aqd-unittest.ms.com",
                    "--personality=vulcan-10g-server-prod"]
@@ -198,37 +190,14 @@ class TestCluster(TestBrokerCommand):
                    "--buildstatus=build"]
         self.successtest(command)
 
-    def testfailbadlocation(self):
-        command = ["cluster", "--hostname=%s.ms.com" % self.aurora_with_node,
-                   "--cluster", "utecl1"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out, "is not within cluster location", command)
-
-    def testfailmaxmembers(self):
-        command = ["cluster", "--hostname=evh9.aqd-unittest.ms.com",
-                   "--cluster", "utecl3"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out,
-                         "ESX Cluster utecl3 has 1 hosts bound, which exceeds "
-                         "the requested limit of 0.",
-                         command)
-
-    def testfailunmadecluster(self):
-        command = ["cluster", "--hostname=evh9.aqd-unittest.ms.com",
-                   "--cluster", "utecl4"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out,
-                         "Please run `make cluster --cluster utecl4`",
-                         command)
-
-    def testbindutmc4(self):
+    def test_140_bind_utmc4(self):
         for i in range(1, 25):
             host = "evh%s.aqd-unittest.ms.com" % (i + 50)
             cluster = "utecl%d" % (5 + ((i - 1) / 4))
             self.successtest(["cluster",
                               "--hostname", host, "--cluster", cluster])
 
-    def testbindstoragecluster(self):
+    def test_150_bind_storagecluster(self):
         command = ["cluster", "--hostname=evh9.aqd-unittest.ms.com",
                    "--cluster=utstorage1"]
         out = self.badrequesttest(command)
@@ -239,11 +208,72 @@ class TestCluster(TestBrokerCommand):
                    "--cluster=utstorage1"]
         self.successtest(command)
 
-    def testclusterutmc7(self):
+    def test_160_bind_utmc7(self):
         host = "evh10.aqd-unittest.ms.com"
         cluster = "utecl13"
         self.successtest(["cluster", "--hostname", host, "--cluster", cluster])
 
+    def test_200_missing_cluster(self):
+        command = ["cluster", "--hostname=evh9.aqd-unittest.ms.com",
+                   "--cluster", "cluster-does-not-exist"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out,
+                         "Cluster cluster-does-not-exist not found.",
+                         command)
+
+    def test_200_bad_location(self):
+        command = ["cluster", "--hostname=%s.ms.com" % self.aurora_with_node,
+                   "--cluster", "utecl1"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "is not within cluster location", command)
+
+    def test_200_cluster_capacity(self):
+        command = ["cluster", "--hostname=evh9.aqd-unittest.ms.com",
+                   "--cluster", "utecl3"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "ESX Cluster utecl3 has 1 hosts bound, which exceeds "
+                         "the requested limit of 0.",
+                         command)
+
+    def test_200_unmade_cluster(self):
+        command = ["cluster", "--hostname=evh9.aqd-unittest.ms.com",
+                   "--cluster", "utecl4"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Please run `make cluster --cluster utecl4`",
+                         command)
+
+    def test_200_missing_personality(self):
+        command = ["cluster", "--hostname=evh9.aqd-unittest.ms.com",
+                   "--cluster", "utecl1",
+                   "--personality", "personality-does-not-exist"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out,
+                         "Personality personality-does-not-exist, "
+                         "archetype vmhost not found.",
+                         command)
+
+    def test_200_missing_personality_stage(self):
+        command = ["cluster", "--hostname=evh9.aqd-unittest.ms.com",
+                   "--cluster", "utecl1",
+                   "--personality", "nostage",
+                   "--personality_stage", "next"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out,
+                         "Personality vmhost/nostage does not have "
+                         "stage next.",
+                         command)
+
+    def test_200_bad_personality_stage(self):
+        command = ["cluster", "--hostname=evh9.aqd-unittest.ms.com",
+                   "--cluster", "utecl1",
+                   "--personality", "nostage",
+                   "--personality_stage", "no-such-stage"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "'no-such-stage' is not a valid personality stage.",
+                         command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestCluster)

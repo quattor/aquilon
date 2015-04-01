@@ -542,6 +542,34 @@ class TestBindFeature(TestBrokerCommand):
                          "personality requires --justification.",
                          command)
 
+    def test_200_missing_personality(self):
+        command = ["bind", "feature", "--feature", "post_host",
+                   "--personality", "personality-does-not-exist",
+                   "--archetype", "aquilon"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out,
+                         "Personality personality-does-not-exist, "
+                         "archetype aquilon not found.",
+                         command)
+
+    def test_200_missing_personality_stage(self):
+        command = ["bind", "feature", "--feature", "post_host",
+                   "--personality", "nostage", "--archetype", "aquilon",
+                   "--personality_stage", "previous"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out,
+                         "Personality aquilon/nostage does not have stage "
+                         "previous.",
+                         command)
+
+    def test_200_bad_personality_stage(self):
+        command = ["bind", "feature", "--feature", "post_host",
+                   "--personality", "nostage", "--archetype", "aquilon",
+                   "--personality_stage", "no-such-stage"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "'no-such-stage' is not a valid personality "
+                         "stage.", command)
+
     def test_200_bind_model_no_justification(self):
         command = ["bind", "feature", "--feature", "disable_ht",
                    "--model", "utmedium", "--archetype", "aquilon"]

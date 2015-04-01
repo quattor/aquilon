@@ -561,6 +561,24 @@ class TestParameter(TestBrokerCommand):
                                r'"windows" = list\(\s*nlist\(\s*"day", "Sun",\s*"duration", 8,\s*"start", "08:00"\s*\)\s*\);',
                           SEC_CAT_CMD)
 
+    def test_700_missing_stage(self):
+        command = ["add_parameter", "--personality", "nostage",
+                   "--archetype", "aquilon",
+                   "--path", "espinfo/function", "--value", "foobar",
+                   "--personality_stage", "previous"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out, "Personality aquilon/nostage does not have "
+                         "stage previous.", command)
+
+    def test_700_bad_stage(self):
+        command = ["add_parameter", "--personality", "nostage",
+                   "--archetype", "aquilon",
+                   "--path", "espinfo/function", "--value", "foobar",
+                   "--personality_stage", "no-such-stage"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "'no-such-stage' is not a valid personality "
+                         "stage.", command)
+
     def test_999_cleanup(self):
         """ cleanup of all data created here """
 

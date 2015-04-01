@@ -17,7 +17,7 @@
 """Contains the logic for `aq add required service --personality`."""
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import Personality, Service
 from aquilon.worker.dbwrappers.personality import validate_personality_justification
 
@@ -32,11 +32,11 @@ class CommandAddRequiredServicePersonality(BrokerCommand):
                                 .format(dbservice, dbstage))
         dbstage.services.append(dbservice)
 
-    def render(self, session, service, archetype, personality, justification,
-               reason, user, **arguments):
+    def render(self, session, service, archetype, personality,
+               personality_stage, justification, reason, user, **arguments):
         dbpersonality = Personality.get_unique(session, name=personality,
                                                archetype=archetype, compel=True)
-        dbstage = dbpersonality.active_stage
+        dbstage = dbpersonality.active_stage(personality_stage)
         validate_personality_justification(dbstage, user, justification,
                                            reason)
         dbservice = Service.get_unique(session, service, compel=True)

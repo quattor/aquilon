@@ -32,7 +32,8 @@ class CommandAddStaticRoute(BrokerCommand):
 
     def render(self, session, logger, gateway, networkip, ip, netmask,
                prefixlen, network_environment, comments, personality,
-               archetype, justification, reason, user, **arguments):
+               personality_stage, archetype, justification, reason, user,
+               **arguments):
         dbnet_env = NetworkEnvironment.get_unique_or_default(session,
                                                              network_environment)
 
@@ -74,7 +75,7 @@ class CommandAddStaticRoute(BrokerCommand):
             dbpersonality = Personality.get_unique(session, name=personality,
                                                    archetype=archetype,
                                                    compel=True)
-            dbstage = dbpersonality.active_stage
+            dbstage = dbpersonality.active_stage(personality_stage)
             validate_personality_justification(dbstage, user, justification,
                                                reason)
         else:

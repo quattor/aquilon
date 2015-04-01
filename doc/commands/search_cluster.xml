@@ -31,7 +31,10 @@
 		<arg choice="opt"><option>--archetype <replaceable>ARCHETYPE</replaceable></option></arg>
 		<arg choice="opt"><option>--buildstatus <replaceable>BUILDSTATUS</replaceable></option></arg>
 		<arg choice="opt"><option>--cluster_type <replaceable>CLUSTER_TYPE</replaceable></option></arg>
-		<arg choice="opt"><option>--personality <replaceable>PERSONALITY</replaceable></option></arg>
+		<group choice="opt">
+		    <arg choice="plain"><option>--personality <replaceable>PERSONALITY</replaceable></option></arg>
+		    <arg choice="opt"><option>--personality_stage <replaceable>STAGE</replaceable></option></arg>
+		</group>
 		<arg choice="opt"><option>--allowed_archetype <replaceable>ALLOWED_ARCHETYPE</replaceable></option></arg>
 		<arg choice="opt"><option>--allowed_personality <replaceable>ALLOWED_PERSONALITY</replaceable></option></arg>
 		<arg choice="opt"><option>--down_hosts_threshold <replaceable>DOWN_HOSTS_THRESHOLD</replaceable></option></arg>
@@ -103,6 +106,16 @@
 			 Typically the archetype indicates the style of cluster (HA, grid, etc)
 			 whereas the personality indicates the type of technology being used.  For
 			 example, "hadoop", "vcs", etc.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+		<term>
+		    <option>--personality_stage <replaceable>STAGE</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Select the stage of the personality to filter for. If not specified, all stages are matched.
 		    </para>
 		</listitem>
 	    </varlistentry>

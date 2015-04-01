@@ -123,6 +123,7 @@ class TestAddESXCluster(PersonalityTestMixin, TestBrokerCommand):
                                 grn="grn:/ms/ei/aquilon/aqd",
                                 environment="prod",
                                 maps=esx_cluster_maps)
+        self.create_personality("esx_cluster", "nostage")
 
     def test_110_add_utecl1(self):
         # For this cluster, we'll use the default for buildstatus
@@ -381,6 +382,41 @@ class TestAddESXCluster(PersonalityTestMixin, TestBrokerCommand):
         out = self.badrequesttest(command)
         self.matchoutput(out, "ESX Cluster newcluster domain ut-prod does "
                          "not match ESX metacluster utmc1 domain unittest.",
+                         command)
+
+    def test_200_missing_personality(self):
+        command = ["add_esx_cluster", "--cluster=utecl999",
+                   "--domain=unittest", "--down_hosts_threshold=2",
+                   "--metacluster=utmc1", "--building=ut",
+                   "--archetype=esx_cluster",
+                   "--personality=personality-does-not-exist"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out,
+                         "Personality personality-does-not-exist, "
+                         "archetype esx_cluster not found",
+                         command)
+
+    def test_200_missing_personality_stage(self):
+        command = ["add_esx_cluster", "--cluster=utecl999",
+                   "--domain=unittest", "--down_hosts_threshold=2",
+                   "--metacluster=utmc1", "--building=ut",
+                   "--archetype=esx_cluster", "--personality=nostage",
+                   "--personality_stage=previous"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out,
+                         "Personality esx_cluster/nostage "
+                         "does not have stage previous.",
+                         command)
+
+    def test_200_bad_personality_stage(self):
+        command = ["add_esx_cluster", "--cluster=utecl999",
+                   "--domain=unittest", "--down_hosts_threshold=2",
+                   "--metacluster=utmc1", "--building=ut",
+                   "--archetype=esx_cluster", "--personality=nostage",
+                   "--personality_stage=no-such-stage"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "'no-such-stage' is not a valid personality stage.",
                          command)
 
     def test_200_show_missing(self):

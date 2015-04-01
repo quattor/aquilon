@@ -27,8 +27,8 @@ class CommandUncluster(BrokerCommand):
 
     required_parameters = ["hostname", "cluster"]
 
-    def render(self, session, logger, hostname, cluster,
-               personality, **arguments):
+    def render(self, session, logger, hostname, cluster, personality,
+               personality_stage, **arguments):
         dbcluster = Cluster.get_unique(session, cluster, compel=True)
         dbhost = hostname_to_host(session, hostname)
         if not dbhost.cluster:
@@ -45,7 +45,7 @@ class CommandUncluster(BrokerCommand):
                 raise ArgumentError("Cannot switch host to personality %s "
                                     "because that personality requires a "
                                     "cluster" % personality)
-            dbhost.personality_stage = dbpersonality.default_stage
+            dbhost.personality_stage = dbpersonality.default_stage(personality_stage)
         elif dbhost.personality.cluster_required:
             raise ArgumentError("Host personality %s requires a cluster, "
                                 "use --personality to change personality "

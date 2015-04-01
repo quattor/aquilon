@@ -30,6 +30,7 @@
 	    <arg choice="plain"><option>--cluster <replaceable>CLUSTER</replaceable></option></arg>
 	    <arg choice="plain"><option>--archetype <replaceable>ARCHETYPE</replaceable></option></arg>
 	    <arg choice="plain"><option>--personality <replaceable>PERSONALITY</replaceable></option></arg>
+	    <arg choice="opt"><option>--personality_stage <replaceable>STAGE</replaceable></option></arg>
 	    <arg choice="plain"><option>--down_hosts_threshold <replaceable>DHT</replaceable></option></arg>
 	    <group choice="req">
 		<arg choice="plain"><option>--domain <replaceable>DOMAIN</replaceable></option></arg>
@@ -146,6 +147,16 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
+		<term>
+		    <option>--personality_stage <replaceable>STAGE</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Select the stage of the personality to use. Defaults to <literal>current</literal>.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
 	        <term>
 		    <option>--domain <replaceable>DOMAIN</replaceable></option>
 		    <option>--sandbox <replaceable>SANDBOX</replaceable></option>
@@ -191,7 +202,7 @@
 		</term>
 		<listitem>
 		    <para>
-			The status of the cluster. This defaults to "build".
+			The status of the cluster. This defaults to <literal>build</literal>.
 		    </para>
 		</listitem>
 	    </varlistentry>
