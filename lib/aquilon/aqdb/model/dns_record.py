@@ -20,6 +20,7 @@ from datetime import datetime
 from collections import deque
 
 from sqlalchemy import Integer, DateTime, Sequence, String, Column, ForeignKey
+from sqlalchemy.inspection import inspect
 from sqlalchemy.orm import relation, deferred, backref, object_session, lazyload
 from sqlalchemy.ext.associationproxy import association_proxy
 
@@ -172,6 +173,10 @@ class DnsRecord(Base):
 
             # Asking for just one column makes both the query and the ORM faster
             for existing in fqdn.dns_records:
+                # Do not bother checking records which are scheduled to be
+                # deleted
+                if existing in session.deleted or inspect(existing).deleted:
+                    continue
                 if existing.dns_record_type in _rr_conflict_map[own_type]:
                     raise ArgumentError("{0} already exist.".format(existing))
 
