@@ -34,35 +34,17 @@ archetype_required = {
 
 class TestAddRequiredService(TestBrokerCommand):
 
-    def testaddrequiredafs(self):
+    def test_100_add_afs(self):
         command = "add required service --service afs --archetype aquilon"
         command += " --justification tcm=12345678"
         self.noouttest(command.split(" "))
 
-    def testaddrequiredafsduplicate(self):
-        command = "add required service --service afs --archetype aquilon"
-        command += " --justification tcm=12345678"
-        self.badrequesttest(command.split(" "))
+    def test_105_verify_afs(self):
+        command = "show service --service afs"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Required for Archetype: aquilon", command)
 
-    def testaddrequiredafsnojustification(self):
-        command = "add required service --service afs --archetype aquilon"
-        out = self.unauthorizedtest(command.split(" "), auth=True,
-                                    msgcheck=False)
-        self.matchoutput(out,
-                         "Changing the required services of an archetype "
-                         "requires --justification.",
-                         command)
-
-    def testfailmissingservice(self):
-        command = ["add_required_service", "--service",
-                   "does-not-exist", "--archetype", "aquilon",
-                   "--justification", "tcm=12345678"]
-        out = self.notfoundtest(command)
-        self.matchoutput(out,
-                         "Service does-not-exist not found.",
-                         command)
-
-    def testadddefault(self):
+    def test_110_add_defaults(self):
         # Setup required services, as expected by the templates.
         for archetype, servicelist in archetype_required.items():
             for service in servicelist:
@@ -70,7 +52,7 @@ class TestAddRequiredService(TestBrokerCommand):
                                 "--archetype", archetype,
                                 "--justification", "tcm=12345678"])
 
-    def testverifyadddefault(self):
+    def test_115_verify_defaults(self):
         all_services = set()
         for archetype, servicelist in archetype_required.items():
             all_services.update(servicelist)
@@ -84,26 +66,13 @@ class TestAddRequiredService(TestBrokerCommand):
             for service in all_services - set(servicelist):
                 self.matchclean(out, "Service: %s" % service, command)
 
-    def testverifyaddrequiredafs(self):
-        command = "show service --service afs"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Required for Archetype: aquilon", command)
-
-    def testaddrequiredpersonality(self):
+    def test_120_add_choosers(self):
         for service in ["chooser1", "chooser2", "chooser3"]:
             command = ["add_required_service", "--service", service,
                        "--archetype=aquilon", "--personality=unixeng-test"]
             self.noouttest(command)
 
-    def testaddrequiredpersonalityduplicate(self):
-        command = ["add_required_service", "--service", "chooser1",
-                   "--archetype", "aquilon", "--personality", "unixeng-test"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out, "Service chooser1 is already required by "
-                         "personality unixeng-test, archetype aquilon.",
-                         command)
-
-    def testverifyaddrequiredpersonality(self):
+    def test_125_show_personality(self):
         command = ["show_personality", "--archetype=aquilon",
                    "--personality=unixeng-test"]
         out = self.commandtest(command)
@@ -111,60 +80,90 @@ class TestAddRequiredService(TestBrokerCommand):
         self.matchoutput(out, "Service: chooser2", command)
         self.matchoutput(out, "Service: chooser3", command)
 
-    def testverifyaddrequiredpersonalitychooser1(self):
+    def test_125_show_service(self):
         command = "show service --service chooser1"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
                          "Required for Personality: unixeng-test Archetype: aquilon",
                          command)
 
-    def testaddrequiredutsvc(self):
+    def test_130_add_utsvc(self):
         command = ["add_required_service", "--personality=compileserver",
                    "--service=utsvc", "--archetype=aquilon"]
         self.noouttest(command)
 
-    def testverifyaddrequiredutsvc(self):
+    def test_135_verify_utsvc(self):
         command = ["show_personality", "--archetype=aquilon",
                    "--personality=compileserver"]
         out = self.commandtest(command)
         self.matchoutput(out, "Service: utsvc", command)
 
-    def testaddrequirednetmap(self):
+    def test_140_add_netmap(self):
         command = ["add_required_service", "--personality=eaitools",
                    "--service=netmap", "--archetype=aquilon"]
         self.noouttest(command)
 
-    def testverifyaddrequirednetmap(self):
+    def test_145_verify_netmap(self):
         command = ["show_personality", "--archetype=aquilon",
                    "--personality=eaitools"]
         out = self.commandtest(command)
         self.matchoutput(out, "Service: netmap", command)
 
-    def testaddrequirednetmapcopy(self):
-        self.noouttest(["add_personality", "--personality", "testme",
+    def test_150_copy_personality(self):
+        self.noouttest(["add_personality", "--personality", "required_svc_test",
                         "--eon_id", "2", "--archetype", "aquilon",
                         "--copy_from", "eaitools",
                         "--host_environment", "dev"])
 
         command = ["show_personality", "--archetype=aquilon",
-                   "--personality=testme"]
+                   "--personality=required_svc_test"]
         out = self.commandtest(command)
         self.matchoutput(out, "Service: netmap", command)
 
-        self.successtest(["del_personality", "--personality", "testme",
+        self.successtest(["del_personality", "--personality", "required_svc_test",
                           "--archetype", "aquilon"])
 
-    def testaddrequiredbadservice(self):
+    def test_160_add_badservice(self):
         command = ["add_required_service", "--service=badservice",
                    "--personality=badpersonality2", "--archetype=aquilon"]
         self.noouttest(command)
 
-    def testverifyaddrequiredbadservice(self):
+    def test_165_verify_badservice(self):
         command = ["show_personality", "--archetype=aquilon",
                    "--personality=badpersonality2"]
         out = self.commandtest(command)
         self.matchoutput(out, "Service: badservice", command)
 
+    def test_200_archetype_duplicate(self):
+        command = "add required service --service afs --archetype aquilon"
+        command += " --justification tcm=12345678"
+        self.badrequesttest(command.split(" "))
+
+    def test_200_personality_duplicate(self):
+        command = ["add_required_service", "--service", "chooser1",
+                   "--archetype", "aquilon", "--personality", "unixeng-test"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Service chooser1 is already required by "
+                         "personality unixeng-test, archetype aquilon.",
+                         command)
+
+    def test_200_no_justification(self):
+        command = "add required service --service afs --archetype aquilon"
+        out = self.unauthorizedtest(command.split(" "), auth=True,
+                                    msgcheck=False)
+        self.matchoutput(out,
+                         "Changing the required services of an archetype "
+                         "requires --justification.",
+                         command)
+
+    def test_200_add_nonexistant(self):
+        command = ["add_required_service", "--service",
+                   "service-does-not-exist", "--archetype", "aquilon",
+                   "--justification", "tcm=12345678"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out,
+                         "Service service-does-not-exist not found.",
+                         command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddRequiredService)

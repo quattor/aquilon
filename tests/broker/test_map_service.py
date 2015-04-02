@@ -79,7 +79,7 @@ default_maps = {
 
 
 class TestMapService(TestBrokerCommand):
-    def testmapdefaults(self):
+    def test_100_map_defaults(self):
         for service, maps in default_maps.items():
             for instance, locations in maps.items():
                 for loc_type, loc_names in locations.items():
@@ -88,7 +88,7 @@ class TestMapService(TestBrokerCommand):
                                         "--instance", instance,
                                         "--" + loc_type, loc_name])
 
-    def testverifydefaults(self):
+    def test_105_verify_defaults(self):
         command = ["show_map", "--all"]
         mapstr = "Archetype: aquilon Service: %s Instance: %s Map: %s %s"
         out = self.commandtest(command)
@@ -101,7 +101,7 @@ class TestMapService(TestBrokerCommand):
                                                         loc_name),
                                          command)
 
-    def testverifymapafs(self):
+    def test_105_verify_afs(self):
         command = "show map --service afs --instance q.ny.ms.com --building ut"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
@@ -109,12 +109,7 @@ class TestMapService(TestBrokerCommand):
                          "Instance: q.ny.ms.com Map: Building ut",
                          command)
 
-    def testverifynomatch(self):
-        command = "show map --service afs --instance q.ny.ms.com --organization ms"
-        out = self.notfoundtest(command.split(" "))
-        self.matchoutput(out, "No matching map found.", command)
-
-    def testverifymapdnsut(self):
+    def test_105_verify_dns_ut(self):
         command = ["show", "map", "--building", "ut", "--service", "dns"]
         out = self.commandtest(command)
         self.matchoutput(out,
@@ -124,7 +119,7 @@ class TestMapService(TestBrokerCommand):
         self.matchclean(out, "cards", command)
         self.matchclean(out, "one-nyp", command)
 
-    def testverifymapdnsinstance(self):
+    def test_105_verify_dns_instance(self):
         command = ["show", "map", "--service", "dns", "--instance", "unittest"]
         out = self.commandtest(command)
         self.matchoutput(out,
@@ -137,7 +132,7 @@ class TestMapService(TestBrokerCommand):
                          command)
         self.matchclean(out, "one-nyp", command)
 
-    def testverifymapbootserver(self):
+    def test_105_verify_bootserver(self):
         command = ["show_map", "--service", "bootserver",
                    "--instance", "unittest"]
         out = self.commandtest(command)
@@ -151,7 +146,7 @@ class TestMapService(TestBrokerCommand):
                          command)
         self.matchclean(out, "Building np", command)
 
-    def testmaputsi1(self):
+    def test_110_map_utsi1(self):
         self.noouttest(["map", "service", "--building", "ut",
                         "--service", "utsvc", "--instance", "utsi1"])
         self.noouttest(["map", "service", "--building", "cards",
@@ -159,14 +154,14 @@ class TestMapService(TestBrokerCommand):
         self.noouttest(["map", "service", "--building", "np",
                         "--service", "utsvc", "--instance", "utsi1"])
 
-    def testmaputsi2(self):
+    def test_111_map_utsi2(self):
         self.noouttest(["map", "service", "--building", "ut",
                         "--service", "utsvc", "--instance", "utsi2"])
         # Do NOT bind utsi2 to "np" to keep test_compile results consistent
         # self.noouttest(["map", "service", "--building", "np",
         #                "--service", "utsvc", "--instance", "utsi2"])
 
-    def testverifymaputsvc(self):
+    def test_115_verify_utsvc(self):
         command = "show map --service utsvc"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
@@ -191,11 +186,7 @@ class TestMapService(TestBrokerCommand):
         #                 "Instance: utsi2 Map: Building np",
         #                 command)
 
-    def testverifyutmapproto(self):
-        command = "show map --building ut --format proto"
-        self.protobuftest(command.split(" "))
-
-    def testmapchooser(self):
+    def test_120_map_chooser(self):
         for service in ["chooser1", "chooser2", "chooser3"]:
             for n in ['a', 'b', 'c']:
                 if service == 'chooser2' and n == 'b':
@@ -206,13 +197,13 @@ class TestMapService(TestBrokerCommand):
                 self.noouttest(["map", "service", "--building", "ut",
                                 "--service", service, "--instance", instance])
 
-    def testmaputsilpersona(self):
+    def test_130_personality_map(self):
         self.noouttest(["map", "service", "--organization", "ms",
                         "--service", "utsvc", "--instance", "utsi2",
                         "--archetype", "aquilon",
                         "--personality", "lemon-collector-oracle"])
 
-    def testverifymappersona(self):
+    def test_135_verify_personality_map(self):
         command = ["show_map", "--archetype=aquilon",
                    "--personality=lemon-collector-oracle", "--service=utsvc"]
         out = self.commandtest(command)
@@ -221,21 +212,7 @@ class TestMapService(TestBrokerCommand):
                          "Service: utsvc Instance: utsi2 Map: Organization ms",
                          command)
 
-    def testmaputsilpersona2(self):
-        self.noouttest(["add_personality", "--personality", "testme",
-                        "--eon_id", "2", "--archetype", "aquilon",
-                        "--copy_from", "lemon-collector-oracle",
-                        "--host_environment", "dev"])
-
-        command = ["show_map", "--archetype=aquilon",
-                   "--service=utsvc"]
-        out = self.commandtest(command)
-        self.matchoutput(out,
-                         "Archetype: aquilon Personality: testme "
-                         "Service: utsvc Instance: utsi2 Map: Organization ms",
-                         command)
-
-    def testverifymapwihtoutarchetype(self):
+    def test_135_verify_personality_no_archetype(self):
         command = ["show_map",
                    "--personality=lemon-collector-oracle", "--service=utsvc"]
         out = self.commandtest(command)
@@ -244,19 +221,7 @@ class TestMapService(TestBrokerCommand):
                          "Service: utsvc Instance: utsi2 Map: Organization ms",
                          command)
 
-    def testverifymapwihtoutpersonality(self):
-        command = ["show_map", "--archetype=aquilon", "--service=utsvc"]
-        out = self.commandtest(command)
-        self.matchoutput(out,
-                         "Archetype: aquilon Personality: lemon-collector-oracle "
-                         "Service: utsvc Instance: utsi2 Map: Organization ms",
-                         command)
-        self.matchoutput(out,
-                         "Archetype: aquilon Personality: testme "
-                         "Service: utsvc Instance: utsi2 Map: Organization ms",
-                         command)
-
-    def testverifypersonalitymapproto(self):
+    def test_135_verify_personality_map_proto(self):
         command = ["show_map", "--format=proto", "--archetype=aquilon",
                    "--personality=lemon-collector-oracle", "--service=utsvc"]
         map = self.protobuftest(command, expect=1)[0]
@@ -267,25 +232,44 @@ class TestMapService(TestBrokerCommand):
         self.assertEqual(map.personality.name, 'lemon-collector-oracle')
         self.assertEqual(map.personality.archetype.name, 'aquilon')
 
-    def testmapwindowsfail(self):
+    def test_140_add_test_map(self):
+        self.noouttest(["add_personality", "--personality", "svc_map_test",
+                        "--eon_id", "2", "--archetype", "aquilon",
+                        "--copy_from", "lemon-collector-oracle",
+                        "--host_environment", "dev"])
+
+        command = ["show_map", "--archetype=aquilon",
+                   "--service=utsvc"]
+        out = self.commandtest(command)
+        self.matchoutput(out,
+                         "Archetype: aquilon Personality: svc_map_test "
+                         "Service: utsvc Instance: utsi2 Map: Organization ms",
+                         command)
+
+    def test_200_verify_nomatch(self):
+        command = "show map --service afs --instance q.ny.ms.com --organization ms"
+        out = self.notfoundtest(command.split(" "))
+        self.matchoutput(out, "No matching map found.", command)
+
+    def test_200_map_windows(self):
         command = ["map", "service", "--organization", "ms",
                    "--service", "utsvc", "--instance", "utsi2",
                    "--archetype", "windows"]
         out = self.badoptiontest(command)
         self.matchoutput(out, "Not all mandatory options specified!", command)
 
-    def testmapgenericfail(self):
+    def test_200_map_generic(self):
         command = ["map", "service", "--organization", "ms",
                    "--service", "utsvc", "--instance", "utsi2",
                    "--personality", "generic"]
         out = self.badoptiontest(command)
         self.matchoutput(out, "Not all mandatory options specified!", command)
 
-    def testzcleanup(self):
-        self.successtest(["del_personality", "--personality", "testme",
-                          "--archetype", "aquilon"])
+    def test_300_show_map_building_proto(self):
+        command = "show map --building ut --format proto"
+        self.protobuftest(command.split(" "))
 
-    def testverifyparents(self):
+    def test_300_verify_parents(self):
         command = ["show_map", "--rack", "ut3", "--include_parents"]
         out = self.commandtest(command)
         self.matchoutput(out,
@@ -315,6 +299,21 @@ class TestMapService(TestBrokerCommand):
         self.matchclean(out, "Building np", command)
         self.matchclean(out, "Building cards", command)
 
+    def test_300_show_map_archetype(self):
+        command = ["show_map", "--archetype=aquilon", "--service=utsvc"]
+        out = self.commandtest(command)
+        self.matchoutput(out,
+                         "Archetype: aquilon Personality: lemon-collector-oracle "
+                         "Service: utsvc Instance: utsi2 Map: Organization ms",
+                         command)
+        self.matchoutput(out,
+                         "Archetype: aquilon Personality: svc_map_test "
+                         "Service: utsvc Instance: utsi2 Map: Organization ms",
+                         command)
+
+    def test_800_cleanup(self):
+        self.successtest(["del_personality", "--personality", "svc_map_test",
+                          "--archetype", "aquilon"])
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestMapService)
