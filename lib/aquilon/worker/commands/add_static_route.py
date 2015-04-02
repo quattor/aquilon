@@ -19,7 +19,7 @@
 from ipaddr import IPv4Network
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import NetworkEnvironment, StaticRoute, Personality
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.worker.dbwrappers.personality import validate_personality_justification
@@ -71,20 +71,21 @@ class CommandAddStaticRoute(BrokerCommand):
                                 "did you mean %s." % (ip, dest.network))
 
         if personality:
-            dbpersonality = Personality.get_unique(session,
-                                                   name=personality,
+            dbpersonality = Personality.get_unique(session, name=personality,
                                                    archetype=archetype,
                                                    compel=True)
-            validate_personality_justification(dbpersonality.active_stage,
-                                               user, justification, reason)
+            dbstage = dbpersonality.active_stage
+            validate_personality_justification(dbstage, user, justification,
+                                               reason)
         else:
-            dbpersonality = None
+            dbstage = None
 
         # TODO: this will have to be changed if we want equal cost multipath
         # etc.
         for route in dbnetwork.static_routes:
             if dest.overlaps(route.destination):
-                if route.personality and route.personality != dbpersonality:
+                if route.personality_stage and \
+                   route.personality_stage != dbstage:
                     continue
                 raise ArgumentError("{0} already has an overlapping route to "
                                     "{1} using gateway {2}."
@@ -93,7 +94,7 @@ class CommandAddStaticRoute(BrokerCommand):
 
         route = StaticRoute(network=dbnetwork, dest_ip=dest.ip,
                             dest_cidr=dest.prefixlen, gateway_ip=gateway,
-                            personality=dbpersonality, comments=comments)
+                            personality_stage=dbstage, comments=comments)
         session.add(route)
         session.flush()
 

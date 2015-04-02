@@ -159,6 +159,7 @@ class PersonalityStage(Base):
         return self.personality.root_netgroups
 
     def copy(self, name="current"):
+        from aquilon.aqdb.model import StaticRoute
         session = object_session(self)
 
         new = self.__class__(name=name)
@@ -175,6 +176,12 @@ class PersonalityStage(Base):
 
             for cluster_type, info in self.cluster_infos.items():
                 new.cluster_infos[cluster_type] = info.copy()
+
+            q = session.query(StaticRoute)
+            q = q.filter_by(personality_stage=self)
+            for src_route in q:
+                dst_route = src_route.copy(personality_stage=new)
+                session.add(dst_route)
 
         return new
 

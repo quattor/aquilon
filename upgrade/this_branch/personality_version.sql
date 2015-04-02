@@ -16,6 +16,7 @@ ALTER TABLE personality_grn_map ADD personality_stage_id INTEGER;
 ALTER TABLE personality_service_list_item ADD personality_stage_id INTEGER;
 ALTER TABLE personality_cluster_info ADD personality_stage_id INTEGER;
 ALTER TABLE feature_link ADD personality_stage_id INTEGER;
+ALTER TABLE static_route ADD personality_stage_id INTEGER;
 
 DECLARE
 	CURSOR pers_curs IS SELECT id FROM personality;
@@ -33,6 +34,7 @@ BEGIN
 		UPDATE personality_service_list_item SET personality_stage_id = vers_id WHERE personality_id = pers_rec.id;
 		UPDATE personality_cluster_info SET personality_stage_id = vers_id WHERE personality_id = pers_rec.id;
 		UPDATE feature_link SET personality_stage_id = vers_id WHERE personality_id = pers_rec.id;
+		UPDATE static_route SET personality_stage_id = vers_id WHERE personality_id = pers_rec.id;
 	END LOOP;
 END;
 /
@@ -88,5 +90,10 @@ ALTER TABLE feature_link ADD CONSTRAINT feature_link_pers_st_fk
 ALTER TABLE feature_link ADD CONSTRAINT feature_link_uk
 	UNIQUE (feature_id, model_id, archetype_id, personality_stage_id, interface_name);
 CREATE INDEX feature_link_pers_st_idx ON feature_link (personality_stage_id);
+
+ALTER TABLE static_route DROP COLUMN personality_id;
+ALTER TABLE static_route ADD CONSTRAINT static_route_pers_st_fk
+	FOREIGN KEY (personality_stage_id) REFERENCES personality_stage (id) ON DELETE CASCADE;
+CREATE INDEX static_route_pers_st_idx ON static_route (personality_stage_id);
 
 QUIT;

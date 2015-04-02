@@ -230,11 +230,11 @@ class Network(Base):
     def personality_static_routes(self, dbstage):
         if dbstage:
             return [route for route in self.static_routes
-                    if route.personality is None or
-                    route.personality == dbstage.personality]
+                    if route.personality_stage is None or
+                    route.personality_stage == dbstage]
         else:
             return [route for route in self.static_routes
-                    if route.personality is None]
+                    if route.personality_stage is None]
 
     def __le__(self, other):
         if self.network_environment_id != other.network_environment_id:

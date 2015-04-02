@@ -21,7 +21,7 @@ from six.moves.configparser import NoSectionError, NoOptionError  # pylint: disa
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import (Archetype, Personality, PersonalityStage,
-                                PersonalityGrnMap, HostEnvironment, StaticRoute,
+                                PersonalityGrnMap, HostEnvironment,
                                 PersonalityServiceMap)
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.grn import lookup_grn
@@ -112,17 +112,6 @@ class CommandAddPersonality(BrokerCommand):
                                                 network=src_map.network,
                                                 personality=dbpersona)
                 session.add(dst_map)
-
-            q = session.query(StaticRoute)
-            q = q.filter_by(personality=dbfrom_persona)
-            for src_route in q:
-                dst_route = StaticRoute(network=src_route.network,
-                                        dest_ip=src_route.dest_ip,
-                                        dest_cidr=src_route.dest_cidr,
-                                        gateway_ip=src_route.gateway_ip,
-                                        comments=src_route.comments,
-                                        personality=dbpersona)
-                session.add(dst_route)
 
             # TODO: should we copy root users and netgroups? Not doing so is
             # safer.

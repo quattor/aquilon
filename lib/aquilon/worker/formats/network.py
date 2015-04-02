@@ -120,10 +120,12 @@ class NetworkFormatter(ObjectFormatter):
                             key=attrgetter('destination', 'gateway_ip')):
             details.append(indent + "  {0:c}: {0.destination} gateway {0.gateway_ip}"
                            .format(route))
-            if route.personality:
+            if route.personality_stage:
                 details.append(indent + "    {0:c}: {0.name} {1:c}: {1.name}"
-                               .format(route.personality,
-                                       route.personality.archetype))
+                               .format(route.personality_stage.personality,
+                                       route.personality_stage.archetype))
+                details.append(indent + "        Stage: %s" %
+                               route.personality_stage.name)
             if route.comments:
                 details.append(indent + "    Comments: %s" % route.comments)
 
