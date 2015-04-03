@@ -1810,15 +1810,16 @@
 	If --all is specified, then the configuration of all services will be shown.
 	<optgroup mandatory="True">
 	    <option name="service" type="string">Service name</option>
-	    <option name="server" type="string" conflict="client">Server hostname</option>
-	    <option name="client" type="string" conflicts="server">Client hostname</option>
-	    <option name="all" type="flag" conflicts="service">Select all services</option>
+	    <option name="server" type="string" conflict="client all">Server hostname</option>
+	    <option name="client" type="string" conflicts="server all">Client hostname</option>
+	    <option name="all" type="flag" conflicts="service client server">Select all services</option>
 	</optgroup>
 	<optgroup>
-	    <option name="instance" type="string">Service Instance</option>
+	    <option name="instance" type="string" conflicts="all">Service Instance</option>
 	</optgroup>
 	<transport trigger="service" method="get" path="service/%(service)s"/>
-	<transport method="get" path="service"/>
+	<transport trigger="all" method="get" path="service"/>
+	<transport method="get" path="command/show_service"/>
 	<format name="proto" >
 	    <message_class name="ServiceList" module="aqdservices_pb2"/>
 	</format>
