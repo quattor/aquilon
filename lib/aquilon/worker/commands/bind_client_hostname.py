@@ -16,10 +16,9 @@
 # limitations under the License.
 """Contains the logic for `aq bind client --hostname`."""
 
-from aquilon.aqdb.model import Service
+from aquilon.aqdb.model import Service, ServiceInstance
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.host import hostname_to_host
-from aquilon.worker.dbwrappers.service_instance import get_service_instance
 from aquilon.worker.services import Chooser
 
 
@@ -33,7 +32,8 @@ class CommandBindClientHostname(BrokerCommand):
         dbservice = Service.get_unique(session, service, compel=True)
         chooser = Chooser(dbhost, logger=logger, required_only=False)
         if instance:
-            dbinstance = get_service_instance(session, dbservice, instance)
+            dbinstance = ServiceInstance.get_unique(session, service=dbservice,
+                                                    name=instance, compel=True)
             chooser.set_single(dbservice, dbinstance, force=force)
         else:
             chooser.set_single(dbservice, force=force)

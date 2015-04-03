@@ -18,22 +18,7 @@
 
 from operator import attrgetter
 
-from sqlalchemy.orm.exc import NoResultFound
-
-from aquilon.exceptions_ import NotFoundException, ArgumentError
-from aquilon.aqdb.model import ServiceInstance
-
-
-def get_service_instance(session, dbservice, instance):
-    try:
-        dbsi = session.query(ServiceInstance).filter_by(service=dbservice,
-                                                        name=instance).one()
-    except NoResultFound:
-        raise NotFoundException("Service %s, instance %s not found.  Try `aq "
-                                "add service --service %s --instance %s` to "
-                                "add it." % (dbservice.name, instance,
-                                             dbservice.name, instance))
-    return dbsi
+from aquilon.exceptions_ import ArgumentError
 
 
 def check_no_provided_service(dbobject):
