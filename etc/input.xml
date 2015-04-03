@@ -1825,6 +1825,56 @@
 	</format>
     </command>
 
+    <command name="search_service">
+	Search for services.
+	<optgroup mandatory="True">
+	    <option name="service" type="string">Service name</option>
+	    <option name="instance" type="string">Service instance name</option>
+	    <option name="server_hostname" type="string">Server hostname</option>
+	    <option name="server_cluster" type="string">Server cluster name</option>
+	    <option name="server_metacluster" type="string">Server metacluster name</option>
+	    <optgroup fields="one">
+		<option name="server_organization" type="string">Organization</option>
+		<option name="server_hub" type="string">Hub</option>
+		<option name="server_continent" type="string">Continent</option>
+		<option name="server_country" type="string">Country</option>
+		<option name="server_campus" type="string">Campus</option>
+		<option name="server_city" type="string">City</option>
+		<option name="server_building" type="string">Building</option>
+		<option name="server_room" type="string">Room</option>
+		<option name="server_bunker" type="string">Bunker</option>
+		<option name="server_rack" type="string">Rack</option>
+		<option name="server_desk" type="string">Desk</option>
+	    </optgroup>
+	    <option name="client_hostname" type="string">Client hostname</option>
+	    <option name="client_cluster" type="string">Client cluster name</option>
+	    <option name="client_metacluster" type="string">Client metacluster name</option>
+	    <optgroup fields="one">
+		<option name="client_organization" type="string">Organization</option>
+		<option name="client_hub" type="string">Hub</option>
+		<option name="client_continent" type="string">Continent</option>
+		<option name="client_country" type="string">Country</option>
+		<option name="client_campus" type="string">Campus</option>
+		<option name="client_city" type="string">City</option>
+		<option name="client_building" type="string">Building</option>
+		<option name="client_room" type="string">Room</option>
+		<option name="client_bunker" type="string">Bunker</option>
+		<option name="client_rack" type="string">Rack</option>
+		<option name="client_desk" type="string">Desk</option>
+	    </optgroup>
+	    <option name="has_clients" reverse="no_clients" type="boolean">Select instances having clients bound</option>
+	</optgroup>
+	<optgroup>
+	    <option name="server_exact_location" type="flag">Match the server location exactly</option>
+	    <option name="client_exact_location" type="flag">Match the client location exactly</option>
+	    <option name="fullinfo" type="flag">Show full information for the matching services</option>
+	</optgroup>
+	<transport method="get" path="find/service"/>
+	<format name="proto" >
+	    <message_class name="ServiceList" module="aqdservices_pb2"/>
+	</format>
+    </command>
+
     <command name="update_service">
 	Update the maximum client count for a service or service instance.
 	<p/>
