@@ -412,7 +412,7 @@ def set_reverse_ptr(session, logger, dbdns_rec, reverse_ptr):
     # the types listed below, but there are no use cases for that, so
     # better avoid confusion
     for rec in dbreverse.dns_records:
-        if not isinstance(rec, (ARecord, AddressAlias, ReservedName)):
+        if not isinstance(rec, (ARecord, AddressAlias, Alias, ReservedName)):
             raise ArgumentError("The reverse PTR cannot point "
                                 "to {0:lc}.".format(rec))
     if dbreverse != dbdns_rec.fqdn:
