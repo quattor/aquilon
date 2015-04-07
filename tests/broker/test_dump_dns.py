@@ -68,7 +68,13 @@ class TestDumpDns(TestBrokerCommand):
                          r":_ldap-restrict._tcp.aqd-unittest.ms.com:33:\000\012\000\024\001\205\004ldap\010restrict\014aqd-unittest\002ms\003com\000",
                          command)
         self.matchoutput(out,
+                         r":_ldap-alias._tcp.aqd-unittest.ms.com:33:\000\012\000\024\001\205\012alias2host\014aqd-unittest\002ms\003com\000",
+                         command)
+        self.matchoutput(out,
                          r":_ldap-reserved._udp.aqd-unittest.ms.com:33:\000\012\000\024\001\205\006nyaqd1\002ms\003com\000",
+                         command)
+        self.matchoutput(out,
+                         r":_http._tcp.aqd-unittest.ms.com:33:\000\062\000\012\037\220\012addralias1\014aqd-unittest\002ms\003com\000",
                          command)
         self.matchclean(out, "utcolo", command)
 
@@ -134,8 +140,16 @@ class TestDumpDns(TestBrokerCommand):
                          "10 20 389 ldap.restrict.aqd-unittest.ms.com.",
                          command)
         self.matchoutput(out,
+                         "_ldap-alias._tcp.aqd-unittest.ms.com.\tIN\tSRV\t"
+                         "10 20 389 alias2host.aqd-unittest.ms.com.",
+                         command)
+        self.matchoutput(out,
                          "_ldap-reserved._udp.aqd-unittest.ms.com.\tIN\tSRV\t"
                          "10 20 389 nyaqd1.ms.com.",
+                         command)
+        self.matchoutput(out,
+                         "_http._tcp.aqd-unittest.ms.com.\tIN\tSRV\t"
+                         "50 10 8080 addralias1.aqd-unittest.ms.com.",
                          command)
         self.matchclean(out, "utcolo", command)
 

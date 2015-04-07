@@ -121,14 +121,16 @@ class TestAddSrvRecord(TestBrokerCommand):
         self.matchoutput(out, "Unknown protocol badproto.", command)
 
     def test_330_alias(self):
-        command = ["add", "srv", "record", "--service", "ldap",
-                   "--protocol", "badproto", "--dns_domain", "aqd-unittest.ms.com",
+        command = ["add", "srv", "record", "--service", "ldap-alias",
+                   "--protocol", "tcp", "--dns_domain", "aqd-unittest.ms.com",
                    "--target", "alias2host.aqd-unittest.ms.com",
                    "--port", 389, "--priority", 10, "--weight", 20]
-        out = self.badrequesttest(command)
-        self.matchoutput(out,
-                         "The target of an SRV record must not be an alias.",
-                         command)
+        self.noouttest(command)
+
+    def test_335_search_ldap_alias(self):
+        command = ["search", "dns", "--record_type", "srv"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "_ldap-alias._tcp.aqd-unittest.ms.com", command)
 
     def test_340_reservedname(self):
         command = ["add", "srv", "record", "--service", "ldap-reserved",
@@ -169,6 +171,30 @@ class TestAddSrvRecord(TestBrokerCommand):
                          "WARNING: Will create a reference to "
                          "ldap.restrict.aqd-unittest.ms.com, but ",
                          command)
+
+    def test_400_addr_alias_target(self):
+        command = ["add", "srv", "record", "--service", "http",
+                   "--protocol", "tcp",
+                   "--dns_domain", "aqd-unittest.ms.com",
+                   "--target", "addralias1.aqd-unittest.ms.com",
+                   "--port", 8080, "--priority", 50, "--weight", 10]
+        self.noouttest(command)
+
+    def test_420_show_addr_alias_target(self):
+        command = ["show", "srv", "record",
+                   "--service", "http",
+                   "--protocol", "tcp",
+                   "--dns_domain", "aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "SRV Record: _http._tcp.aqd-unittest.ms.com",
+                         command)
+        self.matchoutput(out, "Service: http", command)
+        self.matchoutput(out, "Protocol: tcp", command)
+        self.matchoutput(out, "Priority: 50", command)
+        self.matchoutput(out, "Weight: 10", command)
+        self.matchoutput(out, "Target: addralias1.aqd-unittest.ms.com",
+                         command)
+        self.matchoutput(out, "Port: 8080", command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddSrvRecord)

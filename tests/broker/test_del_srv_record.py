@@ -75,6 +75,16 @@ class TestDelSrvRecord(TestBrokerCommand):
                    "--protocol", "udp", "--dns_domain", "aqd-unittest.ms.com"]
         self.noouttest(command)
 
+    def test_148_del_alias_target(self):
+        command = ["del", "srv", "record", "--service", "ldap-alias",
+                   "--protocol", "tcp", "--dns_domain", "aqd-unittest.ms.com"]
+        self.noouttest(command)
+
+    def test_149_del_addr_alias_target(self):
+        command = ["del", "srv", "record", "--service", "http",
+                   "--protocol", "tcp", "--dns_domain", "aqd-unittest.ms.com"]
+        self.noouttest(command)
+
     def test_150_verify_allgone(self):
         command = ["search", "dns", "--record_type", "srv"]
         self.noouttest(command)

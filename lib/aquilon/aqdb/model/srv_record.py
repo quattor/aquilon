@@ -23,7 +23,8 @@ from sqlalchemy.orm import relation, backref, object_session, validates
 from sqlalchemy.ext.associationproxy import association_proxy
 
 from aquilon.exceptions_ import AquilonError, ArgumentError
-from aquilon.aqdb.model import DnsRecord, Fqdn, ARecord, Alias, ReservedName
+from aquilon.aqdb.model import (DnsRecord, Fqdn, ARecord, AddressAlias,
+                                Alias, ReservedName)
 
 _TN = 'srv_record'
 _name_re = re.compile(r'_([^_.]+)\._([^_.]+)$')
@@ -104,17 +105,17 @@ class SrvRecord(DnsRecord):
         # Exception
         # - the target can be a reserved name because no single dns database
         #   holds all records in the world
+        # - the target an be an alias as real world dns software supports it,
+        #   not compliant to RFC 2782
         found_valid_target = False
         for rr in target.dns_records:
-            if isinstance(rr, (ARecord, ReservedName)):
+            if isinstance(rr, (ARecord, AddressAlias, Alias, ReservedName)):
                 found_valid_target = True
-            elif isinstance(rr, Alias):
-                raise ArgumentError("The target of an SRV record must not be "
-                                    "an alias.")
+
         if not found_valid_target:
             raise ArgumentError("The target of an SRV record must resolve to "
                                 "one or more addresses or it should be a "
-                                "reserved name.")
+                                "reserved name or alias.")
 
         if protocol not in PROTOCOLS:
             raise ArgumentError("Unknown protocol %s." % protocol)
