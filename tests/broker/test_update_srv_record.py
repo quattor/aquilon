@@ -56,6 +56,32 @@ class TestUpdateSrvRecord(TestBrokerCommand):
                          "DNS environment internal not found.",
                          command)
 
+    def test_400_update_ttl(self):
+        command = ["update", "srv", "record", "--service", "kerberos",
+                   "--protocol", "tcp", "--dns_domain", "aqd-unittest.ms.com",
+                   "--target", "arecord15.aqd-unittest.ms.com",
+                   "--ttl", 1800]
+        self.noouttest(command)
+
+    def test_420_verify(self):
+        command = ["search", "dns", "--fullinfo", "--record_type", "srv",
+                   "--target", "arecord15.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "TTL: 1800", command)
+
+    def test_500_clear_ttl(self):
+        command = ["update", "srv", "record", "--service", "kerberos",
+                   "--protocol", "tcp", "--dns_domain", "aqd-unittest.ms.com",
+                   "--target", "arecord15.aqd-unittest.ms.com",
+                   "--clear_ttl"]
+        self.noouttest(command)
+
+    def test_520_verify(self):
+        command = ["search", "dns", "--fullinfo", "--record_type", "srv",
+                   "--target", "arecord15.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchclean(out, "TTL", command)
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUpdateSrvRecord)

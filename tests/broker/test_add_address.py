@@ -45,6 +45,7 @@ class TestAddAddress(TestBrokerCommand):
         self.matchoutput(out, "Network: %s [%s]" % (net.name, net), command)
         self.matchoutput(out, "Network Environment: internal", command)
         self.matchclean(out, "Reverse", command)
+        self.matchclean(out, "TTL", command)
 
     def test_200_add_defaultenv(self):
         self.dsdb_expect_add("arecord14.aqd-unittest.ms.com",
@@ -271,6 +272,34 @@ class TestAddAddress(TestBrokerCommand):
         out = self.badrequesttest(command)
         self.matchoutput(out, "Entering external IP addresses to the internal DNS environment is not allowed", command)
 
+    def test_700_ttl(self):
+        self.dsdb_expect_add("arecord40.aqd-unittest.ms.com",
+                             self.net["unknown0"].usable[40])
+        command = ["add_address", "--ip=%s" % self.net["unknown0"].usable[40],
+                   "--fqdn=arecord40.aqd-unittest.ms.com",
+                   "--ttl", 300]
+        self.noouttest(command)
+        self.dsdb_verify()
+
+    def test_720_verifyttl(self):
+        net = self.net["unknown0"]
+        command = ["show_address", "--fqdn=arecord40.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "DNS Record: arecord40.aqd-unittest.ms.com",
+                         command)
+        self.matchoutput(out, "IP: %s" % net.usable[40], command)
+        self.matchoutput(out, "Network: %s [%s]" % (net.name, net), command)
+        self.matchoutput(out, "Network Environment: internal", command)
+        self.matchoutput(out, "TTL: 300", command)
+        self.matchclean(out, "Reverse", command)
+
+    def test_730_badttl(self):
+        command = ["add_address", "--ip=%s" % self.net["unknown0"].usable[41],
+                   "--fqdn=arecord41.aqd-unittest.ms.com",
+                   "--ttl", 2147483648]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "TTL must be between 0 and 2147483647.",
+                         command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddAddress)

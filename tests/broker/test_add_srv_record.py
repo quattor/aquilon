@@ -38,7 +38,8 @@ class TestAddSrvRecord(TestBrokerCommand):
         command = ["add", "srv", "record", "--service", "kerberos",
                    "--protocol", "tcp", "--dns_domain", "aqd-unittest.ms.com",
                    "--target", "arecord15.aqd-unittest.ms.com",
-                   "--port", 88, "--priority", 10, "--weight", 20]
+                   "--port", 88, "--priority", 10, "--weight", 20,
+                   "--ttl", "3600"]
         self.noouttest(command)
 
     def test_120_add_kerberos2_dup(self):
@@ -71,6 +72,7 @@ class TestAddSrvRecord(TestBrokerCommand):
         self.matchoutput(out, "Target: arecord14.aqd-unittest.ms.com", command)
         self.matchoutput(out, "Target: arecord15.aqd-unittest.ms.com", command)
         self.matchoutput(out, "Port: 88", command)
+        self.matchoutput(out, "TTL: 3600", command)
         self.matchclean(out, "Port: 389", command)
 
     def test_210_search_srvrec(self):

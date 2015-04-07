@@ -110,6 +110,11 @@ class DnsDumpFormatter(ObjectFormatter):
         # The output is not the most readable as we don't make use of $ORIGIN,
         # but BIND should be able to digest it
         for record in dump:
+            if record.ttl is not None:
+                ttl = "\t" + str(record.ttl)
+            else:
+                ttl = ''
+
             if isinstance(record, ARecord):
                 if record.reverse_ptr:
                     reverse = record.reverse_ptr
@@ -117,49 +122,58 @@ class DnsDumpFormatter(ObjectFormatter):
                     reverse = record.fqdn
 
                 # Mind the dot!
-                result.append("%s.\tIN\tA\t%s" % (record.fqdn, record.ip))
-                result.append("%s.\tIN\tPTR\t%s." % (inaddr_ptr(record.ip),
-                                                     reverse))
+                result.append("%s.%s\tIN\tA\t%s" % (record.fqdn, ttl, record.ip))
+                result.append("%s.%s\tIN\tPTR\t%s." % (inaddr_ptr(record.ip),
+                                                       ttl,
+                                                       reverse))
             elif isinstance(record, ReservedName):
                 pass
             elif isinstance(record, Alias):
                 # Mind the dot!
-                result.append("%s.\tIN\tCNAME\t%s." % (record.fqdn,
-                                                       record.target.fqdn))
+                result.append("%s.%s\tIN\tCNAME\t%s." % (record.fqdn, ttl,
+                                                         record.target.fqdn))
             elif isinstance(record, SrvRecord):
-                result.append("%s.\tIN\tSRV\t%d %d %d %s." % (record.fqdn,
-                                                              record.priority,
-                                                              record.weight,
-                                                              record.port,
-                                                              record.target.fqdn))
+                result.append("%s.%s\tIN\tSRV\t%d %d %d %s." % (record.fqdn,
+                                                                ttl,
+                                                                record.priority,
+                                                                record.weight,
+                                                                record.port,
+                                                                record.target.fqdn))
             elif isinstance(record, AddressAlias):
-                result.append("%s.\tIN\tA\t%s" % (record.fqdn, record.target_ip))
+                result.append("%s.%s\tIN\tA\t%s" % (record.fqdn, ttl,
+                                                    record.target_ip))
 
         return "\n".join(result)
 
     def format_djb(self, dump):
         result = []
         for record in dump:
+            if record.ttl is not None:
+                ttl = ":" + str(record.ttl)
+            else:
+                ttl = ''
+
             if isinstance(record, ARecord):
                 if record.reverse_ptr:
-                    result.append("+%s:%s" % (record.fqdn, record.ip))
-                    result.append("^%s:%s" % (inaddr_ptr(record.ip),
-                                              record.reverse_ptr))
+                    result.append("+%s:%s%s" % (record.fqdn, record.ip, ttl))
+                    result.append("^%s:%s%s" % (inaddr_ptr(record.ip),
+                                                record.reverse_ptr, ttl))
                 else:
-                    result.append("=%s:%s" % (record.fqdn, record.ip))
+                    result.append("=%s:%s%s" % (record.fqdn, record.ip, ttl))
             elif isinstance(record, ReservedName):
                 pass
             elif isinstance(record, Alias):
-                result.append("C%s:%s" % (record.fqdn, record.target.fqdn))
+                result.append("C%s:%s%s" % (record.fqdn, record.target.fqdn, ttl))
             elif isinstance(record, AddressAlias):
-                result.append("+%s:%s" % (record.fqdn, record.target_ip))
+                result.append("+%s:%s%s" % (record.fqdn, record.target_ip, ttl))
             elif isinstance(record, SrvRecord):
                 # djbdns does not have native support for SRV records
-                result.append(":%s:33:%s%s%s%s" % (record.fqdn,
-                                                   octal16(record.priority),
-                                                   octal16(record.weight),
-                                                   octal16(record.port),
-                                                   nstr(record.target.fqdn)))
+                result.append(":%s:33:%s%s%s%s%s" % (record.fqdn,
+                                                     octal16(record.priority),
+                                                     octal16(record.weight),
+                                                     octal16(record.port),
+                                                     nstr(record.target.fqdn),
+                                                     ttl))
 
         return "\n".join(result)
 

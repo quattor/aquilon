@@ -25,7 +25,8 @@ class CommandUpdateSrvRecord(BrokerCommand):
     required_parameters = ["service", "protocol", "dns_domain", "target"]
 
     def render(self, session, service, protocol, dns_domain, target,
-               priority, weight, port, comments, dns_environment, **kwargs):
+               priority, weight, port, ttl, clear_ttl, comments,
+               dns_environment, **kwargs):
         name = "_%s._%s" % (service.strip().lower(), protocol.strip().lower())
         dbsrv_rec = SrvRecord.get_unique(session, name=name,
                                          dns_domain=dns_domain,
@@ -38,6 +39,12 @@ class CommandUpdateSrvRecord(BrokerCommand):
             dbsrv_rec.weight = weight
         if port:
             dbsrv_rec.port = port
+
+        if ttl is not None:
+            dbsrv_rec.ttl = ttl
+        elif clear_ttl:
+            dbsrv_rec.ttl = None
+
         if comments is not None:
             dbsrv_rec.comments = comments
 

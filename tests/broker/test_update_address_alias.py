@@ -31,6 +31,7 @@ class TestUpdateAddressAlias(TestBrokerCommand):
         command = ["update", "address",  "alias",
                    "--fqdn", "addralias1.aqd-unittest.ms.com",
                    "--target", "arecord13.aqd-unittest.ms.com",
+                   "--ttl", "900",
                    "--comments", "New address alias comments"]
         self.noouttest(command)
 
@@ -40,6 +41,7 @@ class TestUpdateAddressAlias(TestBrokerCommand):
                    "--target", "arecord13.aqd-unittest.ms.com"]
         out = self.commandtest(command)
         self.matchoutput(out, "Comments: New address alias comments", command)
+        self.matchoutput(out, "TTL: 900", command)
 
     def test_130_update_to_change_comment(self):
         command = ["update", "address",  "alias",
@@ -68,6 +70,20 @@ class TestUpdateAddressAlias(TestBrokerCommand):
                    "--target", "arecord14.aqd-unittest.ms.com"]
         out = self.commandtest(command)
         self.matchclean(out, "Comments:", command)
+
+    def test_170_update_to_no_ttl(self):
+        command = ["update", "address", "alias",
+                   "--fqdn", "addralias1.aqd-unittest.ms.com",
+                   "--target", "arecord14.aqd-unittest.ms.com",
+                   "--clear_ttl"]
+        self.noouttest(command)
+
+    def test_175_verify_update_to_no_ttl(self):
+        command = ["search", "dns", "--fullinfo",
+                   "--fqdn", "addralias1.aqd-unittest.ms.com",
+                   "--target", "arecord14.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchclean(out, "TTL", command)
 
     def test_200_update_nonexistent_fqdn(self):
         command = ["update", "address", "alias",

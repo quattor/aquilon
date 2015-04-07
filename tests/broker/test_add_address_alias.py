@@ -55,11 +55,12 @@ class TestAddAddressAlias(TestBrokerCommand):
                          "Target: arecord13.aqd-unittest.ms.com [%s]" %
                          self.net["unknown0"].usable[13], command)
 
-    def test_200_add_new_addralias_with_comment(self):
+    def test_200_add_new_addralias_with_comment_and_ttl(self):
         command = ["add", "address", "alias",
                    "--fqdn", "addralias1.aqd-unittest.ms.com",
                    "--target", "arecord14.aqd-unittest.ms.com",
                    "--dns_environment", "internal",
+                   "--ttl", "1800",
                    "--comments", "Some address alias comments"]
         self.noouttest(command)
 
@@ -88,6 +89,7 @@ class TestAddAddressAlias(TestBrokerCommand):
         self.matchoutput(out,
                          "Target: arecord15.aqd-unittest.ms.com [%s]" %
                          self.net["unknown0"].usable[15], command)
+        self.matchoutput(out, "TTL: 1800", command)
         self.matchoutput(out, "Comments: Some address alias comments", command)
         self.matchoutput(out, "Comments: Some other address alias comments", command)
 

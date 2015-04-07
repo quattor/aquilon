@@ -24,8 +24,8 @@ class CommandUpdateAddressAlias(BrokerCommand):
 
     required_parameters = ["fqdn", "target"]
 
-    def render(self, session, fqdn, target, comments, dns_environment,
-               target_environment, **kwargs):
+    def render(self, session, fqdn, target, ttl, clear_ttl, comments,
+               dns_environment, target_environment, **kwargs):
         if not target_environment:
             target_environment = dns_environment
 
@@ -39,6 +39,11 @@ class CommandUpdateAddressAlias(BrokerCommand):
 
         dbaddr_alias = AddressAlias.get_unique(session, fqdn=dbfqdn,
                                                target=dbtarget, compel=True)
+
+        if ttl is not None:
+            dbaddr_alias.ttl = ttl
+        elif clear_ttl:
+            dbaddr_alias.ttl = None
 
         if comments is not None:
             dbaddr_alias.comments = comments

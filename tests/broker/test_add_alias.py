@@ -172,7 +172,7 @@ class TestAddAlias(TestBrokerCommand):
 
     def test_500_add_alias2alias(self):
         cmd = ['add', 'alias', '--fqdn', 'alias2alias.aqd-unittest.ms.com',
-               '--target', 'alias2host.aqd-unittest.ms.com']
+               '--target', 'alias2host.aqd-unittest.ms.com', '--ttl', 60]
         self.noouttest(cmd)
 
     def test_510_add_alias3alias(self):
@@ -195,6 +195,7 @@ class TestAddAlias(TestBrokerCommand):
         cmd = 'show alias --fqdn alias2alias.aqd-unittest.ms.com'
         out = self.commandtest(cmd.split(" "))
         self.matchoutput(out, 'Alias: alias2alias.aqd-unittest.ms.com', cmd)
+        self.matchoutput(out, 'TTL: 60', cmd)
 
     def test_601_verify_alias2alias_backwards(self):
         cmd = 'show alias --fqdn alias2host.aqd-unittest.ms.com'

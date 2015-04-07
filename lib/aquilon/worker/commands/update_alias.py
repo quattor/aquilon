@@ -28,7 +28,7 @@ class CommandUpdateAlias(BrokerCommand):
     required_parameters = ["fqdn"]
 
     def render(self, session, logger, fqdn, dns_environment, target,
-               target_environment, comments,
+               target_environment, ttl, clear_ttl, comments,
                **kwargs):
         dbdns_env = DnsEnvironment.get_unique_or_default(session,
                                                          dns_environment)
@@ -65,6 +65,11 @@ class CommandUpdateAlias(BrokerCommand):
 
             if dbalias.target != old_target:
                 delete_target_if_needed(session, old_target)
+
+        if ttl is not None:
+            dbalias.ttl = ttl
+        elif clear_ttl:
+            dbalias.ttl = None
 
         if comments is not None:
             dbalias.comments = comments
