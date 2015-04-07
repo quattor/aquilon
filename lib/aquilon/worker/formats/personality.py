@@ -55,7 +55,8 @@ class PersonalityStageFormatter(PersonalityFormatter):
 
         details.append(indent + "{0} {1:c}: {1.name} {2:c}: {2.name}"
                        .format(description, personality, personality.archetype))
-        details.append(indent + "  Stage: {0.name}".format(persst))
+        if personality.staged:
+            details.append(indent + "  Stage: {0.name}".format(persst))
         details.append(indent + "  Environment: {0.name}"
                        .format(personality.host_environment))
         details.append(indent + "  Owned by {0:c}: {0.grn}"
@@ -121,7 +122,8 @@ class PersonalityStageFormatter(PersonalityFormatter):
                                                           indirect_attrs=indirect_attrs)
 
         # FIXME
-        # skeleton.version = str(persst.name)
+        # if persst.staged:
+        #     skeleton.version = str(persst.name)
 
         if indirect_attrs:
             self.redirect_proto(persst.services,

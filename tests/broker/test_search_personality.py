@@ -30,25 +30,25 @@ class TestSearchPersonality(VerifyGrnsMixin, TestBrokerCommand):
     def test_100_by_grn(self):
         command = ["search", "personality", "--grn", "grn:/ms/ei/aquilon/aqd"]
         out = self.commandtest(command)
-        self.matchoutput(out, "aquilon/eaitools@current", command)
-        self.matchoutput(out, "aquilon/utpersonality/dev@current", command)
-        self.matchoutput(out, "esx_cluster/esx_server@current", command)
-        self.matchoutput(out, "esx_cluster/vulcan-10g-server-prod@current", command)
+        self.matchoutput(out, "aquilon/eaitools", command)
+        self.matchoutput(out, "aquilon/utpersonality/dev", command)
+        self.matchoutput(out, "esx_cluster/esx_server", command)
+        self.matchoutput(out, "esx_cluster/vulcan-10g-server-prod", command)
 
     def test_100_by_environment(self):
         command = ["search", "personality", "--host_environment", "prod"]
         out = self.commandtest(command)
-        self.matchoutput(out, "aurora/generic@current", command)
-        self.matchoutput(out, "filer/generic@current", command)
-        self.matchoutput(out, "f5/generic@current", command)
-        self.matchoutput(out, "esx_cluster/vulcan-10g-server-prod@current", command)
-        self.matchoutput(out, "storagecluster/metrocluster@current", command)
+        self.matchoutput(out, "aurora/generic", command)
+        self.matchoutput(out, "filer/generic", command)
+        self.matchoutput(out, "f5/generic", command)
+        self.matchoutput(out, "esx_cluster/vulcan-10g-server-prod", command)
+        self.matchoutput(out, "storagecluster/metrocluster", command)
         self.matchclean(out, "utpersonality/dev", command)
 
     def test_100_config_override(self):
         command = ["search", "personality", "--config_override"]
         out = self.commandtest(command)
-        self.matchoutput(out, "aquilon/utpersonality/dev@current", command)
+        self.matchoutput(out, "aquilon/utpersonality/dev", command)
         self.matchclean(out, "aurora/generic", command)
         self.matchclean(out, "filer/generic", command)
 
@@ -56,22 +56,22 @@ class TestSearchPersonality(VerifyGrnsMixin, TestBrokerCommand):
         command = ["search", "personality",
                    "--host_environment", "dev", "--grn", "grn:/ms/ei/aquilon/aqd"]
         out = self.commandtest(command)
-        self.matchoutput(out, "aquilon/utpersonality/dev@current", command)
+        self.matchoutput(out, "aquilon/utpersonality/dev", command)
 
     def test_100_by_eon_id(self):
         command = ["search", "personality", "--eon_id", 2]
         out = self.commandtest(command)
-        self.matchoutput(out, "aquilon/eaitools@current", command)
-        self.matchoutput(out, "aquilon/utpersonality/dev@current", command)
-        self.matchoutput(out, "esx_cluster/esx_server@current", command)
-        self.matchoutput(out, "esx_cluster/vulcan-10g-server-prod@current", command)
-        self.matchoutput(out, "gridcluster/hadoop@current", command)
+        self.matchoutput(out, "aquilon/eaitools", command)
+        self.matchoutput(out, "aquilon/utpersonality/dev", command)
+        self.matchoutput(out, "esx_cluster/esx_server", command)
+        self.matchoutput(out, "esx_cluster/vulcan-10g-server-prod", command)
+        self.matchoutput(out, "gridcluster/hadoop", command)
         self.matchclean(out, "storagecluster/metrocluster", command)
 
     def test_100_by_dev_eon_id(self):
         command = ["search", "personality", "--host_environment", "dev", "--eon_id", 2]
         out = self.commandtest(command)
-        self.matchoutput(out, "aquilon/utpersonality/dev@current", command)
+        self.matchoutput(out, "aquilon/utpersonality/dev", command)
         self.matchclean(out, "vulcan-10g-server-prod", command)
 
     def test_100_fullinfo(self):
@@ -82,7 +82,7 @@ class TestSearchPersonality(VerifyGrnsMixin, TestBrokerCommand):
                          command)
         self.matchoutput(out, "Config override: enabled", command)
         self.matchoutput(out, "Environment: dev", command)
-        self.matchoutput(out, "Stage: current", command)
+        self.matchoutput(out, "Stage:", command)
         self.matchoutput(out, "Owned by GRN: %s" % self.eon_ids[2], command)
         self.matchoutput(out, "Used by GRN: %s" % self.eon_ids[2], command)
         self.matchclean(out, "inventory", command)
@@ -102,20 +102,20 @@ class TestSearchPersonality(VerifyGrnsMixin, TestBrokerCommand):
     def test_100_non_unique_name(self):
         command = ["search", "personality", "--personality", "vulcan-10g-server-prod"]
         out = self.commandtest(command)
-        self.matchoutput(out, "esx_cluster/vulcan-10g-server-prod@current", command)
-        self.matchoutput(out, "vmhost/vulcan-10g-server-prod@current", command)
+        self.matchoutput(out, "esx_cluster/vulcan-10g-server-prod", command)
+        self.matchoutput(out, "vmhost/vulcan-10g-server-prod", command)
 
     def test_100_by_name_arch(self):
         command = ["search", "personality", "--personality", "vulcan-10g-server-prod",
                    "--archetype", "vmhost"]
         out = self.commandtest(command)
-        self.matchoutput(out, "vmhost/vulcan-10g-server-prod@current", command)
+        self.matchoutput(out, "vmhost/vulcan-10g-server-prod", command)
         self.matchclean(out, "esx_cluster/vulcan-10g-server-prod", command)
 
     def test_100_by_required_service(self):
         command = ["search_personality", "--required_service", "chooser2"]
         out = self.commandtest(command)
-        self.matchoutput(out, "aquilon/unixeng-test@current", command)
+        self.matchoutput(out, "aquilon/unixeng-test", command)
         self.matchclean(out, "compileserver", command)
 
     def test_110_show_diff_1(self):
@@ -123,10 +123,10 @@ class TestSearchPersonality(VerifyGrnsMixin, TestBrokerCommand):
                    "--archetype=aquilon", "--other=inventory"]
         out = self.commandtest(command)
         self.searchoutput(out,
-                          r'missing Options in Personality aquilon/inventory@current:\s+ConfigOverride',
+                          r'missing Options in Personality aquilon/inventory:\s+ConfigOverride',
                           command)
         self.searchoutput(out,
-                          r'missing Grns in Personality aquilon/inventory@current:\s+'
+                          r'missing Grns in Personality aquilon/inventory:\s+'
                           r'GRN grn:/ms/ei/aquilon/aqd',
                           command)
 
@@ -135,13 +135,13 @@ class TestSearchPersonality(VerifyGrnsMixin, TestBrokerCommand):
                    "--archetype=aquilon", "--other=vulcan-10g-server-prod", "--other_archetype=vmhost"]
         out = self.commandtest(command)
         self.searchoutput(out,
-                          r'missing Options in Personality aquilon/utpersonality/dev@current:\s+Cluster Required',
+                          r'missing Options in Personality aquilon/utpersonality/dev:\s+Cluster Required',
                           command)
         self.searchoutput(out,
                           r'matching Options with different values:\s+Environment value=dev, othervalue=prod',
                           command)
         self.searchoutput(out,
-                          r'missing Options in Personality vmhost/vulcan-10g-server-prod@current:\s+ConfigOverride',
+                          r'missing Options in Personality vmhost/vulcan-10g-server-prod:\s+ConfigOverride',
                           command)
 
     def test_200_no_match(self):

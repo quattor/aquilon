@@ -56,6 +56,9 @@ class Personality(Base):
 
     host_environment_id = Column(ForeignKey(HostEnvironment.id), nullable=False)
 
+    staged = Column(Boolean(name="%s_staged_ck" % _TN), default=False,
+                    nullable=False)
+
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
     comments = Column(String(255), nullable=True)
@@ -108,6 +111,8 @@ class Personality(Base):
         Return the default stage to be used for non-update operations
         """
         if stage:
+            if not self.staged:
+                raise ArgumentError("{0} is not staged.".format(self))
             self.force_existing_stage(stage)
             return self.stages[stage]
         else:
@@ -118,6 +123,8 @@ class Personality(Base):
         Return the default stage to be used for updates
         """
         if stage:
+            if not self.staged:
+                raise ArgumentError("{0} is not staged.".format(self))
             self.force_existing_stage(stage)
             return self.stages[stage]
         else:
@@ -146,11 +153,18 @@ class PersonalityStage(Base):
 
     @property
     def qualified_name(self):
-        return self.personality.qualified_name + "@" + self.name
+        if self.staged:
+            return self.personality.qualified_name + "@" + self.name
+        else:
+            return self.personality.qualified_name
 
     @property
     def cluster_required(self):
         return self.personality.cluster_required
+
+    @property
+    def staged(self):
+        return self.personality.staged
 
     @property
     def owner_eon_id(self):

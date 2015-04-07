@@ -232,6 +232,26 @@ class TestUpdatePersonality(VerifyGrnsMixin, TestBrokerCommand):
         out = self.commandtest(command)
         self.matchclean(out, "Comments", command)
 
+    def test_170_make_staged(self):
+        self.noouttest(["update_personality", "--personality", "compileserver",
+                        "--archetype", "aquilon", "--staged"])
+
+    def test_171_verify_staged(self):
+        command = ["show_personality", "--personality", "compileserver",
+                   "--archetype", "aquilon"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Stage: current", command)
+
+    def test_178_make_unstaged(self):
+        self.noouttest(["update_personality", "--personality", "compileserver",
+                        "--archetype", "aquilon", "--unstaged"])
+
+    def test_179_verify_unstaged(self):
+        command = ["show_personality", "--personality", "compileserver",
+                   "--archetype", "aquilon"]
+        out = self.commandtest(command)
+        self.matchclean(out, "Stage:", command)
+
     def test_200_invalid_function(self):
         """ Verify that the list of built-in functions is restricted """
         command = ["update_personality", "--personality", "vulcan-10g-server-prod",

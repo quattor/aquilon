@@ -96,4 +96,9 @@ ALTER TABLE static_route ADD CONSTRAINT static_route_pers_st_fk
 	FOREIGN KEY (personality_stage_id) REFERENCES personality_stage (id) ON DELETE CASCADE;
 CREATE INDEX static_route_pers_st_idx ON static_route (personality_stage_id);
 
+ALTER TABLE personality ADD staged INTEGER;
+UPDATE personality SET staged = 0;
+ALTER TABLE personality MODIFY (staged INTEGER CONSTRAINT personality_staged_nn NOT NULL);
+ALTER TABLE personality ADD CONSTRAINT personality_staged_ck CHECK (staged IN (0, 1));
+
 QUIT;

@@ -180,7 +180,7 @@ class TestUnbindFeature(TestBrokerCommand):
         out = self.notfoundtest(command)
         self.matchoutput(out,
                          "Interface Feature src_route is not bound to "
-                         "personality aquilon/compileserver@current, interface bond0.",
+                         "personality aquilon/compileserver, interface bond0.",
                          command)
 
     def test_900_verify_no_bindings(self):

@@ -119,7 +119,7 @@ class TestUnbindClient(TestBrokerCommand):
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "Service chooser1 is required for personality "
-                         "aquilon/unixeng-test@current, the binding cannot be removed.",
+                         "aquilon/unixeng-test, the binding cannot be removed.",
                          command)
 
     def test_200_reject_unbind_not_bound(self):

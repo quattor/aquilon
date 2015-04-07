@@ -32,7 +32,7 @@ class TestAddMetaCluster(PersonalityTestMixin, TestBrokerCommand):
         # The broker currently assumes this personality to exist
         self.create_personality("metacluster", "metacluster",
                                 grn="grn:/ms/ei/aquilon/aqd")
-        self.create_personality("metacluster", "nostage")
+        self.create_personality("metacluster", "nostage", staged=True)
 
     def test_100_add_utmc1(self):
         command = ["add_metacluster", "--metacluster=utmc1",

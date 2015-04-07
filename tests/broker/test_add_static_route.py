@@ -106,7 +106,8 @@ class TestAddStaticRoute(TestBrokerCommand, MachineTestMixin):
 
     def test_140_clone_personality(self):
         self.noouttest(["add_personality", "--personality", "inventory-clone",
-                        "--archetype", "aquilon", "--copy_from", "inventory"])
+                        "--archetype", "aquilon", "--copy_from", "inventory",
+                        "--staged"])
 
     def test_200_show_host(self):
         gw = self.net["routing1"].usable[-1]
@@ -123,8 +124,7 @@ class TestAddStaticRoute(TestBrokerCommand, MachineTestMixin):
         out = self.commandtest(command)
         self.searchoutput(out,
                           r'Static Route: 192\.168\.248\.0/24 gateway %s'
-                          r'\s*Personality: inventory Archetype: aquilon$'
-                          r'\s*Stage: current$' % gw,
+                          r'\s*Personality: inventory Archetype: aquilon$' % gw,
                           command)
         self.searchoutput(out,
                           r'Static Route: 192\.168\.248\.0/24 gateway %s'

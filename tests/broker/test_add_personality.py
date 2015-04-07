@@ -74,7 +74,7 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
                          command)
         self.matchoutput(out, "Config override: enabled", command)
         self.matchoutput(out, "Environment: dev", command)
-        self.matchoutput(out, "Stage: current", command)
+        self.matchclean(out, "Stage:", command)
         self.matchoutput(out, "Comments: Some personality comments", command)
         self.matchoutput(out, "Owned by GRN: %s" % GRN, command)
         self.matchoutput(out, "Used by GRN: %s" % GRN, command)
@@ -108,7 +108,7 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
         self.matchoutput(out, "Personality: utpersonality-clone/dev Archetype: aquilon",
                          command)
         self.matchoutput(out, "Environment: dev", command)
-        self.matchoutput(out, "Stage: current", command)
+        self.matchclean(out, "Stage:", command)
         self.matchoutput(out, "Comments: Some personality comments", command)
         self.matchoutput(out, "Owned by GRN: %s" % GRN, command)
         self.matchoutput(out, "Used by GRN: %s" % GRN, command)
@@ -227,7 +227,8 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
     def test_166_add_esx_nostage(self):
         command = ["add_personality", "--personality", "nostage",
                    "--archetype", "vmhost", "--cluster_required",
-                   "--eon_id", 2, "--host_environment", "dev"]
+                   "--eon_id", 2, "--host_environment", "dev",
+                   "--staged"]
         self.noouttest(command)
 
     def test_170_add_grid_personality(self):
@@ -255,7 +256,7 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
             'sybase-test': {},
             'lemon-collector-oracle': {},
             'unixeng-test': {},
-            'nostage': {},
+            'nostage': {'staged': True},
             'infra': {'grn': 'grn:/ms/ei/aquilon/aqd',
                       'environment': 'infra'}
         }

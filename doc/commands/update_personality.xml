@@ -36,12 +36,16 @@
 	    </group>
 	    <arg choice="opt"><option>--leave_existing</option></arg>
             <group choice="opt">
-	    	<arg choice="plain"><option>--cluster_required</option></arg>
+		<arg choice="plain"><option>--cluster_required</option></arg>
 		<arg choice="plain"><option>--nocluster_required</option></arg>
 	    </group>
             <group choice="opt">
-	    	<arg choice="plain"><option>--config_override</option></arg>
+	        <arg choice="plain"><option>--config_override</option></arg>
 		<arg choice="plain"><option>--noconfig_override</option></arg>
+	    </group>
+	    <group choice="opt">
+		<arg choice="plain"><option>--staged</option></arg>
+		<arg choice="plain"><option>--unstaged</option></arg>
 	    </group>
 	    <arg choice="opt"><option>--vmhost_capacity_function <replaceable>VMHOST_CAPACITY_FUNCTION</replaceable></option></arg>
 	    <arg choice="opt"><option>--vmhost_overcommit_memory <replaceable>VMHOST_iOVERCOMMIT_MEMORY</replaceable></option></arg>
@@ -139,6 +143,17 @@
 			be included in the aqdb generated personality configuration template. This feature
 			effectively pulls in config_override.tpl from the personality templates in the
 			template domain, if it exists.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+		<term>
+		    <option>--staged</option>, <option>--unstaged</option>
+		</term>
+		<listitem>
+		    <para>
+			This flag turns personality staging on or off. Staging can only be turned off
+			if both the <literal>previous</literal> and the <literal>next</literal> stages are unused.
 		    </para>
 		</listitem>
 	    </varlistentry>

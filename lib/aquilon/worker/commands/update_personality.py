@@ -29,6 +29,19 @@ from aquilon.worker.templates import Plenary, PlenaryCollection
 from aquilon.worker.dbwrappers.personality import validate_personality_justification
 
 
+def _check_stage_unused(session, dbstage):
+    if dbstage.personality.is_cluster:
+        q = session.query(Cluster.id)
+        msg = "clusters"
+    else:
+        q = session.query(Host.hardware_entity_id)
+        msg = "hosts"
+
+    q = q.filter_by(personality_stage=dbstage)
+    if q.count():
+        raise ArgumentError("{0} still has {1!s}.".format(dbstage, msg))
+
+
 class CommandUpdatePersonality(BrokerCommand):
 
     required_parameters = ["personality", "archetype"]
@@ -36,10 +49,21 @@ class CommandUpdatePersonality(BrokerCommand):
     def render(self, session, logger, personality, personality_stage,
                archetype, vmhost_capacity_function, vmhost_overcommit_memory,
                cluster_required, config_override, host_environment, grn, eon_id,
-               leave_existing, justification, reason, comments, user,
+               leave_existing, staged, justification, reason, comments, user,
                **arguments):
         dbpersona = Personality.get_unique(session, name=personality,
                                            archetype=archetype, compel=True)
+
+        if staged is not None:
+            if staged is False:
+                if "previous" in dbpersona.stages:
+                    _check_stage_unused(session, dbpersona.stages["previous"])
+                    del dbpersona.stages["previous"]
+                if "next" in dbpersona.stages:
+                    _check_stage_unused(session, dbpersona.stages["next"])
+                    del dbpersona.stages["next"]
+            dbpersona.staged = staged
+
         dbstage = dbpersona.active_stage(personality_stage)
 
         # It's a bit ugly. If any of the non-staged attributes are touched,

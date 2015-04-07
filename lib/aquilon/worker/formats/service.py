@@ -40,10 +40,10 @@ class ServiceFormatter(ObjectFormatter):
                               key=attrgetter("archetype.name",
                                              "personality.name", "name")):
             details.append(indent +
-                           "  Required for {0:c}: {0.name} {1:c}: {1.name} "
-                           "Stage: {2!s}"
-                           .format(dbstage.personality, dbstage.archetype,
-                                   dbstage.name))
+                           "  Required for {0:c}: {0.name} {1:c}: {1.name}"
+                           .format(dbstage.personality, dbstage.archetype))
+            if dbstage.staged:
+                details.append(indent + "    Stage: %s" % dbstage.name)
         if service.comments:
             details.append(indent + "  Comments: %s" % service.comments)
         for instance in service.instances:

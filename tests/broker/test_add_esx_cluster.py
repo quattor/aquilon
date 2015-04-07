@@ -123,7 +123,7 @@ class TestAddESXCluster(PersonalityTestMixin, TestBrokerCommand):
                                 grn="grn:/ms/ei/aquilon/aqd",
                                 environment="prod",
                                 maps=esx_cluster_maps)
-        self.create_personality("esx_cluster", "nostage")
+        self.create_personality("esx_cluster", "nostage", staged=True)
 
     def test_110_add_utecl1(self):
         # For this cluster, we'll use the default for buildstatus

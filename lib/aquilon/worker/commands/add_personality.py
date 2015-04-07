@@ -36,7 +36,7 @@ class CommandAddPersonality(BrokerCommand):
 
     def render(self, session, logger, personality, archetype, grn, eon_id,
                host_environment, comments, cluster_required, copy_from,
-               copy_stage, config_override, **arguments):
+               copy_stage, config_override, staged, **arguments):
         if not VALID_PERSONALITY_RE.match(personality):
             raise ArgumentError("Personality name '%s' is not valid." %
                                 personality)
@@ -58,6 +58,8 @@ class CommandAddPersonality(BrokerCommand):
                 cluster_required = dbfrom_persona.cluster_required
             if comments is None:
                 comments = dbfrom_persona.comments
+            if staged is None:
+                staged = dbfrom_persona.staged
 
             if dbfrom_persona.config_override:
                 logger.warn("{0} has config_override set. This setting will "
@@ -94,9 +96,9 @@ class CommandAddPersonality(BrokerCommand):
                            config=self.config)
 
         dbpersona = Personality(name=personality, archetype=dbarchetype,
-                                cluster_required=bool(cluster_required),
+                                cluster_required=cluster_required,
                                 host_environment=dbhost_env, owner_grn=dbgrn,
-                                comments=comments,
+                                staged=staged, comments=comments,
                                 config_override=config_override)
         session.add(dbpersona)
 

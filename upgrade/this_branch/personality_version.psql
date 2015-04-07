@@ -99,3 +99,7 @@ ALTER TABLE static_route DROP COLUMN personality_id;
 ALTER TABLE static_route ADD CONSTRAINT static_route_pers_st_fk
 	FOREIGN KEY (personality_stage_id) REFERENCES personality_stage (id) ON DELETE CASCADE;
 CREATE INDEX static_route_pers_st_idx ON static_route (personality_stage_id);
+
+ALTER TABLE personality ADD staged BOOLEAN;
+UPDATE personality SET staged = 'f';
+ALTER TABLE personality ALTER COLUMN staged SET NOT NULL;

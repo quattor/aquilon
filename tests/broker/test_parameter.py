@@ -61,7 +61,7 @@ class TestParameter(TestBrokerCommand):
 
         err = self.notfoundtest(SHOW_CMD)
         self.matchoutput(err,
-                         "No parameters found for personality %s/%s@current." %
+                         "No parameters found for personality %s/%s." %
                          (ARCHETYPE, PERSONALITY), SHOW_CMD)
 
     def test_100_add_re_path(self):
@@ -410,7 +410,7 @@ class TestParameter(TestBrokerCommand):
         out = self.commandtest(cmd)
         self.searchoutput(out,
                           r'Differences for Parameters:\s*'
-                          r'missing Parameters in Personality aquilon/eaitools@current:\s*'
+                          r'missing Parameters in Personality aquilon/eaitools:\s*'
                           r'//action/testaction/command\s*'
                           r'//action/testaction/user\s*'
                           r'//action/testaction2/command\s*'
@@ -447,27 +447,22 @@ class TestParameter(TestBrokerCommand):
         out = self.commandtest(cmd)
         self.searchoutput(out,
                           r'Host Personality: compileserver Archetype: aquilon\s*'
-                          r'Stage: current\s*'
                           r'espinfo/function: "development"',
                           cmd)
         self.searchoutput(out,
                           r'Host Personality: inventory Archetype: aquilon\s*'
-                          r'Stage: current\s*'
                           r'espinfo/function: "development"',
                           cmd)
         self.searchoutput(out,
                           r'Host Personality: unixeng-test Archetype: aquilon\s*'
-                          r'Stage: current\s*'
                           r'espinfo/function: "development"',
                           cmd)
         self.searchoutput(out,
                           r'Host Personality: testpersona/dev Archetype: aquilon\s*'
-                          r'Stage: current\s*'
                           r'espinfo/function: "production"',
                           cmd)
         self.searchoutput(out,
                           r'Host Personality: eaitools Archetype: aquilon\s*'
-                          r'Stage: current\s*'
                           r'espinfo/function: "development"',
                           cmd)
 
@@ -476,7 +471,6 @@ class TestParameter(TestBrokerCommand):
         out = self.commandtest(cmd)
         self.searchoutput(out,
                           r'Host Personality: testpersona/dev Archetype: aquilon\s*'
-                          r'Stage: current\s*'
                           r'action: {\s*'
                           r'"testaction": {\s*"command": "/bin/testaction",\s*"user": "user2"\s*},\s*'
                           r'"testaction2": {\s*"command": "/bin/testaction2",\s*"user": "user1",\s*"timeout": 100\s*}\s*}',

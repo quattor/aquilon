@@ -33,20 +33,15 @@
 		<arg choice="plain"><option>--grn <replaceable>GRN</replaceable></option></arg>
 		<arg choice="plain"><option>--eon_id <replaceable>EON_ID</replaceable></option></arg>
 	    </group>
-	    <group choice="opt">
-	         <arg choice="plain"><option>--cluster_required</option></arg>
-	         <arg choice="plain"><option>--nocluster_required</option></arg>
-	    </group>
+	    <arg choice="opt"><option>--cluster_required</option></arg>
 	    <arg choice="opt"><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
 	    <group choice="opt">
 		<arg choice="plain"><option>--copy_from <replaceable>SRC_PERSONALITY</replaceable></option></arg>
 		<arg choice="opt"><option>--copy_stage <replaceable>SRC_STAGE</replaceable></option></arg>
 	    </group>
 	    <arg choice="opt"><option>--host_environment <replaceable>HOSTENV</replaceable></option></arg>
-	    <group choice="opt">
-	          <arg choice="plain"><option>--config_override</option></arg>
-	          <arg choice="plain"><option>--noconfig_override</option></arg>
-	    </group>
+	    <arg choice="opt"><option>--config_override</option></arg>
+	    <arg choice="opt"><option>--staged</option></arg>
 	    <xi:include href="../common/global_options.xml"/>
 	</cmdsynopsis>
     </refsynopsisdiv>
@@ -114,7 +109,7 @@
 	    </varlistentry>
 	    <varlistentry>
 	        <term>
-		    <option>--cluster_required</option>, <option>--nocluster_required</option>
+		    <option>--cluster_required</option>
 		</term>
 		<listitem>
 		    <para>
@@ -157,7 +152,7 @@
 	    </varlistentry>
 	    <varlistentry>
 	        <term>
-		    <option>--config_override</option>, <option>--noconfig_override</option>
+		    <option>--config_override</option>
 		</term>
 		<listitem>
                     <para>
@@ -165,6 +160,17 @@
 			in the aqdb generated personality configuration template. This feature
 			effectively pulls in config_override.tpl from the personality templates in the template
 			domain, if it exists.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--staged</option>
+		</term>
+		<listitem>
+                    <para>
+			If this flag is specified, the personality will be staged, and changes will be
+			applied to the "next" stage.
 		    </para>
 		</listitem>
 	    </varlistentry>

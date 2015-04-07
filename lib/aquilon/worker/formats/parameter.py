@@ -135,7 +135,10 @@ class SimpleParameterListFormatter(ListFormatter):
             details.append(indent + "{0} {1:c}: {1.name} {2:c}: {2.name}"
                            .format(description, dbstage.personality,
                                    dbstage.archetype))
-            details.append(indent + "  Stage: {0.name}".format(dbstage))
+
+            if dbstage.staged:
+                details.append(indent + "  Stage: {0.name}".format(dbstage))
+
             for ikey, ivalue in v.items():
                 details.extend(indented_value(indent + "  ", ikey, ivalue))
         return "\n".join(details)

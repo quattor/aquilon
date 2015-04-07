@@ -124,8 +124,10 @@ class NetworkFormatter(ObjectFormatter):
                 details.append(indent + "    {0:c}: {0.name} {1:c}: {1.name}"
                                .format(route.personality_stage.personality,
                                        route.personality_stage.archetype))
-                details.append(indent + "        Stage: %s" %
-                               route.personality_stage.name)
+
+                if route.personality_stage.staged:
+                    details.append(indent + "        Stage: %s" %
+                                   route.personality_stage.name)
             if route.comments:
                 details.append(indent + "    Comments: %s" % route.comments)
 

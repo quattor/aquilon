@@ -85,7 +85,7 @@ class TestAddRequiredService(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
                          "Required for Personality: unixeng-test "
-                         "Archetype: aquilon Stage: current",
+                         "Archetype: aquilon",
                          command)
 
     def test_130_add_utsvc(self):
@@ -145,7 +145,7 @@ class TestAddRequiredService(TestBrokerCommand):
                    "--archetype", "aquilon", "--personality", "unixeng-test"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Service chooser1 is already required by "
-                         "personality aquilon/unixeng-test@current.",
+                         "personality aquilon/unixeng-test.",
                          command)
 
     def test_200_no_justification(self):

@@ -3174,9 +3174,10 @@
 	<optgroup>
 	    <option name="copy_stage" type="string">Personality stage to copy, defaults to 'current'.</option>
 	    <option name="host_environment" type="string">Environment for hosts assigned to this personality [dev|qa|uat|prod|infra]</option>
-	    <option name="cluster_required" type="boolean" default='False'>Does this personality require hosts to be clustered?</option>
+	    <option name="cluster_required" type="flag">Does this personality require hosts to be clustered?</option>
 	    <option name="comments" type="string">Comments</option>
-	    <option name="config_override" type="boolean" default='False'>Include external personality config override template</option>
+	    <option name="config_override" type="flag">Include external personality config override template</option>
+	    <option name="staged" type="flag">Enable staged personality updates</option>
 	</optgroup>
 	<transport method="put" path="personality/archetype/%(archetype)s/personality/%(personality)s"/>
   </command>
@@ -3293,6 +3294,7 @@
 	    <option name="config_override" type="boolean">Include external personality config override template</option>
 	    <option name="host_environment" type="string">Environment for Hosts assigned to this personality [dev|qa|uat|prod|infra]</option>
 	    <option name="leave_existing" type="flag">Do not propagate GRN changes to hosts in the personality</option>
+	    <option name="staged" type="boolean" reverse="unstaged">Enable/disable staged personality updates</option>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
 	    <option name="reason" type="string">String to be specified if justification='emergency'</option>
 	    <option name="comments" type="string">Comments</option>
