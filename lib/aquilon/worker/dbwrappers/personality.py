@@ -19,13 +19,17 @@
 from sqlalchemy.orm.session import object_session
 
 from aquilon.exceptions_ import AuthorizationException
-from aquilon.aqdb.model import Host
+from aquilon.aqdb.model import Host, Cluster
 from aquilon.worker.commands.deploy import validate_justification
 
 
 def is_prod_personality_used(dbpersona):
     session = object_session(dbpersona)
-    q = session.query(Host.hardware_entity_id).filter_by(personality=dbpersona)
+    if dbpersona.archetype.cluster_type:
+        q = session.query(Cluster.id)
+    else:
+        q = session.query(Host.hardware_entity_id)
+    q = q.filter_by(personality=dbpersona)
 
     if dbpersona.host_environment.name == 'prod' and q.count() > 0:
         return True
