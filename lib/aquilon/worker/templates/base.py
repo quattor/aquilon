@@ -70,7 +70,10 @@ class Plenary(object):
         self.new_content = None
 
         # We may no longer be able to calculate this during remove()
-        self.debug_name = str(dbobj)
+        try:
+            self.debug_name = str(dbobj.qualified_name)
+        except AttributeError:
+            self.debug_name = str(dbobj)
 
         # The following attributes are for stash/restore_stash
         self.old_path = self.full_path(dbobj)
