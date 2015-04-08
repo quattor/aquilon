@@ -534,8 +534,8 @@ class PlenaryCollection(object):
 
     def get_key(self, exclusive=True):
         keylist = [NoLockKey(logger=self.logger)]
-        for plen in self.plenaries:
-            keylist.append(plen.get_key(exclusive=exclusive))
+        keylist.extend(plen.get_key(exclusive=exclusive)
+                       for plen in self.plenaries)
         return CompileKey.merge(keylist)
 
     def stash(self):

@@ -71,8 +71,7 @@ class CommandCompile(BrokerCommand):
         q2 = q2.filter(and_(Cluster.branch == dbdomain,
                             Cluster.sandbox_author == dbauthor))
 
-        for si in q1.union(q2):
-            plenaries.append(Plenary.get_plenary(si))
+        plenaries.extend(map(Plenary.get_plenary, q1.union(q2)))
 
         if pancdebug:
             pancinclude = r'.*'

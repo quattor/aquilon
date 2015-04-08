@@ -87,9 +87,7 @@ def update_grn_map(config, session, logger):
         raise ArgumentError("GRN synchronization is disabled.")
 
     q = session.query(Grn)
-    grns = {}
-    for dbgrn in q:
-        grns[dbgrn.eon_id] = dbgrn
+    grns = dict((dbgrn.eon_id, dbgrn) for dbgrn in q)
 
     name = os.path.join(config.get("broker", "grn_to_eonid_map_location"),
                         "eon_catalog.csv")

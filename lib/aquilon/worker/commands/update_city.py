@@ -76,8 +76,7 @@ class CommandUpdateCity(BrokerCommand):
             q = session.query(Machine)
             q = q.filter(Machine.location_id.in_(dbcity.offspring_ids()))
             logger.client_info("Updating %d machines..." % q.count())
-            for dbmachine in q:
-                plenaries.append(Plenary.get_plenary(dbmachine))
+            plenaries.extend(map(Plenary.get_plenary, q))
 
         count = plenaries.write()
         dsdb_runner.commit_or_rollback()

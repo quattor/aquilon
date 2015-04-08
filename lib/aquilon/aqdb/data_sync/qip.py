@@ -75,24 +75,20 @@ class QIPRefresh(object):
 
         # Cache building and bunker information. Load all buildings even if
         # we're interested in only one, so we can verify subnetdata.txt
-        self.buildings = {}
-        for item in session.query(Building):
-            self.buildings[item.name] = item
-        self.bunkers = {}
-        for item in session.query(Bunker):
-            self.bunkers[item.name] = item
+        self.buildings = dict((item.name, item)
+                              for item in session.query(Building))
+        self.bunkers = dict((item.name, item)
+                            for item in session.query(Bunker))
 
         # Used to limit the number of warnings
         self.unknown_syslocs = set()
 
         # Load existing networks. We have to load all, otherwise we won't be
         # able to fix networks with wrong location
-        self.aqnetworks = {}
         q = session.query(Network)
         q = q.filter_by(network_environment=self.net_env)
         q = q.options(subqueryload("routers"))
-        for item in q:
-            self.aqnetworks[item.ip] = item
+        self.aqnetworks = dict((item.ip, item) for item in q)
 
         # Save how many networks we had initially
         self.networks_before = len(self.aqnetworks)

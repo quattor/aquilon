@@ -61,8 +61,7 @@ class CommandCompilePersonality(BrokerCommand):
         dbdomain, dbauthor = validate_branch_author(host_list)
 
         plenaries = PlenaryCollection(logger=logger)
-        for host in host_list:
-            plenaries.append(Plenary.get_plenary(host))
+        plenaries.extend(map(Plenary.get_plenary, host_list))
 
         dom = TemplateDomain(dbdomain, dbauthor, logger=logger)
         with plenaries.get_key():

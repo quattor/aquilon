@@ -86,8 +86,7 @@ class CommandUpdateBuilding(BrokerCommand):
             if dbcity.campus and (old_city.campus != dbcity.campus):
                 dsdb_runner.add_campus_building(dbcity.campus, building)
 
-            for dbobj in q:
-                plenaries.append(Plenary.get_plenary(dbobj))
+            plenaries.extend(map(Plenary.get_plenary, q))
 
         session.flush()
 

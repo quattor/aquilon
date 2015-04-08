@@ -56,8 +56,7 @@ class CommandRefreshWindowsHosts(BrokerCommand):
 
         if containers:
             plenaries = PlenaryCollection(logger=logger)
-            for container in containers:
-                plenaries.append(Plenary.get_plenary(container))
+            plenaries.extend(map(Plenary.get_plenary, containers))
             plenaries.write()
         if partial_error:
             raise partial_error

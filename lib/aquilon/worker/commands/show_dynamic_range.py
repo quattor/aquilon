@@ -38,11 +38,9 @@ class CommandShowDynamicRange(BrokerCommand):
         if ip:
             dbnetwork = get_net_id_from_ip(session, ip)
 
-        all_stubs = {}
         q = session.query(DynamicStub.ip)
         q = q.filter_by(network=dbnetwork)
-        for stub in q:
-            all_stubs[int(stub.ip)] = True
+        all_stubs = frozenset(int(stub.ip) for stub in q)
 
         start = int(ip)
         while start > int(dbnetwork.ip) and start - 1 in all_stubs:

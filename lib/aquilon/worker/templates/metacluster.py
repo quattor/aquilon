@@ -102,9 +102,9 @@ class PlenaryMetaClusterObject(ObjectPlenary):
             keylist.append(PlenaryKey(exclusive=False,
                                       personality=self.dbobj.personality,
                                       logger=self.logger))
-            for si in self.dbobj.services_used:
-                keylist.append(PlenaryKey(exclusive=False, service_instance=si,
-                                          logger=self.logger))
+            keylist.extend(PlenaryKey(exclusive=False, service_instance=si,
+                                      logger=self.logger)
+                           for si in self.dbobj.services_used)
             if self.dbobj.virtual_switch:
                 keylist.append(PlenaryKey(exclusive=False,
                                           virtual_switch=self.dbobj.virtual_switch,

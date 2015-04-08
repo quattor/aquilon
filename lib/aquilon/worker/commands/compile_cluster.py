@@ -47,9 +47,7 @@ class CommandCompileCluster(BrokerCommand):
                              logger=logger)
 
         plenaries = PlenaryCollection(logger=logger)
-
-        for dbobj in dbcluster.all_objects():
-            plenaries.append(Plenary.get_plenary(dbobj))
+        plenaries.extend(map(Plenary.get_plenary, dbcluster.all_objects()))
 
         with plenaries.get_key():
             dom.compile(session, only=plenaries.object_templates,

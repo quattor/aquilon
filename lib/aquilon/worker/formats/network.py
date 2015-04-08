@@ -150,8 +150,7 @@ class NetworkFormatter(ObjectFormatter):
         if not indirect_attrs:
             return
 
-        for router in net.routers:
-            skeleton.routers.append(str(router.ip))
+        skeleton.routers.extend(str(router.ip) for router in net.routers)
 
         # Bulk load information about anything having a network address on this
         # network

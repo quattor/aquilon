@@ -140,8 +140,8 @@ def remove_host(logger, dbhw, plenaries, remove_plenaries):
     del dbhost.services_used[:]
 
     if dbhost.resholder:
-        for res in dbhost.resholder.resources:
-            remove_plenaries.append(Plenary.get_plenary(res))
+        remove_plenaries.extend(map(Plenary.get_plenary,
+                                    dbhost.resholder.resources))
 
     if dbhost.cluster:
         dbcluster = dbhost.cluster
@@ -203,8 +203,7 @@ def hostlist_to_hosts(session, hostlist, query_options=None,
 
         missing = set(parsed_fqdns)
         missing.difference_update(dns_domains)
-        for item in missing:
-            failed.append("DNS Domain %s not found." % item)
+        failed.extend("DNS Domain %s not found." % item for item in missing)
 
     def look_up_dns_records():
         for dbdns_domain in itervalues(dns_domains):
@@ -223,8 +222,7 @@ def hostlist_to_hosts(session, hostlist, query_options=None,
 
         missing = set(hostlist)
         missing.difference_update(dns_records_by_name)
-        for item in missing:
-            failed.append("Host %s not found." % item)
+        failed.extend("Host %s not found." % item for item in missing)
 
     def look_up_hosts():
         hosts_by_fqdn = {}
@@ -248,8 +246,7 @@ def hostlist_to_hosts(session, hostlist, query_options=None,
         # rather than from hostlist
         missing = set(dns_records_by_name)
         missing.difference_update(hosts_by_fqdn)
-        for item in missing:
-            failed.append("Host %s not found." % item)
+        failed.extend("Host %s not found." % item for item in missing)
 
         return hosts_by_fqdn.values()
 
@@ -267,9 +264,8 @@ def hostlist_to_hosts(session, hostlist, query_options=None,
 
 
 def preload_machine_data(session, dbhosts):
-    hw_by_id = {}
-    for dbhost in dbhosts:
-        hw_by_id[dbhost.hardware_entity.id] = dbhost.hardware_entity
+    hw_by_id = dict((dbhost.hardware_entity.id, dbhost.hardware_entity)
+                    for dbhost in dbhosts)
 
     # Not all hosts are bound to machines, so load the machine-specific
     # attributes separately
