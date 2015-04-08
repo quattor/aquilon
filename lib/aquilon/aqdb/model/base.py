@@ -344,30 +344,31 @@ class Base(object):
 
         The function works by issuing a SELECT ... FOR UPDATE query.
         """
+
+        # We need to peek at an element, and that would be tricky if objects is
+        # e.g. a generator expression, so force it to a list
+        objects = list(objects)
+
         if not objects:
             return
 
-        # This odd construct works for any iterable type, including set
-        for any_obj in objects:
-            break
-
-        session = object_session(any_obj)
+        session = object_session(objects[0])
         if not session:  # pragma: no cover
             raise InternalError("lock_rows() called on a detached object %r" %
-                                any_obj)
+                                objects[0])
 
-        mapper = inspect(any_obj).mapper
+        mapper = inspect(objects[0]).mapper
 
         pk = mapper.primary_key
         if len(pk) != 1:  # pragma: no cover
             raise InternalError("lock_rows() does not work with composite "
                                 "primary keys")
 
-        # This allows mixing single-table inheritance classes
+        # This still allows mixing single-table inheritance classes
         for obj in objects:
             if inspect(obj).mapper.primary_key != pk:  # pragma: no cover
-                raise InternalError("lock_rows() does work with objects from "
-                                    "multiple tables")
+                raise InternalError("lock_rows() does not work with objects "
+                                    "from multiple tables")
 
         col = pk[0]
         values = [getattr(obj, col.key) for obj in objects]
