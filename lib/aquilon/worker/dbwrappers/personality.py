@@ -25,7 +25,7 @@ from aquilon.worker.commands.deploy import validate_justification
 
 def is_prod_personality_used(dbpersona):
     session = object_session(dbpersona)
-    if dbpersona.archetype.cluster_type:
+    if dbpersona.is_cluster:
         q = session.query(Cluster.id)
     else:
         q = session.query(Host.hardware_entity_id)

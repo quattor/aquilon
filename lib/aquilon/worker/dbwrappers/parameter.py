@@ -174,11 +174,12 @@ def validate_parameter(session, path, value, param_holder, featurelink=None):
 def validate_rebuild_required(session, path, param_holder):
     """ check if this parameter requires hosts to be in non-ready state
     """
-    q = session.query(Host)
     dbready = Ready.get_instance(session)
     dbalmostready = Almostready.get_instance(session)
-    q = q.filter(or_(Host.status == dbready, Host.status == dbalmostready))
     personality = param_holder.personality
+
+    q = session.query(Host.hardware_entity_id)
+    q = q.filter(or_(Host.status == dbready, Host.status == dbalmostready))
     if isinstance(param_holder, PersonalityParameter):
         q = q.filter_by(personality=personality)
     if q.count():

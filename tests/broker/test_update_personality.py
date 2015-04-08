@@ -110,7 +110,9 @@ class TestUpdatePersonality(VerifyGrnsMixin, TestBrokerCommand):
         command = ["update_personality", "--personality=testovrpersona/dev",
                    "--archetype=aquilon", "--host_environment=infra"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "The personality 'testovrpersona/dev' already has env set to 'dev' and cannot be updated",
+        self.matchoutput(out,
+                         "Personality aquilon/testovrpersona/dev already has "
+                         "its environment set to dev, and cannot be updated.",
                          command)
 
     def test_139_delete_testovrpersona_dev(self):
@@ -287,7 +289,7 @@ class TestUpdatePersonality(VerifyGrnsMixin, TestBrokerCommand):
                    "--cluster",
                    "--justification", "tcm=12345678"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "The personality vulcan-10g-server-prod is in use", command)
+        self.matchoutput(out, "Personality esx_cluster/vulcan-10g-server-prod is in use", command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUpdatePersonality)

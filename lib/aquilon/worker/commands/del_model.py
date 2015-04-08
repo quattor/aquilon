@@ -16,9 +16,8 @@
 # limitations under the License.
 """Contains the logic for `aq del model`."""
 
-
 from aquilon.exceptions_ import ArgumentError
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import (Vendor, Model, HardwareEntity, MachineSpecs,
                                 Interface)
 
@@ -33,20 +32,20 @@ class CommandDelModel(BrokerCommand):
                                    compel=True)
 
         if dbmodel.model_type.isNic():
-            q = session.query(Interface)
+            q = session.query(Interface.id)
             q = q.filter_by(model=dbmodel)
-            if q.first():
+            if q.count():
                 raise ArgumentError("{0} is still in use and cannot be "
                                     "deleted.".format(dbmodel))
-            q = session.query(MachineSpecs)
+            q = session.query(MachineSpecs.id)
             q = q.filter_by(nic_model=dbmodel)
-            if q.first():
+            if q.count():
                 raise ArgumentError("{0} is still referenced by machine models and "
                                     "cannot be deleted.".format(dbmodel))
         else:
-            q = session.query(HardwareEntity)
+            q = session.query(HardwareEntity.id)
             q = q.filter_by(model=dbmodel)
-            if q.first():
+            if q.count():
                 raise ArgumentError("{0} is still in use and cannot be "
                                     "deleted.".format(dbmodel))
 

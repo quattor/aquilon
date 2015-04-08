@@ -22,7 +22,7 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import (Personality, PersonalityESXClusterInfo,
                                 Cluster, Host, HostEnvironment)
 from aquilon.aqdb.model.cluster import restricted_builtins
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.grn import lookup_grn
 from aquilon.worker.templates import Plenary, PlenaryCollection
 from aquilon.worker.dbwrappers.personality import validate_personality_justification
@@ -82,14 +82,15 @@ class CommandUpdatePersonality(BrokerCommand):
         if cluster_required is not None and \
            dbpersona.cluster_required != cluster_required:
             if dbpersona.is_cluster:
-                q = session.query(Cluster)
+                q = session.query(Cluster.id)
             else:
-                q = session.query(Host)
+                q = session.query(Host.hardware_entity_id)
             q = q.filter_by(personality=dbpersona)
-            # XXX: Ideally, filter based on hosts that are/arenot in cluster
+            # XXX: Ideally, filter based on hosts/clusters that are/arenot in
+            # cluster/metacluster
             if q.count() > 0:
-                raise ArgumentError("The personality {0} is in use and cannot "
-                                    "be modified".format(str(dbpersona)))
+                raise ArgumentError("{0} is in use, the cluster requirement "
+                                    "cannot be modified.".format(dbpersona))
             dbpersona.cluster_required = cluster_required
 
         if host_environment is not None:
@@ -98,8 +99,8 @@ class CommandUpdatePersonality(BrokerCommand):
                 Personality.validate_env_in_name(personality, dbhost_env.name)
                 dbpersona.host_environment = dbhost_env
             else:
-                raise ArgumentError("The personality '{0!s}' already has env set to '{1!s}'"
-                                    " and cannot be updated"
+                raise ArgumentError("{0} already has its environment set to "
+                                    "{1!s}, and cannot be updated."
                                     .format(dbpersona, dbpersona.host_environment))
 
         plenaries = PlenaryCollection(logger=logger)

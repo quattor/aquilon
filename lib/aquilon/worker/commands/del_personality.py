@@ -18,7 +18,7 @@
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Personality, Host, Cluster
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.templates import Plenary
 
 
@@ -30,9 +30,12 @@ class CommandDelPersonality(BrokerCommand):
         dbpersona = Personality.get_unique(session, name=personality,
                                            archetype=archetype, compel=True)
 
-        dbhost = session.query(Host).filter_by(personality=dbpersona).first()
-        dbcls = session.query(Cluster).filter_by(personality=dbpersona).first()
-        if dbhost or dbcls:
+        if dbpersona.is_cluster:
+            q = session.query(Cluster.id)
+        else:
+            q = session.query(Host.hardware_entity_id)
+        q = q.filter_by(personality=dbpersona)
+        if q.count():
             raise ArgumentError("{0} is still in use and cannot be deleted."
                                 .format(dbpersona))
 

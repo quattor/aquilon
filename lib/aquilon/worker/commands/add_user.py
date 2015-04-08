@@ -38,9 +38,9 @@ class CommandAddUser(BrokerCommand):
             last_uid = session.query(func.max(User.uid)).scalar()
             uid = last_uid + 1
         else:
-            q = session.query(User)
+            q = session.query(User.id)
             q = q.filter_by(uid=uid)
-            if q.first():
+            if q.count():
                 raise ArgumentError("UID %s is already in use." % uid)
 
         dbuser = User(name=username, uid=uid, gid=gid, full_name=full_name,

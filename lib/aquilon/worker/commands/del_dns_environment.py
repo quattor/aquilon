@@ -14,11 +14,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Contains the logic for `aq add dns_domain`."""
-
+"""Contains the logic for `aq del dns environment`."""
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import (DnsEnvironment, RouterAddress,
                                 AddressAssignment, Fqdn)
 
@@ -35,9 +34,9 @@ class CommandDelDnsEnvironment(BrokerCommand):
             raise ArgumentError("{0} is the default DNS environment, "
                                 "therefore it cannot be deleted."
                                 .format(db_dnsenv))
-        q = session.query(Fqdn)
+        q = session.query(Fqdn.id)
         q = q.filter_by(dns_environment=db_dnsenv)
-        if q.first():
+        if q.count():
             raise ArgumentError("{0} is still in use by DNS records, and "
                                 "cannot be deleted.".format(db_dnsenv))
 
@@ -47,9 +46,9 @@ class CommandDelDnsEnvironment(BrokerCommand):
             raise ArgumentError("{0} is still in use by routers, and "
                                 "cannot be deleted.".format(db_dnsenv))
 
-        q = session.query(AddressAssignment)
+        q = session.query(AddressAssignment.id)
         q = q.filter_by(dns_environment=db_dnsenv)
-        if q.first():
+        if q.count():
             raise ArgumentError("{0} is still in use by address assignments, "
                                 "and cannot be deleted.".format(db_dnsenv))
 
