@@ -242,6 +242,23 @@ class TestUpdatePersonality(VerifyGrnsMixin, TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "Stage: current", command)
 
+    def test_172_verify_next(self):
+        command = ["show_personality", "--personality", "unixeng-test",
+                   "--archetype", "aquilon", "--personality_stage", "next"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Stage: next", command)
+
+    def test_174_delete_next(self):
+        self.noouttest(["del_personality", "--personality", "unixeng-test",
+                        "--archetype", "aquilon", "--personality_stage", "next"])
+
+    def test_175_verify_next_gone(self):
+        command = ["show_personality", "--personality", "unixeng-test",
+                   "--archetype", "aquilon", "--personality_stage", "next"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out, "Personality aquilon/unixeng-test does not have "
+                         "stage next.", command)
+
     def test_178_make_unstaged(self):
         self.noouttest(["update_personality", "--personality", "compileserver",
                         "--archetype", "aquilon", "--unstaged"])

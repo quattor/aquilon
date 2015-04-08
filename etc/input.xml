@@ -3277,6 +3277,10 @@
 	    <option name="personality" type="string">The name to delete</option>
 	    <option name="archetype" type="string">Which archetype to use</option>
 	</optgroup>
+	<optgroup>
+	    <option name="personality_stage" type="string">Personality stage to delete</option>
+	</optgroup>
+	<transport method="delete" trigger="personality_stage" path="personality/archetype/%(archetype)s/personality/%(personality)s/stage/%(personality_stage)s"/>
 	<transport method="delete" path="personality/archetype/%(archetype)s/personality/%(personality)s"/>
   </command>
 

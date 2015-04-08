@@ -288,7 +288,9 @@ class Plenary(object):
                 self.new_path = self.full_path(self.dbobj)
         else:
             # Ouch. Personality parameters...
-            self.new_path = self.full_path(self.dbobj)
+            state = inspect(self.dbobj.personality_stage)
+            if not state.deleted:
+                self.new_path = self.full_path(self.dbobj)
 
         try:
             self.old_content = self.read()

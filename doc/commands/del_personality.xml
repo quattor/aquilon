@@ -29,6 +29,7 @@
 	    </group>
 	    <arg choice="plain"><option>--personality <replaceable>PERSONALITY</replaceable></option></arg>
 	    <arg choice="plain"><option>--archetype <replaceable>ARCHETYPE</replaceable></option></arg>
+	    <arg choice="opt"><option>--personality_stage <replaceable>STAGE</replaceable></option></arg>
 	    <xi:include href="../common/global_options.xml"/>
 	</cmdsynopsis>
     </refsynopsisdiv>
@@ -62,6 +63,17 @@
 		<listitem>
 		    <para>
                         The name of the archteype.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--personality_stage <replaceable>STAGE</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Delete just a single stage of the personality. Currenrly, only the <literal>next</literal>
+			stage can be deleted.
 		    </para>
 		</listitem>
 	    </varlistentry>
