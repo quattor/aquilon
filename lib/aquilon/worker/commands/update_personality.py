@@ -146,27 +146,28 @@ class CommandUpdatePersonality(BrokerCommand):
 
         session.flush()
 
-        q = session.query(Cluster)
-        q = q.with_polymorphic("*")
-        # The validation will touch all member hosts/machines, so it's better to
-        # pre-load everything
-        q = q.options(subqueryload('_hosts'),
-                      joinedload('_hosts.host'),
-                      joinedload('_hosts.host.hardware_entity'),
-                      joinedload('resholder'),
-                      subqueryload('resholder.resources'))
-        # TODO: preload virtual machines
-        q = q.filter_by(personality_stage=dbstage)
-        clusters = q.all()
-        failures = []
-        for cluster in clusters:
-            try:
-                cluster.validate()
-            except ArgumentError as err:
-                failures.append(err.message)
-        if failures:
-            raise ArgumentError("Validation failed for the following "
-                                "clusters:\n%s" % "\n".join(failures))
+        if dbpersona.is_cluster:
+            q = session.query(Cluster)
+            q = q.with_polymorphic("*")
+            # The validation will touch all member hosts/machines, so it's better to
+            # pre-load everything
+            q = q.options(subqueryload('_hosts'),
+                          joinedload('_hosts.host'),
+                          joinedload('_hosts.host.hardware_entity'),
+                          joinedload('resholder'),
+                          subqueryload('resholder.resources'))
+            # TODO: preload virtual machines
+            q = q.filter_by(personality_stage=dbstage)
+            clusters = q.all()
+            failures = []
+            for cluster in clusters:
+                try:
+                    cluster.validate()
+                except ArgumentError as err:
+                    failures.append(err.message)
+            if failures:
+                raise ArgumentError("Validation failed for the following "
+                                    "clusters:\n%s" % "\n".join(failures))
 
         plenaries.write()
 
