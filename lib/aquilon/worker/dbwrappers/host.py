@@ -195,10 +195,11 @@ def hostlist_to_hosts(session, hostlist, query_options=None,
             parsed_fqdns[dns_domain].append(short)
 
     def look_up_dns_domains():
-        q = session.query(DnsDomain)
-        q = q.filter(DnsDomain.name.in_(parsed_fqdns))
-        for dbdns_domain in q:
-            dns_domains[dbdns_domain.name] = dbdns_domain
+        if parsed_fqdns:
+            q = session.query(DnsDomain)
+            q = q.filter(DnsDomain.name.in_(parsed_fqdns))
+            for dbdns_domain in q:
+                dns_domains[dbdns_domain.name] = dbdns_domain
 
         missing = set(parsed_fqdns)
         missing.difference_update(dns_domains)
