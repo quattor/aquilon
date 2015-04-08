@@ -30,7 +30,7 @@ class CommandDelServiceInstance(BrokerCommand):
         dbservice = Service.get_unique(session, service, compel=True)
         dbsi = ServiceInstance.get_unique(session, service=dbservice,
                                           name=instance, compel=True)
-        if dbsi.client_count > 0:
+        if dbsi.client_count:
             raise ArgumentError("Service %s, instance %s still has clients and "
                                 "cannot be deleted." %
                                 (dbservice.name, dbsi.name))

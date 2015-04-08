@@ -26,7 +26,7 @@ class DnsDomainFormatter(ObjectFormatter):
         details = [indent + "{0:c}: {0.name}".format(dns_domain)]
         details.append(indent + "  Restricted: %s" % dns_domain.restricted)
 
-        if len(dns_domain.servers) > 0:
+        if dns_domain.servers:
             server_list = ','.join(str(srv) for srv in dns_domain.servers)
             details.append(indent + "  Servers: %s" % server_list)
 

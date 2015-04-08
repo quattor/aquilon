@@ -46,7 +46,7 @@ class ClusterFormatter(CompileableFormatter):
         if cluster.metacluster:
             skeleton.metacluster = str(cluster.metacluster.name)
 
-        if cluster.resholder and len(cluster.resholder.resources) > 0:
+        if cluster.resholder and cluster.resholder.resources:
             self.redirect_proto(cluster.resholder.resources, skeleton.resources)
 
         self.redirect_proto(cluster.services_used, skeleton.aligned_services,

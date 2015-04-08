@@ -97,7 +97,7 @@ class CommandSplitNetwork(BrokerCommand):
                 q = session.query(Network)
                 q = q.filter_by(network_environment=dbnet_env)
                 q = q.filter_by(name=name)
-                if q.count() == 0:
+                if not q.count():
                     break
 
                 # Should not happen...

@@ -96,7 +96,7 @@ class MetaClusterFormatter(CompileableFormatter):
         if metacluster.max_clusters is not None:
             skeleton.max_members = metacluster.max_clusters
 
-        if metacluster.resholder and len(metacluster.resholder.resources) > 0:
+        if metacluster.resholder and metacluster.resholder.resources:
             self.redirect_proto(metacluster.resholder.resources,
                                 skeleton.resources)
 

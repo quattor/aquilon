@@ -103,7 +103,7 @@ class CommandBindFeature(BrokerCommand):
             else:
                 validate_personality_justification(dbpersonality, user,
                                                    justification, reason)
-        elif cnt > 0:
+        elif cnt:
             if not justification:
                 raise AuthorizationException("Changing feature bindings for "
                                              "more than just a personality "

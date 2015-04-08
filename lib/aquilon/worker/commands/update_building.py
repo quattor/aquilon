@@ -71,7 +71,7 @@ class CommandUpdateBuilding(BrokerCommand):
                 maps = maps + session.query(map_type).\
                     filter_by(location=old_city).count()
 
-            if maps > 0:
+            if maps:
                 logger.client_info("There are {0} service(s) mapped to the "
                                    "old location of the ({1:l}), please "
                                    "review and manually update mappings for "

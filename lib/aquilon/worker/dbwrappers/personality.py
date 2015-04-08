@@ -31,7 +31,7 @@ def is_prod_personality_used(dbpersona):
         q = session.query(Host.hardware_entity_id)
     q = q.filter_by(personality=dbpersona)
 
-    if dbpersona.host_environment.name == 'prod' and q.count() > 0:
+    if dbpersona.host_environment.name == 'prod' and q.count():
         return True
 
     return False

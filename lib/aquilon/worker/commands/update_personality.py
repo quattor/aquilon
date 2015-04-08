@@ -88,7 +88,7 @@ class CommandUpdatePersonality(BrokerCommand):
             q = q.filter_by(personality=dbpersona)
             # XXX: Ideally, filter based on hosts/clusters that are/arenot in
             # cluster/metacluster
-            if q.count() > 0:
+            if q.count():
                 raise ArgumentError("{0} is in use, the cluster requirement "
                                     "cannot be modified.".format(dbpersona))
             dbpersona.cluster_required = cluster_required
@@ -149,7 +149,7 @@ class CommandUpdatePersonality(BrokerCommand):
                 cluster.validate()
             except ArgumentError as err:
                 failures.append(err.message)
-        if len(failures):
+        if failures:
             raise ArgumentError("Validation failed for the following "
                                 "clusters:\n%s" % "\n".join(failures))
 

@@ -34,7 +34,7 @@ class CommandUpdateShare(BrokerCommand):
 
         q = session.query(Share).filter_by(name=share)
 
-        if q.count() == 0:
+        if not q.count():
             raise ArgumentError("Share %s is not used on any resource and "
                                 "cannot be modified" % share)
         plenaries = PlenaryCollection(logger=logger)
