@@ -143,6 +143,8 @@ class TestBindFeature(TestBrokerCommand):
     def test_111_verify_show_personality_proto(self):
         command = ["show", "personality", "--personality", "inventory", "--format=proto"]
         personality = self.protobuftest(command, expect=1)[0]
+        self.assertEqual(personality.name, "inventory")
+        self.assertEqual(personality.stage, "")
         feature = personality.features[0]
         self.assertEqual(feature.name, "post_host")
         self.assertEqual(feature.type, "host")

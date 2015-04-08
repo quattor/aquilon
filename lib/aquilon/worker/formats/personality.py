@@ -121,9 +121,8 @@ class PersonalityStageFormatter(PersonalityFormatter):
                                                           embedded=embedded,
                                                           indirect_attrs=indirect_attrs)
 
-        # FIXME
-        # if persst.staged:
-        #     skeleton.version = str(persst.name)
+        if persst.staged:
+            skeleton.stage = str(persst.name)
 
         if indirect_attrs:
             self.redirect_proto(persst.services,

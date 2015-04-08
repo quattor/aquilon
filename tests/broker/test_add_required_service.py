@@ -91,6 +91,19 @@ class TestAddRequiredService(TestBrokerCommand):
         self.matchoutput(out, "Service: chooser2", command)
         self.matchoutput(out, "Service: chooser3", command)
 
+    def test_125_show_personality_next_proto(self):
+        command = ["show_personality", "--archetype=aquilon",
+                   "--personality=unixeng-test",
+                   "--personality_stage=next", "--format", "proto"]
+        personality = self.protobuftest(command, expect=1)[0]
+        self.assertEqual(personality.archetype.name, "aquilon")
+        self.assertEqual(personality.name, "unixeng-test")
+        self.assertEqual(personality.stage, "next")
+        services = set(item.service for item in personality.required_services)
+        self.assertTrue("chooser1" in services)
+        self.assertTrue("chooser2" in services)
+        self.assertTrue("chooser3" in services)
+
     def test_125_show_service(self):
         command = "show service --service chooser1"
         out = self.commandtest(command.split(" "))

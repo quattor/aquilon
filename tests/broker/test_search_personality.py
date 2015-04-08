@@ -17,6 +17,8 @@
 # limitations under the License.
 """Module for testing the search personality command."""
 
+from collections import defaultdict
+
 if __name__ == "__main__":
     from broker import utils
     utils.import_depends()
@@ -97,11 +99,21 @@ class TestSearchPersonality(VerifyGrnsMixin, TestBrokerCommand):
                    "--personality_stage", "current",
                    "--eon_id", 2, "--format=proto"]
         personalities = self.protobuftest(command, expect=12)
-        personality = personalities[0]
+        pers_by_name_ver = defaultdict(dict)
+        for p in personalities:
+            pers_by_name_ver[p.name][p.stage] = p
+
+        personality = pers_by_name_ver["badpersonality"].values()[0]
         self.assertEqual(personality.archetype.name, "aquilon")
         self.assertEqual(personality.name, "badpersonality")
-        # FIXME
-        # self.assertEqual(personality.version, "current")
+        self.assertEqual(personality.stage, "")
+        self.assertEqual(personality.owner_eonid, 2)
+        self.assertEqual(personality.host_environment, "dev")
+
+        personality = pers_by_name_ver["eaitools"]["current"]
+        self.assertEqual(personality.archetype.name, "aquilon")
+        self.assertEqual(personality.name, "eaitools")
+        self.assertEqual(personality.stage, "current")
         self.assertEqual(personality.owner_eonid, 2)
         self.assertEqual(personality.host_environment, "dev")
 
