@@ -5992,5 +5992,14 @@
 	<transport method="delete" path="virtual_switch/%(virtual_switch)s/port_group"/>
     </command>
 
+    <command name="promote">
+	Promote the next stage of a personality to current.
+	<optgroup mandatory="True" fields="all">
+	    <option name="personality" type="string">Name of the personality to promote</option>
+	    <option name="archetype" type="string">Which archetype the personality belongs to</option>
+	</optgroup>
+	<transport method="post" path="personality/archetype/%(archetype)s/personality/%(personality)s/command/promote"/>
+    </command>
+
 </commandline>
 <!-- vim: set ai sw=4: -->

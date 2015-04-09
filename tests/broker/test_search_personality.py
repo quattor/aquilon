@@ -30,7 +30,7 @@ class TestSearchPersonality(VerifyGrnsMixin, TestBrokerCommand):
     def test_100_by_grn(self):
         command = ["search", "personality", "--grn", "grn:/ms/ei/aquilon/aqd"]
         out = self.commandtest(command)
-        self.matchoutput(out, "aquilon/eaitools", command)
+        self.matchoutput(out, "aquilon/eaitools@current", command)
         self.matchoutput(out, "aquilon/utpersonality/dev", command)
         self.matchoutput(out, "esx_cluster/esx_server", command)
         self.matchoutput(out, "esx_cluster/vulcan-10g-server-prod", command)
@@ -57,11 +57,14 @@ class TestSearchPersonality(VerifyGrnsMixin, TestBrokerCommand):
                    "--host_environment", "dev", "--grn", "grn:/ms/ei/aquilon/aqd"]
         out = self.commandtest(command)
         self.matchoutput(out, "aquilon/utpersonality/dev", command)
+        self.matchoutput(out, "aquilon/eaitools@current", command)
+        self.matchoutput(out, "aquilon/eaitools@previous", command)
+        self.matchclean(out, "vulcan-10g-server-prod", command)
 
     def test_100_by_eon_id(self):
         command = ["search", "personality", "--eon_id", 2]
         out = self.commandtest(command)
-        self.matchoutput(out, "aquilon/eaitools", command)
+        self.matchoutput(out, "aquilon/eaitools@current", command)
         self.matchoutput(out, "aquilon/utpersonality/dev", command)
         self.matchoutput(out, "esx_cluster/esx_server", command)
         self.matchoutput(out, "esx_cluster/vulcan-10g-server-prod", command)
@@ -72,6 +75,8 @@ class TestSearchPersonality(VerifyGrnsMixin, TestBrokerCommand):
         command = ["search", "personality", "--host_environment", "dev", "--eon_id", 2]
         out = self.commandtest(command)
         self.matchoutput(out, "aquilon/utpersonality/dev", command)
+        self.matchoutput(out, "aquilon/eaitools@current", command)
+        self.matchoutput(out, "aquilon/eaitools@previous", command)
         self.matchclean(out, "vulcan-10g-server-prod", command)
 
     def test_100_fullinfo(self):
@@ -89,6 +94,7 @@ class TestSearchPersonality(VerifyGrnsMixin, TestBrokerCommand):
 
     def test_100_proto(self):
         command = ["search_personality", "--host_environment", "dev",
+                   "--personality_stage", "current",
                    "--eon_id", 2, "--format=proto"]
         personalities = self.protobuftest(command, expect=12)
         personality = personalities[0]
@@ -115,7 +121,7 @@ class TestSearchPersonality(VerifyGrnsMixin, TestBrokerCommand):
     def test_100_by_required_service(self):
         command = ["search_personality", "--required_service", "chooser2"]
         out = self.commandtest(command)
-        self.matchoutput(out, "aquilon/unixeng-test", command)
+        self.matchoutput(out, "aquilon/unixeng-test@current", command)
         self.matchclean(out, "compileserver", command)
 
     def test_110_show_diff_1(self):

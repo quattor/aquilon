@@ -72,10 +72,21 @@ class TestAddRequiredService(TestBrokerCommand):
                        "--archetype=aquilon", "--personality=unixeng-test"]
             self.noouttest(command)
 
-    def test_125_show_personality(self):
+    def test_125_show_personality_current(self):
         command = ["show_personality", "--archetype=aquilon",
                    "--personality=unixeng-test"]
         out = self.commandtest(command)
+        self.matchoutput(out, "Stage: current", command)
+        self.matchclean(out, "chooser1", command)
+        self.matchclean(out, "chooser2", command)
+        self.matchclean(out, "chooser3", command)
+
+    def test_125_show_personality_next(self):
+        command = ["show_personality", "--archetype=aquilon",
+                   "--personality=unixeng-test",
+                   "--personality_stage=next"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Stage: next", command)
         self.matchoutput(out, "Service: chooser1", command)
         self.matchoutput(out, "Service: chooser2", command)
         self.matchoutput(out, "Service: chooser3", command)
@@ -83,10 +94,14 @@ class TestAddRequiredService(TestBrokerCommand):
     def test_125_show_service(self):
         command = "show service --service chooser1"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out,
-                         "Required for Personality: unixeng-test "
-                         "Archetype: aquilon",
-                         command)
+        self.searchoutput(out,
+                          r"Required for Personality: unixeng-test Archetype: aquilon$"
+                          r"\s+Stage: next$",
+                          command)
+
+    def test_129_promite_unixeng_test(self):
+        self.noouttest(["promote", "--personality", "unixeng-test",
+                        "--archetype", "aquilon"])
 
     def test_130_add_utsvc(self):
         command = ["add_required_service", "--personality=compileserver",
@@ -106,7 +121,8 @@ class TestAddRequiredService(TestBrokerCommand):
 
     def test_145_verify_netmap(self):
         command = ["show_personality", "--archetype=aquilon",
-                   "--personality=eaitools"]
+                   "--personality=eaitools",
+                   "--personality_stage=next"]
         out = self.commandtest(command)
         self.matchoutput(out, "Service: netmap", command)
 
@@ -114,15 +130,21 @@ class TestAddRequiredService(TestBrokerCommand):
         self.noouttest(["add_personality", "--personality", "required_svc_test",
                         "--eon_id", "2", "--archetype", "aquilon",
                         "--copy_from", "eaitools",
+                        "--copy_stage", "next",
                         "--host_environment", "dev"])
 
         command = ["show_personality", "--archetype=aquilon",
                    "--personality=required_svc_test"]
         out = self.commandtest(command)
         self.matchoutput(out, "Service: netmap", command)
+        self.matchoutput(out, "Stage: current", command)
 
         self.successtest(["del_personality", "--personality", "required_svc_test",
                           "--archetype", "aquilon"])
+
+    def test_155_promote_eaitools(self):
+        self.noouttest(["promote", "--personality", "eaitools",
+                        "--archetype", "aquilon"])
 
     def test_160_add_badservice(self):
         command = ["add_required_service", "--service=badservice",
@@ -145,7 +167,7 @@ class TestAddRequiredService(TestBrokerCommand):
                    "--archetype", "aquilon", "--personality", "unixeng-test"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Service chooser1 is already required by "
-                         "personality aquilon/unixeng-test.",
+                         "personality aquilon/unixeng-test@next.",
                          command)
 
     def test_200_no_justification(self):

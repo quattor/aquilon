@@ -58,6 +58,9 @@ class TestDelRequiredService(TestBrokerCommand):
                    "--personality=eaitools", "--archetype=aquilon"]
         self.noouttest(command)
 
+        self.noouttest(["promote", "--archetype", "aquilon",
+                        "--personality", "eaitools"])
+
     def test_130_del_required_all(self):
         for archetype, services in archetype_required.items():
             for service in services:
@@ -76,7 +79,20 @@ class TestDelRequiredService(TestBrokerCommand):
                        "--archetype=aquilon", "--personality=unixeng-test"]
             self.noouttest(command)
 
-    def test_145_verify_del_required_personality(self):
+    def test_145_verify_del_required_personality_next(self):
+        command = ["show_personality", "--archetype=aquilon",
+                   "--personality=unixeng-test",
+                   "--personality_stage", "next"]
+        out = self.commandtest(command)
+        self.matchclean(out, "Service: chooser1", command)
+        self.matchclean(out, "Service: chooser2", command)
+        self.matchclean(out, "Service: chooser3", command)
+
+    def test_146_promote(self):
+        self.noouttest(["promote", "--archetype", "aquilon",
+                        "--personality", "unixeng-test"])
+
+    def test_147_verify_del_required_personality(self):
         command = ["show_personality", "--archetype=aquilon",
                    "--personality=unixeng-test"]
         out = self.commandtest(command)

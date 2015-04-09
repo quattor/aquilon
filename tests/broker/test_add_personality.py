@@ -127,12 +127,34 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
     def test_125_add_eaitools(self):
         command = ["add_personality", "--personality=eaitools",
                    "--archetype=aquilon", "--eon_id=2",
-                   "--host_environment=dev",
+                   "--host_environment=dev", "--staged",
                    "--comments", "Existing personality for netperssvcmap tests"]
         self.noouttest(command)
         self.verifycatforpersonality("aquilon", "eaitools")
         # The basic parameter set needs to be initialized for further tests
+        # Note: these will apply to the next stage
         self.setup_personality("aquilon", "eaitools")
+
+    def test_126_verify_eaitools(self):
+        command = ["show_personality", "--personality", "eaitools",
+                   "--archetype", "aquilon"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Stage: current", command)
+
+        command = ["show_parameter", "--personality", "eaitools",
+                   "--archetype", "aquilon"]
+        self.notfoundtest(command)
+
+    def test_126_verify_eaitools_next(self):
+        command = ["show_personality", "--personality", "eaitools",
+                   "--archetype", "aquilon", "--personality_stage", "next"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Stage: next", command)
+
+        command = ["show_parameter", "--personality", "eaitools",
+                   "--archetype", "aquilon", "--personality_stage", "next"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "espinfo", command)
 
     def test_130_add_windows_desktop(self):
         command = ["add", "personality", "--personality", "desktop",
@@ -255,7 +277,7 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
             'inventory': {},
             'sybase-test': {},
             'lemon-collector-oracle': {},
-            'unixeng-test': {},
+            'unixeng-test': {'staged': True},
             'nostage': {'staged': True},
             'infra': {'grn': 'grn:/ms/ei/aquilon/aqd',
                       'environment': 'infra'}

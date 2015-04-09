@@ -128,7 +128,16 @@ class Personality(Base):
             self.force_existing_stage(stage)
             return self.stages[stage]
         else:
-            return self.stages["current"]
+            if not self.staged:
+                return self.stages["current"]
+
+            if "next" not in self.stages:
+                session = object_session(self)
+                with session.no_autoflush:
+                    dbstage = self.stages["current"].copy(name="next")
+                    self.stages["next"] = dbstage
+
+            return self.stages["next"]
 
 
 class PersonalityStage(Base):
