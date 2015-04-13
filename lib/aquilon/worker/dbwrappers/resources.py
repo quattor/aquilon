@@ -21,14 +21,11 @@ from sqlalchemy.orm.attributes import set_committed_value
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.inspection import inspect
 
-from aquilon.exceptions_ import (IncompleteError, NotFoundException,
-                                 ArgumentError)
+from aquilon.exceptions_ import NotFoundException, ArgumentError
 from aquilon.aqdb.model import (Cluster, MetaCluster, ClusterResource,
                                 HostResource, Resource, ResourceGroup,
                                 BundleResource, RebootIntervention)
-from aquilon.worker.templates import Plenary
 from aquilon.worker.dbwrappers.host import hostname_to_host
-from aquilon.worker.locks import CompileKey
 
 
 def get_resource_holder(session, logger, hostname=None, cluster=None,
@@ -127,70 +124,6 @@ def get_resource(session, holder, **arguments_in):
         return cls.get_unique(session, name=name, holder=holder.resholder,
                               compel=True)
     return None
-
-
-def del_resource(session, logger, dbresource, dsdb_callback=None, **arguments):
-    holder = dbresource.holder
-    holder_plenary = Plenary.get_plenary(holder.holder_object, logger=logger)
-    remove_plenary = Plenary.get_plenary(dbresource, logger=logger)
-
-    if hasattr(dbresource, 'resholder') and dbresource.resholder:
-        # We have to tell the ORM that these are going to be deleted, we can't
-        # just rely on the DB-side cascading
-        del dbresource.resholder.resources[:]
-    holder.resources.remove(dbresource)
-    session.flush()
-
-    with CompileKey.merge([remove_plenary.get_key(), holder_plenary.get_key()]):
-        try:
-            remove_plenary.stash()
-            holder_plenary.stash()
-
-            try:
-                holder_plenary.write(locked=True)
-            except IncompleteError:
-                holder_plenary.remove(locked=True)
-
-            remove_plenary.remove(locked=True)
-
-            if dsdb_callback:
-                dsdb_callback(dbresource, **arguments)
-        except:
-            holder_plenary.restore_stash()
-            remove_plenary.restore_stash()
-            raise
-
-    return
-
-
-def add_resource(session, logger, holder, dbresource, dsdb_callback=None,
-                 **arguments):
-    if dbresource not in holder.resources:
-        holder.resources.append(dbresource)
-
-    holder_plenary = Plenary.get_plenary(holder.holder_object, logger=logger)
-    res_plenary = Plenary.get_plenary(dbresource, logger=logger)
-
-    session.flush()
-
-    with CompileKey.merge([res_plenary.get_key(), holder_plenary.get_key()]):
-        try:
-            holder_plenary.stash()
-            res_plenary.write(locked=True)
-            try:
-                holder_plenary.write(locked=True)
-            except IncompleteError:
-                holder_plenary.remove(locked=True)
-
-            if dsdb_callback:
-                dsdb_callback(dbresource, **arguments)
-
-        except:
-            res_plenary.restore_stash()
-            holder_plenary.restore_stash()
-            raise
-
-    return
 
 
 def walk_resources(dbobj):

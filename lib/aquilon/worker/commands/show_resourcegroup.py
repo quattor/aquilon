@@ -14,17 +14,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+"""Contains the logic for `aq show resourcegroup`."""
 
 from aquilon.aqdb.model import ResourceGroup
-from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.commands.show_resource import show_resource
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.commands.show_resource import CommandShowResource
 
 
-class CommandShowResourceGroup(BrokerCommand):
+class CommandShowResourceGroup(CommandShowResource):
 
-    required_parameters = []
-
-    def render(self, session, logger, hostname, cluster, metacluster, all,
-               resourcegroup, **arguments):
-        return show_resource(session, logger, hostname, cluster, metacluster,
-                             None, all, resourcegroup, ResourceGroup)
+    resource_class = ResourceGroup
+    resource_name = "resourcegroup"

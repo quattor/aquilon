@@ -91,7 +91,7 @@ class TestAddRebootIntervention(TestBrokerCommand):
         command = ["add_reboot_intervention", "--start_time=2013/01/01",
                    "--expiry=2013/01/14",
                    "--justification=test",
-                   "--hostname=server1.aqd-unittest.ms.com"]
+                   "--hostname=server2.aqd-unittest.ms.com"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "The start time or expiry time are in the past.", command)
 

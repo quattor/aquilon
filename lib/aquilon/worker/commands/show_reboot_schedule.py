@@ -14,16 +14,17 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+"""Contains the logic for `aq show reboot schedule`."""
 
 from aquilon.aqdb.model import RebootSchedule
-from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.commands.show_resource import show_resource
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.commands.show_resource import CommandShowResource
 
 
-class CommandShowRebootSchedule(BrokerCommand):
+class CommandShowRebootSchedule(CommandShowResource):
 
-    required_parameters = []
+    resource_class = RebootSchedule
 
-    def render(self, session, logger, hostname, cluster, all, **arguments):
-        return show_resource(session, logger, hostname, cluster, None, None,
-                             all, None, RebootSchedule)
+    def render(self, **kwargs):
+        return super(CommandShowRebootSchedule, self).render(metacluster=None,
+                                                             **kwargs)

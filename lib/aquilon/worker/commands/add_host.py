@@ -179,7 +179,7 @@ class CommandAddHost(BrokerCommand):
             dbinterface.default_route = True
 
         # Disable autoflush, since the ServiceAddress object won't be complete
-        # until add_resource() is called
+        # until it's attached to its holder
         with session.no_autoflush:
             resholder = HostResource(host=dbmachine.host)
             session.add(resholder)

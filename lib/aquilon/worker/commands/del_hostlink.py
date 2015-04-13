@@ -16,20 +16,12 @@
 # limitations under the License.
 
 from aquilon.aqdb.model import Hostlink
-from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.dbwrappers.resources import (del_resource,
-                                                 get_resource_holder)
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.commands.del_resource import CommandDelResource
 
 
-class CommandDelHostlink(BrokerCommand):
+class CommandDelHostlink(CommandDelResource):
 
     required_parameters = ["hostlink"]
-
-    def render(self, session, logger, hostname, cluster, metacluster,
-               resourcegroup, hostlink, **arguments):
-        holder = get_resource_holder(session, logger, hostname, cluster,
-                                     metacluster, resourcegroup)
-        dbhl = Hostlink.get_unique(session, name=hostlink, holder=holder,
-                                   compel=True)
-        del_resource(session, logger, dbhl)
-        return
+    resource_class = Hostlink
+    resource_name = "hostlink"

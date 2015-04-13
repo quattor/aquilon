@@ -14,6 +14,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+"""Contains the logic for `aq add reboot schedule`."""
 
 import re
 from dateutil.parser import parse
@@ -21,15 +22,14 @@ from six import iteritems
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import RebootSchedule
-from aquilon.utils import validate_nlist_key
-from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.dbwrappers.resources import (add_resource,
-                                                 get_resource_holder)
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.commands.add_resource import CommandAddResource
 
 
-class CommandAddRebootSchedule(BrokerCommand):
+class CommandAddRebootSchedule(CommandAddResource):
 
     required_parameters = ["week", "day"]
+    resource_class = RebootSchedule
 
     COMPONENTS = {
         "week": ["1", "2", "3", "4"],
@@ -100,10 +100,7 @@ class CommandAddRebootSchedule(BrokerCommand):
 
         return arguments
 
-    def render(self, session, logger, hostname, cluster, comments, **arguments):
-
-        reboot_schedule = "reboot_schedule"
-        validate_nlist_key("reboot_schedule", reboot_schedule)
+    def add_resource(self, session, logger, comments, **arguments):
         arguments = self._validate_args(**arguments)
 
         time = arguments["time"]
@@ -115,16 +112,12 @@ class CommandAddRebootSchedule(BrokerCommand):
             except (ValueError, TypeError) as e:
                 raise ArgumentError("The preferred time '%s' could not be "
                                     "interpreted: %s" % (time, e))
-        holder = get_resource_holder(session, logger, hostname, cluster,
-                                     compel=False)
 
-        RebootSchedule.get_unique(session, name=reboot_schedule, holder=holder,
-                                  preclude=True)
+        res = RebootSchedule(name="reboot_schedule", time=time, week=week,
+                             day=day, comments=comments)
 
-        res = RebootSchedule(name=reboot_schedule,
-                             time=time,
-                             week=week,
-                             day=day,
-                             comments=comments)
+        return res
 
-        return add_resource(session, logger, holder, res)
+    def render(self, **kwargs):
+        return super(CommandAddRebootSchedule, self).render(metacluster=None,
+                                                            **kwargs)

@@ -17,26 +17,16 @@
 """Contains the logic for `aq add share`."""
 
 from aquilon.aqdb.model import Share
-from aquilon.utils import validate_nlist_key
-from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.dbwrappers.resources import (add_resource,
-                                                 get_resource_holder)
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.commands.add_resource import CommandAddResource
 
 
-class CommandAddShare(BrokerCommand):
+class CommandAddShare(CommandAddResource):
 
     required_parameters = ["share"]
+    resource_class = Share
+    resource_name = "share"
 
-    def render(self, session, logger, share, comments, hostname,
-               resourcegroup, cluster, metacluster, **arguments):
-
-        validate_nlist_key("share", share)
-        holder = get_resource_holder(session, logger, hostname, cluster,
-                                     metacluster, resourcegroup, compel=False)
-
-        Share.get_unique(session, name=share, holder=holder, preclude=True)
-
+    def add_resource(self, session, logger, share, comments, **kwargs):
         dbshare = Share(name=share, comments=comments)
-        add_resource(session, logger, holder, dbshare)
-
-        return
+        return dbshare

@@ -49,7 +49,11 @@ class TestAddServiceAddress(TestBrokerCommand):
                    "--service_address", "zebra2.aqd-unittest.ms.com",
                    "--interfaces", "eth0,eth1", "--ip", ip,
                    "--name", "zebra2"]
-        self.noouttest(command)
+        out = self.statustest(command)
+        self.matchoutput(out,
+                         "Host unittest20.aqd-unittest.ms.com is missing the "
+                         "following required services",
+                         command)
         self.dsdb_verify()
 
     def testverifyzebra2(self):
@@ -101,7 +105,11 @@ class TestAddServiceAddress(TestBrokerCommand):
                    "--service_address", "zebra3.aqd-unittest.ms.com",
                    "--interfaces", "eth0,eth1", "--ip", zebra3_ip,
                    "--name", "zebra3", "--map_to_primary"]
-        self.noouttest(command)
+        out = self.statustest(command)
+        self.matchoutput(out,
+                         "Host unittest20.aqd-unittest.ms.com is missing the "
+                         "following required services",
+                         command)
         self.dsdb_verify()
 
     def testverifyunittest20(self):

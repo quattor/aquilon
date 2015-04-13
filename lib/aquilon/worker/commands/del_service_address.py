@@ -15,20 +15,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from aquilon.exceptions_ import ArgumentError
+from aquilon.exceptions_ import ArgumentError, IncompleteError
 from aquilon.aqdb.model import ServiceAddress
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.dns import delete_dns_record
-from aquilon.worker.dbwrappers.resources import (del_resource,
-                                                 get_resource_holder)
+from aquilon.worker.dbwrappers.resources import get_resource_holder
 from aquilon.worker.dbwrappers.service_instance import check_no_provided_service
 from aquilon.worker.processes import DSDBRunner
-
-
-def del_srv_dsdb_callback(dbsrv_addr, dsdb_runner=None, keep_dns=False):
-    if not keep_dns:
-        dsdb_runner.delete_host_details(dbsrv_addr.dns_record, dbsrv_addr.ip)
-    dsdb_runner.commit_or_rollback("Could not delete host from DSDB")
+from aquilon.worker.locks import CompileKey
+from aquilon.worker.templates import Plenary
 
 
 class CommandDelServiceAddress(BrokerCommand):
@@ -46,16 +41,41 @@ class CommandDelServiceAddress(BrokerCommand):
 
         dbsrv = ServiceAddress.get_unique(session, name=name, holder=holder,
                                           compel=True)
+        dbdns_rec = dbsrv.dns_record
+        old_fqdn = str(dbdns_rec.fqdn)
+        old_ip = dbdns_rec.ip
 
         check_no_provided_service(dbsrv)
 
-        dbdns_rec = dbsrv.dns_record
-
         dsdb_runner = DSDBRunner(logger=logger)
-        del_resource(session, logger, dbsrv, dsdb_runner=dsdb_runner,
-                     dsdb_callback=del_srv_dsdb_callback, keep_dns=keep_dns)
 
+        holder_plenary = Plenary.get_plenary(holder.holder_object, logger=logger)
+        remove_plenary = Plenary.get_plenary(dbsrv, logger=logger)
+
+        holder.resources.remove(dbsrv)
         if not keep_dns:
             delete_dns_record(dbdns_rec)
+
+        session.flush()
+
+        with CompileKey.merge([remove_plenary.get_key(), holder_plenary.get_key()]):
+            remove_plenary.stash()
+            holder_plenary.stash()
+
+            try:
+                try:
+                    holder_plenary.write(locked=True)
+                except IncompleteError:
+                    holder_plenary.remove(locked=True)
+
+                remove_plenary.remove(locked=True)
+
+                if not keep_dns:
+                    dsdb_runner.delete_host_details(old_fqdn, old_ip)
+                dsdb_runner.commit_or_rollback("Could not delete host from DSDB")
+            except:
+                holder_plenary.restore_stash()
+                remove_plenary.restore_stash()
+                raise
 
         return

@@ -16,20 +16,12 @@
 # limitations under the License.
 
 from aquilon.aqdb.model import Filesystem
-from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.dbwrappers.resources import (del_resource,
-                                                 get_resource_holder)
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.commands.del_resource import CommandDelResource
 
 
-class CommandDelFilesystem(BrokerCommand):
+class CommandDelFilesystem(CommandDelResource):
 
     required_parameters = ["filesystem"]
-
-    def render(self, session, logger, filesystem, hostname, cluster,
-               metacluster, resourcegroup, **arguments):
-        holder = get_resource_holder(session, logger, hostname, cluster,
-                                     metacluster, resourcegroup)
-        dbfs = Filesystem.get_unique(session, name=filesystem, holder=holder,
-                                     compel=True)
-        del_resource(session, logger, dbfs)
-        return
+    resource_class = Filesystem
+    resource_name = "filesystem"
