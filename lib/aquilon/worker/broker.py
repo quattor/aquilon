@@ -369,7 +369,7 @@ class BrokerCommand(object):
     @classmethod
     def is_class_lock_free(cls):
         # log.msg("Checking %s" % cls.__module__)
-        for item in sys.modules[cls.__module__].__dict__.values():
+        for (key, item) in sys.modules[cls.__module__].__dict__.items():
             # log.msg("  Checking %s" % item)
             if item in [sync_domain, TemplateDomain,
                         add_resource, del_resource]:
@@ -432,10 +432,10 @@ class BrokerCommand(object):
         if args:
             # Take 'args' as the list of keys that we are going to check
             # exist in 'kwargs', we will ignore any addition 'kwargs'
-            count = sum(1 if kwargs.get(arg, None) else 0 for arg in args)
+            count = sum([1 if kwargs.get(arg, None) else 0 for arg in args])
         else:
             # Make sure only one of the supplied arguments is set
-            count = sum(1 if x else 0 for x in kwargs.values())
+            count = sum([1 if x else 0 for x in kwargs.values()])
         if count != 1:
             if args:
                 names = ["--%s" % arg for arg in args]

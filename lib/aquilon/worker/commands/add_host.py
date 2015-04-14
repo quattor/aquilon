@@ -16,13 +16,13 @@
 # limitations under the License.
 """Contains the logic for `aq add host`."""
 
+
 from aquilon.exceptions_ import ArgumentError, ProcessException
 from aquilon.aqdb.model import (Machine, ServiceAddress, HostResource,
                                 Archetype)
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.dns import grab_address
-from aquilon.worker.dbwrappers.interface import (generate_ip, assign_address,
-                                                 get_interfaces)
+from aquilon.worker.dbwrappers.interface import generate_ip, assign_address
 from aquilon.worker.dbwrappers.host import create_host
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
 from aquilon.worker.processes import DSDBRunner
@@ -102,9 +102,10 @@ class CommandAddHost(BrokerCommand):
         ip = generate_ip(session, logger, dbinterface,
                          audit_results=audit_results, **arguments)
 
-        dbdns_rec, _ = grab_address(session, hostname, ip,
-                                    allow_restricted_domain=True,
-                                    allow_reserved=True, preclude=True)
+        dbdns_rec, newly_created = grab_address(session, hostname, ip,
+                                                allow_restricted_domain=True,
+                                                allow_reserved=True,
+                                                preclude=True)
         dbmachine.primary_name = dbdns_rec
 
         # Fix up auxiliary addresses to point to the primary name by default
@@ -114,6 +115,8 @@ class CommandAddHost(BrokerCommand):
             for addr in dbmachine.all_addresses():
                 if addr.interface.interface_type == "management":
                     continue
+                if addr.service_address_id:  # pragma: no cover
+                    continue
                 for rec in addr.dns_records:
                     if rec.fqdn.dns_environment == dns_env:
                         rec.reverse_ptr = dbdns_rec.fqdn
@@ -122,7 +125,7 @@ class CommandAddHost(BrokerCommand):
             if not ip:
                 raise ArgumentError("Zebra configuration requires an IP address.")
             dbsrv_addr = self.assign_zebra_address(session, dbmachine, dbdns_rec,
-                                                   zebra_interfaces)
+                                                   zebra_interfaces, logger)
         else:
             if ip:
                 if not dbinterface:
@@ -156,27 +159,13 @@ class CommandAddHost(BrokerCommand):
         return
 
     def assign_zebra_address(self, session, dbmachine, dbdns_rec,
-                             zebra_interfaces):
+                             zebra_interfaces, logger):
         """ Assign a Zebra-managed address to multiple interfaces """
 
         # Reset the routing configuration
         for iface in dbmachine.interfaces:
             if iface.default_route:
                 iface.default_route = False
-
-        dbifaces = get_interfaces(dbmachine, zebra_interfaces,
-                                  dbdns_rec.network)
-
-        for dbinterface in dbifaces:
-            # Make sure the transit IPs resolve to the primary name
-            for addr in dbinterface.assignments:
-                if addr.label:
-                    continue
-                for dnr in addr.dns_records:
-                    dnr.reverse_ptr = dbdns_rec.fqdn
-
-            # Transits should be providers of the default route
-            dbinterface.default_route = True
 
         # Disable autoflush, since the ServiceAddress object won't be complete
         # until add_resource() is called
@@ -185,6 +174,27 @@ class CommandAddHost(BrokerCommand):
             session.add(resholder)
             dbsrv_addr = ServiceAddress(name="hostname", dns_record=dbdns_rec)
             resholder.resources.append(dbsrv_addr)
-            dbsrv_addr.interfaces = dbifaces
+
+            for name in zebra_interfaces.split(","):
+                dbinterface = None
+                for iface in dbmachine.interfaces:
+                    if iface.name == name:
+                        dbinterface = iface
+                if not dbinterface:
+                    raise ArgumentError("{0} does not have an interface named "
+                                        "{1}.".format(dbmachine, name))
+                assign_address(dbinterface, dbdns_rec.ip, dbdns_rec.network,
+                               label="hostname", resource=dbsrv_addr,
+                               logger=logger)
+
+                # Make sure the transit IPs resolve to the primary name
+                for addr in dbinterface.assignments:
+                    if addr.label:
+                        continue
+                    for dnr in addr.dns_records:
+                        dnr.reverse_ptr = dbdns_rec.fqdn
+
+                # Transits should be providers of the default route
+                dbinterface.default_route = True
 
         return dbsrv_addr

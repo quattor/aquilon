@@ -232,7 +232,7 @@ class ObjectFormatter(object):
         self.fill_proto(result, skeleton, embedded=embedded,
                         indirect_attrs=indirect_attrs)
 
-    def fill_proto(self, result, skeleton, embedded=True, indirect_attrs=True):  # pragma: no cover
+    def fill_proto(self, result, skeleton, embedded=True, indirect_attrs=True): # pragma: no cover
         # pylint: disable=W0613
         # There's no default protobuf message type
         raise ProtocolError("{0!r} does not have a protobuf formatter."
@@ -281,4 +281,4 @@ ObjectFormatter.default_handler = ObjectFormatter()
 
 # Convenience method for mako templates
 def shift(result, indent="  "):
-    return "\n".join("%s%s" % (indent, line) for line in result.splitlines())
+    return "\n".join(["%s%s" % (indent, line) for line in result.splitlines()])

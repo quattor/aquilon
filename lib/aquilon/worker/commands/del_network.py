@@ -34,9 +34,9 @@ class CommandDelNetwork(BrokerCommand):
                                        ip=ip, compel=True)
 
         # Lock order: DNS domain(s), network
-        DnsDomain.lock_rows(set(rec.fqdn.dns_domain
-                                for rtr in dbnetwork.routers
-                                for rec in rtr.dns_records))
+        DnsDomain.lock_rows(set([rec.fqdn.dns_domain
+                                 for rtr in dbnetwork.routers
+                                 for rec in rtr.dns_records]))
         dbnetwork.lock_row()
 
         # Delete the routers so they don't trigger the checks below

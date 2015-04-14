@@ -66,7 +66,8 @@ class CommandSplitNetwork(BrokerCommand):
             raise ArgumentError("Network split failed, because the following "
                                 "subnet IP and/or broadcast addresses are "
                                 "assigned to hosts: %s" %
-                                ", ".join(str(addr.ip) for addr in used_addrs))
+                                ", ".join([str(addr.ip) for addr in
+                                           used_addrs]))
 
         q = session.query(ARecord.ip)
         q = q.filter_by(network=dbnetwork)
@@ -76,7 +77,8 @@ class CommandSplitNetwork(BrokerCommand):
             raise ArgumentError("Network split failed, because the following "
                                 "subnet IP and/or broadcast addresses are "
                                 "registered in the DNS: %s" %
-                                ", ".join(str(addr.ip) for addr in used_addrs))
+                                ", ".join([str(addr.ip) for addr in
+                                           used_addrs]))
 
         # Reason of the initial value: we keep the name of the first segment
         # (e.g.  "foo"), and the next segment will be called "foo_2"

@@ -147,11 +147,7 @@ class TestUsecaseDatabase(TestBrokerCommand):
         command = ["add_service_address", "--ip", ip, "--name", "nydb1nydb1",
                    "--service_address", "nydb1nydb1.aqd-unittest.ms.com",
                    "--cluster", "nydb1", "--interfaces", "eth0"]
-        out = self.statustest(command)
-        self.matchoutput(out,
-                         "The --interfaces option is only valid for host-bound "
-                         "service addresses, and is ignored otherwise.",
-                         command)
+        self.statustest(command)
         self.dsdb_verify()
 
     def test_210_compile(self):
@@ -168,7 +164,7 @@ class TestUsecaseDatabase(TestBrokerCommand):
         self.matchoutput(out, "Service Address: nydb1nydb1", command)
         self.matchoutput(out, "Address: nydb1nydb1.aqd-unittest.ms.com [%s]" %
                          srv_ip, command)
-        self.matchclean(out, "Interfaces:", command)
+        self.matchoutput(out, "Interfaces: eth0", command)
 
     def test_220_verify_cat(self):
         command = ["cat", "--cluster=nydb1", "--data"]

@@ -15,10 +15,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
 from aquilon.exceptions_ import ArgumentError, IncompleteError
-from aquilon.aqdb.model import Cluster, Personality
-from aquilon.worker.broker import BrokerCommand
+from aquilon.aqdb.model import Cluster, Personality, ServiceAddress
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.host import hostname_to_host
+from aquilon.worker.dbwrappers.resources import walk_resources
 from aquilon.worker.locks import CompileKey
 from aquilon.worker.templates.base import Plenary
 
@@ -53,6 +55,7 @@ class CommandUncluster(BrokerCommand):
                                 dbhost.personality.name)
 
         dbcluster.hosts.remove(dbhost)
+        remove_service_addresses(dbcluster, dbhost)
         dbcluster.validate()
 
         session.flush()
@@ -72,3 +75,22 @@ class CommandUncluster(BrokerCommand):
                 cluster_plenary.restore_stash()
                 host_plenary.restore_stash()
                 raise
+
+
+def remove_service_addresses(dbcluster, dbhost):
+    for res in walk_resources(dbcluster):
+        if not isinstance(res, ServiceAddress):
+            continue
+
+        # The interface names are stored implicitly in the AddressAssignment
+        # objects, so we can't allow a cluster with no hosts
+        if not dbcluster.hosts:
+            raise ArgumentError("{0} still has {1:l} assigned, removing the "
+                                "last cluster member is not allowed."
+                                .format(dbcluster, res))
+
+        for iface in dbhost.hardware_entity.interfaces:
+            addrs = [addr for addr in iface.assignments
+                     if addr.service_address == res]
+            for addr in addrs:
+                iface.assignments.remove(addr)

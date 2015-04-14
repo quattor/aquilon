@@ -56,7 +56,6 @@ _table_abbrev = {
     'reboot_intervention': 'reboot_iv',
     'service': 'svc',
     'service_address': 'srv_addr',
-    'service_address_interface': 'srv_addr_iface',
     'service_instance': 'svc_inst',
     'service_instance_server': 'sis',
     'service_list_item': 'sli',

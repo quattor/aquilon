@@ -44,7 +44,7 @@ class TestShowMachine(TestBrokerCommand):
     def testverifymachineallproto(self):
         command = ["show", "machine", "--all", "--format", "proto"]
         machines = self.protobuftest(command)
-        machine_names = set(msg.name for msg in machines)
+        machine_names = set([msg.name for msg in machines])
         for machine in ("ut3c5n10", "ut3c1n3", "ut3c1n4", "ut3s01p1",
                         "ut8s02p1", "ut9s03p1", "ut10s04p1", "ut11s01p1",
                         "f5test"):

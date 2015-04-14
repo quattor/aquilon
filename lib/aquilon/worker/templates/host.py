@@ -152,6 +152,10 @@ class PlenaryHostData(StructurePlenary):
             static_routes = set()
 
             for addr in dbinterface.assignments:
+                # Service addresses will be handled as resources
+                if addr.service_address:
+                    continue
+
                 net = addr.network
 
                 if addr.label == "":

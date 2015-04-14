@@ -215,7 +215,7 @@ class Plenary(object):
             if self.new_path != self.old_path:
                 self.remove(locked=True)
 
-            self.logger.debug("Writing %r [%s]", self, self.new_path)
+            self.logger.debug("Writing %r [%s]" % (self, self.new_path))
 
             write_file(self.new_path, content, create_directory=True,
                        logger=self.logger)
@@ -261,7 +261,7 @@ class Plenary(object):
                 lock_queue.acquire(key)
             self.stash()
 
-            self.logger.debug("Removing %r [%s]", self, self.old_path)
+            self.logger.debug("Removing %r [%s]" % (self, self.old_path))
             remove_file(self.old_path, cleanup_directory=True,
                         logger=self.logger)
             self.removed = True
@@ -303,7 +303,7 @@ class Plenary(object):
         """
         if not self.stashed:
             self.logger.info("Attempt to restore plenary '%s' "
-                             "without having saved state.", self.old_path)
+                             "without having saved state." % self.old_path)
             return
         # Should this optimization be in use?
         # if not self.changed and not self.removed:
@@ -311,11 +311,11 @@ class Plenary(object):
 
         # If the plenary has moved, then we need to clean up the new location
         if self.new_path and self.new_path != self.old_path:
-            self.logger.debug("Removing %r [%s]", self, self.new_path)
+            self.logger.debug("Removing %r [%s]" % (self, self.new_path))
             remove_file(self.new_path, cleanup_directory=True,
                         logger=self.logger)
 
-        self.logger.debug("Restoring %r [%s]", self, self.old_path)
+        self.logger.debug("Restoring %r [%s]" % (self, self.old_path))
         if self.old_content is None:
             remove_file(self.old_path, cleanup_directory=True,
                         logger=self.logger)
@@ -522,8 +522,8 @@ class PlenaryCollection(object):
     def __str__(self):
         """For debug output."""
         return "%s(%s)" % (self.__class__.__name__,
-                           ", ".join(str(plenary)
-                                     for plenary in self.plenaries))
+                           ", ".join([str(plenary)
+                                      for plenary in self.plenaries]))
 
     def __iter__(self):
         for plen in self.plenaries:

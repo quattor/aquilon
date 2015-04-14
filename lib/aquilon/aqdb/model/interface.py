@@ -27,7 +27,7 @@ from sqlalchemy.orm import (relation, backref, validates, object_session,
 from sqlalchemy.orm.collections import attribute_mapped_collection
 from sqlalchemy.sql import desc, case, and_, or_, null
 
-from aquilon.exceptions_ import InternalError, ArgumentError
+from aquilon.exceptions_ import InternalError
 from aquilon.aqdb.column_types import AqMac, AqStr
 from aquilon.aqdb.model import (Base, HardwareEntity, DeviceLinkMixin,
                                 ObservedMac, Model)
@@ -209,23 +209,6 @@ class Interface(DeviceLinkMixin, Base):
             slaves.append(iface)
             queue.extend(iface.slaves)
         return slaves
-
-    @property
-    def network_environment(self):
-        if self.assignments:
-            return self.assignments[0].network.network_environment
-        if self.service_addresses:
-            return self.service_addresses[0].network_environment
-        return None
-
-    def validate_network(self, dbnetwork):
-        if not self.network_environment:
-            return
-
-        if self.network_environment != dbnetwork.network_environment:
-            raise ArgumentError("{0} already has an IP address from "
-                                "{1:l}.  Network environments cannot be "
-                                "mixed.".format(self, self.network_environment))
 
 
 class PublicInterface(Interface):

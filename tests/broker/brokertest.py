@@ -609,7 +609,7 @@ class TestBrokerCommand(unittest.TestCase):
         expected_name = os.path.join(self.dsdb_coverage_dir, filename)
         with open(expected_name, "a") as fp:
             if isinstance(command, list):
-                fp.write(" ".join(str(cmd) for cmd in command))
+                fp.write(" ".join([str(cmd) for cmd in command]))
             else:
                 fp.write(str(command))
             fp.write("\n")
@@ -786,7 +786,7 @@ class TestBrokerCommand(unittest.TestCase):
             logfile.seek(0, 2)
             # Now call the function that should generate the deprecation warning
             testfunc()
-            self.assertTrue(elem for elem in logfile if depr_str in elem)
+            self.assertTrue([elem for elem in logfile if depr_str in elem])
 
     @staticmethod
     def dynname(ip, domain="aqd-unittest.ms.com"):

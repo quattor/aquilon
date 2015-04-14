@@ -96,7 +96,7 @@ class RequestStatus(object):
 
             # Create a string value for each of the arguments
             if isinstance(value, list):
-                value_str = ' '.join(str(item) for item in value)
+                value_str = ' '.join([str(item) for item in value])
             else:
                 value_str = str(value)
             # TODO: We should also handle booleans here; however, to do so

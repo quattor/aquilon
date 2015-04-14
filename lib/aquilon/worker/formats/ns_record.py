@@ -47,7 +47,7 @@ class SimpleNSRecordListFormatter(ListFormatter):
         #    [indent + ns.dns_domain.name + ": " + ns.a_record.fqdn for ns in snsrlist]))
 
         return str("\n".join(
-            indent + self.redirect_raw(ns) for ns in snsrlist))
+            [indent + self.redirect_raw(ns) for ns in snsrlist]))
 
 
 ObjectFormatter.handlers[SimpleNSRecordList] = SimpleNSRecordListFormatter()

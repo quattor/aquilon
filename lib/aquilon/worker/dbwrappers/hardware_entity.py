@@ -202,7 +202,7 @@ def rename_hardware(session, dbhw_ent, rename_to):
 
     fqdns = []
     for addr in dbhw_ent.all_addresses():
-        fqdns.extend(dns_rec.fqdn for dns_rec in addr.dns_records)
+        fqdns.extend([dns_rec.fqdn for dns_rec in addr.dns_records])
     # This case handles reserved names
     if dbhw_ent.primary_name and dbhw_ent.primary_name.fqdn not in fqdns:
         fqdns.append(dbhw_ent.primary_name.fqdn)

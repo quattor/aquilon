@@ -521,9 +521,9 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
         self.assertEqual(host.machine.name, "ut10s04p1")
         self.assertEqual(len(host.machine.interfaces), 2)
         self.assertEqual(host.machine.location.name, 'ut10')
-        self.assertEqual(' '.join('%s:%s' % (str(loc.location_type),
-                                             str(loc.name))
-                                  for loc in host.machine.location.parents),
+        self.assertEqual(' '.join(['%s:%s' % (str(loc.location_type),
+                                              str(loc.name))
+                                   for loc in host.machine.location.parents]),
                          "company:ms hub:ny continent:na country:us "
                          "campus:ny city:ny building:ut")
         for i in host.machine.interfaces:
@@ -641,7 +641,7 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
     def test_800_verify_host_all_proto(self):
         command = ["show", "host", "--all", "--format", "proto"]
         hostlist = self.protobuftest(command)
-        hostnames = set(host_msg.hostname for host_msg in hostlist)
+        hostnames = set([host_msg.hostname for host_msg in hostlist])
         for hostname in ("afs-by-net.aqd-unittest.ms.com",
                          "unittest02.one-nyp.ms.com",
                          "unittest15.aqd-unittest.ms.com",

@@ -36,9 +36,10 @@ class CommandAddChassis(BrokerCommand):
 
     def render(self, session, logger, chassis, label, rack, model, vendor,
                ip, interface, mac, serial, comments, **arguments):
-        dbdns_rec, _ = grab_address(session, chassis, ip,
-                                    allow_restricted_domain=True,
-                                    allow_reserved=True, preclude=True)
+        dbdns_rec, newly_created = grab_address(session, chassis, ip,
+                                                allow_restricted_domain=True,
+                                                allow_reserved=True,
+                                                preclude=True)
         if not label:
             label = dbdns_rec.fqdn.name
             try:

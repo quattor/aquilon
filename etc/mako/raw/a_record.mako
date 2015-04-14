@@ -4,7 +4,7 @@ ${dns_common.dns_record_head(record)}\
   Network: ${format(record.network, "a")}
   Network Environment: ${record.network.network_environment.name}
 %if record.assignments:
-  Assigned To: ${", ".join("%s/%s" % (addr.interface.hardware_entity.label, addr.interface.name) for addr in record.assignments)}
+  Assigned To: ${", ".join(["%s/%s" % (addr.interface.hardware_entity.label, addr.interface.name) for addr in record.assignments])}
 %endif
 %if record.service_address:
   Provides: ${format(record.service_address)}

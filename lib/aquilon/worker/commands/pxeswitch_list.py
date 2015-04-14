@@ -87,7 +87,7 @@ class CommandPXESwitchList(BrokerCommand):
             # create temporary file, point aii-installfe at that file.
             groupargs = args[:]
             with NamedTemporaryFile() as tmpfile:
-                tmpfile.writelines(x.fqdn + "\n" for x in hostlist)
+                tmpfile.writelines([x.fqdn + "\n" for x in hostlist])
                 tmpfile.flush()
 
                 for (option, mapped) in self._option_map.items():
@@ -106,7 +106,8 @@ class CommandPXESwitchList(BrokerCommand):
                         servers.append(srv.fqdn)
 
                 groupargs.append("--servers")
-                groupargs.append(" ".join("%s@%s" % (user, s) for s in servers))
+                groupargs.append(" ".join(["%s@%s" % (user, s) for s in
+                                           servers]))
 
                 # it would be nice to parallelize this....
                 run_command(groupargs, logger=logger, stream_level=CLIENT_INFO)

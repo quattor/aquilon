@@ -140,8 +140,8 @@ class ClusterFormatter(CompileableFormatter):
             details.append(indent + "  Capacity limits: %s" % capstr)
             usage = cluster.get_total_usage()
             if usage:
-                usagestr = ", ".join("%s: %s" % (name, value) for name, value
-                                     in usage.items())
+                usagestr = ", ".join(["%s: %s" % (name, value) for name, value
+                                      in usage.items()])
             else:
                 usagestr = None
             details.append(indent + "  Resources used by VMs: %s" % usagestr)

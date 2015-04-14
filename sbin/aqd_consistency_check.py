@@ -71,8 +71,8 @@ def main():
     db = DbFactory()
     session = db.Session()
 
-    consistency_check_class_names = set(cls.__name__ for cls in
-                                        consistency_check_classes)
+    consistency_check_class_names = set([cls.__name__ for cls in
+                                         consistency_check_classes])
 
     if opts.only:
         only = set(opts.only.split(","))

@@ -177,8 +177,9 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
         # Interface renaming affects the host and service addresses
         if dbhw_ent.host:
             plenaries.append(Plenary.get_plenary(dbhw_ent.host))
-        for res in dbinterface.service_addresses:
-            plenaries.append(Plenary.get_plenary(res))
+        for addr in dbinterface.assignments:
+            if addr.service_address:
+                plenaries.append(Plenary.get_plenary(addr.service_address))
 
         with plenaries.get_key():
             try:

@@ -98,7 +98,7 @@ class KNCHTTPChannel(http.HTTPChannel):
             try:
                 self.kncLineReceived(line)
             except KNCProtocolException as e:
-                self.logger.warning("Closed KNC Connection: %s", e.message)
+                self.logger.warning("Closed KNC Connection: %s" % e.message)
                 self.transport.write("HTTP/1.1 400 Bad KNC Request\r\n\r\n")
                 self.transport.loseConnection()
         else:

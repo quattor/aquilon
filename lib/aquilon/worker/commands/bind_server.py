@@ -70,17 +70,15 @@ def lookup_target(session, logger, plenaries, hostname, ip, cluster,
                                                holder=holder, compel=True)
         params["service_address"] = dbsrv_addr
     elif ip:
-        # --ip is only allowed for selecting an auxiliary IP of a host
-        if "host" not in params:
-            raise ArgumentError("The --ip option requires --host.")
-
         for addr in params["host"].hardware_entity.all_addresses():
-            if ip == addr.ip:
+            if ip != addr.ip:
+                continue
+
+            if addr.service_address:
+                params["service_address"] = addr.service_address
+            else:
                 params["address_assignment"] = addr
-                break
-        else:
-            raise ArgumentError("IP address {0!s} is not bound to {1:l}."
-                                .format(ip, params["host"]))
+            break
 
     return params
 

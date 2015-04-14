@@ -32,9 +32,9 @@ class ListFormatter(ObjectFormatter):
             return ObjectFormatter.format_raw(self, result, indent,
                                               embedded=embedded,
                                               indirect_attrs=indirect_attrs)
-        return "\n".join(self.redirect_raw(item, indent, embedded=embedded,
-                                           indirect_attrs=indirect_attrs)
-                         for item in result)
+        return "\n".join([self.redirect_raw(item, indent, embedded=embedded,
+                                            indirect_attrs=indirect_attrs)
+                          for item in result])
 
     def format_csv(self, result, writer):
         for item in result:
@@ -44,10 +44,10 @@ class ListFormatter(ObjectFormatter):
         if hasattr(self, "template_html"):
             return ObjectFormatter.format_html(self, result)
         return "<ul>\n<li>" + "<li>\n<li>".join(
-            self.redirect_html(item) for item in result) + "</li>\n</ul>\n"
+            [self.redirect_html(item) for item in result]) + "</li>\n</ul>\n"
 
     def format_djb(self, result):
-        return "\n".join(self.redirect_djb(item) for item in result)
+        return "\n".join([self.redirect_djb(item) for item in result])
 
     def format_proto(self, result, container, embedded=True, indirect_attrs=True):
         for item in result:
@@ -69,7 +69,7 @@ class StringListFormatter(ListFormatter):
     """ Format a list of object as strings, regardless of type """
 
     def format_raw(self, objects, indent="", embedded=True, indirect_attrs=True):
-        return "\n".join(indent + str(obj) for obj in objects)
+        return "\n".join([indent + str(obj) for obj in objects])
 
     def format_csv(self, objects, writer):
         for obj in objects:
@@ -91,7 +91,7 @@ class StringAttributeListFormatter(ListFormatter):
     """ Format a single attribute of every object as a string """
 
     def format_raw(self, objects, indent="", embedded=True, indirect_attrs=True):
-        return "\n".join(indent + str(objects.getter(obj)) for obj in objects)
+        return "\n".join([indent + str(objects.getter(obj)) for obj in objects])
 
     def format_csv(self, objects, writer):
         for obj in objects:

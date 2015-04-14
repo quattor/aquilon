@@ -16,11 +16,10 @@
 # limitations under the License.
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import Cluster, ServiceAddress
+from aquilon.aqdb.model import Cluster
 from aquilon.worker.logger import CLIENT_INFO
 from aquilon.notify.index import trigger_notifications
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.dbwrappers.resources import walk_resources
 from aquilon.worker.dbwrappers.service_instance import check_no_provided_service
 from aquilon.worker.templates import Plenary, PlenaryCollection
 
@@ -29,24 +28,18 @@ def del_cluster(session, logger, dbcluster, config):
     check_no_provided_service(dbcluster)
 
     if dbcluster.virtual_machines:
-        machines = ", ".join(m.label for m in dbcluster.virtual_machines)
+        machines = ", ".join([m.label for m in dbcluster.virtual_machines])
         raise ArgumentError("%s is still in use by virtual machines: %s." %
                             (format(dbcluster), machines))
 
     if hasattr(dbcluster, 'members') and dbcluster.members:
         raise ArgumentError("%s is still in use by clusters: %s." %
                             (format(dbcluster),
-                             ", ".join(c.name for c in dbcluster.members)))
+                             ", ".join([c.name for c in dbcluster.members])))
     elif dbcluster.hosts:
-        hosts = ", ".join(h.fqdn for h in dbcluster.hosts)
+        hosts = ", ".join([h.fqdn for h in dbcluster.hosts])
         raise ArgumentError("%s is still in use by hosts: %s." %
                             (format(dbcluster), hosts))
-
-    # Service addresses cannot be deleted by cascading rules only
-    for res in walk_resources(dbcluster):
-        if isinstance(res, ServiceAddress):
-            raise ArgumentError("{0} still has {1:l} assigned, please delete "
-                                "it first.".format(dbcluster, res))
 
     if dbcluster.metacluster:
         dbmetacluster = dbcluster.metacluster

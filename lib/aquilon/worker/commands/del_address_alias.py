@@ -18,16 +18,18 @@
 
 from aquilon.exceptions_ import NotFoundException
 from aquilon.aqdb.model import Fqdn, AddressAlias
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.dns import delete_dns_record
+#from aquilon.worker.dbwrappers.service_instance import check_no_provided_service
+#from aquilon.worker.processes import DSDBRunner
 
 
 class CommandDelAddressAlias(BrokerCommand):
 
     required_parameters = ["fqdn"]
 
-    def render(self, session, fqdn, target, dns_environment, target_environment,
-               **kwargs):
+    def render(self, session, logger, fqdn, target, dns_environment,
+               target_environment, **kwargs):
 
         if not target_environment:
             target_environment = dns_environment
@@ -50,7 +52,7 @@ class CommandDelAddressAlias(BrokerCommand):
                 if dbtarget and rr.target != dbtarget:
                     continue
                 rrs.append(rr)
-
+                    
         if not rrs:
             if dbtarget:
                 msg = ", with target %s" % dbtarget.fqdn

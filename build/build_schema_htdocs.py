@@ -67,7 +67,6 @@ from aquilon.aqdb.model.location import LocationLink
 from aquilon.aqdb.model.service import (__ServiceListItem,
                                         __PersonalityServiceListItem)
 from aquilon.aqdb.model.service_instance import __BuildItem
-from aquilon.aqdb.model.service_address import __ServiceAddressInterface
 from aquilon.aqdb.model.personality import (__PersonalityRootUser,
                                             __PersonalityRootNetGroup)
 from aquilon.aqdb.model.cluster import (__ClusterServiceBinding,
@@ -98,8 +97,7 @@ model_group = {
         'title': 'Resources',
         'classes': [Resource, ResourceHolder, Application, Filesystem, Hostlink,
                     Intervention, RebootIntervention, RebootSchedule,
-                    ResourceGroup, ServiceAddress, __ServiceAddressInterface,
-                    Share, VirtualMachine],
+                    ResourceGroup, ServiceAddress, Share, VirtualMachine],
     },
     'host': {
         'title': 'Hosts',
@@ -126,8 +124,7 @@ model_group = {
     'dns': {
         'title': 'DNS',
         'classes': [DnsDomain, DnsRecord, ARecord, SrvRecord, NsRecord, Alias,
-                    AddressAlias, ReservedName, Fqdn, DynamicStub,
-                    DnsEnvironment, DnsMap],
+                    ReservedName, Fqdn, DynamicStub, DnsEnvironment, DnsMap],
     },
     'cluster': {
         'title': 'Clusters',
@@ -213,7 +210,7 @@ def write_schema_html():
             <th>Table</th><th>Documentation</th></tr>")
         for cls in classes:
             fh.write("<tr><td>%s</td><td>%s</td><td>%s</td></tr>"
-                     % (cls.__name__, cls.__tablename__, cls.__doc__))
+                % (cls.__name__, cls.__tablename__, cls.__doc__))
         fh.write("</table>")
     fh.write("</body></html>")
 

@@ -31,6 +31,9 @@ if LIBDIR not in sys.path:
 import aquilon.aqdb.depends
 from aquilon.config import Config, lookup_file_path
 
+import ms.modulecmd
+ms.modulecmd.load("fsf/graphviz/2.28.0")
+
 import argparse
 parser = argparse.ArgumentParser(description='generate schema graphs')
 parser.add_argument('--outputdir', '-o', dest='dir', default='.',

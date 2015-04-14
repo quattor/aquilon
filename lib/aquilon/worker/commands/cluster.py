@@ -19,11 +19,14 @@
 from six.moves import range  # pylint: disable=F0401
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import Cluster, Personality
+from aquilon.aqdb.model import Cluster, Personality, ServiceAddress
 from aquilon.aqdb.model.hostlifecycle import (Ready as HostReady,
                                               Almostready as HostAlmostready)
-from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.commands.add_service_address import apply_service_address
+from aquilon.worker.commands.uncluster import remove_service_addresses
 from aquilon.worker.dbwrappers.host import hostname_to_host
+from aquilon.worker.dbwrappers.resources import walk_resources
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
 from aquilon.worker.services import Chooser
 from aquilon.worker.locks import CompileKey
@@ -70,9 +73,16 @@ class CommandCluster(BrokerCommand):
                                                                    dbhost.cluster))
             old_cluster = dbhost.cluster
             old_cluster.hosts.remove(dbhost)
+            remove_service_addresses(old_cluster, dbhost)
             old_cluster.validate()
             session.expire(dbhost, ['_cluster'])
             plenaries.append(Plenary.get_plenary(old_cluster))
+
+        # Apply the service addresses to the new member
+        for res in walk_resources(dbcluster):
+            if not isinstance(res, ServiceAddress):
+                continue
+            apply_service_address(dbhost, res.interfaces, res, logger)
 
         if dbhost.cluster:
             if personality_change:

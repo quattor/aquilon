@@ -181,11 +181,10 @@ class TestAddAquilonHost(TestBrokerCommand):
                           eth0_ip.mac, command)
         self.searchoutput(out, r"Interface: eth1 %s \[default_route\]" %
                           eth1_ip.mac, command)
-        self.searchoutput(out,
-                          r"Service Address: hostname\s*"
-                          r"Address: unittest20.aqd-unittest.ms.com \[%s\]\s*"
-                          r"Interfaces: eth0, eth1" % ip,
-                          command)
+        self.matchoutput(out,
+                         "Provides: unittest20.aqd-unittest.ms.com [%s] "
+                         "(label: hostname, service_holder: host)" % ip,
+                         command)
         self.matchoutput(out,
                          "Provides: unittest20-e1.aqd-unittest.ms.com [%s]" % eth1_ip,
                          command)
@@ -209,8 +208,8 @@ class TestAddAquilonHost(TestBrokerCommand):
         self.assertTrue(found,
                         "Service address hostname not found in the resources. "
                         "Existing resources: %s" %
-                        ", ".join("%s %s" % (res.type, res.name)
-                                  for res in host.resources))
+                        ", ".join(["%s %s" % (res.type, res.name)
+                                   for res in host.resources]))
 
     def test_135_verify_unittest20_service(self):
         ip = self.net["zebra_vip"].usable[2]

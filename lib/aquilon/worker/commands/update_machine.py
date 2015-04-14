@@ -294,8 +294,8 @@ class CommandUpdateMachine(BrokerCommand):
                                 "than one slot, or --clearchassis to remove "
                                 "current chassis slot information.")
         if not multislot:
-            slots = ", ".join(str(dbslot.slot_number) for dbslot in
-                              dbmachine.chassis_slot)
+            slots = ", ".join([str(dbslot.slot_number) for dbslot in
+                               dbmachine.chassis_slot])
             logger.info("Clearing {0:l} out of {1:l} slot(s) "
                         "{2}".format(dbmachine, dbchassis, slots))
             del dbmachine.chassis_slot[:]

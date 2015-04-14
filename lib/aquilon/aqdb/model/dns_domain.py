@@ -38,7 +38,7 @@ def parse_fqdn(session, fqdn):
     if not fqdn:
         raise ArgumentError("No fully qualified name specified.")
 
-    (short, _, dns_domain) = fqdn.partition(".")
+    (short, dot, dns_domain) = fqdn.partition(".")
 
     if not dns_domain:
         raise ArgumentError("FQDN '%s' is not valid, it does not contain a "

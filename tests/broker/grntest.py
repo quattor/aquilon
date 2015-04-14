@@ -44,7 +44,7 @@ class VerifyGrnsMixin(object):
             eon_ids = sorted(self.grns[grn] for grn in grn_list)
             self.searchoutput(out,
                               r'"%s" = list\(\s*' % key +
-                              r',\s*'.join(str(eon_id) for eon_id in eon_ids) +
+                              r',\s*'.join([str(eon_id) for eon_id in eon_ids]) +
                               r'\s*\);',
                               command)
 

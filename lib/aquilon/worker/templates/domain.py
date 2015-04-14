@@ -105,7 +105,7 @@ class TemplateDomain(object):
             raise ArgumentError("Template directory '%s' does not exist." %
                                 templatedir)
 
-        self.logger.info("preparing domain %s for compile", self.domain.name)
+        self.logger.info("preparing domain %s for compile" % self.domain.name)
 
         # Ensure that the compile directory is in a good state.
         outputdir = config.get("broker", "profilesdir")
@@ -113,7 +113,7 @@ class TemplateDomain(object):
         for d in self.directories() + [config.get("broker", "profilesdir")]:
             if not os.path.exists(d):
                 try:
-                    self.logger.info("creating %s", d)
+                    self.logger.info("creating %s" % d)
                     os.makedirs(d)
                 except OSError as e:
                     raise ArgumentError("Failed to mkdir %s: %s" % (d, e))
@@ -142,7 +142,7 @@ class TemplateDomain(object):
                 # Need to restrict to the subset of the sandbox managed
                 # by this author.
                 only = [row.hostname for row in hostnames]
-                only.extend("clusters/%s" % c.name for c in clusternames)
+                only.extend(["clusters/%s" % c.name for c in clusternames])
                 nothing_to_do = not bool(only)
             else:
                 nothing_to_do = not hostnames.count() and not clusternames.count()

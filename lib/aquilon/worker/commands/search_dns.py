@@ -18,8 +18,7 @@
 
 from aquilon.aqdb.model import (DnsRecord, ARecord, Alias, SrvRecord, Fqdn,
                                 AddressAlias, DnsDomain, DnsEnvironment,
-                                Network, NetworkEnvironment, AddressAssignment,
-                                ServiceAddress)
+                                Network, NetworkEnvironment, AddressAssignment)
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.formats.list import StringAttributeList
 
@@ -117,18 +116,17 @@ class CommandSearchDns(BrokerCommand):
             else:
                 q = q.filter(~DnsRecord.hardware_entity.has())
         if used is not None:
-            AAlias = aliased(AddressAssignment)
-            SAlias = aliased(ServiceAddress)
-            q = q.outerjoin(AAlias,
-                            and_(ARecord.network_id == AAlias.network_id,
-                                 ARecord.ip == AAlias.ip))
-            q = q.outerjoin(SAlias, ARecord.service_address)
             if used:
-                q = q.filter(or_(AAlias.id != null(),
-                                 SAlias.id != null()))
+                q = q.join(AddressAssignment,
+                           and_(ARecord.network_id == AddressAssignment.network_id,
+                                ARecord.ip == AddressAssignment.ip),
+                           aliased=True)
             else:
-                q = q.filter(and_(AAlias.id == null(),
-                                  SAlias.id == null()))
+                q = q.outerjoin(AddressAssignment,
+                                and_(ARecord.network_id == AddressAssignment.network_id,
+                                     ARecord.ip == AddressAssignment.ip),
+                                aliased=True)
+                q = q.filter(AddressAssignment.id == null())
             q = q.reset_joinpoint()
         if reverse_override is not None:
             if reverse_override:

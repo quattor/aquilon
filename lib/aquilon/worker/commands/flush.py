@@ -65,7 +65,8 @@ class CommandFlush(BrokerCommand):
         preload_classes = {
             Hostlink: [],
             ServiceAddress: [joinedload('dns_record'),
-                             subqueryload('interfaces')],
+                             joinedload('assignments'),
+                             joinedload('assignments.interface')],
             RebootSchedule: [],
             VirtualMachine: [joinedload('machine'),
                              joinedload('machine.primary_name'),

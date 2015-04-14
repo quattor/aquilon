@@ -175,7 +175,7 @@ class TestAddCluster(PersonalityTestMixin, TestBrokerCommand):
     def test_45_verifyshowallproto(self):
         command = "show cluster --all --format proto"
         clusters = self.protobuftest(command.split(" "))
-        clusternames = set(msg.name for msg in clusters)
+        clusternames = set([msg.name for msg in clusters])
         for clustername in ("utgrid1", "utvcs1"):
             self.assertTrue(clustername in clusternames)
 

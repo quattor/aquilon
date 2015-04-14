@@ -25,7 +25,7 @@ class CommandDelNetgroupWhitelist(BrokerCommand):
 
     required_parameters = ["netgroup"]
 
-    def render(self, session, netgroup, **arguments):
+    def render(self, session, logger, netgroup, **arguments):
         dbng = NetGroupWhiteList.get_unique(session, name=netgroup,
                                             compel=True)
 
@@ -35,7 +35,7 @@ class CommandDelNetgroupWhitelist(BrokerCommand):
 
         if pers:
             raise ArgumentError("Netgroup {0} used by following and cannot be deleted: ".
-                                format(netgroup) + ", ".join("{0}".format(p) for p in pers))
+                                format(netgroup) + ", ".join(["{0}".format(p) for p in pers]))
 
         session.delete(dbng)
         session.flush()

@@ -5222,9 +5222,9 @@
 	    </optgroup>
 	    <option name="service_address" type="string">Fully qualified name to register in the DNS</option>
 	    <option name="name" type="string">Logical name of the service address</option>
+	    <option name="interfaces" type="string">Comma separed list of interfaces</option>
 	</optgroup>
 	<optgroup>
-	    <option name="interfaces" type="string">Comma separated list of interfaces</option>
 	    <option name="ip" type="ipv4">IP address</option>
 	    <option name="network_environment" type="string">Network environment (default: internal)</option>
 	    <option name="comments" type="string">Comments</option>

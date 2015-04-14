@@ -36,7 +36,6 @@ from twisted.python.log import callWithContext, ILogContext
 from aquilon.exceptions_ import (ProcessException, AquilonError, ArgumentError,
                                  InternalError)
 from aquilon.config import Config, running_from_source
-from aquilon.aqdb.model import Machine
 from aquilon.worker.locks import lock_queue, CompileKey
 
 LOGGER = logging.getLogger(__name__)
@@ -134,8 +133,8 @@ def run_command(args, env=None, path="/", logger=LOGGER, loglevel=logging.INFO,
     if stream_level is None:
         out, err = p.communicate(input=input)
         if filterre:
-            out = "\n".join(line for line in out.splitlines()
-                            if filterre.search(line))
+            out = "\n".join([line for line in out.splitlines()
+                             if filterre.search(line)])
     else:
         out_thread = StreamLoggerThread(logger, stream_level, p, p.stdout,
                                         filterre=filterre, context=ctx)
@@ -305,7 +304,7 @@ class DSDBRunner(object):
             try:
                 if verbose:
                     self.logger.client_info("DSDB: %s" %
-                                            " ".join(str(a) for a in args))
+                                            " ".join([str(a) for a in args]))
                 run_command(cmd, env=self.getenv(), logger=self.logger)
             except ProcessException as err:
                 if error_filter and err.out and error_filter.search(err.out):
@@ -324,7 +323,7 @@ class DSDBRunner(object):
             cmd.extend(args)
             try:
                 self.logger.client_info("DSDB: %s" %
-                                        " ".join(str(a) for a in args))
+                                        " ".join([str(a) for a in args]))
                 run_command(cmd, env=self.getenv(), logger=self.logger)
             except ProcessException as err:
                 rollback_failures.append(str(err))
@@ -571,7 +570,7 @@ class DSDBRunner(object):
             # In AQDB there may be multiple domain names associated with
             # an address, in DSDB there can only be one.  Thus we pick
             # the first address to propergate.
-            dns_record = addr.dns_records[0]
+            fqdn = str(addr.fqdns[0])
 
             # By default we take the comments from the hardware_entity,
             # if an interface comment exists then this will be taken
@@ -583,34 +582,38 @@ class DSDBRunner(object):
             else:
                 comments = None
 
-            iface = addr.logical_name
-            if addr.interface.comments and not \
-               addr.interface.comments.startswith("Created automatically"):
-                comments = addr.interface.comments
+            # Determine the interface name and comments used by this address.
+            if addr.service_address:
+                if addr.service_address.holder.holder_type == 'host':
+                    iface = "vip"
+                else:
+                    # Skip cluster-bound service addresses
+                    continue
+            else:
+                iface = addr.logical_name
+                if addr.interface.comments and not \
+                   addr.interface.comments.startswith("Created automatically"):
+                    comments = addr.interface.comments
 
             # Determine if we need to specify a primary name to DSDB.  By
             # doing so we are associating this record with another.
-            # Note, the existence of a primary hostname affects the order
+            # Note, the existance of a primary hostname effects the order
             # that entriers are processed in update_host()
             if addr.interface.interface_type == "management":
                 # Do not use -primary_host_name for the management address
                 # as we do not wish to associate them with the host currently
                 # on the machine (which may change).
                 primary = None
-            elif str(dns_record.fqdn) == real_primary:
-                # Avoid circular dependency - do not set the 'primary' key for
-                # the real primary name
+            elif addr.service_address:
+                # Do not use -primary_host_name for service addresses, because
+                # srvloc does not like that
                 primary = None
-            elif not isinstance(dbhw_ent, Machine):
-                # Not a machine - we don't care about srvloc
-                primary = real_primary
-            elif dns_record.reverse_ptr and str(dns_record.reverse_ptr.fqdn) == real_primary:
-                # If the reverse PTR record points to the primary name in AQDB,
-                # then pass the -primary_name flag to DSDB
-                primary = real_primary
+            elif fqdn == real_primary:
+                # Do not set the 'primary' key for the real primary name.
+                primary = None
             else:
-                # Avoid using -primary_name, to please srvloc
-                primary = None
+                # In all other cases associate the record with the primary name.
+                primary = real_primary
 
             # Exclude the MAC address for aliases
             if addr.label:
@@ -621,24 +624,9 @@ class DSDBRunner(object):
             ifdata = {'iface': iface,
                       'ip': addr.ip,
                       'mac': mac,
-                      'fqdn': str(dns_record.fqdn),
+                      'fqdn': fqdn,
                       'primary': primary,
                       'comments': comments}
-
-            hwdata["by-ip"][ifdata["ip"]] = ifdata
-            hwdata["by-fqdn"][ifdata["fqdn"]] = ifdata
-
-        # The primary address of Zebra hosts needs extra care. Here, we cheat a
-        # bit - we do not check if the primary name is a service address, but
-        # instead check if it has an IP address and it was not handled above.
-        if dbhw_ent.primary_ip and \
-           str(dbhw_ent.primary_name.fqdn) not in hwdata["by-fqdn"]:
-            ifdata = {'iface': "vip",
-                      'ip': dbhw_ent.primary_ip,
-                      'mac': None,
-                      'fqdn': str(dbhw_ent.primary_name),
-                      'primary': None,
-                      'comments': None}
 
             hwdata["by-ip"][ifdata["ip"]] = ifdata
             hwdata["by-fqdn"][ifdata["fqdn"]] = ifdata
