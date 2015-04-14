@@ -112,6 +112,18 @@ class TestAddRequiredService(TestBrokerCommand):
                           r"\s+Stage: next$",
                           command)
 
+    def test_125_show_diff(self):
+        command = ["show_diff", "--personality", "unixeng-test",
+                   "--archetype", "aquilon",
+                   "--personality_stage", "current", "--other_stage", "next"]
+        out = self.commandtest(command)
+        self.searchoutput(out,
+                          r'missing Required Services in Personality aquilon/unixeng-test@current:$'
+                          r'\s*chooser1$'
+                          r'\s*chooser2$'
+                          r'\s*chooser3$',
+                          command)
+
     def test_129_promite_unixeng_test(self):
         self.noouttest(["promote", "--personality", "unixeng-test",
                         "--archetype", "aquilon"])

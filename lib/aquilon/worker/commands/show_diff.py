@@ -25,7 +25,7 @@ from aquilon.worker.formats.parameter import DiffData
 
 class CommandShowDiff(BrokerCommand):
 
-    required_parameters = ["archetype", "personality", "other"]
+    required_parameters = ["archetype", "personality"]
 
     def render(self, session, archetype, personality, personality_stage,
                other, other_archetype, other_stage, **arguments):
@@ -34,6 +34,8 @@ class CommandShowDiff(BrokerCommand):
                                            archetype=archetype, compel=True)
         dbstage = dbpersona.default_stage(personality_stage)
 
+        if not other:
+            other = personality
         if not other_archetype:
             other_archetype = archetype
 

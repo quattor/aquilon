@@ -5665,15 +5665,15 @@
 	Compare config parameter for two object.
 	<optgroup mandatory="True" fields="all">
 	    <option name="archetype" type="string">Archetype</option>
-	    <optgroup fields="all">
-		<option name="personality" type="string">Name of personality</option>
-		<option name="other" type="string">Name of personality</option>
+	    <option name="personality" type="string">Name of personality</option>
+	    <optgroup fields="any">
+		<option name="other" type="string">Name of personality to compare with</option>
+		<option name="other_stage" type="string">Target personality version to use, defaults to 'current'.</option>
 	    </optgroup>
 	</optgroup>
 	<optgroup>
-	    <option name="other_archetype" type="string">Archetype</option>
 	    <option name="personality_stage" type="string">Personality stage to use, defaults to 'current'.</option>
-	    <option name="other_stage" type="string">Target personality stage to use, defaults to 'current'.</option>
+	    <option name="other_archetype" type="string">Archetype of personality to compare with</option>
 	</optgroup>
 	<transport method="get" path="diff"/>
     </command>
