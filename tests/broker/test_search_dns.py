@@ -117,6 +117,8 @@ class TestSearchDns(TestBrokerCommand):
                          command)
         self.matchoutput(out, "SRV Record: _ldap._tcp.aqd-unittest.ms.com",
                          command)
+        self.matchoutput(out, "SRV Record: _ldap-alias._tcp.aqd-unittest.ms.com",
+                         command)
         self.matchoutput(out, "Address Alias: addralias1.aqd-unittest.ms.com",
                          command)
 
