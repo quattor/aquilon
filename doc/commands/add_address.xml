@@ -37,6 +37,7 @@
 	    <arg choice="opt"><option>--dns_environment <replaceable>DNSENV</replaceable></option></arg>
 	    <arg choice="opt"><option>--network_environment <replaceable>NETENV</replaceable></option></arg>
 	    <arg choice="opt"><option>--reverse_ptr <replaceable>FQDN</replaceable></option></arg>
+	    <arg choice="opt"><option>--ttl <replaceable>TTL</replaceable></option></arg>
 	    <arg choice="opt"><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
 	    <xi:include href="../common/global_options.xml"/>
 	</cmdsynopsis>
@@ -95,6 +96,16 @@
 			The name of the DNS environment where the address should be created. The
 			default is the DNS environment associated with the network environment
 			<replaceable>NETENV</replaceable>.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--ttl <replaceable>TTL</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			The TTL of the record in number of seconds.
 		    </para>
 		</listitem>
 	    </varlistentry>

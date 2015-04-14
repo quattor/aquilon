@@ -28,7 +28,7 @@ class CommandAddAlias(BrokerCommand):
     required_parameters = ["fqdn", "target"]
 
     def render(self, session, logger, fqdn, dns_environment, target,
-               target_environment, comments,
+               target_environment, ttl, comments,
                **kwargs):
         dbdns_env = DnsEnvironment.get_unique_or_default(session,
                                                          dns_environment)
@@ -49,7 +49,8 @@ class CommandAddAlias(BrokerCommand):
 
         dbtarget = create_target_if_needed(session, logger, target, dbtgt_env)
         try:
-            db_record = Alias(fqdn=dbfqdn, target=dbtarget, comments=comments)
+            db_record = Alias(fqdn=dbfqdn, target=dbtarget, ttl=ttl,
+                              comments=comments)
             session.add(db_record)
         except ValueError as err:
             raise ArgumentError(err.message)

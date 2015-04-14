@@ -28,7 +28,7 @@ class CommandAddSrvRecord(BrokerCommand):
                            "priority", "weight", "target", "port"]
 
     def render(self, session, logger, service, protocol, dns_domain, priority,
-               weight, target, port, dns_environment, comments, **kwargs):
+               weight, target, port, dns_environment, ttl, comments, **kwargs):
         dbdns_env = DnsEnvironment.get_unique_or_default(session,
                                                          dns_environment)
         dbdns_domain = DnsDomain.get_unique(session, dns_domain, compel=True)
@@ -49,7 +49,7 @@ class CommandAddSrvRecord(BrokerCommand):
         dbtarget = create_target_if_needed(session, logger, target, dbdns_env)
         dbsrv_rec = SrvRecord(service=service, protocol=protocol,
                               priority=priority, weight=weight, target=dbtarget,
-                              port=port, dns_domain=dbdns_domain,
+                              port=port, dns_domain=dbdns_domain, ttl=ttl,
                               dns_environment=dbdns_env, comments=comments)
         session.add(dbsrv_rec)
 

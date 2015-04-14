@@ -150,6 +150,31 @@ class TestUpdateAlias(TestBrokerCommand):
         self.matchoutput(out, "Target: alias13.aqd-unittest.ms.com", command)
         self.matchoutput(out, "DNS Environment: ut-env", command)
 
+    def test_600_update_ttl(self):
+        command = ["update", "alias",
+                   "--fqdn", "alias2alias.aqd-unittest.ms.com",
+                   "--ttl", 120]
+        self.noouttest(command)
+
+    def test_620_verify_update_ttl(self):
+        command = ["search", "dns", "--fullinfo",
+                   "--fqdn", "alias2alias.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Alias: alias2alias.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "TTL: 120", command)
+
+    def test_700_remove_ttl(self):
+        command = ["update", "alias",
+                   "--fqdn", "alias2alias.aqd-unittest.ms.com",
+                   "--clear_ttl"]
+        self.noouttest(command)
+
+    def test_720_verify_remove_ttl(self):
+        command = ["search", "dns", "--fullinfo",
+                   "--fqdn", "alias2alias.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchclean(out, "TTL", command)
+
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUpdateAlias)
     unittest.TextTestRunner(verbosity=2).run(suite)

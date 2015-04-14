@@ -202,6 +202,29 @@ class TestUpdateAddress(TestBrokerCommand):
                          "unittest20.aqd-unittest.ms.com/eth1.",
                          command)
 
+    def test_300_update_no_ttl(self):
+        command = ["update", "address",
+                   "--fqdn", "arecord40.aqd-unittest.ms.com",
+                   "--clear_ttl"]
+        self.noouttest(command)
+        self.dsdb_verify(empty=True)
+
+    def test_320_verify_ttl(self):
+        command = ["show", "fqdn", "--fqdn", "arecord40.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchclean(out, "TTL", command)
+
+    def test_330_update_new_ttl(self):
+        command = ["update", "address",
+                   "--fqdn", "arecord40.aqd-unittest.ms.com",
+                   "--ttl", "600"]
+        self.noouttest(command)
+        self.dsdb_verify(empty=True)
+
+    def test_340_verify_ttl(self):
+        command = ["show", "fqdn", "--fqdn", "arecord40.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "TTL: 600", command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUpdateAddress)

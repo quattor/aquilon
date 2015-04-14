@@ -55,14 +55,17 @@ class TestDumpDns(TestBrokerCommand):
                          "Calias2host.aqd-unittest.ms.com:arecord13.aqd-unittest.ms.com",
                          command)
         self.matchoutput(out,
-                         "Calias2alias.aqd-unittest.ms.com:alias2host.aqd-unittest.ms.com",
+                         "Calias2alias.aqd-unittest.ms.com:alias2host.aqd-unittest.ms.com:60",
                          command)
+        self.matchclean(out,
+                        "Calias2host.aqd-unittest.ms.com:arecord13.aqd-unittest.ms.com:",
+                        command)
         # SRV
         self.matchoutput(out,
                          r":_kerberos._tcp.aqd-unittest.ms.com:33:\000\012\000\024\000\130\011arecord14\014aqd-unittest\002ms\003com\000",
                          command)
         self.matchoutput(out,
-                         r":_kerberos._tcp.aqd-unittest.ms.com:33:\000\012\000\024\000\130\011arecord15\014aqd-unittest\002ms\003com\000",
+                         r":_kerberos._tcp.aqd-unittest.ms.com:33:\000\012\000\024\000\130\011arecord15\014aqd-unittest\002ms\003com\000:3600",
                          command)
         self.matchoutput(out,
                          r":_ldap-restrict._tcp.aqd-unittest.ms.com:33:\000\012\000\024\001\205\004ldap\010restrict\014aqd-unittest\002ms\003com\000",
@@ -70,6 +73,28 @@ class TestDumpDns(TestBrokerCommand):
         self.matchoutput(out,
                          r":_ldap-reserved._udp.aqd-unittest.ms.com:33:\000\012\000\024\001\205\006nyaqd1\002ms\003com\000",
                          command)
+        # Address record
+        self.matchoutput(out,
+                         "=arecord40.aqd-unittest.ms.com:%s:300" %
+                         self.net["unknown0"].usable[40],
+                         command)
+        self.matchclean(out,
+                        "=arecord13.aqd-unittest.ms.com:%s:" %
+                        self.net["unknown0"].usable[13],
+                        command)
+        # Address alias
+        self.matchoutput(out,
+                         "addralias1.aqd-unittest.ms.com:%s:1800" %
+                         self.net["unknown0"].usable[14],
+                         command)
+        self.matchclean(out,
+                        "addralias1.aqd-unittest.ms.com:%s:" %
+                        self.net["unknown0"].usable[13],
+                        command)
+        self.matchclean(out,
+                        "addralias1.aqd-unittest.ms.com:%s:" %
+                        self.net["unknown0"].usable[15],
+                        command)
         self.matchclean(out, "utcolo", command)
 
     def test_djb_domain(self):
@@ -118,7 +143,7 @@ class TestDumpDns(TestBrokerCommand):
                          'alias2host.aqd-unittest.ms.com.\tIN\tCNAME\tarecord13.aqd-unittest.ms.com.',
                          command)
         self.matchoutput(out,
-                         'alias2alias.aqd-unittest.ms.com.\tIN\tCNAME\talias2host.aqd-unittest.ms.com.',
+                         'alias2alias.aqd-unittest.ms.com.\t60\tIN\tCNAME\talias2host.aqd-unittest.ms.com.',
                          command)
         # SRV
         self.matchoutput(out,
@@ -126,7 +151,7 @@ class TestDumpDns(TestBrokerCommand):
                          "10 20 88 arecord14.aqd-unittest.ms.com.",
                          command)
         self.matchoutput(out,
-                         "_kerberos._tcp.aqd-unittest.ms.com.\tIN\tSRV\t"
+                         "_kerberos._tcp.aqd-unittest.ms.com.\t3600\tIN\tSRV\t"
                          "10 20 88 arecord15.aqd-unittest.ms.com.",
                          command)
         self.matchoutput(out,
@@ -136,6 +161,36 @@ class TestDumpDns(TestBrokerCommand):
         self.matchoutput(out,
                          "_ldap-reserved._udp.aqd-unittest.ms.com.\tIN\tSRV\t"
                          "10 20 389 nyaqd1.ms.com.",
+                         command)
+        # Address record
+        self.matchoutput(out,
+                         "arecord40.aqd-unittest.ms.com.\t300\tIN\tA\t%s" %
+                         self.net["unknown0"].usable[40],
+                         command)
+        self.matchoutput(out,
+                         "%s.\t300\tIN\tPTR\tarecord40.aqd-unittest.ms.com." %
+                         inaddr_ptr(self.net["unknown0"].usable[40]),
+                         command)
+        self.matchoutput(out,
+                         "arecord13.aqd-unittest.ms.com.\tIN\tA\t%s" %
+                         self.net["unknown0"].usable[13],
+                         command)
+        self.matchoutput(out,
+                         "%s.\tIN\tPTR\tarecord13.aqd-unittest.ms.com." %
+                         inaddr_ptr(self.net["unknown0"].usable[13]),
+                         command)
+        # Address alias
+        self.matchoutput(out,
+                         "addralias1.aqd-unittest.ms.com.\t1800\tIN\tA\t%s" %
+                         self.net["unknown0"].usable[14],
+                         command)
+        self.matchoutput(out,
+                         "addralias1.aqd-unittest.ms.com.\tIN\tA\t%s" %
+                         self.net["unknown0"].usable[13],
+                         command)
+        self.matchoutput(out,
+                         "addralias1.aqd-unittest.ms.com.\tIN\tA\t%s" %
+                         self.net["unknown0"].usable[15],
                          command)
         self.matchclean(out, "utcolo", command)
 

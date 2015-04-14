@@ -20,7 +20,8 @@ from datetime import datetime
 from collections import deque
 
 from sqlalchemy import Integer, DateTime, Sequence, String, Column, ForeignKey
-from sqlalchemy.orm import relation, deferred, backref, object_session, lazyload
+from sqlalchemy.orm import (relation, deferred, backref, object_session,
+                            lazyload, validates)
 from sqlalchemy.ext.associationproxy import association_proxy
 
 from aquilon.exceptions_ import NotFoundException, ArgumentError
@@ -68,6 +69,8 @@ class DnsRecord(Base):
                                     nullable=False))
 
     comments = deferred(Column(String(255), nullable=True))
+
+    ttl = Column(Integer, nullable=True)
 
     fqdn = relation(Fqdn, lazy=False, innerjoin=True,
                     backref=backref('dns_records'))
@@ -132,6 +135,16 @@ class DnsRecord(Base):
         if format_spec != "a":
             return super(DnsRecord, self).__format__(format_spec)
         return str(self.fqdn)
+
+    @validates('ttl')
+    def validate_ttl(self, key, value):
+        if value is not None:
+            value = int(value)
+            if value < 0 or value > 2147483647:
+                # Valid ttl range according to RFC 2181
+                raise ArgumentError("TTL must be between 0 and 2147483647.")
+
+        return value
 
     @property
     def all_aliases(self):

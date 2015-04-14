@@ -12,6 +12,9 @@ ${"{0:c}: {0.fqdn!s}".format(record)}
 %if record.address_alias_cnt:
   Address Aliases: ${", ".join(str(a.fqdn) + ("" if a.fqdn.dns_environment == record.fqdn.dns_environment else " [environment: " + a.fqdn.dns_environment.name + "]") for a in record.all_address_aliases)}
 %endif
+%if record.ttl:
+  TTL: ${record.ttl}
+%endif
 </%def>
 <%def name="dns_record_tail(record)">\
 %if record.comments:

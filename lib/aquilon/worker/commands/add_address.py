@@ -29,7 +29,7 @@ class CommandAddAddress(BrokerCommand):
     required_parameters = ["fqdn"]
 
     def render(self, session, logger, fqdn, dns_environment,
-               network_environment, reverse_ptr, comments, **arguments):
+               network_environment, reverse_ptr, ttl, comments, **arguments):
         dbnet_env, dbdns_env = get_net_dns_env(session, network_environment,
                                                dns_environment)
         audit_results = []
@@ -42,6 +42,9 @@ class CommandAddAddress(BrokerCommand):
 
         if reverse_ptr:
             set_reverse_ptr(session, logger, dbdns_rec, reverse_ptr)
+
+        if ttl is not None:
+            dbdns_rec.ttl = ttl
 
         session.flush()
 

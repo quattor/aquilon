@@ -4414,6 +4414,7 @@
 	    <option name="dns_environment" type="string">The name of the environment the address is in (defaults to 'internal')</option>
 	    <option name="network_environment" type="string">Name of the environment</option>
 	    <option name="ipalgorithm" type="string">Algorithm for automatically choosing an IP.</option>
+	    <option name="ttl" type="int">TTL</option>
 	    <option name="comments" type="string">Comments</option>
 	    <option name="reverse_ptr" type="string">Where the reverse record should point to</option>
 	</optgroup>
@@ -4452,6 +4453,8 @@
 	</optgroup>
 	<optgroup>
 	    <option name="ip" type="ipv4">The new IP address</option>
+			<option name="ttl" type="int">TTL</option>
+			<option name="clear_ttl" type="flag" conflicts="ttl">Clear customized TTL value</option>
 	    <option name="comments" type="string">Comments</option>
 	    <option name="reverse_ptr" type="string">Where the reverse record should point to</option>
 	    <option name="dns_environment" type="string">The name of the environment the address is in (defaults to 'internal')</option>
@@ -4501,6 +4504,7 @@
 	    <option name="target" type="string">The target of an alias (CNAME)</option>
 	</optgroup>
 	<optgroup>
+			<option name="ttl" type="int">TTL</option>
 	    <option name="comments" type="string">Comments</option>
 	    <option name="dns_environment" type="string">The name of the environment the address is in (defaults to 'internal')</option>
 	    <option name="target_environment" type="string">The name of the environment the target is in (defaults to be the same as the alias environment)</option>
@@ -4526,6 +4530,7 @@
 	    <option name="target" type="string">The target of the A-Record</option>
 	</optgroup>
 	<optgroup>
+			<option name="ttl" type="int">TTL</option>
 	    <option name="comments" type="string">Comments</option>
 	    <option name="dns_environment" type="string">The name of the environment the address is in (defaults to 'internal')</option>
 	    <option name="target_environment" type="string">The name of the environment the target is in (defaults to be the same as the alias environment)</option>
@@ -4553,6 +4558,8 @@
 	    <option name="target" type="string">The target of the A-Record</option>
 	</optgroup>
 	<optgroup>
+			<option name="ttl" type="int">TTL</option>
+			<option name="clear_ttl" type="flag" conflicts="ttl">Clear customized TTL value</option>
 	    <option name="comments" type="string">Comments</option>
 	    <option name="dns_environment" type="string">The name of the environment the address is in (defaults to 'internal')</option>
 	    <option name="target_environment" type="string">The name of the environment the target is in (defaults to be the same as the alias environment)</option>
@@ -4579,6 +4586,8 @@
 	</optgroup>
 	<optgroup>
 	    <option name="target" type="string">The new target of the alias</option>
+			<option name="ttl" type="int">TTL</option>
+			<option name="clear_ttl" type="flag" conflicts="ttl">Clear customized TTL value</option>
 	    <option name="comments" type="string">Comments</option>
 	    <option name="dns_environment" type="string">The name of the environment the address is in (defaults to 'internal')</option>
 	    <option name="target_environment" type="string">The name of the environment the target is in (defaults to be the same as the alias environment)</option>
@@ -4598,6 +4607,7 @@
 	    <option name="port" type="int">The port on the target where the service listens</option>
 	</optgroup>
 	<optgroup>
+			<option name="ttl" type="int">TTL</option>
 	    <option name="comments" type="string">Comments</option>
 	    <option name="dns_environment" type="string">The name of the environment the address is in (defaults to 'internal')</option>
 	</optgroup>
@@ -4645,6 +4655,8 @@
 	    <option name="priority" type="int">The new priority of the record</option>
 	    <option name="weight" type="int">The new weight of the record</option>
 	    <option name="port" type="int">The new port on the target where the service listens</option>
+			<option name="ttl" type="int">TTL</option>
+			<option name="clear_ttl" type="flag" conflicts="ttl">Clear customized TTL value</option>
 	    <option name="comments" type="string">Comments</option>
 	    <option name="dns_environment" type="string">The name of the environment the address is in (defaults to 'internal')</option>
 	</optgroup>

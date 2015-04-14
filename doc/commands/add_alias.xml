@@ -29,6 +29,7 @@
 	    </group>
 	    <arg choice="plain"><option>--fqdn <replaceable>ALIAS</replaceable></option></arg>
 	    <arg choice="plain"><option>--target <replaceable>TARGET</replaceable></option></arg>
+	    <arg choice="opt"><option>--ttl <replaceable>TTL</replaceable></option></arg>
 	    <arg choice="opt"><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
 	    <arg choice="opt"><option>--dns_environment <replaceable>ENV</replaceable></option></arg>
 	    <arg choice="opt"><option>--target_environment <replaceable>ENV</replaceable></option></arg>
@@ -90,6 +91,16 @@
 			The name of the DNS environment where the target lives if it is different from where the
 			alias is created. The target would be in the same dns enviornment as the alias if it is
       not specified.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--ttl <replaceable>TTL</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			The TTL of the record in number of seconds.
 		    </para>
 		</listitem>
 	    </varlistentry>
