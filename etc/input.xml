@@ -5159,7 +5159,11 @@
 		<option name="resourcegroup" type="string">Resourcegroup to apply resource</option>
 	    </optgroup>
 	    <option name="application" type="string">Name of applicaiton</option>
-	    <option name="eonid" type="int">EON identity</option>
+	    <optgroup fields="one">
+		<option name="eonid" type="int">(Deprecated) EON identity</option>
+		<option name="eon_id" type="int">EON identity</option>
+		<option name="grn" type="string">GRN</option>
+	    </optgroup>
 	</optgroup>
 	<optgroup>
 	    <option name="comments" type="string">Comments</option>
@@ -5191,8 +5195,7 @@
 		<option name="resourcegroup" type="string">Resourcegroup to apply resource</option>
 	    </optgroup>
 	    <option name="application" type="string">application name</option>
-	    <option name="eonid" type="int">EON id</option>
-	    <option name="all" type="flag" conflicts="hostname cluster metacluster resourcegroup application eonid">list all applications</option>
+	    <option name="all" type="flag" conflicts="hostname cluster metacluster resourcegroup application">list all applications</option>
 	</optgroup>
 	<transport method="get" trigger="application" path="resource/application/%(application)s"/>
 	<transport method="get" path="find/resource/application"/>

@@ -162,7 +162,7 @@ class TestAddResourceGroup(TestBrokerCommand):
     def test_126_type_mismatch(self):
         command = ["add_application", "--cluster", "utvcs1",
                    "--resourcegroup", "utvcs1as1",
-                   "--application", "testapp", "--eonid", 2]
+                   "--application", "testapp", "--eon_id", 2]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Resource Group utvcs1as1 may contain resources "
                          "of type filesystem only.", command)

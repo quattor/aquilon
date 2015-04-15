@@ -25,10 +25,7 @@ class CommandShowApplication(BrokerCommand):
     required_parameters = []
 
     def render(self, session, logger, hostname, cluster, metacluster,
-               resourcegroup, all, application, eonid, **arguments):
-
-        # if eonid:
-        #     q = q.filter_by(eonid=eonid)
+               resourcegroup, all, application, **arguments):
 
         return show_resource(session, logger, hostname, cluster, metacluster,
                              resourcegroup, all, application, Application)

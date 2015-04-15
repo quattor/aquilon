@@ -105,7 +105,7 @@ class PlenaryResource(StructurePlenary):
         pan_assign(lines, "pass", self.dbobj.passno)
 
     def body_application(self, lines):
-        pan_assign(lines, "eonid", self.dbobj.eonid)
+        pan_assign(lines, "eonid", self.dbobj.eon_id)
 
     def body_hostlink(self, lines):
         pan_assign(lines, "target", self.dbobj.target)

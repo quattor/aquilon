@@ -107,7 +107,7 @@ class TestUsecaseHACluster(TestBrokerCommand):
                                 "--cluster", "hacl%d" % cl,
                                 "--resourcegroup", "hacl%dg%d" % (cl, rg),
                                 "--application", "hacl%dg%dapp" % (cl, rg),
-                                "--eonid", 42])
+                                "--eon_id", 2])
                 self.check_plenary_exists("resource",
                                           "cluster", "hacl%d" % cl,
                                           "resourcegroup", "hacl%dg%d" % (cl, rg),

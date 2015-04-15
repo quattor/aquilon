@@ -15,9 +15,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from sqlalchemy import Integer, Column, ForeignKey
+from sqlalchemy import Column, ForeignKey
+from sqlalchemy.orm import relation
 
-from aquilon.aqdb.model import Resource
+from aquilon.aqdb.model import Resource, Grn
 
 _TN = 'application'
 
@@ -25,11 +26,13 @@ _TN = 'application'
 class Application(Resource):
     """ Application resources """
     __tablename__ = _TN
-    __mapper_args__ = {'polymorphic_identity': _TN}
 
     id = Column(ForeignKey(Resource.id, ondelete='CASCADE'),
                 primary_key=True)
 
-    eonid = Column(Integer, nullable=False)
+    eon_id = Column(ForeignKey(Grn.eon_id), nullable=False)
 
+    grn = relation(Grn, innerjoin=True)
+
+    __mapper_args__ = {'polymorphic_identity': _TN}
     __table_args__ = ({'info': {'unique_fields': ['name', 'holder']}},)
