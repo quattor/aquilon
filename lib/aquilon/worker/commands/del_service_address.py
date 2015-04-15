@@ -22,8 +22,7 @@ from aquilon.worker.dbwrappers.dns import delete_dns_record
 from aquilon.worker.dbwrappers.resources import get_resource_holder
 from aquilon.worker.dbwrappers.service_instance import check_no_provided_service
 from aquilon.worker.processes import DSDBRunner
-from aquilon.worker.locks import CompileKey
-from aquilon.worker.templates import Plenary
+from aquilon.worker.templates import Plenary, PlenaryCollection
 
 
 class CommandDelServiceAddress(BrokerCommand):
@@ -49,9 +48,9 @@ class CommandDelServiceAddress(BrokerCommand):
 
         dsdb_runner = DSDBRunner(logger=logger)
 
-        holder_plenary = Plenary.get_plenary(holder.holder_object,
-                                             logger=logger)
-        remove_plenary = Plenary.get_plenary(dbsrv, logger=logger)
+        plenaries = PlenaryCollection(logger=logger)
+        plenaries.append(Plenary.get_plenary(holder.holder_object))
+        plenaries.append(Plenary.get_plenary(dbsrv))
 
         holder.resources.remove(dbsrv)
         if not keep_dns:
@@ -59,20 +58,17 @@ class CommandDelServiceAddress(BrokerCommand):
 
         session.flush()
 
-        with CompileKey.merge([remove_plenary.get_key(), holder_plenary.get_key()]):
-            remove_plenary.stash()
-            holder_plenary.stash()
+        with plenaries.get_key():
+            plenaries.stash()
 
             try:
-                holder_plenary.write(locked=True)
-                remove_plenary.remove(locked=True)
+                plenaries.write(locked=True)
 
                 if not keep_dns:
                     dsdb_runner.delete_host_details(old_fqdn, old_ip)
                 dsdb_runner.commit_or_rollback("Could not delete host from DSDB")
             except:
-                holder_plenary.restore_stash()
-                remove_plenary.restore_stash()
+                plenaries.restore_stash()
                 raise
 
         return

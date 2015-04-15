@@ -43,4 +43,6 @@ class CommandDelVirtualSwitch(BrokerCommand):
 
         plenaries = PlenaryCollection(logger=logger)
         plenaries.append(Plenary.get_plenary(dbvswitch))
-        plenaries.remove(remove_profile=True)
+        plenaries.write(remove_profile=True)
+
+        return

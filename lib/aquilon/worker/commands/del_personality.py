@@ -46,6 +46,7 @@ class CommandDelPersonality(BrokerCommand):
         session.delete(dbpersona)
 
         session.flush()
-        plenaries.remove()
+
+        plenaries.write()
 
         return

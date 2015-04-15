@@ -122,14 +122,14 @@ def create_host(session, logger, config, dbhw, dbarchetype, domain=None,
     return dbhost
 
 
-def remove_host(logger, dbhw, plenaries, remove_plenaries):
+def remove_host(logger, dbhw, plenaries):
     if not dbhw.host:
         raise NotFoundException("Hardware entity %s has no host." % dbhw.label)
     dbhost = dbhw.host
 
     dbhost.lock_row()
 
-    remove_plenaries.append(Plenary.get_plenary(dbhost))
+    plenaries.append(Plenary.get_plenary(dbhost))
 
     check_no_provided_service(dbhost)
 
@@ -141,8 +141,7 @@ def remove_host(logger, dbhw, plenaries, remove_plenaries):
     del dbhost.services_used[:]
 
     if dbhost.resholder:
-        remove_plenaries.extend(map(Plenary.get_plenary,
-                                    dbhost.resholder.resources))
+        plenaries.extend(map(Plenary.get_plenary, dbhost.resholder.resources))
 
     if dbhost.cluster:
         dbcluster = dbhost.cluster

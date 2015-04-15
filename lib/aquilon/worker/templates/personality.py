@@ -20,6 +20,7 @@ from collections import defaultdict
 from six import iteritems
 
 from sqlalchemy.inspection import inspect
+from sqlalchemy.orm import object_session
 
 from aquilon.aqdb.model import PersonalityStage, Parameter
 from aquilon.worker.locks import NoLockKey, PlenaryKey
@@ -317,3 +318,12 @@ class PlenaryPersonalityParameter(StructurePlenary):
     def body(self, lines):
         for path in self.parameters:
             pan_assign(lines, path, self.parameters[path])
+
+    def is_deleted(self):
+        dbobj = self.dbobj.personality_stage
+        session = object_session(dbobj)
+        return dbobj in session.deleted or inspect(dbobj).deleted
+
+    def is_dirty(self):
+        session = object_session(self.dbobj.personality_stage)
+        return self.dbobj.personality_stage in session.dirty

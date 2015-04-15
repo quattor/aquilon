@@ -19,8 +19,7 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import ServiceAddress
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.resources import get_resource_holder
-from aquilon.worker.locks import CompileKey
-from aquilon.worker.templates import Plenary
+from aquilon.worker.templates import Plenary, PlenaryCollection
 
 
 class CommandDelResource(BrokerCommand):
@@ -47,9 +46,9 @@ class CommandDelResource(BrokerCommand):
         dbresource = self.resource_class.get_unique(session, name=name,
                                                     holder=holder, compel=True)
 
-        holder_plenary = Plenary.get_plenary(holder.holder_object,
-                                             logger=logger)
-        remove_plenary = Plenary.get_plenary(dbresource, logger=logger)
+        plenaries = PlenaryCollection(logger=logger)
+        plenaries.append(Plenary.get_plenary(holder.holder_object))
+        plenaries.append(Plenary.get_plenary(dbresource))
 
         if hasattr(dbresource, 'resholder') and dbresource.resholder:
             for res in dbresource.resholder.resources:
@@ -64,16 +63,6 @@ class CommandDelResource(BrokerCommand):
         holder.resources.remove(dbresource)
         session.flush()
 
-        with CompileKey.merge([remove_plenary.get_key(), holder_plenary.get_key()]):
-            remove_plenary.stash()
-            holder_plenary.stash()
-
-            try:
-                holder_plenary.write(locked=True)
-                remove_plenary.remove(locked=True)
-            except:
-                holder_plenary.restore_stash()
-                remove_plenary.restore_stash()
-                raise
+        plenaries.write()
 
         return
