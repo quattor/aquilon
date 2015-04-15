@@ -5478,6 +5478,7 @@
 	</optgroup>
 	<optgroup>
 	    <option name="required_type" type="string">group members must have this type</option>
+	    <option name="comments" type="string">Comments</option>
 	</optgroup>
 	<transport method="put" path="resource/resourcegroup/%(resourcegroup)s"/>
     </command>
@@ -5511,6 +5512,23 @@
 	<format name="proto" >
 	    <message_class name="ResourceList" module="aqdsystems_pb2"/>
 	</format>
+    </command>
+
+    <command name="update_resourcegroup">
+	Update the parameters of a resource group.
+	<optgroup mandatory="True" fields="all">
+	    <optgroup fields="one">
+		<option name="hostname" type="string">Hostname to apply resource group</option>
+		<option name="cluster" type="string">Cluster to apply resource group</option>
+		<option name="metacluster" type="string">Metacluster to apply resource</option>
+	    </optgroup>
+	    <option name="resourcegroup" type="string">Name of the resource group</option>
+	</optgroup>
+	<optgroup>
+	    <option name="required_type" type="string">group members must have this type</option>
+	    <option name="comments" type="string">Comments</option>
+	</optgroup>
+	<transport method="post" path="resource/resourcegroup/%(resourcegroup)s"/>
     </command>
 
     <command name="add_feature">

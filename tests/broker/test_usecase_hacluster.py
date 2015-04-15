@@ -131,7 +131,15 @@ class TestUsecaseHACluster(TestBrokerCommand):
                                           "filesystem", "hacl%dg%dfs" % (cl, rg),
                                           "config")
 
-    def test_135_add_appsrv(self):
+    def test_136_update_rg(self):
+        command = ["update_resourcegroup", "--cluster", "hacl1",
+                   "--resourcegroup", "hacl1g1",
+                   "--required_type", "application"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Resource Group hacl1g1 already has a resource "
+                         "of type filesystem.", command)
+
+    def test_137_add_appsrv(self):
         # grep-friendly syntax
         ips = [self.net["unknown0"].usable[28],
                self.net["unknown0"].usable[29]]

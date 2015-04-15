@@ -463,9 +463,8 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
                    "--dumpfreq=1", "--fsckpass=3", "--options=ro",
                    "--resourcegroup=utmc8as1"]
         err = self.badrequesttest(command)
-        self.matchoutput(err, "Resource's filesystem type "
-                         "differs from the requested share",
-                         command)
+        self.matchoutput(err, "Resource Group utmc8as1 may contain resources "
+                         "of type share only.", command)
 
     # machine move tests
     def test_350_move_machine_pre(self):
