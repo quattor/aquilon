@@ -38,10 +38,10 @@ class TestDel10GigHardware(TestBrokerCommand):
 
             if i < 9:
                 net_index = (i % 4)
-                usable_index = i / 4
+                usable_index = i // 4
             else:
                 net_index = ((i - 9) % 4) + 4
-                usable_index = (i - 9) / 4
+                usable_index = (i - 9) // 4
             ip = nets[net_index].usable[usable_index]
             self.dsdb_expect_delete(ip)
 

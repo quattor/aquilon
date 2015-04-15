@@ -102,7 +102,7 @@ class TestUncluster(TestBrokerCommand):
     def testunbindutmc4(self):
         for i in range(1, 25):
             host = "evh%s.aqd-unittest.ms.com" % (i + 50)
-            cluster = "utecl%d" % (5 + ((i - 1) / 4))
+            cluster = "utecl%d" % (5 + ((i - 1) // 4))
             self.noouttest(["uncluster", "--personality", "generic",
                             "--hostname", host, "--cluster", cluster])
 

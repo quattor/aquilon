@@ -465,7 +465,7 @@ if __name__ == "__main__":
            status_thread.response_status == httplib.OK:
             sys.exit(0)
         else:
-            sys.exit(status_thread.response_status / 100)
+            sys.exit(status_thread.response_status // 100)
 
     # Normally the status thread will start right away.  We should delay
     # starting it on request - generally because the broker is running
@@ -554,7 +554,7 @@ if __name__ == "__main__":
         if res.status == httplib.MULTI_STATUS and \
            globalOptions.get('partialok'):
             sys.exit(0)
-        sys.exit(res.status / 100)
+        sys.exit(res.status // 100)
 
     exit_status = 0
 

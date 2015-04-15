@@ -74,7 +74,7 @@ class TestAudit(TestBrokerCommand):
                         % (end_time, start_time))
 
         elapsed = end_time - start_time
-        midpoint = start_time + (elapsed / 2)
+        midpoint = start_time + (elapsed // 2)
         # This makes the tests far less confusing when trying to deal
         # with the fact that non-Oracle might be storing microseconds
         # in the database since the aq output only shows seconds.
