@@ -16,8 +16,9 @@
 # limitations under the License.
 """Wrappers to make getting and using systems simpler."""
 
-from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.orm import object_session
+from sqlalchemy.orm.attributes import set_committed_value
+from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.inspection import inspect
 
 from aquilon.exceptions_ import (IncompleteError, NotFoundException,
@@ -43,6 +44,8 @@ def get_resource_holder(session, logger, hostname=None, cluster=None,
             session.add(dbhost.resholder)
             session.flush()
             who = dbhost.resholder
+        else:
+            set_committed_value(who, 'host', dbhost)
 
     if cluster is not None:
         # TODO: disallow metaclusters here
@@ -58,6 +61,8 @@ def get_resource_holder(session, logger, hostname=None, cluster=None,
             session.add(dbcluster.resholder)
             session.flush()
             who = dbcluster.resholder
+        else:
+            set_committed_value(who, 'cluster', dbcluster)
 
     if metacluster is not None:
         dbmeta = MetaCluster.get_unique(session, metacluster, compel=True)
@@ -69,6 +74,8 @@ def get_resource_holder(session, logger, hostname=None, cluster=None,
             session.add(dbmeta.resholder)
             session.flush()
             who = dbmeta.resholder
+        else:
+            set_committed_value(who, 'cluster', dbmeta)
 
     if resgroup is not None:
         dbrg = ResourceGroup.get_unique(session, name=resgroup, holder=who,
@@ -81,6 +88,8 @@ def get_resource_holder(session, logger, hostname=None, cluster=None,
             session.add(dbrg.resholder)
             session.flush()
             who = dbrg.resholder
+        else:
+            set_committed_value(who, 'resourcegroup', dbrg)
 
     return who
 

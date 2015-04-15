@@ -183,6 +183,23 @@ class TestUsecaseHACluster(TestBrokerCommand):
         self.statustest(["make", "cluster", "--cluster", "hacl1"])
         self.statustest(["make", "cluster", "--cluster", "hacl2"])
 
+    def test_155_cat_hacl1_client(self):
+        command = ["cat", "--cluster", "hacl1", "--client"]
+        out = self.commandtest(command)
+        self.searchoutput(out, r'"/system/cluster/name" = "hacl1";', command)
+        self.searchoutput(out,
+                          r'include { if_exists\("features/" \+ value\("/system/archetype/name"\) \+ "/hacluster/hapersonality/config"\) };',
+                          command)
+        self.searchoutput(out,
+                          r'"/system/cluster/resources/resourcegroup" = append\(create\("resource/cluster/hacl1/resourcegroup/hacl1g1/config"\)\);',
+                          command)
+        self.searchoutput(out,
+                          r'"/system/cluster/resources/resourcegroup" = append\(create\("resource/cluster/hacl1/resourcegroup/hacl1g2/config"\)\);',
+                          command)
+        self.searchoutput(out,
+                          r'"/system/cluster/resources/service_address" = append\(create\("resource/cluster/hacl1/service_address/hacl1/config"\)\);',
+                          command)
+
     def test_160_add_hamc1(self):
         self.noouttest(["add_metacluster", "--metacluster", "hamc1",
                         "--archetype", "metacluster",

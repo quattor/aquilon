@@ -39,6 +39,7 @@
 		<arg choice="plain"><option>--metacluster <replaceable>METACLUSTER</replaceable></option></arg>
 	    </group>
 	    <arg choice="opt"><option>--data</option></arg>
+	    <arg choice="opt"><option>--client</option></arg>
 	    <arg choice="opt"><option>--resourcegroup <replaceable>GROUP</replaceable></option></arg>
 	    <group choice="opt">
 		<arg choice="plain"><option>--application <replaceable>NAME</replaceable></option></arg>
@@ -179,6 +180,17 @@
 		    <para>
 			Hosts and clusters have multiple plenary templates. Specifying this option causes
 			the template containing the data definitions to be displayed.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--client</option>
+		</term>
+		<listitem>
+		    <para>
+			In case of clusters, display the plenary template which all members of the cluster
+			include.
 		    </para>
 		</listitem>
 	    </varlistentry>

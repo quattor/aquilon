@@ -186,6 +186,7 @@ class HardwareEntity(Base):
             if dns_rec:
                 # We know the primary name, do not load it again
                 set_committed_value(hwe, 'primary_name', dns_rec)
+                set_committed_value(dns_rec, 'hardware_entity', hwe)
 
         return hwe
 

@@ -17,10 +17,9 @@
 """Contains the logic for `aq bind client --metacluster`."""
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import MetaCluster, Service
+from aquilon.aqdb.model import MetaCluster, Service, ServiceInstance
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.services import Chooser
-from aquilon.worker.dbwrappers.service_instance import get_service_instance
 from aquilon.worker.templates import PlenaryCollection
 
 
@@ -33,7 +32,8 @@ class CommandBindClientMetacluster(BrokerCommand):
         dbmeta = MetaCluster.get_unique(session, metacluster, compel=True)
         dbservice = Service.get_unique(session, service, compel=True)
         if instance:
-            dbinstance = get_service_instance(session, dbservice, instance)
+            dbinstance = ServiceInstance.get_unique(session, service=dbservice,
+                                                    name=instance, compel=True)
         else:
             dbinstance = None
 

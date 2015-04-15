@@ -69,6 +69,14 @@ class TestAddCluster(PersonalityTestMixin, TestBrokerCommand):
         self.matchclean(data, "down_hosts_percent", data_cmd)
         self.matchclean(data, "down_maint_percent", data_cmd)
 
+    def test_12_verify_cat_utvcs1_client(self):
+        command = ["cat", "--cluster", "utvcs1", "--client"]
+        out = self.commandtest(command)
+        self.searchoutput(out, r'"/system/cluster/name" = "utvcs1";', command)
+        self.searchoutput(out,
+                          r'include { if_exists\("features/" \+ value\("/system/archetype/name"\) \+ "/hacluster/hapersonality/config"\) };',
+                          command)
+
     def test_20_fail_add_existing(self):
         command = ["add_cluster", "--cluster=utvcs1",
                    "--building=ut",

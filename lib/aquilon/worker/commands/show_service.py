@@ -25,41 +25,36 @@ from aquilon.worker.dbwrappers.host import hostname_to_host
 
 class CommandShowService(BrokerCommand):
 
-    def render(self, session, server, client, **arguments):
-        instance = arguments.get("instance", None)
-        dbserver = server and hostname_to_host(session, server) or None
-        dbclient = client and hostname_to_host(session, client) or None
-        if dbserver:
-            q = session.query(ServiceInstance)
-            if instance:
-                q = q.filter_by(name=instance)
-            q = q.join(Service)
-            q = q.options(contains_eager('service'))
-            q = q.join(ServiceInstance.servers)
+    def render(self, session, service, instance, server, client, **arguments):
+        if service:
+            dbservice = Service.get_unique(session, service, compel=True)
+            if not client and not server and not instance:
+                return dbservice
+
+        q = session.query(ServiceInstance)
+        if service:
+            q = q.filter_by(service=dbservice)
+        if instance:
+            q = q.filter_by(name=instance)
+        q = q.join(Service)
+        q = q.options(contains_eager('service'))
+
+        if server:
+            dbserver = hostname_to_host(session, server)
+            q = q.join(ServiceInstance.servers, aliased=True)
             q = q.filter_by(host=dbserver)
-            q = q.order_by(Service.name, ServiceInstance.name)
-            return q.all()
-        elif dbclient:
-            service_instances = dbclient.services_used
-            if instance:
-                service_instances = [si for si in service_instances if si.name == instance]
-            return service_instances
-        else:
-            # Try to load as much as we can as bulk queries since loading the
-            # objects one by one is much more expensive
-            q = session.query(Service)
-            q = q.join(ServiceInstance)
-            q = q.options(contains_eager('instances'))
-            q = q.options(subqueryload('archetypes'))
-            q = q.options(subqueryload('personalities'))
-            q = q.options(undefer('instances._client_count'))
-            q = q.options(subqueryload('instances.personality_service_map'))
-            q = q.options(subqueryload('instances.servers'))
-            q = q.options(joinedload('instances.servers.host'))
-            q = q.options(joinedload('instances.servers.host.hardware_entity'))
-            q = q.options(subqueryload('instances.service_map'))
-            q = q.options(joinedload('instances.service_map.location'))
-            q = q.options(subqueryload('instances.personality_service_map'))
-            q = q.options(joinedload('instances.personality_service_map.location'))
-            q = q.order_by(Service.name, ServiceInstance.name)
-            return q.all()
+            q = q.reset_joinpoint()
+        elif client:
+            dbclient = hostname_to_host(session, client)
+            q = q.filter(ServiceInstance.clients.contains(dbclient))
+
+        q = q.options(undefer('_client_count'),
+                      subqueryload('servers'),
+                      joinedload('servers.host'),
+                      joinedload('servers.host.hardware_entity'),
+                      subqueryload('service_map'),
+                      joinedload('service_map.location'),
+                      subqueryload('personality_service_map'),
+                      joinedload('personality_service_map.location'))
+        q = q.order_by(Service.name, ServiceInstance.name)
+        return q.all()

@@ -17,11 +17,10 @@
 """Contains the logic for `aq map service`."""
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.aqdb.model import (Personality, Service, ServiceMap,
-                                PersonalityServiceMap, NetworkEnvironment)
+from aquilon.worker.broker import BrokerCommand
+from aquilon.aqdb.model import (Personality, ServiceMap, PersonalityServiceMap,
+                                ServiceInstance, NetworkEnvironment)
 from aquilon.worker.dbwrappers.location import get_location
-from aquilon.worker.dbwrappers.service_instance import get_service_instance
 from aquilon.worker.dbwrappers.personality import validate_personality_justification
 from aquilon.worker.dbwrappers.network import get_network_byip
 
@@ -32,10 +31,9 @@ class CommandMapService(BrokerCommand):
 
     def render(self, session, service, instance, archetype, personality,
                networkip, justification, reason, user, **kwargs):
-
-        dbservice = Service.get_unique(session, service, compel=True)
+        dbinstance = ServiceInstance.get_unique(session, service=service,
+                                                name=instance, compel=True)
         dblocation = get_location(session, **kwargs)
-        dbinstance = get_service_instance(session, dbservice, instance)
 
         if networkip:
             dbnet_env = NetworkEnvironment.get_unique_or_default(session)

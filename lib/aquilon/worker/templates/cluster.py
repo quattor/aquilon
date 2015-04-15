@@ -233,5 +233,5 @@ class PlenaryClusterClient(Plenary):
                 res_path = PlenaryResource.template_name(resource)
                 pan_append(lines, "/system/cluster/resources/" +
                            resource.resource_type, StructureTemplate(res_path))
-        lines.append("include { if_exists('features/' + value('/system/archetype/name') + '/%s/%s/config') };"
+        lines.append('include { if_exists("features/" + value("/system/archetype/name") + "/%s/%s/config") };'
                      % (self.dbobj.archetype.name, self.dbobj.personality.name))

@@ -16,39 +16,10 @@
 # limitations under the License.
 """Contains the logic for `aq show service --service`."""
 
-from sqlalchemy.orm import contains_eager
-
-from aquilon.aqdb.model import Service, ServiceInstance
-from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.dbwrappers.host import hostname_to_host
-from aquilon.worker.dbwrappers.service_instance import get_service_instance
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.commands.show_service import CommandShowService
 
 
-class CommandShowServiceService(BrokerCommand):
+class CommandShowServiceService(CommandShowService):
 
     required_parameters = ["service"]
-
-    def render(self, session, service, server, client, **arguments):
-        instance = arguments.get("instance", None)
-        dbserver = server and hostname_to_host(session, server) or None
-        dbclient = client and hostname_to_host(session, client) or None
-        dbservice = Service.get_unique(session, service, compel=True)
-        if dbserver:
-            q = session.query(ServiceInstance)
-            q = q.filter_by(service=dbservice)
-            q = q.join(Service)  # Needed for ordering only
-            q = q.options(contains_eager('service'))
-            q = q.join(ServiceInstance.servers)
-            q = q.filter_by(host=dbserver)
-            q = q.order_by(Service.name, ServiceInstance.name)
-            return q.all()
-        elif dbclient:
-            service_instances = dbclient.services_used
-            service_instances = [si for si in service_instances if si.service == dbservice]
-            if instance:
-                service_instances = [si for si in service_instances if si.name == instance]
-            return service_instances
-
-        if not instance:
-            return dbservice
-        return get_service_instance(session, dbservice, instance)

@@ -16,14 +16,12 @@
 # limitations under the License.
 """Contains the logic for `aq bind server`."""
 
-
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import (Service, ServiceInstanceServer, DnsEnvironment,
-                                Cluster, ServiceAddress, Alias)
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.aqdb.model import (ServiceInstance, ServiceInstanceServer,
+                                DnsEnvironment, Cluster, ServiceAddress, Alias)
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.host import hostname_to_host
 from aquilon.worker.dbwrappers.resources import get_resource_holder
-from aquilon.worker.dbwrappers.service_instance import get_service_instance
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
 
 
@@ -127,8 +125,8 @@ class CommandBindServer(BrokerCommand):
             raise ArgumentError("Binding a cluster requires --service_address "
                                 "to be specified.")
 
-        dbservice = Service.get_unique(session, service, compel=True)
-        dbinstance = get_service_instance(session, dbservice, instance)
+        dbinstance = ServiceInstance.get_unique(session, service=service,
+                                                name=instance, compel=True)
 
         plenaries = PlenaryCollection(logger=logger)
         plenaries.append(Plenary.get_plenary(dbinstance))

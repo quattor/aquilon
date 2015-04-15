@@ -114,17 +114,16 @@ def convert_reserved_to_arecord(session, dbdns_rec, dbnetwork, ip):
     dbhw_ent = dbdns_rec.hardware_entity
     dbfqdn = dbdns_rec.fqdn
 
-    session.delete(dbdns_rec)
-    session.flush()
-    session.expire(dbhw_ent, ['primary_name'])
-    session.expire(dbfqdn, ['dns_records'])
-    dbdns_rec = ARecord(fqdn=dbfqdn, ip=ip, network=dbnetwork,
-                        comments=comments)
-    session.add(dbdns_rec)
-    if dbhw_ent:
-        dbhw_ent.primary_name = dbdns_rec
+    with session.no_autoflush:
+        session.delete(dbdns_rec)
+        session.expire(dbfqdn, ['dns_records'])
+        new_dnsrec = ARecord(fqdn=dbfqdn, ip=ip, network=dbnetwork,
+                             comments=comments)
+        session.add(new_dnsrec)
+        if dbhw_ent:
+            dbhw_ent.primary_name = new_dnsrec
 
-    return dbdns_rec
+    return new_dnsrec
 
 
 def _check_netenv_compat(dbdns_rec, dbnet_env):
