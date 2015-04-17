@@ -171,17 +171,13 @@ class Plenary(object):
         session = object_session(self.dbobj)
         return self.dbobj in session.dirty
 
-    def write(self, locked=False, remove_profile=False):
+    def _write(self, remove_profile=False):
         """Write out the template.
 
         If the content is unchanged, then the file will not be modified
         (preserving the mtime).
 
         Returns the number of files that were written.
-
-        If locked is True then it is assumed that error handling happens
-        higher in the call stack.
-
         """
 
         if isinstance(self.dbobj, CompileableMixin) and \
@@ -189,55 +185,41 @@ class Plenary(object):
            not self.dbobj.archetype.is_compileable:
             return 0
 
-        key = None
+        self.stash()
+
+        if self.is_deleted():
+            return self._remove(remove_profile=remove_profile)
+        elif not self.new_path:
+            raise InternalError("{0!r}: object is not deleted, but "
+                                "new_path is not set.".format(self))
+
         try:
-            if not locked:
-                key = self.get_key()
-                lock_queue.acquire(key)
-
-            self.stash()
-
-            if self.is_deleted():
-                return self._remove(remove_profile=remove_profile)
-            elif not self.new_path:
-                raise InternalError("{0!r}: object is not deleted, but "
-                                    "new_path is not set.".format(self))
-
-            try:
-                content = self._generate_content()
-            except IncompleteError as err:
-                self._remove()
-                if self.allow_incomplete:
-                    self.logger.client_info("Warning: %s", err)
-                    return 0
-                else:
-                    raise
-
-            if self.old_content == content and not self.removed:
-                # optimise out the write (leaving the mtime good for ant)
-                # if nothing is actually changed
+            content = self._generate_content()
+        except IncompleteError as err:
+            self._remove()
+            if self.allow_incomplete:
+                self.logger.client_info("Warning: %s", err)
                 return 0
+            else:
+                raise
 
-            # If the plenary has moved, then clean up any potential leftover
-            # files from the old location
-            if self.new_path != self.old_path:
-                self._remove()
+        if self.old_content == content and not self.removed:
+            # optimise out the write (leaving the mtime good for ant)
+            # if nothing is actually changed
+            return 0
 
-            self.logger.debug("Writing %r [%s]", self, self.new_path)
+        # If the plenary has moved, then clean up any potential leftover
+        # files from the old location
+        if self.new_path != self.old_path:
+            self._remove()
 
-            write_file(self.new_path, content, create_directory=True,
-                       logger=self.logger)
+        self.logger.debug("Writing %r [%s]", self, self.new_path)
 
-            self.changed = True
-            if self.new_path == self.old_path:
-                self.removed = False
-        except Exception as e:
-            if not locked:
-                self.restore_stash()
-            raise e
-        finally:
-            if not locked:
-                lock_queue.release(key)
+        write_file(self.new_path, content, create_directory=True,
+                   logger=self.logger)
+        self.changed = True
+        if self.new_path == self.old_path:
+            self.removed = False
 
         return 1
 
@@ -536,28 +518,35 @@ class PlenaryCollection(object):
             elif plen.template_type == 'object':
                 yield plen.template_name(plen.dbobj)
 
-    def write(self, locked=False, remove_profile=False):
+    def _write(self, remove_profile=False):
+        total = 0
+        errors = []
+        for plen in self.plenaries:
+            try:
+                total += plen._write(remove_profile=remove_profile)
+            except IncompleteError as err:
+                errors.append(str(err))
+
+        if errors:
+            raise ArgumentError("\n".join(errors))
+        return total
+
+    def write(self, locked=False, remove_profile=True):
         # If locked is True, assume error handling happens higher
         # in the stack.
         total = 0
-        # Pre-stash all plenaries before attempting to write any
-        # of them.  This way if an error occurs all can go through
-        # the same restore logic.
-        self.stash()
         key = None
-        errors = []
         try:
             if not locked:
                 key = self.get_key()
                 lock_queue.acquire(key)
-            for plen in self.plenaries:
-                try:
-                    total += plen.write(locked=True,
-                                        remove_profile=remove_profile)
-                except IncompleteError as err:
-                    errors.append(str(err))
-            if errors:
-                raise ArgumentError("\n".join(errors))
+
+            # Pre-stash all plenaries before attempting to write any
+            # of them.  This way if an error occurs all can go through
+            # the same restore logic.
+            self.stash()
+
+            total = self._write(remove_profile=remove_profile)
         except:
             if not locked:
                 self.restore_stash()

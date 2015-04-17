@@ -34,7 +34,7 @@ from aquilon.aqdb.model import (Service, Machine, Chassis, Host,
                                 AddressAssignment, ServiceInstance,
                                 NetworkDevice, ParamDefHolder, Feature)
 from aquilon.aqdb.data_sync.storage import StormapParser
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.templates.base import Plenary
 from aquilon.worker.templates.switchdata import PlenarySwitchData
 from aquilon.worker.locks import CompileKey
@@ -198,7 +198,7 @@ class CommandFlush(BrokerCommand):
                 for dbloc in session.query(City).all():
                     try:
                         plenary = Plenary.get_plenary(dbloc, logger=logger)
-                        written += plenary.write(locked=True)
+                        written += plenary._write()
                     except Exception as e:
                         failed.append("{0} failed: {1}".format(dbloc, e))
                         continue
@@ -215,7 +215,7 @@ class CommandFlush(BrokerCommand):
                     try:
                         plenary_info = Plenary.get_plenary(dbservice,
                                                            logger=logger)
-                        written += plenary_info.write(locked=True)
+                        written += plenary_info._write()
                     except Exception as e:
                         failed.append("{0} failed: {1}".format(dbservice, e))
                         continue
@@ -224,7 +224,7 @@ class CommandFlush(BrokerCommand):
                         try:
                             plenary_info = Plenary.get_plenary(dbinst,
                                                                logger=logger)
-                            written += plenary_info.write(locked=True)
+                            written += plenary_info._write()
                         except Exception as e:
                             failed.append("{0} failed: {1}".format(dbinst, e))
                             continue
@@ -262,7 +262,7 @@ class CommandFlush(BrokerCommand):
                     try:
                         plenary_info = Plenary.get_plenary(persst,
                                                            logger=logger)
-                        written += plenary_info.write(locked=True)
+                        written += plenary_info._write()
                     except Exception as e:
                         failed.append("{0} failed: {1}".format(persst, e))
                         continue
@@ -299,7 +299,7 @@ class CommandFlush(BrokerCommand):
                     try:
                         plenary_info = Plenary.get_plenary(machine,
                                                            logger=logger)
-                        written += plenary_info.write(locked=True)
+                        written += plenary_info._write()
                     except Exception as e:
                         failed.append("{0} failed: {1}".format(machine, e))
                         continue
@@ -342,7 +342,7 @@ class CommandFlush(BrokerCommand):
 
                     try:
                         plenary_host = Plenary.get_plenary(h, logger=logger)
-                        written += plenary_host.write(locked=True)
+                        written += plenary_host._write()
                     except IncompleteError as e:
                         pass
                         # logger.client_info("Not flushing host: %s" % e)
@@ -366,7 +366,7 @@ class CommandFlush(BrokerCommand):
                     progress.step()
                     try:
                         plenary = Plenary.get_plenary(clus, logger=logger)
-                        written += plenary.write(locked=True)
+                        written += plenary._write()
                     except Exception as e:
                         failed.append("{0} failed: {1}".format(clus, e))
 
@@ -379,7 +379,7 @@ class CommandFlush(BrokerCommand):
                     progress.step()
                     try:
                         plenary = Plenary.get_plenary(dbresource, logger=logger)
-                        written += plenary.write(locked=True)
+                        written += plenary._write()
                     except Exception as e:
                         failed.append("{0} failed: {1}".format(dbresource, e))
 
@@ -393,12 +393,12 @@ class CommandFlush(BrokerCommand):
                     progress.step()
                     try:
                         plenary = PlenarySwitchData.get_plenary(dbnetdev, logger=logger)
-                        written += plenary.write(locked=True)
+                        written += plenary._write()
                     except Exception as e:
                         failed.append("{0} failed: {1}".format(dbnetdev, e))
                     try:
                         plenary = Plenary.get_plenary(dbnetdev, logger=logger)
-                        written += plenary.write(locked=True)
+                        written += plenary._write()
                     except Exception as e:
                         failed.append("{0} failed: {1}".format(dbnetdev, e))
 
