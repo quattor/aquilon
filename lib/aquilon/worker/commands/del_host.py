@@ -63,23 +63,15 @@ class CommandDelHost(BrokerCommand):
         delete_dns_record(dbdns_rec)
         session.flush()
 
-        with plenaries.get_key():
-            plenaries.stash()
-
-            try:
-                plenaries.write(locked=True, remove_profile=True)
-
-                if oldinfo:
-                    dsdb_runner = DSDBRunner(logger=logger)
-                    dsdb_runner.update_host(dbmachine, oldinfo)
-                    dsdb_runner.commit_or_rollback("Could not remove host %s from "
-                                                   "DSDB" % hostname)
-                else:
-                    logger.client_info("WARNING: removing host %s from AQDB and "
-                                       "*not* changing DSDB." % hostname)
-            except:
-                plenaries.restore_stash()
-                raise
+        with plenaries.transaction():
+            if oldinfo:
+                dsdb_runner = DSDBRunner(logger=logger)
+                dsdb_runner.update_host(dbmachine, oldinfo)
+                dsdb_runner.commit_or_rollback("Could not remove host %s from "
+                                               "DSDB" % hostname)
+            else:
+                logger.client_info("WARNING: removing host %s from AQDB and "
+                                   "*not* changing DSDB." % hostname)
 
         trigger_notifications(self.config, logger, CLIENT_INFO)
 

@@ -118,34 +118,27 @@ class CommandDelInterfaceAddress(BrokerCommand):
 
         session.flush()
 
+        dsdb_runner = DSDBRunner(logger=logger)
+
         if dbhw_ent.host:
             plenaries = PlenaryCollection(logger=logger)
             plenaries.append(Plenary.get_plenary(dbhw_ent.host))
-            with plenaries.get_key():
-                plenaries.stash()
-                try:
-                    plenaries.write(locked=True)
+            with plenaries.transaction():
+                if dbhw_ent.host.archetype.name == 'aurora':
+                    logger.client_info("WARNING: removing IP %s from AQDB and "
+                                       "*not* changing DSDB." % ip)
+                else:
+                    dsdb_runner.update_host(dbhw_ent, oldinfo)
 
-                    dsdb_runner = DSDBRunner(logger=logger)
-                    if dbhw_ent.host.archetype.name == 'aurora':
-                        logger.client_info("WARNING: removing IP %s from AQDB and "
-                                           "*not* changing DSDB." % ip)
-                    else:
-                        dsdb_runner.update_host(dbhw_ent, oldinfo)
+                    if not other_uses and keep_dns:
+                        q = session.query(ARecord)
+                        q = q.filter_by(network=dbnetwork)
+                        q = q.filter_by(ip=ip)
+                        dbdns_rec = q.first()
+                        dsdb_runner.add_host_details(dbdns_rec.fqdn, ip)
 
-                        if not other_uses and keep_dns:
-                            q = session.query(ARecord)
-                            q = q.filter_by(network=dbnetwork)
-                            q = q.filter_by(ip=ip)
-                            dbdns_rec = q.first()
-                            dsdb_runner.add_host_details(dbdns_rec.fqdn, ip)
-
-                        dsdb_runner.commit_or_rollback("Could not add host to DSDB")
-                except:
-                    plenaries.restore_stash()
-                    raise
+                    dsdb_runner.commit_or_rollback("Could not add host to DSDB")
         else:
-            dsdb_runner = DSDBRunner(logger=logger)
             dsdb_runner.update_host(dbhw_ent, oldinfo)
             dsdb_runner.commit_or_rollback("Could not add host to DSDB")
 

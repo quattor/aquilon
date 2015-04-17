@@ -58,17 +58,9 @@ class CommandDelServiceAddress(BrokerCommand):
 
         session.flush()
 
-        with plenaries.get_key():
-            plenaries.stash()
-
-            try:
-                plenaries.write(locked=True)
-
-                if not keep_dns:
-                    dsdb_runner.delete_host_details(old_fqdn, old_ip)
-                dsdb_runner.commit_or_rollback("Could not delete host from DSDB")
-            except:
-                plenaries.restore_stash()
-                raise
+        with plenaries.transaction():
+            if not keep_dns:
+                dsdb_runner.delete_host_details(old_fqdn, old_ip)
+            dsdb_runner.commit_or_rollback("Could not delete host from DSDB")
 
         return

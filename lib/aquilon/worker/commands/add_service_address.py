@@ -91,17 +91,11 @@ class CommandAddServiceAddress(BrokerCommand):
         plenaries.append(Plenary.get_plenary(holder.holder_object))
         plenaries.append(Plenary.get_plenary(dbsrv))
 
-        with plenaries.get_key():
-            plenaries.stash()
-            try:
-                plenaries.write(locked=True)
-                if not newly_created:
-                    dsdb_runner.delete_host_details(dbsrv.dns_record, dbsrv.ip)
+        with plenaries.transaction():
+            if not newly_created:
+                dsdb_runner.delete_host_details(dbsrv.dns_record, dbsrv.ip)
 
-                dsdb_runner.add_host_details(dbsrv.dns_record, dbsrv.ip, comments=comments)
-                dsdb_runner.commit_or_rollback("Could not add host to DSDB")
-            except:
-                plenaries.restore_stash()
-                raise
+            dsdb_runner.add_host_details(dbsrv.dns_record, dbsrv.ip, comments=comments)
+            dsdb_runner.commit_or_rollback("Could not add host to DSDB")
 
         return

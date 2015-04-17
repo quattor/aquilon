@@ -56,13 +56,7 @@ class CommandResetAdvertisedStatusList(BrokerCommand):
         session.flush()
 
         td = TemplateDomain(dbbranch, dbauthor, logger=logger)
-        with plenaries.get_key():
-            plenaries.stash()
-            try:
-                plenaries.write(locked=True)
-                td.compile(session, only=compileable)
-            except:
-                plenaries.restore_stash()
-                raise
+        with plenaries.transaction():
+            td.compile(session, only=compileable)
 
         return

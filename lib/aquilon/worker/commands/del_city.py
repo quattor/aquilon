@@ -41,14 +41,9 @@ class CommandDelCity(CommandDelLocation):
                                   type='city', **arguments)
         session.flush()
 
-        with plenaries.get_key():
-            try:
-                plenaries.write(locked=True)
-                dsdb_runner = DSDBRunner(logger=logger)
-                dsdb_runner.del_city(name, country, fullname)
-                dsdb_runner.commit_or_rollback()
-            except:
-                plenaries.restore_stash()
-                raise
+        with plenaries.transaction():
+            dsdb_runner = DSDBRunner(logger=logger)
+            dsdb_runner.del_city(name, country, fullname)
+            dsdb_runner.commit_or_rollback()
 
         return

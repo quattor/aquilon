@@ -21,6 +21,7 @@ import errno
 import logging
 import threading
 import weakref
+from contextlib import contextmanager
 
 from sqlalchemy.inspection import inspect
 from sqlalchemy.orm import object_session
@@ -600,6 +601,17 @@ class PlenaryCollection(object):
                     yield plen
 
         self.plenaries = list(set(walk_plenaries(self)))
+
+    @contextmanager
+    def transaction(self):
+        with self.get_key():
+            self.stash()
+            try:
+                self.write(locked=True)
+                yield
+            except:
+                self.restore_stash()
+                raise
 
 
 class TemplateFormatter(ObjectFormatter):

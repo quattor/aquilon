@@ -17,9 +17,9 @@
 """Contains the logic for `aq update interface --machine`."""
 
 from aquilon.aqdb.types import NicType
-from aquilon.exceptions_ import ArgumentError, AquilonError
+from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Machine, Interface, Model
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.interface import (set_port_group,
                                                  assign_address,
                                                  rename_interface)
@@ -180,20 +180,11 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
         plenaries.extend(map(Plenary.get_plenary,
                              dbinterface.service_addresses))
 
-        with plenaries.get_key():
-            try:
-                plenaries.write(locked=True)
-
-                if dbhw_ent.host and dbhw_ent.host.archetype.name != "aurora":
-                    dsdb_runner = DSDBRunner(logger=logger)
-                    dsdb_runner.update_host(dbhw_ent, oldinfo)
-                    dsdb_runner.commit_or_rollback()
-            except AquilonError as err:
-                plenaries.restore_stash()
-                raise ArgumentError(err)
-            except:
-                plenaries.restore_stash()
-                raise
+        with plenaries.transaction():
+            if dbhw_ent.host and dbhw_ent.host.archetype.name != "aurora":
+                dsdb_runner = DSDBRunner(logger=logger)
+                dsdb_runner.update_host(dbhw_ent, oldinfo)
+                dsdb_runner.commit_or_rollback()
 
         for name, value in audit_results:
             self.audit_result(session, name, value, **arguments)

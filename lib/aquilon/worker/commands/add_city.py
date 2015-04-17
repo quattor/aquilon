@@ -42,16 +42,10 @@ class CommandAddCity(BrokerCommand):
 
         plenaries = PlenaryCollection(logger=logger)
         plenaries.append(Plenary.get_plenary(dbcity))
-        with plenaries.get_key():
-            plenaries.stash()
-            try:
-                plenaries.write(locked=True)
 
-                dsdb_runner = DSDBRunner(logger=logger)
-                dsdb_runner.add_city(city, dbcity.country.name, fullname)
-                dsdb_runner.commit_or_rollback()
+        with plenaries.transaction():
+            dsdb_runner = DSDBRunner(logger=logger)
+            dsdb_runner.add_city(city, dbcity.country.name, fullname)
+            dsdb_runner.commit_or_rollback()
 
-            except:
-                plenaries.restore_stash()
-                raise
         return

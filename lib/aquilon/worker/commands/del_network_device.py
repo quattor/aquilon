@@ -57,17 +57,9 @@ class CommandDelNetworkDevice(BrokerCommand):
         # Any network device ports hanging off this network device should be deleted with
         # the cascade delete of the network device.
 
-        with plenaries.get_key():
-            plenaries.stash()
-
-            try:
-                plenaries.write(locked=True, remove_profile=True)
-
-                dsdb_runner = DSDBRunner(logger=logger)
-                dsdb_runner.update_host(None, oldinfo)
-                dsdb_runner.commit_or_rollback("Could not remove network device "
-                                               "from DSDB")
-            except:
-                plenaries.restore_stash()
-                raise
+        with plenaries.transaction():
+            dsdb_runner = DSDBRunner(logger=logger)
+            dsdb_runner.update_host(None, oldinfo)
+            dsdb_runner.commit_or_rollback("Could not remove network device "
+                                           "from DSDB")
         return

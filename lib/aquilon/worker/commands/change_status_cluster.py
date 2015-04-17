@@ -55,13 +55,8 @@ class CommandChangeClusterStatus(BrokerCommand):
 
         td = TemplateDomain(dbcluster.branch, dbcluster.sandbox_author,
                             logger=logger)
-        # Force a host lock as pan might overwrite the profile...
-        with plenaries.get_key():
-            plenaries.stash()
-            try:
-                plenaries.write(locked=True)
-                td.compile(session, only=plenaries.object_templates)
-            except:
-                plenaries.restore_stash()
-                raise
+
+        with plenaries.transaction():
+            td.compile(session, only=plenaries.object_templates)
+
         return

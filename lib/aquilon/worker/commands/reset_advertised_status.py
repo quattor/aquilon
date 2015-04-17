@@ -43,12 +43,7 @@ class CommandResetAdvertisedStatus(BrokerCommand):
         plenaries = PlenaryCollection(logger=logger)
         plenaries.append(Plenary.get_plenary(dbhost, allow_incomplete=False))
         # Force a host lock as pan might overwrite the profile...
-        with plenaries.get_key():
-            try:
-                plenaries.write(locked=True)
-                td.compile(session, only=plenaries.object_templates)
-            except:
-                plenaries.restore_stash()
-                raise
+        with plenaries.transaction():
+            td.compile(session, only=plenaries.object_templates)
 
         return

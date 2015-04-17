@@ -192,18 +192,7 @@ class CommandReconfigureList(BrokerCommand):
 
         td = TemplateDomain(dbbranch, dbauthor, logger=logger)
 
-        # Don't bother locking until every possible check before the
-        # actual writing and compile is done.  This will allow for fast
-        # turnaround on errors (no need to wait for a lock if there's
-        # a missing service map entry or something).
-        with plenaries.get_key():
-            plenaries.stash()
-            try:
-                plenaries.write(locked=True)
-
-                td.compile(session, only=plenaries.object_templates)
-            except:
-                plenaries.restore_stash()
-                raise
+        with plenaries.transaction():
+            td.compile(session, only=plenaries.object_templates)
 
         return

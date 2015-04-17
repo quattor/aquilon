@@ -107,16 +107,7 @@ class CommandMake(BrokerCommand):
 
         td = TemplateDomain(dbhost.branch, dbhost.sandbox_author, logger=logger)
 
-        with chooser.get_key():
-            try:
-                chooser.write_plenary_templates(locked=True)
-
-                td.compile(session, only=chooser.plenaries.object_templates)
-            except:
-                chooser.restore_stash()
-
-                # Okay, cleaned up templates, make sure the caller knows
-                # we've aborted so that DB can be appropriately rollback'd.
-                raise
+        with chooser.plenaries.transaction():
+            td.compile(session, only=chooser.plenaries.object_templates)
 
         return

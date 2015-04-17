@@ -21,7 +21,7 @@ import re
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import (Cpu, Chassis, ChassisSlot, Model, Machine,
                                 Resource, BundleResource, Share, Filesystem)
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.hardware_entity import update_primary_ip
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.dbwrappers.resources import (find_resource,
@@ -266,17 +266,10 @@ class CommandUpdateMachine(BrokerCommand):
         # it is consistent without altering (and forgetting to alter)
         # all the calls to the method.
 
-        with plenaries.get_key():
-            plenaries.stash()
-            try:
-                plenaries.write(locked=True)
-
-                dsdb_runner = DSDBRunner(logger=logger)
-                dsdb_runner.update_host(dbmachine, oldinfo)
-                dsdb_runner.commit_or_rollback("Could not update machine in DSDB")
-            except:
-                plenaries.restore_stash()
-                raise
+        with plenaries.transaction():
+            dsdb_runner = DSDBRunner(logger=logger)
+            dsdb_runner.update_host(dbmachine, oldinfo)
+            dsdb_runner.commit_or_rollback("Could not update machine in DSDB")
 
         return
 

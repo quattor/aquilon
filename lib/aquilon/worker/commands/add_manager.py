@@ -64,16 +64,10 @@ class CommandAddManager(BrokerCommand):
 
         plenaries = PlenaryCollection(logger=logger)
         plenaries.append(Plenary.get_plenary(dbmachine))
-        with plenaries.get_key():
-            try:
-                plenaries.write(locked=True)
-
-                dsdb_runner = DSDBRunner(logger=logger)
-                dsdb_runner.update_host(dbmachine, oldinfo)
-                dsdb_runner.commit_or_rollback("Could not add host to DSDB")
-            except:
-                plenaries.restore_stash()
-                raise
+        with plenaries.transaction():
+            dsdb_runner = DSDBRunner(logger=logger)
+            dsdb_runner.update_host(dbmachine, oldinfo)
+            dsdb_runner.commit_or_rollback("Could not add host to DSDB")
 
         if dbmachine.host:
             # XXX: Host needs to be reconfigured.

@@ -158,16 +158,9 @@ class CommandAddInterfaceMachine(BrokerCommand):
 
         # Even though there may be removals going on the write key
         # should be sufficient here.
-        with plenaries.get_key():
-            plenaries.stash()
-            try:
-                plenaries.write(locked=True)
-
-                dsdb_runner.update_host(dbmachine, oldinfo)
-                dsdb_runner.commit_or_rollback("Could not update host in DSDB")
-            except:
-                plenaries.restore_stash()
-                raise
+        with plenaries.transaction():
+            dsdb_runner.update_host(dbmachine, oldinfo)
+            dsdb_runner.commit_or_rollback("Could not update host in DSDB")
 
         if dbmachine.host:
             # FIXME: reconfigure host
