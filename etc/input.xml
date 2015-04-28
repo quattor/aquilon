@@ -687,6 +687,8 @@
 	    <option name="compiler_version" type="string">Version of panc to use</option>
 	    <option name="autosync" type="boolean">Filter by the autosync flag</option>
 	    <option name="validated" type="boolean">Filter by the validated flag</option>
+	    <option name="used" type="boolean" reverse="unused">The domain is in use</option>
+	    <option name="compileable" type="flag">Consider only compileable objects when checking if the domain is in use</option>
 	</optgroup>
 	<optgroup>
 	    <option name="fullinfo" type="flag">Show full information for the matching domains</option>
@@ -720,6 +722,8 @@
 	    <option name="compiler_version" type="string">Version of panc to use</option>
 	    <option name="autosync" type="boolean">Filter by the autosync flag</option>
 	    <option name="validated" type="boolean">Filter by the validated flag</option>
+	    <option name="used" type="boolean" reverse="unused">The sandbox is in use</option>
+	    <option name="compileable" type="flag">Consider only compileable objects when checking if the sandbox is in use</option>
 	</optgroup>
 	<optgroup>
 	    <option name="fullinfo" type="flag">Show full information for the matching sandboxes</option>

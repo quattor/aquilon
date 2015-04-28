@@ -66,6 +66,38 @@ class TestDomainConstraints(TestBrokerCommand):
         self.matchoutput(out, "Sandbox utsandbox has compileable objects, "
                          "the profile format cannot be changed.", command)
 
+    def testsearchused(self):
+        command = ["search_domain", "--used"]
+        out = self.commandtest(command)
+        self.matchclean(out, "deployable", command)
+        self.matchclean(out, "leftbehind", command)
+        self.matchclean(out, "nomanage", command)
+        self.matchoutput(out, "ut-prod", command)
+        self.matchoutput(out, "unittest", command)
+
+    def testsearchusedcomp(self):
+        command = ["search_domain", "--used", "--compileable"]
+        out = self.commandtest(command)
+        self.matchclean(out, "nomanage", command)
+        self.matchclean(out, "ut-prod", command)
+        self.matchoutput(out, "unittest", command)
+
+    def testsearchunused(self):
+        command = ["search_domain", "--unused"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "deployable", command)
+        self.matchoutput(out, "leftbehind", command)
+        self.matchoutput(out, "nomanage", command)
+        self.matchclean(out, "ut-prod", command)
+
+    def testsearchunusedcomp(self):
+        command = ["search_domain", "--unused", "--compileable"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "deployable", command)
+        self.matchoutput(out, "leftbehind", command)
+        self.matchoutput(out, "nomanage", command)
+        self.matchoutput(out, "ut-prod", command)
+
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDomainConstraints)
     unittest.TextTestRunner(verbosity=2).run(suite)

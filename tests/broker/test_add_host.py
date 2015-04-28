@@ -239,7 +239,7 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
         self.dsdb_expect("show_host -host_name test-aurora-default-os")
         self.noouttest(["add", "host", "--archetype", "aurora",
                         "--hostname", "test-aurora-default-os.ms.com",
-                        "--ip", ip, "--domain", "ut-prod", "--machine",
+                        "--ip", ip, "--domain", "unittest", "--machine",
                         "ut8s02p4"])
         self.dsdb_verify()
 
@@ -249,7 +249,7 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
         self.matchoutput(out, "Primary Name: test-aurora-default-os.ms.com", command)
         self.matchoutput(out, "Archetype: aurora", command)
         self.matchoutput(out, "Personality: generic", command)
-        self.matchoutput(out, "Domain: ut-prod", command)
+        self.matchoutput(out, "Domain: unittest", command)
         self.searchoutput(out,
                           r'Operating System: linux\s*'
                           r'Version: generic$',
@@ -395,6 +395,21 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
                              model="bl260c", sandbox="%s/utsandbox" % self.user,
                              manager_iface="ilo",
                              manager_ip=mgmt_net.usable[port])
+
+    def test_305_search_sandbox_used(self):
+        command = ["search_sandbox", "--used"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "utsandbox", command)
+        self.matchclean(out, "camelcasetest1", command)
+
+    def test_305_search_sandbox_unused(self):
+        command = ["search_sandbox", "--unused"]
+        out = self.commandtest(command)
+        self.matchclean(out, "utsandbox", command)
+        self.matchoutput(out, "camelcasetest1", command)
+        self.matchoutput(out, "camelcasetest2", command)
+        self.matchoutput(out, "changetest1", command)
+        self.matchoutput(out, "othersandbox", command)
 
     def test_310_populate_verari_rack_hosts(self):
         # These are used in add_virtual_hardware:

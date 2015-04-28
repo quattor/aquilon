@@ -23,6 +23,7 @@ from tempfile import mkdtemp
 
 from sqlalchemy.inspection import inspect
 from sqlalchemy.orm.session import object_session
+from sqlalchemy.sql import and_, or_
 
 from aquilon.exceptions_ import (ArgumentError, AuthorizationException,
                                  ProcessException)
@@ -176,21 +177,46 @@ def remove_branch(config, logger, dbbranch, dbauthor=None):
 
 
 def search_branch_query(config, session, cls, owner=None, compiler_version=None,
-                        autosync=None, validated=None, **arguments):
+                        autosync=None, validated=None, used=None,
+                        compileable=None, **arguments):
     q = session.query(cls)
     if owner:
         dbowner = get_user_principal(session, owner)
         q = q.filter_by(owner=dbowner)
+
     if compiler_version:
         if not VERSION_RE.match(compiler_version):
             raise ArgumentError("Invalid characters in compiler version")
         compiler = config.get("panc", "pan_compiler",
                               vars={'version': compiler_version})
         q = q.filter_by(compiler=compiler)
+
     if autosync is not None:
         q = q.filter_by(autosync=autosync)
+
     if validated is not None:
         q = q.filter_by(is_sync_valid=validated)
+
+    if used is not None:
+        filters = []
+        for subcls in CompileableMixin.__subclasses__():
+            subq = session.query(subcls.branch_id)
+            subq = subq.distinct()
+
+            if compileable:
+                subq = subq.join(Personality, Archetype)
+                subq = subq.filter_by(is_compileable=True)
+
+            if used:
+                filters.append(cls.id.in_(subq.subquery()))
+            else:
+                filters.append(~cls.id.in_(subq.subquery()))
+
+        if used:
+            q = q.filter(or_(*filters))
+        else:
+            q = q.filter(and_(*filters))
+
     return q
 
 
