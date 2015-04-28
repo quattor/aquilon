@@ -386,7 +386,7 @@ class TestMake(TestBrokerCommand):
     def testmakeunittest24(self):
         command = ["make", "--hostname", "unittest24.aqd-unittest.ms.com"]
         (out, err) = self.successtest(command)
-        self.matchoutput(err, "3/3 compiled", command)
+        self.matchoutput(err, "2/2 compiled", command)
 
     def testverifyunittest24(self):
         # Verify that the host chooses the closest router

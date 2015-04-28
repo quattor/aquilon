@@ -149,10 +149,7 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
 
     def testverifyunittest02services(self):
         for service, instance in [("afs", "q.ny.ms.com"),
-                                  ("bootserver", "unittest"),
-                                  ("dns", "unittest"),
-                                  ("ntp", "pa.ny.na"),
-                                  ("support-group", "ec-service")]:
+                                  ("dns", "unittest")]:
             command = ["cat", "--service", service, "--instance", instance,
                        "--server"]
             out = self.commandtest(command)

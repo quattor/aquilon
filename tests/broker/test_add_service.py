@@ -55,6 +55,17 @@ default_services = {
     "vmseasoning": ["salt", "pepper"],
 }
 
+# Services which need client lists enabled
+need_client_list = [
+    # The utsvc service is used for testing service binding operations
+    "utsvc",
+    # We need a cluster-bound service to test the generation of the
+    # cluster_clients attribute
+    "esx_management_server",
+    # The DNS service is here for testing if servers get recompiled when new
+    # clients are added
+    "dns"]
+
 
 class TestAddService(TestBrokerCommand):
 
@@ -71,8 +82,11 @@ class TestAddService(TestBrokerCommand):
             for pattern in service_plenaries:
                 self.check_plenary_gone(pattern % service)
 
-            self.noouttest(["add_service", "--service", service,
-                            "--need_client_list"])
+            cmd = ["add_service", "--service", service]
+            if service in need_client_list:
+                cmd.append("--need_client_list")
+
+            self.noouttest(cmd)
 
             for instance in instances:
                 for pattern in instance_plenaries:
@@ -150,8 +164,7 @@ class TestAddService(TestBrokerCommand):
     def test_140_add_bootserver(self):
         """ add service without instance first """
         command = ["add", "service", "--service", "bootserver",
-                   "--comments", "Some service comments",
-                   "--need_client_list"]
+                   "--comments", "Some service comments"]
         self.noouttest(command)
 
     def test_141_add_bootserver_instance(self):
@@ -208,6 +221,7 @@ class TestAddService(TestBrokerCommand):
         self.matchoutput(out, "Service: bootserver Instance: unittest", command)
         self.matchoutput(out, "Service: bootserver Instance: one-nyp", command)
         self.searchoutput(out, r"^  Comments: Some service comments", command)
+        self.matchoutput(out, "Need Client List: False", command)
 
     def test_300_cat_utsvc_server_default(self):
         command = ["cat", "--service", "utsvc", "--server", "--default"]
@@ -290,7 +304,6 @@ class TestAddService(TestBrokerCommand):
         command = "cat --service utsvc --default"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "template service/utsvc/client/config;", command)
-
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddService)
