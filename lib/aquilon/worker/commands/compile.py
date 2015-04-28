@@ -55,17 +55,19 @@ class CommandCompile(BrokerCommand):
             for dbpers in q:
                 plenaries.append(Plenary.get_plenary(dbpers))
 
-        q1 = session.query(ServiceInstance)
-        q1 = q1.join(ServiceInstance.clients)
-        q1 = q1.filter(and_(Host.branch == dbdomain,
-                            Host.sandbox_author == dbauthor))
+        q = session.query(ServiceInstance)
+        q = q.filter(ServiceInstance.clients.any(
+            and_(Host.branch == dbdomain,
+                 Host.sandbox_author == dbauthor)))
+        services = set(q)
 
-        q2 = session.query(ServiceInstance)
-        q2 = q2.join(ServiceInstance.cluster_clients)
-        q2 = q2.filter(and_(Cluster.branch == dbdomain,
-                            Cluster.sandbox_author == dbauthor))
+        q = session.query(ServiceInstance)
+        q = q.filter(ServiceInstance.cluster_clients.any(
+            and_(Cluster.branch == dbdomain,
+                 Cluster.sandbox_author == dbauthor)))
+        services.update(q)
 
-        plenaries.extend(map(Plenary.get_plenary, q1.union(q2)))
+        plenaries.extend(Plenary.get_plenary(si) for si in services)
 
         if pancdebug:
             pancinclude = r'.*'
