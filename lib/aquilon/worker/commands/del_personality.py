@@ -16,8 +16,10 @@
 # limitations under the License.
 """Contains the logic for `aq del personality`."""
 
+from sqlalchemy.inspection import inspect
+
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import Personality, Host, Cluster
+from aquilon.aqdb.model import Personality, CompileableMixin
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.templates import Plenary
 
@@ -30,14 +32,12 @@ class CommandDelPersonality(BrokerCommand):
         dbpersona = Personality.get_unique(session, name=personality,
                                            archetype=archetype, compel=True)
 
-        if dbpersona.is_cluster:
-            q = session.query(Cluster.id)
-        else:
-            q = session.query(Host.hardware_entity_id)
-        q = q.filter_by(personality=dbpersona)
-        if q.count():
-            raise ArgumentError("{0} is still in use and cannot be deleted."
-                                .format(dbpersona))
+        for cls_ in CompileableMixin.__subclasses__():
+            q = session.query(*inspect(cls_).mapper.primary_key)
+            q = q.filter(cls_.personality_id == dbpersona.id)
+            if q.count():
+                raise ArgumentError("{0} is still in use and cannot be deleted."
+                                    .format(dbpersona))
 
         plenary = Plenary.get_plenary(dbpersona, logger=logger)
         session.delete(dbpersona)
