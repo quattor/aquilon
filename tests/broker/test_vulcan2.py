@@ -105,7 +105,7 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
             command = ["add", "host", "--hostname", hostname, "--ip", ip,
                        "--machine", machine,
                        "--domain", "unittest", "--buildstatus", "build",
-                       "--osname", "esxi", "--osversion", "4.0.0",
+                       "--osname", "esxi", "--osversion", "5.0.0",
                        "--archetype", "vmhost", "--personality", "vulcan2-server-dev"]
             self.noouttest(command)
         self.dsdb_verify()

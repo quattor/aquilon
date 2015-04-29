@@ -102,7 +102,7 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, MachineTestMixin,
             self.create_host(self.vmhost[i], ip, self.machine[i],
                              model="vb1205xm", rack="ut3",
                              archetype="vmhost", personality="vulcan-local-disk",
-                             osname="esxi", osversion="4.0.0")
+                             osname="esxi", osversion="5.0.0")
 
     def test_060_bind_host_to_cluster(self):
         for i in range(0, 2):

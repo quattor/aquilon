@@ -427,7 +427,7 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
                              eth0_mac=eth0_mac, eth1_mac=eth1_mac,
                              archetype="vmhost",
                              personality="vulcan-10g-server-prod",
-                             osname="esxi", osversion="4.0.0")
+                             osname="esxi", osversion="5.0.0")
 
     def test_320_add_10gig_racks(self):
         for port in range(1, 13):
@@ -474,7 +474,7 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
             command = ["add", "host", "--hostname", hostname, "--autoip",
                        "--machine", machine,
                        "--domain", "unittest",
-                       "--osname", "esxi", "--osversion", "4.0.0",
+                       "--osname", "esxi", "--osversion", "5.0.0",
                        "--archetype", "vmhost", "--personality", "vulcan-10g-server-prod"]
             self.noouttest(command)
         self.dsdb_verify()
@@ -516,7 +516,7 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
         self.assertEqual(host.personality.archetype.name, "vmhost")
         self.assertEqual(host.operating_system.archetype.name, "vmhost")
         self.assertEqual(host.operating_system.name, "esxi")
-        self.assertEqual(host.operating_system.version, "4.0.0")
+        self.assertEqual(host.operating_system.version, "5.0.0")
         self.assertEqual(host.ip, str(self.net["verari_eth0"].usable[1]))
         self.assertEqual(host.machine.name, "ut10s04p1")
         self.assertEqual(len(host.machine.interfaces), 2)

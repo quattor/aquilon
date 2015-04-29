@@ -125,7 +125,7 @@ class TestCluster(TestBrokerCommand):
         # So, make it a compatible archetype and try again
         command = ["reconfigure", "--hostname=aquilon61.aqd-unittest.ms.com",
                    "--personality=esx_server", "--archetype=vmhost",
-                   "--osname", "esxi", "--osversion", "4.0.0",
+                   "--osname", "esxi", "--osversion", "5.0.0",
                    "--buildstatus=build"]
         (out, err) = self.successtest(command)
         self.matchoutput(err,

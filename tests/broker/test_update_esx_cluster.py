@@ -183,7 +183,7 @@ class TestUpdateESXCluster(TestBrokerCommand):
 
         command = ["reconfigure", "--membersof=utecl1",
                    "--archetype=vmhost", "--osname=esxi",
-                   "--osversion=4.0.0"]
+                   "--osversion=5.0.0"]
         out = self.successtest(command)
 
     def test_380_failupdatearchetype(self):
