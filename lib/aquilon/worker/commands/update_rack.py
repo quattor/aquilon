@@ -54,9 +54,9 @@ class CommandUpdateRack(BrokerCommand):
 
         session.flush()
 
-        plenaries = PlenaryCollection(logger=logger)
         q = session.query(Machine)
         q = q.filter(Machine.location_id.in_(dbrack.offspring_ids()))
-        for dbmachine in q:
-            plenaries.append(Plenary.get_plenary(dbmachine))
+
+        plenaries = PlenaryCollection(logger=logger)
+        plenaries.extend(map(Plenary.get_plenary, q))
         plenaries.write()

@@ -23,12 +23,22 @@ from aquilon.worker.formats.formatters import ObjectFormatter
 from aquilon.worker.formats.list import ListFormatter
 
 
+def indented_value(indent, key, paramval):
+    lines = json.dumps(paramval, indent=2).splitlines()
+    key_str = format(key) + ": "
+    fill = indent + " " * len(key_str)
+
+    lines[0] = indent + key_str + lines[0]
+    for idx in range(1, len(lines)):
+        lines[idx] = fill + lines[idx]
+    return lines
+
+
 class ParameterFormatter(ObjectFormatter):
     def format_raw(self, param, indent="", embedded=True, indirect_attrs=True):
         details = []
-        for k in param.value:
-            str_value = json.dumps(param.value[k], indent=4)
-            details.append(indent + "{0}: {1}".format(k, str_value))
+        for key, value in param.value.items():
+            details.extend(indented_value(indent, key, value))
         return "\n".join(details)
 
 ObjectFormatter.handlers[Parameter] = ParameterFormatter()
@@ -109,19 +119,25 @@ ObjectFormatter.handlers[DiffData] = DiffFormatter()
 
 
 class SimpleParameterList(list):
-    """By convention, holds a list of holders and parameter, value to be formatted in a simple
-       (fqdn-only) manner."""
     pass
 
 
 class SimpleParameterListFormatter(ListFormatter):
     def format_raw(self, hlist, indent="", embedded=True, indirect_attrs=True):
-        ret = []
+        details = []
         for k, v in hlist:
-            ret.append(indent + "{0.holder_object}:".format(k))
+            dbpersonality = k.holder_object
+            if dbpersonality.is_cluster:
+                description = "Cluster"
+            else:
+                description = "Host"
+
+            details.append(indent + "{0} {1:c}: {1.name} {2:c}: {2.name}"
+                           .format(description, dbpersonality,
+                                   dbpersonality.archetype))
             for ikey, ivalue in v.items():
-                ret.append(indent + "  {0}: {1}".format(ikey, json.dumps(ivalue)))
-        return "\n".join(ret)
+                details.extend(indented_value(indent + "  ", ikey, ivalue))
+        return "\n".join(details)
 
     def format_proto(self, hostlist, container, embedded=True,
                      indirect_attrs=True):

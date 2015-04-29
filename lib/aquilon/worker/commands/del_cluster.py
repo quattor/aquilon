@@ -56,8 +56,8 @@ def del_cluster(session, logger, dbcluster, config):
     plenaries = PlenaryCollection(logger=logger)
     plenaries.append(Plenary.get_plenary(dbcluster))
     if dbcluster.resholder:
-        for res in dbcluster.resholder.resources:
-            plenaries.append(Plenary.get_plenary(res))
+        plenaries.extend(map(Plenary.get_plenary,
+                             dbcluster.resholder.resources))
 
     session.delete(dbcluster)
 

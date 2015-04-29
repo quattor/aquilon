@@ -14,11 +14,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+"""Contains the logic for `aq del vendor`."""
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Vendor, Cpu, Model
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 
 
 class CommandDelVendor(BrokerCommand):
@@ -27,10 +27,10 @@ class CommandDelVendor(BrokerCommand):
 
     def render(self, session, vendor, **arguments):
         dbvendor = Vendor.get_unique(session, vendor, compel=True)
-        if session.query(Model).filter_by(vendor=dbvendor).first():
+        if session.query(Model.id).filter_by(vendor=dbvendor).count():
             raise ArgumentError("Vendor %s is still in use by a model." %
                                 dbvendor.name)
-        if session.query(Cpu).filter_by(vendor=dbvendor).first():
+        if session.query(Cpu.id).filter_by(vendor=dbvendor).count():
             raise ArgumentError("Vendor %s is still in use by a CPU." %
                                 dbvendor.name)
         session.delete(dbvendor)

@@ -40,7 +40,7 @@ class CommandDelChassis(BrokerCommand):
         q = q.filter(ChassisSlot.machine_id != null())
 
         machine_count = q.count()
-        if machine_count > 0 and not clear_slots:
+        if machine_count and not clear_slots:
             raise ArgumentError("{0} is still in use by {1} machines. Use "
                                 "--clear_slots if you really want to delete "
                                 "it.".format(dbchassis, machine_count))

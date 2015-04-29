@@ -31,13 +31,15 @@ class TestUpdatePersonality(VerifyGrnsMixin, TestBrokerCommand):
     def test_100_update_capacity(self):
         command = ["update_personality", "--personality", "vulcan-10g-server-prod",
                    "--archetype", "esx_cluster",
-                   "--vmhost_capacity_function", "{'memory': (memory - 1500) * 0.94}"]
+                   "--vmhost_capacity_function", "{'memory': (memory - 1500) * 0.94}",
+                   "--justification", "tcm=12345678"]
         self.noouttest(command)
 
     def test_110_update_overcommit(self):
         command = ["update_personality", "--personality", "vulcan-10g-server-prod",
                    "--archetype", "esx_cluster",
-                   "--vmhost_overcommit_memory", 1.04]
+                   "--vmhost_overcommit_memory", 1.04,
+                   "--justification", "tcm=12345678"]
         self.noouttest(command)
 
     def test_115_verify_update_capacity(self):
@@ -108,7 +110,9 @@ class TestUpdatePersonality(VerifyGrnsMixin, TestBrokerCommand):
         command = ["update_personality", "--personality=testovrpersona/dev",
                    "--archetype=aquilon", "--host_environment=infra"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "The personality 'testovrpersona/dev' already has env set to 'dev' and cannot be updated",
+        self.matchoutput(out,
+                         "Personality aquilon/testovrpersona/dev already has "
+                         "its environment set to dev, and cannot be updated.",
                          command)
 
     def test_139_delete_testovrpersona_dev(self):
@@ -232,21 +236,24 @@ class TestUpdatePersonality(VerifyGrnsMixin, TestBrokerCommand):
         """ Verify that the list of built-in functions is restricted """
         command = ["update_personality", "--personality", "vulcan-10g-server-prod",
                    "--archetype", "esx_cluster",
-                   "--vmhost_capacity_function", "locals()"]
+                   "--vmhost_capacity_function", "locals()",
+                   "--justification", "tcm=12345678"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "name 'locals' is not defined", command)
 
     def test_200_invalid_type(self):
         command = ["update_personality", "--personality", "vulcan-10g-server-prod",
                    "--archetype", "esx_cluster",
-                   "--vmhost_capacity_function", "memory - 100"]
+                   "--vmhost_capacity_function", "memory - 100",
+                   "--justification", "tcm=12345678"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "The function should return a dictonary.", command)
 
     def test_200_invalid_dict(self):
         command = ["update_personality", "--personality", "vulcan-10g-server-prod",
                    "--archetype", "esx_cluster",
-                   "--vmhost_capacity_function", "{'memory': 'bar'}"]
+                   "--vmhost_capacity_function", "{'memory': 'bar'}",
+                   "--justification", "tcm=12345678"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "The function should return a dictionary with all "
@@ -256,7 +263,8 @@ class TestUpdatePersonality(VerifyGrnsMixin, TestBrokerCommand):
     def test_200_missing_memory(self):
         command = ["update_personality", "--personality", "vulcan-10g-server-prod",
                    "--archetype", "esx_cluster",
-                   "--vmhost_capacity_function", "{'foo': 5}"]
+                   "--vmhost_capacity_function", "{'foo': 5}",
+                   "--justification", "tcm=12345678"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "The memory constraint is missing from the returned "
@@ -265,7 +273,8 @@ class TestUpdatePersonality(VerifyGrnsMixin, TestBrokerCommand):
     def test_200_not_enough_memory(self):
         command = ["update_personality", "--personality", "vulcan-10g-server-prod",
                    "--archetype", "esx_cluster",
-                   "--vmhost_capacity_function", "{'memory': memory / 4}"]
+                   "--vmhost_capacity_function", "{'memory': memory / 4}",
+                   "--justification", "tcm=12345678"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "Validation failed for the following clusters:",
@@ -277,9 +286,10 @@ class TestUpdatePersonality(VerifyGrnsMixin, TestBrokerCommand):
     def test_200_update_cluster_inuse(self):
         command = ["update_personality", "--personality=vulcan-10g-server-prod",
                    "--archetype=esx_cluster",
-                   "--cluster"]
+                   "--cluster",
+                   "--justification", "tcm=12345678"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "The personality vulcan-10g-server-prod is in use", command)
+        self.matchoutput(out, "Personality esx_cluster/vulcan-10g-server-prod is in use", command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUpdatePersonality)

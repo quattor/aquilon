@@ -25,11 +25,14 @@ from aquilon.worker.formats.formatters import ObjectFormatter
 class PersonalityFormatter(ObjectFormatter):
     def format_raw(self, personality, indent="", embedded=True,
                    indirect_attrs=True):
-        description = "Host"
+        details = []
         if personality.is_cluster:
             description = "Cluster"
-        details = [indent + "{0} Personality: {1.name} Archetype: {1.archetype.name}"
-                   .format(description, personality)]
+        else:
+            description = "Host"
+
+        details.append(indent + "{0} {1:c}: {1.name} {2:c}: {2.name}"
+                       .format(description, personality, personality.archetype))
         details.append(indent + "  Environment: {0.name}"
                        .format(personality.host_environment))
         details.append(indent + "  Owned by {0:c}: {0.grn}"

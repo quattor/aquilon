@@ -56,8 +56,6 @@ class CommandShowClusterCluster(BrokerCommand):
 
         # Manual eager-loading of VM resources. All the code does is making sure
         # the data is pinned in the session's cache
-        machines = {}
-        for vm in vm_q:
-            machines[vm.machine.machine_id] = vm
+        machines = dict((vm.machine.machine_id, vm) for vm in vm_q)
 
         return dbclusters

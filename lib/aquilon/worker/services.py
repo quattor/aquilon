@@ -227,7 +227,7 @@ class Chooser(object):
 
         """
         instances = self.service_maps.get(dbservice, [])
-        if len(instances) >= 1:
+        if instances:
             for instance in instances:
                 self.logger.debug("Found {0:l} in the maps.".format(instance))
             self.staging_services[dbservice] = instances

@@ -23,7 +23,7 @@ from aquilon.aqdb.model import Grn
 class GrnFormatter(ObjectFormatter):
 
     def format_raw(self, grn, indent="", embedded=True, indirect_attrs=True):
-        details = [indent + "GRN: %s" % grn.grn,
+        details = [indent + "{0:c}: {0.grn}".format(grn),
                    indent + "  EON ID: %d" % grn.eon_id,
                    indent + "  Disabled: %s" % grn.disabled]
         return "\n".join(details)

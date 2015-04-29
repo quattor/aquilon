@@ -79,7 +79,7 @@ class CommandUnbindServer(BrokerCommand):
                 session.expire(dbsrv.cluster, ['services_provided'])
             dbinstance.servers.remove(dbsrv)
 
-            if dbinstance.client_count > 0 and not dbinstance.servers:
+            if dbinstance.client_count and not dbinstance.servers:
                 logger.warning("Warning: {0} was left without servers, "
                                "but it still has clients.".format(dbinstance))
 

@@ -157,13 +157,13 @@ class PlenaryClusterObject(ObjectPlenary):
             keylist.append(PlenaryKey(exclusive=False,
                                       personality=self.dbobj.personality,
                                       logger=self.logger))
-            for si in self.dbobj.services_used:
-                keylist.append(PlenaryKey(exclusive=False, service_instance=si,
-                                          logger=self.logger))
-            for srv in self.dbobj.services_provided:
-                keylist.append(PlenaryKey(exclusive=False,
-                                          service_instance=srv.service_instance,
-                                          logger=self.logger))
+            keylist.extend(PlenaryKey(exclusive=False, service_instance=si,
+                                      logger=self.logger)
+                           for si in self.dbobj.services_used)
+            keylist.extend(PlenaryKey(exclusive=False,
+                                      service_instance=srv.service_instance,
+                                      logger=self.logger)
+                           for srv in self.dbobj.services_provided)
 
             if self.dbobj.metacluster:
                 keylist.append(PlenaryKey(exclusive=False,

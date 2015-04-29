@@ -43,6 +43,12 @@ class PlenaryMachineInfo(StructurePlenary):
         return "%s/%s/%s/%s/%s" % (cls.prefix, loc.hub.fullname.lower(),
                                    loc.building, loc.rack, dbmachine.label)
 
+    def __init__(self, dbobj, **kwargs):
+        super(PlenaryMachineInfo, self).__init__(dbobj, **kwargs)
+
+        # Use the hardware label for debug logs, not the primary name
+        self.debug_name = dbobj.label
+
     def get_key(self, exclusive=True):
         if not exclusive:
             # CompileKey() does not support shared mode

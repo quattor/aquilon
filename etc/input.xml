@@ -650,7 +650,7 @@
 	    <option name="personality" type="string" conflicts="hostname cluster metacluster">personality name</option>
 	</optgroup>
 	<optgroup>
-	    <option name="archetype" type="string" conflicts="hostname cluster metacluster">archetype name</option>
+	    <option name="archetype" type="string" requires="personality">archetype name</option>
 	    <option name="pancinclude" type="string" conflicts="pancdebug">Regex for templates to include in debug output (None included by default)</option>
 	    <option name="pancexclude" type="string" conflicts="pancdebug">Regex for templates to exclude in debug output (only useful if pancinclude has been given)</option>
 	    <option name="pancdebug" type="boolean" conflicts="pancinclude pancexclude">Alias for pancinclude=.* and pancexclude=components/spma/functions</option>
@@ -1627,7 +1627,7 @@
 	</optgroup>
 	<optgroup>
 	    <option name="personality" type="string">personality name</option>
-	    <option name="archetype" type="string">archetype name</option>
+	    <option name="archetype" requires="personality" type="string">archetype name</option>
 	    <option name="network_environment" type="string">Network environment (default: internal)</option>
 	    <option name="comments" type="string">Comments</option>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
@@ -1648,7 +1648,7 @@
 	</optgroup>
 	<optgroup>
 	    <option name="personality" type="string">personality name</option>
-	    <option name="archetype" type="string">archetype name</option>
+	    <option name="archetype" requires="personality" type="string">archetype name</option>
 	    <option name="network_environment" type="string">Network environment (default: internal)</option>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
 	    <option name="reason" type="string">String to be specified if justification='emergency'</option>
@@ -2514,30 +2514,32 @@
 	    <option name="virtual_switch" type="string">Virtual Switch name</option>
 	</optgroup>
 	<optgroup>
-	    <option name="archetype" conflicts="hostname cluster service instance default city network_device switch machine" type="string">Archetype</option>
-	    <option name="pre_feature" conflicts="hostname cluster service instance default city network_device switch machine post_feature param_tmpl" type="flag">Pre feature template</option>
-	    <option name="post_feature" conflicts="hostname cluster service instance default city network_device switch machine pre_feature param_tmpl" type="flag">Post feature template</option>
-	    <option name="param_tmpl" conflicts="hostname cluster service instance default city network_device switch machine post_feature pre_feature" type="string">param templates</option>
-	</optgroup>
-	<optgroup>
-	    <option name="default" type="flag" conflicts="hostname machine cluster city network_device switch">Show the default client config for the service/instance</option>
-	    <option name="server" type="flag" conflicts="hostname machine cluster city network_device switch">Show the server config for the service/instance</option>
-	    <option name="data" type="flag" conflicts="machine service city switch">Show the data template for the host/cluster</option>
-	    <option name="client" type="flag" conflicts="hostname machine service city switch">Show the data template for the host/cluster</option>
-	    <option name="instance" type="string" conflicts="hostname machine cluster city network_device switch">Name of the service instance</option>
 	    <option name="generate" type="flag">Show the plenary template as it would be generated</option>
+	    <option name="data" type="flag" requires="hostname cluster metacluster network_device virtual_switch">Show the data template for the host/cluster</option>
+	    <option name="client" type="flag" requires="cluster">Show the data template for the host/cluster</option>
 	</optgroup>
 	<optgroup>
-	    <option name="resourcegroup" type="string" conflicts="machine service instance default data">Name of a resource group</option>
-	    <option name="application" type="string" conflicts="machine service instance default data">Name of an application</option>
-	    <option name="filesystem" type="string" conflicts="machine service instance default data">Name of a file system</option>
-	    <option name="hostlink" type="string" conflicts="machine service instance default data">Name of a hostlink</option>
-	    <option name="intervention" type="string" conflicts="machine service instance default data">Name of an intervention</option>
-	    <option name="reboot_intervention" type="string" conflicts="machine service instance default data">Name of a reboot intervention</option>
-	    <option name="reboot_schedule" type="string" conflicts="machine service instance default data">Name of a reboot schedule</option>
-	    <option name="virtual_machine" type="string" conflicts="machine service instance default data">Name of a virtual machine</option>
-	    <option name="service_address" type="string" conflicts="machine service instance default data">Name of a service address</option>
-	    <option name="share" type="string" conflicts="machine service instance default data">Name of a resource group</option>
+	    <option name="archetype" requires="personality" type="string">Archetype</option>
+	    <option name="pre_feature" requires="personality" conflicts="post_feature param_tmpl" type="flag">Pre feature template</option>
+	    <option name="post_feature" requires="personality" conflicts="pre_feature param_tmpl" type="flag">Post feature template</option>
+	    <option name="param_tmpl" requires="personality" conflicts="post_feature pre_feature" type="string">param templates</option>
+	</optgroup>
+	<optgroup>
+	    <option name="instance" type="string" requires="service">Name of the service instance</option>
+	    <option name="default" type="flag" requires="service">Show the default client config for the service/instance</option>
+	    <option name="server" type="flag" requires="service">Show the server config for the service/instance</option>
+	</optgroup>
+	<optgroup>
+	    <option name="resourcegroup" type="string" requires="hostname cluster metacluster">Name of a resource group</option>
+	    <option name="application" type="string" requires="hostname cluster metacluster">Name of an application</option>
+	    <option name="filesystem" type="string" requires="hostname cluster metacluster">Name of a file system</option>
+	    <option name="hostlink" type="string" requires="hostname cluster metacluster">Name of a hostlink</option>
+	    <option name="intervention" type="string" requires="hostname cluster metacluster">Name of an intervention</option>
+	    <option name="reboot_intervention" type="string" requires="hostname cluster metacluster">Name of a reboot intervention</option>
+	    <option name="reboot_schedule" type="string" requires="hostname cluster metacluster">Name of a reboot schedule</option>
+	    <option name="virtual_machine" type="string" requires="hostname cluster metacluster">Name of a virtual machine</option>
+	    <option name="service_address" type="string" requires="hostname cluster metacluster">Name of a service address</option>
+	    <option name="share" type="string" requires="hostname cluster metacluster">Name of a resource group</option>
 	</optgroup>
 	<transport trigger="machine" method="get" path="machine/%(machine)s/plenary"/>
 	<transport trigger="hostname" method="get" path="host/%(hostname)s/plenary"/>
@@ -4237,7 +4239,7 @@
 		<option name="cluster" type="string">Name of the cluster</option>
 		<option name="metacluster" type="string">Name of the metacluster</option>
 	    </optgroup>
-	    <option name="archetype" type="string">Name of the archetype</option>
+	    <option name="archetype" requires="personality" type="string">Name of the archetype</option>
 	    <option name="personality" type="string">Name of the personality</option>
 	</optgroup>
 	<transport method="put" trigger="cluster" path="cluster/%(cluster)s/allowed/%(archetype)s/%(personality)s"/>
@@ -4251,7 +4253,7 @@
 		<option name="cluster" type="string">Name of the cluster</option>
 		<option name="metacluster" type="string">Name of the metacluster</option>
 	    </optgroup>
-	    <option name="archetype" type="string">Name of the archetype</option>
+	    <option name="archetype" requires="personality" type="string">Name of the archetype</option>
 	    <option name="personality" type="string">Name of the personality</option>
 	</optgroup>
 	<transport method="delete" trigger="cluster" path="cluster/%(cluster)s/allowed/%(archetype)s/%(personality)s"/>
@@ -5337,7 +5339,7 @@
 	    </optgroup>
 	</optgroup>
 	<optgroup>
-	    <option name="archetype" type="string">Archetype of the personality</option>
+	    <option name="archetype" requires="personality" type="string">Archetype of the personality</option>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
 	    <option name="reason" type="string">String to be specified if justification='emergency'</option>
 	</optgroup>
@@ -5362,7 +5364,7 @@
 	    </optgroup>
 	</optgroup>
 	<optgroup>
-	    <option name="archetype" type="string">Archetype of the personality</option>
+	    <option name="archetype" requires="personality" type="string">Archetype of the personality</option>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
 	    <option name="reason" type="string">String to be specified if justification='emergency'</option>
 	</optgroup>
@@ -5500,7 +5502,7 @@
 	    </optgroup>
 	</optgroup>
 	<optgroup>
-	    <option name="vendor" type="string">Vendor name, if the model name is not unique</option>
+	    <option name="vendor" requires="model" type="string">Vendor name, if the model name is not unique</option>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
 	    <option name="reason" type="string">String to be specified if justification='emergency'</option>
 	</optgroup>
@@ -5526,7 +5528,7 @@
 	    </optgroup>
 	</optgroup>
 	<optgroup>
-	    <option name="vendor" type="string">Vendor name, if the model name is not unique</option>
+	    <option name="vendor" requires="model" type="string">Vendor name, if the model name is not unique</option>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
 	    <option name="reason" type="string">String to be specified if justification='emergency'</option>
 	    <option name="flush" type="boolean" default="True">Enable flushing the affected host plenaries</option>

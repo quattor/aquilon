@@ -232,7 +232,7 @@ class TestUsecaseHACluster(TestBrokerCommand):
         self.matchoutput(out, "Member: High Availability Cluster hacl1", command)
         self.matchoutput(out, "Member: High Availability Cluster hacl2", command)
         self.matchoutput(out,
-                         "Allowed Personality: Personality hacluster/hapersonality",
+                         "Allowed Personality: hapersonality Archetype: hacluster",
                          command)
         self.matchoutput(out, "Organization: ms", command)
 

@@ -170,8 +170,7 @@ class CommandUpdateModel(BrokerCommand):
         session.flush()
 
         plenaries = PlenaryCollection(logger=logger)
-        for dbmachine in dbmachines:
-            plenaries.append(Plenary.get_plenary(dbmachine))
+        plenaries.extend(map(Plenary.get_plenary, dbmachines))
         plenaries.write()
 
         return

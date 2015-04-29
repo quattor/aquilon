@@ -36,7 +36,7 @@ class CommandAddAllowedPersonalityCluster(BrokerCommand):
         else:
             dbclus = MetaCluster.get_unique(session, metacluster, compel=True)
 
-        if len(dbclus.allowed_personalities) == 0:
+        if not dbclus.allowed_personalities:
             members = dbclus.hosts[:]
             if hasattr(dbclus, 'members'):
                 members.extend(dbclus.members)

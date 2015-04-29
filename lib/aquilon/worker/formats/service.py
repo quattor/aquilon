@@ -25,7 +25,7 @@ from aquilon.worker.formats.formatters import ObjectFormatter
 class ServiceFormatter(ObjectFormatter):
     def format_raw(self, service, indent="", embedded=True,
                    indirect_attrs=True):
-        details = [indent + "Service: %s" % service.name]
+        details = [indent + "{0:c}: {0.name}".format(service)]
         max_clients = service.max_clients
         if max_clients is None:
             max_clients = "Unlimited"
@@ -34,13 +34,13 @@ class ServiceFormatter(ObjectFormatter):
         details.append(indent + "  Need Client List: %s" %
                        service.need_client_list)
         for archetype in sorted(service.archetypes, key=attrgetter("name")):
-            details.append(indent + "  Required for Archetype: " +
-                           archetype.name)
+            details.append(indent + "  Required for {0:c}: {0.name}"
+                           .format(archetype))
         for personality in sorted(service.personalities,
                                   key=attrgetter("archetype.name", "name")):
             details.append(indent +
-                           "  Required for Personality: %s Archetype: %s" %
-                           (personality.name, personality.archetype.name))
+                           "  Required for {0:c}: {0.name} {1:c}: {1.name}"
+                           .format(personality, personality.archetype))
         if service.comments:
             details.append(indent + "  Comments: %s" % service.comments)
         for instance in service.instances:

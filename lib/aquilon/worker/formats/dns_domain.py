@@ -23,10 +23,10 @@ from aquilon.aqdb.model import DnsDomain
 class DnsDomainFormatter(ObjectFormatter):
     def format_raw(self, dns_domain, indent="", embedded=True,
                    indirect_attrs=True):
-        details = [indent + "DNS Domain: %s" % dns_domain.name]
+        details = [indent + "{0:c}: {0.name}".format(dns_domain)]
         details.append(indent + "  Restricted: %s" % dns_domain.restricted)
 
-        if len(dns_domain.servers) > 0:
+        if dns_domain.servers:
             server_list = ','.join(str(srv) for srv in dns_domain.servers)
             details.append(indent + "  Servers: %s" % server_list)
 

@@ -41,11 +41,13 @@ class CommandDelNetworkDevice(BrokerCommand):
         plenaries = PlenaryCollection(logger=logger)
         remove_plenaries = PlenaryCollection(logger=logger)
 
-        remove_host(logger, dbnetdev, plenaries, remove_plenaries)
-
         # Update cluster plenaries connected to this network device
-        for dbcluster in dbnetdev.esx_clusters:
-            plenaries.append(Plenary.get_plenary(dbcluster))
+        plenaries.extend(map(Plenary.get_plenary, dbnetdev.esx_clusters))
+
+        remove_plenaries.append(PlenarySwitchData.get_plenary(dbnetdev))
+        remove_plenaries.append(Plenary.get_plenary(dbnetdev))
+
+        remove_host(logger, dbnetdev, plenaries, remove_plenaries)
 
         dbdns_rec = dbnetdev.primary_name
         session.delete(dbnetdev)
@@ -56,13 +58,6 @@ class CommandDelNetworkDevice(BrokerCommand):
 
         # Any network device ports hanging off this network device should be deleted with
         # the cascade delete of the network device.
-
-        remove_plenaries.append(PlenarySwitchData.get_plenary(dbnetdev, logger=logger))
-        remove_plenaries.append(Plenary.get_plenary(dbnetdev, logger=logger))
-
-        # Update cluster plenaries connected to this network device
-        for dbcluster in dbnetdev.esx_clusters:
-            plenaries.append(Plenary.get_plenary(dbcluster))
 
         with CompileKey.merge([plenaries.get_key(),
                                remove_plenaries.get_key()]):

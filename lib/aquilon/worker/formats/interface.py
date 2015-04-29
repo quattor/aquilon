@@ -62,8 +62,8 @@ class InterfaceFormatter(ObjectFormatter):
 
         details.append(indent + "  Type: %s" % interface.interface_type)
         if interface.model_allowed:
-            details.append(indent + "  Vendor: %s Model: %s" %
-                           (interface.model.vendor, interface.model))
+            details.append(indent + "  {0:c}: {0.name} {1:c}: {1.name}"
+                           .format(interface.model.vendor, interface.model))
         if interface.bus_address:
             details.append(indent + "  Controller Bus Address: %s" %
                            interface.bus_address)
@@ -110,10 +110,12 @@ class InterfaceFormatter(ObjectFormatter):
 
         for route in sorted(static_routes, key=attrgetter('destination',
                                                           'gateway_ip')):
-            details.append(indent + "  Static Route: {0} gateway {1}"
-                           .format(route.destination, route.gateway_ip))
+            details.append(indent + "  {0:c}: {0.destination} gateway {0.gateway_ip}"
+                           .format(route))
             if route.personality:
-                details.append(indent + "    Personality: {0}".format(route.personality))
+                details.append(indent + "    {0:c}: {0.name} {1:c}: {1.name}"
+                               .format(route.personality,
+                                       route.personality.archetype))
             if route.comments:
                 details.append(indent + "    Comments: %s" % route.comments)
 

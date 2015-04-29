@@ -57,8 +57,7 @@ class CommandBindClientMetacluster(BrokerCommand):
         session.flush()
 
         plenaries = PlenaryCollection(logger=logger)
-        for chooser in choosers:
-            plenaries.append(chooser.plenaries)
+        plenaries.extend(chooser.plenaries for chooser in choosers)
         plenaries.flatten()
 
         plenaries.write()

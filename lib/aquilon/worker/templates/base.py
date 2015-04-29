@@ -70,7 +70,10 @@ class Plenary(object):
         self.new_content = None
 
         # We may no longer be able to calculate this during remove()
-        self.debug_name = str(dbobj)
+        try:
+            self.debug_name = str(dbobj.qualified_name)
+        except AttributeError:
+            self.debug_name = str(dbobj)
 
         # The following attributes are for stash/restore_stash
         self.old_path = self.full_path(dbobj)
@@ -531,8 +534,8 @@ class PlenaryCollection(object):
 
     def get_key(self, exclusive=True):
         keylist = [NoLockKey(logger=self.logger)]
-        for plen in self.plenaries:
-            keylist.append(plen.get_key(exclusive=exclusive))
+        keylist.extend(plen.get_key(exclusive=exclusive)
+                       for plen in self.plenaries)
         return CompileKey.merge(keylist)
 
     def stash(self):

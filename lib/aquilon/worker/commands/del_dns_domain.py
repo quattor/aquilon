@@ -14,11 +14,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Contains the logic for `aq add dns_domain`."""
-
+"""Contains the logic for `aq del dns_domain`."""
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.processes import DSDBRunner
 from aquilon.aqdb.model import DnsDomain, Fqdn
 
@@ -30,9 +29,9 @@ class CommandDelDnsDomain(BrokerCommand):
     def render(self, session, logger, dns_domain, **arguments):
         dbdns_domain = DnsDomain.get_unique(session, dns_domain, compel=True)
 
-        q = session.query(Fqdn)
+        q = session.query(Fqdn.id)
         q = q.filter_by(dns_domain=dbdns_domain)
-        if q.first():
+        if q.count():
             raise ArgumentError("DNS domain %s cannot be deleted while still "
                                 "in use." % dns_domain)
 

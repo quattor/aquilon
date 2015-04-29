@@ -97,6 +97,14 @@ class TestClientFailure(TestBrokerCommand):
                          "STDOUT:\n@@@\n'%s'\n"
                          % (command, p.returncode, 2, out))
 
+    def testrequires(self):
+        command = ["compile", "--domain", "prod", "--archetype", "aquilon"]
+        err = self.badoptiontest(command)
+        self.matchoutput(err,
+                         "Option or option group archetype can only be used "
+                         "together with one of: personality.",
+                         command)
+
     def testunauthorized(self):
         command = "flush"
         out = self.unauthorizedtest(command)

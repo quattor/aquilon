@@ -95,7 +95,7 @@ class NetworkFormatter(ObjectFormatter):
                    indirect_attrs=True):
         netmask = network.netmask
         sysloc = network.location.sysloc()
-        details = [indent + "Network: %s" % network.name]
+        details = [indent + "{0:c}: {0.name}".format(network)]
         details.append(indent + "  {0:c}: {0.name}".format(network.network_environment))
         details.append(indent + "  IP: %s" % network.ip)
         details.append(indent + "  Netmask: %s" % netmask)
@@ -118,10 +118,12 @@ class NetworkFormatter(ObjectFormatter):
 
         for route in sorted(network.static_routes,
                             key=attrgetter('destination', 'gateway_ip')):
-            details.append(indent + "  Static Route: %s gateway %s" %
-                           (route.destination, route.gateway_ip))
+            details.append(indent + "  {0:c}: {0.destination} gateway {0.gateway_ip}"
+                           .format(route))
             if route.personality:
-                details.append(indent + "    Personality: {0}".format(route.personality))
+                details.append(indent + "    {0:c}: {0.name} {1:c}: {1.name}"
+                               .format(route.personality,
+                                       route.personality.archetype))
             if route.comments:
                 details.append(indent + "    Comments: %s" % route.comments)
 
@@ -148,8 +150,7 @@ class NetworkFormatter(ObjectFormatter):
         if not indirect_attrs:
             return
 
-        for router in net.routers:
-            skeleton.routers.append(str(router.ip))
+        skeleton.routers.extend(str(router.ip) for router in net.routers)
 
         # Bulk load information about anything having a network address on this
         # network

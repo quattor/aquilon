@@ -54,7 +54,7 @@ class CommandUpdateArchetype(BrokerCommand):
                 q = session.query(Cluster.id)
             q = q.join(Personality)
             q = q.filter_by(archetype=dbarchetype)
-            if q.count() > 0:
+            if q.count():
                 raise ArgumentError("{0} is currently in use, the cluster "
                                     "type cannot be changed."
                                     .format(dbarchetype))

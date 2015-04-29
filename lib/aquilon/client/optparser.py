@@ -175,7 +175,20 @@ class Command(Element):
                 e.help = self.recursiveHelp(0, width=get_term_width())
                 raise e
             result.update(res)
-        # check for conflicts
+
+        # Check dependencies
+        requires = self.getAllRequires(result)
+        for item in result:
+            if item not in requires:
+                continue
+            for dep in requires[item]:
+                if dep in result:
+                    break
+            else:
+                raise ParsingError("Option or option group %s can only be used "
+                                   "together with one of: %s."
+                                   % (item, ", ".join(requires[item])))
+        # Check for conflicts
         conflicts = self.getAllConflicts(result)
         for conflict, option in conflicts.items():
             if conflict in result:
@@ -204,6 +217,13 @@ class Command(Element):
             c = g.getAllConflicts(found)
             conflicts.update(c)
         return conflicts
+
+    def getAllRequires(self, found):
+        requires = {}
+        for g in self.optgroups:
+            c = g.getAllRequires(found)
+            requires.update(c)
+        return requires
 
     def shortHelp(self, width=None):
         lines = textwrap.wrap(" ".join(o.shortHelp() for o in self.optgroups),
@@ -261,6 +281,11 @@ class OptGroup(Element):
             self.conflicts = node.attrib["conflicts"].split(' ')
         else:
             self.conflicts = []
+
+        if "requires" in node.attrib:
+            self.requires = node.attrib["requires"].split(' ')
+        else:
+            self.requires = []
 
         for child in node:
             if child.tag == "option":
@@ -329,6 +354,16 @@ class OptGroup(Element):
             conflicts[conflict] = self.name
         return conflicts
 
+    def getAllRequires(self, found):
+        requires = {}
+        for o in self.options:
+            r = o.getAllRequires(found)
+            requires.update(r)
+
+        if self.requires:
+            requires[self.name] = self.requires
+        return requires
+
     def shortHelp(self):
         return " ".join(o.shortHelp() for o in self.options)
 
@@ -389,6 +424,11 @@ class Option(Element):
             self.conflicts = node.attrib["conflicts"].split(' ')
         else:
             self.conflicts = []
+
+        if "requires" in node.attrib:
+            self.requires = node.attrib["requires"].split(' ')
+        else:
+            self.requires = []
 
         if "default" in node.attrib:
             if self.type == "boolean" or self.type == "flag":
@@ -467,6 +507,12 @@ class Option(Element):
             for conflict in self.conflicts:
                 conflicts[conflict] = self.name
         return conflicts
+
+    def getAllRequires(self, found):
+        requires = {}
+        if self.name in found and self.requires:
+            requires[self.name] = self.requires
+        return requires
 
     def shortHelp(self):
         if self.type == "boolean":

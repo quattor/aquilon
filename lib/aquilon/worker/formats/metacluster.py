@@ -59,7 +59,8 @@ class MetaClusterFormatter(CompileableFormatter):
                            "  Member Alignment: Service %s Instance %s" %
                            (dbsi.service.name, dbsi.name))
         for personality in metacluster.allowed_personalities:
-            details.append(indent + "  Allowed Personality: {0}".format(personality))
+            details.append(indent + "  Allowed {0:c}: {0.name} {1:c}: {1.name}"
+                           .format(personality, personality.archetype))
         for cluster in metacluster.members:
             details.append(indent + "  Member: {0}".format(cluster))
 
@@ -95,7 +96,7 @@ class MetaClusterFormatter(CompileableFormatter):
         if metacluster.max_clusters is not None:
             skeleton.max_members = metacluster.max_clusters
 
-        if metacluster.resholder and len(metacluster.resholder.resources) > 0:
+        if metacluster.resholder and metacluster.resholder.resources:
             self.redirect_proto(metacluster.resholder.resources,
                                 skeleton.resources)
 

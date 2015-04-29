@@ -65,8 +65,7 @@ class CommandMakeClusterCluster(BrokerCommand):
         session.flush()
 
         plenaries = PlenaryCollection(logger=logger)
-        for chooser in choosers:
-            plenaries.append(chooser.plenaries)
+        plenaries.extend(chooser.plenaries for chooser in choosers)
         plenaries.flatten()
 
         td = TemplateDomain(dbcluster.branch, dbcluster.sandbox_author,
