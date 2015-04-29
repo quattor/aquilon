@@ -122,7 +122,7 @@ class PlenaryMetaClusterObject(ObjectPlenary):
             path = PlenaryServiceInstanceClientDefault.template_name(servinst)
             pan_include(lines, path)
 
-        path = PlenaryPersonalityBase.template_name(self.dbobj.personality)
+        path = PlenaryPersonalityBase.template_name(self.dbobj.personality_stage)
         pan_include(lines, path)
         pan_include(lines, "archetype/final")
 

@@ -327,8 +327,7 @@ class PlenaryHostObject(ObjectPlenary):
         return self.old_content != self.new_content
 
     def body(self, lines):
-        pers = self.dbobj.personality_stage
-        arch = pers.archetype
+        dbstage = self.dbobj.personality_stage
 
         # FIXME: Enforce that one of the interfaces is marked boot?
         for dbinterface in self.dbobj.hardware_entity.interfaces:
@@ -337,7 +336,7 @@ class PlenaryHostObject(ObjectPlenary):
                 continue
 
         services = []
-        required_services = set(arch.services + pers.services)
+        required_services = set(dbstage.archetype.services + dbstage.services)
 
         for si in self.dbobj.services_used:
             required_services.discard(si.service)
@@ -373,13 +372,14 @@ class PlenaryHostObject(ObjectPlenary):
         pan_include(lines, services)
         pan_include(lines, provides)
 
-        path = PlenaryPersonalityBase.template_name(pers.personality)
+        path = PlenaryPersonalityBase.template_name(dbstage)
         pan_include(lines, path)
 
         if self.dbobj.cluster:
             pan_include(lines,
                         PlenaryClusterClient.template_name(self.dbobj.cluster))
-        elif pers.cluster_required:
+        elif dbstage.personality.cluster_required:
             raise IncompleteError("{0} requires cluster membership, please "
-                                  "run 'aq cluster'.".format(pers))
+                                  "run 'aq cluster'."
+                                  .format(dbstage.personality))
         pan_include(lines, "archetype/final")

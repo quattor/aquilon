@@ -132,7 +132,8 @@ class CommandUpdatePersonality(BrokerCommand):
         if comments is not None:
             dbpersona.comments = comments
 
-        plenaries.append(Plenary.get_plenary(dbpersona))
+        plenaries.extend(map(Plenary.get_plenary, dbpersona.stages.values()))
+
         session.flush()
 
         q = session.query(Cluster)

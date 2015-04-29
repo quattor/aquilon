@@ -38,12 +38,13 @@ class CommandAddParameter(BrokerCommand):
                justification=None, reason=None, **arguments):
         dbpersonality = Personality.get_unique(session, name=personality,
                                                archetype=archetype, compel=True)
-        if not dbpersonality.paramholder:
-            dbpersonality.paramholder = PersonalityParameter()
-
         if not dbpersonality.archetype.is_compileable:
             raise ArgumentError("{0} is not compileable."
                                 .format(dbpersonality.archetype))
+
+        dbstage = dbpersonality.active_stage
+        if not dbpersonality.paramholder:
+            dbpersonality.paramholder = PersonalityParameter()
 
         validate_personality_justification(dbpersonality, user, justification, reason)
 
@@ -53,5 +54,5 @@ class CommandAddParameter(BrokerCommand):
         session.add(dbparameter)
         session.flush()
 
-        plenary = Plenary.get_plenary(dbpersonality, logger=logger)
+        plenary = Plenary.get_plenary(dbstage, logger=logger)
         plenary.write()

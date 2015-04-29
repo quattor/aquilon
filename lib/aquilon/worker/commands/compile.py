@@ -62,8 +62,7 @@ class CommandCompile(BrokerCommand):
                         joinedload('personality.paramholder'),
                         subqueryload('personality.paramholder.parameters'))
 
-        for dbstage in q1.union(q2):
-            plenaries.append(Plenary.get_plenary(dbstage.personality))
+        plenaries.extend(map(Plenary.get_plenary, q1.union(q2)))
 
         q1 = session.query(ServiceInstance)
         q1 = q1.join(ServiceInstance.clients)

@@ -25,14 +25,14 @@ from sqlalchemy.orm import (joinedload, subqueryload, lazyload, contains_eager,
 from sqlalchemy.orm.attributes import set_committed_value
 
 from aquilon.exceptions_ import PartialError, IncompleteError
-from aquilon.aqdb.model import (Service, Machine, Chassis, Host, Personality,
-                                Archetype, Cluster, City, Rack, Resource,
-                                HostResource, ClusterResource, VirtualMachine,
-                                Filesystem, RebootSchedule, Hostlink,
-                                ServiceAddress, Share, Disk, Interface,
-                                ManagementInterface, AddressAssignment,
-                                ServiceInstance, NetworkDevice, ParamDefHolder,
-                                Feature)
+from aquilon.aqdb.model import (Service, Machine, Chassis, Host,
+                                PersonalityStage, Archetype, Cluster, City,
+                                Rack, Resource, HostResource, ClusterResource,
+                                VirtualMachine, Filesystem, RebootSchedule,
+                                Hostlink, ServiceAddress, Share, Disk,
+                                Interface, ManagementInterface,
+                                AddressAssignment, ServiceInstance,
+                                NetworkDevice, ParamDefHolder, Feature)
 from aquilon.aqdb.data_sync.storage import StormapParser
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.templates.base import Plenary
@@ -248,22 +248,26 @@ class CommandFlush(BrokerCommand):
                 q = q.options(subqueryload('param_definitions'))
                 paramdefs = q.all()  # pylint: disable=W0612
 
-                q = session.query(Personality)
-                q = q.options(subqueryload('grns'),
-                              subqueryload('features'),
-                              joinedload('paramholder'),
-                              subqueryload('paramholder.parameters'),
-                              subqueryload('root_users'),
-                              subqueryload('root_netgroups'))
+                q = session.query(PersonalityStage)
+                q = q.options(joinedload('personality'),
+                              # FIXME: undo when GRNs are staged
+                              subqueryload('personality.grns'),
+                              # FIXME: undo when feature bindings are staged
+                              subqueryload('personality.features'),
+                              # FIXME: undo when parameters are staged
+                              joinedload('personality.paramholder'),
+                              subqueryload('personality.paramholder.parameters'),
+                              subqueryload('personality.root_users'),
+                              subqueryload('personality.root_netgroups'))
                 progress = ProgressReport(logger, q.count(), "personality")
-                for persona in q:
+                for persst in q:
                     progress.step()
                     try:
-                        plenary_info = Plenary.get_plenary(persona,
+                        plenary_info = Plenary.get_plenary(persst,
                                                            logger=logger)
                         written += plenary_info.write(locked=True)
                     except Exception as e:
-                        failed.append("{0} failed: {1}".format(persona, e))
+                        failed.append("{0} failed: {1}".format(persst, e))
                         continue
 
             if machines:

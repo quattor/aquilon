@@ -86,7 +86,11 @@ class CommandMapGrn(BrokerCommand):
                                     (target, obj.archetype.name,
                                      ", ".join(valid_targets)))
 
-            plenaries.append(Plenary.get_plenary(obj))
+            # FIXME: Remove this split once GRNs are bound to PersonalityStage
+            if hasattr(obj, "stages"):
+                plenaries.append(Plenary.get_plenary(obj.stages["current"]))
+            else:
+                plenaries.append(Plenary.get_plenary(obj))
             self._update_dbobj(obj, target, dbgrn, mapcls)
 
         session.flush()

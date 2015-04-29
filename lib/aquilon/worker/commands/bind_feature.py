@@ -116,7 +116,7 @@ class CommandBindFeature(BrokerCommand):
 
         plenaries = PlenaryCollection(logger=logger)
         for dbpersonality in q:
-            plenaries.append(Plenary.get_plenary(dbpersonality))
+            plenaries.append(Plenary.get_plenary(dbpersonality.active_stage))
 
         written = plenaries.write()
         logger.client_info("Flushed %d/%d templates." %

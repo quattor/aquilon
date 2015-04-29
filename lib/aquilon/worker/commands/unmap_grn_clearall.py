@@ -42,8 +42,10 @@ class CommandUnMapGrnClearAll(BrokerCommand):
             dbcluster = Cluster.get_unique(session, membersof, compel=True)
             objs = dbcluster.hosts
         elif personality:
-            objs = [Personality.get_unique(session, name=personality,
-                                           archetype=archetype, compel=True)]
+            dbpersonality = Personality.get_unique(session, name=personality,
+                                                   archetype=archetype,
+                                                   compel=True)
+            objs = [dbpersonality.active_stage]
 
         plenaries = PlenaryCollection(logger=logger)
         for obj in objs:
