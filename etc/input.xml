@@ -1796,6 +1796,10 @@
 	create a named instance for this service at the same time. Default templates
 	describing the service will be created so that any service instances can be
 	immediately used (bound and configured) by clients.
+	<p/>
+	The need_client_list option can be used to have a server that
+	provides the service receive a full list of clients as part of its
+	profile. The default is false.
 	<optgroup mandatory="True" fields="all">
 	    <option name="service" type="string" mandatory="True">service name</option>
 	</optgroup>

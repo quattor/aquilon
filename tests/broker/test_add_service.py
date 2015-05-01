@@ -71,7 +71,8 @@ class TestAddService(TestBrokerCommand):
             for pattern in service_plenaries:
                 self.check_plenary_gone(pattern % service)
 
-            self.noouttest(["add_service", "--service", service])
+            self.noouttest(["add_service", "--service", service,
+                            "--need_client_list"])
 
             for instance in instances:
                 for pattern in instance_plenaries:
@@ -103,7 +104,8 @@ class TestAddService(TestBrokerCommand):
         self.matchoutput(out, "Service afs not found.", command)
 
     def test_111_add_afs(self):
-        self.noouttest(["add_service", "--service", "afs"])
+        self.noouttest(["add_service", "--service", "afs",
+                        "--need_client_list"])
 
     def test_112_add_afs_instance(self):
         command = ["add", "service", "--service", "afs",
@@ -148,7 +150,8 @@ class TestAddService(TestBrokerCommand):
     def test_140_add_bootserver(self):
         """ add service without instance first """
         command = ["add", "service", "--service", "bootserver",
-                   "--comments", "Some service comments"]
+                   "--comments", "Some service comments",
+                   "--need_client_list"]
         self.noouttest(command)
 
     def test_141_add_bootserver_instance(self):
