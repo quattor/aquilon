@@ -250,11 +250,11 @@ class TestUpdateESXCluster(TestBrokerCommand):
 
     def test_500_missing_personality_stage(self):
         command = ["update_cluster", "--cluster", "utecl1",
-                   "--personality", "nostage", "--personality_stage", "next"]
+                   "--personality", "nostage"]
         out = self.notfoundtest(command)
         self.matchoutput(out,
                          "Personality esx_cluster/nostage does not have stage "
-                         "next.",
+                         "current.",
                          command)
 
     def test_600_updatethreshold(self):

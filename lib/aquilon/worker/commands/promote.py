@@ -51,10 +51,11 @@ class CommandPromote(BrokerCommand):
 
         plenaries = PlenaryCollection(logger=logger)
 
-        current = dbpersonality.stages["current"]
+        current = dbpersonality.stages.get("current", None)
         next = dbpersonality.stages["next"]
 
-        plenaries.append(Plenary.get_plenary(current))
+        if current:
+            plenaries.append(Plenary.get_plenary(current))
         plenaries.append(Plenary.get_plenary(next))
 
         with session.no_autoflush:
@@ -70,7 +71,8 @@ class CommandPromote(BrokerCommand):
                     plenaries.append(Plenary.get_plenary(dbobj))
                     dbobj.personality_stage = next
 
-            current.name = "previous"
+            if current:
+                current.name = "previous"
             next.name = "current"
             session.expire(dbpersonality, ['stages'])
 

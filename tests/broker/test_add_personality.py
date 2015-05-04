@@ -105,20 +105,16 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
                    "--host_environment=dev", "--staged",
                    "--comments", "Existing personality for netperssvcmap tests"]
         self.noouttest(command)
-        self.verifycatpersonality("aquilon", "eaitools")
+        self.verifycatpersonality("aquilon", "eaitools", stage="next")
         # The basic parameter set needs to be initialized for further tests
-        # Note: these will apply to the next stage
         self.setup_personality("aquilon", "eaitools")
 
     def test_126_verify_eaitools(self):
         command = ["show_personality", "--personality", "eaitools",
                    "--archetype", "aquilon"]
-        out = self.commandtest(command)
-        self.matchoutput(out, "Stage: current", command)
-
-        command = ["show_parameter", "--personality", "eaitools",
-                   "--archetype", "aquilon"]
-        self.notfoundtest(command)
+        out = self.notfoundtest(command)
+        self.matchoutput(out, "Personality aquilon/eaitools does not have "
+                         "stage current.", command)
 
     def test_126_verify_eaitools_next(self):
         command = ["show_personality", "--personality", "eaitools",
@@ -130,8 +126,6 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
                    "--archetype", "aquilon", "--personality_stage", "next"]
         out = self.commandtest(command)
         self.matchoutput(out, "espinfo", command)
-
-        self.verifycatpersonality("aquilon", "eaitools", stage="next")
 
     def test_130_add_windows_desktop(self):
         command = ["add", "personality", "--personality", "desktop",
@@ -368,9 +362,10 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
                         "No aurora/generic in personality list.")
         self.assertFalse("current" in
                          archetypes["aquilon"]["utpersonality/dev"])
-        self.assertTrue("current" in archetypes["aquilon"]["eaitools"])
+        self.assertFalse("current" in archetypes["aquilon"]["eaitools"])
         self.assertTrue("next" in archetypes["aquilon"]["eaitools"])
-        self.assertTrue("current" in archetypes["aquilon"]["unixeng-test"])
+        self.assertFalse("current" in archetypes["aquilon"]["unixeng-test"])
+        self.assertTrue("next" in archetypes["aquilon"]["unixeng-test"])
 
     def test_300_show_personality_archetype(self):
         command = "show_personality --archetype aquilon"
@@ -415,11 +410,10 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
 
     def test_400_show_missing_stage(self):
         command = ["show_personality", "--personality", "nostage",
-                   "--archetype", "aquilon",
-                   "--personality_stage", "next"]
+                   "--archetype", "aquilon"]
         out = self.notfoundtest(command)
         self.matchoutput(out, "Personality aquilon/nostage does not have "
-                         "stage next.", command)
+                         "stage current.", command)
 
     def test_400_show_bad_stage(self):
         command = ["show_personality", "--personality", "nostage",
@@ -430,11 +424,10 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
                          "stage.", command)
 
     def test_400_cat_missing_stage(self):
-        command = ["cat", "--personality", "nostage", "--archetype", "aquilon",
-                   "--personality_stage", "next"]
+        command = ["cat", "--personality", "nostage", "--archetype", "aquilon"]
         out = self.notfoundtest(command)
         self.matchoutput(out, "Personality aquilon/nostage does not have "
-                         "stage next.", command)
+                         "stage current.", command)
 
     def test_400_cat_bad_stage(self):
         command = ["cat", "--personality", "nostage", "--archetype", "aquilon",
@@ -445,11 +438,10 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
 
     def test_400_copy_missing_stage(self):
         command = ["add_personality", "--personality", "copy-test",
-                   "--archetype", "aquilon", "--copy_from", "nostage",
-                   "--copy_stage", "next"]
+                   "--archetype", "aquilon", "--copy_from", "nostage"]
         out = self.notfoundtest(command)
         self.matchoutput(out, "Personality aquilon/nostage does not have "
-                         "stage next.", command)
+                         "stage current.", command)
 
     def test_400_copy_bad_stage(self):
         command = ["add_personality", "--personality", "copy-test",
@@ -458,6 +450,10 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
         out = self.badrequesttest(command)
         self.matchoutput(out, "'no-such-stage' is not a valid personality "
                          "stage.", command)
+
+    def test_800_promote_unixeng_test(self):
+        self.noouttest(["promote", "--personality", "unixeng-test",
+                        "--archetype", "aquilon"])
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddPersonality)

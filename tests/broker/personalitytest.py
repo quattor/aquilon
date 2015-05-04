@@ -44,16 +44,12 @@ class PersonalityTestMixin(object):
                 command = ["add_parameter", "--archetype", archetype,
                            "--personality", name,
                            "--path", path, "--value", value]
-                if staged:
-                    command.extend(["--personality_stage", "current"])
                 self.noouttest(command)
 
         if required:
             for service in required:
                 command = ["add_required_service", "--service", service,
                            "--archetype", archetype, "--personality", name]
-                if staged:
-                    command.extend(["--personality_stage", "current"])
                 self.noouttest(command)
 
         if maps:

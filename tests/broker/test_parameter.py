@@ -63,10 +63,10 @@ class TestParameter(TestBrokerCommand):
         self.noouttest(cmd)
 
         cmd = ["show_parameter", "--personality", PERSONALITY, "--archetype",
-               ARCHETYPE]
+               ARCHETYPE, "--personality_stage", "next"]
         err = self.notfoundtest(cmd)
         self.matchoutput(err,
-                         "No parameters found for personality %s/%s@current." %
+                         "No parameters found for personality %s/%s@next." %
                          (ARCHETYPE, PERSONALITY), cmd)
 
     def test_100_add_re_path(self):
@@ -440,8 +440,9 @@ class TestParameter(TestBrokerCommand):
                "--copy_from", PERSONALITY, "--copy_stage", "next"]
         self.successtest(cmd)
 
-        cmd = ["show_diff", "--archetype", ARCHETYPE, "--personality", PERSONALITY,
-               "--personality_stage", "next", "--other", "myshinynew"]
+        cmd = ["show_diff", "--archetype", ARCHETYPE,
+               "--personality", PERSONALITY, "--personality_stage", "next",
+               "--other", "myshinynew", "--other_stage", "next"]
         out = self.noouttest(cmd)
 
         cmd = ["del_personality", "--archetype", ARCHETYPE, "--personality", "myshinynew"]

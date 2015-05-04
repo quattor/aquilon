@@ -159,10 +159,11 @@ class TestAddRequiredService(TestBrokerCommand):
                         "--host_environment", "dev"])
 
         command = ["show_personality", "--archetype=aquilon",
-                   "--personality=required_svc_test"]
+                   "--personality=required_svc_test",
+                   "--personality_stage=next"]
         out = self.commandtest(command)
         self.matchoutput(out, "Service: netmap", command)
-        self.matchoutput(out, "Stage: current", command)
+        self.matchoutput(out, "Stage: next", command)
 
         self.successtest(["del_personality", "--personality", "required_svc_test",
                           "--archetype", "aquilon"])

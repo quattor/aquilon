@@ -349,11 +349,11 @@ class TestCompile(VerifyNotificationsMixin, TestBrokerCommand):
     def test_590_missing_personality_stage(self):
         command = ["compile", "--personality", "nostage",
                    "--archetype", "aquilon",
-                   "--personality_stage", "next"]
+                   "--personality_stage", "previous"]
         out = self.notfoundtest(command)
         self.matchoutput(out,
                          "Personality aquilon/nostage does not have stage "
-                         "next.",
+                         "previous.",
                          command)
 
     def test_590_bad_personality_stage(self):

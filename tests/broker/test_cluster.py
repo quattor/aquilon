@@ -257,12 +257,11 @@ class TestCluster(TestBrokerCommand):
     def test_200_missing_personality_stage(self):
         command = ["cluster", "--hostname=evh9.aqd-unittest.ms.com",
                    "--cluster", "utecl1",
-                   "--personality", "nostage",
-                   "--personality_stage", "next"]
+                   "--personality", "nostage"]
         out = self.notfoundtest(command)
         self.matchoutput(out,
                          "Personality vmhost/nostage does not have "
-                         "stage next.",
+                         "stage current.",
                          command)
 
     def test_200_bad_personality_stage(self):
