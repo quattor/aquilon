@@ -41,10 +41,10 @@
 		<arg choice="plain"><option>--bootmount</option></arg>
 		<arg choice="plain"><option>--nobootmount</option></arg>
 	    </group>
-	    <arg choice="opt"><option>--dumpfreq <replaceable>DUMPFREQ</replaceable></option></arg>
-	    <arg choice="opt"><option>--fsckpass <replaceable>PASSNO</replaceable></option></arg>
-	    <arg choice="opt"><option>--options <replaceable>OPTIONS</replaceable></option></arg>
-	    <arg choice="opt"><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
+	    <arg><option>--dumpfreq <replaceable>DUMPFREQ</replaceable></option></arg>
+	    <arg><option>--fsckpass <replaceable>PASSNO</replaceable></option></arg>
+	    <arg><option>--options <replaceable>OPTIONS</replaceable></option></arg>
+	    <arg><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
 	    <xi:include href="../common/global_options.xml"/>
 	</cmdsynopsis>
     </refsynopsisdiv>

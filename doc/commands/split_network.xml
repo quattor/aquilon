@@ -32,7 +32,7 @@
 	        <arg choice="plain"><option>--netmask <replaceable>NETMASK</replaceable></option></arg>
 	        <arg choice="plain"><option>--prefixlen <replaceable>LENGTH</replaceable></option></arg>
 	    </group>
-	    <arg choice="opt"><option>--network_environment <replaceable>NETENV</replaceable></option></arg>
+	    <arg><option>--network_environment <replaceable>NETENV</replaceable></option></arg>
 	    <xi:include href="../common/global_options.xml"/>
 	</cmdsynopsis>
     </refsynopsisdiv>

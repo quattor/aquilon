@@ -29,29 +29,29 @@
 	    </group>
 	    <arg choice="plain"><option>--machine <replaceable>MACHINE</replaceable></option></arg>
 	    <arg choice="plain"><option>--disk <replaceable>DISK</replaceable></option></arg>
-	    <arg choice="opt"><option>--rename_to <replaceable>NEW_DISK</replaceable></option></arg>
-	    <arg choice="opt"><option>--controller <replaceable>CTRL</replaceable></option></arg>
-	    <arg choice="opt"><option>--size <replaceable>SIZE</replaceable></option></arg>
-	    <arg choice="opt"><option>--address <replaceable>C:T:L</replaceable></option></arg>
-	    <arg choice="opt"><option>--wwn <replaceable>WWN</replaceable></option></arg>
-	    <arg choice="opt"><option>--bus_address <replaceable>URI</replaceable></option></arg>
-	    <arg choice="opt"><option>--iops_limit <replaceable>IOPS_LIMIT</replaceable></option></arg>
-	    <group choice="opt">
+	    <arg><option>--rename_to <replaceable>NEW_DISK</replaceable></option></arg>
+	    <arg><option>--controller <replaceable>CTRL</replaceable></option></arg>
+	    <arg><option>--size <replaceable>SIZE</replaceable></option></arg>
+	    <arg><option>--address <replaceable>C:T:L</replaceable></option></arg>
+	    <arg><option>--wwn <replaceable>WWN</replaceable></option></arg>
+	    <arg><option>--bus_address <replaceable>URI</replaceable></option></arg>
+	    <arg><option>--iops_limit <replaceable>IOPS_LIMIT</replaceable></option></arg>
+	    <group>
 		<arg choice="plain"><option>--boot</option></arg>
 		<arg choice="plain"><option>--noboot</option></arg>
 	    </group>
-	    <group choice="opt">
+	    <group>
 		<arg choice="plain"><option>--snapshot</option></arg>
 		<arg choice="plain"><option>--nosnapshot</option></arg>
 	    </group>
-	    <group choice="opt">
+	    <group>
 		<group choice="req">
-		    <arg choice="opt"><option>--share <replaceable>SHARE</replaceable></option></arg>
-		    <arg choice="opt"><option>--filesystem <replaceable>FS</replaceable></option></arg>
+		    <arg><option>--share <replaceable>SHARE</replaceable></option></arg>
+		    <arg><option>--filesystem <replaceable>FS</replaceable></option></arg>
 		</group>
-		<arg choice="opt"><option>--resourcegroup <replaceable>RG</replaceable></option></arg>
+		<arg><option>--resourcegroup <replaceable>RG</replaceable></option></arg>
 	    </group>
-	    <arg choice="opt"><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
+	    <arg><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
 	    <xi:include href="../common/global_options.xml"/>
 	</cmdsynopsis>
     </refsynopsisdiv>

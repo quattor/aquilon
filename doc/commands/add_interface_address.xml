@@ -34,13 +34,13 @@
 	        <arg choice="plain"><option>--network_device <replaceable>NETDEV</replaceable></option></arg>
 	    </group>
 	    <arg choice="plain"><option>--interface <replaceable>IFACE</replaceable></option></arg>
-	    <arg choice="opt"><option>--fqdn <replaceable>FQDN</replaceable></option></arg>
-	    <arg choice="opt"><option>--label <replaceable>LABEL</replaceable></option></arg>
-	    <arg choice="opt"><option>--network_environment <replaceable>NETENV</replaceable></option></arg>
+	    <arg><option>--fqdn <replaceable>FQDN</replaceable></option></arg>
+	    <arg><option>--label <replaceable>LABEL</replaceable></option></arg>
+	    <arg><option>--network_environment <replaceable>NETENV</replaceable></option></arg>
 	    <group>
 		<synopfragmentref linkend="ip-options">IP address options</synopfragmentref>
 	    </group>
-	    <group choice="opt">
+	    <group>
 		<arg choice="plain"><option>--map_to_primary</option></arg>
 		<arg choice="plain"><option>--nomap_to_primary</option></arg>
 	    </group>

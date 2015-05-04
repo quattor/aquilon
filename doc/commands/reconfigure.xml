@@ -30,21 +30,21 @@
 		<arg choice="plain"><option>--hostlist <replaceable>FILENAME</replaceable></option></arg>
 		<arg choice="plain"><option>--membersof <replaceable>CLUSTER</replaceable></option></arg>
 	    </group>
-	    <arg choice="opt"><option>--osname <replaceable>OSNAME</replaceable></option></arg>
-	    <arg choice="opt"><option>--osversion <replaceable>OSVERSION</replaceable></option></arg>
-	    <arg choice="opt"><option>--archetype <replaceable>ARCHETYPE</replaceable></option></arg>
-	    <arg choice="opt"><option>--personality <replaceable>PERSONALITY</replaceable></option></arg>
-	    <arg choice="opt"><option>--buildstatus <replaceable>BUILDSTATUS</replaceable></option></arg>
-	    <arg choice="opt"><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
-	    <group choice="opt">
+	    <arg><option>--osname <replaceable>OSNAME</replaceable></option></arg>
+	    <arg><option>--osversion <replaceable>OSVERSION</replaceable></option></arg>
+	    <arg><option>--archetype <replaceable>ARCHETYPE</replaceable></option></arg>
+	    <arg><option>--personality <replaceable>PERSONALITY</replaceable></option></arg>
+	    <arg><option>--buildstatus <replaceable>BUILDSTATUS</replaceable></option></arg>
+	    <arg><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
+	    <group>
 		<arg choice="plain"><option>--grn <replaceable>GRN</replaceable></option></arg>
 		<arg choice="plain"><option>--eon_id <replaceable>EON_ID</replaceable></option></arg>
 	    </group>
-	    <group choice="opt">
+	    <group>
 		<arg choice="plain"><option>--keepbindings</option></arg>
 		<arg choice="plain"><option>--nokeepbindings</option></arg>
 	    </group>
-	    <group choice="opt">
+	    <group>
 		<arg choice="plain"><option>--cleargrn</option></arg>
 	    </group>
 	    <group>

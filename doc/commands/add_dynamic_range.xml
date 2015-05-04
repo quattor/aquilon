@@ -29,15 +29,15 @@
 	    </group>
 	    <arg choice="plain"><option>--startip <replaceable>IP</replaceable></option></arg>
 	    <arg choice="plain"><option>--endip <replaceable>IP</replaceable></option></arg>
-	    <arg choice="opt"><option>--dns_domain <replaceable>DOMAIN</replaceable></option></arg>
-	    <arg choice="opt"><option>--prefix <replaceable>PREFIX</replaceable></option></arg>
+	    <arg><option>--dns_domain <replaceable>DOMAIN</replaceable></option></arg>
+	    <arg><option>--prefix <replaceable>PREFIX</replaceable></option></arg>
 	    <xi:include href="../common/global_options.xml"/>
 	</cmdsynopsis>
 	<cmdsynopsis>
 	    <command>aq add dynamic range</command>
 	    <arg choice="plain"><option>--fillnetwork <replaceable>NETWORK</replaceable></option></arg>
-	    <arg choice="opt"><option>--dns_domain <replaceable>DOMAIN</replaceable></option></arg>
-	    <arg choice="opt"><option>--prefix <replaceable>PREFIX</replaceable></option></arg>
+	    <arg><option>--dns_domain <replaceable>DOMAIN</replaceable></option></arg>
+	    <arg><option>--prefix <replaceable>PREFIX</replaceable></option></arg>
 	</cmdsynopsis>
     </refsynopsisdiv>
 

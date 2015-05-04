@@ -28,50 +28,50 @@
 		<synopfragmentref linkend="global-options">Global options</synopfragmentref>
 	    </group>
 	    <group choice="req">
-		<arg choice="opt"><option>--archetype <replaceable>ARCHETYPE</replaceable></option></arg>
-		<arg choice="opt"><option>--buildstatus <replaceable>BUILDSTATUS</replaceable></option></arg>
-		<arg choice="opt"><option>--cluster_type <replaceable>CLUSTER_TYPE</replaceable></option></arg>
-		<arg choice="opt"><option>--personality <replaceable>PERSONALITY</replaceable></option></arg>
-		<arg choice="opt"><option>--allowed_archetype <replaceable>ALLOWED_ARCHETYPE</replaceable></option></arg>
-		<arg choice="opt"><option>--allowed_personality <replaceable>ALLOWED_PERSONALITY</replaceable></option></arg>
-		<arg choice="opt"><option>--down_hosts_threshold <replaceable>DOWN_HOSTS_THRESHOLD</replaceable></option></arg>
-		<arg choice="opt"><option>--down_maint_threshold <replaceable>DOWN_MAINT_THRESHOLD</replaceable></option></arg>
-		<arg choice="opt"><option>--max_members <replaceable>MAX_MEMBERS</replaceable></option></arg>
-		<arg choice="opt"><option>--member_archetype <replaceable>MEMBER_ARCHETYPE</replaceable></option></arg>
-		<arg choice="opt"><option>--member_hostname <replaceable>MEMBER_HOSTNAME</replaceable></option></arg>
-		<arg choice="opt"><option>--member_personality <replaceable>MEMBER_PERSONALITY</replaceable></option></arg>
+		<arg><option>--archetype <replaceable>ARCHETYPE</replaceable></option></arg>
+		<arg><option>--buildstatus <replaceable>BUILDSTATUS</replaceable></option></arg>
+		<arg><option>--cluster_type <replaceable>CLUSTER_TYPE</replaceable></option></arg>
+		<arg><option>--personality <replaceable>PERSONALITY</replaceable></option></arg>
+		<arg><option>--allowed_archetype <replaceable>ALLOWED_ARCHETYPE</replaceable></option></arg>
+		<arg><option>--allowed_personality <replaceable>ALLOWED_PERSONALITY</replaceable></option></arg>
+		<arg><option>--down_hosts_threshold <replaceable>DOWN_HOSTS_THRESHOLD</replaceable></option></arg>
+		<arg><option>--down_maint_threshold <replaceable>DOWN_MAINT_THRESHOLD</replaceable></option></arg>
+		<arg><option>--max_members <replaceable>MAX_MEMBERS</replaceable></option></arg>
+		<arg><option>--member_archetype <replaceable>MEMBER_ARCHETYPE</replaceable></option></arg>
+		<arg><option>--member_hostname <replaceable>MEMBER_HOSTNAME</replaceable></option></arg>
+		<arg><option>--member_personality <replaceable>MEMBER_PERSONALITY</replaceable></option></arg>
 	    </group>
 
-	    <group choice="opt">
+	    <group>
 		<arg choice="plain"><option>--domain <replaceable>DOMAIN</replaceable></option></arg>
 		<arg choice="plain"><option>--sandbox <replaceable>USER</replaceable>/<replaceable>SANDBOX</replaceable></option></arg>
 		<arg choice="plain"><option>--branch <replaceable>BRANCH</replaceable></option></arg>
 		<arg choice="plain"><option>--sandbox_author <replaceable>USER</replaceable></option></arg>
 	    </group>
 
-	    <group choice="opt">
-		<arg choice="opt"><option>--cluster <replaceable>CLUSTER</replaceable></option></arg>
-		<arg choice="opt"><option>--metacluster <replaceable>METACLUSTER</replaceable></option></arg>
-		<arg choice="opt"><option>--esx_metacluster <replaceable>METACLUSTER</replaceable></option></arg>
-		<arg choice="opt"><option>--esx_virtual_machine <replaceable>ESX_VIRTUAL_MACHINE</replaceable></option></arg>
-		<arg choice="opt"><option>--esx_guest <replaceable>ESX_GUEST</replaceable></option></arg>
-		<arg choice="opt"><option>--service <replaceable>SERVICE</replaceable></option></arg>
-		<arg choice="opt"><option>--instance <replaceable>INSTANCE</replaceable></option></arg>
-		<arg choice="opt"><option>--share <replaceable>SHARE</replaceable></option></arg>
-		<arg choice="opt"><option>--esx_share <replaceable>SHARE</replaceable></option></arg>
-		<arg choice="opt"><option>--capacity_override</option></arg>
-		<arg choice="opt"><option>--esx_switch <replaceable>ESX_SWITCH</replaceable></option></arg>
+	    <group>
+		<arg><option>--cluster <replaceable>CLUSTER</replaceable></option></arg>
+		<arg><option>--metacluster <replaceable>METACLUSTER</replaceable></option></arg>
+		<arg><option>--esx_metacluster <replaceable>METACLUSTER</replaceable></option></arg>
+		<arg><option>--esx_virtual_machine <replaceable>ESX_VIRTUAL_MACHINE</replaceable></option></arg>
+		<arg><option>--esx_guest <replaceable>ESX_GUEST</replaceable></option></arg>
+		<arg><option>--service <replaceable>SERVICE</replaceable></option></arg>
+		<arg><option>--instance <replaceable>INSTANCE</replaceable></option></arg>
+		<arg><option>--share <replaceable>SHARE</replaceable></option></arg>
+		<arg><option>--esx_share <replaceable>SHARE</replaceable></option></arg>
+		<arg><option>--capacity_override</option></arg>
+		<arg><option>--esx_switch <replaceable>ESX_SWITCH</replaceable></option></arg>
 	    </group>
-	    <group choice="opt">
-		<arg choice="opt"><option>--fullinfo</option></arg>
+	    <group>
+		<arg><option>--fullinfo</option></arg>
 	    </group>
 	    <group>
 		<synopfragmentref linkend="cluster-location-options">cluster location options</synopfragmentref>
-		<arg choice="opt"><option>--cluster_exact_location</option></arg>
+		<arg><option>--cluster_exact_location</option></arg>
 	    </group>
 	    <group>
 		<synopfragmentref linkend="member-location-options">member location options</synopfragmentref>
-		<arg choice="opt"><option>--member_exact_location</option></arg>
+		<arg><option>--member_exact_location</option></arg>
 	    </group>
 	    <xi:include href="../common/cluster_location_options.xml"/>
 	    <xi:include href="../common/member_location_options.xml"/>

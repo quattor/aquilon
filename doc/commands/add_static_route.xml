@@ -36,14 +36,14 @@
 	        <arg choice="plain"><option>--gateway <replaceable>GW</replaceable></option></arg>
 	        <arg choice="plain"><option>--networkip <replaceable>NETIP</replaceable></option></arg>
 	    </group>
-	    <group choice="opt">
+	    <group>
 		<arg choice="plain"><option>--personality <replaceable>PERS</replaceable></option></arg>
-		<arg choice="opt"><option>--archetype <replaceable>ARCH</replaceable></option></arg>
-	        <arg choice="opt"><option>--justification <replaceable>REASON</replaceable></option></arg>
-	        <arg choice="opt"><option>--reason <replaceable>REASON</replaceable></option></arg>
+		<arg><option>--archetype <replaceable>ARCH</replaceable></option></arg>
+	        <arg><option>--justification <replaceable>REASON</replaceable></option></arg>
+	        <arg><option>--reason <replaceable>REASON</replaceable></option></arg>
 	    </group>
-	    <arg choice="opt"><option>--network_environment <replaceable>NETENV</replaceable></option></arg>
-	    <arg choice="opt"><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
+	    <arg><option>--network_environment <replaceable>NETENV</replaceable></option></arg>
+	    <arg><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
 	    <xi:include href="../common/global_options.xml"/>
 	</cmdsynopsis>
     </refsynopsisdiv>

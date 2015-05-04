@@ -27,9 +27,9 @@
 	    <group>
 		<synopfragmentref linkend="global-options">Global options</synopfragmentref>
 	    </group>
-	    <arg choice="opt"><option>--building <replaceable>BUILDING</replaceable></option></arg>
-	    <arg choice="opt"><option>--network_environment <replaceable>ENV</replaceable></option></arg>
-	    <arg choice="opt"><option>--fullinfo</option></arg>
+	    <arg><option>--building <replaceable>BUILDING</replaceable></option></arg>
+	    <arg><option>--network_environment <replaceable>ENV</replaceable></option></arg>
+	    <arg><option>--fullinfo</option></arg>
 	    <xi:include href="../common/global_options.xml"/>
 	</cmdsynopsis>
     </refsynopsisdiv>

@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <synopfragment xml:id="location-options" xmlns="http://docbook.org/ns/docbook">
-    <group choice="opt">
+    <group>
     <arg choice="plain"><option>--organization <replaceable>ORGANIZATION</replaceable></option></arg>
     <arg choice="plain"><option>--hub <replaceable>HUB</replaceable></option></arg>
     <arg choice="plain"><option>--continent <replaceable>CONTINENT</replaceable></option></arg>

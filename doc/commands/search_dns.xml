@@ -27,31 +27,31 @@
 	    <group>
 		<synopfragmentref linkend="global-options">Global options</synopfragmentref>
 	    </group>
-	    <arg choice="opt"><option>--fqdn <replaceable>FQDN</replaceable></option></arg>
-	    <arg choice="opt"><option>--shortname <replaceable>NAME</replaceable></option></arg>
-	    <arg choice="opt"><option>--dns_domain <replaceable>DOMAIN</replaceable></option></arg>
-	    <arg choice="opt"><option>--record_type <replaceable>RRTYPE</replaceable></option></arg>
-	    <arg choice="opt"><option>--ip <replaceable>IPADDR</replaceable></option></arg>
-	    <arg choice="opt"><option>--network <replaceable>NAME</replaceable></option></arg>
-	    <arg choice="opt"><option>--target <replaceable>FQDN</replaceable></option></arg>
-	    <arg choice="opt"><option>--target_domain <replaceable>DOMAIN</replaceable></option></arg>
-	    <arg choice="opt"><option>--reverse_ptr <replaceable>FQDN</replaceable></option></arg>
-	    <group choice="opt">
+	    <arg><option>--fqdn <replaceable>FQDN</replaceable></option></arg>
+	    <arg><option>--shortname <replaceable>NAME</replaceable></option></arg>
+	    <arg><option>--dns_domain <replaceable>DOMAIN</replaceable></option></arg>
+	    <arg><option>--record_type <replaceable>RRTYPE</replaceable></option></arg>
+	    <arg><option>--ip <replaceable>IPADDR</replaceable></option></arg>
+	    <arg><option>--network <replaceable>NAME</replaceable></option></arg>
+	    <arg><option>--target <replaceable>FQDN</replaceable></option></arg>
+	    <arg><option>--target_domain <replaceable>DOMAIN</replaceable></option></arg>
+	    <arg><option>--reverse_ptr <replaceable>FQDN</replaceable></option></arg>
+	    <group>
 		<arg choice="plain"><option>--primary_name</option></arg>
 		<arg choice="plain"><option>--noprimary_name</option></arg>
 	    </group>
-	    <group choice="opt">
+	    <group>
 		<arg choice="plain"><option>--used</option></arg>
 		<arg choice="plain"><option>--unused</option></arg>
 	    </group>
-	    <group choice="opt">
+	    <group>
 		<arg choice="plain"><option>--reverse_override</option></arg>
 		<arg choice="plain"><option>--noreverse_override</option></arg>
 	    </group>
-	    <arg choice="opt"><option>--dns_environment <replaceable>DNSENV</replaceable></option></arg>
-	    <arg choice="opt"><option>--network_environment <replaceable>NETENV</replaceable></option></arg>
-	    <arg choice="opt"><option>--target_environment <replaceable>DNSENV</replaceable></option></arg>
-	    <arg choice="opt"><option>--fullinfo</option></arg>
+	    <arg><option>--dns_environment <replaceable>DNSENV</replaceable></option></arg>
+	    <arg><option>--network_environment <replaceable>NETENV</replaceable></option></arg>
+	    <arg><option>--target_environment <replaceable>DNSENV</replaceable></option></arg>
+	    <arg><option>--fullinfo</option></arg>
 	    <xi:include href="../common/global_options.xml"/>
 	</cmdsynopsis>
     </refsynopsisdiv>

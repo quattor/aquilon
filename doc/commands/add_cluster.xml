@@ -38,13 +38,13 @@
 	    <group choice="req">
 		<synopfragmentref linkend="location-options">Location options</synopfragmentref>
 	    </group>
-	    <arg choice="opt"><option>--maint_threshold <replaceable>THRESHOLD</replaceable></option></arg>
-	    <arg choice="opt"><option>--max_members <replaceable>LIMIT</replaceable></option></arg>
-	    <arg choice="opt"><option>--buildstatus <replaceable>STATUS</replaceable></option></arg>
-	    <arg choice="opt"><option>--metacluster <replaceable>METACLUSTER</replaceable></option></arg>
-	    <arg choice="opt"><option>--vm_to_host_ratio <replaceable>VM_COUNT</replaceable>:<replaceable>HOST_COUNT</replaceable></option></arg>
-	    <arg choice="opt"><option>--switch <replaceable>SWITCH</replaceable></option></arg>
-	    <arg choice="opt"><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
+	    <arg><option>--maint_threshold <replaceable>THRESHOLD</replaceable></option></arg>
+	    <arg><option>--max_members <replaceable>LIMIT</replaceable></option></arg>
+	    <arg><option>--buildstatus <replaceable>STATUS</replaceable></option></arg>
+	    <arg><option>--metacluster <replaceable>METACLUSTER</replaceable></option></arg>
+	    <arg><option>--vm_to_host_ratio <replaceable>VM_COUNT</replaceable>:<replaceable>HOST_COUNT</replaceable></option></arg>
+	    <arg><option>--switch <replaceable>SWITCH</replaceable></option></arg>
+	    <arg><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
 	    <xi:include href="../common/global_options.xml"/>
 	    <xi:include href="../common/location_options.xml"/>
 	</cmdsynopsis>

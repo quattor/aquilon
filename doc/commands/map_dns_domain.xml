@@ -28,8 +28,8 @@
 		<synopfragmentref linkend="global-options">Global options</synopfragmentref>
 	    </group>
 	    <arg choice="plain"><option>--dns_domain <replaceable>DOMAIN</replaceable></option></arg>
-	    <arg choice="opt"><option>--position <replaceable>POSITION</replaceable></option></arg>
-	    <arg choice="opt"><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
+	    <arg><option>--position <replaceable>POSITION</replaceable></option></arg>
+	    <arg><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
 	    <group>
 		<synopfragmentref linkend="location-options">Location options</synopfragmentref>
 	    </group>
