@@ -487,6 +487,16 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
                          "ut01ga2s01.aqd-unittest.ms.com port 1 [",
                          command)
 
+    def test_323_verify_show_ut11s01p1_proto(self):
+        command = ["show_machine","--machine", "ut11s01p1", "--format", "proto"]
+        machine = self.protobuftest(command, expect=1)[0]
+        ifaces = dict((iface.device, iface) for iface in machine.interfaces)
+        self.assertIn("eth1", ifaces)
+        self.assertEqual(ifaces["eth1"].port_group_name, "storage-v701")
+        # There's no detailed information for phys machines
+        self.assertEqual(ifaces["eth1"].port_group_usage, "")
+        self.assertEqual(ifaces["eth1"].port_group_tag, 0)
+
     def test_325_verify_cat_ut11s01p1(self):
         command = "cat --machine ut11s01p1"
         out = self.commandtest(command.split(" "))

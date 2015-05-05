@@ -129,11 +129,21 @@ class InterfaceFormatter(ObjectFormatter):
 
     def fill_proto(self, interface, skeleton, embedded=True,
                    indirect_attrs=True):
+        skeleton.bootable = interface.bootable
+
         if interface.mac:
             skeleton.mac = str(interface.mac)
+
         if interface.bus_address:
             skeleton.bus_address = str(interface.bus_address)
-        skeleton.bootable = interface.bootable
+
+        if interface.port_group:
+            skeleton.port_group_usage = interface.port_group.usage
+            skeleton.port_group_tag = interface.port_group.network_tag
+            skeleton.port_group_name = interface.port_group.legacy_vlan.port_group
+        elif interface.port_group_name:
+            skeleton.port_group_name = interface.port_group_name
+
         self.redirect_proto(interface.model, skeleton.model)
 
 ObjectFormatter.handlers[Interface] = InterfaceFormatter()
