@@ -15,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from aquilon.exceptions_ import ArgumentError, IncompleteError
+from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import ServiceAddress
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.dns import delete_dns_record
@@ -49,7 +49,8 @@ class CommandDelServiceAddress(BrokerCommand):
 
         dsdb_runner = DSDBRunner(logger=logger)
 
-        holder_plenary = Plenary.get_plenary(holder.holder_object, logger=logger)
+        holder_plenary = Plenary.get_plenary(holder.holder_object,
+                                             logger=logger)
         remove_plenary = Plenary.get_plenary(dbsrv, logger=logger)
 
         holder.resources.remove(dbsrv)
@@ -63,11 +64,7 @@ class CommandDelServiceAddress(BrokerCommand):
             holder_plenary.stash()
 
             try:
-                try:
-                    holder_plenary.write(locked=True)
-                except IncompleteError:
-                    holder_plenary.remove(locked=True)
-
+                holder_plenary.write(locked=True)
                 remove_plenary.remove(locked=True)
 
                 if not keep_dns:

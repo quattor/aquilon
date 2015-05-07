@@ -39,12 +39,15 @@ class PlenaryMetaCluster(PlenaryCollection):
     """
     A facade for the variety of PlenaryMetaCluster subsidiary files
     """
-    def __init__(self, dbcluster, logger=LOGGER):
-        super(PlenaryMetaCluster, self).__init__(logger=logger)
+    def __init__(self, dbcluster, logger=LOGGER, allow_incomplete=True):
+        super(PlenaryMetaCluster, self).__init__(logger=logger,
+                                                 allow_incomplete=allow_incomplete)
 
         self.dbobj = dbcluster
-        self.append(PlenaryMetaClusterObject.get_plenary(dbcluster))
-        self.append(PlenaryMetaClusterData.get_plenary(dbcluster))
+        self.append(PlenaryMetaClusterObject.get_plenary(dbcluster,
+                                                         allow_incomplete=allow_incomplete))
+        self.append(PlenaryMetaClusterData.get_plenary(dbcluster,
+                                                       allow_incomplete=allow_incomplete))
 
 
 class PlenaryMetaClusterData(StructurePlenary):

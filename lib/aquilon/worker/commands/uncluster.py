@@ -15,12 +15,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from aquilon.exceptions_ import ArgumentError, IncompleteError
+from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Cluster, Personality
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.host import hostname_to_host
-from aquilon.worker.locks import CompileKey
-from aquilon.worker.templates.base import Plenary
+from aquilon.worker.templates.base import Plenary, PlenaryCollection
 
 
 class CommandUncluster(BrokerCommand):
@@ -58,17 +57,10 @@ class CommandUncluster(BrokerCommand):
         session.flush()
         session.expire(dbhost, ['_cluster'])
 
-        host_plenary = Plenary.get_plenary(dbhost, logger=logger)
-        cluster_plenary = Plenary.get_plenary(dbcluster, logger=logger)
-        with CompileKey.merge([host_plenary.get_key(),
-                               cluster_plenary.get_key()]):
-            try:
-                cluster_plenary.write(locked=True)
-                try:
-                    host_plenary.write(locked=True)
-                except IncompleteError:
-                    host_plenary.remove(locked=True)
-            except:
-                cluster_plenary.restore_stash()
-                host_plenary.restore_stash()
-                raise
+        plenaries = PlenaryCollection(logger=logger)
+        plenaries.append(Plenary.get_plenary(dbhost))
+        plenaries.append(Plenary.get_plenary(dbcluster))
+
+        plenaries.write()
+
+        return

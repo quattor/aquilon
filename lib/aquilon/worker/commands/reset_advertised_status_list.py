@@ -50,7 +50,8 @@ class CommandResetAdvertisedStatusList(BrokerCommand):
         plenaries = PlenaryCollection(logger=logger)
         for dbhost in dbhosts:
             dbhost.advertise_status = False
-            plenaries.append(Plenary.get_plenary(dbhost))
+            plenaries.append(Plenary.get_plenary(dbhost,
+                                                 allow_incomplete=False))
 
         session.flush()
 

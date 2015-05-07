@@ -184,7 +184,9 @@ class Chooser(object):
 
         """
         self.verify_init()
-        self.prestash_primary()
+        # When modifying just one service, we allow the object to be left in an
+        # incomplete state
+        self.prestash_primary(allow_incomplete=True)
         if instance:
             self.logger.debug("Setting service %s instance %s",
                               service.name, instance.name)
@@ -260,7 +262,7 @@ class Chooser(object):
                           .format(si, parent))
         self.staging_services[dbservice] = [si]
 
-    def get_footprint(self, instance):
+    def get_footprint(self, instance):  # pylint: disable=W0613
         return 1
 
     def instance_full(self, instance, max_clients, current_clients):
@@ -487,6 +489,9 @@ class Chooser(object):
                dbobj.sandbox_author_id != self.dbobj.sandbox_author_id:
                 continue
 
+            # Ignore IncompleteError for servers of service instances. It is
+            # debatable if this is the right thing to do, but it preserves the
+            # status quo, and can be revisited later.
             self.plenaries.append(Plenary.get_plenary(dbobj))
 
     def get_key(self):
@@ -496,9 +501,10 @@ class Chooser(object):
         self.plenaries.stash()
         self.plenaries.write(locked=locked)
 
-    def prestash_primary(self):
+    def prestash_primary(self, allow_incomplete=False):
         for dbobj in self.dbobj.all_objects():
-            self.plenaries.append(Plenary.get_plenary(dbobj))
+            self.plenaries.append(Plenary.get_plenary(dbobj,
+                                                      allow_incomplete=allow_incomplete))
 
             # This may be too much action at a distance... however, if
             # we are potentially re-writing a host plenary, it seems like

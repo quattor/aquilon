@@ -22,7 +22,7 @@ from aquilon.aqdb.model import (Archetype, HostLifecycle,
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.grn import lookup_grn
 from aquilon.worker.dbwrappers.host import hostname_to_host
-from aquilon.worker.templates import Plenary, TemplateDomain
+from aquilon.worker.templates import TemplateDomain
 from aquilon.worker.services import Chooser
 
 
@@ -107,16 +107,9 @@ class CommandMake(BrokerCommand):
 
         td = TemplateDomain(dbhost.branch, dbhost.sandbox_author, logger=logger)
 
-        host_plenary = Plenary.get_plenary(dbhost)
-
         with chooser.get_key():
             try:
-                # Do this separately, because it may raise an IncompleteError
-                try:
-                    host_plenary.write(locked=True)
-                    chooser.write_plenary_templates(locked=True)
-                except IncompleteError as err:
-                    raise ArgumentError(err)
+                chooser.write_plenary_templates(locked=True)
 
                 td.compile(session, only=chooser.plenaries.object_templates,
                            locked=True)

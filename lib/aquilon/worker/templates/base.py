@@ -24,7 +24,8 @@ import weakref
 
 from sqlalchemy.inspection import inspect
 
-from aquilon.exceptions_ import InternalError, IncompleteError, NotFoundException
+from aquilon.exceptions_ import (InternalError, IncompleteError,
+                                 NotFoundException, ArgumentError)
 from aquilon.config import Config
 from aquilon.aqdb.model import Base, Sandbox, CompileableMixin
 from aquilon.worker.locks import lock_queue, CompileKey, NoLockKey
@@ -63,7 +64,7 @@ class Plenary(object):
         object
     """
 
-    def __init__(self, dbobj, logger=LOGGER):
+    def __init__(self, dbobj, logger=LOGGER, allow_incomplete=True):
         super(Plenary, self).__init__()
 
         if not dbobj:
@@ -85,6 +86,7 @@ class Plenary(object):
         self.stashed = False
         self.removed = False
         self.changed = False
+        self.allow_incomplete = allow_incomplete
 
     def __hash__(self):
         """Since equality is based on dbobj, just hash on it."""
@@ -144,7 +146,7 @@ class Plenary(object):
         """
         pass
 
-    def get_key(self, exclusive=True):
+    def get_key(self, exclusive=True):  # pylint: disable=W0613
         return NoLockKey(logger=self.logger)
 
     def _generate_content(self):
@@ -178,9 +180,6 @@ class Plenary(object):
            not self.dbobj.archetype.is_compileable:
             return 0
 
-        # This is a hack to handle the case when the DB object has been deleted,
-        # but a plenary instance still references it (probably buried inside a
-        # PlenaryCollection).
         if isinstance(self.dbobj, Base):
             state = inspect(self.dbobj)
             if state.deleted:
@@ -194,7 +193,15 @@ class Plenary(object):
 
             self.stash()
 
-            content = self._generate_content()
+            try:
+                content = self._generate_content()
+            except IncompleteError as err:
+                self.remove(locked=True)
+                if self.allow_incomplete:
+                    self.logger.client_info("Warning: %s", err)
+                    return 0
+                else:
+                    raise
 
             if self.old_content == content and not self.removed:
                 # optimise out the write (leaving the mtime good for ant)
@@ -245,7 +252,7 @@ class Plenary(object):
             # Read has failed, which shouldn't happen unless there is a problem
             raise int_error(e)
 
-    def remove(self, locked=False, remove_profile=False):
+    def remove(self, locked=False, remove_profile=False):  # pylint: disable=W0613
         """
         remove this plenary template
         """
@@ -327,7 +334,7 @@ class Plenary(object):
         self.changed = False
 
     @classmethod
-    def get_plenary(cls, dbobj, logger=LOGGER):
+    def get_plenary(cls, dbobj, logger=LOGGER, allow_incomplete=True):
         if cls == Plenary:
             if dbobj.__class__ not in Plenary.handlers:
                 raise InternalError("Class %s does not have a plenary handler" %
@@ -343,7 +350,8 @@ class Plenary(object):
         try:
             return _mylocal.plenaries[key]
         except KeyError:
-            plenary = handler(dbobj, logger=logger)
+            plenary = handler(dbobj, logger=logger,
+                              allow_incomplete=allow_incomplete)
             _mylocal.plenaries[key] = plenary
             return plenary
 
@@ -364,12 +372,12 @@ class ObjectPlenary(Plenary):
     # is to be removed
     cleanup_extensions = (".dep", ".xml", ".xml.gz", ".json", ".json.gz")
 
-    def __init__(self, dbobj=None, logger=LOGGER):
+    def __init__(self, dbobj=None, **kwargs):
         if not dbobj or not hasattr(dbobj, "branch"):
             raise InternalError("Plenaries meant to be compiled need a DB "
                                 "object that has a branch; got: %r" % dbobj)
 
-        super(ObjectPlenary, self).__init__(dbobj, logger)
+        super(ObjectPlenary, self).__init__(dbobj, **kwargs)
 
         self.old_name = self.template_name(dbobj)
         self.old_branch = dbobj.branch.name
@@ -489,7 +497,7 @@ class PlenaryCollection(object):
     group that needs to be written.
 
     """
-    def __init__(self, logger=LOGGER):
+    def __init__(self, logger=LOGGER, allow_incomplete=True):  # pylint: disable=W0613
         super(PlenaryCollection, self).__init__()
 
         self.plenaries = []
@@ -559,17 +567,18 @@ class PlenaryCollection(object):
         # the same restore logic.
         self.stash()
         key = None
+        errors = []
         try:
             if not locked:
                 key = self.get_key()
                 lock_queue.acquire(key)
             for plen in self.plenaries:
-                # IncompleteError is almost pointless in this context, but
-                # it has the nice side effect of not updating the total.
                 try:
                     total += plen.write(locked=True)
                 except IncompleteError as err:
-                    self.logger.client_info("Warning: %s" % err)
+                    errors.append(str(err))
+            if errors:
+                raise ArgumentError("\n".join(errors))
         except:
             if not locked:
                 self.restore_stash()

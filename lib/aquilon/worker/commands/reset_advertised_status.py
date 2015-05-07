@@ -16,10 +16,10 @@
 # limitations under the License.
 """Contains the logic for `aq reset advertised status --hostname`."""
 
-from aquilon.exceptions_ import ArgumentError, IncompleteError
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.exceptions_ import ArgumentError
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.host import hostname_to_host
-from aquilon.worker.templates import Plenary, TemplateDomain
+from aquilon.worker.templates import Plenary, PlenaryCollection, TemplateDomain
 
 
 class CommandResetAdvertisedStatus(BrokerCommand):
@@ -40,17 +40,15 @@ class CommandResetAdvertisedStatus(BrokerCommand):
         session.flush()
 
         td = TemplateDomain(dbhost.branch, dbhost.sandbox_author, logger=logger)
-        plenary = Plenary.get_plenary(dbhost, logger=logger)
+        plenaries = PlenaryCollection(logger=logger)
+        plenaries.append(Plenary.get_plenary(dbhost, allow_incomplete=False))
         # Force a host lock as pan might overwrite the profile...
-        with plenary.get_key():
+        with plenaries.get_key():
             try:
-                plenary.write(locked=True)
-                td.compile(session, only=plenary.object_templates, locked=True)
-            except IncompleteError:
-                raise ArgumentError("Run aq make for host %s first." %
-                                    dbhost.fqdn)
+                plenaries.write(locked=True)
+                td.compile(session, only=plenaries.object_templates, locked=True)
             except:
-                plenary.restore_stash()
+                plenaries.restore_stash()
                 raise
 
         return

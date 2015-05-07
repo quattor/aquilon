@@ -17,14 +17,14 @@
 """Contains the logic for `aq add interface address`."""
 
 from aquilon.utils import validate_nlist_key
-from aquilon.exceptions_ import ArgumentError, IncompleteError, ProcessException
+from aquilon.exceptions_ import ArgumentError, ProcessException
 from aquilon.aqdb.model import HardwareEntity, NetworkEnvironment, Interface
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.dns import grab_address
 from aquilon.worker.dbwrappers.interface import (generate_ip,
                                                  assign_address)
 from aquilon.worker.processes import DSDBRunner
-from aquilon.worker.templates import Plenary
+from aquilon.worker.templates import Plenary, PlenaryCollection
 
 
 class CommandAddInterfaceAddress(BrokerCommand):
@@ -136,17 +136,12 @@ class CommandAddInterfaceAddress(BrokerCommand):
 
         dbhost = getattr(dbhw_ent, "host", None)
         if dbhost:
-            plenary_info = Plenary.get_plenary(dbhost, logger=logger)
-            with plenary_info.get_key():
+            plenaries = PlenaryCollection(logger=logger)
+            plenaries.append(Plenary.get_plenary(dbhost))
+            with plenaries.get_key():
+                plenaries.stash()
                 try:
-                    try:
-                        plenary_info.write(locked=True)
-                    except IncompleteError:
-                        # FIXME: if this command is used after "add host" but
-                        # before "make", then writing out the template will fail
-                        # due to required services not being assigned. Ignore
-                        # this error for now.
-                        plenary_info.restore_stash()
+                    plenaries.write(locked=True)
 
                     dsdb_runner = DSDBRunner(logger=logger)
                     if dbhost.archetype.name == 'aurora':
@@ -161,7 +156,7 @@ class CommandAddInterfaceAddress(BrokerCommand):
                         dsdb_runner.update_host(dbhw_ent, oldinfo)
                         dsdb_runner.commit_or_rollback("Could not add host to DSDB")
                 except:
-                    plenary_info.restore_stash()
+                    plenaries.restore_stash()
                     raise
         else:
             dsdb_runner = DSDBRunner(logger=logger)

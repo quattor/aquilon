@@ -17,13 +17,13 @@
 """Contains the logic for `aq del interface address`."""
 
 from aquilon.worker.broker import BrokerCommand
-from aquilon.exceptions_ import ArgumentError, IncompleteError
+from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import (HardwareEntity, Interface, AddressAssignment,
                                 DnsDomain, Fqdn, ARecord, NetworkEnvironment)
 from aquilon.worker.dbwrappers.dns import delete_dns_record
 from aquilon.worker.dbwrappers.service_instance import check_no_provided_service
 from aquilon.worker.processes import DSDBRunner
-from aquilon.worker.templates import Plenary
+from aquilon.worker.templates import Plenary, PlenaryCollection
 from aquilon.utils import first_of
 
 
@@ -118,22 +118,16 @@ class CommandDelInterfaceAddress(BrokerCommand):
 
         session.flush()
 
-        dbhost = getattr(dbhw_ent, "host", None)
-        if dbhost:
-            plenary_info = Plenary.get_plenary(dbhost, logger=logger)
-            with plenary_info.get_key():
+        if dbhw_ent.host:
+            plenaries = PlenaryCollection(logger=logger)
+            plenaries.append(Plenary.get_plenary(dbhw_ent.host))
+            with plenaries.get_key():
+                plenaries.stash()
                 try:
-                    try:
-                        plenary_info.write(locked=True)
-                    except IncompleteError:
-                        # FIXME: if this command is used after "add host" but
-                        # before "make", then writing out the template will fail
-                        # due to required services not being assigned. Ignore
-                        # this error for now.
-                        plenary_info.restore_stash()
+                    plenaries.write(locked=True)
 
                     dsdb_runner = DSDBRunner(logger=logger)
-                    if dbhost.archetype.name == 'aurora':
+                    if dbhw_ent.host.archetype.name == 'aurora':
                         logger.client_info("WARNING: removing IP %s from AQDB and "
                                            "*not* changing DSDB." % ip)
                     else:
@@ -148,7 +142,7 @@ class CommandDelInterfaceAddress(BrokerCommand):
 
                         dsdb_runner.commit_or_rollback("Could not add host to DSDB")
                 except:
-                    plenary_info.restore_stash()
+                    plenaries.restore_stash()
                     raise
         else:
             dsdb_runner = DSDBRunner(logger=logger)

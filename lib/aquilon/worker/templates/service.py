@@ -33,13 +33,17 @@ class PlenaryService(PlenaryCollection):
     """
     A facade for the variety of PlenaryService subsidiary files
     """
-    def __init__(self, dbservice, logger=LOGGER):
-        super(PlenaryService, self).__init__(logger=logger)
+    def __init__(self, dbservice, logger=LOGGER, allow_incomplete=True):
+        super(PlenaryService, self).__init__(logger=logger,
+                                             allow_incomplete=allow_incomplete)
 
         self.dbobj = dbservice
-        self.append(PlenaryServiceToplevel.get_plenary(dbservice))
-        self.append(PlenaryServiceClientDefault.get_plenary(dbservice))
-        self.append(PlenaryServiceServerDefault.get_plenary(dbservice))
+        self.append(PlenaryServiceToplevel.get_plenary(dbservice,
+                                                       allow_incomplete=allow_incomplete))
+        self.append(PlenaryServiceClientDefault.get_plenary(dbservice,
+                                                            allow_incomplete=allow_incomplete))
+        self.append(PlenaryServiceServerDefault.get_plenary(dbservice,
+                                                            allow_incomplete=allow_incomplete))
 
 
 Plenary.handlers[Service] = PlenaryService
@@ -120,14 +124,19 @@ class PlenaryServiceInstance(SIHelperMixin, PlenaryCollection):
     """
     A facade for the variety of PlenaryServiceInstance subsidiary files
     """
-    def __init__(self, dbinstance, logger=LOGGER):
-        super(PlenaryServiceInstance, self).__init__(logger=logger)
+    def __init__(self, dbinstance, logger=LOGGER, allow_incomplete=True):
+        super(PlenaryServiceInstance, self).__init__(logger=logger,
+                                                     allow_incomplete=allow_incomplete)
         self.dbobj = dbinstance
 
-        self.append(PlenaryServiceInstanceToplevel.get_plenary(dbinstance))
-        self.append(PlenaryServiceInstanceClientDefault.get_plenary(dbinstance))
-        self.append(PlenaryServiceInstanceServer.get_plenary(dbinstance))
-        self.append(PlenaryServiceInstanceServerDefault.get_plenary(dbinstance))
+        self.append(PlenaryServiceInstanceToplevel.get_plenary(dbinstance,
+                                                               allow_incomplete=allow_incomplete))
+        self.append(PlenaryServiceInstanceClientDefault.get_plenary(dbinstance,
+                                                                    allow_incomplete=allow_incomplete))
+        self.append(PlenaryServiceInstanceServer.get_plenary(dbinstance,
+                                                             allow_incomplete=allow_incomplete))
+        self.append(PlenaryServiceInstanceServerDefault.get_plenary(dbinstance,
+                                                                    allow_incomplete=allow_incomplete))
 
 Plenary.handlers[ServiceInstance] = PlenaryServiceInstance
 

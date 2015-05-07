@@ -48,8 +48,10 @@ class CommandChangeClusterStatus(BrokerCommand):
         session.flush()
 
         plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(Plenary.get_plenary(dbcluster))
-        plenaries.extend(map(Plenary.get_plenary, dbcluster.hosts))
+        plenaries.append(Plenary.get_plenary(dbcluster,
+                                             allow_incomplete=False))
+        plenaries.extend(Plenary.get_plenary(dbhost, allow_incomplete=False)
+                         for dbhost in dbcluster.hosts)
 
         td = TemplateDomain(dbcluster.branch, dbcluster.sandbox_author,
                             logger=logger)

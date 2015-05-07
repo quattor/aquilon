@@ -40,13 +40,17 @@ class PlenaryCluster(PlenaryCollection):
     """
     A facade for the variety of PlenaryCluster subsidiary files
     """
-    def __init__(self, dbcluster, logger=LOGGER):
-        super(PlenaryCluster, self).__init__(logger=logger)
+    def __init__(self, dbcluster, logger=LOGGER, allow_incomplete=True):
+        super(PlenaryCluster, self).__init__(logger=logger,
+                                             allow_incomplete=allow_incomplete)
 
         self.dbobj = dbcluster
-        self.append(PlenaryClusterObject.get_plenary(dbcluster))
-        self.append(PlenaryClusterData.get_plenary(dbcluster))
-        self.append(PlenaryClusterClient.get_plenary(dbcluster))
+        self.append(PlenaryClusterObject.get_plenary(dbcluster,
+                                                     allow_incomplete=allow_incomplete))
+        self.append(PlenaryClusterData.get_plenary(dbcluster,
+                                                   allow_incomplete=allow_incomplete))
+        self.append(PlenaryClusterClient.get_plenary(dbcluster,
+                                                     allow_incomplete=allow_incomplete))
 
 
 Plenary.handlers[Cluster] = PlenaryCluster
