@@ -37,6 +37,8 @@ class TestDelHost(VerifyNotificationsMixin, MachineTestMixin,
         command = "del host --hostname unittest02.one-nyp.ms.com"
         self.statustest(command.split(" "))
         self.dsdb_verify()
+        self.verify_buildfiles("unittest", "unittest02.one-nyp.ms.com",
+                               want_exist=False, command="del_host")
 
     def test_105_verify_del_unittest02(self):
         command = "show host --hostname unittest02.one-nyp.ms.com"

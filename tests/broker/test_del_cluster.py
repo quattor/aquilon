@@ -35,6 +35,8 @@ class TestDelCluster(TestBrokerCommand):
         self.successtest(command)
         self.check_plenary_gone("cluster", "utgrid1", "client",
                                 directory_gone=True)
+        self.verify_buildfiles("unittest", "clusters/utgrid1", want_exist=False,
+                               command="del_cluster")
 
     def test_105_verifydelutgrid1(self):
         command = ["show_cluster", "--cluster=utgrid1"]
