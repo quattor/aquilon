@@ -305,14 +305,19 @@ def write_file(filename, content, mode=None, compress=None,
 def remove_file(filename, cleanup_directory=False, logger=LOGGER):
     try:
         os.remove(filename)
+
+        if cleanup_directory:
+            try:
+                os.removedirs(os.path.dirname(filename))
+            except OSError:
+                pass
+
+        return True
     except OSError as e:
         if e.errno != errno.ENOENT:
             logger.info("Could not remove file '%s': %s", filename, e)
-    if cleanup_directory:
-        try:
-            os.removedirs(os.path.dirname(filename))
-        except OSError:
-            pass
+        else:
+            return False
 
 
 class ProgressReport(object):

@@ -72,8 +72,6 @@ class Plenary(object):
         self.dbobj = dbobj
         self.logger = logger
 
-        self.new_content = None
-
         # We may no longer be able to calculate this during remove()
         try:
             self.debug_name = str(dbobj.qualified_name)
@@ -146,12 +144,6 @@ class Plenary(object):
         """
         pass
 
-    def will_change(self):
-        self.stash()
-        if not self.new_content:
-            self.new_content = self._generate_content()
-        return self.old_content != self.new_content
-
     def get_key(self, exclusive=True):
         return NoLockKey(logger=self.logger)
 
@@ -188,16 +180,11 @@ class Plenary(object):
 
         # This is a hack to handle the case when the DB object has been deleted,
         # but a plenary instance still references it (probably buried inside a
-        # PlenaryCollection). Calling self.will_change() on such a plenary would
-        # fail, because the primary key is None, which is otherwise impossible.
+        # PlenaryCollection).
         if isinstance(self.dbobj, Base):
             state = inspect(self.dbobj)
             if state.deleted:
                 return 0
-
-        if not self.new_content:
-            self.new_content = self._generate_content()
-        content = self.new_content
 
         key = None
         try:
@@ -207,8 +194,9 @@ class Plenary(object):
 
             self.stash()
 
-            if self.old_content == content and \
-               not self.removed and not self.changed:
+            content = self._generate_content()
+
+            if self.old_content == content and not self.removed:
                 # optimise out the write (leaving the mtime good for ant)
                 # if nothing is actually changed
                 return 0
@@ -226,9 +214,10 @@ class Plenary(object):
 
             write_file(self.new_path, content, create_directory=True,
                        logger=self.logger)
-            self.removed = False
-            if self.old_content != content:
-                self.changed = True
+
+            self.changed = True
+            if self.new_path == self.old_path:
+                self.removed = False
         except Exception as e:
             if not locked:
                 self.restore_stash()
@@ -269,9 +258,9 @@ class Plenary(object):
             self.stash()
 
             self.logger.debug("Removing %r [%s]", self, self.old_path)
-            remove_file(self.old_path, cleanup_directory=True,
-                        logger=self.logger)
-            self.removed = True
+            if remove_file(self.old_path, cleanup_directory=True,
+                           logger=self.logger):
+                self.removed = True
         # Most of the error handling routines would restore_stash...
         # but there's no need here if the remove failed. :)
         finally:
@@ -314,9 +303,6 @@ class Plenary(object):
             self.logger.info("Attempt to restore plenary '%s' "
                              "without having saved state.", self.old_path)
             return
-        # Should this optimization be in use?
-        # if not self.changed and not self.removed:
-        #    return
 
         # If the plenary has moved, then we need to clean up the new location
         if self.new_path and self.new_path != self.old_path:
@@ -336,6 +322,9 @@ class Plenary(object):
             # batch, we want the next domain compile to recompile the hosts that
             # did not fail here. Otherwise, the domain compile would push out
             # the state that got reverted in the DB.
+
+        self.removed = False
+        self.changed = False
 
     @classmethod
     def get_plenary(cls, dbobj, logger=LOGGER):

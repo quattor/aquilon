@@ -310,18 +310,6 @@ class PlenaryHostObject(ObjectPlenary):
                                           logger=self.logger))
         return CompileKey.merge(keylist)
 
-    def will_change(self):
-        # Need to override to handle IncompleteError...
-        self.stash()
-        if not self.new_content:
-            try:
-                self.new_content = self._generate_content()
-            except IncompleteError:
-                # Attempting to have IncompleteError thrown later by
-                # not caching the return
-                return self.old_content is None
-        return self.old_content != self.new_content
-
     def body(self, lines):
         dbstage = self.dbobj.personality_stage
 
