@@ -212,6 +212,7 @@ class PlenaryClusterClient(Plenary):
     """
 
     prefix = "cluster"
+    ignore_compileable = True
 
     @classmethod
     def template_name(cls, dbcluster):

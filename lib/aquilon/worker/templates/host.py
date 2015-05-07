@@ -91,10 +91,6 @@ class PlenaryHost(PlenaryCollection):
         self.append(PlenaryHostData.get_plenary(dbhost))
 
     def write(self, locked=False):
-        # Don't bother writing plenary files non-compilable archetypes.
-        if not self.dbobj.archetype.is_compileable:
-            return 0
-
         # Standard PlenaryCollection swallows IncompleteError.  If/when
         # the Host plenaries no longer raise that error this override
         # should be removed.

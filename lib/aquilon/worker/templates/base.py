@@ -26,7 +26,7 @@ from sqlalchemy.inspection import inspect
 
 from aquilon.exceptions_ import InternalError, IncompleteError, NotFoundException
 from aquilon.config import Config
-from aquilon.aqdb.model import Base, Sandbox
+from aquilon.aqdb.model import Base, Sandbox, CompileableMixin
 from aquilon.worker.locks import lock_queue, CompileKey, NoLockKey
 from aquilon.worker.processes import build_mako_lookup
 from aquilon.worker.formats.formatters import ObjectFormatter
@@ -57,6 +57,11 @@ class Plenary(object):
 
     config = Config()
     TEMPLATE_EXTENSION = config.get("panc", "template_extension")
+
+    ignore_compileable = False
+    """ Force generating the plenary even if it belongs to a non-compileable
+        object
+    """
 
     def __init__(self, dbobj, logger=LOGGER):
         super(Plenary, self).__init__()
@@ -176,7 +181,8 @@ class Plenary(object):
 
         """
 
-        if self.template_type == "object" and \
+        if isinstance(self.dbobj, CompileableMixin) and \
+           not self.ignore_compileable and \
            not self.dbobj.archetype.is_compileable:
             return 0
 
