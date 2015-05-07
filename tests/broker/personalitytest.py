@@ -69,13 +69,14 @@ class PersonalityTestMixin(object):
 
     def create_personality(self, archetype, name, environment="dev",
                            grn="grn:/ms/ei/aquilon/unittest", staged=False,
-                           comments=None, maps=None, required=None):
+                           comments=None, maps=None, required=None,
+                           cluster_required=None):
         """ Create the given personality with reasonable defaults. """
 
         command = ["add_personality", "--archetype", archetype,
                    "--personality", name, "--grn", grn,
                    "--host_environment", environment]
-        if archetype in clustered_archetypes:
+        if cluster_required or archetype in clustered_archetypes:
             command.append("--cluster_required")
         if staged:
             command.append("--staged")

@@ -280,6 +280,7 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
             'lemon-collector-oracle': {},
             'unixeng-test': {'staged': True},
             'nostage': {'staged': True},
+            'clustered': {'cluster_required': True},
             'infra': {'grn': 'grn:/ms/ei/aquilon/aqd',
                       'environment': 'infra'}
         }

@@ -727,6 +727,22 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
         self.matchoutput(out, "The number of hosts in list {0:d} can not be more "
                          "than {1:d}".format(len(hosts), hostlimit), command)
 
+    def test_2000_cluster_req(self):
+        command = ["reconfigure", "--hostname", "aquilon62.aqd-unittest.ms.com",
+                   "--personality", "clustered"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Personality aquilon/clustered requires cluster "
+                         "membership", command)
+
+    def test_2000_cluster_req_list(self):
+        hosts = ["aquilon62.aqd-unittest.ms.com"]
+        scratchfile = self.writescratch("cluster_req", "\n".join(hosts))
+        command = ["reconfigure", "--list", scratchfile,
+                   "--personality", "clustered"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Personality aquilon/clustered requires cluster "
+                         "membership", command)
+
     def test_3000_missing_required_params(self):
         command = ["reconfigure",
                    "--hostname", "aquilon62.aqd-unittest.ms.com",
