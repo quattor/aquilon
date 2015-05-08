@@ -101,7 +101,7 @@ class TestAddVirtualSwitch(TestBrokerCommand):
         vswitches = self.protobuftest(command)
         vswitch_names = set(msg.name for msg in vswitches)
         for vswitch_name in ("utvswitch", "utvswitch2"):
-            self.assertTrue(vswitch_name in vswitch_names)
+            self.assertIn(vswitch_name, vswitch_names)
 
     def test_130_add_camelcase(self):
         self.noouttest(["add_virtual_switch", "--virtual_switch", "CaMeLcAsE"])

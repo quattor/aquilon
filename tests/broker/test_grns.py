@@ -29,8 +29,8 @@ from broker.grntest import VerifyGrnsMixin
 class TestGrns(VerifyGrnsMixin, TestBrokerCommand):
 
     def test_100_add_test1(self):
-        self.assertTrue("grn:/ms/test1" not in self.grns)
-        self.assertTrue(1 in self.eon_ids)
+        self.assertNotIn("grn:/ms/test1", self.grns)
+        self.assertIn(1, self.eon_ids)
         command = ["add", "grn", "--grn", "grn:/ms/test1", "--eon_id", "1",
                    "--disabled"]
         self.noouttest(command)
@@ -49,7 +49,7 @@ class TestGrns(VerifyGrnsMixin, TestBrokerCommand):
         self.commandtest(command)
 
     def test_110_add_test2(self):
-        self.assertTrue("grn:/ms/test2" not in self.grns)
+        self.assertNotIn("grn:/ms/test2", self.grns)
         command = ["add", "grn", "--grn", "grn:/ms/test2",
                    "--eon_id", "123456789"]
         self.noouttest(command)

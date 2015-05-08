@@ -121,8 +121,7 @@ class TestAddDnsDomain(TestBrokerCommand):
         dns_domains = self.protobuftest(command.split(" "))
         dns_names = [d.name for d in dns_domains]
         for domain in ['ms.com', 'aqd-unittest.ms.com', 'aqd-unittest-ut-env.ms.com']:
-            self.assertTrue(domain in dns_names,
-                            "Domain %s not in list %s" % (domain, dns_names))
+            self.assertIn(domain, dns_names)
 
     def testaddtd1(self):
         self.dsdb_expect("add_dns_domain -domain_name td1.aqd-unittest.ms.com "

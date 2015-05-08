@@ -153,7 +153,7 @@ class TestAddMetaCluster(PersonalityTestMixin, TestBrokerCommand):
         mcs = self.protobuftest(command.split(" "))
         names = set(msg.name for msg in mcs)
         for name in ("utmc1", "utmc2", "utmc3"):
-            self.assertTrue(name in names)
+            self.assertIn(name, names)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddMetaCluster)

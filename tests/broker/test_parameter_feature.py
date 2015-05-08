@@ -275,28 +275,28 @@ class TestParameterFeature(TestBrokerCommand):
         for param in params:
             param_values[param.path] = param.value
 
-        self.assertTrue('features/hostfeature/teststring' in param_values)
+        self.assertIn('features/hostfeature/teststring', param_values)
         self.assertEqual(param_values['features/hostfeature/testdefault'],
                          'override')
         self.assertEqual(param_values['features/hostfeature/teststring'],
                          'host_feature')
-        self.assertTrue('features/hostfeature/testlist' in param_values)
+        self.assertIn('features/hostfeature/testlist', param_values)
         self.assertEqual(param_values['features/hostfeature/testlist'],
                          'host1,host2')
-        self.assertTrue('features/hardware/hardwarefeature/hs21-8853/teststring'
-                        in param_values)
+        self.assertIn('features/hardware/hardwarefeature/hs21-8853/teststring',
+                      param_values)
         self.assertEqual(param_values['features/hardware/hardwarefeature/hs21-8853/teststring'],
                          'hardware_feature')
-        self.assertTrue('features/hardware/hardwarefeature/hs21-8853/testlist'
-                        in param_values)
+        self.assertIn('features/hardware/hardwarefeature/hs21-8853/testlist',
+                      param_values)
         self.assertEqual(param_values['features/hardware/hardwarefeature/hs21-8853/testlist'],
                          'hardware1,hardware2')
-        self.assertTrue('features/interface/interfacefeature/eth0/teststring'
-                        in param_values)
+        self.assertIn('features/interface/interfacefeature/eth0/teststring',
+                      param_values)
         self.assertEqual(param_values['features/interface/interfacefeature/eth0/teststring'],
                          'interface_feature')
-        self.assertTrue('features/interface/interfacefeature/eth0/testlist' in
-                        param_values)
+        self.assertIn('features/interface/interfacefeature/eth0/testlist',
+                      param_values)
         self.assertEqual(param_values['features/interface/interfacefeature/eth0/testlist'],
                          'intf1,intf2')
 

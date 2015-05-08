@@ -665,7 +665,7 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
                          "test-windows-default-os.msad.ms.com",
                          "filer1.ms.com",
                          "f5test.aqd-unittest.ms.com"):
-            self.assertTrue(hostname in hostnames)
+            self.assertIn(hostname, hostnames)
 
     def test_800_verify_host_list(self):
         hosts = ["unittest15.aqd-unittest.ms.com",

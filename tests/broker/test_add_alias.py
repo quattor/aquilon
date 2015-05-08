@@ -239,7 +239,7 @@ class TestAddAlias(TestBrokerCommand):
         host = self.protobuftest(command, expect=1)[0]
         self.assertEqual(host.hostname, 'unittest20')
         interfaces = {iface.device: iface for iface in host.machine.interfaces}
-        self.assertTrue("eth0" in interfaces)
+        self.assertIn("eth0", interfaces)
         self.assertEqual(interfaces["eth0"].aliases[0], 'alias0.aqd-unittest.ms.com')
         self.assertEqual(interfaces["eth0"].aliases[1], 'alias01.aqd-unittest.ms.com')
         self.assertEqual(interfaces["eth0"].ip, str(ip))
@@ -274,7 +274,7 @@ class TestAddAlias(TestBrokerCommand):
         host = self.protobuftest(command, expect=1)[0]
         self.assertEqual(host.hostname, 'unittest20')
         interfaces = {iface.device: iface for iface in host.machine.interfaces}
-        self.assertTrue("eth1:e1" in interfaces)
+        self.assertIn("eth1:e1", interfaces)
         self.assertEqual(interfaces["eth1:e1"].aliases[0], 'alias1.aqd-unittest.ms.com')
         self.assertEqual(interfaces["eth1:e1"].aliases[1], 'alias11.aqd-unittest.ms.com')
         self.assertEqual(interfaces["eth1:e1"].ip, str(ip))

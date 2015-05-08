@@ -395,8 +395,7 @@ class TestAudit(TestBrokerCommand):
                          "Expected 2 arguments and got %s" % values)
         for host in [h.strip() for h in hosts]:
             if host:
-                self.assertTrue(host in values,
-                                "missing '%s' from '%s'" % (host, values))
+                self.assertIn(host, values)
 
     def test_910_long_list_arg(self):
         # Generate a really big command and verify all arguments arrive in the
@@ -416,8 +415,7 @@ class TestAudit(TestBrokerCommand):
                          "Expected %d arguments and got %d" %
                          (len(hosts), len(values)))
         for host in hosts:
-            self.assertTrue(host in values,
-                            "'%s' missing from '%s'" % (host, values))
+            self.assertIn(host, values)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAudit)
