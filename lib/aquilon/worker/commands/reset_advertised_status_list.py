@@ -60,7 +60,7 @@ class CommandResetAdvertisedStatusList(BrokerCommand):
             plenaries.stash()
             try:
                 plenaries.write(locked=True)
-                td.compile(session, only=compileable, locked=True)
+                td.compile(session, only=compileable)
             except:
                 plenaries.restore_stash()
                 raise

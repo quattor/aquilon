@@ -201,8 +201,7 @@ class CommandReconfigureList(BrokerCommand):
             try:
                 plenaries.write(locked=True)
 
-                td.compile(session, only=plenaries.object_templates,
-                           locked=True)
+                td.compile(session, only=plenaries.object_templates)
             except:
                 plenaries.restore_stash()
                 raise

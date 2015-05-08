@@ -111,8 +111,7 @@ class CommandMake(BrokerCommand):
             try:
                 chooser.write_plenary_templates(locked=True)
 
-                td.compile(session, only=chooser.plenaries.object_templates,
-                           locked=True)
+                td.compile(session, only=chooser.plenaries.object_templates)
             except:
                 chooser.restore_stash()
 

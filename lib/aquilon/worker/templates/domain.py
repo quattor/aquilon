@@ -28,7 +28,6 @@ from aquilon.aqdb.model import (Host, Cluster, Fqdn, DnsDomain, DnsRecord,
 from aquilon.worker.logger import CLIENT_INFO
 from aquilon.notify.index import trigger_notifications
 from aquilon.worker.processes import run_command
-from aquilon.worker.locks import lock_queue, CompileKey
 
 LOGGER = logging.getLogger(__name__)
 
@@ -82,14 +81,12 @@ class TemplateDomain(object):
 
         return dirs
 
-    def compile(self, session, only=None, locked=False,
-                panc_debug_include=None, panc_debug_exclude=None,
-                cleandeps=False):
+    def compile(self, session, only=None, panc_debug_include=None,
+                panc_debug_exclude=None, cleandeps=False):
         """The build directories are checked and constructed
-        if necessary, so no prior setup is required.  The compile may
-        take some time (current rate is 10 hosts per second, with a
-        couple of seconds of constant overhead), and the possibility
-        of blocking on the compile lock.
+        if necessary, so no prior setup is required.
+
+        The caller is responsible for locking.
 
         If the 'only' parameter is provided, then it should be a
         list or set containing the profiles that need to be compiled.
@@ -227,40 +224,27 @@ class TemplateDomain(object):
             # whether or not the property is defined at all.
             args.append("-Dclean.dep.files=%s" % cleandeps)
 
+        self.logger.info("starting compile")
         try:
-            if not locked:
-                if only and len(only) == 1:
-                    key = CompileKey(domain=self.domain.name,
-                                     profile=list(only)[0],
-                                     logger=self.logger)
-                else:
-                    key = CompileKey(domain=self.domain.name,
-                                     logger=self.logger)
-                lock_queue.acquire(key)
-            self.logger.info("starting compile")
-            try:
-                start_time = time.time()
-                run_command(args, env=panc_env, logger=self.logger,
-                            path=config.get("broker", "quattordir"),
-                            stream_level=CLIENT_INFO)
-                end_time = time.time()
-            except ProcessException:
-                raise ArgumentError("Compilation failed, see the compiler "
-                                    "messages for details.")
+            start_time = time.time()
+            run_command(args, env=panc_env, logger=self.logger,
+                        path=config.get("broker", "quattordir"),
+                        stream_level=CLIENT_INFO)
+            end_time = time.time()
+        except ProcessException:
+            raise ArgumentError("Compilation failed, see the compiler "
+                                "messages for details.")
 
-            # Ugly hack. The File.lastModified() method is supposed to have
-            # millisecond granularity, but the actual implementation in Java 7
-            # has 1 second granularity only. So if the compilation finishes in
-            # less than a second, and something modifies the data within that
-            # second, the panc dependency tracker will be unable to notice that
-            # the object is out of date and needs to be recompiled. Sleeping a
-            # bit works around the issue by making sure further modifications
-            # to the source templates will have a different second value than
-            # anything this compilation used.
-            if long(start_time) == long(end_time):
-                time.sleep(1)
-        finally:
-            if not locked:
-                lock_queue.release(key)
+        # Ugly hack. The File.lastModified() method is supposed to have
+        # millisecond granularity, but the actual implementation in Java 7
+        # has 1 second granularity only. So if the compilation finishes in
+        # less than a second, and something modifies the data within that
+        # second, the panc dependency tracker will be unable to notice that
+        # the object is out of date and needs to be recompiled. Sleeping a
+        # bit works around the issue by making sure further modifications
+        # to the source templates will have a different second value than
+        # anything this compilation used.
+        if long(start_time) == long(end_time):
+            time.sleep(1)
 
         trigger_notifications(config, self.logger, CLIENT_INFO)

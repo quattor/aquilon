@@ -77,6 +77,5 @@ class CommandCompile(BrokerCommand):
             dom.compile(session,
                         panc_debug_include=pancinclude,
                         panc_debug_exclude=pancexclude,
-                        cleandeps=cleandeps,
-                        locked=True)
+                        cleandeps=cleandeps)
         return

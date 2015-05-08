@@ -74,5 +74,5 @@ class CommandCompilePersonality(BrokerCommand):
             dom.compile(session, only=plenaries.object_templates,
                         panc_debug_include=pancinclude,
                         panc_debug_exclude=pancexclude,
-                        cleandeps=cleandeps, locked=True)
+                        cleandeps=cleandeps)
         return
