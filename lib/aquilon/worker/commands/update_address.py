@@ -21,7 +21,8 @@ from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.aqdb.model.network_environment import get_net_dns_env
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.dns import (set_reverse_ptr,
-                                           delete_target_if_needed)
+                                           delete_target_if_needed,
+                                           update_address)
 from aquilon.worker.processes import DSDBRunner
 
 
@@ -38,33 +39,8 @@ class CommandUpdateAddress(BrokerCommand):
         old_comments = dbdns_rec.comments
 
         if ip:
-            if dbdns_rec.hardware_entity:
-                raise ArgumentError("{0} is a primary name, and its IP address "
-                                    "cannot be changed.".format(dbdns_rec))
-
-            if dbdns_rec.assignments:
-                ifaces = ", ".join(sorted(addr.interface.qualified_name
-                                          for addr in dbdns_rec.assignments))
-                raise ArgumentError("{0} is already used by the following "
-                                    "interfaces, and its IP address cannot be "
-                                    "changed: {1!s}."
-                                    .format(dbdns_rec, ifaces))
-
             dbnetwork = get_net_id_from_ip(session, ip, dbnet_env)
-
-            q = session.query(ARecord)
-            q = q.filter_by(network=dbnetwork)
-            q = q.filter_by(ip=ip)
-            q = q.join(ARecord.fqdn)
-            q = q.filter_by(dns_environment=dbdns_env)
-            existing = q.first()
-            if existing:
-                raise ArgumentError("IP address {0!s} is already used by "
-                                    "{1:l}." .format(ip, existing))
-
-            dbdns_rec.network = dbnetwork
-            old_ip = dbdns_rec.ip
-            dbdns_rec.ip = ip
+            update_address(session, dbdns_rec, ip, dbnetwork)
 
         if reverse_ptr:
             old_reverse = dbdns_rec.reverse_ptr

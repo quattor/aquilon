@@ -328,6 +328,32 @@ def grab_address(session, fqdn, ip, network_environment=None,
     return (existing_record, newly_created)
 
 
+def update_address(session, dbdns_rec, ip, dbnetwork):
+    if dbdns_rec.hardware_entity:
+        raise ArgumentError("{0} is a primary name, and its IP address "
+                            "cannot be changed.".format(dbdns_rec))
+
+    if dbdns_rec.assignments:
+        ifaces = ", ".join(sorted(addr.interface.qualified_name
+                                  for addr in dbdns_rec.assignments))
+        raise ArgumentError("{0} is already used by the following "
+                            "interfaces, and its IP address cannot be "
+                            "changed: {1!s}."
+                            .format(dbdns_rec, ifaces))
+
+    q = session.query(ARecord)
+    q = q.filter_by(network=dbnetwork, ip=ip)
+    q = q.join(ARecord.fqdn)
+    q = q.filter_by(dns_environment=dbdns_rec.fqdn.dns_environment)
+    existing = q.first()
+    if existing:
+        raise ArgumentError("IP address {0!s} is already used by "
+                            "{1:l}." .format(ip, existing))
+
+    dbdns_rec.network = dbnetwork
+    dbdns_rec.ip = ip
+
+
 def create_target_if_needed(session, logger, target, dbdns_env):
     """
     Create FQDNs in restricted domains.
