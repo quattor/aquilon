@@ -29,7 +29,7 @@ class TestAdd10GigHardware(TestBrokerCommand):
 
     def test_000_addmachines(self):
         for i in range(0, 18):
-            cluster = "utecl%d" % (5 + (i / 3))
+            cluster = "utecl%d" % (5 + (i // 3))
             machine = "evm%d" % (10 + i)
             self.noouttest(["add", "machine", "--machine", machine,
                             "--cluster", cluster, "--model", "utmedium"])
@@ -114,7 +114,7 @@ class TestAdd10GigHardware(TestBrokerCommand):
 
     def test_130_adddisks(self):
         for i in range(0, 18):
-            share = "utecl%d_share" % (5 + (i / 3))
+            share = "utecl%d_share" % (5 + (i // 3))
             machine = "evm%d" % (10 + i)
             self.noouttest(["add", "disk", "--machine", machine,
                             "--disk", "sda", "--controller", "sata",
@@ -266,10 +266,10 @@ class TestAdd10GigHardware(TestBrokerCommand):
 
             if i < 9:
                 net_index = (i % 4)
-                usable_index = i / 4
+                usable_index = i // 4
             else:
                 net_index = ((i - 9) % 4) + 4
-                usable_index = (i - 9) / 4
+                usable_index = (i - 9) // 4
             ip = nets[net_index].usable[usable_index]
 
             # FIXME: the MAC check is fragile...
@@ -315,10 +315,10 @@ class TestAdd10GigHardware(TestBrokerCommand):
         for i in range(0, 8) + range(9, 17):
             if i < 9:
                 net_index = (i % 4)
-                usable_index = i / 4
+                usable_index = i // 4
             else:
                 net_index = ((i - 9) % 4) + 4
-                usable_index = (i - 9) / 4
+                usable_index = (i - 9) // 4
             hostname = "ivirt%d.aqd-unittest.ms.com" % (i + 1)
             ip = nets[net_index].usable[usable_index]
             command = "search host --hostname %s --ip %s" % (hostname, ip)
@@ -332,7 +332,7 @@ class TestAdd10GigHardware(TestBrokerCommand):
                 self.net["ut01ga2s02_v712"], self.net["ut01ga2s02_v713"])
         i = 16
         net_index = ((i - 9) % 4) + 4
-        usable_index = (i - 9) / 4
+        usable_index = (i - 9) // 4
         ip = nets[net_index].usable[usable_index]
         command = ["search", "audit", "--keyword",
                    "ivirt%d.aqd-unittest.ms.com" % (i + 1)]

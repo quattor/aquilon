@@ -32,36 +32,36 @@
 		<arg choice="plain"><option>--hostname <replaceable>HOST</replaceable></option></arg>
 	    </group>
 	    <arg choice="plain"><option>--interface <replaceable>IFACE</replaceable></option></arg>
-	    <arg choice="opt"><option>--rename_to <replaceable>NEW_IFACE</replaceable></option></arg>
-	    <arg choice="opt"><option>--mac <replaceable>MAC</replaceable></option></arg>
-	    <arg choice="opt"><option>--boot</option></arg>
-	    <group choice="opt">
+	    <arg><option>--rename_to <replaceable>NEW_IFACE</replaceable></option></arg>
+	    <arg><option>--mac <replaceable>MAC</replaceable></option></arg>
+	    <arg><option>--boot</option></arg>
+	    <group>
 		<arg choice="plain"><option>--default_route</option></arg>
 		<arg choice="plain"><option>--nodefault_route</option></arg>
 	    </group>
-	    <group choice="opt">
+	    <group>
 		<arg choice="plain"><option>--pg <replaceable>PG</replaceable></option></arg>
 		<arg choice="plain"><option>--autopg</option></arg>
 	    </group>
-	    <group choice="opt">
+	    <group>
 		<arg choice="plain"><option>--model <replaceable>MODEL</replaceable></option></arg>
-		<arg choice="opt"><option>--vendor <replaceable>VENDOR</replaceable></option></arg>
+		<arg><option>--vendor <replaceable>VENDOR</replaceable></option></arg>
 	    </group>
-	    <arg choice="opt"><option>--bus_address <replaceable>URI</replaceable></option></arg>
-	    <group choice="opt">
+	    <arg><option>--bus_address <replaceable>URI</replaceable></option></arg>
+	    <group>
 		<arg choice="plain"><option>--master <replaceable>IFACE</replaceable></option></arg>
 		<arg choice="plain"><option>--clear_master</option></arg>
 	    </group>
-	    <arg choice="opt"><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
+	    <arg><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
 	    <xi:include href="../common/global_options.xml"/>
 	</cmdsynopsis>
 	<cmdsynopsis>
 	    <command>aq update interface</command>
 	    <arg choice="plain"><option>--chassis <replaceable>CHASSIS</replaceable></option></arg>
 	    <arg choice="plain"><option>--interface <replaceable>IFACE</replaceable></option></arg>
-	    <arg choice="opt"><option>--rename_to <replaceable>NEW_IFACE</replaceable></option></arg>
-	    <arg choice="opt"><option>--mac <replaceable>MAC</replaceable></option></arg>
-	    <arg choice="opt"><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
+	    <arg><option>--rename_to <replaceable>NEW_IFACE</replaceable></option></arg>
+	    <arg><option>--mac <replaceable>MAC</replaceable></option></arg>
+	    <arg><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
 	</cmdsynopsis>
 	<cmdsynopsis>
 	    <command>aq add interface</command>
@@ -70,9 +70,9 @@
 		<arg choice="plain"><option>--switch <replaceable>NETDEV</replaceable></option></arg>
 	    </group>
 	    <arg choice="plain"><option>--interface <replaceable>IFACE</replaceable></option></arg>
-	    <arg choice="opt"><option>--mac <replaceable>MAC</replaceable></option></arg>
-	    <arg choice="opt"><option>--rename_to <replaceable>NEW_IFACE</replaceable></option></arg>
-	    <arg choice="opt"><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
+	    <arg><option>--mac <replaceable>MAC</replaceable></option></arg>
+	    <arg><option>--rename_to <replaceable>NEW_IFACE</replaceable></option></arg>
+	    <arg><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
 	</cmdsynopsis>
     </refsynopsisdiv>
 

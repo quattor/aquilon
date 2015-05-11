@@ -15,10 +15,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from sqlalchemy.sql import or_
+
 from aquilon.exceptions_ import (ArgumentError, InternalError,
                                  AuthorizationException, UnimplementedError)
 from aquilon.aqdb.model import (Feature, Archetype, Personality, Model, Domain,
-                                Host, Cluster)
+                                CompileableMixin)
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.commands.deploy import validate_justification
 from aquilon.worker.dbwrappers.feature import add_link, check_feature_template
@@ -133,20 +135,23 @@ class CommandBindFeature(BrokerCommand):
             dbpersonality = None
             dbarchetype = params["archetype"]
 
-        queries = []
-        for cls_ in (Host, Cluster):
-            q = session.query(Domain)
-            q = q.join(cls_)
-            if dbpersonality:
-                q = q.filter_by(personality=dbpersonality)
-            else:
-                q = q.join(Personality)
-                q = q.filter_by(archetype=dbarchetype)
-            queries.append(q)
+        filters = []
+        for cls_ in CompileableMixin.__subclasses__():
+            subq = session.query(cls_.branch_id)
+            subq = subq.distinct()
 
-        # This may look a bit strange, but will work without modification if the
-        # above code is extended to more than 2 classes
-        for dbdomain in queries.pop().union(*queries):
+            if dbpersonality:
+                subq = subq.filter_by(personality=dbpersonality)
+            else:
+                subq = subq.join(Personality)
+                subq = subq.filter_by(archetype=dbarchetype)
+            filters.append(Domain.id.in_(subq.subquery()))
+
+        q = session.query(Domain)
+        q = q.distinct()
+        q = q.filter(or_(*filters))
+
+        for dbdomain in q:
             check_feature_template(self.config, dbarchetype, dbfeature,
                                    dbdomain)
 

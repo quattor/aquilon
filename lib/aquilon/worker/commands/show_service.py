@@ -40,11 +40,15 @@ class CommandShowService(BrokerCommand):
         q = q.options(contains_eager('service'))
 
         if server:
+            self.deprecated_option("server", "Please use the search_service "
+                                   "command instead.", **arguments)
             dbserver = hostname_to_host(session, server)
             q = q.join(ServiceInstance.servers, aliased=True)
             q = q.filter_by(host=dbserver)
             q = q.reset_joinpoint()
         elif client:
+            self.deprecated_option("client", "Please use the search_service "
+                                   "command instead.", **arguments)
             dbclient = hostname_to_host(session, client)
             q = q.filter(ServiceInstance.clients.contains(dbclient))
 

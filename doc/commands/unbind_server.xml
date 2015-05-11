@@ -33,10 +33,10 @@
 		<arg choice="plain"><option>--all</option></arg>
 	    </group>
 	    <arg choice="plain"><option>--hostname <replaceable>HOST</replaceable></option></arg>
-	    <arg choice="opt"><option>--ip <replaceable>IPADDR</replaceable></option></arg>
-	    <arg choice="opt">
+	    <arg><option>--ip <replaceable>IPADDR</replaceable></option></arg>
+	    <arg>
 		<arg choice="plain"><option>--service_address <replaceable>NAME</replaceable></option></arg>
-		<arg choice="opt"><option>--resourcegroup <replaceable>GROUP</replaceable></option></arg>
+		<arg><option>--resourcegroup <replaceable>GROUP</replaceable></option></arg>
 	    </arg>
 	    <xi:include href="../common/global_options.xml"/>
 	</cmdsynopsis>
@@ -49,7 +49,7 @@
 	    </group>
 	    <arg choice="plain"><option>--cluster <replaceable>CLUSTER</replaceable></option></arg>
 	    <arg choice="plain"><option>--service_address <replaceable>NAME</replaceable></option></arg>
-	    <arg choice="opt"><option>--resourcegroup <replaceable>GROUP</replaceable></option></arg>
+	    <arg><option>--resourcegroup <replaceable>GROUP</replaceable></option></arg>
 	</cmdsynopsis>
 	<cmdsynopsis>
 	    <command>aq unbind server</command>

@@ -28,7 +28,7 @@
 		<synopfragmentref linkend="global-options">Global options</synopfragmentref>
 	    </group>
 	    <arg choice="plain"><option>--machine <replaceable>MACHINE</replaceable></option></arg>
-	    <arg choice="opt"><option>--generate</option></arg>
+	    <arg><option>--generate</option></arg>
 	    <xi:include href="../common/global_options.xml"/>
 	</cmdsynopsis>
 	<cmdsynopsis>
@@ -38,10 +38,10 @@
 		<arg choice="plain"><option>--cluster <replaceable>CLUSTER</replaceable></option></arg>
 		<arg choice="plain"><option>--metacluster <replaceable>METACLUSTER</replaceable></option></arg>
 	    </group>
-	    <arg choice="opt"><option>--data</option></arg>
-	    <arg choice="opt"><option>--client</option></arg>
-	    <arg choice="opt"><option>--resourcegroup <replaceable>GROUP</replaceable></option></arg>
-	    <group choice="opt">
+	    <arg><option>--data</option></arg>
+	    <arg><option>--client</option></arg>
+	    <arg><option>--resourcegroup <replaceable>GROUP</replaceable></option></arg>
+	    <group>
 		<arg choice="plain"><option>--application <replaceable>NAME</replaceable></option></arg>
 		<arg choice="plain"><option>--filesystem <replaceable>NAME</replaceable></option></arg>
 		<arg choice="plain"><option>--hostlink <replaceable>NAME</replaceable></option></arg>
@@ -52,20 +52,20 @@
 		<arg choice="plain"><option>--reboot_schedule <replaceable>NAME</replaceable></option></arg>
 		<arg choice="plain"><option>--virtual_machine <replaceable>NAME</replaceable></option></arg>
 	    </group>
-	    <arg choice="opt"><option>--generate</option></arg>
+	    <arg><option>--generate</option></arg>
 	</cmdsynopsis>
 	<cmdsynopsis>
 	    <command>aq cat</command>
 	    <arg choice="plain"><option>--city <replaceable>CITY</replaceable></option></arg>
-	    <arg choice="opt"><option>--generate</option></arg>
+	    <arg><option>--generate</option></arg>
 	</cmdsynopsis>
 	<cmdsynopsis>
 	    <command>aq cat</command>
 	    <arg choice="plain"><option>--service <replaceable>SERVICE</replaceable></option></arg>
-	    <arg choice="opt"><option>--instance <replaceable>INSTANCE</replaceable></option></arg>
-	    <arg choice="opt"><option>--server</option></arg>
-	    <arg choice="opt"><option>--default</option></arg>
-	    <arg choice="opt"><option>--generate</option></arg>
+	    <arg><option>--instance <replaceable>INSTANCE</replaceable></option></arg>
+	    <arg><option>--server</option></arg>
+	    <arg><option>--default</option></arg>
+	    <arg><option>--generate</option></arg>
 	</cmdsynopsis>
 	<cmdsynopsis>
 	    <command>aq cat</command>
@@ -73,22 +73,22 @@
 		<arg choice="plain"><option>--switch <replaceable>SWITCH</replaceable></option></arg>
 		<arg choice="plain"><option>--network_device <replaceable>NETDEV</replaceable></option></arg>
 	    </group>
-	    <arg choice="opt"><option>--generate</option></arg>
+	    <arg><option>--generate</option></arg>
 	</cmdsynopsis>
 	<cmdsynopsis>
 	    <command>aq cat</command>
 	    <arg choice="plain"><option>--personality <replaceable>PERSONALITY</replaceable></option></arg>
-	    <arg choice="opt"><option>--archetype <replaceable>ARCHETYPE</replaceable></option></arg>
-	    <arg choice="opt"><option>--pre_feature</option></arg>
-	    <arg choice="opt"><option>--post_feature</option></arg>
-	    <arg choice="opt"><option>--param_tmpl <replaceable>NAME</replaceable></option></arg>
-	    <arg choice="opt"><option>--generate</option></arg>
+	    <arg><option>--archetype <replaceable>ARCHETYPE</replaceable></option></arg>
+	    <arg><option>--pre_feature</option></arg>
+	    <arg><option>--post_feature</option></arg>
+	    <arg><option>--param_tmpl <replaceable>NAME</replaceable></option></arg>
+	    <arg><option>--generate</option></arg>
 	</cmdsynopsis>
 	<cmdsynopsis>
 	    <command>aq cat</command>
 	    <arg choice="plain"><option>--virtual_switch <replaceable>NAME</replaceable></option></arg>
 	    <arg choice="plain"><option>--data</option></arg>
-	    <arg choice="opt"><option>--generate</option></arg>
+	    <arg><option>--generate</option></arg>
 	</cmdsynopsis>
     </refsynopsisdiv>
 

@@ -33,14 +33,14 @@
 		<arg choice="plain"><option>--grn <replaceable>GRN</replaceable></option></arg>
 		<arg choice="plain"><option>--eon_id <replaceable>EON_ID</replaceable></option></arg>
 	    </group>
-	    <group choice="opt">
+	    <group>
 	         <arg choice="plain"><option>--cluster_required</option></arg>
 	         <arg choice="plain"><option>--nocluster_required</option></arg>
 	    </group>
-	    <arg choice="opt"><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
-	    <arg choice="opt"><option>--copy_from <replaceable>COPY_FROM</replaceable></option></arg>
-	    <arg choice="opt"><option>--host_environment <replaceable>HOSTENV</replaceable></option></arg>
-	    <group choice="opt">
+	    <arg><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
+	    <arg><option>--copy_from <replaceable>COPY_FROM</replaceable></option></arg>
+	    <arg><option>--host_environment <replaceable>HOSTENV</replaceable></option></arg>
+	    <group>
 	          <arg choice="plain"><option>--config_override</option></arg>
 	          <arg choice="plain"><option>--noconfig_override</option></arg>
 	    </group>

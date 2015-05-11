@@ -105,6 +105,10 @@ class CommandAddMachine(BrokerCommand):
             # FIXME: Are virtual machines allowed to be in a chassis?
             dbslot = session.query(ChassisSlot).filter_by(chassis=dbchassis,
                                                           slot_number=slot).first()
+            if dbslot and dbslot.machine:
+                raise ArgumentError("{0} slot {1} already has machine "
+                                    "{2}.".format(dbchassis, slot,
+                                                  dbslot.machine.label))
             if not dbslot:
                 dbslot = ChassisSlot(chassis=dbchassis, slot_number=slot)
             dbslot.machine = dbmachine

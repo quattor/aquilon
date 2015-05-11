@@ -146,16 +146,34 @@ class TestUpdateService(TestBrokerCommand):
         command = ["cat", "--service", "support-group",
                    "--instance", "ec-service", "--server"]
         out = self.commandtest(command)
+        self.matchclean(out, "clients", command)
+        self.matchclean(out, "unittest00.one-nyp.ms.com", command)
+        self.matchclean(out, "unittest02.one-nyp.ms.com", command)
+
+    def test_141_enable_clientlist(self):
+        command = ["update_service", "--service", "support-group",
+                   "--need_client_list"]
+        self.noouttest(command)
+
+    def test_142_check_clientlist_enabled(self):
+        command = ["cat", "--service", "support-group",
+                   "--instance", "ec-service", "--server"]
+        out = self.commandtest(command)
         self.searchoutput(out,
                           r'"clients" = list\(([^)]|\s)*"unittest00.one-nyp.ms.com"',
                           command)
 
-    def test_141_no_clientlist(self):
+    def test_142_verify_service(self):
+        command = ["show_service", "--service", "support-group"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Need Client List: True", command)
+
+    def test_143_no_clientlist(self):
         command = ["update_service", "--service", "support-group",
                    "--noneed_client_list"]
         self.noouttest(command)
 
-    def test_145_check_clientlist(self):
+    def test_144_check_clientlist_gone(self):
         command = ["cat", "--service", "support-group",
                    "--instance", "ec-service", "--server"]
         out = self.commandtest(command)
@@ -163,7 +181,7 @@ class TestUpdateService(TestBrokerCommand):
         self.matchclean(out, "unittest00.one-nyp.ms.com", command)
         self.matchclean(out, "unittest02.one-nyp.ms.com", command)
 
-    def test_145_verify_service(self):
+    def test_144_verify_service(self):
         command = ["show_service", "--service", "support-group"]
         out = self.commandtest(command)
         self.matchoutput(out, "Need Client List: False", command)

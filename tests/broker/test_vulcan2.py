@@ -122,7 +122,7 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
 
     def test_090_addmachines(self):
         for i in range(0, 3):
-            cluster = "utpgcl%d" % (i / 2)
+            cluster = "utpgcl%d" % (i // 2)
             machine = "utpgm%d" % i
 
             self.noouttest(["add", "machine", "--machine", machine,

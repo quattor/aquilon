@@ -43,8 +43,8 @@
 	    <arg choice="plain"><option>--hostlink <replaceable>NAME</replaceable></option></arg>
 	    <arg choice="plain"><option>--target <replaceable>PATH</replaceable></option></arg>
 	    <arg choice="plain"><option>--owner <replaceable>USER</replaceable></option></arg>
-	    <arg choice="opt"><option>--group <replaceable>GROUP</replaceable></option></arg>
-	    <arg choice="opt"><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
+	    <arg><option>--group <replaceable>GROUP</replaceable></option></arg>
+	    <arg><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
 	    <xi:include href="../common/global_options.xml"/>
 	</cmdsynopsis>
     </refsynopsisdiv>

@@ -28,47 +28,47 @@
                 <synopfragmentref linkend="global-options">Global options</synopfragmentref>
             </group>
             <group choice="req">
-		<arg choice="opt"><option>--hostname <replaceable>FQDN</replaceable></option></arg>
-		<arg choice="opt"><option>--machine <replaceable>LABEL</replaceable></option></arg>
-		<arg choice="opt"><option>--cpuname <replaceable>NAME</replaceable></option></arg>
-		<arg choice="opt"><option>--cpuvendor <replaceable>NAME</replaceable></option></arg>
-		<arg choice="opt"><option>--cpuspeed <replaceable>NUMBER</replaceable></option></arg>
-		<arg choice="opt"><option>--cpucount <replaceable>NUMBER</replaceable></option></arg>
-		<arg choice="opt"><option>--memory <replaceable>NUMBER</replaceable></option></arg>
-		<arg choice="opt"><option>--cluster <replaceable>NAME</replaceable></option></arg>
-		<arg choice="opt"><option>--metacluster <replaceable>NAME</replaceable></option></arg>
-		<arg choice="opt"><option>--vmhost <replaceable>FQFDN</replaceable></option></arg>
-		<arg choice="opt"><option>--model <replaceable>NAME</replaceable></option></arg>
-		<arg choice="opt"><option>--machine_type <replaceable>TYPE</replaceable></option></arg>
-		<arg choice="opt"><option>--vendor <replaceable>NAME</replaceable></option></arg>
-		<arg choice="opt"><option>--ip <replaceable>IP</replaceable></option></arg>
-		<arg choice="opt"><option>--networkip <replaceable>IP</replaceable></option></arg>
-		<arg choice="opt"><option>--network_environment <replaceable>ENV</replaceable></option></arg>
-		<arg choice="opt"><option>--mac <replaceable>MAC</replaceable></option></arg>
-		<arg choice="opt"><option>--interface_name <replaceable>NAME</replaceable></option></arg>
-		<arg choice="opt"><option>--interface_model <replaceable>NAME</replaceable></option></arg>
-		<arg choice="opt"><option>--interface_vendor <replaceable>NAME</replaceable></option></arg>
-		<arg choice="opt"><option>--interface_bus_address <replaceable>URI</replaceable></option></arg>
-		<arg choice="opt"><option>--pg <replaceable>PG</replaceable></option></arg>
-		<arg choice="opt"><option>--serial <replaceable>SERIAL</replaceable></option></arg>
-		<arg choice="opt"><option>--chassis <replaceable>FQDN</replaceable></option></arg>
-		<arg choice="opt"><option>--slot <replaceable>NUMBER</replaceable></option></arg>
-		<arg choice="opt"><option>--disk_name <replaceable>NAME</replaceable></option></arg>
-		<arg choice="opt"><option>--disk_size <replaceable>NUMBER</replaceable></option></arg>
-		<arg choice="opt"><option>--disk_controller <replaceable>NAME</replaceable></option></arg>
-		<arg choice="opt"><option>--disk_address <replaceable>[H:]C:T[:L]</replaceable></option></arg>
-		<arg choice="opt"><option>--disk_bus_address <replaceable>URI</replaceable></option></arg>
-		<arg choice="opt"><option>--disk_wwn <replaceable>WWN</replaceable></option></arg>
-		<group choice="opt">
+		<arg><option>--hostname <replaceable>FQDN</replaceable></option></arg>
+		<arg><option>--machine <replaceable>LABEL</replaceable></option></arg>
+		<arg><option>--cpuname <replaceable>NAME</replaceable></option></arg>
+		<arg><option>--cpuvendor <replaceable>NAME</replaceable></option></arg>
+		<arg><option>--cpuspeed <replaceable>NUMBER</replaceable></option></arg>
+		<arg><option>--cpucount <replaceable>NUMBER</replaceable></option></arg>
+		<arg><option>--memory <replaceable>NUMBER</replaceable></option></arg>
+		<arg><option>--cluster <replaceable>NAME</replaceable></option></arg>
+		<arg><option>--metacluster <replaceable>NAME</replaceable></option></arg>
+		<arg><option>--vmhost <replaceable>FQFDN</replaceable></option></arg>
+		<arg><option>--model <replaceable>NAME</replaceable></option></arg>
+		<arg><option>--machine_type <replaceable>TYPE</replaceable></option></arg>
+		<arg><option>--vendor <replaceable>NAME</replaceable></option></arg>
+		<arg><option>--ip <replaceable>IP</replaceable></option></arg>
+		<arg><option>--networkip <replaceable>IP</replaceable></option></arg>
+		<arg><option>--network_environment <replaceable>ENV</replaceable></option></arg>
+		<arg><option>--mac <replaceable>MAC</replaceable></option></arg>
+		<arg><option>--interface_name <replaceable>NAME</replaceable></option></arg>
+		<arg><option>--interface_model <replaceable>NAME</replaceable></option></arg>
+		<arg><option>--interface_vendor <replaceable>NAME</replaceable></option></arg>
+		<arg><option>--interface_bus_address <replaceable>URI</replaceable></option></arg>
+		<arg><option>--pg <replaceable>PG</replaceable></option></arg>
+		<arg><option>--serial <replaceable>SERIAL</replaceable></option></arg>
+		<arg><option>--chassis <replaceable>FQDN</replaceable></option></arg>
+		<arg><option>--slot <replaceable>NUMBER</replaceable></option></arg>
+		<arg><option>--disk_name <replaceable>NAME</replaceable></option></arg>
+		<arg><option>--disk_size <replaceable>NUMBER</replaceable></option></arg>
+		<arg><option>--disk_controller <replaceable>NAME</replaceable></option></arg>
+		<arg><option>--disk_address <replaceable>[H:]C:T[:L]</replaceable></option></arg>
+		<arg><option>--disk_bus_address <replaceable>URI</replaceable></option></arg>
+		<arg><option>--disk_wwn <replaceable>WWN</replaceable></option></arg>
+		<group>
 		    <arg choice="plain"><option>--disk_share <replaceable>NAME</replaceable></option></arg>
 		    <arg choice="plain"><option>--share <replaceable>NAME</replaceable></option></arg>
 		</group>
-		<arg choice="opt"><option>--disk_filesystem <replaceable>NAME</replaceable></option></arg>
+		<arg><option>--disk_filesystem <replaceable>NAME</replaceable></option></arg>
             </group>
-	    <arg choice="opt"><option>--fullinfo</option></arg>
+	    <arg><option>--fullinfo</option></arg>
 	    <group>
 		<synopfragmentref linkend="location-options">Location options</synopfragmentref>
-		<arg choice="opt"><option>--exact_location</option></arg>
+		<arg><option>--exact_location</option></arg>
 	    </group>
             <xi:include href="../common/location_options.xml"/>
             <xi:include href="../common/global_options.xml"/>

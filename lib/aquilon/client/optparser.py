@@ -599,8 +599,8 @@ class OptParser(object):
                            if node.get("name") != "*"])
 
         maxlen = max(len(s) for s in commands) + 4
-        columns = (width - 4) / maxlen
-        rows = len(commands) / columns + 1
+        columns = (width - 4) // maxlen
+        rows = len(commands) // columns + 1
 
         for row in range(rows):
             res = "    "

@@ -27,8 +27,8 @@
 	    <group>
 		<synopfragmentref linkend="global-options">Global options</synopfragmentref>
 	    </group>
-	    <arg choice="opt"><option>--dns_domain <replaceable>DOMAIN</replaceable></option></arg>
-	    <arg choice="opt"><option>--include_parents</option></arg>
+	    <arg><option>--dns_domain <replaceable>DOMAIN</replaceable></option></arg>
+	    <arg><option>--include_parents</option></arg>
 	    <group>
 		<synopfragmentref linkend="location-options">Location options</synopfragmentref>
 	    </group>

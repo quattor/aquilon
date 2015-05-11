@@ -27,8 +27,8 @@
 	    <group>
 		<synopfragmentref linkend="global-options">Global options</synopfragmentref>
 	    </group>
-	    <arg choice="opt"><option>--auditid <replaceable>UUID</replaceable></option></arg>
-	    <arg choice="opt"><option>--requestid <replaceable>UUID</replaceable></option></arg>
+	    <arg><option>--auditid <replaceable>UUID</replaceable></option></arg>
+	    <arg><option>--requestid <replaceable>UUID</replaceable></option></arg>
 	    <xi:include href="../common/global_options.xml"/>
 	</cmdsynopsis>
     </refsynopsisdiv>

@@ -33,8 +33,8 @@
             </group>
 	    <arg choice="plain"><option>--expiry <replaceable>WHEN</replaceable></option></arg>
 	    <arg choice="plain"><option>--justification <replaceable>REASON</replaceable></option></arg>
-	    <arg choice="opt"><option>--start_time <replaceable>WHEN</replaceable></option></arg>
-	    <arg choice="opt"><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
+	    <arg><option>--start_time <replaceable>WHEN</replaceable></option></arg>
+	    <arg><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
 	    <xi:include href="../common/global_options.xml"/>
 	</cmdsynopsis>
     </refsynopsisdiv>

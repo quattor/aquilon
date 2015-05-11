@@ -34,11 +34,11 @@
 		<arg choice="plain"><option>--ipfromsystem <replaceable>FQDN</replaceable></option></arg>
 		<arg choice="plain"><option>--ipalgorithm <replaceable>ALGO</replaceable></option></arg>
 	    </group>
-	    <arg choice="opt"><option>--dns_environment <replaceable>DNSENV</replaceable></option></arg>
-	    <arg choice="opt"><option>--network_environment <replaceable>NETENV</replaceable></option></arg>
-	    <arg choice="opt"><option>--reverse_ptr <replaceable>FQDN</replaceable></option></arg>
-	    <arg choice="opt"><option>--ttl <replaceable>TTL</replaceable></option></arg>
-	    <arg choice="opt"><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
+	    <arg><option>--dns_environment <replaceable>DNSENV</replaceable></option></arg>
+	    <arg><option>--network_environment <replaceable>NETENV</replaceable></option></arg>
+	    <arg><option>--reverse_ptr <replaceable>FQDN</replaceable></option></arg>
+	    <arg><option>--ttl <replaceable>TTL</replaceable></option></arg>
+	    <arg><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
 	    <xi:include href="../common/global_options.xml"/>
 	</cmdsynopsis>
     </refsynopsisdiv>

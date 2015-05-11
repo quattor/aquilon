@@ -91,7 +91,7 @@ class ClusterFormatter(CompileableFormatter):
             details.append(indent + "  Max members: %s" % cluster.max_hosts)
 
         if cluster.down_hosts_percent:
-            dht = int((cluster.down_hosts_threshold * len(cluster.hosts)) / 100)
+            dht = cluster.down_hosts_threshold * len(cluster.hosts) // 100
             details.append(indent + "  Down Hosts Threshold: %s (%s%%)" %
                            (dht, cluster.down_hosts_threshold))
         else:
@@ -100,8 +100,7 @@ class ClusterFormatter(CompileableFormatter):
 
         if cluster.down_maint_threshold is not None:
             if cluster.down_maint_percent:
-                dht = int((cluster.down_maint_threshold *
-                           len(cluster.hosts)) / 100)
+                dht = cluster.down_maint_threshold * len(cluster.hosts) // 100
                 details.append(indent + "  Maintenance Threshold: %s (%s%%)" %
                                (dht, cluster.down_maint_threshold))
             else:

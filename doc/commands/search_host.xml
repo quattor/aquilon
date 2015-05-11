@@ -28,45 +28,45 @@
                 <synopfragmentref linkend="global-options">Global options</synopfragmentref>
             </group>
             <group choice="req">
-		<arg choice="opt"><option>--hostname <replaceable>FQDN</replaceable></option></arg>
-		<arg choice="opt"><option>--machine <replaceable>LABEL</replaceable></option></arg>
-		<arg choice="opt"><option>--dns_domain <replaceable>DOMAIN</replaceable></option></arg>
-		<arg choice="opt"><option>--shortname <replaceable>NAME</replaceable></option></arg>
-		<arg choice="opt"><option>--archetype <replaceable>NAME</replaceable></option></arg>
-		<arg choice="opt"><option>--buildstatus <replaceable>STATUS</replaceable></option></arg>
-		<arg choice="opt"><option>--ip <replaceable>IP</replaceable></option></arg>
-		<arg choice="opt"><option>--networkip <replaceable>IP</replaceable></option></arg>
-		<arg choice="opt"><option>--network_environment <replaceable>NETENV</replaceable></option></arg>
-		<arg choice="opt"><option>--mac <replaceable>MAC</replaceable></option></arg>
-		<arg choice="opt"><option>--personality <replaceable>NAME</replaceable></option></arg>
-		<arg choice="opt"><option>--host_environment <replaceable>HOSTENV</replaceable></option></arg>
-		<arg choice="opt"><option>--osname <replaceable>NAME</replaceable></option></arg>
-		<arg choice="opt"><option>--osversion <replaceable>VERSION</replaceable></option></arg>
-		<arg choice="opt"><option>--service <replaceable>NAME</replaceable></option></arg>
-		<arg choice="opt"><option>--instance <replaceable>NAME</replaceable></option></arg>
-		<arg choice="opt"><option>--model <replaceable>NAME</replaceable></option></arg>
-		<arg choice="opt"><option>--machine_type <replaceable>TYPE</replaceable></option></arg>
-		<arg choice="opt"><option>--vendor <replaceable>NAME</replaceable></option></arg>
-		<arg choice="opt"><option>--serial <replaceable>SERIAL</replaceable></option></arg>
-		<arg choice="opt"><option>--cluster <replaceable>NAME</replaceable></option></arg>
-		<arg choice="opt"><option>--guest_on_cluster <replaceable>NAME</replaceable></option></arg>
-		<arg choice="opt"><option>--guest_on_share <replaceable>NAME</replaceable></option></arg>
-		<arg choice="opt"><option>--member_cluster_share <replaceable>NAME</replaceable></option></arg>
-		<group choice="opt">
+		<arg><option>--hostname <replaceable>FQDN</replaceable></option></arg>
+		<arg><option>--machine <replaceable>LABEL</replaceable></option></arg>
+		<arg><option>--dns_domain <replaceable>DOMAIN</replaceable></option></arg>
+		<arg><option>--shortname <replaceable>NAME</replaceable></option></arg>
+		<arg><option>--archetype <replaceable>NAME</replaceable></option></arg>
+		<arg><option>--buildstatus <replaceable>STATUS</replaceable></option></arg>
+		<arg><option>--ip <replaceable>IP</replaceable></option></arg>
+		<arg><option>--networkip <replaceable>IP</replaceable></option></arg>
+		<arg><option>--network_environment <replaceable>NETENV</replaceable></option></arg>
+		<arg><option>--mac <replaceable>MAC</replaceable></option></arg>
+		<arg><option>--personality <replaceable>NAME</replaceable></option></arg>
+		<arg><option>--host_environment <replaceable>HOSTENV</replaceable></option></arg>
+		<arg><option>--osname <replaceable>NAME</replaceable></option></arg>
+		<arg><option>--osversion <replaceable>VERSION</replaceable></option></arg>
+		<arg><option>--service <replaceable>NAME</replaceable></option></arg>
+		<arg><option>--instance <replaceable>NAME</replaceable></option></arg>
+		<arg><option>--model <replaceable>NAME</replaceable></option></arg>
+		<arg><option>--machine_type <replaceable>TYPE</replaceable></option></arg>
+		<arg><option>--vendor <replaceable>NAME</replaceable></option></arg>
+		<arg><option>--serial <replaceable>SERIAL</replaceable></option></arg>
+		<arg><option>--cluster <replaceable>NAME</replaceable></option></arg>
+		<arg><option>--guest_on_cluster <replaceable>NAME</replaceable></option></arg>
+		<arg><option>--guest_on_share <replaceable>NAME</replaceable></option></arg>
+		<arg><option>--member_cluster_share <replaceable>NAME</replaceable></option></arg>
+		<group>
 		    <arg choice="plain"><option>--domain <replaceable>DOMAIN</replaceable></option></arg>
 		    <arg choice="plain"><option>--sandbox <replaceable>USER</replaceable>/<replaceable>SANDBOX</replaceable></option></arg>
 		    <arg choice="plain"><option>--branch <replaceable>NAME</replaceable></option></arg>
 		    <arg choice="plain"><option>--sandbox_author <replaceable>USER</replaceable></option></arg>
 		</group>
-		<arg choice="opt"><option>--server_of_service <replaceable>NAME</replaceable></option></arg>
-		<arg choice="opt"><option>--server_of_instance <replaceable>NAME</replaceable></option></arg>
-		<arg choice="opt"><option>--grn <replaceable>GRN</replaceable></option></arg>
-		<arg choice="opt"><option>--eon_id <replaceable>EONID</replaceable></option></arg>
+		<arg><option>--server_of_service <replaceable>NAME</replaceable></option></arg>
+		<arg><option>--server_of_instance <replaceable>NAME</replaceable></option></arg>
+		<arg><option>--grn <replaceable>GRN</replaceable></option></arg>
+		<arg><option>--eon_id <replaceable>EONID</replaceable></option></arg>
             </group>
-	    <arg choice="opt"><option>--fullinfo</option></arg>
+	    <arg><option>--fullinfo</option></arg>
 	    <group>
 		<synopfragmentref linkend="location-options">Location options</synopfragmentref>
-		<arg choice="opt"><option>--exact_location</option></arg>
+		<arg><option>--exact_location</option></arg>
 	    </group>
             <xi:include href="../common/location_options.xml"/>
             <xi:include href="../common/global_options.xml"/>

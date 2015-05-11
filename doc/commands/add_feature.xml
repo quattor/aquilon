@@ -33,9 +33,9 @@
                 <arg choice="plain"><option>--grn <replaceable>GRN</replaceable></option></arg>
                 <arg choice="plain"><option>--eon_id <replaceable>EON_ID</replaceable></option></arg>
             </group>
-	    <arg choice="opt"><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
-	    <arg choice="opt"><option>--post_personality</option></arg>
-	    <arg choice="opt"><option>--visibility  <replaceable>VISIBILITY</replaceable></option></arg>
+	    <arg><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
+	    <arg><option>--post_personality</option></arg>
+	    <arg><option>--visibility <replaceable>VISIBILITY</replaceable></option></arg>
 	    <xi:include href="../common/global_options.xml"/>
 	</cmdsynopsis>
     </refsynopsisdiv>

@@ -35,11 +35,11 @@
 	    <arg choice="plain"><option>--intervention <replaceable>NAME</replaceable></option></arg>
 	    <arg choice="plain"><option>--expiry <replaceable>WHEN</replaceable></option></arg>
 	    <arg choice="plain"><option>--justification <replaceable>REASON</replaceable></option></arg>
-	    <arg choice="opt"><option>--allowusers <replaceable>USERS</replaceable></option></arg>
-	    <arg choice="opt"><option>--allowgroups <replaceable>GROUPS</replaceable></option></arg>
-	    <arg choice="opt"><option>--disabled_actions <replaceable>ACTIONS</replaceable></option></arg>
-	    <arg choice="opt"><option>--start_time <replaceable>WHEN</replaceable></option></arg>
-	    <arg choice="opt"><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
+	    <arg><option>--allowusers <replaceable>USERS</replaceable></option></arg>
+	    <arg><option>--allowgroups <replaceable>GROUPS</replaceable></option></arg>
+	    <arg><option>--disabled_actions <replaceable>ACTIONS</replaceable></option></arg>
+	    <arg><option>--start_time <replaceable>WHEN</replaceable></option></arg>
+	    <arg><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
 	    <xi:include href="../common/global_options.xml"/>
 	</cmdsynopsis>
     </refsynopsisdiv>

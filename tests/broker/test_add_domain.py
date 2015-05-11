@@ -110,6 +110,10 @@ class TestAddDomain(TestBrokerCommand):
         self.successtest(["add_domain", "--domain", "unittest-json",
                           "--track", "utsandbox"])
 
+    def test_160_add_netinfra(self):
+        self.successtest(["add_domain", "--domain", "netinfra",
+                          "--track", "prod"])
+
     def test_210_verifysearchtrack(self):
         command = ["search", "domain", "--track", "utsandbox"]
         out = self.commandtest(command)

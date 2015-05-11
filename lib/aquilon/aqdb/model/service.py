@@ -55,7 +55,7 @@ class Service(Base):
     name = Column(AqStr(64), nullable=False, unique=True)
     max_clients = Column(Integer, nullable=True)  # 0 means 'no limit'
     need_client_list = Column(Boolean(name='%s_need_client_list_ck' % _TN),
-                              nullable=False, default=True)
+                              nullable=False, default=False)
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
     comments = Column(String(255), nullable=True)

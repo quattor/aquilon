@@ -21,12 +21,14 @@ import os.path
 import re
 from tempfile import mkdtemp
 
+from sqlalchemy.inspection import inspect
 from sqlalchemy.orm.session import object_session
+from sqlalchemy.sql import and_, or_
 
 from aquilon.exceptions_ import (ArgumentError, AuthorizationException,
                                  ProcessException)
 from aquilon.aqdb.column_types import AqStr
-from aquilon.aqdb.model import (Domain, Sandbox, Branch, Host, Cluster,
+from aquilon.aqdb.model import (Domain, Sandbox, Branch, CompileableMixin,
                                 Archetype, Personality, User)
 from aquilon.utils import remove_dir, validate_template_name
 from aquilon.worker.dbwrappers.user_principal import get_user_principal
@@ -107,15 +109,13 @@ def get_branch_dependencies(dbbranch):
     session = object_session(dbbranch)
     ret = []
 
-    q = session.query(Host.hardware_entity_id)
-    q = q.filter_by(branch=dbbranch)
-    if q.count():
-        ret.append("Hosts are still attached to {0:l}.".format(dbbranch))
-
-    q = session.query(Cluster.id)
-    q = q.filter_by(branch=dbbranch)
-    if q.count():
-        ret.append("Clusters are still attached to {0:l}.".format(dbbranch))
+    for cls_ in CompileableMixin.__subclasses__():
+        q = session.query(*inspect(cls_).mapper.primary_key)
+        q = q.filter(cls_.branch_id == dbbranch.id)
+        cnt = q.count()
+        if cnt:
+            ret.append("{0} {1!s}s are still attached to {2:l}."
+                       .format(cnt, cls_._get_class_label().lower(), dbbranch))
 
     if dbbranch.trackers:
         ret.append("%s is tracked by %s." %
@@ -177,21 +177,46 @@ def remove_branch(config, logger, dbbranch, dbauthor=None):
 
 
 def search_branch_query(config, session, cls, owner=None, compiler_version=None,
-                        autosync=None, validated=None, **arguments):
+                        autosync=None, validated=None, used=None,
+                        compileable=None, **arguments):
     q = session.query(cls)
     if owner:
         dbowner = get_user_principal(session, owner)
         q = q.filter_by(owner=dbowner)
+
     if compiler_version:
         if not VERSION_RE.match(compiler_version):
             raise ArgumentError("Invalid characters in compiler version")
         compiler = config.get("panc", "pan_compiler",
                               vars={'version': compiler_version})
         q = q.filter_by(compiler=compiler)
+
     if autosync is not None:
         q = q.filter_by(autosync=autosync)
+
     if validated is not None:
         q = q.filter_by(is_sync_valid=validated)
+
+    if used is not None:
+        filters = []
+        for subcls in CompileableMixin.__subclasses__():
+            subq = session.query(subcls.branch_id)
+            subq = subq.distinct()
+
+            if compileable:
+                subq = subq.join(Personality, Archetype)
+                subq = subq.filter_by(is_compileable=True)
+
+            if used:
+                filters.append(cls.id.in_(subq.subquery()))
+            else:
+                filters.append(~cls.id.in_(subq.subquery()))
+
+        if used:
+            q = q.filter(or_(*filters))
+        else:
+            q = q.filter(and_(*filters))
+
     return q
 
 
@@ -207,18 +232,21 @@ def expand_compiler(config, compiler_version):
 
 def has_compileable_objects(dbbranch):
     session = object_session(dbbranch)
+    used = False
 
-    q1 = session.query(Cluster.id)
-    q1 = q1.filter_by(branch=dbbranch)
-    q1 = q1.join(Personality, Archetype)
-    q1 = q1.filter_by(is_compileable=True)
+    for cls_ in CompileableMixin.__subclasses__():
+        q = session.query(*inspect(cls_).mapper.primary_key)
+        q = q.filter(cls_.branch_id == dbbranch.id)
+        q = q.join(Personality, Archetype)
+        q = q.filter_by(is_compileable=True)
 
-    q2 = session.query(Host.hardware_entity_id)
-    q2 = q2.filter_by(branch=dbbranch)
-    q2 = q2.join(Personality, Archetype)
-    q2 = q2.filter_by(is_compileable=True)
+        used |= q.count() > 0
 
-    return q1.count() or q2.count()
+        # Short circuit
+        if used:
+            break
+
+    return used
 
 
 def merge_into_trash(config, logger, branch, merge_msg, loglevel=logging.INFO):
