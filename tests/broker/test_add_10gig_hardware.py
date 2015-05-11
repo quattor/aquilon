@@ -155,6 +155,13 @@ class TestAdd10GigHardware(TestBrokerCommand):
         self.noouttest(command)
         self.verifypg()
 
+    def test_161_show_evm10_proto(self):
+        command = ["show_machine", "--machine", "evm10", "--format", "proto"]
+        machine = self.protobuftest(command, expect=1)[0]
+        self.assertEqual(machine.interfaces[0].port_group_tag, 710)
+        self.assertEqual(machine.interfaces[0].port_group_usage, "user")
+        self.assertEqual(machine.interfaces[0].port_group_name, "user-v710")
+
     def test_165_updateclear(self):
         command = ["update_interface", "--machine=evm10", "--interface=eth0",
                    "--pg", ""]

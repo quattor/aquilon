@@ -221,19 +221,19 @@ class TestParameter(TestBrokerCommand):
         for param in parameters:
             params[param.path] = param.value
 
-        self.assertTrue('espinfo/function' in params)
+        self.assertIn('espinfo/function', params)
         self.assertEqual(params['espinfo/function'], 'production')
 
-        self.assertTrue('espinfo/class' in params)
+        self.assertIn('espinfo/class', params)
         self.assertEqual(params['espinfo/class'], 'INFRASTRUCTURE')
 
-        self.assertTrue('espinfo/users' in params)
+        self.assertIn('espinfo/users', params)
         self.assertEqual(params['espinfo/users'], 'someusers, otherusers')
 
-        self.assertTrue('action' in params)
+        self.assertIn('action', params)
         self.assertEqual(params['action'], u'{"testaction": {"command": "/bin/testaction", "user": "user2"}, "testaction2": {"command": "/bin/testaction2", "user": "user1", "timeout": 100}}')
 
-        self.assertTrue('monitoring/metric' in params)
+        self.assertIn('monitoring/metric', params)
         self.assertEqual(params['monitoring/metric'], u'{"_20003": {"name": "SwapUsed", "descr": "Swap space used [%]", "smooth": {"maxdiff": 3.0, "typeString": false, "maxtime": 3600}, "latestonly": false, "period": 300, "active": false, "class": "system.swapUsed"}}')
 
     def test_250_verify_actions(self):

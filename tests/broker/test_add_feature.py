@@ -151,35 +151,35 @@ class TestAddFeature(TestBrokerCommand):
         command = ["show", "feature", "--all", "--format", "proto"]
         features = dict((feature.name, feature)
                         for feature in self.protobuftest(command))
-        self.assertTrue("bios_setup" in features)
+        self.assertIn("bios_setup", features)
         feature = features["bios_setup"]
         self.assertEqual(feature.name, "bios_setup")
         self.assertEqual(feature.type, "hardware")
         self.assertEqual(feature.owner_eonid, 2)
         self.assertEqual(feature.visibility, feature.PUBLIC)
-        self.assertTrue("disable_ht" in features)
+        self.assertIn("disable_ht", features)
         feature = features["disable_ht"]
         self.assertEqual(feature.name, "disable_ht")
         self.assertEqual(feature.visibility, feature.OWNER_APPROVED)
-        self.assertTrue("pre_host" in features)
+        self.assertIn("pre_host", features)
         feature = features["pre_host"]
         self.assertEqual(feature.name, "pre_host")
         self.assertEqual(feature.type, "host")
         self.assertEqual(feature.post_personality, False)
         self.assertEqual(feature.owner_eonid, 2)
-        self.assertTrue("pre_host_param" in features)
+        self.assertIn("pre_host_param", features)
         feature = features["pre_host_param"]
         self.assertEqual(feature.name, "pre_host_param")
         self.assertEqual(feature.type, "host")
         self.assertEqual(feature.post_personality, False)
         self.assertEqual(feature.owner_eonid, 2)
-        self.assertTrue("post_host" in features)
+        self.assertIn("post_host", features)
         feature = features["post_host"]
         self.assertEqual(feature.name, "post_host")
         self.assertEqual(feature.type, "host")
         self.assertEqual(feature.post_personality, True)
         self.assertEqual(feature.owner_eonid, 2)
-        self.assertTrue("src_route" in features)
+        self.assertIn("src_route", features)
         feature = features["src_route"]
         self.assertEqual(feature.name, "src_route")
         self.assertEqual(feature.type, "interface")
