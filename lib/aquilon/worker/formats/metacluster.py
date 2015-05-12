@@ -46,7 +46,8 @@ class MetaClusterFormatter(CompileableFormatter):
             usagestr = None
         details.append(indent + "  Resources used by VMs: %s" % usagestr)
         details.append(self.redirect_raw(metacluster.status, indent + "  "))
-        details.append(self.redirect_raw(metacluster.personality, indent + "  "))
+        details.append(self.redirect_raw(metacluster.personality_stage,
+                                         indent + "  "))
         details.append(indent + "  {0:c}: {1}"
                        .format(metacluster.branch, metacluster.authored_branch))
 

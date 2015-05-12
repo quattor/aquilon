@@ -82,7 +82,6 @@ class TestSearchCluster(TestBrokerCommand):
         self.matchclean(out, "utgrid1", command)
 
     def testpersonalityunavailable(self):
-        # Will only get this error if archetype is specified
         command = ['search', 'cluster', '--archetype', 'storagecluster',
                    '--personality', 'personality-does-not-exist']
         out = self.notfoundtest(command)
@@ -90,9 +89,10 @@ class TestSearchCluster(TestBrokerCommand):
                          "archetype storagecluster not found.", command)
 
     def testpersonalityunavailable2(self):
-        # Will only get an error if archetype is specified
         command = "search cluster --personality personality-does-not-exist"
-        self.noouttest(command.split(" "))
+        out = self.notfoundtest(command.split(" "))
+        self.matchoutput(out, "Personality personality-does-not-exist "
+                         "not found.", command)
 
     def testsandboxavailable(self):
         command = ["search_cluster", "--sandbox=%s/utsandbox" % self.user]
@@ -110,10 +110,10 @@ class TestSearchCluster(TestBrokerCommand):
         self.matchclean(out, "utstorages2", command)
 
     def testdomainunavailable(self):
-        command = ["search_cluster", "--domain=domaind-does-not-exist"]
+        command = ["search_cluster", "--domain=domain-does-not-exist"]
         out = self.notfoundtest(command)
         self.matchoutput(out,
-                         "Domain domaind-does-not-exist not found.", command)
+                         "Domain domain-does-not-exist not found.", command)
 
     def testclusterlocationavailable(self):
         command = "search cluster --cluster_building ut"

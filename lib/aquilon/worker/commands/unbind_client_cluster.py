@@ -41,10 +41,10 @@ class CommandUnbindClientCluster(BrokerCommand):
             raise ArgumentError("{0} is required for {1:l}, the binding cannot "
                                 "be removed."
                                 .format(dbservice, dbcluster.archetype))
-        if dbservice in dbcluster.personality.services:
+        if dbservice in dbcluster.personality_stage.services:
             raise ArgumentError("{0} is required for {1:l}, the binding cannot "
                                 "be removed."
-                                .format(dbservice, dbcluster.personality))
+                                .format(dbservice, dbcluster.personality_stage))
 
         dbcluster.services_used.remove(dbinstance)
 

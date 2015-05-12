@@ -28,7 +28,7 @@ from broker.personalitytest import PersonalityTestMixin
 GRN = "grn:/ms/ei/aquilon/aqd"
 PPROD = "justify-prod"
 QPROD = "justify-qa"
-AUTHERR = "Personality aquilon/%s is marked production and is under change management control. Please specify --justification or --justification='emergency' and reason."
+AUTHERR = "Personality aquilon/%s@next is marked production and is under change management control. Please specify --justification or --justification='emergency' and reason."
 AUTHERR2 = "Justification of 'emergency' requires --reason to be specified."
 AUTHERR3 = "Changing feature bindings for a owner_only feature where owner grns do not match requires --justification."
 
@@ -37,9 +37,11 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
     def test_100_setup(self):
         personalities = {
             QPROD: {'grn': GRN,
-                    'environment': 'qa'},
+                    'environment': 'qa',
+                    'staged': True},
             PPROD: {'grn': GRN,
-                    'environment': 'prod'},
+                    'environment': 'prod',
+                    'staged': True},
         }
         for personality, kwargs in personalities.items():
             self.create_personality("aquilon", personality, **kwargs)
@@ -48,12 +50,19 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
                    "--type", "host", "--grn", GRN, "--visibility", "public"]
         self.noouttest(command)
 
+    def test_105_setup_next(self):
+        # Force the next stage to be created
+        self.noouttest(["update_personality", "--personality", PPROD,
+                        "--archetype", "aquilon"])
+        self.noouttest(["update_personality", "--personality", QPROD,
+                        "--archetype", "aquilon"])
+
     def test_110_host_setup(self):
         h = "aquilon91.aqd-unittest.ms.com"
 
         command = ["reconfigure", "--hostname", h,
                    "--archetype", "aquilon",
-                   "--personality", PPROD]
+                   "--personality", PPROD, "--personality_stage", "next"]
         out = self.successtest(command)
 
     def test_200_update_personality(self):
@@ -255,7 +264,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
 
         command = ["reconfigure", "--hostname", h,
                    "--archetype", "aquilon",
-                   "--personality", QPROD]
+                   "--personality", QPROD, "--personality_stage", "next"]
         out = self.successtest(command)
 
     def test_405_update_personality(self):
@@ -354,7 +363,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
 
         command = ["reconfigure", "--hostname", h,
                    "--archetype", "aquilon",
-                   "--personality", PPROD]
+                   "--personality", PPROD, "--personality_stage", "next"]
         out = self.successtest(command)
 
     def test_600_update_personality_reason(self):

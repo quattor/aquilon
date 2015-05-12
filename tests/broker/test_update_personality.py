@@ -200,6 +200,7 @@ class TestUpdatePersonality(VerifyGrnsMixin, TestBrokerCommand):
         personality = self.protobuftest(command, expect=1)[0]
         self.assertEqual(personality.archetype.name, "esx_cluster")
         self.assertEqual(personality.name, "vulcan-1g-clone")
+        self.assertEqual(personality.stage, "")
         self.assertEqual(personality.owner_eonid, self.grns["grn:/ms/ei/aquilon/aqd"])
         self.assertEqual(personality.host_environment, "prod")
         self.assertEqual(personality.vmhost_capacity_function, "{'memory': (memory - 1500) * 0.94}")
@@ -231,6 +232,43 @@ class TestUpdatePersonality(VerifyGrnsMixin, TestBrokerCommand):
                    "--archetype=aquilon"]
         out = self.commandtest(command)
         self.matchclean(out, "Comments", command)
+
+    def test_170_make_staged(self):
+        self.noouttest(["update_personality", "--personality", "compileserver",
+                        "--archetype", "aquilon", "--staged"])
+
+    def test_171_verify_staged(self):
+        command = ["show_personality", "--personality", "compileserver",
+                   "--archetype", "aquilon"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Stage: current", command)
+
+    def test_172_verify_next(self):
+        command = ["show_personality", "--personality", "unixeng-test",
+                   "--archetype", "aquilon", "--personality_stage", "next"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Stage: next", command)
+
+    def test_174_delete_next(self):
+        self.noouttest(["del_personality", "--personality", "unixeng-test",
+                        "--archetype", "aquilon", "--personality_stage", "next"])
+
+    def test_175_verify_next_gone(self):
+        command = ["show_personality", "--personality", "unixeng-test",
+                   "--archetype", "aquilon", "--personality_stage", "next"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out, "Personality aquilon/unixeng-test does not have "
+                         "stage next.", command)
+
+    def test_178_make_unstaged(self):
+        self.noouttest(["update_personality", "--personality", "compileserver",
+                        "--archetype", "aquilon", "--unstaged"])
+
+    def test_179_verify_unstaged(self):
+        command = ["show_personality", "--personality", "compileserver",
+                   "--archetype", "aquilon"]
+        out = self.commandtest(command)
+        self.matchclean(out, "Stage:", command)
 
     def test_200_invalid_function(self):
         """ Verify that the list of built-in functions is restricted """
@@ -290,6 +328,23 @@ class TestUpdatePersonality(VerifyGrnsMixin, TestBrokerCommand):
                    "--justification", "tcm=12345678"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Personality esx_cluster/vulcan-10g-server-prod is in use", command)
+
+    def test_200_missing_personality(self):
+        command = ["update_personality", "--archetype", "aquilon",
+                   "--personality", "personality-does-not-exist"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out, "Personality personality-does-not-exist, "
+                         "archetype aquilon not found.", command)
+
+    def test_200_missing_personality_stage(self):
+        command = ["update_personality", "--archetype", "aquilon",
+                   "--personality", "nostage",
+                   "--personality_stage", "previous"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out,
+                         "Personality aquilon/nostage does not have stage "
+                         "previous.",
+                         command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUpdatePersonality)

@@ -72,20 +72,61 @@ class TestAddRequiredService(TestBrokerCommand):
                        "--archetype=aquilon", "--personality=unixeng-test"]
             self.noouttest(command)
 
-    def test_125_show_personality(self):
+    def test_125_show_personality_current(self):
         command = ["show_personality", "--archetype=aquilon",
                    "--personality=unixeng-test"]
         out = self.commandtest(command)
+        self.matchoutput(out, "Stage: current", command)
+        self.matchclean(out, "chooser1", command)
+        self.matchclean(out, "chooser2", command)
+        self.matchclean(out, "chooser3", command)
+
+    def test_125_show_personality_next(self):
+        command = ["show_personality", "--archetype=aquilon",
+                   "--personality=unixeng-test",
+                   "--personality_stage=next"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Stage: next", command)
         self.matchoutput(out, "Service: chooser1", command)
         self.matchoutput(out, "Service: chooser2", command)
         self.matchoutput(out, "Service: chooser3", command)
 
+    def test_125_show_personality_next_proto(self):
+        command = ["show_personality", "--archetype=aquilon",
+                   "--personality=unixeng-test",
+                   "--personality_stage=next", "--format", "proto"]
+        personality = self.protobuftest(command, expect=1)[0]
+        self.assertEqual(personality.archetype.name, "aquilon")
+        self.assertEqual(personality.name, "unixeng-test")
+        self.assertEqual(personality.stage, "next")
+        services = set(item.service for item in personality.required_services)
+        self.assertTrue("chooser1" in services)
+        self.assertTrue("chooser2" in services)
+        self.assertTrue("chooser3" in services)
+
     def test_125_show_service(self):
         command = "show service --service chooser1"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out,
-                         "Required for Personality: unixeng-test Archetype: aquilon",
-                         command)
+        self.searchoutput(out,
+                          r"Required for Personality: unixeng-test Archetype: aquilon$"
+                          r"\s+Stage: next$",
+                          command)
+
+    def test_125_show_diff(self):
+        command = ["show_diff", "--personality", "unixeng-test",
+                   "--archetype", "aquilon",
+                   "--personality_stage", "current", "--other_stage", "next"]
+        out = self.commandtest(command)
+        self.searchoutput(out,
+                          r'missing Required Services in Personality aquilon/unixeng-test@current:$'
+                          r'\s*chooser1$'
+                          r'\s*chooser2$'
+                          r'\s*chooser3$',
+                          command)
+
+    def test_129_promite_unixeng_test(self):
+        self.noouttest(["promote", "--personality", "unixeng-test",
+                        "--archetype", "aquilon"])
 
     def test_130_add_utsvc(self):
         command = ["add_required_service", "--personality=compileserver",
@@ -105,7 +146,8 @@ class TestAddRequiredService(TestBrokerCommand):
 
     def test_145_verify_netmap(self):
         command = ["show_personality", "--archetype=aquilon",
-                   "--personality=eaitools"]
+                   "--personality=eaitools",
+                   "--personality_stage=next"]
         out = self.commandtest(command)
         self.matchoutput(out, "Service: netmap", command)
 
@@ -113,15 +155,21 @@ class TestAddRequiredService(TestBrokerCommand):
         self.noouttest(["add_personality", "--personality", "required_svc_test",
                         "--eon_id", "2", "--archetype", "aquilon",
                         "--copy_from", "eaitools",
+                        "--copy_stage", "next",
                         "--host_environment", "dev"])
 
         command = ["show_personality", "--archetype=aquilon",
                    "--personality=required_svc_test"]
         out = self.commandtest(command)
         self.matchoutput(out, "Service: netmap", command)
+        self.matchoutput(out, "Stage: current", command)
 
         self.successtest(["del_personality", "--personality", "required_svc_test",
                           "--archetype", "aquilon"])
+
+    def test_155_promote_eaitools(self):
+        self.noouttest(["promote", "--personality", "eaitools",
+                        "--archetype", "aquilon"])
 
     def test_160_add_badservice(self):
         command = ["add_required_service", "--service=badservice",
@@ -144,7 +192,7 @@ class TestAddRequiredService(TestBrokerCommand):
                    "--archetype", "aquilon", "--personality", "unixeng-test"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Service chooser1 is already required by "
-                         "personality unixeng-test, archetype aquilon.",
+                         "personality aquilon/unixeng-test@next.",
                          command)
 
     def test_200_no_justification(self):
@@ -156,7 +204,7 @@ class TestAddRequiredService(TestBrokerCommand):
                          "requires --justification.",
                          command)
 
-    def test_200_add_nonexistant(self):
+    def test_200_missing_service(self):
         command = ["add_required_service", "--service",
                    "service-does-not-exist", "--archetype", "aquilon",
                    "--justification", "tcm=12345678"]
@@ -164,6 +212,34 @@ class TestAddRequiredService(TestBrokerCommand):
         self.matchoutput(out,
                          "Service service-does-not-exist not found.",
                          command)
+
+    def test_200_missing_personality(self):
+        command = ["add_required_service", "--service", "afs",
+                   "--personality", "personality-does-not-exist",
+                   "--archetype", "aquilon"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out,
+                         "Personality personality-does-not-exist, "
+                         "archetype aquilon not found.",
+                         command)
+
+    def test_200_missing_personality_stage(self):
+        command = ["add_required_service", "--service", "afs",
+                   "--personality", "nostage", "--archetype", "aquilon",
+                   "--personality_stage", "previous"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out,
+                         "Personality aquilon/nostage does not have stage "
+                         "previous.",
+                         command)
+
+    def test_200_bad_personality_stage(self):
+        command = ["add_required_service", "--service", "afs",
+                   "--personality", "nostage", "--archetype", "aquilon",
+                   "--personality_stage", "no-such-stage"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "'no-such-stage' is not a valid personality "
+                         "stage.", command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddRequiredService)

@@ -37,7 +37,7 @@ from sqlalchemy.sql import or_, null
 from sqlalchemy.util import memoized_property
 
 from aquilon.aqdb.column_types.aqstr import AqStr
-from aquilon.aqdb.model import Base, Archetype, Personality
+from aquilon.aqdb.model import Base, Archetype, Personality, PersonalityStage
 
 _TN = 'service'
 _SLI = 'service_list_item'
@@ -74,14 +74,15 @@ class Service(Base):
         ArchService = aliased(Service)
 
         # Check if the service instance is used by any cluster-bound personality
-        q = session.query(Personality.id)
-        q = q.outerjoin(PersService, Personality.services)
+        q = session.query(PersonalityStage.id)
+        q = q.outerjoin(PersService, PersonalityStage.services)
         q = q.reset_joinpoint()
-        q = q.join(Archetype)
+        q = q.join(Personality, Archetype)
         q = q.filter(Archetype.cluster_type != null())
         q = q.outerjoin(ArchService, Archetype.services)
         q = q.filter(or_(PersService.id == self.id, ArchService.id == self.id))
-        return [pers.id for pers in q]
+        q = q.distinct()
+        return [persst.id for persst in q]
 
 
 class __ServiceListItem(Base):
@@ -114,12 +115,13 @@ class __PersonalityServiceListItem(Base):
 
     service_id = Column(ForeignKey(Service.id), nullable=False)
 
-    personality_id = Column(ForeignKey(Personality.id, ondelete='CASCADE'),
-                            nullable=False, index=True)
+    personality_stage_id = Column(ForeignKey(PersonalityStage.id,
+                                             ondelete='CASCADE'),
+                                  nullable=False, index=True)
 
-    __table_args__ = (PrimaryKeyConstraint(service_id, personality_id),)
+    __table_args__ = (PrimaryKeyConstraint(service_id, personality_stage_id),)
 
-Service.personalities = relation(Personality,
-                                 secondary=__PersonalityServiceListItem.__table__,
-                                 backref=backref("services",
-                                                 passive_deletes=True))
+Service.personality_stages = relation(PersonalityStage,
+                                      secondary=__PersonalityServiceListItem.__table__,
+                                      backref=backref("services",
+                                                      passive_deletes=True))

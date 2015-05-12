@@ -29,8 +29,8 @@ class CommandAddMetaCluster(BrokerCommand):
     required_parameters = ["metacluster"]
 
     def render(self, session, logger, metacluster, archetype, personality,
-               domain, sandbox, max_members, buildstatus, comments,
-               **arguments):
+               personality_stage, domain, sandbox, max_members, buildstatus,
+               comments, **arguments):
         validate_nlist_key("metacluster", metacluster)
         if metacluster.strip().lower() == 'global':
             raise ArgumentError("Metacluster name global is reserved.")
@@ -45,15 +45,15 @@ class CommandAddMetaCluster(BrokerCommand):
             archetype = "metacluster"
 
         kw = parse_cluster_arguments(session, self.config, archetype,
-                                     personality, domain, sandbox, buildstatus,
-                                     max_members)
+                                     personality, personality_stage, domain,
+                                     sandbox, buildstatus, max_members)
         max_clusters = kw.pop('max_members')
 
         dbloc = get_location(session, **arguments)
 
         # This should be reverted when virtbuild supports this option
         if not dbloc:
-            section = "archetype_" + kw['personality'].archetype.name
+            section = "archetype_" + kw['personality_stage'].archetype.name
             dbloc = Location.get_unique(session,
                                         name=self.config.get(section,
                                                              "location_name"),

@@ -35,10 +35,13 @@ class ModelFormatter(ObjectFormatter):
                 if link.archetype:
                     details.append(indent + "    {0:c}: {0.name}"
                                    .format(link.archetype))
-                if link.personality:
+                if link.personality_stage:
                     details.append(indent + "    {0:c}: {0.name} {1:c}: {1.name}"
-                                   .format(link.personality,
-                                           link.personality.archetype))
+                                   .format(link.personality_stage.personality,
+                                           link.personality_stage.archetype))
+                    if link.personality_stage.staged:
+                        details.append(indent + "      Stage: %s" %
+                                       link.personality_stage.name)
                 if link.interface_name:
                     details.append(indent + "    Interface: %s" %
                                    link.interface_name)

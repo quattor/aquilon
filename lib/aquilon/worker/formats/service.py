@@ -36,11 +36,14 @@ class ServiceFormatter(ObjectFormatter):
         for archetype in sorted(service.archetypes, key=attrgetter("name")):
             details.append(indent + "  Required for {0:c}: {0.name}"
                            .format(archetype))
-        for personality in sorted(service.personalities,
-                                  key=attrgetter("archetype.name", "name")):
+        for dbstage in sorted(service.personality_stages,
+                              key=attrgetter("archetype.name",
+                                             "personality.name", "name")):
             details.append(indent +
                            "  Required for {0:c}: {0.name} {1:c}: {1.name}"
-                           .format(personality, personality.archetype))
+                           .format(dbstage.personality, dbstage.archetype))
+            if dbstage.staged:
+                details.append(indent + "    Stage: %s" % dbstage.name)
         if service.comments:
             details.append(indent + "  Comments: %s" % service.comments)
         for instance in service.instances:

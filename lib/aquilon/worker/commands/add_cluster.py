@@ -28,10 +28,10 @@ class CommandAddCluster(BrokerCommand):
 
     required_parameters = ["cluster", "down_hosts_threshold"]
 
-    def render(self, session, logger, cluster, archetype, personality, domain,
-               sandbox, max_members, down_hosts_threshold, maint_threshold,
-               buildstatus, comments, vm_to_host_ratio, switch, metacluster,
-               **arguments):
+    def render(self, session, logger, cluster, archetype, personality,
+               personality_stage, domain, sandbox, max_members,
+               down_hosts_threshold, maint_threshold, buildstatus, comments,
+               vm_to_host_ratio, switch, metacluster, **arguments):
         if vm_to_host_ratio:
             self.deprecated_option("vm_to_host_ratio", "It has no effect.",
                                    logger=logger, **arguments)
@@ -40,8 +40,8 @@ class CommandAddCluster(BrokerCommand):
         Cluster.get_unique(session, cluster, preclude=True)
 
         kw = parse_cluster_arguments(session, self.config, archetype,
-                                     personality, domain, sandbox, buildstatus,
-                                     max_members)
+                                     personality, personality_stage, domain,
+                                     sandbox, buildstatus, max_members)
         max_hosts = kw.pop('max_members')
 
         dbloc = get_location(session, **arguments)
@@ -51,7 +51,7 @@ class CommandAddCluster(BrokerCommand):
 
         # Not finding the cluster type is an internal consistency issue, so make
         # that show up in the logs by using AquilonError
-        ctype = kw['personality'].archetype.cluster_type
+        ctype = kw['personality_stage'].archetype.cluster_type
         clus_type = Cluster.polymorphic_subclass(ctype, "Unknown cluster type",
                                                  error=AquilonError)
 

@@ -41,8 +41,9 @@ class StaticRoute(Base):
     network_id = Column(ForeignKey(Network.id, ondelete="CASCADE"),
                         nullable=False)
 
-    personality_id = Column(ForeignKey('personality.id', ondelete='CASCADE'),
-                            nullable=True)
+    personality_stage_id = Column(ForeignKey('personality_stage.id',
+                                             ondelete='CASCADE'),
+                                  nullable=True, index=True)
 
     # It is possible and useful to cover multiple real networks with one routing
     # entry, therefore the destination cannot be a simple pointer to the network
@@ -60,7 +61,7 @@ class StaticRoute(Base):
                                        cascade="all, delete-orphan",
                                        passive_deletes=True))
 
-    personality = relation('Personality')
+    personality_stage = relation('PersonalityStage')
 
     __table_args__ = (Index("%s_gw_network_ip_idx" % _TN, network_id,
                             gateway_ip),)
@@ -78,3 +79,9 @@ class StaticRoute(Base):
                              (gateway_ip, network))
         super(StaticRoute, self).__init__(network=network,
                                           gateway_ip=gateway_ip, **kwargs)
+
+    def copy(self, personality_stage=None):
+        return StaticRoute(gateway_ip=self.gateway_ip, network=self.network,
+                           dest_ip=self.dest_ip, dest_cidr=self.dest_cidr,
+                           comments=self.comments,
+                           personality_stage=personality_stage)

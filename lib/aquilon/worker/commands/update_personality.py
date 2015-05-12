@@ -20,7 +20,8 @@ from sqlalchemy.orm import joinedload, subqueryload
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import (Personality, PersonalityESXClusterInfo,
-                                Cluster, Host, HostEnvironment)
+                                PersonalityStage, Cluster, Host,
+                                HostEnvironment)
 from aquilon.aqdb.model.cluster import restricted_builtins
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.grn import lookup_grn
@@ -28,24 +29,59 @@ from aquilon.worker.templates import Plenary, PlenaryCollection
 from aquilon.worker.dbwrappers.personality import validate_personality_justification
 
 
+def _check_stage_unused(session, dbstage):
+    if dbstage.personality.is_cluster:
+        q = session.query(Cluster.id)
+        msg = "clusters"
+    else:
+        q = session.query(Host.hardware_entity_id)
+        msg = "hosts"
+
+    q = q.filter_by(personality_stage=dbstage)
+    if q.count():
+        raise ArgumentError("{0} still has {1!s}.".format(dbstage, msg))
+
+
 class CommandUpdatePersonality(BrokerCommand):
 
     required_parameters = ["personality", "archetype"]
 
-    def render(self, session, logger, personality, archetype, vmhost_capacity_function,
-               vmhost_overcommit_memory, cluster_required, config_override,
-               host_environment, grn, eon_id, leave_existing,
-               justification, reason, comments, user, **arguments):
+    def render(self, session, logger, personality, personality_stage,
+               archetype, vmhost_capacity_function, vmhost_overcommit_memory,
+               cluster_required, config_override, host_environment, grn, eon_id,
+               leave_existing, staged, justification, reason, comments, user,
+               **arguments):
         dbpersona = Personality.get_unique(session, name=personality,
                                            archetype=archetype, compel=True)
 
-        validate_personality_justification(dbpersona, user,
-                                           justification, reason)
+        if staged is not None:
+            if staged is False:
+                if "previous" in dbpersona.stages:
+                    _check_stage_unused(session, dbpersona.stages["previous"])
+                    del dbpersona.stages["previous"]
+                if "next" in dbpersona.stages:
+                    _check_stage_unused(session, dbpersona.stages["next"])
+                    del dbpersona.stages["next"]
+            dbpersona.staged = staged
+
+        dbstage = dbpersona.active_stage(personality_stage)
+
+        # It's a bit ugly. If any of the non-staged attributes are touched,
+        # then we need to check for prod hosts for all stages
+        if (cluster_required is not None or config_override is not None or
+                host_environment or grn or eon_id or
+                leave_existing is not None or comments is not None):
+            for ver in dbpersona.stages.values():
+                validate_personality_justification(ver, user, justification,
+                                                   reason)
+        else:
+            validate_personality_justification(dbstage, user, justification,
+                                               reason)
 
         if vmhost_capacity_function is not None or \
                 vmhost_overcommit_memory is not None:
-            if "esx" not in dbpersona.cluster_infos:
-                dbpersona.cluster_infos["esx"] = PersonalityESXClusterInfo()
+            if "esx" not in dbstage.cluster_infos:
+                dbstage.cluster_infos["esx"] = PersonalityESXClusterInfo()
 
         if vmhost_capacity_function:
             # Basic sanity tests to see if the function works
@@ -70,14 +106,14 @@ class CommandUpdatePersonality(BrokerCommand):
                 raise ArgumentError("The memory constraint is missing from "
                                     "the returned dictionary.")
 
-            dbpersona.cluster_infos["esx"].vmhost_capacity_function = vmhost_capacity_function
+            dbstage.cluster_infos["esx"].vmhost_capacity_function = vmhost_capacity_function
         elif vmhost_capacity_function == "":
-            dbpersona.cluster_infos["esx"].vmhost_capacity_function = None
+            dbstage.cluster_infos["esx"].vmhost_capacity_function = None
 
         if vmhost_overcommit_memory:
             if vmhost_overcommit_memory < 1:
                 raise ArgumentError("The memory overcommit factor must be >= 1.")
-            dbpersona.cluster_infos["esx"].vmhost_overcommit_memory = vmhost_overcommit_memory
+            dbstage.cluster_infos["esx"].vmhost_overcommit_memory = vmhost_overcommit_memory
 
         if cluster_required is not None and \
            dbpersona.cluster_required != cluster_required:
@@ -85,6 +121,7 @@ class CommandUpdatePersonality(BrokerCommand):
                 q = session.query(Cluster.id)
             else:
                 q = session.query(Host.hardware_entity_id)
+            q = q.join(PersonalityStage)
             q = q.filter_by(personality=dbpersona)
             # XXX: Ideally, filter based on hosts/clusters that are/arenot in
             # cluster/metacluster
@@ -116,7 +153,9 @@ class CommandUpdatePersonality(BrokerCommand):
                 # various GRNs inside the personality, so make sure we preserve
                 # those GRNs by filtering on the original GRN of the personality
                 q = session.query(Host)
-                q = q.filter_by(personality=dbpersona, owner_grn=old_grn)
+                q = q.filter_by(owner_grn=old_grn)
+                q = q.join(PersonalityStage)
+                q = q.filter_by(personality=dbpersona)
                 for dbhost in q.all():
                     dbhost.owner_grn = dbgrn
                     plenaries.append(Plenary.get_plenary(dbhost))
@@ -128,30 +167,32 @@ class CommandUpdatePersonality(BrokerCommand):
         if comments is not None:
             dbpersona.comments = comments
 
-        plenaries.append(Plenary.get_plenary(dbpersona))
+        plenaries.extend(map(Plenary.get_plenary, dbpersona.stages.values()))
+
         session.flush()
 
-        q = session.query(Cluster)
-        q = q.with_polymorphic("*")
-        # The validation will touch all member hosts/machines, so it's better to
-        # pre-load everything
-        q = q.options(subqueryload('_hosts'),
-                      joinedload('_hosts.host'),
-                      joinedload('_hosts.host.hardware_entity'),
-                      joinedload('resholder'),
-                      subqueryload('resholder.resources'))
-        # TODO: preload virtual machines
-        q = q.filter_by(personality=dbpersona)
-        clusters = q.all()
-        failures = []
-        for cluster in clusters:
-            try:
-                cluster.validate()
-            except ArgumentError as err:
-                failures.append(err.message)
-        if failures:
-            raise ArgumentError("Validation failed for the following "
-                                "clusters:\n%s" % "\n".join(failures))
+        if dbpersona.is_cluster:
+            q = session.query(Cluster)
+            q = q.with_polymorphic("*")
+            # The validation will touch all member hosts/machines, so it's better to
+            # pre-load everything
+            q = q.options(subqueryload('_hosts'),
+                          joinedload('_hosts.host'),
+                          joinedload('_hosts.host.hardware_entity'),
+                          joinedload('resholder'),
+                          subqueryload('resholder.resources'))
+            # TODO: preload virtual machines
+            q = q.filter_by(personality_stage=dbstage)
+            clusters = q.all()
+            failures = []
+            for cluster in clusters:
+                try:
+                    cluster.validate()
+                except ArgumentError as err:
+                    failures.append(err.message)
+            if failures:
+                raise ArgumentError("Validation failed for the following "
+                                    "clusters:\n%s" % "\n".join(failures))
 
         plenaries.write()
 

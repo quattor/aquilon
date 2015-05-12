@@ -21,7 +21,7 @@ from six import iteritems
 
 from sqlalchemy.inspection import inspect
 
-from aquilon.aqdb.model import Personality, Parameter
+from aquilon.aqdb.model import PersonalityStage, Parameter
 from aquilon.worker.locks import NoLockKey, PlenaryKey
 from aquilon.worker.templates.base import (Plenary, StructurePlenary,
                                            TemplateFormatter, PlenaryCollection)
@@ -37,13 +37,13 @@ def string_to_list(data):
     return [item.strip() for item in data.split(',') if item]
 
 
-def get_parameters_by_feature(dbpersonality, dbfeaturelink):
+def get_parameters_by_feature(dbstage, dbfeaturelink):
     ret = {}
     paramdef_holder = dbfeaturelink.feature.paramdef_holder
-    if not paramdef_holder or not dbpersonality.paramholder:
+    if not paramdef_holder or not dbstage.paramholder:
         return ret
 
-    parameters = dbpersonality.paramholder.parameters
+    parameters = dbstage.paramholder.parameters
     for param_def in paramdef_holder.param_definitions:
         for param in parameters:
             value = param.get_feature_path(dbfeaturelink,
@@ -58,8 +58,8 @@ def get_parameters_by_feature(dbpersonality, dbfeaturelink):
     return ret
 
 
-def helper_feature_template(dbpersonality, featuretemplate, dbfeaturelink, lines):
-    params = get_parameters_by_feature(dbpersonality, dbfeaturelink)
+def helper_feature_template(dbstage, featuretemplate, dbfeaturelink, lines):
+    params = get_parameters_by_feature(dbstage, dbfeaturelink)
     for path in params:
         pan_assign(lines, "/system/%s/%s" % (dbfeaturelink.cfg_path_escaped, path), params[path])
     lines.append(featuretemplate.format_raw(dbfeaturelink))
@@ -88,14 +88,16 @@ def get_path_under_top(path, value, ret):
         ret[top] = value
 
 
-def get_parameters_by_tmpl(dbpersonality):
+def get_parameters_by_tmpl(dbstage):
     ret = defaultdict(dict)
+
+    dbpersonality = dbstage.personality
     paramdef_holder = dbpersonality.archetype.paramdef_holder
     if not paramdef_holder:
         return ret
 
-    if dbpersonality.paramholder:
-        parameters = dbpersonality.paramholder.parameters
+    if dbstage.paramholder:
+        parameters = dbstage.paramholder.parameters
     else:
         parameters = []
 
@@ -120,33 +122,42 @@ def get_parameters_by_tmpl(dbpersonality):
     return ret
 
 
+def staged_path(prefix, dbstage, suffix):
+    if dbstage.name == "current":
+        return "%s/%s/%s" % (prefix, dbstage.personality.name, suffix)
+    else:
+        return "%s/%s+%s/%s" % (prefix, dbstage.personality.name,
+                                dbstage.name, suffix)
+
+
 # Normally we have exactly one instance of every plenary class per DB object.
 # This class just wraps the (personality, template path) tuple to make parameter
 # plenaries behave the same way.
 class ParameterTemplate(object):
-    def __init__(self, dbpersonality, template, values):
-        self.personality = dbpersonality
+    def __init__(self, dbstage, template, values):
+        self.personality_stage = dbstage
         self.template = template
         self.values = values
 
     def __str__(self):
-        return "%s/%s" % (self.personality.name, self.template)
+        return "%s/%s" % (self.personality_stage.personality.name,
+                          self.template)
 
 
 class PlenaryPersonality(PlenaryCollection):
 
-    def __init__(self, dbpersonality, logger=LOGGER):
+    def __init__(self, dbstage, logger=LOGGER):
         super(PlenaryPersonality, self).__init__(logger=logger)
 
-        self.dbobj = dbpersonality
+        self.dbobj = dbstage
 
-        self.append(PlenaryPersonalityBase.get_plenary(dbpersonality))
-        self.append(PlenaryPersonalityPreFeature.get_plenary(dbpersonality))
-        self.append(PlenaryPersonalityPostFeature.get_plenary(dbpersonality))
+        self.append(PlenaryPersonalityBase.get_plenary(dbstage))
+        self.append(PlenaryPersonalityPreFeature.get_plenary(dbstage))
+        self.append(PlenaryPersonalityPostFeature.get_plenary(dbstage))
 
         # mulitple structure templates for parameters
-        for path, values in get_parameters_by_tmpl(dbpersonality).items():
-            ptmpl = ParameterTemplate(dbpersonality, path, values)
+        for path, values in get_parameters_by_tmpl(dbstage).items():
+            ptmpl = ParameterTemplate(dbstage, path, values)
             self.append(PlenaryPersonalityParameter.get_plenary(ptmpl))
 
     def get_key(self, exclusive=True):
@@ -156,7 +167,7 @@ class PlenaryPersonality(PlenaryCollection):
             return PlenaryKey(personality=self.dbobj, logger=self.logger,
                               exclusive=exclusive)
 
-Plenary.handlers[Personality] = PlenaryPersonality
+Plenary.handlers[PersonalityStage] = PlenaryPersonality
 
 
 class FeatureTemplate(TemplateFormatter):
@@ -167,15 +178,21 @@ class PlenaryPersonalityBase(Plenary):
     prefix = "personality"
 
     @classmethod
-    def template_name(cls, dbpersonality):
-        return "%s/%s/config" % (cls.prefix, dbpersonality.name)
+    def template_name(cls, dbstage):
+        return staged_path(cls.prefix, dbstage, "config")
 
     @classmethod
-    def loadpath(cls, dbpersonality):
-        return dbpersonality.archetype.name
+    def loadpath(cls, dbstage):
+        return dbstage.personality.archetype.name
 
     def body(self, lines):
-        pan_variable(lines, "PERSONALITY", self.dbobj.name)
+        dbpers = self.dbobj.personality
+
+        if self.dbobj.name == "current":
+            pan_variable(lines, "PERSONALITY", dbpers.name)
+        else:
+            pan_variable(lines, "PERSONALITY", "%s+%s" % (dbpers.name,
+                                                          self.dbobj.name))
 
         # process grns
         eon_id_map = defaultdict(set)
@@ -188,7 +205,7 @@ class PlenaryPersonalityBase(Plenary):
             for eon_id in sorted(eon_id_set):
                 pan_append(lines, "/system/eon_id_maps/%s" % target, eon_id)
 
-        section = "archetype_" + self.dbobj.archetype.name
+        section = "archetype_" + dbpers.archetype.name
         # backward compat for esp reporting
         if self.config.has_option(section, "default_grn_target"):
             default_grn_target = self.config.get(section, "default_grn_target")
@@ -197,13 +214,13 @@ class PlenaryPersonalityBase(Plenary):
                 pan_append(lines, "/system/eon_ids", eon_id)
 
         pan_assign(lines, "/system/personality/owner_eon_id",
-                   self.dbobj.owner_eon_id)
+                   dbpers.owner_eon_id)
 
-        user_list = sorted(dbusr.name for dbusr in self.dbobj.root_users)
+        user_list = sorted(dbusr.name for dbusr in dbpers.root_users)
         if user_list:
             pan_assign(lines, "/system/root_users", user_list)
 
-        ng_list = sorted(str(ng) for ng in self.dbobj.root_netgroups)
+        ng_list = sorted(str(ng) for ng in dbpers.root_netgroups)
         if ng_list:
             pan_assign(lines, "/system/root_netgroups", ng_list)
 
@@ -213,12 +230,12 @@ class PlenaryPersonalityBase(Plenary):
 
         # process parameter templates
         pan_include_if_exists(lines, "personality/config")
-        pan_assign(lines, "/system/personality/name", self.dbobj.name)
-        if self.dbobj.host_environment.name != 'legacy':
+        pan_assign(lines, "/system/personality/name", dbpers.name)
+        if dbpers.host_environment.name != 'legacy':
             pan_assign(lines, "/system/personality/host_environment",
-                       self.dbobj.host_environment, True)
+                       dbpers.host_environment, True)
 
-        if self.dbobj.config_override:
+        if dbpers.config_override:
             pan_include(lines, "features/personality/config_override/config")
 
         # include post features
@@ -230,19 +247,20 @@ class PlenaryPersonalityPreFeature(Plenary):
     prefix = "personality"
 
     @classmethod
-    def template_name(cls, dbpersonality):
-        return "%s/%s/pre_feature" % (cls.prefix, dbpersonality)
+    def template_name(cls, dbstage):
+        return staged_path(cls.prefix, dbstage, "pre_feature")
 
     @classmethod
-    def loadpath(cls, dbpersonality):
-        return dbpersonality.archetype.name
+    def loadpath(cls, dbstage):
+        return dbstage.personality.archetype.name
 
     def body(self, lines):
         feat_tmpl = FeatureTemplate()
         model_feat = []
         interface_feat = []
         pre_feat = []
-        for link in self.dbobj.archetype.features + self.dbobj.features:
+        dbpers = self.dbobj.personality
+        for link in dbpers.archetype.features + self.dbobj.features:
             if link.model:
                 model_feat.append(link)
                 continue
@@ -261,16 +279,17 @@ class PlenaryPersonalityPostFeature(Plenary):
     prefix = "personality"
 
     @classmethod
-    def template_name(cls, dbpersonality):
-        return "%s/%s/post_feature" % (cls.prefix, dbpersonality)
+    def template_name(cls, dbstage):
+        return staged_path(cls.prefix, dbstage, "post_feature")
 
     @classmethod
-    def loadpath(cls, dbpersonality):
-        return dbpersonality.archetype.name
+    def loadpath(cls, dbstage):
+        return dbstage.personality.archetype.name
 
     def body(self, lines):
         feat_tmpl = FeatureTemplate()
-        for link in self.dbobj.archetype.features + self.dbobj.features:
+        dbpers = self.dbobj.personality
+        for link in dbpers.archetype.features + self.dbobj.features:
             if link.feature.post_personality:
                 helper_feature_template(self.dbobj, feat_tmpl, link, lines)
 
@@ -280,11 +299,11 @@ class PlenaryPersonalityParameter(StructurePlenary):
 
     @classmethod
     def template_name(cls, ptmpl):
-        return "%s/%s/%s" % (cls.prefix, ptmpl.personality.name, ptmpl.template)
+        return staged_path(cls.prefix, ptmpl.personality_stage, ptmpl.template)
 
     @classmethod
     def loadpath(cls, ptmpl):
-        return ptmpl.personality.archetype.name
+        return ptmpl.personality_stage.personality.archetype.name
 
     def __init__(self, ptmpl, logger=LOGGER):
         super(PlenaryPersonalityParameter, self).__init__(ptmpl,

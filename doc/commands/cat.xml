@@ -78,6 +78,7 @@
 	<cmdsynopsis>
 	    <command>aq cat</command>
 	    <arg choice="plain"><option>--personality <replaceable>PERSONALITY</replaceable></option></arg>
+	    <arg><option>--personality_stage <replaceable>STAGE</replaceable></option></arg>
 	    <arg><option>--archetype <replaceable>ARCHETYPE</replaceable></option></arg>
 	    <arg><option>--pre_feature</option></arg>
 	    <arg><option>--post_feature</option></arg>
@@ -333,6 +334,16 @@
 		<listitem>
 		    <para>
 			Specify the archetype of the personality, if the name of the personality is not unique.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+		<term>
+		    <option>--personality_stage <replaceable>STAGE</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Select the stage of the personality to use. Defaults to <literal>current</literal>.
 		    </para>
 		</listitem>
 	    </varlistentry>

@@ -20,8 +20,9 @@ from aquilon.aqdb.model import Archetype, Personality, ClusterLifecycle
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
 
 
-def parse_cluster_arguments(session, config, archetype, personality, domain, sandbox,
-                            buildstatus, max_members):
+def parse_cluster_arguments(session, config, archetype, personality,
+                            personality_stage, domain, sandbox, buildstatus,
+                            max_members):
     dbarchetype = Archetype.get_unique(session, archetype, compel=True)
     section = "archetype_" + dbarchetype.name
 
@@ -57,7 +58,7 @@ def parse_cluster_arguments(session, config, archetype, personality, domain, san
     if max_members is None and config.has_option(section, "max_members_default"):
         max_members = config.getint(section, "max_members_default")
 
-    kw = {'personality': dbpersonality,
+    kw = {'personality_stage': dbpersonality.default_stage(personality_stage),
           'branch': dbbranch,
           'sandbox_author': dbauthor,
           'status': dbstatus,

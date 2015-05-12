@@ -33,10 +33,10 @@ class InterfaceFormatter(ObjectFormatter):
         details = ''
 
         if interface.hardware_entity.host:
-            dbpers = interface.hardware_entity.host.personality
-            dbarch = dbpers.archetype
+            dbstage = interface.hardware_entity.host.personality_stage
+            dbarch = dbstage.archetype
         else:
-            dbpers = None
+            dbstage = None
             dbarch = None
 
         flags = []
@@ -101,25 +101,25 @@ class InterfaceFormatter(ObjectFormatter):
                 tagstr = ""
             details.append(indent + "  Provides: %s [%s]%s" %
                            (names, addr.ip, tagstr))
-            static_routes |= set(addr.network.personality_static_routes(dbpers))
+            static_routes |= set(addr.network.personality_static_routes(dbstage))
 
             for dns_record in addr.dns_records:
                 if dns_record.alias_cnt:
                     details.append(indent + "  Aliases: %s" %
                                    ", ".join(str(a.fqdn) for a in dns_record.all_aliases))
 
-        for route in sorted(static_routes, key=attrgetter('destination',
-                                                          'gateway_ip')):
+        for route in sorted(static_routes,
+                            key=attrgetter('destination', 'gateway_ip')):
             details.append(indent + "  {0:c}: {0.destination} gateway {0.gateway_ip}"
                            .format(route))
-            if route.personality:
+            if route.personality_stage:
                 details.append(indent + "    {0:c}: {0.name} {1:c}: {1.name}"
-                               .format(route.personality,
-                                       route.personality.archetype))
+                               .format(route.personality_stage.personality,
+                                       route.personality_stage.archetype))
             if route.comments:
                 details.append(indent + "    Comments: %s" % route.comments)
 
-        for feature in sorted(interface_features(interface, dbarch, dbpers),
+        for feature in sorted(interface_features(interface, dbarch, dbstage),
                               key=attrgetter('name')):
             details.append(indent + "  Template: %s" % feature.cfg_path)
 

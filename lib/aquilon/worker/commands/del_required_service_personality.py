@@ -26,10 +26,9 @@ class CommandDelRequiredServicePersonality(CommandAddRequiredServicePersonality)
 
     required_parameters = ["service", "archetype", "personality"]
 
-    def _update_dbobj(self, archetype, dbpersonality, dbservice):
+    def _update_dbobj(self, dbstage, dbservice):
         try:
-            dbservice.personalities.remove(dbpersonality)
+            dbstage.services.remove(dbservice)
         except ValueError:
-            raise NotFoundException("Service %s required for archetype "
-                                    "%s, personality %s not found." %
-                                    (dbservice.name, archetype, dbpersonality.name))
+            raise NotFoundException("{0} is not required for {1:l}."
+                                    .format(dbservice, dbstage))

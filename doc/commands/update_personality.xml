@@ -29,18 +29,23 @@
 	    </group>
 	    <arg choice="plain"><option>--personality <replaceable>PERSONALITY</replaceable></option></arg>
 	    <arg choice="plain"><option>--archetype <replaceable>ARCHETYPE</replaceable></option></arg>
+	    <arg><option>--personality_stage <replaceable>STAGE</replaceable></option></arg>
 	    <group>
 		<arg choice="plain"><option>--grn <replaceable>GRN</replaceable></option></arg>
 		<arg choice="plain"><option>--eon_id <replaceable>EON_ID</replaceable></option></arg>
 	    </group>
 	    <arg><option>--leave_existing</option></arg>
             <group>
-	    	<arg choice="plain"><option>--cluster_required</option></arg>
+		<arg choice="plain"><option>--cluster_required</option></arg>
 		<arg choice="plain"><option>--nocluster_required</option></arg>
 	    </group>
             <group>
-	    	<arg choice="plain"><option>--config_override</option></arg>
+	        <arg choice="plain"><option>--config_override</option></arg>
 		<arg choice="plain"><option>--noconfig_override</option></arg>
+	    </group>
+	    <group>
+		<arg choice="plain"><option>--staged</option></arg>
+		<arg choice="plain"><option>--unstaged</option></arg>
 	    </group>
 	    <arg><option>--vmhost_capacity_function <replaceable>VMHOST_CAPACITY_FUNCTION</replaceable></option></arg>
 	    <arg><option>--vmhost_overcommit_memory <replaceable>VMHOST_iOVERCOMMIT_MEMORY</replaceable></option></arg>
@@ -70,6 +75,17 @@
 		<listitem>
 		    <para>
 			The name of the personality to update.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+		<term>
+		    <option>--personality_stage <replaceable>STAGE</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Select the stage of the personality to use. Defaults to <literal>next</literal>.
+			Note that this parameter only affects updating staged properties.
 		    </para>
 		</listitem>
 	    </varlistentry>
@@ -123,10 +139,21 @@
 		</term>
 		<listitem>
 		    <para>
-			If this flag is specified a special feature 'personality/config_override' will
+			If this flag is specified a special template <filename>personality/config_override</filename> will
 			be included in the aqdb generated personality configuration template. This feature
 			effectively pulls in config_override.tpl from the personality templates in the
 			template domain, if it exists.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+		<term>
+		    <option>--staged</option>, <option>--unstaged</option>
+		</term>
+		<listitem>
+		    <para>
+			This flag turns personality staging on or off. Staging can only be turned off
+			if both the <literal>previous</literal> and the <literal>next</literal> stages are unused.
 		    </para>
 		</listitem>
 	    </varlistentry>

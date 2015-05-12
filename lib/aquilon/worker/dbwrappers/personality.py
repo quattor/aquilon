@@ -23,26 +23,27 @@ from aquilon.aqdb.model import Host, Cluster
 from aquilon.worker.commands.deploy import validate_justification
 
 
-def is_prod_personality_used(dbpersona):
-    session = object_session(dbpersona)
-    if dbpersona.is_cluster:
+def is_prod_personality_used(dbstage):
+    session = object_session(dbstage)
+    if dbstage.personality.is_cluster:
         q = session.query(Cluster.id)
     else:
         q = session.query(Host.hardware_entity_id)
-    q = q.filter_by(personality=dbpersona)
+    q = q.filter_by(personality_stage=dbstage)
 
-    if dbpersona.host_environment.name == 'prod' and q.count():
+    if dbstage.host_environment.name == 'prod' and q.count():
         return True
 
     return False
 
 
-def validate_personality_justification(dbpersona, user, justification, reason):
-    if is_prod_personality_used(dbpersona):
+def validate_personality_justification(dbstage, user, justification, reason):
+    if is_prod_personality_used(dbstage):
         if not justification:
             raise AuthorizationException(
                 "{0} is marked production and is under "
                 "change management control. Please specify "
-                "--justification or --justification='emergency' and reason.".format(dbpersona))
+                "--justification or --justification='emergency' and reason."
+                .format(dbstage))
 
         validate_justification(user, justification, reason)

@@ -31,8 +31,8 @@ class TestServiceConstraints(TestBrokerCommand):
         command = ["del_required_service", "--service=ntp",
                    "--archetype=windows", "--personality=desktop"]
         out = self.notfoundtest(command)
-        self.matchoutput(out, "Service ntp required for archetype windows, "
-                         "personality desktop not found.", command)
+        self.matchoutput(out, "Service ntp is not required for personality "
+                         "windows/desktop.", command)
 
     def test_110_del_service_with_instances(self):
         command = "del service --service unmapped"
@@ -55,7 +55,7 @@ class TestServiceConstraints(TestBrokerCommand):
         command = "del service --service chooser1"
         out = self.badrequesttest(command.split(" "))
         self.matchoutput(out, "Service chooser1 is still required by the "
-                         "following personalities: aquilon/unixeng-test.",
+                         "following personalities: aquilon/unixeng-test@current.",
                          command)
 
     def test_140_del_service_instance_with_servers(self):

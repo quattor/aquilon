@@ -20,9 +20,9 @@ import re
 from six.moves.configparser import NoSectionError, NoOptionError  # pylint: disable=F0401
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import (Archetype, Personality, PersonalityGrnMap,
-                                Parameter, HostEnvironment, StaticRoute,
-                                PersonalityServiceMap, PersonalityParameter)
+from aquilon.aqdb.model import (Archetype, Personality, PersonalityStage,
+                                PersonalityGrnMap, HostEnvironment,
+                                PersonalityServiceMap)
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.grn import lookup_grn
 from aquilon.worker.templates import Plenary
@@ -34,9 +34,9 @@ class CommandAddPersonality(BrokerCommand):
 
     required_parameters = ["personality", "archetype"]
 
-    def render(self, session, logger, personality, archetype,
-               grn, eon_id, host_environment, comments,
-               cluster_required, copy_from, config_override, **arguments):
+    def render(self, session, logger, personality, archetype, grn, eon_id,
+               host_environment, comments, cluster_required, copy_from,
+               copy_stage, config_override, staged, **arguments):
         if not VALID_PERSONALITY_RE.match(personality):
             raise ArgumentError("Personality name '%s' is not valid." %
                                 personality)
@@ -58,12 +58,15 @@ class CommandAddPersonality(BrokerCommand):
                 cluster_required = dbfrom_persona.cluster_required
             if comments is None:
                 comments = dbfrom_persona.comments
+            if staged is None:
+                staged = dbfrom_persona.staged
 
             if dbfrom_persona.config_override:
                 logger.warn("{0} has config_override set. This setting will "
                             "not be copied, you will need to set it separately "
                             "on the new personality if needed."
                             .format(dbfrom_persona))
+            dbfrom_vers = dbfrom_persona.default_stage(copy_stage)
 
         if not grn and not eon_id:
             raise ArgumentError("GRN or EON ID is required for adding a "
@@ -93,24 +96,15 @@ class CommandAddPersonality(BrokerCommand):
                            config=self.config)
 
         dbpersona = Personality(name=personality, archetype=dbarchetype,
-                                cluster_required=bool(cluster_required),
+                                cluster_required=cluster_required,
                                 host_environment=dbhost_env, owner_grn=dbgrn,
-                                comments=comments,
+                                staged=staged, comments=comments,
                                 config_override=config_override)
         session.add(dbpersona)
 
         if copy_from:
-            if dbfrom_persona.paramholder:
-                dbpersona.paramholder = PersonalityParameter()
-
-                for param in dbfrom_persona.paramholder.parameters:
-                    dbparameter = Parameter(value=param.value,
-                                            comments=param.comments,
-                                            holder=dbpersona.paramholder)
-                    session.add(dbparameter)
-
-            for link in dbfrom_persona.features:
-                dbpersona.features.append(link.copy())
+            dbstage = dbfrom_vers.copy()
+            dbpersona.stages["current"] = dbstage
 
             q = session.query(PersonalityServiceMap)
             q = q.filter_by(personality=dbfrom_persona)
@@ -121,34 +115,18 @@ class CommandAddPersonality(BrokerCommand):
                                                 personality=dbpersona)
                 session.add(dst_map)
 
-            dbpersona.services.extend(dbfrom_persona.services)
-
-            for grn_link in dbfrom_persona.grns:
-                dbpersona.grns.append(grn_link.copy())
-
-            for cluster_type, info in dbfrom_persona.cluster_infos.items():
-                dbpersona.cluster_infos[cluster_type] = info.copy()
-
-            q = session.query(StaticRoute)
-            q = q.filter_by(personality=dbfrom_persona)
-            for src_route in q:
-                dst_route = StaticRoute(network=src_route.network,
-                                        dest_ip=src_route.dest_ip,
-                                        dest_cidr=src_route.dest_cidr,
-                                        gateway_ip=src_route.gateway_ip,
-                                        comments=src_route.comments,
-                                        personality=dbpersona)
-                session.add(dst_route)
-
             # TODO: should we copy root users and netgroups? Not doing so is
             # safer.
         else:
+            dbstage = PersonalityStage(name="current")
+            dbpersona.stages["current"] = dbstage
+
             if self.config.has_option(section, "default_grn_target"):
                 target = self.config.get(section, "default_grn_target")
-                dbpersona.grns.append(PersonalityGrnMap(grn=dbgrn, target=target))
+                dbstage.grns.append(PersonalityGrnMap(grn=dbgrn, target=target))
 
         session.flush()
 
-        plenary = Plenary.get_plenary(dbpersona, logger=logger)
+        plenary = Plenary.get_plenary(dbstage, logger=logger)
         plenary.write()
         return

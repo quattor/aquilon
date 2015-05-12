@@ -34,6 +34,7 @@
 	    <arg><option>--osversion <replaceable>OSVERSION</replaceable></option></arg>
 	    <arg><option>--archetype <replaceable>ARCHETYPE</replaceable></option></arg>
 	    <arg><option>--personality <replaceable>PERSONALITY</replaceable></option></arg>
+	    <arg><option>--personality_stage <replaceable>STAGE</replaceable></option></arg>
 	    <arg><option>--buildstatus <replaceable>BUILDSTATUS</replaceable></option></arg>
 	    <arg><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
 	    <group>
@@ -186,6 +187,16 @@
 			The name of the personality that should be given to the host.
 			If the operation fails, then the previous personality will remain
 			on the host.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+		<term>
+		    <option>--personality_stage <replaceable>STAGE</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Select the stage of the personality to use. Defaults to <literal>current</literal>.
 		    </para>
 		</listitem>
 	    </varlistentry>

@@ -120,10 +120,14 @@ class NetworkFormatter(ObjectFormatter):
                             key=attrgetter('destination', 'gateway_ip')):
             details.append(indent + "  {0:c}: {0.destination} gateway {0.gateway_ip}"
                            .format(route))
-            if route.personality:
+            if route.personality_stage:
                 details.append(indent + "    {0:c}: {0.name} {1:c}: {1.name}"
-                               .format(route.personality,
-                                       route.personality.archetype))
+                               .format(route.personality_stage.personality,
+                                       route.personality_stage.archetype))
+
+                if route.personality_stage.staged:
+                    details.append(indent + "        Stage: %s" %
+                                   route.personality_stage.name)
             if route.comments:
                 details.append(indent + "    Comments: %s" % route.comments)
 
@@ -162,7 +166,7 @@ class NetworkFormatter(ObjectFormatter):
             q = q.filter(HardwareEntity.id.in_(hw_ids))
             q = q.options(subqueryload('interfaces'),
                           subqueryload('host'),
-                          subqueryload('host.personality'))
+                          subqueryload('host.personality_stage'))
             hwent_by_id = {}
             for dbhwent in q.all():
                 hwent_by_id[dbhwent.id] = dbhwent
@@ -223,7 +227,7 @@ class NetworkFormatter(ObjectFormatter):
                         self.redirect_proto(hwent.host.archetype,
                                             host_msg.archetype,
                                             indirect_attrs=False)
-                        self.redirect_proto(hwent.host.personality,
+                        self.redirect_proto(hwent.host.personality_stage,
                                             host_msg.personality,
                                             indirect_attrs=False)
 

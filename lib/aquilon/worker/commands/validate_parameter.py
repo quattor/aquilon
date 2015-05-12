@@ -25,11 +25,12 @@ class CommandValidateParameter(BrokerCommand):
 
     required_parameters = ["personality"]
 
-    def render(self, session, logger, personality, archetype, **arguments):
+    def render(self, session, logger, personality, personality_stage,
+               archetype, **arguments):
         dbpersonality = Personality.get_unique(session, name=personality,
                                                archetype=archetype, compel=True)
 
-        errors = validate_personality_config(dbpersonality)
+        errors = validate_personality_config(dbpersonality.active_stage(personality_stage))
         if errors:
             raise ArgumentError("Following required parameters have not been "
                                 "specified:\n" +

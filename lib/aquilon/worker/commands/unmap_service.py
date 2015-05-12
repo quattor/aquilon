@@ -55,8 +55,11 @@ class CommandUnmapService(BrokerCommand):
                                                    archetype=dbarchetype,
                                                    name=personality,
                                                    compel=True)
-            validate_personality_justification(dbpersonality, user,
-                                               justification, reason)
+
+            for dbstage in dbpersonality.stages.values():
+                validate_personality_justification(dbstage, user,
+                                                   justification, reason)
+
             q = session.query(PersonalityServiceMap)
             q = q.filter_by(personality=dbpersonality)
         else:

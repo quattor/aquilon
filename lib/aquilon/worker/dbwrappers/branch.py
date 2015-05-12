@@ -29,7 +29,8 @@ from aquilon.exceptions_ import (ArgumentError, AuthorizationException,
                                  ProcessException)
 from aquilon.aqdb.column_types import AqStr
 from aquilon.aqdb.model import (Domain, Sandbox, Branch, CompileableMixin,
-                                Archetype, Personality, User)
+                                Archetype, Personality, PersonalityStage,
+                                User)
 from aquilon.utils import remove_dir, validate_template_name
 from aquilon.worker.dbwrappers.user_principal import get_user_principal
 from aquilon.worker.processes import run_git
@@ -204,7 +205,7 @@ def search_branch_query(config, session, cls, owner=None, compiler_version=None,
             subq = subq.distinct()
 
             if compileable:
-                subq = subq.join(Personality, Archetype)
+                subq = subq.join(PersonalityStage, Personality, Archetype)
                 subq = subq.filter_by(is_compileable=True)
 
             if used:
@@ -237,7 +238,7 @@ def has_compileable_objects(dbbranch):
     for cls_ in CompileableMixin.__subclasses__():
         q = session.query(*inspect(cls_).mapper.primary_key)
         q = q.filter(cls_.branch_id == dbbranch.id)
-        q = q.join(Personality, Archetype)
+        q = q.join(PersonalityStage, Personality, Archetype)
         q = q.filter_by(is_compileable=True)
 
         used |= q.count() > 0

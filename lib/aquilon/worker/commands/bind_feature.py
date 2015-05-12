@@ -15,13 +15,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from sqlalchemy.orm import contains_eager
 from sqlalchemy.sql import or_
 
 from aquilon.exceptions_ import (ArgumentError, InternalError,
                                  AuthorizationException, UnimplementedError)
-from aquilon.aqdb.model import (Feature, Archetype, Personality, Model, Domain,
+from aquilon.aqdb.model import (Feature, Archetype, Personality,
+                                PersonalityStage, Model, Domain,
                                 CompileableMixin)
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.commands.deploy import validate_justification
 from aquilon.worker.dbwrappers.feature import add_link, check_feature_template
 from aquilon.worker.dbwrappers.personality import validate_personality_justification
@@ -32,8 +34,9 @@ class CommandBindFeature(BrokerCommand):
 
     required_parameters = ['feature']
 
-    def render(self, session, logger, feature, archetype, personality, model,
-               vendor, interface, justification, reason, user, **arguments):
+    def render(self, session, logger, feature, archetype, personality,
+               personality_stage, model, vendor, interface, justification,
+               reason, user, **arguments):
 
         # Binding a feature to a named interface makes sense in the scope of a
         # personality, but not for a whole archetype.
@@ -41,8 +44,10 @@ class CommandBindFeature(BrokerCommand):
             raise ArgumentError("Binding to a named interface needs "
                                 "a personality.")
 
-        q = session.query(Personality)
-        dbarchetype = None
+        if archetype:
+            dbarchetype = Archetype.get_unique(session, archetype, compel=True)
+        else:
+            dbarchetype = None
 
         feature_type = "host"
 
@@ -51,19 +56,26 @@ class CommandBindFeature(BrokerCommand):
         if personality:
             dbpersonality = Personality.get_unique(session,
                                                    name=personality,
-                                                   archetype=archetype,
+                                                   archetype=dbarchetype,
                                                    compel=True)
-            params["personality"] = dbpersonality
+            if not dbarchetype:
+                dbarchetype = dbpersonality.archetype
+            dbstage = dbpersonality.active_stage(personality_stage)
+
+            personalities = [dbstage]
+
+            params["personality_stage"] = dbstage
             if interface:
                 params["interface_name"] = interface
                 feature_type = "interface"
-            dbarchetype = dbpersonality.archetype
-            q = q.filter_by(archetype=dbarchetype)
-            q = q.filter_by(name=personality)
         elif archetype:
-            dbarchetype = Archetype.get_unique(session, archetype, compel=True)
             params["archetype"] = dbarchetype
+
+            q = session.query(PersonalityStage)
+            q = q.join(Personality)
+            q = q.options(contains_eager('personality'))
             q = q.filter_by(archetype=dbarchetype)
+            personalities = q.all()
         else:
             # It's highly unlikely that a feature template would work for
             # _any_ archetype, so disallow this case for now. As I can't
@@ -93,7 +105,6 @@ class CommandBindFeature(BrokerCommand):
         dbfeature = Feature.get_unique(session, name=feature,
                                        feature_type=feature_type, compel=True)
 
-        cnt = q.count()
         if personality:
             if dbpersonality.owner_grn != dbfeature.owner_grn and \
                dbfeature.visibility == 'owner_only':
@@ -103,10 +114,10 @@ class CommandBindFeature(BrokerCommand):
                                                  "do not match requires --justification.")
                 validate_justification(user, justification, reason)
             else:
-                validate_personality_justification(dbpersonality, user,
+                validate_personality_justification(dbstage, user,
                                                    justification, reason)
-        elif cnt:
-            if not justification:
+        else:
+            if personalities and not justification:
                 raise AuthorizationException("Changing feature bindings for "
                                              "more than just a personality "
                                              "requires --justification.")
@@ -116,8 +127,7 @@ class CommandBindFeature(BrokerCommand):
         session.flush()
 
         plenaries = PlenaryCollection(logger=logger)
-        for dbpersonality in q:
-            plenaries.append(Plenary.get_plenary(dbpersonality))
+        plenaries.extend(map(Plenary.get_plenary, personalities))
 
         written = plenaries.write()
         logger.client_info("Flushed %d/%d templates." %
@@ -128,11 +138,11 @@ class CommandBindFeature(BrokerCommand):
         # Check that the feature templates exist in all affected domains. We
         # don't care about sandboxes, it's the job of sandbox owners to fix
         # them if they break.
-        if "personality" in params:
-            dbpersonality = params["personality"]
-            dbarchetype = dbpersonality.archetype
+        if "personality_stage" in params:
+            dbstage = params["personality_stage"]
+            dbarchetype = dbstage.archetype
         else:
-            dbpersonality = None
+            dbstage = None
             dbarchetype = params["archetype"]
 
         filters = []
@@ -140,10 +150,10 @@ class CommandBindFeature(BrokerCommand):
             subq = session.query(cls_.branch_id)
             subq = subq.distinct()
 
-            if dbpersonality:
-                subq = subq.filter_by(personality=dbpersonality)
+            if dbstage:
+                subq = subq.filter_by(personality_stage=dbstage)
             else:
-                subq = subq.join(Personality)
+                subq = subq.join(PersonalityStage, Personality)
                 subq = subq.filter_by(archetype=dbarchetype)
             filters.append(Domain.id.in_(subq.subquery()))
 

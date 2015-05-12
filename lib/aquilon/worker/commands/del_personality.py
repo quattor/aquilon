@@ -19,9 +19,9 @@
 from sqlalchemy.inspection import inspect
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import Personality, CompileableMixin
+from aquilon.aqdb.model import Personality, PersonalityStage, CompileableMixin
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.templates import Plenary
+from aquilon.worker.templates import Plenary, PlenaryCollection
 
 
 class CommandDelPersonality(BrokerCommand):
@@ -34,14 +34,18 @@ class CommandDelPersonality(BrokerCommand):
 
         for cls_ in CompileableMixin.__subclasses__():
             q = session.query(*inspect(cls_).mapper.primary_key)
-            q = q.filter(cls_.personality_id == dbpersona.id)
+            q = q.join(PersonalityStage)
+            q = q.filter_by(personality=dbpersona)
             if q.count():
                 raise ArgumentError("{0} is still in use and cannot be deleted."
                                     .format(dbpersona))
 
-        plenary = Plenary.get_plenary(dbpersona, logger=logger)
+        plenaries = PlenaryCollection(logger=logger)
+        plenaries.extend(map(Plenary.get_plenary, dbpersona.stages.values()))
+
         session.delete(dbpersona)
+
         session.flush()
-        plenary.remove()
+        plenaries.remove()
 
         return

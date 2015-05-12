@@ -17,7 +17,7 @@
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import ServiceAddress, Host
-from aquilon.utils import validate_nlist_key, first_of
+from aquilon.utils import validate_nlist_key
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.dns import grab_address
 from aquilon.worker.dbwrappers.interface import get_interfaces

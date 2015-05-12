@@ -672,6 +672,18 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
                          "Personality generic, archetype aquilon not found.",
                          command)
 
+    def test_2000_missing_personality_stage(self):
+        hosts = ["aquilon91.aqd-unittest.ms.com"]
+        scratchfile = self.writescratch("missingpersst", "\n".join(hosts))
+        command = ["reconfigure", "--list", scratchfile,
+                   "--personality", "nostage",
+                   "--personality_stage", "previous"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Personality aquilon/nostage does not have stage "
+                         "previous.",
+                         command)
+
     def test_2000_empty_hostlist(self):
         hosts = ["#host", "#does", "", "   #not   ", "#exist"]
         scratchfile = self.writescratch("empty", "\n".join(hosts))

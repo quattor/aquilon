@@ -35,6 +35,7 @@
 	    </group>
 	    <group>
 		<arg choice="plain"><option>--personality <replaceable>PERS</replaceable></option></arg>
+		<arg><option>--personality_stage <replaceable>STAGE</replaceable></option></arg>
 		<arg><option>--archetype <replaceable>ARCH</replaceable></option></arg>
 	        <arg><option>--justification <replaceable>REASON</replaceable></option></arg>
 		<arg><option>--reason <replaceable>REASON</replaceable></option></arg>
@@ -117,6 +118,16 @@
                     </para>
                 </listitem>
             </varlistentry>
+	    <varlistentry>
+		<term>
+		    <option>--personality_stage <replaceable>STAGE</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Select the stage of the personality to use. Defaults to <literal>next</literal>.
+		    </para>
+		</listitem>
+	    </varlistentry>
             <varlistentry>
                 <term>
                     <option>--archetype <replaceable>ARCH</replaceable></option>

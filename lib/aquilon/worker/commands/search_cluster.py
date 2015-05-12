@@ -23,11 +23,11 @@ from aquilon.exceptions_ import NotFoundException
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.formats.list import StringAttributeList
 from aquilon.aqdb.model import (Cluster, EsxCluster, MetaCluster, Archetype,
-                                Personality, Machine, Host, NetworkDevice,
-                                HardwareEntity, ClusterLifecycle, Service,
-                                ServiceInstance, Share, ClusterResource,
-                                VirtualMachine, BundleResource, ResourceGroup,
-                                User)
+                                Personality, PersonalityStage, Machine, Host,
+                                NetworkDevice, HardwareEntity, ClusterLifecycle,
+                                Service, ServiceInstance, Share,
+                                ClusterResource, VirtualMachine, BundleResource,
+                                ResourceGroup, User)
 from aquilon.worker.dbwrappers.host import hostname_to_host
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
 from aquilon.worker.dbwrappers.location import get_location
@@ -38,7 +38,7 @@ class CommandSearchCluster(BrokerCommand):
     required_parameters = []
 
     def render(self, session, logger,
-               archetype, cluster_type, personality,
+               archetype, cluster_type, personality, personality_stage,
                domain, sandbox, branch, sandbox_author, buildstatus,
                allowed_archetype, allowed_personality,
                down_hosts_threshold, down_maint_threshold, max_members,
@@ -92,19 +92,23 @@ class CommandSearchCluster(BrokerCommand):
         if archetype:
             # Added to the searches as appropriate below.
             dbarchetype = Archetype.get_unique(session, archetype, compel=True)
-        if personality and archetype:
-            dbpersonality = Personality.get_unique(session,
-                                                   archetype=dbarchetype,
-                                                   name=personality,
-                                                   compel=True)
-            q = q.filter_by(personality=dbpersonality)
-        elif personality:
-            q = q.join(Personality, aliased=True)
-            q = q.filter_by(name=personality)
-            q = q.reset_joinpoint()
-        elif archetype:
-            q = q.join(Personality, aliased=True)
-            q = q.filter_by(archetype=dbarchetype)
+        else:
+            dbarchetype = None
+
+        if personality or archetype:
+            q = q.join(PersonalityStage, aliased=True)
+            if personality_stage:
+                Personality.force_valid_stage(personality_stage)
+                q = q.filter_by(name=personality_stage)
+            if personality:
+                subq = Personality.get_matching_query(session, name=personality,
+                                                      archetype=dbarchetype,
+                                                      compel=True)
+                q = q.filter(PersonalityStage.personality_id.in_(subq))
+            elif archetype:
+                q = q.join(Personality, aliased=True, from_joinpoint=True)
+                q = q.filter_by(archetype=dbarchetype)
+
             q = q.reset_joinpoint()
 
         if buildstatus:
@@ -243,17 +247,19 @@ class CommandSearchCluster(BrokerCommand):
             # Added to the searches as appropriate below.
             dbma = Archetype.get_unique(session, member_archetype, compel=True)
         if member_personality and member_archetype:
-            q = q.join(Cluster._hosts, Host, aliased=True)
+            q = q.join(Cluster._hosts, Host, PersonalityStage, aliased=True)
             dbmp = Personality.get_unique(session, archetype=dbma,
                                           name=member_personality, compel=True)
-            q = q.filter_by(personality=dbmp)
+            q = q.filter_by(personality_stage=dbmp)
             q = q.reset_joinpoint()
         elif member_personality:
-            q = q.join(Cluster._hosts, Host, Personality, aliased=True)
+            q = q.join(Cluster._hosts, Host, PersonalityStage, Personality,
+                       aliased=True)
             q = q.filter_by(name=member_personality)
             q = q.reset_joinpoint()
         elif member_archetype:
-            q = q.join(Cluster._hosts, Host, Personality, aliased=True)
+            q = q.join(Cluster._hosts, Host, PersonalityStage, Personality,
+                       aliased=True)
             q = q.filter_by(archetype=dbma)
             q = q.reset_joinpoint()
 

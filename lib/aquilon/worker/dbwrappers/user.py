@@ -133,9 +133,10 @@ class UserSync(object):
             for p in q:
                 for dbuser in userset & set(p.root_users):
                     p.root_users.remove(dbuser)
-                personalities.add(p)
 
-        self.plenaries.extend(Plenary.get_plenary(p) for p in personalities)
+                personalities.update(p.stages.values())
+
+        self.plenaries.extend(map(Plenary.get_plenary, personalities))
 
         for dbuser in userlist:
             self.session.delete(dbuser)

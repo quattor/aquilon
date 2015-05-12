@@ -76,8 +76,8 @@ class ServiceInstance(Base):
         from aquilon.aqdb.model import Cluster, MetaCluster
 
         # Check if the service instance is used by any cluster-bound personality
-        personality_ids = self.service.cluster_aligned_personalities
-        if not personality_ids:
+        persst_ids = self.service.cluster_aligned_personalities
+        if not persst_ids:
             # By far, the common case.
             return self._client_count
 
@@ -91,7 +91,7 @@ class ServiceInstance(Base):
         # Force orm to look for mc - service relation
         q = q.join(McAlias, Cluster.metacluster)
         q = q.filter(McAlias.services_used.contains(self))
-        q = q.filter(McAlias.personality_id.in_(personality_ids))
+        q = q.filter(McAlias.personality_stage_id.in_(persst_ids))
 
         for name, max_host in q.all():
             clusters[name] = max_host
@@ -100,7 +100,7 @@ class ServiceInstance(Base):
         q = session.query(Cluster.name, Cluster.max_hosts)
         q = q.filter(Cluster.cluster_type != 'meta')
         q = q.filter(Cluster.services_used.contains(self))
-        q = q.filter(Cluster.personality_id.in_(personality_ids))
+        q = q.filter(Cluster.personality_stage_id.in_(persst_ids))
 
         for name, max_host in q.all():
             clusters[name] = max_host
@@ -111,7 +111,7 @@ class ServiceInstance(Base):
         q = q.filter(Host.services_used.contains(self))
         q = q.outerjoin('_cluster', 'cluster')
         q = q.filter(or_(Cluster.id == null(),
-                         ~Cluster.personality_id.in_(personality_ids)))
+                         ~Cluster.personality_stage_id.in_(persst_ids)))
         adjusted_count += q.count()
         return adjusted_count
 
@@ -145,7 +145,7 @@ class ServiceInstance(Base):
         return self.service.max_clients
 
     @classmethod
-    def get_mapped_instance_cache(cls, dbpersonality, dblocation, dbservices,
+    def get_mapped_instance_cache(cls, dbstage, dblocation, dbservices,
                                   dbnetwork=None):
         """Returns dict of requested services to closest mapped instances."""
         # Can't import these on init as ServiceInstance is a dependency.
@@ -173,7 +173,7 @@ class ServiceInstance(Base):
         instance_priority = defaultdict(lambda: maxsize)
 
         search_maps = []
-        if dbpersonality:
+        if dbstage:
             search_maps.append(PersonalityServiceMap)
         search_maps.append(ServiceMap)
         for map_type in search_maps:
@@ -190,7 +190,7 @@ class ServiceInstance(Base):
             q = session.query(map_type.location_id, ServiceInstance)
             q = q.filter(map_type.service_instance_id == ServiceInstance.id)
             if map_type == PersonalityServiceMap:
-                q = q.filter_by(personality=dbpersonality)
+                q = q.filter_by(personality=dbstage.personality)
             q = q.filter(ServiceInstance.service_id.in_(missing_ids))
             q = q.options(defer(ServiceInstance.comments),
                           undefer(ServiceInstance._client_count),

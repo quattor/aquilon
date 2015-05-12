@@ -48,7 +48,7 @@ def determine_helper_hostname(session, logger, config, dbnetdev):
     helper_service = Service.get_unique(session, helper_name,
                                         compel=InternalError)
     mapped_instances = ServiceInstance.get_mapped_instance_cache(
-        dbpersonality=None, dblocation=dbnetdev.location,
+        dbstage=None, dblocation=dbnetdev.location,
         dbservices=[helper_service])
     for dbsi in mapped_instances.get(helper_service, []):
         if dbsi.servers:

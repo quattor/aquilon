@@ -1,0 +1,105 @@
+CREATE SEQUENCE personality_stage_id_seq;
+
+CREATE TABLE personality_stage (
+	id INTEGER NOT NULL,
+	personality_id INTEGER NOT NULL,
+	name VARCHAR(8) NOT NULL,
+	CONSTRAINT personality_stage_pers_fk FOREIGN KEY (personality_id) REFERENCES personality (id) ON DELETE CASCADE,
+	CONSTRAINT personality_stage_pk PRIMARY KEY (id),
+	CONSTRAINT personality_stage_uk UNIQUE (personality_id, name)
+);
+
+ALTER TABLE host ADD personality_stage_id INTEGER;
+ALTER TABLE clstr ADD personality_stage_id INTEGER;
+ALTER TABLE param_holder ADD personality_stage_id INTEGER;
+ALTER TABLE personality_grn_map ADD personality_stage_id INTEGER;
+ALTER TABLE personality_service_list_item ADD personality_stage_id INTEGER;
+ALTER TABLE personality_cluster_info ADD personality_stage_id INTEGER;
+ALTER TABLE feature_link ADD personality_stage_id INTEGER;
+ALTER TABLE static_route ADD personality_stage_id INTEGER;
+
+CREATE OR REPLACE FUNCTION _convert_personalities() RETURNS VOID LANGUAGE plpgsql AS $$
+DECLARE
+	pers_curs CURSOR IS SELECT id FROM personality;
+	pers_rec RECORD;
+	vers_id personality_stage.id%TYPE;
+BEGIN
+	FOR pers_rec IN pers_curs LOOP
+		INSERT INTO personality_stage (id, personality_id, name)
+			VALUES (nextval('personality_stage_id_seq'), pers_rec.id, 'current')
+			RETURNING id INTO vers_id;
+		UPDATE host SET personality_stage_id = vers_id WHERE personality_id = pers_rec.id;
+		UPDATE clstr SET personality_stage_id = vers_id WHERE personality_id = pers_rec.id;
+		UPDATE param_holder SET personality_stage_id = vers_id WHERE personality_id = pers_rec.id;
+		UPDATE personality_grn_map SET personality_stage_id = vers_id WHERE personality_id = pers_rec.id;
+		UPDATE personality_service_list_item SET personality_stage_id = vers_id WHERE personality_id = pers_rec.id;
+		UPDATE personality_cluster_info SET personality_stage_id = vers_id WHERE personality_id = pers_rec.id;
+		UPDATE feature_link SET personality_stage_id = vers_id WHERE personality_id = pers_rec.id;
+		UPDATE static_route SET personality_stage_id = vers_id WHERE personality_id = pers_rec.id;
+	END LOOP;
+END;
+$$;
+
+BEGIN;
+SELECT _convert_personalities();
+COMMIT;
+DROP FUNCTION _convert_personalities();
+
+ALTER TABLE host ALTER COLUMN personality_stage_id SET NOT NULL;
+ALTER TABLE host ADD CONSTRAINT host_personality_stage_fk
+	FOREIGN KEY (personality_stage_id) REFERENCES personality_stage (id);
+ALTER TABLE host DROP COLUMN personality_id;
+CREATE INDEX host_personality_stage_idx ON host (personality_stage_id);
+
+ALTER TABLE clstr ALTER COLUMN personality_stage_id SET NOT NULL;
+ALTER TABLE clstr ADD CONSTRAINT clstr_personality_stage_fk
+	FOREIGN KEY (personality_stage_id) REFERENCES personality_stage (id);
+ALTER TABLE clstr DROP COLUMN personality_id;
+CREATE INDEX clstr_personality_stage_idx ON clstr (personality_stage_id);
+
+ALTER TABLE param_holder ADD CONSTRAINT param_holder_pers_st_fk
+	FOREIGN KEY (personality_stage_id) REFERENCES personality_stage (id) ON DELETE CASCADE;
+ALTER TABLE param_holder ADD CONSTRAINT param_holder_pers_st_uk UNIQUE (personality_stage_id);
+ALTER TABLE param_holder DROP COLUMN personality_id;
+
+ALTER TABLE personality_grn_map ALTER COLUMN personality_stage_id SET NOT NULL;
+ALTER TABLE personality_grn_map DROP CONSTRAINT personality_grn_map_pk;
+ALTER TABLE personality_grn_map DROP COLUMN personality_id;
+ALTER TABLE personality_grn_map ADD CONSTRAINT personality_grn_map_pers_st_fk
+	FOREIGN KEY (personality_stage_id) REFERENCES personality_stage (id) ON DELETE CASCADE;
+ALTER TABLE personality_grn_map ADD CONSTRAINT personality_grn_map_pk
+	PRIMARY KEY (personality_stage_id, eon_id, target);
+
+ALTER TABLE personality_service_list_item ALTER COLUMN personality_stage_id SET NOT NULL;
+ALTER TABLE personality_service_list_item DROP CONSTRAINT psli_pk;
+ALTER TABLE personality_service_list_item DROP COLUMN personality_id;
+ALTER TABLE personality_service_list_item ADD CONSTRAINT psli_personality_stage_fk
+	FOREIGN KEY (personality_stage_id) REFERENCES personality_stage (id) ON DELETE CASCADE;
+ALTER TABLE personality_service_list_item ADD CONSTRAINT psli_pk
+	PRIMARY KEY (service_id, personality_stage_id);
+CREATE INDEX psli_pers_st_idx ON personality_service_list_item (personality_stage_id);
+
+ALTER TABLE personality_cluster_info ALTER COLUMN personality_stage_id SET NOT NULL;
+ALTER TABLE personality_cluster_info DROP CONSTRAINT pers_clstr_pc_uk;
+ALTER TABLE personality_cluster_info DROP COLUMN personality_id;
+ALTER TABLE personality_cluster_info ADD CONSTRAINT pers_clstr_pers_st_fk
+	FOREIGN KEY (personality_stage_id) REFERENCES personality_stage (id) ON DELETE CASCADE;
+ALTER TABLE personality_cluster_info ADD CONSTRAINT pers_clstr_pc_uk
+	UNIQUE (personality_stage_id, cluster_type);
+
+ALTER TABLE feature_link DROP CONSTRAINT feature_link_uk;
+ALTER TABLE feature_link DROP COLUMN personality_id;
+ALTER TABLE feature_link ADD CONSTRAINT feature_link_pers_st_fk
+	FOREIGN KEY (personality_stage_id) REFERENCES personality_stage (id) ON DELETE CASCADE;
+ALTER TABLE feature_link ADD CONSTRAINT feature_link_uk
+	UNIQUE (feature_id, model_id, archetype_id, personality_stage_id, interface_name);
+CREATE INDEX feature_link_pers_st_idx ON feature_link (personality_stage_id);
+
+ALTER TABLE static_route DROP COLUMN personality_id;
+ALTER TABLE static_route ADD CONSTRAINT static_route_pers_st_fk
+	FOREIGN KEY (personality_stage_id) REFERENCES personality_stage (id) ON DELETE CASCADE;
+CREATE INDEX static_route_pers_st_idx ON static_route (personality_stage_id);
+
+ALTER TABLE personality ADD staged BOOLEAN;
+UPDATE personality SET staged = 'f';
+ALTER TABLE personality ALTER COLUMN staged SET NOT NULL;

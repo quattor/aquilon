@@ -24,7 +24,7 @@ from sqlalchemy.orm import relation, backref, deferred, validates
 from sqlalchemy.orm.exc import NoResultFound
 
 from aquilon.exceptions_ import ArgumentError, NotFoundException, InternalError
-from aquilon.aqdb.model import Base, Archetype, Personality, Model, Grn
+from aquilon.aqdb.model import Base, Archetype, PersonalityStage, Model, Grn
 from aquilon.aqdb.column_types import AqStr, Enum
 from aquilon.aqdb.model.base import _raise_custom
 
@@ -134,17 +134,17 @@ class InterfaceFeature(Feature):
 
     def validate_link(self, key, link):
         if (link.model and link.model.model_type.isNic()) or \
-           (link.interface_name and link.personality):
+           (link.interface_name and link.personality_stage):
             return link
 
         raise InternalError("Interface features can only be bound to "
                             "NIC models or personality/interface name pairs.")
 
 
-def _error_msg(archetype, personality, model, interface_name):
+def _error_msg(archetype, personality_stage, model, interface_name):
     msg = []
-    if archetype or personality:
-        msg.append("{0:l}".format(archetype or personality))
+    if archetype or personality_stage:
+        msg.append("{0:l}".format(archetype or personality_stage))
     if model:
         msg.append(format(model, "l"))
     if interface_name:
@@ -165,8 +165,9 @@ class FeatureLink(Base):
     archetype_id = Column(ForeignKey(Archetype.id, ondelete='CASCADE'),
                           nullable=True, index=True)
 
-    personality_id = Column(ForeignKey(Personality.id, ondelete='CASCADE'),
-                            nullable=True, index=True)
+    personality_stage_id = Column(ForeignKey(PersonalityStage.id,
+                                             ondelete='CASCADE'),
+                                  nullable=True, index=True)
 
     interface_name = Column(AqStr(32), nullable=True)
 
@@ -187,58 +188,59 @@ class FeatureLink(Base):
                                          cascade='all, delete-orphan',
                                          passive_deletes=True))
 
-    personality = relation(Personality,
-                           backref=backref('features',
-                                           cascade='all, delete-orphan',
-                                           passive_deletes=True))
+    personality_stage = relation(PersonalityStage,
+                                 backref=backref('features',
+                                                 cascade='all, delete-orphan',
+                                                 passive_deletes=True))
 
     # The behavior of UNIQUE constraints in the presence of NULL columns is not
     # universal. We need the Oracle compatible behavior, meaning:
     # - Trying to add a row like ('a', NULL) two times should fail
     # - Trying to add ('b', NULL) after ('a', NULL) should succeed
     __table_args__ = (UniqueConstraint(feature_id, model_id, archetype_id,
-                                       personality_id, interface_name,
+                                       personality_stage_id, interface_name,
                                        name='%s_uk' % _LINK),)
 
-    def __init__(self, feature=None, archetype=None, personality=None,
+    def __init__(self, feature=None, archetype=None, personality_stage=None,
                  model=None, interface_name=None):
         # Archetype and personality are mutually exclusive. This makes
         # querying archetype-wide features a bit easier
-        if archetype and personality:  # pragma: no cover
+        if archetype and personality_stage:  # pragma: no cover
             raise InternalError("Archetype and personality are mutually "
                                 "exclusive.")
 
-        if interface_name and not personality:  # pragma: no cover
+        if interface_name and not personality_stage:  # pragma: no cover
             raise InternalError("Binding to a named interface requires "
                                 "a personality.")
 
         super(FeatureLink, self).__init__(feature=feature, archetype=archetype,
-                                          personality=personality, model=model,
+                                          personality_stage=personality_stage,
+                                          model=model,
                                           interface_name=interface_name)
 
     @classmethod
-    def get_unique(cls, session, feature=None, archetype=None, personality=None,
-                   model=None, interface_name=None, compel=False,
-                   preclude=False):
+    def get_unique(cls, session, feature=None, archetype=None,
+                   personality_stage=None, model=None, interface_name=None,
+                   compel=False, preclude=False):
         if feature is None:  # pragma: no cover
             raise ValueError("Feature must be specified.")
 
         q = session.query(cls)
         q = q.filter_by(feature=feature, archetype=archetype,
-                        personality=personality, model=model,
+                        personality_stage=personality_stage, model=model,
                         interface_name=interface_name)
         try:
             result = q.one()
             if preclude:
                 msg = "{0} is already bound to {1}.".format(
-                    feature, _error_msg(archetype, personality, model,
+                    feature, _error_msg(archetype, personality_stage, model,
                                         interface_name))
                 _raise_custom(preclude, ArgumentError, msg)
         except NoResultFound:
             if not compel:
                 return None
             msg = "{0} is not bound to {1}.".format(
-                feature, _error_msg(archetype, personality, model,
+                feature, _error_msg(archetype, personality_stage, model,
                                     interface_name))
             _raise_custom(compel, NotFoundException, msg)
 
@@ -267,9 +269,9 @@ class FeatureLink(Base):
         return self.feature.cfg_path
 
     def copy(self):
-        # We have two foreign keys: feature and personality. Since we want to
-        # use this method for cloning personalities, we copy the feature_id, but
-        # not the personality_id.
+        # We have two foreign keys: feature and personality_stage. Since we
+        # want to use this method for cloning personalities, we copy the
+        # feature_id, but not the personality_stage_id.
         return type(self)(feature=self.feature, model=self.model,
                           archetype=self.archetype,
                           interface_name=self.interface_name)

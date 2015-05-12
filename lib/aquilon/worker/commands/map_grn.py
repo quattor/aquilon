@@ -41,8 +41,8 @@ class CommandMapGrn(BrokerCommand):
         obj.grns.append(mapcls(grn=grn, target=target))
 
     def render(self, session, logger, target, grn, eon_id, hostname, list,
-               membersof, personality, archetype, justification, reason,
-               user, **arguments):
+               membersof, personality, personality_stage, archetype,
+               justification, reason, user, **arguments):
         dbgrn = lookup_grn(session, grn, eon_id, logger=logger,
                            config=self.config,
                            usable_only=self.require_usable_grn)
@@ -64,12 +64,14 @@ class CommandMapGrn(BrokerCommand):
             mapcls = HostGrnMap
             config_key = "host_grn_targets"
         elif personality:
-            objs = [Personality.get_unique(session, name=personality,
-                                           archetype=archetype, compel=True)]
+            dbpersonality = Personality.get_unique(session, name=personality,
+                                                   archetype=archetype,
+                                                   compel=True)
+            objs = [dbpersonality.active_stage(personality_stage)]
             mapcls = PersonalityGrnMap
             config_key = "personality_grn_targets"
-            validate_personality_justification(objs[0], user,
-                                               justification, reason)
+            validate_personality_justification(objs[0], user, justification,
+                                               reason)
         for obj in objs:
             section = "archetype_" + obj.archetype.name
 

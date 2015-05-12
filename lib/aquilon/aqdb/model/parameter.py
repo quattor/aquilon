@@ -22,7 +22,7 @@ from sqlalchemy import Column, Integer, DateTime, Sequence, String, ForeignKey
 from sqlalchemy.orm import relation, backref, deferred
 
 from aquilon.aqdb.column_types import JSONEncodedDict, MutationDict
-from aquilon.aqdb.model import Base, Personality
+from aquilon.aqdb.model import Base, PersonalityStage
 from aquilon.exceptions_ import NotFoundException, ArgumentError, InternalError
 from aquilon.aqdb.column_types import AqStr
 
@@ -56,32 +56,36 @@ class ParameterHolder(Base):
     def holder_object(self):  # pragma: no cover
         raise InternalError("Abstract base method called")
 
+    def copy(self):
+        return self.__class__()
+
 paramholder = ParameterHolder.__table__  # pylint: disable=C0103
 
 
 class PersonalityParameter(ParameterHolder):
     """ Association of parameters with Personality """
 
-    personality_id = Column(ForeignKey(Personality.id, ondelete='CASCADE'),
-                            nullable=True, unique=True)
+    personality_stage_id = Column(ForeignKey(PersonalityStage.id,
+                                             ondelete='CASCADE'),
+                                  nullable=True, unique=True)
 
-    personality = relation(Personality,
-                           backref=backref('paramholder', uselist=False,
-                                           cascade='all, delete-orphan'))
+    personality_stage = relation(PersonalityStage,
+                                 backref=backref('paramholder', uselist=False,
+                                                 cascade='all, delete-orphan'))
 
     __mapper_args__ = {'polymorphic_identity': 'personality'}
 
     @property
     def holder_name(self):
-        return self.personality.qualified_name  # pylint: disable=C0103
+        return self.personality_stage.qualified_name  # pylint: disable=C0103
 
     @property
     def holder_object(self):
-        return self.personality
+        return self.personality_stage
 
     @property
     def archetype(self):
-        return self.personality.archetype
+        return self.personality_stage.archetype
 
 
 class Parameter(Base):
@@ -256,3 +260,6 @@ class Parameter(Base):
         else:
             flattened[((path + PATH_SEP) if path else "") + key] = data
         return flattened
+
+    def copy(self):
+        return self.__class__(value=self.value, comments=self.comments)

@@ -25,44 +25,49 @@ from aquilon.worker.formats.parameter import DiffData
 
 class CommandShowDiff(BrokerCommand):
 
-    required_parameters = ["archetype", "personality", "other"]
+    required_parameters = ["archetype", "personality"]
 
-    def render(self, session, archetype, personality, other,
-               other_archetype, **arguments):
+    def render(self, session, archetype, personality, personality_stage,
+               other, other_archetype, other_stage, **arguments):
 
         dbpersona = Personality.get_unique(session, name=personality,
                                            archetype=archetype, compel=True)
+        dbstage = dbpersona.default_stage(personality_stage)
 
+        if not other:
+            other = personality
         if not other_archetype:
             other_archetype = archetype
 
         db_other_persona = Personality.get_unique(session, name=other,
                                                   archetype=other_archetype,
                                                   compel=True)
+        db_other_ver = db_other_persona.default_stage(other_stage)
 
         ret = defaultdict(dict)
-        self.populate_data(session, dbpersona, "my", ret)
-        self.populate_data(session, db_other_persona, "other", ret)
+        self.populate_data(session, dbstage, "my", ret)
+        self.populate_data(session, db_other_ver, "other", ret)
 
-        return DiffData(dbpersona, db_other_persona, ret)
+        return DiffData(dbstage, db_other_ver, ret)
 
-    def populate_data(self, session, dbpersona, dtype, ret):
+    def populate_data(self, session, dbstage, dtype, ret):
         """ pouplate data we are interesetd in seeing as part of diff """
+        dbpersona = dbstage.personality
 
         # parameters
         params = {}
 
-        if dbpersona.paramholder:
-            for param in dbpersona.paramholder.parameters:
+        if dbstage.paramholder:
+            for param in dbstage.paramholder.parameters:
                 params.update(Parameter.flatten(param.value))
         ret["Parameters"][dtype] = params
 
         # process features
-        features = dict((fl.feature.name, True) for fl in dbpersona.features)
+        features = dict((fl.feature.name, True) for fl in dbstage.features)
         ret["Features"][dtype] = features
 
         # process required_services
-        services = dict((srv.name, True) for srv in dbpersona.services)
+        services = dict((srv.name, True) for srv in dbstage.services)
         ret["Required Services"][dtype] = services
 
         # service maps
@@ -73,7 +78,7 @@ class CommandShowDiff(BrokerCommand):
         ret["ServiceMap"][dtype] = smaps
 
         # grns
-        grns = dict((grn_rec.grn, True) for grn_rec in dbpersona.grns)
+        grns = dict((grn_rec.grn, True) for grn_rec in dbstage.grns)
         ret["Grns"][dtype] = grns
 
         # options

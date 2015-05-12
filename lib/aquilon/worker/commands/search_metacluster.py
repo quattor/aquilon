@@ -23,9 +23,9 @@ from aquilon.exceptions_ import NotFoundException
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.formats.list import StringAttributeList
 from aquilon.aqdb.model import (Cluster, MetaCluster, Archetype, Personality,
-                                ClusterLifecycle, Service, ServiceInstance,
-                                Share, ClusterResource, BundleResource,
-                                ResourceGroup, User)
+                                PersonalityStage, ClusterLifecycle, Service,
+                                ServiceInstance, Share, ClusterResource,
+                                BundleResource, ResourceGroup, User)
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
 from aquilon.worker.dbwrappers.location import get_location
 
@@ -34,7 +34,7 @@ class CommandSearchCluster(BrokerCommand):
 
     required_parameters = []
 
-    def render(self, session, archetype, personality,
+    def render(self, session, archetype, personality, personality_stage,
                domain, sandbox, branch, sandbox_author, buildstatus,
                allowed_archetype, allowed_personality, max_members,
                member_archetype, member_cluster, member_personality,
@@ -65,19 +65,23 @@ class CommandSearchCluster(BrokerCommand):
         if archetype:
             # Added to the searches as appropriate below.
             dbarchetype = Archetype.get_unique(session, archetype, compel=True)
-        if personality and archetype:
-            dbpersonality = Personality.get_unique(session,
-                                                   archetype=dbarchetype,
-                                                   name=personality,
-                                                   compel=True)
-            q = q.filter_by(personality=dbpersonality)
-        elif personality:
-            PersAlias = aliased(Personality)
-            q = q.join(PersAlias).filter_by(name=personality)
-            q = q.reset_joinpoint()
-        elif archetype:
-            PersAlias = aliased(Personality)
-            q = q.join(PersAlias).filter_by(archetype=dbarchetype)
+        else:
+            dbarchetype = None
+
+        if personality or archetype:
+            q = q.join(PersonalityStage, aliased=True)
+            if personality_stage:
+                Personality.force_valid_stage(personality_stage)
+                q = q.filter_by(name=personality_stage)
+            if personality:
+                subq = Personality.get_matching_query(session, name=personality,
+                                                      archetype=dbarchetype,
+                                                      compel=True)
+                q = q.filter(PersonalityStage.personality_id.in_(subq))
+            elif archetype:
+                q = q.join(Personality, aliased=True, from_joinpoint=True)
+                q = q.filter_by(archetype=dbarchetype)
+
             q = q.reset_joinpoint()
 
         if buildstatus:
@@ -183,23 +187,29 @@ class CommandSearchCluster(BrokerCommand):
             dbma = Archetype.get_unique(session, member_archetype, compel=True)
         if member_personality and member_archetype:
             CAlias = aliased(Cluster)
-            q = q.join(CAlias, MetaCluster.members)
+            PVAlias = aliased(PersonalityStage)
+            q = q.join((CAlias, MetaCluster.members),
+                       (PVAlias, CAlias.personality_stage))
             dbmp = Personality.get_unique(session, archetype=dbma,
                                           name=member_personality, compel=True)
             q = q.filter_by(personality=dbmp)
             q = q.reset_joinpoint()
         elif member_personality:
             CAlias = aliased(Cluster)
+            PVAlias = aliased(PersonalityStage)
             PersAlias = aliased(Personality)
-            q = q.join(CAlias, MetaCluster.members)
-            q = q.join(PersAlias, CAlias.personality)
+            q = q.join((CAlias, MetaCluster.members),
+                       (PVAlias, CAlias.personality_stage),
+                       (PersAlias, PVAlias.personality))
             q = q.filter_by(name=member_personality)
             q = q.reset_joinpoint()
         elif member_archetype:
             CAlias = aliased(Cluster)
+            PVAlias = aliased(PersonalityStage)
             PersAlias = aliased(Personality)
-            q = q.join(CAlias, MetaCluster.members)
-            q = q.join(PersAlias, CAlias.personality)
+            q = q.join((CAlias, MetaCluster.members),
+                       (PVAlias, CAlias.personality_stage),
+                       (PersAlias, PVAlias.personality))
             q = q.filter_by(archetype=dbma)
             q = q.reset_joinpoint()
 

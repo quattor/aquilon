@@ -20,11 +20,12 @@ import re
 
 from sqlalchemy import (Column, Integer, Boolean, DateTime, Sequence, String,
                         ForeignKey, UniqueConstraint, PrimaryKeyConstraint)
-from sqlalchemy.orm import relation, deferred
 from sqlalchemy.inspection import inspect
+from sqlalchemy.orm import relation, backref, deferred, object_session
+from sqlalchemy.orm.collections import column_mapped_collection
 
-from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.column_types.aqstr import AqStr
+from aquilon.exceptions_ import ArgumentError, NotFoundException
+from aquilon.aqdb.column_types import AqStr, Enum
 from aquilon.aqdb.model import (Base, Archetype, Grn, HostEnvironment,
                                 User, NetGroupWhiteList)
 
@@ -32,6 +33,8 @@ _TN = 'personality'
 _PGN = 'personality_grn_map'
 _PRU = 'personality_rootuser'
 _PRNG = 'personality_rootnetgroup'
+_PS = 'personality_stage'
+_ALLOWED_STAGES = ('previous', 'current', 'next')
 
 
 class Personality(Base):
@@ -52,6 +55,9 @@ class Personality(Base):
                           nullable=False)
 
     host_environment_id = Column(ForeignKey(HostEnvironment.id), nullable=False)
+
+    staged = Column(Boolean(name="%s_staged_ck" % _TN), default=False,
+                    nullable=False)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
@@ -88,12 +94,145 @@ class Personality(Base):
                                 "does not match the host environment '{1}'"
                                 .format(name, host_environment))
 
+    @staticmethod
+    def force_valid_stage(stage):
+        if stage not in _ALLOWED_STAGES:
+            raise ArgumentError("'%s' is not a valid personality stage." %
+                                stage)
+
+    def force_existing_stage(self, stage):
+        self.force_valid_stage(stage)
+        if stage not in self.stages:
+            raise NotFoundException("{0} does not have stage {1!s}."
+                                    .format(self, stage))
+
+    def default_stage(self, stage=None):
+        """
+        Return the default stage to be used for non-update operations
+        """
+        if stage:
+            if not self.staged:
+                raise ArgumentError("{0} is not staged.".format(self))
+            self.force_existing_stage(stage)
+            return self.stages[stage]
+        else:
+            return self.stages["current"]
+
+    def active_stage(self, stage=None):
+        """
+        Return the default stage to be used for updates
+        """
+        if stage:
+            if not self.staged:
+                raise ArgumentError("{0} is not staged.".format(self))
+            self.force_existing_stage(stage)
+            return self.stages[stage]
+        else:
+            if not self.staged:
+                return self.stages["current"]
+
+            if "next" not in self.stages:
+                session = object_session(self)
+                with session.no_autoflush:
+                    dbstage = self.stages["current"].copy(name="next")
+                    self.stages["next"] = dbstage
+
+            return self.stages["next"]
+
+
+class PersonalityStage(Base):
+    __tablename__ = _PS
+    _class_label = "Personality"
+
+    id = Column(Integer, Sequence('%s_id_seq' % _PS), primary_key=True)
+
+    personality_id = Column(ForeignKey(Personality.id, ondelete='CASCADE'),
+                            nullable=False)
+    name = Column(Enum(8, _ALLOWED_STAGES), nullable=False)
+
+    # The plenary classes need the ORM to be aware if the object is deleted, so
+    # we're using a ORM cascading instead of passive_deletes=True here.
+    personality = relation(Personality, innerjoin=True,
+                           backref=backref('stages',
+                                           cascade='all, delete-orphan',
+                                           collection_class=column_mapped_collection(name)))
+
+    __table_args__ = (UniqueConstraint(personality_id, name,
+                                       name='%s_uk' % _PS),)
+
+    @property
+    def qualified_name(self):
+        if self.staged:
+            return self.personality.qualified_name + "@" + self.name
+        else:
+            return self.personality.qualified_name
+
+    @property
+    def cluster_required(self):
+        return self.personality.cluster_required
+
+    @property
+    def staged(self):
+        return self.personality.staged
+
+    @property
+    def owner_eon_id(self):
+        return self.personality.owner_eon_id
+
+    @property
+    def archetype(self):
+        return self.personality.archetype
+
+    @property
+    def owner_grn(self):
+        return self.personality.owner_grn
+
+    @property
+    def host_environment(self):
+        return self.personality.host_environment
+
+    @property
+    def root_users(self):
+        return self.personality.root_users
+
+    @property
+    def root_netgroups(self):
+        return self.personality.root_netgroups
+
+    def copy(self, name="current"):
+        from aquilon.aqdb.model import StaticRoute
+        session = object_session(self)
+
+        new = self.__class__(name=name)
+
+        with session.no_autoflush:
+            if self.paramholder:
+                new.paramholder = self.paramholder.copy()
+                new.paramholder.parameters.extend(param.copy()
+                                                  for param in self.paramholder.parameters)
+
+            new.features.extend(link.copy() for link in self.features)
+            new.services.extend(self.services)
+            new.grns.extend(grn_link.copy() for grn_link in self.grns)
+
+            for cluster_type, info in self.cluster_infos.items():
+                new.cluster_infos[cluster_type] = info.copy()
+
+            q = session.query(StaticRoute)
+            q = q.filter_by(personality_stage=self)
+            for src_route in q:
+                dst_route = src_route.copy(personality_stage=new)
+                session.add(dst_route)
+
+        return new
+
 
 class PersonalityGrnMap(Base):
     __tablename__ = _PGN
 
-    personality_id = Column(ForeignKey(Personality.id, ondelete='CASCADE'),
-                            nullable=False)
+    personality_stage_id = Column(ForeignKey(PersonalityStage.id,
+                                             ondelete='CASCADE'),
+                                  nullable=False)
 
     eon_id = Column(ForeignKey(Grn.eon_id), nullable=False)
 
@@ -101,13 +240,15 @@ class PersonalityGrnMap(Base):
 
     grn = relation(Grn, lazy=False, innerjoin=True)
 
-    __table_args__ = (PrimaryKeyConstraint(personality_id, eon_id, target),)
+    __table_args__ = (PrimaryKeyConstraint(personality_stage_id, eon_id,
+                                           target),)
 
     def copy(self):
         return type(self)(eon_id=self.eon_id, target=self.target)
 
-Personality.grns = relation(PersonalityGrnMap, cascade='all, delete-orphan',
-                            passive_deletes=True)
+PersonalityStage.grns = relation(PersonalityGrnMap,
+                                 cascade='all, delete-orphan',
+                                 passive_deletes=True)
 
 
 class __PersonalityRootUser(Base):

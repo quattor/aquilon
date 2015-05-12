@@ -32,6 +32,7 @@ class TestAddMetaCluster(PersonalityTestMixin, TestBrokerCommand):
         # The broker currently assumes this personality to exist
         self.create_personality("metacluster", "metacluster",
                                 grn="grn:/ms/ei/aquilon/aqd")
+        self.create_personality("metacluster", "nostage", staged=True)
 
     def test_100_add_utmc1(self):
         command = ["add_metacluster", "--metacluster=utmc1",
@@ -140,6 +141,34 @@ class TestAddMetaCluster(PersonalityTestMixin, TestBrokerCommand):
                    "--domain=unittest"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "name global is reserved", command)
+
+    def test_200_missing_personality(self):
+        command = ["add_metacluster", "--metacluster", "utmc99",
+                   "--building", "ut", "--domain", "unittest",
+                   "--archetype", "metacluster",
+                   "--personality", "no-such-personality"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out, "Personality no-such-personality, archetype "
+                         "metacluster not found.", command)
+
+    def test_200_missing_personality_stage(self):
+        command = ["add_metacluster", "--metacluster", "utmc99",
+                   "--building", "ut", "--domain", "unittest",
+                   "--archetype", "metacluster", "--personality", "nostage",
+                   "--personality_stage", "previous"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out, "Personality metacluster/nostage does not "
+                         "have stage previous.", command)
+
+    def test_200_bad_personality_stage(self):
+        command = ["add_metacluster", "--metacluster", "utmc99",
+                   "--building", "ut", "--domain", "unittest",
+                   "--archetype", "metacluster", "--personality", "nostage",
+                   "--personality_stage", "no-such-stage"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "'no-such-stage' is not a valid personality stage.",
+                         command)
 
     def test_300_show_all(self):
         command = "show metacluster --all"

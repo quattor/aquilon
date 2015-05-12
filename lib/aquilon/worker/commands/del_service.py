@@ -35,9 +35,9 @@ class CommandDelService(BrokerCommand):
                                    for archetype in dbservice.archetypes))
             raise ArgumentError("Service %s is still required by the following "
                                 "archetypes: %s." % (dbservice.name, msg))
-        if dbservice.personalities:
-            msg = ", ".join(sorted(personality.qualified_name
-                                   for personality in dbservice.personalities))
+        if dbservice.personality_stages:
+            msg = ", ".join(sorted(persst.qualified_name
+                                   for persst in dbservice.personality_stages))
             raise ArgumentError("Service %s is still required by the following "
                                 "personalities: %s." % (dbservice.name, msg))
         if dbservice.instances:

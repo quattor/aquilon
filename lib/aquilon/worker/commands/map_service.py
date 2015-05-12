@@ -51,8 +51,10 @@ class CommandMapService(BrokerCommand):
             dbpersona = Personality.get_unique(session, name=personality,
                                                archetype=archetype, compel=True)
 
-            validate_personality_justification(dbpersona, user,
-                                               justification, reason)
+            for dbstage in dbpersona.stages.values():
+                validate_personality_justification(dbstage, user,
+                                                   justification, reason)
+
             map_class = PersonalityServiceMap
             query = session.query(map_class).filter_by(personality=dbpersona)
 

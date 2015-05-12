@@ -106,7 +106,8 @@ class TestAddStaticRoute(TestBrokerCommand, MachineTestMixin):
 
     def test_140_clone_personality(self):
         self.noouttest(["add_personality", "--personality", "inventory-clone",
-                        "--archetype", "aquilon", "--copy_from", "inventory"])
+                        "--archetype", "aquilon", "--copy_from", "inventory",
+                        "--staged"])
 
     def test_200_show_host(self):
         gw = self.net["routing1"].usable[-1]
@@ -127,7 +128,8 @@ class TestAddStaticRoute(TestBrokerCommand, MachineTestMixin):
                           command)
         self.searchoutput(out,
                           r'Static Route: 192\.168\.248\.0/24 gateway %s'
-                          r'\s*Personality: inventory-clone Archetype: aquilon$' % gw,
+                          r'\s*Personality: inventory-clone Archetype: aquilon$'
+                          r'\s*Stage: current$' % gw,
                           command)
         self.searchoutput(out,
                           r'Static Route: 192\.168\.250\.0/23 gateway %s'
@@ -272,6 +274,40 @@ class TestAddStaticRoute(TestBrokerCommand, MachineTestMixin):
                           (net.broadcast, net.gateway,
                            eth0_ip, net.netmask, net.gateway),
                           command)
+
+    def test_300_missing_personality(self):
+        gw = self.net["routing1"].usable[-1]
+        command = ["add", "static", "route", "--gateway", gw,
+                   "--ip", "192.168.250.0", "--prefixlen", "23",
+                   "--personality", "personality-does-not-exist",
+                   "--archetype", "aquilon"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out,
+                         "Personality personality-does-not-exist, "
+                         "archetype aquilon not found.",
+                         command)
+
+    def test_300_missing_personality_stage(self):
+        gw = self.net["routing1"].usable[-1]
+        command = ["add", "static", "route", "--gateway", gw,
+                   "--ip", "192.168.250.0", "--prefixlen", "23",
+                   "--personality", "nostage", "--archetype", "aquilon",
+                   "--personality_stage", "previous"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out,
+                         "Personality aquilon/nostage does not have stage "
+                         "previous.",
+                         command)
+
+    def test_300_bad_personality_stage(self):
+        gw = self.net["routing1"].usable[-1]
+        command = ["add", "static", "route", "--gateway", gw,
+                   "--ip", "192.168.250.0", "--prefixlen", "23",
+                   "--personality", "nostage", "--archetype", "aquilon",
+                   "--personality_stage", "no-such-stage"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "'no-such-stage' is not a valid personality "
+                         "stage.", command)
 
     def test_800_cleanup_clone(self):
         self.noouttest(["del_personality", "--archetype", "aquilon",

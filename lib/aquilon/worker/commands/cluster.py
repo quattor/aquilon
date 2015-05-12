@@ -33,8 +33,8 @@ class CommandCluster(BrokerCommand):
 
     required_parameters = ["hostname", "cluster"]
 
-    def render(self, session, logger, hostname, cluster,
-               personality, **arguments):
+    def render(self, session, logger, hostname, cluster, personality,
+               personality_stage, **arguments):
         dbhost = hostname_to_host(session, hostname)
         dbcluster = Cluster.get_unique(session, cluster, compel=True)
 
@@ -54,8 +54,9 @@ class CommandCluster(BrokerCommand):
                                                    name=personality,
                                                    archetype=dbhost.archetype,
                                                    compel=True)
-            if dbhost.personality != dbpersonality:
-                dbhost.personality = dbpersonality
+            dbstage = dbpersonality.default_stage(personality_stage)
+            if dbhost.personality_stage != dbstage:
+                dbhost.personality_stage = dbstage
                 personality_change = True
 
         # Now that we've changed the personality, we can check

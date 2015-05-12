@@ -40,8 +40,9 @@ class CommandReconfigureList(BrokerCommand):
 
     def get_hostlist(self, session, list, **arguments):   # pylint: disable=W0613
         check_hostlist_size(self.command, self.config, list)
-        options = [joinedload('personality'),
-                   subqueryload('personality.grns'),
+        options = [joinedload('personality_stage'),
+                   joinedload('personality_stage.personality'),
+                   subqueryload('personality_stage.grns'),
                    subqueryload('grns'),
                    subqueryload('services_used'),
                    undefer('services_used._client_count'),
@@ -61,7 +62,7 @@ class CommandReconfigureList(BrokerCommand):
         preload_machine_data(session, dbhosts)
         return dbhosts
 
-    def render(self, session, logger, archetype, personality, keepbindings,
+    def render(self, session, logger, archetype, personality, personality_stage, keepbindings,
                buildstatus, osname, osversion, grn, eon_id, cleargrn, comments,
                **arguments):
         dbhosts = self.get_hostlist(session, **arguments)
@@ -98,20 +99,22 @@ class CommandReconfigureList(BrokerCommand):
             else:
                 dbarchetype = dbhost.archetype
 
-            if personality or old_archetype != dbarchetype:
+            if personality or personality_stage or old_archetype != dbarchetype:
                 if not personality:
                     personality = dbhost.personality.name
 
                 # Cache personalities to avoid looking up the same data many
                 # times
                 if personality in personality_cache[dbarchetype]:
-                    dbpersonality = personality_cache[dbarchetype][personality]
+                    dbstage = personality_cache[dbarchetype][personality]
+                    dbpersonality = dbstage.personality
                 else:
                     try:
                         dbpersonality = Personality.get_unique(session, name=personality,
                                                                archetype=dbarchetype,
                                                                compel=True)
-                        personality_cache[dbarchetype][personality] = dbpersonality
+                        dbstage = dbpersonality.default_stage(personality_stage)
+                        personality_cache[dbarchetype][personality] = dbstage
                     except NotFoundException as err:
                         failed.append("%s: %s" % (dbhost.fqdn, err))
                         continue
@@ -126,7 +129,7 @@ class CommandReconfigureList(BrokerCommand):
                                           dbhost.cluster, ", ".join(allowed)))
                     continue
 
-                dbhost.personality = dbpersonality
+                dbhost.personality_stage = dbstage
 
             if osname or osversion or old_archetype != dbarchetype:
                 if not osname:

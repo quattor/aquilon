@@ -143,6 +143,8 @@ class TestBindFeature(TestBrokerCommand):
     def test_111_verify_show_personality_proto(self):
         command = ["show", "personality", "--personality", "inventory", "--format=proto"]
         personality = self.protobuftest(command, expect=1)[0]
+        self.assertEqual(personality.name, "inventory")
+        self.assertEqual(personality.stage, "")
         feature = personality.features[0]
         self.assertEqual(feature.name, "post_host")
         self.assertEqual(feature.type, "host")
@@ -414,7 +416,8 @@ class TestBindFeature(TestBrokerCommand):
         command = ["show", "feature", "--feature", "src_route",
                    "--type", "interface"]
         out = self.commandtest(command)
-        self.matchoutput(out, 'Bound to: Personality aquilon/compileserver, '
+        self.matchoutput(out,
+                         'Bound to: Personality aquilon/compileserver, '
                          'Interface bond0', command)
 
     def test_161_verify_show_host(self):
@@ -438,7 +441,8 @@ class TestBindFeature(TestBrokerCommand):
 
     def test_170_clone_personality(self):
         self.noouttest(["add_personality", "--personality", "inventory-clone",
-                        "--copy_from", "inventory", "--archetype", "aquilon"])
+                        "--copy_from", "inventory", "--archetype", "aquilon",
+                        "--staged"])
 
     def test_171_verify_clone(self):
         command = ["show", "personality", "--personality", "inventory-clone"]
@@ -463,7 +467,7 @@ class TestBindFeature(TestBrokerCommand):
         out = self.commandtest(command)
         self.searchoutput(out, r"Bound to: Personality aquilon/inventory$",
                           command)
-        self.searchoutput(out, r"Bound to: Personality aquilon/inventory-clone$",
+        self.searchoutput(out, r"Bound to: Personality aquilon/inventory-clone@current$",
                           command)
 
     def test_179_cleanup_clone(self):
@@ -540,6 +544,34 @@ class TestBindFeature(TestBrokerCommand):
                          "Changing feature bindings for more than just a "
                          "personality requires --justification.",
                          command)
+
+    def test_200_missing_personality(self):
+        command = ["bind", "feature", "--feature", "post_host",
+                   "--personality", "personality-does-not-exist",
+                   "--archetype", "aquilon"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out,
+                         "Personality personality-does-not-exist, "
+                         "archetype aquilon not found.",
+                         command)
+
+    def test_200_missing_personality_stage(self):
+        command = ["bind", "feature", "--feature", "post_host",
+                   "--personality", "nostage", "--archetype", "aquilon",
+                   "--personality_stage", "previous"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out,
+                         "Personality aquilon/nostage does not have stage "
+                         "previous.",
+                         command)
+
+    def test_200_bad_personality_stage(self):
+        command = ["bind", "feature", "--feature", "post_host",
+                   "--personality", "nostage", "--archetype", "aquilon",
+                   "--personality_stage", "no-such-stage"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "'no-such-stage' is not a valid personality "
+                         "stage.", command)
 
     def test_200_bind_model_no_justification(self):
         command = ["bind", "feature", "--feature", "disable_ht",

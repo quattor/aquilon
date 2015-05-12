@@ -19,8 +19,8 @@
 from sqlalchemy.orm import joinedload, subqueryload, contains_eager
 from sqlalchemy.sql import or_
 
-from aquilon.aqdb.model import (Archetype, Personality, HostEnvironment,
-                                PersonalityGrnMap, Service)
+from aquilon.aqdb.model import (Archetype, Personality, PersonalityStage,
+                                HostEnvironment, PersonalityGrnMap, Service)
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.grn import lookup_grn
 from aquilon.worker.formats.list import StringAttributeList
@@ -30,10 +30,14 @@ class CommandSearchPersonality(BrokerCommand):
 
     required_parameters = []
 
-    def render(self, session, personality, archetype, grn, eon_id,
-               host_environment, config_override, required_service, fullinfo,
-               style, **arguments):
-        q = session.query(Personality)
+    def render(self, session, personality, personality_stage, archetype, grn,
+               eon_id, host_environment, config_override, required_service,
+               fullinfo, style, **arguments):
+        q = session.query(PersonalityStage)
+        if personality_stage:
+            Personality.force_valid_stage(personality_stage)
+            q = q.filter_by(name=personality_stage)
+        q = q.join(Personality)
         if archetype:
             dbarchetype = Archetype.get_unique(session, archetype, compel=True)
             q = q.filter_by(archetype=dbarchetype)
@@ -51,18 +55,19 @@ class CommandSearchPersonality(BrokerCommand):
         if grn or eon_id:
             dbgrn = lookup_grn(session, grn, eon_id, autoupdate=False,
                                usable_only=False)
-            q = q.outerjoin(PersonalityGrnMap, aliased=True)
+            q = q.outerjoin(PersonalityStage, PersonalityGrnMap, aliased=True)
             q = q.filter(or_(Personality.owner_eon_id == dbgrn.eon_id,
                              PersonalityGrnMap.eon_id == dbgrn.eon_id))
             q = q.reset_joinpoint()
 
         if required_service:
             dbsrv = Service.get_unique(session, required_service, compel=True)
-            q = q.filter(Personality.services.contains(dbsrv))
+            q = q.filter(PersonalityStage.services.contains(dbsrv))
 
         q = q.join(Archetype)
-        q = q.order_by(Archetype.name, Personality.name)
-        q = q.options(contains_eager('archetype'))
+        q = q.order_by(Archetype.name, Personality.name, PersonalityStage.name)
+        q = q.options(contains_eager('personality'),
+                      contains_eager('personality.archetype'))
 
         if fullinfo or style != 'raw':
             q = q.options(subqueryload('services'),

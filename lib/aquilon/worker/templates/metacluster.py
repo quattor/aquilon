@@ -100,7 +100,7 @@ class PlenaryMetaClusterObject(ObjectPlenary):
 
         if not inspect(self.dbobj).deleted:
             keylist.append(PlenaryKey(exclusive=False,
-                                      personality=self.dbobj.personality,
+                                      personality=self.dbobj.personality_stage,
                                       logger=self.logger))
             keylist.extend(PlenaryKey(exclusive=False, service_instance=si,
                                       logger=self.logger)
@@ -122,7 +122,7 @@ class PlenaryMetaClusterObject(ObjectPlenary):
             path = PlenaryServiceInstanceClientDefault.template_name(servinst)
             pan_include(lines, path)
 
-        path = PlenaryPersonalityBase.template_name(self.dbobj.personality)
+        path = PlenaryPersonalityBase.template_name(self.dbobj.personality_stage)
         pan_include(lines, path)
         pan_include(lines, "archetype/final")
 

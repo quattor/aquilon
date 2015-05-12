@@ -33,17 +33,15 @@
 		<arg choice="plain"><option>--grn <replaceable>GRN</replaceable></option></arg>
 		<arg choice="plain"><option>--eon_id <replaceable>EON_ID</replaceable></option></arg>
 	    </group>
-	    <group>
-	         <arg choice="plain"><option>--cluster_required</option></arg>
-	         <arg choice="plain"><option>--nocluster_required</option></arg>
-	    </group>
+	    <arg><option>--cluster_required</option></arg>
 	    <arg><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
-	    <arg><option>--copy_from <replaceable>COPY_FROM</replaceable></option></arg>
-	    <arg><option>--host_environment <replaceable>HOSTENV</replaceable></option></arg>
 	    <group>
-	          <arg choice="plain"><option>--config_override</option></arg>
-	          <arg choice="plain"><option>--noconfig_override</option></arg>
+		<arg choice="plain"><option>--copy_from <replaceable>SRC_PERSONALITY</replaceable></option></arg>
+		<arg><option>--copy_stage <replaceable>SRC_STAGE</replaceable></option></arg>
 	    </group>
+	    <arg><option>--host_environment <replaceable>HOSTENV</replaceable></option></arg>
+	    <arg><option>--config_override</option></arg>
+	    <arg><option>--staged</option></arg>
 	    <xi:include href="../common/global_options.xml"/>
 	</cmdsynopsis>
     </refsynopsisdiv>
@@ -111,7 +109,7 @@
 	    </varlistentry>
 	    <varlistentry>
 	        <term>
-		    <option>--cluster_required</option>, <option>--nocluster_required</option>
+		    <option>--cluster_required</option>
 		</term>
 		<listitem>
 		    <para>
@@ -131,7 +129,7 @@
 	    </varlistentry>
 	    <varlistentry>
 	        <term>
-		    <option>--copy_from <replaceable>COPY_FROM</replaceable></option>
+		    <option>--copy_from <replaceable>SRC_PERSONALITY</replaceable></option>
 		</term>
 		<listitem>
 		    <para>
@@ -143,15 +141,36 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
+		<term>
+		    <option>--copy_stage <replaceable>SRC_STAGE</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Select the stage of the personality to copy. Defaults to <literal>current</literal>.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
 	        <term>
-		    <option>--config_override</option>, <option>--noconfig_override</option>
+		    <option>--config_override</option>
 		</term>
 		<listitem>
                     <para>
-		       If this flag is specified a special feature 'personality/config_override' will be included
-		       in the aqdb generated personality configuration template. This feature
-		       effectively pulls in config_override.tpl from the personality templates in the template
-		       domain, if it exists.
+			If this flag is specified a special template <filename>personality/config_overridex</filename> will be included
+			in the aqdb generated personality configuration template. This feature
+			effectively pulls in config_override.tpl from the personality templates in the template
+			domain, if it exists.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--staged</option>
+		</term>
+		<listitem>
+                    <para>
+			If this flag is specified, the personality will be staged, and changes will be
+			applied to the "next" stage.
 		    </para>
 		</listitem>
 	    </varlistentry>

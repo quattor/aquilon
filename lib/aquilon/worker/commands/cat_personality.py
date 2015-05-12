@@ -17,7 +17,7 @@
 """Contains the logic for `aq cat --personality`."""
 
 from aquilon.aqdb.model import Personality
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.templates.personality import (PlenaryPersonalityPreFeature,
                                                   PlenaryPersonalityPostFeature,
                                                   PlenaryPersonalityParameter,
@@ -30,29 +30,31 @@ class CommandCatPersonality(BrokerCommand):
 
     required_parameters = ["personality"]
 
-    def render(self, generate, session, logger, personality, archetype,
-               pre_feature, post_feature, param_tmpl, **kwargs):
+    def render(self, generate, session, logger, personality,
+               personality_stage, archetype, pre_feature, post_feature,
+               param_tmpl, **kwargs):
         dbpersonality = Personality.get_unique(session, archetype=archetype,
                                                name=personality, compel=True)
+        dbstage = dbpersonality.default_stage(personality_stage)
 
         if pre_feature:
-            plenary = PlenaryPersonalityPreFeature.get_plenary(dbpersonality,
+            plenary = PlenaryPersonalityPreFeature.get_plenary(dbstage,
                                                                logger=logger)
         elif post_feature:
-            plenary = PlenaryPersonalityPostFeature.get_plenary(dbpersonality,
+            plenary = PlenaryPersonalityPostFeature.get_plenary(dbstage,
                                                                 logger=logger)
         elif param_tmpl:
-            param_templates = get_parameters_by_tmpl(dbpersonality)
+            param_templates = get_parameters_by_tmpl(dbstage)
 
             if param_tmpl in param_templates:
                 values = param_templates[param_tmpl]
             else:
                 values = {}
 
-            ptmpl = ParameterTemplate(dbpersonality, param_tmpl, values)
+            ptmpl = ParameterTemplate(dbstage, param_tmpl, values)
             plenary = PlenaryPersonalityParameter(ptmpl, logger=logger)
         else:
-            plenary = PlenaryPersonalityBase.get_plenary(dbpersonality,
+            plenary = PlenaryPersonalityBase.get_plenary(dbstage,
                                                          logger=logger)
 
         if generate:

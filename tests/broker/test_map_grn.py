@@ -308,6 +308,36 @@ class TestMapGrn(VerifyGrnsMixin, PersonalityTestMixin, TestBrokerCommand):
         self.matchoutput(out, "Archetype aurora has no valid GRN targets "
                          "configured.", command)
 
+    def test_500_missing_personality(self):
+        command = ["map_grn", "--grn", "grn:/ms/ei/aquilon/unittest",
+                   "--target", "esp", "--archetype", "aquilon",
+                   "--personality", "personality-does-not-exist"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out,
+                         "Personality personality-does-not-exist, "
+                         "archetype aquilon not found.",
+                         command)
+
+    def test_500_missing_personality_stage(self):
+        command = ["map_grn", "--grn", "grn:/ms/ei/aquilon/unittest",
+                   "--target", "esp", "--archetype", "aquilon",
+                   "--personality", "nostage",
+                   "--personality_stage", "previous"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out,
+                         "Personality aquilon/nostage does not have stage "
+                         "previous.",
+                         command)
+
+    def test_500_bad_personality_stage(self):
+        command = ["map_grn", "--grn", "grn:/ms/ei/aquilon/unittest",
+                   "--target", "esp", "--archetype", "aquilon",
+                   "--personality", "nostage",
+                   "--personality_stage", "no-such-stage"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "'no-such-stage' is not a valid personality "
+                         "stage.", command)
+
     def test_600_unmap_personality(self):
         for grn in self.grn_list:
             command = ["map", "grn", "--grn", grn,

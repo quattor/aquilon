@@ -19,8 +19,8 @@
 from sqlalchemy.orm import joinedload, subqueryload
 from sqlalchemy.sql import and_
 
-from aquilon.aqdb.model import (Personality, Host, Cluster, CompileableMixin,
-                                ServiceInstance)
+from aquilon.aqdb.model import (PersonalityStage, Host, Cluster,
+                                CompileableMixin, ServiceInstance)
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
 from aquilon.worker.locks import CompileKey
@@ -44,7 +44,7 @@ class CommandCompile(BrokerCommand):
         plenaries = PlenaryCollection(logger=logger)
 
         for cls_ in CompileableMixin.__subclasses__():
-            q = session.query(Personality)
+            q = session.query(PersonalityStage)
             q = q.join(cls_)
             q = q.filter(and_(cls_.branch == dbdomain,
                               cls_.sandbox_author == dbauthor))
@@ -52,8 +52,7 @@ class CommandCompile(BrokerCommand):
             q = q.options(joinedload('paramholder'),
                           subqueryload('paramholder.parameters'))
 
-            for dbpers in q:
-                plenaries.append(Plenary.get_plenary(dbpers))
+            plenaries.extend(Plenary.get_plenary(dbstage) for dbstage in q)
 
         q = session.query(ServiceInstance)
         q = q.filter(ServiceInstance.clients.any(

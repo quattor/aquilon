@@ -37,17 +37,24 @@ clustered_archetypes = ["vmhost"]
 
 
 class PersonalityTestMixin(object):
-    def setup_personality(self, archetype, name, maps=None, required=None):
+    def setup_personality(self, archetype, name, maps=None, required=None,
+                          staged=False):
         if archetype in default_parameters:
             for path, value in default_parameters[archetype].items():
-                self.noouttest(["add_parameter", "--archetype", archetype,
-                                "--personality", name,
-                                "--path", path, "--value", value])
+                command = ["add_parameter", "--archetype", archetype,
+                           "--personality", name,
+                           "--path", path, "--value", value]
+                if staged:
+                    command.extend(["--personality_stage", "current"])
+                self.noouttest(command)
 
         if required:
             for service in required:
-                self.noouttest(["add_required_service", "--service", service,
-                                "--archetype", archetype, "--personality", name])
+                command = ["add_required_service", "--service", service,
+                           "--archetype", archetype, "--personality", name]
+                if staged:
+                    command.extend(["--personality_stage", "current"])
+                self.noouttest(command)
 
         if maps:
             for service, mappings in maps.items():
@@ -61,8 +68,8 @@ class PersonalityTestMixin(object):
                                             "--archetype", archetype])
 
     def create_personality(self, archetype, name, environment="dev",
-                           grn="grn:/ms/ei/aquilon/unittest", comments=None, maps=None,
-                           required=None):
+                           grn="grn:/ms/ei/aquilon/unittest", staged=False,
+                           comments=None, maps=None, required=None):
         """ Create the given personality with reasonable defaults. """
 
         command = ["add_personality", "--archetype", archetype,
@@ -70,11 +77,14 @@ class PersonalityTestMixin(object):
                    "--host_environment", environment]
         if archetype in clustered_archetypes:
             command.append("--cluster_required")
+        if staged:
+            command.append("--staged")
         if comments:
             command.extend(["--comments", comments])
         self.noouttest(command)
 
-        self.setup_personality(archetype, name, maps=maps, required=required)
+        self.setup_personality(archetype, name, maps=maps, required=required,
+                               staged=staged)
 
     def drop_personality(self, archetype, name):
         # Ok, not much here yet. In the future, this helper may be used to

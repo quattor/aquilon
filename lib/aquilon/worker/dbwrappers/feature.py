@@ -19,26 +19,27 @@
 import os.path
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import FeatureLink, Personality
+from aquilon.aqdb.model import FeatureLink, Personality, PersonalityStage
 
 from aquilon.worker.templates.domain import template_branch_basedir
 
 
-def model_features(dbmodel, dbarch, dbpers, interface_name=None):
+def model_features(dbmodel, dbarch, dbstage, interface_name=None):
     features = set()
     for link in dbmodel.features:
         if (link.archetype is None or link.archetype == dbarch) and \
-           (link.personality is None or link.personality == dbpers) and \
+           (link.personality_stage is None or
+            link.personality_stage == dbstage) and \
            (link.interface_name is None or link.interface_name == interface_name):
             features.add(link.feature)
 
     return features
 
 
-def personality_features(dbpersonality):
+def personality_features(dbstage):
     pre = set()
     post = set()
-    for link in dbpersonality.archetype.features:
+    for link in dbstage.archetype.features:
         if link.model or link.interface_name:
             continue
         if link.feature.post_personality:
@@ -46,7 +47,7 @@ def personality_features(dbpersonality):
         else:
             pre.add(link.feature)
 
-    for link in dbpersonality.features:
+    for link in dbstage.features:
         if link.model or link.interface_name:
             continue
         if link.feature.post_personality:
@@ -57,17 +58,17 @@ def personality_features(dbpersonality):
     return (pre, post)
 
 
-def interface_features(dbinterface, dbarch, dbpers):
+def interface_features(dbinterface, dbarch, dbstage):
     features = set()
 
     if dbinterface.model_allowed:
         # Add features bound to the model
-        features.update(model_features(dbinterface.model, dbarch, dbpers,
+        features.update(model_features(dbinterface.model, dbarch, dbstage,
                                        dbinterface.name))
 
-    if dbpers:
+    if dbstage:
         # Add features bound to the personality, if the interface name matches
-        for link in dbpers.features:
+        for link in dbstage.features:
             # Model features were handled above
             if link.model:
                 continue
@@ -88,23 +89,23 @@ def add_link(session, logger, dbfeature, params):
     q = session.query(FeatureLink)
     q = q.filter_by(feature=dbfeature,
                     model=params.get("model", None))
-    if "personality" in params and "interface_name" not in params:
-        q = q.filter_by(archetype=params["personality"].archetype,
-                        personality=None)
+    if "personality_stage" in params and "interface_name" not in params:
+        q = q.filter_by(archetype=params["personality_stage"].archetype,
+                        personality_stage=None)
         if q.first():
             logger.client_info("Warning: {0:l} is already bound to {1:l}; "
                                "binding it to {2:l} is redundant."
                                .format(dbfeature,
-                                       params["personality"].archetype,
-                                       params["personality"]))
+                                       params["personality_stage"].archetype,
+                                       params["personality_stage"]))
     elif "archetype" in params:
         q = q.filter_by(interface_name=None)
-        q = q.join(Personality)
+        q = q.join(PersonalityStage, Personality)
         q = q.filter_by(archetype=params["archetype"])
         for link in q.all():
             logger.client_info("Warning: {0:l} is bound to {1:l} which "
                                "is now redundant; consider removing it."
-                               .format(dbfeature, link.personality))
+                               .format(dbfeature, link.personality_stage))
 
     dbfeature.links.append(FeatureLink(**params))
 

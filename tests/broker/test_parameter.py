@@ -30,7 +30,8 @@ ARCHETYPE = 'aquilon'
 OTHER_PERSONALITY = 'eaitools'
 
 
-SHOW_CMD = ["show", "parameter", "--personality", PERSONALITY]
+SHOW_CMD = ["show", "parameter", "--personality", PERSONALITY,
+            "--personality_stage", "next"]
 
 ADD_CMD = ["add", "parameter", "--personality", PERSONALITY]
 
@@ -38,9 +39,10 @@ UPD_CMD = ["update", "parameter", "--personality", PERSONALITY]
 
 DEL_CMD = ["del", "parameter", "--personality", PERSONALITY]
 
-CAT_CMD = ["cat", "--personality", PERSONALITY]
+CAT_CMD = ["cat", "--personality", PERSONALITY, "--personality_stage", "next"]
 
-VAL_CMD = ["validate_parameter", "--personality", PERSONALITY]
+VAL_CMD = ["validate_parameter", "--personality", PERSONALITY,
+           "--personality_stage", "next"]
 
 
 class TestParameter(TestBrokerCommand):
@@ -56,13 +58,16 @@ class TestParameter(TestBrokerCommand):
     def test_000_verify_preload(self):
 
         cmd = ["add_personality", "--archetype", ARCHETYPE, "--personality", PERSONALITY,
-               "--eon_id=2", "--host_environment=dev", "--comment", "tests parameters"]
+               "--eon_id=2", "--host_environment=dev", "--comment", "tests parameters",
+               "--staged"]
         self.noouttest(cmd)
 
-        err = self.notfoundtest(SHOW_CMD)
+        cmd = ["show_parameter", "--personality", PERSONALITY, "--archetype",
+               ARCHETYPE]
+        err = self.notfoundtest(cmd)
         self.matchoutput(err,
-                         "No parameters found for personality %s/%s." %
-                         (ARCHETYPE, PERSONALITY), SHOW_CMD)
+                         "No parameters found for personality %s/%s@current." %
+                         (ARCHETYPE, PERSONALITY), cmd)
 
     def test_100_add_re_path(self):
         action = "testaction"
@@ -249,7 +254,7 @@ class TestParameter(TestBrokerCommand):
     def test_255_verify_espinfo(self):
         ESP_CAT_CMD = CAT_CMD + ["--param_tmpl=espinfo"]
         out = self.commandtest(ESP_CAT_CMD)
-        self.searchoutput(out, r'structure template personality/testpersona/dev/espinfo;\s*'
+        self.searchoutput(out, r'structure template personality/testpersona/dev\+next/espinfo;\s*'
                                r'"function" = "production";\s*'
                                r'"class" = "INFRASTRUCTURE";\s*'
                                r'"users" = list\(\s*'
@@ -279,7 +284,7 @@ class TestParameter(TestBrokerCommand):
         self.noouttest(command)
 
         command = ["reconfigure", "--hostname", "unittest17.aqd-unittest.ms.com",
-                   "--personality", PERSONALITY]
+                   "--personality", PERSONALITY, "--personality_stage", "next"]
         (out, err) = self.failuretest(command, 4)
         self.matchoutput(err, "'/system/personality/function' does not have an associated value", command)
         self.matchoutput(err, "BUILD FAILED", command)
@@ -303,7 +308,7 @@ class TestParameter(TestBrokerCommand):
 
     def test_330_reconfigurehost(self):
         command = ["reconfigure", "--hostname", "unittest17.aqd-unittest.ms.com",
-                   "--personality", PERSONALITY]
+                   "--personality", PERSONALITY, "--personality_stage", "next"]
         self.successtest(command)
 
     def test_400_add_rebuild_required_ready(self):
@@ -405,12 +410,12 @@ class TestParameter(TestBrokerCommand):
 
     def test_500_verify_diff(self):
         cmd = ["show_diff", "--archetype", ARCHETYPE, "--personality", PERSONALITY,
-               "--other", OTHER_PERSONALITY]
+               "--personality_stage", "next", "--other", OTHER_PERSONALITY]
 
         out = self.commandtest(cmd)
         self.searchoutput(out,
                           r'Differences for Parameters:\s*'
-                          r'missing Parameters in Personality aquilon/eaitools:\s*'
+                          r'missing Parameters in Personality aquilon/eaitools@current:\s*'
                           r'//action/testaction/command\s*'
                           r'//action/testaction/user\s*'
                           r'//action/testaction2/command\s*'
@@ -432,11 +437,11 @@ class TestParameter(TestBrokerCommand):
 
     def test_520_copy_from(self):
         cmd = ["add_personality", "--archetype", ARCHETYPE, "--personality", "myshinynew",
-               "--eon_id=2", "--copy_from", PERSONALITY, "--host_environment", "dev"]
+               "--copy_from", PERSONALITY, "--copy_stage", "next"]
         self.successtest(cmd)
 
         cmd = ["show_diff", "--archetype", ARCHETYPE, "--personality", PERSONALITY,
-               "--other", "myshinynew"]
+               "--personality_stage", "next", "--other", "myshinynew"]
         out = self.noouttest(cmd)
 
         cmd = ["del_personality", "--archetype", ARCHETYPE, "--personality", "myshinynew"]
@@ -455,14 +460,17 @@ class TestParameter(TestBrokerCommand):
                           cmd)
         self.searchoutput(out,
                           r'Host Personality: unixeng-test Archetype: aquilon\s*'
+                          r'Stage: current\s*'
                           r'espinfo/function: "development"',
                           cmd)
         self.searchoutput(out,
                           r'Host Personality: testpersona/dev Archetype: aquilon\s*'
+                          r'Stage: next\s*'
                           r'espinfo/function: "production"',
                           cmd)
         self.searchoutput(out,
                           r'Host Personality: eaitools Archetype: aquilon\s*'
+                          r'Stage: current\s*'
                           r'espinfo/function: "development"',
                           cmd)
 
@@ -471,6 +479,7 @@ class TestParameter(TestBrokerCommand):
         out = self.commandtest(cmd)
         self.searchoutput(out,
                           r'Host Personality: testpersona/dev Archetype: aquilon\s*'
+                          r'Stage: next\s*'
                           r'action: {\s*'
                           r'"testaction": {\s*"command": "/bin/testaction",\s*"user": "user2"\s*},\s*'
                           r'"testaction2": {\s*"command": "/bin/testaction2",\s*"user": "user1",\s*"timeout": 100\s*}\s*}',
@@ -489,7 +498,7 @@ class TestParameter(TestBrokerCommand):
     def test_555_verify_espinfo(self):
         ESP_CAT_CMD = CAT_CMD + ["--param_tmpl=espinfo"]
         out = self.commandtest(ESP_CAT_CMD)
-        self.searchoutput(out, r'structure template personality/testpersona/dev/espinfo;\s*', ESP_CAT_CMD)
+        self.searchoutput(out, r'structure template personality/testpersona/dev\+next/espinfo;\s*', ESP_CAT_CMD)
         self.searchoutput(out, r'"function" = "production";', ESP_CAT_CMD)
         self.searchoutput(out, r'"threshold" = 0;', ESP_CAT_CMD)
         self.searchoutput(out, r'"class" = "INFRASTRUCTURE";', ESP_CAT_CMD)
@@ -499,7 +508,7 @@ class TestParameter(TestBrokerCommand):
         # included by default
         SEC_CAT_CMD = CAT_CMD + ["--param_tmpl=windows"]
         out = self.commandtest(SEC_CAT_CMD)
-        self.searchoutput(out, r'structure template personality/testpersona/dev/windows;\s*'
+        self.searchoutput(out, r'structure template personality/testpersona/dev\+next/windows;\s*'
                                r'"windows" = list\(\s*nlist\(\s*"day", "Sun",\s*"duration", 8,\s*"start", "08:00"\s*\)\s*\);',
                           SEC_CAT_CMD)
 
@@ -551,9 +560,27 @@ class TestParameter(TestBrokerCommand):
         # included by default
         SEC_CAT_CMD = CAT_CMD + ["--param_tmpl=windows"]
         out = self.commandtest(SEC_CAT_CMD)
-        self.searchoutput(out, r'structure template personality/testpersona/dev/windows;\s*'
+        self.searchoutput(out, r'structure template personality/testpersona/dev\+next/windows;\s*'
                                r'"windows" = list\(\s*nlist\(\s*"day", "Sun",\s*"duration", 8,\s*"start", "08:00"\s*\)\s*\);',
                           SEC_CAT_CMD)
+
+    def test_700_missing_stage(self):
+        command = ["add_parameter", "--personality", "nostage",
+                   "--archetype", "aquilon",
+                   "--path", "espinfo/function", "--value", "foobar",
+                   "--personality_stage", "previous"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out, "Personality aquilon/nostage does not have "
+                         "stage previous.", command)
+
+    def test_700_bad_stage(self):
+        command = ["add_parameter", "--personality", "nostage",
+                   "--archetype", "aquilon",
+                   "--path", "espinfo/function", "--value", "foobar",
+                   "--personality_stage", "no-such-stage"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "'no-such-stage' is not a valid personality "
+                         "stage.", command)
 
     def test_999_cleanup(self):
         """ cleanup of all data created here """

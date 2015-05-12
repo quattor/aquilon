@@ -22,14 +22,14 @@ from sqlalchemy.sql import and_, or_
 
 from aquilon.exceptions_ import NotFoundException
 from aquilon.aqdb.model import (Host, Cluster, Archetype, Personality,
-                                PersonalityGrnMap, HostGrnMap, HostLifecycle,
-                                OperatingSystem, ServiceInstance,
-                                ServiceInstanceServer,
-                                Share, VirtualDisk, Machine, Model,
-                                DnsRecord, ARecord, Fqdn, DnsDomain, Interface,
-                                AddressAssignment, NetworkEnvironment, Network,
-                                MetaCluster, VirtualMachine, ClusterResource,
-                                HardwareEntity, HostEnvironment, User)
+                                PersonalityStage, PersonalityGrnMap,
+                                HostGrnMap, HostLifecycle, OperatingSystem,
+                                ServiceInstance, ServiceInstanceServer, Share,
+                                VirtualDisk, Machine, Model, DnsRecord, ARecord,
+                                Fqdn, DnsDomain, Interface, AddressAssignment,
+                                NetworkEnvironment, Network, MetaCluster,
+                                VirtualMachine, ClusterResource, HardwareEntity,
+                                HostEnvironment, User)
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.formats.list import StringAttributeList
@@ -44,14 +44,14 @@ class CommandSearchHost(BrokerCommand):
 
     required_parameters = []
 
-    def render(self, session, logger, hostname, machine, archetype,
-               buildstatus, personality, host_environment, osname, osversion,
+    def render(self, session, logger, hostname, machine, archetype, buildstatus,
+               personality, personality_stage, host_environment, osname, osversion,
                service, instance, model, machine_type, vendor, serial, cluster,
-               guest_on_cluster, guest_on_share, member_cluster_share,
-               domain, sandbox, branch, sandbox_author,
-               dns_domain, shortname, mac, ip, networkip, network_environment,
-               exact_location, server_of_service, server_of_instance, grn,
-               eon_id, fullinfo, style, **arguments):
+               guest_on_cluster, guest_on_share, member_cluster_share, domain,
+               sandbox, branch, sandbox_author, dns_domain, shortname, mac, ip,
+               networkip, network_environment, exact_location,
+               server_of_service, server_of_instance, grn, eon_id, fullinfo,
+               style, **arguments):
         dbnet_env = NetworkEnvironment.get_unique_or_default(session,
                                                              network_environment)
 
@@ -165,19 +165,24 @@ class CommandSearchHost(BrokerCommand):
             dbarchetype = None
 
         if archetype or personality or host_environment:
-            q = q.join(Personality, aliased=True)
-
-            if archetype:
-                q = q.filter_by(archetype=dbarchetype)
+            q = q.join(PersonalityStage, aliased=True)
+            if personality_stage:
+                Personality.force_valid_stage(personality_stage)
+                q = q.filter_by(name=personality_stage)
             if personality:
                 subq = Personality.get_matching_query(session, name=personality,
                                                       archetype=dbarchetype,
                                                       compel=True)
-                q = q.filter(Personality.id.in_(subq))
-            if host_environment:
-                dbhost_env = HostEnvironment.get_instance(session,
-                                                          host_environment)
-                q = q.filter_by(host_environment=dbhost_env)
+                q = q.filter(PersonalityStage.personality_id.in_(subq))
+
+            if archetype or host_environment:
+                q = q.join(Personality, aliased=True, from_joinpoint=True)
+                if archetype:
+                    q = q.filter_by(archetype=dbarchetype)
+                if host_environment:
+                    dbhost_env = HostEnvironment.get_instance(session,
+                                                              host_environment)
+                    q = q.filter_by(host_environment=dbhost_env)
 
             q = q.reset_joinpoint()
 
@@ -253,20 +258,23 @@ class CommandSearchHost(BrokerCommand):
             dbgrn = lookup_grn(session, grn, eon_id, autoupdate=False,
                                usable_only=False)
 
-            persq = session.query(Personality.id)
+            persq = session.query(PersonalityStage.id)
+            persq = persq.join(Personality)
             persq = persq.outerjoin(PersonalityGrnMap)
             persq = persq.filter(or_(Personality.owner_eon_id == dbgrn.eon_id,
                                      PersonalityGrnMap.eon_id == dbgrn.eon_id))
-            q = q.outerjoin(HostGrnMap, aliased=True)
+
+            q = q.outerjoin(Host.grns, aliased=True)
             q = q.filter(or_(Host.owner_eon_id == dbgrn.eon_id,
                              HostGrnMap.eon_id == dbgrn.eon_id,
-                             Host.personality_id.in_(persq.subquery())))
+                             Host.personality_stage_id.in_(persq.subquery())))
             q = q.reset_joinpoint()
 
         if fullinfo or style != "raw":
-            q = q.options(joinedload('personality'),
-                          undefer('personality.archetype.comments'),
-                          subqueryload('personality.grns'),
+            q = q.options(joinedload('personality_stage'),
+                          joinedload('personality_stage.personality'),
+                          undefer('personality_stage.personality.archetype.comments'),
+                          subqueryload('personality_stage.grns'),
                           subqueryload('grns'),
                           subqueryload('services_used'),
                           subqueryload('services_provided'),

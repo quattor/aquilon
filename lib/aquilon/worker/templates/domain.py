@@ -24,7 +24,7 @@ from aquilon.config import Config, lookup_file_path
 from aquilon.exceptions_ import ArgumentError, ProcessException, AquilonError
 from aquilon.aqdb.model import (Host, Cluster, Fqdn, DnsDomain, DnsRecord,
                                 HardwareEntity, Sandbox, Domain, Archetype,
-                                Personality)
+                                Personality, PersonalityStage)
 from aquilon.worker.logger import CLIENT_INFO
 from aquilon.notify.index import trigger_notifications
 from aquilon.worker.processes import run_command
@@ -129,13 +129,13 @@ class TemplateDomain(object):
             hostnames = hostnames.join(DnsRecord, HardwareEntity, Host)
             hostnames = hostnames.filter_by(branch=self.domain,
                                             sandbox_author=self.author)
-            hostnames = hostnames.join(Personality, Archetype)
+            hostnames = hostnames.join(PersonalityStage, Personality, Archetype)
             hostnames = hostnames.filter_by(is_compileable=True)
 
             clusternames = session.query(Cluster.name)
             clusternames = clusternames.filter_by(branch=self.domain,
                                                   sandbox_author=self.author)
-            clusternames = clusternames.join(Personality, Archetype)
+            clusternames = clusternames.join(PersonalityStage, Personality, Archetype)
             clusternames = clusternames.filter_by(is_compileable=True)
 
             if self.author:

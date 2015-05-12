@@ -18,7 +18,7 @@
 
 from sqlalchemy.orm import joinedload, subqueryload, contains_eager
 
-from aquilon.aqdb.model import Archetype, Personality
+from aquilon.aqdb.model import Archetype, Personality, PersonalityStage
 from aquilon.worker.broker import BrokerCommand
 
 
@@ -26,7 +26,8 @@ class CommandShowPersonality(BrokerCommand):
 
     required_parameters = []
 
-    def render(self, session, personality, archetype, **arguments):
+    def render(self, session, personality, personality_stage, archetype,
+               **arguments):
         if archetype:
             dbarchetype = Archetype.get_unique(session, archetype, compel=True)
         else:
@@ -36,22 +37,29 @@ class CommandShowPersonality(BrokerCommand):
             dbpersonality = Personality.get_unique(session, name=personality,
                                                    archetype=dbarchetype,
                                                    compel=True)
-            return dbpersonality
+            return dbpersonality.default_stage(personality_stage)
 
-        q = session.query(Personality)
+        q = session.query(PersonalityStage)
+        if personality_stage:
+            Personality.force_valid_stage(personality_stage)
+            q = q.filter_by(name=personality_stage)
+        elif personality:
+            q = q.filter_by(name="current")
+        q = q.join(Personality)
         if archetype:
             q = q.filter_by(archetype=dbarchetype)
         if personality:
             q = q.filter_by(name=personality)
         q = q.join(Archetype)
-        q = q.order_by(Archetype.name, Personality.name)
-        q = q.options(contains_eager('archetype'),
+        q = q.order_by(Archetype.name, Personality.name, PersonalityStage.name)
+        q = q.options(contains_eager('personality'),
+                      contains_eager('personality.archetype'),
                       subqueryload('services'),
                       subqueryload('grns'),
                       subqueryload('features'),
                       joinedload('features.feature'),
                       joinedload('cluster_infos'),
-                      subqueryload('root_users'),
-                      subqueryload('root_netgroups'))
+                      subqueryload('personality.root_users'),
+                      subqueryload('personality.root_netgroups'))
 
         return q.all()
