@@ -148,8 +148,8 @@ class PlenaryResource(StructurePlenary):
         pan_assign(lines, "ip", str(self.dbobj.ip))
         pan_assign(lines, "fqdn", str(self.dbobj.dns_record))
         if self.dbobj.interfaces:
-            pan_assign(lines, "interfaces", [iface.name for iface in
-                                             self.dbobj.interfaces])
+            pan_assign(lines, "interfaces", sorted(iface.name for iface in
+                                                   self.dbobj.interfaces))
 
     def body_virtual_machine(self, lines):
         machine = self.dbobj.machine
