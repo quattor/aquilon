@@ -26,6 +26,7 @@ BEGIN
 END;
 /
 
+DELETE FROM address_assignment WHERE service_address_id IS NOT NULL;
 ALTER TABLE address_assignment DROP COLUMN service_address_id;
 DROP INDEX service_address_dns_record_idx;
 ALTER TABLE service_address ADD CONSTRAINT service_address_dns_record_uk UNIQUE (dns_record_id);
