@@ -109,7 +109,7 @@ model_group = {
     },
     'personality': {
         'title': 'Personalities',
-        'classes': [Personality, Archetype, HostEnvironment, Grn,
+        'classes': [Personality, PersonalityStage, Archetype, HostEnvironment, Grn,
                     ParameterHolder, Parameter, PersonalityGrnMap,
                     __PersonalityRootUser, __PersonalityRootNetGroup],
     },
