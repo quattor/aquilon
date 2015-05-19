@@ -96,7 +96,7 @@ $(COMMON)/sbin/aqd_consistency_check: sbin/aqd_consistency_check.py
 $(COMMON)/%.pyc: $(COMMON)/%.py
 	@echo "compiling $@"
 	@rm -f $@
-	./build/compile_for_dist.py $<
+	./tools/compile_for_dist.py $<
 
 $(COMMON)/lib/%: lib/%
 	@mkdir -p `dirname $@`
@@ -123,9 +123,9 @@ $(COMMON)/etc/rc.d/init.d/aqd: etc/rc.d/init.d/aqd
 install: remove_stale $(INSTALLFILES) install-doc
 	ln -sf aqd "$(COMMON)/sbin/aqd_readonly"
 	$(COMMON)/sbin/aqd --help >/dev/null
-	./build/gen_completion.py --outputdir="$(COMMON)/etc" --templatedir="./etc/templates" --all
-	./build/graph_schema.py --outputdir="$(COMMON)/doc"
-	./build/build_schema_htdocs.py --outputdir="$(COMMON)/doc/schema"
+	./tools/gen_completion.py --outputdir="$(COMMON)/etc" --templatedir="./etc/templates" --all
+	./tools/graph_schema.py --outputdir="$(COMMON)/doc"
+	./tools/build_schema_htdocs.py --outputdir="$(COMMON)/doc/schema"
 
 .PHONY: install-doc
 install-doc:
@@ -133,7 +133,7 @@ install-doc:
 
 .PHONY: remove_stale
 remove_stale:
-	./build/remove_stale.py "$(COMMON)"
+	./tools/remove_stale.py "$(COMMON)"
 
 .PHONY: default
 default:
