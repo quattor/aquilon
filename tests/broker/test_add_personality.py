@@ -33,40 +33,14 @@ GRN = "grn:/ms/ei/aquilon/aqd"
 
 class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
                          TestBrokerCommand):
-    def verifycatforpersonality(self, archetype, personality,
-                                config_override=False, host_env='dev',
-                                grn=None):
-        command = ["cat", "--archetype", archetype, "--personality", personality]
-        out = self.commandtest(command)
-        self.matchoutput(out, 'variable PERSONALITY = "%s"' % personality,
-                         command)
-        if grn:
-            self.check_personality_grns(out, [grn], {"esp": [grn]}, command)
-        self.matchoutput(out, 'include { if_exists("personality/%s/pre_feature") };' %
-                         personality, command)
-        self.matchoutput(out, "template personality/%s/config;" % personality,
-                         command)
-        self.matchoutput(out, '"/system/personality/name" = "%s";' % personality,
-                         command)
-        self.matchoutput(out, 'final "/system/personality/host_environment" = "%s";' % host_env,
-                         command)
-        if config_override:
-            self.searchoutput(out, r'include { "features/personality/config_override/config" };\s*'
-                                   r'include { if_exists\("personality/utpersonality/dev/post_feature"\) };',
-                              command)
-        else:
-            self.matchoutput(out, 'include { if_exists("personality/%s/post_feature") };' %
-                             personality, command)
-            self.matchclean(out, 'config_override', command)
-
     def test_100_add_utpersonality(self):
         command = ["add_personality", "--personality=utpersonality/dev",
                    "--archetype=aquilon", "--grn=%s" % GRN, "--config_override",
                    "--host_environment=dev",
                    "--comments", "Some personality comments"]
         self.noouttest(command)
-        self.verifycatforpersonality("aquilon", "utpersonality/dev", True,
-                                     "dev", grn=GRN)
+        self.verifycatpersonality("aquilon", "utpersonality/dev", True, "dev",
+                                  grn=GRN)
 
     def test_105_verify_utpersonality(self):
         command = ["show_personality", "--personality=utpersonality/dev",
@@ -131,7 +105,7 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
                    "--host_environment=dev", "--staged",
                    "--comments", "Existing personality for netperssvcmap tests"]
         self.noouttest(command)
-        self.verifycatforpersonality("aquilon", "eaitools")
+        self.verifycatpersonality("aquilon", "eaitools")
         # The basic parameter set needs to be initialized for further tests
         # Note: these will apply to the next stage
         self.setup_personality("aquilon", "eaitools")
@@ -157,12 +131,14 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
         out = self.commandtest(command)
         self.matchoutput(out, "espinfo", command)
 
+        self.verifycatpersonality("aquilon", "eaitools", stage="next")
+
     def test_130_add_windows_desktop(self):
         command = ["add", "personality", "--personality", "desktop",
                    "--archetype", "windows", "--grn", "grn:/ms/windows/desktop",
                    "--host_environment", "dev"]
         self.noouttest(command)
-        self.verifycatforpersonality("windows", "desktop")
+        self.verifycatpersonality("windows", "desktop")
 
     def test_135_verify_windows_desktop(self):
         command = "show_personality --personality desktop --archetype windows"
@@ -221,8 +197,8 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
                    "--host_environment=dev",
                    "--personality=esx_server", "--archetype=vmhost"]
         self.noouttest(command)
-        self.verifycatforpersonality("vmhost", "esx_server",
-                                     grn="grn:/ms/ei/aquilon/aqd")
+        self.verifycatpersonality("vmhost", "esx_server",
+                                  grn="grn:/ms/ei/aquilon/aqd")
         command = ["show_personality", "--personality=esx_server",
                    "--archetype=vmhost"]
         out = self.commandtest(command)
@@ -231,7 +207,7 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
         command = ["add_personality", "--eon_id=2", "--host_environment=dev",
                    "--personality=esx_server", "--archetype=esx_cluster"]
         self.noouttest(command)
-        self.verifycatforpersonality("esx_cluster", "esx_server")
+        self.verifycatpersonality("esx_cluster", "esx_server")
 
     def test_165_add_esx_standalone(self):
         # Can't use create_personality() here, because the --cluster_required
@@ -240,8 +216,8 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
                    "--host_environment=dev",
                    "--archetype=vmhost", "--eon_id=2"]
         self.noouttest(command)
-        self.verifycatforpersonality("vmhost", "esx_standalone",
-                                     grn="grn:/ms/ei/aquilon/aqd")
+        self.verifycatpersonality("vmhost", "esx_standalone",
+                                  grn="grn:/ms/ei/aquilon/aqd")
         command = ["show_personality", "--personality=esx_standalone",
                    "--archetype=vmhost"]
         out = self.commandtest(command)
@@ -258,12 +234,12 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
         command = ["add_personality", "--eon_id=2", "--host_environment=dev",
                    "--personality=hadoop", "--archetype=gridcluster"]
         self.noouttest(command)
-        self.verifycatforpersonality("gridcluster", "hadoop")
+        self.verifycatpersonality("gridcluster", "hadoop")
 
     def test_171_add_ha_personality(self):
         self.create_personality("hacluster", "hapersonality",
                                 grn="grn:/ms/ei/aquilon/aqd")
-        self.verifycatforpersonality("hacluster", "hapersonality")
+        self.verifycatpersonality("hacluster", "hapersonality")
 
     def test_172_add_generic(self):
         for archetype in ["aurora", "f5", "filer", "vmhost", "windows"]:

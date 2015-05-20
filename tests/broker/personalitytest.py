@@ -92,3 +92,39 @@ class PersonalityTestMixin(object):
         # personality from being removed.
         self.noouttest(["del_personality", "--archetype", archetype,
                         "--personality", name])
+
+    def verifycatpersonality(self, archetype, personality,
+                             config_override=False, host_env='dev', grn=None,
+                             stage=None):
+        if stage and stage != "current":
+            staged_name = "%s+%s" % (personality, stage)
+        else:
+            staged_name = personality
+
+        command = ["cat", "--archetype", archetype, "--personality", personality]
+        if stage:
+            command.extend(["--personality_stage", stage])
+        out = self.commandtest(command)
+        self.matchoutput(out, 'variable PERSONALITY = "%s"' % staged_name,
+                         command)
+        if grn:
+            self.matchoutput(out, '"/system/personality/owner_eon_id" = %d;' %
+                             self.grns[grn], command)
+            self.check_personality_grns(out, [grn], {"esp": [grn]}, command)
+
+        self.matchoutput(out, 'include { if_exists("personality/%s/pre_feature") };' %
+                         staged_name, command)
+        self.matchoutput(out, "template personality/%s/config;" % staged_name,
+                         command)
+        self.matchoutput(out, '"/system/personality/name" = "%s";' % personality,
+                         command)
+        self.matchoutput(out, 'final "/system/personality/host_environment" = "%s";' % host_env,
+                         command)
+        if config_override:
+            self.matchoutput(out, 'include { "features/personality/config_override/config" };',
+                             command)
+        else:
+            self.matchclean(out, 'config_override', command)
+
+        self.matchoutput(out, 'include { if_exists("personality/%s/post_feature") };' %
+                         staged_name, command)
