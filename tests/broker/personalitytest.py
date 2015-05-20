@@ -116,11 +116,18 @@ class PersonalityTestMixin(object):
                          command)
         self.matchoutput(out, 'final "/system/personality/host_environment" = "%s";' % host_env,
                          command)
+
         if config_override:
             self.matchoutput(out, 'include { "features/personality/config_override/config" };',
                              command)
         else:
             self.matchclean(out, 'config_override', command)
+
+        if stage is None:
+            self.matchclean(out, "/system/personality/stage", command)
+        else:
+            self.matchoutput(out, '"/system/personality/stage" = "%s";' % stage,
+                             command)
 
         self.matchoutput(out, 'include { if_exists("personality/%s/post_feature") };' %
                          staged_name, command)

@@ -231,6 +231,8 @@ class PlenaryPersonalityBase(Plenary):
         # process parameter templates
         pan_include_if_exists(lines, "personality/config")
         pan_assign(lines, "/system/personality/name", dbpers.name)
+        if dbpers.staged:
+            pan_assign(lines, "/system/personality/stage", self.dbobj.name)
         if dbpers.host_environment.name != 'legacy':
             pan_assign(lines, "/system/personality/host_environment",
                        dbpers.host_environment, True)
