@@ -28,11 +28,11 @@ from aquilon.exceptions_ import PartialError, IncompleteError
 from aquilon.aqdb.model import (Service, Machine, Chassis, Host,
                                 PersonalityStage, Archetype, Cluster, City,
                                 Rack, Resource, HostResource, ClusterResource,
-                                VirtualMachine, Filesystem, RebootSchedule,
-                                Hostlink, ServiceAddress, Share, Disk,
-                                Interface, ManagementInterface,
-                                AddressAssignment, ServiceInstance,
-                                NetworkDevice, ParamDefHolder, Feature)
+                                BundleResource, VirtualMachine, Filesystem,
+                                ServiceAddress, Share, Disk, Model, Interface,
+                                ManagementInterface, AddressAssignment,
+                                ServiceInstance, NetworkDevice, VirtualSwitch,
+                                PortGroup, ParamDefHolder, Feature)
 from aquilon.aqdb.data_sync.storage import StormapParser
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.templates.base import Plenary
@@ -43,43 +43,43 @@ from aquilon.utils import ProgressReport
 
 class CommandFlush(BrokerCommand):
 
-    def preload_virt_disk_info(self, session, cache):
-        parser = StormapParser()
-
-        q = session.query(Share)
-        q = q.options(joinedload('holder'))
-        for res in q:
-            res.populate_share_info(parser)
-            cache[res.id] = res
-
-        q = session.query(Filesystem)
-        q = q.options(joinedload('holder'))
-        for res in q:
-            cache[res.id] = res
-
-    def preload_resources(self, session, cache):
+    def preload_resources(self, session, res_cache, holder_cache, classes=None):
         # Load the most common resource types. Using
         # with_polymorphic('*') on Resource would generate a huge query,
-        # so do something more targeted. More resource subclasses may be
-        # added later if they become common.
-        preload_classes = {
-            Hostlink: [],
+        # so do something more targeted.
+        extra_options = {
+            BundleResource: [joinedload('resourcegroup')],
             ServiceAddress: [joinedload('dns_record'),
                              subqueryload('interfaces')],
-            RebootSchedule: [],
             VirtualMachine: [joinedload('machine'),
                              joinedload('machine.primary_name'),
-                             joinedload('machine.primary_name.fqdn')],
+                             joinedload('machine.primary_name.fqdn'),
+                             joinedload('machine.host'),
+                             subqueryload('machine.host.personality_stage'),
+                             joinedload('machine.host.personality_stage.personality'),
+                             lazyload('machine.host.branch')],
         }
 
-        for cls, options in preload_classes.items():
+        if not classes:
+            classes = Resource.__subclasses__()
+
+        if Share in classes:
+            parser = StormapParser()
+
+        for cls in classes:
             q = session.query(cls)
             q = q.options(joinedload('holder'))
-            if options:
-                q = q.options(*options)
+            if cls in extra_options:
+                q = q.options(*extra_options[cls])
 
             for res in q:
-                cache[res.id] = res
+                res_cache[res.id] = res
+
+                if res.holder_id not in holder_cache:
+                    holder_cache[res.holder_id] = res.holder
+
+                if isinstance(res, Share):
+                    res.populate_share_info(parser)
 
     def preload_interfaces(self, session, hosts, interfaces_by_id,
                            interfaces_by_hwent):
@@ -103,12 +103,9 @@ class CommandFlush(BrokerCommand):
                       joinedload("dns_records"))
         q = q.order_by(AddressAssignment._label)
 
-        # Machine templates want the management interface only
         if hosts:
             q = q.options(subqueryload("network.static_routes"),
                           subqueryload("network.routers"))
-        else:
-            q = q.join(AddressAssignment.interface.of_type(ManagementInterface))
 
         for addr in q:
             addrs_by_iface[addr.interface_id].append(addr)
@@ -120,8 +117,8 @@ class CommandFlush(BrokerCommand):
                                 slaves_by_id.get(iface_id, None))
 
     def render(self, session, logger, services, personalities, machines,
-               clusters, hosts, locations, resources, network_devices, all,
-               **arguments):
+               clusters, hosts, locations, resources, network_devices,
+               virtual_switches, all, **arguments):
         if all:
             services = True
             personalities = True
@@ -131,6 +128,7 @@ class CommandFlush(BrokerCommand):
             locations = True
             resources = True
             network_devices = True
+            virtual_switches = True
 
         with CompileKey(logger=logger):
             logger.client_info("Loading data.")
@@ -145,6 +143,7 @@ class CommandFlush(BrokerCommand):
             resholder_by_id = {}
             service_instances = None  # pylint: disable=W0612
             racks = None  # pylint: disable=W0612
+            models = None  # pylint: disable=W0612
 
             # Object caches that are accessed directly
             disks_by_machine = defaultdict(list)
@@ -165,13 +164,12 @@ class CommandFlush(BrokerCommand):
                 q = session.query(HostResource)
                 # Using joinedload('host') would generate an outer join
                 q = q.join(Host)
-                q = q.options(contains_eager('host'))
+                q = q.options(contains_eager('host'),
+                              joinedload('host.hardware_entity'))
                 for resholder in q:
                     resholder_by_id[resholder.id] = resholder
 
             if hosts or clusters or resources or machines:
-                self.preload_virt_disk_info(session, resource_by_id)
-
                 # Most machines are in racks...
                 q = session.query(Rack)
                 q = q.options(subqueryload("dns_maps"),
@@ -181,8 +179,15 @@ class CommandFlush(BrokerCommand):
                               lazyload("parents.dns_maps.location"))
                 racks = q.all()
 
+            if machines or resources:
+                # Loading all models is cheaper than any filtering
+                models = session.query(Model).options(joinedload('vendor')).all()
+
             if hosts or clusters or resources:
-                self.preload_resources(session, resource_by_id)
+                self.preload_resources(session, resource_by_id, resholder_by_id)
+            elif machines:
+                self.preload_resources(session, resource_by_id, resholder_by_id,
+                                       [Share, Filesystem])
 
             if hosts or machines:
                 self.preload_interfaces(session, hosts, interfaces_by_id,
@@ -195,7 +200,9 @@ class CommandFlush(BrokerCommand):
 
             if locations:
                 logger.client_info("Flushing locations.")
-                for dbloc in session.query(City).all():
+                q = session.query(City)
+                q = q.options(subqueryload('parents'))
+                for dbloc in q:
                     try:
                         plenary = Plenary.get_plenary(dbloc, logger=logger)
                         written += plenary.write(locked=True)
@@ -208,7 +215,9 @@ class CommandFlush(BrokerCommand):
                 q = session.query(Service)
                 q = q.options(subqueryload("instances"),
                               lazyload("instances.service"),
-                              subqueryload("instances.servers"))
+                              subqueryload("instances.servers"),
+                              subqueryload("instances.servers.host"),
+                              joinedload("instances.servers.host.hardware_entity"))
                 progress = ProgressReport(logger, q.count(), "service")
                 for dbservice in q:
                     progress.step()
@@ -283,6 +292,10 @@ class CommandFlush(BrokerCommand):
                               joinedload("primary_name.fqdn"))
                 chassis = q.all()  # pylint: disable=W0612
 
+                q = session.query(PortGroup)
+                q = q.options(subqueryload('legacy_vlan'))
+                port_groups = q.all()  # pylint: disable=W0612
+
                 q = session.query(Machine)
                 q = q.options(lazyload("primary_name"),
                               subqueryload("chassis_slot"))
@@ -326,7 +339,9 @@ class CommandFlush(BrokerCommand):
                               subqueryload("_cluster"),
                               subqueryload("personality_stage"),
                               joinedload("personality_stage.personality"),
-                              subqueryload("personality_stage.grns"))
+                              subqueryload("personality_stage.grns"),
+                              subqueryload("personality_stage.required_services"),
+                              subqueryload("virtual_switch"))
 
                 progress = ProgressReport(logger, q.count(), "host")
                 for h in q:
@@ -360,7 +375,9 @@ class CommandFlush(BrokerCommand):
                               joinedload('resholder'),
                               subqueryload('resholder.resources'),
                               subqueryload('services_used'),
-                              subqueryload('allowed_personalities'))
+                              subqueryload('services_provided'),
+                              subqueryload('allowed_personalities'),
+                              subqueryload('virtual_switch'))
                 progress = ProgressReport(logger, q.count(), "cluster")
                 for clus in q:
                     progress.step()
@@ -373,10 +390,11 @@ class CommandFlush(BrokerCommand):
             if resources:
                 logger.client_info("Flushing resources.")
 
-                q = session.query(Resource)
+                q = session.query(Resource.id)
                 progress = ProgressReport(logger, q.count(), "resource")
-                for dbresource in q:
+                for resid in q:
                     progress.step()
+                    dbresource = session.query(Resource).get(resid)
                     try:
                         plenary = Plenary.get_plenary(dbresource, logger=logger)
                         written += plenary.write(locked=True)
@@ -386,7 +404,8 @@ class CommandFlush(BrokerCommand):
             if network_devices:
                 logger.client_info("Flushing network devices.")
                 q = session.query(NetworkDevice)
-                q = q.options(subqueryload('port_groups'),
+                q = q.options(subqueryload('interfaces'),
+                              subqueryload('port_groups'),
                               joinedload('port_groups.network'))
                 progress = ProgressReport(logger, q.count(), "network device")
                 for dbnetdev in q:
@@ -401,6 +420,21 @@ class CommandFlush(BrokerCommand):
                         written += plenary.write(locked=True)
                     except Exception as e:
                         failed.append("{0} failed: {1}".format(dbnetdev, e))
+
+            if virtual_switches:
+                logger.client_info("Flushing virtual switches.")
+                q = session.query(VirtualSwitch)
+                q = q.options(subqueryload("port_groups"),
+                              joinedload("port_groups.network"),
+                              joinedload("port_groups.legacy_vlan"))
+                progress = ProgressReport(logger, q.count(), "virtual switch")
+                for dbvswitch in q:
+                    progress.step()
+                    try:
+                        plenary = Plenary.get_plenary(dbvswitch, logger=logger)
+                        written += plenary.write(locked=True)
+                    except Exception as e:
+                        failed.append("{0} failed: {1}".format(dbvswitch, e))
 
             # written + len(failed) isn't actually the total that should
             # have been done, but it's the easiest to implement for this
