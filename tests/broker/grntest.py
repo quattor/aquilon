@@ -48,7 +48,6 @@ class VerifyGrnsMixin(object):
                               r'\s*\);',
                               command)
 
-        check_grn_for_key(grn_list, "system/eon_ids")
         for (target, target_list) in iteritems(grn_maps):
             check_grn_for_key(target_list, "system/eon_id_maps/%s" % target)
 
@@ -60,6 +59,5 @@ class VerifyGrnsMixin(object):
                                   r'"%s" = append\(%d\);' % (key, eon_id),
                                   command)
 
-        check_grn_for_key(grn_list, "/system/eon_ids")
         for target, target_list in iteritems(grn_maps):
             check_grn_for_key(target_list, "/system/eon_id_maps/%s" % target)

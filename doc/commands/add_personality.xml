@@ -205,7 +205,6 @@ Host Personality: foo Archetype: aquilon
 template personality/foo/config;
 
 variable PERSONALITY = "foo";
-"/system/eon_ids" = append(1234);
 include { if_exists("personality/foo/pre_feature") };
 include { if_exists("personality/config") };
 include { if_exists("personality/foo/post_feature") };
@@ -237,7 +236,6 @@ Host Personality: foo Archetype: aquilon
 template personality/foo/config;
 
 variable PERSONALITY = "foo";
-"/system/eon_ids" = append(1234);
 include { if_exists("personality/foo/pre_feature") };
 include { if_exists("personality/config") };
 include { "features/personality/config_override/config" };

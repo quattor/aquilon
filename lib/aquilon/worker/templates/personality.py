@@ -205,14 +205,6 @@ class PlenaryPersonalityBase(Plenary):
             for eon_id in sorted(eon_id_set):
                 pan_append(lines, "/system/eon_id_maps/%s" % target, eon_id)
 
-        section = "archetype_" + dbpers.archetype.name
-        # backward compat for esp reporting
-        if self.config.has_option(section, "default_grn_target"):
-            default_grn_target = self.config.get(section, "default_grn_target")
-
-            for eon_id in sorted(eon_id_map[default_grn_target]):
-                pan_append(lines, "/system/eon_ids", eon_id)
-
         pan_assign(lines, "/system/personality/owner_eon_id",
                    dbpers.owner_eon_id)
 

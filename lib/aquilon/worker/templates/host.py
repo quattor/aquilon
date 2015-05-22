@@ -248,15 +248,6 @@ class PlenaryHostData(StructurePlenary):
             eon_id_list = sorted(grn.eon_id for grn in eon_id_set)
             pan_assign(lines, "system/eon_id_maps/%s" % target, eon_id_list)
 
-        # backward compat for esp reporting
-        section = "archetype_" + self.dbobj.archetype.name
-        if self.config.has_option(section, "default_grn_target"):
-            default_grn_target = self.config.get(section, "default_grn_target")
-
-            eon_id_list = sorted(grn.eon_id for grn in eon_id_map[default_grn_target])
-            if eon_id_list:
-                pan_assign(lines, "system/eon_ids", eon_id_list)
-
         pan_assign(lines, "system/owner_eon_id", self.dbobj.effective_owner_grn.eon_id)
 
         if self.dbobj.cluster:
