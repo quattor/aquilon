@@ -222,6 +222,7 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
         self.matchoutput(out, '"rack/room" = "utroom1";', command)
         self.matchoutput(out, '"sysloc/building" = "ut";', command)
         self.matchoutput(out, '"sysloc/city" = "ny";', command)
+        self.matchoutput(out, '"sysloc/country" = "us";', command)
         self.matchoutput(out, '"sysloc/continent" = "na";', command)
         self.matchoutput(out,
                          '"chassis" = "ut3c1.aqd-unittest.ms.com";',

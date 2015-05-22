@@ -54,6 +54,8 @@ class TestAddESXCluster(PersonalityTestMixin, TestBrokerCommand):
                          data_command)
         self.matchoutput(data, '"system/cluster/sysloc/continent" = "na";',
                          data_command)
+        self.matchoutput(data, '"system/cluster/sysloc/country" = "us";',
+                         data_command)
         self.matchoutput(data, '"system/cluster/sysloc/city" = "ny";',
                          data_command)
         self.matchoutput(data, '"system/cluster/sysloc/campus" = "ny";',

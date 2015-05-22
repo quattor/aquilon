@@ -655,17 +655,13 @@ class TemplateFormatter(ObjectFormatter):
 
 
 def add_location_info(lines, dblocation, prefix=""):
-    if dblocation.continent:
-        pan_assign(lines, prefix + "sysloc/continent", dblocation.continent.name)
-    if dblocation.city:
-        pan_assign(lines, prefix + "sysloc/city", dblocation.city.name)
-    if dblocation.building:
-        pan_assign(lines, prefix + "sysloc/building", dblocation.building.name)
-    # FIXME: add hub?
-    if dblocation.campus:
-        pan_assign(lines, prefix + "sysloc/campus", dblocation.campus.name)
-    if dblocation.bunker:
-        pan_assign(lines, prefix + "sysloc/bunker", dblocation.bunker.name)
+    # FIXME: sort out hub/region
+    for parent_type in ["continent", "country", "city", "campus", "building",
+                        "bunker"]:
+        dbparent = getattr(dblocation, parent_type)
+        if dbparent:
+            pan_assign(lines, prefix + "sysloc/" + parent_type, dbparent.name)
+
     if dblocation.rack:
         pan_assign(lines, prefix + "rack/name", dblocation.rack.name)
         if dblocation.rack_row:
