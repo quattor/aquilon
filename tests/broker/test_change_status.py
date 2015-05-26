@@ -30,10 +30,12 @@ class TestChangeStatus(TestBrokerCommand):
         # List of (state, forbidden transitions) tuples. We're starting from
         # ready.
         transitions = [('failed', ['build', 'install', 'ready', 'almostready']),
-                       ('decommissioned', ['build', 'install', 'ready',
-                                           'almostready', 'failed']),
-                       ('rebuild', ['build', 'install']),
-                       ('ready', ['build', 'install'])]
+                       ('decommissioned', ['ready', 'almostready', 'failed',
+                                           'blind']),
+                       ('build', ['install', 'reinstall', 'rebuild', 'blind']),
+                       ('decommissioned', []),
+                       ('rebuild', ['build', 'install', 'blind']),
+                       ('ready', ['build', 'install', 'blind'])]
 
         for status, forbidden in transitions:
             command = ["change_status", "--hostname=unittest02.one-nyp.ms.com",
