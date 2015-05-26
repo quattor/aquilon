@@ -336,7 +336,7 @@ class PlenaryHostObject(ObjectPlenary):
                 continue
 
         services = []
-        required_services = set(dbstage.archetype.services + dbstage.services)
+        required_services = self.dbobj.required_services
 
         for si in self.dbobj.services_used:
             required_services.discard(si.service)

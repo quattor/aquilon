@@ -16,43 +16,15 @@
 # limitations under the License.
 """Contains the logic for `aq unbind client --cluster`."""
 
-from aquilon.exceptions_ import ArgumentError, NotFoundException
-from aquilon.aqdb.model import Cluster, Service
-from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.templates import (Plenary, PlenaryCollection,
-                                      PlenaryServiceInstanceServer)
-from aquilon.utils import first_of
+from aquilon.aqdb.model import Cluster
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.commands.unbind_client_hostname import \
+        CommandUnbindClientHostname
 
 
-class CommandUnbindClientCluster(BrokerCommand):
+class CommandUnbindClientCluster(CommandUnbindClientHostname):
 
     required_parameters = ["cluster", "service"]
 
-    def render(self, session, logger, cluster, service, **arguments):
-        dbservice = Service.get_unique(session, service, compel=True)
-        dbcluster = Cluster.get_unique(session, cluster, compel=True)
-        dbinstance = first_of(dbcluster.services_used,
-                              lambda x: x.service == dbservice)
-
-        if not dbinstance:
-            raise NotFoundException("{0} is not bound to {1:l}."
-                                    .format(dbservice, dbcluster))
-        if dbservice in dbcluster.archetype.services:
-            raise ArgumentError("{0} is required for {1:l}, the binding cannot "
-                                "be removed."
-                                .format(dbservice, dbcluster.archetype))
-        if dbservice in dbcluster.personality_stage.services:
-            raise ArgumentError("{0} is required for {1:l}, the binding cannot "
-                                "be removed."
-                                .format(dbservice, dbcluster.personality_stage))
-
-        dbcluster.services_used.remove(dbinstance)
-
-        session.flush()
-
-        plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(Plenary.get_plenary(dbcluster))
-        plenaries.append(PlenaryServiceInstanceServer.get_plenary(dbinstance))
-        plenaries.write()
-
-        return
+    def get_dbobj(self, session, cluster=None, **arguments):
+        return Cluster.get_unique(session, cluster, compel=True)

@@ -130,8 +130,9 @@
 	    <option name="clusters" type="flag">flush the cluster templates</option>
 	    <option name="services" type="flag">flush the service templates</option>
 	    <option name="resources" type="flag">flush the resource templates</option>
-	    <option name="locations" type="flag">flush templates related to locations. This is only cities for now.</option>
-	    <option name="network_devices" type="flag">flush templates related to network devices.</option>
+	    <option name="locations" type="flag">flush templates related to locations. This is only cities for now</option>
+	    <option name="network_devices" type="flag">flush templates related to network devices</option>
+	    <option name="virtual_switches" type="flag">flush templates of virtual switches</option>
 	    <option name="all" type="flag">flush all templates</option>
 	</optgroup>
 	<transport method="post" path="command/flush"/>

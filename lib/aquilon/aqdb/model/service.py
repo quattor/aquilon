@@ -75,11 +75,11 @@ class Service(Base):
 
         # Check if the service instance is used by any cluster-bound personality
         q = session.query(PersonalityStage.id)
-        q = q.outerjoin(PersService, PersonalityStage.services)
+        q = q.outerjoin(PersService, PersonalityStage.required_services)
         q = q.reset_joinpoint()
         q = q.join(Personality, Archetype)
         q = q.filter(Archetype.cluster_type != null())
-        q = q.outerjoin(ArchService, Archetype.services)
+        q = q.outerjoin(ArchService, Archetype.required_services)
         q = q.filter(or_(PersService.id == self.id, ArchService.id == self.id))
         q = q.distinct()
         return [persst.id for persst in q]
@@ -102,7 +102,8 @@ class __ServiceListItem(Base):
     __table_args__ = (PrimaryKeyConstraint(service_id, archetype_id),)
 
 Service.archetypes = relation(Archetype, secondary=__ServiceListItem.__table__,
-                              backref=backref("services", passive_deletes=True))
+                              backref=backref("required_services",
+                                              passive_deletes=True))
 
 
 class __PersonalityServiceListItem(Base):
@@ -123,5 +124,5 @@ class __PersonalityServiceListItem(Base):
 
 Service.personality_stages = relation(PersonalityStage,
                                       secondary=__PersonalityServiceListItem.__table__,
-                                      backref=backref("services",
+                                      backref=backref("required_services",
                                                       passive_deletes=True))

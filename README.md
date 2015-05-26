@@ -84,7 +84,7 @@ Run as root to install to a system directory, or run as a normal user
 to install into a user-writable location.
 
 ```bash
-cd build
+cd tools
 ./bootstrap_env.py > aq_env.py
 ```
 

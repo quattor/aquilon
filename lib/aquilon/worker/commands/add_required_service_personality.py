@@ -27,10 +27,10 @@ class CommandAddRequiredServicePersonality(BrokerCommand):
     required_parameters = ["service", "archetype", "personality"]
 
     def _update_dbobj(self, dbstage, dbservice):
-        if dbservice in dbstage.services:
+        if dbservice in dbstage.required_services:
             raise ArgumentError("{0} is already required by {1:l}."
                                 .format(dbservice, dbstage))
-        dbstage.services.append(dbservice)
+        dbstage.required_services.append(dbservice)
 
     def render(self, session, service, archetype, personality,
                personality_stage, justification, reason, user, **arguments):

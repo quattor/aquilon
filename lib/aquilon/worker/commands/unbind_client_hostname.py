@@ -29,29 +29,30 @@ class CommandUnbindClientHostname(BrokerCommand):
 
     required_parameters = ["hostname", "service"]
 
-    def render(self, session, logger, hostname, service, **arguments):
-        dbhost = hostname_to_host(session, hostname)
+    def get_dbobj(self, session, hostname=None, **arguments):
+        return hostname_to_host(session, hostname)
+
+    def render(self, session, logger, service, **arguments):
+        dbobj = self.get_dbobj(session, **arguments)
         dbservice = Service.get_unique(session, service, compel=True)
-        dbinstance = first_of(dbhost.services_used,
+        dbinstance = first_of(dbobj.services_used,
                               lambda x: x.service == dbservice)
 
         if not dbinstance:
             raise NotFoundException("{0} is not bound to {1:l}."
-                                    .format(dbservice, dbhost))
-        if dbservice in dbhost.archetype.services:
-            raise ArgumentError("{0} is required for {1:l}, the binding cannot "
-                                "be removed."
-                                .format(dbservice, dbhost.archetype))
-        if dbservice in dbhost.personality_stage.services:
-            raise ArgumentError("{0} is required for {1:l}, the binding cannot "
-                                "be removed."
-                                .format(dbservice, dbhost.personality_stage))
+                                    .format(dbservice, dbobj))
 
-        dbhost.services_used.remove(dbinstance)
+        for parent in (dbobj.archetype, dbobj.personality_stage):
+            if dbservice in parent.required_services:
+                raise ArgumentError("{0} is required for {1:l}, the binding "
+                                    "cannot be removed."
+                                    .format(dbservice, parent))
+
+        dbobj.services_used.remove(dbinstance)
         session.flush()
 
         plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(Plenary.get_plenary(dbhost))
+        plenaries.append(Plenary.get_plenary(dbobj))
         plenaries.append(PlenaryServiceInstanceServer.get_plenary(dbinstance))
         plenaries.write()
 

@@ -67,7 +67,7 @@ class CommandShowDiff(BrokerCommand):
         ret["Features"][dtype] = features
 
         # process required_services
-        services = dict((srv.name, True) for srv in dbstage.services)
+        services = dict((srv.name, True) for srv in dbstage.required_services)
         ret["Required Services"][dtype] = services
 
         # service maps

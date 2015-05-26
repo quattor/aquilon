@@ -28,13 +28,6 @@ from distutils.command.build import build
 
 VERSIONFILE = "VERSION"
 
-# distutils won't package anything under "build".  We cheat by
-# creating a symlink and referring to it during all the packaging
-# process.
-try:
-    os.symlink("build", "bootstrap")
-except OSError:
-    pass
 
 class BuildExcept(Exception):
     pass
@@ -84,10 +77,10 @@ def find_regular_files(path):
 
 
 all_packages = find_packages("lib")
-all_packages.extend(find_packages("bootstrap/bootstrap_ms"))
+all_packages.extend(find_packages("tools/bootstrap_ms"))
 all_scripts = glob.glob(os.path.join("bin", "a*")) + \
               glob.glob(os.path.join("sbin", "a*"))
-all_scripts.extend(glob.glob(os.path.join("bootstrap", "*.py")))
+all_scripts.extend(glob.glob(os.path.join("tools", "*.py")))
 
 setup(name="aquilon",
       version=get_version(),
@@ -98,7 +91,7 @@ setup(name="aquilon",
       author_email="quattor-aquilon@lists.sourceforge.net",
       package_dir={'aquilon' : 'lib/aquilon',
                    'twisted' : 'lib/twisted',
-                   'ms': 'bootstrap/bootstrap_ms/ms'},
+                   'ms': 'tools/bootstrap_ms/ms'},
       packages=all_packages,
       cmdclass = {"install_scripts" : install_scripts},
       data_files=[("/usr/share/aquilon/etc",

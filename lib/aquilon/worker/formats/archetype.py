@@ -31,7 +31,8 @@ class ArchetypeFormatter(ObjectFormatter):
             skeleton.cluster_type = str(archetype.cluster_type)
 
         if indirect_attrs:
-            self.redirect_proto(archetype.services, skeleton.required_services,
+            self.redirect_proto(archetype.required_services,
+                                skeleton.required_services,
                                 indirect_attrs=False)
 
 ObjectFormatter.handlers[Archetype] = ArchetypeFormatter()

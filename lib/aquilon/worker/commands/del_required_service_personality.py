@@ -28,7 +28,7 @@ class CommandDelRequiredServicePersonality(CommandAddRequiredServicePersonality)
 
     def _update_dbobj(self, dbstage, dbservice):
         try:
-            dbstage.services.remove(dbservice)
+            dbstage.required_services.remove(dbservice)
         except ValueError:
             raise NotFoundException("{0} is not required for {1:l}."
                                     .format(dbservice, dbstage))
