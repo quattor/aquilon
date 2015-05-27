@@ -46,8 +46,8 @@ class CommandAddManager(BrokerCommand):
                                               name=interface, mac=mac,
                                               interface_type='management')
 
-        addrs = ", ".join("%s [%s]" % (addr.logical_name, addr.ip) for addr
-                          in dbinterface.assignments)
+        addrs = ", ".join(sorted("%s [%s]" % (addr.logical_name, addr.ip)
+                                 for addr in dbinterface.assignments))
         if addrs:
             raise ArgumentError("{0} already has the following addresses: "
                                 "{1}.".format(dbinterface, addrs))

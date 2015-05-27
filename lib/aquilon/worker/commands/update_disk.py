@@ -58,7 +58,8 @@ class CommandUpdateDisk(BrokerCommand):
             if controller not in controller_types:
                 raise ArgumentError("%s is not a valid controller type, use "
                                     "one of: %s." %
-                                    (controller, ", ".join(controller_types)))
+                                    (controller,
+                                     ", ".join(sorted(controller_types))))
             dbdisk.controller_type = controller
 
         if boot is not None:

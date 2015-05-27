@@ -235,4 +235,4 @@ def check_only_primary_ip(dbhw_ent):
     if addrs:
         raise ArgumentError("{0} still provides the following addresses, "
                             "delete them first: {1}.".format
-                            (dbhw_ent, ", ".join(addrs)))
+                            (dbhw_ent, ", ".join(sorted(addrs))))

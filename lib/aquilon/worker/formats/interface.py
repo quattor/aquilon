@@ -88,7 +88,7 @@ class InterfaceFormatter(ObjectFormatter):
         static_routes = set()
         for addr in interface.assignments:
             if addr.fqdns:
-                names = ", ".join(str(fqdn) for fqdn in addr.fqdns)
+                names = ", ".join(sorted(str(fqdn) for fqdn in addr.fqdns))
             else:
                 names = "unknown"
 
@@ -106,7 +106,8 @@ class InterfaceFormatter(ObjectFormatter):
             for dns_record in addr.dns_records:
                 if dns_record.alias_cnt:
                     details.append(indent + "  Aliases: %s" %
-                                   ", ".join(str(a.fqdn) for a in dns_record.all_aliases))
+                                   ", ".join(sorted(str(a.fqdn) for a in
+                                                    dns_record.all_aliases)))
 
         for route in sorted(static_routes,
                             key=attrgetter('destination', 'gateway_ip')):

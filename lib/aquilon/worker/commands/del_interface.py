@@ -52,21 +52,22 @@ class CommandDelInterface(BrokerCommand):
             dbhw_ent = dbinterface.hardware_entity
 
         if dbinterface.vlans:
-            vlans = ", ".join(iface.name for iface in
-                              dbinterface.vlans.values())
+            vlans = ", ".join(sorted(iface.name for iface in
+                                     dbinterface.vlans.values()))
             raise ArgumentError("{0} is the parent of the following VLAN "
                                 "interfaces, delete them first: "
                                 "{1}.".format(dbinterface, vlans))
 
         if dbinterface.slaves:
-            slaves = ", ".join(iface.name for iface in dbinterface.slaves)
+            slaves = ", ".join(sorted(iface.name for iface in
+                                      dbinterface.slaves))
             raise ArgumentError("{0} is the master of the following slave "
                                 "interfaces, delete them first: "
                                 "{1}.".format(dbinterface, slaves))
 
         if dbinterface.service_addresses:
-            srvs = ", ".join(srv.name for srv in
-                             dbinterface.service_addresses)
+            srvs = ", ".join(sorted(srv.name for srv in
+                                    dbinterface.service_addresses))
             raise ArgumentError("{0} still has the following service "
                                 "addresses bound to it, delete them first: "
                                 "{1}.".format(dbinterface, srvs))
@@ -86,8 +87,8 @@ class CommandDelInterface(BrokerCommand):
                                 "therefore it cannot be deleted."
                                 "{2}".format(dbinterface, dbhw_ent, msg))
 
-        addrs = ", ".join("%s: %s" % (addr.logical_name, addr.ip) for addr in
-                          dbinterface.assignments)
+        addrs = ", ".join(sorted("%s: %s" % (addr.logical_name, addr.ip)
+                                 for addr in dbinterface.assignments))
         if addrs:
             raise ArgumentError("{0} still has the following addresses "
                                 "configured, delete them first: "

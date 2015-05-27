@@ -253,8 +253,8 @@ class TestUpdateDisk(TestBrokerCommand):
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "bad-controller is not a valid controller type, "
-                         "use one of: cciss, ide, sas, sata, scsi, flash, "
-                         "fibrechannel.",
+                         "use one of: cciss, fibrechannel, flash, ide, "
+                         "sas, sata, scsi.",
                          command)
 
     def test_300_bad_address(self):

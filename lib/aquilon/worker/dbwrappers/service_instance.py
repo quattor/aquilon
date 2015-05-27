@@ -16,8 +16,6 @@
 # limitations under the License.
 """Wrapper to make getting a service instance simpler."""
 
-from operator import attrgetter
-
 from aquilon.exceptions_ import ArgumentError
 
 
@@ -26,8 +24,6 @@ def check_no_provided_service(dbobject):
         # De-duplicate and sort the provided service instances
         instances = set(srv.service_instance for srv in
                         dbobject.services_provided)
-        instances = sorted(instances, key=attrgetter("service.name", "name"))
-
         msg = ", ".join(sorted(si.qualified_name for si in instances))
         raise ArgumentError("{0} still provides the following services, "
                             "and cannot be deleted: {1!s}."
