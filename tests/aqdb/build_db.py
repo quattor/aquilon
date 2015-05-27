@@ -92,9 +92,6 @@ def main(*args, **kw):
     assert db, "No db_factory in build_db"
     Base.metadata.bind = db.engine
 
-    if opts.verbose:
-        db.engine.echo = True
-
     if opts.delete_db:
         log.debug('Dropping database')
         db.drop_all_tables_and_sequences()

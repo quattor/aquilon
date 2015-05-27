@@ -129,15 +129,20 @@ class DbFactory(object):
                 log.info("SQLite is operating in unsafe mode!")
         elif engine.dialect.name == "postgresql":
             pass
+
+        if self.verbose:
+            engine.echo = True
+
         return engine
 
-    def __init__(self, *args, **kw):
+    def __init__(self, verbose=False):
         self.__dict__ = self.__shared_state
 
         if self.__started:
             return
 
         self.__started = True
+        self.verbose = verbose
 
         config = Config()
         log = logging.getLogger(__name__)

@@ -84,9 +84,6 @@ def main(*args, **kw):
     db = DbFactory(verbose=opts.verbose)
     Base.metadata.bind = db.engine
 
-    if opts.verbose:
-        db.engine.echo = True
-
     session = db.Session()
 
     aqd_admin = Role.get_unique(session, "aqd_admin", compel=True)

@@ -45,10 +45,6 @@ from aquilon.aqdb.db_factory import DbFactory
 # Make all classes from the model available inside the shell
 from aquilon.aqdb.model import *  # pylint: disable=W0401,W0614
 
-db = DbFactory()
-Base.metadata.bind = db.engine
-session = s = db.Session()
-
 _banner = '<<<Welcome to the Aquilon shell (courtesy of IPython). Ctrl-D to quit>>>\n'
 
 
@@ -60,9 +56,12 @@ def main():
                         help='show queries')
     opts = parser.parse_args()
 
+    db = DbFactory(verbose=opts.verbose)
+    Base.metadata.bind = db.engine
+    session = s = db.Session()
+
     rootlogger = logging.getLogger('aquilon.aqdb')
     if opts.verbose:
-        db.engine.echo = True
         rootlogger.setLevel(logging.INFO)
     elif rootlogger.level == logging.NOTSET:
         rootlogger.setLevel(logging.WARN)

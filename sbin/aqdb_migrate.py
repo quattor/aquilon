@@ -73,9 +73,7 @@ if __name__ == '__main__':
     opts = parser.parse_args()
 
     # Use aquilon.aqdb for connecting to the source backend
-    db = DbFactory()
-    if opts.verbose:
-        db.engine.echo = True
+    db = DbFactory(verbose=opts.verbose)
     src_session = sessionmaker(bind=db.engine)()
 
     if db.engine.dialect.name == 'oracle' or \
