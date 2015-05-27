@@ -13,6 +13,8 @@ basedir = /var/tmp/%(user)s
 [database]
 database_section = database_sqlite
 #log_query_times = yes
+#log_query_plans = yes
+#log_unique_plans_only = yes
 
 [broker]
 quattordir = %(basedir)s/quattor

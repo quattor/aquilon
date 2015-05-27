@@ -110,6 +110,12 @@ database_section = database_sqlite
 # section.
 #log_query_times = yes
 
+# Log query execution plans, if the backend supports it. This can be quite heavy.
+#log_query_plans = yes
+
+# Only log the query plan for the first time a query is seen
+#log_unique_plans_only = yes
+
 [broker]
 default_organization = ms
 servername = %(hostname)s
