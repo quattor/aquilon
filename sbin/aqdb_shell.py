@@ -18,6 +18,7 @@
 
 import os
 import sys
+import logging
 
 # -- begin path_setup --
 import ms.version
@@ -55,12 +56,22 @@ def main():
     parser = argparse.ArgumentParser(
         description='An ipython shell, useful for testing and exploring aqdb')
 
-    parser.add_argument('-v', action='count', dest='verbose',
-                        help='increase verbosity by adding more (-vv), etc.')
+    parser.add_argument('-v', action='store_true', dest='verbose',
+                        help='show queries')
     opts = parser.parse_args()
 
-    if opts.verbose >= 1:
+    rootlogger = logging.getLogger('aquilon.aqdb')
+    if opts.verbose:
         db.engine.echo = True
+        rootlogger.setLevel(logging.INFO)
+    elif rootlogger.level == logging.NOTSET:
+        rootlogger.setLevel(logging.WARN)
+
+    if not rootlogger.handlers:
+        handler = logging.StreamHandler(sys.stdout)
+        handler.setFormatter(logging.Formatter(
+            '%(asctime)s %(levelname)s %(name)s %(message)s'))
+        rootlogger.addHandler(handler)
 
     if db.engine.dialect.name == 'sqlite':
         prompt = str(db.engine.url).split('///')[1]
