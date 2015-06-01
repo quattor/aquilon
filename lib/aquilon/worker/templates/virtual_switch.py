@@ -16,6 +16,7 @@
 # limitations under the License.
 
 import logging
+from operator import attrgetter
 
 from sqlalchemy.inspection import inspect
 
@@ -43,7 +44,8 @@ class PlenaryVirtualSwitchData(StructurePlenary):
                               exclusive=exclusive)
 
     def body(self, lines):
-        for pg in self.dbobj.port_groups:
+        for pg in sorted(self.dbobj.port_groups,
+                         key=attrgetter("usage", "network_tag")):
             params = {"network_tag": pg.network_tag,
                       "network_ip": pg.network.ip,
                       "usage": pg.usage,

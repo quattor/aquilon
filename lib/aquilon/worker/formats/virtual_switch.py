@@ -27,7 +27,8 @@ class VirtualSwitchFormatter(ObjectFormatter):
         details = [indent + "{0:c}: {0.name}".format(vswitch)]
         if vswitch.comments:
             details.append(indent + "  Comments: %s" % vswitch.comments)
-        for pg in sorted(vswitch.port_groups, key=attrgetter("network_tag")):
+        for pg in sorted(vswitch.port_groups,
+                         key=attrgetter("usage", "network_tag")):
             details.append(indent + "  Port Group: %s" % pg.name)
             details.append(indent + "    Network: %s" % pg.network.ip)
 
