@@ -5366,6 +5366,27 @@
 	</format>
     </command>
 
+    <command name="update_service_address">
+	Update the parameters of a service address resource.
+	<optgroup mandatory="True">
+	    <optgroup>
+		<option name="hostname" type="string" conflicts="cluster metacluster">Hostname to apply resource</option>
+		<option name="cluster" type="string" conflicts="hostname metacluster">Cluster to apply resource</option>
+		<option name="metacluster" type="string" conflicts="hostname cluster">Metacluster to apply resource</option>
+		<option name="resourcegroup" type="string">Resourcegroup to apply resource</option>
+	    </optgroup>
+	    <option name="name" type="string">Logical name of the service address</option>
+	</optgroup>
+	<optgroup>
+	    <option name="interfaces" type="string">Comma separed list of interfaces</option>
+	    <option name="ip" type="ipv4">IP address</option>
+	    <option name="network_environment" type="string" requires="ip">Network environment (default: internal)</option>
+	    <option name="comments" type="string">Comments</option>
+	    <option name="map_to_primary" type="boolean">Should the reverse PTR point to the primary name?</option>
+	</optgroup>
+	<transport method="post" path="resource/service_address/%(name)s"/>
+    </command>
+
     <command name="add_grn">
 	Add a new GRN.
 	<optgroup mandatory="True" fields="all">

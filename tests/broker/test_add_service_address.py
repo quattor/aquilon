@@ -86,23 +86,28 @@ class TestAddServiceAddress(TestBrokerCommand):
                                   for res in host.resources))
 
     def testverifyzebra2dns(self):
-        ip = self.net["zebra_vip"].usable[1]
         command = ["show", "fqdn", "--fqdn", "zebra2.aqd-unittest.ms.com"]
         out = self.commandtest(command)
         self.matchclean(out, "Reverse", command)
 
     def testaddzebra3(self):
-        # Adding an even lower IP should cause zebra2 to be renumbered in DSDB
-        zebra2_ip = self.net["zebra_vip"].usable[1]
         zebra3_ip = self.net["zebra_vip"].usable[0]
-        self.dsdb_expect_add("zebra3.aqd-unittest.ms.com", zebra3_ip)
+        self.dsdb_expect_add("zebra3.aqd-unittest.ms.com", zebra3_ip,
+                             comments="Some service address comments")
         command = ["add", "service", "address",
                    "--hostname", "unittest20.aqd-unittest.ms.com",
                    "--service_address", "zebra3.aqd-unittest.ms.com",
                    "--interfaces", "eth0,eth1", "--ip", zebra3_ip,
-                   "--name", "zebra3", "--map_to_primary"]
+                   "--name", "zebra3", "--map_to_primary",
+                   "--comments", "Some service address comments"]
         self.noouttest(command)
         self.dsdb_verify()
+
+    def testverifyzebra3dns(self):
+        command = ["show", "fqdn", "--fqdn", "zebra3.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Reverse PTR: unittest20.aqd-unittest.ms.com",
+                         command)
 
     def testverifyunittest20(self):
         ip = self.net["zebra_vip"].usable[2]
@@ -128,6 +133,7 @@ class TestAddServiceAddress(TestBrokerCommand):
                           command)
         self.searchoutput(out,
                           r"Service Address: zebra3$"
+                          r"\s+Comments: Some service address comments$"
                           r"\s+Address: zebra3\.aqd-unittest\.ms\.com \[%s\]$"
                           r"\s+Interfaces: eth0, eth1$" % zebra3_ip,
                           command)

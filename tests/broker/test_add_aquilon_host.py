@@ -133,7 +133,7 @@ class TestAddAquilonHost(TestBrokerCommand):
         self.matchoutput(out, "Domain: unittest", command)
         self.matchoutput(out, "Build Status: blind", command)
 
-    def test_130_add_unittest20_bad(self):
+    def test_130_add_unittest20_bad_iface(self):
         ip = self.net["zebra_vip"].usable[2]
         command = ["add", "host", "--archetype", "aquilon",
                    "--hostname", "unittest20.aqd-unittest.ms.com",
@@ -143,6 +143,16 @@ class TestAddAquilonHost(TestBrokerCommand):
         out = self.badrequesttest(command)
         self.matchoutput(out, "Machine unittest20.aqd-unittest.ms.com does not "
                          "have an interface named eth2.", command)
+
+    def test_130_add_unittest20_no_iface(self):
+        ip = self.net["zebra_vip"].usable[2]
+        command = ["add", "host", "--archetype", "aquilon",
+                   "--hostname", "unittest20.aqd-unittest.ms.com",
+                   "--ip", ip, "--zebra_interfaces", ",",
+                   "--machine", "ut3c5n2", "--domain", "unittest",
+                   "--personality", "compileserver"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "The interface list cannot be empty.", command)
 
     def test_131_add_unittest20_e1(self):
         # Add the transit before the host to verify that the reverse DNS entry
