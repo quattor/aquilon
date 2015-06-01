@@ -50,13 +50,15 @@ def del_cluster(session, logger, dbcluster, config):
             raise ArgumentError("{0} still has {1:l} assigned, please delete "
                                 "it first.".format(dbcluster, res))
 
+    plenaries = PlenaryCollection(logger=logger)
+    plenaries.append(Plenary.get_plenary(dbcluster))
+
     if dbcluster.metacluster:
         dbmetacluster = dbcluster.metacluster
+        plenaries.append(Plenary.get_plenary(dbmetacluster))
         dbmetacluster.members.remove(dbcluster)
         dbmetacluster.validate()
 
-    plenaries = PlenaryCollection(logger=logger)
-    plenaries.append(Plenary.get_plenary(dbcluster))
     if dbcluster.resholder:
         plenaries.extend(map(Plenary.get_plenary,
                              dbcluster.resholder.resources))
