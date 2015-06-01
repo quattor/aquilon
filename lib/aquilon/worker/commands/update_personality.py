@@ -62,6 +62,11 @@ class CommandUpdatePersonality(BrokerCommand):
                 if "next" in dbpersona.stages:
                     _check_stage_unused(session, dbpersona.stages["next"])
                     del dbpersona.stages["next"]
+                if "current" not in dbpersona.stages:
+                    raise ArgumentError("{0} does not have stage current, "
+                                        "you need to promote it before "
+                                        "staging can be turned off."
+                                        .format(dbpersona))
             dbpersona.staged = staged
 
         dbstage = dbpersona.active_stage(personality_stage)

@@ -60,7 +60,6 @@ class TestSearchPersonality(VerifyGrnsMixin, TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "aquilon/utpersonality/dev", command)
         self.matchoutput(out, "aquilon/eaitools@current", command)
-        self.matchoutput(out, "aquilon/eaitools@previous", command)
         self.matchclean(out, "vulcan-10g-server-prod", command)
 
     def test_100_by_eon_id(self):
@@ -78,7 +77,6 @@ class TestSearchPersonality(VerifyGrnsMixin, TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "aquilon/utpersonality/dev", command)
         self.matchoutput(out, "aquilon/eaitools@current", command)
-        self.matchoutput(out, "aquilon/eaitools@previous", command)
         self.matchclean(out, "vulcan-10g-server-prod", command)
 
     def test_100_fullinfo(self):
@@ -98,7 +96,7 @@ class TestSearchPersonality(VerifyGrnsMixin, TestBrokerCommand):
         command = ["search_personality", "--host_environment", "dev",
                    "--personality_stage", "current",
                    "--eon_id", 2, "--format=proto"]
-        personalities = self.protobuftest(command, expect=12)
+        personalities = self.protobuftest(command, expect=11)
         pers_by_name_ver = defaultdict(dict)
         for p in personalities:
             pers_by_name_ver[p.name][p.stage] = p

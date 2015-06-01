@@ -113,10 +113,11 @@ class Personality(Base):
         if stage:
             if not self.staged:
                 raise ArgumentError("{0} is not staged.".format(self))
-            self.force_existing_stage(stage)
-            return self.stages[stage]
         else:
-            return self.stages["current"]
+            stage = "current"
+
+        self.force_existing_stage(stage)
+        return self.stages[stage]
 
     def active_stage(self, stage=None):
         """

@@ -33,40 +33,14 @@ GRN = "grn:/ms/ei/aquilon/aqd"
 
 class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
                          TestBrokerCommand):
-    def verifycatforpersonality(self, archetype, personality,
-                                config_override=False, host_env='dev',
-                                grn=None):
-        command = ["cat", "--archetype", archetype, "--personality", personality]
-        out = self.commandtest(command)
-        self.matchoutput(out, 'variable PERSONALITY = "%s"' % personality,
-                         command)
-        if grn:
-            self.check_personality_grns(out, [grn], {"esp": [grn]}, command)
-        self.matchoutput(out, 'include { if_exists("personality/%s/pre_feature") };' %
-                         personality, command)
-        self.matchoutput(out, "template personality/%s/config;" % personality,
-                         command)
-        self.matchoutput(out, '"/system/personality/name" = "%s";' % personality,
-                         command)
-        self.matchoutput(out, 'final "/system/personality/host_environment" = "%s";' % host_env,
-                         command)
-        if config_override:
-            self.searchoutput(out, r'include { "features/personality/config_override/config" };\s*'
-                                   r'include { if_exists\("personality/utpersonality/dev/post_feature"\) };',
-                              command)
-        else:
-            self.matchoutput(out, 'include { if_exists("personality/%s/post_feature") };' %
-                             personality, command)
-            self.matchclean(out, 'config_override', command)
-
     def test_100_add_utpersonality(self):
         command = ["add_personality", "--personality=utpersonality/dev",
                    "--archetype=aquilon", "--grn=%s" % GRN, "--config_override",
                    "--host_environment=dev",
                    "--comments", "Some personality comments"]
         self.noouttest(command)
-        self.verifycatforpersonality("aquilon", "utpersonality/dev", True,
-                                     "dev", grn=GRN)
+        self.verifycatpersonality("aquilon", "utpersonality/dev", True, "dev",
+                                  grn=GRN)
 
     def test_105_verify_utpersonality(self):
         command = ["show_personality", "--personality=utpersonality/dev",
@@ -131,20 +105,16 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
                    "--host_environment=dev", "--staged",
                    "--comments", "Existing personality for netperssvcmap tests"]
         self.noouttest(command)
-        self.verifycatforpersonality("aquilon", "eaitools")
+        self.verifycatpersonality("aquilon", "eaitools", stage="next")
         # The basic parameter set needs to be initialized for further tests
-        # Note: these will apply to the next stage
         self.setup_personality("aquilon", "eaitools")
 
     def test_126_verify_eaitools(self):
         command = ["show_personality", "--personality", "eaitools",
                    "--archetype", "aquilon"]
-        out = self.commandtest(command)
-        self.matchoutput(out, "Stage: current", command)
-
-        command = ["show_parameter", "--personality", "eaitools",
-                   "--archetype", "aquilon"]
-        self.notfoundtest(command)
+        out = self.notfoundtest(command)
+        self.matchoutput(out, "Personality aquilon/eaitools does not have "
+                         "stage current.", command)
 
     def test_126_verify_eaitools_next(self):
         command = ["show_personality", "--personality", "eaitools",
@@ -162,7 +132,7 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
                    "--archetype", "windows", "--grn", "grn:/ms/windows/desktop",
                    "--host_environment", "dev"]
         self.noouttest(command)
-        self.verifycatforpersonality("windows", "desktop")
+        self.verifycatpersonality("windows", "desktop")
 
     def test_135_verify_windows_desktop(self):
         command = "show_personality --personality desktop --archetype windows"
@@ -221,8 +191,8 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
                    "--host_environment=dev",
                    "--personality=esx_server", "--archetype=vmhost"]
         self.noouttest(command)
-        self.verifycatforpersonality("vmhost", "esx_server",
-                                     grn="grn:/ms/ei/aquilon/aqd")
+        self.verifycatpersonality("vmhost", "esx_server",
+                                  grn="grn:/ms/ei/aquilon/aqd")
         command = ["show_personality", "--personality=esx_server",
                    "--archetype=vmhost"]
         out = self.commandtest(command)
@@ -231,7 +201,7 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
         command = ["add_personality", "--eon_id=2", "--host_environment=dev",
                    "--personality=esx_server", "--archetype=esx_cluster"]
         self.noouttest(command)
-        self.verifycatforpersonality("esx_cluster", "esx_server")
+        self.verifycatpersonality("esx_cluster", "esx_server")
 
     def test_165_add_esx_standalone(self):
         # Can't use create_personality() here, because the --cluster_required
@@ -240,8 +210,8 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
                    "--host_environment=dev",
                    "--archetype=vmhost", "--eon_id=2"]
         self.noouttest(command)
-        self.verifycatforpersonality("vmhost", "esx_standalone",
-                                     grn="grn:/ms/ei/aquilon/aqd")
+        self.verifycatpersonality("vmhost", "esx_standalone",
+                                  grn="grn:/ms/ei/aquilon/aqd")
         command = ["show_personality", "--personality=esx_standalone",
                    "--archetype=vmhost"]
         out = self.commandtest(command)
@@ -258,12 +228,12 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
         command = ["add_personality", "--eon_id=2", "--host_environment=dev",
                    "--personality=hadoop", "--archetype=gridcluster"]
         self.noouttest(command)
-        self.verifycatforpersonality("gridcluster", "hadoop")
+        self.verifycatpersonality("gridcluster", "hadoop")
 
     def test_171_add_ha_personality(self):
         self.create_personality("hacluster", "hapersonality",
                                 grn="grn:/ms/ei/aquilon/aqd")
-        self.verifycatforpersonality("hacluster", "hapersonality")
+        self.verifycatpersonality("hacluster", "hapersonality")
 
     def test_172_add_generic(self):
         for archetype in ["aurora", "f5", "filer", "vmhost", "windows"]:
@@ -392,9 +362,10 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
                         "No aurora/generic in personality list.")
         self.assertFalse("current" in
                          archetypes["aquilon"]["utpersonality/dev"])
-        self.assertTrue("current" in archetypes["aquilon"]["eaitools"])
+        self.assertFalse("current" in archetypes["aquilon"]["eaitools"])
         self.assertTrue("next" in archetypes["aquilon"]["eaitools"])
-        self.assertTrue("current" in archetypes["aquilon"]["unixeng-test"])
+        self.assertFalse("current" in archetypes["aquilon"]["unixeng-test"])
+        self.assertTrue("next" in archetypes["aquilon"]["unixeng-test"])
 
     def test_300_show_personality_archetype(self):
         command = "show_personality --archetype aquilon"
@@ -439,11 +410,10 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
 
     def test_400_show_missing_stage(self):
         command = ["show_personality", "--personality", "nostage",
-                   "--archetype", "aquilon",
-                   "--personality_stage", "next"]
+                   "--archetype", "aquilon"]
         out = self.notfoundtest(command)
         self.matchoutput(out, "Personality aquilon/nostage does not have "
-                         "stage next.", command)
+                         "stage current.", command)
 
     def test_400_show_bad_stage(self):
         command = ["show_personality", "--personality", "nostage",
@@ -454,11 +424,10 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
                          "stage.", command)
 
     def test_400_cat_missing_stage(self):
-        command = ["cat", "--personality", "nostage", "--archetype", "aquilon",
-                   "--personality_stage", "next"]
+        command = ["cat", "--personality", "nostage", "--archetype", "aquilon"]
         out = self.notfoundtest(command)
         self.matchoutput(out, "Personality aquilon/nostage does not have "
-                         "stage next.", command)
+                         "stage current.", command)
 
     def test_400_cat_bad_stage(self):
         command = ["cat", "--personality", "nostage", "--archetype", "aquilon",
@@ -469,11 +438,10 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
 
     def test_400_copy_missing_stage(self):
         command = ["add_personality", "--personality", "copy-test",
-                   "--archetype", "aquilon", "--copy_from", "nostage",
-                   "--copy_stage", "next"]
+                   "--archetype", "aquilon", "--copy_from", "nostage"]
         out = self.notfoundtest(command)
         self.matchoutput(out, "Personality aquilon/nostage does not have "
-                         "stage next.", command)
+                         "stage current.", command)
 
     def test_400_copy_bad_stage(self):
         command = ["add_personality", "--personality", "copy-test",
@@ -482,6 +450,10 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
         out = self.badrequesttest(command)
         self.matchoutput(out, "'no-such-stage' is not a valid personality "
                          "stage.", command)
+
+    def test_800_promote_unixeng_test(self):
+        self.noouttest(["promote", "--personality", "unixeng-test",
+                        "--archetype", "aquilon"])
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddPersonality)

@@ -445,14 +445,15 @@ class TestBindFeature(TestBrokerCommand):
                         "--staged"])
 
     def test_171_verify_clone(self):
-        command = ["show", "personality", "--personality", "inventory-clone"]
+        command = ["show", "personality", "--personality", "inventory-clone",
+                   "--personality_stage", "next"]
         out = self.commandtest(command)
         self.matchoutput(out, "Host Feature: post_host [post_personality]",
                          command)
 
     def test_171_verify_clone_proto(self):
         command = ["show", "personality", "--personality", "inventory-clone",
-                   "--format=proto"]
+                   "--personality_stage", "next", "--format=proto"]
         personality = self.protobuftest(command, expect=1)[0]
         feature = personality.features[0]
         self.assertEqual(feature.name, "post_host")
@@ -467,7 +468,7 @@ class TestBindFeature(TestBrokerCommand):
         out = self.commandtest(command)
         self.searchoutput(out, r"Bound to: Personality aquilon/inventory$",
                           command)
-        self.searchoutput(out, r"Bound to: Personality aquilon/inventory-clone@current$",
+        self.searchoutput(out, r"Bound to: Personality aquilon/inventory-clone@next$",
                           command)
 
     def test_179_cleanup_clone(self):

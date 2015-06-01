@@ -24,10 +24,11 @@ if __name__ == "__main__":
 import unittest2 as unittest
 from broker.brokertest import TestBrokerCommand
 from broker.grntest import VerifyGrnsMixin
+from broker.personalitytest import PersonalityTestMixin
 
 
-class TestUpdatePersonality(VerifyGrnsMixin, TestBrokerCommand):
-
+class TestUpdatePersonality(VerifyGrnsMixin, PersonalityTestMixin,
+                            TestBrokerCommand):
     def test_100_update_capacity(self):
         command = ["update_personality", "--personality", "vulcan-10g-server-prod",
                    "--archetype", "esx_cluster",
@@ -74,9 +75,7 @@ class TestUpdatePersonality(VerifyGrnsMixin, TestBrokerCommand):
         out = self.commandtest(command)
         self.matchclean(out, "override", command)
 
-        command = ["cat", "--archetype=aquilon", "--personality=testovrpersona/dev"]
-        out = self.commandtest(command)
-        self.matchclean(out, 'override', command)
+        self.verifycatpersonality("aquilon", "testovrpersona/dev")
 
     def test_131_update_config_override(self):
         command = ["update_personality", "--personality=testovrpersona/dev",
@@ -88,10 +87,8 @@ class TestUpdatePersonality(VerifyGrnsMixin, TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "Config override: enabled", command)
 
-        command = ["cat", "--archetype=aquilon", "--personality=testovrpersona/dev"]
-        out = self.commandtest(command)
-        self.matchoutput(out, 'include { "features/personality/config_override/config" }',
-                         command)
+        self.verifycatpersonality("aquilon", "testovrpersona/dev",
+                                  config_override=True)
 
     def test_132_remove_config_override(self):
         command = ["update_personality", "--personality=testovrpersona/dev",
@@ -103,8 +100,7 @@ class TestUpdatePersonality(VerifyGrnsMixin, TestBrokerCommand):
         out = self.commandtest(command)
         self.matchclean(out, "override", command)
 
-        command = ["cat", "--archetype=aquilon", "--personality=testovrpersona/dev"]
-        self.matchclean(out, 'override', command)
+        self.verifycatpersonality("aquilon", "testovrpersona/dev")
 
     def test_133_update_hostenv_testovrpersona(self):
         command = ["update_personality", "--personality=testovrpersona/dev",
@@ -237,17 +233,23 @@ class TestUpdatePersonality(VerifyGrnsMixin, TestBrokerCommand):
         self.noouttest(["update_personality", "--personality", "compileserver",
                         "--archetype", "aquilon", "--staged"])
 
-    def test_171_verify_staged(self):
+    def test_171_show_current(self):
         command = ["show_personality", "--personality", "compileserver",
                    "--archetype", "aquilon"]
         out = self.commandtest(command)
         self.matchoutput(out, "Stage: current", command)
 
-    def test_172_verify_next(self):
+    def test_171_cat_current(self):
+        self.verifycatpersonality("aquilon", "compileserver", stage="current")
+
+    def test_172_show_next(self):
         command = ["show_personality", "--personality", "unixeng-test",
                    "--archetype", "aquilon", "--personality_stage", "next"]
         out = self.commandtest(command)
         self.matchoutput(out, "Stage: next", command)
+
+    def test_172_cat_next(self):
+        self.verifycatpersonality("aquilon", "compileserver", stage="next")
 
     def test_174_delete_next(self):
         self.noouttest(["del_personality", "--personality", "unixeng-test",
@@ -269,6 +271,9 @@ class TestUpdatePersonality(VerifyGrnsMixin, TestBrokerCommand):
                    "--archetype", "aquilon"]
         out = self.commandtest(command)
         self.matchclean(out, "Stage:", command)
+
+    def test_179_cat_unstaged(self):
+        self.verifycatpersonality("aquilon", "compileserver")
 
     def test_200_invalid_function(self):
         """ Verify that the list of built-in functions is restricted """

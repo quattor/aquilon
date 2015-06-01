@@ -102,9 +102,14 @@ class CommandAddPersonality(BrokerCommand):
                                 config_override=config_override)
         session.add(dbpersona)
 
+        if staged:
+            initial_stage = "next"
+        else:
+            initial_stage = "current"
+
         if copy_from:
-            dbstage = dbfrom_vers.copy()
-            dbpersona.stages["current"] = dbstage
+            dbstage = dbfrom_vers.copy(name=initial_stage)
+            dbpersona.stages[initial_stage] = dbstage
 
             q = session.query(PersonalityServiceMap)
             q = q.filter_by(personality=dbfrom_persona)
@@ -118,8 +123,8 @@ class CommandAddPersonality(BrokerCommand):
             # TODO: should we copy root users and netgroups? Not doing so is
             # safer.
         else:
-            dbstage = PersonalityStage(name="current")
-            dbpersona.stages["current"] = dbstage
+            dbstage = PersonalityStage(name=initial_stage)
+            dbpersona.stages[initial_stage] = dbstage
 
             if self.config.has_option(section, "default_grn_target"):
                 target = self.config.get(section, "default_grn_target")
