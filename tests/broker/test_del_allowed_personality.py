@@ -23,9 +23,10 @@ if __name__ == "__main__":
 
 import unittest2 as unittest
 from brokertest import TestBrokerCommand
+from personalitytest import PersonalityTestMixin
 
 
-class TestDelAllowedPersonality(TestBrokerCommand):
+class TestDelAllowedPersonality(PersonalityTestMixin, TestBrokerCommand):
 
     def test_10_delbadconstraint(self):
         command = ["del_allowed_personality", "--archetype", "vmhost",
@@ -55,9 +56,29 @@ class TestDelAllowedPersonality(TestBrokerCommand):
         self.noouttest(["del_allowed_personality", "--archetype", "vmhost",
                         "--personality=generic", "--cluster=utecl1"])
 
-    def test_17_delconstraint(self):
+    def test_16_cat_utecl1(self):
+        command = ["cat", "--cluster", "utecl1", "--data"]
+        out = self.commandtest(command)
+        self.searchoutput(out,
+                          r'"system/cluster/allowed_personalities" = list\(\s*'
+                          r'"vmhost/allowedtest",\s*'
+                          r'"vmhost/vulcan-10g-server-prod"\s*\);',
+                          command)
+
+    def test_17_delconstraintagain(self):
         self.noouttest(["del_allowed_personality", "--archetype", "vmhost",
                         "--personality=generic", "--cluster=utecl1"])
+
+    def test_18_del_personality(self):
+        self.drop_personality("vmhost", "allowedtest")
+
+    def test_19_cat_utecl1(self):
+        command = ["cat", "--cluster", "utecl1", "--data"]
+        out = self.commandtest(command)
+        self.searchoutput(out,
+                          r'"system/cluster/allowed_personalities" = list\(\s*'
+                          r'"vmhost/vulcan-10g-server-prod"\s*\);',
+                          command)
 
     def test_20_checkconstraint(self):
         command = ["show_cluster", "--cluster=utecl1"]

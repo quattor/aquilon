@@ -16,17 +16,18 @@
 # limitations under the License.
 """Contains the logic for `aq del allowed personality --cluster`."""
 
-from aquilon.worker.broker import BrokerCommand
-from aquilon.aqdb.model import Personality, Cluster, MetaCluster
 from aquilon.exceptions_ import ArgumentError
+from aquilon.aqdb.model import Personality, Cluster, MetaCluster
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.templates import Plenary, PlenaryCollection
 
 
 class CommandDelAllowedPersonalityCluster(BrokerCommand):
 
     required_parameters = ["archetype", "personality", "cluster"]
 
-    def render(self, session, archetype, personality, cluster, metacluster,
-               **kwargs):
+    def render(self, session, logger, archetype, personality, cluster,
+               metacluster, **kwargs):
         dbpers = Personality.get_unique(session, name=personality,
                                         archetype=archetype, compel=True)
         if cluster:
@@ -35,6 +36,9 @@ class CommandDelAllowedPersonalityCluster(BrokerCommand):
                 raise ArgumentError("Please use --metacluster for metaclusters.")
         else:
             dbclus = MetaCluster.get_unique(session, metacluster, compel=True)
+
+        plenaries = PlenaryCollection(logger=logger)
+        plenaries.append(Plenary.get_plenary(dbclus))
 
         if len(dbclus.allowed_personalities) > 1:
             members = dbclus.hosts[:]
@@ -52,5 +56,7 @@ class CommandDelAllowedPersonalityCluster(BrokerCommand):
             dbclus.validate()
 
         session.flush()
+
+        plenaries.write()
 
         return

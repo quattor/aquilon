@@ -23,9 +23,13 @@ if __name__ == "__main__":
 
 import unittest2 as unittest
 from brokertest import TestBrokerCommand
+from personalitytest import PersonalityTestMixin
 
 
-class TestAddAllowedPersonality(TestBrokerCommand):
+class TestAddAllowedPersonality(PersonalityTestMixin, TestBrokerCommand):
+
+    def test_00_setup(self):
+        self.create_personality("vmhost", "allowedtest")
 
     def test_10_addbadconstraint(self):
         command = ["add_allowed_personality", "--archetype", "vmhost",
@@ -60,22 +64,35 @@ class TestAddAllowedPersonality(TestBrokerCommand):
                         "--cluster", "utecl1"])
         self.noouttest(["add_allowed_personality", "--archetype", "vmhost",
                         "--personality=generic", "--cluster", "utecl1"])
+        self.noouttest(["add_allowed_personality", "--archetype", "vmhost",
+                        "--personality=allowedtest", "--cluster", "utecl1"])
         self.noouttest(["add_allowed_personality", "--archetype", "esx_cluster",
                         "--personality=vulcan-10g-server-prod",
                         "--metacluster", "utmc1"])
+
+    def test_16_cat_utecl1(self):
+        command = ["cat", "--cluster", "utecl1", "--data"]
+        out = self.commandtest(command)
+        self.searchoutput(out,
+                          r'"system/cluster/allowed_personalities" = list\(\s*'
+                          r'"vmhost/allowedtest",\s*'
+                          r'"vmhost/generic",\s*'
+                          r'"vmhost/vulcan-10g-server-prod"\s*\);',
+                          command)
 
     def test_20_checkconstraint(self):
         command = ["show_cluster", "--cluster=utecl1"]
         out = self.commandtest(command)
         self.matchoutput(out, "Allowed Personality: vulcan-10g-server-prod Archetype: vmhost", command)
         self.matchoutput(out, "Allowed Personality: generic Archetype: vmhost", command)
+        self.matchoutput(out, "Allowed Personality: allowedtest Archetype: vmhost", command)
 
         command = ["show_cluster", "--cluster=utecl1", "--format", "proto"]
         cluster = self.protobuftest(command, expect=1)[0]
-        self.assertEqual(len(cluster.allowed_personalities), 2)
+        self.assertEqual(len(cluster.allowed_personalities), 3)
         self.assertEqual(set(pers.name for pers in
                              cluster.allowed_personalities),
-                         set(["generic", "vulcan-10g-server-prod"]))
+                         set(["allowedtest", "generic", "vulcan-10g-server-prod"]))
 
         command = ["show_metacluster", "--metacluster=utmc1"]
         out = self.commandtest(command)
