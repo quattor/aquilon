@@ -62,10 +62,10 @@ class CommandAddPersonality(BrokerCommand):
                 staged = dbfrom_persona.staged
 
             if dbfrom_persona.config_override:
-                logger.warn("{0} has config_override set. This setting will "
-                            "not be copied, you will need to set it separately "
-                            "on the new personality if needed."
-                            .format(dbfrom_persona))
+                logger.warning("{0} has config_override set. This setting will "
+                               "not be copied, you will need to set it separately "
+                               "on the new personality if needed."
+                               .format(dbfrom_persona))
             dbfrom_vers = dbfrom_persona.default_stage(copy_stage)
 
         if not grn and not eon_id:
