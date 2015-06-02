@@ -21,5 +21,4 @@ from aquilon.aqdb.column_types.enum import Enum
 from aquilon.aqdb.column_types.guid import GUID
 from aquilon.aqdb.column_types.utc_datetime import UTCDateTime
 from aquilon.aqdb.column_types.json_dict import JSONEncodedDict
-from aquilon.aqdb.column_types.mutation_dict import MutationDict
 from aquilon.aqdb.column_types.string_enum import StringEnumColumn

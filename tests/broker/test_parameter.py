@@ -75,9 +75,27 @@ class TestParameter(TestBrokerCommand):
         command = ADD_CMD + ["--path", path, "--value", "user1"]
         self.noouttest(command)
 
+    def test_101_promote(self):
+        self.noouttest(["promote", "--personality", PERSONALITY,
+                        "--archetype", "aquilon"])
+
+    def test_105_add_re_path_2(self):
+        action = "testaction"
         path = "action/%s/command" % action
         command = ADD_CMD + ["--path", path, "--value", "/bin/%s" % action]
         self.noouttest(command)
+
+    def test_106_verify_stage_diff(self):
+        # The parameter should not be present in 'current'
+        command = ["show_parameter", "--personality", PERSONALITY,
+                   "--archetype", "aquilon", "--personality_stage", "current"]
+        out = self.commandtest(command)
+        self.matchclean(out, '"command": "/bin/testaction"', command)
+
+        command = ["show_parameter", "--personality", PERSONALITY,
+                   "--archetype", "aquilon", "--personality_stage", "next"]
+        out = self.commandtest(command)
+        self.matchoutput(out, '"command": "/bin/testaction"', command)
 
     def test_100_add_noncompileable(self):
         command = ["add", "parameter", "--path", "foo", "--value", "bar",
@@ -278,6 +296,10 @@ class TestParameter(TestBrokerCommand):
                           r'Template: espinfo',
                           VAL_CMD)
 
+    def test_305_promote(self):
+        self.noouttest(["promote", "--personality", PERSONALITY,
+                        "--archetype", "aquilon"])
+
     def test_310_reconfigurehost(self):
         path = "espinfo/function"
         command = DEL_CMD + ["--path", path]
@@ -288,6 +310,18 @@ class TestParameter(TestBrokerCommand):
         (out, err) = self.failuretest(command, 4)
         self.matchoutput(err, "'/system/personality/function' does not have an associated value", command)
         self.matchoutput(err, "BUILD FAILED", command)
+
+    def test_315_verify_stage_diff(self):
+        # The parameter should still be present in 'current'
+        command = ["show_parameter", "--personality", PERSONALITY,
+                   "--archetype", "aquilon", "--personality_stage", "current"]
+        out = self.commandtest(command)
+        self.matchoutput(out, '"function": "production"', command)
+
+        command = ["show_parameter", "--personality", PERSONALITY,
+                   "--archetype", "aquilon", "--personality_stage", "next"]
+        out = self.commandtest(command)
+        self.matchclean(out, '"function": "production"', command)
 
     def test_320_add_all_required(self):
         path = "espinfo/threshold"

@@ -20,8 +20,9 @@ from datetime import datetime
 
 from sqlalchemy import Column, Integer, DateTime, Sequence, String, ForeignKey
 from sqlalchemy.orm import relation, backref, deferred
+from sqlalchemy.ext.mutable import MutableDict
 
-from aquilon.aqdb.column_types import JSONEncodedDict, MutationDict
+from aquilon.aqdb.column_types import JSONEncodedDict
 from aquilon.aqdb.model import Base, PersonalityStage
 from aquilon.exceptions_ import NotFoundException, ArgumentError, InternalError
 from aquilon.aqdb.column_types import AqStr
@@ -96,7 +97,7 @@ class Parameter(Base):
     __tablename__ = _TN
 
     id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
-    value = Column(MutationDict.as_mutable(JSONEncodedDict))
+    value = Column(MutableDict.as_mutable(JSONEncodedDict))
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
     comments = deferred(Column(String(255), nullable=True))
@@ -262,4 +263,4 @@ class Parameter(Base):
         return flattened
 
     def copy(self):
-        return self.__class__(value=self.value, comments=self.comments)
+        return self.__class__(value=self.value.copy(), comments=self.comments)
