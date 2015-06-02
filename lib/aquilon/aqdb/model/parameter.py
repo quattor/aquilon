@@ -263,4 +263,4 @@ class Parameter(Base):
         return flattened
 
     def copy(self):
-        return self.__class__(value=self.value, comments=self.comments)
+        return self.__class__(value=self.value.copy(), comments=self.comments)
