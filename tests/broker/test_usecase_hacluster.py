@@ -51,11 +51,6 @@ class TestUsecaseHACluster(TestBrokerCommand):
                    "--personality", "hapersonality"]
         self.noouttest(command)
 
-    def test_115_cat_hacl2(self):
-        command = ["cat", "--cluster", "hacl2", "--data"]
-        out = self.commandtest(command)
-        self.matchoutput(out, '"system/cluster/max_hosts" = 2;', command)
-
     def test_120_add_members(self):
         for i in range(0, 4):
             server_idx = i + 2
@@ -190,6 +185,11 @@ class TestUsecaseHACluster(TestBrokerCommand):
     def test_150_make_cluster(self):
         self.statustest(["make", "cluster", "--cluster", "hacl1"])
         self.statustest(["make", "cluster", "--cluster", "hacl2"])
+
+    def test_155_cat_hacl2(self):
+        command = ["cat", "--cluster", "hacl2", "--data"]
+        out = self.commandtest(command)
+        self.matchoutput(out, '"system/cluster/max_hosts" = 2;', command)
 
     def test_155_cat_hacl1_client(self):
         command = ["cat", "--cluster", "hacl1", "--client"]

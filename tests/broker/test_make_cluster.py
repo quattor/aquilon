@@ -27,14 +27,16 @@ if __name__ == "__main__":
 import unittest2 as unittest
 from brokertest import TestBrokerCommand
 from notificationtest import VerifyNotificationsMixin
+from clustertest import ClusterTestMixin
 
 
-class TestMakeCluster(VerifyNotificationsMixin, TestBrokerCommand):
+class TestMakeCluster(VerifyNotificationsMixin, ClusterTestMixin,
+                      TestBrokerCommand):
 
-    def testmakeutecl1(self):
+    def test_100_make_utecl1(self):
         basetime = datetime.now()
         command = ["make_cluster", "--cluster", "utecl1"]
-        (out, err) = self.successtest(command)
+        err = self.statustest(command)
         self.matchoutput(err,
                          "ESX Cluster utecl1 adding binding for "
                          "service instance esx_management_server",
@@ -51,7 +53,25 @@ class TestMakeCluster(VerifyNotificationsMixin, TestBrokerCommand):
         self.assertTrue(os.path.exists(
             self.build_profile_name("clusters", "utecl1", domain="unittest")))
 
-    def testverifycatsvc(self):
+    def test_105_cat_utecl1(self):
+        obj_cmd, obj, data_cmd, data = self.verify_cat_clusters("utecl1",
+                                                                "esx_cluster",
+                                                                "vulcan-10g-server-prod",
+                                                                metacluster="utmc1")
+        self.searchoutput(obj,
+                          r'include { "service/esx_management_server/ut.[ab]/client/config" };',
+                          obj_cmd)
+
+        self.matchoutput(data, '"system/cluster/down_hosts_threshold" = 2;',
+                         data_cmd)
+        self.matchoutput(data, '"system/cluster/down_maint_threshold" = 2;',
+                         data_cmd)
+        self.matchclean(data, '"system/cluster/down_hosts_as_percent"', data_cmd)
+        self.matchclean(data, '"system/cluster/down_maint_as_percent"', data_cmd)
+        self.matchclean(data, '"system/cluster/down_hosts_percent"', data_cmd)
+        self.matchclean(data, '"system/cluster/down_maint_percent"', data_cmd)
+
+    def test_105_verify_svc(self):
         # The cluster may use either the ut.a or ut.b instance, so we need to
         # check which one was choosen
         command = ["show_cluster", "--cluster=utecl1"]
@@ -75,26 +95,7 @@ class TestMakeCluster(VerifyNotificationsMixin, TestBrokerCommand):
         out = self.commandtest(command)
         self.matchclean(out, '"utecl1"', command)
 
-    def testverifycatutecl1(self):
-        command = "cat --cluster=utecl1"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "object template clusters/utecl1;", command)
-        self.searchoutput(out,
-                          r'include { "service/esx_management_server/ut.[ab]/client/config" };',
-                          command)
-        self.matchoutput(out, '"/metadata/template/branch/name" = "unittest";',
-                         command)
-        self.matchoutput(out, '"/metadata/template/branch/type" = "domain";',
-                         command)
-
-        command = "cat --cluster=utecl1 --data"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, '"system/cluster/name" = "utecl1";', command)
-        self.matchoutput(out, '"system/cluster/metacluster/name" = "utmc1";', command)
-        self.matchoutput(out, '"system/metacluster/name" = "utmc1";', command)
-        self.matchclean(out, "resources/virtual_machine", command)
-
-    def testverifycatutecl1_2(self):
+    def test_110_add_allowed_personality(self):
         self.successtest(["add_allowed_personality",
                           "--archetype", "vmhost",
                           "--personality=vulcan-10g-server-prod",
@@ -105,8 +106,7 @@ class TestMakeCluster(VerifyNotificationsMixin, TestBrokerCommand):
                           "--personality=generic",
                           "--cluster", "utecl1"])
 
-        command = ["make_cluster", "--cluster", "utecl1"]
-        (out, err) = self.successtest(command)
+        self.successtest(["make_cluster", "--cluster", "utecl1"])
 
         command = "cat --cluster=utecl1 --data"
         out = self.commandtest(command.split(" "))
@@ -127,32 +127,10 @@ class TestMakeCluster(VerifyNotificationsMixin, TestBrokerCommand):
                           "--personality=vulcan-10g-server-prod",
                           "--cluster", "utecl1"])
 
-    def testverifygridcluster(self):
-        command = "make_cluster --cluster utgrid1"
-        (out, err) = self.successtest(command.split(" "))
-
-        command = "cat --cluster=utgrid1"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, '"/metadata/template/branch/name" = "unittest";',
-                         command)
-        self.matchoutput(out, '"/metadata/template/branch/type" = "domain";',
-                         command)
-
-    def testverifyhacluster(self):
-        command = "make_cluster --cluster utvcs1"
-        (out, err) = self.successtest(command.split(" "))
-
-        command = "cat --cluster=utvcs1"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, '"/metadata/template/branch/name" = "unittest";',
-                         command)
-        self.matchoutput(out, '"/metadata/template/branch/type" = "domain";',
-                         command)
-
-    def testmakeutecl2(self):
+    def test_120_make_utecl2(self):
         basetime = datetime.now()
         command = ["make_cluster", "--cluster", "utecl2"]
-        (out, err) = self.successtest(command)
+        err = self.statustest(command)
         self.matchoutput(err,
                          "ESX Cluster utecl2 adding binding for "
                          "service instance esx_management_server",
@@ -169,40 +147,72 @@ class TestMakeCluster(VerifyNotificationsMixin, TestBrokerCommand):
         self.assertTrue(os.path.exists(
             self.build_profile_name("clusters", "utecl2", domain="unittest")))
 
-    def testverifycatutecl2(self):
-        command = "cat --cluster=utecl2"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "object template clusters/utecl2;", command)
-        self.searchoutput(out,
+    def test_125_verify_utecl2(self):
+        obj_cmd, obj, data_cmd, data = self.verify_cat_clusters("utecl2",
+                                                                "esx_cluster",
+                                                                "vulcan-10g-server-prod",
+                                                                metacluster="utmc1")
+
+        self.searchoutput(obj,
                           r'include { "service/esx_management_server/ut.[ab]/client/config" };',
-                          command)
-        self.matchoutput(out, '"/metadata/template/branch/name" = "unittest";',
-                         command)
-        self.matchoutput(out, '"/metadata/template/branch/type" = "domain";',
-                         command)
+                          obj_cmd)
 
-        command = "cat --cluster=utecl2 --data"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, '"system/cluster/name" = "utecl2";', command)
-        self.matchoutput(out, '"system/cluster/metacluster/name" = "utmc1";', command)
-        self.matchoutput(out, '"system/metacluster/name" = "utmc1";', command)
-        self.matchclean(out, "resources/virtual_machine", command)
+        self.matchoutput(data, '"system/cluster/down_hosts_threshold" = 1;',
+                         data_cmd)
 
-    def testfailmissingcluster(self):
+    def test_130_make_utgrid1(self):
+        command = "make_cluster --cluster utgrid1"
+        self.successtest(command.split(" "))
+
+    def test_135_verify_utgrid1(self):
+        _, _, data_cmd, data = self.verify_cat_clusters("utgrid1",
+                                                        "gridcluster", "hadoop")
+
+        self.matchoutput(data, '"system/cluster/down_hosts_threshold" = 0;',
+                         data_cmd)
+        self.matchoutput(data, '"system/cluster/down_maint_threshold" = 0;',
+                         data_cmd)
+        self.matchoutput(data, '"system/cluster/down_hosts_as_percent" = true;',
+                         data_cmd)
+        self.matchoutput(data, '"system/cluster/down_maint_as_percent" = true;',
+                         data_cmd)
+        self.matchoutput(data, '"system/cluster/down_hosts_percent" = 5;',
+                         data_cmd)
+        self.matchoutput(data, '"system/cluster/down_maint_percent" = 6;',
+                         data_cmd)
+        self.matchclean(data, '/system/cluster/max_hosts', data_cmd)
+
+    def test_140_make_utvcs1(self):
+        command = "make_cluster --cluster utvcs1"
+        self.successtest(command.split(" "))
+
+    def test_145_verify_cat_utvcs1(self):
+        _, _, data_cmd, data = self.verify_cat_clusters("utvcs1", "hacluster",
+                                                        "hapersonality")
+
+        self.matchoutput(data, '"system/cluster/down_hosts_threshold" = 0;',
+                         data_cmd)
+        self.matchclean(data, "down_maint_threshold", data_cmd)
+        self.matchclean(data, "down_hosts_as_percent", data_cmd)
+        self.matchclean(data, "down_maint_as_percent", data_cmd)
+        self.matchclean(data, "down_hosts_percent", data_cmd)
+        self.matchclean(data, "down_maint_percent", data_cmd)
+
+    def test_150_make_utmc4(self):
+        for i in range(5, 11):
+            command = ["make_cluster", "--cluster", "utecl%d" % i]
+            self.statustest(command)
+
+    def test_155_make_utmc7(self):
+        for i in [13]:
+            command = ["make_cluster", "--cluster", "utecl%d" % i]
+            self.statustest(command)
+
+    def test_200_missing_cluster(self):
         command = ["make_cluster", "--cluster=cluster-does-not-exist"]
         out = self.notfoundtest(command)
         self.matchoutput(out, "Cluster cluster-does-not-exist not found.",
                          command)
-
-    def testmakeutmc4(self):
-        for i in range(5, 11):
-            command = ["make_cluster", "--cluster", "utecl%d" % i]
-            (out, err) = self.successtest(command)
-
-    def testmakeutmc7(self):
-        for i in [13]:
-            command = ["make_cluster", "--cluster", "utecl%d" % i]
-            (out, err) = self.successtest(command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestMakeCluster)

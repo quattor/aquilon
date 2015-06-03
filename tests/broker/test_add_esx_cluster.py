@@ -28,63 +28,6 @@ from personalitytest import PersonalityTestMixin
 
 class TestAddESXCluster(PersonalityTestMixin, TestBrokerCommand):
 
-    def verify_cat_clusters(self, name, persona, ctype, metacluster,
-                            on_rack=False):
-        object_command = ["cat", "--cluster", name]
-        object = self.commandtest(object_command)
-
-        self.matchoutput(object, "object template clusters/%s;" % name,
-                         object_command)
-        self.searchoutput(object,
-                          r'variable LOADPATH = list\(\s*"esx_cluster"\s*\);',
-                          object_command)
-        self.matchoutput(object, '"/" = create("clusterdata/%s"' % name,
-                         object_command)
-        self.matchclean(object, 'include { "service', object_command)
-        self.matchoutput(object, 'include { "personality/%s/config" };' % persona,
-                         object_command)
-
-        data_command = ["cat", "--cluster", name, "--data"]
-        data = self.commandtest(data_command)
-
-        self.matchoutput(data, "structure template clusterdata/%s;" % name, data_command)
-        self.matchoutput(data, '"system/cluster/name" = "%s";' % name,
-                         data_command)
-        self.matchoutput(data, '"system/cluster/type" = "%s";' % ctype,
-                         data_command)
-        self.matchoutput(data, '"system/cluster/sysloc/continent" = "na";',
-                         data_command)
-        self.matchoutput(data, '"system/cluster/sysloc/country" = "us";',
-                         data_command)
-        self.matchoutput(data, '"system/cluster/sysloc/city" = "ny";',
-                         data_command)
-        self.matchoutput(data, '"system/cluster/sysloc/campus" = "ny";',
-                         data_command)
-        self.matchoutput(data, '"system/cluster/sysloc/building" = "ut";',
-                         data_command)
-        self.matchoutput(data, '"system/cluster/sysloc/location" = "ut.ny.na";',
-                         data_command)
-        self.matchoutput(data, '"system/cluster/metacluster/name" = "%s";' %
-                         metacluster, data_command)
-        self.matchoutput(data, '"system/metacluster/name" = "%s";' %
-                         metacluster, data_command)
-        self.matchoutput(data, '"system/build" = "build";', data_command)
-        if on_rack:
-            self.matchoutput(data, '"system/cluster/rack/name" = "ut13"',
-                             data_command)
-            self.matchoutput(data, '"system/cluster/rack/row" = "k"',
-                             data_command)
-            self.matchoutput(data, '"system/cluster/rack/column" = "3"',
-                             data_command)
-        else:
-            self.matchclean(data, '"system/cluster/rack/name"', data_command)
-            self.matchclean(data, '"system/cluster/rack/row"', data_command)
-            self.matchclean(data, '"system/cluster/rack/column"', data_command)
-        self.matchclean(data, '"system/cluster/allowed_personalities"', data_command)
-        self.matchclean(data, "resources/virtual_machine", data_command)
-
-        return object_command, object, data_command, data
-
     def test_100_add_personality(self):
         vmhost_maps = {
             "esx_management_server": {
@@ -178,20 +121,6 @@ class TestAddESXCluster(PersonalityTestMixin, TestBrokerCommand):
                          self.config.getint("archetype_esx_cluster",
                                             "max_members_default"))
 
-    def test_115_cat_utecl1(self):
-        obj_cmd, obj, data_cmd, data = self.verify_cat_clusters("utecl1",
-                                                                "vulcan-10g-server-prod",
-                                                                "esx", "utmc1")
-
-        self.matchoutput(data, '"system/cluster/down_hosts_threshold" = 2;',
-                         data_cmd)
-        self.matchoutput(data, '"system/cluster/down_maint_threshold" = 2;',
-                         data_cmd)
-        self.matchclean(data, '"system/cluster/down_hosts_as_percent"', data_cmd)
-        self.matchclean(data, '"system/cluster/down_maint_as_percent"', data_cmd)
-        self.matchclean(data, '"system/cluster/down_hosts_percent"', data_cmd)
-        self.matchclean(data, '"system/cluster/down_maint_percent"', data_cmd)
-
     def test_120_add_utecl2(self):
         command = ["add_esx_cluster", "--cluster=utecl2",
                    "--metacluster=utmc1", "--building=ut",
@@ -220,14 +149,6 @@ class TestAddESXCluster(PersonalityTestMixin, TestBrokerCommand):
         self.matchoutput(out, "Domain: unittest", command)
         self.matchoutput(out, "Comments: Some ESX cluster comments", command)
 
-    def test_125_cat_utecl2(self):
-        obj_cmd, obj, data_cmd, data = self.verify_cat_clusters("utecl2",
-                                                                "vulcan-10g-server-prod",
-                                                                "esx", "utmc1")
-
-        self.matchoutput(data, '"system/cluster/down_hosts_threshold" = 1;',
-                         data_cmd)
-
     def test_130_add_utecl3(self):
         command = ["add_esx_cluster", "--cluster=utecl3",
                    "--max_members=0", "--down_hosts_threshold=2",
@@ -249,9 +170,6 @@ class TestAddESXCluster(PersonalityTestMixin, TestBrokerCommand):
                          command)
         self.matchoutput(out, "Domain: unittest", command)
         self.matchclean(out, "Comments", command)
-
-    def test_135_cat_utecl3(self):
-        self.verify_cat_clusters("utecl3", "vulcan-10g-server-prod", "esx", "utmc2")
 
     def test_140_add_utecl4(self):
         # Bog standard - used for some noop tests
@@ -277,10 +195,7 @@ class TestAddESXCluster(PersonalityTestMixin, TestBrokerCommand):
         self.matchoutput(out, "Domain: unittest", command)
         self.matchclean(out, "Comments", command)
 
-    def test_145_cat_utecl4(self):
-        self.verify_cat_clusters("utecl4", "vulcan-10g-server-prod", "esx", "utmc2")
-
-    def test_148_verif_cluster_client(self):
+    def test_148_verify_cluster_client(self):
         for i in range(1, 5):
             cluster = "utecl%s" % i
             plenary = self.plenary_name("cluster", cluster, "client")
