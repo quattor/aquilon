@@ -16,29 +16,19 @@
 # limitations under the License.
 """Contains the logic for `aq del required service`."""
 
-from aquilon.exceptions_ import NotFoundException, AuthorizationException
-from aquilon.aqdb.model import Archetype, Service
-from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.dbwrappers.change_management import validate_justification
+from aquilon.exceptions_ import NotFoundException
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.commands.add_required_service import \
+        CommandAddRequiredService
 
 
-class CommandDelRequiredService(BrokerCommand):
+class CommandDelRequiredService(CommandAddRequiredService):
 
     required_parameters = ["service", "archetype"]
 
-    def render(self, session, service, archetype, justification, user,
-               reason, **arguments):
-        if not justification:
-            raise AuthorizationException("Changing the required services of "
-                                         "an archetype requires "
-                                         "--justification.")
-        validate_justification(user, justification, reason)
-        dbarchetype = Archetype.get_unique(session, archetype, compel=True)
-        dbservice = Service.get_unique(session, service, compel=True)
+    def _update_dbobj(self, dbarchetype, dbservice):
         try:
-            dbservice.archetypes.remove(dbarchetype)
+            dbarchetype.required_services.remove(dbservice)
         except ValueError:
-            raise NotFoundException("Service %s required for archetype %s "
-                                    "not found." % (service, archetype))
-        session.flush()
-        return
+            raise NotFoundException("{0} required for {1:l} not found."
+                                    .format(dbservice, dbarchetype))

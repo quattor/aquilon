@@ -39,15 +39,6 @@ class TestDelRequiredService(TestBrokerCommand):
         command += " --justification tcm=12345678"
         self.noouttest(command.split(" "))
 
-    def test_110_del_required_afs_no_justification(self):
-        command = "del required service --service afs --archetype aquilon"
-        out = self.unauthorizedtest(command.split(" "), auth=True,
-                                    msgcheck=False)
-        self.matchoutput(out,
-                         "Changing the required services of an archetype "
-                         "requires --justification.",
-                         command)
-
     def test_110_del_required_afs_again(self):
         command = "del required service --service afs --archetype aquilon"
         command += " --justification tcm=12345678"

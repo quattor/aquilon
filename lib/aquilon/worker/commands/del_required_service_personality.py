@@ -16,10 +16,10 @@
 # limitations under the License.
 """Contains the logic for `aq del required service --personality`."""
 
-
 from aquilon.exceptions_ import NotFoundException
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.commands.add_required_service_personality import CommandAddRequiredServicePersonality
+from aquilon.worker.commands.add_required_service_personality import \
+        CommandAddRequiredServicePersonality
 
 
 class CommandDelRequiredServicePersonality(CommandAddRequiredServicePersonality):

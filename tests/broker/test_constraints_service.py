@@ -15,7 +15,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Module for testing constraints in commands involving domain."""
+"""Module for testing constraints in commands involving services."""
 
 if __name__ == "__main__":
     import utils
@@ -74,6 +74,24 @@ class TestServiceConstraints(TestBrokerCommand):
         out = self.badrequesttest(command.split(" "))
         self.matchoutput(out, "Service utsvc, instance utsi1 still has "
                          "clients and cannot be deleted", command)
+
+    def test_160_add_required_service_no_justification(self):
+        command = "add required service --service utsvc --archetype aquilon"
+        out = self.unauthorizedtest(command.split(" "), auth=True,
+                                    msgcheck=False)
+        self.matchoutput(out,
+                         "Changing the required services of an archetype "
+                         "requires --justification.",
+                         command)
+
+    def test_165_del_required_afs_no_justification(self):
+        command = "del required service --service afs --archetype aquilon"
+        out = self.unauthorizedtest(command.split(" "), auth=True,
+                                    msgcheck=False)
+        self.matchoutput(out,
+                         "Changing the required services of an archetype "
+                         "requires --justification.",
+                         command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestServiceConstraints)

@@ -196,15 +196,6 @@ class TestAddRequiredService(TestBrokerCommand):
                          "personality aquilon/unixeng-test@next.",
                          command)
 
-    def test_200_no_justification(self):
-        command = "add required service --service afs --archetype aquilon"
-        out = self.unauthorizedtest(command.split(" "), auth=True,
-                                    msgcheck=False)
-        self.matchoutput(out,
-                         "Changing the required services of an archetype "
-                         "requires --justification.",
-                         command)
-
     def test_200_missing_service(self):
         command = ["add_required_service", "--service",
                    "service-does-not-exist", "--archetype", "aquilon",

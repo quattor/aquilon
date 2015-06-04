@@ -17,7 +17,9 @@
 """Contains the logic for `aq add required service`."""
 
 from aquilon.exceptions_ import ArgumentError, AuthorizationException
-from aquilon.aqdb.model import Archetype, Service
+from aquilon.aqdb.model import (Archetype, Personality, PersonalityStage,
+                                Service, Host, Cluster)
+from aquilon.aqdb.model.host_environment import Production
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.change_management import validate_justification
 
@@ -26,17 +28,34 @@ class CommandAddRequiredService(BrokerCommand):
 
     required_parameters = ["service", "archetype"]
 
+    def _update_dbobj(self, dbarchetype, dbservice):
+        if dbservice in dbarchetype.required_services:
+            raise ArgumentError("{0} is already required by {1:l}."
+                                .format(dbservice, dbarchetype))
+        dbarchetype.required_services.append(dbservice)
+
     def render(self, session, service, archetype, justification, user,
                reason, **arguments):
-        if not justification:
-            raise AuthorizationException("Changing the required services of "
-                                         "an archetype requires "
-                                         "--justification.")
-        validate_justification(user, justification, reason)
         dbarchetype = Archetype.get_unique(session, archetype, compel=True)
         dbservice = Service.get_unique(session, name=service, compel=True)
-        if dbarchetype in dbservice.archetypes:
-            raise ArgumentError("Service %s is already required by archetype "
-                                "%s" % (service, archetype))
-        dbservice.archetypes.append(dbarchetype)
+        prod = Production.get_instance(session)
+
+        # Are any production hosts/clusters impacted?
+        if dbarchetype.cluster_type:
+            q = session.query(Cluster.id)
+        else:
+            q = session.query(Host.hardware_entity_id)
+        q = q.join(PersonalityStage, Personality)
+        q = q.filter_by(host_environment=prod, archetype=dbarchetype)
+
+        if q.count():
+            if not justification:
+                raise AuthorizationException("Changing the required services of "
+                                             "an archetype requires "
+                                             "--justification.")
+            validate_justification(user, justification, reason)
+
+        self._update_dbobj(dbarchetype, dbservice)
+
+        session.flush()
         return
