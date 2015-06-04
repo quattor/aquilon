@@ -89,8 +89,7 @@ class CommandUpdateCluster(BrokerCommand):
 
     def render(self, session, logger, cluster, personality, personality_stage,
                max_members, fix_location, down_hosts_threshold, maint_threshold,
-               comments, switch, virtual_switch, memory_capacity,
-               clear_overrides, metacluster, **arguments):
+               comments, switch, virtual_switch, metacluster, **arguments):
         dbcluster = Cluster.get_unique(session, cluster, compel=True)
         self.check_cluster_type(dbcluster, forbid=MetaCluster)
         plenaries = PlenaryCollection(logger=logger)
@@ -113,14 +112,6 @@ class CommandUpdateCluster(BrokerCommand):
             else:
                 dbnetdev = None
             dbcluster.network_device = dbnetdev
-
-        if memory_capacity is not None:
-            self.check_cluster_type(dbcluster, require=EsxCluster)
-            dbcluster.memory_capacity = memory_capacity
-
-        if clear_overrides is not None:
-            self.check_cluster_type(dbcluster, require=EsxCluster)
-            dbcluster.memory_capacity = None
 
         if down_hosts_threshold is not None:
             (dbcluster.down_hosts_percent,

@@ -55,24 +55,6 @@ class ClusterFormatter(CompileableFormatter):
                             skeleton.allowed_personalities,
                             indirect_attrs=False)
 
-        if isinstance(cluster, EsxCluster):
-            caps = cluster.get_total_capacity()
-            if caps:
-                overrides = cluster.get_capacity_overrides()
-                for name, value in caps.items():
-                    v = skeleton.limits.add()
-                    v.name = name
-                    v.value = value
-                    if overrides.get(name) is not None:
-                        v.override = True
-
-            usage = cluster.get_total_usage()
-            if usage:
-                for name, value in usage.items():
-                    u = skeleton.usage.add()
-                    u.name = name
-                    u.value = value
-
         if cluster.virtual_switch:
             self.redirect_proto(cluster.virtual_switch,
                                 skeleton.virtual_switch)
@@ -124,26 +106,6 @@ class ClusterFormatter(CompileableFormatter):
                            len(cluster.hosts))
             if cluster.network_device:
                 details.append(indent + "  {0:c}: {0!s}".format(cluster.network_device))
-            caps = cluster.get_total_capacity()
-            if caps:
-                overrides = cluster.get_capacity_overrides()
-                values = []
-                for name, value in caps.items():
-                    flags = ""
-                    if overrides.get(name) is not None:
-                        flags = " [override]"
-                    values.append("%s: %s%s" % (name, value, flags))
-                capstr = ", ".join(values)
-            else:
-                capstr = None
-            details.append(indent + "  Capacity limits: %s" % capstr)
-            usage = cluster.get_total_usage()
-            if usage:
-                usagestr = ", ".join("%s: %s" % (name, value) for name, value
-                                     in usage.items())
-            else:
-                usagestr = None
-            details.append(indent + "  Resources used by VMs: %s" % usagestr)
         details.append(self.redirect_raw(cluster.status, indent + "  "))
         details.append(self.redirect_raw(cluster.personality_stage,
                                          indent + "  "))

@@ -62,7 +62,6 @@
 		<arg><option>--instance <replaceable>INSTANCE</replaceable></option></arg>
 		<arg><option>--share <replaceable>SHARE</replaceable></option></arg>
 		<arg><option>--esx_share <replaceable>SHARE</replaceable></option></arg>
-		<arg><option>--capacity_override</option></arg>
 		<arg><option>--esx_switch <replaceable>ESX_SWITCH</replaceable></option></arg>
 	    </group>
 	    <group>
@@ -302,16 +301,6 @@
 		    <para>
 			The name of a network share linked to the cluster. The <option>--esx_share</option> variant
 			is deprecated.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--capacity_override</option>
-		</term>
-		<listitem>
-		    <para>
-			Select clusters with capacity overrides.
 		    </para>
 		</listitem>
 	    </varlistentry>

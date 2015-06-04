@@ -49,7 +49,6 @@ class CommandAddAllowedPersonalityCluster(BrokerCommand):
 
         if dbpers not in dbclus.allowed_personalities:
             dbclus.allowed_personalities.append(dbpers)
-            dbclus.validate()
 
         session.flush()
 

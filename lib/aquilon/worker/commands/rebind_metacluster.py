@@ -37,5 +37,4 @@ class CommandRebindMetaCluster(CommandUpdateCluster):
                                            down_hosts_threshold=None,
                                            maint_threshold=None, comments=None,
                                            switch=None, virtual_switch=None,
-                                           memory_capacity=None,
                                            clear_overrides=None, **arguments)

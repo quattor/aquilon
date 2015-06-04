@@ -106,13 +106,6 @@ class PersonalityStageFormatter(PersonalityFormatter):
             details.append(indent + "  Comments: {0.comments}"
                            .format(personality))
 
-        for cltype, info in persst.cluster_infos.items():
-            details.append(indent + "  Extra settings for %s clusters:" % cltype)
-            if cltype == "esx":
-                details.append(indent + "    VM host capacity function: %s" %
-                               info.vmhost_capacity_function)
-                details.append(indent + "    VM host overcommit factor: %s" %
-                               info.vmhost_overcommit_memory)
         return "\n".join(details)
 
     def fill_proto(self, persst, skeleton, embedded=True, indirect_attrs=True):
@@ -142,11 +135,6 @@ class PersonalityStageFormatter(PersonalityFormatter):
                 map = skeleton.eonid_maps.add()
                 map.target = grn_rec.target
                 map.eonid = grn_rec.eon_id
-
-        for cltype, info in persst.cluster_infos.items():
-            if cltype == "esx":
-                skeleton.vmhost_capacity_function = info.vmhost_capacity_function
-                skeleton.vmhost_overcommit_memory = info.vmhost_overcommit_memory
 
     def csv_fields(self, obj):
         yield (obj.archetype.name, obj.personality.name, obj.name)

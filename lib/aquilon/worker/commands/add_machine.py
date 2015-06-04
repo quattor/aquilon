@@ -89,10 +89,13 @@ class CommandAddMachine(BrokerCommand):
             raise ArgumentError("Virtual machines must be assigned to a "
                                 "cluster or a host.")
 
+        plenaries = PlenaryCollection(logger=logger)
+
         Machine.get_unique(session, machine, preclude=True)
         dbmachine = create_machine(session, machine, dblocation, dbmodel,
                                    cpuname, cpuvendor, cpuspeed, cpucount,
                                    memory, serial, comments)
+        plenaries.append(Plenary.get_plenary(dbmachine))
 
         if uri and not dbmodel.model_type.isVirtualAppliance():
             raise ArgumentError("URI can be specified only for virtual "
@@ -121,13 +124,10 @@ class CommandAddMachine(BrokerCommand):
                callable(vmholder.holder_object.validate):
                 vmholder.holder_object.validate()
 
-        session.flush()
-
-        plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(Plenary.get_plenary(dbmachine))
-        if vmholder:
             plenaries.append(Plenary.get_plenary(vmholder.holder_object))
             plenaries.append(Plenary.get_plenary(dbvm))
+
+        session.flush()
 
         # The check to make sure a plenary file is not written out for
         # dummy aurora hardware is within the call to write().  This way
