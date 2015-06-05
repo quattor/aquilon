@@ -19,7 +19,8 @@
 from sqlalchemy.orm import subqueryload, joinedload, undefer
 
 from aquilon.exceptions_ import NotFoundException
-from aquilon.aqdb.model import (Machine, Cpu, Cluster, ClusterResource,
+from aquilon.aqdb.types import CpuType
+from aquilon.aqdb.model import (Machine, Model, Cluster, ClusterResource,
                                 HostResource, Resource, Share, Filesystem, Disk,
                                 VirtualDisk, MetaCluster, DnsRecord, Chassis,
                                 ChassisSlot)
@@ -62,9 +63,10 @@ class CommandSearchMachine(BrokerCommand):
             dns_rec = DnsRecord.get_unique(session, fqdn=hostname, compel=True)
             q = q.filter(Machine.primary_name_id == dns_rec.id)
         if cpuname or cpuvendor:
-            subq = Cpu.get_matching_query(session, name=cpuname,
-                                          vendor=cpuvendor, compel=True)
-            q = q.filter(Machine.cpu_id.in_(subq))
+            subq = Model.get_matching_query(session, name=cpuname,
+                                            vendor=cpuvendor,
+                                            model_type=CpuType.Cpu, compel=True)
+            q = q.filter(Machine.cpu_model_id.in_(subq))
         if cpucount is not None:
             q = q.filter_by(cpu_quantity=cpucount)
         if memory is not None:

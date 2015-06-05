@@ -91,7 +91,7 @@ model_group = {
     },
     'hardware': {
         'title': 'Hardware Information',
-        'classes': [HardwareEntity, Model, Vendor, Machine, MachineSpecs, Cpu,
+        'classes': [HardwareEntity, Model, Vendor, Machine, MachineSpecs,
                     NetworkDevice, Chassis, ChassisSlot],
     },
     'resource': {

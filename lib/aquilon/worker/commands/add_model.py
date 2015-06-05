@@ -17,8 +17,8 @@
 """Contains the logic for `aq add model`."""
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.types import NicType
-from aquilon.aqdb.model import Vendor, Model, MachineSpecs, Cpu
+from aquilon.aqdb.types import CpuType, NicType
+from aquilon.aqdb.model import Vendor, Model, MachineSpecs
 from aquilon.worker.broker import BrokerCommand
 
 
@@ -48,15 +48,16 @@ class CommandAddModel(BrokerCommand):
             if not type.isMachineType():
                 raise ArgumentError("Machine specfications are only valid"
                                     " for machine types")
-            dbcpu = Cpu.get_unique(session, name=cpuname, vendor=cpuvendor,
-                                   compel=True)
+            dbcpu = Model.get_unique(session, model_type=CpuType.Cpu,
+                                     name=cpuname, vendor=cpuvendor,
+                                     compel=True)
             if nicmodel or nicvendor:
                 dbnic = Model.get_unique(session, model_type=NicType.Nic,
                                          name=nicmodel, vendor=nicvendor,
                                          compel=True)
             else:
                 dbnic = Model.default_nic_model(session)
-            dbmachine_specs = MachineSpecs(model=dbmodel, cpu=dbcpu,
+            dbmachine_specs = MachineSpecs(model=dbmodel, cpu_model=dbcpu,
                                            cpu_quantity=cpunum, memory=memory,
                                            disk_type=disktype,
                                            controller_type=diskcontroller,

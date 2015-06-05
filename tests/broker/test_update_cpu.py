@@ -30,7 +30,7 @@ class TestUpdateCpu(TestBrokerCommand):
     def test_100_clear_comments(self):
         command = ["update_cpu", "--cpu", "utcpu", "--vendor", "intel",
                    "--comments", ""]
-        self.noouttest(command)
+        self.statustest(command)
 
     def test_105_verify_update(self):
         command = "show cpu --cpu utcpu --vendor intel"
@@ -40,12 +40,13 @@ class TestUpdateCpu(TestBrokerCommand):
     def test_110_update_cpu(self):
         command = ["update_cpu", "--cpu", "utcpu", "--vendor", "intel",
                    "--comments", "New CPU comments"]
-        self.noouttest(command)
+        self.statustest(command)
 
     def test_115_verify_update(self):
         command = "show cpu --cpu utcpu --vendor intel"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Cpu: intel utcpu", command)
+        self.matchoutput(out, "Vendor: intel Model: utcpu", command)
+        self.matchoutput(out, "Model Type: cpu", command)
         self.matchoutput(out, "Comments: New CPU comments", command)
 
 if __name__ == '__main__':

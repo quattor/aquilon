@@ -16,8 +16,9 @@
 # limitations under the License.
 """Contains the logic for `aq update cpu`."""
 
+from aquilon.aqdb.types import CpuType
+from aquilon.aqdb.model import Model
 from aquilon.worker.broker import BrokerCommand
-from aquilon.aqdb.model import Cpu
 
 
 class CommandUpdateCpu(BrokerCommand):
@@ -25,7 +26,10 @@ class CommandUpdateCpu(BrokerCommand):
     required_parameters = ["cpu", "vendor"]
 
     def render(self, session, cpu, vendor, comments, **arguments):
-        dbcpu = Cpu.get_unique(session, name=cpu, vendor=vendor, compel=True)
+        self.deprecated_command("The update_cpu command is deprecated. Please "
+                                "use update_model instead.", **arguments)
+        dbcpu = Model.get_unique(session, name=cpu, vendor=vendor,
+                                 model_type=CpuType.Cpu, compel=True)
 
         if comments is not None:
             dbcpu.comments = comments

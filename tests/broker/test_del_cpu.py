@@ -29,30 +29,29 @@ class TestDelCpu(TestBrokerCommand):
 
     def test_100_del_utcpu(self):
         command = "del cpu --cpu utcpu --vendor intel"
-        self.noouttest(command.split(" "))
+        self.statustest(command.split(" "))
 
     def test_105_verify_utcpu(self):
         command = "show cpu --cpu utcpu --vendor intel"
-        out = self.commandtest(command.split(" "))
-        self.matchclean(out, "Cpu: intel utcpu", command)
+        self.notfoundtest(command.split(" "))
 
     def test_110_del_utcpu_1500(self):
         command = "del cpu --cpu utcpu_1500 --vendor intel"
-        self.noouttest(command.split(" "))
+        self.statustest(command.split(" "))
 
     def test_115_verify_utcpu_1500(self):
         command = "show cpu --cpu utcpu_1500"
-        out = self.commandtest(command.split(" "))
-        self.matchclean(out, "Cpu: intel utcpu_1500", command)
+        self.notfoundtest(command.split(" "))
 
     def test_120_del_unused(self):
-        self.noouttest(["del_cpu", "--cpu", "unused", "--vendor", "utvendor"])
+        self.statustest(["del_cpu", "--cpu", "unused", "--vendor", "utvendor"])
 
     def test_200_del_nocpu(self):
         command = ["del_cpu", "--cpu", "no-such-cpu", "--vendor", "utvendor"]
         out = self.notfoundtest(command)
         self.matchoutput(out,
-                         "Cpu no-such-cpu, vendor utvendor not found.",
+                         "Model no-such-cpu, vendor utvendor, "
+                         "model_type cpu not found.",
                          command)
 
     def test_200_del_novendor(self):

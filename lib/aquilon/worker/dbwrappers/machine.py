@@ -17,21 +17,22 @@
 """Wrapper to make getting a machine simpler."""
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import Cpu, LocalDisk, Machine
+from aquilon.aqdb.types import CpuType
+from aquilon.aqdb.model import Model, LocalDisk, Machine
 
 
 def create_machine(session, machine, dblocation, dbmodel, cpuname=None,
                    cpuvendor=None, cpucount=None, memory=None, serial=None,
                    comments=None):
     if cpuname:
-        dbcpu = Cpu.get_unique(session, name=cpuname, vendor=cpuvendor,
-                               compel=True)
+        dbcpu = Model.get_unique(session, name=cpuname, vendor=cpuvendor,
+                                 model_type=CpuType.Cpu, compel=True)
     else:
         if not dbmodel.machine_specs:
             raise ArgumentError("Model %s does not have machine specification "
                                 "defaults, please specify --cpuname and "
                                 "--cpuvendor." % dbmodel.name)
-        dbcpu = dbmodel.machine_specs.cpu
+        dbcpu = dbmodel.machine_specs.cpu_model
 
     if cpucount is None:
         if dbmodel.machine_specs:
@@ -50,7 +51,7 @@ def create_machine(session, machine, dblocation, dbmodel, cpuname=None,
                                 dbmodel.name)
 
     dbmachine = Machine(location=dblocation, model=dbmodel, label=machine,
-                        cpu=dbcpu, cpu_quantity=cpucount, memory=memory,
+                        cpu_model=dbcpu, cpu_quantity=cpucount, memory=memory,
                         serial_no=serial, comments=comments)
     session.add(dbmachine)
 

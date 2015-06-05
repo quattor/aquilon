@@ -889,7 +889,9 @@
 	<optgroup mandatory="True">
 	    <option name="all" type="flag">Show all cpu types</option>
 	    <option name="cpu" type="string">CPU type name</option>
-	    <option name="vendor" type="string">name of the vendor</option>
+	</optgroup>
+	<optgroup>
+	    <option name="vendor" requires="cpu" type="string">name of the vendor</option>
 	</optgroup>
 	<transport method="get" path="find/cpu"/>
     </command>

@@ -19,7 +19,7 @@
 from sqlalchemy import Column, Integer, ForeignKey, String
 from sqlalchemy.orm import relation
 
-from aquilon.aqdb.model import Cpu, HardwareEntity
+from aquilon.aqdb.model import Model, HardwareEntity
 
 
 class Machine(HardwareEntity):
@@ -32,14 +32,15 @@ class Machine(HardwareEntity):
     machine_id = Column(ForeignKey(HardwareEntity.id, ondelete='CASCADE'),
                         primary_key=True)
 
-    cpu_id = Column(ForeignKey(Cpu.id), nullable=False)
+    cpu_model_id = Column(ForeignKey(Model.id, name='machine_cpu_model_fk'),
+                          nullable=False)
 
     # TODO: constrain/smallint
     cpu_quantity = Column(Integer, nullable=False, default=2)
 
     memory = Column(Integer, nullable=False, default=512)
 
-    cpu = relation(Cpu, innerjoin=True)
+    cpu_model = relation(Model, innerjoin=True, foreign_keys=cpu_model_id)
 
     uri = Column(String(255), nullable=True)
 

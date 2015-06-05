@@ -18,8 +18,8 @@
 
 from sqlalchemy.orm import joinedload, contains_eager
 
-from aquilon.aqdb.types import NicType
-from aquilon.aqdb.model import Model, Vendor, Cpu, MachineSpecs
+from aquilon.aqdb.types import CpuType, NicType
+from aquilon.aqdb.model import Model, Vendor, MachineSpecs
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.formats.list import StringAttributeList
 
@@ -50,9 +50,11 @@ class CommandSearchModel(BrokerCommand):
             q = q.options(contains_eager('machine_specs'))
 
             if cpuname or cpuvendor:
-                subq = Cpu.get_matching_query(session, name=cpuname,
-                                              vendor=cpuvendor, compel=True)
-                q = q.filter(MachineSpecs.cpu_id.in_(subq))
+                subq = Model.get_matching_query(session, name=cpuname,
+                                                vendor=cpuvendor,
+                                                model_type=CpuType.Cpu,
+                                                compel=True)
+                q = q.filter(MachineSpecs.cpu_model_id.in_(subq))
 
             if cpunum is not None:
                 q = q.filter_by(cpu_quantity=cpunum)
@@ -75,7 +77,7 @@ class CommandSearchModel(BrokerCommand):
         else:
             if fullinfo or style != 'raw':
                 q = q.options(joinedload('machine_specs'),
-                              joinedload('machine_specs.cpu'))
+                              joinedload('machine_specs.cpu_model'))
         q = q.order_by(Vendor.name, Model.name)
 
         if fullinfo or style != 'raw':

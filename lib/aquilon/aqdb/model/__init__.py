@@ -72,7 +72,6 @@ from aquilon.aqdb.model.operating_system import OperatingSystem
 from aquilon.aqdb.model.vendor import Vendor
 from aquilon.aqdb.model.model import Model
 from aquilon.aqdb.model.hardware_entity import HardwareEntity, DeviceLinkMixin
-from aquilon.aqdb.model.cpu import Cpu
 from aquilon.aqdb.model.machine import Machine
 from aquilon.aqdb.model.hostlifecycle import HostLifecycle
 from aquilon.aqdb.model.network_device import NetworkDevice

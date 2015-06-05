@@ -17,7 +17,7 @@
 """Contains the logic for `aq del vendor`."""
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import Vendor, Cpu, Model
+from aquilon.aqdb.model import Vendor, Model
 from aquilon.worker.broker import BrokerCommand
 
 
@@ -29,9 +29,6 @@ class CommandDelVendor(BrokerCommand):
         dbvendor = Vendor.get_unique(session, vendor, compel=True)
         if session.query(Model.id).filter_by(vendor=dbvendor).count():
             raise ArgumentError("Vendor %s is still in use by a model." %
-                                dbvendor.name)
-        if session.query(Cpu.id).filter_by(vendor=dbvendor).count():
-            raise ArgumentError("Vendor %s is still in use by a CPU." %
                                 dbvendor.name)
         session.delete(dbvendor)
         return

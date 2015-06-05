@@ -24,6 +24,7 @@ from aquilon.aqdb.types.model_types import PhysicalMachineType
 from aquilon.aqdb.types.model_types import VirtualMachineType
 from aquilon.aqdb.types.model_types import ChassisType
 from aquilon.aqdb.types.model_types import NetworkDeviceType
+from aquilon.aqdb.types.model_types import CpuType
 from aquilon.aqdb.types.model_types import NicType
 
 from aquilon.aqdb.types.mac_address import MACAddress

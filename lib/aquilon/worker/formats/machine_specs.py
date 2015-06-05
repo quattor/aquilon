@@ -27,7 +27,7 @@ class MachineSpecsFormatter(ObjectFormatter):
         details = [indent + "MachineSpecs for %s %s:" %
                    (machine_specs.model.vendor.name, machine_specs.model.name)]
         details.append(indent + "  Cpu: %s x %d" %
-                       (machine_specs.cpu.name, machine_specs.cpu_quantity))
+                       (machine_specs.cpu_model.name, machine_specs.cpu_quantity))
         details.append(indent + "  Memory: %d MB" % machine_specs.memory)
         details.append(indent + "  NIC count: %d" % machine_specs.nic_count)
         if machine_specs.nic_model:

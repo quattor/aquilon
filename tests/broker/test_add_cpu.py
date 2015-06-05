@@ -30,26 +30,28 @@ class TestAddCpu(TestBrokerCommand):
     def test_100_add_utcpu(self):
         command = ["add", "cpu", "--cpu", "utcpu", "--vendor", "intel",
                    "--comments", "Some CPU comments"]
-        self.noouttest(command)
+        self.statustest(command)
 
     def test_105_show_utcpu(self):
         command = "show cpu --cpu utcpu --vendor intel"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Cpu: intel utcpu", command)
+        self.matchoutput(out, "Vendor: intel Model: utcpu", command)
+        self.matchoutput(out, "Model Type: cpu", command)
         self.matchoutput(out, "Comments: Some CPU comments", command)
 
     def test_110_add_utcpu_1500(self):
         command = "add cpu --cpu utcpu_1500 --vendor intel"
-        self.noouttest(command.split(" "))
+        self.statustest(command.split(" "))
 
     def test_115_show_utcpu_1500(self):
         command = "show cpu --cpu utcpu_1500"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Cpu: intel utcpu_1500", command)
+        self.matchoutput(out, "Vendor: intel Model: utcpu_1500", command)
 
     def test_120_add_unused_cpu(self):
         # A CPU model that should not be used by any machines
-        self.noouttest(["add_cpu", "--cpu", "unused", "--vendor", "utvendor"])
+        self.noouttest(["add_model", "--type", "cpu", "--model", "unused",
+                        "--vendor", "utvendor"])
 
     def test_200_add_utcpu_again(self):
         command = ["add", "cpu", "--cpu", "utcpu", "--vendor", "intel",

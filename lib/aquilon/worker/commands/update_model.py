@@ -19,8 +19,8 @@
 from sqlalchemy.orm import object_session, contains_eager
 
 from aquilon.exceptions_ import ArgumentError, UnimplementedError
-from aquilon.aqdb.types import NicType
-from aquilon.aqdb.model import (Vendor, Model, Cpu, MachineSpecs, Machine, Disk,
+from aquilon.aqdb.types import CpuType, NicType
+from aquilon.aqdb.model import (Vendor, Model, MachineSpecs, Machine, Disk,
                                 HardwareEntity, Interface)
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.templates import Plenary, PlenaryCollection
@@ -120,22 +120,24 @@ class CommandUpdateModel(BrokerCommand):
                                         "machine specs for the model.  Please "
                                         "give all CPU, disk, RAM, and NIC "
                                         "count information.")
-                dbcpu = Cpu.get_unique(session, compel=True, **cpu_info)
+                dbcpu = Model.get_unique(session, compel=True,
+                                         model_type=CpuType.Cpu, **cpu_info)
                 if nic_values:
                     dbnic = Model.get_unique(session, compel=True,
                                              model_type=NicType.Nic, **nic_info)
                 else:
                     dbnic = Model.default_nic_model(session)
-                dbmachine_specs = MachineSpecs(model=dbmodel, cpu=dbcpu,
+                dbmachine_specs = MachineSpecs(model=dbmodel, cpu_model=dbcpu,
                                                nic_model=dbnic, **specs)
                 session.add(dbmachine_specs)
 
         # Anything below that updates specs should have been verified above.
 
         if cpu_values:
-            dbcpu = Cpu.get_unique(session, compel=True, **cpu_info)
+            dbcpu = Model.get_unique(session, compel=True,
+                                     model_type=CpuType.Cpu, **cpu_info)
             self.update_machine_specs(model=dbmodel, dbmachines=dbmachines,
-                                      attr='cpu', value=dbcpu,
+                                      attr='cpu_model', value=dbcpu,
                                       fix_existing=fix_existing)
 
         for arg in ['memory', 'cpunum']:

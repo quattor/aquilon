@@ -19,8 +19,9 @@
 import re
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import (Cpu, Chassis, ChassisSlot, Model, Machine,
+from aquilon.aqdb.model import (Chassis, ChassisSlot, Model, Machine,
                                 Resource, BundleResource, Share, Filesystem)
+from aquilon.aqdb.types import CpuType
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.hardware_entity import update_primary_ip
 from aquilon.worker.dbwrappers.location import get_location
@@ -169,9 +170,9 @@ class CommandUpdateMachine(BrokerCommand):
             dbmachine.model = dbmodel
 
         if cpuname or cpuvendor:
-            dbcpu = Cpu.get_unique(session, name=cpuname, vendor=cpuvendor,
-                                   compel=True)
-            dbmachine.cpu = dbcpu
+            dbcpu = Model.get_unique(session, name=cpuname, vendor=cpuvendor,
+                                     model_type=CpuType.Cpu, compel=True)
+            dbmachine.cpu_model = dbcpu
 
         if cpucount is not None:
             dbmachine.cpu_quantity = cpucount
