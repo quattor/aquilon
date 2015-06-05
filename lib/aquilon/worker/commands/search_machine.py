@@ -44,8 +44,8 @@ class CommandSearchMachine(BrokerCommand):
         'disk_bus_address': ('bus_address', None),
     }
 
-    def render(self, session, hostname, machine, cpuname, cpuvendor, cpuspeed,
-               cpucount, memory, cluster, metacluster, vmhost, share, disk_share,
+    def render(self, session, hostname, machine, cpuname, cpuvendor, cpucount,
+               memory, cluster, metacluster, vmhost, share, disk_share,
                disk_filesystem, chassis, slot, fullinfo, style, **arguments):
         if share:
             self.deprecated_option("share", "Please use --disk_share instead.",
@@ -61,10 +61,9 @@ class CommandSearchMachine(BrokerCommand):
         if hostname:
             dns_rec = DnsRecord.get_unique(session, fqdn=hostname, compel=True)
             q = q.filter(Machine.primary_name_id == dns_rec.id)
-        if cpuname or cpuvendor or cpuspeed is not None:
+        if cpuname or cpuvendor:
             subq = Cpu.get_matching_query(session, name=cpuname,
-                                          vendor=cpuvendor, speed=cpuspeed,
-                                          compel=True)
+                                          vendor=cpuvendor, compel=True)
             q = q.filter(Machine.cpu_id.in_(subq))
         if cpucount is not None:
             q = q.filter_by(cpu_quantity=cpucount)

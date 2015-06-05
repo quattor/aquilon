@@ -18,21 +18,19 @@
 
 from sqlalchemy.orm import contains_eager, undefer
 
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import Cpu, Vendor
 
 
 class CommandShowCpu(BrokerCommand):
 
-    def render(self, session, cpu, vendor, speed, **arguments):
+    def render(self, session, cpu, vendor, **arguments):
         q = session.query(Cpu)
         if cpu:
             q = q.filter_by(name=cpu)
         if vendor:
             dbvendor = Vendor.get_unique(session, vendor, compel=True)
             q = q.filter_by(vendor=dbvendor)
-        if speed is not None:
-            q = q.filter_by(speed=speed)
         q = q.join(Vendor)
         q = q.options(undefer('comments'),
                       contains_eager('vendor'))

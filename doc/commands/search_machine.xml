@@ -32,7 +32,6 @@
 		<arg><option>--machine <replaceable>LABEL</replaceable></option></arg>
 		<arg><option>--cpuname <replaceable>NAME</replaceable></option></arg>
 		<arg><option>--cpuvendor <replaceable>NAME</replaceable></option></arg>
-		<arg><option>--cpuspeed <replaceable>NUMBER</replaceable></option></arg>
 		<arg><option>--cpucount <replaceable>NUMBER</replaceable></option></arg>
 		<arg><option>--memory <replaceable>NUMBER</replaceable></option></arg>
 		<arg><option>--cluster <replaceable>NAME</replaceable></option></arg>
@@ -196,16 +195,6 @@
 		<listitem>
 		    <para>
 			Look for machines having a CPU from vendor <replaceable>NAME</replaceable>.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--cpuspeed <replaceable>NUMBER</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			Look for machines having a CPU running at frequency <replaceable>NUMBER</replaceable>.
 		    </para>
 		</listitem>
 	    </varlistentry>

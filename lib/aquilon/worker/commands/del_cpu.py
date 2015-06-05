@@ -16,19 +16,17 @@
 # limitations under the License.
 """Contains the logic for `aq del cpu`."""
 
-
 from aquilon.exceptions_ import ArgumentError
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import Cpu, MachineSpecs, Model, Vendor, Machine
 
 
 class CommandDelCpu(BrokerCommand):
 
-    required_parameters = ["cpu", "vendor", "speed"]
+    required_parameters = ["cpu", "vendor"]
 
-    def render(self, session, cpu, vendor, speed, **arguments):
-        dbcpu = Cpu.get_unique(session, name=cpu, vendor=vendor, speed=speed,
-                               compel=True)
+    def render(self, session, cpu, vendor, **arguments):
+        dbcpu = Cpu.get_unique(session, name=cpu, vendor=vendor, compel=True)
 
         q = session.query(Machine.machine_id)
         q = q.filter_by(cpu=dbcpu)

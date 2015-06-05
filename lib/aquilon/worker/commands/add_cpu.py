@@ -16,21 +16,19 @@
 # limitations under the License.
 """Contains the logic for `aq add cpu`."""
 
-
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import Cpu, Vendor
 
 
 class CommandAddCpu(BrokerCommand):
 
-    required_parameters = ["cpu", "vendor", "speed"]
+    required_parameters = ["cpu", "vendor"]
 
-    def render(self, session, cpu, vendor, speed, comments, **arguments):
+    def render(self, session, cpu, vendor, comments, **arguments):
         dbvendor = Vendor.get_unique(session, vendor, compel=True)
 
-        Cpu.get_unique(session, name=cpu, vendor=dbvendor, speed=speed,
-                       preclude=True)
+        Cpu.get_unique(session, name=cpu, vendor=dbvendor, preclude=True)
 
-        dbcpu = Cpu(name=cpu, vendor=dbvendor, speed=speed, comments=comments)
+        dbcpu = Cpu(name=cpu, vendor=dbvendor, comments=comments)
         session.add(dbcpu)
         return

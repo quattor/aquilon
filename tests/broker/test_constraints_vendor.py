@@ -49,7 +49,7 @@ class TestVendorConstraints(TestBrokerCommand):
 
     # TODO: better place for this test
     def testdelxeon2500(self):
-        command = "del cpu --cpu xeon_2500 --vendor intel --speed 2500"
+        command = "del cpu --cpu xeon_2500 --vendor intel"
         out = self.badrequesttest(command.split(" "))
         self.searchoutput(out,
                           r"Cpu xeon_2500 is still used by \d+ machines, and "
@@ -58,7 +58,7 @@ class TestVendorConstraints(TestBrokerCommand):
 
     # TODO: better place for this test
     def testdelxeon2660(self):
-        command = "del cpu --cpu unused --vendor utvendor --speed 3000"
+        command = "del cpu --cpu unused --vendor utvendor"
         out = self.badrequesttest(command.split(" "))
         self.matchoutput(out,
                          "Cpu unused is still used by the following "

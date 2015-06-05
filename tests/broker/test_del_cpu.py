@@ -28,38 +28,36 @@ from brokertest import TestBrokerCommand
 class TestDelCpu(TestBrokerCommand):
 
     def test_100_del_utcpu(self):
-        command = "del cpu --cpu utcpu --vendor intel --speed 1000"
+        command = "del cpu --cpu utcpu --vendor intel"
         self.noouttest(command.split(" "))
 
     def test_105_verify_utcpu(self):
-        command = "show cpu --cpu utcpu --speed 1000 --vendor intel"
+        command = "show cpu --cpu utcpu --vendor intel"
         out = self.commandtest(command.split(" "))
-        self.matchclean(out, "Cpu: intel utcpu 1000 MHz", command)
+        self.matchclean(out, "Cpu: intel utcpu", command)
 
     def test_110_del_utcpu_1500(self):
-        command = "del cpu --cpu utcpu_1500 --vendor intel --speed 1500"
+        command = "del cpu --cpu utcpu_1500 --vendor intel"
         self.noouttest(command.split(" "))
 
     def test_115_verify_utcpu_1500(self):
         command = "show cpu --cpu utcpu_1500"
         out = self.commandtest(command.split(" "))
-        self.matchclean(out, "Cpu: intel utcpu_1500 1500 MHz", command)
+        self.matchclean(out, "Cpu: intel utcpu_1500", command)
 
     def test_120_del_unused(self):
-        self.noouttest(["del_cpu", "--cpu", "unused", "--vendor", "utvendor",
-                        "--speed", "3000"])
+        self.noouttest(["del_cpu", "--cpu", "unused", "--vendor", "utvendor"])
 
     def test_200_del_nocpu(self):
-        command = ["del_cpu", "--cpu", "no-such-cpu", "--vendor", "utvendor",
-                   "--speed", "1000"]
+        command = ["del_cpu", "--cpu", "no-such-cpu", "--vendor", "utvendor"]
         out = self.notfoundtest(command)
         self.matchoutput(out,
-                         "Cpu no-such-cpu, vendor utvendor, speed 1000 not found.",
+                         "Cpu no-such-cpu, vendor utvendor not found.",
                          command)
 
     def test_200_del_novendor(self):
         command = ["del_cpu", "--cpu", "no-such-cpu",
-                   "--vendor", "no-such-vendor", "--speed", "1000"]
+                   "--vendor", "no-such-vendor"]
         out = self.notfoundtest(command)
         self.matchoutput(out, "Vendor no-such-vendor not found.", command)
 

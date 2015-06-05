@@ -17,50 +17,21 @@
 """Wrapper to make getting a machine simpler."""
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import Cpu, LocalDisk, Machine, Vendor
+from aquilon.aqdb.model import Cpu, LocalDisk, Machine
 
 
 def create_machine(session, machine, dblocation, dbmodel, cpuname=None,
-                   cpuvendor=None, cpuspeed=None, cpucount=None, memory=None,
-                   serial=None, comments=None):
-
-    # Figure out a CPU...
-    dbcpu = None
-    if not (cpuname or cpuvendor or cpuspeed is not None):
+                   cpuvendor=None, cpucount=None, memory=None, serial=None,
+                   comments=None):
+    if cpuname:
+        dbcpu = Cpu.get_unique(session, name=cpuname, vendor=cpuvendor,
+                               compel=True)
+    else:
         if not dbmodel.machine_specs:
             raise ArgumentError("Model %s does not have machine specification "
-                                "defaults, please specify --cpuvendor, "
-                                "--cpuname, or --cpuspeed." % dbmodel.name)
+                                "defaults, please specify --cpuname and "
+                                "--cpuvendor." % dbmodel.name)
         dbcpu = dbmodel.machine_specs.cpu
-    else:
-        # Was there enough on the command line to specify one?
-        q = session.query(Cpu)
-        if cpuname:
-            q = q.filter_by(name=cpuname)
-        if cpuspeed is not None:
-            q = q.filter_by(speed=cpuspeed)
-        if cpuvendor:
-            dbvendor = Vendor.get_unique(session, cpuvendor, compel=True)
-            q = q.filter_by(vendor=dbvendor)
-        cpulist = q.all()
-        if not cpulist:
-            raise ArgumentError("Could not find a CPU with the given "
-                                "attributes.")
-        if len(cpulist) == 1:
-            # Found it exactly.
-            dbcpu = cpulist[0]
-        elif dbmodel.machine_specs:
-            # Not exact, but see if the specs match the default.
-            dbcpu = dbmodel.machine_specs.cpu
-            if ((cpuname and not dbcpu.name.startswith(cpuname.lower()))
-                    or (cpuspeed is not None and dbcpu.speed != cpuspeed)
-                    or (cpuvendor and
-                        dbcpu.vendor.name != cpuvendor.lower())):
-                raise ArgumentError("Could not uniquely identify a CPU with "
-                                    "the attributes given.")
-        else:
-            raise ArgumentError("Could not uniquely identify a CPU with the "
-                                "attributes given.")
 
     if cpucount is None:
         if dbmodel.machine_specs:

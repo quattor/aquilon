@@ -16,15 +16,13 @@
 # limitations under the License.
 """Cpu formatter."""
 
-
 from aquilon.worker.formats.formatters import ObjectFormatter
 from aquilon.aqdb.model import Cpu
 
 
 class CpuFormatter(ObjectFormatter):
     def format_raw(self, cpu, indent="", embedded=True, indirect_attrs=True):
-        details = [indent + "Cpu: %s %s %d MHz" % (cpu.vendor.name, cpu.name,
-                                                   cpu.speed)]
+        details = [indent + "Cpu: %s %s" % (cpu.vendor.name, cpu.name)]
         if cpu.comments:
             details.append(indent + "  Comments: %s" % cpu.comments)
         return "\n".join(details)

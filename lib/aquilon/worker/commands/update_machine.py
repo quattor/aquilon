@@ -80,7 +80,7 @@ class CommandUpdateMachine(BrokerCommand):
     def render(self, session, logger, machine, model, vendor, serial,
                chassis, slot, clearchassis, multislot,
                vmhost, cluster, metacluster, allow_metacluster_change,
-               cpuname, cpuvendor, cpuspeed, cpucount, memory, ip, uri,
+               cpuname, cpuvendor, cpucount, memory, ip, uri,
                remap_disk, comments, **arguments):
         dbmachine = Machine.get_unique(session, machine, compel=True)
         oldinfo = DSDBRunner.snapshot_hw(dbmachine)
@@ -168,9 +168,9 @@ class CommandUpdateMachine(BrokerCommand):
 
             dbmachine.model = dbmodel
 
-        if cpuname or cpuvendor or cpuspeed is not None:
+        if cpuname or cpuvendor:
             dbcpu = Cpu.get_unique(session, name=cpuname, vendor=cpuvendor,
-                                   speed=cpuspeed, compel=True)
+                                   compel=True)
             dbmachine.cpu = dbcpu
 
         if cpucount is not None:

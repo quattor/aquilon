@@ -22,11 +22,10 @@ from aquilon.aqdb.model import Cpu
 
 class CommandUpdateCpu(BrokerCommand):
 
-    required_parameters = ["cpu", "vendor", "speed"]
+    required_parameters = ["cpu", "vendor"]
 
-    def render(self, session, cpu, vendor, speed, comments, **arguments):
-        dbcpu = Cpu.get_unique(session, name=cpu, vendor=vendor, speed=speed,
-                               compel=True)
+    def render(self, session, cpu, vendor, comments, **arguments):
+        dbcpu = Cpu.get_unique(session, name=cpu, vendor=vendor, compel=True)
 
         if comments is not None:
             dbcpu.comments = comments

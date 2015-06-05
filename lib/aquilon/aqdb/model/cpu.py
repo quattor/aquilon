@@ -28,14 +28,11 @@ _TN = 'cpu'
 
 
 class Cpu(Base):
-    """ Cpus with vendor, model name and speed (in MHz) """
     __tablename__ = _TN
 
     id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
     name = Column(AqStr(64), nullable=False)
     vendor_id = Column(ForeignKey(Vendor.id), nullable=False)
-
-    speed = Column(Integer, nullable=False)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
@@ -43,5 +40,5 @@ class Cpu(Base):
 
     vendor = relation(Vendor, innerjoin=True)
 
-    __table_args__ = (UniqueConstraint(vendor_id, name, speed),
-                      {'info': {'unique_fields': ['name', 'vendor', 'speed']}},)
+    __table_args__ = (UniqueConstraint(vendor_id, name),
+                      {'info': {'unique_fields': ['name', 'vendor']}},)

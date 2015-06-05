@@ -29,32 +29,31 @@ class TestAddCpu(TestBrokerCommand):
 
     def test_100_add_utcpu(self):
         command = ["add", "cpu", "--cpu", "utcpu", "--vendor", "intel",
-                   "--speed", "1000", "--comments", "Some CPU comments"]
+                   "--comments", "Some CPU comments"]
         self.noouttest(command)
 
     def test_105_show_utcpu(self):
-        command = "show cpu --cpu utcpu --speed 1000 --vendor intel"
+        command = "show cpu --cpu utcpu --vendor intel"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Cpu: intel utcpu 1000 MHz", command)
+        self.matchoutput(out, "Cpu: intel utcpu", command)
         self.matchoutput(out, "Comments: Some CPU comments", command)
 
     def test_110_add_utcpu_1500(self):
-        command = "add cpu --cpu utcpu_1500 --vendor intel --speed 1500"
+        command = "add cpu --cpu utcpu_1500 --vendor intel"
         self.noouttest(command.split(" "))
 
     def test_115_show_utcpu_1500(self):
         command = "show cpu --cpu utcpu_1500"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Cpu: intel utcpu_1500 1500 MHz", command)
+        self.matchoutput(out, "Cpu: intel utcpu_1500", command)
 
     def test_120_add_unused_cpu(self):
         # A CPU model that should not be used by any machines
-        self.noouttest(["add_cpu", "--cpu", "unused", "--vendor", "utvendor",
-                        "--speed", "3000"])
+        self.noouttest(["add_cpu", "--cpu", "unused", "--vendor", "utvendor"])
 
     def test_200_add_utcpu_again(self):
         command = ["add", "cpu", "--cpu", "utcpu", "--vendor", "intel",
-                   "--speed", "1000", "--comments", "Some CPU comments"]
+                   "--comments", "Some CPU comments"]
         self.badrequesttest(command)
 
 if __name__ == '__main__':

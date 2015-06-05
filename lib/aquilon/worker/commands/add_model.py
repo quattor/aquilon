@@ -16,18 +16,17 @@
 # limitations under the License.
 """Contains the logic for `aq add model`."""
 
-
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.types import NicType
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.aqdb.model import Vendor, Model, MachineSpecs, Cpu
+from aquilon.worker.broker import BrokerCommand
 
 
 class CommandAddModel(BrokerCommand):
 
     required_parameters = ["model", "vendor", "type"]
 
-    def render(self, session, model, vendor, type, cpuname, cpuvendor, cpuspeed,
+    def render(self, session, model, vendor, type, cpuname, cpuvendor,
                cpunum, memory, disktype, diskcontroller, disksize,
                nics, nicmodel, nicvendor,
                comments, **arguments):
@@ -45,12 +44,12 @@ class CommandAddModel(BrokerCommand):
         session.add(dbmodel)
         session.flush()
 
-        if cpuname or cpuvendor or cpuspeed is not None:
+        if cpuname or cpuvendor:
             if not type.isMachineType():
                 raise ArgumentError("Machine specfications are only valid"
                                     " for machine types")
             dbcpu = Cpu.get_unique(session, name=cpuname, vendor=cpuvendor,
-                                   speed=cpuspeed, compel=True)
+                                   compel=True)
             if nicmodel or nicvendor:
                 dbnic = Model.get_unique(session, model_type=NicType.Nic,
                                          name=nicmodel, vendor=nicvendor,

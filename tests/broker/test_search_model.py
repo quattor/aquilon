@@ -130,21 +130,6 @@ class TestSearchModel(TestBrokerCommand):
         self.matchoutput(out, "Disk: c0d0 466 GB cciss (local)",
                          command)
 
-    def test_200_search_cpu_vendor_speed(self):
-        command = ["search_model", "--cpuvendor", "intel", "--cpuspeed", "2660"]
-        out = self.commandtest(command)
-
-        # CPU: xeon_2660
-        self.matchoutput(out, "hs21-8853", command)
-
-        # CPU: xeon_5150
-        self.matchoutput(out, "utlarge", command)
-        self.matchoutput(out, "utmedium", command)
-
-        self.matchclean(out, "bl260c", command)
-        self.matchclean(out, "uttorswitch", command)
-        self.matchclean(out, "utchassis", command)
-
     def test_200_search_cpu_count(self):
         command = ["search_model", "--cpunum", "2"]
         out = self.commandtest(command)

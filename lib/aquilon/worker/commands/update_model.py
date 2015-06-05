@@ -33,7 +33,7 @@ class CommandUpdateModel(BrokerCommand):
     # Quick hash of the arguments this method takes to the corresponding
     # aqdb label.
     argument_lookup = {'cpuname': 'name', 'cpuvendor': 'vendor',
-                       'cpuspeed': 'speed', 'cpunum': 'cpu_quantity',
+                       'cpunum': 'cpu_quantity',
                        'memory': 'memory', 'disktype': 'disk_type',
                        'diskcontroller': 'controller_type',
                        'disksize': 'disk_capacity', 'nics': 'nic_count',
@@ -94,7 +94,7 @@ class CommandUpdateModel(BrokerCommand):
             dbmodel.comments = comments
             # The comments also do not affect the templates.
 
-        cpu_args = ['cpuname', 'cpuvendor', 'cpuspeed']
+        cpu_args = ['cpuname', 'cpuvendor']
         cpu_info = dict((self.argument_lookup[arg], arguments[arg])
                         for arg in cpu_args)
         cpu_values = [v for v in cpu_info.values() if v is not None]
