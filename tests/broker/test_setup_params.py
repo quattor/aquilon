@@ -141,6 +141,23 @@ AQUILON_PARAM_DEFS = {
     ],
 }
 
+AURORA_PARAM_DEFS = {
+    "espinfo": [
+        {
+            "path": "espinfo/class",
+            "value_type": "string",
+            "description": "espinfo class",
+            "required": True
+        },
+        {
+            "path": "espinfo/function",
+            "value_type": "string",
+            "description": "espinfo function",
+            "required": True
+        },
+    ],
+}
+
 HACLUSTER_PARAM_DEFS = {
     "espinfo": [
         {
@@ -199,6 +216,9 @@ class TestSetupParams(TestBrokerCommand):
         for template, paramlist in AQUILON_PARAM_DEFS.items():
             for params in paramlist:
                 self.add_param_def("aquilon", template, params)
+        for template, paramlist in AURORA_PARAM_DEFS.items():
+            for params in paramlist:
+                self.add_param_def("aurora", template, params)
         for template, paramlist in HACLUSTER_PARAM_DEFS.items():
             for params in paramlist:
                 self.add_param_def("hacluster", template, params)

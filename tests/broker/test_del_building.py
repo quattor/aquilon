@@ -35,6 +35,7 @@ class TestDelBuilding(TestBrokerCommand):
         self.dsdb_verify()
 
     def test_100_del_ex(self):
+        self.dsdb_expect_del_campus_building("ta", "cards")
         self.dsdb_expect("delete_building_aq -building cards")
         command = "del building --building cards"
         self.noouttest(command.split(" "))
@@ -48,18 +49,19 @@ class TestDelBuilding(TestBrokerCommand):
         self.dsdb_verify()
 
     def test_110_del_bunotindsdb(self):
-        test_building = "bz"
         self.dsdb_expect("add_building_aq -building_name bz -city ex "
                          "-building_addr Nowhere")
-        command = ["add", "building", "--building", test_building, "--city", "ex",
+        self.dsdb_expect_add_campus_building("ta", "bz")
+        command = ["add", "building", "--building", "bz", "--city", "ex",
                    "--address", "Nowhere"]
         self.noouttest(command)
         self.dsdb_verify()
 
-        dsdb_command = "delete_building_aq -building %s" % test_building
-        errstr = "bldg %s doesn't exists" % test_building
+        dsdb_command = "delete_building_aq -building bz"
+        errstr = "bldg bz doesn't exists"
         self.dsdb_expect(dsdb_command, True, errstr)
-        command = "del building --building %s" % test_building
+        self.dsdb_expect_del_campus_building("ta", "bz")
+        command = "del building --building bz"
         out, err = self.successtest(command.split(" "))
         self.matchoutput(err,
                          "DSDB does not have building bz defined, proceeding.",

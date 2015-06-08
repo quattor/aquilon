@@ -30,7 +30,7 @@ class TestAddCity(TestBrokerCommand):
     def test_100_add_example(self):
         self.dsdb_expect("add_city_aq -city_symbol ex " +
                          "-country_symbol us -city_name Exampleton")
-        command = ["add", "city", "--city", "ex", "--country", "us",
+        command = ["add", "city", "--city", "ex", "--campus", "ta",
                    "--fullname", "Exampleton", "--timezone",
                    "US/Eastern", "--comments", "Some city comments"]
         self.noouttest(command)
@@ -41,7 +41,8 @@ class TestAddCity(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "City: ex", command)
         self.matchoutput(out,
-                         "Location Parents: [Organization ms, Hub ny, Continent na, Country us]",
+                         "Location Parents: [Organization ms, Hub ny, "
+                         "Continent na, Country us, Campus ta]",
                          command)
         self.matchoutput(out, "Fullname: Exampleton", command)
         self.matchoutput(out, "Timezone: US/Eastern", command)
@@ -77,7 +78,7 @@ class TestAddCity(TestBrokerCommand):
     def test_115_verify_example_csv(self):
         command = "show city --city ex --format=csv"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "city,ex,country,us,,,EDT,New Exampleton",
+        self.matchoutput(out, "city,ex,campus,ta,,,EDT,New Exampleton",
                          command)
 
     def test_120_add_default_tz(self):

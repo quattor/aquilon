@@ -45,8 +45,7 @@ class TestAddBuilding(TestBrokerCommand):
     def testaddbucards(self):
         self.dsdb_expect("add_building_aq -building_name cards -city ex "
                          "-building_addr Nowhere")
-        # No campus for city ex
-#        self.dsdb_expect_add_campus_building("ny", "bu")
+        self.dsdb_expect_add_campus_building("ta", "cards")
         command = ["add", "building", "--building", "cards", "--city", "ex",
                    "--address", "Nowhere"]
         self.noouttest(command)
