@@ -159,7 +159,7 @@ def find_resource(cls, dbobj, resourcegroup, resource, ignore=None,
 
     session = object_session(dbobj)
 
-    if resourcegroup:
+    if resourcegroup and dbobj.resholder:
         dbrg = ResourceGroup.get_unique(session, name=resourcegroup,
                                         holder=dbobj.resholder)
         if dbrg:
