@@ -280,6 +280,7 @@ def set_port_group_phys(session, dbinterface, port_group_name):
             raise ArgumentError("{0} does not have port group {1!s} assigned."
                                 .format(allocator, port_group_name))
 
+    dbinterface.port_group = None
     dbinterface.port_group_name = dbvi.port_group
 
 
@@ -334,6 +335,7 @@ def set_port_group_vm(session, logger, dbinterface, port_group_name):
         logger.info("Selected {0:l} for {1:l} (based on {2:l})"
                     .format(selected_pg, dbmachine, allocator))
 
+    dbinterface.port_group_name = None
     dbinterface.port_group = selected_pg
 
 
