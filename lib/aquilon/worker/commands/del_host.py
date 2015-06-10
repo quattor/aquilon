@@ -35,6 +35,12 @@ class CommandDelHost(BrokerCommand):
         dbhost = hostname_to_host(session, hostname)
         dbmachine = dbhost.hardware_entity
 
+        if dbhost.virtual_machines:
+            machines = ", ".join(sorted(m.label for m in
+                                        dbhost.virtual_machines))
+            raise ArgumentError("{0} still has virtual machines: {1!s}."
+                                .format(dbhost, machines))
+
         if dbhost.cluster:
             raise ArgumentError("{0} is still a member of {1:l}, and cannot "
                                 "be deleted.  Please remove it from the "

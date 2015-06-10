@@ -31,18 +31,17 @@ def del_cluster(session, logger, dbcluster, config):
     if dbcluster.virtual_machines:
         machines = ", ".join(sorted(m.label for m in
                                     dbcluster.virtual_machines))
-        raise ArgumentError("%s is still in use by virtual machines: %s." %
-                            (format(dbcluster), machines))
+        raise ArgumentError("{0} is still in use by virtual machines: {1!s}."
+                            .format(dbcluster, machines))
 
     if hasattr(dbcluster, 'members') and dbcluster.members:
-        raise ArgumentError("%s is still in use by clusters: %s." %
-                            (format(dbcluster),
-                             ", ".join(sorted(c.name for c in
-                                              dbcluster.members))))
+        members = ", ".join(sorted(c.name for c in dbcluster.members))
+        raise ArgumentError("{0} is still in use by clusters: {1!s}."
+                            .format(dbcluster, members))
     elif dbcluster.hosts:
         hosts = ", ".join(sorted(h.fqdn for h in dbcluster.hosts))
-        raise ArgumentError("%s is still in use by hosts: %s." %
-                            (format(dbcluster), hosts))
+        raise ArgumentError("{0} is still in use by hosts: {1!s}."
+                            .format(dbcluster, hosts))
 
     # Service addresses cannot be deleted by cascading rules only
     for res in walk_resources(dbcluster):
