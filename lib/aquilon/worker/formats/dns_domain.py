@@ -27,7 +27,8 @@ class DnsDomainFormatter(ObjectFormatter):
         details.append(indent + "  Restricted: %s" % dns_domain.restricted)
 
         if dns_domain.servers:
-            server_list = ','.join(str(srv) for srv in dns_domain.servers)
+            server_list = ','.join(sorted(str(srv) for srv in
+                                          dns_domain.servers))
             details.append(indent + "  Servers: %s" % server_list)
 
         for location in dns_domain.mapped_locations:

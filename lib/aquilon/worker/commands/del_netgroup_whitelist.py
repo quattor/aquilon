@@ -35,7 +35,8 @@ class CommandDelNetgroupWhitelist(BrokerCommand):
 
         if pers:
             raise ArgumentError("Netgroup {0} used by following and cannot be deleted: ".
-                                format(netgroup) + ", ".join("{0}".format(p) for p in pers))
+                                format(netgroup) +
+                                ", ".join(sorted("{0}".format(p) for p in pers)))
 
         session.delete(dbng)
         session.flush()

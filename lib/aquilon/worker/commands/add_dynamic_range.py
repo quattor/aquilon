@@ -64,7 +64,7 @@ class CommandAddDynamicRange(BrokerCommand):
         if conflicts:
             raise ArgumentError("Cannot allocate the address range because the "
                                 "following IP addresses are already in use:\n" +
-                                ", ".join(str(c.ip) for c in conflicts))
+                                ", ".join(sorted(str(c.ip) for c in conflicts)))
 
         # No filtering on DNS environment. If an address is dynamic in one
         # environment, it should not be considered static in a different

@@ -20,7 +20,10 @@ import re
 import os
 import sys
 import logging
+import time
 from numbers import Number
+import hashlib
+import struct
 
 from aquilon.aqdb import depends  # pylint: disable=W0611
 from aquilon.config import Config
@@ -35,6 +38,12 @@ from sqlalchemy.inspection import inspect
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.schema import CreateIndex, Sequence
 from sqlalchemy.dialects.oracle.base import OracleDDLCompiler
+from sqlalchemy.sql.selectable import Select
+from sqlalchemy.sql.elements import TextClause
+
+# Global cache of SQL statement hashes, used to implement unique query plan
+# logging
+query_hashes = None
 
 
 # Add support for Oracle-specific index extensions
@@ -91,6 +100,45 @@ def sqlite_no_fsync(dbapi_con, con_record):  # pylint: disable=W0613
     dbapi_con.execute('pragma synchronous=OFF')
 
 
+def sqlite_show_plan(conn, cursor, statement, parameters, context, executemany):
+    sqlid = stmt_2_sqlid(statement)
+    if query_hashes is not None:
+        if sqlid in query_hashes:
+            return
+        query_hashes.add(sqlid)
+
+    explain = "EXPLAIN QUERY PLAN " + statement
+    if executemany:
+        cursor.executemany(explain, parameters)
+    elif not parameters:
+        cursor.execute(explain)
+    else:
+        cursor.execute(explain, parameters)
+
+    log = logging.getLogger(__name__)
+    rows = cursor.fetchall()
+    for row in rows:
+        log.info("Plan: %s", "|".join(str(col) for col in row))
+
+
+def stmt_2_sqlid(stmt):
+    # Generate Oracle SQL_ID for an SQL statement.
+    # Based on http://www.slaviks-blog.com/2010/03/30/oracle-sql_id-and-hash-value/
+    hash = hashlib.md5(stmt + '\x00').digest()
+    _, _, msb, lsb = struct.unpack('IIII', hash)
+    sqln = long(msb) * (2 ** 32) + lsb
+    alphabet = '0123456789abcdfghjkmnpqrstuvwxyz'
+    sqlid = ''
+    while sqln:
+        sqlid = alphabet[sqln % 32] + sqlid
+        sqln //= 32
+
+    if len(sqlid) < 13:
+        sqlid = "0" * (13 - len(sqlid)) + sqlid
+
+    return sqlid
+
+
 def oracle_set_module(dbapi_con, con_record):  # pylint: disable=W0613
     # Store the program's name in v$session. Trying to set a value longer than
     # the allowed length will generate ORA-24960, so do an explicit truncation.
@@ -110,16 +158,110 @@ def oracle_reset_action(dbapi_con, con_record):  # pylint: disable=W0613
         pass
 
 
+def oracle_enable_statistics(dbapi_con, con_record):  # pylint: disable=W0613
+    log = logging.getLogger(__name__)
+    stmt = 'ALTER SESSION SET statistics_level = all'
+    cursor = dbapi_con.cursor()
+    log.info(stmt)
+    cursor.execute(stmt)
+    cursor.close()
+
+
+def oracle_remember_sqlid(conn, cursor, statement, parameters, context,
+                          executemany):
+    if statement.lower().startswith("set "):
+        return
+    sqlid = stmt_2_sqlid(statement)
+    if query_hashes is not None:
+        if sqlid in query_hashes:
+            return
+        query_hashes.add(sqlid)
+
+    context._oracle_sqlid = sqlid
+
+
+def oracle_show_plan(conn, cursor, statement, parameters, context, executemany):
+    if not hasattr(context, "_oracle_sqlid"):
+        return
+
+    log = logging.getLogger(__name__)
+    dbapi_conn = conn.connection.connection
+    cursor2 = dbapi_conn.cursor()
+    cursor2.execute("SELECT plan_table_output "
+                    "FROM table(dbms_xplan.display_cursor(:sqlid, NULL, 'typical'))",
+                    sqlid=context._oracle_sqlid)
+    rows = cursor2.fetchall()
+    for row in rows:
+        log.info("Plan: %s", row[0])
+    cursor2.close()
+    delattr(context, "_oracle_sqlid")
+
+
+def postgres_show_plan(conn, cursor, statement, parameters, context, executemany):
+    cmd = statement.split()[0]
+    if cmd.upper() not in ("SELECT", "INSERT", "UPDATE", "DELETE"):
+        return
+
+    sqlid = stmt_2_sqlid(statement)
+    if query_hashes is not None:
+        if sqlid in query_hashes:
+            return
+        query_hashes.add(sqlid)
+
+    log = logging.getLogger(__name__)
+
+    cursor.execute("SAVEPOINT explain_plan")
+    try:
+        explain = "EXPLAIN ANALYZE VERBOSE " + statement
+        if executemany:
+            cursor.executemany(explain, parameters)
+        elif not parameters:
+            cursor.execute(explain)
+        else:
+            cursor.execute(explain, parameters)
+
+        rows = cursor.fetchall()
+        for row in rows:
+            log.info("Plan: %s", row[0])
+    except Exception as err:
+        log.error("Error fetching plan: %s", err)
+    finally:
+        cursor.execute("ROLLBACK TO SAVEPOINT explain_plan")
+        cursor.execute("RELEASE SAVEPOINT explain_plan")
+
+
+def timer_start(conn, cursor, statement, parameters, context, executemany):
+    # pylint: disable=W0613
+    conn.info.setdefault('query_start_time', []).append(time.time())
+
+
+def timer_stop(conn, cursor, statement, parameters, context, executemany):
+    # pylint: disable=W0613
+    total = time.time() - conn.info['query_start_time'].pop(-1)
+    log = logging.getLogger(__name__)
+    log.info("Query running time: %f", total)
+
+
 class DbFactory(object):
     __shared_state = {}
     __started = False  # at the class definition, that is
 
     def create_engine(self, config, dsn, **pool_options):
         engine = create_engine(dsn, **pool_options)
+        show_plan = config.has_option("database", "log_query_plans") and \
+                config.getboolean("database", "log_query_plans")
+        if config.has_option("database", "log_unique_plans_only") and \
+           config.getboolean("database", "log_unique_plans_only"):
+            global query_hashes
+            query_hashes = set()
 
         if engine.dialect.name == "oracle":
             event.listen(engine, "connect", oracle_set_module)
             event.listen(engine, "checkin", oracle_reset_action)
+            if show_plan:
+                event.listen(engine, "connect", oracle_enable_statistics)
+                event.listen(engine, "before_cursor_execute", oracle_remember_sqlid)
+                event.listen(engine, "after_cursor_execute", oracle_show_plan)
         elif engine.dialect.name == "sqlite":
             event.listen(engine, "connect", sqlite_foreign_keys)
             if config.has_option("database", "disable_fsync") and \
@@ -127,17 +269,30 @@ class DbFactory(object):
                 event.listen(engine, "connect", sqlite_no_fsync)
                 log = logging.getLogger(__name__)
                 log.info("SQLite is operating in unsafe mode!")
+            if show_plan:
+                event.listen(engine, "before_cursor_execute", sqlite_show_plan)
         elif engine.dialect.name == "postgresql":
-            pass
+            if show_plan:
+                event.listen(engine, "before_cursor_execute", postgres_show_plan)
+
+        if self.verbose:
+            engine.echo = True
+
+        if config.has_option("database", "log_query_times") and \
+           config.getboolean("database", "log_query_times"):
+            event.listen(engine, "before_cursor_execute", timer_start)
+            event.listen(engine, "after_cursor_execute", timer_stop)
+
         return engine
 
-    def __init__(self, *args, **kw):
+    def __init__(self, verbose=False):
         self.__dict__ = self.__shared_state
 
         if self.__started:
             return
 
         self.__started = True
+        self.verbose = verbose
 
         config = Config()
         log = logging.getLogger(__name__)

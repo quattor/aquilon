@@ -43,10 +43,10 @@ class MachineFormatter(HardwareEntityFormatter):
 
         for mgr in managers:
             details.append(indent + "  Manager: %s [%s]" %
-                           (", ".join(mgr[0]), mgr[1]))
+                           (", ".join(sorted(mgr[0])), mgr[1]))
         for aux in auxiliaries:
             details.append(indent + "  Auxiliary: %s [%s]" %
-                           (", ".join(aux[0]), aux[1]))
+                           (", ".join(sorted(aux[0])), aux[1]))
 
     def format_raw(self, machine, indent="", embedded=True,
                    indirect_attrs=True):

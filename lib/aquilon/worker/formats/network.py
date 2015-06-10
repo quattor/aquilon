@@ -107,8 +107,8 @@ class NetworkFormatter(ObjectFormatter):
             details.append(indent + "  Comments: %s" % network.comments)
 
         if network.routers:
-            routers = ", ".join("{0} ({1})".format(rtr.ip, rtr.location)
-                                for rtr in network.routers)
+            routers = ", ".join(sorted("{0} ({1})".format(rtr.ip, rtr.location)
+                                       for rtr in network.routers))
             details.append(indent + "  Routers: %s" % routers)
 
         # Look for dynamic DHCP ranges
@@ -288,7 +288,7 @@ class NetworkHostListFormatter(ListFormatter):
                 iface = addr.interface
                 hw_ent = iface.hardware_entity
                 if addr.fqdns:
-                    names = ", ".join(str(fqdn) for fqdn in addr.fqdns)
+                    names = ", ".join(sorted(str(fqdn) for fqdn in addr.fqdns))
                 else:
                     names = "unknown"
                 details.append(indent + "  {0:c}: {0.printable_name}, "
@@ -312,7 +312,7 @@ class SimpleNetworkListFormatter(ListFormatter):
 
     def format_raw(self, nlist, indent="", embedded=True, indirect_attrs=True):
         details = [indent + "\t".join(self.fields)]
-        for network in nlist:
+        for network in sorted(nlist, key=attrgetter("ip")):
             details.append(indent + str("\t".join([network.name,
                                                    str(network.ip),
                                                    str(network.netmask),

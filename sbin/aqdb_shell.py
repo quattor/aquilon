@@ -18,6 +18,7 @@
 
 import os
 import sys
+import logging
 
 # -- begin path_setup --
 import ms.version
@@ -44,10 +45,6 @@ from aquilon.aqdb.db_factory import DbFactory
 # Make all classes from the model available inside the shell
 from aquilon.aqdb.model import *  # pylint: disable=W0401,W0614
 
-db = DbFactory()
-Base.metadata.bind = db.engine
-session = s = db.Session()
-
 _banner = '<<<Welcome to the Aquilon shell (courtesy of IPython). Ctrl-D to quit>>>\n'
 
 
@@ -55,12 +52,25 @@ def main():
     parser = argparse.ArgumentParser(
         description='An ipython shell, useful for testing and exploring aqdb')
 
-    parser.add_argument('-v', action='count', dest='verbose',
-                        help='increase verbosity by adding more (-vv), etc.')
+    parser.add_argument('-v', action='store_true', dest='verbose',
+                        help='show queries')
     opts = parser.parse_args()
 
-    if opts.verbose >= 1:
-        db.engine.echo = True
+    db = DbFactory(verbose=opts.verbose)
+    Base.metadata.bind = db.engine
+    session = s = db.Session()
+
+    rootlogger = logging.getLogger('aquilon.aqdb')
+    if opts.verbose:
+        rootlogger.setLevel(logging.INFO)
+    elif rootlogger.level == logging.NOTSET:
+        rootlogger.setLevel(logging.WARN)
+
+    if not rootlogger.handlers:
+        handler = logging.StreamHandler(sys.stdout)
+        handler.setFormatter(logging.Formatter(
+            '%(asctime)s %(levelname)s %(name)s %(message)s'))
+        rootlogger.addHandler(handler)
 
     if db.engine.dialect.name == 'sqlite':
         prompt = str(db.engine.url).split('///')[1]

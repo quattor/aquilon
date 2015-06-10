@@ -35,8 +35,8 @@ class CommandAddDisk(BrokerCommand):
                snapshot, wwn, bus_address, iops_limit, **kw):
         if controller not in controller_types:
             raise ArgumentError("%s is not a valid controller type, use one "
-                                "of: %s." % (controller,
-                                             ", ".join(controller_types)))
+                                "of: %s." %
+                                (controller, ", ".join(sorted(controller_types))))
 
         dbmachine = Machine.get_unique(session, machine, compel=True)
         for dbdisk in dbmachine.disks:

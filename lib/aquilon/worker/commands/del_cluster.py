@@ -29,16 +29,18 @@ def del_cluster(session, logger, dbcluster, config):
     check_no_provided_service(dbcluster)
 
     if dbcluster.virtual_machines:
-        machines = ", ".join(m.label for m in dbcluster.virtual_machines)
+        machines = ", ".join(sorted(m.label for m in
+                                    dbcluster.virtual_machines))
         raise ArgumentError("%s is still in use by virtual machines: %s." %
                             (format(dbcluster), machines))
 
     if hasattr(dbcluster, 'members') and dbcluster.members:
         raise ArgumentError("%s is still in use by clusters: %s." %
                             (format(dbcluster),
-                             ", ".join(c.name for c in dbcluster.members)))
+                             ", ".join(sorted(c.name for c in
+                                              dbcluster.members))))
     elif dbcluster.hosts:
-        hosts = ", ".join(h.fqdn for h in dbcluster.hosts)
+        hosts = ", ".join(sorted(h.fqdn for h in dbcluster.hosts))
         raise ArgumentError("%s is still in use by hosts: %s." %
                             (format(dbcluster), hosts))
 
