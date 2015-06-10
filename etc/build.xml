@@ -161,7 +161,7 @@
 			-->
 			<fileset dir="${compiled.profiles}" includes="**/*">
 				<scriptselector language="javascript"> <![CDATA[
-					importClass(java.io.File);
+					var File = java.io.File;
 					// importClass(java.lang.System);
 
 					var thisfile = self.getFile().getPath();
