@@ -238,6 +238,15 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
                         "--interface", "eth0", "--label", "ip2"])
         self.dsdb_verify()
 
+        # There's just one pg, so this should fail
+        command = ["add_interface", "--machine", "utpgm0",
+                   "--interface", "eth1", "--automac", "--autopg"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "No available user port groups on virtual switch "
+                         "utvswitch.",
+                         command)
+
         # Now it should succeed
         self.noouttest(["add", "interface", "--machine", "utpgm1",
                         "--interface", "eth0", "--automac", "--autopg"])

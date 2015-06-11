@@ -319,7 +319,12 @@ def set_port_group_vm(session, logger, dbinterface, port_group_name):
         # Protect agains concurrent invocations
         Network.lock_rows(pg.network for pg in allocator.port_groups)
 
-        for pg in sorted(allocator.port_groups, key=attrgetter('network_tag')):
+        used_pgs = set(iface.port_group for iface in dbmachine.interfaces
+                       if iface.port_group)
+        usable_pgs = set(allocator.port_groups)
+        usable_pgs -= used_pgs
+
+        for pg in sorted(usable_pgs, key=attrgetter('network_tag')):
             if pg.usage != port_group_name:
                 continue
             net = pg.network
