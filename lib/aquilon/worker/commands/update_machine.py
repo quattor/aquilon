@@ -61,21 +61,66 @@ def parse_remap_disk(old_vmholder, new_vmholder, remap_disk):
     return result
 
 
+def get_metacluster(holder):
+    if hasattr(holder, "metacluster"):
+        return holder.metacluster
+
+    # vmhost
+    if hasattr(holder, "cluster") and holder.cluster:
+        return holder.cluster.metacluster
+    else:
+        # TODO vlocal still has clusters, so this case not tested yet.
+        return None
+
+
+def update_disk_backing_stores(dbmachine, old_holder, new_holder, remap_disk):
+    disk_mapping = parse_remap_disk(old_holder, new_holder, remap_disk)
+
+    for dbdisk in dbmachine.disks:
+        old_bstore = dbdisk.backing_store
+        if isinstance(old_bstore.holder, BundleResource):
+            resourcegroup = old_bstore.holder.resourcegroup.name
+        else:
+            resourcegroup = None
+
+        if old_bstore in disk_mapping:
+            new_bstore = disk_mapping[old_bstore]
+        else:
+            new_bstore = find_resource(old_bstore.__class__, new_holder,
+                                       resourcegroup, old_bstore.name,
+                                       error=ArgumentError)
+        dbdisk.backing_store = new_bstore
+
+
+def move_vm(session, logger, dbmachine, resholder, remap_disk,
+            allow_metacluster_change, plenaries):
+    old_holder = dbmachine.vm_container.holder.holder_object
+    new_holder = resholder.holder_object
+
+    old_mc = get_metacluster(old_holder)
+    new_mc = get_metacluster(new_holder)
+    if old_mc != new_mc and not allow_metacluster_change:
+        raise ArgumentError("Moving VMs between metaclusters is "
+                            "disabled by default.  Use the "
+                            "--allow_metacluster_change option to "
+                            "override.")
+
+    plenaries.append(Plenary.get_plenary(old_holder))
+    plenaries.append(Plenary.get_plenary(new_holder))
+
+    dbmachine.vm_container.holder = resholder
+
+    update_disk_backing_stores(dbmachine, old_holder, new_holder, remap_disk)
+
+    if hasattr(new_holder, 'location_constraint'):
+        dbmachine.location = new_holder.location_constraint
+    else:
+        dbmachine.location = new_holder.hardware_entity.location
+
+
 class CommandUpdateMachine(BrokerCommand):
 
     required_parameters = ["machine"]
-
-    # handles clusters and hosts
-    def get_metacluster(self, holder):
-        if hasattr(holder, "metacluster"):
-            return holder.metacluster
-
-        # vmhost
-        if hasattr(holder, "cluster") and holder.cluster:
-            return holder.cluster.metacluster
-        else:
-            # TODO vlocal still has clusters, so this case not tested yet.
-            return None
 
     def render(self, session, logger, machine, model, vendor, serial,
                chassis, slot, clearchassis, multislot,
@@ -203,47 +248,13 @@ class CommandUpdateMachine(BrokerCommand):
                 raise ArgumentError("Cannot convert a physical machine to "
                                     "virtual.")
 
-            old_holder = dbmachine.vm_container.holder.holder_object
             resholder = get_resource_holder(session, logger, hostname=vmhost,
                                             cluster=cluster,
                                             metacluster=metacluster,
                                             compel=False)
-            new_holder = resholder.holder_object
 
-            old_mc = self.get_metacluster(old_holder)
-            new_mc = self.get_metacluster(new_holder)
-            if old_mc != new_mc and not allow_metacluster_change:
-                raise ArgumentError("Moving VMs between metaclusters is "
-                                    "disabled by default.  Use the "
-                                    "--allow_metacluster_change option to "
-                                    "override.")
-
-            plenaries.append(Plenary.get_plenary(old_holder))
-            plenaries.append(Plenary.get_plenary(new_holder))
-
-            dbmachine.vm_container.holder = resholder
-
-            disk_mapping = parse_remap_disk(old_holder, new_holder, remap_disk)
-
-            for dbdisk in dbmachine.disks:
-                old_bstore = dbdisk.backing_store
-                if isinstance(old_bstore.holder, BundleResource):
-                    resourcegroup = old_bstore.holder.resourcegroup.name
-                else:
-                    resourcegroup = None
-
-                if old_bstore in disk_mapping:
-                    new_bstore = disk_mapping[old_bstore]
-                else:
-                    new_bstore = find_resource(old_bstore.__class__, new_holder,
-                                               resourcegroup, old_bstore.name,
-                                               error=ArgumentError)
-                dbdisk.backing_store = new_bstore
-
-            if hasattr(new_holder, 'location_constraint'):
-                dbmachine.location = new_holder.location_constraint
-            else:
-                dbmachine.location = new_holder.hardware_entity.location
+            move_vm(session, logger, dbmachine, resholder, remap_disk,
+                    allow_metacluster_change, plenaries)
 
         if dbmachine.location != old_location and dbmachine.host:
             for vm in dbmachine.host.virtual_machines:
