@@ -14,34 +14,35 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+"""Contains the logic for `aq add intervention`."""
 
 from dateutil.parser import parse
 from datetime import datetime
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Intervention
-from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.dbwrappers.resources import (add_resource,
-                                                 get_resource_holder)
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.commands.add_resource import CommandAddResource
 
 
-class CommandAddIntervention(BrokerCommand):
+class CommandAddIntervention(CommandAddResource):
 
     required_parameters = ["expiry", "intervention", "justification"]
+    resource_class = Intervention
+    resource_name = "intervention"
 
-    def render(self, session, logger, intervention, expiry, start_time,
-               allowusers, allowgroups, disabled_actions,
-               comments, justification, hostname, cluster, metacluster,
-               **arguments):
-
+    def add_resource(self, session, logger, intervention, expiry, start_time,
+                     allowusers, allowgroups, disabled_actions, comments,
+                     justification, **kwargs):
         try:
             expire_when = parse(expiry)
         except (ValueError, TypeError) as err:
             raise ArgumentError("The expiry value '%s' could not be "
                                 "interpreted: %s" % (expiry, err))
 
+        now = datetime.utcnow().replace(microsecond=0)
         if start_time is None:
-            start_when = datetime.utcnow().replace(microsecond=0)
+            start_when = now
         else:
             try:
                 start_when = parse(start_time)
@@ -52,19 +53,12 @@ class CommandAddIntervention(BrokerCommand):
         if start_when > expire_when:
             raise ArgumentError("The start time is later than the expiry time.")
 
-        holder = get_resource_holder(session, logger, hostname, cluster,
-                                     metacluster, compel=False)
+        if start_when < now or expire_when < now:
+            raise ArgumentError("The start time or expiry time are in the past.")
 
-        Intervention.get_unique(session, name=intervention, holder=holder,
-                                preclude=True)
-
-        dbiv = Intervention(name=intervention,
-                            expiry_date=expire_when,
-                            start_date=start_when,
-                            users=allowusers,
-                            groups=allowgroups,
-                            disabled=disabled_actions,
-                            comments=comments,
-                            justification=justification)
-
-        return add_resource(session, logger, holder, dbiv)
+        dbiv = self.resource_class(name=intervention, expiry_date=expire_when,
+                                   start_date=start_when, users=allowusers,
+                                   groups=allowgroups,
+                                   disabled=disabled_actions, comments=comments,
+                                   justification=justification)
+        return dbiv

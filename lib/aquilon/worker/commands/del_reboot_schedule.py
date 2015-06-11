@@ -15,20 +15,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 from aquilon.aqdb.model import RebootSchedule
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.dbwrappers.resources import (del_resource,
-                                                 get_resource_holder)
+from aquilon.worker.commands.del_resource import CommandDelResource
 
 
-class CommandDelRebootSchedule(BrokerCommand):
+class CommandDelRebootSchedule(CommandDelResource):
 
-    def render(self, session, logger, hostname, cluster, **arguments):
-        reboot_schedule = "reboot_schedule"
+    resource_class = RebootSchedule
 
-        holder = get_resource_holder(session, logger, hostname, cluster)
-        res = RebootSchedule.get_unique(session, name=reboot_schedule,
-                                        holder=holder, compel=True)
-
-        return del_resource(session, logger, res)
+    def render(self, **kwargs):
+        return super(CommandDelRebootSchedule, self).render(metacluster=None,
+                                                            **kwargs)

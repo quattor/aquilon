@@ -50,6 +50,7 @@ class CommandDelPersonalityPersonalityStage(BrokerCommand):
         del dbpersonality.stages[personality_stage]
 
         session.flush()
-        plenaries.remove()
+
+        plenaries.write()
 
         return

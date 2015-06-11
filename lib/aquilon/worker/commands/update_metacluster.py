@@ -40,6 +40,6 @@ class CommandUpdateMetaCluster(CommandUpdateCluster):
         session.flush()
         dbmetacluster.validate()
 
-        plenaries.write(locked=False)
+        plenaries.write()
 
         return

@@ -14,6 +14,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+"""Contains the logic for `aq add service address`."""
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import ServiceAddress, Host
@@ -21,18 +22,9 @@ from aquilon.utils import validate_nlist_key
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.dns import grab_address
 from aquilon.worker.dbwrappers.interface import get_interfaces
-from aquilon.worker.dbwrappers.resources import (add_resource,
-                                                 get_resource_holder)
+from aquilon.worker.dbwrappers.resources import get_resource_holder
 from aquilon.worker.processes import DSDBRunner
-
-
-def add_srv_dsdb_callback(dbsrv, dsdb_runner=None, newly_created=None,
-                          comments=None):
-    if not newly_created:
-        dsdb_runner.delete_host_details(dbsrv.dns_record, dbsrv.ip)
-
-    dsdb_runner.add_host_details(dbsrv.dns_record, dbsrv.ip, comments=comments)
-    dsdb_runner.commit_or_rollback("Could not add host to DSDB")
+from aquilon.worker.templates import Plenary, PlenaryCollection
 
 
 class CommandAddServiceAddress(BrokerCommand):
@@ -92,9 +84,18 @@ class CommandAddServiceAddress(BrokerCommand):
             if dbifaces:
                 dbsrv.interfaces = dbifaces
 
-        add_resource(session, logger, holder, dbsrv,
-                     dsdb_callback=add_srv_dsdb_callback,
-                     dsdb_runner=dsdb_runner,
-                     newly_created=newly_created, comments=comments)
+        session.flush()
+
+        plenaries = PlenaryCollection(logger=logger)
+
+        plenaries.append(Plenary.get_plenary(holder.holder_object))
+        plenaries.append(Plenary.get_plenary(dbsrv))
+
+        with plenaries.transaction():
+            if not newly_created:
+                dsdb_runner.delete_host_details(dbsrv.dns_record, dbsrv.ip)
+
+            dsdb_runner.add_host_details(dbsrv.dns_record, dbsrv.ip, comments=comments)
+            dsdb_runner.commit_or_rollback("Could not add host to DSDB")
 
         return

@@ -21,9 +21,8 @@ from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.dns import delete_dns_record
 from aquilon.worker.dbwrappers.hardware_entity import check_only_primary_ip
 from aquilon.worker.dbwrappers.host import remove_host
-from aquilon.worker.locks import CompileKey
 from aquilon.worker.processes import DSDBRunner
-from aquilon.worker.templates.base import Plenary, PlenaryCollection
+from aquilon.worker.templates import Plenary, PlenaryCollection
 from aquilon.worker.templates.switchdata import PlenarySwitchData
 
 
@@ -39,15 +38,14 @@ class CommandDelNetworkDevice(BrokerCommand):
         oldinfo = DSDBRunner.snapshot_hw(dbnetdev)
 
         plenaries = PlenaryCollection(logger=logger)
-        remove_plenaries = PlenaryCollection(logger=logger)
 
         # Update cluster plenaries connected to this network device
         plenaries.extend(map(Plenary.get_plenary, dbnetdev.esx_clusters))
 
-        remove_plenaries.append(PlenarySwitchData.get_plenary(dbnetdev))
-        remove_plenaries.append(Plenary.get_plenary(dbnetdev))
+        plenaries.append(PlenarySwitchData.get_plenary(dbnetdev, logger=logger))
+        plenaries.append(Plenary.get_plenary(dbnetdev, logger=logger))
 
-        remove_host(logger, dbnetdev, plenaries, remove_plenaries)
+        remove_host(logger, dbnetdev, plenaries)
 
         dbdns_rec = dbnetdev.primary_name
         session.delete(dbnetdev)
@@ -59,21 +57,9 @@ class CommandDelNetworkDevice(BrokerCommand):
         # Any network device ports hanging off this network device should be deleted with
         # the cascade delete of the network device.
 
-        with CompileKey.merge([plenaries.get_key(),
-                               remove_plenaries.get_key()]):
-            plenaries.stash()
-            remove_plenaries.stash()
-
-            try:
-                plenaries.write(locked=True)
-                remove_plenaries.remove(locked=True)
-
-                dsdb_runner = DSDBRunner(logger=logger)
-                dsdb_runner.update_host(None, oldinfo)
-                dsdb_runner.commit_or_rollback("Could not remove network device "
-                                               "from DSDB")
-            except:
-                plenaries.restore_stash()
-                remove_plenaries.restore_stash()
-                raise
+        with plenaries.transaction():
+            dsdb_runner = DSDBRunner(logger=logger)
+            dsdb_runner.update_host(None, oldinfo)
+            dsdb_runner.commit_or_rollback("Could not remove network device "
+                                           "from DSDB")
         return

@@ -165,7 +165,7 @@ class CommandUpdateCluster(BrokerCommand):
         session.flush()
         dbcluster.validate()
 
-        plenaries.write(locked=False)
+        plenaries.write()
 
         return
 

@@ -17,8 +17,8 @@
 """Contains the logic for `aq del disk`."""
 
 from aquilon.aqdb.model import Disk, Machine
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.templates.base import Plenary, PlenaryCollection
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.templates import Plenary, PlenaryCollection
 
 
 class CommandDelDisk(BrokerCommand):
@@ -27,6 +27,13 @@ class CommandDelDisk(BrokerCommand):
 
     def render(self, session, logger, machine, disk, all, **arguments):
         dbmachine = Machine.get_unique(session, machine, compel=True)
+
+        plenaries = PlenaryCollection(logger=logger)
+        plenaries.append(Plenary.get_plenary(dbmachine))
+        dbcontainer = dbmachine.vm_container
+        if dbcontainer:
+            plenaries.append(Plenary.get_plenary(dbcontainer, logger=logger))
+
         if disk:
             dbdisk = Disk.get_unique(session, machine=dbmachine,
                                      device_name=disk, compel=True)
@@ -35,12 +42,6 @@ class CommandDelDisk(BrokerCommand):
             del dbmachine.disks[:]
 
         session.flush()
-
-        plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(Plenary.get_plenary(dbmachine))
-        dbcontainer = dbmachine.vm_container
-        if dbcontainer:
-            plenaries.append(Plenary.get_plenary(dbcontainer, logger=logger))
 
         plenaries.write()
 

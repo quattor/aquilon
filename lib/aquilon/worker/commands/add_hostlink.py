@@ -14,30 +14,21 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+"""Contains the logic for `aq add hostlink`."""
 
 from aquilon.aqdb.model import Hostlink
-from aquilon.utils import validate_nlist_key
-from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.dbwrappers.resources import (add_resource,
-                                                 get_resource_holder)
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.commands.add_resource import CommandAddResource
 
 
-class CommandAddHostlink(BrokerCommand):
+class CommandAddHostlink(CommandAddResource):
 
     required_parameters = ["hostlink", "target", "owner"]
+    resource_class = Hostlink
+    resource_name = "hostlink"
 
-    def render(self, session, logger, hostlink, target, owner,
-               group, hostname, cluster, metacluster, resourcegroup,
-               comments, **arguments):
-
-        validate_nlist_key("hostlink", hostlink)
-        holder = get_resource_holder(session, logger, hostname, cluster,
-                                     metacluster, resourcegroup, compel=False)
-
-        Hostlink.get_unique(session, name=hostlink, holder=holder,
-                            preclude=True)
-
-        dbhl = Hostlink(name=hostlink, comments=comments, target=target,
-                        owner_user=owner, owner_group=group)
-        return add_resource(session, logger, holder, dbhl)
+    def add_resource(self, session, logger, hostlink, target, owner, group,
+                     comments, **kwargs):
+        dbhl = Hostlink(name=hostlink, target=target, owner_user=owner,
+                        owner_group=group, comments=comments)
+        return dbhl

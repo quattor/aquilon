@@ -14,21 +14,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+"""Contains the logic for `aq show application`."""
 
 from aquilon.aqdb.model import Application
-from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.commands.show_resource import show_resource
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.commands.show_resource import CommandShowResource
 
 
-class CommandShowApplication(BrokerCommand):
+class CommandShowApplication(CommandShowResource):
 
-    required_parameters = []
-
-    def render(self, session, logger, hostname, cluster, metacluster,
-               resourcegroup, all, application, eonid, **arguments):
-
-        # if eonid:
-        #     q = q.filter_by(eonid=eonid)
-
-        return show_resource(session, logger, hostname, cluster, metacluster,
-                             resourcegroup, all, application, Application)
+    resource_class = Application
+    resource_name = "application"

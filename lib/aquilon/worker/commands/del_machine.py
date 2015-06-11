@@ -17,10 +17,9 @@
 """Contains the logic for `aq del machine`."""
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.locks import CompileKey
-from aquilon.worker.templates.base import Plenary, PlenaryCollection
 from aquilon.aqdb.model import Machine
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.templates import Plenary, PlenaryCollection
 from aquilon.worker.dbwrappers.hardware_entity import check_only_primary_ip
 
 
@@ -32,11 +31,10 @@ class CommandDelMachine(BrokerCommand):
         dbmachine = Machine.get_unique(session, machine, compel=True)
 
         plenaries = PlenaryCollection(logger=logger)
-        remove_plenaries = PlenaryCollection(logger=logger)
+        plenaries.append(Plenary.get_plenary(dbmachine))
 
-        remove_plenaries.append(Plenary.get_plenary(dbmachine))
         if dbmachine.vm_container:
-            remove_plenaries.append(Plenary.get_plenary(dbmachine.vm_container))
+            plenaries.append(Plenary.get_plenary(dbmachine.vm_container))
             holder = dbmachine.vm_container.holder.holder_object
             plenaries.append(Plenary.get_plenary(holder))
 
@@ -48,15 +46,5 @@ class CommandDelMachine(BrokerCommand):
         session.delete(dbmachine)
         session.flush()
 
-        with CompileKey.merge([remove_plenaries.get_key(),
-                               plenaries.get_key()]):
-            plenaries.stash()
-            remove_plenaries.stash()
-            try:
-                plenaries.write(locked=True)
-                remove_plenaries.remove(locked=True)
-            except:
-                remove_plenaries.restore_stash()
-                plenaries.restore_stash()
-                raise
+        plenaries.write()
         return

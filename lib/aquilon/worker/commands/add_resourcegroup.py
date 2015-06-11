@@ -14,36 +14,32 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+"""Contains the logic for `aq add resourcegroup`."""
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import ResourceGroup, Resource
-from aquilon.utils import validate_nlist_key
-from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.dbwrappers.resources import (add_resource,
-                                                 get_resource_holder)
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.commands.add_resource import CommandAddResource
 
 
-class CommandAddResourceGroup(BrokerCommand):
+class CommandAddResourceGroup(CommandAddResource):
 
     required_parameters = ["resourcegroup"]
+    resource_class = ResourceGroup
+    resource_name = "resourcegroup"
 
-    def render(self, session, logger, resourcegroup, required_type,
-               hostname, cluster, metacluster, **arguments):
-
-        validate_nlist_key("resourcegroup", resourcegroup)
-
+    def add_resource(self, session, logger, resourcegroup, required_type,
+                     comments, **kwargs):
         if required_type is not None:
-            Resource.polymorphic_subclass(required_type,
-                                          "Unknown resource type")
-            if required_type == "resourcegroup":
+            rqtype = Resource.polymorphic_subclass(required_type,
+                                                   "Unknown resource type")
+            # Normalize the value
+            required_type = rqtype.__mapper__.polymorphic_identity
+
+            if rqtype == ResourceGroup:
                 raise ArgumentError("A resourcegroup can't hold other "
                                     "resourcegroups.")
 
-        holder = get_resource_holder(session, logger, hostname, cluster,
-                                     metacluster, compel=False)
-
-        ResourceGroup.get_unique(session, name=resourcegroup, holder=holder,
-                                 preclude=True)
-
-        dbrg = ResourceGroup(name=resourcegroup, required_type=required_type)
-        return add_resource(session, logger, holder, dbrg)
+        dbrg = ResourceGroup(name=resourcegroup, required_type=required_type,
+                             comments=comments)
+        return dbrg

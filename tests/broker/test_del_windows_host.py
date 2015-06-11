@@ -41,6 +41,7 @@ class TestDelWindowsHost(TestBrokerCommand):
         (out, err) = self.successtest(command.split(" "))
         self.assertEmptyOut(out, command)
         self.dsdb_verify()
+        self.check_plenary_gone("hostdata", "unittest01.one-nyp.ms.com")
 
     def testverifydelunittest01(self):
         command = "show host --hostname unittest01.one-nyp.ms.com"

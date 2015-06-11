@@ -17,24 +17,45 @@
 
 from sqlalchemy.orm.attributes import set_committed_value
 
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.resources import get_resource_holder
 
 
-def show_resource(session, logger, hostname, cluster, metacluster,
-                  resourcegroup, all, name, resource_class):
-    q = session.query(resource_class)
-    if name:
-        q = q.filter_by(name=name)
-    if hostname or cluster or resourcegroup:
-        who = get_resource_holder(session, logger, hostname, cluster,
-                                  metacluster, resourcegroup)
-        q = q.filter_by(holder=who)
-    else:
-        who = None
+class CommandShowResource(BrokerCommand):
 
-    results = q.all()
-    if who:
-        for dbresource in results:
-            set_committed_value(dbresource, 'holder', who)
+    resource_class = None
+    resource_name = None
 
-    return results
+    def render(self, session, logger, hostname, cluster, metacluster, all,
+               **kwargs):
+        # resourcegroup is special, because it's both a holder and a resource
+        # itself
+        if self.resource_name != "resourcegroup":
+            resourcegroup = kwargs.pop("resourcegroup", None)
+        else:
+            resourcegroup = None
+
+        q = session.query(self.resource_class)
+
+        if not all:
+            if self.resource_name:
+                name = kwargs.get(self.resource_name)
+            else:
+                name = self.resource_class.__mapper__.polymorphic_identity
+
+            if name:
+                q = q.filter_by(name=name)
+
+        if hostname or cluster or resourcegroup:
+            who = get_resource_holder(session, logger, hostname, cluster,
+                                      metacluster, resourcegroup)
+            q = q.filter_by(holder=who)
+        else:
+            who = None
+
+        results = q.all()
+        if who:
+            for dbresource in results:
+                set_committed_value(dbresource, 'holder', who)
+
+        return results

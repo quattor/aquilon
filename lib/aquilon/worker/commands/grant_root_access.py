@@ -18,7 +18,7 @@
 
 from aquilon.aqdb.model import Personality, User, NetGroupWhiteList
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.templates.personality import Plenary, PlenaryCollection
+from aquilon.worker.templates import Plenary, PlenaryCollection
 from aquilon.worker.commands.deploy import validate_justification
 
 
@@ -35,7 +35,6 @@ class CommandGrantRootAccess(BrokerCommand):
 
     def render(self, session, logger, username, netgroup, personality,
                archetype, justification, user, reason, **arguments):
-
         validate_justification(user, justification, reason)
         dbobj = Personality.get_unique(session, name=personality,
                                        archetype=archetype, compel=True)
@@ -53,7 +52,6 @@ class CommandGrantRootAccess(BrokerCommand):
 
         plenaries = PlenaryCollection(logger=logger)
         plenaries.extend(map(Plenary.get_plenary, dbobj.stages.values()))
-
         plenaries.write()
 
         return

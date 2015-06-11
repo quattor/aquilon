@@ -119,11 +119,28 @@ class TestCluster(TestBrokerCommand):
                    "--personality=esx_server", "--archetype=vmhost",
                    "--osname", "esxi", "--osversion", "5.0.0",
                    "--buildstatus=build"]
-        (out, err) = self.successtest(command)
-        self.matchoutput(err,
-                         "Warning: Personality vmhost/esx_server requires "
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Personality vmhost/esx_server requires "
                          "cluster membership, please run 'aq cluster'.",
                          command)
+
+        # Now we have a problem - vmhosts do not compile without a cluster,
+        # which is a bug, but it means we cannot just switch the archetype. We
+        # need to delete & re-add the host instead. Sigh...
+        self.dsdb_expect_delete(self.net["hp_eth0"].usable[11])
+        self.statustest(["del_host", "--hostname", "aquilon61.aqd-unittest.ms.com"])
+        self.dsdb_expect_add("aquilon61.aqd-unittest.ms.com",
+                             self.net["hp_eth0"].usable[11], "eth0",
+                             self.net["hp_eth0"].usable[11].mac)
+        self.noouttest(["add_host", "--hostname", "aquilon61.aqd-unittest.ms.com",
+                        "--archetype", "vmhost", "--personality", "esx_server",
+                        "--osname", "esxi", "--osversion", "5.0.0",
+                        "--machine", "ut9s03p11",
+                        "--sandbox", "%s/utsandbox" % self.user,
+                        "--ip", self.net["hp_eth0"].usable[11]])
+        self.dsdb_verify()
+
         command = ["cluster", "--cluster=utecl1",
                    "--personality=vulcan-10g-server-prod",
                    "--hostname=aquilon61.aqd-unittest.ms.com"]

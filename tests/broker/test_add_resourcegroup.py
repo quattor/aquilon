@@ -29,32 +29,34 @@ class TestAddResourceGroup(TestBrokerCommand):
 
     def test_100_add_rg_to_cluster(self):
         command = ["add_resourcegroup", "--resourcegroup=utvcs1as1",
-                   "--cluster=utvcs1"]
+                   "--cluster=utvcs1",
+                   "--comment", "Some resourcegroup comments"]
         self.successtest(command)
 
-    def test_110_show_resourcegroup(self):
+    def test_105_show_resourcegroup(self):
         command = ["show_resourcegroup", "--cluster=utvcs1"]
         out = self.commandtest(command)
         self.matchoutput(out, "Resource Group: utvcs1as1", command)
         self.matchoutput(out,
                          "Bound to: High Availability Cluster utvcs1",
                          command)
+        self.matchoutput(out, "Comments: Some resourcegroup comments", command)
+        self.matchclean(out, "Type:", command)
 
-    def test_110_show_all(self):
+    def test_105_show_all(self):
         command = ["show_resourcegroup", "--all"]
         out = self.commandtest(command)
         self.matchoutput(out, "Resource Group: utvcs1as1", command)
 
-    def test_120_add_fs_to_rg(self):
+    def test_110_add_fs_to_rg(self):
         command = ["add_filesystem", "--filesystem=fs1", "--type=ext3",
                    "--mountpoint=/mnt", "--blockdevice=/dev/foo/bar",
                    "--bootmount",
                    "--dumpfreq=1", "--fsckpass=3", "--options=ro",
-                   "--comments=Some resourcegroup comments",
                    "--resourcegroup=utvcs1as1", "--cluster=utvcs1"]
         self.successtest(command)
 
-    def test_130_show_filesystem(self):
+    def test_115_show_filesystem(self):
         command = ["show_filesystem", "--filesystem=fs1"]
         out = self.commandtest(command)
         self.matchoutput(out, "Filesystem: fs1", command)
@@ -65,14 +67,13 @@ class TestAddResourceGroup(TestBrokerCommand):
         self.matchoutput(out, "Mountpoint: /mnt", command)
         self.matchoutput(out, "Dump Freq: 1", command)
         self.matchoutput(out, "Fsck Pass: 3", command)
-        self.matchoutput(out, "Comments: Some resourcegroup comments", command)
 
-    def test_130_show_resourcegroup(self):
+    def test_115_show_resourcegroup(self):
         command = ["show", "resourcegroup", "--resourcegroup", "utvcs1as1"]
         out = self.commandtest(command)
         self.matchoutput(out, "Filesystem: fs1", command)
 
-    def test_130_cat_cluster(self):
+    def test_115_cat_cluster(self):
         command = ["cat", "--cluster", "utvcs1", "--data"]
         out = self.commandtest(command)
         self.matchoutput(out,
@@ -80,7 +81,7 @@ class TestAddResourceGroup(TestBrokerCommand):
                          'append(create("resource/cluster/utvcs1/resourcegroup/utvcs1as1/config"));',
                          command)
 
-    def test_130_cat_resourcegroup(self):
+    def test_115_cat_resourcegroup(self):
         command = ["cat", "--resourcegroup", "utvcs1as1", "--cluster", "utvcs1"]
         out = self.commandtest(command)
         self.matchoutput(out,
@@ -88,7 +89,7 @@ class TestAddResourceGroup(TestBrokerCommand):
                          'append(create("resource/cluster/utvcs1/resourcegroup/utvcs1as1/filesystem/fs1/config"));',
                          command)
 
-    def test_130_cat_resourcegroup_generate(self):
+    def test_115_cat_resourcegroup_generate(self):
         command = ["cat", "--resourcegroup", "utvcs1as1", "--cluster", "utvcs1",
                    "--generate"]
         out = self.commandtest(command)
@@ -97,7 +98,7 @@ class TestAddResourceGroup(TestBrokerCommand):
                          'append(create("resource/cluster/utvcs1/resourcegroup/utvcs1as1/filesystem/fs1/config"));',
                          command)
 
-    def test_130_cat_filesystem(self):
+    def test_115_cat_filesystem(self):
         command = ["cat", "--cluster", "utvcs1", "--resourcegroup", "utvcs1as1",
                    "--filesystem", "fs1"]
         out = self.commandtest(command)
@@ -106,13 +107,13 @@ class TestAddResourceGroup(TestBrokerCommand):
                          command)
         self.matchoutput(out, '"block_device_path" = "/dev/foo/bar";', command)
 
-    def test_130_show_cluster(self):
+    def test_115_show_cluster(self):
         command = ["show", "cluster", "--cluster", "utvcs1"]
         out = self.commandtest(command)
         self.matchoutput(out, "    Resource Group: utvcs1", command)
         self.matchoutput(out, "      Filesystem: fs1", command)
 
-    def test_130_show_cluster_proto(self):
+    def test_115_show_cluster_proto(self):
         command = ["show", "cluster", "--cluster", "utvcs1", "--format", "proto"]
         cluster = self.protobuftest(command, expect=1)[0]
         rg_msg = None
@@ -142,6 +143,45 @@ class TestAddResourceGroup(TestBrokerCommand):
                         ", ".join("%s %s" % (res.type, res.name)
                                   for res in rg_msg.resourcegroup.resources))
 
+    def test_120_update_rg(self):
+        self.noouttest(["update_resourcegroup", "--cluster", "utvcs1",
+                        "--resourcegroup", "utvcs1as1",
+                        "--comments", "New resourcegroup comments",
+                        "--required_type", "FiLeSyStEm"])
+
+    def test_125_verify_update(self):
+        command = ["show_resourcegroup", "--cluster=utvcs1"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Resource Group: utvcs1as1", command)
+        self.matchoutput(out,
+                         "Bound to: High Availability Cluster utvcs1",
+                         command)
+        self.matchoutput(out, "Comments: New resourcegroup comments", command)
+        self.matchoutput(out, "Type: filesystem", command)
+
+    def test_126_type_mismatch(self):
+        command = ["add_application", "--cluster", "utvcs1",
+                   "--resourcegroup", "utvcs1as1",
+                   "--application", "testapp", "--eon_id", 2]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Resource Group utvcs1as1 may contain resources "
+                         "of type filesystem only.", command)
+
+    def test_130_reset_data(self):
+        self.noouttest(["update_resourcegroup", "--cluster", "utvcs1",
+                        "--resourcegroup", "utvcs1as1",
+                        "--comments", "", "--required_type", ""])
+
+    def test_135_verify_reset(self):
+        command = ["show_resourcegroup", "--cluster=utvcs1"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Resource Group: utvcs1as1", command)
+        self.matchoutput(out,
+                         "Bound to: High Availability Cluster utvcs1",
+                         command)
+        self.matchclean(out, "Comments:", command)
+        self.searchclean(out, r"^\s*Type:", command)
+
     def test_140_add_empty(self):
         # Add an empty resourcegroup, that won't have any resources in it
         command = ["add_resourcegroup", "--resourcegroup", "empty",
@@ -156,14 +196,14 @@ class TestAddResourceGroup(TestBrokerCommand):
         self.successtest(command)
 
     def test_200_add_bad_type(self):
-        command = ["add_resourcegroup", "--resourcegroup=utvcs1as1",
-                   "--cluster=utvcs1", "--required_type=non-existent-type"]
+        command = ["add_resourcegroup", "--resourcegroup=utvcs1as2",
+                   "--cluster=utvcs1", "--required_type=no-such-resource-type"]
         err = self.badrequesttest(command)
-        self.matchoutput(err, "Unknown resource type 'non-existent-type'.",
+        self.matchoutput(err, "Unknown resource type 'no-such-resource-type'.",
                          command)
 
     def test_200_stacked_resourcegroup(self):
-        command = ["add_resourcegroup", "--resourcegroup=utvcs1as1",
+        command = ["add_resourcegroup", "--resourcegroup=utvcs1as2",
                    "--cluster=utvcs1", "--required_type=resourcegroup"]
         err = self.badrequesttest(command)
         self.matchoutput(err, "Bad Request: A resourcegroup can't hold other "

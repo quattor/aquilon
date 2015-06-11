@@ -14,33 +14,23 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+"""Contains the logic for `aq add filesystem`."""
 
 from aquilon.aqdb.model import Filesystem
-from aquilon.utils import validate_nlist_key
-from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.dbwrappers.resources import (add_resource,
-                                                 get_resource_holder)
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.commands.add_resource import CommandAddResource
 
 
-class CommandAddFilesystem(BrokerCommand):
+class CommandAddFilesystem(CommandAddResource):
 
     required_parameters = ["filesystem", "mountpoint", "blockdevice",
                            "type", "bootmount"]
+    resource_class = Filesystem
+    resource_name = "filesystem"
 
-    def render(self, session, logger, filesystem, type, mountpoint,
-               blockdevice, bootmount,
-               dumpfreq, fsckpass, options,
-               hostname, cluster, metacluster, resourcegroup,
-               comments, **arguments):
-
-        validate_nlist_key("filesystem", filesystem)
-        holder = get_resource_holder(session, logger, hostname, cluster,
-                                     metacluster, resourcegroup, compel=False)
-
-        Filesystem.get_unique(session, name=filesystem, holder=holder,
-                              preclude=True)
-
+    def add_resource(self, session, logger, filesystem, type, mountpoint,
+                     blockdevice, bootmount, dumpfreq, fsckpass, options,
+                     comments, **kwargs):
         if dumpfreq is None:
             dumpfreq = 0
         if fsckpass is None:
@@ -48,14 +38,8 @@ class CommandAddFilesystem(BrokerCommand):
             # we're being extra paranoid...
             fsckpass = 2  # pragma: no cover
 
-        dbfs = Filesystem(name=filesystem,
-                          mountpoint=mountpoint,
-                          mountoptions=options,
-                          mount=bool(bootmount),
-                          blockdev=blockdevice,
-                          fstype=type,
-                          passno=fsckpass,
-                          dumpfreq=dumpfreq,
-                          comments=comments)
-
-        return add_resource(session, logger, holder, dbfs)
+        dbfs = Filesystem(name=filesystem, mountpoint=mountpoint,
+                          mountoptions=options, mount=bool(bootmount),
+                          blockdev=blockdevice, fstype=type, passno=fsckpass,
+                          dumpfreq=dumpfreq, comments=comments)
+        return dbfs

@@ -16,11 +16,10 @@
 # limitations under the License.
 """Contains the logic for `aq del service`."""
 
-
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Service
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.templates import Plenary
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.templates import Plenary, PlenaryCollection
 
 
 class CommandDelService(BrokerCommand):
@@ -44,10 +43,12 @@ class CommandDelService(BrokerCommand):
             raise ArgumentError("Service %s still has instances defined and "
                                 "cannot be deleted." % dbservice.name)
 
+        plenaries = PlenaryCollection(logger=logger)
+        plenaries.append(Plenary.get_plenary(dbservice))
+
         session.delete(dbservice)
         session.flush()
 
-        plenary_info = Plenary.get_plenary(dbservice, logger=logger)
-        plenary_info.remove()
+        plenaries.write()
 
         return

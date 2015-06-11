@@ -153,7 +153,7 @@ class TestNetworkConstraints(TestBrokerCommand):
         command = ["del_interface_address",
                    "--machine", "server9.aqd-unittest.ms.com",
                    "--interface", "eth0", "--label", "bunkertest"]
-        self.noouttest(command)
+        self.statustest(command)
         self.dsdb_verify()
 
     def test_310_network_cleanup(self):

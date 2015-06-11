@@ -24,7 +24,6 @@ from aquilon.worker.dbwrappers.host import hostname_to_host, remove_host
 from aquilon.worker.dbwrappers.dns import delete_dns_record
 from aquilon.worker.processes import DSDBRunner
 from aquilon.worker.templates import (Plenary, PlenaryCollection)
-from aquilon.worker.locks import CompileKey
 
 
 class CommandDelHost(BrokerCommand):
@@ -43,13 +42,12 @@ class CommandDelHost(BrokerCommand):
 
         # Any service bindings that we need to clean up afterwards
         plenaries = PlenaryCollection(logger=logger)
-        remove_plenaries = PlenaryCollection(logger=logger)
 
         oldinfo = None
         if dbhost.archetype.name != 'aurora':
             oldinfo = DSDBRunner.snapshot_hw(dbmachine)
 
-        remove_host(logger, dbmachine, plenaries, remove_plenaries)
+        remove_host(logger, dbmachine, plenaries)
 
         if dbmachine.vm_container:
             plenaries.append(Plenary.get_plenary(dbmachine.vm_container))
@@ -65,27 +63,15 @@ class CommandDelHost(BrokerCommand):
         delete_dns_record(dbdns_rec)
         session.flush()
 
-        with CompileKey.merge([plenaries.get_key(),
-                               remove_plenaries.get_key()]):
-            plenaries.stash()
-            remove_plenaries.stash()
-
-            try:
-                plenaries.write(locked=True)
-                remove_plenaries.remove(locked=True, remove_profile=True)
-
-                if oldinfo:
-                    dsdb_runner = DSDBRunner(logger=logger)
-                    dsdb_runner.update_host(dbmachine, oldinfo)
-                    dsdb_runner.commit_or_rollback("Could not remove host %s from "
-                                                   "DSDB" % hostname)
-                else:
-                    logger.client_info("WARNING: removing host %s from AQDB and "
-                                       "*not* changing DSDB." % hostname)
-            except:
-                plenaries.restore_stash()
-                remove_plenaries.restore_stash()
-                raise
+        with plenaries.transaction():
+            if oldinfo:
+                dsdb_runner = DSDBRunner(logger=logger)
+                dsdb_runner.update_host(dbmachine, oldinfo)
+                dsdb_runner.commit_or_rollback("Could not remove host %s from "
+                                               "DSDB" % hostname)
+            else:
+                logger.client_info("WARNING: removing host %s from AQDB and "
+                                   "*not* changing DSDB." % hostname)
 
         trigger_notifications(self.config, logger, CLIENT_INFO)
 

@@ -34,7 +34,7 @@ class TestAddInterfaceAddress(TestBrokerCommand):
                              primary="unittest20.aqd-unittest.ms.com")
         command = ["add", "interface", "address", "--machine", "ut3c5n2",
                    "--interface", "eth0", "--fqdn", fqdn, "--ip", ip]
-        self.noouttest(command)
+        self.statustest(command)
         self.dsdb_verify()
 
     def testaddunittest20e0again(self):
@@ -110,7 +110,7 @@ class TestAddInterfaceAddress(TestBrokerCommand):
         command = ["add", "interface", "address", "--machine", "ut3c5n2",
                    "--interface", "eth1", "--label", "e1",
                    "--fqdn", fqdn, "--ip", ip, "--nomap_to_primary"]
-        self.noouttest(command)
+        self.statustest(command)
         self.dsdb_verify()
 
     def testrejectprimaryip(self):
@@ -243,7 +243,7 @@ class TestAddInterfaceAddress(TestBrokerCommand):
                    "--interface", "eth1", "--ip", ip,
                    "--fqdn", "unittest25-e1.utcolo.aqd-unittest.ms.com",
                    "--network_environment", "utcolo"]
-        self.noouttest(command)
+        self.statustest(command)
         # External IP addresses should not be added to DSDB
         self.dsdb_verify(empty=True)
 
@@ -261,7 +261,7 @@ class TestAddInterfaceAddress(TestBrokerCommand):
                    "--interface", "eth2", "--ipfromip", net.ip,
                    "--fqdn", "unittest25-e2.utcolo.aqd-unittest.ms.com",
                    "--network_environment", "utcolo"]
-        self.noouttest(command)
+        self.statustest(command)
         # External IP addresses should not be added to DSDB
         self.dsdb_verify(empty=True)
 
@@ -324,7 +324,7 @@ class TestAddInterfaceAddress(TestBrokerCommand):
         command = ["add", "interface", "address",
                    "--machine", "unittest26.aqd-unittest.ms.com",
                    "--interface", "eth1", "--ip", ip, "--fqdn", fqdn]
-        self.noouttest(command)
+        self.statustest(command)
         self.dsdb_verify()
 
     def testaddut3gd1r04vlan110(self):

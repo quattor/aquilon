@@ -15,52 +15,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from dateutil.parser import parse
-from datetime import datetime
-
-from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import RebootIntervention
-from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.dbwrappers.resources import (add_resource,
-                                                 get_resource_holder)
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.commands.add_intervention import CommandAddIntervention
 
 
-class CommandAddRebootIntervention(BrokerCommand):
+class CommandAddRebootIntervention(CommandAddIntervention):
 
     required_parameters = ["expiry", "justification"]
+    resource_class = RebootIntervention
 
-    def render(self, session, logger, expiry, start_time, comments,
-               justification, hostname, cluster, **arguments):
-
-        allowusers = None
-        allowgroups = None
-        disabled_actions = None
-
-        # Name for the plenary and show_host output
-        intervention = 'reboot_intervention'
-
-        try:
-            expire_when = parse(expiry)
-        except (ValueError, TypeError) as e:
-            raise ArgumentError("The expiry value '%s' could not be "
-                                "interpreted: %s" % (expiry, e))
-
-        now = datetime.utcnow().replace(microsecond=0)
-        if start_time is None:
-            start_when = now
-        else:
-            try:
-                start_when = parse(start_time)
-
-            except (ValueError, TypeError) as e:
-                raise ArgumentError("The start time '%s' could not be "
-                                    "interpreted: %s" % (start_time, e))
-
-        if start_when > expire_when:
-            raise ArgumentError("The start time is later than the expiry time.")
-
-        if (start_when < now) or (expire_when < now):
-            raise ArgumentError("The start time or expiry time are in the past.")
+    def add_resource(self, **kwargs):
+        return super(CommandAddRebootIntervention, self).add_resource(
+            allowusers=None, allowgroups=None, disabled_actions=None, **kwargs)
 
         # More thorough check reboot_schedule and intervention
         # XXX TODO
@@ -70,20 +37,7 @@ class CommandAddRebootIntervention(BrokerCommand):
         # iv) ... and time
         # v) test all the above doesn't conflict within 1hr of each other.
 
-        # Setup intervention
-        holder = get_resource_holder(session, logger, hostname, cluster,
-                                     compel=False)
-
-        RebootIntervention.get_unique(session, name=intervention,
-                                      holder=holder, preclude=True)
-
-        dbiv = RebootIntervention(name=intervention,
-                                  expiry_date=expire_when,
-                                  start_date=start_when,
-                                  users=allowusers,
-                                  groups=allowgroups,
-                                  disabled=disabled_actions,
-                                  comments=comments,
-                                  justification=justification)
-
-        return add_resource(session, logger, holder, dbiv)
+    def render(self, **kwargs):
+        return super(CommandAddRebootIntervention, self).render(metacluster=None,
+                                                                intervention="reboot_intervention",
+                                                                **kwargs)

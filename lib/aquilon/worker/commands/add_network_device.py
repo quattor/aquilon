@@ -16,11 +16,10 @@
 # limitations under the License.
 """Contains the logic for `aq add network_device`."""
 
-
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import NetworkDevice, Model, Archetype
 from aquilon.aqdb.model.network import get_net_id_from_ip
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.dns import grab_address
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.dbwrappers.interface import (get_or_create_interface,
@@ -99,15 +98,9 @@ class CommandAddNetworkDevice(BrokerCommand):
         plenaries.append(Plenary.get_plenary(dbnetdev))
         plenaries.append(Plenary.get_plenary(dbhost))
 
-        with plenaries.get_key():
-            plenaries.stash()
-            try:
-                plenaries.write(locked=True)
-                dsdb_runner = DSDBRunner(logger=logger)
-                dsdb_runner.update_host(dbnetdev, None)
-                dsdb_runner.commit_or_rollback("Could not add network device to DSDB")
-            except:
-                plenaries.restore_stash()
-                raise
+        with plenaries.transaction():
+            dsdb_runner = DSDBRunner(logger=logger)
+            dsdb_runner.update_host(dbnetdev, None)
+            dsdb_runner.commit_or_rollback("Could not add network device to DSDB")
 
         return

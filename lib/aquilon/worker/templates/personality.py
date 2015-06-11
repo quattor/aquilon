@@ -20,6 +20,7 @@ from collections import defaultdict
 from six import iteritems
 
 from sqlalchemy.inspection import inspect
+from sqlalchemy.orm import object_session
 
 from aquilon.aqdb.model import PersonalityStage, Parameter
 from aquilon.worker.locks import NoLockKey, PlenaryKey
@@ -146,19 +147,24 @@ class ParameterTemplate(object):
 
 class PlenaryPersonality(PlenaryCollection):
 
-    def __init__(self, dbstage, logger=LOGGER):
-        super(PlenaryPersonality, self).__init__(logger=logger)
+    def __init__(self, dbstage, logger=LOGGER, allow_incomplete=True):
+        super(PlenaryPersonality, self).__init__(logger=logger,
+                                                 allow_incomplete=allow_incomplete)
 
         self.dbobj = dbstage
 
-        self.append(PlenaryPersonalityBase.get_plenary(dbstage))
-        self.append(PlenaryPersonalityPreFeature.get_plenary(dbstage))
-        self.append(PlenaryPersonalityPostFeature.get_plenary(dbstage))
+        self.append(PlenaryPersonalityBase.get_plenary(dbstage,
+                                                       allow_incomplete=allow_incomplete))
+        self.append(PlenaryPersonalityPreFeature.get_plenary(dbstage,
+                                                             allow_incomplete=allow_incomplete))
+        self.append(PlenaryPersonalityPostFeature.get_plenary(dbstage,
+                                                              allow_incomplete=allow_incomplete))
 
         # mulitple structure templates for parameters
         for path, values in get_parameters_by_tmpl(dbstage).items():
             ptmpl = ParameterTemplate(dbstage, path, values)
-            self.append(PlenaryPersonalityParameter.get_plenary(ptmpl))
+            self.append(PlenaryPersonalityParameter.get_plenary(ptmpl,
+                                                                allow_incomplete=allow_incomplete))
 
     def get_key(self, exclusive=True):
         if inspect(self.dbobj).deleted:
@@ -307,11 +313,19 @@ class PlenaryPersonalityParameter(StructurePlenary):
     def loadpath(cls, ptmpl):
         return ptmpl.personality_stage.personality.archetype.name
 
-    def __init__(self, ptmpl, logger=LOGGER):
-        super(PlenaryPersonalityParameter, self).__init__(ptmpl,
-                                                          logger=logger)
+    def __init__(self, ptmpl, **kwargs):
+        super(PlenaryPersonalityParameter, self).__init__(ptmpl, **kwargs)
         self.parameters = ptmpl.values
 
     def body(self, lines):
         for path in self.parameters:
             pan_assign(lines, path, self.parameters[path])
+
+    def is_deleted(self):
+        dbobj = self.dbobj.personality_stage
+        session = object_session(dbobj)
+        return dbobj in session.deleted or inspect(dbobj).deleted
+
+    def is_dirty(self):
+        session = object_session(self.dbobj.personality_stage)
+        return self.dbobj.personality_stage in session.dirty

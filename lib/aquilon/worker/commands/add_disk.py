@@ -20,9 +20,9 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import (Machine, LocalDisk, VirtualDisk, Share,
                                 Filesystem)
 from aquilon.aqdb.model.disk import controller_types
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.resources import find_resource
-from aquilon.worker.templates import Plenary
+from aquilon.worker.templates import Plenary, PlenaryCollection
 
 
 class CommandAddDisk(BrokerCommand):
@@ -84,7 +84,8 @@ class CommandAddDisk(BrokerCommand):
 
         dbmachine.disks.append(dbdisk)
 
-        plenary_info = Plenary.get_plenary(dbmachine, logger=logger)
-        plenary_info.write()
+        plenaries = PlenaryCollection(logger=logger)
+        plenaries.append(Plenary.get_plenary(dbmachine))
+        plenaries.write()
 
         return

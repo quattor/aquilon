@@ -19,7 +19,7 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Cluster, ServiceAddress
 from aquilon.worker.logger import CLIENT_INFO
 from aquilon.notify.index import trigger_notifications
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.resources import walk_resources
 from aquilon.worker.dbwrappers.service_instance import check_no_provided_service
 from aquilon.worker.templates import Plenary, PlenaryCollection
@@ -65,7 +65,7 @@ def del_cluster(session, logger, dbcluster, config):
 
     session.flush()
 
-    plenaries.remove(remove_profile=True)
+    plenaries.write(remove_profile=True)
 
     trigger_notifications(config, logger, CLIENT_INFO)
 

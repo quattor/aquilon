@@ -29,7 +29,7 @@ from aquilon.worker.dbwrappers.observed_mac import (
     update_or_create_observed_mac)
 from aquilon.worker.dbwrappers.network_device import discover_network_device
 from aquilon.worker.processes import DSDBRunner
-from aquilon.worker.templates.base import (Plenary, PlenaryCollection)
+from aquilon.worker.templates import Plenary, PlenaryCollection
 from aquilon.worker.templates.switchdata import PlenarySwitchData
 
 
@@ -102,16 +102,9 @@ class CommandUpdateNetworkDevice(BrokerCommand):
 
         session.flush()
 
-        with plenaries.get_key():
-            plenaries.stash()
-            try:
-                plenaries.write(locked=True)
-
-                dsdb_runner = DSDBRunner(logger=logger)
-                dsdb_runner.update_host(dbnetdev, oldinfo)
-                dsdb_runner.commit_or_rollback("Could not update network device in DSDB")
-            except:
-                plenaries.restore_stash()
-                raise
+        with plenaries.transaction():
+            dsdb_runner = DSDBRunner(logger=logger)
+            dsdb_runner.update_host(dbnetdev, oldinfo)
+            dsdb_runner.commit_or_rollback("Could not update network device in DSDB")
 
         return

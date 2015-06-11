@@ -91,14 +91,8 @@ class CommandUpdateBuilding(BrokerCommand):
         session.flush()
 
         if plenaries.plenaries:
-            with plenaries.get_key():
-                plenaries.stash()
-                try:
-                    plenaries.write(locked=True)
-                    dsdb_runner.commit_or_rollback()
-                except:
-                    plenaries.restore_stash()
-                    raise
+            with plenaries.transaction():
+                dsdb_runner.commit_or_rollback()
         else:
             dsdb_runner.commit_or_rollback()
 

@@ -17,13 +17,13 @@
 """Contains the logic for `aq del interface address`."""
 
 from aquilon.worker.broker import BrokerCommand
-from aquilon.exceptions_ import ArgumentError, IncompleteError
+from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import (HardwareEntity, Interface, AddressAssignment,
                                 DnsDomain, Fqdn, ARecord, NetworkEnvironment)
 from aquilon.worker.dbwrappers.dns import delete_dns_record
 from aquilon.worker.dbwrappers.service_instance import check_no_provided_service
 from aquilon.worker.processes import DSDBRunner
-from aquilon.worker.templates import Plenary
+from aquilon.worker.templates import Plenary, PlenaryCollection
 from aquilon.utils import first_of
 
 
@@ -118,40 +118,27 @@ class CommandDelInterfaceAddress(BrokerCommand):
 
         session.flush()
 
-        dbhost = getattr(dbhw_ent, "host", None)
-        if dbhost:
-            plenary_info = Plenary.get_plenary(dbhost, logger=logger)
-            with plenary_info.get_key():
-                try:
-                    try:
-                        plenary_info.write(locked=True)
-                    except IncompleteError:
-                        # FIXME: if this command is used after "add host" but
-                        # before "make", then writing out the template will fail
-                        # due to required services not being assigned. Ignore
-                        # this error for now.
-                        plenary_info.restore_stash()
+        dsdb_runner = DSDBRunner(logger=logger)
 
-                    dsdb_runner = DSDBRunner(logger=logger)
-                    if dbhost.archetype.name == 'aurora':
-                        logger.client_info("WARNING: removing IP %s from AQDB and "
-                                           "*not* changing DSDB." % ip)
-                    else:
-                        dsdb_runner.update_host(dbhw_ent, oldinfo)
+        if dbhw_ent.host:
+            plenaries = PlenaryCollection(logger=logger)
+            plenaries.append(Plenary.get_plenary(dbhw_ent.host))
+            with plenaries.transaction():
+                if dbhw_ent.host.archetype.name == 'aurora':
+                    logger.client_info("WARNING: removing IP %s from AQDB and "
+                                       "*not* changing DSDB." % ip)
+                else:
+                    dsdb_runner.update_host(dbhw_ent, oldinfo)
 
-                        if not other_uses and keep_dns:
-                            q = session.query(ARecord)
-                            q = q.filter_by(network=dbnetwork)
-                            q = q.filter_by(ip=ip)
-                            dbdns_rec = q.first()
-                            dsdb_runner.add_host_details(dbdns_rec.fqdn, ip)
+                    if not other_uses and keep_dns:
+                        q = session.query(ARecord)
+                        q = q.filter_by(network=dbnetwork)
+                        q = q.filter_by(ip=ip)
+                        dbdns_rec = q.first()
+                        dsdb_runner.add_host_details(dbdns_rec.fqdn, ip)
 
-                        dsdb_runner.commit_or_rollback("Could not add host to DSDB")
-                except:
-                    plenary_info.restore_stash()
-                    raise
+                    dsdb_runner.commit_or_rollback("Could not add host to DSDB")
         else:
-            dsdb_runner = DSDBRunner(logger=logger)
             dsdb_runner.update_host(dbhw_ent, oldinfo)
             dsdb_runner.commit_or_rollback("Could not add host to DSDB")
 

@@ -16,20 +16,12 @@
 # limitations under the License.
 
 from aquilon.aqdb.model import Application
-from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.dbwrappers.resources import (del_resource,
-                                                 get_resource_holder)
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.commands.del_resource import CommandDelResource
 
 
-class CommandDelApplication(BrokerCommand):
+class CommandDelApplication(CommandDelResource):
 
     required_parameters = ["application"]
-
-    def render(self, session, logger, hostname, cluster, metacluster,
-               resourcegroup, application, **arguments):
-        holder = get_resource_holder(session, logger, hostname, cluster,
-                                     metacluster, resourcegroup)
-        dbapp = Application.get_unique(session, name=application, holder=holder,
-                                       compel=True)
-        del_resource(session, logger, dbapp)
-        return
+    resource_class = Application
+    resource_name = "application"

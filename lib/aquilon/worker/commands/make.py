@@ -16,14 +16,13 @@
 # limitations under the License.
 """Contains the logic for `aq make`."""
 
-from aquilon.exceptions_ import ArgumentError
-
+from aquilon.exceptions_ import ArgumentError, IncompleteError
 from aquilon.aqdb.model import (Archetype, HostLifecycle,
                                 OperatingSystem, Personality)
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.grn import lookup_grn
 from aquilon.worker.dbwrappers.host import hostname_to_host
-from aquilon.worker.templates.domain import TemplateDomain
+from aquilon.worker.templates import TemplateDomain
 from aquilon.worker.services import Chooser
 
 
@@ -108,17 +107,7 @@ class CommandMake(BrokerCommand):
 
         td = TemplateDomain(dbhost.branch, dbhost.sandbox_author, logger=logger)
 
-        with chooser.get_key():
-            try:
-                chooser.write_plenary_templates(locked=True)
-
-                td.compile(session, only=chooser.plenaries.object_templates,
-                           locked=True)
-            except:
-                chooser.restore_stash()
-
-                # Okay, cleaned up templates, make sure the caller knows
-                # we've aborted so that DB can be appropriately rollback'd.
-                raise
+        with chooser.plenaries.transaction():
+            td.compile(session, only=chooser.plenaries.object_templates)
 
         return

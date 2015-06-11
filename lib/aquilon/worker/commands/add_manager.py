@@ -16,16 +16,15 @@
 # limitations under the License.
 """Contains the logic for `aq add manager`."""
 
-
 from aquilon.exceptions_ import ArgumentError
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.host import hostname_to_host
 from aquilon.worker.dbwrappers.dns import grab_address
 from aquilon.worker.dbwrappers.interface import (generate_ip,
                                                  get_or_create_interface,
                                                  assign_address)
 from aquilon.worker.processes import DSDBRunner
-from aquilon.worker.templates import Plenary
+from aquilon.worker.templates import Plenary, PlenaryCollection
 
 
 class CommandAddManager(BrokerCommand):
@@ -63,17 +62,12 @@ class CommandAddManager(BrokerCommand):
 
         session.flush()
 
-        plenary_info = Plenary.get_plenary(dbmachine, logger=logger)
-        with plenary_info.get_key():
-            try:
-                plenary_info.write(locked=True)
-
-                dsdb_runner = DSDBRunner(logger=logger)
-                dsdb_runner.update_host(dbmachine, oldinfo)
-                dsdb_runner.commit_or_rollback("Could not add host to DSDB")
-            except:
-                plenary_info.restore_stash()
-                raise
+        plenaries = PlenaryCollection(logger=logger)
+        plenaries.append(Plenary.get_plenary(dbmachine))
+        with plenaries.transaction():
+            dsdb_runner = DSDBRunner(logger=logger)
+            dsdb_runner.update_host(dbmachine, oldinfo)
+            dsdb_runner.commit_or_rollback("Could not add host to DSDB")
 
         if dbmachine.host:
             # XXX: Host needs to be reconfigured.

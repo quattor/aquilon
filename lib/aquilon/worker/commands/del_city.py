@@ -16,12 +16,11 @@
 # limitations under the License.
 """Contains the logic for `aq del city`."""
 
-
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.processes import DSDBRunner
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.commands.del_location import CommandDelLocation
-from aquilon.worker.templates import Plenary
+from aquilon.worker.templates import Plenary, PlenaryCollection
 
 
 class CommandDelCity(CommandDelLocation):
@@ -35,19 +34,16 @@ class CommandDelCity(CommandDelLocation):
         country = dbcity.country.name
         fullname = dbcity.fullname
 
-        plenary = Plenary.get_plenary(dbcity, logger=logger)
+        plenaries = PlenaryCollection(logger=logger)
+        plenaries.append(Plenary.get_plenary(dbcity))
+
         CommandDelLocation.render(self, session=session, name=city,
                                   type='city', **arguments)
         session.flush()
 
-        with plenary.get_key():
-            try:
-                plenary.remove(locked=True)
-                dsdb_runner = DSDBRunner(logger=logger)
-                dsdb_runner.del_city(name, country, fullname)
-                dsdb_runner.commit_or_rollback()
-            except:
-                plenary.restore_stash()
-                raise
+        with plenaries.transaction():
+            dsdb_runner = DSDBRunner(logger=logger)
+            dsdb_runner.del_city(name, country, fullname)
+            dsdb_runner.commit_or_rollback()
 
         return

@@ -15,30 +15,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import ResourceGroup, ServiceAddress
-from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.dbwrappers.resources import (del_resource,
-                                                 get_resource_holder)
+from aquilon.aqdb.model import ResourceGroup
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.commands.del_resource import CommandDelResource
 
 
-class CommandDelResourceGroup(BrokerCommand):
+class CommandDelResourceGroup(CommandDelResource):
 
     required_parameters = ["resourcegroup"]
-
-    def render(self, session, logger, resourcegroup, hostname, cluster,
-               metacluster, **arguments):
-        holder = get_resource_holder(session, logger, hostname, cluster,
-                                     metacluster, compel=True)
-        dbrg = ResourceGroup.get_unique(session, name=resourcegroup,
-                                        holder=holder, compel=True)
-
-        # Deleting service addresses can't be done with just cascading
-        if dbrg.resholder:
-            for res in dbrg.resholder.resources:
-                if isinstance(res, ServiceAddress):
-                    raise ArgumentError("{0} contains {1:l}, please delete "
-                                        "it first.".format(dbrg, res))
-
-        del_resource(session, logger, dbrg)
-        return
+    resource_class = ResourceGroup
+    resource_name = "resourcegroup"

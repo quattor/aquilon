@@ -20,8 +20,7 @@ from collections import defaultdict
 
 from sqlalchemy.orm import joinedload, subqueryload, undefer
 
-from aquilon.exceptions_ import (ArgumentError, NotFoundException,
-                                 IncompleteError)
+from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.aqdb.model import (Archetype, Personality, OperatingSystem,
                                 HostLifecycle)
 from aquilon.worker.broker import BrokerCommand
@@ -193,33 +192,7 @@ class CommandReconfigureList(BrokerCommand):
 
         td = TemplateDomain(dbbranch, dbauthor, logger=logger)
 
-        # Don't bother locking until every possible check before the
-        # actual writing and compile is done.  This will allow for fast
-        # turnaround on errors (no need to wait for a lock if there's
-        # a missing service map entry or something).
-        with plenaries.get_key():
-            plenaries.stash()
-            try:
-                errors = []
-                for template in plenaries.plenaries:
-                    try:
-                        template.write(locked=True)
-                    except IncompleteError as err:
-                        # Ignore IncompleteError for hosts added indirectly,
-                        # e.g. servers of service instances. It is debatable
-                        # if this is the right thing to do, but it preserves the
-                        # status quo, and can be revisited later.
-                        if template.dbobj not in dbhosts:
-                            logger.client_info("Warning: %s" % err)
-                        else:
-                            errors.append(str(err))
-
-                if errors:
-                    raise ArgumentError("\n".join(errors))
-                td.compile(session, only=plenaries.object_templates,
-                           locked=True)
-            except:
-                plenaries.restore_stash()
-                raise
+        with plenaries.transaction():
+            td.compile(session, only=plenaries.object_templates)
 
         return

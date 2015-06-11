@@ -22,7 +22,7 @@ from six import iteritems
 
 from sqlalchemy.inspection import inspect
 
-from aquilon.exceptions_ import IncompleteError, InternalError
+from aquilon.exceptions_ import InternalError, IncompleteError
 from aquilon.aqdb.model import (Host, VlanInterface, BondingInterface,
                                 BridgeInterface)
 from aquilon.worker.locks import CompileKey, PlenaryKey
@@ -80,27 +80,18 @@ def is_default_route(dbinterface):
 
 
 class PlenaryHost(PlenaryCollection):
-    def __init__(self, dbhost, logger=LOGGER):
-        super(PlenaryHost, self).__init__(logger=logger)
+    def __init__(self, dbhost, logger=LOGGER, allow_incomplete=True):
+        super(PlenaryHost, self).__init__(logger=logger,
+                                          allow_incomplete=allow_incomplete)
 
         if not isinstance(dbhost, Host):
             raise InternalError("PlenaryHost called with %s instead of Host" %
                                 dbhost.__class__.name)
         self.dbobj = dbhost
-        self.append(PlenaryHostObject.get_plenary(dbhost))
-        self.append(PlenaryHostData.get_plenary(dbhost))
-
-    def write(self, locked=False):
-        # Don't bother writing plenary files non-compilable archetypes.
-        if not self.dbobj.archetype.is_compileable:
-            return 0
-
-        # Standard PlenaryCollection swallows IncompleteError.  If/when
-        # the Host plenaries no longer raise that error this override
-        # should be removed.
-        total = sum(plenary.write(locked=locked) for plenary in self.plenaries)
-        return total
-
+        self.append(PlenaryHostObject.get_plenary(dbhost,
+                                                  allow_incomplete=allow_incomplete))
+        self.append(PlenaryHostData.get_plenary(dbhost,
+                                                allow_incomplete=allow_incomplete))
 
 Plenary.handlers[Host] = PlenaryHost
 
@@ -313,18 +304,6 @@ class PlenaryHostObject(ObjectPlenary):
                                           virtual_switch=self.dbobj.virtual_switch,
                                           logger=self.logger))
         return CompileKey.merge(keylist)
-
-    def will_change(self):
-        # Need to override to handle IncompleteError...
-        self.stash()
-        if not self.new_content:
-            try:
-                self.new_content = self._generate_content()
-            except IncompleteError:
-                # Attempting to have IncompleteError thrown later by
-                # not caching the return
-                return self.old_content is None
-        return self.old_content != self.new_content
 
     def body(self, lines):
         dbstage = self.dbobj.personality_stage

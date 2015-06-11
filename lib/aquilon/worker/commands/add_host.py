@@ -24,7 +24,7 @@ from aquilon.worker.dbwrappers.dns import grab_address
 from aquilon.worker.dbwrappers.interface import (generate_ip, assign_address,
                                                  get_interfaces)
 from aquilon.worker.dbwrappers.host import create_host
-from aquilon.worker.templates.base import Plenary, PlenaryCollection
+from aquilon.worker.templates import Plenary, PlenaryCollection
 from aquilon.worker.processes import DSDBRunner
 
 
@@ -141,15 +141,10 @@ class CommandAddHost(BrokerCommand):
         if dbsrv_addr:
             plenaries.append(Plenary.get_plenary(dbsrv_addr))
 
-        with plenaries.get_key():
-            try:
-                plenaries.write(locked=True)
-                if oldinfo:
-                    dsdb_runner.update_host(dbmachine, oldinfo)
-                    dsdb_runner.commit_or_rollback("Could not add host to DSDB")
-            except:
-                plenaries.restore_stash()
-                raise
+        with plenaries.transaction():
+            if oldinfo:
+                dsdb_runner.update_host(dbmachine, oldinfo)
+                dsdb_runner.commit_or_rollback("Could not add host to DSDB")
 
         for name, value in audit_results:
             self.audit_result(session, name, value, **arguments)
@@ -179,7 +174,7 @@ class CommandAddHost(BrokerCommand):
             dbinterface.default_route = True
 
         # Disable autoflush, since the ServiceAddress object won't be complete
-        # until add_resource() is called
+        # until it's attached to its holder
         with session.no_autoflush:
             resholder = HostResource(host=dbmachine.host)
             session.add(resholder)

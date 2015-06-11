@@ -39,7 +39,8 @@ class TestUsecaseDatabase(TestBrokerCommand):
         self.noouttest(command)
 
     def test_101_add_app(self):
-        command = ["add_application", "--application=nydb1", "--eonid=42",
+        command = ["add_application", "--application=nydb1",
+                   "--grn=grn:/ms/ei/aquilon/aqd",
                    "--hostname=server1.aqd-unittest.ms.com"]
         self.noouttest(command)
 
@@ -52,6 +53,7 @@ class TestUsecaseDatabase(TestBrokerCommand):
         command = ["show_host", "--hostname=server1.aqd-unittest.ms.com"]
         out = self.commandtest(command)
         self.matchoutput(out, "Application: nydb1", command)
+        self.matchoutput(out, "GRN: grn:/ms/ei/aquilon/aqd", command)
         self.matchoutput(out, "Filesystem: gnr.0", command)
 
     def test_110_verify_cat(self):
@@ -70,7 +72,7 @@ class TestUsecaseDatabase(TestBrokerCommand):
         self.noouttest(command)
 
     def test_111_add_app(self):
-        command = ["add_application", "--application=utdb2", "--eonid=42",
+        command = ["add_application", "--application=utdb2", "--eon_id=2",
                    "--hostname=server1.aqd-unittest.ms.com"]
         self.noouttest(command)
 
@@ -137,7 +139,7 @@ class TestUsecaseDatabase(TestBrokerCommand):
         self.noouttest(command)
 
     def test_205_add_app(self):
-        command = ["add_application", "--application=nydb1", "--eonid=42",
+        command = ["add_application", "--application=nydb1", "--eon_id=2",
                    "--cluster=nydb1"]
         self.noouttest(command)
 

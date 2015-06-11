@@ -309,8 +309,8 @@ class MachineTestMixin(object):
             nic_ip = kwargs.get(nic_name + "_ip", None)
             if nic_ip and nic_ip != ip:
                 self.dsdb_expect_delete(nic_ip)
-                self.noouttest(["del_interface_address", "--machine", machine,
-                                "--interface", nic_name, "--ip", nic_ip])
+                self.statustest(["del_interface_address", "--machine", machine,
+                                 "--interface", nic_name, "--ip", nic_ip])
                 self.dsdb_verify()
 
         self.dsdb_expect_delete(ip)

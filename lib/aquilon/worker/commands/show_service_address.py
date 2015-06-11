@@ -14,17 +14,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+"""Contains the logic for `aq show service address`."""
 
 from aquilon.aqdb.model import ServiceAddress
-from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.commands.show_resource import show_resource
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.commands.show_resource import CommandShowResource
 
 
-class CommandShowServiceAddress(BrokerCommand):
+class CommandShowServiceAddress(CommandShowResource):
 
-    required_parameters = []
-
-    def render(self, session, logger, hostname, cluster, metacluster,
-               resourcegroup, all, name, **arguments):
-        return show_resource(session, logger, hostname, cluster, metacluster,
-                             resourcegroup, all, name, ServiceAddress)
+    resource_class = ServiceAddress
+    resource_name = "name"

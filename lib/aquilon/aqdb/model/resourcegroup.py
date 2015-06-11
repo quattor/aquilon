@@ -79,8 +79,8 @@ class BundleResource(ResourceHolder):
     def validate_resources(self, key, value):
         rg = self.resourcegroup
         if rg.required_type and rg.required_type != value.resource_type:
-            raise ArgumentError("Resource's %s type differs from the requested"
-                                " %s" % (value.resource_type, rg.required_type))
+            raise ArgumentError("{0} may contain resources of type {1!s} only."
+                                .format(self, rg.required_type))
 
         return value
 

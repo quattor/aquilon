@@ -19,16 +19,10 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import ServiceAddress
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.dns import delete_dns_record
-from aquilon.worker.dbwrappers.resources import (del_resource,
-                                                 get_resource_holder)
+from aquilon.worker.dbwrappers.resources import get_resource_holder
 from aquilon.worker.dbwrappers.service_instance import check_no_provided_service
 from aquilon.worker.processes import DSDBRunner
-
-
-def del_srv_dsdb_callback(dbsrv_addr, dsdb_runner=None, keep_dns=False):
-    if not keep_dns:
-        dsdb_runner.delete_host_details(dbsrv_addr.dns_record, dbsrv_addr.ip)
-    dsdb_runner.commit_or_rollback("Could not delete host from DSDB")
+from aquilon.worker.templates import Plenary, PlenaryCollection
 
 
 class CommandDelServiceAddress(BrokerCommand):
@@ -46,16 +40,27 @@ class CommandDelServiceAddress(BrokerCommand):
 
         dbsrv = ServiceAddress.get_unique(session, name=name, holder=holder,
                                           compel=True)
+        dbdns_rec = dbsrv.dns_record
+        old_fqdn = str(dbdns_rec.fqdn)
+        old_ip = dbdns_rec.ip
 
         check_no_provided_service(dbsrv)
 
-        dbdns_rec = dbsrv.dns_record
-
         dsdb_runner = DSDBRunner(logger=logger)
-        del_resource(session, logger, dbsrv, dsdb_runner=dsdb_runner,
-                     dsdb_callback=del_srv_dsdb_callback, keep_dns=keep_dns)
 
+        plenaries = PlenaryCollection(logger=logger)
+        plenaries.append(Plenary.get_plenary(holder.holder_object))
+        plenaries.append(Plenary.get_plenary(dbsrv))
+
+        holder.resources.remove(dbsrv)
         if not keep_dns:
             delete_dns_record(dbdns_rec)
+
+        session.flush()
+
+        with plenaries.transaction():
+            if not keep_dns:
+                dsdb_runner.delete_host_details(old_fqdn, old_ip)
+            dsdb_runner.commit_or_rollback("Could not delete host from DSDB")
 
         return

@@ -14,15 +14,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+"""Contains the logic for `aq show intervention`."""
 
 from aquilon.aqdb.model import Intervention
-from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.commands.show_resource import show_resource
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.commands.show_resource import CommandShowResource
 
 
-class CommandShowIntervention(BrokerCommand):
+class CommandShowIntervention(CommandShowResource):
 
-    def render(self, session, logger, intervention, hostname, cluster,
-               metacluster, all, **arguments):
-        return show_resource(session, logger, hostname, cluster, metacluster,
-                             None, all, intervention, Intervention)
+    resource_class = Intervention
+    resource_name = "intervention"

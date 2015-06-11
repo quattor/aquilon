@@ -16,20 +16,12 @@
 # limitations under the License.
 
 from aquilon.aqdb.model import Intervention
-from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.dbwrappers.resources import (del_resource,
-                                                 get_resource_holder)
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.commands.del_resource import CommandDelResource
 
 
-class CommandDelIntervention(BrokerCommand):
+class CommandDelIntervention(CommandDelResource):
 
     required_parameters = ["intervention"]
-
-    def render(self, session, logger, hostname, cluster, metacluster,
-               intervention, **arguments):
-        holder = get_resource_holder(session, logger, hostname, cluster,
-                                     metacluster)
-        dbapp = Intervention.get_unique(session, name=intervention,
-                                        holder=holder, compel=True)
-        del_resource(session, logger, dbapp)
-        return
+    resource_class = Intervention
+    resource_name = "intervention"

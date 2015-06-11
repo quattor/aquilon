@@ -5160,7 +5160,11 @@
 		<option name="resourcegroup" type="string">Resourcegroup to apply resource</option>
 	    </optgroup>
 	    <option name="application" type="string">Name of applicaiton</option>
-	    <option name="eonid" type="int">EON identity</option>
+	    <optgroup fields="one">
+		<option name="eonid" type="int">(Deprecated) EON identity</option>
+		<option name="eon_id" type="int">EON identity</option>
+		<option name="grn" type="string">GRN</option>
+	    </optgroup>
 	</optgroup>
 	<optgroup>
 	    <option name="comments" type="string">Comments</option>
@@ -5192,8 +5196,7 @@
 		<option name="resourcegroup" type="string">Resourcegroup to apply resource</option>
 	    </optgroup>
 	    <option name="application" type="string">application name</option>
-	    <option name="eonid" type="int">EON id</option>
-	    <option name="all" type="flag" conflicts="hostname cluster metacluster resourcegroup application eonid">list all applications</option>
+	    <option name="all" type="flag" conflicts="hostname cluster metacluster resourcegroup application">list all applications</option>
 	</optgroup>
 	<transport method="get" trigger="application" path="resource/application/%(application)s"/>
 	<transport method="get" path="find/resource/application"/>
@@ -5500,6 +5503,7 @@
 	</optgroup>
 	<optgroup>
 	    <option name="required_type" type="string">group members must have this type</option>
+	    <option name="comments" type="string">Comments</option>
 	</optgroup>
 	<transport method="put" path="resource/resourcegroup/%(resourcegroup)s"/>
     </command>
@@ -5533,6 +5537,23 @@
 	<format name="proto" >
 	    <message_class name="ResourceList" module="aqdsystems_pb2"/>
 	</format>
+    </command>
+
+    <command name="update_resourcegroup">
+	Update the parameters of a resource group.
+	<optgroup mandatory="True" fields="all">
+	    <optgroup fields="one">
+		<option name="hostname" type="string">Hostname to apply resource group</option>
+		<option name="cluster" type="string">Cluster to apply resource group</option>
+		<option name="metacluster" type="string">Metacluster to apply resource</option>
+	    </optgroup>
+	    <option name="resourcegroup" type="string">Name of the resource group</option>
+	</optgroup>
+	<optgroup>
+	    <option name="required_type" type="string">group members must have this type</option>
+	    <option name="comments" type="string">Comments</option>
+	</optgroup>
+	<transport method="post" path="resource/resourcegroup/%(resourcegroup)s"/>
     </command>
 
     <command name="add_feature">

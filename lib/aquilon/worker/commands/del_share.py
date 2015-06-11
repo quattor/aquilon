@@ -16,20 +16,12 @@
 # limitations under the License.
 
 from aquilon.aqdb.model import Share
-from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.dbwrappers.resources import (del_resource,
-                                                 get_resource_holder)
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.commands.del_resource import CommandDelResource
 
 
-class CommandDelShare(BrokerCommand):
+class CommandDelShare(CommandDelResource):
 
     required_parameters = ["share"]
-
-    def render(self, session, logger, share, hostname, resourcegroup, cluster,
-               metacluster, **arguments):
-        holder = get_resource_holder(session, logger, hostname, cluster,
-                                     metacluster, resourcegroup)
-        dbshare = Share.get_unique(session, name=share, holder=holder,
-                                   compel=True)
-        del_resource(session, logger, dbshare)
-        return
+    resource_class = Share
+    resource_name = "share"

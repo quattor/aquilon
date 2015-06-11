@@ -31,6 +31,7 @@ class TestDelVirtualHardware(TestBrokerCommand):
         command = "del_host --hostname aqddesk1.msad.ms.com"
         (out, err) = self.successtest(command.split(" "))
         self.assertEmptyOut(out, command)
+        self.check_plenary_gone("hostdata", "aqddesk1.msad.ms.com")
 
     def test_300_readd_windows_host(self):
         command = ["add_windows_host", "--hostname=aqdtop1.msad.ms.com",

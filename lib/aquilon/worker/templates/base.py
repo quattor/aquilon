@@ -21,12 +21,15 @@ import errno
 import logging
 import threading
 import weakref
+from contextlib import contextmanager
 
 from sqlalchemy.inspection import inspect
+from sqlalchemy.orm import object_session
 
-from aquilon.exceptions_ import InternalError, IncompleteError, NotFoundException
+from aquilon.exceptions_ import (InternalError, IncompleteError,
+                                 NotFoundException, ArgumentError)
 from aquilon.config import Config
-from aquilon.aqdb.model import Base, Sandbox
+from aquilon.aqdb.model import Sandbox, CompileableMixin
 from aquilon.worker.locks import lock_queue, CompileKey, NoLockKey
 from aquilon.worker.processes import build_mako_lookup
 from aquilon.worker.formats.formatters import ObjectFormatter
@@ -58,7 +61,12 @@ class Plenary(object):
     config = Config()
     TEMPLATE_EXTENSION = config.get("panc", "template_extension")
 
-    def __init__(self, dbobj, logger=LOGGER):
+    ignore_compileable = False
+    """ Force generating the plenary even if it belongs to a non-compileable
+        object
+    """
+
+    def __init__(self, dbobj, logger=LOGGER, allow_incomplete=True):
         super(Plenary, self).__init__()
 
         if not dbobj:
@@ -66,8 +74,6 @@ class Plenary(object):
 
         self.dbobj = dbobj
         self.logger = logger
-
-        self.new_content = None
 
         # We may no longer be able to calculate this during remove()
         try:
@@ -82,6 +88,7 @@ class Plenary(object):
         self.stashed = False
         self.removed = False
         self.changed = False
+        self.allow_incomplete = allow_incomplete
 
     def __hash__(self):
         """Since equality is based on dbobj, just hash on it."""
@@ -141,13 +148,7 @@ class Plenary(object):
         """
         pass
 
-    def will_change(self):
-        self.stash()
-        if not self.new_content:
-            self.new_content = self._generate_content()
-        return self.old_content != self.new_content
-
-    def get_key(self, exclusive=True):
+    def get_key(self, exclusive=True):  # pylint: disable=W0613
         return NoLockKey(logger=self.logger)
 
     def _generate_content(self):
@@ -163,73 +164,63 @@ class Plenary(object):
 
         return "\n".join(lines) + "\n"
 
-    def write(self, locked=False):
+    def is_deleted(self):
+        session = object_session(self.dbobj)
+        return self.dbobj in session.deleted or inspect(self.dbobj).deleted
+
+    def is_dirty(self):
+        session = object_session(self.dbobj)
+        return self.dbobj in session.dirty
+
+    def _write(self, remove_profile=False):
         """Write out the template.
 
         If the content is unchanged, then the file will not be modified
         (preserving the mtime).
 
         Returns the number of files that were written.
-
-        If locked is True then it is assumed that error handling happens
-        higher in the call stack.
-
         """
 
-        if self.template_type == "object" and \
+        if isinstance(self.dbobj, CompileableMixin) and \
+           not self.ignore_compileable and \
            not self.dbobj.archetype.is_compileable:
             return 0
 
-        # This is a hack to handle the case when the DB object has been deleted,
-        # but a plenary instance still references it (probably buried inside a
-        # PlenaryCollection). Calling self.will_change() on such a plenary would
-        # fail, because the primary key is None, which is otherwise impossible.
-        if isinstance(self.dbobj, Base):
-            state = inspect(self.dbobj)
-            if state.deleted:
-                return 0
+        self.stash()
 
-        if not self.new_content:
-            self.new_content = self._generate_content()
-        content = self.new_content
+        if self.is_deleted():
+            return self._remove(remove_profile=remove_profile)
+        elif not self.new_path:
+            raise InternalError("{0!r}: object is not deleted, but "
+                                "new_path is not set.".format(self))
 
-        key = None
         try:
-            if not locked:
-                key = self.get_key()
-                lock_queue.acquire(key)
-
-            self.stash()
-
-            if self.old_content == content and \
-               not self.removed and not self.changed:
-                # optimise out the write (leaving the mtime good for ant)
-                # if nothing is actually changed
+            content = self._generate_content()
+        except IncompleteError as err:
+            self._remove()
+            if self.allow_incomplete:
+                self.logger.client_info("Warning: %s", err)
                 return 0
+            else:
+                raise
 
-            if not self.new_path:
-                raise InternalError("New path not set - likely write() is "
-                                    "called on deleted object.")
+        if self.old_content == content and not self.removed:
+            # optimise out the write (leaving the mtime good for ant)
+            # if nothing is actually changed
+            return 0
 
-            # If the plenary has moved, then clean up any potential leftover
-            # files from the old location
-            if self.new_path != self.old_path:
-                self.remove(locked=True)
+        # If the plenary has moved, then clean up any potential leftover
+        # files from the old location
+        if self.new_path != self.old_path:
+            self._remove()
 
-            self.logger.debug("Writing %r [%s]", self, self.new_path)
+        self.logger.debug("Writing %r [%s]", self, self.new_path)
 
-            write_file(self.new_path, content, create_directory=True,
-                       logger=self.logger)
+        write_file(self.new_path, content, create_directory=True,
+                   logger=self.logger)
+        self.changed = True
+        if self.new_path == self.old_path:
             self.removed = False
-            if self.old_content != content:
-                self.changed = True
-        except Exception as e:
-            if not locked:
-                self.restore_stash()
-            raise e
-        finally:
-            if not locked:
-                lock_queue.release(key)
 
         return 1
 
@@ -250,28 +241,16 @@ class Plenary(object):
             # Read has failed, which shouldn't happen unless there is a problem
             raise int_error(e)
 
-    def remove(self, locked=False, remove_profile=False):
+    def _remove(self, remove_profile=False):  # pylint: disable=W0613
         """
         remove this plenary template
         """
 
-        key = None
-        try:
-            if not locked:
-                key = self.get_key()
-                lock_queue.acquire(key)
-            self.stash()
-
-            self.logger.debug("Removing %r [%s]", self, self.old_path)
-            remove_file(self.old_path, cleanup_directory=True,
-                        logger=self.logger)
+        self.logger.debug("Removing %r [%s]", self, self.old_path)
+        if remove_file(self.old_path, cleanup_directory=True,
+                       logger=self.logger):
             self.removed = True
-        # Most of the error handling routines would restore_stash...
-        # but there's no need here if the remove failed. :)
-        finally:
-            if not locked:
-                lock_queue.release(key)
-        return
+        return 1
 
     def stash(self):
         """Record the state of the plenary to make restoration possible.
@@ -282,15 +261,14 @@ class Plenary(object):
         if self.stashed:
             return
 
-        if isinstance(self.dbobj, Base):
-            state = inspect(self.dbobj)
-            if not state.deleted:
-                self.new_path = self.full_path(self.dbobj)
-        else:
-            # Ouch. Personality parameters...
-            state = inspect(self.dbobj.personality_stage)
-            if not state.deleted:
-                self.new_path = self.full_path(self.dbobj)
+        if self.is_dirty():
+            raise InternalError("{0!r}: stash() is called on dirty object"
+                                .format(self))
+
+        # If the object is already deleted, then it may not have enough state
+        # for generating the path.
+        if not self.is_deleted():
+            self.new_path = self.full_path(self.dbobj)
 
         try:
             self.old_content = self.read()
@@ -308,9 +286,6 @@ class Plenary(object):
             self.logger.info("Attempt to restore plenary '%s' "
                              "without having saved state.", self.old_path)
             return
-        # Should this optimization be in use?
-        # if not self.changed and not self.removed:
-        #    return
 
         # If the plenary has moved, then we need to clean up the new location
         if self.new_path and self.new_path != self.old_path:
@@ -331,8 +306,11 @@ class Plenary(object):
             # did not fail here. Otherwise, the domain compile would push out
             # the state that got reverted in the DB.
 
+        self.removed = False
+        self.changed = False
+
     @classmethod
-    def get_plenary(cls, dbobj, logger=LOGGER):
+    def get_plenary(cls, dbobj, logger=LOGGER, allow_incomplete=True):
         if cls == Plenary:
             if dbobj.__class__ not in Plenary.handlers:
                 raise InternalError("Class %s does not have a plenary handler" %
@@ -348,7 +326,8 @@ class Plenary(object):
         try:
             return _mylocal.plenaries[key]
         except KeyError:
-            plenary = handler(dbobj, logger=logger)
+            plenary = handler(dbobj, logger=logger,
+                              allow_incomplete=allow_incomplete)
             _mylocal.plenaries[key] = plenary
             return plenary
 
@@ -369,12 +348,12 @@ class ObjectPlenary(Plenary):
     # is to be removed
     cleanup_extensions = (".dep", ".xml", ".xml.gz", ".json", ".json.gz")
 
-    def __init__(self, dbobj=None, logger=LOGGER):
+    def __init__(self, dbobj=None, **kwargs):
         if not dbobj or not hasattr(dbobj, "branch"):
             raise InternalError("Plenaries meant to be compiled need a DB "
                                 "object that has a branch; got: %r" % dbobj)
 
-        super(ObjectPlenary, self).__init__(dbobj, logger)
+        super(ObjectPlenary, self).__init__(dbobj, **kwargs)
 
         self.old_name = self.template_name(dbobj)
         self.old_branch = dbobj.branch.name
@@ -430,49 +409,34 @@ class ObjectPlenary(Plenary):
 
         return "\n".join(lines) + "\n"
 
-    def remove(self, locked=False, remove_profile=False):
+    def _remove(self, remove_profile=False):
         """
         remove all files related to an object template including
         any intermediate build files
         """
-        key = None
+        basename = os.path.join(self.config.get("broker", "quattordir"),
+                                "build", self.old_branch, self.old_name)
+        for ext in self.cleanup_extensions:
+            remove_file(basename + ext, logger=self.logger)
         try:
-            if not locked:
-                key = self.get_key()
-                lock_queue.acquire(key)
-            self.stash()
+            os.removedirs(os.path.dirname(basename))
+        except OSError:
+            pass
 
-            basename = os.path.join(self.config.get("broker", "quattordir"),
-                                    "build", self.old_branch, self.old_name)
+        super(ObjectPlenary, self)._remove()
+
+        if remove_profile:
+            basename = os.path.join(self.config.get("broker", "profilesdir"),
+                                    self.old_name)
             for ext in self.cleanup_extensions:
                 remove_file(basename + ext, logger=self.logger)
-            try:
-                os.removedirs(os.path.dirname(basename))
-            except OSError:
-                pass
 
-            super(ObjectPlenary, self).remove(locked=True)
-
-            if remove_profile:
-                basename = os.path.join(self.config.get("broker",
-                                                        "profilesdir"),
-                                        self.old_name)
-                for ext in self.cleanup_extensions:
-                    remove_file(basename + ext, logger=self.logger)
-
-                # Remove the cached template created by ant
-                remove_file(os.path.join(self.config.get("broker",
-                                                         "quattordir"),
-                                         "objects",
-                                         self.old_name + self.TEMPLATE_EXTENSION),
-                            logger=self.logger)
-        except:
-            if not locked:
-                self.restore_stash()
-            raise
-        finally:
-            if not locked:
-                lock_queue.release(key)
+            # Remove the cached template created by ant
+            remove_file(os.path.join(self.config.get("broker", "quattordir"),
+                                     "objects",
+                                     self.old_name + self.TEMPLATE_EXTENSION),
+                        logger=self.logger)
+        return 1
 
 
 class PlenaryCollection(object):
@@ -494,7 +458,7 @@ class PlenaryCollection(object):
     group that needs to be written.
 
     """
-    def __init__(self, logger=LOGGER):
+    def __init__(self, logger=LOGGER, allow_incomplete=True):  # pylint: disable=W0613
         super(PlenaryCollection, self).__init__()
 
         self.plenaries = []
@@ -555,26 +519,35 @@ class PlenaryCollection(object):
             elif plen.template_type == 'object':
                 yield plen.template_name(plen.dbobj)
 
-    def write(self, locked=False):
+    def _write(self, remove_profile=False):
+        total = 0
+        errors = []
+        for plen in self.plenaries:
+            try:
+                total += plen._write(remove_profile=remove_profile)
+            except IncompleteError as err:
+                errors.append(str(err))
+
+        if errors:
+            raise ArgumentError("\n".join(errors))
+        return total
+
+    def write(self, locked=False, remove_profile=True):
         # If locked is True, assume error handling happens higher
         # in the stack.
         total = 0
-        # Pre-stash all plenaries before attempting to write any
-        # of them.  This way if an error occurs all can go through
-        # the same restore logic.
-        self.stash()
         key = None
         try:
             if not locked:
                 key = self.get_key()
                 lock_queue.acquire(key)
-            for plen in self.plenaries:
-                # IncompleteError is almost pointless in this context, but
-                # it has the nice side effect of not updating the total.
-                try:
-                    total += plen.write(locked=True)
-                except IncompleteError as err:
-                    self.logger.client_info("Warning: %s" % err)
+
+            # Pre-stash all plenaries before attempting to write any
+            # of them.  This way if an error occurs all can go through
+            # the same restore logic.
+            self.stash()
+
+            total = self._write(remove_profile=remove_profile)
         except:
             if not locked:
                 self.restore_stash()
@@ -583,23 +556,6 @@ class PlenaryCollection(object):
             if not locked:
                 lock_queue.release(key)
         return total
-
-    def remove(self, locked=False, remove_profile=False):
-        self.stash()
-        key = None
-        try:
-            if not locked:
-                key = self.get_key()
-                lock_queue.acquire(key)
-            for plen in self.plenaries:
-                plen.remove(locked=True, remove_profile=remove_profile)
-        except:
-            if not locked:
-                self.restore_stash()
-            raise
-        finally:
-            if not locked:
-                lock_queue.release(key)
 
     def read(self):
         # This should never be called, but we put it here
@@ -645,6 +601,17 @@ class PlenaryCollection(object):
                     yield plen
 
         self.plenaries = list(set(walk_plenaries(self)))
+
+    @contextmanager
+    def transaction(self):
+        with self.get_key():
+            self.stash()
+            try:
+                self.write(locked=True)
+                yield
+            except:
+                self.restore_stash()
+                raise
 
 
 class TemplateFormatter(ObjectFormatter):

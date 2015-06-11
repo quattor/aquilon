@@ -36,8 +36,8 @@ LOGGER = logging.getLogger('aquilon.server.templates.resource')
 class PlenaryResource(StructurePlenary):
     prefix = "resource"
 
-    def __init__(self, dbresource, logger=LOGGER):
-        super(PlenaryResource, self).__init__(dbresource, logger=logger)
+    def __init__(self, dbresource, **kwargs):
+        super(PlenaryResource, self).__init__(dbresource, **kwargs)
 
         holder_object = dbresource.holder.toplevel_holder_object
         if isinstance(holder_object, Host):
@@ -105,7 +105,7 @@ class PlenaryResource(StructurePlenary):
         pan_assign(lines, "pass", self.dbobj.passno)
 
     def body_application(self, lines):
-        pan_assign(lines, "eonid", self.dbobj.eonid)
+        pan_assign(lines, "eonid", self.dbobj.eon_id)
 
     def body_hostlink(self, lines):
         pan_assign(lines, "target", self.dbobj.target)
@@ -187,16 +187,19 @@ Plenary.handlers[VirtualMachine] = PlenaryResource
 
 
 class PlenaryResourceGroup(PlenaryCollection):
-    def __init__(self, dbresource, logger=LOGGER):
-        super(PlenaryResourceGroup, self).__init__(logger=logger)
+    def __init__(self, dbresource, logger=LOGGER, allow_incomplete=True):
+        super(PlenaryResourceGroup, self).__init__(logger=logger,
+                                                   allow_incomplete=allow_incomplete)
 
         self.dbobj = dbresource
-        self.real_plenary = PlenaryResource.get_plenary(dbresource)
+        self.real_plenary = PlenaryResource.get_plenary(dbresource,
+                                                        allow_incomplete=allow_incomplete)
 
         self.append(self.real_plenary)
         if dbresource.resholder:
             for res in dbresource.resholder.resources:
-                self.append(PlenaryResource.get_plenary(res))
+                self.append(PlenaryResource.get_plenary(res,
+                                                        allow_incomplete=allow_incomplete))
 
     def read(self):
         # This is used by the cat command

@@ -29,7 +29,7 @@ from aquilon.worker.dbwrappers.interface import (get_or_create_interface,
                                                  describe_interface,
                                                  set_port_group,
                                                  assign_address)
-from aquilon.worker.templates.base import Plenary, PlenaryCollection
+from aquilon.worker.templates import Plenary, PlenaryCollection
 from aquilon.worker.processes import DSDBRunner
 
 
@@ -42,6 +42,7 @@ class CommandAddInterfaceMachine(BrokerCommand):
                **arguments):
         dbmachine = Machine.get_unique(session, machine, compel=True)
         oldinfo = DSDBRunner.snapshot_hw(dbmachine)
+        plenaries = PlenaryCollection(logger=logger)
         audit_results = []
 
         if type:
@@ -79,7 +80,6 @@ class CommandAddInterfaceMachine(BrokerCommand):
                 bootable = False
 
         dbmanager = None
-        pending_removals = PlenaryCollection()
         dsdb_runner = DSDBRunner(logger=logger)
         if mac:
             prev = session.query(Interface).filter_by(mac=mac).first()
@@ -104,7 +104,7 @@ class CommandAddInterfaceMachine(BrokerCommand):
                 old_fqdn = str(dummy_machine.primary_name)
                 old_iface = prev.name
                 old_mac = prev.mac
-                self.remove_prev(session, logger, prev, pending_removals)
+                self.remove_prev(session, logger, prev, plenaries)
                 session.flush()
                 dsdb_runner.delete_host_details(old_fqdn, old_ip, old_iface,
                                                 old_mac)
@@ -152,25 +152,15 @@ class CommandAddInterfaceMachine(BrokerCommand):
 
         session.flush()
 
-        plenaries = PlenaryCollection(logger=logger)
         plenaries.append(Plenary.get_plenary(dbmachine))
         if dbmachine.host:
             plenaries.append(Plenary.get_plenary(dbmachine.host))
 
         # Even though there may be removals going on the write key
         # should be sufficient here.
-        with plenaries.get_key():
-            pending_removals.stash()
-            try:
-                plenaries.write(locked=True)
-                pending_removals.remove(locked=True)
-
-                dsdb_runner.update_host(dbmachine, oldinfo)
-                dsdb_runner.commit_or_rollback("Could not update host in DSDB")
-            except:
-                plenaries.restore_stash()
-                pending_removals.restore_stash()
-                raise
+        with plenaries.transaction():
+            dsdb_runner.update_host(dbmachine, oldinfo)
+            dsdb_runner.commit_or_rollback("Could not update host in DSDB")
 
         if dbmachine.host:
             # FIXME: reconfigure host
@@ -180,7 +170,7 @@ class CommandAddInterfaceMachine(BrokerCommand):
             self.audit_result(session, name, value, **arguments)
         return
 
-    def remove_prev(self, session, logger, prev, pending_removals):
+    def remove_prev(self, session, logger, prev, plenaries):
         """Remove the interface 'prev' and its host and machine."""
         # This should probably be re-factored to call code used elsewhere.
         # The below seems too simple to warrant that, though...
@@ -192,9 +182,8 @@ class CommandAddInterfaceMachine(BrokerCommand):
         # FIXME: Should really do everything that del_host.py does, not
         # just remove the host plenary but adjust all the service
         # plenarys and dependency files.
-        pending_removals.append(Plenary.get_plenary(dbmachine.host,
-                                                    logger=logger))
-        pending_removals.append(Plenary.get_plenary(dbmachine, logger=logger))
+        plenaries.append(Plenary.get_plenary(dbmachine.host))
+        plenaries.append(Plenary.get_plenary(dbmachine))
 
         dbdns_rec = dbmachine.primary_name
         dbmachine.primary_name = None

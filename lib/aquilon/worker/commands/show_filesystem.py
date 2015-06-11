@@ -14,18 +14,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+"""Contains the logic for `aq show filesystem`."""
 
 from aquilon.aqdb.model import Filesystem
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.commands.show_resource import show_resource
+from aquilon.worker.commands.show_resource import CommandShowResource
 
 
-class CommandShowFilesystem(BrokerCommand):
+class CommandShowFilesystem(CommandShowResource):
 
-    required_parameters = []
-
-    def render(self, session, logger, hostname, cluster, metacluster,
-               resourcegroup, all, filesystem, **arguments):
-
-        return show_resource(session, logger, hostname, cluster, metacluster,
-                             resourcegroup, all, filesystem, Filesystem)
+    resource_class = Filesystem
+    resource_name = "filesystem"
