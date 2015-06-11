@@ -88,7 +88,7 @@ class TestDelVirtualHardware(TestBrokerCommand):
         self.noouttest(["del", "machine", "--machine", "evm42"])
 
     def test_140_del_utmc9_hosts(self):
-        ip = self.net["utpgsw0-v710"].usable[0]
+        ip = self.net["autopg2"].usable[0]
         self.dsdb_expect_delete(ip)
         command = ["del", "host", "--hostname", "evm50.aqd-unittest.ms.com"]
         self.statustest(command)

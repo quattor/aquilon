@@ -716,8 +716,8 @@ class TestAddVirtualHardware(TestBrokerCommand):
 
     def test_410_move_vm_to_cluster(self):
         # Test migration when there are no disks and no interfaces yet
-        self.statustest(["update", "machine", "--machine", "evm50",
-                         "--cluster", "utecl15"])
+        self.noouttest(["update", "machine", "--machine", "evm50",
+                        "--cluster", "utecl15"])
 
     def test_411_show_evm50(self):
         command = ["show", "machine", "--machine", "evm50"]
@@ -732,8 +732,8 @@ class TestAddVirtualHardware(TestBrokerCommand):
         self.matchclean(out, "evm50", command)
 
     def test_412_move_vm_back_to_vmhost(self):
-        self.statustest(["update", "machine", "--machine", "evm50",
-                         "--vmhost", "evh82.aqd-unittest.ms.com"])
+        self.noouttest(["update", "machine", "--machine", "evm50",
+                        "--vmhost", "evh82.aqd-unittest.ms.com"])
 
         command = ["show", "machine", "--machine", "evm50"]
         out = self.commandtest(command)
@@ -822,7 +822,7 @@ class TestAddVirtualHardware(TestBrokerCommand):
 
     def test_450_add_utmc9_host(self):
         net = self.net["autopg2"]
-        ip = self.net["utpgsw0-v710"].usable[0]
+        ip = self.net["unknown0"].usable[-1]
         self.dsdb_expect_add("evm50.aqd-unittest.ms.com", ip, "eth0",
                              "00:50:56:01:20:19")
         command = ["add", "host", "--hostname", "evm50.aqd-unittest.ms.com",
@@ -841,7 +841,13 @@ class TestAddVirtualHardware(TestBrokerCommand):
                          command)
         self.dsdb_verify()
 
-    def test_451_make_evm50(self):
+    def test_451_fix_pg_mismatch(self):
+        new_ip = self.net["autopg2"].usable[0]
+        self.dsdb_expect_update("evm50.aqd-unittest.ms.com", "eth0", new_ip)
+        self.noouttest(["update_machine", "--machine", "evm50", "--ip", new_ip])
+        self.dsdb_verify()
+
+    def test_452_make_evm50(self):
         command = ["make", "--hostname", "evm50.aqd-unittest.ms.com"]
         self.statustest(command)
 

@@ -313,6 +313,12 @@ def set_port_group_vm(session, logger, dbinterface, port_group_name):
             raise ArgumentError("Port group %s does not match either a "
                                 "registered port group name, or a port "
                                 "group type." % port_group_name)
+
+        # If the current port group matches the requirements, then we're done.
+        if dbinterface.port_group in allocator.port_groups and \
+           dbinterface.port_group.name == port_group_name:
+            return
+
         selected_pg = None
         selected_capacity = 0
 
@@ -344,7 +350,8 @@ def set_port_group_vm(session, logger, dbinterface, port_group_name):
     dbinterface.port_group = selected_pg
 
 
-def set_port_group(session, logger, dbinterface, port_group_name):
+def set_port_group(session, logger, dbinterface, port_group_name,
+                   check_pg_consistency=True):
     """Validate that the port_group can be used on an interface.
 
     If the machine is virtual, check that the corresponding VLAN has
@@ -377,7 +384,8 @@ def set_port_group(session, logger, dbinterface, port_group_name):
     else:
         set_port_group_phys(session, dbinterface, port_group_name)
 
-    dbinterface.check_pg_consistency(logger=logger)
+    if check_pg_consistency:
+        dbinterface.check_pg_consistency(logger=logger)
 
 
 def _type_msg(interface_type, bootable):

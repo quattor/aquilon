@@ -23,6 +23,7 @@ from aquilon.aqdb.model import (Cpu, Chassis, ChassisSlot, Model, Machine,
                                 Resource, BundleResource, Share, Filesystem)
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.hardware_entity import update_primary_ip
+from aquilon.worker.dbwrappers.interface import set_port_group, generate_ip
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.dbwrappers.resources import (find_resource,
                                                  get_resource_holder)
@@ -97,8 +98,47 @@ def update_disk_backing_stores(dbmachine, old_holder, new_holder, remap_disk):
         dbdisk.backing_store = new_bstore
 
 
+def update_interface_bindings(session, logger, dbmachine, autoip):
+    for dbinterface in dbmachine.interfaces:
+        old_pg = dbinterface.port_group
+        if not old_pg:
+            continue
+
+        old_net = old_pg.network
+
+        # Suppress the warning about PG mismatch - we'll update the addresses
+        # later
+        set_port_group(session, logger, dbinterface, old_pg.name,
+                       check_pg_consistency=False)
+        logger.info("Updated {0:l} to use {1:l}.".format(dbinterface,
+                                                         dbinterface.port_group))
+        new_net = dbinterface.port_group.network
+
+        if new_net == old_net or not autoip:
+            dbinterface.check_pg_consistency(logger=logger)
+            continue
+
+        for addr in dbinterface.assignments:
+            if addr.network != old_net:
+                continue
+
+            new_ip = generate_ip(session, logger, dbinterface, autoip=True,
+                                 network_environment=old_net.network_environment)
+            for dbdns_rec in addr.dns_records:
+                dbdns_rec.network = new_net
+                dbdns_rec.ip = new_ip
+
+            old_ip = addr.ip
+            addr.ip = new_ip
+            addr.network = new_net
+            logger.info("Changed {0:l} IP address from {1!s} to {2!s}."
+                        .format(dbinterface, old_ip, new_ip))
+
+        dbinterface.check_pg_consistency(logger=logger)
+
+
 def move_vm(session, logger, dbmachine, resholder, remap_disk,
-            allow_metacluster_change, plenaries):
+            allow_metacluster_change, autoip, plenaries):
     old_holder = dbmachine.vm_container.holder.holder_object
     if resholder:
         new_holder = resholder.holder_object
@@ -122,6 +162,9 @@ def move_vm(session, logger, dbmachine, resholder, remap_disk,
     if new_holder != old_holder or remap_disk:
         update_disk_backing_stores(dbmachine, old_holder, new_holder, remap_disk)
 
+    if new_holder != old_holder or autoip:
+        update_interface_bindings(session, logger, dbmachine, autoip)
+
     if hasattr(new_holder, 'location_constraint'):
         dbmachine.location = new_holder.location_constraint
     else:
@@ -132,11 +175,10 @@ class CommandUpdateMachine(BrokerCommand):
 
     required_parameters = ["machine"]
 
-    def render(self, session, logger, machine, model, vendor, serial,
-               chassis, slot, clearchassis, multislot,
-               vmhost, cluster, metacluster, allow_metacluster_change,
-               cpuname, cpuvendor, cpuspeed, cpucount, memory, ip, uri,
-               remap_disk, comments, **arguments):
+    def render(self, session, logger, machine, model, vendor, serial, chassis,
+               slot, clearchassis, multislot, vmhost, cluster, metacluster,
+               allow_metacluster_change, cpuname, cpuvendor, cpuspeed, cpucount,
+               memory, ip, autoip, uri, remap_disk, comments, **arguments):
         dbmachine = Machine.get_unique(session, machine, compel=True)
         oldinfo = DSDBRunner.snapshot_hw(dbmachine)
         old_location = dbmachine.location
@@ -237,9 +279,6 @@ class CommandUpdateMachine(BrokerCommand):
         if comments is not None:
             dbmachine.comments = comments
 
-        if ip:
-            update_primary_ip(session, logger, dbmachine, ip)
-
         if uri and not dbmachine.model.model_type.isVirtualAppliance():
             raise ArgumentError("URI can be specified only for virtual "
                                 "appliances and the model's type is %s" %
@@ -262,11 +301,13 @@ class CommandUpdateMachine(BrokerCommand):
                                             cluster=cluster,
                                             metacluster=metacluster,
                                             compel=False)
-
             move_vm(session, logger, dbmachine, resholder, remap_disk,
-                    allow_metacluster_change, plenaries)
+                    allow_metacluster_change, autoip, plenaries)
         elif remap_disk:
             update_disk_backing_stores(dbmachine, None, None, remap_disk)
+
+        if ip:
+            update_primary_ip(session, logger, dbmachine, ip)
 
         if dbmachine.location != old_location and dbmachine.host:
             for vm in dbmachine.host.virtual_machines:

@@ -137,19 +137,10 @@ class TestVMMigration(TestBrokerCommand):
                          command)
 
     def test_121_move_remap_disk(self):
-        net = self.net["autopg2"]
-        ip = self.net["utpgsw0-v710"].usable[0]
         command = ["update_machine", "--machine", "evm50",
                    "--vmhost", "evh83.aqd-unittest.ms.com",
                    "--remap_disk", "filesystem/utfs1:filesystem/utrg2/utfs2"]
-        out = self.statustest(command)
-        self.matchoutput(out,
-                         "Warning: public interface eth0 of machine "
-                         "evm50.aqd-unittest.ms.com is bound to network "
-                         "autopg2 [%s] due to port group user-v710, which "
-                         "does not contain IP address %s." %
-                         (net, ip),
-                         command)
+        self.noouttest(command)
 
         command = ["show_machine", "--machine", "evm50"]
         out = self.commandtest(command)
@@ -157,18 +148,9 @@ class TestVMMigration(TestBrokerCommand):
         self.matchoutput(out, "stored on filesystem utfs2", command)
 
     def test_122_convert_to_share(self):
-        net = self.net["autopg2"]
-        ip = self.net["utpgsw0-v710"].usable[0]
         command = ["update_machine", "--machine", "evm50",
                    "--remap_disk", "filesystem/utrg2/utfs2:share/utrg2/test_v2_share"]
-        out = self.statustest(command)
-        self.matchoutput(out,
-                         "Warning: public interface eth0 of machine "
-                         "evm50.aqd-unittest.ms.com is bound to network "
-                         "autopg2 [%s] due to port group user-v710, which "
-                         "does not contain IP address %s." %
-                         (net, ip),
-                         command)
+        self.noouttest(command)
 
         command = ["show_machine", "--machine", "evm50"]
         out = self.commandtest(command)
@@ -179,11 +161,82 @@ class TestVMMigration(TestBrokerCommand):
         command = ["update_machine", "--machine", "evm50",
                    "--vmhost", "evh82.aqd-unittest.ms.com",
                    "--remap_disk", "share/utrg2/test_v2_share:filesystem/utfs1"]
-        self.statustest(command)
+        self.noouttest(command)
 
         command = ["show_machine", "--machine", "evm50"]
         out = self.commandtest(command)
         self.matchoutput(out, "Hosted by: Host evh82.aqd-unittest.ms.com", command)
+
+    def test_130_make_room(self):
+        self.noouttest(["del_interface", "--machine", "evm41", "--interface", "eth0"])
+
+    def test_132_pg_move_autoip(self):
+        self.dsdb_expect_update("evm50.aqd-unittest.ms.com", "eth0",
+                                self.net["autopg1"].usable[0])
+        command = ["update_machine", "--machine", "evm50",
+                   "--cluster", "utecl13", "--allow_metacluster_change",
+                   "--remap_disk", "filesystem/utfs1:share/utmc8as1/test_v2_share",
+                   "--autoip"]
+        self.noouttest(command)
+        self.dsdb_verify()
+
+    def test_135_show_evm50(self):
+        command = ["show_machine", "--machine", "evm50"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Hosted by: ESX Cluster utecl13", command)
+        self.matchoutput(out,
+                         "Primary Name: evm50.aqd-unittest.ms.com [%s]" %
+                         self.net["autopg1"].usable[0],
+                         command)
+
+    def test_135_autopg1(self):
+        net = self.net["autopg1"]
+        command = ["search_machine", "--networkip", net.ip]
+        out = self.commandtest(command)
+        self.matchoutput(out, "evm50", command)
+
+    def test_135_autopg2(self):
+        # This verifies that the port group binding is gone
+        net = self.net["autopg2"]
+        command = ["search_machine", "--networkip", net.ip]
+        out = self.commandtest(command)
+        self.matchclean(out, "evm50", command)
+
+    def test_136_move_back(self):
+        ip = self.net["autopg2"].usable[0]
+        self.dsdb_expect_update("evm50.aqd-unittest.ms.com", "eth0", ip)
+        command = ["update_machine", "--machine", "evm50",
+                   "--vmhost", "evh82.aqd-unittest.ms.com",
+                   "--allow_metacluster_change",
+                   "--remap_disk", "share/utmc8as1/test_v2_share:filesystem/utfs1",
+                   "--autoip"]
+        self.noouttest(command)
+        self.dsdb_verify()
+
+    def test_137_show_evm50(self):
+        command = ["show_machine", "--machine", "evm50"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Hosted by: Host evh82.aqd-unittest.ms.com", command)
+        self.matchoutput(out,
+                         "Primary Name: evm50.aqd-unittest.ms.com [%s]" %
+                         self.net["autopg2"].usable[0],
+                         command)
+
+    def test_137_autopg1(self):
+        net = self.net["autopg1"]
+        command = ["search_machine", "--networkip", net.ip]
+        out = self.commandtest(command)
+        self.matchclean(out, "evm50", command)
+
+    def test_137_autopg2(self):
+        net = self.net["autopg2"]
+        command = ["search_machine", "--networkip", net.ip]
+        out = self.commandtest(command)
+        self.matchoutput(out, "evm50", command)
+
+    def test_138_restore_evm41(self):
+        self.noouttest(["add_interface", "--machine", "evm41",
+                        "--interface", "eth0", "--automac", "--autopg"])
 
     def test_200_missing_cluster(self):
         command = ["update_machine", "--machine=evm1",

@@ -3810,7 +3810,10 @@
 	    <option name="clearchassis" type="boolean">remove chassis and slot information</option>
 	    <option name="multislot" type="boolean">use to record machine as taking multiple slots in a chassis</option>
 	    <option name="allow_metacluster_change" type="boolean">when changing clusters, allow the cluster to be in a different metacluster</option>
-	    <option name="ip" type="ipv4">New primary IP address</option>
+	    <optgroup fields="one">
+		<option name="autoip" type="flag" requires="cluster metacluster vmhost">Re-assign IP addresses</option>
+		<option name="ip" type="ipv4">New primary IP address</option>
+	    </optgroup>
 	    <option name="uri" type="string">URI to point to a template describing the virtual appliance</option>
 	    <option name="remap_disk" type="string">Vitual disk backend remapping definitions</option>
 	    <option name="comments" type="string">Update comments</option>
