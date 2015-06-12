@@ -74,6 +74,11 @@ def get_metacluster(holder):
 
 
 def update_disk_backing_stores(dbmachine, old_holder, new_holder, remap_disk):
+    if not old_holder:
+        old_holder = dbmachine.vm_container.holder.holder_object
+    if not new_holder:
+        new_holder = old_holder
+
     disk_mapping = parse_remap_disk(old_holder, new_holder, remap_disk)
 
     for dbdisk in dbmachine.disks:
@@ -95,22 +100,27 @@ def update_disk_backing_stores(dbmachine, old_holder, new_holder, remap_disk):
 def move_vm(session, logger, dbmachine, resholder, remap_disk,
             allow_metacluster_change, plenaries):
     old_holder = dbmachine.vm_container.holder.holder_object
-    new_holder = resholder.holder_object
+    if resholder:
+        new_holder = resholder.holder_object
+    else:
+        new_holder = old_holder
 
-    old_mc = get_metacluster(old_holder)
-    new_mc = get_metacluster(new_holder)
-    if old_mc != new_mc and not allow_metacluster_change:
-        raise ArgumentError("Moving VMs between metaclusters is "
-                            "disabled by default.  Use the "
-                            "--allow_metacluster_change option to "
-                            "override.")
+    if new_holder != old_holder:
+        old_mc = get_metacluster(old_holder)
+        new_mc = get_metacluster(new_holder)
+        if old_mc != new_mc and not allow_metacluster_change:
+            raise ArgumentError("Moving VMs between metaclusters is "
+                                "disabled by default.  Use the "
+                                "--allow_metacluster_change option to "
+                                "override.")
 
-    plenaries.append(Plenary.get_plenary(old_holder))
-    plenaries.append(Plenary.get_plenary(new_holder))
+        plenaries.append(Plenary.get_plenary(old_holder))
+        plenaries.append(Plenary.get_plenary(new_holder))
 
-    dbmachine.vm_container.holder = resholder
+        dbmachine.vm_container.holder = resholder
 
-    update_disk_backing_stores(dbmachine, old_holder, new_holder, remap_disk)
+    if new_holder != old_holder or remap_disk:
+        update_disk_backing_stores(dbmachine, old_holder, new_holder, remap_disk)
 
     if hasattr(new_holder, 'location_constraint'):
         dbmachine.location = new_holder.location_constraint
@@ -255,6 +265,8 @@ class CommandUpdateMachine(BrokerCommand):
 
             move_vm(session, logger, dbmachine, resholder, remap_disk,
                     allow_metacluster_change, plenaries)
+        elif remap_disk:
+            update_disk_backing_stores(dbmachine, None, None, remap_disk)
 
         if dbmachine.location != old_location and dbmachine.host:
             for vm in dbmachine.host.virtual_machines:

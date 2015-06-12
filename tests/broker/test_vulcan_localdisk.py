@@ -328,7 +328,7 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, MachineTestMixin,
                          "assigned to it.",
                          command)
 
-    def test_241_remap_disk(self):
+    def test_241_move_remap_disk(self):
         command = ["update_machine", "--machine", "utpgm0",
                    "--vmhost", self.vmhost[1],
                    "--remap_disk", "filesystem/utfs1:filesystem/utrg2/utfs2"]
@@ -339,20 +339,9 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, MachineTestMixin,
         self.matchoutput(out, "Hosted by: Host %s" % self.vmhost[1], command)
         self.matchoutput(out, "stored on filesystem utfs2", command)
 
-    def test_242_move_back(self):
+    def test_242_convert_to_share(self):
         command = ["update_machine", "--machine", "utpgm0",
-                   "--vmhost", self.vmhost[0],
-                   "--remap_disk", "filesystem/utrg2/utfs2:filesystem/utfs1"]
-        self.noouttest(command)
-
-        command = ["show_machine", "--machine", "utpgm0"]
-        out = self.commandtest(command)
-        self.matchoutput(out, "Hosted by: Host %s" % self.vmhost[0], command)
-
-    def test_243_convert_to_share(self):
-        command = ["update_machine", "--machine", "utpgm0",
-                   "--vmhost", self.vmhost[1],
-                   "--remap_disk", "filesystem/utfs1:share/utrg2/test_v2_share"]
+                   "--remap_disk", "filesystem/utrg2/utfs2:share/utrg2/test_v2_share"]
         self.noouttest(command)
 
         command = ["show_machine", "--machine", "utpgm0"]
@@ -360,7 +349,7 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, MachineTestMixin,
         self.matchoutput(out, "Hosted by: Host %s" % self.vmhost[1], command)
         self.matchoutput(out, "stored on share test_v2_share", command)
 
-    def test_244_move_back(self):
+    def test_243_move_back(self):
         command = ["update_machine", "--machine", "utpgm0",
                    "--vmhost", self.vmhost[0],
                    "--remap_disk", "share/utrg2/test_v2_share:filesystem/utfs1"]
@@ -369,8 +358,6 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, MachineTestMixin,
         command = ["show_machine", "--machine", "utpgm0"]
         out = self.commandtest(command)
         self.matchoutput(out, "Hosted by: Host %s" % self.vmhost[0], command)
-
-    # deletes
 
     def test_250_delutpgm0disk(self):
         for i in range(0, 3):
