@@ -288,11 +288,11 @@ class TestAddInterfaceAddress(TestBrokerCommand):
                    "--network_environment", "excx"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
-                         "Network %s in network environment internal used on "
+                         "Network %s [%s] in network environment internal used on "
                          "public interface eth0 of machine "
                          "unittest25.aqd-unittest.ms.com overlaps requested "
-                         "network excx-net in network environment excx." %
-                         net_internal.name,
+                         "network excx-net [%s] in network environment excx." %
+                         (net_internal.name, net_internal, net_excx),
                          command)
 
     def testverifyunittest23(self):

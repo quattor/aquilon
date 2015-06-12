@@ -124,7 +124,8 @@ class TestAddRouterAddress(TestBrokerCommand):
                    "--building", "ut"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "IP address %s is already present as a router "
-                         "for network %s." % (net.gateway, net.name), command)
+                         "for network %s [%s]." % (net.gateway, net.name, net),
+                         command)
 
     def test_200_add_normal_host_as_router(self):
         net = self.net["ut01ga2s01_v710"]
@@ -135,7 +136,7 @@ class TestAddRouterAddress(TestBrokerCommand):
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "IP address %s is not a valid router address on "
-                         "network %s." % (ip, net.name),
+                         "network %s [%s]." % (ip, net.name, net),
                          command)
 
     def test_200_add_reserved(self):
@@ -147,7 +148,7 @@ class TestAddRouterAddress(TestBrokerCommand):
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "IP address %s is not a valid router address on "
-                         "network %s." % (ip, net.name),
+                         "network %s [%s]." % (ip, net.name, net),
                          command)
 
     def test_200_show_bad_ip(self):

@@ -84,8 +84,9 @@ class TestAddStaticRoute(TestBrokerCommand, MachineTestMixin):
                    "--ip", "192.168.252.128", "--prefixlen", "25"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
-                         "Network %s already has an overlapping route to "
-                         "192.168.252.0/23 using gateway %s." % (net.name, gw),
+                         "Network %s [%s] already has an overlapping route to "
+                         "192.168.252.0/23 using gateway %s." %
+                         (net.name, net, gw),
                          command)
 
     def test_120_add_default(self):

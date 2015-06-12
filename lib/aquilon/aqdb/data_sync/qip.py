@@ -224,19 +224,19 @@ class QIPRefresh(object):
         """ Update the network parameters except the netmask """
 
         if dbnetwork.name != qipinfo.name:
-            self.logger.client_info("Setting network {0:a} name to {1}"
+            self.logger.client_info("Setting network {0!s} name to {1}"
                                     .format(dbnetwork, qipinfo.name))
             dbnetwork.name = qipinfo.name
         if dbnetwork.network_type != qipinfo.network_type:
-            self.logger.client_info("Setting network {0:a} type to {1}"
+            self.logger.client_info("Setting network {0!s} type to {1}"
                                     .format(dbnetwork, qipinfo.network_type))
             dbnetwork.network_type = qipinfo.network_type
         if dbnetwork.location != qipinfo.location:
-            self.logger.client_info("Setting network {0:a} location to {1:l}"
+            self.logger.client_info("Setting network {0!s} location to {1:l}"
                                     .format(dbnetwork, qipinfo.location))
             dbnetwork.location = qipinfo.location
         if dbnetwork.side != qipinfo.side:
-            self.logger.client_info("Setting network {0:a} side to {1}"
+            self.logger.client_info("Setting network {0!s} side to {1}"
                                     .format(dbnetwork, qipinfo.side))
             dbnetwork.side = qipinfo.side
 
@@ -268,7 +268,7 @@ class QIPRefresh(object):
                             side=qipinfo.side, location=qipinfo.location,
                             network_environment=self.net_env)
         self.session.add(dbnetwork)
-        self.logger.client_info("Adding network {0:a}".format(dbnetwork))
+        self.logger.client_info("Adding network {0!s}".format(dbnetwork))
         for ip in qipinfo.routers:
             self.add_router(dbnetwork, ip)
         self.session.flush()
@@ -296,7 +296,7 @@ class QIPRefresh(object):
                 for dns_rec in router.dns_records:
                     delete_dns_record(dns_rec)
             dbnetwork.routers = []
-            self.logger.client_info("Deleting network {0:a}".format(dbnetwork))
+            self.logger.client_info("Deleting network {0!s}".format(dbnetwork))
             self.session.delete(dbnetwork)
 
     def add_router(self, dbnetwork, ip):
@@ -394,7 +394,7 @@ class QIPRefresh(object):
                 # other tables. So we need a flag to remember if we want to keep
                 # the original object or not
                 if aqnet.ip == qipinfo.address.ip:
-                    self.logger.client_info("Setting network {0:a} prefix "
+                    self.logger.client_info("Setting network {0!s} prefix "
                                             "length to {1}"
                                             .format(aqnet,
                                                     qipinfo.address.prefixlen))

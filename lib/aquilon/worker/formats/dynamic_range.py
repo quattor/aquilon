@@ -33,7 +33,7 @@ class DynamicRangeFormatter(ObjectFormatter):
         details = [indent + "Dynamic Range: %s - %s" % (range.start, range.end)]
         details.append(indent + "  Size: %d" %
                        (int(range.end) - int(range.start) + 1))
-        details.append(indent + "  Network: {0:a}".format(range.network))
+        details.append(indent + "  Network: %s" % range.network)
         return "\n".join(details)
 
 
