@@ -354,7 +354,7 @@ class TestMapGrn(VerifyGrnsMixin, PersonalityTestMixin, TestBrokerCommand):
 
         command = ["cat", "--archetype", "aquilon", "--personality", "compileserver"]
         out = self.commandtest(command)
-        self.searchclean(out, "system/eon_ids", command)
+        self.searchclean(out, "system/eon_id_maps", command)
 
     def test_620_unmap_unittest12(self):
         for grn in self.grn_list:
