@@ -110,8 +110,7 @@ class CommandSplitNetwork(BrokerCommand):
             # Inherit location & side from the supernet
             newnet = Network(name=name, network=subnet,
                              network_environment=dbnet_env,
-                             location=dbnetwork.location, side=dbnetwork.side,
-                             comments="Created by splitting {0:a}".format(dbnetwork))
+                             location=dbnetwork.location, side=dbnetwork.side)
             session.add(newnet)
             dbnets.append(newnet)
 

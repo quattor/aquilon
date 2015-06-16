@@ -126,7 +126,7 @@ class TestPollNetworkDevice(TestBrokerCommand):
         self.matchoutput(err,
                          "Switch ut01ga2s01.aqd-unittest.ms.com: skipping VLAN "
                          "714, because network bitmask value 24 differs from "
-                         "prefixlen 26 of network %s." % net.name,
+                         "prefixlen 26 of network %s [%s]." % (net.name, net),
                          command)
         service = self.config.get("broker", "poll_helper_service")
         self.matchoutput(err,

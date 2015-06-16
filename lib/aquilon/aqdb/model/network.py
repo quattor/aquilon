@@ -99,6 +99,7 @@ class Network(Base):
     """
 
     __tablename__ = _TN
+    _instance_label = '_label'
 
     # Class-level cache of properties bound to the network type
     network_type_map = {}
@@ -307,9 +308,8 @@ class Network(Base):
                                               query_options=options,
                                               compel=compel)
 
-    def __format__(self, format_spec):
-        if format_spec != "a":
-            return super(Network, self).__format__(format_spec)
+    @property
+    def _label(self):
         return "%s [%s]" % (self.name, self.network)
 
     def __repr__(self):

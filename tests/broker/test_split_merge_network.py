@@ -131,9 +131,6 @@ class TestSplitMergeNetwork(TestBrokerCommand):
                 # Check the name
                 self.matchoutput(out, "Network: 0.2.2.0_%d" % idx, command)
                 idx += 1
-                # Check the generated comment
-                self.matchoutput(out, "Comments: Created by splitting 0.2.2.0 "
-                                 "[0.2.2.0/24]", command)
 
     def test_311_dns_record(self):
         command = ["show", "fqdn", "--fqdn", "merge1.aqd-unittest.ms.com"]

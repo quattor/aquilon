@@ -53,8 +53,8 @@ class TestDelRouterAddress(TestBrokerCommand):
         net = self.net["unknown0"]
         command = ["del", "router", "address", "--ip", net.gateway]
         out = self.notfoundtest(command)
-        self.matchoutput(out, "IP address %s is not a router on network %s." %
-                         (net.gateway, net.name), command)
+        self.matchoutput(out, "IP address %s is not a router on network %s [%s]."
+                         % (net.gateway, net.name, net), command)
 
     def test_300_verify_all(self):
         command = ["show", "router", "address", "--all"]

@@ -158,7 +158,8 @@ class TestAddNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
                           interface="gigabitethernet0/1")
 
     def test_135_add_np06fals01(self):
-        ip = self.net["notbunkerized"][5]
+        net = self.net["notbunkerized"]
+        ip = net[5]
         self.dsdb_expect_add("np06fals01.ms.com", ip, "xge49",
                              "00:1c:f6:99:e5:c1")
         command = ["add", "network_device", "--type", "tor",
@@ -170,8 +171,8 @@ class TestAddNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
         self.dsdb_verify()
         self.matchoutput(err,
                          "Bunker violation: rack np7 is inside bunker "
-                         "nyb10.np, but network notbunkerized is "
-                         "not bunkerized.",
+                         "nyb10.np, but network notbunkerized [%s] is "
+                         "not bunkerized." % net,
                          command)
         self.check_plenary_exists('network_device', 'americas', 'np', 'np06fals01')
         self.check_plenary_exists('hostdata', 'np06fals01.ms.com')

@@ -240,9 +240,10 @@ class TestRefreshNetwork(TestBrokerCommand):
                         command)
         for i in range(4, 9):
             self.matchoutput(err,
-                             "Network 0.1.1.0 cannot be deleted because DNS "
-                             "record dynamic-0-1-1-%d.aqd-unittest.ms.com "
-                             "[0.1.1.%d] still exists." %
+                             "Network 0.1.1.0 [0.1.1.0/24] cannot be deleted "
+                             "because DNS record "
+                             "dynamic-0-1-1-%d.aqd-unittest.ms.com [0.1.1.%d] "
+                             "still exists." %
                              (i, i),
                              command)
         return err

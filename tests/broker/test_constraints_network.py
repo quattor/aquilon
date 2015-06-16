@@ -45,8 +45,8 @@ class TestNetworkConstraints(TestBrokerCommand):
         err = self.statustest(command)
         self.matchoutput(err,
                          "Bunker violation: rack ut9 is inside bunker "
-                         "bucket2.ut, but network bunker_mismatch1 is not "
-                         "bunkerized.",
+                         "bucket2.ut, but network %s [%s] "
+                         "is not bunkerized." % (net.name, net),
                          command)
         self.dsdb_verify()
 
@@ -64,8 +64,8 @@ class TestNetworkConstraints(TestBrokerCommand):
         err = self.statustest(command)
         self.matchoutput(err,
                          "Bunker violation: rack ut9 is inside bunker "
-                         "bucket2.ut, but network bunker_mismatch2 is inside "
-                         "bunker bucket1.ut.",
+                         "bucket2.ut, but network %s [%s] is inside "
+                         "bunker bucket1.ut." % (net.name, net),
                          command)
         self.dsdb_verify()
 
@@ -83,9 +83,9 @@ class TestNetworkConstraints(TestBrokerCommand):
                    "--fqdn", "mismatch3.aqd-unittest.ms.com"]
         err = self.statustest(command)
         self.matchoutput(err,
-                         "Bunker violation: network bunker_mismatch2 is "
+                         "Bunker violation: network %s [%s] is "
                          "inside bunker bucket1.ut, but rack ut8 is not inside "
-                         "a bunker.",
+                         "a bunker." % (net.name, net),
                          command)
         self.dsdb_verify()
 
