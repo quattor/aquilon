@@ -40,7 +40,7 @@ class TestAddApplication(TestBrokerCommand):
         self.matchoutput(out, "Application: app1", command)
         self.matchoutput(out, "Bound to: Host server1.aqd-unittest.ms.com",
                          command)
-        self.matchoutput(out, "GRN: grn:/ms/ei/aquilon/aqd", command)
+        self.matchoutput(out, "EON id: 2", command)
         self.matchoutput(out, "Comments: Some application comments", command)
 
     def test_10_addexisting(self):

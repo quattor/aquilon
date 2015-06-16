@@ -39,5 +39,6 @@ class CommandAddApplication(CommandAddResource):
         dbgrn = lookup_grn(session, grn, eon_id, logger=logger,
                            config=self.config)
 
-        dbapp = Application(name=application, comments=comments, grn=dbgrn)
+        dbapp = Application(name=application, comments=comments,
+                            eonid=dbgrn.eon_id)
         return dbapp

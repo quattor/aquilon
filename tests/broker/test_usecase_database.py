@@ -53,7 +53,7 @@ class TestUsecaseDatabase(TestBrokerCommand):
         command = ["show_host", "--hostname=server1.aqd-unittest.ms.com"]
         out = self.commandtest(command)
         self.matchoutput(out, "Application: nydb1", command)
-        self.matchoutput(out, "GRN: grn:/ms/ei/aquilon/aqd", command)
+        self.matchoutput(out, "EON id: 2", command)
         self.matchoutput(out, "Filesystem: gnr.0", command)
 
     def test_110_verify_cat(self):

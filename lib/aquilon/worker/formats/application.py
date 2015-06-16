@@ -24,12 +24,12 @@ from aquilon.aqdb.model import Application
 class ApplicationFormatter(ResourceFormatter):
     def extra_details(self, app, indent=""):
         details = []
-        details.append(indent + "  {0:c}: {0.grn}".format(app.grn))
+        details.append(indent + "  EON id: %s" % app.eonid)
 
         return details
 
     def fill_proto(self, app, skeleton, embedded=True, indirect_attrs=True):
         super(ApplicationFormatter, self).fill_proto(app, skeleton)
-        skeleton.appdata.eonid = app.eon_id
+        skeleton.appdata.eonid = app.eonid
 
 ObjectFormatter.handlers[Application] = ApplicationFormatter()
