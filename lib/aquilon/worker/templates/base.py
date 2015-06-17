@@ -639,5 +639,8 @@ def add_location_info(lines, dblocation, prefix=""):
             pan_assign(lines, prefix + "rack/row", dblocation.rack_row)
         if dblocation.rack_column:
             pan_assign(lines, prefix + "rack/column", dblocation.rack_column)
+        if dblocation.room:
+            # rack/room should be deprecated
+            pan_assign(lines, prefix + "rack/room", dblocation.room.name)
     if dblocation.room:
-        pan_assign(lines, prefix + "rack/room", dblocation.room.name)
+        pan_assign(lines, prefix + "sysloc/room", dblocation.room.name)
