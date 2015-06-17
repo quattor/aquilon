@@ -64,6 +64,7 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
         self.matchoutput(out, '"sysloc/building" = "ut";', command)
         self.matchoutput(out, '"sysloc/city" = "ny";', command)
         self.matchoutput(out, '"sysloc/continent" = "na";', command)
+        self.matchoutput(out, '"sysloc/country" = "us";', command)
         self.searchoutput(out,
                           r'"sysloc/dns_search_domains" = '
                           r'list\(\s*"new-york.ms.com"\s*\);',

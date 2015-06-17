@@ -302,6 +302,9 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
                          '"system/metacluster/sysloc/continent" = "na";',
                          command)
         self.matchoutput(out,
+                         '"system/metacluster/sysloc/country" = "us";',
+                         command)
+        self.matchoutput(out,
                          '"system/metacluster/sysloc/city" = "ny";',
                          command)
         self.matchoutput(out,
