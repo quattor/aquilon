@@ -207,9 +207,8 @@ class PersonalityStage(Base):
         new = self.__class__(name=name)
 
         with session.no_autoflush:
-            if self.parameter:
-                new.parameter = self.parameter.copy()
-
+            for defholder, param in self.parameters.items():
+                new.parameters[defholder] = param.copy()
             new.features.extend(link.copy() for link in self.features)
             for dbsrv, info in self.required_services.items():
                 new.required_services[dbsrv] = info.copy()

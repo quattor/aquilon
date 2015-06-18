@@ -16,14 +16,13 @@
 # limitations under the License.
 """Contains the logic for `aq cat --personality`."""
 
-from aquilon.exceptions_ import ArgumentError
+from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.aqdb.model import Personality
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.templates.personality import (PlenaryPersonalityPreFeature,
                                                   PlenaryPersonalityPostFeature,
                                                   PlenaryPersonalityParameter,
-                                                  PlenaryPersonalityBase,
-                                                  ParameterTemplate)
+                                                  PlenaryPersonalityBase)
 
 
 class CommandCatPersonality(BrokerCommand):
@@ -47,12 +46,18 @@ class CommandCatPersonality(BrokerCommand):
             plenary = PlenaryPersonalityPostFeature.get_plenary(dbstage,
                                                                 logger=logger)
         elif param_tmpl:
-            if param_tmpl not in dbstage.archetype.param_def_holders:
-                raise ArgumentError("No parameter definitions found for "
-                                    "template %s." % param_tmpl)
-            param_def_holder = dbstage.archetype.param_def_holders[param_tmpl]
-            ptmpl = ParameterTemplate(dbstage, param_def_holder)
-            plenary = PlenaryPersonalityParameter(ptmpl, logger=logger)
+            try:
+                param_def_holder = dbstage.archetype.param_def_holders[param_tmpl]
+            except KeyError:
+                raise ArgumentError("Unknown parameter template %s." % param_tmpl)
+
+            try:
+                dbparam = dbstage.parameters[param_def_holder]
+            except KeyError:
+                raise NotFoundException("No parameters found for template %s." %
+                                        param_tmpl)
+
+            plenary = PlenaryPersonalityParameter(dbparam, logger=logger)
         else:
             plenary = PlenaryPersonalityBase.get_plenary(dbstage,
                                                          logger=logger)

@@ -31,10 +31,14 @@ class CommandAddParameter(BrokerCommand):
     strict_path = True
 
     def process_parameter(self, session, dbstage, db_paramdef, path, value):
-        if not dbstage.parameter:
-            dbstage.parameter = PersonalityParameter(value={})
+        try:
+            parameter = dbstage.parameters[db_paramdef.holder]
+        except KeyError:
+            parameter = PersonalityParameter(param_def_holder=db_paramdef.holder,
+                                             value={})
+            dbstage.parameters[db_paramdef.holder] = parameter
 
-        set_parameter(session, dbstage.parameter, db_paramdef, path, value)
+        set_parameter(session, parameter, db_paramdef, path, value)
 
     def render(self, session, logger, archetype, personality, personality_stage,
                feature, type, path, user, value=None, justification=None,

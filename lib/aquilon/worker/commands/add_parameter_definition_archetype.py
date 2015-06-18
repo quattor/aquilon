@@ -15,8 +15,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from sqlalchemy.orm import contains_eager
+
 from aquilon.exceptions_ import ArgumentError, UnimplementedError
-from aquilon.aqdb.model import Archetype, ArchetypeParamDef, ParamDefinition
+from aquilon.aqdb.model import (Archetype, ArchetypeParamDef, ParamDefinition,
+                                Personality, PersonalityStage,
+                                PersonalityParameter)
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.parameter import add_arch_paramdef_plenaries
 from aquilon.worker.templates import PlenaryCollection
@@ -45,7 +49,19 @@ class CommandAddParameterDefintionArchetype(BrokerCommand):
         except KeyError:
             holder = ArchetypeParamDef(template=template)
             dbarchetype.param_def_holders[template] = holder
-            add_arch_paramdef_plenaries(session, dbarchetype, holder, plenaries)
+
+            # Create the parameter object for all existing personalities
+            q = session.query(PersonalityStage)
+            q = q.join(Personality)
+            q = q.filter_by(archetype=dbarchetype)
+            q = q.options(contains_eager('personality'))
+            for dbstage in q:
+                dbparam = PersonalityParameter(param_def_holder=holder,
+                                               personality_stage=dbstage,
+                                               value={})
+                session.add(dbparam)
+
+            add_arch_paramdef_plenaries(session, holder, plenaries)
 
         if not activation:
             activation = 'dispatch'

@@ -16,7 +16,8 @@
 # limitations under the License.
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import ParamDefinition, Archetype
+from aquilon.aqdb.model import (ParamDefinition, Archetype,
+                                PersonalityParameter)
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.parameter import (search_path_in_personas,
                                                  lookup_paramdef,
@@ -49,9 +50,13 @@ class CommandDelParameterDefintionArchetype(BrokerCommand):
         # This was the last definition for the given template - need to
         # clean up
         if not param_def_holder.param_definitions:
-            add_arch_paramdef_plenaries(session, dbarchetype, param_def_holder,
-                                        plenaries)
-            dbarchetype.param_def_holders.remove(param_def_holder)
+            add_arch_paramdef_plenaries(session, param_def_holder, plenaries)
+
+            q = session.query(PersonalityParameter)
+            q = q.filter_by(param_def_holder=param_def_holder)
+            # synchronize_session='evaluate' does not seem to work correctly
+            q.delete(synchronize_session='fetch')
+            del dbarchetype.param_def_holders[param_def_holder.template]
 
         session.flush()
 

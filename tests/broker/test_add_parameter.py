@@ -330,6 +330,13 @@ class TestAddParameter(VerifyGrnsMixin, PersonalityTestMixin,
         err = self.badrequesttest(command)
         self.matchoutput(err, "Additional properties are not allowed", command)
 
+    def test_200_cat_bad_template(self):
+        command = ["cat", "--personality", "utpers-dev",
+                   "--archetype", "aquilon", "--param_tmpl", "bad-template"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Unknown parameter template bad-template.",
+                         command)
+
     def test_300_verify_diff(self):
         cmd = ["show_diff", "--archetype", "aquilon",
                "--personality", "utpers-dev", "--personality_stage", "next",

@@ -19,15 +19,15 @@
 from jsonschema import validate, ValidationError
 from six import iteritems
 
-from sqlalchemy.orm import contains_eager, joinedload, subqueryload, undefer
+from sqlalchemy.orm import joinedload, subqueryload, undefer
 from sqlalchemy.sql import or_
 
 from aquilon.exceptions_ import NotFoundException, ArgumentError
-from aquilon.aqdb.model import (Personality, PersonalityStage, Parameter,
-                                PersonalityParameter, FeatureLink, Host,
-                                ArchetypeParamDef, FeatureParamDef)
+from aquilon.aqdb.model import (PersonalityStage, Parameter,
+                                PersonalityParameter, Host, FeatureParamDef)
 from aquilon.aqdb.model.hostlifecycle import Ready, Almostready
 from aquilon.worker.formats.parameter_definition import ParamDefinitionFormatter
+from aquilon.worker.templates.base import Plenary
 
 
 def set_parameter(session, parameter, db_paramdef, path, value, update=False):
@@ -59,10 +59,13 @@ def del_all_feature_parameter(session, dblink):
     dbstage = dblink.personality_stage
     defholder = dblink.feature.param_def_holder
 
-    if not dbstage or not defholder or not dbstage.parameter:
+    if not dbstage or not defholder:
         return
 
-    parameter = dblink.personality_stage.parameter
+    try:
+        parameter = dbstage.parameters[defholder]
+    except KeyError:
+        return
 
     for link in dbstage.features:
         # If the feature is still bound, then leave the parameters alone
@@ -70,12 +73,15 @@ def del_all_feature_parameter(session, dblink):
             break
     else:
         for paramdef in defholder.param_definitions:
+            if paramdef.activation != 'rebuild':
+                continue
+
             path = Parameter.feature_path(dblink.feature, paramdef.path)
             value = parameter.get_path(path, compel=False)
             if value is not None:
-                if paramdef.activation == 'rebuild':
-                    validate_rebuild_required(session, path, dbstage)
-                parameter.del_path(path)
+                validate_rebuild_required(session, path, dbstage)
+
+        del dbstage.parameters[defholder]
 
 
 def validate_rebuild_required(session, path, dbstage):
@@ -153,7 +159,7 @@ def validate_required_parameter(param_def_holder, parameter):
             continue
 
         if isinstance(param_def_holder, FeatureParamDef):
-            path = parameter.feature_path(param_def_holder.feature,
+            path = Parameter.feature_path(param_def_holder.feature,
                                           param_def.path)
         else:
             path = param_def.path
@@ -171,15 +177,9 @@ def validate_required_parameter(param_def_holder, parameter):
 
 def search_path_in_personas(session, db_paramdef):
     q = session.query(PersonalityParameter)
-    q = q.join(PersonalityStage)
-    q = q.options(contains_eager('personality_stage'))
-    if isinstance(db_paramdef.holder, ArchetypeParamDef):
-        q = q.join(Personality)
-        q = q.options(contains_eager('personality_stage.personality'))
-        q = q.filter_by(archetype=db_paramdef.holder.archetype)
-    else:
-        q = q.join(FeatureLink)
-        q = q.filter_by(feature=db_paramdef.holder.feature)
+    q = q.filter_by(param_def_holder=db_paramdef.holder)
+    q = q.options(joinedload('personality_stage'),
+                  joinedload('personality_stage.personality'))
 
     params = {}
 
@@ -204,40 +204,32 @@ def validate_personality_config(dbstage):
         parameters are also validated.
     """
     dbarchetype = dbstage.personality.archetype
-    parameter = dbstage.parameter
-
     error = []
 
     for param_def_holder in dbarchetype.param_def_holders.values():
+        parameter = dbstage.parameters.get(param_def_holder, None)
         error += validate_required_parameter(param_def_holder, parameter)
 
     # features for personalities
     for link in dbarchetype.features + dbstage.features:
-        if not link.feature.param_def_holder:
+        param_def_holder = link.feature.param_def_holder
+        if not param_def_holder:
             continue
 
-        tmp_error = validate_required_parameter(link.feature.param_def_holder,
-                                                parameter)
+        parameter = dbstage.parameters.get(param_def_holder, None)
+        tmp_error = validate_required_parameter(param_def_holder, parameter)
         if tmp_error:
             error.append("Feature Binding: %s" % link.feature)
             error += tmp_error
     return error
 
 
-def add_arch_paramdef_plenaries(session, dbarchetype, param_def_holder,
-                                plenaries):
-    # Do the import here, to avoid circles...
-    from aquilon.worker.templates.personality import (ParameterTemplate,
-                                                      PlenaryPersonalityParameter)
-
-    q = session.query(PersonalityStage)
-    q = q.join(Personality)
-    q = q.filter_by(archetype=dbarchetype)
-    q = q.options(contains_eager('personality'),
-                  joinedload('parameter'))
-    for dbstage in q:
-        ptmpl = ParameterTemplate(dbstage, param_def_holder)
-        plenaries.append(PlenaryPersonalityParameter.get_plenary(ptmpl))
+def add_arch_paramdef_plenaries(session, param_def_holder, plenaries):
+    q = session.query(PersonalityParameter)
+    q = q.filter_by(param_def_holder=param_def_holder)
+    q = q.options(joinedload('personality_stage'),
+                  joinedload('personality_stage.personality'))
+    plenaries.extend(Plenary.get_plenary(dbparam) for dbparam in q)
 
 
 def add_feature_paramdef_plenaries(session, dbfeature, plenaries):
@@ -250,7 +242,7 @@ def add_feature_paramdef_plenaries(session, dbfeature, plenaries):
     q = q.join(PersonalityStage.features)
     q = q.filter_by(feature=dbfeature)
     q = q.options(joinedload('personality'),
-                  joinedload('parameter'),
+                  subqueryload('parameters'),
                   subqueryload('features'),
                   joinedload('features.feature'),
                   undefer('features.feature.comments'),

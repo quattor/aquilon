@@ -21,9 +21,9 @@ from operator import attrgetter
 from six import iteritems
 
 from sqlalchemy.inspection import inspect
-from sqlalchemy.orm import object_session
 
-from aquilon.aqdb.model import PersonalityStage, ParamDefinition
+from aquilon.aqdb.model import (PersonalityStage, ParamDefinition,
+                                PersonalityParameter)
 from aquilon.worker.locks import NoLockKey, PlenaryKey
 from aquilon.worker.templates.base import (Plenary, StructurePlenary,
                                            TemplateFormatter, PlenaryCollection)
@@ -37,23 +37,23 @@ LOGGER = logging.getLogger(__name__)
 def get_parameters_by_feature(dbstage, dbfeaturelink):
     ret = {}
     param_def_holder = dbfeaturelink.feature.param_def_holder
-    if not param_def_holder or not dbstage.parameter:
+    if not param_def_holder:
         return ret
 
-    parameters = [dbstage.parameter]
+    param = dbstage.parameters.get(param_def_holder, None)
+
     for param_def in param_def_holder.param_definitions:
-        for param in parameters:
-            if param:
-                value = param.get_feature_path(dbfeaturelink.feature,
-                                               param_def.path, compel=False)
-            else:
-                value = None
+        if param:
+            value = param.get_feature_path(dbfeaturelink.feature,
+                                           param_def.path, compel=False)
+        else:
+            value = None
 
-            if value is None:
-                value = param_def.parsed_default
+        if value is None:
+            value = param_def.parsed_default
 
-            if value is not None:
-                ret[param_def.path] = value
+        if value is not None:
+            ret[param_def.path] = value
     return ret
 
 
@@ -101,19 +101,6 @@ def staged_path(prefix, dbstage, suffix):
                                 dbstage.name, suffix)
 
 
-# Normally we have exactly one instance of every plenary class per DB object.
-# This class just wraps the (personality, template path) tuple to make parameter
-# plenaries behave the same way.
-class ParameterTemplate(object):
-    def __init__(self, dbstage, param_def_holder):
-        self.personality_stage = dbstage
-        self.param_def_holder = param_def_holder
-
-    def __str__(self):
-        return "%s/%s" % (self.personality_stage.personality.name,
-                          self.param_def_holder.template)
-
-
 class PlenaryPersonality(PlenaryCollection):
 
     def __init__(self, dbstage, logger=LOGGER, allow_incomplete=True):
@@ -129,11 +116,15 @@ class PlenaryPersonality(PlenaryCollection):
         self.append(PlenaryPersonalityPostFeature.get_plenary(dbstage,
                                                               allow_incomplete=allow_incomplete))
 
-        # mulitple structure templates for parameters
-        for defholder in dbstage.archetype.param_def_holders.values():
-            ptmpl = ParameterTemplate(dbstage, defholder)
-            self.append(PlenaryPersonalityParameter.get_plenary(ptmpl,
-                                                                allow_incomplete=allow_incomplete))
+        for template, defholder in dbstage.archetype.param_def_holders.items():
+            if defholder not in dbstage.parameters:
+                logger.client_info("{0} does not have parameters for "
+                                   "template {1!s}.".format(dbstage, template))
+                continue
+
+            plenary = PlenaryPersonalityParameter.get_plenary(dbstage.parameters[defholder],
+                                                              allow_incomplete=allow_incomplete)
+            self.append(plenary)
 
     def get_key(self, exclusive=True):
         if inspect(self.dbobj).deleted:
@@ -283,31 +274,26 @@ class PlenaryPersonalityParameter(StructurePlenary):
     prefix = "personality"
 
     @classmethod
-    def template_name(cls, ptmpl):
-        return staged_path(cls.prefix, ptmpl.personality_stage,
-                           ptmpl.param_def_holder.template)
+    def template_name(cls, dbparam):
+        return staged_path(cls.prefix, dbparam.personality_stage,
+                           dbparam.param_def_holder.template)
 
     @classmethod
-    def loadpath(cls, ptmpl):
-        return ptmpl.personality_stage.personality.archetype.name
+    def loadpath(cls, dbparam):
+        return dbparam.personality_stage.personality.archetype.name
+
+    def __init__(self, *args, **kwargs):
+        super(PlenaryPersonalityParameter, self).__init__(*args, **kwargs)
+        self.debug_name = "%s/%s" % (self.dbobj.personality_stage.qualified_name,
+                                     self.dbobj.param_def_holder.template)
 
     def body(self, lines):
-        dbstage = self.dbobj.personality_stage
-        param_def_holder = self.dbobj.param_def_holder
-
-        if dbstage.parameter:
-            parameters = [dbstage.parameter]
-        else:
-            parameters = []
+        dbparam = self.dbobj
+        param_def_holder = dbparam.param_def_holder
 
         for param_def in sorted(param_def_holder.param_definitions,
                                 key=attrgetter('path')):
-            value = None
-
-            for param in parameters:
-                value = param.get_path(param_def.path, compel=False)
-                if value is not None:
-                    break
+            value = dbparam.get_path(param_def.path, compel=False)
 
             if value is None:
                 value = param_def.parsed_default
@@ -317,22 +303,11 @@ class PlenaryPersonalityParameter(StructurePlenary):
                 for path in sorted(values.keys()):
                     pan_assign(lines, path, values[path])
 
-    def is_deleted(self):
-        for dbobj in (self.dbobj.personality_stage,
-                      self.dbobj.param_def_holder):
-            session = object_session(dbobj)
-            if dbobj in session.deleted or inspect(dbobj).deleted:
-                return True
-
-        return False
-
-    def is_dirty(self):
-        session = object_session(self.dbobj.personality_stage)
-        return self.dbobj.personality_stage in session.dirty
-
     def get_key(self, exclusive=True):
         if self.is_deleted():
             return NoLockKey(logger=self.logger)
         else:
             return PlenaryKey(personality=self.dbobj.personality_stage,
                               logger=self.logger, exclusive=exclusive)
+
+Plenary.handlers[PersonalityParameter] = PlenaryPersonalityParameter
