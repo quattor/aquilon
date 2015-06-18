@@ -33,26 +33,26 @@ class CommandDelParameterDefintionArchetype(BrokerCommand):
 
     def render(self, session, logger, archetype, path, **kwargs):
         dbarchetype = Archetype.get_unique(session, archetype, compel=True)
-        if not dbarchetype.param_def_holder:
-            raise ArgumentError("No parameter definitions found for {0}."
-                                .format(dbarchetype))
 
-        db_paramdef = ParamDefinition.get_unique(session, path=path,
-                                                 holder=dbarchetype.param_def_holder,
-                                                 compel=True)
+        for holder in dbarchetype.param_def_holders.values():
+            db_paramdef = ParamDefinition.get_unique(session, path=path,
+                                                     holder=holder)
+            if db_paramdef:
+                break
+        else:
+            raise ArgumentError("Parameter definition %s not found." % path)
+
         # validate if this path is being used
-        holder = search_path_in_personas(session, path, dbarchetype.param_def_holder)
+        holder = search_path_in_personas(session, path, db_paramdef.holder)
         if holder:
             raise ArgumentError("Parameter with path {0} used by following and cannot be deleted : ".format(path) +
                                 ", ".join("{0.holder_object:l}".format(h) for h in holder))
 
         plenaries = PlenaryCollection(logger=logger)
 
-        q = session.query(ParamDefinition.id)
-        q = q.filter_by(holder=dbarchetype.param_def_holder)
-        q = q.filter_by(template=db_paramdef.template)
-        q = q.filter(ParamDefinition.id != db_paramdef.id)
-        if not q.count():
+        param_def_holder = db_paramdef.holder
+        param_def_holder.param_definitions.remove(db_paramdef)
+        if not param_def_holder.param_definitions:
             # This was the last definition for the given template - need to
             # clean up
             q = session.query(PersonalityStage)
@@ -60,11 +60,11 @@ class CommandDelParameterDefintionArchetype(BrokerCommand):
             q = q.options(contains_eager('personality'))
             q = q.filter_by(archetype=dbarchetype)
             for dbstage in q:
-                ptmpl = ParameterTemplate(dbstage, db_paramdef.template, None)
-                ptmpl.force_delete = True
+                ptmpl = ParameterTemplate(dbstage, param_def_holder)
                 plenaries.append(PlenaryPersonalityParameter.get_plenary(ptmpl))
 
-        session.delete(db_paramdef)
+            dbarchetype.param_def_holders.remove(param_def_holder)
+
         session.flush()
 
         plenaries.write()

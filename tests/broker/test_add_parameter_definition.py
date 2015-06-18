@@ -182,14 +182,17 @@ class TestAddParameterDefinition(TestBrokerCommand):
         cmd = ["show_parameter_definition", "--archetype", "aquilon",
                "--path", "path-does-not-exist"]
         out = self.notfoundtest(cmd)
-        self.matchoutput(out, "Parameter Definition path-does-not-exist, "
-                         "parameter definition holder aquilon not found.", cmd)
+        self.matchoutput(out,
+                         "Parameter definition path-does-not-exist not found.",
+                         cmd)
 
     def test_300_show_archetype_no_params(self):
         cmd = ["show_parameter_definition", "--archetype", "windows",
                "--path", "path-does-not-exist"]
         out = self.notfoundtest(cmd)
-        self.matchoutput(out, "Archetype windows does not have parameters.", cmd)
+        self.matchoutput(out,
+                         "Parameter definition path-does-not-exist not found.",
+                         cmd)
 
     def test_400_verify_all(self):
         cmd = ["search_parameter_definition", "--archetype", "aquilon"]

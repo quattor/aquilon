@@ -52,12 +52,15 @@ class CommandAddParameter(BrokerCommand):
         if feature:
             dbfeature = Feature.get_unique(session, name=feature, feature_type=type,
                                            compel=True)
-            param_def_holder = dbfeature.param_def_holder
+            holders = [dbfeature.param_def_holder]
         else:
-            param_def_holder = dbpersonality.archetype.param_def_holder
+            holders = dbpersonality.archetype.param_def_holders.values()
 
-        dbparam_def = get_paramdef_for_parameter(path, param_def_holder)
-        if not dbparam_def:
+        for param_def_holder in holders:
+            dbparam_def = get_paramdef_for_parameter(path, param_def_holder)
+            if dbparam_def:
+                break
+        else:
             raise NotFoundException("Parameter %s does not match any "
                                     "parameter definitions." % path)
 

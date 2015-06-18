@@ -31,8 +31,8 @@ class ParamDefinitionFormatter(ObjectFormatter):
 
         details.append(indent + "{0:c}: {0!s}{1}".format(paramdef, reqstr))
         details.append(indent + "  Type: %s" % paramdef.value_type)
-        if paramdef.template:
-            details.append(indent + "  Template: %s" % paramdef.template)
+        if hasattr(paramdef.holder, 'template'):
+            details.append(indent + "  Template: %s" % paramdef.holder.template)
         if paramdef.default:
             details.append(indent + "  Default: %s" % paramdef.default)
         if paramdef.activation:
@@ -46,8 +46,8 @@ class ParamDefinitionFormatter(ObjectFormatter):
         skeleton.path = str(paramdef.path)
         skeleton.value_type = str(paramdef.value_type)
         skeleton.is_required = paramdef.required
-        if paramdef.template:
-            skeleton.template = str(paramdef.template)
+        if hasattr(paramdef.holder, 'template'):
+            skeleton.template = str(paramdef.holder.template)
         if paramdef.default:
             skeleton.default = str(paramdef.default)
         if paramdef.description:
@@ -62,7 +62,7 @@ class ParamDefinitionFormatter(ObjectFormatter):
                paramdef.value_type,
                paramdef.default,
                paramdef.description,
-               paramdef.template,
+               paramdef.holder.template if hasattr(paramdef.holder, 'template') else None,
                paramdef.required,
                paramdef.activation)
 

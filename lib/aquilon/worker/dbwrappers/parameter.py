@@ -145,8 +145,7 @@ def get_paramdef_for_parameter(path, param_def_holder):
         if path == paramdef.path:
             match = paramdef
             break
-
-    if not match:
+    else:
         for paramdef in param_definitions:
             if re.match(paramdef.path + '$', path):
                 match = paramdef
@@ -219,9 +218,8 @@ def validate_personality_config(dbstage):
 
     error = []
 
-    if dbarchetype.param_def_holder:
-        error += validate_required_parameter(dbarchetype.param_def_holder,
-                                             parameter)
+    for param_def_holder in dbarchetype.param_def_holders.values():
+        error += validate_required_parameter(param_def_holder, parameter)
 
     # features for personalities
     for link in dbarchetype.features + dbstage.features:

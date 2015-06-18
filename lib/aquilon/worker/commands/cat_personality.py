@@ -16,14 +16,14 @@
 # limitations under the License.
 """Contains the logic for `aq cat --personality`."""
 
+from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Personality
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.templates.personality import (PlenaryPersonalityPreFeature,
                                                   PlenaryPersonalityPostFeature,
                                                   PlenaryPersonalityParameter,
                                                   PlenaryPersonalityBase,
-                                                  ParameterTemplate,
-                                                  get_parameters_by_tmpl)
+                                                  ParameterTemplate)
 
 
 class CommandCatPersonality(BrokerCommand):
@@ -44,14 +44,11 @@ class CommandCatPersonality(BrokerCommand):
             plenary = PlenaryPersonalityPostFeature.get_plenary(dbstage,
                                                                 logger=logger)
         elif param_tmpl:
-            param_templates = get_parameters_by_tmpl(dbstage)
-
-            if param_tmpl in param_templates:
-                values = param_templates[param_tmpl]
-            else:
-                values = {}
-
-            ptmpl = ParameterTemplate(dbstage, param_tmpl, values)
+            if param_tmpl not in dbstage.archetype.param_def_holders:
+                raise ArgumentError("No parameter definitions found for "
+                                    "template %s." % param_tmpl)
+            param_def_holder = dbstage.archetype.param_def_holders[param_tmpl]
+            ptmpl = ParameterTemplate(dbstage, param_def_holder)
             plenary = PlenaryPersonalityParameter(ptmpl, logger=logger)
         else:
             plenary = PlenaryPersonalityBase.get_plenary(dbstage,

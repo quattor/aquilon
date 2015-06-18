@@ -16,7 +16,7 @@
 # limitations under the License.
 
 from aquilon.exceptions_ import ArgumentError, UnimplementedError
-from aquilon.aqdb.model import Archetype, ArchetypeParamDef, ParamDefinition
+from aquilon.aqdb.model import Archetype, ParamDefinition
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.parameter import validate_param_definition
 
@@ -31,12 +31,14 @@ class CommandUpdParameterDefintionArchetype(BrokerCommand):
         if not dbarchetype.is_compileable:
             raise ArgumentError("{0} is not compileable.".format(dbarchetype))
 
-        if not dbarchetype.param_def_holder:
-            dbarchetype.param_def_holder = ArchetypeParamDef()
+        for holder in dbarchetype.param_def_holders.values():
+            db_paramdef = ParamDefinition.get_unique(session, path=path,
+                                                     holder=holder)
+            if db_paramdef:
+                break
+        else:
+            raise ArgumentError("Parameter definition %s not found." % path)
 
-        db_paramdef = ParamDefinition.get_unique(session, path=path,
-                                                 holder=dbarchetype.param_def_holder,
-                                                 compel=True)
         if required is not None:
             db_paramdef.required = required
         if activation is not None:

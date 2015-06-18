@@ -28,11 +28,11 @@ class CommandSearchParameterDefinitionArchetype(BrokerCommand):
     def render(self, session, archetype, template, **arguments):
         dbarchetype = Archetype.get_unique(session, archetype, compel=True)
         q = session.query(ParamDefinition)
+        q = q.join(ParamDefinition.holder.of_type(ArchetypeParamDef))
         if template:
             q = q.filter_by(template=template)
-        q = q.join(ParamDefinition.holder.of_type(ArchetypeParamDef))
         q = q.options(contains_eager('holder'),
                       undefer('description'))
         q = q.filter_by(archetype=dbarchetype)
-        q = q.order_by(ParamDefinition.template, ParamDefinition.path)
+        q = q.order_by(ArchetypeParamDef.template, ParamDefinition.path)
         return q.all()

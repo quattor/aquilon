@@ -42,10 +42,8 @@ class CommandShowParameterPersonality(BrokerCommand):
             params = PersonalityProtoParameter()
 
             param_definitions = None
-            param_def_holder = dbpersonality.archetype.param_def_holder
-
             for param in [dbstage.parameter]:
-                if param_def_holder:
+                for param_def_holder in dbpersonality.archetype.param_def_holders.values():
                     param_definitions = param_def_holder.param_definitions
                     for param_def in param_definitions:
                         value = param.get_path(param_def.path, compel=False)

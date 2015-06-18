@@ -249,7 +249,7 @@ class CommandFlush(BrokerCommand):
 
                 q = session.query(Archetype)
                 q = q.options(subqueryload('features'),
-                              joinedload('param_def_holder'))
+                              subqueryload('param_def_holders'))
                 archetypes = q.all()  # pylint: disable=W0612
 
                 q = session.query(ParamDefHolder)
