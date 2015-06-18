@@ -38,10 +38,6 @@
 	    <arg><option>--interface <replaceable>IFACE</replaceable></option></arg>
 	    <arg><option>--justification <replaceable>REASON</replaceable></option></arg>
 	    <arg><option>--reason <replaceable>REASON</replaceable></option></arg>
-	    <group>
-		<arg choice="plain"><option>--flush</option></arg>
-		<arg choice="plain"><option>--noflush</option></arg>
-	    </group>
 	    <xi:include href="../common/global_options.xml"/>
 	</cmdsynopsis>
     </refsynopsisdiv>
@@ -169,21 +165,6 @@
 		</term>
 		<listitem>
 		    <para>This string option needs to be specified  to explain why the --justification=emergency was used.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-	        <term>
-		    <option>--flush</option>, <option>--noflush</option>
-		</term>
-		<listitem>
-		    <para>
-			Specify if the plenary templates of affected hosts should be updated
-			(<option>--flush</option>), or not (<option>--noflush</option>). The default is to
-			flush host templates.
-		    </para>
-		    <para>
-			Note that updating the plenary templates for a whole archetype can take a long time.
 		    </para>
 		</listitem>
 	    </varlistentry>
