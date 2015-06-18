@@ -15,11 +15,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from operator import attrgetter
+from sqlalchemy.orm import contains_eager, undefer
 
-from aquilon.exceptions_ import NotFoundException
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.aqdb.model import Archetype
+from aquilon.aqdb.model import Archetype, ArchetypeParamDef, ParamDefinition
+from aquilon.worker.broker import BrokerCommand
 
 
 class CommandSearchParameterDefinitionArchetype(BrokerCommand):
@@ -28,10 +27,10 @@ class CommandSearchParameterDefinitionArchetype(BrokerCommand):
 
     def render(self, session, archetype, **arguments):
         dbarchetype = Archetype.get_unique(session, archetype, compel=True)
-        if dbarchetype.paramdef_holder and \
-           dbarchetype.paramdef_holder.param_definitions:
-            return sorted(dbarchetype.paramdef_holder.param_definitions,
-                          key=attrgetter('template', 'path'))
-
-        raise NotFoundException("No parameter definitions found for "
-                                "archetype {0}.".format(archetype))
+        q = session.query(ParamDefinition)
+        q = q.join(ParamDefinition.holder.of_type(ArchetypeParamDef))
+        q = q.options(contains_eager('holder'),
+                      undefer('description'))
+        q = q.filter_by(archetype=dbarchetype)
+        q = q.order_by(ParamDefinition.template, ParamDefinition.path)
+        return q.all()

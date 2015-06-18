@@ -260,10 +260,7 @@ class TestParameterDefinitionFeature(TestBrokerCommand):
 
     def test_200_verify_delete(self):
         cmd = ["search_parameter_definition", "--feature", FEATURE, "--type=host"]
-
-        err = self.notfoundtest(cmd)
-        self.matchoutput(err, "No parameter definitions found for host "
-                         "feature myfeature", cmd)
+        self.noouttest(cmd)
 
     def test_210_invalid_path_cleaned(self):
         for path in ["/startslash", "endslash/"]:

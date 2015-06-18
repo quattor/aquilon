@@ -275,9 +275,7 @@ class TestParameterDefinition(TestBrokerCommand):
 
     def test_200_verify_delete(self):
         cmd = ["search_parameter_definition", "--archetype", ARCHETYPE]
-
-        err = self.notfoundtest(cmd)
-        self.matchoutput(err, "Not Found: No parameter definitions found for archetype aquilon", cmd)
+        self.noouttest(cmd)
 
     def test_210_invalid_path_cleaned(self):
         for path in ["/startslash", "endslash/"]:

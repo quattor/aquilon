@@ -18,6 +18,7 @@
 
 import re
 
+from sqlalchemy.orm import contains_eager, subqueryload
 from sqlalchemy.sql import or_
 
 from aquilon.exceptions_ import NotFoundException, ArgumentError
@@ -250,18 +251,21 @@ def validate_required_parameter(param_definitions, parameters, dbfeaturelink=Non
 def search_path_in_personas(session, path, paramdef_holder):
     q = session.query(PersonalityParameter)
     q = q.join(PersonalityStage)
+    q = q.options(contains_eager('personality_stage'))
     if isinstance(paramdef_holder, ArchetypeParamDef):
         q = q.join(Personality)
+        q = q.options(contains_eager('personality_stage.personality'))
         q = q.filter_by(archetype=paramdef_holder.archetype)
     else:
         q = q.join(FeatureLink)
         q = q.filter_by(feature=paramdef_holder.feature)
+    q = q.options(subqueryload('parameters'))
 
     holder = {}
     trypath = []
     if isinstance(paramdef_holder, ArchetypeParamDef):
         trypath.append(path)
-    for param_holder in q.all():
+    for param_holder in q:
         try:
             if not isinstance(paramdef_holder, ArchetypeParamDef):
                 trypath = []

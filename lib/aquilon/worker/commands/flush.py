@@ -30,7 +30,7 @@ from aquilon.aqdb.model import (Service, Machine, Chassis, Host,
                                 Rack, Resource, HostResource, ClusterResource,
                                 BundleResource, VirtualMachine, Filesystem,
                                 ServiceAddress, Share, Disk, Model, Interface,
-                                ManagementInterface, AddressAssignment,
+                                AddressAssignment,
                                 ServiceInstance, NetworkDevice, VirtualSwitch,
                                 PortGroup, ParamDefHolder, Feature)
 from aquilon.aqdb.data_sync.storage import StormapParser
@@ -253,7 +253,6 @@ class CommandFlush(BrokerCommand):
                 archetypes = q.all()  # pylint: disable=W0612
 
                 q = session.query(ParamDefHolder)
-                q = q.with_polymorphic('*')
                 q = q.options(subqueryload('param_definitions'))
                 paramdefs = q.all()  # pylint: disable=W0612
 

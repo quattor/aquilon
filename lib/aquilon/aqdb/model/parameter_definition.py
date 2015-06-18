@@ -48,7 +48,8 @@ class ParamDefHolder(Base):
                                     nullable=False))
 
     __table_args = ({'info': {'unique_fields': ['id']}},)
-    __mapper_args__ = {'polymorphic_on': type}
+    __mapper_args__ = {'polymorphic_on': type,
+                       'with_polymorphic': '*'}
 
     @property
     def holder_name(self):  # pragma: no cover
