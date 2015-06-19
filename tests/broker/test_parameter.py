@@ -69,6 +69,13 @@ class TestParameter(TestBrokerCommand):
                          "No parameters found for personality %s/%s@next." %
                          (ARCHETYPE, PERSONALITY), cmd)
 
+        cmd = ["show_parameter", "--personality", PERSONALITY, "--archetype",
+               ARCHETYPE, "--personality_stage", "next", "--format", "proto"]
+        err = self.notfoundtest(cmd)
+        self.matchoutput(err,
+                         "No parameters found for personality %s/%s@next." %
+                         (ARCHETYPE, PERSONALITY), cmd)
+
     def test_100_add_re_path(self):
         action = "testaction"
         path = "action/%s/user" % action

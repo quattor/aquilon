@@ -16,9 +16,10 @@
 # limitations under the License.
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import Personality, PersonalityParameter
+from aquilon.aqdb.model import Personality, Parameter, PersonalityParameter
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.dbwrappers.parameter import set_parameter
+from aquilon.worker.dbwrappers.parameter import (set_parameter,
+                                                 get_feature_link)
 from aquilon.worker.dbwrappers.personality import validate_personality_justification
 from aquilon.worker.templates import Plenary, PlenaryCollection
 
@@ -27,10 +28,14 @@ class CommandAddParameter(BrokerCommand):
 
     required_parameters = ['personality', 'path']
 
-    def process_parameter(self, session, param_holder, feature, model,
-                          interface, path, value):
-        return set_parameter(session, param_holder, feature, model, interface,
-                             path, value, compel=False, preclude=True)
+    def process_parameter(self, session, dbstage, dblink, path, value):
+        if not dbstage.paramholder:
+            dbstage.paramholder = PersonalityParameter()
+        if not dbstage.paramholder.parameter:
+            dbstage.paramholder.parameter = Parameter(value={})
+
+        set_parameter(session, dbstage.paramholder, dblink, path, value,
+                      compel=False, preclude=True)
 
     def render(self, session, logger, archetype, personality, personality_stage,
                feature, model, interface, path, user, value=None,
@@ -46,13 +51,14 @@ class CommandAddParameter(BrokerCommand):
         validate_personality_justification(dbstage, user, justification,
                                            reason)
 
-        if not dbstage.paramholder:
-            dbstage.paramholder = PersonalityParameter()
+        if feature:
+            dblink = get_feature_link(session, feature, model, interface,
+                                      dbstage)
+        else:
+            dblink = None
 
-        dbparameter = self.process_parameter(session, dbstage.paramholder,
-                                             feature, model, interface, path,
-                                             value)
-        session.add(dbparameter)
+        self.process_parameter(session, dbstage, dblink, path, value)
+
         session.flush()
 
         plenaries = PlenaryCollection(logger=logger)

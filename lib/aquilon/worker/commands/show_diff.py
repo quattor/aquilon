@@ -57,9 +57,8 @@ class CommandShowDiff(BrokerCommand):
         # parameters
         params = {}
 
-        if dbstage.paramholder:
-            for param in dbstage.paramholder.parameters:
-                params.update(Parameter.flatten(param.value))
+        if dbstage.paramholder and dbstage.paramholder.parameter:
+            params.update(Parameter.flatten(dbstage.paramholder.parameter.value))
         ret["Parameters"][dtype] = params
 
         # process features

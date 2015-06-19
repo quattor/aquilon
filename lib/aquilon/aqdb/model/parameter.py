@@ -60,8 +60,6 @@ class ParameterHolder(Base):
     def copy(self):
         return self.__class__()
 
-paramholder = ParameterHolder.__table__  # pylint: disable=C0103
-
 
 class PersonalityParameter(ParameterHolder):
     """ Association of parameters with Personality """
@@ -78,7 +76,7 @@ class PersonalityParameter(ParameterHolder):
 
     @property
     def holder_name(self):
-        return self.personality_stage.qualified_name  # pylint: disable=C0103
+        return self.personality_stage.qualified_name
 
     @property
     def holder_object(self):
@@ -104,11 +102,10 @@ class Parameter(Base):
                        nullable=False, index=True)
 
     holder = relation(ParameterHolder, innerjoin=True,
-                      backref=backref('parameters',
+                      backref=backref('parameter', uselist=False,
                                       cascade='all, delete-orphan'))
 
-    __table_args__ = ({'oracle_compress': True,
-                       'info': {'unique_fields': ['holder']}},)
+    __table_args__ = ({'oracle_compress': True},)
 
     @staticmethod
     def tokey(path):

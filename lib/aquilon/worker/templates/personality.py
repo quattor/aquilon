@@ -45,7 +45,7 @@ def get_parameters_by_feature(dbstage, dbfeaturelink):
     if not param_def_holder or not dbstage.paramholder:
         return ret
 
-    parameters = dbstage.paramholder.parameters
+    parameters = [dbstage.paramholder.parameter]
     for param_def in param_def_holder.param_definitions:
         for param in parameters:
             value = param.get_feature_path(dbfeaturelink,
@@ -99,7 +99,7 @@ def get_parameters_by_tmpl(dbstage):
         return ret
 
     if dbstage.paramholder:
-        parameters = dbstage.paramholder.parameters
+        parameters = [dbstage.paramholder.parameter]
     else:
         parameters = []
 

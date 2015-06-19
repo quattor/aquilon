@@ -15,6 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from aquilon.exceptions_ import NotFoundException
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.commands.add_parameter import CommandAddParameter
 from aquilon.worker.dbwrappers.parameter import set_parameter
@@ -24,7 +25,9 @@ class CommandUpdateParameter(CommandAddParameter):
 
     required_parameters = ['personality', 'path']
 
-    def process_parameter(self, session, param_holder, feature, model,
-                          interface, path, value):
-        return set_parameter(session, param_holder, feature, model, interface,
-                             path, value, compel=True)
+    def process_parameter(self, session, dbstage, dblink, path, value):
+        if not dbstage.paramholder or not dbstage.paramholder.parameter:
+            raise NotFoundException("No parameter of path=%s defined." % path)
+
+        set_parameter(session, dbstage.paramholder, dblink, path, value,
+                      compel=True)
