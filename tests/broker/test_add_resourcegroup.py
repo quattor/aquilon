@@ -188,7 +188,14 @@ class TestAddResourceGroup(TestBrokerCommand):
                    "--cluster", "utvcs1"]
         self.successtest(command)
 
-    def test_141_del_empty(self):
+    def test_141_update_empty(self):
+        # Test updating a resourcegroup that never had any resources, so the
+        # BundleResource object is never created
+        command = ["update_resourcegroup", "--resourcegroup", "empty",
+                   "--cluster", "utvcs1", "--required_type", "filesystem"]
+        self.successtest(command)
+
+    def test_142_del_empty(self):
         # Test deleting a resourcegroup that never had any resources, so the
         # BundleResource object is never created
         command = ["del_resourcegroup", "--resourcegroup", "empty",
