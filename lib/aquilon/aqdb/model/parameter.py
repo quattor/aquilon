@@ -18,7 +18,7 @@
 
 from datetime import datetime
 
-from sqlalchemy import Column, Integer, DateTime, Sequence, String, ForeignKey
+from sqlalchemy import Column, Integer, DateTime, Sequence, ForeignKey
 from sqlalchemy.orm import relation, backref, deferred
 from sqlalchemy.ext.mutable import MutableDict
 
@@ -100,7 +100,6 @@ class Parameter(Base):
     value = Column(MutableDict.as_mutable(JSONEncodedDict))
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
-    comments = deferred(Column(String(255), nullable=True))
     holder_id = Column(ForeignKey(ParameterHolder.id, ondelete='CASCADE'),
                        nullable=False, index=True)
 
@@ -263,4 +262,4 @@ class Parameter(Base):
         return flattened
 
     def copy(self):
-        return self.__class__(value=self.value.copy(), comments=self.comments)
+        return self.__class__(value=self.value.copy())

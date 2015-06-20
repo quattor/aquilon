@@ -24,6 +24,7 @@ class CommandDelParameter(CommandAddParameter):
 
     required_parameters = ['personality', 'path']
 
-    def process_parameter(self, session, param_holder, feature, model, interface,
-                          path, value=None, comments=None):
-        return del_parameter(session, path, param_holder, feature, model, interface)
+    def process_parameter(self, session, param_holder, feature, model,
+                          interface, path, value=None):
+        return del_parameter(session, path, param_holder, feature, model,
+                             interface)

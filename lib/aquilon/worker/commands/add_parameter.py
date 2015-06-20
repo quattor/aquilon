@@ -28,15 +28,13 @@ class CommandAddParameter(BrokerCommand):
     required_parameters = ['personality', 'path']
 
     def process_parameter(self, session, param_holder, feature, model,
-                          interface, path, value, comments):
+                          interface, path, value):
         return set_parameter(session, param_holder, feature, model, interface,
-                             path, value, comments=comments, compel=False,
-                             preclude=True)
+                             path, value, compel=False, preclude=True)
 
-    def render(self, session, logger, archetype, personality,
-               personality_stage, feature, model, interface, path, user,
-               value=None, comments=None, justification=None, reason=None,
-               **arguments):
+    def render(self, session, logger, archetype, personality, personality_stage,
+               feature, model, interface, path, user, value=None,
+               justification=None, reason=None, **arguments):
         dbpersonality = Personality.get_unique(session, name=personality,
                                                archetype=archetype, compel=True)
         if not dbpersonality.archetype.is_compileable:
@@ -53,7 +51,7 @@ class CommandAddParameter(BrokerCommand):
 
         dbparameter = self.process_parameter(session, dbstage.paramholder,
                                              feature, model, interface, path,
-                                             value, comments)
+                                             value)
         session.add(dbparameter)
         session.flush()
 

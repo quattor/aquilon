@@ -24,7 +24,7 @@ class CommandUpdateParameter(CommandAddParameter):
 
     required_parameters = ['personality', 'path']
 
-    def process_parameter(self, session, param_holder, feature, model, interface,
-                          path, value, comments):
+    def process_parameter(self, session, param_holder, feature, model,
+                          interface, path, value):
         return set_parameter(session, param_holder, feature, model, interface,
-                             path, value, comments=comments, compel=True)
+                             path, value, compel=True)
