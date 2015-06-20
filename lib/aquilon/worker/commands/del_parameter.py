@@ -28,7 +28,7 @@ class CommandDelParameter(CommandAddParameter):
 
     def process_parameter(self, session, dbstage, dbparam_def, path,
                           value=None):
-        if not dbstage.paramholder or not dbstage.paramholder.parameter:
+        if not dbstage.parameter:
             raise NotFoundException("No parameter of path=%s defined." % path)
 
         if dbparam_def.activation == 'rebuild':
@@ -36,4 +36,4 @@ class CommandDelParameter(CommandAddParameter):
 
         if isinstance(dbparam_def.holder, FeatureParamDef):
             path = Parameter.feature_path(dbparam_def.holder.feature, path)
-        dbstage.paramholder.parameter.del_path(path)
+        dbstage.parameter.del_path(path)

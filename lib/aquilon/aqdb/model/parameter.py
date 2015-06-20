@@ -28,23 +28,20 @@ from aquilon.exceptions_ import NotFoundException, ArgumentError, InternalError
 from aquilon.aqdb.column_types import AqStr
 
 _TN = 'parameter'
-_PARAM_HOLDER = 'param_holder'
 PATH_SEP = '/'
 
 
-class ParameterHolder(Base):
+class Parameter(Base):
     """
     The dbobj with which this parameter is associaetd with.
     """
-    __tablename__ = _PARAM_HOLDER
-    _class_label = 'Parameter Holder'
+    __tablename__ = _TN
     _instance_label = 'holder_name'
 
-    id = Column(Integer, Sequence('%s_id_seq' % _PARAM_HOLDER), primary_key=True)
-
+    id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
+    value = Column(MutableDict.as_mutable(JSONEncodedDict), nullable=False)
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
-
     holder_type = Column(AqStr(16), nullable=False)
 
     __mapper_args__ = {'polymorphic_on': holder_type}
@@ -56,63 +53,6 @@ class ParameterHolder(Base):
     @property
     def holder_object(self):  # pragma: no cover
         raise InternalError("Abstract base method called")
-
-    def copy(self):
-        return self.__class__()
-
-
-class PersonalityParameter(ParameterHolder):
-    """ Association of parameters with Personality """
-
-    personality_stage_id = Column(ForeignKey(PersonalityStage.id,
-                                             ondelete='CASCADE'),
-                                  nullable=True, unique=True)
-
-    personality_stage = relation(PersonalityStage,
-                                 backref=backref('paramholder', uselist=False,
-                                                 cascade='all, delete-orphan'))
-
-    __mapper_args__ = {'polymorphic_identity': 'personality'}
-
-    @property
-    def holder_name(self):
-        return self.personality_stage.qualified_name
-
-    @property
-    def holder_object(self):
-        return self.personality_stage
-
-    @property
-    def archetype(self):
-        return self.personality_stage.archetype
-
-
-class Parameter(Base):
-    """
-        Paramter data storing individual key value pairs
-    """
-
-    __tablename__ = _TN
-
-    id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
-    value = Column(MutableDict.as_mutable(JSONEncodedDict), nullable=False)
-    creation_date = deferred(Column(DateTime, default=datetime.now,
-                                    nullable=False))
-    holder_id = Column(ForeignKey(ParameterHolder.id, ondelete='CASCADE'),
-                       nullable=False, index=True)
-
-    holder = relation(ParameterHolder, innerjoin=True,
-                      backref=backref('parameter', uselist=False,
-                                      cascade='all, delete-orphan'))
-
-    __table_args__ = ({'oracle_compress': True},)
-
-    @staticmethod
-    def tokey(path):
-        """ converts path to dict keys ie. /system/key returns [system][key]"""
-        parts = Parameter.path_parts(path)
-        key_str = ('["' + '"]["'.join(parts) + '"]')
-        return key_str
 
     @staticmethod
     def path_parts(path):
@@ -260,3 +200,25 @@ class Parameter(Base):
 
     def copy(self):
         return self.__class__(value=self.value.copy())
+
+
+class PersonalityParameter(Parameter):
+    """ Association of parameters with Personality """
+
+    personality_stage_id = Column(ForeignKey(PersonalityStage.id,
+                                             ondelete='CASCADE'),
+                                  nullable=True, unique=True)
+
+    personality_stage = relation(PersonalityStage,
+                                 backref=backref('parameter', uselist=False,
+                                                 cascade='all, delete-orphan'))
+
+    __mapper_args__ = {'polymorphic_identity': 'personality'}
+
+    @property
+    def holder_name(self):
+        return self.personality_stage.qualified_name
+
+    @property
+    def holder_object(self):
+        return self.personality_stage

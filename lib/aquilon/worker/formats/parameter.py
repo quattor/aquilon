@@ -18,7 +18,7 @@
 
 import json
 
-from aquilon.aqdb.model import Parameter
+from aquilon.aqdb.model import Parameter, PersonalityParameter
 from aquilon.worker.formats.formatters import ObjectFormatter
 from aquilon.worker.formats.list import ListFormatter
 
@@ -42,6 +42,7 @@ class ParameterFormatter(ObjectFormatter):
         return "\n".join(details)
 
 ObjectFormatter.handlers[Parameter] = ParameterFormatter()
+ObjectFormatter.handlers[PersonalityParameter] = ParameterFormatter()
 
 
 class PersonalityProtoParameter(list):

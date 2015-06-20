@@ -18,7 +18,7 @@
 
 import re
 
-from sqlalchemy.orm import contains_eager, subqueryload
+from sqlalchemy.orm import contains_eager
 from sqlalchemy.sql import or_
 
 from aquilon.exceptions_ import NotFoundException, ArgumentError
@@ -32,16 +32,14 @@ from aquilon.aqdb.model.hostlifecycle import Ready, Almostready
 from aquilon.worker.formats.parameter_definition import ParamDefinitionFormatter
 
 
-def set_parameter(session, param_holder, dbparam_def, path, value, compel=False,
+def set_parameter(session, parameter, dbparam_def, path, value, compel=False,
                   preclude=False):
     """
         Handles add parameter as well as update parameter. Parmeters for features
         will be stored as part of personality as features/<feature_name>/<path>
     """
-    parameter = param_holder.parameter
-
     retval = validate_parameter(session, dbparam_def, path, value,
-                                param_holder.personality_stage)
+                                parameter.personality_stage)
 
     if isinstance(dbparam_def.holder, FeatureParamDef):
         path = Parameter.feature_path(dbparam_def.holder.feature, path)
@@ -52,11 +50,11 @@ def del_all_feature_parameter(session, dblink):
     # TODO: if the feature is bound to the whole archetype, then we should clean
     # up all personalities here
     if not dblink or not dblink.personality_stage or \
-       not dblink.personality_stage.paramholder or \
+       not dblink.personality_stage.parameter or \
        not dblink.feature.param_def_holder:
         return
 
-    parameter = dblink.personality_stage.paramholder.parameter
+    parameter = dblink.personality_stage.parameter
     dbstage = dblink.personality_stage
     for paramdef in dblink.feature.param_def_holder.param_definitions:
         if paramdef.activation == 'rebuild':
@@ -194,19 +192,17 @@ def search_path_in_personas(session, path, param_def_holder):
     else:
         q = q.join(FeatureLink)
         q = q.filter_by(feature=param_def_holder.feature)
-    q = q.options(subqueryload('parameter'))
 
     holder = {}
 
     if isinstance(param_def_holder, FeatureParamDef):
         path = Parameter.feature_path(param_def_holder.feature, path)
 
-    for param_holder in q:
+    for parameter in q:
         try:
-            if param_holder.parameter:
-                value = param_holder.parameter.get_path(path)
-                if value is not None:
-                    holder[param_holder] = {path: value}
+            value = parameter.get_path(path)
+            if value is not None:
+                holder[parameter] = {path: value}
         except NotFoundException:
             pass
     return holder
@@ -219,11 +215,7 @@ def validate_personality_config(dbstage):
         parameters are also validated.
     """
     dbarchetype = dbstage.personality.archetype
-
-    if dbstage.paramholder:
-        parameter = dbstage.paramholder.parameter
-    else:
-        parameter = None
+    parameter = dbstage.parameter
 
     error = []
 

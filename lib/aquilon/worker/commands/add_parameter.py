@@ -16,8 +16,7 @@
 # limitations under the License.
 
 from aquilon.exceptions_ import ArgumentError, NotFoundException
-from aquilon.aqdb.model import (Personality, Parameter, PersonalityParameter,
-                                Feature)
+from aquilon.aqdb.model import Personality, PersonalityParameter, Feature
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.parameter import (set_parameter,
                                                  get_paramdef_for_parameter)
@@ -30,12 +29,10 @@ class CommandAddParameter(BrokerCommand):
     required_parameters = ['personality', 'path']
 
     def process_parameter(self, session, dbstage, dbparam_def, path, value):
-        if not dbstage.paramholder:
-            dbstage.paramholder = PersonalityParameter()
-        if not dbstage.paramholder.parameter:
-            dbstage.paramholder.parameter = Parameter(value={})
+        if not dbstage.parameter:
+            dbstage.parameter = PersonalityParameter(value={})
 
-        set_parameter(session, dbstage.paramholder, dbparam_def, path, value,
+        set_parameter(session, dbstage.parameter, dbparam_def, path, value,
                       compel=False, preclude=True)
 
     def render(self, session, logger, archetype, personality, personality_stage,

@@ -42,10 +42,10 @@ def string_to_list(data):
 def get_parameters_by_feature(dbstage, dbfeaturelink):
     ret = {}
     param_def_holder = dbfeaturelink.feature.param_def_holder
-    if not param_def_holder or not dbstage.paramholder:
+    if not param_def_holder or not dbstage.parameter:
         return ret
 
-    parameters = [dbstage.paramholder.parameter]
+    parameters = [dbstage.parameter]
     for param_def in param_def_holder.param_definitions:
         for param in parameters:
             if param:
@@ -105,8 +105,8 @@ def get_parameters_by_tmpl(dbstage):
     if not param_def_holder:
         return ret
 
-    if dbstage.paramholder:
-        parameters = [dbstage.paramholder.parameter]
+    if dbstage.parameter:
+        parameters = [dbstage.parameter]
     else:
         parameters = []
 

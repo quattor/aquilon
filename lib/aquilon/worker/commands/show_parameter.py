@@ -30,9 +30,7 @@ class CommandShowParameterPersonality(BrokerCommand):
         dbpersonality = Personality.get_unique(session, name=personality,
                                                archetype=archetype, compel=True)
         dbstage = dbpersonality.default_stage(personality_stage)
-        if not dbstage.paramholder or \
-           not dbstage.paramholder.parameter or \
-           not dbstage.paramholder.parameter.value:
+        if not dbstage.parameter or not dbstage.parameter.value:
             raise NotFoundException("No parameters found for {0:l}."
                                     .format(dbstage))
 
@@ -46,7 +44,7 @@ class CommandShowParameterPersonality(BrokerCommand):
             param_definitions = None
             param_def_holder = dbpersonality.archetype.param_def_holder
 
-            for param in [dbstage.paramholder.parameter]:
+            for param in [dbstage.parameter]:
                 if param_def_holder:
                     param_definitions = param_def_holder.param_definitions
                     for param_def in param_definitions:
@@ -70,4 +68,4 @@ class CommandShowParameterPersonality(BrokerCommand):
                                         .format(dbstage))
             return params
         else:
-            return [dbstage.paramholder.parameter]
+            return [dbstage.parameter]
