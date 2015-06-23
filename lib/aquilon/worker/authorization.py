@@ -261,7 +261,8 @@ class AuthorizationBroker(object):
             if action not in ['reconfigure', 'reconfigure_list',
                               'reconfigure_membersof',
                               'add_reboot_intervention',
-                              'compile_hostname', 'compile_personality',
+                              'compile', 'compile_hostname',
+                              'compile_personality',
                               'add_reboot_schedule',
                               'del_reboot_intervention',
                               'del_reboot_schedule',
@@ -274,6 +275,7 @@ class AuthorizationBroker(object):
                               'del_parameter',
                               'bind_feature', 'unbind_feature',
                               'map_service',
+                              'promote', 'demote',
                               'add_alias', 'del_alias', 'update_alias']:
                 self.raise_auth_error(principal, action, resource)
 
