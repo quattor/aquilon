@@ -107,7 +107,7 @@ _aq ()
 	fi
 
 	if [[ -n "$subject" ]]; then
-	    list=$( _aq_complete_${opt} )
+	    list=$( _aq_complete_${opt} $cur)
 	    COMPREPLY=( $( compgen -W "$list" -- $cur ) )
 	    return 0
 	fi
