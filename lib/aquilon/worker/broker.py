@@ -20,6 +20,7 @@ import sys
 from inspect import isclass
 from types import NoneType
 
+from sqlalchemy import event
 from sqlalchemy.sql import text
 from sqlalchemy.exc import DatabaseError
 from twisted.web import http
@@ -29,6 +30,7 @@ from aquilon.config import Config
 from aquilon.exceptions_ import (ArgumentError, AuthorizationException,
                                  NotFoundException, UnimplementedError,
                                  PartialError, AquilonError, TransientError)
+from aquilon.worker.exporter import Exporter
 from aquilon.worker.authorization import AuthorizationBroker
 from aquilon.worker.messages import StatusCatalog
 from aquilon.worker.logger import RequestLogger
@@ -198,6 +200,7 @@ class BrokerCommand(object):
         rollback_failed = False
         dbuser = None
         session = None
+        exporter = None
 
         if not self.requires_readonly \
            and self.config.get('broker', 'mode') != 'readwrite':
@@ -212,6 +215,15 @@ class BrokerCommand(object):
                     session = self.dbf.NLSession()
                 else:
                     session = self.dbf.Session()
+
+                # Create an exporter to handle external events.  We stash this
+                # in the session.info dict to provide access to other users.
+                # (note that session.info is designed for this purpose)
+                # Listen to flush events and use them to tell the exporter
+                # when various objects have chnaged.
+                exporter = Exporter(logger=logger, requestid=requestid, user=user)
+                event.listen(session, "after_flush", exporter.event_after_flush)
+                session.info['exporter'] = exporter
 
                 # Force connecting to the DB
                 try:
@@ -257,7 +269,8 @@ class BrokerCommand(object):
                 style = kwargs.get("style", None)
                 retval = self.formatter.format(style, retval, request)
             if session:
-                session.commit()
+                with exporter:
+                    session.commit()
             return retval
         except Exception as e:
             raising_exception = e

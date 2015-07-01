@@ -23,9 +23,10 @@ if __name__ == "__main__":
 
 import unittest
 from broker.brokertest import TestBrokerCommand
+from eventstest import EventsTestMixin
 
 
-class TestUpdateAlias(TestBrokerCommand):
+class TestUpdateAlias(EventsTestMixin, TestBrokerCommand):
 
     def test_100_update(self):
         command = ["update", "alias",
@@ -34,6 +35,7 @@ class TestUpdateAlias(TestBrokerCommand):
         self.noouttest(command)
 
     def test_110_update_mscom(self):
+        self.event_upd_dns('alias.ms.com')
         command = ["update", "alias", "--fqdn", "alias.ms.com",
                    "--target", "arecord14.aqd-unittest.ms.com",
                    "--comments", "New alias comments"]

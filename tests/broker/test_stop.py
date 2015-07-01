@@ -31,6 +31,10 @@ from aquilon.config import Config
 
 class TestBrokerStop(unittest.TestCase):
 
+    @classmethod
+    def setUpClass(cls):
+        cls.config = Config()
+
     def setUp(self):
         pass
 
@@ -38,9 +42,11 @@ class TestBrokerStop(unittest.TestCase):
         pass
 
     def teststop(self):
-        config = Config()
-        pidfile = os.path.join(config.get("broker", "rundir"), "aqd.pid")
-        self.assertTrue(os.path.exists(pidfile))
+        pidfile = os.path.join(self.config.get("broker", "rundir"), "aqd.pid")
+        self.terminate_daemon(pidfile)
+
+    def terminate_daemon(self, pidfile):
+        self.assertTrue(os.path.exists(pidfile), msg=pidfile)
         f = open(pidfile)
         pid = f.readline()
         self.assertNotEqual(pid, "")
@@ -61,6 +67,10 @@ class TestBrokerStop(unittest.TestCase):
 
         # Verify that the broker is down
         self.assertRaises(OSError, os.kill, pid, 0)
+
+    def testeventsstop(self):
+        pidfile = os.path.join(self.config.get('broker', 'rundir'), 'read_events.pid')
+        self.terminate_daemon(pidfile)
 
 
 if __name__ == '__main__':

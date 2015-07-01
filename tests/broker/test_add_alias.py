@@ -23,13 +23,16 @@ if __name__ == '__main__':
 
 import unittest
 from broker.brokertest import TestBrokerCommand
+from eventstest import EventsTestMixin
 
 
-class TestAddAlias(TestBrokerCommand):
+class TestAddAlias(EventsTestMixin, TestBrokerCommand):
     def test_100_add_alias2host(self):
+        self.event_add_dns('alias2host.aqd-unittest.ms.com')
         cmd = ['add', 'alias', '--fqdn', 'alias2host.aqd-unittest.ms.com',
                '--target', 'arecord13.aqd-unittest.ms.com']
         self.noouttest(cmd)
+        self.events_verify()
 
     def test_105_add_aliasduplicate(self):
         cmd = ['add', 'alias', '--fqdn', 'alias2host.aqd-unittest.ms.com',
@@ -39,6 +42,7 @@ class TestAddAlias(TestBrokerCommand):
                          "already exists.", cmd)
 
     def test_110_mscom_alias(self):
+        self.event_add_dns('alias.ms.com')
         cmd = ['add', 'alias', '--fqdn', 'alias.ms.com',
                '--target', 'arecord13.aqd-unittest.ms.com',
                '--comments', 'Some alias comments']
@@ -48,6 +52,7 @@ class TestAddAlias(TestBrokerCommand):
                          "-comments Some alias comments")
         self.noouttest(cmd)
         self.dsdb_verify()
+        self.events_verify()
 
     def test_120_conflict_a_record(self):
         cmd = ['add', 'alias', '--fqdn', 'arecord14.aqd-unittest.ms.com',
@@ -72,11 +77,13 @@ class TestAddAlias(TestBrokerCommand):
                          cmd)
 
     def test_150_add_alias2diff_environment(self):
+        self.event_add_dns('alias2host.aqd-unittest-ut-env.ms.com', dns_enviornment='ut-env')
         cmd = ['add', 'alias', '--fqdn', 'alias2host.aqd-unittest-ut-env.ms.com',
                '--dns_environment', 'ut-env',
                '--target', 'arecord13.aqd-unittest.ms.com',
                '--target_environment', 'internal']
         self.noouttest(cmd)
+        self.events_verify()
 
     def test_155_add_alias2explicit_target_environment(self):
         cmd = ['add', 'alias', '--fqdn', 'alias2alias.aqd-unittest-ut-env.ms.com',

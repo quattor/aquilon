@@ -92,6 +92,14 @@ class TestBrokerStart(unittest.TestCase):
         # FIXME: If it fails, either cat the log file, or tell the user to try
         # running '%s -bn aqd --config %s'%(aqd, self.config.baseconfig)
 
+    def testeventsstart(self):
+        # pidfile = os.path.join(self.config.get('broker', 'rundir'), 'read_events.pid')
+        read_events = os.path.join(self.config.get('broker', 'srcdir'),
+                                   'tests', 'read_events.py')
+        args = [sys.executable, read_events, '--store', '--daemon',
+                '--config', self.config.baseconfig]
+        self.run_command(args)
+
     def testclonetemplateking(self):
         source = self.config.get("unittest", "template_base")
         if not source:

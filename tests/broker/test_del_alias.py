@@ -23,9 +23,10 @@ if __name__ == '__main__':
 
 import unittest
 from brokertest import TestBrokerCommand
+from eventstest import EventsTestMixin
 
 
-class TestDelAlias(TestBrokerCommand):
+class TestDelAlias(EventsTestMixin, TestBrokerCommand):
     def test_100_del_alias2host(self):
         command = ["del", "alias", "--fqdn", "alias2host.aqd-unittest.ms.com"]
         out = self.badrequesttest(command)
@@ -53,14 +54,18 @@ class TestDelAlias(TestBrokerCommand):
         self.noouttest(command)
 
     def test_210_del_alias2host(self):
+        self.event_del_dns('alias2host.aqd-unittest.ms.com')
         command = ["del", "alias", "--fqdn", "alias2host.aqd-unittest.ms.com"]
         self.noouttest(command)
+        self.events_verify()
 
     def test_220_del_mscom_alias(self):
+        self.event_del_dns('alias.ms.com')
         command = ["del", "alias", "--fqdn", "alias.ms.com"]
         self.dsdb_expect("delete_host_alias -alias_name alias.ms.com")
         self.noouttest(command)
         self.dsdb_verify()
+        self.events_verify()
 
     def test_230_del_alias2diff_environment(self):
         command = ["del", "alias", "--fqdn", "alias2alias.aqd-unittest-ut-env.ms.com",
@@ -68,9 +73,11 @@ class TestDelAlias(TestBrokerCommand):
         self.noouttest(command)
 
     def test_235_del_alias2diff_environment(self):
+        self.event_del_dns('alias2host.aqd-unittest-ut-env.ms.com', dns_enviornment='ut-env')
         command = ["del", "alias", "--fqdn", "alias2host.aqd-unittest-ut-env.ms.com",
                    "--dns_environment", "ut-env"]
         self.noouttest(command)
+        self.events_verify()
 
     def test_238_del_alias2diff_environment(self):
         command = ["del", "alias", "--fqdn", "alias13.aqd-unittest.ms.com",
