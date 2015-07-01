@@ -21,13 +21,13 @@ from json import JSONDecoder
 from six.moves import cStringIO as StringIO  # pylint: disable=F0401
 from datetime import datetime
 
-from aquilon.exceptions_ import (AquilonError, ArgumentError, InternalError,
-                                 NotFoundException, ProcessException)
+from aquilon.exceptions_ import (AquilonError, ArgumentError, NotFoundException,
+                                 ProcessException)
 from aquilon.utils import force_ipv4
 from aquilon.aqdb.types import MACAddress
 from aquilon.aqdb.model import (NetworkDevice, ObservedMac, PortGroup, Network,
                                 NetworkEnvironment, VlanInfo)
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.dbwrappers.observed_mac import (
     update_or_create_observed_mac)
@@ -142,32 +142,35 @@ class CommandPollNetworkDevice(BrokerCommand):
                 bitmask = row.get("bitmask", None)
                 if vlan is None or network is None or bitmask is None or \
                    len(vlan) == 0 or len(network) == 0 or len(bitmask) == 0:
-                    logger.info("Missing value for vlan, network or bitmask in "
-                                "output line #%d: %s" % (reader.line_num, row))
+                    logger.client_info("Missing value for vlan, network or "
+                                       "bitmask in output line #%d: %s",
+                                       reader.line_num, row)
                     continue
                 try:
                     vlan_int = int(vlan)
                 except ValueError as e:
-                    logger.info("Error parsing vlan number in output "
-                                "line #%d: %s error: %s" %
-                                (reader.line_num, row, e))
+                    logger.client_info("Error parsing vlan number in output "
+                                       "line #%d: %s error: %s",
+                                       reader.line_num, row, e)
                     continue
                 try:
                     network = force_ipv4("network", network)
                 except ArgumentError as e:
-                    raise InternalError(e)
+                    logger.client_info(str(e))
+                    continue
                 try:
                     bitmask_int = int(bitmask)
                 except ValueError as e:
-                    logger.info("Error parsing bitmask in output "
-                                "line #%d: %s error: %s" %
-                                (reader.line_num, row, e))
+                    logger.client_info("Error parsing bitmask in output "
+                                       "line #%d: %s error: %s",
+                                       reader.line_num, row, e)
                     continue
                 dbnetwork = Network.get_unique(session, ip=network,
                                                network_environment=dbnet_env)
                 if not dbnetwork:
-                    logger.info("Unknown network %s in output line #%d: %s" %
-                                (network, reader.line_num, row))
+                    logger.client_info("Unknown network %s in output "
+                                       "line #%d: %s",
+                                       network, reader.line_num, row)
                     continue
                 if dbnetwork.cidr != bitmask_int:
                     logger.client_info("{0}: skipping VLAN {1}, because network "

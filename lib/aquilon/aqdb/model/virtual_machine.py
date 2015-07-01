@@ -28,12 +28,11 @@ class VirtualMachine(Resource):
     __tablename__ = _TN
     _class_label = 'Virtual Machine'
 
-    resource_id = Column(ForeignKey(Resource.id, ondelete='CASCADE'),
-                         primary_key=True)
+    resource_id = Column(ForeignKey(Resource.id), primary_key=True)
 
     # A machine can be assigned to one holder only.
-    machine_id = Column(ForeignKey(Machine.machine_id, ondelete='CASCADE'),
-                        nullable=False, unique=True)
+    machine_id = Column(ForeignKey(Machine.machine_id), nullable=False,
+                        unique=True)
 
     machine = relation(Machine, innerjoin=True,
                        backref=backref('vm_container', uselist=False,

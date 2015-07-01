@@ -309,7 +309,7 @@ class DSDBRunner(object):
                 run_command(cmd, env=self.getenv(), logger=self.logger)
             except ProcessException as err:
                 if error_filter and err.out and error_filter.search(err.out):
-                    self.logger.warn(ignore_msg)
+                    self.logger.warning(ignore_msg)
                 else:
                     raise
 
@@ -344,7 +344,7 @@ class DSDBRunner(object):
         except ProcessException as err:
             if not error_msg:
                 error_msg = "DSDB update failed"
-            self.logger.warn(str(err))
+            self.logger.warning(str(err))
             self.rollback(verbose=verbose)
             raise ArgumentError(error_msg)
 

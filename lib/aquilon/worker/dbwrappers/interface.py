@@ -280,6 +280,7 @@ def set_port_group_phys(session, dbinterface, port_group_name):
             raise ArgumentError("{0} does not have port group {1!s} assigned."
                                 .format(allocator, port_group_name))
 
+    dbinterface.port_group = None
     dbinterface.port_group_name = dbvi.port_group
 
 
@@ -334,6 +335,7 @@ def set_port_group_vm(session, logger, dbinterface, port_group_name):
         logger.info("Selected {0:l} for {1:l} (based on {2:l})"
                     .format(selected_pg, dbmachine, allocator))
 
+    dbinterface.port_group_name = None
     dbinterface.port_group = selected_pg
 
 
@@ -530,8 +532,8 @@ def enforce_bucket_alignment(dbrack, dbnetwork, logger):
 
         # The second easiest case - the rack is in a bunker, but the network is
         # not
-        logger.warn("Bunker violation: {0:l} is inside {1:l}, but {2:l} is "
-                    "not bunkerized.".format(dbrack, rack_bunker, dbnetwork))
+        logger.warning("Bunker violation: {0:l} is inside {1:l}, but {2:l} is "
+                       "not bunkerized.".format(dbrack, rack_bunker, dbnetwork))
         return
 
     session = object_session(dbrack)
@@ -555,9 +557,9 @@ def enforce_bucket_alignment(dbrack, dbnetwork, logger):
         q = q.join(Location)
         q = q.filter(Location.id.in_(dbrack.offspring_ids()))
         if q.count() > 1:
-            logger.warn("Bunker violation: {0:l} is inside {1:l}, but {2:l} "
-                        "is not inside a bunker."
-                        .format(dbnetwork, net_bunker, dbrack))
+            logger.warning("Bunker violation: {0:l} is inside {1:l}, "
+                           "but {2:l} is not inside a bunker."
+                           .format(dbnetwork, net_bunker, dbrack))
             return
 
         logger.client_info("Moving {0:l} into {1:l} based on network tagging."
@@ -566,9 +568,10 @@ def enforce_bucket_alignment(dbrack, dbnetwork, logger):
         rack_bunker = expected_bunker
 
     if rack_bunker != expected_bunker:
-        logger.warn("Bunker violation: {0:l} is inside {1:l}, but "
-                    "{2:l} is inside {3:l}."
-                    .format(dbrack, rack_bunker, dbnetwork, expected_bunker))
+        logger.warning("Bunker violation: {0:l} is inside {1:l}, but "
+                       "{2:l} is inside {3:l}."
+                       .format(dbrack, rack_bunker, dbnetwork,
+                               expected_bunker))
 
 
 def assign_address(dbinterface, ip, dbnetwork, label=None, logger=None):

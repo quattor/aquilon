@@ -158,7 +158,7 @@ class CommandDeploy(BrokerCommand):
         try:
             sync_domain(dbtarget, logger=logger)
         except ProcessException as e:
-            logger.warn("Error syncing domain %s: %s" % (dbtarget.name, e))
+            logger.warning("Error syncing domain %s: %s" % (dbtarget.name, e))
 
         if not sync or not dbtarget.autosync:
             return
@@ -169,6 +169,6 @@ class CommandDeploy(BrokerCommand):
             try:
                 sync_domain(domain, logger=logger)
             except ProcessException as e:
-                logger.warn("Error syncing domain %s: %s" % (domain.name, e))
+                logger.warning("Error syncing domain %s: %s" % (domain.name, e))
 
         return

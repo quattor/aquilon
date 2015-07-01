@@ -122,6 +122,6 @@ class CommandPublish(BrokerCommand):
             try:
                 sync_domain(domain, logger=logger)
             except ProcessException as e:
-                logger.warn("Error syncing domain %s: %s" % (domain.name, e))
+                logger.warning("Error syncing domain %s: %s" % (domain.name, e))
 
         return client_command

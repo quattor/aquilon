@@ -28,7 +28,7 @@ class CommandValidate(BrokerCommand):
     def render(self, session, logger, branch, comments, **arguments):
         dbbranch = Branch.get_unique(session, branch, compel=True)
         if dbbranch.is_sync_valid:
-            logger.warn("{0} already marked as valid.".format(dbbranch))
+            logger.warning("{0} already marked as valid.".format(dbbranch))
         # For now, comments just get stored in the audit log.
         dbbranch.is_sync_valid = True
         session.flush()

@@ -118,6 +118,14 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, MachineTestMixin,
                        "--vmhost", self.vmhost[0], "--model", "utmedium"]
             self.noouttest(command)
 
+    def test_070_try_delete_vmhost(self):
+        command = ["del_host", "--hostname", self.vmhost[0]]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Host %s still has virtual machines: utpgm0, utpgm1, "
+                         "utpgm2." % self.vmhost[0],
+                         command)
+
     def test_120_cat_vmhost(self):
         command = ["cat", "--hostname=%s" % self.vmhost[0], "--generate", "--data"]
         out = self.commandtest(command)
