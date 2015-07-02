@@ -18,6 +18,7 @@
 
 from datetime import datetime
 from collections import deque
+import logging
 import re
 
 from sqlalchemy import (Column, Integer, DateTime, Sequence, String, Boolean,
@@ -34,6 +35,7 @@ from aquilon.aqdb.model import (Base, HardwareEntity, DeviceLinkMixin,
 from aquilon.aqdb.model.vlan import MAX_VLANS
 
 _TN = "interface"
+LOGGER = logging.getLogger(__name__)
 
 
 class Interface(DeviceLinkMixin, Base):
@@ -169,6 +171,17 @@ class Interface(DeviceLinkMixin, Base):
             raise ValueError("{0} cannot be enslaved as long as it holds "
                              "addresses.".format(self))
         return value
+
+    def check_pg_consistency(self, logger=LOGGER):
+        if not self.port_group:
+            return
+
+        net = self.port_group.network
+        for addr in self.assignments:
+            if addr.network != net:
+                logger.warning("Warning: {0:l} is bound to {1:l} due to {2:l}, "
+                               "which does not contain IP address {3}."
+                               .format(self, net, self.port_group, addr.ip))
 
     @property
     def last_observation(self):

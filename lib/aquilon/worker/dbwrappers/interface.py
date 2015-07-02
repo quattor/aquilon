@@ -377,6 +377,8 @@ def set_port_group(session, logger, dbinterface, port_group_name):
     else:
         set_port_group_phys(session, dbinterface, port_group_name)
 
+    dbinterface.check_pg_consistency(logger=logger)
+
 
 def _type_msg(interface_type, bootable):
     if bootable is not None:
@@ -610,6 +612,7 @@ def assign_address(dbinterface, ip, dbnetwork, label=None, logger=None):
     dbinterface.assignments.append(AddressAssignment(ip=ip, network=dbnetwork,
                                                      label=label,
                                                      dns_environment=dns_environment))
+    dbinterface.check_pg_consistency(logger=logger)
 
 
 def rename_interface(session, dbinterface, rename_to):

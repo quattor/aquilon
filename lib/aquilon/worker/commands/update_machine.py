@@ -284,6 +284,9 @@ class CommandUpdateMachine(BrokerCommand):
         if dbmachine.host and dbmachine.host.cluster:
             dbmachine.host.cluster.validate()
 
+        for dbinterface in dbmachine.interfaces:
+            dbinterface.check_pg_consistency(logger=logger)
+
         # The check to make sure a plenary file is not written out for
         # dummy aurora hardware is within the call to write().  This way
         # it is consistent without altering (and forgetting to alter)

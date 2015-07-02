@@ -16,7 +16,7 @@
 # limitations under the License.
 """Wrappers to make getting and using hardware entities simpler."""
 
-from sqlalchemy.orm import aliased
+from sqlalchemy.orm import aliased, contains_eager, joinedload
 from sqlalchemy.sql import and_, or_
 
 from aquilon.exceptions_ import ArgumentError, AquilonError
@@ -161,8 +161,9 @@ def update_primary_ip(session, logger, dbhw_ent, ip):
         q = q.filter_by(network=dns_rec.network)
         q = q.filter_by(ip=dns_rec.ip)
         q = q.join(Interface)
+        q = q.options(contains_eager('interface'),
+                      joinedload('interface.port_group'))
         q = q.filter_by(hardware_entity=dbhw_ent)
-        # In case of Zebra, the address may be assigned to multiple interfaces
         addrs = q.all()
 
         dns_rec.ip = ip
@@ -171,6 +172,9 @@ def update_primary_ip(session, logger, dbhw_ent, ip):
         for addr in addrs:
             addr.ip = ip
             addr.network = dbnetwork
+
+        for iface in set(addr.interface for addr in addrs):
+            iface.check_pg_consistency(logger=logger)
 
 
 def rename_hardware(session, dbhw_ent, rename_to):

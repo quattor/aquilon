@@ -39,9 +39,6 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, MachineTestMixin,
     vmhost = ["utpgh0.aqd-unittest.ms.com", "utpgh1.aqd-unittest.ms.com"]
     machine = ["utpgs01p0", "utpgs01p1"]
 
-    def getip(self):
-        return self.net["autopg2"].usable[0]
-
     def test_000_add_vlocal(self):
         maps = {
             "esx_management_server": {
@@ -264,6 +261,7 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, MachineTestMixin,
                             "--interface", "eth0", "--automac", "--autopg"])
 
     def test_170_add_vm_hosts(self):
+        net = self.net["autopg1"]
         ip = self.net["utpgsw0-v710"].usable[0]
         self.dsdb_expect_add("utpgm0.aqd-unittest.ms.com", ip, "eth0", "00:50:56:01:20:00")
         command = ["add", "host", "--hostname", "utpgm0.aqd-unittest.ms.com",
@@ -272,7 +270,14 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, MachineTestMixin,
                    "--domain", "unittest", "--buildstatus", "build",
                    "--archetype", "aquilon",
                    "--personality", "virteng-perf-test"]
-        self.noouttest(command)
+        out = self.statustest(command)
+        self.matchoutput(out,
+                         "Warning: public interface eth0 of machine "
+                         "utpgm0.aqd-unittest.ms.com is bound to network "
+                         "autopg1 [%s] due to port group user-v710, which "
+                         "does not contain IP address %s." %
+                         (net, ip),
+                         command)
         self.dsdb_verify()
 
     def test_175_make_vm_host(self):
@@ -329,10 +334,19 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, MachineTestMixin,
                          command)
 
     def test_241_move_remap_disk(self):
+        net = self.net["autopg1"]
+        ip = self.net["utpgsw0-v710"].usable[0]
         command = ["update_machine", "--machine", "utpgm0",
                    "--vmhost", self.vmhost[1],
                    "--remap_disk", "filesystem/utfs1:filesystem/utrg2/utfs2"]
-        self.noouttest(command)
+        out = self.statustest(command)
+        self.matchoutput(out,
+                         "Warning: public interface eth0 of machine "
+                         "utpgm0.aqd-unittest.ms.com is bound to network "
+                         "autopg1 [%s] due to port group user-v710, which "
+                         "does not contain IP address %s." %
+                         (net, ip),
+                         command)
 
         command = ["show_machine", "--machine", "utpgm0"]
         out = self.commandtest(command)
@@ -340,9 +354,18 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, MachineTestMixin,
         self.matchoutput(out, "stored on filesystem utfs2", command)
 
     def test_242_convert_to_share(self):
+        net = self.net["autopg1"]
+        ip = self.net["utpgsw0-v710"].usable[0]
         command = ["update_machine", "--machine", "utpgm0",
                    "--remap_disk", "filesystem/utrg2/utfs2:share/utrg2/test_v2_share"]
-        self.noouttest(command)
+        out = self.statustest(command)
+        self.matchoutput(out,
+                         "Warning: public interface eth0 of machine "
+                         "utpgm0.aqd-unittest.ms.com is bound to network "
+                         "autopg1 [%s] due to port group user-v710, which "
+                         "does not contain IP address %s." %
+                         (net, ip),
+                         command)
 
         command = ["show_machine", "--machine", "utpgm0"]
         out = self.commandtest(command)
@@ -353,7 +376,7 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, MachineTestMixin,
         command = ["update_machine", "--machine", "utpgm0",
                    "--vmhost", self.vmhost[0],
                    "--remap_disk", "share/utrg2/test_v2_share:filesystem/utfs1"]
-        self.noouttest(command)
+        self.statustest(command)
 
         command = ["show_machine", "--machine", "utpgm0"]
         out = self.commandtest(command)
@@ -364,8 +387,8 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, MachineTestMixin,
             self.noouttest(["del_disk", "--machine", "utpgm%d" % i, "--disk", "sda"])
 
     def test_260_move_vm_to_cluster(self):
-        self.noouttest(["update", "machine", "--machine", "utpgm0",
-                        "--cluster", "utlccl1"])
+        self.statustest(["update", "machine", "--machine", "utpgm0",
+                         "--cluster", "utlccl1"])
 
         command = ["show", "machine", "--machine", "utpgm0"]
         out = self.commandtest(command)
@@ -379,8 +402,8 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, MachineTestMixin,
         self.matchclean(out, "utpgm0", command)
 
     def test_270_move_vm_to_vmhost(self):
-        self.noouttest(["update", "machine", "--machine", "utpgm0",
-                        "--vmhost", self.vmhost[0]])
+        self.statustest(["update", "machine", "--machine", "utpgm0",
+                         "--vmhost", self.vmhost[0]])
 
         command = ["show", "machine", "--machine", "utpgm0"]
         out = self.commandtest(command)

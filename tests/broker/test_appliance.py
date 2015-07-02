@@ -72,6 +72,7 @@ class TestAppliance(VerifyNotificationsMixin, MachineTestMixin,
                         "--interface", "eth0", "--automac", "--autopg"])
 
     def test_210_add_appliance_host(self):
+        net = self.net["ut01ga2s02_v713"]
         ip = self.net["appliance"].usable[0]
         self.dsdb_expect_add("utva.aqd-unittest.ms.com", ip, "eth0",
                              "00:50:56:01:20:17")
@@ -82,7 +83,13 @@ class TestAppliance(VerifyNotificationsMixin, MachineTestMixin,
                    "--archetype", "utappliance",
                    "--personality", "virt-appliance",
                    "--osname", "utos", "--osversion", "1.0"]
-        self.noouttest(command)
+        out = self.statustest(command)
+        self.matchoutput(out,
+                         "Warning: public interface eth0 of machine "
+                         "utva.aqd-unittest.ms.com is bound to network "
+                         "ut01ga2s02_v713 [%s] due to port group user-v713, "
+                         "which does not contain IP address %s." % (net, ip),
+                         command)
         self.dsdb_verify()
 
     # TODO do we need this?
