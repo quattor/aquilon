@@ -243,13 +243,13 @@ class CommandFlush(BrokerCommand):
 
                 q = session.query(Feature)
                 q = q.with_polymorphic('*')
-                q = q.options(joinedload('paramdef_holder'),
+                q = q.options(joinedload('param_def_holder'),
                               undefer('comments'))
                 features = q.all()  # pylint: disable=W0612
 
                 q = session.query(Archetype)
                 q = q.options(subqueryload('features'),
-                              joinedload('paramdef_holder'))
+                              joinedload('param_def_holder'))
                 archetypes = q.all()  # pylint: disable=W0612
 
                 q = session.query(ParamDefHolder)

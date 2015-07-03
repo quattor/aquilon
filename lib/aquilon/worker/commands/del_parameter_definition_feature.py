@@ -29,16 +29,16 @@ class CommandDelParameterDefintionFeature(BrokerCommand):
     def render(self, session, feature, type, path, **kwargs):
         dbfeature = Feature.get_unique(session, name=feature, feature_type=type,
                                        compel=True)
-        if not dbfeature.paramdef_holder:
+        if not dbfeature.param_def_holder:
             raise ArgumentError("No parameter definitions found for {0:l}."
                                 .format(dbfeature))
 
         db_paramdef = ParamDefinition.get_unique(session, path=path,
-                                                 holder=dbfeature.paramdef_holder,
+                                                 holder=dbfeature.param_def_holder,
                                                  compel=True)
 
         # validate if this path is being used
-        holder = search_path_in_personas(session, path, dbfeature.paramdef_holder)
+        holder = search_path_in_personas(session, path, dbfeature.param_def_holder)
         if holder:
             raise ArgumentError("Parameter with path {0} used by following and cannot be deleted : ".format(path) +
                                 ", ".join("{0.holder_object:l}".format(h) for h in holder))

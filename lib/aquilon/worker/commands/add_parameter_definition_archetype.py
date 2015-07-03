@@ -31,8 +31,8 @@ class CommandAddParameterDefintionArchetype(BrokerCommand):
         if not dbarchetype.is_compileable:
             raise ArgumentError("{0} is not compileable.".format(dbarchetype))
 
-        if not dbarchetype.paramdef_holder:
-            dbarchetype.paramdef_holder = ArchetypeParamDef()
+        if not dbarchetype.param_def_holder:
+            dbarchetype.param_def_holder = ArchetypeParamDef()
 
         # strip slash from path start and end
         if path.startswith("/"):
@@ -49,10 +49,10 @@ class CommandAddParameterDefintionArchetype(BrokerCommand):
         validate_param_definition(path, value_type, default)
 
         ParamDefinition.get_unique(session, path=path,
-                                   holder=dbarchetype.paramdef_holder, preclude=True)
+                                   holder=dbarchetype.param_def_holder, preclude=True)
 
         db_paramdef = ParamDefinition(path=path,
-                                      holder=dbarchetype.paramdef_holder,
+                                      holder=dbarchetype.param_def_holder,
                                       value_type=value_type, default=default,
                                       required=required, template=template,
                                       rebuild_required=rebuild_required,

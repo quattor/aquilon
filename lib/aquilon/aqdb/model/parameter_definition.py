@@ -69,7 +69,7 @@ class ArchetypeParamDef(ParamDefHolder):
                           nullable=True, unique=True)
 
     archetype = relation(Archetype,
-                         backref=backref('paramdef_holder', uselist=False,
+                         backref=backref('param_def_holder', uselist=False,
                                          cascade='all, delete-orphan',
                                          passive_deletes=True))
 
@@ -89,7 +89,7 @@ class FeatureParamDef(ParamDefHolder):
                         nullable=True, unique=True)
 
     feature = relation(Feature,
-                       backref=backref('paramdef_holder', uselist=False,
+                       backref=backref('param_def_holder', uselist=False,
                                        cascade='all, delete-orphan',
                                        passive_deletes=True))
 

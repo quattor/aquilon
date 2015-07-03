@@ -43,20 +43,20 @@ class CommandShowParameterPersonality(BrokerCommand):
             params = PersonalityProtoParameter()
 
             param_definitions = None
-            paramdef_holder = dbpersonality.archetype.paramdef_holder
+            param_def_holder = dbpersonality.archetype.param_def_holder
 
             for param in dbstage.paramholder.parameters:
-                if paramdef_holder:
-                    param_definitions = paramdef_holder.param_definitions
+                if param_def_holder:
+                    param_definitions = param_def_holder.param_definitions
                     for param_def in param_definitions:
                         value = param.get_path(param_def.path, compel=False)
                         if value is not None:
                             params.append((param_def.path, param_def, value))
 
                 for link in dbstage.features:
-                    if not link.feature.paramdef_holder:
+                    if not link.feature.param_def_holder:
                         continue
-                    param_definitions = link.feature.paramdef_holder.param_definitions
+                    param_definitions = link.feature.param_def_holder.param_definitions
                     for param_def in param_definitions:
                         value = param.get_feature_path(link, param_def.path,
                                                        compel=False)

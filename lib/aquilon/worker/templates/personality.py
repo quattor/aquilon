@@ -41,12 +41,12 @@ def string_to_list(data):
 
 def get_parameters_by_feature(dbstage, dbfeaturelink):
     ret = {}
-    paramdef_holder = dbfeaturelink.feature.paramdef_holder
-    if not paramdef_holder or not dbstage.paramholder:
+    param_def_holder = dbfeaturelink.feature.param_def_holder
+    if not param_def_holder or not dbstage.paramholder:
         return ret
 
     parameters = dbstage.paramholder.parameters
-    for param_def in paramdef_holder.param_definitions:
+    for param_def in param_def_holder.param_definitions:
         for param in parameters:
             value = param.get_feature_path(dbfeaturelink,
                                            param_def.path, compel=False)
@@ -94,8 +94,8 @@ def get_parameters_by_tmpl(dbstage):
     ret = defaultdict(dict)
 
     dbpersonality = dbstage.personality
-    paramdef_holder = dbpersonality.archetype.paramdef_holder
-    if not paramdef_holder:
+    param_def_holder = dbpersonality.archetype.param_def_holder
+    if not param_def_holder:
         return ret
 
     if dbstage.paramholder:
@@ -103,7 +103,7 @@ def get_parameters_by_tmpl(dbstage):
     else:
         parameters = []
 
-    for param_def in paramdef_holder.param_definitions:
+    for param_def in param_def_holder.param_definitions:
         value = None
         for param in parameters:
             value = param.get_path(param_def.path, compel=False)

@@ -106,11 +106,11 @@ def del_all_feature_parameter(session, dblink):
     # up all personalities here
     if not dblink or not dblink.personality_stage or \
        not dblink.personality_stage.paramholder or \
-       not dblink.feature.paramdef_holder:
+       not dblink.feature.param_def_holder:
         return
 
     parameters = dblink.personality_stage.paramholder.parameters
-    for paramdef in dblink.feature.paramdef_holder.param_definitions:
+    for paramdef in dblink.feature.param_def_holder.param_definitions:
         for dbparam in parameters:
             if paramdef.rebuild_required:
                 validate_rebuild_required(session, paramdef.path, dbparam.holder)
@@ -193,14 +193,14 @@ def validate_rebuild_required(session, path, param_holder):
 
 def get_paramdef_for_parameter(path, param_holder, dbfeaturelink):
     if dbfeaturelink:
-        paramdef_holder = dbfeaturelink.feature.paramdef_holder
+        param_def_holder = dbfeaturelink.feature.param_def_holder
     else:
-        paramdef_holder = param_holder.archetype.paramdef_holder
+        param_def_holder = param_holder.archetype.param_def_holder
 
-    if not paramdef_holder:
+    if not param_def_holder:
         return None
 
-    param_definitions = paramdef_holder.param_definitions
+    param_definitions = param_def_holder.param_definitions
     match = None
 
     # the specified path of the parameter should either be an actual match
@@ -245,29 +245,29 @@ def validate_required_parameter(param_definitions, parameters, dbfeaturelink=Non
     return errors
 
 
-def search_path_in_personas(session, path, paramdef_holder):
+def search_path_in_personas(session, path, param_def_holder):
     q = session.query(PersonalityParameter)
     q = q.join(PersonalityStage)
     q = q.options(contains_eager('personality_stage'))
-    if isinstance(paramdef_holder, ArchetypeParamDef):
+    if isinstance(param_def_holder, ArchetypeParamDef):
         q = q.join(Personality)
         q = q.options(contains_eager('personality_stage.personality'))
-        q = q.filter_by(archetype=paramdef_holder.archetype)
+        q = q.filter_by(archetype=param_def_holder.archetype)
     else:
         q = q.join(FeatureLink)
-        q = q.filter_by(feature=paramdef_holder.feature)
+        q = q.filter_by(feature=param_def_holder.feature)
     q = q.options(subqueryload('parameters'))
 
     holder = {}
     trypath = []
-    if isinstance(paramdef_holder, ArchetypeParamDef):
+    if isinstance(param_def_holder, ArchetypeParamDef):
         trypath.append(path)
     for param_holder in q:
         try:
-            if not isinstance(paramdef_holder, ArchetypeParamDef):
+            if not isinstance(param_def_holder, ArchetypeParamDef):
                 trypath = []
                 q = session.query(FeatureLink)
-                q = q.filter_by(feature=paramdef_holder.feature,
+                q = q.filter_by(feature=param_def_holder.feature,
                                 personality_stage=param_holder.personality_stage)
 
                 for link in q.all():
@@ -298,15 +298,15 @@ def validate_personality_config(dbstage):
 
     error = []
 
-    if dbarchetype.paramdef_holder:
-        param_definitions = dbarchetype.paramdef_holder.param_definitions
+    if dbarchetype.param_def_holder:
+        param_definitions = dbarchetype.param_def_holder.param_definitions
         error += validate_required_parameter(param_definitions, parameters)
 
     # features for personalities
     for link in dbarchetype.features + dbstage.features:
         param_definitions = []
-        if link.feature.paramdef_holder:
-            param_definitions = link.feature.paramdef_holder.param_definitions
+        if link.feature.param_def_holder:
+            param_definitions = link.feature.param_def_holder.param_definitions
             tmp_error = validate_required_parameter(param_definitions, parameters, link)
             if tmp_error:
                 error.append("Feature Binding : %s" % link.feature)

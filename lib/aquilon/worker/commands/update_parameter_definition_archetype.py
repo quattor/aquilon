@@ -31,11 +31,11 @@ class CommandUpdParameterDefintionArchetype(BrokerCommand):
         if not dbarchetype.is_compileable:
             raise ArgumentError("{0} is not compileable.".format(dbarchetype))
 
-        if not dbarchetype.paramdef_holder:
-            dbarchetype.paramdef_holder = ArchetypeParamDef()
+        if not dbarchetype.param_def_holder:
+            dbarchetype.param_def_holder = ArchetypeParamDef()
 
         db_paramdef = ParamDefinition.get_unique(session, path=path,
-                                                 holder=dbarchetype.paramdef_holder,
+                                                 holder=dbarchetype.param_def_holder,
                                                  compel=True)
         if required is not None:
             db_paramdef.required = required

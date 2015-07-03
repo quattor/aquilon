@@ -30,11 +30,11 @@ class CommandUpdParameterDefintionFeature(BrokerCommand):
         dbfeature = Feature.get_unique(session, name=feature, feature_type=type,
                                        compel=True)
 
-        if not dbfeature.paramdef_holder:
-            dbfeature.paramdef_holder = FeatureParamDef()
+        if not dbfeature.param_def_holder:
+            dbfeature.param_def_holder = FeatureParamDef()
 
         db_paramdef = ParamDefinition.get_unique(session, path=path,
-                                                 holder=dbfeature.paramdef_holder,
+                                                 holder=dbfeature.param_def_holder,
                                                  compel=True)
 
         if default:
