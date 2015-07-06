@@ -50,7 +50,7 @@ class CommandShowParameterPersonality(BrokerCommand):
                     param_definitions = paramdef_holder.param_definitions
                     for param_def in param_definitions:
                         value = param.get_path(param_def.path, compel=False)
-                        if value:
+                        if value is not None:
                             params.append((param_def.path, param_def, value))
 
                 for link in dbstage.features:
@@ -60,7 +60,7 @@ class CommandShowParameterPersonality(BrokerCommand):
                     for param_def in param_definitions:
                         value = param.get_feature_path(link, param_def.path,
                                                        compel=False)
-                        if value:
+                        if value is not None:
                             path = Parameter.feature_path(link, param_def.path)
                             params.append((path, param_def, value))
 

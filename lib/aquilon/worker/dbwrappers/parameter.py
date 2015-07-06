@@ -239,7 +239,7 @@ def validate_required_parameter(param_definitions, parameters, dbfeaturelink=Non
                 value = param.get_feature_path(dbfeaturelink, param_def.path, compel=False)
             else:
                 value = param.get_path(param_def.path, compel=False)
-            if value:
+            if value is not None:
                 break
             # ignore if value is specified
         if value is None:
@@ -279,7 +279,7 @@ def search_path_in_personas(session, path, paramdef_holder):
             for tpath in trypath:
                 for param in param_holder.parameters:
                     value = param.get_path(tpath)
-                    if value:
+                    if value is not None:
                         holder[param_holder] = {path: value}
         except NotFoundException:
             pass
