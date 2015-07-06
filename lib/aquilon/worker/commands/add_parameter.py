@@ -15,11 +15,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from aquilon.exceptions_ import ArgumentError
+from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.aqdb.model import Personality, Parameter, PersonalityParameter
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.parameter import (set_parameter,
-                                                 get_feature_link)
+                                                 get_feature_link,
+                                                 get_paramdef_for_parameter)
 from aquilon.worker.dbwrappers.personality import validate_personality_justification
 from aquilon.worker.templates import Plenary, PlenaryCollection
 
@@ -28,14 +29,15 @@ class CommandAddParameter(BrokerCommand):
 
     required_parameters = ['personality', 'path']
 
-    def process_parameter(self, session, dbstage, dblink, path, value):
+    def process_parameter(self, session, dbstage, dblink, dbparam_def, path,
+                          value):
         if not dbstage.paramholder:
             dbstage.paramholder = PersonalityParameter()
         if not dbstage.paramholder.parameter:
             dbstage.paramholder.parameter = Parameter(value={})
 
-        set_parameter(session, dbstage.paramholder, dblink, path, value,
-                      compel=False, preclude=True)
+        set_parameter(session, dbstage.paramholder, dblink, dbparam_def, path,
+                      value, compel=False, preclude=True)
 
     def render(self, session, logger, archetype, personality, personality_stage,
                feature, model, interface, path, user, value=None,
@@ -57,7 +59,13 @@ class CommandAddParameter(BrokerCommand):
         else:
             dblink = None
 
-        self.process_parameter(session, dbstage, dblink, path, value)
+        dbparam_def = get_paramdef_for_parameter(path, dbstage, dblink)
+        if not dbparam_def:
+            raise NotFoundException("Parameter %s does not match any "
+                                    "parameter definitions." % path)
+
+        self.process_parameter(session, dbstage, dblink, dbparam_def, path,
+                               value)
 
         session.flush()
 

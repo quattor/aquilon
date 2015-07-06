@@ -58,32 +58,20 @@ def get_feature_link(session, feature, model, interface_name, dbstage):
     return dblink
 
 
-def set_parameter(session, param_holder, dblink, path, value, compel=False,
-                  preclude=False):
+def set_parameter(session, param_holder, dblink, dbparam_def, path, value,
+                  compel=False, preclude=False):
     """
         Handles add parameter as well as update parameter. Parmeters for features
         will be stored as part of personality as features/<feature_name>/<path>
     """
     parameter = param_holder.parameter
 
-    retval = validate_parameter(session, path, value, param_holder, dblink)
+    retval = validate_parameter(session, dbparam_def, path, value,
+                                param_holder.personality_stage)
 
     if dblink:
         path = Parameter.feature_path(dblink, path)
     parameter.set_path(path, retval, compel, preclude)
-
-
-def del_parameter(session, path, param_holder, dblink):
-    parameter = param_holder.parameter
-
-    match = get_paramdef_for_parameter(path, param_holder, dblink)
-
-    if match and match.rebuild_required:
-        validate_rebuild_required(session, path, param_holder.personality_stage)
-
-    if dblink:
-        path = Parameter.feature_path(dblink, path)
-    parameter.del_path(path)
 
 
 def del_all_feature_parameter(session, dblink):
@@ -124,7 +112,7 @@ def validate_value(label, value_type, value):
     return retval
 
 
-def validate_parameter(session, path, value, param_holder, featurelink=None):
+def validate_parameter(session, dbparam_def, path, value, dbstage):
     """
         Validates parameter before updating in db.
         - checks if matching parameter definition exists
@@ -133,23 +121,18 @@ def validate_parameter(session, path, value, param_holder, featurelink=None):
         - if rebuild_required validate do validation on host status
     """
 
-    match = get_paramdef_for_parameter(path, param_holder, featurelink)
-    if not match:
-        raise ArgumentError("Parameter %s does not match any parameter definitions"
-                            % path)
-
     # check if default specified on parameter definition
     if not value:
-        if match.default:
-            value = match.default
+        if dbparam_def.default:
+            value = dbparam_def.default
         else:
             raise ArgumentError("Parameter %s does not have any value defined."
                                 % path)
 
-    retval = validate_value(path, match.value_type, value)
+    retval = validate_value(path, dbparam_def.value_type, value)
 
-    if match.rebuild_required:
-        validate_rebuild_required(session, path, param_holder.personality_stage)
+    if dbparam_def.rebuild_required:
+        validate_rebuild_required(session, path, dbstage)
 
     return retval
 
@@ -173,11 +156,11 @@ def validate_rebuild_required(session, path, dbstage):
                             (path, dbstage, dbstage))
 
 
-def get_paramdef_for_parameter(path, param_holder, dbfeaturelink):
+def get_paramdef_for_parameter(path, dbstage, dbfeaturelink):
     if dbfeaturelink:
         param_def_holder = dbfeaturelink.feature.param_def_holder
     else:
-        param_def_holder = param_holder.archetype.param_def_holder
+        param_def_holder = dbstage.archetype.param_def_holder
 
     if not param_def_holder:
         return None

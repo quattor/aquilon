@@ -162,7 +162,7 @@ class TestParameter(TestBrokerCommand):
         action = "testaction"
         path = "action/%s/badpath" % action
         command = UPD_CMD + ["--path", path, "--value", "badvalue"]
-        err = self.badrequesttest(command)
+        err = self.notfoundtest(command)
         self.matchoutput(err,
                          "Parameter %s does not match any parameter definitions" % path, command)
 
@@ -171,7 +171,7 @@ class TestParameter(TestBrokerCommand):
         path = "actions/%s/badpath" % action
         value = 800
         command = ADD_CMD + ["--path", path, "--value", value]
-        err = self.badrequesttest(command)
+        err = self.notfoundtest(command)
         self.matchoutput(err,
                          "Parameter %s does not match any parameter definitions" % path, command)
 
@@ -230,7 +230,7 @@ class TestParameter(TestBrokerCommand):
         path = "espinfo/badpath"
         value = "somevalue"
         command = UPD_CMD + ["--path", path, "--value", value]
-        err = self.badrequesttest(command)
+        err = self.notfoundtest(command)
         self.matchoutput(err,
                          "Parameter %s does not match any parameter definitions" % path, command)
 
@@ -570,16 +570,12 @@ class TestParameter(TestBrokerCommand):
         path = "boo"
         command = DEL_CMD + ["--path", path]
         err = self.notfoundtest(command)
-        self.matchoutput(err, "No parameter of path=%s defined" % path, command)
+        self.matchoutput(err,
+                         "Parameter %s does not match any parameter definitions." % path,
+                         command)
 
     def test_620_del_path_json(self):
-        action = "testaction2"
-        path = "action/%s" % action
-        command = DEL_CMD + ["--path", path]
-        err = self.noouttest(command)
-
-        path = "espinfo/"
-        command = DEL_CMD + ["--path", path]
+        command = DEL_CMD + ["--path", "action"]
         err = self.noouttest(command)
 
     def test_630_verify_show(self):
@@ -594,11 +590,6 @@ class TestParameter(TestBrokerCommand):
 
         self.searchclean(out, "testaction", ACT_CAT_CMD)
         self.searchclean(out, "testaction2", ACT_CAT_CMD)
-
-    def test_650_verify_esp(self):
-        ESP_CAT_CMD = CAT_CMD + ["--param_tmpl=espinfo"]
-        err = self.commandtest(ESP_CAT_CMD)
-        self.searchclean(err, r'"function" = "production";', ESP_CAT_CMD)
 
     def test_660_verify_default(self):
         # included by default
