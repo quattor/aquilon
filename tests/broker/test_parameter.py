@@ -136,7 +136,7 @@ class TestParameter(TestBrokerCommand):
     def test_150_add_re_json_path(self):
         action = "testaction2"
         path = "action/%s" % action
-        value = '{ "command": "/bin/%s", "user": "user1", "timeout": 100 }' % action
+        value = '{ "command": "/bin/%s", "timeout": 100, "user": "user1" }' % action
         command = ADD_CMD + ["--path", path, "--value", value]
         self.noouttest(command)
 
@@ -230,11 +230,13 @@ class TestParameter(TestBrokerCommand):
     def test_240_verify_path(self):
         out = self.commandtest(SHOW_CMD)
         self.check_match(out,
-                         'espinfo: { "function": "production", '
-                         '"users": "someusers, otherusers", '
-                         '"class": "INFRASTRUCTURE" }', SHOW_CMD)
+                         'espinfo: { '
+                         '"class": "INFRASTRUCTURE", '
+                         '"function": "production", '
+                         '"users": "someusers, otherusers" }',
+                         SHOW_CMD)
         self.check_match(out, '"testaction": { "command": "/bin/testaction", "user": "user2" }', SHOW_CMD)
-        self.check_match(out, '"testaction2": { "command": "/bin/testaction2", "user": "user1", "timeout": 100 } }', SHOW_CMD)
+        self.check_match(out, '"testaction2": { "command": "/bin/testaction2", "timeout": 100, "user": "user1" } }', SHOW_CMD)
 
     def test_245_verify_path_proto(self):
         cmd = SHOW_CMD + ["--format=proto"]
@@ -273,8 +275,8 @@ class TestParameter(TestBrokerCommand):
         ESP_CAT_CMD = CAT_CMD + ["--param_tmpl=espinfo"]
         out = self.commandtest(ESP_CAT_CMD)
         self.searchoutput(out, r'structure template personality/testpersona/dev\+next/espinfo;\s*'
-                               r'"function" = "production";\s*'
                                r'"class" = "INFRASTRUCTURE";\s*'
+                               r'"function" = "production";\s*'
                                r'"users" = list\(\s*'
                                r'"someusers",\s*'
                                r'"otherusers"\s*'
@@ -517,7 +519,7 @@ class TestParameter(TestBrokerCommand):
                           r'Stage: next\s*'
                           r'action: {\s*'
                           r'"testaction": {\s*"command": "/bin/testaction",\s*"user": "user2"\s*},\s*'
-                          r'"testaction2": {\s*"command": "/bin/testaction2",\s*"user": "user1",\s*"timeout": 100\s*}\s*}',
+                          r'"testaction2": {\s*"command": "/bin/testaction2",\s*"timeout": 100,\s*"user": "user1"\s*}\s*}',
                           cmd)
 
     def test_550_verify_actions(self):

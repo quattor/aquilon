@@ -61,7 +61,7 @@ def get_parameters_by_feature(dbstage, dbfeaturelink):
 
 def helper_feature_template(dbstage, featuretemplate, dbfeaturelink, lines):
     params = get_parameters_by_feature(dbstage, dbfeaturelink)
-    for path in params:
+    for path in sorted(params.keys()):
         pan_assign(lines, "/system/%s/%s" % (dbfeaturelink.cfg_path_escaped, path), params[path])
     lines.append(featuretemplate.format_raw(dbfeaturelink))
 
@@ -310,7 +310,7 @@ class PlenaryPersonalityParameter(StructurePlenary):
         self.parameters = ptmpl.values
 
     def body(self, lines):
-        for path in self.parameters:
+        for path in sorted(self.parameters.keys()):
             pan_assign(lines, path, self.parameters[path])
 
     def is_deleted(self):
