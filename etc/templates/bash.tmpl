@@ -101,6 +101,12 @@ _aq ()
 	    opt=${COMP_WORDS[1]\#\#*_}
 	fi
 
+	if [[ $opt == "command" ]]; then
+	    list=$cmds
+	    COMPREPLY=( $( compgen -W "$list" -- $cur ) )
+	    return 0
+	fi
+
 	subject=""
 	if typeset -F _aq_complete_${opt} >/dev/null 2>&1; then
 	    subject=${opt}
