@@ -22,6 +22,16 @@ global_options_with_params = filter(option_has_parameter, global_options)
 _aq_sqlite="/ms/dist/fsf/PROJ/sqlite/3.8.2-1/bin/sqlite3"
 _aq_datawarehouse="/ms/dist/aquilon/PROJ/datawarehouse/dumpv3"
 
+_aq_complete_branch ()
+{
+    $_aq_sqlite $_aq_datawarehouse/hostdata.db "select distinct branch_name from hosts where branch_type = 'sandbox' and branch_name glob '$1*'"
+}
+
+_aq_complete_author_branch ()
+{
+    $_aq_sqlite $_aq_datawarehouse/hostdata.db "select distinct (branch_author || '/' || branch_name) from hosts where branch_type = 'sandbox'"
+}
+
 _aq_complete_hostname ()
 {
     $_aq_sqlite $_aq_datawarehouse/hostdata.db "select hostname from hosts where hostname glob '$1*'"
@@ -105,6 +115,24 @@ _aq ()
 	    list=$cmds
 	    COMPREPLY=( $( compgen -W "$list" -- $cur ) )
 	    return 0
+	fi
+
+	if [[ $opt == "sandbox" ]]; then
+            if [[ ${COMP_WORDS[1]} == "show_sandbox" ||
+                  ${COMP_WORDS[1]} == "update_sandbox" ||
+                  ${COMP_WORDS[1]} == "add_sandbox" ||
+                  ${COMP_WORDS[1]} == "del_sandbox" ||
+                  ${COMP_WORDS[1]} == "get"
+                ]]; then
+
+                # echo running _aq_complete_branch
+                list=$( _aq_complete_branch $cur)
+            else
+                # echo running _aq_complete_author_branch
+                list=$( _aq_complete_author_branch $cur)
+            fi
+            COMPREPLY=( $( compgen -W "$list" -- $cur ) )
+            return 0
 	fi
 
 	subject=""
