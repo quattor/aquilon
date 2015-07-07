@@ -23,8 +23,7 @@ from sqlalchemy.orm import joinedload, subqueryload, undefer
 from sqlalchemy.sql import or_
 
 from aquilon.exceptions_ import NotFoundException, ArgumentError
-from aquilon.aqdb.model import (PersonalityStage, Parameter,
-                                PersonalityParameter, Host, FeatureParamDef)
+from aquilon.aqdb.model import PersonalityStage, PersonalityParameter, Host
 from aquilon.aqdb.model.hostlifecycle import Ready, Almostready
 from aquilon.worker.formats.parameter_definition import ParamDefinitionFormatter
 from aquilon.worker.templates.base import Plenary
@@ -39,16 +38,10 @@ def set_parameter(session, parameter, db_paramdef, path, value, update=False):
     if db_paramdef.activation == 'rebuild':
         validate_rebuild_required(session, path, parameter.personality_stage)
 
-    if isinstance(db_paramdef.holder, FeatureParamDef):
-        path = Parameter.feature_path(db_paramdef.holder.feature, path)
     parameter.set_path(path, retval, update)
 
     if db_paramdef.schema:
-        base_path = db_paramdef.path
-        if isinstance(db_paramdef.holder, FeatureParamDef):
-            base_path = Parameter.feature_path(db_paramdef.holder.feature,
-                                               base_path)
-        new_value = parameter.get_path(base_path)
+        new_value = parameter.get_path(db_paramdef.path)
         try:
             validate(new_value, db_paramdef.schema)
         except ValidationError as err:
@@ -76,10 +69,9 @@ def del_all_feature_parameter(session, dblink):
             if paramdef.activation != 'rebuild':
                 continue
 
-            path = Parameter.feature_path(dblink.feature, paramdef.path)
-            value = parameter.get_path(path, compel=False)
+            value = parameter.get_path(paramdef.path, compel=False)
             if value is not None:
-                validate_rebuild_required(session, path, dbstage)
+                validate_rebuild_required(session, paramdef.path, dbstage)
 
         del dbstage.parameters[defholder]
 
@@ -158,14 +150,8 @@ def validate_required_parameter(param_def_holder, parameter):
         if (not param_def.required) or param_def.default is not None:
             continue
 
-        if isinstance(param_def_holder, FeatureParamDef):
-            path = Parameter.feature_path(param_def_holder.feature,
-                                          param_def.path)
-        else:
-            path = param_def.path
-
         if parameter:
-            value = parameter.get_path(path, compel=False)
+            value = parameter.get_path(param_def.path, compel=False)
         else:
             value = None
 
@@ -184,9 +170,6 @@ def search_path_in_personas(session, db_paramdef):
     params = {}
 
     path = db_paramdef.path
-    if isinstance(db_paramdef.holder, FeatureParamDef):
-        path = Parameter.feature_path(db_paramdef.holder.feature, path)
-
     for parameter in q:
         try:
             value = parameter.get_path(path)

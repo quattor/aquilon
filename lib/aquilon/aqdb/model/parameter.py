@@ -70,13 +70,6 @@ class Parameter(Base):
     def holder_object(self):  # pragma: no cover
         raise InternalError("Abstract base method called")
 
-    @staticmethod
-    def feature_path(dbfeature, path):
-        """
-        constructs the parameter path for feature namespace
-        """
-        return "/".join([dbfeature.cfg_path, path])
-
     def path_walk(self, path, vivify=False):
         """
         Walk the path given as parameter, and return the list of intermediate
@@ -166,9 +159,6 @@ class Parameter(Base):
 
         index, value = route.pop()
         return value[index]
-
-    def get_feature_path(self, dbfeature, path, compel=True):
-        return self.get_path(Parameter.feature_path(dbfeature, path), compel)
 
     def set_path(self, path, value, update=False):
         try:

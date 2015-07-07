@@ -16,7 +16,7 @@
 # limitations under the License.
 
 from aquilon.exceptions_ import NotFoundException
-from aquilon.aqdb.model import Personality, Parameter, ArchetypeParamDef
+from aquilon.aqdb.model import Personality, ArchetypeParamDef, FeatureParamDef
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.formats.parameter import PersonalityProtoParameter
 
@@ -40,22 +40,19 @@ class CommandShowParameterPersonality(BrokerCommand):
 
             for param_def_holder, param in dbstage.parameters.items():
                 param_definitions = param_def_holder.param_definitions
-                if isinstance(param_def_holder, ArchetypeParamDef):
-                    for param_def in param_definitions:
-                        value = param.get_path(param_def.path, compel=False)
-                        if value is not None:
-                            if param_def.value_type == "list":
-                                value = ",".join(value)
-                            params.append((param_def.path, param_def, value))
-                else:
-                    for param_def in param_definitions:
-                        path = Parameter.feature_path(param_def_holder.feature,
-                                                      param_def.path)
-                        value = param.get_path(path, compel=False)
-                        if value is not None:
-                            if param_def.value_type == "list":
-                                value = ",".join(value)
-                            params.append((path, param_def, value))
+                for param_def in param_definitions:
+                    value = param.get_path(param_def.path, compel=False)
+                    if value is not None:
+                        if param_def.value_type == "list":
+                            value = ",".join(value)
+                        if isinstance(param_def_holder, FeatureParamDef):
+                            # Backwards compatibility path fixup
+                            path = "%s/%s" % (param_def_holder.feature.cfg_path,
+                                              param_def.path)
+                        else:
+                            path = param_def.path
+
+                        params.append((path, param_def, value))
 
             if not params:
                 raise NotFoundException("No parameters found for {0:l}."

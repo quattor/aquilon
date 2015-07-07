@@ -45,8 +45,8 @@ class ParameterFormatter(ObjectFormatter):
             details.append("{0:c}: {0.name}"
                            .format(param.param_def_holder.feature))
 
-        for key, value in param.value.items():
-            details.extend(indented_value(indent + "  ", key, value))
+        for key in sorted(param.value):
+            details.extend(indented_value(indent + "  ", key, param.value[key]))
         return "\n".join(details)
 
 ObjectFormatter.handlers[Parameter] = ParameterFormatter()

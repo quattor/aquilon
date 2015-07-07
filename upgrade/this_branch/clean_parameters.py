@@ -31,8 +31,8 @@ import aquilon.worker.depends
 from sqlalchemy.orm import joinedload, subqueryload
 
 from aquilon.aqdb.db_factory import DbFactory
-from aquilon.aqdb.model import (Base, Parameter, PersonalityParameter,
-                                PersonalityStage, Archetype, Feature)
+from aquilon.aqdb.model import (Base, PersonalityParameter, PersonalityStage,
+                                Archetype, Feature)
 
 
 def clean_params(dbstage):
@@ -49,9 +49,9 @@ def clean_params(dbstage):
         new_param = PersonalityParameter(value={})
         print "  Feature: %s" % defholder.feature
         for paramdef in defholder.param_definitions:
+            path = paramdef.path
             for dblink in links:
-                path = Parameter.feature_path(dblink, paramdef.path)
-                value = param.get_path(path, compel=False)
+                value = param.get_path(dblink.feature.cfg_path + "/" + path, compel=False)
                 if value is not None:
                     new_param.set_path(path, value)
         print "  --> Old: %r" % param.value

@@ -34,9 +34,9 @@ from aquilon.worker.templates.panutils import (pan_include, pan_variable,
 LOGGER = logging.getLogger(__name__)
 
 
-def get_parameters_by_feature(dbstage, dbfeaturelink):
+def get_parameters_by_feature(dbstage, dbfeature):
     ret = {}
-    param_def_holder = dbfeaturelink.feature.param_def_holder
+    param_def_holder = dbfeature.param_def_holder
     if not param_def_holder:
         return ret
 
@@ -44,8 +44,7 @@ def get_parameters_by_feature(dbstage, dbfeaturelink):
 
     for param_def in param_def_holder.param_definitions:
         if param:
-            value = param.get_feature_path(dbfeaturelink.feature,
-                                           param_def.path, compel=False)
+            value = param.get_path(param_def.path, compel=False)
         else:
             value = None
 
@@ -59,11 +58,14 @@ def get_parameters_by_feature(dbstage, dbfeaturelink):
 
 def helper_feature_template(dbstage, featuretemplate, dbfeaturelink, lines):
     dbfeature = dbfeaturelink.feature
-    params = get_parameters_by_feature(dbstage, dbfeaturelink)
-    base_path = "/system/" + dbfeature.cfg_path
+    param_def_holder = dbfeature.param_def_holder
 
-    for path in sorted(params.keys()):
-        pan_assign(lines, base_path + "/" + path, params[path])
+    if param_def_holder:
+        base_path = "/system/" + dbfeature.cfg_path
+        params = get_parameters_by_feature(dbstage, dbfeature)
+
+        for key in sorted(params.keys()):
+            pan_assign(lines, base_path + "/" + key, params[key])
 
     lines.append(featuretemplate.format_raw(dbfeaturelink))
 
