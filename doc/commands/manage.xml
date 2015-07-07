@@ -27,6 +27,9 @@
             <group>
 		<synopfragmentref linkend="global-options">Global options</synopfragmentref>
             </group>
+	    <group>
+		<synopfragmentref linkend="change-management">Change management</synopfragmentref>
+	    </group>
             <group choice="req">
 		<arg choice="plain"><option>--hostname <replaceable>HOSTNAME</replaceable></option></arg>
 		<arg choice="plain"><option>--list <replaceable>FILENAME</replaceable></option></arg>
@@ -38,6 +41,7 @@
 		<arg choice="plain"><option>--sandbox <replaceable>SANDBOX</replaceable></option></arg>
             </group>
 	    <arg><option>--force</option></arg>
+	    <xi:include href="../common/change_management.xml"/>
             <xi:include href="../common/global_options.xml"/>
         </cmdsynopsis>
     </refsynopsisdiv>
@@ -155,6 +159,7 @@
                 </listitem>
             </varlistentry>
         </variablelist>
+	<xi:include href="../common/change_management_desc.xml"/>
         <xi:include href="../common/global_options_desc.xml"/>
     </refsect1>
 

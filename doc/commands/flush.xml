@@ -24,6 +24,12 @@
     <refsynopsisdiv>
 	<cmdsynopsis>
 	    <command>aq flush</command>
+	    <group>
+		<synopfragmentref linkend="global-options">Global options</synopfragmentref>
+	    </group>
+	    <group>
+		<synopfragmentref linkend="change-management">Change management</synopfragmentref>
+	    </group>
 	    <group choice="req">
 	        <arg choice="plain"><option>--hosts</option></arg>
 	        <arg choice="plain"><option>--machines</option></arg>
@@ -35,9 +41,7 @@
 	        <arg choice="plain"><option>--network_devices</option></arg>
 	        <arg choice="plain"><option>--virtual_switches</option></arg>
 	    </group>
-	    <group>
-		<synopfragmentref linkend="global-options">Global options</synopfragmentref>
-	    </group>
+	    <xi:include href="../common/change_management.xml"/>
 	    <xi:include href="../common/global_options.xml"/>
 	</cmdsynopsis>
 	<cmdsynopsis>
@@ -176,6 +180,7 @@
 		</listitem>
 	    </varlistentry>
 	</variablelist>
+	<xi:include href="../common/change_management_desc.xml"/>
 	<xi:include href="../common/global_options_desc.xml"/>
     </refsect1>
 </refentry>

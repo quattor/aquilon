@@ -27,12 +27,16 @@
 	    <group>
 		<synopfragmentref linkend="global-options">Global options</synopfragmentref>
 	    </group>
+	    <group>
+		<synopfragmentref linkend="change-management">Change management</synopfragmentref>
+	    </group>
 	    <arg choice="plain"><option>--ip <replaceable>IP</replaceable></option></arg>
 	    <group choice="req">
 	        <arg choice="plain"><option>--netmask <replaceable>NETMASK</replaceable></option></arg>
 	        <arg choice="plain"><option>--prefixlen <replaceable>LENGTH</replaceable></option></arg>
 	    </group>
 	    <arg><option>--network_environment <replaceable>NETENV</replaceable></option></arg>
+	    <xi:include href="../common/change_management.xml"/>
 	    <xi:include href="../common/global_options.xml"/>
 	</cmdsynopsis>
     </refsynopsisdiv>
@@ -106,6 +110,7 @@
 		</listitem>
 	    </varlistentry>
 	</variablelist>
+	<xi:include href="../common/change_management_desc.xml"/>
 	<xi:include href="../common/global_options_desc.xml"/>
     </refsect1>
 
