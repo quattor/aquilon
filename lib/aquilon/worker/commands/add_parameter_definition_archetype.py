@@ -15,10 +15,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
-from aquilon.exceptions_ import ArgumentError
+from aquilon.exceptions_ import ArgumentError, UnimplementedError
 from aquilon.aqdb.model import Archetype, ArchetypeParamDef, ParamDefinition
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.parameter import validate_param_definition
 
 
@@ -26,8 +25,8 @@ class CommandAddParameterDefintionArchetype(BrokerCommand):
 
     required_parameters = ["archetype", "template", "path", "value_type"]
 
-    def render(self, session, archetype, template, path, value_type, required,
-               rebuild_required, default, description, **kwargs):
+    def render(self, session, logger, archetype, template, path, value_type,
+               required, rebuild_required, default, description, **kwargs):
         dbarchetype = Archetype.get_unique(session, archetype, compel=True)
         if not dbarchetype.is_compileable:
             raise ArgumentError("{0} is not compileable.".format(dbarchetype))
@@ -40,6 +39,12 @@ class CommandAddParameterDefintionArchetype(BrokerCommand):
             path = path[1:]
         if path.endswith("/"):
             path = path[:-1]
+
+        if rebuild_required and default:
+            raise UnimplementedError("Setting a default value for a parameter "
+                                     "which requires rebuild would cause all "
+                                     "existing hosts to require a rebuild, "
+                                     "which is not supported.")
 
         validate_param_definition(path, value_type, default)
 
@@ -55,5 +60,9 @@ class CommandAddParameterDefintionArchetype(BrokerCommand):
         session.add(db_paramdef)
 
         session.flush()
+
+        if default:
+            logger.client_info("You need to run 'aq flush --personalities' for "
+                               "the default value to take effect.")
 
         return

@@ -210,7 +210,13 @@ class TestSetupParams(TestBrokerCommand):
             cmd.append("--rebuild_required")
         if "default" in params:
             cmd.extend(["--default", params["default"]])
-        self.noouttest(cmd)
+
+        if "default" in params:
+            out = self.statustest(cmd)
+            self.matchoutput(out, "You need to run 'aq flush --personalities' "
+                             "for the default value to take effect.", cmd)
+        else:
+            self.noouttest(cmd)
 
     def test_100_add_parameter_definitions(self):
         for template, paramlist in AQUILON_PARAM_DEFS.items():
