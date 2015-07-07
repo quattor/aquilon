@@ -17,6 +17,7 @@
 
 import logging
 from collections import defaultdict
+from operator import attrgetter
 from six import iteritems
 
 from sqlalchemy.inspection import inspect
@@ -271,7 +272,8 @@ class PlenaryPersonalityPreFeature(Plenary):
                 pre_feat.append(link)
 
         # hardware features should precede host features
-        for link in model_feat + interface_feat + pre_feat:
+        for link in sorted(model_feat + interface_feat + pre_feat,
+                           key=attrgetter("feature.name")):
             helper_feature_template(self.dbobj, feat_tmpl, link, lines)
 
 
@@ -289,7 +291,8 @@ class PlenaryPersonalityPostFeature(Plenary):
     def body(self, lines):
         feat_tmpl = FeatureTemplate()
         dbpers = self.dbobj.personality
-        for link in dbpers.archetype.features + self.dbobj.features:
+        for link in sorted(dbpers.archetype.features + self.dbobj.features,
+                           key=attrgetter("feature.name")):
             if link.feature.post_personality:
                 helper_feature_template(self.dbobj, feat_tmpl, link, lines)
 
