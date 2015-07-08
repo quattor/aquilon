@@ -123,7 +123,7 @@
 	how many templates were successfully written and how many templates
 	were selected. For example "flushed 10/10 templates" would indicate
 	that 10 templates matched and they were all written out successfully.
-	<optgroup>
+	<optgroup mandatory="True">
 	    <option name="hosts" type="flag">flush the host templates</option>
 	    <option name="machines" type="flag">flush the machine templates</option>
 	    <option name="personalities" type="flag">flush the personality templates</option>
@@ -1514,6 +1514,7 @@
 	    <option name="type" type="string">Network type</option>
 	    <option name="side" type="string">Network side</option>
 	    <option name="comments" type="string">Comments</option>
+	    <option name="network_environment" type="string">Network environment (default: internal)</option>
 	</optgroup>
 	<optgroup fields="one">
 	    <option name="organization" type="string">Organization</option>
@@ -1527,9 +1528,6 @@
 	    <option name="bunker" type="string">Bunker</option>
 	    <option name="rack" type="string">Rack</option>
 	    <option name="desk" type="string">Desk</option>
-	</optgroup>
-	<optgroup>
-	    <option name="network_environment" type="string">Network environment (default: internal)</option>
 	</optgroup>
 	<transport method="post" path="network"/>
     </command>
@@ -2312,7 +2310,6 @@
 	<transport method="post" path="host/%(hostname)s/command/resetadvertisedstatus"/>
 	<transport trigger="list" method="post" path="command/resetadvertisedstatus/list"/>
     </command>
-
 
     <command name="add_domain">
 	Add a new server-managed template domain.  Updates to these domains
@@ -3192,7 +3189,7 @@
 	<transport method="delete" path="location/hub/%(hub)s"/>
     </command>
 
-  <command name="add_archetype">
+    <command name="add_archetype">
 	Create an archetype.
 	<optgroup mandatory="True" fields="all">
 	    <option name="archetype" type="string">The name to create</option>
@@ -3204,18 +3201,17 @@
 	    <option name="comments" type="string">Comments</option>
 	</optgroup>
 	<transport method="put" path="archetype/%(archetype)s"/>
-  </command>
+    </command>
 
-  <command name="del_archetype">
+    <command name="del_archetype">
 	Delete an archetype.
 	<optgroup mandatory="True" fields="all">
 	    <option name="archetype" type="string">The name to delete</option>
 	</optgroup>
 	<transport method="delete" path="archetype/%(archetype)s"/>
-  </command>
+    </command>
 
-
-  <command name="add_personality">
+    <command name="add_personality">
 	Create a personality. A default template will be created, however
 	this default will be insufficient for real usage and will need to
 	be edited in order to provide realistic information for such things as
@@ -3240,9 +3236,9 @@
 	    <option name="staged" type="flag">Enable staged personality updates</option>
 	</optgroup>
 	<transport method="put" path="personality/archetype/%(archetype)s/personality/%(personality)s"/>
-  </command>
+    </command>
 
-  <command name="add_vendor">
+    <command name="add_vendor">
 	Create a vendor definition.
 	<optgroup mandatory="True" fields="all">
 	    <option name="vendor" type="string">The name of the vendor</option>
@@ -3251,17 +3247,17 @@
 	    <option name="comments" type="string">Comments</option>
 	</optgroup>
 	<transport method="put" path="vendor/%(vendor)s"/>
-  </command>
+    </command>
 
-  <command name="del_vendor">
+    <command name="del_vendor">
 	Remove a vendor definition.
 	<optgroup mandatory="True" fields="all">
 	    <option name="vendor" type="string">The name of the vendor</option>
 	</optgroup>
 	<transport method="delete" path="vendor/%(vendor)s"/>
-  </command>
+    </command>
 
-  <command name="show_vendor">
+    <command name="show_vendor">
 	Show currently defined vendors.
 	<optgroup mandatory="True" fields="one">
 	    <option name="vendor" type="string">The name of the vendor</option>
@@ -3269,9 +3265,9 @@
 	</optgroup>
 	<transport trigger="vendor" method="get" path="vendor/%(vendor)s"/>
 	<transport trigger="all" method="get" path="vendor"/>
-  </command>
+    </command>
 
-  <command name="update_vendor">
+    <command name="update_vendor">
 	Update a vendor definition.
 	<optgroup mandatory="True" fields="all">
 	    <option name="vendor" type="string">The name of the vendor</option>
@@ -3280,9 +3276,9 @@
 	    <option name="comments" type="string">Comments</option>
 	</optgroup>
 	<transport method="post" path="vendor/%(vendor)s"/>
-  </command>
+    </command>
 
-  <command name="add_os">
+    <command name="add_os">
 	Create an operating system definition.
 	<optgroup mandatory="True" fields="all">
 	    <option name="osname" type="string">The name of the operating system</option>
@@ -3293,9 +3289,9 @@
 	    <option name="comments" type="string">Comments</option>
 	</optgroup>
 	<transport method="put" path="os/%(osname)s/%(osversion)s/%(archetype)s"/>
-  </command>
+    </command>
 
-  <command name="update_os">
+    <command name="update_os">
 	Update an operating system comments.
 	<optgroup mandatory="True" fields="all">
 	    <option name="osname" type="string">The name of the operating system</option>
@@ -3304,9 +3300,9 @@
 	    <option name="comments" type="string">Comments</option>
 	</optgroup>
 	<transport method="post" path="os/%(osname)s/%(osversion)s/%(archetype)s"/>
-  </command>
+    </command>
 
-  <command name="del_os">
+    <command name="del_os">
 	Delete an operating system definition.
 	<optgroup mandatory="True" fields="all">
 	    <option name="osname" type="string">The name of the operating system</option>
@@ -3314,9 +3310,9 @@
 	    <option name="archetype" type="string">Which archetype the OS is being deleted from</option>
 	</optgroup>
 	<transport method="delete" path="os/%(osname)s/%(osversion)s/%(archetype)s"/>
-  </command>
+    </command>
 
-  <command name="show_os">
+    <command name="show_os">
 	Show an operating system definition.
 	<optgroup mandatory="True">
 	    <option name="osname" type="string">The name of the operating system</option>
@@ -3328,9 +3324,9 @@
 	<format name="proto" >
 	    <message_class name="OperatingSystemList" module="aqdsystems_pb2"/>
 	</format>
-  </command>
+    </command>
 
-  <command name="del_personality">
+    <command name="del_personality">
 	Delete a personality. This command will fail if any hosts are currently
 	using the personality.
 	<optgroup mandatory="True" fields="all">
@@ -3342,9 +3338,9 @@
 	</optgroup>
 	<transport method="delete" trigger="personality_stage" path="personality/archetype/%(archetype)s/personality/%(personality)s/stage/%(personality_stage)s"/>
 	<transport method="delete" path="personality/archetype/%(archetype)s/personality/%(personality)s"/>
-  </command>
+    </command>
 
-  <command name="update_personality">
+    <command name="update_personality">
 	Updates personality information.
 	<optgroup mandatory="True" fields="all">
 	    <option name="personality" type="string">The personality to update</option>
@@ -3368,9 +3364,9 @@
 	    <option name="eon_id" type="int">Numeric EON ID</option>
 	</optgroup>
 	<transport method="post" path="personality/archetype/%(archetype)s/personality/%(personality)s"/>
-  </command>
+    </command>
 
-  <command name="show_personality">
+    <command name="show_personality">
 	Show personality details.  Specifying both name and archetype will
 	uniquely identify a personality.
 	<p/>
@@ -3388,9 +3384,9 @@
 	<format name="proto" >
 	    <message_class name="PersonalityList" module="aqdsystems_pb2"/>
 	</format>
-  </command>
+    </command>
 
-  <command name="search_personality">
+    <command name="search_personality">
 	Search personality based on given options. Full details of the personality can
 	be shown using the --fullinfo option
 	<p/>
@@ -3409,7 +3405,7 @@
 	<format name="proto" >
 	    <message_class name="PersonalityList" module="aqdsystems_pb2"/>
 	</format>
-  </command>
+    </command>
 
     <command name="make">
 	Build a host configuration.  Any required services which are not bound
@@ -4551,8 +4547,8 @@
 	</optgroup>
 	<optgroup>
 	    <option name="ip" type="ipv4">The new IP address</option>
-			<option name="ttl" type="int">TTL</option>
-			<option name="clear_ttl" type="flag" conflicts="ttl">Clear customized TTL value</option>
+	    <option name="ttl" type="int">TTL</option>
+	    <option name="clear_ttl" type="flag" conflicts="ttl">Clear customized TTL value</option>
 	    <option name="comments" type="string">Comments</option>
 	    <option name="reverse_ptr" type="string">Where the reverse record should point to</option>
 	    <option name="dns_environment" type="string">The name of the environment the address is in (defaults to 'internal')</option>
@@ -4602,7 +4598,7 @@
 	    <option name="target" type="string">The target of an alias (CNAME)</option>
 	</optgroup>
 	<optgroup>
-			<option name="ttl" type="int">TTL</option>
+	    <option name="ttl" type="int">TTL</option>
 	    <option name="comments" type="string">Comments</option>
 	    <option name="dns_environment" type="string">The name of the environment the address is in (defaults to 'internal')</option>
 	    <option name="target_environment" type="string">The name of the environment the target is in (defaults to be the same as the alias environment)</option>
@@ -4628,7 +4624,7 @@
 	    <option name="target" type="string">The target of the A-Record</option>
 	</optgroup>
 	<optgroup>
-			<option name="ttl" type="int">TTL</option>
+	    <option name="ttl" type="int">TTL</option>
 	    <option name="comments" type="string">Comments</option>
 	    <option name="dns_environment" type="string">The name of the environment the address is in (defaults to 'internal')</option>
 	    <option name="target_environment" type="string">The name of the environment the target is in (defaults to be the same as the alias environment)</option>
@@ -4656,15 +4652,14 @@
 	    <option name="target" type="string">The target of the A-Record</option>
 	</optgroup>
 	<optgroup>
-			<option name="ttl" type="int">TTL</option>
-			<option name="clear_ttl" type="flag" conflicts="ttl">Clear customized TTL value</option>
+	    <option name="ttl" type="int">TTL</option>
+	    <option name="clear_ttl" type="flag" conflicts="ttl">Clear customized TTL value</option>
 	    <option name="comments" type="string">Comments</option>
 	    <option name="dns_environment" type="string">The name of the environment the address is in (defaults to 'internal')</option>
 	    <option name="target_environment" type="string">The name of the environment the target is in (defaults to be the same as the alias environment)</option>
 	</optgroup>
 	<transport method="post" path="address_alias/%(fqdn)s"/>
     </command>
-
 
     <command name="show_alias">
 	Show an alias in the DNS.
@@ -4684,8 +4679,8 @@
 	</optgroup>
 	<optgroup>
 	    <option name="target" type="string">The new target of the alias</option>
-			<option name="ttl" type="int">TTL</option>
-			<option name="clear_ttl" type="flag" conflicts="ttl">Clear customized TTL value</option>
+	    <option name="ttl" type="int">TTL</option>
+	    <option name="clear_ttl" type="flag" conflicts="ttl">Clear customized TTL value</option>
 	    <option name="comments" type="string">Comments</option>
 	    <option name="dns_environment" type="string">The name of the environment the address is in (defaults to 'internal')</option>
 	    <option name="target_environment" type="string">The name of the environment the target is in (defaults to be the same as the alias environment)</option>
@@ -4705,7 +4700,7 @@
 	    <option name="port" type="int">The port on the target where the service listens</option>
 	</optgroup>
 	<optgroup>
-			<option name="ttl" type="int">TTL</option>
+	    <option name="ttl" type="int">TTL</option>
 	    <option name="comments" type="string">Comments</option>
 	    <option name="dns_environment" type="string">The name of the environment the address is in (defaults to 'internal')</option>
 	</optgroup>
@@ -4753,8 +4748,8 @@
 	    <option name="priority" type="int">The new priority of the record</option>
 	    <option name="weight" type="int">The new weight of the record</option>
 	    <option name="port" type="int">The new port on the target where the service listens</option>
-			<option name="ttl" type="int">TTL</option>
-			<option name="clear_ttl" type="flag" conflicts="ttl">Clear customized TTL value</option>
+	    <option name="ttl" type="int">TTL</option>
+	    <option name="clear_ttl" type="flag" conflicts="ttl">Clear customized TTL value</option>
 	    <option name="comments" type="string">Comments</option>
 	    <option name="dns_environment" type="string">The name of the environment the address is in (defaults to 'internal')</option>
 	</optgroup>
@@ -4995,16 +4990,15 @@
 
     <command name="add_reboot_intervention">
 	Add a new reboot intervention resource.
-
-	<p/> The intervention will apply after host compilation and NCM
+	<p/>
+	The intervention will apply after host compilation and NCM
 	update and so should be done in plenty of time before the
 	scheduled reboot is to take place.
-
-	<p/> This intervention treats date as the whole day inclusive to
+	<p/>
+	This intervention treats date as the whole day inclusive to
 	expiry. Time of the intervention is ignored.
-
-	<p/> Only a single reboot intervention can be in place at once.
-
+	<p/>
+	Only a single reboot intervention can be in place at once.
 	<optgroup mandatory="True" fields="all">
 	    <optgroup fields="one">
 		<option name="hostname" type="string">Host</option>
@@ -5579,12 +5573,11 @@
 	    <option name="comments" type="string">Comments</option>
 	    <option name="visibility" type="string">scope of the feature values are public(default), restricted, owner_only, owner_approved</option>
 	</optgroup>
-
 	<transport method="put" path="feature/%(type)s/%(feature)s"/>
     </command>
 
     <command name="update_feature">
-        Update feature attributes.
+	Update feature attributes.
 	<optgroup mandatory="True" fields="all">
 	    <option name="feature" type="string">The name of the feature</option>
 	    <option name="type" type="string">Type of the feature: host, hardware or interface</option>
@@ -5600,14 +5593,12 @@
 	<transport method="post" path="feature/%(type)s/%(feature)s"/>
     </command>
 
-
     <command name="del_feature">
 	Delete a feature.
 	<optgroup mandatory="True" fields="all">
 	    <option name="feature" type="string">The name of the feature</option>
 	    <option name="type" type="string">Type of the feature: host, hardware or interface</option>
 	</optgroup>
-
 	<transport method="delete" path="feature/%(type)s/%(feature)s"/>
     </command>
 
@@ -5620,12 +5611,11 @@
 	    </optgroup>
 	    <option name="all" type="flag">Show all features</option>
 	</optgroup>
-
 	<transport trigger="all" method="get" path="feature"/>
 	<transport method="get" path="feature/%(type)s/%(feature)s"/>
-        <format name="proto">
-            <message_class name="FeatureList" module="aqdsystems_pb2"/>
-        </format>
+	<format name="proto">
+	    <message_class name="FeatureList" module="aqdsystems_pb2"/>
+	</format>
     </command>
 
     <command name="bind_feature">
@@ -5635,7 +5625,6 @@
 	The hosts however are not compiled; that has to be done manually.
 	<p/>
 	Changing feature links for a whole archetype require --justification and a valid TCM.
-
 	<optgroup mandatory="True" fields="all">
 	    <option name="feature" type="string">Name of the feature</option>
 	    <optgroup>
@@ -5651,7 +5640,6 @@
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
 	    <option name="reason" type="string">String to be specified if justification='emergency'</option>
 	</optgroup>
-
 	<transport method="post" path="command/bind_feature"/>
     </command>
 
@@ -5662,7 +5650,6 @@
 	The hosts however are not compiled; that has to be done manually.
 	<p/>
 	Changing feature links for a whole archetype require --justification and a valid TCM.
-
 	<optgroup mandatory="True" fields="all">
 	    <option name="feature" type="string">Name of the feature</option>
 	    <optgroup>
@@ -5678,7 +5665,6 @@
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
 	    <option name="reason" type="string">String to be specified if justification='emergency'</option>
 	</optgroup>
-
 	<transport method="post" path="command/unbind_feature"/>
     </command>
 
@@ -5699,7 +5685,6 @@
 
     <command name="validate_parameter">
 	Validate all parameters configured on a personality
-	<p/>
 	<optgroup mandatory="True" fields="all">
 	    <option name="personality" type="string">Name of personality</option>
 	</optgroup>
@@ -5853,7 +5838,7 @@
 	Display all parameter definition configured for a object
 	<p/>
 	Supported options for --format: raw, csv.
-
+	<p/>
 	The 'csv' format contains the following fields, in this order:
 	Definition Holder name, path, value type, default value, description, template, is_required
 	<optgroup mandatory="True">

@@ -106,8 +106,8 @@ class TestClientFailure(TestBrokerCommand):
                          command)
 
     def testunauthorized(self):
-        command = "flush"
-        out = self.unauthorizedtest(command)
+        command = ["flush", "--all"]
+        self.unauthorizedtest(command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestClientFailure)
