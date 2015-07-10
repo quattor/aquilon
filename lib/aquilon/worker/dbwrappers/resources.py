@@ -24,7 +24,7 @@ from sqlalchemy.inspection import inspect
 from aquilon.exceptions_ import NotFoundException, ArgumentError
 from aquilon.aqdb.model import (Cluster, MetaCluster, ClusterResource,
                                 HostResource, Resource, ResourceGroup,
-                                BundleResource, RebootIntervention)
+                                BundleResource, RebootIntervention, VirtualDisk)
 from aquilon.worker.dbwrappers.host import hostname_to_host
 
 
@@ -203,3 +203,11 @@ def find_resource(cls, dbobj, resourcegroup, resource, ignore=None,
                                                                    resource)
 
     raise error(msg)
+
+
+def check_resource_dependencies(session, dbresource):
+    q = session.query(VirtualDisk.id)
+    q = q.filter_by(backing_store=dbresource)
+    if q.count():
+        raise ArgumentError("{0} has virtual disks attached, so it cannot "
+                            "be deleted.".format(dbresource))

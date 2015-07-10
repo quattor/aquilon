@@ -194,6 +194,12 @@ class TestAddVirtualHardware(TestBrokerCommand):
         out = self.badrequesttest(command)
         self.matchoutput(out, "cannot support VMs", command)
 
+    def test_300_faildelshare(self):
+        command = ["del_share", "--share", "test_share_1", "--cluster", "utecl1"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Share test_share_1 has virtual disks attached, "
+                         "so it cannot be deleted.", command)
+
     def test_500_verifyaddmachines(self):
         # Skipping evm9 since the mac is out of sequence and different cluster
         for i in range(1, 9):
