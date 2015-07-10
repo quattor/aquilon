@@ -95,7 +95,7 @@ class Parameter(Base):
     __tablename__ = _TN
 
     id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
-    value = Column(MutableDict.as_mutable(JSONEncodedDict))
+    value = Column(MutableDict.as_mutable(JSONEncodedDict), nullable=False)
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
     holder_id = Column(ForeignKey(ParameterHolder.id, ondelete='CASCADE'),

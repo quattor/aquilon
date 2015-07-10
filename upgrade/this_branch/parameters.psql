@@ -1,0 +1,1 @@
+ALTER TABLE parameter ALTER value SET NOT NULL;
