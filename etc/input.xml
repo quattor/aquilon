@@ -5188,14 +5188,16 @@
 
     <command name="show_application">
 	Show applications based on filtering for host/cluster association
-	<optgroup mandatory="True">
-	    <optgroup>
-		<option name="hostname" type="string" conflicts="cluster metacluster">Hostname to apply resource</option>
-		<option name="cluster" type="string" conflicts="hostname metacluster">Cluster to apply resource</option>
-		<option name="metacluster" type="string" conflicts="hostname cluster">Metacluster to apply resource</option>
-		<option name="resourcegroup" type="string">Resourcegroup to apply resource</option>
+	<optgroup mandatory="True" fields="one">
+	    <optgroup fields="all">
+		<optgroup>
+		    <option name="hostname" type="string" conflicts="cluster metacluster">Hostname to apply resource</option>
+		    <option name="cluster" type="string" conflicts="hostname metacluster">Cluster to apply resource</option>
+		    <option name="metacluster" type="string" conflicts="hostname cluster">Metacluster to apply resource</option>
+		    <option name="resourcegroup" type="string">Resourcegroup to apply resource</option>
+		</optgroup>
+		<option name="application" type="string">application name</option>
 	    </optgroup>
-	    <option name="application" type="string">application name</option>
 	    <option name="all" type="flag" conflicts="hostname cluster metacluster resourcegroup application">list all applications</option>
 	</optgroup>
 	<transport method="get" trigger="application" path="resource/application/%(application)s"/>
@@ -5241,14 +5243,16 @@
 
     <command name="show_hostlink">
 	Show a hostlink resource.
-	<optgroup mandatory="True">
-	    <optgroup>
-		<option name="hostname" type="string" conflicts="cluster metacluster">Hostname to apply resource</option>
-		<option name="cluster" type="string" conflicts="hostname metacluster">Cluster to apply resource</option>
-		<option name="metacluster" type="string" conflicts="hostname cluster">Metacluster to apply resource</option>
-		<option name="resourcegroup" type="string">Resourcegroup to apply resource</option>
+	<optgroup mandatory="True" fields="one">
+	    <optgroup fields="all">
+		<optgroup>
+		    <option name="hostname" type="string" conflicts="cluster metacluster">Hostname to apply resource</option>
+		    <option name="cluster" type="string" conflicts="hostname metacluster">Cluster to apply resource</option>
+		    <option name="metacluster" type="string" conflicts="hostname cluster">Metacluster to apply resource</option>
+		    <option name="resourcegroup" type="string">Resourcegroup to apply resource</option>
+		</optgroup>
+		<option name="hostlink" type="string">hostlink name</option>
 	    </optgroup>
-	    <option name="hostlink" type="string">hostlink name</option>
 	    <option name="all" type="flag" conflicts="hostname cluster metacluster resourcegroup hostlink">list all hostlinks</option>
 	</optgroup>
 	<transport method="get" trigger="hostlink" path="resource/hostlink/%(hostlink)s"/>
@@ -5352,14 +5356,16 @@
 
     <command name="show_service_address">
 	Show service addresss based on filtering for host/cluster association
-	<optgroup mandatory="True">
-	    <optgroup>
-		<option name="hostname" type="string" conflicts="cluster metacluster">Hostname to apply resource</option>
-		<option name="cluster" type="string" conflicts="hostname metacluster">Cluster to apply resource</option>
-		<option name="metacluster" type="string" conflicts="hostname cluster">Metacluster to apply resource</option>
-		<option name="resourcegroup" type="string">Resourcegroup to apply resource</option>
+	<optgroup mandatory="True" fields="one">
+	    <optgroup fields="all">
+		<optgroup>
+		    <option name="hostname" type="string" conflicts="cluster metacluster">Hostname to apply resource</option>
+		    <option name="cluster" type="string" conflicts="hostname metacluster">Cluster to apply resource</option>
+		    <option name="metacluster" type="string" conflicts="hostname cluster">Metacluster to apply resource</option>
+		    <option name="resourcegroup" type="string">Resourcegroup to apply resource</option>
+		</optgroup>
+		<option name="name" type="string">service address name</option>
 	    </optgroup>
-	    <option name="name" type="string">service address name</option>
 	    <option name="all" type="flag" conflicts="hostname cluster metacluster resourcegroup name">list all service addresses</option>
 	</optgroup>
 	<transport method="get" trigger="name" path="resource/service_address/%(name)s"/>
@@ -5371,7 +5377,7 @@
 
     <command name="update_service_address">
 	Update the parameters of a service address resource.
-	<optgroup mandatory="True">
+	<optgroup mandatory="True" fields="all">
 	    <optgroup>
 		<option name="hostname" type="string" conflicts="cluster metacluster">Hostname to apply resource</option>
 		<option name="cluster" type="string" conflicts="hostname metacluster">Cluster to apply resource</option>
