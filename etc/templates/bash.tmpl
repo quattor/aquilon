@@ -72,10 +72,14 @@ _aq_complete_service ()
     $_aq_sqlite $_aq_datawarehouse/servers.db "select distinct service from servers where service glob '$1*'"
 }
 
+_aq_complete_server_of_service () { _aq_complete_service $*; }
+
 _aq_complete_instance ()
 {
     $_aq_sqlite $_aq_datawarehouse/servers.db "select distinct instance from servers where instance glob '$1*'"
 }
+
+_aq_complete_server_of_instance () { _aq_complete_instance $*; }
 
 _aq ()
 {
