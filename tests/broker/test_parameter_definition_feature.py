@@ -296,6 +296,43 @@ class TestParameterDefinitionFeature(TestBrokerCommand):
                    "--path=%s" % path]
             self.noouttest(cmd)
 
+    def test_230_add_bad_feature_type(self):
+        cmd = ["add_parameter_definition", "--feature", FEATURE,
+               "--type=no-such-type",
+               "--path=testpath", "--value_type=string"]
+        err = self.badrequesttest(cmd)
+        self.matchoutput(err,
+                         "Unknown feature type 'no-such-type'. The valid "
+                         "values are: hardware, host, interface.",
+                         cmd)
+
+    def test_230_update_bad_feature_type(self):
+        cmd = ["update_parameter_definition", "--feature", FEATURE,
+               "--type=no-such-type", "--path=testpath"]
+        err = self.badrequesttest(cmd)
+        self.matchoutput(err,
+                         "Unknown feature type 'no-such-type'. The valid "
+                         "values are: hardware, host, interface.",
+                         cmd)
+
+    def test_230_del_bad_feature_type(self):
+        cmd = ["del_parameter_definition", "--feature", FEATURE,
+               "--type=no-such-type", "--path=testpath"]
+        err = self.badrequesttest(cmd)
+        self.matchoutput(err,
+                         "Unknown feature type 'no-such-type'. The valid "
+                         "values are: hardware, host, interface.",
+                         cmd)
+
+    def test_230_search_bad_feature_type(self):
+        cmd = ["search_parameter_definition", "--feature", FEATURE,
+               "--type=no-such-type"]
+        err = self.badrequesttest(cmd)
+        self.matchoutput(err,
+                         "Unknown feature type 'no-such-type'. The valid "
+                         "values are: hardware, host, interface.",
+                         cmd)
+
     def test_300_del(self):
         cmd = ["del_feature", "--feature", FEATURE, "--type=host"]
         self.noouttest(cmd)
