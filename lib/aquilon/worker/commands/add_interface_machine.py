@@ -134,6 +134,8 @@ class CommandAddInterfaceMachine(BrokerCommand):
                                               bus_address=bus_address,
                                               comments=comments, preclude=True)
 
+        # Note: autopg handling must come after automac, to ensure lock ordering
+        # is consistent with update_interface, to avoid deadlocks
         if pg or autopg:
             if autopg:
                 pg = 'user'
