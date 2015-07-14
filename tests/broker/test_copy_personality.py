@@ -147,7 +147,10 @@ class TestCopyPersonality(VerifyGrnsMixin, TestBrokerCommand):
                    "--other", "utpers-dev-clone", "--other_stage", "next"]
         out = self.commandtest(command)
         self.matchoutput(out,
-                         "missing Parameters in Personality aquilon/utpers-dev@current:",
+                         "missing Parameters for template actions in Personality aquilon/utpers-dev@current:",
+                         command)
+        self.matchoutput(out,
+                         "missing Parameters for template foo in Personality aquilon/utpers-dev@current:",
                          command)
 
     def test_200_copy_missing_stage(self):

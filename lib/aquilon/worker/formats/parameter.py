@@ -18,7 +18,8 @@
 
 import json
 
-from aquilon.aqdb.model import Parameter, PersonalityParameter
+from aquilon.aqdb.model import (Parameter, PersonalityParameter,
+                                ArchetypeParamDef)
 from aquilon.worker.formats.formatters import ObjectFormatter
 from aquilon.worker.formats.list import ListFormatter
 
@@ -37,8 +38,15 @@ def indented_value(indent, key, paramval):
 class ParameterFormatter(ObjectFormatter):
     def format_raw(self, param, indent="", embedded=True, indirect_attrs=True):
         details = []
+
+        if isinstance(param.param_def_holder, ArchetypeParamDef):
+            details.append("Template: %s" % param.param_def_holder.template)
+        else:
+            details.append("{0:c}: {0.name}"
+                           .format(param.param_def_holder.feature))
+
         for key, value in param.value.items():
-            details.extend(indented_value(indent, key, value))
+            details.extend(indented_value(indent + "  ", key, value))
         return "\n".join(details)
 
 ObjectFormatter.handlers[Parameter] = ParameterFormatter()
@@ -75,10 +83,11 @@ class DiffFormatter(ObjectFormatter):
     def format_raw(self, diff, indent="", embedded=True, indirect_attrs=True):
         ret = []
 
-        for key, value in diff.items():
+        for key in sorted(diff):
             details = []
-            mydata = value["my"]
-            otherdata = value["other"]
+            value = diff[key]
+            mydata = value.get("my", {})
+            otherdata = value.get("other", {})
 
             mykeys = set(mydata)
             otherkeys = set(otherdata)

@@ -67,4 +67,12 @@ class CommandShowParameterPersonality(BrokerCommand):
             if not params:
                 raise NotFoundException("No parameters found for {0:l}."
                                         .format(dbstage))
+
+            # List general parameters first sorted by template, then the feature
+            # parameters
+            params.sort(key=lambda x:
+                        (0, x.param_def_holder.template)
+                        if isinstance(x.param_def_holder, ArchetypeParamDef) else
+                        (1, x.param_def_holder.feature.name))
+
             return params

@@ -95,8 +95,8 @@ class TestAddParameter(VerifyGrnsMixin, PersonalityTestMixin,
                    "--personality_stage", "next", "--other_stage", "current"]
         out = self.commandtest(command)
         self.output_equals(out, """
-            Differences for Parameters:
-              missing Parameters in Personality aquilon/utpers-dev@current:
+            Differences for Parameters for template espinfo:
+              missing Parameters for template espinfo in Personality aquilon/utpers-dev@current:
                 //espinfo/class
                 //espinfo/function
                 //espinfo/users/0
@@ -173,6 +173,7 @@ class TestAddParameter(VerifyGrnsMixin, PersonalityTestMixin,
                    "--archetype", "aquilon", "--personality_stage", "next"]
         out = self.commandtest(command)
         self.check_match(out,
+                         'Template: espinfo '
                          'espinfo: { '
                          '"class": "INFRASTRUCTURE", '
                          '"function": "crash", '
@@ -344,15 +345,30 @@ class TestAddParameter(VerifyGrnsMixin, PersonalityTestMixin,
 
         out = self.commandtest(cmd)
         self.searchoutput(out,
-                          r'Differences for Parameters:\s*'
-                          r'missing Parameters in Personality aquilon/utpers-prod:\s*'
+                          r'Differences for Parameters for template actions:\s*'
+                          r'missing Parameters for template actions in Personality aquilon/utpers-prod:\s*'
                           r'//actions/testaction/command\s*'
                           r'//actions/testaction/user\s*'
                           r'//actions/testaction2/command\s*'
                           r'//actions/testaction2/timeout\s*'
-                          r'//actions/testaction2/user\s*'
+                          r'//actions/testaction2/user\s*',
+                          cmd)
+        self.searchoutput(out,
+                          r'Differences for Parameters for template espinfo:\s*'
+                          r'missing Parameters for template espinfo in Personality aquilon/utpers-prod:\s*'
                           r'//espinfo/users/1\s*'
-                          r'//foo/testrequired\s*'
+                          r'matching Parameters for template espinfo with different values:\s*'
+                          r'//espinfo/function value=crash, othervalue=development\s*'
+                          r'//espinfo/users/0 value=someusers, othervalue=IT / TECHNOLOGY',
+                          cmd)
+        self.searchoutput(out,
+                          r'Differences for Parameters for template foo:\s*'
+                          r'missing Parameters for template foo in Personality aquilon/utpers-prod:\s*'
+                          r'//foo/testrequired\s*',
+                          cmd)
+        self.searchoutput(out,
+                          r'Differences for Parameters for template monitoring:\s*'
+                          r'missing Parameters for template monitoring in Personality aquilon/utpers-prod:\s*'
                           r'//monitoring/metric/_20003/active\s*'
                           r'//monitoring/metric/_20003/class\s*'
                           r'//monitoring/metric/_20003/descr\s*'
@@ -361,10 +377,7 @@ class TestAddParameter(VerifyGrnsMixin, PersonalityTestMixin,
                           r'//monitoring/metric/_20003/period\s*'
                           r'//monitoring/metric/_20003/smooth/maxdiff\s*'
                           r'//monitoring/metric/_20003/smooth/maxtime\s*'
-                          r'//monitoring/metric/_20003/smooth/typeString\s*'
-                          r'matching Parameters with different values:\s*'
-                          r'//espinfo/function value=crash, othervalue=development\s*'
-                          r'//espinfo/users/0 value=someusers, othervalue=IT / TECHNOLOGY',
+                          r'//monitoring/metric/_20003/smooth/typeString\s*',
                           cmd)
 
     def test_310_search_parameter_espinfo(self):

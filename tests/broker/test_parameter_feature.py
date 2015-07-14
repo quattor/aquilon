@@ -121,6 +121,8 @@ class TestParameterFeature(TestBrokerCommand):
         cmd = SHOW_CMD
         out = self.commandtest(cmd)
         self.searchoutput(out,
+                          r'Host Feature: hostfeature\s*'
+                          r'features: {\s*'
                           r'"hostfeature": {\s*'
                           r'"testboolean": false,\s*'
                           r'"testdefault": "host_feature",\s*'
@@ -199,11 +201,13 @@ class TestParameterFeature(TestBrokerCommand):
         cmd = SHOW_CMD
         out = self.commandtest(cmd)
         self.searchoutput(out,
+                          r'Interface Feature: interfacefeature\s*'
+                          r'features: {\s*'
                           r'"interface": {\s*'
                           r'"interfacefeature": {\s*'
                           r'"testdefault": "interface_feature",\s*'
                           r'"testlist": \[\s*"intf1",\s*"intf2"\s*\]\s*'
-                          r'}\s*}',
+                          r'}\s*}\s*}',
                           cmd)
 
     def test_220_verify_cat_interface_feature(self):
@@ -248,6 +252,8 @@ class TestParameterFeature(TestBrokerCommand):
         cmd = SHOW_CMD
         out = self.commandtest(cmd)
         self.searchoutput(out,
+                          r'Hardware Feature: hardwarefeature\s*'
+                          r'features: {\s*'
                           r'"hardware": {\s*'
                           r'"hardwarefeature": {\s*'
                           r'"testdefault": "hardware_feature",\s*'
@@ -348,10 +354,12 @@ class TestParameterFeature(TestBrokerCommand):
         cmd = SHOW_CMD
         out = self.commandtest(cmd)
         self.searchoutput(out,
+                          r'Hardware Feature: hardwarefeature\s*'
+                          r'features: {\s*'
                           r'"hardware": {\s*'
                           r'"hardwarefeature": {\s*'
                           r'"testdefault": "hardware_newstring",\s*'
-                          r'"testlist": \[\s*"hardware1",\s*"hardware2"\s*\]',
+                          r'"testlist": \[\s*"hardware1",\s*"hardware2"\s*\]\s*',
                           cmd)
 
     def test_390_verify_cat_hardware_feature(self):
@@ -446,14 +454,17 @@ class TestParameterFeature(TestBrokerCommand):
                           r'hostfeature\s*'
                           r'interfacefeature\s*',
                           cmd)
+
         self.searchoutput(out,
-                          r'Differences for Parameters:\s*'
-                          r'missing Parameters in Personality aquilon/unixeng-test@next:\s*'
-                          r'//espinfo/users/1\s*'
-                          r'missing Parameters in Personality aquilon/utpers-dev@current:\s*'
+                          r'Differences for Parameters for hardware feature hardwarefeature:\s*'
+                          r'missing Parameters for hardware feature hardwarefeature in Personality aquilon/utpers-dev@current:\s*'
                           r'//features/hardware/hardwarefeature/testdefault\s*'
                           r'//features/hardware/hardwarefeature/testlist/0\s*'
-                          r'//features/hardware/hardwarefeature/testlist/1\s*'
+                          r'//features/hardware/hardwarefeature/testlist/1\s*',
+                          cmd)
+        self.searchoutput(out,
+                          r'Differences for Parameters for host feature hostfeature:\s*'
+                          r'missing Parameters for host feature hostfeature in Personality aquilon/utpers-dev@current:\s*'
                           r'//features/hostfeature/testboolean\s*'
                           r'//features/hostfeature/testdefault\s*'
                           r'//features/hostfeature/testint\s*'
@@ -462,7 +473,11 @@ class TestParameterFeature(TestBrokerCommand):
                           r'//features/hostfeature/testjson/values/1\s*'
                           r'//features/hostfeature/testlist/0\s*'
                           r'//features/hostfeature/testlist/1\s*'
-                          r'//features/hostfeature/teststring\s*'
+                          r'//features/hostfeature/teststring\s*',
+                          cmd)
+        self.searchoutput(out,
+                          r'Differences for Parameters for interface feature interfacefeature:\s*'
+                          r'missing Parameters for interface feature interfacefeature in Personality aquilon/utpers-dev@current:\s*'
                           r'//features/interface/interfacefeature/testdefault\s*'
                           r'//features/interface/interfacefeature/testlist/0\s*'
                           r'//features/interface/interfacefeature/testlist/1\s*',
@@ -493,12 +508,23 @@ class TestParameterFeature(TestBrokerCommand):
     def test_620_verify_name_feature_parameter(self):
         cmd = SHOW_CMD
         out = self.commandtest(cmd)
-        self.searchoutput(out, r'"shinynew": {\s*'
-                               r'"car": "bmwinterface"', cmd)
-        self.searchoutput(out, r'"shinynew": {\s*'
-                               r'"car": "bmwhardware"', cmd)
-        self.searchoutput(out, r'"shinynew": {\s*'
-                               r'"car": "bmwhost"', cmd)
+        self.searchoutput(out,
+                          r'Interface Feature: shinynew\s*'
+                          r'features: {\s*'
+                          r'"interface": {\s*'
+                          r'"shinynew": {\s*'
+                          r'"car": "bmwinterface"', cmd)
+        self.searchoutput(out,
+                          r'Hardware Feature: shinynew\s*'
+                          r'features: {\s*'
+                          r'"hardware": {\s*'
+                          r'"shinynew": {\s*'
+                          r'"car": "bmwhardware"', cmd)
+        self.searchoutput(out,
+                          r'Host Feature: shinynew\s*'
+                          r'features: {\s*'
+                          r'"shinynew": {\s*'
+                          r'"car": "bmwhost"', cmd)
 
     def test_630_upd_same_name_feature_parameter(self):
         feature = "shinynew"
@@ -511,12 +537,23 @@ class TestParameterFeature(TestBrokerCommand):
     def test_640_verify_name_feature_parameter(self):
         cmd = SHOW_CMD
         out = self.commandtest(cmd)
-        self.searchoutput(out, r'"shinynew": {\s*'
-                               r'"car": "audiinterface"', cmd)
-        self.searchoutput(out, r'"shinynew": {\s*'
-                               r'"car": "audihardware"', cmd)
-        self.searchoutput(out, r'"shinynew": {\s*'
-                               r'"car": "audihost"', cmd)
+        self.searchoutput(out,
+                          r'Interface Feature: shinynew\s*'
+                          r'features: {\s*'
+                          r'"interface": {\s*'
+                          r'"shinynew": {\s*'
+                          r'"car": "audiinterface"', cmd)
+        self.searchoutput(out,
+                          r'Hardware Feature: shinynew\s*'
+                          r'features: {\s*'
+                          r'"hardware": {\s*'
+                          r'"shinynew": {\s*'
+                          r'"car": "audihardware"', cmd)
+        self.searchoutput(out,
+                          r'Host Feature: shinynew\s*'
+                          r'features: {\s*'
+                          r'"shinynew": {\s*'
+                          r'"car": "audihost"', cmd)
 
     def test_700_add_src_route_param(self):
         self.noouttest(["add_parameter", "--personality", "compileserver",
