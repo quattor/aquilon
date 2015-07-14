@@ -23,7 +23,7 @@ from six import iteritems
 from sqlalchemy.inspection import inspect
 from sqlalchemy.orm import object_session
 
-from aquilon.aqdb.model import PersonalityStage, Parameter
+from aquilon.aqdb.model import PersonalityStage, Parameter, InterfaceFeature
 from aquilon.worker.locks import NoLockKey, PlenaryKey
 from aquilon.worker.templates.base import (Plenary, StructurePlenary,
                                            TemplateFormatter, PlenaryCollection)
@@ -61,9 +61,16 @@ def get_parameters_by_feature(dbstage, dbfeaturelink):
 
 
 def helper_feature_template(dbstage, featuretemplate, dbfeaturelink, lines):
+    dbfeature = dbfeaturelink.feature
     params = get_parameters_by_feature(dbstage, dbfeaturelink)
+    base_path = "/system/" + dbfeature.cfg_path
+
+    if isinstance(dbfeature, InterfaceFeature) and dbfeaturelink.interface_name:
+        base_path = base_path + "/{%s}" % dbfeaturelink.interface_name
+
     for path in sorted(params.keys()):
-        pan_assign(lines, "/system/%s/%s" % (dbfeaturelink.cfg_path_escaped, path), params[path])
+        pan_assign(lines, base_path + "/" + path, params[path])
+
     lines.append(featuretemplate.format_raw(dbfeaturelink))
 
 

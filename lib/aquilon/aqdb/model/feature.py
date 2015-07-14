@@ -248,25 +248,10 @@ class FeatureLink(Base):
 
     @property
     def cfg_path(self):
-        format_str = "%s/%s"
-        if self.model:
-            return format_str % (self.feature.cfg_path, self.model)
-
-        if self.interface_name:
-            return format_str % (self.feature.cfg_path, self.interface_name)
-
-        return self.feature.cfg_path
-
-    @property
-    def cfg_path_escaped(self):
-        format_str = "%s/{%s}"
-        if self.model:
-            return format_str % (self.feature.cfg_path, self.model)
-
-        if self.interface_name:
-            return format_str % (self.feature.cfg_path, self.interface_name)
-
-        return self.feature.cfg_path
+        if isinstance(self.feature, InterfaceFeature) and self.interface_name:
+            return self.feature.cfg_path + "/" + self.interface_name
+        else:
+            return self.feature.cfg_path
 
     def copy(self):
         # We have two foreign keys: feature and personality_stage. Since we
