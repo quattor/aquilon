@@ -382,8 +382,10 @@ class TestBindFeature(TestBrokerCommand):
         command = ["bind", "feature", "--feature", "src_route",
                    "--interface", "eth0"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "Binding to a named interface needs a "
-                         "personality.", command)
+        self.matchoutput(out,
+                         "Please specify either an archetype or a personality "
+                         "when binding a feature.",
+                         command)
 
     def test_200_bind_archetype_again(self):
         command = ["bind", "feature", "--feature", "pre_host",
@@ -445,8 +447,8 @@ class TestBindFeature(TestBrokerCommand):
                    "--archetype", "aquilon"]
         out = self.unauthorizedtest(command, auth=True, msgcheck=False)
         self.matchoutput(out,
-                         "Changing feature bindings for more than just a "
-                         "personality requires --justification.",
+                         "The operation has production impact, "
+                         "--justification is required.",
                          command)
 
     def test_200_missing_personality(self):
@@ -482,8 +484,8 @@ class TestBindFeature(TestBrokerCommand):
                    "--model", "utmedium", "--archetype", "aquilon"]
         out = self.unauthorizedtest(command, auth=True, msgcheck=False)
         self.matchoutput(out,
-                         "Changing feature bindings for more than just a "
-                         "personality requires --justification.",
+                         "The operation has production impact, "
+                         "--justification is required.",
                          command)
 
     def test_300_constraint_pre_host(self):

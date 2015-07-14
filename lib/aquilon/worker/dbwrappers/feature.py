@@ -18,10 +18,12 @@
 
 import os.path
 
+from sqlalchemy.orm import contains_eager
+
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import FeatureLink, Personality, PersonalityStage
-
 from aquilon.worker.templates.domain import template_branch_basedir
+from aquilon.worker.templates.base import Plenary
 
 
 def model_features(dbmodel, dbarch, dbstage, interface_name=None):
@@ -127,3 +129,15 @@ def check_feature_template(config, dbarchetype, dbfeature, dbdomain):
 
     raise ArgumentError("{0} does not have templates present in {1:l} "
                         "for {2:l}.".format(dbfeature, dbdomain, dbarchetype))
+
+
+def get_affected_plenaries(session, plenaries, personality_stage=None,
+                           archetype=None, model=None, interface_name=None):
+    if personality_stage:
+        plenaries.append(Plenary.get_plenary(personality_stage))
+    else:
+        q = session.query(PersonalityStage)
+        q = q.join(Personality)
+        q = q.filter_by(archetype=archetype)
+        q = q.options(contains_eager('personality'))
+        plenaries.extend(Plenary.get_plenary(dbobj) for dbobj in q)
