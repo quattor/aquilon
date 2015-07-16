@@ -25,16 +25,26 @@ import unittest2 as unittest
 from brokertest import TestBrokerCommand
 
 
-class TestClusterEarlyConstraints(TestBrokerCommand):
+class TestClusterConstraintsNoMembers(TestBrokerCommand):
 
-    def testaddvmwithoutvmhost(self):
+    def test_100_reconfigure_utecl1_members(self):
+        # Check if reconfiguring an empty list does nothing
+        command = ["reconfigure", "--membersof", "utecl1"]
+        self.noouttest(command)
+
+    def test_200_add_vm_without_vmhost(self):
         command = ["add_machine", "--machine=evm1", "--model=utmedium",
                    "--cluster=utecl1"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "cannot support VMs", command)
 
+    def test_200_try_fix_location(self):
+        command = ["update_cluster", "--cluster", "utecl5", "--fix_location"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Cannot infer the cluster location from the "
+                         "host locations.", command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(
-        TestClusterEarlyConstraints)
+        TestClusterConstraintsNoMembers)
     unittest.TextTestRunner(verbosity=2).run(suite)

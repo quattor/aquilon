@@ -370,6 +370,11 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
         self.matchoutput(out, "Room: utroom1", command)
         self.matchclean(out, "Rack", command)
 
+    def test_192_show_utnorack_csv(self):
+        command = ["show_machine", "--machine", "utnorack", "--format", "csv"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "utnorack,,ut,dell,poweredge_6650,", command)
+
     def test_193_add_f5test(self):
         ip = DummyIP(self.net["f5test"].ip)
         self.create_machine("f5test", "f5_model", rack="ut3", eth0_mac=ip.mac)

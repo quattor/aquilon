@@ -42,36 +42,6 @@ class TestAdd10GigHardware(TestBrokerCommand):
                          "or assigned to a network.",
                          command)
 
-    def test_010_oldlocation(self):
-        for i in range(5, 11):
-            command = ["show_esx_cluster", "--cluster=utecl%d" % i]
-            out = self.commandtest(command)
-            self.matchoutput(out, "Building: ut", command)
-
-    def test_020_fixlocation(self):
-        for i in range(5, 11):
-            command = ["update_cluster", "--cluster=utecl%d" % i,
-                       "--fix_location"]
-            self.noouttest(command)
-
-    def test_030_newlocation(self):
-        for i in range(5, 8):
-            command = ["show_esx_cluster", "--cluster=utecl%d" % i]
-            out = self.commandtest(command)
-            self.matchoutput(out, "Rack: ut11", command)
-        for i in range(8, 11):
-            command = ["show_esx_cluster", "--cluster=utecl%d" % i]
-            out = self.commandtest(command)
-            self.matchoutput(out, "Rack: ut12", command)
-
-    def test_090_addswitch(self):
-        for i in range(5, 8):
-            self.successtest(["update_cluster", "--cluster=utecl%d" % i,
-                              "--switch=ut01ga2s01.aqd-unittest.ms.com"])
-        for i in range(8, 11):
-            self.noouttest(["update_cluster", "--cluster=utecl%d" % i,
-                            "--switch=ut01ga2s02.aqd-unittest.ms.com"])
-
     def test_095_unused_pg(self):
         # If
         # - the machine has a host defined,

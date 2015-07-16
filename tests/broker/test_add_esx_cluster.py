@@ -81,11 +81,6 @@ class TestAddESXCluster(PersonalityTestMixin, TestBrokerCommand):
                    "--personality=vulcan-10g-server-prod"]
         self.noouttest(command)
 
-    def test_111_reconfigure_utecl1_members(self):
-        # Check if reconfiguring an empty list does nothing
-        command = ["reconfigure", "--membersof", "utecl1"]
-        self.noouttest(command)
-
     def test_115_show_utecl1(self):
         command = "show esx_cluster --cluster utecl1"
         out = self.commandtest(command.split(" "))
@@ -362,7 +357,6 @@ class TestAddESXCluster(PersonalityTestMixin, TestBrokerCommand):
         self.assertEqual(len(mc.clusters), 2)
         self.assertEqual(set(cluster.name for cluster in mc.clusters),
                          set(["utecl1", "utecl2"]))
-
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddESXCluster)

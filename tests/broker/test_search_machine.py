@@ -46,6 +46,12 @@ class TestSearchMachine(TestBrokerCommand):
         self.matchoutput(out, "evm", command)
         self.matchoutput(out, "ut", command)
 
+    def testdesk(self):
+        command = "search machine --desk utdesk1"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "utnorack", command)
+        self.matchclean(out, "evm", command)
+
     def testlocationexact(self):
         # Should only show virtual machines, since all the physical machines
         # are at the rack level and this search is exact.

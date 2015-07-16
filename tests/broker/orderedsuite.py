@@ -79,7 +79,8 @@ from .test_add_share import TestAddShare
 from .test_update_cluster import TestUpdateCluster
 from .test_del_cluster import TestDelCluster
 from .test_del_share import TestDelShare
-from .test_early_constraints_cluster import TestClusterEarlyConstraints
+from .test_constraints_cluster_no_members import TestClusterConstraintsNoMembers
+from .test_constraints_cluster_no_vms import TestClusterConstraintsNoVMs
 from .test_deprecated_switch import TestDeprecatedSwitch
 from .test_add_netdev import TestAddNetworkDevice
 from .test_add_virtual_switch import TestAddVirtualSwitch
@@ -319,7 +320,7 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestAddMetaCluster, TestAddESXCluster,
                      TestAddCluster,
                      TestAddShare,
-                     TestClusterEarlyConstraints,
+                     TestClusterConstraintsNoMembers,
                      TestDeprecatedSwitch,
                      TestAddVlan,
                      TestAddNetworkDevice, TestUpdateNetworkDevice,
@@ -352,6 +353,7 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestMapGrn,
                      TestRebindMetaCluster,
                      TestUpdateCampus, TestUpdateBuilding,
+                     TestClusterConstraintsNoVMs,
                      TestAddVirtualHardware, TestAdd10GigHardware,
                      TestAppliance,
                      TestUnbindClient, TestRebindClient, TestReconfigure,
