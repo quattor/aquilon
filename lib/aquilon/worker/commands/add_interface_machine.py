@@ -134,6 +134,10 @@ class CommandAddInterfaceMachine(BrokerCommand):
                                               bus_address=bus_address,
                                               comments=comments, preclude=True)
 
+        if automac:
+            logger.info("Selected MAC address {0!s} for {1:l}."
+                        .format(mac, dbinterface))
+
         # Note: autopg handling must come after automac, to ensure lock ordering
         # is consistent with update_interface, to avoid deadlocks
         if pg or autopg:

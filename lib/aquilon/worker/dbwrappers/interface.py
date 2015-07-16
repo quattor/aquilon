@@ -236,10 +236,10 @@ def generate_ip(session, logger, dbinterface, ip=None, ipfromip=None,
 
     if audit_results is not None:
         if dbinterface:
-            logger.info("Selected IP address {0!s} for {1:l}"
+            logger.info("Selected IP address {0!s} for {1:l}."
                         .format(ip, dbinterface))
         else:
-            logger.info("Selected IP address %s" % ip)
+            logger.info("Selected IP address %s." % ip)
         audit_results.append(('ip', ip))
 
     return ip
@@ -337,8 +337,8 @@ def set_port_group_vm(session, logger, dbinterface, port_group_name):
             raise ArgumentError("No available {0!s} port groups on {1:l}."
                                 .format(port_group_name, allocator))
 
-        logger.info("Selected {0:l} for {1:l} (based on {2:l})"
-                    .format(selected_pg, dbmachine, allocator))
+        logger.info("Selected {0:l} for {1:l} (based on {2:l})."
+                    .format(selected_pg, dbinterface, allocator))
 
     dbinterface.port_group_name = None
     dbinterface.port_group = selected_pg

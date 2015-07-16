@@ -39,6 +39,6 @@ class CommandAddMachinePrefix(CommandAddMachine):
         args['machine'] = machine
         CommandAddMachine.render(self, session, logger, **args)
 
-        logger.info("Selected hardware label %s" % machine)
+        logger.info("Selected hardware label %s." % machine)
         self.audit_result(session, 'machine', machine, **args)
         return machine
