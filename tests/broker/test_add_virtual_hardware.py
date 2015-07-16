@@ -348,14 +348,6 @@ class TestAddVirtualHardware(TestBrokerCommand):
                    "--cpucount=1", "--memory=8192"]
         self.noouttest(command)
 
-    def test_560_del_nic_model(self):
-        command = ["del", "model", "--model", "default", "--vendor", "utvirt"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out,
-                         "Model utvirt/default is still in use and cannot be "
-                         "deleted.",
-                         command)
-
     def test_600_makecluster(self):
         command = ["make_cluster", "--cluster=utecl1"]
         (out, err) = self.successtest(command)

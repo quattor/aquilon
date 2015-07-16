@@ -155,6 +155,7 @@ from .test_constraints_personality import TestPersonalityConstraints
 from .test_constraints_service import TestServiceConstraints
 from .test_constraints_domain import TestDomainConstraints
 from .test_constraints_vendor import TestVendorConstraints
+from .test_constraints_model import TestModelConstraints
 from .test_constraints_machine import TestMachineConstraints
 from .test_constraints_interface import TestInterfaceConstraints
 from .test_constraints_netdev import TestNetworkDeviceConstraints
@@ -370,7 +371,8 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestAddRebootSchedule, TestAddRebootIntervention,
                      TestBindClientConstraints, TestBindServerConstraints,
                      TestArchetypeConstraints, TestPersonalityConstraints,
-                     TestDomainConstraints, TestVendorConstraints,
+                     TestDomainConstraints,
+                     TestVendorConstraints, TestModelConstraints,
                      TestMachineConstraints, TestNetworkDeviceConstraints,
                      TestInterfaceConstraints,
                      TestUpdatePersonality,

@@ -59,14 +59,6 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
         self.matchoutput(out, "Comments: Some machine comments", command)
         self.matchclean(out, "Primary Name:", command)
 
-    def test_105_verify_del_model(self):
-        # This should be in test_del_model.py but when that is run there are no
-        # more machines defined...
-        command = "del model --model hs21-8853 --vendor ibm"
-        out = self.badrequesttest(command.split(" "))
-        self.matchoutput(out, "Model ibm/hs21-8853 is still in use and "
-                         "cannot be deleted.", command)
-
     def test_105_cat_ut3c5n10(self):
         command = "cat --machine ut3c5n10"
         out = self.commandtest(command.split(" "))
