@@ -127,7 +127,6 @@ from .test_change_status_cluster import TestChangeClusterStatus
 from .test_rebind_cluster import TestRebindCluster
 from .test_rebind_metacluster import TestRebindMetaCluster
 from .test_add_virtual_hardware import TestAddVirtualHardware
-from .test_add_10gig_hardware import TestAdd10GigHardware
 from .test_appliance import TestAppliance
 from .test_unbind_client import TestUnbindClient
 from .test_rebind_client import TestRebindClient
@@ -355,7 +354,7 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestRebindMetaCluster,
                      TestUpdateCampus, TestUpdateBuilding,
                      TestClusterConstraintsNoVMs,
-                     TestAddVirtualHardware, TestAdd10GigHardware,
+                     TestAddVirtualHardware,
                      TestAppliance,
                      TestUnbindClient, TestRebindClient, TestReconfigure,
                      TestChangeStatus, TestResetAdvertisedStatus,

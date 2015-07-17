@@ -292,6 +292,295 @@ class TestAddVirtualHardware(TestBrokerCommand):
         command = ["make_cluster", "--cluster=utecl1"]
         self.successtest(command)
 
+    def test_200_add_utmc4_machines(self):
+        for i in range(0, 18):
+            cluster = "utecl%d" % (5 + (i // 3))
+            machine = "evm%d" % (10 + i)
+            self.noouttest(["add", "machine", "--machine", machine,
+                            "--cluster", cluster, "--model", "utmedium"])
+
+    def test_201_search_network_fail(self):
+        command = ["search_network", "--machine=evm18"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Machine evm18 has no interfaces with a port group "
+                         "or assigned to a network.",
+                         command)
+
+    def test_210_add_utmc4_interfaces(self):
+        # Skip index 8 and 17 - these will fail.
+        for i in range(0, 8) + range(9, 17):
+            machine = "evm%d" % (10 + i)
+            self.noouttest(["add", "interface", "--machine", machine,
+                            "--interface", "eth0", "--automac", "--autopg"])
+
+    def test_211_evm18_no_pg(self):
+        command = ["add", "interface", "--machine", "evm18",
+                   "--interface", "eth0", "--automac", "--autopg"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "No available user port groups on switch "
+                         "ut01ga2s01.aqd-unittest.ms.com",
+                         command)
+
+    def test_212_evm27_no_pg(self):
+        command = ["add", "interface", "--machine", "evm27",
+                   "--interface", "eth0", "--automac", "--autopg"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "No available user port groups on switch "
+                         "ut01ga2s02.aqd-unittest.ms.com",
+                         command)
+
+    # We are checking the portgroups the machines have been mapped to
+    # evm10 -> user-v710, evm11 -> user-v711, evm12 -> user-v712, evm13 -> user-v13
+    # evm14 -> user-v710, evm15 -> user-v711, evm16 -> user-v712, evm17 -> user-v13
+    # and so on and so forth
+    def test_215_verify_search_machine_pg(self):
+        for i in range(0, 8) + range(9, 17):
+            if i < 9:
+                port_group = "user-v71%d" % (i % 4)
+            else:
+                port_group = "user-v71%d" % ((i - 9) % 4)
+            machine = "evm%d" % (i + 10)
+            command = ["search_machine", "--machine", machine,
+                       "--pg", port_group]
+            out = self.commandtest(command)
+            self.matchoutput(out, machine, command)
+
+    def test_215_verify_search_network_machine(self):
+        command = ["search_network", "--machine=evm10"]
+        out = self.commandtest(command)
+        self.matchoutput(out, str(self.net["ut01ga2s01_v710"]), command)
+
+    # Utility method...
+    def verifypg(self):
+        command = ["search_machine", "--machine=evm10", "--pg=user-v710"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "evm10", command)
+
+    # These set of port group tests needs to happen before the hosts are added,
+    # because otherwise the primary name of the host would be inculded in the
+    # number of existing allocations, and that would prevent re-adding the
+    # interface to the port group.
+    def test_220_updatenoop(self):
+        command = ["update_interface", "--machine=evm10", "--interface=eth0",
+                   "--pg", "user-v710"]
+        self.noouttest(command)
+        self.verifypg()
+
+    def test_221_show_evm10_proto(self):
+        command = ["show_machine", "--machine", "evm10", "--format", "proto"]
+        machine = self.protobuftest(command, expect=1)[0]
+        self.assertEqual(machine.interfaces[0].port_group_tag, 710)
+        self.assertEqual(machine.interfaces[0].port_group_usage, "user")
+        self.assertEqual(machine.interfaces[0].port_group_name, "user-v710")
+
+    def test_222_updateclear(self):
+        command = ["update_interface", "--machine=evm10", "--interface=eth0",
+                   "--pg", ""]
+        self.noouttest(command)
+        command = ["show_machine", "--machine=evm10"]
+        out = self.commandtest(command)
+        self.matchclean(out, "Port Group", command)
+
+    def test_223_updatemanual(self):
+        command = ["update_interface", "--machine=evm10", "--interface=eth0",
+                   "--pg", "user-v710"]
+        self.noouttest(command)
+        self.verifypg()
+
+    def test_224_updateauto(self):
+        command = ["update_interface", "--machine=evm10", "--interface=eth0",
+                   "--pg", ""]
+        self.noouttest(command)
+        command = ["update_interface", "--machine=evm10", "--interface=eth0",
+                   "--autopg"]
+        self.noouttest(command)
+        self.verifypg()
+
+    def test_230_add_utmc4_disks(self):
+        for i in range(0, 18):
+            share = "utecl%d_share" % (5 + (i // 3))
+            machine = "evm%d" % (10 + i)
+            self.noouttest(["add", "disk", "--machine", machine,
+                            "--disk", "sda", "--controller", "sata",
+                            "--size", "15", "--share", share,
+                            "--address", "0:0"])
+
+    def test_240_add_utmc4_aux(self):
+        net = self.net["vm_storage_net"]
+        for i in range(1, 25):
+            hostname = "evh%d-e1.aqd-unittest.ms.com" % (i + 50)
+            if i < 13:
+                port = i
+                machine = "ut11s01p%d" % port
+            else:
+                port = i - 12
+                machine = "ut12s02p%d" % port
+            self.dsdb_expect_add(hostname, net.usable[i - 1],
+                                 "eth1", net.usable[i - 1].mac,
+                                 "evh%d.aqd-unittest.ms.com" % (i + 50))
+            command = ["add_interface_address", "--fqdn", hostname,
+                       "--machine", machine, "--interface", "eth1", "--autoip"]
+            self.noouttest(command)
+        self.dsdb_verify()
+
+    def test_245_verify_utmc4_aux(self):
+        command = ["show", "network", "--hosts",
+                   "--ip", self.net["vm_storage_net"].ip]
+        out = self.commandtest(command)
+        for i in range(1, 25):
+            hostname = "evh%d-e1.aqd-unittest.ms.com" % (i + 50)
+            self.matchoutput(out, hostname, command)
+
+    def test_250_delmachines(self):
+        # Need to remove machines without interfaces or the make will fail.
+        self.noouttest(["del", "machine", "--machine", "evm18"])
+        self.noouttest(["del", "machine", "--machine", "evm27"])
+
+    def test_255_makecluster(self):
+        for i in range(5, 11):
+            command = ["make_cluster", "--cluster=utecl%s" % i]
+            self.successtest(command)
+
+    def test_260_verifycatmachines(self):
+        for i in range(0, 8):
+            command = "cat --machine evm%s" % (10 + i)
+            port_group = "user-v71%d" % (i % 4)
+            out = self.commandtest(command.split(" "))
+            self.matchoutput(out, """"location" = "ut.ny.na";""", command)
+            self.matchoutput(out,
+                             'include { "hardware/machine/utvendor/utmedium" };',
+                             command)
+            self.searchoutput(out,
+                              r'"ram" = list\(\s*'
+                              r'create\("hardware/ram/generic",\s*'
+                              r'"size", 8192\*MB\s*\)\s*\);',
+                              command)
+            self.searchoutput(out,
+                              r'"cpu" = list\(\s*'
+                              r'create\("hardware/cpu/intel/xeon_5150"\)\s*\);',
+                              command)
+            self.searchoutput(out,
+                              r'"cards/nic/eth0" = '
+                              r'create\("hardware/nic/utvirt/default",\s*'
+                              r'"boot", true,\s*'
+                              r'"hwaddr", "00:50:56:[0-9a-f:]{8}",\s*'
+                              r'"port_group", "%s"\s*\);'
+                              % port_group,
+                              command)
+
+    # Because the machines are allocated across portgroups, the IP addresses
+    # allocated by autoip also differ
+    # evm10 -> self.net["ut01ga2s01_v710"].usable[0]
+    # evm11 -> self.net["ut01ga2s01_v711"].usable[0]
+    # evm12 -> self.net["ut01ga2s01_v712"].usable[0]
+    # evm13 -> self.net["ut01ga2s01_v713"].usable[0]
+    # evm14 -> self.net["ut01ga2s01_v710"].usable[1]
+    # As each subnet only has two usable IPs, when we get to evm19 it becomes
+    # evm19 -> self.net["ut01ga2s02_v710"].usable[0]
+    # and the above pattern repeats
+    def test_270_add_hosts(self):
+        # Skip index 8 and 17 - these don't have interfaces. Index 16 will be
+        # used for --prefix testing.
+        mac_prefix = "00:50:56:01:20"
+        mac_idx = 8
+        nets = (self.net["ut01ga2s01_v710"], self.net["ut01ga2s01_v711"],
+                self.net["ut01ga2s01_v712"], self.net["ut01ga2s01_v713"],
+                self.net["ut01ga2s02_v710"], self.net["ut01ga2s02_v711"],
+                self.net["ut01ga2s02_v712"], self.net["ut01ga2s02_v713"])
+        for i in range(0, 8) + range(9, 16):
+            machine = "evm%d" % (10 + i)
+            hostname = "ivirt%d.aqd-unittest.ms.com" % (1 + i)
+
+            if i < 9:
+                net_index = (i % 4)
+                usable_index = i // 4
+            else:
+                net_index = ((i - 9) % 4) + 4
+                usable_index = (i - 9) // 4
+            ip = nets[net_index].usable[usable_index]
+
+            # FIXME: the MAC check is fragile...
+            self.dsdb_expect_add(hostname, ip, "eth0",
+                                 "%s:%02x" % (mac_prefix, mac_idx))
+            mac_idx += 1
+
+            command = ["add_host", "--hostname", hostname,
+                       "--machine", machine, "--autoip", "--domain=unittest",
+                       "--archetype=aquilon", "--personality=inventory"]
+            (out, err) = self.successtest(command)
+        self.dsdb_verify()
+
+    def test_271_add_host_prefix(self):
+        ip = self.net["ut01ga2s02_v713"].usable[1]
+        mac = "00:50:56:01:20:17"
+        self.dsdb_expect_add("ivirt17.aqd-unittest.ms.com", ip, "eth0", mac)
+        command = ["add", "host", "--prefix", "ivirt", "--machine", "evm26",
+                   "--autoip", "--domain", "unittest",
+                   "--archetype", "aquilon", "--personality", "inventory"]
+        out = self.commandtest(command)
+        # This also verifies that we use the mapping for the building, not the
+        # city
+        self.matchoutput(out, "ivirt17.aqd-unittest.ms.com", command)
+        self.dsdb_verify()
+
+    def test_275_verify_add_host(self):
+        # This test also verifies the --autoip allocation logic
+        nets = (self.net["ut01ga2s01_v710"], self.net["ut01ga2s01_v711"],
+                self.net["ut01ga2s01_v712"], self.net["ut01ga2s01_v713"],
+                self.net["ut01ga2s02_v710"], self.net["ut01ga2s02_v711"],
+                self.net["ut01ga2s02_v712"], self.net["ut01ga2s02_v713"])
+        for i in range(0, 8) + range(9, 17):
+            if i < 9:
+                net_index = (i % 4)
+                usable_index = i // 4
+            else:
+                net_index = ((i - 9) % 4) + 4
+                usable_index = (i - 9) // 4
+            hostname = "ivirt%d.aqd-unittest.ms.com" % (i + 1)
+            ip = nets[net_index].usable[usable_index]
+            command = "search host --hostname %s --ip %s" % (hostname, ip)
+            out = self.commandtest(command.split(" "))
+            self.matchoutput(out, hostname, command)
+
+    def test_276_verify_audit(self):
+        nets = (self.net["ut01ga2s01_v710"], self.net["ut01ga2s01_v711"],
+                self.net["ut01ga2s01_v712"], self.net["ut01ga2s01_v713"],
+                self.net["ut01ga2s02_v710"], self.net["ut01ga2s02_v711"],
+                self.net["ut01ga2s02_v712"], self.net["ut01ga2s02_v713"])
+        i = 16
+        net_index = ((i - 9) % 4) + 4
+        usable_index = (i - 9) // 4
+        ip = nets[net_index].usable[usable_index]
+        command = ["search", "audit", "--keyword",
+                   "ivirt%d.aqd-unittest.ms.com" % (i + 1)]
+        out = self.commandtest(command)
+        self.matchoutput(out,
+                         "[Result: hostname=ivirt%d.aqd-unittest.ms.com "
+                         "ip=%s]" % (i + 1, ip),
+                         command)
+
+    def test_280_make_hosts(self):
+        for i in range(0, 8) + range(9, 17):
+            hostname = "ivirt%d.aqd-unittest.ms.com" % (1 + i)
+            command = ["make", "--hostname", hostname]
+            (out, err) = self.successtest(command)
+
+    # Drop evm26 for appliance reuse
+    def test_290_del_ivirt17(self):
+        ip = self.net["ut01ga2s02_v713"].usable[1]
+        command = ["del_host", "--hostname", "ivirt17.aqd-unittest.ms.com"]
+
+        self.dsdb_expect_delete(ip)
+        self.statustest(command)
+        self.dsdb_verify()
+
+    def test_291_del_evm26(self):
+        machine = "evm26"
+        self.noouttest(["del_machine", "--machine", machine])
+
     # FIXME: we need a more generic test to check if a host/cluster may contain
     # VMs. Perhaps an attribute of Archetype or Personality?
     # def testfailaddnonvirtualcluster(self):

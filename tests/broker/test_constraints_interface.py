@@ -58,6 +58,30 @@ class TestInterfaceConstraints(TestBrokerCommand):
                          "them first: hostname, zebra2, zebra3.",
                          command)
 
+    def testpgmismatchphys(self):
+        # If
+        # - the machine has a host defined,
+        # - the host is in a cluster,
+        # - and the cluster has a switch,
+        # then setting an invalid port group is an error.
+        # TODO: why is this not an error if the above conditions do not hold?
+        command = ["add", "interface", "--machine", "evh51.aqd-unittest.ms.com",
+                   "--interface", "eth2", "--pg", "unused-v999"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Switch ut01ga2s01.aqd-unittest.ms.com does not have "
+                         "port group unused-v999 assigned.",
+                         command)
+
+    def testpgmismatchvm(self):
+        command = ["add", "interface", "--machine", "ivirt1.aqd-unittest.ms.com",
+                   "--interface", "eth1", "--pg", "unused-v999"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Cannot verify port group availability: no record "
+                         "for VLAN 999 on switch ut01ga2s01.aqd-unittest.ms.com.",
+                         command)
+
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestInterfaceConstraints)
     unittest.TextTestRunner(verbosity=2).run(suite)
