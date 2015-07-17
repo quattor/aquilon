@@ -227,7 +227,7 @@ class TestCluster(TestBrokerCommand):
 
     def test_160_bind_utmc7(self):
         host = "evh10.aqd-unittest.ms.com"
-        cluster = "utecl13"
+        cluster = "utecl11"
         self.successtest(["cluster", "--hostname", host, "--cluster", cluster])
 
     def test_200_missing_cluster(self):

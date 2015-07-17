@@ -398,7 +398,7 @@ class TestMapGrn(VerifyGrnsMixin, PersonalityTestMixin, TestBrokerCommand):
         self.matchclean(out, "^  Used by GRN", command)
 
     def test_700_map_cluster(self):
-        cluster = "utecl13"
+        cluster = "utecl11"
         for grn in self.grn_list:
             command = ["map", "grn", "--grn", grn, "--membersof", cluster,
                        "--target", "esp"]
@@ -414,7 +414,7 @@ class TestMapGrn(VerifyGrnsMixin, PersonalityTestMixin, TestBrokerCommand):
             self.matchoutput(out, "Used by GRN: grn:/ms/ei/aquilon/aqd [target: esp]", command)
 
     def test_701_unmap_cluster(self):
-        cluster = "utecl13"
+        cluster = "utecl11"
         command = ["unmap", "grn", "--grn", self.grn_list[0], "--membersof", cluster,
                    "--target", "esp"]
         self.statustest(command)

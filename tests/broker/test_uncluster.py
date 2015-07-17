@@ -114,7 +114,7 @@ class TestUncluster(TestBrokerCommand):
 
     def testunbindutmc7(self):
         host = "evh10.aqd-unittest.ms.com"
-        cluster = "utecl13"
+        cluster = "utecl11"
         self.successtest(["uncluster", "--hostname", host, "--cluster", cluster,
                           "--personality", "generic"])
 

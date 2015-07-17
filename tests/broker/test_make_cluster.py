@@ -204,9 +204,8 @@ class TestMakeCluster(VerifyNotificationsMixin, ClusterTestMixin,
             self.statustest(command)
 
     def test_155_make_utmc7(self):
-        for i in [13]:
-            command = ["make_cluster", "--cluster", "utecl%d" % i]
-            self.statustest(command)
+        command = ["make_cluster", "--cluster", "utecl11"]
+        self.statustest(command)
 
     def test_200_missing_cluster(self):
         command = ["make_cluster", "--cluster=cluster-does-not-exist"]

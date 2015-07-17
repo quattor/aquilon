@@ -84,12 +84,12 @@ class TestSearchNext(TestBrokerCommand):
     def testclusterdefault(self):
         command = ["search_next", "--cluster=utecl"]
         out = self.commandtest(command)
-        self.matchoutput(out, "utecl14", command)
+        self.matchoutput(out, "utecl12", command)
 
     def testclusternumber(self):
         command = ["search_next", "--number", "--cluster=utecl"]
         out = self.commandtest(command)
-        self.matchoutput(out, "14", command)
+        self.matchoutput(out, "12", command)
         self.matchclean(out, "utecl", command)
 
     def testclusterdefaultmissing(self):

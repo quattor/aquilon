@@ -212,7 +212,7 @@ class TestAddESXCluster(PersonalityTestMixin, TestBrokerCommand):
             self.noouttest(command)
 
     def test_160_add_utmc7(self):
-        command = ["add_esx_cluster", "--cluster=utecl13",
+        command = ["add_esx_cluster", "--cluster=utecl11",
                    "--metacluster=utmc7", "--building=ut",
                    "--domain=unittest", "--down_hosts_threshold=0",
                    "--archetype=esx_cluster",

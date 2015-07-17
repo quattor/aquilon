@@ -63,7 +63,7 @@ class TestDelESXCluster(TestBrokerCommand):
             self.successtest(command)
 
     def test_130_del_utmc7(self):
-        self.successtest(["del_esx_cluster", "--cluster=utecl13"])
+        self.successtest(["del_esx_cluster", "--cluster=utecl11"])
 
     def test_140_del_sandboxmc(self):
         self.successtest(["del_esx_cluster", "--cluster=sandboxcl1"])

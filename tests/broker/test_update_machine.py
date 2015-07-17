@@ -392,7 +392,7 @@ class TestUpdateMachine(TestBrokerCommand):
     def test_1110_metacluster_change_pre(self):
         command = ["show_share", "--all"]
         out = self.commandtest(command)
-        # Initially the VM is on utecl1, test_share_1 is not used on utecl13
+        # Initially the VM is on utecl1, test_share_1 is not used on utecl11
         self.searchoutput(out,
                           r'Share: test_share_1\s*'
                           r'Comments: New share comments\s*'
@@ -406,7 +406,7 @@ class TestUpdateMachine(TestBrokerCommand):
         self.searchoutput(out,
                           r'Share: test_share_1\s*'
                           r'Comments: New share comments\s*'
-                          r'Bound to: ESX Cluster utecl13\s*'
+                          r'Bound to: ESX Cluster utecl11\s*'
                           r'Latency threshold: 30\s*'
                           r'Server: lnn30f1\s*'
                           r'Mountpoint: /vol/lnn30f1v1/test_share_1\s*'
@@ -417,7 +417,7 @@ class TestUpdateMachine(TestBrokerCommand):
     def test_1111_metacluster_change(self):
         old_path = ["machine", "americas", "ut", "ut10", "evm1"]
         new_path = ["machine", "americas", "ut", "None", "evm1"]
-        command = ["update_machine", "--machine=evm1", "--cluster=utecl13",
+        command = ["update_machine", "--machine=evm1", "--cluster=utecl11",
                    "--allow_metacluster_change"]
         self.noouttest(command)
         self.check_plenary_gone(*old_path)
@@ -427,7 +427,7 @@ class TestUpdateMachine(TestBrokerCommand):
         command = ["show_share", "--all"]
         out = self.commandtest(command)
 
-        # The disk should have moved to utecl13, test_share_1 should be unused on
+        # The disk should have moved to utecl11, test_share_1 should be unused on
         # utecl1
         self.searchoutput(out,
                           r'Share: test_share_1\s*'
@@ -442,7 +442,7 @@ class TestUpdateMachine(TestBrokerCommand):
         self.searchoutput(out,
                           r'Share: test_share_1\s*'
                           r'Comments: New share comments\s*'
-                          r'Bound to: ESX Cluster utecl13\s*'
+                          r'Bound to: ESX Cluster utecl11\s*'
                           r'Latency threshold: 30\s*'
                           r'Server: lnn30f1\s*'
                           r'Mountpoint: /vol/lnn30f1v1/test_share_1\s*'
@@ -451,7 +451,7 @@ class TestUpdateMachine(TestBrokerCommand):
                           command)
 
     def test_1115_verify_search_machine(self):
-        command = ["search_machine", "--machine=evm1", "--cluster=utecl13"]
+        command = ["search_machine", "--machine=evm1", "--cluster=utecl11"]
         out = self.commandtest(command)
         self.matchoutput(out, "evm1", command)
 
@@ -550,7 +550,7 @@ class TestUpdateMachine(TestBrokerCommand):
                          command)
 
     def test_2000_change_metacluster(self):
-        command = ["update_machine", "--machine=evm1", "--cluster=utecl13"]
+        command = ["update_machine", "--machine=evm1", "--cluster=utecl11"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "Moving VMs between metaclusters is disabled by "

@@ -36,7 +36,7 @@ class TestAddShare(TestBrokerCommand):
                         "--share=test_share_1"])
         self.noouttest(["add_share", "--cluster=utecl3",
                         "--share=test_share_1"])
-        self.noouttest(["add_share", "--cluster=utecl13",
+        self.noouttest(["add_share", "--cluster=utecl11",
                         "--share=test_share_1"])
 
     def test_105_show_test_share_1(self):
@@ -126,7 +126,7 @@ class TestAddShare(TestBrokerCommand):
         self.matchclean(out, "Latency", command)
 
     def test_142_verify_no_latency_per_cluster(self):
-        for cluster in ("utecl1", "utecl2", "utecl3", "utecl13"):
+        for cluster in ("utecl1", "utecl2", "utecl3", "utecl11"):
             command = ["show_share", "--share=test_share_1", "--cluster=%s" % cluster]
             out = self.commandtest(command)
             self.matchclean(out, "Latency", command)
@@ -152,7 +152,7 @@ class TestAddShare(TestBrokerCommand):
                         "--comments=New share comments"])
 
     def test_146_verify_updated_latency(self):
-        for cluster in ("utecl1", "utecl2", "utecl3", "utecl13"):
+        for cluster in ("utecl1", "utecl2", "utecl3", "utecl11"):
             command = ["show_share", "--share=test_share_1", "--cluster=%s" % cluster]
             out = self.commandtest(command)
             self.matchoutput(out, "Share: test_share_1", command)
