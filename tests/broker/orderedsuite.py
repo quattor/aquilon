@@ -141,10 +141,12 @@ from .test_compile import TestCompile
 from .test_profile import TestProfile
 from .test_bind_server import TestBindServer
 from .test_add_filesystem import TestAddFilesystem
+from .test_del_filesystem import TestDelFilesystem
 from .test_add_application import TestAddApplication
 from .test_add_hostlink import TestAddHostlink
 from .test_add_intervention import TestAddIntervention
 from .test_add_resourcegroup import TestAddResourceGroup
+from .test_del_resourcegroup import TestDelResourceGroup
 from .test_add_reboot_schedule import TestAddRebootSchedule
 from .test_add_reboot_intervention import TestAddRebootIntervention
 from .test_constraints_bind_client import TestBindClientConstraints
@@ -317,14 +319,13 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestAddFeature, TestParameterDefinitionFeature,
                      TestAddNetworkEnvironment, TestAddNetwork,
                      TestAddNSRecord, TestMapDnsDomain,
+                     TestAddVlan,
+                     TestAddVirtualSwitch,
                      TestAddMetaCluster, TestAddESXCluster,
                      TestAddCluster,
-                     TestAddShare,
                      TestClusterConstraintsNoMembers,
                      TestDeprecatedSwitch,
-                     TestAddVlan,
                      TestAddNetworkDevice, TestUpdateNetworkDevice,
-                     TestAddVirtualSwitch,
                      TestAddChassis, TestUpdateChassis,
                      TestAddMachine, TestAddDisk, TestAddInterface,
                      TestAddAddress,
@@ -341,10 +342,11 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestAddSrvRecord,
                      TestMapService, TestBindClient, TestPrebindServer,
                      TestServiceConstraints,
+                     TestFlush,
+                     TestAddResourceGroup, TestAddShare, TestAddFilesystem,
+                     TestMakeAquilon, TestMakeCluster, TestCluster,
                      TestVulcanLocalDisk,
                      TestVulcan20,
-                     TestFlush,
-                     TestMakeAquilon, TestMakeCluster, TestCluster,
                      TestAddAllowedPersonality,
                      TestDelAllowedPersonality,
                      TestBindCluster, TestChangeClusterStatus, TestRebindCluster,
@@ -365,9 +367,8 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestCompile,
                      TestProfile,
                      TestBindServer,
-                     TestAddFilesystem, TestAddApplication, TestAddIntervention,
-                     TestAddResourceGroup, TestAddHostlink,
-                     TestAddRebootSchedule, TestAddRebootIntervention,
+                     TestAddApplication, TestAddIntervention,
+                     TestAddHostlink, TestAddRebootSchedule, TestAddRebootIntervention,
                      TestBindClientConstraints, TestBindServerConstraints,
                      TestArchetypeConstraints, TestPersonalityConstraints,
                      TestDomainConstraints,
@@ -416,6 +417,8 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestUnbindServer, TestUnmapService,
                      TestDel10GigHardware, TestDelVirtualHardware,
                      TestUnbindCluster, TestUncluster,
+                     TestDelShare, TestDelFilesystem,
+                     TestDelResourceGroup,
                      TestDelStaticRoute,
                      TestDelServiceAddress, TestDelInterfaceAddress,
                      TestDelDynamicRange, TestDelSrvRecord, TestDelAlias,
@@ -423,11 +426,10 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestDelAddress, TestDelNSRecord,
                      TestDelManager, TestDelAuxiliary, TestDelWindowsHost, TestDelHost,
                      TestDelInterface, TestDelDisk, TestDelMachine, TestDelChassis,
-                     TestDelVirtualSwitch,
                      TestDelNetworkDevice,
-                     TestDelShare,
                      TestDelCluster,
                      TestDelESXCluster, TestDelMetaCluster,
+                     TestDelVirtualSwitch,
                      TestDelRouterAddress, TestDelNetwork, TestDelNetworkEnvironment,
                      TestDelVlan,
                      TestDelModel, TestDelCpu, TestDelVendor,

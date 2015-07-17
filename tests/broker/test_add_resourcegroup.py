@@ -27,6 +27,14 @@ from brokertest import TestBrokerCommand
 
 class TestAddResourceGroup(TestBrokerCommand):
 
+    def test_000_early_constraints(self):
+        # Test what happens if the holder never had any resources
+        command = ["show_filesystem", "--cluster=utvcs1"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out,
+                         "High Availability Cluster utvcs1 has no resources.",
+                         command)
+
     def test_100_add_rg_to_cluster(self):
         command = ["add_resourcegroup", "--resourcegroup=utvcs1as1",
                    "--cluster=utvcs1",
@@ -215,29 +223,6 @@ class TestAddResourceGroup(TestBrokerCommand):
         err = self.badrequesttest(command)
         self.matchoutput(err, "Bad Request: A resourcegroup can't hold other "
                          "resourcegroups.", command)
-
-    def test_300_del_resourcegroup(self):
-        # Check that the plenaries of contained resources get cleaned up
-        rg_base = ["resource", "cluster", "utvcs1", "resourcegroup",
-                   "utvcs1as1"]
-
-        rg_path = rg_base[:]
-        rg_path.append("config")
-
-        fs_path = rg_base[:]
-        fs_path.extend(["filesystem", "fs1", "config"])
-
-        # Verify that we got the paths right
-        self.check_plenary_exists(*fs_path)
-        self.check_plenary_exists(*rg_path)
-
-        command = ["del_resourcegroup", "--resourcegroup=utvcs1as1",
-                   "--cluster=utvcs1"]
-        self.successtest(command)
-
-        # The resource plenaries should be gone, and the directory too
-        self.check_plenary_gone(*fs_path, directory_gone=True)
-        self.check_plenary_gone(*rg_path, directory_gone=True)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddResourceGroup)

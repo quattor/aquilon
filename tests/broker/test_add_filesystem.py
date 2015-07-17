@@ -134,12 +134,6 @@ class TestAddFilesystem(TestBrokerCommand):
                 self.assertEqual(resource.fsdata.mountpoint, "/mnt")
 
     def test_50_add_to_cluster(self):
-        command = ["show_filesystem", "--cluster=utvcs1"]
-        out = self.notfoundtest(command)
-        self.matchoutput(out,
-                         "High Availability Cluster utvcs1 has no resources.",
-                         command)
-
         command = ["add_filesystem", "--filesystem=fsshared", "--type=ext3",
                    "--mountpoint=/mnt", "--blockdevice=/dev/foo/bar",
                    "--nobootmount",
@@ -167,18 +161,7 @@ class TestAddFilesystem(TestBrokerCommand):
 
     def test_60_show_all_proto(self):
         command = ["show", "filesystem", "--all", "--format", "proto"]
-        self.protobuftest(command, expect=3)
-
-    def test_del_filesystem(self):
-        command = ["del_filesystem", "--filesystem=fs2",
-                   "--hostname=server1.aqd-unittest.ms.com"]
-        self.successtest(command)
-
-        command = ["del_filesystem", "--filesystem=fsshared",
-                   "--cluster=utvcs1"]
-        self.successtest(command)
-
-        # fs1 is not deleted here, it will be removed when the host is deleted.
+        self.protobuftest(command, expect=4)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddFilesystem)
