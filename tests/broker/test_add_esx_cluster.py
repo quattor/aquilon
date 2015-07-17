@@ -122,7 +122,7 @@ class TestAddESXCluster(PersonalityTestMixin, TestBrokerCommand):
                                             "max_members_default"))
 
     def test_120_add_utecl2(self):
-        command = ["add_esx_cluster", "--cluster=utecl2",
+        command = ["add_cluster", "--prefix", "utecl",
                    "--metacluster=utmc1", "--building=ut",
                    "--buildstatus=build",
                    "--archetype=esx_cluster",
@@ -130,9 +130,10 @@ class TestAddESXCluster(PersonalityTestMixin, TestBrokerCommand):
                    "--domain=unittest", "--down_hosts_threshold=1",
                    "--max_members=101", "--vm_to_host_ratio=1:1",
                    "--comments=Some ESX cluster comments"]
-        err = self.statustest(command)
+        out, err = self.successtest(command)
         self.matchoutput(err, "The --vm_to_host_ratio option is deprecated.",
                          command)
+        self.matchoutput(out, "utecl2", command)
 
     def test_125_show_utecl2(self):
         command = "show esx_cluster --cluster utecl2"

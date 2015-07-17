@@ -68,11 +68,12 @@ class TestAddMetaCluster(PersonalityTestMixin, TestBrokerCommand):
         self.assertEqual(mc.virtual_switch.name, "")
 
     def test_110_add_utmc2(self):
-        command = ["add_metacluster", "--metacluster=utmc2",
+        command = ["add_metacluster", "--prefix=utmc",
                    "--max_members=99", "--building=ut",
                    "--domain=unittest",
                    "--comments", "Some metacluster comments"]
-        self.noouttest(command)
+        out = self.commandtest(command)
+        self.matchoutput(out, "utmc2", command)
 
     def test_115_show_utmc2(self):
         command = "show metacluster --metacluster utmc2"
