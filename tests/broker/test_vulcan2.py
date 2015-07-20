@@ -93,11 +93,11 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
         for i in range(0, 2):
             machine = "ut14s1p%d" % i
             self.create_machine(machine, "vb1205xm", rack="ut14",
-                                eth0_mac=self.net["autopg2"].usable[i].mac)
+                                eth0_mac=self.net["ut14_net"].usable[i].mac)
 
     def test_070_populate10gigrackhosts(self):
         for i in range(0, 2):
-            ip = self.net["autopg2"].usable[i]
+            ip = self.net["ut14_net"].usable[i]
             hostname = "evh8%d.aqd-unittest.ms.com" % i
             machine = "ut14s1p%d" % i
 
@@ -782,7 +782,7 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
     def test_725_del10gigrackhosts(self):
         for i in range(0, 2):
             basetime = datetime.now()
-            ip = self.net["autopg2"].usable[i]
+            ip = self.net["ut14_net"].usable[i]
             hostname = "evh8%d.aqd-unittest.ms.com" % i
 
             self.dsdb_expect_delete(ip)

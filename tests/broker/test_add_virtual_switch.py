@@ -146,7 +146,7 @@ class TestAddVirtualSwitch(TestBrokerCommand):
                          command)
 
     def test_200_bind_duplicate_tag(self):
-        net = self.net["autopg2"]
+        net = self.net["ut14_net"]
         command = ["bind_port_group", "--virtual_switch", "utvswitch",
                    "--networkip", net.ip, "--type", "user", "--tag", "710"]
         out = self.badrequesttest(command)

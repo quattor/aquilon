@@ -92,7 +92,7 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, MachineTestMixin,
 
     def test_050_add_vmhost(self):
         for i in range(0, 2):
-            ip = self.net["autopg2"].usable[i]
+            ip = self.net["ut14_net"].usable[i + 2]
 
             self.create_host(self.vmhost[i], ip, self.machine[i],
                              model="vb1205xm", rack="ut3",
@@ -436,7 +436,7 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, MachineTestMixin,
 
     def test_325_del_vmhost(self):
         for i in range(0, 2):
-            ip = self.net["autopg2"].usable[i]
+            ip = self.net["ut14_net"].usable[i + 2]
             basetime = datetime.now()
             self.dsdb_expect_delete(ip)
             command = ["del", "host", "--hostname", self.vmhost[i]]
