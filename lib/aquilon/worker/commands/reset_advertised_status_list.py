@@ -36,7 +36,6 @@ class CommandResetAdvertisedStatusList(BrokerCommand):
         dbbranch, dbauthor = validate_branch_author(dbhosts)
 
         failed = []
-        compileable = []
         # Do any cross-list or dependency checks
         for dbhost in dbhosts:
             if dbhost.status.name == 'ready':
@@ -57,6 +56,6 @@ class CommandResetAdvertisedStatusList(BrokerCommand):
 
         td = TemplateDomain(dbbranch, dbauthor, logger=logger)
         with plenaries.transaction():
-            td.compile(session, only=compileable)
+            td.compile(session, only=plenaries.object_templates)
 
         return
