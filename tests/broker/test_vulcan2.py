@@ -129,7 +129,7 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
                             "--cluster", cluster, "--model", "utmedium"])
 
     def test_095_search_host_by_metacluster(self):
-        command = "search host --cluster utmc8"
+        command = "search host --metacluster utmc8"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "utpgh0.aqd-unittest.ms.com", command)
         self.matchoutput(out, "utpgh1.aqd-unittest.ms.com", command)
