@@ -33,11 +33,10 @@ class TestAddStaticRoute(TestBrokerCommand, MachineTestMixin):
         eth1_ip = self.net["routing1"].usable[1]
         self.create_host("unittest27.aqd-unittest.ms.com", eth0_ip, "ut3c5n9",
                          model="hs21-8853", chassis="ut3c5", slot=9,
-                         interfaces=["eth0", "eth1"], zebra=False,
                          eth0_mac=eth0_ip.mac,
                          eth1_mac=eth1_ip.mac, eth1_ip=eth1_ip,
                          eth1_fqdn="unittest27-e1.aqd-unittest.ms.com",
-                         personality="inventory")
+                         zebra=False, personality="inventory")
 
     def test_100_add_route1(self):
         gw = self.net["routing1"].usable[-1]

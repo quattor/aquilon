@@ -236,7 +236,6 @@ class TestDelHost(VerifyNotificationsMixin, MachineTestMixin,
         eth1_ip = self.net["unknown1"].usable[34]
         ip = self.net["zebra_vip"].usable[3]
         self.delete_host("infra1.aqd-unittest.ms.com", ip, "ut3c5n13",
-                         interfaces=["eth0", "eth1"],
                          eth0_ip=eth0_ip, eth1_ip=eth1_ip)
 
     def test_300_del_npinfra(self):
@@ -244,7 +243,6 @@ class TestDelHost(VerifyNotificationsMixin, MachineTestMixin,
         eth1_ip = self.net["unknown1"].usable[36]
         ip = self.net["zebra_vip"].usable[4]
         self.delete_host("infra1.one-nyp.ms.com", ip, "np3c5n13",
-                         interfaces=["eth0", "eth1"],
                          eth0_ip=eth0_ip, eth1_ip=eth1_ip)
 
     def test_300_del_hp_rack_hosts(self):

@@ -96,7 +96,6 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
     # Used for Zebra tests
     def test_110_add_ut3c5n2(self):
         self.create_machine_hs21("ut3c5n2", chassis="ut3c5", slot=2,
-                                 interfaces=["eth0", "eth1"],
                                  eth0_mac=self.net["zebra_eth0"].usable[0].mac,
                                  eth0_vendor="intel", eth0_model="e1000",
                                  eth1_mac=self.net["zebra_eth1"].usable[0].mac,
@@ -105,14 +104,12 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
     # Used for bonding tests
     def test_111_add_ut3c5n3(self):
         self.create_machine_hs21("ut3c5n3", chassis="ut3c5", slot=3,
-                                 interfaces=["eth0", "eth1"],
                                  eth0_mac=self.net["zebra_eth0"].usable[1].mac,
                                  eth1_mac=self.net["zebra_eth1"].usable[1].mac)
 
     # Used for bridge tests
     def test_112_add_ut3c5n4(self):
         self.create_machine_hs21("ut3c5n4", chassis="ut3c5", slot=4,
-                                 interfaces=["eth0", "eth1"],
                                  eth0_mac=self.net["zebra_eth0"].usable[2].mac,
                                  eth1_mac=self.net["zebra_eth1"].usable[2].mac)
 
@@ -160,7 +157,6 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
     def test_141_add_ut3c5n7(self):
         net = self.net["unknown0"]
         self.create_machine_hs21("ut3c5n7", chassis="ut3c5", slot=7,
-                                 interfaces=["eth0", "eth1", "eth2"],
                                  eth0_mac=net.usable[20].mac,
                                  eth1_mac=net.usable[21].mac,
                                  eth2_mac=net.usable[22].mac)
@@ -168,7 +164,6 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
     # Network environment testing
     def test_142_add_ut3c5n8(self):
         self.create_machine_hs21("ut3c5n8", chassis="ut3c5", slot=8,
-                                 interfaces=["eth0", "eth1"],
                                  eth0_mac=self.net["unknown0"].usable[23].mac,
                                  eth1_mac=self.net["routing1"].usable[0].mac)
 

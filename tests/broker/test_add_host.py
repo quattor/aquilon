@@ -437,7 +437,6 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
             eth1_mac = eth1_net.usable[port].mac
             # The virtual machine tests require quite a bit of memory...
             self.create_host(hostname, ip, machine,
-                             interfaces=["eth0", "eth1"],
                              model="vb1205xm", memory=81920, rack="ut10",
                              eth0_mac=eth0_mac, eth1_mac=eth1_mac,
                              archetype="vmhost",
@@ -456,7 +455,6 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
                 eth0_mac = self.net["vmotion_net"].usable[i].mac
                 eth1_mac = self.net["vm_storage_net"].usable[j].mac
                 self.create_machine_verari(machine, rack=rack,
-                                           interfaces=["eth0", "eth1"],
                                            eth0_mac=eth0_mac,
                                            eth1_mac=eth1_mac,
                                            eth1_pg="storage-v701")
@@ -599,12 +597,11 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
         ip = self.net["zebra_vip"].usable[3]
         self.create_host("infra1.aqd-unittest.ms.com", ip, "ut3c5n13",
                          model="utrackmount", chassis="ut3c5", slot=13,
-                         interfaces=["eth0", "eth1"], zebra=True,
                          eth0_mac=eth0_ip.mac, eth0_ip=eth0_ip,
                          eth0_fqdn="infra1-e0.aqd-unittest.ms.com",
                          eth1_mac=eth1_ip.mac, eth1_ip=eth1_ip,
                          eth1_fqdn="infra1-e1.aqd-unittest.ms.com",
-                         personality="infra")
+                         zebra=True, personality="infra")
 
     def test_435_add_npinfra(self):
         eth0_ip = self.net["unknown0"].usable[35]
@@ -612,12 +609,11 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
         ip = self.net["zebra_vip"].usable[4]
         self.create_host("infra1.one-nyp.ms.com", ip, "np3c5n13",
                          model="utrackmount", chassis="np3c5", slot=13,
-                         interfaces=["eth0", "eth1"], zebra=True,
                          eth0_mac=eth0_ip.mac, eth0_ip=eth0_ip,
                          eth0_fqdn="infra1-e0.one-nyp.ms.com",
                          eth1_mac=eth1_ip.mac, eth1_ip=eth1_ip,
                          eth1_fqdn="infra1-e1.one-nyp.ms.com",
-                         personality="infra")
+                         zebra=True, personality="infra")
 
     def test_440_add_jack_host(self):
         ip = self.net["unknown0"].usable[17]
