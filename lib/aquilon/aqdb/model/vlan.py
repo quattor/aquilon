@@ -17,6 +17,7 @@
 """ The classes pertaining to VLAN info"""
 
 from datetime import datetime
+import re
 
 from sqlalchemy import (Column, Integer, DateTime, ForeignKey, CheckConstraint,
                         PrimaryKeyConstraint, Index, Sequence)
@@ -24,12 +25,12 @@ from sqlalchemy.orm import relation, backref, deferred
 from sqlalchemy.sql import and_
 
 from aquilon.exceptions_ import InternalError
-from aquilon.aqdb.column_types import AqStr, Enum
+from aquilon.aqdb.column_types import AqStr
 from aquilon.aqdb.model import Base, Network, NetworkDevice
 
 MAX_VLANS = 4096  # IEEE 802.1Q standard
 
-VLAN_TYPES = ('storage', 'vmotion', 'user', 'unknown', 'vulcan-mgmt', 'transit')
+pg_re = re.compile(r'^(.*)-v(\d+)$')
 
 _TN = 'observed_vlan'
 _VTN = 'vlan_info'
@@ -43,7 +44,7 @@ class VlanInfo(Base):
 
     vlan_id = Column(Integer, primary_key=True, autoincrement=False)
     port_group = Column(AqStr(32), nullable=False, unique=True)
-    vlan_type = Column(Enum(32, VLAN_TYPES), nullable=False)
+    vlan_type = Column(AqStr(32), nullable=False)
 
     __table_args__ = (CheckConstraint(and_(vlan_id >= 0,
                                            vlan_id < MAX_VLANS),
@@ -84,7 +85,7 @@ class PortGroup(Base):
     # VLAN or VxLAN ID
     network_tag = Column(Integer, nullable=False)
 
-    usage = Column(Enum(32, VLAN_TYPES), nullable=False)
+    usage = Column(AqStr(32), nullable=False)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
@@ -105,9 +106,18 @@ class PortGroup(Base):
 
     @property
     def name(self):
-        # The following almost works...
-        # return "%s-v%d" % (self.usage, self.network_tag)
-        return self.legacy_vlan.port_group
+        if self.legacy_vlan:
+            return self.legacy_vlan.port_group
+        else:
+            return "%s-v%d" % (self.usage, self.network_tag)
+
+    @classmethod
+    def parse_name(cls, name):
+        match = pg_re.match(name)
+        if match:
+            return (match.group(1), int(match.group(2)))
+        else:
+            return (None, None)
 
 
 class __ObservedVlan(Base):

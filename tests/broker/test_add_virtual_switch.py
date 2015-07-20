@@ -43,26 +43,48 @@ class TestAddVirtualSwitch(TestBrokerCommand):
                    "--networkip", net.ip, "--type", "user", "--tag", "710"]
         self.noouttest(command)
 
+    def test_111_bind_unregistered_tag(self):
+        # Make sure the VLAN number is not registered
+        self.noouttest(["show_vlan", "--vlan", "800"])
+
+        net = self.net["vmotion_net"]
+        command = ["bind_port_group", "--virtual_switch", "utvswitch",
+                   "--networkip", net.ip, "--type", "vmotion", "--tag", "800"]
+        self.noouttest(command)
+
     def test_115_show_utvswitch(self):
-        net = self.net["autopg1"]
+        net1 = self.net["autopg1"]
+        net2 = self.net["vmotion_net"]
         command = ["show_virtual_switch", "--virtual_switch", "utvswitch"]
         out = self.commandtest(command)
         self.matchoutput(out, "Virtual Switch: utvswitch", command)
-        self.matchoutput(out, "Port Group: user-v710", command)
-        self.matchoutput(out, "Network: %s" % net.ip, command)
+        self.searchoutput(out,
+                          r'Port Group: user-v710\s*'
+                          r'Network: %s$' % net1.ip,
+                          command)
+        self.searchoutput(out,
+                          r'Port Group: vmotion-v800\s*'
+                          r'Network: %s$' % net2.ip,
+                          command)
         self.matchclean(out, "Comments", command)
 
     def test_115_show_utvswitch_proto(self):
-        net = self.net["autopg1"]
+        nets = {
+            self.net["autopg1"]: ("user", 710),
+            self.net["vmotion_net"]: ("vmotion", 800),
+        }
+
         command = ["show_virtual_switch", "--virtual_switch", "utvswitch",
                    "--format", "proto"]
         vswitch = self.protobuftest(command, expect=1)[0]
         self.assertEqual(vswitch.name, "utvswitch")
-        self.assertEqual(len(vswitch.portgroups), 1)
-        self.assertEqual(vswitch.portgroups[0].ip, str(net.ip))
-        self.assertEqual(vswitch.portgroups[0].cidr, 29)
-        self.assertEqual(vswitch.portgroups[0].network_tag, 710)
-        self.assertEqual(vswitch.portgroups[0].usage, "user")
+        self.assertEqual(len(vswitch.portgroups), 2)
+        pgs = dict((pg.ip, pg) for pg in vswitch.portgroups)
+        for net, (usage, network_tag) in nets.items():
+            self.assertIn(str(net.ip), pgs)
+            self.assertEqual(pgs[str(net.ip)].cidr, net.prefixlen)
+            self.assertEqual(pgs[str(net.ip)].usage, usage)
+            self.assertEqual(pgs[str(net.ip)].network_tag, network_tag)
 
     def test_115_cat_utvswitch(self):
         net = self.net["autopg1"]
@@ -138,7 +160,7 @@ class TestAddVirtualSwitch(TestBrokerCommand):
     def test_200_bind_different_type(self):
         net = self.net["autopg1"]
         command = ["bind_port_group", "--virtual_switch", "utvswitch2",
-                   "--networkip", net.ip, "--type", "vcs", "--tag", "710"]
+                   "--networkip", net.ip, "--type", "storage", "--tag", "710"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Port Group user-v710 is already used as "
                          "type user.", command)
@@ -161,6 +183,14 @@ class TestAddVirtualSwitch(TestBrokerCommand):
                          "with tag 710.",
                          command)
 
+    def test_200_bind_bad_type(self):
+        net = self.net["autopg1"]
+        command = ["bind_port_group", "--virtual_switch", "utvswitch2",
+                   "--networkip", net.ip, "--type", "vcs", "--tag", "710"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Unknown VLAN type 'vcs'. Valid values are: ",
+                         command)
+
     def test_300_update_utvswitch2(self):
         self.noouttest(["update_virtual_switch",
                         "--virtual_switch", "utvswitch2",
@@ -180,6 +210,58 @@ class TestAddVirtualSwitch(TestBrokerCommand):
         command = ["show_virtual_switch", "--virtual_switch", "utvswitch2"]
         out = self.commandtest(command)
         self.matchclean(out, "Comments", command)
+
+    def test_320_search_net_by_pg(self):
+        net1 = self.net["autopg1"]
+        net2 = self.net["vmotion_net"]
+        command = ["search_network", "--pg", "vmotion-v800"]
+        out = self.commandtest(command)
+        self.matchoutput(out, str(net2.ip), command)
+        self.matchclean(out, str(net1.ip), command)
+
+    def test_320_search_net_by_usage(self):
+        net1 = self.net["autopg1"]
+        net2 = self.net["vmotion_net"]
+        command = ["search_network", "--pg", "vmotion"]
+        out = self.commandtest(command)
+        self.matchoutput(out, str(net2.ip), command)
+        self.matchclean(out, str(net1.ip), command)
+
+    def test_400_unbind_nonregistered(self):
+        net = self.net["unknown0"]
+        command = ["unbind_port_group", "--virtual_switch", "utvswitch",
+                   "--networkip", net.ip]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Network unknown0 [%s/%d] is not assigned to a "
+                         "port group." % (net.ip, net.prefixlen), command)
+
+    def test_400_unbind_bad_vswitch(self):
+        net = self.net["vmotion_net"]
+        command = ["unbind_port_group", "--virtual_switch", "utvswitch2",
+                   "--networkip", net.ip]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Port Group vmotion-v800 is not bound to "
+                         "virtual switch utvswitch2.", command)
+
+    def test_400_unbind_bad_tag(self):
+        command = ["unbind_port_group", "--virtual_switch", "utvswitch", "--tag", 900]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Virtual Switch utvswitch does not have a port "
+                         "group tagged with 900.", command)
+
+    def test_800_unregister_pg(self):
+        net = self.net["vmotion_net"]
+        self.noouttest(["unbind_port_group", "--virtual_switch", "utvswitch",
+                        "--networkip", net.ip])
+
+    def test_805_verify_unregister(self):
+        command = ["show_virtual_switch", "--virtual_switch", "utvswitch"]
+        out = self.commandtest(command)
+        self.matchclean(out, "vmotion", command)
+
+    def test_805_verify_pg_cleanup(self):
+        # The PortGroup object should be gone when the last reference is deleted
+        self.noouttest(["search_network", "--pg", "vmotion-v800"])
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddVirtualSwitch)

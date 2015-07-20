@@ -190,6 +190,7 @@ unmap_grn_max_list_size =
 user_delete_limit = 1000
 
 default_network_type = unknown
+vlan_types = storage, vmotion, user, unknown, vulcan-mgmt, transit
 
 [tool_locations]
 dsdb = /ms/dist/aurora/PROJ/dsdb/5.0prod/bin/dsdb

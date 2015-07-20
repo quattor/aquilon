@@ -26,20 +26,29 @@ from brokertest import TestBrokerCommand
 
 
 class TestDelVirtualSwitch(TestBrokerCommand):
-    def test_100_del_utvswitch(self):
+    def test_100_unregister_pg_tag(self):
+        self.noouttest(["unbind_port_group", "--virtual_switch", "utvswitch",
+                        "--tag", "710"])
+
+    def test_105_verify_pg_gone(self):
+        command = ["show_virtual_switch", "--virtual_switch", "utvswitch"]
+        out = self.commandtest(command)
+        self.matchclean(out, "Port Group", command)
+
+    def test_110_del_utvswitch(self):
         command = ["del_virtual_switch", "--virtual_switch", "utvswitch"]
         self.noouttest(command)
 
-    def test_105_verify_utvswitch(self):
+    def test_115_verify_utvswitch(self):
         command = ["show_virtual_switch", "--virtual_switch", "utvswitch"]
         out = self.notfoundtest(command)
         self.matchoutput(out, "Virtual Switch utvswitch not found.", command)
 
-    def test_110_del_utvswitch2(self):
+    def test_120_del_utvswitch2(self):
         command = ["del_virtual_switch", "--virtual_switch", "utvswitch2"]
         self.noouttest(command)
 
-    def test_120_del_camelcase(self):
+    def test_130_del_camelcase(self):
         self.check_plenary_exists("virtualswitchdata", "camelcase")
         self.noouttest(["del_virtual_switch", "--virtual_switch", "CaMeLcAsE"])
         self.check_plenary_gone("virtualswitchdata", "camelcase")
