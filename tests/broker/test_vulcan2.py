@@ -84,22 +84,22 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
         self.noouttest(command)
 
     # see testaddutmc4
-    def test_020_addutpgcl(self):
+    def test_020_add_utmc4_clusters(self):
         for i in range(0, 2):
-            self.add_utcluster("utpgcl%d" % i, "utmc8")
+            self.add_utcluster("utecl%d" % (i + 12), "utmc8")
 
     # for each cluster's hosts
     def test_060_add10gigracks(self):
         for i in range(0, 2):
-            machine = "utpgs01p%d" % i
-            self.create_machine(machine, "vb1205xm", rack="ut3",
+            machine = "ut14s1p%d" % i
+            self.create_machine(machine, "vb1205xm", rack="ut14",
                                 eth0_mac=self.net["autopg2"].usable[i].mac)
 
     def test_070_populate10gigrackhosts(self):
         for i in range(0, 2):
             ip = self.net["autopg2"].usable[i]
-            hostname = "utpgh%d.aqd-unittest.ms.com" % i
-            machine = "utpgs01p%d" % i
+            hostname = "evh8%d.aqd-unittest.ms.com" % i
+            machine = "ut14s1p%d" % i
 
             self.dsdb_expect_add(hostname, ip, "eth0", ip.mac)
             command = ["add", "host", "--hostname", hostname, "--ip", ip,
@@ -113,8 +113,8 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
     def test_080_makeclusters(self):
         for i in range(0, 2):
 
-            host = "utpgh%s.aqd-unittest.ms.com" % i
-            cluster = "utpgcl%d" % i
+            host = "evh8%s.aqd-unittest.ms.com" % i
+            cluster = "utecl%d" % (i + 12)
             self.statustest(["make", "cluster", "--cluster", cluster])
 
             self.statustest(["cluster",
@@ -122,7 +122,7 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
 
     def test_090_addmachines(self):
         for i in range(0, 3):
-            cluster = "utpgcl%d" % (i // 2)
+            cluster = "utecl%d" % (i // 2 + 12)
             machine = "utpgm%d" % i
 
             self.noouttest(["add", "machine", "--machine", machine,
@@ -131,8 +131,8 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
     def test_095_search_host_by_metacluster(self):
         command = "search host --metacluster utmc8"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "utpgh0.aqd-unittest.ms.com", command)
-        self.matchoutput(out, "utpgh1.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "evh80.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "evh81.aqd-unittest.ms.com", command)
 
     def test_097_search_machine_by_metacluster(self):
         command = "search machine --cluster utmc8"
@@ -140,7 +140,7 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
         self.matchoutput(out, "utpgm0", command)
         self.matchoutput(out, "utpgm1", command)
         self.matchoutput(out, "utpgm2", command)
-        self.matchclean(out, "utpgs01p0", command)
+        self.matchclean(out, "ut14s1p0", command)
 
     # switch tests
     def test_100_addswitch(self):
@@ -171,31 +171,31 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
         # storage IPs
         for i in range(0, 2):
             ip = self.net["vm_storage_net"].usable[i + 26]
-            machine = "utpgs01p%d" % i
+            machine = "ut14s1p%d" % i
 
             self.noouttest(["add", "interface", "--interface", "eth1",
                             "--machine", machine,
                             "--mac", ip.mac])
 
-            self.dsdb_expect_add("utpgh%d-eth1.aqd-unittest.ms.com" % i,
+            self.dsdb_expect_add("evh8%d-eth1.aqd-unittest.ms.com" % i,
                                  ip, "eth1", ip.mac,
-                                 primary="utpgh%d.aqd-unittest.ms.com" % i)
+                                 primary="evh8%d.aqd-unittest.ms.com" % i)
             command = ["add", "interface", "address", "--machine", machine,
                        "--interface", "eth1", "--ip", ip]
             self.noouttest(command)
         self.dsdb_verify()
 
-    def test_120_catutpgcl0(self):
-        data_command = ["cat", "--cluster", "utpgcl0", "--data"]
+    def test_120_catutecl12(self):
+        data_command = ["cat", "--cluster", "utecl12", "--data"]
         data = self.commandtest(data_command)
 
         self.matchoutput(data, '"system/cluster/sysloc/room" = "utroom1";',
                          data_command)
 
-        data_command = ["cat", "--machine", "utpgs01p0"]
+        data_command = ["cat", "--machine", "ut14s1p0"]
         data = self.commandtest(data_command)
 
-        self.matchoutput(data, '"rack/name" = "ut3";',
+        self.matchoutput(data, '"rack/name" = "ut14";',
                          data_command)
         self.matchoutput(data, '"rack/room" = "utroom1";',
                          data_command)
@@ -299,8 +299,8 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
         self.matchoutput(out, '"system/metacluster/type" = "meta";', command)
         self.searchoutput(out,
                           r'"system/metacluster/members" = list\(\s*'
-                          r'"utpgcl0",\s*'
-                          r'"utpgcl1"\s*'
+                          r'"utecl12",\s*'
+                          r'"utecl13"\s*'
                           r'\);',
                           command)
         self.matchoutput(out, '"system/build" = "build";', command)
@@ -448,7 +448,7 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
         self.assertEqual(machine.disks[0].backing_store.type, "share")
         self.assertEqual(machine.disks[0].iops_limit, 20)
         self.assertEqual(machine.vm_host.fqdn, "")
-        self.assertEqual(machine.vm_cluster.name, "utpgcl0")
+        self.assertEqual(machine.vm_cluster.name, "utecl12")
         self.assertEqual(machine.vm_cluster.metacluster, "utmc8")
 
         command = ["show_share", "--resourcegroup=utmc8as1",
@@ -484,7 +484,7 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
     def test_350_move_machine_pre(self):
         command = ["show_machine", "--machine", "utpgm0"]
         out = self.commandtest(command)
-        self.matchoutput(out, "Hosted by: ESX Cluster utpgcl0", command)
+        self.matchoutput(out, "Hosted by: ESX Cluster utecl12", command)
         self.searchoutput(out,
                           r"Disk: sda 34 GB scsi "
                           r"\(virtual_disk stored on share test_v2_share\) "
@@ -495,13 +495,13 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
         # Moving the machine from one cluster to the other exercises the case in
         # the disk movement logic when the old share is inside a resource group.
         command = ["update_machine", "--machine", "utpgm0",
-                   "--cluster", "utpgcl1"]
+                   "--cluster", "utecl13"]
         self.noouttest(command)
 
     def test_370_verify_move(self):
         command = ["show_machine", "--machine", "utpgm0"]
         out = self.commandtest(command)
-        self.matchoutput(out, "Hosted by: ESX Cluster utpgcl1", command)
+        self.matchoutput(out, "Hosted by: ESX Cluster utecl13", command)
         self.searchoutput(out,
                           r"Disk: sda 34 GB scsi "
                           r"\(virtual_disk stored on share test_v2_share\) "
@@ -514,7 +514,7 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
                    "--resourcegroup", "utmc8as1"]
         out = self.notfoundtest(command)
         self.matchoutput(out,
-                         "ESX Cluster utpgcl1 does not have share "
+                         "ESX Cluster utecl13 does not have share "
                          "non_existent_share assigned to it in "
                          "resourcegroup utmc8as1.",
                          command)
@@ -537,13 +537,13 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
         # not to the clusters as they do not require it
         self.matchoutput(err, "Metacluster utmc8 adding binding for "
                          "service instance vcenter/ut", command)
-        self.matchoutput(err, "Host utpgh0.aqd-unittest.ms.com adding binding "
+        self.matchoutput(err, "Host evh80.aqd-unittest.ms.com adding binding "
                          "for service instance vcenter/ut", command)
-        self.matchoutput(err, "Host utpgh1.aqd-unittest.ms.com adding binding "
+        self.matchoutput(err, "Host evh81.aqd-unittest.ms.com adding binding "
                          "for service instance vcenter/ut", command)
-        self.matchclean(err, "utpgcl", command)
+        self.matchclean(err, "utecl", command)
 
-        command = ["show", "host", "--hostname", "utpgh0.aqd-unittest.ms.com"]
+        command = ["show", "host", "--hostname", "evh80.aqd-unittest.ms.com"]
         out = self.commandtest(command)
         self.matchoutput(out,
                          "Uses Service: vcenter Instance: ut",
@@ -597,12 +597,12 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
                    "--personality", "vulcan2-server-dev", "--archetype", "vmhost"]
         self.noouttest(command)
 
-        command = ["make", "--hostname", "utpgh0.aqd-unittest.ms.com"]
+        command = ["make", "--hostname", "evh80.aqd-unittest.ms.com"]
         err = self.statustest(command)
-        self.matchoutput(err, "Host utpgh0.aqd-unittest.ms.com removing "
+        self.matchoutput(err, "Host evh80.aqd-unittest.ms.com removing "
                          "binding for service instance vcenter/ut", command)
 
-        command = ["show", "host", "--hostname", "utpgh0.aqd-unittest.ms.com"]
+        command = ["show", "host", "--hostname", "evh80.aqd-unittest.ms.com"]
         out = self.commandtest(command)
         self.matchclean(out,
                         "Uses Service: vcenter Instance: ut",
@@ -631,7 +631,7 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
                          "Metacluster utmc8 adding binding for service "
                          "instance esx_management_server/ut.mc",
                          command)
-        for cluster in ["utpgcl0", "utpgcl1"]:
+        for cluster in ["utecl12", "utecl13"]:
             self.matchoutput(err,
                              "ESX Cluster %s removing binding for service "
                              "instance esx_management_server/ut.a" % cluster,
@@ -640,7 +640,7 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
                              "ESX Cluster %s adding binding for service "
                              "instance esx_management_server/ut.mc" % cluster,
                              command)
-        for host in ["utpgh0", "utpgh1"]:
+        for host in ["evh80", "evh81"]:
             self.matchoutput(err,
                              "Host %s.aqd-unittest.ms.com removing binding for "
                              "service instance esx_management_server/ut.a" % host,
@@ -651,28 +651,28 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
                              command)
 
     def test_510_fail_make_host(self):
-        command = ["make", "--hostname", "utpgh0.aqd-unittest.ms.com"]
+        command = ["make", "--hostname", "evh80.aqd-unittest.ms.com"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "ESX Metacluster utmc8 is set to use service instance "
                          "esx_management_server/ut.mc, but that instance is "
                          "not in a service map for "
-                         "host utpgh0.aqd-unittest.ms.com.",
+                         "host evh80.aqd-unittest.ms.com.",
                          command)
 
     def test_510_fail_make_cluster(self):
-        command = ["make", "cluster", "--cluster", "utpgcl0"]
+        command = ["make", "cluster", "--cluster", "utecl12"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "ESX Metacluster utmc8 is set to use service instance "
                          "esx_management_server/ut.mc, but that instance is "
-                         "not in a service map for ESX cluster utpgcl0.",
+                         "not in a service map for ESX cluster utecl12.",
                          command)
         self.matchoutput(out,
                          "ESX Metacluster utmc8 is set to use service instance "
                          "esx_management_server/ut.mc, but that instance is "
                          "not in a service map for "
-                         "host utpgh0.aqd-unittest.ms.com.",
+                         "host evh80.aqd-unittest.ms.com.",
                          command)
 
     def test_520_verify_client_count(self):
@@ -713,12 +713,12 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
                    "--archetype", "metacluster"]
         self.noouttest(command)
 
-        out = self.statustest(["make_cluster", "--cluster", "utpgcl0"])
+        out = self.statustest(["make_cluster", "--cluster", "utecl12"])
         self.matchoutput(out, "removing binding for service instance "
                          "esx_management_server/ut.mc", command)
         self.matchoutput(out, "adding binding for service instance "
                          "esx_management_server/ut.a", command)
-        out = self.statustest(["make_cluster", "--cluster", "utpgcl1"])
+        out = self.statustest(["make_cluster", "--cluster", "utecl13"])
         self.matchoutput(out, "removing binding for service instance "
                          "esx_management_server/ut.mc", command)
         self.matchoutput(out, "adding binding for service instance "
@@ -754,7 +754,7 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
     def test_700_delinterfaces(self):
         for i in range(0, 2):
             ip = self.net["vm_storage_net"].usable[i + 26]
-            machine = "utpgs01p%d" % i
+            machine = "ut14s1p%d" % i
 
             self.dsdb_expect_delete(ip)
             command = ["del", "interface", "address", "--machine", machine,
@@ -773,8 +773,8 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
 
     def test_720_uncluster(self):
         for i in range(0, 2):
-            host = "utpgh%s.aqd-unittest.ms.com" % i
-            cluster = "utpgcl%d" % i
+            host = "evh8%s.aqd-unittest.ms.com" % i
+            cluster = "utecl%d" % (i + 12)
             self.noouttest(["uncluster", "--hostname", host,
                             "--cluster", cluster,
                             "--personality", "esx_standalone"])
@@ -783,7 +783,7 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
         for i in range(0, 2):
             basetime = datetime.now()
             ip = self.net["autopg2"].usable[i]
-            hostname = "utpgh%d.aqd-unittest.ms.com" % i
+            hostname = "evh8%d.aqd-unittest.ms.com" % i
 
             self.dsdb_expect_delete(ip)
             command = ["del", "host", "--hostname", hostname]
@@ -794,16 +794,16 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
     def test_730_del10gigracks(self):
         for port in range(0, 2):
             self.noouttest(["del", "machine", "--machine",
-                            "utpgs01p%d" % port])
+                            "ut14s1p%d" % port])
 
-    def test_750_delutpgcl(self):
+    def test_750_delclusters(self):
         command = ["del_metacluster", "--metacluster=utmc8"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "ESX Metacluster utmc8 is still in use by "
-                         "clusters: utpgcl0, utpgcl1.", command)
+                         "clusters: utecl12, utecl13.", command)
 
         for i in range(0, 2):
-            command = ["del_cluster", "--cluster=utpgcl%d" % i]
+            command = ["del_cluster", "--cluster=utecl%d" % (i + 12)]
             self.statustest(command)
 
     def test_760_delutmc8(self):
