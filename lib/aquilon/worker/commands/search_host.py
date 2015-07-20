@@ -49,7 +49,7 @@ class CommandSearchHost(BrokerCommand):
                service, instance, model, machine_type, vendor, serial, cluster,
                guest_on_cluster, guest_on_share, member_cluster_share, domain,
                sandbox, branch, sandbox_author, dns_domain, shortname, mac, ip,
-               networkip, network_environment, exact_location,
+               networkip, network_environment, exact_location, metacluster,
                server_of_service, server_of_instance, grn, eon_id, fullinfo,
                style, **arguments):
         dbnet_env = NetworkEnvironment.get_unique_or_default(session,
@@ -216,12 +216,20 @@ class CommandSearchHost(BrokerCommand):
 
         if cluster:
             dbcluster = Cluster.get_unique(session, cluster, compel=True)
+            # TODO: disallow metaclusters here
             if isinstance(dbcluster, MetaCluster):
                 q = q.join('_cluster', 'cluster', aliased=True)
                 q = q.filter_by(metacluster=dbcluster)
             else:
                 q = q.filter_by(cluster=dbcluster)
             q = q.reset_joinpoint()
+
+        if metacluster:
+            dbmeta = MetaCluster.get_unique(session, metacluster, compel=True)
+            q = q.join('_cluster', 'cluster', aliased=True)
+            q = q.filter_by(metacluster=dbmeta)
+            q = q.reset_joinpoint()
+
 
         if guest_on_cluster:
             # TODO: this does not handle metaclusters according to Wes

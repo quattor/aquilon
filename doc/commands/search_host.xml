@@ -52,6 +52,7 @@
 		<arg><option>--vendor <replaceable>NAME</replaceable></option></arg>
 		<arg><option>--serial <replaceable>SERIAL</replaceable></option></arg>
 		<arg><option>--cluster <replaceable>NAME</replaceable></option></arg>
+		<arg><option>--metacluster <replaceable>NAME</replaceable></option></arg>
 		<arg><option>--guest_on_cluster <replaceable>NAME</replaceable></option></arg>
 		<arg><option>--guest_on_share <replaceable>NAME</replaceable></option></arg>
 		<arg><option>--member_cluster_share <replaceable>NAME</replaceable></option></arg>
@@ -320,6 +321,16 @@
 		<listitem>
 		    <para>
 			Look for hosts that are member of cluster <replaceable>NAME</replaceable>.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+		<term>
+		    <option>--metacluster <replaceable>NAME</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Look for hosts that are member of clusters held by this metacluster <replaceable>NAME</replaceable>.
 		    </para>
 		</listitem>
 	    </varlistentry>
