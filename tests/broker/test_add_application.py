@@ -50,8 +50,9 @@ class TestAddApplication(TestBrokerCommand):
         self.matchoutput(out, "already exists", command)
 
     def test_15_notfoundfs(self):
-        command = "show application --application app-does-not-exist"
-        self.notfoundtest(command.split(" "))
+        command = ["show_application", "--application", "app-does-not-exist",
+                   "--hostname", "server1.aqd-unittest.ms.com"]
+        self.notfoundtest(command)
 
     def test_16_badeonid(self):
         command = ["add_application", "--application", "app2",

@@ -41,10 +41,11 @@ class CommandUpdateResourceGroup(CommandUpdateResource):
                     raise ArgumentError("A resourcegroup can't hold other "
                                         "resourcegroups.")
 
-                for res in dbresource.resholder.resources:
-                    if type(res) != rqtype:
-                        raise ArgumentError("{0} already has a resource of "
-                                            "type {1:lc}."
-                                            .format(dbresource, res))
+                if dbresource.resholder:
+                    for res in dbresource.resholder.resources:
+                        if type(res) != rqtype:
+                            raise ArgumentError("{0} already has a resource of "
+                                                "type {1:lc}."
+                                                .format(dbresource, res))
 
             dbresource.required_type = required_type

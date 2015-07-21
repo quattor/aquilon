@@ -54,6 +54,10 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
         dbinterface = Interface.get_unique(session, hardware_entity=dbhw_ent,
                                            name=interface, compel=True)
 
+        # Lock the interface here, to ensure lock order (Interface, then
+        # Network) is consistent with add_interface if autopg is used
+        dbinterface.lock_row()
+
         oldinfo = DSDBRunner.snapshot_hw(dbhw_ent)
 
         if arguments.get('hostname', None):

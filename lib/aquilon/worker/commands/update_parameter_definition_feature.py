@@ -27,8 +27,8 @@ class CommandUpdParameterDefintionFeature(BrokerCommand):
 
     def render(self, session, feature, type, path, required,
                rebuild_required, default, description, **kwargs):
-        dbfeature = Feature.get_unique(session, name=feature, feature_type=type,
-                                       compel=True)
+        cls = Feature.polymorphic_subclass(type, "Unknown feature type")
+        dbfeature = cls.get_unique(session, name=feature, compel=True)
 
         if not dbfeature.paramdef_holder:
             dbfeature.paramdef_holder = FeatureParamDef()

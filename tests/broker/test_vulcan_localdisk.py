@@ -247,6 +247,13 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, MachineTestMixin,
         self.matchoutput(out, '"mountpoint", "/mnt",', command)
         self.matchoutput(out, '"path", "utpgm0/sda.vmdk"', command)
 
+    def test_156_del_used_filesystem(self):
+        command = ["del_filesystem", "--filesystem", "utfs1",
+                   "--hostname", self.vmhost[0]]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Filesystem utfs1 has virtual disks attached, "
+                         "so it cannot be deleted.", command)
+
     def test_160_addinterfaces(self):
         # TODO: fixed mac addresses grabbed from test_vulcan2 until automac\pg
         # for localdisk is implemented.

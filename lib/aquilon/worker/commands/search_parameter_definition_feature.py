@@ -27,8 +27,8 @@ class CommandSearchParameterDefinitionFeature(BrokerCommand):
     required_parameters = ["feature", "type"]
 
     def render(self, session, feature, type, **arguments):
-        dbfeature = Feature.get_unique(session, name=feature, feature_type=type,
-                                       compel=True)
+        cls = Feature.polymorphic_subclass(type, "Unknown feature type")
+        dbfeature = cls.get_unique(session, name=feature, compel=True)
         if dbfeature.paramdef_holder and \
            dbfeature.paramdef_holder.param_definitions:
             return sorted(dbfeature.paramdef_holder.param_definitions,

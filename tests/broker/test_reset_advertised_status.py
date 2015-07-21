@@ -17,6 +17,8 @@
 # limitations under the License.
 """Module for testing the reset advertised status command."""
 
+import re
+
 if __name__ == "__main__":
     import broker.utils
     broker.utils.import_depends()
@@ -86,7 +88,11 @@ class TestResetAdvertisedStatus(TestBrokerCommand):
                                  "when host is in non ready state", command)
             else:
                 advertise_status = "False"
-                self.successtest(command)
+                out, err = self.successtest(command)
+                # We don't care if there was nothing to recompile, but we should
+                # not compile too much
+                match = re.search("(\d+)/\d+ object template", err, re.M) 
+                self.assertLessEqual(int(match.group(1)), 1)
 
             command = "show host --hostname %s" % hostname
             out = self.commandtest(command.split(" "))
@@ -157,7 +163,11 @@ class TestResetAdvertisedStatus(TestBrokerCommand):
                                  "when host is in non ready state", command)
             else:
                 advertise_status = "False"
-                self.successtest(command)
+                out, err = self.successtest(command)
+                # We don't care if there was nothing to recompile, but we should
+                # not compile too much
+                match = re.search("(\d+)/\d+ object template", err, re.M) 
+                self.assertLessEqual(int(match.group(1)), 1)
 
             command = "show host --hostname %s" % hostname
             out = self.commandtest(command.split(" "))

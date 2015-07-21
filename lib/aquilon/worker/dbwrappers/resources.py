@@ -24,7 +24,7 @@ from sqlalchemy.inspection import inspect
 from aquilon.exceptions_ import NotFoundException, ArgumentError
 from aquilon.aqdb.model import (Cluster, MetaCluster, ClusterResource,
                                 HostResource, Resource, ResourceGroup,
-                                BundleResource, RebootIntervention)
+                                BundleResource, RebootIntervention, VirtualDisk)
 from aquilon.worker.dbwrappers.host import hostname_to_host
 
 
@@ -38,8 +38,6 @@ def get_resource_holder(session, logger, hostname=None, cluster=None,
             if compel:
                 raise NotFoundException("{0} has no resources.".format(dbhost))
             dbhost.resholder = HostResource(host=dbhost)
-            session.add(dbhost.resholder)
-            session.flush()
             who = dbhost.resholder
         else:
             set_committed_value(who, 'host', dbhost)
@@ -55,8 +53,6 @@ def get_resource_holder(session, logger, hostname=None, cluster=None,
             if compel:
                 raise NotFoundException("{0} has no resources.".format(dbcluster))
             dbcluster.resholder = ClusterResource(cluster=dbcluster)
-            session.add(dbcluster.resholder)
-            session.flush()
             who = dbcluster.resholder
         else:
             set_committed_value(who, 'cluster', dbcluster)
@@ -68,8 +64,6 @@ def get_resource_holder(session, logger, hostname=None, cluster=None,
             if compel:
                 raise NotFoundException("{0} has no resources.".format(dbmeta))
             dbmeta.resholder = ClusterResource(cluster=dbmeta)
-            session.add(dbmeta.resholder)
-            session.flush()
             who = dbmeta.resholder
         else:
             set_committed_value(who, 'cluster', dbmeta)
@@ -82,11 +76,12 @@ def get_resource_holder(session, logger, hostname=None, cluster=None,
             if compel:
                 raise NotFoundException("{0} has no resources.".format(dbrg))
             dbrg.resholder = BundleResource(resourcegroup=dbrg)
-            session.add(dbrg.resholder)
-            session.flush()
             who = dbrg.resholder
         else:
             set_committed_value(who, 'resourcegroup', dbrg)
+
+    if not who:  # pragma: no cover
+        raise ArgumentError("No resource holder object was specified.")
 
     return who
 
@@ -203,3 +198,11 @@ def find_resource(cls, dbobj, resourcegroup, resource, ignore=None,
                                                                    resource)
 
     raise error(msg)
+
+
+def check_resource_dependencies(session, dbresource):
+    q = session.query(VirtualDisk.id)
+    q = q.filter_by(backing_store=dbresource)
+    if q.count():
+        raise ArgumentError("{0} has virtual disks attached, so it cannot "
+                            "be deleted.".format(dbresource))

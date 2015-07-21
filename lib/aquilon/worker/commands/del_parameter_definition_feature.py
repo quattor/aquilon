@@ -27,8 +27,8 @@ class CommandDelParameterDefintionFeature(BrokerCommand):
     required_parameters = ["path", "feature", "type"]
 
     def render(self, session, feature, type, path, **kwargs):
-        dbfeature = Feature.get_unique(session, name=feature, feature_type=type,
-                                       compel=True)
+        cls = Feature.polymorphic_subclass(type, "Unknown feature type")
+        dbfeature = cls.get_unique(session, name=feature, compel=True)
         if not dbfeature.paramdef_holder:
             raise ArgumentError("No parameter definitions found for {0:l}."
                                 .format(dbfeature))

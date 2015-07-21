@@ -18,7 +18,8 @@
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import ServiceAddress
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.dbwrappers.resources import get_resource_holder
+from aquilon.worker.dbwrappers.resources import (get_resource_holder,
+                                                 check_resource_dependencies)
 from aquilon.worker.templates import Plenary, PlenaryCollection
 
 
@@ -58,8 +59,11 @@ class CommandDelResource(BrokerCommand):
 
             # We have to tell the ORM that these are going to be deleted, we can't
             # just rely on the DB-side cascading
+            for res in dbresource.resholder.resources:
+                check_resource_dependencies(session, res)
             del dbresource.resholder.resources[:]
 
+        check_resource_dependencies(session, dbresource)
         holder.resources.remove(dbresource)
         session.flush()
 
