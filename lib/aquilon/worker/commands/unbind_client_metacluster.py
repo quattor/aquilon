@@ -19,7 +19,7 @@
 from aquilon.aqdb.model import MetaCluster
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.commands.unbind_client_hostname import \
-        CommandUnbindClientHostname
+    CommandUnbindClientHostname
 
 
 class CommandUnbindClientMetacluster(CommandUnbindClientHostname):

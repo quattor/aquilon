@@ -230,7 +230,6 @@ class CommandSearchHost(BrokerCommand):
             q = q.filter_by(metacluster=dbmeta)
             q = q.reset_joinpoint()
 
-
         if guest_on_cluster:
             # TODO: this does not handle metaclusters according to Wes
             dbcluster = Cluster.get_unique(session, guest_on_cluster,

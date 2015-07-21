@@ -75,7 +75,7 @@ def fix_file(filepath):
             last_leading_comment = i
             continue
         break
-    #print >>sys.stderr, "Using %d as last leading comment line." % last_leading_comment
+    # print >>sys.stderr, "Using %d as last leading comment line." % last_leading_comment
 
     current_copyright_line = copyright_line
     # Find the copyright line.
@@ -129,13 +129,13 @@ def fix_file(filepath):
     for i in range(last_leading_comment + 1, len(contents)):
         line = contents[i]
         if ex_re.search(line) or emacs_re.search(line):
-            #print >>sys.stderr, "Skipping ex line"
+            # print >>sys.stderr, "Skipping ex line"
             continue
         if copyright_re.search(line):
-            #print >>sys.stderr, "Skipping copyright line"
+            # print >>sys.stderr, "Skipping copyright line"
             continue
         if module_re.search(line):
-            #print >>sys.stderr, "Skipping module line"
+            # print >>sys.stderr, "Skipping module line"
             continue
         new_contents.append(line)
 

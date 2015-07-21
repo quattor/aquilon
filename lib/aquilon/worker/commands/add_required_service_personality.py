@@ -21,6 +21,7 @@ from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import Personality, Service
 from aquilon.worker.dbwrappers.change_management import validate_personality_justification
 
+
 class CommandAddRequiredServicePersonality(BrokerCommand):
 
     required_parameters = ["service", "archetype", "personality"]

@@ -91,6 +91,7 @@ def del_all_feature_parameter(session, dblink):
         parameter.del_path(Parameter.feature_path(dblink, paramdef.path),
                            compel=False)
 
+
 def validate_value(label, value_type, value):
     retval = None
 

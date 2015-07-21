@@ -38,8 +38,6 @@ from sqlalchemy.inspection import inspect
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.schema import CreateIndex, Sequence
 from sqlalchemy.dialects.oracle.base import OracleDDLCompiler
-from sqlalchemy.sql.selectable import Select
-from sqlalchemy.sql.elements import TextClause
 
 # Global cache of SQL statement hashes, used to implement unique query plan
 # logging
@@ -49,7 +47,7 @@ query_hashes = None
 # Add support for Oracle-specific index extensions
 @compiles(CreateIndex, 'oracle')
 def visit_create_index(create, compiler, **kw):  # pragma: no cover
-                                                 # pylint: disable=W0613
+    # pylint: disable=W0613
     index = create.element
     compiler._verify_index_table(index)
     preparer = compiler.preparer
@@ -80,7 +78,7 @@ def visit_create_index(create, compiler, **kw):  # pragma: no cover
 # Add support for table compression
 @monkeypatch(OracleDDLCompiler)
 def post_create_table(self, table):  # pragma: no cover
-                                     # pylint: disable=W0613
+    # pylint: disable=W0613
     text = ""  # pylint: disable=W0621
     compress = table.kwargs.get("oracle_compress", False)
     if compress:
@@ -101,6 +99,7 @@ def sqlite_no_fsync(dbapi_con, con_record):  # pylint: disable=W0613
 
 
 def sqlite_show_plan(conn, cursor, statement, parameters, context, executemany):
+    # pylint: disable=W0613
     sqlid = stmt_2_sqlid(statement)
     if query_hashes is not None:
         if sqlid in query_hashes:
@@ -168,7 +167,7 @@ def oracle_enable_statistics(dbapi_con, con_record):  # pylint: disable=W0613
 
 
 def oracle_remember_sqlid(conn, cursor, statement, parameters, context,
-                          executemany):
+                          executemany):  # pylint: disable=W0613
     if statement.lower().startswith("set "):
         return
     sqlid = stmt_2_sqlid(statement)
@@ -181,6 +180,7 @@ def oracle_remember_sqlid(conn, cursor, statement, parameters, context,
 
 
 def oracle_show_plan(conn, cursor, statement, parameters, context, executemany):
+    # pylint: disable=W0613
     if not hasattr(context, "_oracle_sqlid"):
         return
 
@@ -198,6 +198,7 @@ def oracle_show_plan(conn, cursor, statement, parameters, context, executemany):
 
 
 def postgres_show_plan(conn, cursor, statement, parameters, context, executemany):
+    # pylint: disable=W0613
     cmd = statement.split()[0]
     if cmd.upper() not in ("SELECT", "INSERT", "UPDATE", "DELETE"):
         return
@@ -249,7 +250,7 @@ class DbFactory(object):
     def create_engine(self, config, dsn, **pool_options):
         engine = create_engine(dsn, **pool_options)
         show_plan = config.has_option("database", "log_query_plans") and \
-                config.getboolean("database", "log_query_plans")
+            config.getboolean("database", "log_query_plans")
         if config.has_option("database", "log_unique_plans_only") and \
            config.getboolean("database", "log_unique_plans_only"):
             global query_hashes
