@@ -15,11 +15,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import Personality, PersonalityParameter
+from aquilon.exceptions_ import ArgumentError, NotFoundException
+from aquilon.aqdb.model import Personality, Parameter, PersonalityParameter
 from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.dbwrappers.parameter import (set_parameter,
+                                                 get_feature_link,
+                                                 get_paramdef_for_parameter)
 from aquilon.worker.dbwrappers.change_management import validate_personality_justification
-from aquilon.worker.dbwrappers.parameter import set_parameter
 from aquilon.worker.templates import Plenary, PlenaryCollection
 
 
@@ -27,16 +29,19 @@ class CommandAddParameter(BrokerCommand):
 
     required_parameters = ['personality', 'path']
 
-    def process_parameter(self, session, param_holder, feature, model,
-                          interface, path, value, comments):
-        return set_parameter(session, param_holder, feature, model, interface,
-                             path, value, comments=comments, compel=False,
-                             preclude=True)
+    def process_parameter(self, session, dbstage, dblink, dbparam_def, path,
+                          value):
+        if not dbstage.paramholder:
+            dbstage.paramholder = PersonalityParameter()
+        if not dbstage.paramholder.parameter:
+            dbstage.paramholder.parameter = Parameter(value={})
 
-    def render(self, session, logger, archetype, personality,
-               personality_stage, feature, model, interface, path, user,
-               value=None, comments=None, justification=None, reason=None,
-               **arguments):
+        set_parameter(session, dbstage.paramholder, dblink, dbparam_def, path,
+                      value, compel=False, preclude=True)
+
+    def render(self, session, logger, archetype, personality, personality_stage,
+               feature, model, interface, path, user, value=None,
+               justification=None, reason=None, **arguments):
         dbpersonality = Personality.get_unique(session, name=personality,
                                                archetype=archetype, compel=True)
         if not dbpersonality.archetype.is_compileable:
@@ -48,13 +53,20 @@ class CommandAddParameter(BrokerCommand):
         validate_personality_justification(dbstage, user, justification,
                                            reason)
 
-        if not dbstage.paramholder:
-            dbstage.paramholder = PersonalityParameter()
+        if feature:
+            dblink = get_feature_link(session, feature, model, interface,
+                                      dbstage)
+        else:
+            dblink = None
 
-        dbparameter = self.process_parameter(session, dbstage.paramholder,
-                                             feature, model, interface, path,
-                                             value, comments)
-        session.add(dbparameter)
+        dbparam_def = get_paramdef_for_parameter(path, dbstage, dblink)
+        if not dbparam_def:
+            raise NotFoundException("Parameter %s does not match any "
+                                    "parameter definitions." % path)
+
+        self.process_parameter(session, dbstage, dblink, dbparam_def, path,
+                               value)
+
         session.flush()
 
         plenaries = PlenaryCollection(logger=logger)

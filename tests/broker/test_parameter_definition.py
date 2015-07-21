@@ -34,7 +34,9 @@ class TestParameterDefinition(TestBrokerCommand):
                "--path=testpath", "--value_type=string", "--description=blaah",
                "--template=foo", "--required", "--default=default"]
 
-        self.noouttest(cmd)
+        out = self.statustest(cmd)
+        self.matchoutput(out, "You need to run 'aq flush --personalities' for "
+                         "the default value to take effect.", cmd)
 
     def test_110_add_existing(self):
         cmd = ["add_parameter_definition", "--archetype", ARCHETYPE,
@@ -59,7 +61,10 @@ class TestParameterDefinition(TestBrokerCommand):
                "--path=testint", "--description=blaah",
                "--template=foo", "--value_type=int", "--default=60"]
 
-        self.noouttest(cmd)
+        out = self.statustest(cmd)
+        self.matchoutput(out, "You need to run 'aq flush --personalities' for "
+                         "the default value to take effect.", cmd)
+
 
     def test_130_add_invalid_int_value_type(self):
         cmd = ["add_parameter_definition", "--archetype", ARCHETYPE,
@@ -74,7 +79,9 @@ class TestParameterDefinition(TestBrokerCommand):
                "--path=testfloat", "--description=blaah",
                "--template=foo", "--value_type=float", "--default=100.100"]
 
-        self.noouttest(cmd)
+        out = self.statustest(cmd)
+        self.matchoutput(out, "You need to run 'aq flush --personalities' for "
+                         "the default value to take effect.", cmd)
 
     def test_130_add_invalid_float_value_type(self):
         cmd = ["add_parameter_definition", "--archetype", ARCHETYPE,
@@ -89,7 +96,9 @@ class TestParameterDefinition(TestBrokerCommand):
                "--path=testboolean", "--description=blaah",
                "--template=foo", "--value_type=boolean", "--default=yes"]
 
-        self.noouttest(cmd)
+        out = self.statustest(cmd)
+        self.matchoutput(out, "You need to run 'aq flush --personalities' for "
+                         "the default value to take effect.", cmd)
 
     def test_130_add_invalid_boolean_value_type(self):
         cmd = ["add_parameter_definition", "--archetype", ARCHETYPE,
@@ -104,14 +113,18 @@ class TestParameterDefinition(TestBrokerCommand):
                "--path=testlist", "--description=blaah",
                "--template=foo", "--value_type=list", "--default=val1,val2"]
 
-        self.noouttest(cmd)
+        out = self.statustest(cmd)
+        self.matchoutput(out, "You need to run 'aq flush --personalities' for "
+                         "the default value to take effect.", cmd)
 
     def test_130_add_json_value_type(self):
         cmd = ["add_parameter_definition", "--archetype", ARCHETYPE,
                "--path=testjson", "--description=blaah",
                "--template=foo", "--value_type=json", "--default=\"{'val1':'val2'}\""]
 
-        self.noouttest(cmd)
+        out = self.statustest(cmd)
+        self.matchoutput(out, "You need to run 'aq flush --personalities' for "
+                         "the default value to take effect.", cmd)
 
     def test_130_add_invalid_json_value_type(self):
         cmd = ["add_parameter_definition", "--archetype", ARCHETYPE,
@@ -134,6 +147,15 @@ class TestParameterDefinition(TestBrokerCommand):
                "--template=foo", "--value_type=string", "--rebuild_required"]
 
         self.noouttest(cmd)
+
+    def test_135_update_rebuild_required_default(self):
+        cmd = ["update_parameter_definition", "--archetype", ARCHETYPE,
+               "--path=test_rebuild_required", "--default=default"]
+        out = self.unimplementederrortest(cmd)
+        self.matchoutput(out, "Changing the default value of a parameter "
+                         "which requires rebuild would cause all existing "
+                         "hosts to require a rebuild, which is not supported.",
+                         cmd)
 
     def test_140_verify_add(self):
         cmd = ["search_parameter_definition", "--archetype", ARCHETYPE]
@@ -231,9 +253,10 @@ class TestParameterDefinition(TestBrokerCommand):
     def test_146_update(self):
         cmd = ["update_parameter_definition", "--archetype", ARCHETYPE,
                "--path=testint", "--description=testint",
-               "--default=100", "--required",
-               "--rebuild_required"]
-        self.noouttest(cmd)
+               "--default=100", "--required"]
+        out = self.statustest(cmd)
+        self.matchoutput(out, "You need to run 'aq flush --personalities' for "
+                         "the change of the default value to take effect.", cmd)
 
     def test_147_verify_add(self):
         cmd = ["search_parameter_definition", "--archetype", ARCHETYPE]
@@ -244,7 +267,7 @@ class TestParameterDefinition(TestBrokerCommand):
                           r'Template: foo\s*'
                           r'Default: 100\s*'
                           r'Description: testint\s*'
-                          r'Rebuild Required: True',
+                          r'Rebuild Required: False',
                           cmd)
 
     def test_150_del_validation(self):
@@ -275,9 +298,7 @@ class TestParameterDefinition(TestBrokerCommand):
 
     def test_200_verify_delete(self):
         cmd = ["search_parameter_definition", "--archetype", ARCHETYPE]
-
-        err = self.notfoundtest(cmd)
-        self.matchoutput(err, "Not Found: No parameter definitions found for archetype aquilon", cmd)
+        self.noouttest(cmd)
 
     def test_210_invalid_path_cleaned(self):
         for path in ["/startslash", "endslash/"]:
@@ -309,6 +330,15 @@ class TestParameterDefinition(TestBrokerCommand):
             cmd = ["del_parameter_definition", "--archetype", ARCHETYPE,
                    "--path=%s" % path]
             self.noouttest(cmd)
+
+    def test_230_add_rebuild_default(self):
+        cmd = ["add_parameter_definition", "--archetype", ARCHETYPE,
+               "--path=test_rebuild_required_default", "--default=default",
+               "--template=foo", "--value_type=string", "--rebuild_required"]
+        out = self.unimplementederrortest(cmd)
+        self.matchoutput(out, "Setting a default value for a parameter which "
+                         "requires rebuild would cause all existing hosts to "
+                         "require a rebuild, which is not supported.", cmd)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestParameterDefinition)

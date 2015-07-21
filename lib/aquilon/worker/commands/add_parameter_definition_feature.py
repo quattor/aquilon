@@ -30,8 +30,8 @@ class CommandAddParameterDefintionFeature(BrokerCommand):
         cls = Feature.polymorphic_subclass(type, "Unknown feature type")
         dbfeature = cls.get_unique(session, name=feature, compel=True)
 
-        if not dbfeature.paramdef_holder:
-            dbfeature.paramdef_holder = FeatureParamDef()
+        if not dbfeature.param_def_holder:
+            dbfeature.param_def_holder = FeatureParamDef()
 
         # strip slash from path start and end
         if path.startswith("/"):
@@ -42,10 +42,10 @@ class CommandAddParameterDefintionFeature(BrokerCommand):
         validate_param_definition(path, value_type, default)
 
         ParamDefinition.get_unique(session, path=path,
-                                   holder=dbfeature.paramdef_holder, preclude=True)
+                                   holder=dbfeature.param_def_holder, preclude=True)
 
         db_paramdef = ParamDefinition(path=path,
-                                      holder=dbfeature.paramdef_holder,
+                                      holder=dbfeature.param_def_holder,
                                       value_type=value_type, default=default,
                                       required=required,
                                       rebuild_required=rebuild_required,

@@ -15,11 +15,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from operator import attrgetter
+from sqlalchemy.orm import contains_eager, undefer
 
-from aquilon.exceptions_ import NotFoundException
-from aquilon.aqdb.model import Feature
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.aqdb.model import Feature, FeatureParamDef, ParamDefinition
+from aquilon.worker.broker import BrokerCommand
 
 
 class CommandSearchParameterDefinitionFeature(BrokerCommand):
@@ -29,10 +28,11 @@ class CommandSearchParameterDefinitionFeature(BrokerCommand):
     def render(self, session, feature, type, **arguments):
         cls = Feature.polymorphic_subclass(type, "Unknown feature type")
         dbfeature = cls.get_unique(session, name=feature, compel=True)
-        if dbfeature.paramdef_holder and \
-           dbfeature.paramdef_holder.param_definitions:
-            return sorted(dbfeature.paramdef_holder.param_definitions,
-                          key=attrgetter('template', 'path'))
-
-        raise NotFoundException("No parameter definitions found for "
-                                "{0:l}.".format(dbfeature))
+        q = session.query(ParamDefinition)
+        q = q.join(ParamDefinition.holder.of_type(FeatureParamDef))
+        q = q.join(FeatureParamDef)
+        q = q.options(contains_eager('holder'),
+                      undefer('description'))
+        q = q.filter_by(feature=dbfeature)
+        q = q.order_by(ParamDefinition.path)
+        return q.all()

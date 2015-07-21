@@ -15,10 +15,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
-from aquilon.exceptions_ import ArgumentError
+from aquilon.exceptions_ import ArgumentError, UnimplementedError
 from aquilon.aqdb.model import Archetype, ArchetypeParamDef, ParamDefinition
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.parameter import validate_param_definition
 
 
@@ -26,14 +25,14 @@ class CommandAddParameterDefintionArchetype(BrokerCommand):
 
     required_parameters = ["archetype", "template", "path", "value_type"]
 
-    def render(self, session, archetype, template, path, value_type, required,
-               rebuild_required, default, description, **kwargs):
+    def render(self, session, logger, archetype, template, path, value_type,
+               required, rebuild_required, default, description, **kwargs):
         dbarchetype = Archetype.get_unique(session, archetype, compel=True)
         if not dbarchetype.is_compileable:
             raise ArgumentError("{0} is not compileable.".format(dbarchetype))
 
-        if not dbarchetype.paramdef_holder:
-            dbarchetype.paramdef_holder = ArchetypeParamDef()
+        if not dbarchetype.param_def_holder:
+            dbarchetype.param_def_holder = ArchetypeParamDef()
 
         # strip slash from path start and end
         if path.startswith("/"):
@@ -41,13 +40,19 @@ class CommandAddParameterDefintionArchetype(BrokerCommand):
         if path.endswith("/"):
             path = path[:-1]
 
+        if rebuild_required and default:
+            raise UnimplementedError("Setting a default value for a parameter "
+                                     "which requires rebuild would cause all "
+                                     "existing hosts to require a rebuild, "
+                                     "which is not supported.")
+
         validate_param_definition(path, value_type, default)
 
         ParamDefinition.get_unique(session, path=path,
-                                   holder=dbarchetype.paramdef_holder, preclude=True)
+                                   holder=dbarchetype.param_def_holder, preclude=True)
 
         db_paramdef = ParamDefinition(path=path,
-                                      holder=dbarchetype.paramdef_holder,
+                                      holder=dbarchetype.param_def_holder,
                                       value_type=value_type, default=default,
                                       required=required, template=template,
                                       rebuild_required=rebuild_required,
@@ -55,5 +60,9 @@ class CommandAddParameterDefintionArchetype(BrokerCommand):
         session.add(db_paramdef)
 
         session.flush()
+
+        if default:
+            logger.client_info("You need to run 'aq flush --personalities' for "
+                               "the default value to take effect.")
 
         return

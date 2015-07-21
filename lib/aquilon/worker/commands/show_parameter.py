@@ -31,7 +31,8 @@ class CommandShowParameterPersonality(BrokerCommand):
                                                archetype=archetype, compel=True)
         dbstage = dbpersonality.default_stage(personality_stage)
         if not dbstage.paramholder or \
-           not dbstage.paramholder.parameters:
+           not dbstage.paramholder.parameter or \
+           not dbstage.paramholder.parameter.value:
             raise NotFoundException("No parameters found for {0:l}."
                                     .format(dbstage))
 
@@ -43,27 +44,30 @@ class CommandShowParameterPersonality(BrokerCommand):
             params = PersonalityProtoParameter()
 
             param_definitions = None
-            paramdef_holder = dbpersonality.archetype.paramdef_holder
+            param_def_holder = dbpersonality.archetype.param_def_holder
 
-            for param in dbstage.paramholder.parameters:
-                if paramdef_holder:
-                    param_definitions = paramdef_holder.param_definitions
+            for param in [dbstage.paramholder.parameter]:
+                if param_def_holder:
+                    param_definitions = param_def_holder.param_definitions
                     for param_def in param_definitions:
                         value = param.get_path(param_def.path, compel=False)
-                        if value:
+                        if value is not None:
                             params.append((param_def.path, param_def, value))
 
                 for link in dbstage.features:
-                    if not link.feature.paramdef_holder:
+                    if not link.feature.param_def_holder:
                         continue
-                    param_definitions = link.feature.paramdef_holder.param_definitions
+                    param_definitions = link.feature.param_def_holder.param_definitions
                     for param_def in param_definitions:
                         value = param.get_feature_path(link, param_def.path,
                                                        compel=False)
-                        if value:
+                        if value is not None:
                             path = Parameter.feature_path(link, param_def.path)
                             params.append((path, param_def, value))
 
+            if not params:
+                raise NotFoundException("No parameters found for {0:l}."
+                                        .format(dbstage))
             return params
         else:
-            return dbstage.paramholder.parameters
+            return [dbstage.paramholder.parameter]

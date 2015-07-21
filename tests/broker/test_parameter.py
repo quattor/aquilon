@@ -69,6 +69,13 @@ class TestParameter(TestBrokerCommand):
                          "No parameters found for personality %s/%s@next." %
                          (ARCHETYPE, PERSONALITY), cmd)
 
+        cmd = ["show_parameter", "--personality", PERSONALITY, "--archetype",
+               ARCHETYPE, "--personality_stage", "next", "--format", "proto"]
+        err = self.notfoundtest(cmd)
+        self.matchoutput(err,
+                         "No parameters found for personality %s/%s@next." %
+                         (ARCHETYPE, PERSONALITY), cmd)
+
     def test_100_add_re_path(self):
         action = "testaction"
         path = "action/%s/user" % action
@@ -136,7 +143,7 @@ class TestParameter(TestBrokerCommand):
     def test_150_add_re_json_path(self):
         action = "testaction2"
         path = "action/%s" % action
-        value = '{ "command": "/bin/%s", "user": "user1", "timeout": 100 }' % action
+        value = '{ "command": "/bin/%s", "timeout": 100, "user": "user1" }' % action
         command = ADD_CMD + ["--path", path, "--value", value]
         self.noouttest(command)
 
@@ -155,7 +162,7 @@ class TestParameter(TestBrokerCommand):
         action = "testaction"
         path = "action/%s/badpath" % action
         command = UPD_CMD + ["--path", path, "--value", "badvalue"]
-        err = self.badrequesttest(command)
+        err = self.notfoundtest(command)
         self.matchoutput(err,
                          "Parameter %s does not match any parameter definitions" % path, command)
 
@@ -164,7 +171,7 @@ class TestParameter(TestBrokerCommand):
         path = "actions/%s/badpath" % action
         value = 800
         command = ADD_CMD + ["--path", path, "--value", value]
-        err = self.badrequesttest(command)
+        err = self.notfoundtest(command)
         self.matchoutput(err,
                          "Parameter %s does not match any parameter definitions" % path, command)
 
@@ -223,18 +230,20 @@ class TestParameter(TestBrokerCommand):
         path = "espinfo/badpath"
         value = "somevalue"
         command = UPD_CMD + ["--path", path, "--value", value]
-        err = self.badrequesttest(command)
+        err = self.notfoundtest(command)
         self.matchoutput(err,
                          "Parameter %s does not match any parameter definitions" % path, command)
 
     def test_240_verify_path(self):
         out = self.commandtest(SHOW_CMD)
         self.check_match(out,
-                         'espinfo: { "function": "production", '
-                         '"users": "someusers, otherusers", '
-                         '"class": "INFRASTRUCTURE" }', SHOW_CMD)
+                         'espinfo: { '
+                         '"class": "INFRASTRUCTURE", '
+                         '"function": "production", '
+                         '"users": "someusers, otherusers" }',
+                         SHOW_CMD)
         self.check_match(out, '"testaction": { "command": "/bin/testaction", "user": "user2" }', SHOW_CMD)
-        self.check_match(out, '"testaction2": { "command": "/bin/testaction2", "user": "user1", "timeout": 100 } }', SHOW_CMD)
+        self.check_match(out, '"testaction2": { "command": "/bin/testaction2", "timeout": 100, "user": "user1" } }', SHOW_CMD)
 
     def test_245_verify_path_proto(self):
         cmd = SHOW_CMD + ["--format=proto"]
@@ -273,8 +282,8 @@ class TestParameter(TestBrokerCommand):
         ESP_CAT_CMD = CAT_CMD + ["--param_tmpl=espinfo"]
         out = self.commandtest(ESP_CAT_CMD)
         self.searchoutput(out, r'structure template personality/testpersona/dev\+next/espinfo;\s*'
-                               r'"function" = "production";\s*'
                                r'"class" = "INFRASTRUCTURE";\s*'
+                               r'"function" = "production";\s*'
                                r'"users" = list\(\s*'
                                r'"someusers",\s*'
                                r'"otherusers"\s*'
@@ -517,7 +526,7 @@ class TestParameter(TestBrokerCommand):
                           r'Stage: next\s*'
                           r'action: {\s*'
                           r'"testaction": {\s*"command": "/bin/testaction",\s*"user": "user2"\s*},\s*'
-                          r'"testaction2": {\s*"command": "/bin/testaction2",\s*"user": "user1",\s*"timeout": 100\s*}\s*}',
+                          r'"testaction2": {\s*"command": "/bin/testaction2",\s*"timeout": 100,\s*"user": "user1"\s*}\s*}',
                           cmd)
 
     def test_550_verify_actions(self):
@@ -561,16 +570,12 @@ class TestParameter(TestBrokerCommand):
         path = "boo"
         command = DEL_CMD + ["--path", path]
         err = self.notfoundtest(command)
-        self.matchoutput(err, "No parameter of path=%s defined" % path, command)
+        self.matchoutput(err,
+                         "Parameter %s does not match any parameter definitions." % path,
+                         command)
 
     def test_620_del_path_json(self):
-        action = "testaction2"
-        path = "action/%s" % action
-        command = DEL_CMD + ["--path", path]
-        err = self.noouttest(command)
-
-        path = "espinfo/"
-        command = DEL_CMD + ["--path", path]
+        command = DEL_CMD + ["--path", "action"]
         err = self.noouttest(command)
 
     def test_630_verify_show(self):
@@ -585,11 +590,6 @@ class TestParameter(TestBrokerCommand):
 
         self.searchclean(out, "testaction", ACT_CAT_CMD)
         self.searchclean(out, "testaction2", ACT_CAT_CMD)
-
-    def test_650_verify_esp(self):
-        ESP_CAT_CMD = CAT_CMD + ["--param_tmpl=espinfo"]
-        err = self.commandtest(ESP_CAT_CMD)
-        self.searchclean(err, r'"function" = "production";', ESP_CAT_CMD)
 
     def test_660_verify_default(self):
         # included by default

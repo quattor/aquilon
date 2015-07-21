@@ -30,7 +30,7 @@ from aquilon.aqdb.model import (Service, Machine, Chassis, Host,
                                 Rack, Resource, HostResource, ClusterResource,
                                 BundleResource, VirtualMachine, Filesystem,
                                 ServiceAddress, Share, Disk, Model, Interface,
-                                ManagementInterface, AddressAssignment,
+                                AddressAssignment,
                                 ServiceInstance, NetworkDevice, VirtualSwitch,
                                 PortGroup, ParamDefHolder, Feature)
 from aquilon.aqdb.data_sync.storage import StormapParser
@@ -243,17 +243,16 @@ class CommandFlush(BrokerCommand):
 
                 q = session.query(Feature)
                 q = q.with_polymorphic('*')
-                q = q.options(joinedload('paramdef_holder'),
+                q = q.options(joinedload('param_def_holder'),
                               undefer('comments'))
                 features = q.all()  # pylint: disable=W0612
 
                 q = session.query(Archetype)
                 q = q.options(subqueryload('features'),
-                              joinedload('paramdef_holder'))
+                              joinedload('param_def_holder'))
                 archetypes = q.all()  # pylint: disable=W0612
 
                 q = session.query(ParamDefHolder)
-                q = q.with_polymorphic('*')
                 q = q.options(subqueryload('param_definitions'))
                 paramdefs = q.all()  # pylint: disable=W0612
 
@@ -262,7 +261,7 @@ class CommandFlush(BrokerCommand):
                               subqueryload('grns'),
                               subqueryload('features'),
                               joinedload('paramholder'),
-                              subqueryload('paramholder.parameters'),
+                              joinedload('paramholder.parameter'),
                               subqueryload('personality.root_users'),
                               subqueryload('personality.root_netgroups'))
                 progress = ProgressReport(logger, q.count(), "personality")

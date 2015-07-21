@@ -24,7 +24,7 @@ from aquilon.worker.formats.list import ListFormatter
 
 
 def indented_value(indent, key, paramval):
-    lines = json.dumps(paramval, indent=2).splitlines()
+    lines = json.dumps(paramval, indent=2, sort_keys=True).splitlines()
     key_str = format(key) + ": "
     fill = indent + " " * len(key_str)
 

@@ -15,10 +15,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
-from aquilon.exceptions_ import ArgumentError
+from aquilon.exceptions_ import ArgumentError, UnimplementedError
 from aquilon.aqdb.model import Archetype, ArchetypeParamDef, ParamDefinition
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.parameter import validate_param_definition
 
 
@@ -26,30 +25,43 @@ class CommandUpdParameterDefintionArchetype(BrokerCommand):
 
     required_parameters = ["archetype", "path"]
 
-    def render(self, session, archetype, path, required,
+    def render(self, session, logger, archetype, path, required,
                rebuild_required, default, description, **kwargs):
         dbarchetype = Archetype.get_unique(session, archetype, compel=True)
         if not dbarchetype.is_compileable:
             raise ArgumentError("{0} is not compileable.".format(dbarchetype))
 
-        if not dbarchetype.paramdef_holder:
-            dbarchetype.paramdef_holder = ArchetypeParamDef()
+        if not dbarchetype.param_def_holder:
+            dbarchetype.param_def_holder = ArchetypeParamDef()
 
         db_paramdef = ParamDefinition.get_unique(session, path=path,
-                                                 holder=dbarchetype.paramdef_holder,
+                                                 holder=dbarchetype.param_def_holder,
                                                  compel=True)
-        if default:
-            validate_param_definition(db_paramdef.path,
-                                      db_paramdef.value_type,
-                                      default)
-            db_paramdef.default = default
-
         if required is not None:
             db_paramdef.required = required
         if rebuild_required is not None:
             db_paramdef.rebuild_required = rebuild_required
         if description is not None:
             db_paramdef.description = description
+
+        if default:
+            # Changing the default of a parameter which requires a rebuild is
+            # a risky operation. If it is really needed, then the workaround is
+            # to turn the rebuild_required flag off first, update the value, and
+            # turn rebuild_required back again.
+            if db_paramdef.rebuild_required:
+                raise UnimplementedError("Changing the default value of a "
+                                         "parameter which requires rebuild "
+                                         "would cause all existing hosts to "
+                                         "require a rebuild, which is not "
+                                         "supported.")
+
+            validate_param_definition(db_paramdef.path, db_paramdef.value_type,
+                                      default)
+            db_paramdef.default = default
+
+            logger.client_info("You need to run 'aq flush --personalities' for "
+                               "the change of the default value to take effect.")
 
         session.flush()
 

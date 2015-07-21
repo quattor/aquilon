@@ -29,11 +29,11 @@ class CommandSearchParameter(BrokerCommand):
 
     def render(self, session, archetype, path, **arguments):
         dbarchetype = Archetype.get_unique(session, archetype, compel=True)
-        if not dbarchetype.paramdef_holder:
+        if not dbarchetype.param_def_holder:
             return
 
         db_paramdef = ParamDefinition.get_unique(session, path=path,
-                                                 holder=dbarchetype.paramdef_holder,
+                                                 holder=dbarchetype.param_def_holder,
                                                  compel=True)
         if not db_paramdef:
             return

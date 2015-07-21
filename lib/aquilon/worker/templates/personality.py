@@ -17,12 +17,13 @@
 
 import logging
 from collections import defaultdict
+from operator import attrgetter
 from six import iteritems
 
 from sqlalchemy.inspection import inspect
 from sqlalchemy.orm import object_session
 
-from aquilon.aqdb.model import PersonalityStage, Parameter
+from aquilon.aqdb.model import PersonalityStage, Parameter, InterfaceFeature
 from aquilon.worker.locks import NoLockKey, PlenaryKey
 from aquilon.worker.templates.base import (Plenary, StructurePlenary,
                                            TemplateFormatter, PlenaryCollection)
@@ -40,12 +41,12 @@ def string_to_list(data):
 
 def get_parameters_by_feature(dbstage, dbfeaturelink):
     ret = {}
-    paramdef_holder = dbfeaturelink.feature.paramdef_holder
-    if not paramdef_holder or not dbstage.paramholder:
+    param_def_holder = dbfeaturelink.feature.param_def_holder
+    if not param_def_holder or not dbstage.paramholder:
         return ret
 
-    parameters = dbstage.paramholder.parameters
-    for param_def in paramdef_holder.param_definitions:
+    parameters = [dbstage.paramholder.parameter]
+    for param_def in param_def_holder.param_definitions:
         for param in parameters:
             value = param.get_feature_path(dbfeaturelink,
                                            param_def.path, compel=False)
@@ -60,9 +61,16 @@ def get_parameters_by_feature(dbstage, dbfeaturelink):
 
 
 def helper_feature_template(dbstage, featuretemplate, dbfeaturelink, lines):
+    dbfeature = dbfeaturelink.feature
     params = get_parameters_by_feature(dbstage, dbfeaturelink)
-    for path in params:
-        pan_assign(lines, "/system/%s/%s" % (dbfeaturelink.cfg_path_escaped, path), params[path])
+    base_path = "/system/" + dbfeature.cfg_path
+
+    if isinstance(dbfeature, InterfaceFeature) and dbfeaturelink.interface_name:
+        base_path = base_path + "/{%s}" % dbfeaturelink.interface_name
+
+    for path in sorted(params.keys()):
+        pan_assign(lines, base_path + "/" + path, params[path])
+
     lines.append(featuretemplate.format_raw(dbfeaturelink))
 
 
@@ -93,16 +101,16 @@ def get_parameters_by_tmpl(dbstage):
     ret = defaultdict(dict)
 
     dbpersonality = dbstage.personality
-    paramdef_holder = dbpersonality.archetype.paramdef_holder
-    if not paramdef_holder:
+    param_def_holder = dbpersonality.archetype.param_def_holder
+    if not param_def_holder:
         return ret
 
     if dbstage.paramholder:
-        parameters = dbstage.paramholder.parameters
+        parameters = [dbstage.paramholder.parameter]
     else:
         parameters = []
 
-    for param_def in paramdef_holder.param_definitions:
+    for param_def in param_def_holder.param_definitions:
         value = None
         for param in parameters:
             value = param.get_path(param_def.path, compel=False)
@@ -271,7 +279,8 @@ class PlenaryPersonalityPreFeature(Plenary):
                 pre_feat.append(link)
 
         # hardware features should precede host features
-        for link in model_feat + interface_feat + pre_feat:
+        for link in sorted(model_feat + interface_feat + pre_feat,
+                           key=attrgetter("feature.name")):
             helper_feature_template(self.dbobj, feat_tmpl, link, lines)
 
 
@@ -289,7 +298,8 @@ class PlenaryPersonalityPostFeature(Plenary):
     def body(self, lines):
         feat_tmpl = FeatureTemplate()
         dbpers = self.dbobj.personality
-        for link in dbpers.archetype.features + self.dbobj.features:
+        for link in sorted(dbpers.archetype.features + self.dbobj.features,
+                           key=attrgetter("feature.name")):
             if link.feature.post_personality:
                 helper_feature_template(self.dbobj, feat_tmpl, link, lines)
 
@@ -310,7 +320,7 @@ class PlenaryPersonalityParameter(StructurePlenary):
         self.parameters = ptmpl.values
 
     def body(self, lines):
-        for path in self.parameters:
+        for path in sorted(self.parameters.keys()):
             pan_assign(lines, path, self.parameters[path])
 
     def is_deleted(self):
