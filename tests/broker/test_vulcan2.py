@@ -281,7 +281,7 @@ class TestVulcan20(VerifyNotificationsMixin, MachineTestMixin,
         self.matchoutput(out, "Resource Group: utmc8as2", command)
 
     def test_160_verify_metacluster(self):
-        self.statustest(["make", "cluster", "--metacluster", "utmc8"])
+        self.statustest(["make", "metacluster", "--metacluster", "utmc8"])
 
         command = ["cat", "--metacluster", "utmc8", "--data"]
         out = self.commandtest(command)

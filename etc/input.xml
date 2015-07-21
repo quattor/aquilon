@@ -3458,13 +3458,33 @@
 	cluster ready to build.
 	<optgroup mandatory="True" fields="one">
 	    <option name="cluster" type="string">Cluster name to make</option>
+	    <option name="metacluster" type="string">[Deprecated] Metacluster name to make</option>
+	</optgroup>
+	<optgroup>
+	    <option name="keepbindings" type="boolean">Preserve service bindings that are not marked as aligned</option>
+	</optgroup>
+	<transport method="post" trigger="cluster" path="cluster/%(cluster)s/command/make_cluster"/>
+	<transport method="post" trigger="metacluster" path="metacluster/%(metacluster)s/command/make_cluster"/>
+    </command>
+
+    <command name="make_metacluster">
+	Build a metacluster configuration.  Any metacluster aligned services which
+	are not bound will cause an implicit bind_cluster to occur.  Any
+	services that are not listed as aligned for the metacluster type
+	are dropped unless the --keepbindings flag is specified.  The metacluster
+	information will be compiled into a working configuration.  Any
+	errors in creating the configuration will be printed to the screen
+	and cause the command to fail.  If the configuration is successfully
+	created, then the new configuration may be "advertised" to the metacluster
+	itself, to the data warehouse and to the bootservers, making the
+	metacluster ready to build.
+	<optgroup mandatory="True" fields="one">
 	    <option name="metacluster" type="string">Metacluster name to make</option>
 	</optgroup>
 	<optgroup>
 	    <option name="keepbindings" type="boolean">Preserve service bindings that are not marked as aligned</option>
 	</optgroup>
-	<transport method="post" trigger="cluster" path="cluster/%(cluster)s/command/make"/>
-	<transport method="post" trigger="metacluster" path="metacluster/%(metacluster)s/command/make"/>
+	<transport method="post" trigger="metacluster" path="metacluster/%(metacluster)s/command/make_metacluster"/>
     </command>
 
     <command name="add_machine">
@@ -5162,7 +5182,7 @@
 	    </optgroup>
 	    <option name="application" type="string">Name of applicaiton</option>
 	    <optgroup fields="one">
-		<option name="eonid" type="int">(Deprecated) EON identity</option>
+		<option name="eonid" type="int">[Deprecated] EON identity</option>
 		<option name="eon_id" type="int">EON identity</option>
 		<option name="grn" type="string">GRN</option>
 	    </optgroup>

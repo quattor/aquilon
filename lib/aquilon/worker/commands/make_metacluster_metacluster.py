@@ -14,19 +14,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Contains the logic for `aq make cluster --metacluster`."""
+"""Contains the logic for `aq make metacluster --metacluster`."""
 
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.commands.make_cluster_cluster import (
     CommandMakeClusterCluster)
 
 
-class CommandMakeClusterMetacluster(CommandMakeClusterCluster):
+class CommandMakeMetaclusterMetacluster(CommandMakeClusterCluster):
     required_parameters = ["metacluster"]
 
     def render(self, **arguments):
-
-        self.deprecated_option("metacluster", "Please use "
-                               "aq make_metacluster --metacluster instead.",
-                                **arguments)
-        return CommandMakeClusterCluster.render(self, **arguments)
+        return CommandMakeClusterCluster.render(self, cluster=None, **arguments)
