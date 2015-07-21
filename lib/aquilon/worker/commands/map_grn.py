@@ -19,11 +19,11 @@
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import (Personality, PersonalityGrnMap, HostGrnMap,
                                 Cluster)
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.dbwrappers.change_management import validate_personality_justification
 from aquilon.worker.dbwrappers.grn import lookup_grn
 from aquilon.worker.dbwrappers.host import (hostname_to_host, hostlist_to_hosts,
                                             check_hostlist_size)
-from aquilon.worker.dbwrappers.personality import validate_personality_justification
 from aquilon.worker.templates import Plenary, PlenaryCollection
 
 

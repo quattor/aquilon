@@ -27,6 +27,9 @@
 	    <group>
 		<synopfragmentref linkend="global-options">Global options</synopfragmentref>
 	    </group>
+	    <group>
+		<synopfragmentref linkend="change-management">Change management</synopfragmentref>
+	    </group>
 	    <arg choice="plain"><option>--feature <replaceable>FEATURE</replaceable></option></arg>
 	    <arg><option>--model <replaceable>MODEL</replaceable></option></arg>
 	    <arg><option>--vendor <replaceable>VENDOR</replaceable></option></arg>
@@ -38,6 +41,7 @@
 	    <arg><option>--interface <replaceable>IFACE</replaceable></option></arg>
 	    <arg><option>--justification <replaceable>REASON</replaceable></option></arg>
 	    <arg><option>--reason <replaceable>REASON</replaceable></option></arg>
+	    <xi:include href="../common/change_management.xml"/>
 	    <xi:include href="../common/global_options.xml"/>
 	</cmdsynopsis>
     </refsynopsisdiv>
@@ -169,6 +173,7 @@
 		</listitem>
 	    </varlistentry>
 	</variablelist>
+	<xi:include href="../common/change_management_desc.xml"/>
 	<xi:include href="../common/global_options_desc.xml"/>
     </refsect1>
 

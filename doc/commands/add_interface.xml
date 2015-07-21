@@ -27,6 +27,9 @@
 	    <group>
 		<synopfragmentref linkend="global-options">Global options</synopfragmentref>
 	    </group>
+	    <group>
+		<synopfragmentref linkend="change-management">Change management</synopfragmentref>
+	    </group>
 	    <group choice="req">
 		<arg choice="plain"><option>--machine <replaceable>MACHINE</replaceable></option></arg>
 		<arg choice="plain"><option>--hostname <replaceable>HOST</replaceable></option></arg>
@@ -50,10 +53,17 @@
 	    </group>
 	    <arg><option>--bus_address <replaceable>URI</replaceable></option></arg>
 	    <arg><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
+	    <xi:include href="../common/change_management.xml"/>
 	    <xi:include href="../common/global_options.xml"/>
 	</cmdsynopsis>
 	<cmdsynopsis>
 	    <command>aq add interface</command>
+	    <group>
+		<synopfragmentref linkend="global-options">Global options</synopfragmentref>
+	    </group>
+	    <group>
+		<synopfragmentref linkend="change-management">Change management</synopfragmentref>
+	    </group>
 	    <arg choice="plain"><option>--chassis <replaceable>CHASSIS</replaceable></option></arg>
 	    <arg choice="plain"><option>--interface <replaceable>IFACE</replaceable></option></arg>
 	    <arg choice="plain"><option>--mac <replaceable>MAC</replaceable></option></arg>
@@ -65,6 +75,12 @@
 	</cmdsynopsis>
 	<cmdsynopsis>
 	    <command>aq add interface</command>
+	    <group>
+		<synopfragmentref linkend="global-options">Global options</synopfragmentref>
+	    </group>
+	    <group>
+		<synopfragmentref linkend="change-management">Change management</synopfragmentref>
+	    </group>
 	    <group choice="req">
 		<arg choice="plain"><option>--network_device <replaceable>NETDEV</replaceable></option></arg>
 		<arg choice="plain"><option>--switch <replaceable>NETDEV</replaceable></option></arg>
@@ -280,6 +296,7 @@
 		</listitem>
 	    </varlistentry>
 	</variablelist>
+	<xi:include href="../common/change_management_desc.xml"/>
 	<xi:include href="../common/global_options_desc.xml"/>
     </refsect1>
 

@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<variablelist xmlns="http://docbook.org/ns/docbook">
+    <title>Options related to change management</title>
+    <varlistentry>
+	<term>
+	    <option>--justification <replaceable>TOKENS</replaceable></option>
+	</term>
+	<listitem>
+	    <para>
+		Extra authorization tokens (e.g. change management reference ID) used to validate or correlate the request with.
+		<replaceable>TOKENS</replaceable> can either have the form of
+		<literal><replaceable>MANAGER</replaceable>=<replaceable>ID</replaceable></literal>,
+		or it can be the string <literal>emergency</literal>. In the former case, the syntax of
+		<replaceable>ID</replaceable> depends on the change management system identified by
+		<replaceable>MANAGER</replaceable>.
+	    </para>
+	</listitem>
+    </varlistentry>
+    <varlistentry>
+	<term>
+	    <option>--reason <replaceable>REASON</replaceable></option>
+	</term>
+	<listitem>
+	    <para>
+		Human-readable description of why the operation was performed. Describing the reason is
+		mandatory if <option>--justification emergency</option> is being used.
+	    </para>
+	</listitem>
+    </varlistentry>
+</variablelist>
+
+<!-- vim: set ai sw=4: -->

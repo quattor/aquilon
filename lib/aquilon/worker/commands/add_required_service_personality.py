@@ -19,8 +19,7 @@
 from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import Personality, Service
-from aquilon.worker.dbwrappers.personality import validate_personality_justification
-
+from aquilon.worker.dbwrappers.change_management import validate_personality_justification
 
 class CommandAddRequiredServicePersonality(BrokerCommand):
 

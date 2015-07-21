@@ -34,7 +34,8 @@
             </group>
 	    <arg choice="plain"><option>--intervention <replaceable>NAME</replaceable></option></arg>
 	    <arg choice="plain"><option>--expiry <replaceable>WHEN</replaceable></option></arg>
-	    <arg choice="plain"><option>--justification <replaceable>REASON</replaceable></option></arg>
+	    <arg choice="plain"><option>--justification <replaceable>TOKENS</replaceable></option></arg>
+	    <arg><option>--reason <replaceable>REASON</replaceable></option></arg>
 	    <arg><option>--allowusers <replaceable>USERS</replaceable></option></arg>
 	    <arg><option>--allowgroups <replaceable>GROUPS</replaceable></option></arg>
 	    <arg><option>--disabled_actions <replaceable>ACTIONS</replaceable></option></arg>
@@ -107,16 +108,6 @@
 		<listitem>
 		    <para>
 			The name of the target metacluster for the intervention.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-	        <term>
-		    <option>--justification <replaceable>WHY</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			Extra authorization tokens (e.g. change management reference ID) to with which the system can validate or correlate the request.
 		    </para>
 		</listitem>
 	    </varlistentry>
@@ -202,6 +193,7 @@
 		</listitem>
 	    </varlistentry>
 	</variablelist>
+	<xi:include href="../common/change_management_desc.xml"/>
 	<xi:include href="../common/global_options_desc.xml"/>
     </refsect1>
 

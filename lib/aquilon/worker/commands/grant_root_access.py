@@ -19,7 +19,7 @@
 from aquilon.aqdb.model import Personality, User, NetGroupWhiteList
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.templates import Plenary, PlenaryCollection
-from aquilon.worker.commands.deploy import validate_justification
+from aquilon.worker.dbwrappers.change_management import validate_justification
 
 
 class CommandGrantRootAccess(BrokerCommand):

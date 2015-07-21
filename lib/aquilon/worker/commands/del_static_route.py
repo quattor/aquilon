@@ -24,7 +24,7 @@ from aquilon.exceptions_ import NotFoundException
 from aquilon.aqdb.model import NetworkEnvironment, StaticRoute, Personality
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.dbwrappers.personality import validate_personality_justification
+from aquilon.worker.dbwrappers.change_management import validate_personality_justification
 
 
 class CommandDelStaticRoute(BrokerCommand):
