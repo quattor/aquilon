@@ -77,6 +77,18 @@ class TestClusterConstraints(TestBrokerCommand):
                          "ESX Cluster utecl5 is over capacity regarding memory",
                          command)
 
+    def test_150_failrebindhost(self):
+        command = ["cluster", "--cluster=utecl1",
+                   "--host=evh1.aqd-unittest.ms.com"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "cannot support VMs", command)
+
+    def test_160_faildelshare(self):
+        command = ["del_share", "--share", "test_share_1", "--cluster", "utecl1"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Share test_share_1 has virtual disks attached, "
+                         "so it cannot be deleted.", command)
+
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestClusterConstraints)
     unittest.TextTestRunner(verbosity=2).run(suite)

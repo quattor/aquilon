@@ -415,9 +415,13 @@ class TestUpdateMachine(TestBrokerCommand):
                           command)
 
     def test_1111_metacluster_change(self):
+        old_path = ["machine", "americas", "ut", "ut10", "evm1"]
+        new_path = ["machine", "americas", "ut", "None", "evm1"]
         command = ["update_machine", "--machine=evm1", "--cluster=utecl13",
                    "--allow_metacluster_change"]
         self.noouttest(command)
+        self.check_plenary_gone(*old_path)
+        self.check_plenary_exists(*new_path)
 
     def test_1115_verify_shares(self):
         command = ["show_share", "--all"]
@@ -466,6 +470,68 @@ class TestUpdateMachine(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Machine: ut3s01p2", command)
         self.matchoutput(out, "Model Type: blade", command)
+
+    def test_1130_verify_initial_state(self):
+        command = "cat --machine evm1"
+        out = self.commandtest(command.split(" "))
+        self.searchoutput(out,
+                          r'"cards/nic/eth0" = '
+                          r'create\("hardware/nic/utvirt/default",\s*'
+                          r'"boot", true,\s*'
+                          r'"hwaddr", "00:50:56:01:20:00"\s*\);',
+                          command)
+
+    def test_1131_update_default_nic_model(self):
+        command = ["update_machine", "--machine=evm1", "--model=utlarge",
+                   "--cpucount=2", "--memory=12288"]
+        self.noouttest(command)
+
+    def test_1132_cat_evm1(self):
+        command = "cat --machine evm1"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, '"location" = "ut.ny.na";', command)
+        self.matchoutput(out,
+                         'include { "hardware/machine/utvendor/utlarge" };',
+                         command)
+        self.searchoutput(out,
+                          r'"ram" = list\(\s*'
+                          r'create\("hardware/ram/generic",\s*'
+                          r'"size", 12288\*MB\s*\)\s*\);',
+                          command)
+        self.searchoutput(out,
+                          r'"cpu" = list\(\s*'
+                          r'create\("hardware/cpu/intel/xeon_5150"\),\s*'
+                          r'create\("hardware/cpu/intel/xeon_5150"\)\s*\);',
+                          command)
+        # Updating the model of the machine changes the NIC model from
+        # utvirt/default to generic/generic_nic
+        self.searchoutput(out,
+                          r'"cards/nic/eth0" = '
+                          r'create\("hardware/nic/generic/generic_nic",\s*'
+                          r'"boot", true,\s*'
+                          r'"hwaddr", "00:50:56:01:20:00"\s*\);',
+                          command)
+
+    def test_1132_show_evm1(self):
+        command = "show machine --machine evm1"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Machine: evm1", command)
+        self.matchoutput(out, "Model Type: virtual_machine", command)
+        self.matchoutput(out, "Hosted by: ESX Cluster utecl1", command)
+        self.matchoutput(out, "Building: ut", command)
+        self.matchoutput(out, "Vendor: utvendor Model: utlarge", command)
+        self.matchoutput(out, "Cpu: xeon_5150 x 2", command)
+        self.matchoutput(out, "Memory: 12288 MB", command)
+        self.searchoutput(out,
+                          r"Interface: eth0 00:50:56:01:20:00 \[boot, default_route\]\s*"
+                          r"Type: public\s*"
+                          r"Vendor: generic Model: generic_nic$",
+                          command)
+
+    def test_1135_restore_status_quo(self):
+        command = ["update_machine", "--machine=evm1", "--model=utmedium",
+                   "--cpucount=1", "--memory=8192"]
+        self.noouttest(command)
 
     def test_2000_bad_cpu_vendor(self):
         self.notfoundtest(["update", "machine", "--machine", "ut3c1n4",
