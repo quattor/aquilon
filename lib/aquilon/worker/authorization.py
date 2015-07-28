@@ -157,6 +157,7 @@ class AuthorizationBroker(object):
                               'make_cluster_metacluster',
                               'pxeswitch',
                               'change_status',
+                              'update_machine', 'update_machine_hostname',
                               'add_room', 'add_rack', 'add_rack_room',
                               'add_disk', 'del_disk', 'del_disk_disk',
                               'update_disk']:
