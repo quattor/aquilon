@@ -48,8 +48,11 @@ def get_parameters_by_feature(dbstage, dbfeaturelink):
     parameters = [dbstage.paramholder.parameter]
     for param_def in param_def_holder.param_definitions:
         for param in parameters:
-            value = param.get_feature_path(dbfeaturelink,
-                                           param_def.path, compel=False)
+            if param:
+                value = param.get_feature_path(dbfeaturelink,
+                                               param_def.path, compel=False)
+            else:
+                value = None
             if value is None and param_def.default:
                 value = validate_value("default for path=%s" % param_def.path,
                                        param_def.value_type, param_def.default)
@@ -111,10 +114,12 @@ def get_parameters_by_tmpl(dbstage):
         parameters = []
 
     for param_def in param_def_holder.param_definitions:
-        value = None
         for param in parameters:
-            value = param.get_path(param_def.path, compel=False)
-            if (value is None) and param_def.default:
+            if param:
+                value = param.get_path(param_def.path, compel=False)
+            else:
+                value = None
+            if value is None and param_def.default:
                 value = validate_value("default for path=%s" % param_def.path,
                                        param_def.value_type, param_def.default)
             if value is not None:
