@@ -5675,16 +5675,14 @@
 
     <command name="show_hostlink">
 	Show a hostlink resource.
-	<optgroup mandatory="True" fields="one">
-	    <optgroup fields="all">
-		<optgroup>
-		    <option name="hostname" type="string" conflicts="cluster metacluster">Hostname to apply resource</option>
-		    <option name="cluster" type="string" conflicts="hostname metacluster">Cluster to apply resource</option>
-		    <option name="metacluster" type="string" conflicts="hostname cluster">Metacluster to apply resource</option>
-		    <option name="resourcegroup" type="string">Resourcegroup to apply resource</option>
-		</optgroup>
-		<option name="hostlink" type="string">hostlink name</option>
+	<optgroup mandatory="True">
+	    <optgroup>
+		<option name="hostname" type="string" conflicts="cluster metacluster">Hostname to apply resource</option>
+		<option name="cluster" type="string" conflicts="hostname metacluster">Cluster to apply resource</option>
+		<option name="metacluster" type="string" conflicts="hostname cluster">Metacluster to apply resource</option>
+		<option name="resourcegroup" type="string">Resourcegroup to apply resource</option>
 	    </optgroup>
+	    <option name="hostlink" type="string">hostlink name</option>
 	    <option name="all" type="flag" conflicts="hostname cluster metacluster resourcegroup hostlink">list all hostlinks</option>
 	</optgroup>
 	<transport method="get" trigger="hostlink" path="resource/hostlink/%(hostlink)s"/>
