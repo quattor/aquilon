@@ -200,7 +200,7 @@ class TestAddParameterFeature(TestBrokerCommand):
                           command)
 
     def test_120_verify_host_feature_defaults(self):
-        command = ["cat", "--personality", "inventory", "--pre_feature"]
+        command = ["cat", "--personality", "inventory"]
         out = self.commandtest(command)
         self.searchoutput(out,
                           r'"/system/features/pre_host/testboolean" = true;\s*'
@@ -284,7 +284,7 @@ class TestAddParameterFeature(TestBrokerCommand):
                          'host_feature')
 
     def test_135_verify_cat_host_feature(self):
-        command = ["cat", "--personality", "inventory", "--pre_feature"]
+        command = ["cat", "--personality", "inventory"]
         out = self.commandtest(command)
         self.searchoutput(out,
                           r'"/system/features/pre_host/testboolean" = false;\s*'

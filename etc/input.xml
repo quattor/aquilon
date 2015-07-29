@@ -2796,9 +2796,7 @@
 	<optgroup>
 	    <option name="archetype" requires="personality" type="string">Archetype</option>
 	    <option name="personality_stage" requires="personality" type="string">Personality stage to use, defaults to 'current'.</option>
-	    <option name="pre_feature" requires="personality" conflicts="post_feature param_tmpl" type="flag">Pre feature template</option>
-	    <option name="post_feature" requires="personality" conflicts="pre_feature param_tmpl" type="flag">Post feature template</option>
-	    <option name="param_tmpl" requires="personality" conflicts="post_feature pre_feature" type="string">param templates</option>
+	    <option name="param_tmpl" requires="personality" type="string">param templates</option>
 	</optgroup>
 	<optgroup>
 	    <option name="instance" type="string" requires="service">Name of the service instance</option>

@@ -66,7 +66,7 @@ class TestBindFeature(TestBrokerCommand):
                           command)
 
     def test_101_verify_cat_personality(self):
-        command = ["cat", "--personality", "inventory", "--pre_feature"]
+        command = ["cat", "--personality", "inventory"]
         out = self.commandtest(command)
         self.searchoutput(out,
                           r'include { "features/pre_host/config" };\s*',
@@ -124,7 +124,7 @@ class TestBindFeature(TestBrokerCommand):
         self.searchclean(out, r'^  Host Feature: post_host', command)
 
     def test_111_verify_cat_personality(self):
-        command = ["cat", "--personality", "inventory", "--post_feature"]
+        command = ["cat", "--personality", "inventory"]
         out = self.commandtest(command)
         self.searchoutput(out,
                           r'include { "features/post_host/config" };',
@@ -151,7 +151,7 @@ class TestBindFeature(TestBrokerCommand):
         self.matchoutput(out, "Bound to: Personality aquilon/inventory", command)
 
     def test_121_verify_cat_personality(self):
-        command = ["cat", "--personality", "inventory", "--pre_feature"]
+        command = ["cat", "--personality", "inventory"]
         out = self.commandtest(command)
         # Default parameters should now be there
         self.matchoutput(out, '"/system/features/pre_host/', command)

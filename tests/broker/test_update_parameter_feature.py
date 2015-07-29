@@ -97,7 +97,7 @@ class TestUpdateParameterFeature(TestBrokerCommand):
                         "--path", "testdefault", "--value", "host_newstring"])
 
     def test_125_cat_host_params(self):
-        command = ["cat", "--personality", "inventory", "--pre_feature"]
+        command = ["cat", "--personality", "inventory"]
         out = self.commandtest(command)
         self.searchoutput(out,
                           r'"/system/features/pre_host/testboolean" = false;\s*'

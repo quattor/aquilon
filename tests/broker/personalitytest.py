@@ -105,8 +105,6 @@ class PersonalityTestMixin(object):
         if grn:
             self.check_personality_grns(out, grn, {"esp": [grn]}, command)
 
-        self.matchoutput(out, 'include { if_exists("personality/%s/pre_feature") };' %
-                         staged_name, command)
         self.matchoutput(out, "template personality/%s/config;" % staged_name,
                          command)
         self.matchoutput(out, '"/system/personality/name" = "%s";' % personality,
@@ -125,6 +123,3 @@ class PersonalityTestMixin(object):
         else:
             self.matchoutput(out, '"/system/personality/stage" = "%s";' % stage,
                              command)
-
-        self.matchoutput(out, 'include { if_exists("personality/%s/post_feature") };' %
-                         staged_name, command)

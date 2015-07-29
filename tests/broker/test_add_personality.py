@@ -42,7 +42,7 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
         self.noouttest(command)
         self.verifycatpersonality("aquilon", "utunused/dev", True, "dev",
                                   grn=GRN)
-        for plenary in ("pre_feature", "post_feature", "espinfo"):
+        for plenary in ("config", "espinfo"):
             self.check_plenary_exists("aquilon", "personality",
                                       "utunused/dev", plenary)
 
@@ -84,7 +84,7 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
                    "--archetype=aquilon", "--eon_id=2",
                    "--host_environment=dev", "--staged"]
         self.noouttest(command)
-        for plenary in ("pre_feature", "post_feature", "espinfo"):
+        for plenary in ("config", "espinfo"):
             self.check_plenary_exists("aquilon", "personality",
                                       "utpers-dev+next", plenary)
         self.verifycatpersonality("aquilon", "utpers-dev", stage="next")

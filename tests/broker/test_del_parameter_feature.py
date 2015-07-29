@@ -65,7 +65,7 @@ class TestDelParameterFeature(TestBrokerCommand):
                         "--path", "testdefault"])
 
     def test_125_cat_host_param_gone(self):
-        command = ["cat", "--personality", "inventory", "--pre_feature"]
+        command = ["cat", "--personality", "inventory"]
         out = self.commandtest(command)
         self.matchclean(out, "pre_host/testdefault", command)
 

@@ -51,7 +51,7 @@ class TestUnbindFeature(TestBrokerCommand):
         self.matchoutput(out, "Bound to: Archetype aquilon", command)
         self.matchclean(out, "inventory", command)
 
-        command = ["cat", "--personality", "inventory", "--pre_feature"]
+        command = ["cat", "--personality", "inventory"]
         out = self.commandtest(command)
         self.searchoutput(out,
                           r'include { "features/pre_host/config" };',
@@ -83,7 +83,7 @@ class TestUnbindFeature(TestBrokerCommand):
         self.searchclean(out, r'^  Host Feature: pre_host$', command)
 
     def test_106_verify_cat_personality(self):
-        command = ["cat", "--personality", "inventory", "--pre_feature"]
+        command = ["cat", "--personality", "inventory"]
         out = self.commandtest(command)
         self.matchclean(out, "pre_host/config", command)
 
@@ -108,7 +108,7 @@ class TestUnbindFeature(TestBrokerCommand):
         self.matchclean(out, "Bound to: Archetype aquilon", command)
 
     def test_111_verify_cat_personality(self):
-        command = ["cat", "--personality", "inventory", "--post_feature"]
+        command = ["cat", "--personality", "inventory"]
         out = self.commandtest(command)
         self.searchoutput(out,
                           r'include { "features/post_host/config" };',
@@ -126,7 +126,7 @@ class TestUnbindFeature(TestBrokerCommand):
         self.matchclean(out, "post_host", command)
 
     def test_116_verify_cat_personality(self):
-        command = ["cat", "--personality", "inventory", "--post_feature"]
+        command = ["cat", "--personality", "inventory"]
         out = self.commandtest(command)
         self.matchclean(out, "post_host/config", command)
 

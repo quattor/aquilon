@@ -29,8 +29,6 @@ from aquilon.aqdb.model import (PersonalityStage, PersonalityParameter, Host,
 from aquilon.aqdb.model.hostlifecycle import Ready, Almostready
 from aquilon.worker.formats.parameter_definition import ParamDefinitionFormatter
 from aquilon.worker.templates import Plenary, PlenaryHost, PlenaryPersonality
-from aquilon.worker.templates.personality import (PlenaryPersonalityPreFeature,
-                                                  PlenaryPersonalityPostFeature)
 
 
 def set_parameter(session, parameter, db_paramdef, path, value, update=False):
@@ -227,9 +225,7 @@ def add_feature_paramdef_plenaries(session, dbfeature, plenaries):
         q = q.join(PersonalityStage.features)
         q = q.filter_by(feature=dbfeature)
         q = q.options(PlenaryPersonality.query_options())
-        for dbstage in q:
-            plenaries.append(PlenaryPersonalityPreFeature.get_plenary(dbstage))
-            plenaries.append(PlenaryPersonalityPostFeature.get_plenary(dbstage))
+        plenaries.extend(map(Plenary.get_plenary, q))
     else:
         q = session.query(Host)
         q = q.join(PersonalityStage, FeatureLink)
