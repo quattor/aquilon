@@ -37,155 +37,6 @@ class TestVulcan20(VerifyNotificationsMixin, TestBrokerCommand):
                    "--personality=vulcan2-server-dev"]
         self.noouttest(command)
 
-    def test_090_addmachines(self):
-        for i in range(0, 3):
-            cluster = "utecl%d" % (i // 2 + 12)
-            machine = "evm%d" % (i + 40)
-
-            self.noouttest(["add", "machine", "--machine", machine,
-                            "--cluster", cluster, "--model", "utmedium"])
-
-    def test_097_search_machine_by_metacluster(self):
-        command = "search machine --cluster utmc8"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "evm40", command)
-        self.matchoutput(out, "evm41", command)
-        self.matchoutput(out, "evm42", command)
-        self.matchclean(out, "ut14s1p0", command)
-
-    # Autopg test
-    def test_130_addinterfaces(self):
-        self.noouttest(["add", "interface", "--machine", "evm40",
-                        "--interface", "eth0", "--automac", "--autopg"])
-
-        # Consume available IP addresses
-        self.dsdb_expect_add("evm40-ip1.aqd-unittest.ms.com",
-                             self.net["autopg1"].usable[0], "eth0_ip1")
-        self.dsdb_expect_add("evm40-ip2.aqd-unittest.ms.com",
-                             self.net["autopg1"].usable[1], "eth0_ip2")
-        self.noouttest(["add_interface_address", "--machine", "evm40",
-                        "--interface", "eth0", "--label", "ip1", "--autoip",
-                        "--fqdn", "evm40-ip1.aqd-unittest.ms.com"])
-        self.noouttest(["add_interface_address", "--machine", "evm40",
-                        "--interface", "eth0", "--label", "ip2", "--autoip",
-                        "--fqdn", "evm40-ip2.aqd-unittest.ms.com"])
-        self.dsdb_verify()
-
-        # All IPs gone, this should fail
-        command = ["add", "interface", "--machine", "evm41",
-                   "--interface", "eth0", "--automac", "--autopg"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out,
-                         "No available user port groups on virtual switch "
-                         "utvswitch.",
-                         command)
-
-        # Free up the IP addresses
-        self.dsdb_expect_delete(self.net["autopg1"].usable[0])
-        self.dsdb_expect_delete(self.net["autopg1"].usable[1])
-        self.noouttest(["del_interface_address", "--machine", "evm40",
-                        "--interface", "eth0", "--label", "ip1"])
-        self.noouttest(["del_interface_address", "--machine", "evm40",
-                        "--interface", "eth0", "--label", "ip2"])
-        self.dsdb_verify()
-
-        # There's just one pg, so this should fail
-        command = ["add_interface", "--machine", "evm40",
-                   "--interface", "eth1", "--automac", "--autopg"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out,
-                         "No available user port groups on virtual switch "
-                         "utvswitch.",
-                         command)
-
-        # Now it should succeed
-        self.noouttest(["add", "interface", "--machine", "evm41",
-                        "--interface", "eth0", "--automac", "--autopg"])
-
-        # The third one shall fail
-        command = ["add", "interface", "--machine", "evm42",
-                   "--interface", "eth0", "--automac", "--autopg"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out,
-                         "No available user port groups on virtual switch "
-                         "utvswitch.",
-                         command)
-
-    def test_140_verify_audit(self):
-        command = ["search_audit", "--command", "add_interface",
-                   "--keyword", "evm40"]
-        out = self.commandtest(command)
-        self.matchoutput(out, "pg=user-v710", command)
-
-    def test_260_search_metacluster_by_share(self):
-        command = ["search_metacluster", "--share", "test_v2_share"]
-        out = self.commandtest(command)
-        self.matchoutput(out, "utmc8", command)
-
-    def test_265_search_cluster_by_share(self):
-        self.noouttest(["search_cluster", "--share", "test_v2_share"])
-
-    # disk tests
-    def test_300_add_disk_to_share(self):
-        for i in range(0, 3):
-            self.noouttest(["add", "disk", "--machine", "evm%d" % (i + 40),
-                            "--disk", "sda", "--controller", "scsi",
-                            "--snapshot", "--share", "test_v2_share",
-                            "--size", "34", "--resourcegroup", "utmc8as1",
-                            "--address", "0:0", "--iops_limit", "20"])
-
-    def test_305_search_machine_by_share(self):
-        command = ["search_machine", "--share=test_v2_share"]
-        out = self.commandtest(command)
-        self.matchoutput(out, "evm40", command)
-        self.matchclean(out, "evm2", command)
-        self.matchclean(out, "evm10", command)
-
-    def test_310_verify_add_disk_to_share(self):
-        command = "show machine --machine evm40"
-        out = self.commandtest(command.split(" "))
-        self.searchoutput(out, r"Disk: sda 34 GB scsi "
-                          r"\(virtual_disk stored on share test_v2_share\) "
-                          r"\[boot, snapshot\]$", command)
-        self.searchoutput(out, r"IOPS Limit: 20", command)
-
-        command = ["show_machine", "--machine", "evm40", "--format", "proto"]
-        machine = self.protobuftest(command, expect=1)[0]
-        self.assertEqual(machine.name, "evm40")
-        self.assertEqual(len(machine.disks), 1)
-        self.assertEqual(machine.disks[0].device_name, "sda")
-        self.assertEqual(machine.disks[0].disk_type, "scsi")
-        self.assertEqual(machine.disks[0].capacity, 34)
-        self.assertEqual(machine.disks[0].address, "0:0")
-        self.assertEqual(machine.disks[0].bus_address, "")
-        self.assertEqual(machine.disks[0].wwn, "")
-        self.assertEqual(machine.disks[0].snapshotable, True)
-        self.assertEqual(machine.disks[0].backing_store.name, "test_v2_share")
-        self.assertEqual(machine.disks[0].backing_store.type, "share")
-        self.assertEqual(machine.disks[0].iops_limit, 20)
-        self.assertEqual(machine.vm_host.fqdn, "")
-        self.assertEqual(machine.vm_cluster.name, "utecl12")
-        self.assertEqual(machine.vm_cluster.metacluster, "utmc8")
-
-        command = ["show_share", "--resourcegroup=utmc8as1",
-                   "--metacluster=utmc8", "--share=test_v2_share"]
-        out = self.commandtest(command)
-        self.matchoutput(out, "Share: test_v2_share", command)
-        self.matchoutput(out, "Bound to: Resource Group utmc8as1", command)
-        self.matchoutput(out, "Disk Count: 3", command)
-
-        command = ["cat", "--machine", "evm40", "--generate"]
-
-        out = self.commandtest(command)
-        self.matchoutput(out, '"harddisks/{sda}" = nlist(', command)
-        self.searchoutput(out,
-                          r'"mountpoint", "/vol/lnn30f1v1/test_v2_share",\s*'
-                          r'"path", "evm40/sda.vmdk",\s*'
-                          r'"server", "lnn30f1",\s*'
-                          r'"sharename", "test_v2_share",\s*'
-                          r'"snapshot", true',
-                          command)
-
     # machine move tests
     def test_350_move_machine_pre(self):
         command = ["show_machine", "--machine", "evm40"]
@@ -213,17 +64,6 @@ class TestVulcan20(VerifyNotificationsMixin, TestBrokerCommand):
                           r"\(virtual_disk stored on share test_v2_share\) "
                           r"\[boot, snapshot\]$",
                           command)
-
-    def test_380_fail_update_disk(self):
-        command = ["update_disk", "--disk", "sda", "--machine", "evm40",
-                   "--share", "non_existent_share",
-                   "--resourcegroup", "utmc8as1"]
-        out = self.notfoundtest(command)
-        self.matchoutput(out,
-                         "ESX Cluster utecl13 does not have share "
-                         "non_existent_share assigned to it in "
-                         "resourcegroup utmc8as1.",
-                         command)
 
 #    metacluster aligned svc tests
     def test_400_addvcenterservices(self):
@@ -432,16 +272,6 @@ class TestVulcan20(VerifyNotificationsMixin, TestBrokerCommand):
 
         command = ["del", "service", "--service", "esx_management_server", "--instance", "ut.mc"]
         self.noouttest(command)
-
-    def test_600_del_disk(self):
-        for i in range(0, 3):
-            self.noouttest(["del_disk", "--machine", "evm%d" % (i + 40), "--disk", "sda"])
-
-    def test_710_delmachines(self):
-        for i in range(0, 3):
-            machine = "evm%d" % (i + 40)
-
-            self.noouttest(["del", "machine", "--machine", machine])
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestVulcan20)

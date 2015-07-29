@@ -154,12 +154,21 @@ class TestSearchMachine(TestBrokerCommand):
         self.matchclean(out, "evm2", command)
         self.matchclean(out, "evm10", command)
 
-    def testdiskshare(self):
+    def testclustershare(self):
+        # Share bound to cluster
         command = ["search_machine", "--disk_share=test_share_1"]
         out = self.commandtest(command)
         self.matchoutput(out, "evm1", command)
         self.matchclean(out, "evm2", command)
         self.matchclean(out, "evm10", command)
+
+    def testmetaclustershare(self):
+        # Share bound to metacluster
+        command = ["search_machine", "--disk_share=test_v2_share"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "evm40", command)
+        self.matchclean(out, "evm1", command)
+        self.matchclean(out, "evm2", command)
 
     def testsharebad(self):
         command = ["search_machine", "--share", "no-such-share"]
@@ -223,6 +232,14 @@ class TestSearchMachine(TestBrokerCommand):
         self.matchclean(out, "evm11", command)
         self.matchclean(out, "evm15", command)
         self.matchclean(out, "evm17", command)
+
+    def testmetacluster(self):
+        command = "search machine --metacluster utmc8"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "evm40", command)
+        self.matchoutput(out, "evm41", command)
+        self.matchoutput(out, "evm42", command)
+        self.matchclean(out, "ut14s1p0", command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestSearchMachine)

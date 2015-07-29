@@ -180,6 +180,11 @@ class TestSearchMetaCluster(TestBrokerCommand):
         self.matchoutput(out, "utmc2", command)
         self.matchclean(out, "vulcan1", command)
 
+    def testshare(self):
+        command = ["search_metacluster", "--share", "test_v2_share"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "utmc8", command)
+
     def testshareunavailable(self):
         command = ['search', 'metacluster', '--share', 'share-does-not-exist']
         out = self.notfoundtest(command)

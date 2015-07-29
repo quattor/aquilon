@@ -314,6 +314,16 @@ class TestUpdateDisk(TestBrokerCommand):
                          "hexadecimal digits.",
                          command)
 
+    def test_300_bad_share(self):
+        command = ["update_disk", "--disk", "sda", "--machine", "evm40",
+                   "--share", "non_existent_share",
+                   "--resourcegroup", "utmc8as1"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out,
+                         "ESX Cluster utecl13 does not have share "
+                         "non_existent_share assigned to it in "
+                         "resourcegroup utmc8as1.",
+                         command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUpdateDisk)

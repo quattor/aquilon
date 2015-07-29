@@ -205,6 +205,14 @@ class TestMake(TestBrokerCommand):
             command = ["make", "--hostname", "evh%s.aqd-unittest.ms.com" % i]
             (out, err) = self.successtest(command)
 
+    def testmakeutmc9(self):
+        command = ["make", "--hostname", "evh82.aqd-unittest.ms.com"]
+        self.statustest(command)
+
+        command = ["show", "host", "--hostname", "evh82.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchclean(out, "Uses Service: vcenter Instance: ut", command)
+
     def testmakeccisshost(self):
         command = ["make", "--hostname=unittest18.aqd-unittest.ms.com"]
         (out, err) = self.successtest(command)

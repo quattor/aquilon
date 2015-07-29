@@ -581,6 +581,275 @@ class TestAddVirtualHardware(TestBrokerCommand):
         machine = "evm26"
         self.noouttest(["del_machine", "--machine", machine])
 
+    def test_300_add_utmc8_machines(self):
+        self.noouttest(["add", "machine", "--machine", "evm40",
+                        "--cluster", "utecl12", "--model", "utmedium"])
+        self.noouttest(["add", "machine", "--machine", "evm41",
+                        "--cluster", "utecl12", "--model", "utmedium"])
+
+        self.noouttest(["add", "machine", "--machine", "evm42",
+                        "--cluster", "utecl13", "--model", "utmedium"])
+
+    # Autopg test
+    def test_310_add_utmc8_interfaces(self):
+        self.noouttest(["add", "interface", "--machine", "evm40",
+                        "--interface", "eth0", "--automac", "--autopg"])
+
+        # Consume available IP addresses
+        self.dsdb_expect_add("evm40-ip1.aqd-unittest.ms.com",
+                             self.net["autopg1"].usable[0], "eth0_ip1")
+        self.dsdb_expect_add("evm40-ip2.aqd-unittest.ms.com",
+                             self.net["autopg1"].usable[1], "eth0_ip2")
+        self.noouttest(["add_interface_address", "--machine", "evm40",
+                        "--interface", "eth0", "--label", "ip1", "--autoip",
+                        "--fqdn", "evm40-ip1.aqd-unittest.ms.com"])
+        self.noouttest(["add_interface_address", "--machine", "evm40",
+                        "--interface", "eth0", "--label", "ip2", "--autoip",
+                        "--fqdn", "evm40-ip2.aqd-unittest.ms.com"])
+        self.dsdb_verify()
+
+        # All IPs gone, this should fail
+        command = ["add", "interface", "--machine", "evm41",
+                   "--interface", "eth0", "--automac", "--autopg"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "No available user port groups on virtual switch "
+                         "utvswitch.",
+                         command)
+
+        # Free up the IP addresses
+        self.dsdb_expect_delete(self.net["autopg1"].usable[0])
+        self.dsdb_expect_delete(self.net["autopg1"].usable[1])
+        self.noouttest(["del_interface_address", "--machine", "evm40",
+                        "--interface", "eth0", "--label", "ip1"])
+        self.noouttest(["del_interface_address", "--machine", "evm40",
+                        "--interface", "eth0", "--label", "ip2"])
+        self.dsdb_verify()
+
+        # There's just one pg, so this should fail
+        command = ["add_interface", "--machine", "evm40",
+                   "--interface", "eth1", "--automac", "--autopg"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "No available user port groups on virtual switch "
+                         "utvswitch.",
+                         command)
+
+        # Now it should succeed
+        self.noouttest(["add", "interface", "--machine", "evm41",
+                        "--interface", "eth0", "--automac", "--autopg"])
+
+        # The third one shall fail
+        command = ["add", "interface", "--machine", "evm42",
+                   "--interface", "eth0", "--automac", "--autopg"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "No available user port groups on virtual switch "
+                         "utvswitch.",
+                         command)
+
+    def test_315_verify_audit(self):
+        command = ["search_audit", "--command", "add_interface",
+                   "--keyword", "evm40"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "pg=user-v710", command)
+
+    def test_320_add_utmc8_disks(self):
+        for i in range(0, 3):
+            self.noouttest(["add", "disk", "--machine", "evm%d" % (i + 40),
+                            "--disk", "sda", "--controller", "scsi",
+                            "--snapshot", "--share", "test_v2_share",
+                            "--size", "34", "--resourcegroup", "utmc8as1",
+                            "--address", "0:0", "--iops_limit", "20"])
+
+    def test_325_verify_evm40(self):
+        command = "show machine --machine evm40"
+        out = self.commandtest(command.split(" "))
+        self.searchoutput(out, r"Disk: sda 34 GB scsi "
+                          r"\(virtual_disk stored on share test_v2_share\) "
+                          r"\[boot, snapshot\]$", command)
+        self.searchoutput(out, r"IOPS Limit: 20", command)
+
+        command = ["show_machine", "--machine", "evm40", "--format", "proto"]
+        machine = self.protobuftest(command, expect=1)[0]
+        self.assertEqual(machine.name, "evm40")
+        self.assertEqual(len(machine.disks), 1)
+        self.assertEqual(machine.disks[0].device_name, "sda")
+        self.assertEqual(machine.disks[0].disk_type, "scsi")
+        self.assertEqual(machine.disks[0].capacity, 34)
+        self.assertEqual(machine.disks[0].address, "0:0")
+        self.assertEqual(machine.disks[0].bus_address, "")
+        self.assertEqual(machine.disks[0].wwn, "")
+        self.assertEqual(machine.disks[0].snapshotable, True)
+        self.assertEqual(machine.disks[0].backing_store.name, "test_v2_share")
+        self.assertEqual(machine.disks[0].backing_store.type, "share")
+        self.assertEqual(machine.disks[0].iops_limit, 20)
+        self.assertEqual(machine.vm_host.fqdn, "")
+        self.assertEqual(machine.vm_cluster.name, "utecl12")
+        self.assertEqual(machine.vm_cluster.metacluster, "utmc8")
+
+        command = ["cat", "--machine", "evm40", "--generate"]
+
+        out = self.commandtest(command)
+        self.matchoutput(out, '"harddisks/{sda}" = nlist(', command)
+        self.searchoutput(out,
+                          r'"mountpoint", "/vol/lnn30f1v1/test_v2_share",\s*'
+                          r'"path", "evm40/sda.vmdk",\s*'
+                          r'"server", "lnn30f1",\s*'
+                          r'"sharename", "test_v2_share",\s*'
+                          r'"snapshot", true',
+                          command)
+
+    def test_325_verify_utmc8as1_disk_count(self):
+        command = ["show_share", "--resourcegroup=utmc8as1",
+                   "--metacluster=utmc8", "--share=test_v2_share"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Share: test_v2_share", command)
+        self.matchoutput(out, "Bound to: Resource Group utmc8as1", command)
+        self.matchoutput(out, "Disk Count: 3", command)
+
+    def test_400_add_utmc9_machines(self):
+        for i in range(0, 3):
+            command = ["add", "machine", "--machine", "evm%d" % (i + 50),
+                       "--vmhost", "evh82.aqd-unittest.ms.com", "--model", "utmedium"]
+            self.noouttest(command)
+
+    def test_410_move_vm_to_cluster(self):
+        # Test migration when there are no disks and no interfaces yet
+        self.statustest(["update", "machine", "--machine", "evm50",
+                         "--cluster", "utecl15"])
+
+    def test_411_show_evm50(self):
+        command = ["show", "machine", "--machine", "evm50"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Hosted by: ESX Cluster utecl15", command)
+
+    def test_411_search_machine_vmhost(self):
+        command = ["search_machine", "--vmhost", "evh82.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "evm51", command)
+        self.matchoutput(out, "evm52", command)
+        self.matchclean(out, "evm50", command)
+
+    def test_412_move_vm_back_to_vmhost(self):
+        self.statustest(["update", "machine", "--machine", "evm50",
+                         "--vmhost", "evh82.aqd-unittest.ms.com"])
+
+        command = ["show", "machine", "--machine", "evm50"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Hosted by: Host evh82.aqd-unittest.ms.com",
+                         command)
+
+    def test_420_add_utmc9_disks(self):
+        for i in range(0, 3):
+            self.noouttest(["add", "disk", "--machine", "evm%d" % (i + 50),
+                            "--disk", "sda", "--controller", "scsi",
+                            "--filesystem", "utfs1", "--address", "0:0",
+                            "--size", "34"])
+
+    def test_425_verify_utmc9_disks(self):
+        for i in range(0, 3):
+            command = ["show", "machine", "--machine", "evm%d" % (i + 50)]
+            out = self.commandtest(command)
+
+            self.searchoutput(out, r"Disk: sda 34 GB scsi \(virtual_disk stored on filesystem utfs1\) \[boot\]$",
+                              command)
+
+    def test_425_show_evm50_proto(self):
+        command = ["show_machine", "--machine", "evm50", "--format", "proto"]
+        machine = self.protobuftest(command, expect=1)[0]
+        self.assertEqual(machine.name, "evm50")
+        self.assertEqual(len(machine.disks), 1)
+        self.assertEqual(machine.disks[0].device_name, "sda")
+        self.assertEqual(machine.disks[0].disk_type, "scsi")
+        self.assertEqual(machine.disks[0].capacity, 34)
+        self.assertEqual(machine.disks[0].address, "0:0")
+        self.assertEqual(machine.disks[0].bus_address, "")
+        self.assertEqual(machine.disks[0].wwn, "")
+        self.assertEqual(machine.disks[0].snapshotable, False)
+        self.assertEqual(machine.disks[0].backing_store.name, "utfs1")
+        self.assertEqual(machine.disks[0].backing_store.type, "filesystem")
+        self.assertEqual(machine.vm_cluster.name, "")
+        self.assertEqual(machine.vm_host.hostname, "evh82")
+        self.assertEqual(machine.vm_host.fqdn, "evh82.aqd-unittest.ms.com")
+        self.assertEqual(machine.vm_host.dns_domain, "aqd-unittest.ms.com")
+
+    def test_425_cat_evm50(self):
+        command = ["cat", "--machine", "evm50"]
+        out = self.commandtest(command)
+        self.matchoutput(out, '', command)
+        self.matchoutput(out, '"filesystemname", "utfs1",', command)
+        self.matchoutput(out, '"mountpoint", "/mnt",', command)
+        self.matchoutput(out, '"path", "evm50/sda.vmdk"', command)
+        self.matchclean(out, "snapshot", command)
+
+    def test_425_search_machine_filesystem(self):
+        command = ["search_machine", "--disk_filesystem", "utfs1"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "evm50", command)
+        self.matchoutput(out, "evm51", command)
+        self.matchoutput(out, "evm52", command)
+        self.matchclean(out, "evm1", command)
+        self.matchclean(out, "evm2", command)
+        self.matchclean(out, "evm4", command)
+        self.matchclean(out, "ut3", command)
+        self.matchclean(out, "ut5", command)
+
+    def test_425_verifyutfs1(self):
+        command = ["show_filesystem", "--filesystem=utfs1"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Filesystem: utfs1", command)
+        self.matchoutput(out, "Bound to: Host evh82.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "Virtual Disk Count: 3", command)
+
+    def test_430_add_utmc9_interfaces(self):
+        for i in range(0, 2):
+            self.noouttest(["add", "interface", "--machine", "evm%d" % (i + 50),
+                            "--interface", "eth0", "--automac", "--autopg"])
+
+    def test_440_cat_evh82(self):
+        command = ["cat", "--hostname", "evh82.aqd-unittest.ms.com", "--generate", "--data"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "template hostdata/evh82.aqd-unittest.ms.com;",
+                         command)
+        for i in range(0, 3):
+            machine = "evm%d" % (i + 50)
+            self.matchoutput(out,
+                             '"system/resources/virtual_machine" '
+                             '= append(create("resource/host/evh82.aqd-unittest.ms.com/'
+                             'virtual_machine/%s/config"));' % machine,
+                             command)
+
+    def test_450_add_utmc9_host(self):
+        net = self.net["autopg2"]
+        ip = self.net["utpgsw0-v710"].usable[0]
+        self.dsdb_expect_add("evm50.aqd-unittest.ms.com", ip, "eth0",
+                             "00:50:56:01:20:19")
+        command = ["add", "host", "--hostname", "evm50.aqd-unittest.ms.com",
+                   "--ip", ip,
+                   "--machine", "evm50",
+                   "--domain", "unittest", "--buildstatus", "build",
+                   "--archetype", "aquilon",
+                   "--personality", "unixeng-test"]
+        out = self.statustest(command)
+        self.matchoutput(out,
+                         "Warning: public interface eth0 of machine "
+                         "evm50.aqd-unittest.ms.com is bound to network "
+                         "autopg2 [%s] due to port group user-v710, which "
+                         "does not contain IP address %s." %
+                         (net, ip),
+                         command)
+        self.dsdb_verify()
+
+    def test_451_make_evm50(self):
+        command = ["make", "--hostname", "evm50.aqd-unittest.ms.com"]
+        self.statustest(command)
+
+    def test_455_show_host_evm50(self):
+        command = ["show", "host", "--hostname", "evm50.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Hosted by: Host evh82.aqd-unittest.ms.com", command)
+
     # FIXME: we need a more generic test to check if a host/cluster may contain
     # VMs. Perhaps an attribute of Archetype or Personality?
     # def testfailaddnonvirtualcluster(self):

@@ -62,12 +62,12 @@ class TestSearchNext(TestBrokerCommand):
     def testmachinedefault(self):
         command = ["search_next", "--machine=evm"]
         out = self.commandtest(command)
-        self.matchoutput(out, "evm26", command)
+        self.matchoutput(out, "evm53", command)
 
     def testmachinenumber(self):
         command = ["search_next", "--number", "--machine=evm"]
         out = self.commandtest(command)
-        self.matchoutput(out, "26", command)
+        self.matchoutput(out, "53", command)
         self.matchclean(out, "evm", command)
 
     def testmachinedefaultmissing(self):
