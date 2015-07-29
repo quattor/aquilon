@@ -32,6 +32,7 @@ class TestAddMetaCluster(PersonalityTestMixin, TestBrokerCommand):
         # The broker currently assumes this personality to exist
         self.create_personality("metacluster", "metacluster",
                                 grn="grn:/ms/ei/aquilon/aqd")
+
         self.create_personality("metacluster", "nostage", staged=True)
 
     def test_100_add_utmc1(self):
@@ -122,9 +123,54 @@ class TestAddMetaCluster(PersonalityTestMixin, TestBrokerCommand):
                    "--sandbox=%s/utsandbox" % self.user]
         self.noouttest(command)
 
-    def test_160_add_vulcan1(self):
+    def test_160_add_metacluster_parameter_defaults(self):
+        # Legacy users do not pass --archetype/--domain etc.
         # this should be removed when virtbuild supports new options
         command = ["add_metacluster", "--metacluster=vulcan1"]
+        self.noouttest(command)
+
+    def test_170_addutmc8(self):
+        self.create_personality("metacluster", "vulcan2")
+
+        command = ["add_metacluster", "--metacluster=utmc8",
+                   "--personality=vulcan2", "--archetype=metacluster",
+                   "--domain=unittest", "--building=ut",
+                   "--comments=autopg_v2_tests"]
+        self.noouttest(command)
+
+    def test_171_update_utmc8_vswitch(self):
+        self.noouttest(["update_metacluster", "--metacluster", "utmc8",
+                        "--virtual_switch", "utvswitch"])
+
+    def test_172_cat_utmc8(self):
+        command = ["cat", "--metacluster", "utmc8", "--data"]
+        out = self.commandtest(command)
+        self.matchoutput(out,
+                         '"system/metacluster/virtual_switch" = "utvswitch";',
+                         command)
+
+    def test_172_show_utmc8_proto(self):
+        net = self.net["autopg1"]
+        command = ["show_metacluster", "--metacluster", "utmc8",
+                   "--format", "proto"]
+        mc = self.protobuftest(command, expect=1)[0]
+        self.assertEqual(mc.name, "utmc8")
+        self.assertEqual(mc.virtual_switch.name, "utvswitch")
+        self.assertEqual(len(mc.virtual_switch.portgroups), 1)
+        self.assertEqual(mc.virtual_switch.portgroups[0].ip, str(net.ip))
+        self.assertEqual(mc.virtual_switch.portgroups[0].cidr, 29)
+        self.assertEqual(mc.virtual_switch.portgroups[0].network_tag, 710)
+        self.assertEqual(mc.virtual_switch.portgroups[0].usage, "user")
+
+    def test_175_add_utmc9(self):
+        # FIXME: Localdisk setups should not have a metacluster, but the
+        # templates expect one to exist
+        self.create_personality("metacluster", "vulcan-local-disk")
+
+        command = ["add_metacluster", "--metacluster=utmc9",
+                   "--personality=vulcan-local-disk", "--archetype=metacluster",
+                   "--domain=alt-unittest", "--building=ut",
+                   "--comments=vulcan_localdisk_test"]
         self.noouttest(command)
 
     def test_200_add_utmc1_again(self):

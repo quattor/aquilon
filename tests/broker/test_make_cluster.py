@@ -203,9 +203,57 @@ class TestMakeCluster(VerifyNotificationsMixin, ClusterTestMixin,
             command = ["make_cluster", "--cluster", "utecl%d" % i]
             self.statustest(command)
 
-    def test_155_make_utmc7(self):
+    def test_151_make_utmc7(self):
         command = ["make_cluster", "--cluster", "utecl11"]
         self.statustest(command)
+
+    def test_152_make_utmc8(self):
+        self.statustest(["make_cluster", "--metacluster", "utmc8"])
+
+        command = ["cat", "--metacluster", "utmc8", "--data"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "structure template clusterdata/utmc8;", command)
+        self.matchoutput(out, '"system/metacluster/name" = "utmc8";', command)
+        self.matchoutput(out, '"system/metacluster/type" = "meta";', command)
+        self.searchoutput(out,
+                          r'"system/metacluster/members" = list\(\s*'
+                          r'"utecl12",\s*'
+                          r'"utecl13"\s*'
+                          r'\);',
+                          command)
+        self.matchoutput(out, '"system/build" = "build";', command)
+        self.matchoutput(out,
+                         '"system/metacluster/sysloc/location" = "ut.ny.na";',
+                         command)
+        self.matchoutput(out,
+                         '"system/metacluster/sysloc/continent" = "na";',
+                         command)
+        self.matchoutput(out,
+                         '"system/metacluster/sysloc/country" = "us";',
+                         command)
+        self.matchoutput(out,
+                         '"system/metacluster/sysloc/city" = "ny";',
+                         command)
+        self.matchoutput(out,
+                         '"system/metacluster/sysloc/campus" = "ny";',
+                         command)
+        self.matchoutput(out,
+                         '"system/metacluster/sysloc/building" = "ut";',
+                         command)
+        self.matchoutput(out,
+                         '"system/resources/resourcegroup" = '
+                         'append(create("resource/cluster/utmc8/'
+                         'resourcegroup/utmc8as1/config"));',
+                         command)
+        self.matchoutput(out,
+                         '"system/resources/resourcegroup" = '
+                         'append(create("resource/cluster/utmc8/'
+                         'resourcegroup/utmc8as2/config"));',
+                         command)
+
+    def test_153_make_utmc9(self):
+        self.statustest(["make_cluster", "--cluster", "utecl14"])
+        self.statustest(["make_cluster", "--cluster", "utecl15"])
 
     def test_200_missing_cluster(self):
         command = ["make_cluster", "--cluster=cluster-does-not-exist"]

@@ -341,6 +341,39 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
         self.noouttest(["del_machine", "--machine", "cardsmachine"])
         self.net.dispose_network(self, "cards_net")
 
+    def test_180_add_utmc8_vmhosts(self):
+        pri_net = self.net["ut14_net"]
+        storage_net = self.net["vm_storage_net"]
+        for i in range(0, 2):
+            hostname = "evh%d.aqd-unittest.ms.com" % (i + 80)
+            machine = "ut14s1p%d" % i
+            ip = pri_net.usable[i]
+            eth0_mac = ip.mac
+            eth1_ip = storage_net.usable[i + 26]
+            eth1_mac = eth1_ip.mac
+
+            self.create_host(hostname, ip, machine,
+                             model="vb1205xm", rack="ut14",
+                             eth0_mac=eth0_mac,
+                             eth1_mac=eth1_mac, eth1_ip=eth1_ip,
+                             osname="esxi", osversion="5.0.0",
+                             archetype="vmhost", personality="vulcan2-server-dev")
+
+    def test_185_add_utmc9_vmhosts(self):
+        # This machine will be moved into the right rack later
+        self.create_host("evh82.aqd-unittest.ms.com",
+                         self.net["ut14_net"].usable[2],
+                         "ut14s1p2", model="vb1205xm", rack="ut3",
+                         archetype="vmhost", personality="vulcan-local-disk",
+                         osname="esxi", osversion="5.0.0",
+                         domain="alt-unittest")
+        self.create_host("evh83.aqd-unittest.ms.com",
+                         self.net["ut14_net"].usable[3],
+                         "ut14s1p3", model="vb1205xm", rack="ut14",
+                         archetype="vmhost", personality="vulcan-local-disk",
+                         osname="esxi", osversion="5.0.0",
+                         domain="alt-unittest")
+
     def test_200_machine_reuse(self):
         ip = self.net["unknown0"].usable[-1]
         command = ["add", "host", "--hostname", "used-already.one-nyp.ms.com",

@@ -46,6 +46,11 @@ class TestAddESXCluster(PersonalityTestMixin, TestBrokerCommand):
                     "building": ["ut"],
                 },
             },
+            "vcenter": {
+                "ut": {
+                    "building": ["ut"],
+                },
+            },
         }
         esx_cluster_maps = {
             "esx_management_server": {
@@ -64,11 +69,28 @@ class TestAddESXCluster(PersonalityTestMixin, TestBrokerCommand):
                                 required=["esx_management_server",
                                           "vmseasoning"],
                                 maps=vmhost_maps)
+        self.create_personality("vmhost", "vulcan-local-disk",
+                                grn="grn:/ms/ei/aquilon/aqd",
+                                maps=vmhost_maps,
+                                required=["esx_management_server"])
         self.create_personality("esx_cluster", "vulcan-10g-server-prod",
                                 grn="grn:/ms/ei/aquilon/aqd",
                                 environment="prod",
                                 maps=esx_cluster_maps)
         self.create_personality("esx_cluster", "nostage", staged=True)
+        self.create_personality("esx_cluster", "vulcan-local-disk",
+                                grn="grn:/ms/ei/aquilon/aqd",
+                                maps=esx_cluster_maps)
+
+        # We can't set up the vcenter as required here, because the first
+        # batch of tests do not work with it. Sigh.
+        self.create_personality("vmhost", "vulcan2-server-dev",
+                                grn="grn:/ms/ei/aquilon/aqd",
+                                required=["esx_management_server"],
+                                maps=vmhost_maps)
+        self.create_personality("esx_cluster", "vulcan2-server-dev",
+                                grn="grn:/ms/ei/aquilon/aqd",
+                                maps=esx_cluster_maps)
 
     def test_110_add_utecl1(self):
         # For this cluster, we'll use the default for buildstatus
@@ -226,6 +248,43 @@ class TestAddESXCluster(PersonalityTestMixin, TestBrokerCommand):
                    "--archetype=esx_cluster",
                    "--personality=vulcan-10g-server-prod"]
         self.noouttest(command)
+
+    def test_180_add_utmc8(self):
+        for i in range(12, 14):
+            command = ["add_cluster", "--prefix=utecl",
+                       "--metacluster", "utmc8", "--room=utroom1",
+                       "--buildstatus=build",
+                       "--domain=unittest", "--down_hosts_threshold=0",
+                       "--archetype=esx_cluster",
+                       "--personality=vulcan2-server-dev"]
+            out = self.commandtest(command)
+            self.matchoutput(out, "utecl%d" % i, command)
+
+    def test_181_cat_utecl12(self):
+        data_command = ["cat", "--cluster", "utecl12", "--data"]
+        data = self.commandtest(data_command)
+
+        self.matchoutput(data, '"system/cluster/sysloc/room" = "utroom1";',
+                         data_command)
+
+    def test_185_add_utmc9(self):
+        for i in range(14, 16):
+            command = ["add_cluster", "--prefix=utecl",
+                       "--metacluster", "utmc9", "--room=utroom1",
+                       "--domain=alt-unittest", "--down_hosts_threshold=0",
+                       "--archetype=esx_cluster",
+                       "--personality=vulcan-local-disk"]
+            out = self.commandtest(command)
+            self.matchoutput(out, "utecl%d" % i, command)
+
+            self.noouttest(["update_cluster", "--cluster", "utecl%d" % i,
+                            "--virtual_switch", "utvswitch"])
+
+    def test_186_verify_utecl14_proto(self):
+        command = ["show_cluster", "--cluster", "utecl14", "--format", "proto"]
+        cluster = self.protobuftest(command, expect=1)[0]
+        self.assertEqual(cluster.name, "utecl14")
+        self.assertEqual(cluster.virtual_switch.name, "utvswitch")
 
     def test_200_cat_missing_cluster(self):
         command = "cat --cluster=cluster-does-not-exist"

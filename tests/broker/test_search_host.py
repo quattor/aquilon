@@ -601,6 +601,11 @@ class TestSearchHost(TestBrokerCommand):
         self.matchoutput(out, "Unknown host environment 'no-such-environment'",
                          command)
 
+    def testmetacluster(self):
+        command = "search host --metacluster utmc8"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "evh80.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "evh81.aqd-unittest.ms.com", command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestSearchHost)

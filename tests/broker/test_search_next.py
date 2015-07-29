@@ -84,12 +84,12 @@ class TestSearchNext(TestBrokerCommand):
     def testclusterdefault(self):
         command = ["search_next", "--cluster=utecl"]
         out = self.commandtest(command)
-        self.matchoutput(out, "utecl12", command)
+        self.matchoutput(out, "utecl16", command)
 
     def testclusternumber(self):
         command = ["search_next", "--number", "--cluster=utecl"]
         out = self.commandtest(command)
-        self.matchoutput(out, "12", command)
+        self.matchoutput(out, "16", command)
         self.matchclean(out, "utecl", command)
 
     def testclusterdefaultmissing(self):
@@ -106,12 +106,12 @@ class TestSearchNext(TestBrokerCommand):
     def testmetaclusterdefault(self):
         command = ["search_next", "--metacluster=utmc"]
         out = self.commandtest(command)
-        self.matchoutput(out, "utmc8", command)
+        self.matchoutput(out, "utmc10", command)
 
     def testmetaclusternumber(self):
         command = ["search_next", "--number", "--metacluster=utmc"]
         out = self.commandtest(command)
-        self.matchoutput(out, "8", command)
+        self.matchoutput(out, "10", command)
         self.matchclean(out, "utmc", command)
 
     def testmetaclusterdefaultmissing(self):
@@ -146,9 +146,9 @@ class TestSearchNext(TestBrokerCommand):
         self.matchoutput(out, "utmc5", command)
 
     def testpackskiptostart(self):
-        command = ["search_next", "--pack", "--start=9", "--metacluster=utmc"]
+        command = ["search_next", "--pack", "--start=99", "--metacluster=utmc"]
         out = self.commandtest(command)
-        self.matchoutput(out, "utmc9", command)
+        self.matchoutput(out, "utmc99", command)
 
 
 if __name__ == '__main__':

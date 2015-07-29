@@ -50,6 +50,15 @@ class TestDelResourceGroup(TestBrokerCommand):
         self.check_plenary_gone(*fs_path, directory_gone=True)
         self.check_plenary_gone(*rg_path, directory_gone=True)
 
+    def test_110_del_utmc8_rgs(self):
+        command = ["del_resourcegroup", "--resourcegroup=utmc8as1",
+                   "--metacluster=utmc8"]
+        self.noouttest(command)
+
+        command = ["del_resourcegroup", "--resourcegroup=utmc8as2",
+                   "--metacluster=utmc8"]
+        self.noouttest(command)
+
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelResourceGroup)
     unittest.TextTestRunner(verbosity=2).run(suite)

@@ -96,7 +96,7 @@ class TestSearchPersonality(VerifyGrnsMixin, TestBrokerCommand):
         command = ["search_personality", "--host_environment", "dev",
                    "--personality_stage", "current",
                    "--eon_id", 2, "--format=proto"]
-        personalities = self.protobuftest(command, expect=11)
+        personalities = self.protobuftest(command, expect=15)
         pers_by_name_ver = defaultdict(dict)
         for p in personalities:
             pers_by_name_ver[p.name][p.stage] = p

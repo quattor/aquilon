@@ -118,6 +118,22 @@ class TestUncluster(TestBrokerCommand):
         self.successtest(["uncluster", "--hostname", host, "--cluster", cluster,
                           "--personality", "generic"])
 
+    def testunbindutmc8(self):
+        self.noouttest(["uncluster", "--hostname", "evh80.aqd-unittest.ms.com",
+                        "--cluster", "utecl12",
+                        "--personality", "esx_standalone"])
+        self.noouttest(["uncluster", "--hostname", "evh81.aqd-unittest.ms.com",
+                        "--cluster", "utecl13",
+                        "--personality", "esx_standalone"])
+
+    def testunbindutmc9(self):
+        self.noouttest(["uncluster", "--hostname", "evh82.aqd-unittest.ms.com",
+                        "--cluster", "utecl14",
+                        "--personality", "esx_standalone"])
+        self.noouttest(["uncluster", "--hostname", "evh83.aqd-unittest.ms.com",
+                        "--cluster", "utecl15",
+                        "--personality", "esx_standalone"])
+
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUncluster)
     unittest.TextTestRunner(verbosity=2).run(suite)

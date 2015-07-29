@@ -278,6 +278,20 @@ class TestDelHost(VerifyNotificationsMixin, MachineTestMixin,
                 machine = "ut12s02p%d" % (i - 12)
             self.delete_host(hostname, net.usable[i + 1], machine)
 
+    def test_300_del_utmc8_hosts(self):
+        self.delete_host("evh80.aqd-unittest.ms.com",
+                         self.net["ut14_net"].usable[0], "ut14s1p0",
+                         eth1_ip=self.net["vm_storage_net"].usable[26])
+        self.delete_host("evh81.aqd-unittest.ms.com",
+                         self.net["ut14_net"].usable[1], "ut14s1p1",
+                         eth1_ip=self.net["vm_storage_net"].usable[27])
+
+    def test_300_del_utmc9_hosts(self):
+        self.delete_host("evh82.aqd-unittest.ms.com",
+                         self.net["ut14_net"].usable[2], "ut14s1p2")
+        self.delete_host("evh83.aqd-unittest.ms.com",
+                         self.net["ut14_net"].usable[3], "ut14s1p3")
+
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelHost)
     unittest.TextTestRunner(verbosity=2).run(suite)

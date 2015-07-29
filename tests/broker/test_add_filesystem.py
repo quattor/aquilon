@@ -159,9 +159,30 @@ class TestAddFilesystem(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "Filesystem: fsshared", command)
 
+    def test_55_add_utmc9_fs(self):
+        command = ["add_filesystem", "--filesystem=utfs1",
+                   "--type=ext3", "--mountpoint=/mnt",
+                   "--blockdevice=/dev/foo/bar",
+                   "--bootmount",
+                   "--hostname=evh82.aqd-unittest.ms.com"]
+        self.statustest(command)
+
+        # Quick test
+        command = ["cat", "--filesystem=utfs1",
+                   "--hostname=evh82.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out, '"name" = "utfs1";', command)
+
+        self.statustest(["add_filesystem", "--filesystem", "utfs2",
+                         "--type", "ext3", "--mountpoint", "/mnt",
+                         "--blockdevice", "/dev/foo/bar",
+                         "--bootmount",
+                         "--hostname", "evh83.aqd-unittest.ms.com",
+                         "--resourcegroup", "utrg2"])
+
     def test_60_show_all_proto(self):
         command = ["show", "filesystem", "--all", "--format", "proto"]
-        self.protobuftest(command, expect=4)
+        self.protobuftest(command, expect=6)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddFilesystem)

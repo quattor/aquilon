@@ -51,11 +51,6 @@ class TestAddResourceGroup(TestBrokerCommand):
         self.matchoutput(out, "Comments: Some resourcegroup comments", command)
         self.matchclean(out, "Type:", command)
 
-    def test_105_show_all(self):
-        command = ["show_resourcegroup", "--all"]
-        out = self.commandtest(command)
-        self.matchoutput(out, "Resource Group: utvcs1as1", command)
-
     def test_110_add_fs_to_rg(self):
         command = ["add_filesystem", "--filesystem=fs1", "--type=ext3",
                    "--mountpoint=/mnt", "--blockdevice=/dev/foo/bar",
@@ -210,6 +205,28 @@ class TestAddResourceGroup(TestBrokerCommand):
                    "--cluster", "utvcs1"]
         self.successtest(command)
 
+    def test_150_add_utmc8_rg(self):
+        command = ["add_resourcegroup", "--resourcegroup=utmc8as1",
+                   "--cluster=utmc8", "--required_type=share"]
+        out = self.statustest(command)
+        self.matchoutput(out,
+                         "Please use the --metacluster option for metaclusters.",
+                         command)
+
+        command = ["add_resourcegroup", "--resourcegroup=utmc8as2",
+                   "--metacluster=utmc8", "--required_type=share"]
+        self.noouttest(command)
+
+    def test_155_show_utmc8_rg(self):
+        command = ["show_resourcegroup", "--metacluster=utmc8"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Resource Group: utmc8as1", command)
+        self.matchoutput(out, "Bound to: ESX Metacluster utmc8", command)
+
+    def test_160_add_utmc9_rg(self):
+        self.statustest(["add_resourcegroup", "--resourcegroup", "utrg2",
+                         "--hostname", "evh83.aqd-unittest.ms.com"])
+
     def test_200_add_bad_type(self):
         command = ["add_resourcegroup", "--resourcegroup=utvcs1as2",
                    "--cluster=utvcs1", "--required_type=no-such-resource-type"]
@@ -223,6 +240,14 @@ class TestAddResourceGroup(TestBrokerCommand):
         err = self.badrequesttest(command)
         self.matchoutput(err, "Bad Request: A resourcegroup can't hold other "
                          "resourcegroups.", command)
+
+    def test_300_show_all(self):
+        command = ["show_resourcegroup", "--all"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Resource Group: utvcs1", command)
+        self.matchoutput(out, "Resource Group: utvcs1as1", command)
+        self.matchoutput(out, "Resource Group: utmc8as1", command)
+        self.matchoutput(out, "Resource Group: utmc8as2", command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddResourceGroup)
