@@ -108,6 +108,12 @@ class TestAddVirtualSwitch(TestBrokerCommand):
         self.check_plenary_exists("virtualswitchdata", "camelcase")
         self.check_plenary_gone("virtualswitchdata", "CaMeLcAsE")
 
+    def test_140_bind_autopg2(self):
+        net = self.net["autopg2"]
+        command = ["bind_port_group", "--virtual_switch", "utvswitch2",
+                   "--networkip", net.ip, "--type", "user", "--tag", "710"]
+        self.noouttest(command)
+
     def test_200_add_utvswitch_again(self):
         command = ["add_virtual_switch", "--virtual_switch", "utvswitch"]
         out = self.badrequesttest(command)
@@ -158,14 +164,13 @@ class TestAddVirtualSwitch(TestBrokerCommand):
     def test_300_update_utvswitch2(self):
         self.noouttest(["update_virtual_switch",
                         "--virtual_switch", "utvswitch2",
-                        "--comments", "Some other vswitch comments"])
+                        "--comments", "New vswitch comments"])
 
     def test_305_verify_update_utvswitch2(self):
         command = ["show_virtual_switch", "--virtual_switch", "utvswitch2"]
         out = self.commandtest(command)
         self.matchoutput(out, "Virtual Switch: utvswitch2", command)
-        self.matchoutput(out, "Comments: Some other vswitch comments", command)
-        self.matchclean(out, "Port Group", command)
+        self.matchoutput(out, "Comments: New vswitch comments", command)
 
     def test_310_clear_comments(self):
         self.noouttest(["update_virtual_switch",

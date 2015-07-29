@@ -32,7 +32,7 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, TestBrokerCommand):
 
     def test_065_add_vms(self):
         for i in range(0, 3):
-            machine = "utpgm%d" % i
+            machine = "evm%d" % (i + 50)
 
             command = ["add", "machine", "--machine", machine,
                        "--vmhost", "evh82.aqd-unittest.ms.com", "--model", "utmedium"]
@@ -43,7 +43,7 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, TestBrokerCommand):
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "Host evh82.aqd-unittest.ms.com still has virtual "
-                         "machines: utpgm0, utpgm1, utpgm2.",
+                         "machines: evm50, evm51, evm52.",
                          command)
 
     def test_120_cat_vmhost(self):
@@ -54,12 +54,12 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, TestBrokerCommand):
         self.matchoutput(out,
                          '"system/resources/virtual_machine" '
                          '= append(create("resource/host/evh82.aqd-unittest.ms.com/'
-                         'virtual_machine/utpgm0/config"));',
+                         'virtual_machine/evm50/config"));',
                          command)
 
     def test_122_addvmfswohost(self):
         # Try to bind to fs1 of another host.
-        command = ["add", "disk", "--machine", "utpgm0",
+        command = ["add", "disk", "--machine", "evm50",
                    "--disk", "sda", "--controller", "scsi",
                    "--filesystem", "utfs1n", "--address", "0:0",
                    "--size", "34"]
@@ -70,17 +70,17 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, TestBrokerCommand):
                          "filesystem utfs1n assigned to it.",
                          command)
 
-    def test_130_addutpgm0disk(self):
+    def test_130_addevm50disk(self):
         for i in range(0, 3):
-            machine = "utpgm%d" % i
+            machine = "evm%d" % (i + 50)
             self.noouttest(["add", "disk", "--machine", machine,
                             "--disk", "sda", "--controller", "scsi",
                             "--filesystem", "utfs1", "--address", "0:0",
                             "--size", "34"])
 
-    def test_140_verifyaddutpgm0disk(self):
+    def test_140_verifyaddevm50disk(self):
         for i in range(0, 3):
-            machine = "utpgm%d" % i
+            machine = "evm%d" % (i + 50)
 
             command = ["show", "machine", "--machine", machine]
             out = self.commandtest(command)
@@ -88,14 +88,14 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, TestBrokerCommand):
             self.searchoutput(out, r"Disk: sda 34 GB scsi \(virtual_disk stored on filesystem utfs1\) \[boot\]$",
                               command)
 
-        command = ["cat", "--machine", "utpgm0", "--generate"]
+        command = ["cat", "--machine", "evm50", "--generate"]
         out = self.commandtest(command)
         self.matchclean(out, "snapshot", command)
 
     def test_141_verify_proto(self):
-        command = ["show_machine", "--machine", "utpgm0", "--format", "proto"]
+        command = ["show_machine", "--machine", "evm50", "--format", "proto"]
         machine = self.protobuftest(command, expect=1)[0]
-        self.assertEqual(machine.name, "utpgm0")
+        self.assertEqual(machine.name, "evm50")
         self.assertEqual(len(machine.disks), 1)
         self.assertEqual(machine.disks[0].device_name, "sda")
         self.assertEqual(machine.disks[0].disk_type, "scsi")
@@ -114,10 +114,12 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, TestBrokerCommand):
     def test_145_search_machine_filesystem(self):
         command = ["search_machine", "--disk_filesystem", "utfs1"]
         out = self.commandtest(command)
-        self.matchoutput(out, "utpgm0", command)
-        self.matchoutput(out, "utpgm1", command)
-        self.matchoutput(out, "utpgm2", command)
-        self.matchclean(out, "evm", command)
+        self.matchoutput(out, "evm50", command)
+        self.matchoutput(out, "evm51", command)
+        self.matchoutput(out, "evm52", command)
+        self.matchclean(out, "evm1", command)
+        self.matchclean(out, "evm2", command)
+        self.matchclean(out, "evm4", command)
         self.matchclean(out, "ut3", command)
         self.matchclean(out, "ut5", command)
 
@@ -128,13 +130,13 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, TestBrokerCommand):
         self.matchoutput(out, "Bound to: Host evh82.aqd-unittest.ms.com", command)
         self.matchoutput(out, "Virtual Disk Count: 3", command)
 
-    def test_155_catutpgm0(self):
-        command = ["cat", "--machine", "utpgm0"]
+    def test_155_catevm50(self):
+        command = ["cat", "--machine", "evm50"]
         out = self.commandtest(command)
         self.matchoutput(out, '', command)
         self.matchoutput(out, '"filesystemname", "utfs1",', command)
         self.matchoutput(out, '"mountpoint", "/mnt",', command)
-        self.matchoutput(out, '"path", "utpgm0/sda.vmdk"', command)
+        self.matchoutput(out, '"path", "evm50/sda.vmdk"', command)
 
     def test_156_del_used_filesystem(self):
         command = ["del_filesystem", "--filesystem", "utfs1",
@@ -149,24 +151,24 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, TestBrokerCommand):
 
         # Pick first one with automac(fakebind data should be fixed)
         for i in range(0, 2):
-            self.noouttest(["add", "interface", "--machine", "utpgm%d" % i,
+            self.noouttest(["add", "interface", "--machine", "evm%d" % (i + 50),
                             "--interface", "eth0", "--automac", "--autopg"])
 
     def test_170_add_vm_hosts(self):
-        net = self.net["autopg1"]
+        net = self.net["autopg2"]
         ip = self.net["utpgsw0-v710"].usable[0]
-        self.dsdb_expect_add("utpgm0.aqd-unittest.ms.com", ip, "eth0", "00:50:56:01:20:00")
-        command = ["add", "host", "--hostname", "utpgm0.aqd-unittest.ms.com",
+        self.dsdb_expect_add("evm50.aqd-unittest.ms.com", ip, "eth0", "00:50:56:01:20:00")
+        command = ["add", "host", "--hostname", "evm50.aqd-unittest.ms.com",
                    "--ip", ip,
-                   "--machine", "utpgm0",
+                   "--machine", "evm50",
                    "--domain", "unittest", "--buildstatus", "build",
                    "--archetype", "aquilon",
                    "--personality", "unixeng-test"]
         out = self.statustest(command)
         self.matchoutput(out,
                          "Warning: public interface eth0 of machine "
-                         "utpgm0.aqd-unittest.ms.com is bound to network "
-                         "autopg1 [%s] due to port group user-v710, which "
+                         "evm50.aqd-unittest.ms.com is bound to network "
+                         "autopg2 [%s] due to port group user-v710, which "
                          "does not contain IP address %s." %
                          (net, ip),
                          command)
@@ -174,11 +176,11 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, TestBrokerCommand):
 
     def test_175_make_vm_host(self):
         basetime = datetime.now()
-        command = ["make", "--hostname", "utpgm0.aqd-unittest.ms.com"]
+        command = ["make", "--hostname", "evm50.aqd-unittest.ms.com"]
         self.statustest(command)
         self.wait_notification(basetime, 1)
 
-        command = ["show", "host", "--hostname", "utpgm0.aqd-unittest.ms.com"]
+        command = ["show", "host", "--hostname", "evm50.aqd-unittest.ms.com"]
         out = self.commandtest(command)
         self.matchoutput(out, "Hosted by: Host evh82.aqd-unittest.ms.com", command)
 
@@ -210,14 +212,14 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, TestBrokerCommand):
 
     def test_230_check_vm_location(self):
         for i in range(0, 3):
-            machine = "utpgm%d" % i
+            machine = "evm%d" % (i + 50)
             command = ["show", "machine", "--machine", machine]
             out = self.commandtest(command)
             self.matchoutput(out, "Rack: ut14", command)
 
     # Move uptpgm back and forth
     def test_240_fail_move_vm_disks(self):
-        command = ["update_machine", "--machine", "utpgm0",
+        command = ["update_machine", "--machine", "evm50",
                    "--cluster", "utecl15"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
@@ -226,78 +228,78 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, TestBrokerCommand):
                          command)
 
     def test_241_move_remap_disk(self):
-        net = self.net["autopg1"]
+        net = self.net["autopg2"]
         ip = self.net["utpgsw0-v710"].usable[0]
-        command = ["update_machine", "--machine", "utpgm0",
+        command = ["update_machine", "--machine", "evm50",
                    "--vmhost", "evh83.aqd-unittest.ms.com",
                    "--remap_disk", "filesystem/utfs1:filesystem/utrg2/utfs2"]
         out = self.statustest(command)
         self.matchoutput(out,
                          "Warning: public interface eth0 of machine "
-                         "utpgm0.aqd-unittest.ms.com is bound to network "
-                         "autopg1 [%s] due to port group user-v710, which "
+                         "evm50.aqd-unittest.ms.com is bound to network "
+                         "autopg2 [%s] due to port group user-v710, which "
                          "does not contain IP address %s." %
                          (net, ip),
                          command)
 
-        command = ["show_machine", "--machine", "utpgm0"]
+        command = ["show_machine", "--machine", "evm50"]
         out = self.commandtest(command)
         self.matchoutput(out, "Hosted by: Host evh83.aqd-unittest.ms.com", command)
         self.matchoutput(out, "stored on filesystem utfs2", command)
 
     def test_242_convert_to_share(self):
-        net = self.net["autopg1"]
+        net = self.net["autopg2"]
         ip = self.net["utpgsw0-v710"].usable[0]
-        command = ["update_machine", "--machine", "utpgm0",
+        command = ["update_machine", "--machine", "evm50",
                    "--remap_disk", "filesystem/utrg2/utfs2:share/utrg2/test_v2_share"]
         out = self.statustest(command)
         self.matchoutput(out,
                          "Warning: public interface eth0 of machine "
-                         "utpgm0.aqd-unittest.ms.com is bound to network "
-                         "autopg1 [%s] due to port group user-v710, which "
+                         "evm50.aqd-unittest.ms.com is bound to network "
+                         "autopg2 [%s] due to port group user-v710, which "
                          "does not contain IP address %s." %
                          (net, ip),
                          command)
 
-        command = ["show_machine", "--machine", "utpgm0"]
+        command = ["show_machine", "--machine", "evm50"]
         out = self.commandtest(command)
         self.matchoutput(out, "Hosted by: Host evh83.aqd-unittest.ms.com", command)
         self.matchoutput(out, "stored on share test_v2_share", command)
 
     def test_243_move_back(self):
-        command = ["update_machine", "--machine", "utpgm0",
+        command = ["update_machine", "--machine", "evm50",
                    "--vmhost", "evh82.aqd-unittest.ms.com",
                    "--remap_disk", "share/utrg2/test_v2_share:filesystem/utfs1"]
         self.statustest(command)
 
-        command = ["show_machine", "--machine", "utpgm0"]
+        command = ["show_machine", "--machine", "evm50"]
         out = self.commandtest(command)
         self.matchoutput(out, "Hosted by: Host evh82.aqd-unittest.ms.com", command)
 
-    def test_250_delutpgm0disk(self):
+    def test_250_delevm50disk(self):
         for i in range(0, 3):
-            self.noouttest(["del_disk", "--machine", "utpgm%d" % i, "--disk", "sda"])
+            self.noouttest(["del_disk", "--machine", "evm%d" % (i + 50), "--disk", "sda"])
 
     def test_260_move_vm_to_cluster(self):
-        self.statustest(["update", "machine", "--machine", "utpgm0",
+        self.statustest(["update", "machine", "--machine", "evm50",
                          "--cluster", "utecl15"])
 
-        command = ["show", "machine", "--machine", "utpgm0"]
+        command = ["show", "machine", "--machine", "evm50"]
         out = self.commandtest(command)
         self.matchoutput(out, "Hosted by: ESX Cluster utecl15", command)
 
     def test_265_search_machine_vmhost(self):
         command = ["search_machine", "--vmhost", "evh82.aqd-unittest.ms.com"]
         out = self.commandtest(command)
-        self.matchoutput(out, "utpgm1", command)
-        self.matchoutput(out, "utpgm2", command)
-        self.matchclean(out, "utpgm0", command)
+        self.matchoutput(out, "evm51", command)
+        self.matchoutput(out, "evm52", command)
+        self.matchclean(out, "evm50", command)
 
     def test_270_move_vm_to_vmhost(self):
-        self.statustest(["update", "machine", "--machine", "utpgm0",
+        self.statustest(["update", "machine", "--machine", "evm50",
                          "--vmhost", "evh82.aqd-unittest.ms.com"])
 
-        command = ["show", "machine", "--machine", "utpgm0"]
+        command = ["show", "machine", "--machine", "evm50"]
         out = self.commandtest(command)
         self.matchoutput(out, "Hosted by: Host evh82.aqd-unittest.ms.com",
                          command)
@@ -311,14 +313,14 @@ class TestVulcanLocalDisk(VerifyNotificationsMixin, TestBrokerCommand):
         basetime = datetime.now()
         ip = self.net["utpgsw0-v710"].usable[0]
         self.dsdb_expect_delete(ip)
-        command = ["del", "host", "--hostname", "utpgm0.aqd-unittest.ms.com"]
+        command = ["del", "host", "--hostname", "evm50.aqd-unittest.ms.com"]
         self.statustest(command)
         self.wait_notification(basetime, 1)
         self.dsdb_verify()
 
     def test_310_del_vms(self):
         for i in range(0, 3):
-            machine = "utpgm%d" % i
+            machine = "evm%d" % (i + 50)
 
             self.noouttest(["del", "machine", "--machine", machine])
 

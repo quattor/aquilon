@@ -278,13 +278,13 @@ class TestAddESXCluster(PersonalityTestMixin, TestBrokerCommand):
             self.matchoutput(out, "utecl%d" % i, command)
 
             self.noouttest(["update_cluster", "--cluster", "utecl%d" % i,
-                            "--virtual_switch", "utvswitch"])
+                            "--virtual_switch", "utvswitch2"])
 
     def test_186_verify_utecl14_proto(self):
         command = ["show_cluster", "--cluster", "utecl14", "--format", "proto"]
         cluster = self.protobuftest(command, expect=1)[0]
         self.assertEqual(cluster.name, "utecl14")
-        self.assertEqual(cluster.virtual_switch.name, "utvswitch")
+        self.assertEqual(cluster.virtual_switch.name, "utvswitch2")
 
     def test_200_cat_missing_cluster(self):
         command = "cat --cluster=cluster-does-not-exist"
