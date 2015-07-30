@@ -42,6 +42,7 @@ _table_abbrev = {
     'netgroup_whitelist': 'netgr_whtlst',
     'network_device': 'netdev',
     'network_environment': 'net_env',
+    'network_compartment': 'net_comp',
     'operating_system': 'os',
     'param_definition': 'param_def',
     'param_def_holder': 'pd_holder',

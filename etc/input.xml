@@ -1511,6 +1511,54 @@
 	<transport method="get" path="find/network_environment"/>
     </command>
 
+    <command name="add_network_compartment">
+	Define a new network compartment.
+	<optgroup mandatory="True" fields="all">
+	    <option name="network_compartment" type="string">Name of the compartment</option>
+	</optgroup>
+	<optgroup>
+	    <option name="comments" type="string">Comments</option>
+	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
+	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
+	</optgroup>
+	<transport method="put" path="network_compartment/%(network_compartment)s"/>
+    </command>
+
+    <command name="show_network_compartment">
+	Display a network compartment.
+	<optgroup mandatory="True" fields="one">
+	    <option name="network_compartment" type="string">Name of the compartment</option>
+	    <option name="all" type="flag">Show all compartments</option>
+	</optgroup>
+	<transport method="get" path="network_compartment/%(network_compartment)s"/>
+	<transport trigger="all" method="get" path="network_compartment"/>
+    </command>
+
+    <command name="update_network_compartment">
+	Update a network compartment.
+	<optgroup mandatory="True" fields="all">
+	    <option name="network_compartment" type="string">Name of the compartment</option>
+	</optgroup>
+	<optgroup>
+	    <option name="comments" type="string">Comments</option>
+	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
+	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
+	</optgroup>
+	<transport method="post" path="network_compartment/%(network_compartment)s"/>
+    </command>
+
+    <command name="del_network_compartment">
+	Delete a new network compartment.
+	<optgroup mandatory="True" fields="all">
+	    <option name="network_compartment" type="string">Name of the compartment</option>
+	</optgroup>
+	<optgroup>
+	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
+	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
+	</optgroup>
+	<transport method="delete" path="network_compartment/%(network_compartment)s"/>
+    </command>
+
     <command name="add_network">
 	Define a new network.
 	<p/>

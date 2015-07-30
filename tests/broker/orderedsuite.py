@@ -69,6 +69,7 @@ from .test_add_model import TestAddModel
 from .test_add_user import TestAddUser
 from .test_add_network import TestAddNetwork
 from .test_add_network_environment import TestAddNetworkEnvironment
+from .test_add_network_compartment import TestAddNetworkCompartment
 from .test_add_ns_record import TestAddNSRecord
 from .test_add_router_address import TestAddRouterAddress
 from .test_update_router_address import TestUpdateRouterAddress
@@ -197,6 +198,7 @@ from .test_update_model import TestUpdateModel
 from .test_update_rack import TestUpdateRack
 from .test_update_network import TestUpdateNetwork
 from .test_update_network_environment import TestUpdateNetworkEnvironment
+from .test_update_network_compartment import TestUpdateNetworkCompartment
 from .test_update_archetype import TestUpdateArchetype
 from .test_update_personality import TestUpdatePersonality
 from .test_update_metacluster import TestUpdateMetaCluster
@@ -239,6 +241,7 @@ from .test_del_metacluster import TestDelMetaCluster
 from .test_del_router_address import TestDelRouterAddress
 from .test_del_network import TestDelNetwork
 from .test_del_network_environment import TestDelNetworkEnvironment
+from .test_del_network_compartment import TestDelNetworkCompartment
 from .test_del_model import TestDelModel
 from .test_del_cpu import TestDelCpu
 from .test_del_vendor import TestDelVendor
@@ -314,6 +317,7 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestAddRack, TestAddDesk,
                      TestAddVendor, TestAddCpu, TestAddModel,
                      TestAddFeature, TestParameterDefinitionFeature,
+                     TestAddNetworkCompartment,
                      TestAddNetworkEnvironment, TestAddNetwork,
                      TestAddNSRecord, TestMapDnsDomain,
                      TestAddMetaCluster, TestAddESXCluster,
@@ -395,6 +399,7 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestUpdateAddressAlias,
                      TestUpdateServiceAddress,
                      TestBindFeature, TestUnbindFeature,
+                     TestUpdateNetworkCompartment,
                      TestRefreshNetwork, TestUpdateNetwork, TestSplitMergeNetwork,
                      TestNetworkConstraints,
                      TestUpdateService,
@@ -426,6 +431,7 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestDelCluster,
                      TestDelESXCluster, TestDelMetaCluster,
                      TestDelRouterAddress, TestDelNetwork, TestDelNetworkEnvironment,
+                     TestDelNetworkCompartment,
                      TestDelVlan,
                      TestDelModel, TestDelCpu, TestDelVendor,
                      TestDelFeature,
