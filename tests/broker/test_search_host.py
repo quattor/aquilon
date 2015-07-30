@@ -134,11 +134,6 @@ class TestSearchHost(TestBrokerCommand):
         self.matchoutput(out, "Unknown host lifecycle 'status-does-not-exist'",
                          command)
 
-    def testipavailable(self):
-        command = "search host --ip %s" % self.net["unknown0"].usable[2]
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "unittest00.one-nyp.ms.com", command)
-
     def testipunavailable(self):
         command = "search host --ip 199.98.16.4"
         self.noouttest(command.split(" "))

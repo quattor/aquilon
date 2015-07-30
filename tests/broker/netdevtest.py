@@ -25,7 +25,7 @@ class VerifyNetworkDeviceMixin(object):
                      interface='xge', comments=None):
         command = "show network device --network_device %s" % netdev
         out = self.commandtest(command.split(" "))
-        (short, dot, dns_domain) = netdev.partition(".")
+        (short, _, dns_domain) = netdev.partition(".")
         self.matchoutput(out, "Switch: %s" % short, command)
         if dns_domain:
             if ip:

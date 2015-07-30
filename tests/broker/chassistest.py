@@ -24,7 +24,7 @@ class VerifyChassisMixin(object):
                       comments=None):
         command = "show chassis --chassis %s" % chassis
         out = self.commandtest(command.split(" "))
-        (short, dot, dns_domain) = chassis.partition(".")
+        (short, _, dns_domain) = chassis.partition(".")
         self.matchoutput(out, "Chassis: %s" % short, command)
         if dns_domain:
             if ip:

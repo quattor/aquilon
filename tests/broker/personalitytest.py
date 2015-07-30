@@ -37,8 +37,7 @@ clustered_archetypes = ["vmhost"]
 
 
 class PersonalityTestMixin(object):
-    def setup_personality(self, archetype, name, maps=None, required=None,
-                          staged=False):
+    def setup_personality(self, archetype, name, maps=None, required=None):
         if archetype in default_parameters:
             for path, value in default_parameters[archetype].items():
                 command = ["add_parameter", "--archetype", archetype,
@@ -80,8 +79,7 @@ class PersonalityTestMixin(object):
             command.extend(["--comments", comments])
         self.noouttest(command)
 
-        self.setup_personality(archetype, name, maps=maps, required=required,
-                               staged=staged)
+        self.setup_personality(archetype, name, maps=maps, required=required)
 
     def drop_personality(self, archetype, name):
         # Ok, not much here yet. In the future, this helper may be used to
@@ -105,9 +103,7 @@ class PersonalityTestMixin(object):
         self.matchoutput(out, 'variable PERSONALITY = "%s"' % staged_name,
                          command)
         if grn:
-            self.matchoutput(out, '"/system/personality/owner_eon_id" = %d;' %
-                             self.grns[grn], command)
-            self.check_personality_grns(out, [grn], {"esp": [grn]}, command)
+            self.check_personality_grns(out, grn, {"esp": [grn]}, command)
 
         self.matchoutput(out, 'include { if_exists("personality/%s/pre_feature") };' %
                          staged_name, command)

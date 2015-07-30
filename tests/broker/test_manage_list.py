@@ -163,12 +163,6 @@ class TestManageList(TestBrokerCommand):
                          "Primary Name: unittest17.aqd-unittest.ms.com",
                          command)
         self.matchoutput(out, "Sandbox: %s/managetest1" % self.user, command)
-        command = "show host --hostname unittest17.aqd-unittest.ms.com"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out,
-                         "Primary Name: unittest17.aqd-unittest.ms.com",
-                         command)
-        self.matchoutput(out, "Sandbox: %s/managetest1" % self.user, command)
 
     def test_120_fail_overlimit_manage_list(self):
         hostlimit = self.config.getint("broker", "manage_max_list_size")

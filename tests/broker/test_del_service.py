@@ -29,6 +29,7 @@ services_to_delete = {
     "aqd": ["ny-prod"],
     "badservice": [],
     "bootserver": ["one-nyp", "unittest"],
+    "chooser_test": ["max_clients"],
     "dns": ["unittest", "one-nyp"],
     "esx_management_server": ["ut.a", "ut.b"],
     "lemon": ["ny-prod"],

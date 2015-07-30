@@ -534,7 +534,7 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
                          command)
 
     def test_323_verify_show_ut11s01p1_proto(self):
-        command = ["show_machine","--machine", "ut11s01p1", "--format", "proto"]
+        command = ["show_machine", "--machine", "ut11s01p1", "--format", "proto"]
         machine = self.protobuftest(command, expect=1)[0]
         ifaces = dict((iface.device, iface) for iface in machine.interfaces)
         self.assertIn("eth1", ifaces)

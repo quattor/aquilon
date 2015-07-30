@@ -439,11 +439,11 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
 
     def test_260_reuse_chassis_slot(self):
         command = ["add", "machine", "--machine", "ut3c5n99",
-                        "--chassis", "ut3c5", "--slot", 10,
-                        "--model", "hs21-8853",
-                        "--cpucount", "2", "--cpuvendor", "intel",
-                        "--cpuname", "xeon_2660", "--cpuspeed", "2660",
-                        "--memory", "8192"]
+                   "--chassis", "ut3c5", "--slot", 10,
+                   "--model", "hs21-8853",
+                   "--cpucount", "2", "--cpuvendor", "intel",
+                   "--cpuname", "xeon_2660", "--cpuspeed", "2660",
+                   "--memory", "8192"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "Chassis ut3c5.aqd-unittest.ms.com slot 10 "

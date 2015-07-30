@@ -28,7 +28,7 @@ from brokertest import TestBrokerCommand
 class TestUpdateAddressAlias(TestBrokerCommand):
 
     def test_100_update_to_add_comment(self):
-        command = ["update", "address",  "alias",
+        command = ["update", "address", "alias",
                    "--fqdn", "addralias1.aqd-unittest.ms.com",
                    "--target", "arecord13.aqd-unittest.ms.com",
                    "--ttl", "900",
@@ -44,7 +44,7 @@ class TestUpdateAddressAlias(TestBrokerCommand):
         self.matchoutput(out, "TTL: 900", command)
 
     def test_130_update_to_change_comment(self):
-        command = ["update", "address",  "alias",
+        command = ["update", "address", "alias",
                    "--fqdn", "addralias1.aqd-unittest.ms.com",
                    "--target", "arecord14.aqd-unittest.ms.com",
                    "--comments", "New other address alias comments"]

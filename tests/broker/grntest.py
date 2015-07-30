@@ -39,7 +39,7 @@ class VerifyGrnsMixin(object):
                 self.grns[row["name"]] = int(row["id"])
                 self.eon_ids[int(row["id"])] = row["name"]
 
-    def check_grns(self, out, grn_list, grn_maps, command):
+    def check_grns(self, out, grn_maps, command):
         def check_grn_for_key(grn_list, key):
             eon_ids = sorted(self.grns[grn] for grn in grn_list)
             self.searchoutput(out,
@@ -51,7 +51,7 @@ class VerifyGrnsMixin(object):
         for (target, target_list) in iteritems(grn_maps):
             check_grn_for_key(target_list, "system/eon_id_maps/%s" % target)
 
-    def check_personality_grns(self, out, grn_list, grn_maps, command):
+    def check_personality_grns(self, out, owner_grn, grn_maps, command):
         def check_grn_for_key(grn_list, key):
             eon_ids = sorted(self.grns[grn] for grn in grn_list)
             for eon_id in eon_ids:
@@ -59,5 +59,7 @@ class VerifyGrnsMixin(object):
                                   r'"%s" = append\(%d\);' % (key, eon_id),
                                   command)
 
+        self.matchoutput(out, '"/system/personality/owner_eon_id" = %d;' %
+                         self.grns[owner_grn], command)
         for target, target_list in iteritems(grn_maps):
             check_grn_for_key(target_list, "/system/eon_id_maps/%s" % target)
