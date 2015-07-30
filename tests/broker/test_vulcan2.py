@@ -37,34 +37,6 @@ class TestVulcan20(VerifyNotificationsMixin, TestBrokerCommand):
                    "--personality=vulcan2-server-dev"]
         self.noouttest(command)
 
-    # machine move tests
-    def test_350_move_machine_pre(self):
-        command = ["show_machine", "--machine", "evm40"]
-        out = self.commandtest(command)
-        self.matchoutput(out, "Hosted by: ESX Cluster utecl12", command)
-        self.searchoutput(out,
-                          r"Disk: sda 34 GB scsi "
-                          r"\(virtual_disk stored on share test_v2_share\) "
-                          r"\[boot, snapshot\]$",
-                          command)
-
-    def test_360_move_machine(self):
-        # Moving the machine from one cluster to the other exercises the case in
-        # the disk movement logic when the old share is inside a resource group.
-        command = ["update_machine", "--machine", "evm40",
-                   "--cluster", "utecl13"]
-        self.noouttest(command)
-
-    def test_370_verify_move(self):
-        command = ["show_machine", "--machine", "evm40"]
-        out = self.commandtest(command)
-        self.matchoutput(out, "Hosted by: ESX Cluster utecl13", command)
-        self.searchoutput(out,
-                          r"Disk: sda 34 GB scsi "
-                          r"\(virtual_disk stored on share test_v2_share\) "
-                          r"\[boot, snapshot\]$",
-                          command)
-
 #    metacluster aligned svc tests
     def test_400_addvcenterservices(self):
         command = ["add_required_service", "--service", "vcenter",

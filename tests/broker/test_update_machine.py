@@ -389,6 +389,29 @@ class TestUpdateMachine(TestBrokerCommand):
         self.matchoutput(out, "Slot: 5", command)
         self.matchclean(out, "Slot: 6", command)
 
+    def test_1110_move_machine_with_vms(self):
+        old_path = ["machine", "americas", "ut", "ut3", "ut14s1p2"]
+        new_path = ["machine", "americas", "ut", "ut14", "ut14s1p2"]
+
+        self.check_plenary_exists(*old_path)
+        self.check_plenary_gone(*new_path)
+        self.noouttest(["update", "machine", "--machine", "ut14s1p2",
+                        "--rack", "ut14"])
+        self.check_plenary_gone(*old_path)
+        self.check_plenary_exists(*new_path)
+
+    def test_1115_show_ut14s1p2(self):
+        command = ["show", "machine", "--machine", "ut14s1p2"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Rack: ut14", command)
+
+    def test_1115_check_vm_location(self):
+        for i in range(0, 3):
+            machine = "evm%d" % (i + 50)
+            command = ["show", "machine", "--machine", machine]
+            out = self.commandtest(command)
+            self.matchoutput(out, "Rack: ut14", command)
+
     def test_1120_update_ut3s01p2(self):
         self.noouttest(["update", "machine", "--machine", "ut3s01p2",
                         "--model", "hs21-8853", "--vendor", "ibm"])

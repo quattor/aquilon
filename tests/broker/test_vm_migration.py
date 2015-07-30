@@ -99,6 +99,92 @@ class TestVMMigration(TestBrokerCommand):
         # restore
         self.noouttest(command)
 
+    def test_110_verify_status_quo(self):
+        command = ["show_machine", "--machine", "evm40"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Hosted by: ESX Cluster utecl12", command)
+        self.searchoutput(out,
+                          r"Disk: sda 34 GB scsi "
+                          r"\(virtual_disk stored on share test_v2_share\) "
+                          r"\[boot, snapshot\]$",
+                          command)
+
+    def test_111_move_machine(self):
+        # Moving the machine from one cluster to the other exercises the case in
+        # the disk movement logic when the old share is inside a resource group.
+        command = ["update_machine", "--machine", "evm40",
+                   "--cluster", "utecl13"]
+        self.noouttest(command)
+
+    def test_115_verify_move(self):
+        command = ["show_machine", "--machine", "evm40"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Hosted by: ESX Cluster utecl13", command)
+        self.searchoutput(out,
+                          r"Disk: sda 34 GB scsi "
+                          r"\(virtual_disk stored on share test_v2_share\) "
+                          r"\[boot, snapshot\]$",
+                          command)
+
+    def test_120_fail_move_vm_disks(self):
+        # This should fail without --remap_disk
+        command = ["update_machine", "--machine", "evm50",
+                   "--cluster", "utecl15"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "ESX Cluster utecl15 does not have filesystem utfs1 "
+                         "assigned to it.",
+                         command)
+
+    def test_121_move_remap_disk(self):
+        net = self.net["autopg2"]
+        ip = self.net["utpgsw0-v710"].usable[0]
+        command = ["update_machine", "--machine", "evm50",
+                   "--vmhost", "evh83.aqd-unittest.ms.com",
+                   "--remap_disk", "filesystem/utfs1:filesystem/utrg2/utfs2"]
+        out = self.statustest(command)
+        self.matchoutput(out,
+                         "Warning: public interface eth0 of machine "
+                         "evm50.aqd-unittest.ms.com is bound to network "
+                         "autopg2 [%s] due to port group user-v710, which "
+                         "does not contain IP address %s." %
+                         (net, ip),
+                         command)
+
+        command = ["show_machine", "--machine", "evm50"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Hosted by: Host evh83.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "stored on filesystem utfs2", command)
+
+    def test_122_convert_to_share(self):
+        net = self.net["autopg2"]
+        ip = self.net["utpgsw0-v710"].usable[0]
+        command = ["update_machine", "--machine", "evm50",
+                   "--remap_disk", "filesystem/utrg2/utfs2:share/utrg2/test_v2_share"]
+        out = self.statustest(command)
+        self.matchoutput(out,
+                         "Warning: public interface eth0 of machine "
+                         "evm50.aqd-unittest.ms.com is bound to network "
+                         "autopg2 [%s] due to port group user-v710, which "
+                         "does not contain IP address %s." %
+                         (net, ip),
+                         command)
+
+        command = ["show_machine", "--machine", "evm50"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Hosted by: Host evh83.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "stored on share test_v2_share", command)
+
+    def test_123_move_back(self):
+        command = ["update_machine", "--machine", "evm50",
+                   "--vmhost", "evh82.aqd-unittest.ms.com",
+                   "--remap_disk", "share/utrg2/test_v2_share:filesystem/utfs1"]
+        self.statustest(command)
+
+        command = ["show_machine", "--machine", "evm50"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Hosted by: Host evh82.aqd-unittest.ms.com", command)
+
     def test_200_missing_cluster(self):
         command = ["update_machine", "--machine=evm1",
                    "--cluster=cluster-does-not-exist"]
