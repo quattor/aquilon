@@ -21,7 +21,7 @@ from aquilon.aqdb.model import Feature
 from aquilon.worker.dbwrappers.grn import lookup_grn
 
 
-class CommandAddFeature(BrokerCommand):
+class CommandUpdateFeature(BrokerCommand):
 
     def render(self, session, feature, type, comments,
                grn, eon_id, visibility, logger, **arguments):
