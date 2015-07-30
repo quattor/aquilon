@@ -389,78 +389,6 @@ class TestUpdateMachine(TestBrokerCommand):
         self.matchoutput(out, "Slot: 5", command)
         self.matchclean(out, "Slot: 6", command)
 
-    def test_1110_metacluster_change_pre(self):
-        command = ["show_share", "--all"]
-        out = self.commandtest(command)
-        # Initially the VM is on utecl1, test_share_1 is not used on utecl11
-        self.searchoutput(out,
-                          r'Share: test_share_1\s*'
-                          r'Comments: New share comments\s*'
-                          r'Bound to: ESX Cluster utecl1\s*'
-                          r'Latency threshold: 30\s*'
-                          r'Server: lnn30f1\s*'
-                          r'Mountpoint: /vol/lnn30f1v1/test_share_1\s*'
-                          r'Disk Count: 1\s*'
-                          r'Machine Count: 1\s*',
-                          command)
-        self.searchoutput(out,
-                          r'Share: test_share_1\s*'
-                          r'Comments: New share comments\s*'
-                          r'Bound to: ESX Cluster utecl11\s*'
-                          r'Latency threshold: 30\s*'
-                          r'Server: lnn30f1\s*'
-                          r'Mountpoint: /vol/lnn30f1v1/test_share_1\s*'
-                          r'Disk Count: 0\s*'
-                          r'Machine Count: 0\s*',
-                          command)
-
-    def test_1111_metacluster_change(self):
-        old_path = ["machine", "americas", "ut", "ut10", "evm1"]
-        new_path = ["machine", "americas", "ut", "None", "evm1"]
-        command = ["update_machine", "--machine=evm1", "--cluster=utecl11",
-                   "--allow_metacluster_change"]
-        self.noouttest(command)
-        self.check_plenary_gone(*old_path)
-        self.check_plenary_exists(*new_path)
-
-    def test_1115_verify_shares(self):
-        command = ["show_share", "--all"]
-        out = self.commandtest(command)
-
-        # The disk should have moved to utecl11, test_share_1 should be unused on
-        # utecl1
-        self.searchoutput(out,
-                          r'Share: test_share_1\s*'
-                          r'Comments: New share comments\s*'
-                          r'Bound to: ESX Cluster utecl1\s*'
-                          r'Latency threshold: 30\s*'
-                          r'Server: lnn30f1\s*'
-                          r'Mountpoint: /vol/lnn30f1v1/test_share_1\s*'
-                          r'Disk Count: 0\s*'
-                          r'Machine Count: 0\s*',
-                          command)
-        self.searchoutput(out,
-                          r'Share: test_share_1\s*'
-                          r'Comments: New share comments\s*'
-                          r'Bound to: ESX Cluster utecl11\s*'
-                          r'Latency threshold: 30\s*'
-                          r'Server: lnn30f1\s*'
-                          r'Mountpoint: /vol/lnn30f1v1/test_share_1\s*'
-                          r'Disk Count: 1\s*'
-                          r'Machine Count: 1\s*',
-                          command)
-
-    def test_1115_verify_search_machine(self):
-        command = ["search_machine", "--machine=evm1", "--cluster=utecl11"]
-        out = self.commandtest(command)
-        self.matchoutput(out, "evm1", command)
-
-    def test_1119_revert_metacluster_change(self):
-        command = ["update_machine", "--machine=evm1", "--cluster=utecl1",
-                   "--allow_metacluster_change"]
-        # restore
-        self.noouttest(command)
-
     def test_1120_update_ut3s01p2(self):
         self.noouttest(["update", "machine", "--machine", "ut3s01p2",
                         "--model", "hs21-8853", "--vendor", "ibm"])
@@ -540,30 +468,6 @@ class TestUpdateMachine(TestBrokerCommand):
     def test_2000_bad_cpu_name(self):
         self.notfoundtest(["update", "machine", "--machine", "ut3c1n4",
                            "--cpuname", "no-such-cpu"])
-
-    def test_2000_missing_cluster(self):
-        command = ["update_machine", "--machine=evm1",
-                   "--cluster=cluster-does-not-exist"]
-        out = self.notfoundtest(command)
-        self.matchoutput(out,
-                         "Cluster cluster-does-not-exist not found.",
-                         command)
-
-    def test_2000_change_metacluster(self):
-        command = ["update_machine", "--machine=evm1", "--cluster=utecl11"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out,
-                         "Moving VMs between metaclusters is disabled by "
-                         "default.",
-                         command)
-
-    def test_2000_cluster_full(self):
-        command = ["update_machine", "--machine=evm1", "--cluster=utecl3"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out,
-                         "ESX Cluster utecl3 cannot support VMs with "
-                         "0 vmhosts and a down_hosts_threshold of 2",
-                         command)
 
     def test_2000_phys_to_cluster(self):
         command = ["update_machine", "--machine=ut9s03p19", "--cluster=utecl1"]

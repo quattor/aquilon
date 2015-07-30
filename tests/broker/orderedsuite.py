@@ -195,6 +195,7 @@ from .test_update_srv_record import TestUpdateSrvRecord
 from .test_update_address_alias import TestUpdateAddressAlias
 from .test_update_interface import TestUpdateInterface
 from .test_update_machine import TestUpdateMachine
+from .test_vm_migration import TestVMMigration
 from .test_update_cpu import TestUpdateCpu
 from .test_update_model import TestUpdateModel
 from .test_update_rack import TestUpdateRack
@@ -391,7 +392,7 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestSearchObservedMac, TestSearchNext, TestSearchNetwork,
                      TestSearchModel,
                      TestSearchService,
-                     TestUpdateInterface, TestUpdateMachine,
+                     TestUpdateInterface, TestUpdateMachine, TestVMMigration,
                      TestUpdateModel, TestUpdateCpu,
                      TestUpdateDisk,
                      TestUpdateRack,
