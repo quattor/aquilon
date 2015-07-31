@@ -27,39 +27,52 @@ from brokertest import TestBrokerCommand
 
 class TestDelManager(TestBrokerCommand):
 
-    def testdelunittest00r(self):
+    def test_100_del_unittest00r(self):
         self.dsdb_expect_delete(self.net["unknown0"].usable[4])
         command = "del manager --manager unittest00r.one-nyp.ms.com"
-        (out, err) = self.successtest(command.split(" "))
-        self.assertEmptyOut(out, command)
+        self.statustest(command.split(" "))
         self.dsdb_verify()
 
-    def testverifydelunittest00r(self):
+    def test_105_show_manager(self):
         command = "show manager --manager unittest00r.one-nyp.ms.com"
         self.notfoundtest(command.split(" "))
 
-    def testdelunittest02rsa(self):
+    def test_105_show_host(self):
+        command = ["show_host", "--hostname", "unittest00.one-nyp.ms.com"]
+        out = self.commandtest(command)
+        self.matchclean(out, "unittest00r", command)
+
+    def test_105_cat_machine(self):
+        command = ["cat", "--machine", "ut3c1n3"]
+        out = self.commandtest(command)
+        self.matchclean(out, "unittest00r", command)
+
+    def test_110_del_unittest02rsa(self):
         self.dsdb_expect_delete(self.net["unknown0"].usable[9])
         command = "del manager --manager unittest02rsa.one-nyp.ms.com"
-        (out, err) = self.successtest(command.split(" "))
-        self.assertEmptyOut(out, command)
+        self.statustest(command.split(" "))
         self.dsdb_verify()
 
-    def testverifydelunittest02rsa(self):
+    def test_115_verify_unittest02rsa(self):
         command = "show manager --manager unittest02rsa.one-nyp.ms.com"
         self.notfoundtest(command.split(" "))
 
-    def testdelunittest12r(self):
+    def test_120_del_unittest12r(self):
         self.dsdb_expect_delete(self.net["unknown0"].usable[8])
         command = "del manager --manager unittest12r.aqd-unittest.ms.com"
-        (out, err) = self.successtest(command.split(" "))
-        self.assertEmptyOut(out, command)
+        self.statustest(command.split(" "))
         self.dsdb_verify()
 
-    def testverifydelunittest12r(self):
+    def test_125_del_unittest12r(self):
         command = "show manager --manager unittest12r.aqd-unittest.ms.com"
         self.notfoundtest(command.split(" "))
 
+    def test_200_not_a_manager(self):
+        ip = self.net["unknown0"].usable[2]
+        command = ["del_manager", "--manager", "unittest00.one-nyp.ms.com"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "unittest00.one-nyp.ms.com [%s] is not a "
+                         "manager." % ip, command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelManager)

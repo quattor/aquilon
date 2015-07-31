@@ -118,12 +118,15 @@ class CommandDelInterfaceAddress(BrokerCommand):
 
         session.flush()
 
+        plenaries = PlenaryCollection(logger=logger)
+        plenaries.append(Plenary.get_plenary(dbhw_ent))
+        if dbhw_ent.host:
+            plenaries.append(Plenary.get_plenary(dbhw_ent.host))
+
         dsdb_runner = DSDBRunner(logger=logger)
 
-        if dbhw_ent.host:
-            plenaries = PlenaryCollection(logger=logger)
-            plenaries.append(Plenary.get_plenary(dbhw_ent.host))
-            with plenaries.transaction():
+        with plenaries.transaction():
+            if dbhw_ent.host:
                 if dbhw_ent.host.archetype.name == 'aurora':
                     logger.client_info("WARNING: removing IP %s from AQDB and "
                                        "*not* changing DSDB." % ip)
@@ -138,8 +141,8 @@ class CommandDelInterfaceAddress(BrokerCommand):
                         dsdb_runner.add_host_details(dbdns_rec.fqdn, ip)
 
                     dsdb_runner.commit_or_rollback("Could not add host to DSDB")
-        else:
-            dsdb_runner.update_host(dbhw_ent, oldinfo)
-            dsdb_runner.commit_or_rollback("Could not add host to DSDB")
+            else:
+                dsdb_runner.update_host(dbhw_ent, oldinfo)
+                dsdb_runner.commit_or_rollback("Could not add host to DSDB")
 
         return
