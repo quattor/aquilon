@@ -30,6 +30,9 @@ class CommandDelNetworkCompartment(BrokerCommand):
         dbnet_comp = NetworkCompartment.get_unique(session, network_compartment,
                                                    compel=True)
 
+        if session.query(Network.id).filter_by(network_compartment=dbnet_comp).first():
+            raise ArgumentError("{0} still has networks defined, delete them "
+                                "first.".format(dbnet_comp))
         session.delete(dbnet_comp)
         session.flush()
         return

@@ -21,7 +21,7 @@ from ipaddr import IPv4Network, AddressValueError, NetmaskValueError
 from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.location import get_location
-from aquilon.aqdb.model import Network, NetworkEnvironment
+from aquilon.aqdb.model import Network, NetworkEnvironment, NetworkCompartment
 from aquilon.aqdb.model.network import get_net_id_from_ip
 
 
@@ -31,7 +31,7 @@ class CommandAddNetwork(BrokerCommand):
 
     def render(self, session, dbuser,
                network, ip, network_environment, type, side, comments, logger,
-               netmask, prefixlen, mask, **arguments):
+               netmask, prefixlen, mask, network_compartment, **arguments):
 
         # Handle the different ways of specifying the netmask
         self.require_one_of(netmask=netmask, prefixlen=prefixlen, mask=mask)
@@ -61,6 +61,13 @@ class CommandAddNetwork(BrokerCommand):
                                                              network_environment)
         self.az.check_network_environment(dbuser, dbnet_env)
 
+        if network_compartment:
+            dbcomp = NetworkCompartment.get_unique(session,
+                                                   network_compartment,
+                                                   compel=True)
+        else:
+            dbcomp = None
+
         # Check if the name is free. Network names are not unique in QIP and
         # there is no uniqueness constraint in AQDB, so only warn if the name is
         # already in use.
@@ -84,7 +91,8 @@ class CommandAddNetwork(BrokerCommand):
         # Okay, all looks good, let's create the network
         net = Network(name=network, network=address,
                       network_environment=dbnet_env, network_type=type,
-                      side=side, location=location, comments=comments)
+                      side=side, location=location, comments=comments,
+                      network_compartment=dbcomp)
 
         session.add(net)
         session.flush()

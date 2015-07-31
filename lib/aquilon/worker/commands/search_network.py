@@ -21,7 +21,8 @@ from sqlalchemy.orm import undefer, joinedload, subqueryload
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import (Network, Machine, VlanInfo, PortGroup, Cluster,
-                                ARecord, DynamicStub, NetworkEnvironment)
+                                ARecord, DynamicStub, NetworkEnvironment,
+                                NetworkCompartment)
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.worker.broker import BrokerCommand
@@ -35,7 +36,7 @@ class CommandSearchNetwork(BrokerCommand):
 
     def render(self, session, network, network_environment, ip, type, side,
                machine, fqdn, cluster, pg, has_dynamic_ranges, exact_location,
-               fullinfo, style, **arguments):
+               fullinfo, style, network_compartment, **arguments):
         """Return a network matching the parameters.
 
         Some of the search terms can only return a unique network.  For
@@ -58,6 +59,11 @@ class CommandSearchNetwork(BrokerCommand):
             q = q.filter_by(network_type=type)
         if side:
             q = q.filter_by(side=side)
+        if network_compartment:
+            dbcomp = NetworkCompartment.get_unique(session,
+                                                   network_compartment,
+                                                   compel=True)
+            q = q.filter_by(network_compartment=dbcomp)
         if machine:
             dbmachine = Machine.get_unique(session, machine, compel=True)
             # If this is a VM, consult the port groups.  There

@@ -799,6 +799,7 @@
 	<optgroup mandatory="True">
 	    <option name="network" type="string">Network name</option>
 	    <option name="network_environment" type="string">Network environment (default: internal)</option>
+	    <option name="network_compartment" type="string">Network compartment</option>
 	    <option name="ip" type="ipv4">IP address of the network or contained in the network</option>
 	    <option name="type" type="string">Network type</option>
 	    <option name="side" type="string">Network side</option>
@@ -1590,6 +1591,7 @@
 	</optgroup>
 	<optgroup>
 	    <option name="network_environment" type="string">Network environment (default: internal)</option>
+	    <option name="network_compartment" type="string">Network compartment</option>
 	    <option name="type" type="string">Network type, defaults to 'unknown'</option>
 	    <option name="side" type="string">Network side, defaults to 'a'</option>
 	    <option name="comments" type="string">Comments</option>
@@ -1627,6 +1629,7 @@
 	    <option name="side" type="string">Network side</option>
 	    <option name="comments" type="string">Comments</option>
 	    <option name="network_environment" type="string">Network environment (default: internal)</option>
+	    <option name="network_compartment" type="string">Network compartment</option>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
 	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
 	</optgroup>

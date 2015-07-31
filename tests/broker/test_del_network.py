@@ -99,6 +99,11 @@ class TestDelNetwork(TestBrokerCommand):
         command = ["del", "network", "--ip", net.ip]
         self.noouttest(command)
 
+    def testdelnetutdmz1(self):
+        net = self.net["ut_dmz1"]
+        command = ["del", "network", "--ip", net.ip]
+        self.noouttest(command)
+
     def testdelnetperssvcmap(self):
         net = self.net["netperssvcmap"]
         command = ["del", "network", "--ip", net.ip]

@@ -31,7 +31,8 @@ from sqlalchemy.pool import Pool
 from sqlalchemy.sql import and_, not_, func, literal_column
 
 from aquilon.exceptions_ import NotFoundException, InternalError
-from aquilon.aqdb.model import Base, Location, NetworkEnvironment
+from aquilon.aqdb.model import (Base, Location, NetworkEnvironment,
+                                NetworkCompartment)
 from aquilon.aqdb.column_types import AqStr, IPV4
 from aquilon.config import Config
 
@@ -112,6 +113,9 @@ class Network(Base):
     network_environment_id = Column(ForeignKey(NetworkEnvironment.id),
                                     nullable=False)
 
+    network_compartment_id = Column(ForeignKey(NetworkCompartment.id),
+                                    nullable=True)
+
     location_id = Column(ForeignKey(Location.id), nullable=False, index=True)
 
     network_type = Column(AqStr(32), nullable=False)
@@ -126,6 +130,8 @@ class Network(Base):
     comments = deferred(Column(String(255), nullable=True))
 
     network_environment = relation(NetworkEnvironment, innerjoin=True)
+
+    network_compartment = relation(NetworkCompartment, innerjoin=True)
 
     location = relation(Location, innerjoin=True)
 
