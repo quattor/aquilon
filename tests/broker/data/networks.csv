@@ -46,6 +46,8 @@ np06bals03_v103,4.2.22.64/26,unknown,True,bunker,nyb10.np,b,Some network comment
 notbunkerized,4.2.23.0/26,unknown,True,building,np,b,,
 refreshtest1,4.2.24.0/25,unknown,False,building,np,b,,
 refreshtest2,4.2.25.88/29,unknown,False,building,np,b,,
+refreshtest3,4.2.25.96/29,unknown,True,building,np,a,,
+refreshtest4,4.2.25.104/29,unknown,True,building,bu,a,,
 reserved_dont_use_1,4.2.26.0/24,transit,False,building,ut,a,,
 reserved_dont_use_2,4.2.27.0/24,transit,False,building,ut,a,,
 reserved_dont_use_3,4.2.28.0/24,vip,False,building,ut,a,,

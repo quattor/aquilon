@@ -23,7 +23,7 @@ import heapq
 from aquilon.exceptions_ import PartialError
 from aquilon.aqdb.model import (NetworkEnvironment, Network, RouterAddress,
                                 ARecord, DnsEnvironment, AddressAssignment,
-                                Building, Bunker)
+                                Building, Bunker, NetworkCompartment)
 from aquilon.worker.dbwrappers.dns import delete_dns_record
 from aquilon.worker.dbwrappers.network import fix_foreign_links
 
@@ -42,15 +42,17 @@ def heap_pop(heap):
 
 class QIPInfo(object):
     __slots__ = ("name", "address", "location", "network_type", "side",
-                 "routers")
+                 "routers", "compartment")
 
-    def __init__(self, name, address, location, network_type, side, routers):
+    def __init__(self, name, address, location, network_type,
+                 side, routers, compartment):
         self.name = name
         self.address = address
         self.location = location
         self.network_type = network_type
         self.side = side
         self.routers = routers
+        self.compartment = compartment
 
     def __cmp__(self, other):
         # The refresh algorithm depends on QIPInfo objects being ordered by the
@@ -79,15 +81,19 @@ class QIPRefresh(object):
                               for item in session.query(Building))
         self.bunkers = dict((item.name, item)
                             for item in session.query(Bunker))
+        self.compartments = dict((item.name, item)
+                                 for item in session.query(NetworkCompartment))
 
         # Used to limit the number of warnings
         self.unknown_syslocs = set()
+        self.unknown_compartments = set()
 
         # Load existing networks. We have to load all, otherwise we won't be
         # able to fix networks with wrong location
         q = session.query(Network)
         q = q.filter_by(network_environment=self.net_env)
-        q = q.options(subqueryload("routers"))
+        q = q.options(subqueryload("routers"),
+                      subqueryload('network_compartment'))
         self.aqnetworks = dict((item.ip, item) for item in q)
 
         # Save how many networks we had initially
@@ -130,6 +136,7 @@ class QIPRefresh(object):
         network_type = "unknown"
         side = "a"
         routers = []
+        compartment = None
 
         fields = line.split("\t")
         for field in fields:
@@ -208,6 +215,15 @@ class QIPRefresh(object):
             if "SIDE" in qipinfo["UDF"]:
                 side = qipinfo["UDF"]["SIDE"].strip().lower()
 
+            if "COMPARTMENT" in qipinfo["UDF"]:
+                compartment_name = qipinfo["UDF"]["COMPARTMENT"].strip().lower()
+                if compartment_name in self.compartments:
+                    compartment = self.compartments[compartment_name]
+                elif compartment not in self.unknown_compartments:
+                    self.logger.client_info("Unknown compartment %s,"
+                                            " ignoring" % compartment_name)
+                    self.unknown_compartments.add(compartment)
+
         # FIXME: How to handle networks with no location? dsdb maps them to
         # sysloc "xx.ny.na", so mimic that for now
         if not location:
@@ -218,7 +234,8 @@ class QIPRefresh(object):
                 return None
 
         return QIPInfo(name=name, address=address, location=location,
-                       network_type=network_type, side=side, routers=routers)
+                       network_type=network_type, side=side,
+                       routers=routers, compartment=compartment)
 
     def update_network(self, dbnetwork, qipinfo):
         """ Update the network parameters except the netmask """
@@ -239,6 +256,10 @@ class QIPRefresh(object):
             self.logger.client_info("Setting network {0!s} side to {1}"
                                     .format(dbnetwork, qipinfo.side))
             dbnetwork.side = qipinfo.side
+        if dbnetwork.network_compartment != qipinfo.compartment:
+            self.logger.client_info("Setting network {0!s} compartment to {1}"
+                                    .format(dbnetwork, qipinfo.compartment))
+            dbnetwork.network_compartment = qipinfo.compartment
 
         old_rtrs = set(dbnetwork.router_ips)
         new_rtrs = set(qipinfo.routers)
@@ -266,7 +287,8 @@ class QIPRefresh(object):
         dbnetwork = Network(name=qipinfo.name, network=qipinfo.address,
                             network_type=qipinfo.network_type,
                             side=qipinfo.side, location=qipinfo.location,
-                            network_environment=self.net_env)
+                            network_environment=self.net_env,
+                            network_compartment=qipinfo.compartment)
         self.session.add(dbnetwork)
         self.logger.client_info("Adding network {0!s}".format(dbnetwork))
         for ip in qipinfo.routers:

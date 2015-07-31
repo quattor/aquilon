@@ -1,6 +1,8 @@
 SubnetAddress 4.2.24.0	SubnetMask 255.255.255.128	SubnetId 37760	SubnetName refreshtest1	DHCPServer pispm2.ms.com	DefaultRouters 4.2.24.1,4.2.24.2	DHCPOptionTemplate np.nt.b	UDF LOCATION=np.ny.na;SIDE=b
 SubnetAddress 4.2.22.64	SubnetMask 255.255.255.192	SubnetId 62708	SubnetName np06bals03_v103	DHCPServer hqfid1.ms.com	DefaultRouters 4.2.22.65,4.2.22.66	DHCPOptionTemplate np.nt.a	UDF LOCATION=np.ny.na;SIDE=a
 SubnetAddress 4.2.23.0	SubnetMask 255.255.255.192	SubnetId 65362	SubnetName notbunkerized	DHCPServer hqfid1.ms.com	DefaultRouters 4.2.23.1	DHCPOptionTemplate np.nt.a	UDF LOCATION=np.ny.na;SIDE=a
+SubnetAddress 4.2.25.104	SubnetMask 255.255.255.248	SubnetId 37528	SubnetName refreshtest4	DHCPServer hqfid1.ms.com	DHCPOptionTemplate bu.nt.a	UDF LOCATION=bu.ny.na;SIDE=a;COMPARTMENT=nonexistant
+SubnetAddress 4.2.25.96	SubnetMask 255.255.255.248	SubnetId 37527	SubnetName refreshtest3	DHCPServer hqfid1.ms.com	DHCPOptionTemplate np.nt.a	UDF LOCATION=np.ny.na;SIDE=a;COMPARTMENT=interior.ut
 SubnetAddress 4.2.25.88	SubnetMask 255.255.255.248	SubnetId 37526	SubnetName refreshtest2	DHCPServer hqfid1.ms.com	DHCPOptionTemplate hq.nt.a	UDF LOCATION=hq.ny.na;SIDE=a
 SubnetAddress 4.2.24.0	SubnetMask 255.255.255.128	SubnetId 37760	SubnetName refreshtest1	DHCPServer pispm2.ms.com	DefaultRouters 4.2.24.1,4.2.24.2	DHCPOptionTemplate np.nt.b	UDF LOCATION=np.ny.na;SIDE=b
 SubnetAddress 4.2.8.224	SubnetMask 255.255.255.224	SubnetId 61770	SubnetName refresh_bunker	DHCPServer pispm2.ms.com	DefaultRouters 4.2.8.225,4.2.8.226	DHCPOptionTemplate np.nt.m	UDF BUCKET=NYB10;LOCATION=np.ny.na;SIDE=b;TYPE=transit
