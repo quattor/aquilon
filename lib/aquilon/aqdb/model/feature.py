@@ -175,22 +175,16 @@ class FeatureLink(Base):
                                     nullable=False))
 
     feature = relation(Feature, innerjoin=True,
-                       backref=backref('links',
-                                       cascade='all, delete-orphan'))
+                       backref=backref('links', passive_deletes=True))
 
     model = relation(Model,
-                     backref=backref('features',
-                                     cascade='all, delete-orphan',
-                                     passive_deletes=True))
+                     backref=backref('features', passive_deletes=True))
 
     archetype = relation(Archetype,
-                         backref=backref('features',
-                                         cascade='all, delete-orphan',
-                                         passive_deletes=True))
+                         backref=backref('features', passive_deletes=True))
 
     personality_stage = relation(PersonalityStage,
                                  backref=backref('features',
-                                                 cascade='all, delete-orphan',
                                                  passive_deletes=True))
 
     # The behavior of UNIQUE constraints in the presence of NULL columns is not
