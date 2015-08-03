@@ -42,6 +42,11 @@ _aq_complete_cluster ()
     $_aq_sqlite $_aq_datawarehouse/clusters.db "select name from cluster where name glob '$1*'"
 }
 
+_aq_complete_metacluster ()
+{
+    $_aq_sqlite $_aq_datawarehouse/clusters.db "select name from metacluster where name glob '$1*'"
+}
+
 _aq_complete_building ()
 {
     $_aq_sqlite $_aq_datawarehouse/geography.db "select name from geography where loctype = 'building' and name glob '$1*'"
