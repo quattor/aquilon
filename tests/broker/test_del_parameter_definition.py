@@ -47,6 +47,42 @@ class TestDelParameterDefinition(TestBrokerCommand):
         self.check_plenary_gone("aquilon", "personality", "utpersonality",
                                 "foo")
 
+    def test_110_del_feature(self):
+        for path, params in default_param_defs.items():
+            if "activation" in params:
+                continue
+
+            cmd = ["del_parameter_definition", "--feature", "myfeature",
+                   "--type=host", "--path", path]
+            self.noouttest(cmd)
+
+        for path in ["startslash", "endslash"]:
+            cmd = ["del_parameter_definition", "--feature", "myfeature",
+                   "--type=host", "--path", path]
+            self.noouttest(cmd)
+
+    def test_115_verify_delete(self):
+        cmd = ["search_parameter_definition", "--feature", "myfeature", "--type=host"]
+        self.noouttest(cmd)
+
+    def test_200_del_bad_feature_type(self):
+        cmd = ["del_parameter_definition", "--feature", "pre_host",
+               "--type=no-such-type", "--path=testpath"]
+        err = self.badrequesttest(cmd)
+        self.matchoutput(err,
+                         "Unknown feature type 'no-such-type'. The valid "
+                         "values are: hardware, host, interface.",
+                         cmd)
+
+    def test_200_del_bad_feature_path(self):
+        cmd = ["del_parameter_definition", "--feature", "myfeature",
+               "--type", "host", "--path", "path-does-not-exist"]
+        out = self.notfoundtest(cmd)
+        self.matchoutput(out,
+                         "Parameter Definition path-does-not-exist, "
+                         "parameter definition holder myfeature not found.",
+                         cmd)
+
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelParameterDefinition)
     unittest.TextTestRunner(verbosity=2).run(suite)

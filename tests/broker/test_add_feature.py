@@ -36,6 +36,10 @@ default_features = {
             "visibility": "public",
             "post_personality": True,
         },
+        "pre_host_no_params": {
+            "visibility": "public",
+            "comments": "Feature which will not have any parameters",
+        },
         "myfeature": {
             "visibility": "public",
         },
@@ -128,6 +132,8 @@ class TestAddFeature(TestBrokerCommand):
                     command.extend(["--deactivation", params["deactivation"]])
                 if params.get("post_personality", False):
                     command.append("--post_personality")
+                if "comments" in params:
+                    command.extend(["--comments", params["comments"]])
 
                 self.noouttest(command)
 

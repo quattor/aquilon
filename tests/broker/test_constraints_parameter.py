@@ -32,6 +32,14 @@ class TestParameterConstraints(TestBrokerCommand):
         out = self.badrequesttest(cmd)
         self.matchoutput(out, "Parameter with path espinfo/function used by following and cannot be deleted", cmd)
 
+    # This test should eventually be here, but parameter tests need to be
+    # re-organized first
+    #def test_110_feature_validation(self):
+    #    cmd = ["del_parameter_definition", "--feature", "myfeature", "--type=host",
+    #           "--path=teststring"]
+    #    out = self.badrequesttest(cmd)
+    #    self.matchoutput(out, "Parameter with path teststring used by following and cannot be deleted", cmd)
+
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestParameterConstraints)
     unittest.TextTestRunner(verbosity=2).run(suite)

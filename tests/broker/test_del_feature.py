@@ -27,6 +27,7 @@ from brokertest import TestBrokerCommand
 default_features = {
     "host": ["pre_host",
              "pre_host_param",
+             "pre_host_no_params",
              "post_host",
              "myfeature",
              "hostfeature",

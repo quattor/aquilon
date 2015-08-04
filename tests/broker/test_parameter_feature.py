@@ -153,6 +153,13 @@ class TestParameterFeature(TestBrokerCommand):
                           r'include \{ "features/hostfeature/config" \};',
                           cmd)
 
+    # TODO: Move this to test_constraints_parameter
+    def test_125_try_del_paramdef(self):
+        cmd = ["del_parameter_definition", "--feature", "hostfeature", "--type=host",
+               "--path=teststring"]
+        out = self.badrequesttest(cmd)
+        self.matchoutput(out, "Parameter with path teststring used by following and cannot be deleted", cmd)
+
     def test_130_validate(self):
         cmd = VAL_CMD
         out = self.badrequesttest(cmd)
