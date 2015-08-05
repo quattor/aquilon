@@ -340,11 +340,16 @@ class TestParameterFeature(TestBrokerCommand):
                           r'"hardware1",\s*"hardware2"\s*\);\s*'
                           r'"/system/features/hardware/hardwarefeature/teststring" = "hardware_feature";\s*',
                           cmd)
-        self.searchoutput(out, r'include \{\s*'
-                               r'if \(\(value\("/hardware/manufacturer"\) == "ibm"\) &&\s*'
-                               r'\(value\("/hardware/template_name"\) == "hs21-8853"\)\)\{\s*'
-                               r'return\("features/hardware/hardwarefeature"\)\s*'
-                               r'\} else\{ return\(undef\); \};\s*};',
+        self.searchoutput(out,
+                          r'include \{\s*'
+                          r'if \(\(value\("/hardware/manufacturer"\) == "ibm"\) &&\s*'
+                          r'\(value\("/hardware/template_name"\) == "hs21-8853"\)\)\s*\{\s*'
+                          r'if \(exists\("features/hardware/hardwarefeature/config"\)\) \{\s*'
+                          r'"features/hardware/hardwarefeature/config";\s*'
+                          r'\} else \{\s*'
+                          r'"features/hardware/hardwarefeature";\s*'
+                          r'\};\s*'
+                          r'\} else \{\s*undef;\s*\};\s*\};',
                           cmd)
 
     def test_360_add_existing(self):
