@@ -153,10 +153,10 @@ class NetworkFormatter(ObjectFormatter):
         skeleton.type = str(net.network_type)
         skeleton.env_name = str(net.network_environment.name)
 
+        skeleton.routers.extend(str(router.ip) for router in net.routers)
+
         if not indirect_attrs:
             return
-
-        skeleton.routers.extend(str(router.ip) for router in net.routers)
 
         # Bulk load information about anything having a network address on this
         # network
