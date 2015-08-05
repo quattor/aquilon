@@ -270,7 +270,7 @@ class TestParameterFeature(TestBrokerCommand):
 
     def test_310_verify_feature_proto(self):
         cmd = SHOW_CMD + ["--format=proto"]
-        params = self.protobuftest(cmd, expect=14)
+        params = self.protobuftest(cmd, expect=13)
 
         param_values = {}
         for param in params:
@@ -278,7 +278,6 @@ class TestParameterFeature(TestBrokerCommand):
 
         self.assertEqual(set(param_values.keys()),
                          set(["espinfo/class",
-                              "espinfo/threshold",
                               "espinfo/function",
                               "espinfo/users",
                               "features/hostfeature/testboolean",

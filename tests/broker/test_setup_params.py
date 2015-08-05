@@ -113,12 +113,6 @@ AQUILON_PARAM_DEFS = {
             "required": True
         },
         {
-            "path": "espinfo/threshold",
-            "value_type": "int",
-            "description": "espinfo threshold",
-            "required": True
-        },
-        {
             "path": "espinfo/description",
             "value_type": "string",
             "description": "espinfo desc"
@@ -130,13 +124,6 @@ AQUILON_PARAM_DEFS = {
             "value_type": "json",
             "required": True,
             "default": '[{"duration": 8, "start": "08:00", "day": "Sun"}]'
-        }
-    ],
-    "testrebuild": [
-        {
-            "path": "test/rebuild_required",
-            "value_type": "string",
-            "rebuild_required": True
         }
     ],
 }

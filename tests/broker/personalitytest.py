@@ -21,7 +21,6 @@ default_parameters = {
         "espinfo/function": "development",
         "espinfo/class": "INFRASTRUCTURE",
         "espinfo/users": "IT / TECHNOLOGY",
-        "espinfo/threshold": 0
     },
     'hacluster': {
         "espinfo/class": "INFRASTRUCTURE",
