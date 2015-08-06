@@ -26,7 +26,7 @@ class CommandUpdParameterDefintionFeature(BrokerCommand):
     required_parameters = ["feature", "type", "path"]
 
     def render(self, session, feature, type, path, required,
-               rebuild_required, default, description, **kwargs):
+               default, description, **kwargs):
         cls = Feature.polymorphic_subclass(type, "Unknown feature type")
         dbfeature = cls.get_unique(session, name=feature, compel=True)
 
@@ -44,8 +44,6 @@ class CommandUpdParameterDefintionFeature(BrokerCommand):
 
         if required is not None:
             db_paramdef.required = required
-        if rebuild_required is not None:
-            db_paramdef.rebuild_required = rebuild_required
         if description is not None:
             db_paramdef.description = description
 

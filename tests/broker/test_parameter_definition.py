@@ -26,8 +26,16 @@ from broker.brokertest import TestBrokerCommand
 
 ARCHETYPE = 'aquilon'
 
+proto = None
 
 class TestParameterDefinition(TestBrokerCommand):
+
+    def setUp(self):
+        global proto
+
+        super(TestParameterDefinition, self).setUp()
+        proto = self.protocols['aqdsystems_pb2']
+
 
     def test_100_add(self):
         cmd = ["add_parameter_definition", "--archetype", ARCHETYPE,
@@ -141,14 +149,14 @@ class TestParameterDefinition(TestBrokerCommand):
         out = self.badrequesttest(cmd)
         self.matchoutput(out, "Archetype windows is not compileable.", cmd)
 
-    def test_130_rebuild_required(self):
+    def test_130_activation_rebuild(self):
         cmd = ["add_parameter_definition", "--archetype", ARCHETYPE,
                "--path=test_rebuild_required", "--description=rebuild_required",
-               "--template=foo", "--value_type=string", "--rebuild_required"]
+               "--template=foo", "--value_type=string", "--activation=rebuild"]
 
         self.noouttest(cmd)
 
-    def test_135_update_rebuild_required_default(self):
+    def test_135_update_rebuild__default(self):
         cmd = ["update_parameter_definition", "--archetype", ARCHETYPE,
                "--path=test_rebuild_required", "--default=default"]
         out = self.unimplementederrortest(cmd)
@@ -165,43 +173,49 @@ class TestParameterDefinition(TestBrokerCommand):
                           r'Parameter Definition: testpath \[required\]\s*'
                           r'Type: string\s*'
                           r'Template: foo\s*'
-                          r'Default: default',
+                          r'Default: default\s*'
+                          r'Activation: dispatch\s*',
                           cmd)
         self.searchoutput(out,
                           r'Parameter Definition: testdefault\s*'
                           r'Type: string\s*'
-                          r'Template: foo',
+                          r'Template: foo\s*'
+                          r'Activation: dispatch\s*',
                           cmd)
         self.searchoutput(out,
                           r'Parameter Definition: testint\s*'
                           r'Type: int\s*'
                           r'Template: foo\s*'
-                          r'Default: 60',
+                          r'Default: 60\s*'
+                          r'Activation: dispatch\s*',
                           cmd)
         self.searchoutput(out,
                           r'Parameter Definition: testjson\s*'
                           r'Type: json\s*'
                           r'Template: foo\s*'
-                          r"Default: \"{'val1':'val2'}\"",
+                          r'Default: \"{\'val1\':\'val2\'}\"\s*'
+                          r'Activation: dispatch\s*',
                           cmd)
         self.searchoutput(out,
                           r'Parameter Definition: testlist\s*'
                           r'Type: list\s*'
                           r'Template: foo\s*'
-                          r'Default: val1,val2',
+                          r'Default: val1,val2\s*'
+                          r'Activation: dispatch\s*',
                           cmd)
         self.searchoutput(out,
                           r'Parameter Definition: testboolean\s*'
                           r'Type: boolean\s*'
                           r'Template: foo\s*'
-                          r'Default: yes',
+                          r'Default: yes\s*'
+                          r'Activation: dispatch\s*',
                           cmd)
         self.searchoutput(out,
                           r'Parameter Definition: test_rebuild_required\s*'
                           r'Type: string\s*'
                           r'Template: foo\s*'
-                          r'Description: rebuild_required\s*'
-                          r'Rebuild Required: True',
+                          r'Activation: rebuild\s*'
+                          r'Description: rebuild_required\s*',
                           cmd)
 
     def test_145_verify_add(self):
@@ -212,48 +226,55 @@ class TestParameterDefinition(TestBrokerCommand):
         self.assertEqual(param_defs[0].path, 'test_rebuild_required')
         self.assertEqual(param_defs[0].value_type, 'string')
         self.assertEqual(param_defs[0].template, 'foo')
-        self.assertEqual(param_defs[0].rebuild_required, True)
+        self.assertEqual(param_defs[0].activation, proto.REBUILD)
 
         self.assertEqual(param_defs[1].path, 'testboolean')
         self.assertEqual(param_defs[1].value_type, 'boolean')
         self.assertEqual(param_defs[1].template, 'foo')
         self.assertEqual(param_defs[1].default, 'yes')
+        self.assertEqual(param_defs[1].activation, proto.DISPATCH)
 
         self.assertEqual(param_defs[2].path, 'testdefault')
         self.assertEqual(param_defs[2].value_type, 'string')
         self.assertEqual(param_defs[2].template, 'foo')
         self.assertEqual(param_defs[2].default, '')
+        self.assertEqual(param_defs[2].activation, proto.DISPATCH)
 
         self.assertEqual(param_defs[3].path, 'testfloat')
         self.assertEqual(param_defs[3].value_type, 'float')
         self.assertEqual(param_defs[3].template, 'foo')
         self.assertEqual(param_defs[3].default, '100.100')
+        self.assertEqual(param_defs[3].activation, proto.DISPATCH)
 
         self.assertEqual(param_defs[4].path, 'testint')
         self.assertEqual(param_defs[4].value_type, 'int')
         self.assertEqual(param_defs[4].template, 'foo')
         self.assertEqual(param_defs[4].default, '60')
+        self.assertEqual(param_defs[4].activation, proto.DISPATCH)
 
         self.assertEqual(param_defs[5].path, 'testjson')
         self.assertEqual(param_defs[5].value_type, 'json')
         self.assertEqual(param_defs[5].template, 'foo')
         self.assertEqual(param_defs[5].default, u'"{\'val1\':\'val2\'}"')
+        self.assertEqual(param_defs[5].activation, proto.DISPATCH)
 
         self.assertEqual(param_defs[6].path, 'testlist')
         self.assertEqual(param_defs[6].value_type, 'list')
         self.assertEqual(param_defs[6].template, 'foo')
         self.assertEqual(param_defs[6].default, "val1,val2")
+        self.assertEqual(param_defs[6].activation, proto.DISPATCH)
 
         self.assertEqual(param_defs[7].path, 'testpath')
         self.assertEqual(param_defs[7].value_type, 'string')
         self.assertEqual(param_defs[7].template, 'foo')
         self.assertEqual(param_defs[7].default, 'default')
         self.assertEqual(param_defs[7].is_required, True)
+        self.assertEqual(param_defs[7].activation, proto.DISPATCH)
 
     def test_146_update(self):
         cmd = ["update_parameter_definition", "--archetype", ARCHETYPE,
                "--path=testint", "--description=testint",
-               "--default=100", "--required"]
+               "--default=100", "--required", "--activation=reboot"]
         out = self.statustest(cmd)
         self.matchoutput(out, "You need to run 'aq flush --personalities' for "
                          "the change of the default value to take effect.", cmd)
@@ -266,8 +287,8 @@ class TestParameterDefinition(TestBrokerCommand):
                           r'Type: int\s*'
                           r'Template: foo\s*'
                           r'Default: 100\s*'
-                          r'Description: testint\s*'
-                          r'Rebuild Required: False',
+                          r'Activation: reboot\s*'
+                          r'Description: testint\s*',
                           cmd)
 
     def test_150_del_validation(self):
@@ -333,8 +354,8 @@ class TestParameterDefinition(TestBrokerCommand):
 
     def test_230_add_rebuild_default(self):
         cmd = ["add_parameter_definition", "--archetype", ARCHETYPE,
-               "--path=test_rebuild_required_default", "--default=default",
-               "--template=foo", "--value_type=string", "--rebuild_required"]
+               "--path=test_rebuild_default", "--default=default",
+               "--template=foo", "--value_type=string", "--activation=rebuild"]
         out = self.unimplementederrortest(cmd)
         self.matchoutput(out, "Setting a default value for a parameter which "
                          "requires rebuild would cause all existing hosts to "

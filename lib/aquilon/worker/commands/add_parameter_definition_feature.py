@@ -26,7 +26,7 @@ class CommandAddParameterDefintionFeature(BrokerCommand):
     required_parameters = ["feature", "type", "path", "value_type"]
 
     def render(self, session, feature, type, path, value_type, required,
-               rebuild_required, default, description, **kwargs):
+               default, description, **kwargs):
         cls = Feature.polymorphic_subclass(type, "Unknown feature type")
         dbfeature = cls.get_unique(session, name=feature, compel=True)
 
@@ -41,6 +41,7 @@ class CommandAddParameterDefintionFeature(BrokerCommand):
 
         validate_param_definition(path, value_type, default)
 
+        ## activation field  has been skipped on purpose
         ParamDefinition.get_unique(session, path=path,
                                    holder=dbfeature.param_def_holder, preclude=True)
 
@@ -48,7 +49,6 @@ class CommandAddParameterDefintionFeature(BrokerCommand):
                                       holder=dbfeature.param_def_holder,
                                       value_type=value_type, default=default,
                                       required=required,
-                                      rebuild_required=rebuild_required,
                                       description=description)
         session.add(db_paramdef)
 

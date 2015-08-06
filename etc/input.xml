@@ -6346,7 +6346,7 @@
 	    <option name="required" type="flag">Is this parameter required for object compilation </option>
 	    <option name="default" type="string">Default value </option>
 	    <option name="description" type="string">Description</option>
-	    <option name="rebuild_required" type="flag">Adding/Modifiying this parameter value requires rebuild of host </option>
+	    <option name="activation" type="string" conflicts="feature type">How the parameter gets activated, valid values are rebuild, reboot, dispatch(default)</option>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
 	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
 	</optgroup>
@@ -6390,7 +6390,7 @@
 	    <option name="required" type="flag">Is this parameter required for object compilation </option>
 	    <option name="default" type="string">Default value </option>
 	    <option name="description" type="string">Description</option>
-	    <option name="rebuild_required" type="flag">Adding/Modifiying this parameter value requires rebuild of host </option>
+            <option name="activation" type="string" conflicts="feature type">Update how the parameter gets activated, valid values are rebuild, reboot, dispatch</option>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
 	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
 	</optgroup>

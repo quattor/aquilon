@@ -26,7 +26,7 @@ class CommandAddParameterDefintionArchetype(BrokerCommand):
     required_parameters = ["archetype", "template", "path", "value_type"]
 
     def render(self, session, logger, archetype, template, path, value_type,
-               required, rebuild_required, default, description, **kwargs):
+               required, activation, default, description, **kwargs):
         dbarchetype = Archetype.get_unique(session, archetype, compel=True)
         if not dbarchetype.is_compileable:
             raise ArgumentError("{0} is not compileable.".format(dbarchetype))
@@ -40,7 +40,9 @@ class CommandAddParameterDefintionArchetype(BrokerCommand):
         if path.endswith("/"):
             path = path[:-1]
 
-        if rebuild_required and default:
+        if not activation:
+            activation = 'dispatch'
+        if activation == 'rebuild' and default:
             raise UnimplementedError("Setting a default value for a parameter "
                                      "which requires rebuild would cause all "
                                      "existing hosts to require a rebuild, "
@@ -55,7 +57,7 @@ class CommandAddParameterDefintionArchetype(BrokerCommand):
                                       holder=dbarchetype.param_def_holder,
                                       value_type=value_type, default=default,
                                       required=required, template=template,
-                                      rebuild_required=rebuild_required,
+                                      activation=activation,
                                       description=description)
         session.add(db_paramdef)
 

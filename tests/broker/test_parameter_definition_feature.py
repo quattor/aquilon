@@ -125,12 +125,6 @@ class TestParameterDefinitionFeature(TestBrokerCommand):
         err = self.badrequesttest(cmd)
         self.matchoutput(err, "The json string specified for default for path=testbadjson is invalid", cmd)
 
-    def test_130_rebuild_required(self):
-        cmd = ["add_parameter_definition", "--feature", FEATURE, "--type=host",
-               "--path=test_rebuild_required", "--value_type=string", "--rebuild_required"]
-
-        self.noouttest(cmd)
-
     def test_140_verify_add(self):
         cmd = ["search_parameter_definition", "--feature", FEATURE, "--type=host"]
 
@@ -159,55 +153,45 @@ class TestParameterDefinitionFeature(TestBrokerCommand):
                           r'Type: list\s*'
                           r'Default: val1,val2',
                           cmd)
-        self.searchoutput(out,
-                          r'Parameter Definition: test_rebuild_required\s*'
-                          r'Type: string\s*'
-                          r'Rebuild Required: True',
-                          cmd)
 
     def test_145_verify_add(self):
         cmd = ["search_parameter_definition", "--feature", FEATURE, "--format=proto", "--type=host"]
-        param_defs = self.protobuftest(cmd, expect=8)[:]
+        param_defs = self.protobuftest(cmd, expect=7)[:]
         param_defs.sort(key=lambda x: x.path)
 
-        self.assertEqual(param_defs[0].path, 'test_rebuild_required')
-        self.assertEqual(param_defs[0].value_type, 'string')
-        self.assertEqual(param_defs[0].rebuild_required, True)
+        self.assertEqual(param_defs[0].path, 'testboolean')
+        self.assertEqual(param_defs[0].value_type, 'boolean')
+        self.assertEqual(param_defs[0].default, 'yes')
 
-        self.assertEqual(param_defs[1].path, 'testboolean')
-        self.assertEqual(param_defs[1].value_type, 'boolean')
-        self.assertEqual(param_defs[1].default, 'yes')
+        self.assertEqual(param_defs[1].path, 'testdefault')
+        self.assertEqual(param_defs[1].value_type, 'string')
+        self.assertEqual(param_defs[1].default, '')
 
-        self.assertEqual(param_defs[2].path, 'testdefault')
-        self.assertEqual(param_defs[2].value_type, 'string')
-        self.assertEqual(param_defs[2].default, '')
+        self.assertEqual(param_defs[2].path, 'testfloat')
+        self.assertEqual(param_defs[2].value_type, 'float')
+        self.assertEqual(param_defs[2].default, '100.100')
 
-        self.assertEqual(param_defs[3].path, 'testfloat')
-        self.assertEqual(param_defs[3].value_type, 'float')
-        self.assertEqual(param_defs[3].default, '100.100')
+        self.assertEqual(param_defs[3].path, 'testint')
+        self.assertEqual(param_defs[3].value_type, 'int')
+        self.assertEqual(param_defs[3].default, '60')
 
-        self.assertEqual(param_defs[4].path, 'testint')
-        self.assertEqual(param_defs[4].value_type, 'int')
-        self.assertEqual(param_defs[4].default, '60')
+        self.assertEqual(param_defs[4].path, 'testjson')
+        self.assertEqual(param_defs[4].value_type, 'json')
+        self.assertEqual(param_defs[4].default, u'"{\'val1\':\'val2\'}"')
 
-        self.assertEqual(param_defs[5].path, 'testjson')
-        self.assertEqual(param_defs[5].value_type, 'json')
-        self.assertEqual(param_defs[5].default, u'"{\'val1\':\'val2\'}"')
+        self.assertEqual(param_defs[5].path, 'testlist')
+        self.assertEqual(param_defs[5].value_type, 'list')
+        self.assertEqual(param_defs[5].default, "val1,val2")
 
-        self.assertEqual(param_defs[6].path, 'testlist')
-        self.assertEqual(param_defs[6].value_type, 'list')
-        self.assertEqual(param_defs[6].default, "val1,val2")
-
-        self.assertEqual(param_defs[7].path, 'testpath')
-        self.assertEqual(param_defs[7].value_type, 'string')
-        self.assertEqual(param_defs[7].default, 'default')
-        self.assertEqual(param_defs[7].is_required, True)
+        self.assertEqual(param_defs[6].path, 'testpath')
+        self.assertEqual(param_defs[6].value_type, 'string')
+        self.assertEqual(param_defs[6].default, 'default')
+        self.assertEqual(param_defs[6].is_required, True)
 
     def test_146_update(self):
         cmd = ["update_parameter_definition", "--feature", FEATURE, "--type=host",
                "--path=testint", "--description=testint",
-               "--default=100", "--required",
-               "--rebuild_required"]
+               "--default=100", "--required"]
         self.noouttest(cmd)
 
     def test_147_verify_add(self):
@@ -217,8 +201,7 @@ class TestParameterDefinitionFeature(TestBrokerCommand):
                           r'Parameter Definition: testint \[required\]\s*'
                           r'Type: int\s*'
                           r'Default: 100\s*'
-                          r'Description: testint\s*'
-                          r'Rebuild Required: True',
+                          r'Description: testint\s*',
                           cmd)
 
     def test_150_del_validation(self):
@@ -253,7 +236,7 @@ class TestParameterDefinitionFeature(TestBrokerCommand):
 
     def test_200_del(self):
         for path in ['testpath', 'testdefault', 'testint', 'testlist',
-                     'testjson', 'testboolean', 'testfloat', 'test_rebuild_required']:
+                     'testjson', 'testboolean', 'testfloat']:
             cmd = ["del_parameter_definition", "--feature", FEATURE,
                    "--type=host", "--path=%s" % path]
             self.noouttest(cmd)

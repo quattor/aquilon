@@ -20,12 +20,13 @@ from datetime import datetime
 
 from sqlalchemy import (Column, Integer, DateTime, Sequence, String, Boolean,
                         Text, ForeignKey)
-from sqlalchemy.orm import (relation, backref, deferred)
+from sqlalchemy.orm import relation, backref, deferred, validates
 
 from aquilon.aqdb.model import Base, Archetype, Feature
 from aquilon.aqdb.column_types import Enum
 from aquilon.exceptions_ import ArgumentError, InternalError
 from aquilon.aqdb.column_types import AqStr
+from aquilon.aqdb.model.feature import _ACTIVATION_TYPE
 
 _TN = 'param_definition'
 _PARAM_DEF_HOLDER = 'param_def_holder'
@@ -125,8 +126,9 @@ class ParamDefinition(Base):
                        nullable=False, index=True)
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
-    rebuild_required = Column(Boolean(name="%s_rebld_req_ck" % _TN),
-                              nullable=False, default=False)
+
+    activation = Column(Enum(10, _ACTIVATION_TYPE), nullable=True)
+
     holder = relation(ParamDefHolder, innerjoin=True,
                       backref=backref('param_definitions',
                                       cascade='all, delete-orphan'))
@@ -142,3 +144,14 @@ class ParamDefinition(Base):
         valid_types = ", ".join(sorted(_PATH_TYPES))
         raise ArgumentError("Unknown value type '%s'.  The valid types are: "
                             "%s." % (value_type, valid_types))
+
+    @validates('activation')
+    def validate_activation(self, key, activation):
+        """ Utility function for validating the value type """
+        if not activation:
+            return
+        if activation in _ACTIVATION_TYPE:
+            return activation
+        valid_activation = ", ".join(sorted(_ACTIVATION_TYPE))
+        raise ArgumentError("Unknown value for %s. Valid values are: "
+                            "%s." % (key, valid_activation))

@@ -35,9 +35,10 @@ class ParamDefinitionFormatter(ObjectFormatter):
             details.append(indent + "  Template: %s" % paramdef.template)
         if paramdef.default:
             details.append(indent + "  Default: %s" % paramdef.default)
+        if paramdef.activation:
+            details.append(indent + "  Activation: %s" % paramdef.activation)
         if paramdef.description:
             details.append(indent + "  Description: %s" % paramdef.description)
-        details.append(indent + "  Rebuild Required: %s" % paramdef.rebuild_required)
         return "\n".join(details)
 
     def fill_proto(self, paramdef, skeleton, embedded=True,
@@ -45,13 +46,15 @@ class ParamDefinitionFormatter(ObjectFormatter):
         skeleton.path = str(paramdef.path)
         skeleton.value_type = str(paramdef.value_type)
         skeleton.is_required = paramdef.required
-        skeleton.rebuild_required = paramdef.rebuild_required
         if paramdef.template:
             skeleton.template = str(paramdef.template)
         if paramdef.default:
             skeleton.default = str(paramdef.default)
         if paramdef.description:
             skeleton.description = str(paramdef.description)
+        if paramdef.activation:
+           act_type = skeleton.DESCRIPTOR.fields_by_name['activation'].enum_type
+           skeleton.activation = act_type.values_by_name[paramdef.activation.upper()].number
 
     def csv_fields(self, paramdef):
         yield (paramdef.holder.holder_name,
@@ -61,6 +64,6 @@ class ParamDefinitionFormatter(ObjectFormatter):
                paramdef.description,
                paramdef.template,
                paramdef.required,
-               paramdef.rebuild_required)
+               paramdef.activation)
 
 ObjectFormatter.handlers[ParamDefinition] = ParamDefinitionFormatter()
