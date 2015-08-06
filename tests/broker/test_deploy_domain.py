@@ -152,6 +152,16 @@ class TestDeployDomain(TestBrokerCommand):
         sandboxdir = os.path.join(self.sandboxdir, "advanced")
         rmtree(sandboxdir, ignore_errors=True)
 
+    def test_800_deploy_utsandbox(self):
+        # utsandbox contains changes needed to compile test hosts
+        command = ["deploy", "--source", "utsandbox", "--target", "prod",
+                   "--justification", "tcm=12345678"]
+        out = self.statustest(command)
+        for domain in ["prod", "ut-prod", "netinfra"]:
+            self.matchoutput(out,
+                             "Updating the checked out copy of domain %s..." %
+                             domain, command)
+
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDeployDomain)
     unittest.TextTestRunner(verbosity=2).run(suite)
