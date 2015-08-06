@@ -239,7 +239,10 @@ def search_path_in_personas(session, path, param_def_holder):
                     trypath.append(Parameter.feature_path(link, path))
 
             for tpath in trypath:
-                value = param_holder.parameter.get_path(tpath)
+                if param_holder.parameter:
+                    value = param_holder.parameter.get_path(tpath)
+                else:
+                    value = None
                 if value is not None:
                     holder[param_holder] = {path: value}
         except NotFoundException:

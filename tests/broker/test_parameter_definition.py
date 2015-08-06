@@ -296,9 +296,13 @@ class TestParameterDefinition(TestBrokerCommand):
                    "--path=%s" % path]
             self.noouttest(cmd)
 
-    def test_200_verify_delete(self):
+    def test_205_verify_delete(self):
         cmd = ["search_parameter_definition", "--archetype", ARCHETYPE]
         self.noouttest(cmd)
+
+    def test_205_verify_plenary_gone(self):
+        self.check_plenary_gone("aquilon", "personality", "utpersonality",
+                                "foo")
 
     def test_210_invalid_path_cleaned(self):
         for path in ["/startslash", "endslash/"]:
