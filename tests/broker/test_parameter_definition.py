@@ -38,6 +38,17 @@ class TestParameterDefinition(TestBrokerCommand):
         self.matchoutput(out, "You need to run 'aq flush --personalities' for "
                          "the default value to take effect.", cmd)
 
+    def test_105_show_testpath(self):
+        cmd = ["show_parameter_definition", "--archetype", ARCHETYPE,
+               "--path", "testpath"]
+        out = self.commandtest(cmd)
+        self.searchoutput(out,
+                          r'Parameter Definition: testpath \[required\]\s*'
+                          r'Type: string\s*'
+                          r'Template: foo\s*'
+                          r'Default: default',
+                          cmd)
+
     def test_110_add_existing(self):
         cmd = ["add_parameter_definition", "--archetype", ARCHETYPE,
                "--path=testpath", "--value_type=string", "--description=blaah",
@@ -339,6 +350,19 @@ class TestParameterDefinition(TestBrokerCommand):
         self.matchoutput(out, "Setting a default value for a parameter which "
                          "requires rebuild would cause all existing hosts to "
                          "require a rebuild, which is not supported.", cmd)
+
+    def test_240_show_bad_path(self):
+        cmd = ["show_parameter_definition", "--archetype", ARCHETYPE,
+               "--path", "path-does-not-exist"]
+        out = self.notfoundtest(cmd)
+        self.matchoutput(out, "Parameter Definition path-does-not-exist, "
+                         "parameter definition holder aquilon not found.", cmd)
+
+    def test_240_show_archetype_no_params(self):
+        cmd = ["show_parameter_definition", "--archetype", "windows",
+               "--path", "path-does-not-exist"]
+        out = self.notfoundtest(cmd)
+        self.matchoutput(out, "Archetype windows does not have parameters.", cmd)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestParameterDefinition)
