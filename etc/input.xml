@@ -6423,6 +6423,9 @@
 		<option name="type" type="string">Type of the feature: host, hardware or interface</option>
 	    </optgroup>
 	</optgroup>
+	<optgroup>
+	    <option name="template" type="string" requires="archetype">Look for definitions belonging to the given template</option>
+	</optgroup>
 	<transport method="get" trigger="archetype" path="find/archetype/%(archetype)s/parameter_definitions"/>
 	<transport method="get" trigger="feature" path="find/feature/%(type)s/%(feature)s/parameter_definitions"/>
 	<format name="proto" >
