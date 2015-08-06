@@ -62,7 +62,7 @@ default_param_defs = {
     },
     "testjson": {
         "type": "json",
-        "default": "\"{'val1':'val2'}\"",
+        "default": '{"val1": "val2"}',
         "invalid_default": "bad_json",
     },
 }
