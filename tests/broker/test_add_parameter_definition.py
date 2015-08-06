@@ -67,6 +67,12 @@ default_param_defs = {
     },
 }
 
+param_features = {
+    "host": ["myfeature", "hostfeature"],
+    "hardware": ["hardwarefeature"],
+    "interface": ["interfacefeature"],
+}
+
 
 class TestAddParameterDefinition(TestBrokerCommand):
     def setUp(self):
@@ -123,14 +129,14 @@ class TestAddParameterDefinition(TestBrokerCommand):
                    "--path=%s" % path]
             self.noouttest(cmd)
 
-    def test_200_add_feature_all(self):
+    def load_feature_paramdefs(self, feature, feature_type):
         for path, params in default_param_defs.items():
             # Activation cannot be set for feature parameters
             if "activation" in params:
                 continue
 
-            cmd = ["add_parameter_definition", "--feature", "myfeature",
-                   "--type", "host", "--path", path]
+            cmd = ["add_parameter_definition", "--feature", feature,
+                   "--type", feature_type, "--path", path]
             if "type" in params:
                 cmd.extend(["--value_type", params["type"]])
             if "default" in params:
@@ -139,6 +145,11 @@ class TestAddParameterDefinition(TestBrokerCommand):
                 cmd.append("--required")
 
             self.noouttest(cmd)
+
+    def test_200_add_feature_all(self):
+        for feature_type, features in param_features.items():
+            for feature in features:
+                self.load_feature_paramdefs(feature, feature_type)
 
     def test_205_show_testrequired(self):
         cmd = ["show_parameter_definition", "--feature", "myfeature", "--type=host",
