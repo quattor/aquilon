@@ -267,6 +267,35 @@ class TestAddNetwork(TestBrokerCommand):
         self.matchoutput(out, "IP: %s" % net.ip, command)
         self.matchoutput(out, "Netmask: %s" % net.netmask, command)
 
+    def test_800_add_utdmz1_fail(self):
+        network = self.net["ut_dmz1"]
+        command = ["add_network", "--network=%s" % network.name,
+                   "--ip=%s" % network.ip,
+                   "--netmask=%s" % network.netmask,
+                   "--" + network.loc_type, network.loc_name,
+                   "--type=%s" % network.nettype,
+                   "--side=%s" % network.side,
+                   "--network_compartment=noexistant"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out, "Network Compartment noexistant not found.", command)
+
+    def test_801_add_utdmz1(self):
+        network = self.net["ut_dmz1"]
+        command = ["add_network", "--network=%s" % network.name,
+                   "--ip=%s" % network.ip,
+                   "--netmask=%s" % network.netmask,
+                   "--" + network.loc_type, network.loc_name,
+                   "--type=%s" % network.nettype,
+                   "--side=%s" % network.side,
+                   "--network_compartment=perimeter.ut"]
+        self.noouttest(command)
+
+    def test_802_del_utper(self):
+        command = ["del", "network", "compartment",
+                   "--network_compartment", "perimeter.ut"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "still has networks defined", command)
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddNetwork)

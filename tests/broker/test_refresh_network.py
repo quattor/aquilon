@@ -71,7 +71,10 @@ class TestRefreshNetwork(TestBrokerCommand):
         # Technically this could have changed in the last few seconds,
         # but the test seems worth the risk. :)
         err = self.striplock(err)
-        self.assertEmptyErr(err, command)
+        for line in err.rstrip().split('\n'):
+            if line.startswith('Unknown compartment nonexistant'):
+                continue
+            self.fail("Unexpected output '%s'" % line)
 
     # 120 sync up building np dryrun expecting no output
     def test_120_dryrun(self):
@@ -80,7 +83,10 @@ class TestRefreshNetwork(TestBrokerCommand):
         # Technically this also could have changed in the last few seconds,
         # but the test again seems worth the risk. :)
         err = self.striplock(err)
-        self.assertEmptyErr(err, command)
+        for line in err.rstrip().split('\n'):
+            if line.startswith('Unknown compartment nonexistant'):
+                continue
+            self.fail("Unexpected output '%s'" % line)
 
     def test_130_updates(self):
         net = self.net["refreshtest1"]
@@ -317,6 +323,12 @@ class TestRefreshNetwork(TestBrokerCommand):
         command = ["search", "system", "--fqdn", "dummydyn.aqd-unittest.ms.com"]
         self.noouttest(command)
 
+    def test_720_syncbu(self):
+        command = "refresh network --building bu"
+        err = self.statustest(command.split(" "))
+        err = self.striplock(err)
+        self.matchoutput(err, "Unknown compartment nonexistant, ignoring", command)
+
     def test_800_bunker_added(self):
         net = self.net["aurora2"]
         command = ["show", "network", "--ip", net.ip]
@@ -334,6 +346,18 @@ class TestRefreshNetwork(TestBrokerCommand):
         self.matchoutput(out, "Network: np06bals03_v103", command)
         self.matchoutput(out, "IP: %s" % net.ip, command)
         self.matchoutput(out, "Building: np", command)
+
+    def test_800_compartment_set(self):
+        net = self.net["refreshtest3"]
+        command = ["show", "network", "--ip", net.ip]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Network Compartment: interior.ut", command)
+
+    def test_800_compartment_skipped(self):
+        net = self.net["refreshtest4"]
+        command = ["show", "network", "--ip", net.ip]
+        out = self.commandtest(command)
+        self.matchclean(out, "Network Compartment", command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestRefreshNetwork)

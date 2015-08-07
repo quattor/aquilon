@@ -19,13 +19,13 @@
 from aquilon.exceptions_ import NotFoundException, ArgumentError
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.location import get_location
-from aquilon.aqdb.model import Network, NetworkEnvironment
+from aquilon.aqdb.model import Network, NetworkEnvironment, NetworkCompartment
 
 
 class CommandUpdateNetwork(BrokerCommand):
 
     def render(self, session, dbuser, network, ip, network_environment, type,
-               side, comments, **arguments):
+               side, network_compartment, comments, **arguments):
 
         dbnet_env = NetworkEnvironment.get_unique_or_default(session,
                                                              network_environment)
@@ -33,6 +33,14 @@ class CommandUpdateNetwork(BrokerCommand):
 
         if not network and not ip:
             raise ArgumentError("Please specify either --network or --ip.")
+
+        if network_compartment is not None:
+            if not network_compartment:
+                dbcomp = None
+            else:
+                dbcomp = NetworkCompartment.get_unique(session,
+                                                       network_compartment,
+                                                       compel=True)
 
         q = session.query(Network)
         q = q.filter_by(network_environment=dbnet_env)
@@ -54,6 +62,8 @@ class CommandUpdateNetwork(BrokerCommand):
                 dbnetwork.side = side
             if dblocation:
                 dbnetwork.location = dblocation
+            if network_compartment is not None:
+                dbnetwork.network_compartment = dbcomp
             if comments is not None:
                 dbnetwork.comments = comments
 

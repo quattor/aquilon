@@ -43,6 +43,17 @@ class TestUpdateNetwork(TestBrokerCommand):
         self.matchoutput(out, "Network Type: dmz-net", command)
         self.matchoutput(out, "Side: b", command)
 
+    def test_200_update_utdmz1(self):
+        net = self.net["ut_dmz1"]
+        command = ["update_network",
+                   "--ip=%s" % net.ip,
+                   "--network_compartment="]
+        self.noouttest(command)
+
+    def test_201_verify_utdmz1(self):
+        command = ["search", "network", "--network_compartment", "perimeter.ut"]
+        self.noouttest(command)
+
     # There should be a test_constraint_network.py one day...
     def test_900_delinuse(self):
         net = self.net["unknown0"]

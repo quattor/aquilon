@@ -182,6 +182,16 @@ class TestSearchNetwork(TestBrokerCommand):
         self.matchclean(out, str(self.net["dyndhcp0"].ip), command)
         self.matchclean(out, str(self.net["unknown0"].ip), command)
 
+    def testcompartment(self):
+        command = ["search", "network", "--network_compartment", "perimeter.ut"]
+        out = self.commandtest(command)
+        for net in self.net:
+            if net.name == "ut_dmz1":
+                self.matchoutput(out, str(net), command)
+            else:
+                self.matchclean(out, str(net), command)
+
+
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestSearchNetwork)
     unittest.TextTestRunner(verbosity=2).run(suite)

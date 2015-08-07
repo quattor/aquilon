@@ -103,6 +103,8 @@ class NetworkFormatter(ObjectFormatter):
         details.append(self.redirect_raw(network.location, indent + "  "))
         details.append(indent + "  Side: %s" % network.side)
         details.append(indent + "  Network Type: %s" % network.network_type)
+        if network.network_compartment:
+            details.append(indent + "  {0:c}: {0.name}".format(network.network_compartment))
         if network.comments:
             details.append(indent + "  Comments: %s" % network.comments)
 
