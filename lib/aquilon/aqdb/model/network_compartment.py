@@ -43,7 +43,7 @@ class NetworkCompartment(Base):
 
     id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
 
-    name = Column(AqStr(32), nullable=False, unique=True)
+    name = Column(AqStr(64), nullable=False, unique=True)
 
     creation_date = deferred(Column(DateTime, nullable=False,
                                     default=datetime.now))
