@@ -154,6 +154,8 @@ class NetworkFormatter(ObjectFormatter):
         skeleton.env_name = str(net.network_environment.name)
 
         skeleton.routers.extend(str(router.ip) for router in net.routers)
+        if net.network_compartment:
+            skeleton.compartment = str(net.network_compartment.name)
 
         # Look for dynamic DHCP ranges
         range_msg = None

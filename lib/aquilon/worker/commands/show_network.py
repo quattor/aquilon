@@ -37,6 +37,7 @@ class CommandShowNetwork(BrokerCommand):
                    undefer('routers.comments'),
                    undefer('static_routes.comments'),
                    subqueryload("routers"),
+                   subqueryload("network_compartment"),
                    subqueryload("dynamic_stubs")]
         if hosts:
             options.extend([subqueryload("assignments"),
