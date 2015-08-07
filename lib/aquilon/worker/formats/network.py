@@ -319,7 +319,6 @@ class SimpleNetworkList(list):
 
 
 class SimpleNetworkListFormatter(ListFormatter):
-    protocol = "aqdnetworks_pb2"
     fields = ["Network", "IP", "Netmask", "Sysloc", "Country", "Side", "Network Type", "Discoverable", "Discovered", "Comments"]
 
     def format_raw(self, nlist, indent="", embedded=True, indirect_attrs=True):
@@ -336,11 +335,6 @@ class SimpleNetworkListFormatter(ListFormatter):
                                                    "False",
                                                    str(network.comments)])))
         return "\n".join(details)
-
-    def csv_fields(self, network):
-        yield (network.name, network.ip, network.netmask,
-               network.location.sysloc(), network.location.country,
-               network.side, network.network_type, network.comments)
 
     def format_html(self, nlist):
         return "<ul>\n%s\n</ul>\n" % "\n".join(
