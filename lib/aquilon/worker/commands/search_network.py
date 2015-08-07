@@ -28,7 +28,7 @@ from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.formats.list import StringAttributeList
-from aquilon.worker.formats.network import NetworkHostList
+from aquilon.worker.formats.network import NetworkHostList, NetworkList
 
 
 class CommandSearchNetwork(BrokerCommand):
@@ -128,7 +128,4 @@ class CommandSearchNetwork(BrokerCommand):
                            subqueryload("routers"),
                            subqueryload("dynamic_stubs")])
             return NetworkHostList(q.all())
-        if style != 'raw':
-            return q.all()
-        return StringAttributeList(q.all(),
-                                   lambda n: "%s/%s" % (n.ip, n.cidr))
+        return NetworkList(q.all())

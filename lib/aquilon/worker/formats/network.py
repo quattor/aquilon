@@ -312,13 +312,29 @@ class NetworkHostListFormatter(ListFormatter):
 ObjectFormatter.handlers[NetworkHostList] = NetworkHostListFormatter()
 
 
+class NetworkList(list):
+    """By convention, holds a list of networks to be formatted as alist"""
+    pass
+
+class NetworkListFormatter(ListFormatter):
+    def format_raw(self, objects, indent="", embedded=True, indirect_attrs=True):
+        return "\n".join(indent + "%s/%s" % (network.ip, network.cidr)
+                         for network in sorted(objects, key=attrgetter("ip")))
+
+    def format_html(self, nlist):
+        return "<ul>\n%s\n</ul>\n" % "\n".join(
+            """<li><a href="/network/%(ip)s.html">%(ip)s</a></li>"""
+            % {"ip": n.ip} for n in nlist)
+
+ObjectFormatter.handlers[NetworkList] = NetworkListFormatter()
+
+
 class SimpleNetworkList(list):
     """By convention, holds a list of networks to be formatted in a simple
     network map type format."""
     pass
 
-
-class SimpleNetworkListFormatter(ListFormatter):
+class SimpleNetworkListFormatter(NetworkListFormatter):
     fields = ["Network", "IP", "Netmask", "Sysloc", "Country", "Side", "Network Type", "Discoverable", "Discovered", "Comments"]
 
     def format_raw(self, nlist, indent="", embedded=True, indirect_attrs=True):
@@ -336,9 +352,5 @@ class SimpleNetworkListFormatter(ListFormatter):
                                                    str(network.comments)])))
         return "\n".join(details)
 
-    def format_html(self, nlist):
-        return "<ul>\n%s\n</ul>\n" % "\n".join(
-            """<li><a href="/network/%(ip)s.html">%(ip)s</a></li>"""
-            % {"ip": n.ip} for n in nlist)
-
 ObjectFormatter.handlers[SimpleNetworkList] = SimpleNetworkListFormatter()
+
