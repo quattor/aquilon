@@ -258,7 +258,8 @@ class TestAddAquilonHost(TestBrokerCommand):
     def test_145_verify_unittest21_network(self):
         net = self.net["zebra_eth0"]
         ip = net.usable[1]
-        command = ["show", "network", "--ip", net.ip, "--format", "proto"]
+        command = ["show", "network", "--ip", net.ip, "--hosts",
+                   "--format", "proto"]
         network = self.protobuftest(command, expect=1)[0]
         seen = False
         macs = [ip.mac]  # , self.net["zebra_eth1"].usable[1].mac]
@@ -290,7 +291,8 @@ class TestAddAquilonHost(TestBrokerCommand):
     def test_155_verify_unittest22_network(self):
         net = self.net["zebra_eth0"]
         ip = net.usable[2]
-        command = ["show", "network", "--ip", net.ip, "--format", "proto"]
+        command = ["show", "network", "--ip", net.ip, "--hosts",
+                   "--format", "proto"]
         network = self.protobuftest(command, expect=1)[0]
         seen = False
         macs = [ip.mac]  # , self.net["zebra_eth1"].usable[2].mac]

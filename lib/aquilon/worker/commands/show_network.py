@@ -38,7 +38,7 @@ class CommandShowNetwork(BrokerCommand):
                    undefer('static_routes.comments'),
                    subqueryload("routers"),
                    subqueryload("dynamic_stubs")]
-        if hosts or style == "proto":
+        if hosts:
             options.extend([subqueryload("assignments"),
                             joinedload("assignments.interface"),
                             joinedload("assignments.interface.hardware_entity"),

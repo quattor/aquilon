@@ -155,9 +155,65 @@ class NetworkFormatter(ObjectFormatter):
 
         skeleton.routers.extend(str(router.ip) for router in net.routers)
 
-        if not indirect_attrs:
-            return
+        # Look for dynamic DHCP ranges
+        range_msg = None
+        last_ip = None
+        for dynhost in net.dynamic_stubs:
+            if not last_ip or dynhost.ip != last_ip + 1:
+                if last_ip:
+                    range_msg.end = str(last_ip)
+                range_msg = skeleton.dynamic_ranges.add()
+                range_msg.start = str(dynhost.ip)
+            last_ip = dynhost.ip
+        if last_ip:
+            range_msg.end = str(last_ip)
 
+ObjectFormatter.handlers[Network] = NetworkFormatter()
+
+
+class NetworkHostList(list):
+    """Holds a list of networks for which a host list will be formatted
+    """
+    pass
+
+
+class NetworkHostListFormatter(ListFormatter):
+    protocol = "aqdnetworks_pb2"
+
+    def format_raw(self, netlist, indent="", embedded=True,
+                   indirect_attrs=True):
+        details = []
+
+        for network in netlist:
+            # we'll get the header from the existing formatter
+            nfm = NetworkFormatter()
+            details.append(indent + nfm.format_raw(network))
+
+            for addr in network.assignments:
+                iface = addr.interface
+                hw_ent = iface.hardware_entity
+                if addr.fqdns:
+                    names = ", ".join(sorted(str(fqdn) for fqdn in addr.fqdns))
+                else:
+                    names = "unknown"
+                details.append(indent + "  {0:c}: {0.printable_name}, "
+                               "interface: {1.logical_name}, "
+                               "MAC: {2.mac}, IP: {1.ip} ({3})".format(
+                                   hw_ent, addr, iface, names))
+        return "\n".join(details)
+
+    def format_proto(self, result, container, embedded=True, indirect_attrs=True):
+        for item in result:
+            skeleton = container.add()
+            handler = NetworkFormatter()
+            # Use the standard network formatter to fill in the non-host details
+            handler.format_proto(item, skeleton, embedded=embedded,
+                                 indirect_attrs=indirect_attrs)
+            # Use ourself to fill in all of the assignement information
+            self.fill_proto(item, skeleton, embedded=embedded,
+                            indirect_attrs=indirect_attrs)
+
+    def fill_proto(self, net, skeleton, embedded=True, indirect_attrs=True):
         # Bulk load information about anything having a network address on this
         # network
         hw_ids = set(addr.interface.hardware_entity_id for addr in
@@ -252,52 +308,6 @@ class NetworkFormatter(ObjectFormatter):
                     if iface.mac:
                         int_msg.mac = str(iface.mac)
 
-        # Look for dynamic DHCP ranges
-        range_msg = None
-        last_ip = None
-        for dynhost in net.dynamic_stubs:
-            if not last_ip or dynhost.ip != last_ip + 1:
-                if last_ip:
-                    range_msg.end = str(last_ip)
-                range_msg = skeleton.dynamic_ranges.add()
-                range_msg.start = str(dynhost.ip)
-            last_ip = dynhost.ip
-        if last_ip:
-            range_msg.end = str(last_ip)
-
-ObjectFormatter.handlers[Network] = NetworkFormatter()
-
-
-class NetworkHostList(list):
-    """Holds a list of networks for which a host list will be formatted
-    """
-    pass
-
-
-class NetworkHostListFormatter(ListFormatter):
-    protocol = "aqdnetworks_pb2"
-
-    def format_raw(self, netlist, indent="", embedded=True,
-                   indirect_attrs=True):
-        details = []
-
-        for network in netlist:
-            # we'll get the header from the existing formatter
-            nfm = NetworkFormatter()
-            details.append(indent + nfm.format_raw(network))
-
-            for addr in network.assignments:
-                iface = addr.interface
-                hw_ent = iface.hardware_entity
-                if addr.fqdns:
-                    names = ", ".join(sorted(str(fqdn) for fqdn in addr.fqdns))
-                else:
-                    names = "unknown"
-                details.append(indent + "  {0:c}: {0.printable_name}, "
-                               "interface: {1.logical_name}, "
-                               "MAC: {2.mac}, IP: {1.ip} ({3})".format(
-                                   hw_ent, addr, iface, names))
-        return "\n".join(details)
 
 ObjectFormatter.handlers[NetworkHostList] = NetworkHostListFormatter()
 
