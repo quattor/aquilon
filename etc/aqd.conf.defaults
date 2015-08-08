@@ -317,6 +317,8 @@ gzip_output = false
 # only used if gzip_output = true
 transparent_gzip = true
 template_extension = .tpl
+# Max. time a compilation is allowed to take. The value is passed to the "timeout" command verbatim.
+timeout = 30m
 
 [site]
 # Site specific settings
