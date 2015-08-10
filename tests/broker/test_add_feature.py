@@ -304,7 +304,7 @@ class TestAddFeature(TestBrokerCommand):
                    "--visibility", "bad_visibility"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
-                         "Unknown visibility. Valid values are: "
+                         "Unknown value for visibility. Valid values are: "
                          "owner_approved, owner_only, public, restricted.",
                          command)
 

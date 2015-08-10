@@ -75,9 +75,8 @@ class Feature(Base):
         if visibility in _VISIBILITY:
             return visibility
         valid_visibility = ", ".join(sorted(_VISIBILITY))
-        raise ArgumentError("Unknown value for visibility '%s'.  The valid values are: "
-                            "%s." % (visibility, valid_visibility))
-
+        raise ArgumentError("Unknown value for %s. Valid values are: "
+                            "%s." % (key, valid_visibility))
 
 class HostFeature(Feature):
     _class_label = "Host Feature"

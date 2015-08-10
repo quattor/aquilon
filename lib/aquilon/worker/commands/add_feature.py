@@ -19,7 +19,6 @@ import re
 
 from aquilon.exceptions_ import ArgumentError, UnimplementedError
 from aquilon.aqdb.model import Feature
-from aquilon.aqdb.model.feature import _VISIBILITY
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.grn import lookup_grn
 
@@ -56,9 +55,6 @@ class CommandAddFeature(BrokerCommand):
         if not visibility:
             visibility = "restricted"
 
-        if visibility not in _VISIBILITY:
-            raise ArgumentError("Unknown visibility. Valid values are: %s."
-                                % ", ".join(sorted(_VISIBILITY)))
 
         dbfeature = cls(name=feature, post_personality=post_personality,
                         owner_grn=dbgrn, visibility=visibility,
