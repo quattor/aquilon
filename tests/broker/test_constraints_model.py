@@ -2,7 +2,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2009,2010,2012,2013  Contributor
+# Copyright (C) 2015  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Module for testing constraints available after cluster creation."""
+"""Module for testing constraints in commands involving models."""
 
 if __name__ == "__main__":
     import utils
@@ -25,16 +25,21 @@ import unittest2 as unittest
 from brokertest import TestBrokerCommand
 
 
-class TestClusterEarlyConstraints(TestBrokerCommand):
+class TestModelConstraints(TestBrokerCommand):
 
-    def testaddvmwithoutvmhost(self):
-        command = ["add_machine", "--machine=evm1", "--model=utmedium",
-                   "--cluster=utecl1"]
+    def test_100_del_machine_model(self):
+        command = ["del_model", "--model", "hs21-8853", "--vendor", "ibm"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "cannot support VMs", command)
+        self.matchoutput(out, "Model ibm/hs21-8853 is still in use and "
+                         "cannot be deleted.", command)
 
+    def test_120_del_nic_model(self):
+        command = ["del", "model", "--model", "default", "--vendor", "utvirt"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Model utvirt/default is still in use and "
+                         "cannot be deleted.", command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(
-        TestClusterEarlyConstraints)
+        TestModelConstraints)
     unittest.TextTestRunner(verbosity=2).run(suite)

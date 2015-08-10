@@ -25,9 +25,10 @@ if __name__ == "__main__":
 
 import unittest2 as unittest
 from brokertest import TestBrokerCommand
+from broker.personalitytest import PersonalityTestMixin
 
 
-class TestDelPersonality(TestBrokerCommand):
+class TestDelPersonality(PersonalityTestMixin, TestBrokerCommand):
 
     def test_100_del_utpersonality(self):
         command = ["del_personality", "--personality=utpersonality/dev",
@@ -68,17 +69,20 @@ class TestDelPersonality(TestBrokerCommand):
                    "--archetype=aquilon"]
         self.noouttest(command)
 
-    def test_140_del_esx_server(self):
-        command = "del personality --personality esx_server --archetype vmhost"
-        self.noouttest(command.split(" "))
+    def test_140_del_esx(self):
+        self.drop_personality("vmhost", "esx_server")
+        self.drop_personality("vmhost", "vulcan-10g-server-prod")
+        self.drop_personality("vmhost", "vulcan-local-disk")
+        self.drop_personality("vmhost", "vulcan2-server-dev")
+        self.drop_personality("esx_cluster", "vulcan-10g-server-prod")
+        self.drop_personality("esx_cluster", "vulcan-local-disk")
+        self.drop_personality("esx_cluster", "vulcan2-server-dev")
+        self.drop_personality("esx_cluster", "nostage")
 
-    def test_145_del_v1_personalities(self):
-        command = ["del_personality",
-                   "--personality=vulcan-10g-server-prod", "--archetype=vmhost"]
-        self.noouttest(command)
-        command = ["del_personality",
-                   "--personality=metacluster", "--archetype=metacluster"]
-        self.noouttest(command)
+    def test_145_del_metacluster(self):
+        self.drop_personality("metacluster", "metacluster")
+        self.drop_personality("metacluster", "vulcan2")
+        self.drop_personality("metacluster", "vulcan-local-disk")
 
     def test_150_del_camelcase(self):
         self.check_plenary_exists("aquilon", "personality", "camelcase",

@@ -45,6 +45,11 @@ default_maps = {
             "building": ["np"],
         },
     },
+    "chooser_test": {
+        "max_clients": {
+            "building": ["ut"],
+        },
+    },
     "dns": {
         "unittest": {
             "building": ["ut", "cards"],

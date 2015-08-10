@@ -18,6 +18,7 @@
 """Module for testing the del metacluster command."""
 
 from datetime import datetime
+import os
 
 if __name__ == "__main__":
     import utils
@@ -80,6 +81,21 @@ class TestDelMetaCluster(VerifyNotificationsMixin, TestBrokerCommand):
         command = ["del_metacluster", "--metacluster=vulcan1"]
         self.statustest(command)
         self.wait_notification(basetime, 0)
+
+    def test_160_del_utmc8(self):
+        self.statustest(["del_metacluster", "--metacluster=utmc8"])
+
+        self.assertFalse(os.path.exists(os.path.join(
+            self.config.get("broker", "profilesdir"), "clusters",
+            "utmc8" + self.xml_suffix)))
+
+    def test_165_del_utmc9(self):
+        command = ["del_metacluster", "--metacluster=utmc9"]
+        self.statustest(command)
+
+        self.assertFalse(os.path.exists(os.path.join(
+            self.config.get("broker", "profilesdir"), "clusters",
+            "utmc9" + self.xml_suffix)))
 
     def test_200_del_nonexistant(self):
         command = ["del_metacluster",

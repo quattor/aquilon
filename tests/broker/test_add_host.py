@@ -341,6 +341,39 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
         self.noouttest(["del_machine", "--machine", "cardsmachine"])
         self.net.dispose_network(self, "cards_net")
 
+    def test_180_add_utmc8_vmhosts(self):
+        pri_net = self.net["ut14_net"]
+        storage_net = self.net["vm_storage_net"]
+        for i in range(0, 2):
+            hostname = "evh%d.aqd-unittest.ms.com" % (i + 80)
+            machine = "ut14s1p%d" % i
+            ip = pri_net.usable[i]
+            eth0_mac = ip.mac
+            eth1_ip = storage_net.usable[i + 26]
+            eth1_mac = eth1_ip.mac
+
+            self.create_host(hostname, ip, machine,
+                             model="vb1205xm", rack="ut14",
+                             eth0_mac=eth0_mac,
+                             eth1_mac=eth1_mac, eth1_ip=eth1_ip,
+                             osname="esxi", osversion="5.0.0",
+                             archetype="vmhost", personality="vulcan2-server-dev")
+
+    def test_185_add_utmc9_vmhosts(self):
+        # This machine will be moved into the right rack later
+        self.create_host("evh82.aqd-unittest.ms.com",
+                         self.net["ut14_net"].usable[2],
+                         "ut14s1p2", model="vb1205xm", rack="ut3",
+                         archetype="vmhost", personality="vulcan-local-disk",
+                         osname="esxi", osversion="5.0.0",
+                         domain="alt-unittest")
+        self.create_host("evh83.aqd-unittest.ms.com",
+                         self.net["ut14_net"].usable[3],
+                         "ut14s1p3", model="vb1205xm", rack="ut14",
+                         archetype="vmhost", personality="vulcan-local-disk",
+                         osname="esxi", osversion="5.0.0",
+                         domain="alt-unittest")
+
     def test_200_machine_reuse(self):
         ip = self.net["unknown0"].usable[-1]
         command = ["add", "host", "--hostname", "used-already.one-nyp.ms.com",
@@ -437,7 +470,6 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
             eth1_mac = eth1_net.usable[port].mac
             # The virtual machine tests require quite a bit of memory...
             self.create_host(hostname, ip, machine,
-                             interfaces=["eth0", "eth1"],
                              model="vb1205xm", memory=81920, rack="ut10",
                              eth0_mac=eth0_mac, eth1_mac=eth1_mac,
                              archetype="vmhost",
@@ -456,7 +488,6 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
                 eth0_mac = self.net["vmotion_net"].usable[i].mac
                 eth1_mac = self.net["vm_storage_net"].usable[j].mac
                 self.create_machine_verari(machine, rack=rack,
-                                           interfaces=["eth0", "eth1"],
                                            eth0_mac=eth0_mac,
                                            eth1_mac=eth1_mac,
                                            eth1_pg="storage-v701")
@@ -503,7 +534,7 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
                          command)
 
     def test_323_verify_show_ut11s01p1_proto(self):
-        command = ["show_machine","--machine", "ut11s01p1", "--format", "proto"]
+        command = ["show_machine", "--machine", "ut11s01p1", "--format", "proto"]
         machine = self.protobuftest(command, expect=1)[0]
         ifaces = dict((iface.device, iface) for iface in machine.interfaces)
         self.assertIn("eth1", ifaces)
@@ -599,12 +630,11 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
         ip = self.net["zebra_vip"].usable[3]
         self.create_host("infra1.aqd-unittest.ms.com", ip, "ut3c5n13",
                          model="utrackmount", chassis="ut3c5", slot=13,
-                         interfaces=["eth0", "eth1"], zebra=True,
                          eth0_mac=eth0_ip.mac, eth0_ip=eth0_ip,
                          eth0_fqdn="infra1-e0.aqd-unittest.ms.com",
                          eth1_mac=eth1_ip.mac, eth1_ip=eth1_ip,
                          eth1_fqdn="infra1-e1.aqd-unittest.ms.com",
-                         personality="infra")
+                         zebra=True, personality="infra")
 
     def test_435_add_npinfra(self):
         eth0_ip = self.net["unknown0"].usable[35]
@@ -612,12 +642,11 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
         ip = self.net["zebra_vip"].usable[4]
         self.create_host("infra1.one-nyp.ms.com", ip, "np3c5n13",
                          model="utrackmount", chassis="np3c5", slot=13,
-                         interfaces=["eth0", "eth1"], zebra=True,
                          eth0_mac=eth0_ip.mac, eth0_ip=eth0_ip,
                          eth0_fqdn="infra1-e0.one-nyp.ms.com",
                          eth1_mac=eth1_ip.mac, eth1_ip=eth1_ip,
                          eth1_fqdn="infra1-e1.one-nyp.ms.com",
-                         personality="infra")
+                         zebra=True, personality="infra")
 
     def test_440_add_jack_host(self):
         ip = self.net["unknown0"].usable[17]

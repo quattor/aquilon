@@ -63,10 +63,18 @@ class TestDelESXCluster(TestBrokerCommand):
             self.successtest(command)
 
     def test_130_del_utmc7(self):
-        self.successtest(["del_esx_cluster", "--cluster=utecl13"])
+        self.successtest(["del_esx_cluster", "--cluster=utecl11"])
 
     def test_140_del_sandboxmc(self):
         self.successtest(["del_esx_cluster", "--cluster=sandboxcl1"])
+
+    def test_150_del_utmc8(self):
+        self.statustest(["del_cluster", "--cluster", "utecl12"])
+        self.statustest(["del_cluster", "--cluster", "utecl13"])
+
+    def test_155_del_utmc9(self):
+        self.statustest(["del_cluster", "--cluster", "utecl14"])
+        self.statustest(["del_cluster", "--cluster", "utecl15"])
 
     def test_200_del_nonexistent(self):
         command = ["del_esx_cluster", "--cluster=esx_cluster-does-not-exist"]

@@ -481,7 +481,6 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
         self.assertFalse(counts[0] < 1,
                          "One of the instances was never bound:\n%s" % out)
 
-
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestMakeAquilon)
     unittest.TextTestRunner(verbosity=2).run(suite)

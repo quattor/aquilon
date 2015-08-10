@@ -87,6 +87,9 @@ class TestDelDomain(TestBrokerCommand):
     def test_135_del_unittest_json(self):
         self.noouttest(["del_domain", "--domain", "unittest-json"])
 
+    def test_140_del_alt_unittest(self):
+        self.noouttest(["del_domain", "--domain", "alt-unittest"])
+
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelDomain)
     unittest.TextTestRunner(verbosity=2).run(suite)

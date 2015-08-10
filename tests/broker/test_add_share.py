@@ -36,7 +36,7 @@ class TestAddShare(TestBrokerCommand):
                         "--share=test_share_1"])
         self.noouttest(["add_share", "--cluster=utecl3",
                         "--share=test_share_1"])
-        self.noouttest(["add_share", "--cluster=utecl13",
+        self.noouttest(["add_share", "--cluster=utecl11",
                         "--share=test_share_1"])
 
     def test_105_show_test_share_1(self):
@@ -126,7 +126,7 @@ class TestAddShare(TestBrokerCommand):
         self.matchclean(out, "Latency", command)
 
     def test_142_verify_no_latency_per_cluster(self):
-        for cluster in ("utecl1", "utecl2", "utecl3", "utecl13"):
+        for cluster in ("utecl1", "utecl2", "utecl3", "utecl11"):
             command = ["show_share", "--share=test_share_1", "--cluster=%s" % cluster]
             out = self.commandtest(command)
             self.matchclean(out, "Latency", command)
@@ -152,7 +152,7 @@ class TestAddShare(TestBrokerCommand):
                         "--comments=New share comments"])
 
     def test_146_verify_updated_latency(self):
-        for cluster in ("utecl1", "utecl2", "utecl3", "utecl13"):
+        for cluster in ("utecl1", "utecl2", "utecl3", "utecl11"):
             command = ["show_share", "--share=test_share_1", "--cluster=%s" % cluster]
             out = self.commandtest(command)
             self.matchoutput(out, "Share: test_share_1", command)
@@ -166,6 +166,65 @@ class TestAddShare(TestBrokerCommand):
             self.matchoutput(out, '"name" = "test_share_1";', command)
             self.matchoutput(out, '"latency_threshold" = 30;', command)
 
+    def test_150_add_utmc8_shares(self):
+        command = ["add_share", "--resourcegroup=utmc8as1",
+                   "--metacluster=utmc8", "--share=test_v2_share"]
+        self.noouttest(command)
+
+        command = ["add_share", "--resourcegroup=utmc8as2",
+                   "--metacluster=utmc8", "--share=test_v2_share"]
+        self.noouttest(command)
+
+    def test_155_show_utmc8as1(self):
+        command = ["show_share", "--resourcegroup=utmc8as1",
+                   "--metacluster=utmc8", "--share=test_v2_share"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Share: test_v2_share", command)
+        self.matchoutput(out, "Bound to: Resource Group utmc8as1", command)
+        self.matchclean(out, "Latency", command)
+
+        command = ["show_resourcegroup", "--metacluster=utmc8"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Resource Group: utmc8as1", command)
+        self.matchoutput(out, "Share: test_v2_share", command)
+
+    def test_155_cat_utmc8as1(self):
+        command = ["cat", "--resourcegroup=utmc8as1", "--metacluster=utmc8",
+                   "--generate"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "structure template resource/cluster/utmc8/"
+                         "resourcegroup/utmc8as1/config;",
+                         command)
+        self.matchoutput(out, '"name" = "utmc8as1', command)
+        self.matchoutput(out,
+                         '"resources/share" = '
+                         'append(create("resource/cluster/utmc8/resourcegroup/'
+                         'utmc8as1/share/test_v2_share/config"));',
+                         command)
+
+    def test_155_cat_share(self):
+        command = ["cat", "--share=test_v2_share", "--resourcegroup=utmc8as1",
+                   "--metacluster=utmc8", "--generate"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "structure template resource/cluster/utmc8/"
+                         "resourcegroup/utmc8as1/share/test_v2_share/config;",
+                         command)
+        self.matchoutput(out, '"name" = "test_v2_share";', command)
+        self.matchoutput(out, '"server" = "lnn30f1";', command)
+        self.matchoutput(out, '"mountpoint" = "/vol/lnn30f1v1/test_v2_share";',
+                         command)
+        self.matchclean(out, 'latency', command)
+
+    def test_155_show_utmc8(self):
+        command = "show metacluster --metacluster utmc8"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out, "Share: test_v2_share", command)
+
+    def test_160_add_utmc9(self):
+        self.noouttest(["add_share", "--share", "test_v2_share",
+                        "--hostname", "evh83.aqd-unittest.ms.com",
+                        "--resourcegroup", "utrg2"])
+
     def test_200_update_nonexistant(self):
         command = ["update_share", "--share=doesnotexist", "--latency_threshold=10",
                    "--comments=New share comments"]
@@ -178,6 +237,13 @@ class TestAddShare(TestBrokerCommand):
                    "--comments=New share comments"]
         out = self.badrequesttest(command)
         self.matchoutput(out, 'The value of latency_threshold must be either zero, or at least 20.', command)
+
+    def test_200_add_same_share_name(self):
+        command = ["add_share", "--resourcegroup=utmc8as2",
+                   "--share=test_v2_share"]
+        err = self.badrequesttest(command)
+        self.matchoutput(err, "Share test_v2_share, "
+                         "resource group utmc8as2 already exists.", command)
 
     # test_share_1 must appear once.
     def test_300_verify_utmc1(self):
@@ -204,6 +270,10 @@ class TestAddShare(TestBrokerCommand):
                          command)
         self.matchoutput(out, "Disk Count: 0", command)
         self.matchoutput(out, "Machine Count: 0", command)
+
+        self.matchoutput(out, "Share: test_v2_share", command)
+        self.matchoutput(out, "Bound to: Resource Group utmc8as1", command)
+        self.matchoutput(out, "Bound to: Resource Group utmc8as2", command)
 
     def test_800_cleanup(self):
         # Having a share without a server would blow up compilation, so we need

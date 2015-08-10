@@ -236,10 +236,10 @@ def generate_ip(session, logger, dbinterface, ip=None, ipfromip=None,
 
     if audit_results is not None:
         if dbinterface:
-            logger.info("Selected IP address {0!s} for {1:l}"
+            logger.info("Selected IP address {0!s} for {1:l}."
                         .format(ip, dbinterface))
         else:
-            logger.info("Selected IP address %s" % ip)
+            logger.info("Selected IP address %s." % ip)
         audit_results.append(('ip', ip))
 
     return ip
@@ -313,13 +313,24 @@ def set_port_group_vm(session, logger, dbinterface, port_group_name):
             raise ArgumentError("Port group %s does not match either a "
                                 "registered port group name, or a port "
                                 "group type." % port_group_name)
+
+        # If the current port group matches the requirements, then we're done.
+        if dbinterface.port_group in allocator.port_groups and \
+           dbinterface.port_group.name == port_group_name:
+            return
+
         selected_pg = None
         selected_capacity = 0
 
         # Protect agains concurrent invocations
         Network.lock_rows(pg.network for pg in allocator.port_groups)
 
-        for pg in sorted(allocator.port_groups, key=attrgetter('network_tag')):
+        used_pgs = set(iface.port_group for iface in dbmachine.interfaces
+                       if iface.port_group)
+        usable_pgs = set(allocator.port_groups)
+        usable_pgs -= used_pgs
+
+        for pg in sorted(usable_pgs, key=attrgetter('network_tag')):
             if pg.usage != port_group_name:
                 continue
             net = pg.network
@@ -332,14 +343,15 @@ def set_port_group_vm(session, logger, dbinterface, port_group_name):
             raise ArgumentError("No available {0!s} port groups on {1:l}."
                                 .format(port_group_name, allocator))
 
-        logger.info("Selected {0:l} for {1:l} (based on {2:l})"
-                    .format(selected_pg, dbmachine, allocator))
+        logger.info("Selected {0:l} for {1:l} (based on {2:l})."
+                    .format(selected_pg, dbinterface, allocator))
 
     dbinterface.port_group_name = None
     dbinterface.port_group = selected_pg
 
 
-def set_port_group(session, logger, dbinterface, port_group_name):
+def set_port_group(session, logger, dbinterface, port_group_name,
+                   check_pg_consistency=True):
     """Validate that the port_group can be used on an interface.
 
     If the machine is virtual, check that the corresponding VLAN has
@@ -371,6 +383,9 @@ def set_port_group(session, logger, dbinterface, port_group_name):
         set_port_group_vm(session, logger, dbinterface, port_group_name)
     else:
         set_port_group_phys(session, dbinterface, port_group_name)
+
+    if check_pg_consistency:
+        dbinterface.check_pg_consistency(logger=logger)
 
 
 def _type_msg(interface_type, bootable):
@@ -605,6 +620,7 @@ def assign_address(dbinterface, ip, dbnetwork, label=None, logger=None):
     dbinterface.assignments.append(AddressAssignment(ip=ip, network=dbnetwork,
                                                      label=label,
                                                      dns_environment=dns_environment))
+    dbinterface.check_pg_consistency(logger=logger)
 
 
 def rename_interface(session, dbinterface, rename_to):

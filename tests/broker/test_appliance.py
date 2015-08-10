@@ -26,12 +26,11 @@ if __name__ == "__main__":
 import unittest2 as unittest
 from brokertest import TestBrokerCommand
 from notificationtest import VerifyNotificationsMixin
-from machinetest import MachineTestMixin
 from personalitytest import PersonalityTestMixin
 
 
-class TestAppliance(VerifyNotificationsMixin, MachineTestMixin,
-                    PersonalityTestMixin, TestBrokerCommand):
+class TestAppliance(VerifyNotificationsMixin, PersonalityTestMixin,
+                    TestBrokerCommand):
 
     cluster = "utecl10"
     vapp = "utvapp0"
@@ -72,9 +71,9 @@ class TestAppliance(VerifyNotificationsMixin, MachineTestMixin,
                         "--interface", "eth0", "--automac", "--autopg"])
 
     def test_210_add_appliance_host(self):
-        ip = self.net["appliance"].usable[0]
+        ip = self.net["ut01ga2s02_v713"].usable[1]
         self.dsdb_expect_add("utva.aqd-unittest.ms.com", ip, "eth0",
-                             "00:50:56:01:20:17")
+                             "00:50:56:01:20:1b")
         command = ["add", "host", "--hostname", "utva.aqd-unittest.ms.com",
                    "--ip", ip,
                    "--machine", self.vapp,
@@ -92,7 +91,7 @@ class TestAppliance(VerifyNotificationsMixin, MachineTestMixin,
 
     def test_300_del_appl_host(self):
         basetime = datetime.now()
-        self.dsdb_expect_delete(self.net["appliance"].usable[0])
+        self.dsdb_expect_delete(self.net["ut01ga2s02_v713"].usable[1])
         command = ["del", "host", "--hostname", "utva.aqd-unittest.ms.com"]
         self.statustest(command)
         self.wait_notification(basetime, 1)

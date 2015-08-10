@@ -123,6 +123,10 @@ class TestAddRack(TestBrokerCommand):
         command = "add rack --rackid 13 --building np --row k --column 3"
         self.noouttest(command.split(" "))
 
+    def testaddut14(self):
+        command = "add rack --rackid 14 --room utroom1 --row k --column 4"
+        self.noouttest(command.split(" "))
+
     def testverifyaddnp997(self):
         command = "show rack --rack np997"
         out = self.commandtest(command.split(" "))

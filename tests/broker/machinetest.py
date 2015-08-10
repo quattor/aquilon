@@ -32,12 +32,27 @@ class MachineData(object):
         # None here.
 
 
+def guess_interfaces(kwargs, eth0_default=True):
+    ifnames = set()
+
+    if eth0_default:
+        ifnames.add("eth0")
+
+    for arg in kwargs:
+        if arg.endswith("_ip") or arg.endswith("_pg"):
+            ifnames.add(arg[0:-3])
+        elif arg.endswith("_mac"):
+            ifnames.add(arg[0:-4])
+
+    return sorted(ifnames)
+
+
 class MachineTestMixin(object):
     def verify_show_machine(self, name, interfaces=None, zebra=False, model=None,
                             vendor=None, cluster=None, vmhost=None, memory=None,
                             **kwargs):
         if not interfaces:
-            interfaces = ["eth0"]
+            interfaces = guess_interfaces(kwargs)
 
         # Now do some basic tests. We cannot test for information that was not
         # specified directly but comes from other sources (defaults, model
@@ -125,13 +140,12 @@ class MachineTestMixin(object):
     def create_machine(self, name, model, interfaces=None, **orig_kwargs):
         kwargs = orig_kwargs.copy()
         if not interfaces:
-            interfaces = ["eth0"]
+            interfaces = guess_interfaces(kwargs)
 
         machdef = MachineData(name, model)
 
         # We assume the vendor will be guessed
-        add_machine_args = ["--machine", name,
-                            "--model", model]
+        add_machine_args = ["--machine", name, "--model", model]
 
         for optional in ["cpucount", "cpuvendor", "cpuname", "cpuspeed",
                          "memory", "chassis", "slot", "serial", "comments",
@@ -148,8 +162,6 @@ class MachineTestMixin(object):
             params = {}
             add_iface_args = ["add_interface", "--machine", name,
                               "--interface", nic_name]
-            add_ifaddr_args = ["add_interface_address", "--machine", name,
-                               "--interface", nic_name]
 
             for arg_name in ["mac", "pg", "model", "vendor"]:
                 if nic_name + "_" + arg_name in kwargs:
@@ -157,20 +169,12 @@ class MachineTestMixin(object):
                     add_iface_args.extend(["--" + arg_name, value])
                     params[arg_name] = value
 
-            needs_addr = False
-            for arg_name in ["ip", "fqdn"]:
-                if nic_name + "_" + arg_name in kwargs:
-                    value = kwargs.pop(nic_name + "_" + arg_name)
-                    add_ifaddr_args.extend(["--" + arg_name, value])
-                    params[arg_name] = value
-                    needs_addr = True
+            # Skip unknown interface-related parameters
+            for arg_name in kwargs.keys()[:]:
+                if arg_name.startswith(nic_name + "_"):
+                    params[arg_name[len(nic_name) + 1:]] = kwargs.pop(arg_name)
 
             self.noouttest(add_iface_args)
-            if needs_addr:
-                self.dsdb_expect_add(params["fqdn"], params["ip"], nic_name,
-                                     params["mac"])
-                self.noouttest(add_ifaddr_args)
-                self.dsdb_verify()
 
             machdef.interfaces[nic_name] = params
 
@@ -182,7 +186,7 @@ class MachineTestMixin(object):
     def create_machine_hs21(self, name, interfaces=None, **orig_kwargs):
         kwargs = orig_kwargs.copy()
         if not interfaces:
-            interfaces = ["eth0"]
+            interfaces = guess_interfaces(kwargs)
 
         self.create_machine(name, "hs21-8853", interfaces, **kwargs)
 
@@ -207,7 +211,7 @@ class MachineTestMixin(object):
     def create_machine_verari(self, name, interfaces=None, **orig_kwargs):
         kwargs = orig_kwargs.copy()
         if not interfaces:
-            interfaces = ["eth0"]
+            interfaces = guess_interfaces(kwargs)
 
         self.create_machine(name, "vb1205xm", interfaces, **kwargs)
 
@@ -242,8 +246,10 @@ class MachineTestMixin(object):
             if arg in kwargs:
                 host_kwargs[arg] = kwargs.pop(arg)
 
+        short_hostname, dns_domain = hostname.split(".", 1)
+
         if not interfaces:
-            interfaces = ["eth0"]
+            interfaces = guess_interfaces(kwargs)
             if "eth0_mac" not in kwargs:
                 kwargs["eth0_mac"] = ip.mac
 
@@ -251,13 +257,6 @@ class MachineTestMixin(object):
             host_kwargs["domain"] = "unittest"
 
         machdef = self.create_machine(machine, model, interfaces, **kwargs)
-
-        for nic_name, params in machdef.interfaces.items():
-            if "ip" not in params:
-                continue
-            self.dsdb_expect_delete(params["ip"])
-            self.dsdb_expect_add(params["fqdn"], params["ip"], nic_name,
-                                 params["mac"], primary=hostname)
 
         command = ["add_host", "--hostname", hostname, "--ip", ip,
                    "--machine", machine, "--archetype", archetype]
@@ -272,6 +271,24 @@ class MachineTestMixin(object):
             self.dsdb_expect_add(hostname, ip, "eth0", ip.mac, comments=machdef.comments)
 
         self.noouttest(command)
+
+        for nic_name, params in machdef.interfaces.items():
+            if "ip" not in params:
+                continue
+
+            if "fqdn" in params:
+                fqdn = params["fqdn"]
+            else:
+                fqdn = "%s-%s.%s" % (short_hostname, nic_name, dns_domain)
+                params["fqdn"] = fqdn
+                kwargs[nic_name + "_fqdn"] = fqdn
+
+            self.dsdb_expect_add(fqdn, params["ip"], nic_name, params["mac"],
+                                 primary=hostname)
+            self.statustest(["add_interface_address", "--machine", machine,
+                             "--interface", nic_name, "--ip", params["ip"],
+                             "--fqdn", fqdn])
+
         self.dsdb_verify()
 
         if manager_iface:
@@ -303,7 +320,7 @@ class MachineTestMixin(object):
     def delete_host(self, hostname, ip, machine, interfaces=None,
                     manager_ip=None, **kwargs):
         if not interfaces:
-            interfaces = []
+            interfaces = guess_interfaces(kwargs, eth0_default=False)
 
         for nic_name in interfaces:
             nic_ip = kwargs.get(nic_name + "_ip", None)

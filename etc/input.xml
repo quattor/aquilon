@@ -3881,7 +3881,10 @@
 	    <option name="clearchassis" type="boolean">remove chassis and slot information</option>
 	    <option name="multislot" type="boolean">use to record machine as taking multiple slots in a chassis</option>
 	    <option name="allow_metacluster_change" type="boolean">when changing clusters, allow the cluster to be in a different metacluster</option>
-	    <option name="ip" type="ipv4">New primary IP address</option>
+	    <optgroup fields="one">
+		<option name="autoip" type="flag" requires="cluster metacluster vmhost">Re-assign IP addresses</option>
+		<option name="ip" type="ipv4">New primary IP address</option>
+	    </optgroup>
 	    <option name="uri" type="string">URI to point to a template describing the virtual appliance</option>
 	    <option name="remap_disk" type="string">Vitual disk backend remapping definitions</option>
 	    <option name="comments" type="string">Update comments</option>
@@ -4418,8 +4421,9 @@
 
     <command name="add_metacluster">
 	Add a new metacluster.
-	<optgroup mandatory="True" fields="all">
+	<optgroup mandatory="True" fields="one">
 	    <option name="metacluster" type="string">Name of the new metacluster</option>
+	    <option name="prefix" type="string">Prefix for generating the metacluster name</option>
 	</optgroup>
 	<optgroup fields="one">
 	    <option name="organization" type="string">Organization</option>
@@ -4449,6 +4453,7 @@
 	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
 	</optgroup>
 	<transport method="put" path="metacluster/%(metacluster)s"/>
+	<transport method="put" trigger="prefix" path="next_metacluster/%(prefix)s"/>
     </command>
 
     <command name="show_metacluster">
@@ -4639,7 +4644,10 @@
     <command name="add_cluster">
 	Add a new cluster.
 	<optgroup mandatory="True" fields="all">
-	    <option name="cluster" type="string">Name of the new cluster</option>
+	    <optgroup fields="one">
+		<option name="cluster" type="string">Name of the new cluster</option>
+		<option name="prefix" type="string">Prefix for generating the cluster name</option>
+	    </optgroup>
 	    <option name="archetype" type="string">Archetype name</option>
 	    <option name="personality" type="string">Personality name</option>
 	    <option name="down_hosts_threshold" type="string">Number of hosts that can be down before monitoring alarms trigger</option>
@@ -4674,6 +4682,7 @@
 	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
 	</optgroup>
 	<transport method="put" path="cluster/%(cluster)s"/>
+	<transport method="put" trigger="prefix" path="next_cluster/%(prefix)s"/>
     </command>
 
     <command name="update_cluster">

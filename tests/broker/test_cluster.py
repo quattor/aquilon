@@ -227,8 +227,20 @@ class TestCluster(TestBrokerCommand):
 
     def test_160_bind_utmc7(self):
         host = "evh10.aqd-unittest.ms.com"
-        cluster = "utecl13"
+        cluster = "utecl11"
         self.successtest(["cluster", "--hostname", host, "--cluster", cluster])
+
+    def test_170_bind_utmc8(self):
+        self.statustest(["cluster", "--hostname", "evh80.aqd-unittest.ms.com",
+                         "--cluster", "utecl12"])
+        self.statustest(["cluster", "--hostname", "evh81.aqd-unittest.ms.com",
+                         "--cluster", "utecl13"])
+
+    def test_175_bind_utmc9(self):
+        self.statustest(["cluster", "--hostname", "evh82.aqd-unittest.ms.com",
+                         "--cluster", "utecl14"])
+        self.statustest(["cluster", "--hostname", "evh83.aqd-unittest.ms.com",
+                         "--cluster", "utecl15"])
 
     def test_200_missing_cluster(self):
         command = ["cluster", "--hostname=evh9.aqd-unittest.ms.com",

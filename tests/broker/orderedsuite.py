@@ -80,7 +80,8 @@ from .test_add_share import TestAddShare
 from .test_update_cluster import TestUpdateCluster
 from .test_del_cluster import TestDelCluster
 from .test_del_share import TestDelShare
-from .test_early_constraints_cluster import TestClusterEarlyConstraints
+from .test_constraints_cluster_no_members import TestClusterConstraintsNoMembers
+from .test_constraints_cluster_no_vms import TestClusterConstraintsNoVMs
 from .test_deprecated_switch import TestDeprecatedSwitch
 from .test_add_netdev import TestAddNetworkDevice
 from .test_add_virtual_switch import TestAddVirtualSwitch
@@ -127,7 +128,6 @@ from .test_change_status_cluster import TestChangeClusterStatus
 from .test_rebind_cluster import TestRebindCluster
 from .test_rebind_metacluster import TestRebindMetaCluster
 from .test_add_virtual_hardware import TestAddVirtualHardware
-from .test_add_10gig_hardware import TestAdd10GigHardware
 from .test_appliance import TestAppliance
 from .test_unbind_client import TestUnbindClient
 from .test_rebind_client import TestRebindClient
@@ -142,10 +142,12 @@ from .test_compile import TestCompile
 from .test_profile import TestProfile
 from .test_bind_server import TestBindServer
 from .test_add_filesystem import TestAddFilesystem
+from .test_del_filesystem import TestDelFilesystem
 from .test_add_application import TestAddApplication
 from .test_add_hostlink import TestAddHostlink
 from .test_add_intervention import TestAddIntervention
 from .test_add_resourcegroup import TestAddResourceGroup
+from .test_del_resourcegroup import TestDelResourceGroup
 from .test_add_reboot_schedule import TestAddRebootSchedule
 from .test_add_reboot_intervention import TestAddRebootIntervention
 from .test_constraints_bind_client import TestBindClientConstraints
@@ -155,6 +157,7 @@ from .test_constraints_personality import TestPersonalityConstraints
 from .test_constraints_service import TestServiceConstraints
 from .test_constraints_domain import TestDomainConstraints
 from .test_constraints_vendor import TestVendorConstraints
+from .test_constraints_model import TestModelConstraints
 from .test_constraints_machine import TestMachineConstraints
 from .test_constraints_interface import TestInterfaceConstraints
 from .test_constraints_netdev import TestNetworkDeviceConstraints
@@ -193,6 +196,7 @@ from .test_update_srv_record import TestUpdateSrvRecord
 from .test_update_address_alias import TestUpdateAddressAlias
 from .test_update_interface import TestUpdateInterface
 from .test_update_machine import TestUpdateMachine
+from .test_vm_migration import TestVMMigration
 from .test_update_cpu import TestUpdateCpu
 from .test_update_model import TestUpdateModel
 from .test_update_rack import TestUpdateRack
@@ -320,14 +324,13 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestAddNetworkCompartment,
                      TestAddNetworkEnvironment, TestAddNetwork,
                      TestAddNSRecord, TestMapDnsDomain,
+                     TestAddVlan,
+                     TestAddVirtualSwitch,
                      TestAddMetaCluster, TestAddESXCluster,
                      TestAddCluster,
-                     TestAddShare,
-                     TestClusterEarlyConstraints,
+                     TestClusterConstraintsNoMembers,
                      TestDeprecatedSwitch,
-                     TestAddVlan,
                      TestAddNetworkDevice, TestUpdateNetworkDevice,
-                     TestAddVirtualSwitch,
                      TestAddChassis, TestUpdateChassis,
                      TestAddMachine, TestAddDisk, TestAddInterface,
                      TestAddAddress,
@@ -344,9 +347,8 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestAddSrvRecord,
                      TestMapService, TestBindClient, TestPrebindServer,
                      TestServiceConstraints,
-                     TestVulcanLocalDisk,
-                     TestVulcan20,
                      TestFlush,
+                     TestAddResourceGroup, TestAddShare, TestAddFilesystem,
                      TestMakeAquilon, TestMakeCluster, TestCluster,
                      TestAddAllowedPersonality,
                      TestDelAllowedPersonality,
@@ -356,7 +358,10 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestMapGrn,
                      TestRebindMetaCluster,
                      TestUpdateCampus, TestUpdateBuilding,
-                     TestAddVirtualHardware, TestAdd10GigHardware,
+                     TestClusterConstraintsNoVMs,
+                     TestAddVirtualHardware,
+                     TestVulcanLocalDisk,
+                     TestVulcan20,
                      TestAppliance,
                      TestUnbindClient, TestRebindClient, TestReconfigure,
                      TestChangeStatus, TestResetAdvertisedStatus,
@@ -367,12 +372,12 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestCompile,
                      TestProfile,
                      TestBindServer,
-                     TestAddFilesystem, TestAddApplication, TestAddIntervention,
-                     TestAddResourceGroup, TestAddHostlink,
-                     TestAddRebootSchedule, TestAddRebootIntervention,
+                     TestAddApplication, TestAddIntervention,
+                     TestAddHostlink, TestAddRebootSchedule, TestAddRebootIntervention,
                      TestBindClientConstraints, TestBindServerConstraints,
                      TestArchetypeConstraints, TestPersonalityConstraints,
-                     TestDomainConstraints, TestVendorConstraints,
+                     TestDomainConstraints,
+                     TestVendorConstraints, TestModelConstraints,
                      TestMachineConstraints, TestNetworkDeviceConstraints,
                      TestInterfaceConstraints,
                      TestUpdatePersonality,
@@ -391,7 +396,7 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestSearchObservedMac, TestSearchNext, TestSearchNetwork,
                      TestSearchModel,
                      TestSearchService,
-                     TestUpdateInterface, TestUpdateMachine,
+                     TestUpdateInterface, TestUpdateMachine, TestVMMigration,
                      TestUpdateModel, TestUpdateCpu,
                      TestUpdateDisk,
                      TestUpdateRack,
@@ -418,6 +423,8 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestUnbindServer, TestUnmapService,
                      TestDel10GigHardware, TestDelVirtualHardware,
                      TestUnbindCluster, TestUncluster,
+                     TestDelShare, TestDelFilesystem,
+                     TestDelResourceGroup,
                      TestDelStaticRoute,
                      TestDelServiceAddress, TestDelInterfaceAddress,
                      TestDelDynamicRange, TestDelSrvRecord, TestDelAlias,
@@ -425,11 +432,10 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestDelAddress, TestDelNSRecord,
                      TestDelManager, TestDelAuxiliary, TestDelWindowsHost, TestDelHost,
                      TestDelInterface, TestDelDisk, TestDelMachine, TestDelChassis,
-                     TestDelVirtualSwitch,
                      TestDelNetworkDevice,
-                     TestDelShare,
                      TestDelCluster,
                      TestDelESXCluster, TestDelMetaCluster,
+                     TestDelVirtualSwitch,
                      TestDelRouterAddress, TestDelNetwork, TestDelNetworkEnvironment,
                      TestDelNetworkCompartment,
                      TestDelVlan,

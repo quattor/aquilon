@@ -28,7 +28,7 @@ from brokertest import TestBrokerCommand
 class TestDelAddressAlias(TestBrokerCommand):
 
     def test_100_del_addralias_with_target(self):
-        command = ["del", "address",  "alias",
+        command = ["del", "address", "alias",
                    "--fqdn", "addralias1.aqd-unittest.ms.com",
                    "--target", "arecord13.aqd-unittest.ms.com"]
         self.noouttest(command)
@@ -65,7 +65,7 @@ class TestDelAddressAlias(TestBrokerCommand):
                          "not found.", command)
 
     def test_400_del_addralias(self):
-        command = ["del", "address",  "alias",
+        command = ["del", "address", "alias",
                    "--fqdn", "addralias1.aqd-unittest.ms.com"]
         self.noouttest(command)
 

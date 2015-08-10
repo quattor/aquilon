@@ -39,6 +39,8 @@ default_services = {
     # Skipping ut.c for chooser3
     "chooser3": ["ut.a", "ut.b"],
 
+    "chooser_test": ["max_clients"],
+
     "dns": ["unittest", "one-nyp"],
     "esx_management_server": ["ut.a", "ut.b"],
     "lemon": ["ny-prod"],

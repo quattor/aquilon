@@ -23,6 +23,7 @@ from aquilon.aqdb.model import (Cpu, Chassis, ChassisSlot, Model, Machine,
                                 Resource, BundleResource, Share, Filesystem)
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.hardware_entity import update_primary_ip
+from aquilon.worker.dbwrappers.interface import set_port_group, generate_ip
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.dbwrappers.resources import (find_resource,
                                                  get_resource_holder)
@@ -61,27 +62,123 @@ def parse_remap_disk(old_vmholder, new_vmholder, remap_disk):
     return result
 
 
+def get_metacluster(holder):
+    if hasattr(holder, "metacluster"):
+        return holder.metacluster
+
+    # vmhost
+    if hasattr(holder, "cluster") and holder.cluster:
+        return holder.cluster.metacluster
+    else:
+        # TODO vlocal still has clusters, so this case not tested yet.
+        return None
+
+
+def update_disk_backing_stores(dbmachine, old_holder, new_holder, remap_disk):
+    if not old_holder:
+        old_holder = dbmachine.vm_container.holder.holder_object
+    if not new_holder:
+        new_holder = old_holder
+
+    disk_mapping = parse_remap_disk(old_holder, new_holder, remap_disk)
+
+    for dbdisk in dbmachine.disks:
+        old_bstore = dbdisk.backing_store
+        if isinstance(old_bstore.holder, BundleResource):
+            resourcegroup = old_bstore.holder.resourcegroup.name
+        else:
+            resourcegroup = None
+
+        if old_bstore in disk_mapping:
+            new_bstore = disk_mapping[old_bstore]
+        else:
+            new_bstore = find_resource(old_bstore.__class__, new_holder,
+                                       resourcegroup, old_bstore.name,
+                                       error=ArgumentError)
+        dbdisk.backing_store = new_bstore
+
+
+def update_interface_bindings(session, logger, dbmachine, autoip):
+    for dbinterface in dbmachine.interfaces:
+        old_pg = dbinterface.port_group
+        if not old_pg:
+            continue
+
+        old_net = old_pg.network
+
+        # Suppress the warning about PG mismatch - we'll update the addresses
+        # later
+        set_port_group(session, logger, dbinterface, old_pg.name,
+                       check_pg_consistency=False)
+        logger.info("Updated {0:l} to use {1:l}.".format(dbinterface,
+                                                         dbinterface.port_group))
+        new_net = dbinterface.port_group.network
+
+        if new_net == old_net or not autoip:
+            dbinterface.check_pg_consistency(logger=logger)
+            continue
+
+        for addr in dbinterface.assignments:
+            if addr.network != old_net:
+                continue
+
+            new_ip = generate_ip(session, logger, dbinterface, autoip=True,
+                                 network_environment=old_net.network_environment)
+            for dbdns_rec in addr.dns_records:
+                dbdns_rec.network = new_net
+                dbdns_rec.ip = new_ip
+
+            old_ip = addr.ip
+            addr.ip = new_ip
+            addr.network = new_net
+            logger.info("Changed {0:l} IP address from {1!s} to {2!s}."
+                        .format(dbinterface, old_ip, new_ip))
+
+        dbinterface.check_pg_consistency(logger=logger)
+
+
+def move_vm(session, logger, dbmachine, resholder, remap_disk,
+            allow_metacluster_change, autoip, plenaries):
+    old_holder = dbmachine.vm_container.holder.holder_object
+    if resholder:
+        new_holder = resholder.holder_object
+    else:
+        new_holder = old_holder
+
+    if new_holder != old_holder:
+        old_mc = get_metacluster(old_holder)
+        new_mc = get_metacluster(new_holder)
+        if old_mc != new_mc and not allow_metacluster_change:
+            raise ArgumentError("Moving VMs between metaclusters is "
+                                "disabled by default.  Use the "
+                                "--allow_metacluster_change option to "
+                                "override.")
+
+        plenaries.append(Plenary.get_plenary(old_holder))
+        plenaries.append(Plenary.get_plenary(new_holder))
+
+        dbmachine.vm_container.holder = resholder
+
+    if new_holder != old_holder or remap_disk:
+        update_disk_backing_stores(dbmachine, old_holder, new_holder, remap_disk)
+
+    if new_holder != old_holder or autoip:
+        update_interface_bindings(session, logger, dbmachine, autoip)
+
+    if hasattr(new_holder, 'location_constraint'):
+        dbmachine.location = new_holder.location_constraint
+    else:
+        dbmachine.location = new_holder.hardware_entity.location
+
+
 class CommandUpdateMachine(BrokerCommand):
 
     required_parameters = ["machine"]
 
-    # handles clusters and hosts
-    def get_metacluster(self, holder):
-        if hasattr(holder, "metacluster"):
-            return holder.metacluster
-
-        # vmhost
-        if hasattr(holder, "cluster") and holder.cluster:
-            return holder.cluster.metacluster
-        else:
-            # TODO vlocal still has clusters, so this case not tested yet.
-            return None
-
-    def render(self, session, logger, machine, model, vendor, serial,
-               chassis, slot, clearchassis, multislot,
-               vmhost, cluster, metacluster, allow_metacluster_change,
-               cpuname, cpuvendor, cpuspeed, cpucount, memory, ip, uri,
-               remap_disk, comments, **arguments):
+    def render(self, session, logger, machine, model, vendor, serial, chassis,
+               slot, clearchassis, multislot, vmhost, cluster, metacluster,
+               allow_metacluster_change, cpuname, cpuvendor, cpuspeed, cpucount,
+               memory, ip, autoip, uri, remap_disk, comments, **arguments):
         dbmachine = Machine.get_unique(session, machine, compel=True)
         oldinfo = DSDBRunner.snapshot_hw(dbmachine)
         old_location = dbmachine.location
@@ -182,9 +279,6 @@ class CommandUpdateMachine(BrokerCommand):
         if comments is not None:
             dbmachine.comments = comments
 
-        if ip:
-            update_primary_ip(session, logger, dbmachine, ip)
-
         if uri and not dbmachine.model.model_type.isVirtualAppliance():
             raise ArgumentError("URI can be specified only for virtual "
                                 "appliances and the model's type is %s" %
@@ -203,47 +297,17 @@ class CommandUpdateMachine(BrokerCommand):
                 raise ArgumentError("Cannot convert a physical machine to "
                                     "virtual.")
 
-            old_holder = dbmachine.vm_container.holder.holder_object
             resholder = get_resource_holder(session, logger, hostname=vmhost,
                                             cluster=cluster,
                                             metacluster=metacluster,
                                             compel=False)
-            new_holder = resholder.holder_object
+            move_vm(session, logger, dbmachine, resholder, remap_disk,
+                    allow_metacluster_change, autoip, plenaries)
+        elif remap_disk:
+            update_disk_backing_stores(dbmachine, None, None, remap_disk)
 
-            old_mc = self.get_metacluster(old_holder)
-            new_mc = self.get_metacluster(new_holder)
-            if old_mc != new_mc and not allow_metacluster_change:
-                raise ArgumentError("Moving VMs between metaclusters is "
-                                    "disabled by default.  Use the "
-                                    "--allow_metacluster_change option to "
-                                    "override.")
-
-            plenaries.append(Plenary.get_plenary(old_holder))
-            plenaries.append(Plenary.get_plenary(new_holder))
-
-            dbmachine.vm_container.holder = resholder
-
-            disk_mapping = parse_remap_disk(old_holder, new_holder, remap_disk)
-
-            for dbdisk in dbmachine.disks:
-                old_bstore = dbdisk.backing_store
-                if isinstance(old_bstore.holder, BundleResource):
-                    resourcegroup = old_bstore.holder.resourcegroup.name
-                else:
-                    resourcegroup = None
-
-                if old_bstore in disk_mapping:
-                    new_bstore = disk_mapping[old_bstore]
-                else:
-                    new_bstore = find_resource(old_bstore.__class__, new_holder,
-                                               resourcegroup, old_bstore.name,
-                                               error=ArgumentError)
-                dbdisk.backing_store = new_bstore
-
-            if hasattr(new_holder, 'location_constraint'):
-                dbmachine.location = new_holder.location_constraint
-            else:
-                dbmachine.location = new_holder.hardware_entity.location
+        if ip:
+            update_primary_ip(session, logger, dbmachine, ip)
 
         if dbmachine.location != old_location and dbmachine.host:
             for vm in dbmachine.host.virtual_machines:
@@ -260,6 +324,9 @@ class CommandUpdateMachine(BrokerCommand):
                 dbmachine.cluster.metacluster.validate()
         if dbmachine.host and dbmachine.host.cluster:
             dbmachine.host.cluster.validate()
+
+        for dbinterface in dbmachine.interfaces:
+            dbinterface.check_pg_consistency(logger=logger)
 
         # The check to make sure a plenary file is not written out for
         # dummy aurora hardware is within the call to write().  This way

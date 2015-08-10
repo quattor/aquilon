@@ -91,7 +91,7 @@ class TestResetAdvertisedStatus(TestBrokerCommand):
                 out, err = self.successtest(command)
                 # We don't care if there was nothing to recompile, but we should
                 # not compile too much
-                match = re.search("(\d+)/\d+ object template", err, re.M) 
+                match = re.search(r"(\d+)/\d+ object template", err, re.M)
                 self.assertLessEqual(int(match.group(1)), 1)
 
             command = "show host --hostname %s" % hostname
@@ -166,7 +166,7 @@ class TestResetAdvertisedStatus(TestBrokerCommand):
                 out, err = self.successtest(command)
                 # We don't care if there was nothing to recompile, but we should
                 # not compile too much
-                match = re.search("(\d+)/\d+ object template", err, re.M) 
+                match = re.search(r"(\d+)/\d+ object template", err, re.M)
                 self.assertLessEqual(int(match.group(1)), 1)
 
             command = "show host --hostname %s" % hostname

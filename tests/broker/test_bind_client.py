@@ -35,23 +35,16 @@ class TestBindClient(TestBrokerCommand):
 
     """
 
-    def testbindafs(self):
+    def test_100_bind_afs(self):
         command = ["bind", "client", "--hostname", "unittest02.one-nyp.ms.com",
                    "--service", "afs", "--instance", "q.ny.ms.com"]
-        (out, err) = self.successtest(command)
+        err = self.statustest(command)
         self.matchoutput(err,
                          "unittest02.one-nyp.ms.com adding binding for "
                          "service instance afs/q.ny.ms.com",
                          command)
 
-    def testverifybindafs(self):
-        command = "show host --hostname unittest02.one-nyp.ms.com"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out,
-                         "Uses Service: afs Instance: q.ny.ms.com",
-                         command)
-
-    def testverifycatafs(self):
+    def test_105_verify_cat_afs(self):
         command = ["cat", "--service", "afs", "--instance", "q.ny.ms.com",
                    "--server"]
         out = self.commandtest(command)
@@ -59,27 +52,97 @@ class TestBindClient(TestBrokerCommand):
                           r'"clients" = list\(\s*"unittest02.one-nyp.ms.com"\s*\);',
                           command)
 
-    def testbinddns(self):
+    def test_110_bind_bootserver(self):
+        command = ["bind", "client", "--hostname", "unittest02.one-nyp.ms.com",
+                   "--service", "bootserver", "--instance", "unittest"]
+        err = self.statustest(command)
+        self.matchoutput(err,
+                         "unittest02.one-nyp.ms.com adding binding for "
+                         "service instance bootserver/unittest",
+                         command)
+
+    def test_115_bind_bootserver_auto(self):
+        command = ["bind", "client", "--hostname", "unittest00.one-nyp.ms.com",
+                   "--service", "bootserver"]
+        err = self.statustest(command)
+        self.matchoutput(err,
+                         "unittest00.one-nyp.ms.com adding binding for "
+                         "service instance bootserver/unittest",
+                         command)
+
+    def test_120_bind_dns(self):
         command = ["bind", "client", "--hostname", "unittest02.one-nyp.ms.com",
                    "--service", "dns", "--instance", "unittest"]
-        (out, err) = self.successtest(command)
+        err = self.statustest(command)
         self.matchoutput(err,
                          "unittest02.one-nyp.ms.com adding binding for "
                          "service instance dns/unittest",
                          command)
 
-    def testbindutsi1(self):
+    def test_130_bind_ntp(self):
+        command = ["bind", "client", "--hostname", "unittest02.one-nyp.ms.com",
+                   "--service", "ntp", "--instance", "pa.ny.na"]
+        err = self.statustest(command)
+        self.matchoutput(err,
+                         "unittest02.one-nyp.ms.com adding binding for "
+                         "service instance ntp/pa.ny.na",
+                         command)
+
+    def test_135_bind_ntp_auto(self):
+        command = ["bind", "client", "--hostname", "unittest00.one-nyp.ms.com",
+                   "--service", "ntp"]
+        err = self.statustest(command)
+        self.matchoutput(err,
+                         "unittest00.one-nyp.ms.com adding binding for "
+                         "service instance ntp/pa.ny.na",
+                         command)
+
+    def test_140_bind_utsi1(self):
         command = ["bind", "client", "--hostname", "unittest00.one-nyp.ms.com",
                    "--service", "utsvc", "--instance", "utsi1"]
-        (out, err) = self.successtest(command)
+        err = self.statustest(command)
         self.matchoutput(err,
                          "unittest00.one-nyp.ms.com adding binding for "
                          "service instance utsvc/utsi1",
                          command)
 
-    def testverifybindutsi1(self):
+    def test_145_bind_utsi2_debug(self):
+        command = ["bind", "client", "--debug",
+                   "--hostname", "unittest02.one-nyp.ms.com",
+                   "--service", "utsvc", "--instance", "utsi2"]
+        _, err = self.successtest(command)
+        self.matchoutput(err, "Creating service chooser", command)
+
+    def test_300_verify_unittest02(self):
+        command = "show host --hostname unittest02.one-nyp.ms.com"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out,
+                         "Uses Service: afs Instance: q.ny.ms.com",
+                         command)
+        self.matchoutput(out,
+                         "Uses Service: bootserver Instance: unittest",
+                         command)
+        self.matchoutput(out,
+                         "Uses Service: dns Instance: unittest",
+                         command)
+        self.matchoutput(out,
+                         "Uses Service: ntp Instance: pa.ny.na",
+                         command)
+        self.matchoutput(out,
+                         "Uses Service: utsvc Instance: utsi2",
+                         command)
+
+    def test_300_verify_unittest00(self):
+        # For unittest00, will test that afs and dns are bound by make/reconfigure
+        # because they are required services.
         command = "show host --hostname unittest00.one-nyp.ms.com"
         out = self.commandtest(command.split(" "))
+        self.matchoutput(out,
+                         "Uses Service: bootserver Instance: unittest",
+                         command)
+        self.matchoutput(out,
+                         "Uses Service: ntp Instance: pa.ny.na",
+                         command)
         self.matchoutput(out,
                          "Uses Service: utsvc Instance: utsi1",
                          command)
@@ -102,94 +165,6 @@ class TestBindClient(TestBrokerCommand):
     #                      "instance utsi1: %s\n" %
     #                      " ".join(clients))
 
-    def testbindutsi2(self):
-        command = ["bind", "client", "--debug",
-                   "--hostname", "unittest02.one-nyp.ms.com",
-                   "--service", "utsvc", "--instance", "utsi2"]
-        (out, err) = self.successtest(command)
-        self.matchoutput(err, "Creating service chooser", command)
-
-    def testverifybindutsi2(self):
-        command = "show host --hostname unittest02.one-nyp.ms.com"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out,
-                         "Uses Service: utsvc Instance: utsi2",
-                         command)
-
-    def testverifybinddns(self):
-        command = "show host --hostname unittest02.one-nyp.ms.com"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out,
-                         "Uses Service: dns Instance: unittest",
-                         command)
-
-    def testbindbootserver(self):
-        command = ["bind", "client", "--hostname", "unittest02.one-nyp.ms.com",
-                   "--service", "bootserver", "--instance", "unittest"]
-        err = self.statustest(command)
-        self.matchoutput(err,
-                         "unittest02.one-nyp.ms.com adding binding for "
-                         "service instance bootserver/unittest",
-                         command)
-
-    def testverifybindbootserver(self):
-        command = "show host --hostname unittest02.one-nyp.ms.com"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out,
-                         "Uses Service: bootserver Instance: unittest",
-                         command)
-
-    def testbindntp(self):
-        command = ["bind", "client", "--hostname", "unittest02.one-nyp.ms.com",
-                   "--service", "ntp", "--instance", "pa.ny.na"]
-        (out, err) = self.successtest(command)
-        self.matchoutput(err,
-                         "unittest02.one-nyp.ms.com adding binding for "
-                         "service instance ntp/pa.ny.na",
-                         command)
-
-    def testverifybindntp(self):
-        command = "show host --hostname unittest02.one-nyp.ms.com"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out,
-                         "Uses Service: ntp Instance: pa.ny.na",
-                         command)
-
-    # For unittest00, will test that afs and dns are bound by make/reconfigure
-    # because they are required services.  Checking the service map
-    # functionality for bind client, below.
-
-    def testbindautobootserver(self):
-        command = ["bind", "client", "--hostname", "unittest00.one-nyp.ms.com",
-                   "--service", "bootserver"]
-        (out, err) = self.successtest(command)
-        self.matchoutput(err,
-                         "unittest00.one-nyp.ms.com adding binding for "
-                         "service instance bootserver/unittest",
-                         command)
-
-    def testverifybindautobootserver(self):
-        command = "show host --hostname unittest00.one-nyp.ms.com"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out,
-                         "Uses Service: bootserver Instance: unittest",
-                         command)
-
-    def testbindautontp(self):
-        command = ["bind", "client", "--hostname", "unittest00.one-nyp.ms.com",
-                   "--service", "ntp"]
-        (out, err) = self.successtest(command)
-        self.matchoutput(err,
-                         "unittest00.one-nyp.ms.com adding binding for "
-                         "service instance ntp/pa.ny.na",
-                         command)
-
-    def testverifybindautontp(self):
-        command = "show host --hostname unittest00.one-nyp.ms.com"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out,
-                         "Uses Service: ntp Instance: pa.ny.na",
-                         command)
 
 
 if __name__ == '__main__':

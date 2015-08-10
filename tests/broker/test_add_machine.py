@@ -59,14 +59,6 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
         self.matchoutput(out, "Comments: Some machine comments", command)
         self.matchclean(out, "Primary Name:", command)
 
-    def test_105_verify_del_model(self):
-        # This should be in test_del_model.py but when that is run there are no
-        # more machines defined...
-        command = "del model --model hs21-8853 --vendor ibm"
-        out = self.badrequesttest(command.split(" "))
-        self.matchoutput(out, "Model ibm/hs21-8853 is still in use and "
-                         "cannot be deleted.", command)
-
     def test_105_cat_ut3c5n10(self):
         command = "cat --machine ut3c5n10"
         out = self.commandtest(command.split(" "))
@@ -104,7 +96,6 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
     # Used for Zebra tests
     def test_110_add_ut3c5n2(self):
         self.create_machine_hs21("ut3c5n2", chassis="ut3c5", slot=2,
-                                 interfaces=["eth0", "eth1"],
                                  eth0_mac=self.net["zebra_eth0"].usable[0].mac,
                                  eth0_vendor="intel", eth0_model="e1000",
                                  eth1_mac=self.net["zebra_eth1"].usable[0].mac,
@@ -113,14 +104,12 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
     # Used for bonding tests
     def test_111_add_ut3c5n3(self):
         self.create_machine_hs21("ut3c5n3", chassis="ut3c5", slot=3,
-                                 interfaces=["eth0", "eth1"],
                                  eth0_mac=self.net["zebra_eth0"].usable[1].mac,
                                  eth1_mac=self.net["zebra_eth1"].usable[1].mac)
 
     # Used for bridge tests
     def test_112_add_ut3c5n4(self):
         self.create_machine_hs21("ut3c5n4", chassis="ut3c5", slot=4,
-                                 interfaces=["eth0", "eth1"],
                                  eth0_mac=self.net["zebra_eth0"].usable[2].mac,
                                  eth1_mac=self.net["zebra_eth1"].usable[2].mac)
 
@@ -168,7 +157,6 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
     def test_141_add_ut3c5n7(self):
         net = self.net["unknown0"]
         self.create_machine_hs21("ut3c5n7", chassis="ut3c5", slot=7,
-                                 interfaces=["eth0", "eth1", "eth2"],
                                  eth0_mac=net.usable[20].mac,
                                  eth1_mac=net.usable[21].mac,
                                  eth2_mac=net.usable[22].mac)
@@ -176,7 +164,6 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
     # Network environment testing
     def test_142_add_ut3c5n8(self):
         self.create_machine_hs21("ut3c5n8", chassis="ut3c5", slot=8,
-                                 interfaces=["eth0", "eth1"],
                                  eth0_mac=self.net["unknown0"].usable[23].mac,
                                  eth1_mac=self.net["routing1"].usable[0].mac)
 
@@ -370,6 +357,11 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
         self.matchoutput(out, "Room: utroom1", command)
         self.matchclean(out, "Rack", command)
 
+    def test_192_show_utnorack_csv(self):
+        command = ["show_machine", "--machine", "utnorack", "--format", "csv"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "utnorack,,ut,dell,poweredge_6650,", command)
+
     def test_193_add_f5test(self):
         ip = DummyIP(self.net["f5test"].ip)
         self.create_machine("f5test", "f5_model", rack="ut3", eth0_mac=ip.mac)
@@ -447,11 +439,11 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
 
     def test_260_reuse_chassis_slot(self):
         command = ["add", "machine", "--machine", "ut3c5n99",
-                        "--chassis", "ut3c5", "--slot", 10,
-                        "--model", "hs21-8853",
-                        "--cpucount", "2", "--cpuvendor", "intel",
-                        "--cpuname", "xeon_2660", "--cpuspeed", "2660",
-                        "--memory", "8192"]
+                   "--chassis", "ut3c5", "--slot", 10,
+                   "--model", "hs21-8853",
+                   "--cpucount", "2", "--cpuvendor", "intel",
+                   "--cpuname", "xeon_2660", "--cpuspeed", "2660",
+                   "--memory", "8192"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "Chassis ut3c5.aqd-unittest.ms.com slot 10 "

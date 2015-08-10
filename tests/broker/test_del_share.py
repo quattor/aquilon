@@ -40,6 +40,13 @@ class TestDelShare(TestBrokerCommand):
         self.noouttest(["del_share", "--cluster=utecl2",
                         "--share=test_share_1"])
 
+    def testdelutmc8shares(self):
+        command = ["del_share", "--resourcegroup=utmc8as1",
+                   "--metacluster=utmc8", "--share=test_v2_share"]
+        self.noouttest(command)
+        command = ["del_share", "--resourcegroup=utmc8as2",
+                   "--metacluster=utmc8", "--share=test_v2_share"]
+        self.noouttest(command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelShare)

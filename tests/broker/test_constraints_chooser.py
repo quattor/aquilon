@@ -28,24 +28,15 @@ from brokertest import TestBrokerCommand
 class TestChooserConstraints(TestBrokerCommand):
 
     def test_000_setupservice(self):
-        self.noouttest(["add_service", "--service", "chooser_test"])
-        command = "add service --service chooser_test --instance max_clients"
-        self.noouttest(command.split(" "))
-
         command = ["update_service", "--service=chooser_test",
                    "--instance=max_clients", "--max_clients=1"]
-        self.noouttest(command)
-
-        command = ["map_service", "--service=chooser_test",
-                   "--instance=max_clients", "--building=ut"]
         self.noouttest(command)
 
     def test_010_setuphost(self):
         # Bind a host to that instance
         command = ["bind_client", "--hostname=aquilon61.aqd-unittest.ms.com",
                    "--service=chooser_test", "--instance=max_clients"]
-        (out, err) = self.successtest(command)
-        self.assertEmptyOut(out, command)
+        err = self.statustest(command)
         self.matchoutput(err,
                          "aquilon61.aqd-unittest.ms.com adding binding for "
                          "service instance chooser_test/max_clients",
@@ -66,8 +57,7 @@ class TestChooserConstraints(TestBrokerCommand):
         # This is for coverage to check the edge condition.
         command = ["rebind_client", "--hostname=aquilon61.aqd-unittest.ms.com",
                    "--service=chooser_test"]
-        (out, err) = self.successtest(command)
-        self.assertEmptyOut(out, command)
+        err = self.statustest(command)
         self.matchclean(err, "removing binding", command)
         self.matchclean(err, "adding binding", command)
 
@@ -78,26 +68,13 @@ class TestChooserConstraints(TestBrokerCommand):
                          "Uses Service: chooser_test Instance: max_clients",
                          command)
 
-    def test_200_cleanuphost(self):
+    def test_130_cleanup_host(self):
         command = ["reconfigure", "--hostname=aquilon61.aqd-unittest.ms.com"]
-        (out, err) = self.successtest(command)
-        self.assertEmptyOut(out, command)
+        err = self.statustest(command)
         self.matchoutput(err,
                          "aquilon61.aqd-unittest.ms.com removing binding for "
                          "service instance chooser_test/max_clients",
                          command)
-
-    def test_210_cleanupservice(self):
-        command = ["unmap_service", "--building=ut",
-                   "--service=chooser_test", "--instance=max_clients"]
-        self.noouttest(command)
-
-        command = "del service --service chooser_test --instance max_clients"
-        self.noouttest(command.split(" "))
-
-        command = "del service --service chooser_test"
-        self.noouttest(command.split(" "))
-
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(

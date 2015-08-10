@@ -50,6 +50,6 @@ class CommandAddHostPrefix(CommandAddHost):
         CommandAddHost.render(self, session, logger, hostname=hostname,
                               machine=machine, **args)
 
-        logger.info("Selected host name %s" % hostname)
+        logger.info("Selected host name %s." % hostname)
         self.audit_result(session, 'hostname', hostname, **args)
         return hostname

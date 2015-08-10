@@ -250,6 +250,8 @@ class TestSearchCluster(TestBrokerCommand):
         self.matchoutput(out,
                          "Share share-does-not-exist not found.", command)
 
+    def testsearchmetaclustershare(self):
+        self.noouttest(["search_cluster", "--share", "test_v2_share"])
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestSearchCluster)

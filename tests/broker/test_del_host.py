@@ -236,7 +236,6 @@ class TestDelHost(VerifyNotificationsMixin, MachineTestMixin,
         eth1_ip = self.net["unknown1"].usable[34]
         ip = self.net["zebra_vip"].usable[3]
         self.delete_host("infra1.aqd-unittest.ms.com", ip, "ut3c5n13",
-                         interfaces=["eth0", "eth1"],
                          eth0_ip=eth0_ip, eth1_ip=eth1_ip)
 
     def test_300_del_npinfra(self):
@@ -244,7 +243,6 @@ class TestDelHost(VerifyNotificationsMixin, MachineTestMixin,
         eth1_ip = self.net["unknown1"].usable[36]
         ip = self.net["zebra_vip"].usable[4]
         self.delete_host("infra1.one-nyp.ms.com", ip, "np3c5n13",
-                         interfaces=["eth0", "eth1"],
                          eth0_ip=eth0_ip, eth1_ip=eth1_ip)
 
     def test_300_del_hp_rack_hosts(self):
@@ -279,6 +277,20 @@ class TestDelHost(VerifyNotificationsMixin, MachineTestMixin,
             else:
                 machine = "ut12s02p%d" % (i - 12)
             self.delete_host(hostname, net.usable[i + 1], machine)
+
+    def test_300_del_utmc8_hosts(self):
+        self.delete_host("evh80.aqd-unittest.ms.com",
+                         self.net["ut14_net"].usable[0], "ut14s1p0",
+                         eth1_ip=self.net["vm_storage_net"].usable[26])
+        self.delete_host("evh81.aqd-unittest.ms.com",
+                         self.net["ut14_net"].usable[1], "ut14s1p1",
+                         eth1_ip=self.net["vm_storage_net"].usable[27])
+
+    def test_300_del_utmc9_hosts(self):
+        self.delete_host("evh82.aqd-unittest.ms.com",
+                         self.net["ut14_net"].usable[2], "ut14s1p2")
+        self.delete_host("evh83.aqd-unittest.ms.com",
+                         self.net["ut14_net"].usable[3], "ut14s1p3")
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelHost)

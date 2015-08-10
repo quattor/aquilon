@@ -134,12 +134,6 @@ class TestAddFilesystem(TestBrokerCommand):
                 self.assertEqual(resource.fsdata.mountpoint, "/mnt")
 
     def test_50_add_to_cluster(self):
-        command = ["show_filesystem", "--cluster=utvcs1"]
-        out = self.notfoundtest(command)
-        self.matchoutput(out,
-                         "High Availability Cluster utvcs1 has no resources.",
-                         command)
-
         command = ["add_filesystem", "--filesystem=fsshared", "--type=ext3",
                    "--mountpoint=/mnt", "--blockdevice=/dev/foo/bar",
                    "--nobootmount",
@@ -165,20 +159,30 @@ class TestAddFilesystem(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "Filesystem: fsshared", command)
 
+    def test_55_add_utmc9_fs(self):
+        command = ["add_filesystem", "--filesystem=utfs1",
+                   "--type=ext3", "--mountpoint=/mnt",
+                   "--blockdevice=/dev/foo/bar",
+                   "--bootmount",
+                   "--hostname=evh82.aqd-unittest.ms.com"]
+        self.statustest(command)
+
+        # Quick test
+        command = ["cat", "--filesystem=utfs1",
+                   "--hostname=evh82.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out, '"name" = "utfs1";', command)
+
+        self.statustest(["add_filesystem", "--filesystem", "utfs2",
+                         "--type", "ext3", "--mountpoint", "/mnt",
+                         "--blockdevice", "/dev/foo/bar",
+                         "--bootmount",
+                         "--hostname", "evh83.aqd-unittest.ms.com",
+                         "--resourcegroup", "utrg2"])
+
     def test_60_show_all_proto(self):
         command = ["show", "filesystem", "--all", "--format", "proto"]
-        self.protobuftest(command, expect=3)
-
-    def test_del_filesystem(self):
-        command = ["del_filesystem", "--filesystem=fs2",
-                   "--hostname=server1.aqd-unittest.ms.com"]
-        self.successtest(command)
-
-        command = ["del_filesystem", "--filesystem=fsshared",
-                   "--cluster=utvcs1"]
-        self.successtest(command)
-
-        # fs1 is not deleted here, it will be removed when the host is deleted.
+        self.protobuftest(command, expect=6)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddFilesystem)

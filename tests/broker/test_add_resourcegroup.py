@@ -27,6 +27,14 @@ from brokertest import TestBrokerCommand
 
 class TestAddResourceGroup(TestBrokerCommand):
 
+    def test_000_early_constraints(self):
+        # Test what happens if the holder never had any resources
+        command = ["show_filesystem", "--cluster=utvcs1"]
+        out = self.notfoundtest(command)
+        self.matchoutput(out,
+                         "High Availability Cluster utvcs1 has no resources.",
+                         command)
+
     def test_100_add_rg_to_cluster(self):
         command = ["add_resourcegroup", "--resourcegroup=utvcs1as1",
                    "--cluster=utvcs1",
@@ -42,11 +50,6 @@ class TestAddResourceGroup(TestBrokerCommand):
                          command)
         self.matchoutput(out, "Comments: Some resourcegroup comments", command)
         self.matchclean(out, "Type:", command)
-
-    def test_105_show_all(self):
-        command = ["show_resourcegroup", "--all"]
-        out = self.commandtest(command)
-        self.matchoutput(out, "Resource Group: utvcs1as1", command)
 
     def test_110_add_fs_to_rg(self):
         command = ["add_filesystem", "--filesystem=fs1", "--type=ext3",
@@ -202,6 +205,28 @@ class TestAddResourceGroup(TestBrokerCommand):
                    "--cluster", "utvcs1"]
         self.successtest(command)
 
+    def test_150_add_utmc8_rg(self):
+        command = ["add_resourcegroup", "--resourcegroup=utmc8as1",
+                   "--cluster=utmc8", "--required_type=share"]
+        out = self.statustest(command)
+        self.matchoutput(out,
+                         "Please use the --metacluster option for metaclusters.",
+                         command)
+
+        command = ["add_resourcegroup", "--resourcegroup=utmc8as2",
+                   "--metacluster=utmc8", "--required_type=share"]
+        self.noouttest(command)
+
+    def test_155_show_utmc8_rg(self):
+        command = ["show_resourcegroup", "--metacluster=utmc8"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Resource Group: utmc8as1", command)
+        self.matchoutput(out, "Bound to: ESX Metacluster utmc8", command)
+
+    def test_160_add_utmc9_rg(self):
+        self.statustest(["add_resourcegroup", "--resourcegroup", "utrg2",
+                         "--hostname", "evh83.aqd-unittest.ms.com"])
+
     def test_200_add_bad_type(self):
         command = ["add_resourcegroup", "--resourcegroup=utvcs1as2",
                    "--cluster=utvcs1", "--required_type=no-such-resource-type"]
@@ -216,28 +241,13 @@ class TestAddResourceGroup(TestBrokerCommand):
         self.matchoutput(err, "Bad Request: A resourcegroup can't hold other "
                          "resourcegroups.", command)
 
-    def test_300_del_resourcegroup(self):
-        # Check that the plenaries of contained resources get cleaned up
-        rg_base = ["resource", "cluster", "utvcs1", "resourcegroup",
-                   "utvcs1as1"]
-
-        rg_path = rg_base[:]
-        rg_path.append("config")
-
-        fs_path = rg_base[:]
-        fs_path.extend(["filesystem", "fs1", "config"])
-
-        # Verify that we got the paths right
-        self.check_plenary_exists(*fs_path)
-        self.check_plenary_exists(*rg_path)
-
-        command = ["del_resourcegroup", "--resourcegroup=utvcs1as1",
-                   "--cluster=utvcs1"]
-        self.successtest(command)
-
-        # The resource plenaries should be gone, and the directory too
-        self.check_plenary_gone(*fs_path, directory_gone=True)
-        self.check_plenary_gone(*rg_path, directory_gone=True)
+    def test_300_show_all(self):
+        command = ["show_resourcegroup", "--all"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Resource Group: utvcs1", command)
+        self.matchoutput(out, "Resource Group: utvcs1as1", command)
+        self.matchoutput(out, "Resource Group: utmc8as1", command)
+        self.matchoutput(out, "Resource Group: utmc8as2", command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddResourceGroup)
