@@ -35,14 +35,14 @@ class CommandShowNetwork(BrokerCommand):
         options = [undefer('comments'),
                    joinedload('location'),
                    undefer('routers.comments'),
-                   undefer('static_routes.comments')]
-        if hosts or style == "proto":
+                   undefer('static_routes.comments'),
+                   subqueryload("routers"),
+                   subqueryload("dynamic_stubs")]
+        if hosts:
             options.extend([subqueryload("assignments"),
                             joinedload("assignments.interface"),
                             joinedload("assignments.interface.hardware_entity"),
-                            joinedload("assignments.dns_records"),
-                            subqueryload("routers"),
-                            subqueryload("dynamic_stubs")])
+                            joinedload("assignments.dns_records")])
         dbnet_env = NetworkEnvironment.get_unique_or_default(session,
                                                              network_environment)
         dbnetwork = network and get_network_byname(session, network, dbnet_env,
