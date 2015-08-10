@@ -39,6 +39,8 @@
 	    <arg><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
 	    <arg><option>--post_personality</option></arg>
 	    <arg><option>--visibility <replaceable>VISIBILITY</replaceable></option></arg>
+	    <arg><option>--activation <replaceable>ACTIVATION</replaceable></option></arg>
+	    <arg><option>--deactivation <replaceable>DEACTIVATION</replaceable></option></arg>
 	    <xi:include href="../common/change_management.xml"/>
 	    <xi:include href="../common/global_options.xml"/>
 	</cmdsynopsis>
@@ -207,6 +209,96 @@
 		    </variablelist>
 		    <para>
 			The default value is <literal>restricted</literal>.
+		    </para>
+		    <para>
+			Currently, the broker does not enforce the above rules itself, but relies on
+			external tools and procedures doing so.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--activation <replaceable>ACTIVATION</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Atrribute for determining what action needs to be done on the host for this feature to be activated after bound to the personality.
+                        Possible values of
+			<replaceable>ACTIVATION</replaceable> are:
+		    </para>
+		    <variablelist>
+			<varlistentry>
+			    <term><literal>dispatch</literal></term>
+			    <listitem>
+				<para>
+				    The feature gets automatically activated after a host compile.
+				</para>
+			    </listitem>
+			</varlistentry>
+			<varlistentry>
+			    <term><literal>reboot</literal></term>
+			    <listitem>
+				<para>
+				    The host needs to be rebooted for the feature to be activated.
+				</para>
+			    </listitem>
+			</varlistentry>
+			<varlistentry>
+			    <term><literal>rebuild</literal></term>
+			    <listitem>
+				<para>
+				    The feature is activated only after the host is rebuilt.
+				</para>
+			    </listitem>
+			</varlistentry>
+		    </variablelist>
+		    <para>
+			The default value is <literal>reboot</literal>.
+		    </para>
+		    <para>
+			Currently, the broker does not enforce the above rules itself, but relies on
+			external tools and procedures doing so.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--deactivation <replaceable>DEACTIVATION</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Atrribute for determining what action needs to be done on the host for this feature to be deactivaed after removing from the personality.
+                        Possible values of
+			<replaceable>DEACTIVATION</replaceable> are:
+		    </para>
+		    <variablelist>
+			<varlistentry>
+			    <term><literal>dispatch</literal></term>
+			    <listitem>
+				<para>
+				    The feature gets automatically de-activated after a host compile.
+				</para>
+			    </listitem>
+			</varlistentry>
+			<varlistentry>
+			    <term><literal>reboot</literal></term>
+			    <listitem>
+				<para>
+				    The host needs to be rebooted for the feature to be de-activated.
+				</para>
+			    </listitem>
+			</varlistentry>
+			<varlistentry>
+			    <term><literal>rebuild</literal></term>
+			    <listitem>
+				<para>
+				    The feature is de-activated only after the host is rebuilt.
+				</para>
+			    </listitem>
+			</varlistentry>
+		    </variablelist>
+		    <para>
+			The default value is <literal>reboot</literal>.
 		    </para>
 		    <para>
 			Currently, the broker does not enforce the above rules itself, but relies on

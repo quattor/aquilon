@@ -32,7 +32,7 @@ class CommandAddFeature(BrokerCommand):
     required_parameters = ['feature', 'type']
 
     def render(self, session, feature, type, post_personality, comments,
-               grn, eon_id, visibility, logger, **arguments):
+               grn, eon_id, visibility, activation, deactivation, logger, **arguments):
         cls = Feature.polymorphic_subclass(type, "Unknown feature type")
 
         if _name_re.search(feature):
@@ -55,9 +55,15 @@ class CommandAddFeature(BrokerCommand):
         if not visibility:
             visibility = "restricted"
 
+        if not activation:
+           activation = "reboot"
+
+        if not deactivation:
+           deactivation = "reboot"
 
         dbfeature = cls(name=feature, post_personality=post_personality,
                         owner_grn=dbgrn, visibility=visibility,
+                        activation=activation, deactivation=deactivation,
                         comments=comments)
         session.add(dbfeature)
 

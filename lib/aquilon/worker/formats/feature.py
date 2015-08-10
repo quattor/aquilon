@@ -34,6 +34,10 @@ class FeatureFormatter(ObjectFormatter):
                        .format(feature.owner_grn))
         details.append(indent + "  Visibility: {0.visibility}"
                        .format(feature))
+        details.append(indent + "  Activation: {0.activation}"
+                       .format(feature))
+        details.append(indent + "  Deactivation: {0.deactivation}"
+                       .format(feature))
 
         details.append(indent + "  Template: %s" % feature.cfg_path)
 
@@ -63,6 +67,11 @@ class FeatureFormatter(ObjectFormatter):
         skeleton.owner_eonid = feature.owner_eon_id
         desc = skeleton.DESCRIPTOR
         skeleton.visibility = desc.enum_values_by_name[feature.visibility.upper()].number
+        act_type = skeleton.DESCRIPTOR.fields_by_name['activation'].enum_type
+        if feature.activation:
+            skeleton.activation = act_type.values_by_name[feature.activation.upper()].number
+        if feature.deactivation:
+            skeleton.deactivation = act_type.values_by_name[feature.deactivation.upper()].number
 
 ObjectFormatter.handlers[Feature] = FeatureFormatter()
 ObjectFormatter.handlers[HostFeature] = FeatureFormatter()

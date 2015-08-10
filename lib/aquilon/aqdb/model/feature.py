@@ -32,6 +32,7 @@ _TN = 'feature'
 _LINK = 'feature_link'
 
 _VISIBILITY = ('public', 'restricted', 'owner_approved', 'owner_only')
+_ACTIVATION_TYPE = ('rebuild', 'reboot', 'dispatch')
 
 
 class Feature(Base):
@@ -47,6 +48,8 @@ class Feature(Base):
     owner_eon_id = Column(ForeignKey(Grn.eon_id, name='%s_owner_grn_fk' % _TN),
                           nullable=False)
     visibility = Column(Enum(16, _VISIBILITY), nullable=False)
+    activation = Column(Enum(10, _ACTIVATION_TYPE), nullable=True)
+    deactivation = Column(Enum(10, _ACTIVATION_TYPE), nullable=True)
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
     comments = deferred(Column(String(255), nullable=True))
@@ -77,6 +80,19 @@ class Feature(Base):
         valid_visibility = ", ".join(sorted(_VISIBILITY))
         raise ArgumentError("Unknown value for %s. Valid values are: "
                             "%s." % (key, valid_visibility))
+    @validates('activation')
+    def validate_activation(self, key, activation):
+        """ Utility function for validating the value type """
+        if not activation:
+            return
+        if activation in _ACTIVATION_TYPE:
+            return activation
+        valid_activation = ", ".join(sorted(_ACTIVATION_TYPE))
+        raise ArgumentError("Unknown value for %s. Valid values are: "
+                            "%s." % (key, valid_activation))
+    @validates('deactivation')
+    def validate_deactivation(self, key, deactivation):
+        return self.validate_activation(key, deactivation)
 
 class HostFeature(Feature):
     _class_label = "Host Feature"
