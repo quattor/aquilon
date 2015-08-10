@@ -1,0 +1,9 @@
+CREATE SEQUENCE network_compartment_id_seq;
+CREATE TABLE network_compartment (
+	id INTEGER NOT NULL,
+	name VARCHAR(32) NOT NULL,
+	creation_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+	comments VARCHAR(255),
+	CONSTRAINT network_compartment_pk PRIMARY KEY (id),
+	CONSTRAINT network_compartment_name_uk UNIQUE (name)
+);
