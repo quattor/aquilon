@@ -102,7 +102,7 @@ class TestAddParameterDefinition(TestBrokerCommand):
                           r'Parameter Definition: testrequired \[required\]\s*'
                           r'Type: string\s*'
                           r'Template: foo\s*'
-                          r'Default: default',
+                          r'Activation: dispatch\s*',
                           cmd)
 
     def test_120_clean_path(self):
