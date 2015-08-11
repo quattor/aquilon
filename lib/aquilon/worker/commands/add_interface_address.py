@@ -134,28 +134,25 @@ class CommandAddInterfaceAddress(BrokerCommand):
         assign_address(dbinterface, ip, dbnetwork, label=label, logger=logger)
         session.flush()
 
+        plenaries = PlenaryCollection(logger=logger)
+        plenaries.append(Plenary.get_plenary(dbhw_ent))
+        if dbhw_ent.host:
+            plenaries.append(Plenary.get_plenary(dbhw_ent.host))
+
         dsdb_runner = DSDBRunner(logger=logger)
 
-        if dbhw_ent.host:
-            plenaries = PlenaryCollection(logger=logger)
-            plenaries.append(Plenary.get_plenary(dbhw_ent.host))
-            with plenaries.transaction():
-                if dbhw_ent.host.archetype.name == 'aurora':
-                    try:
-                        dsdb_runner.show_host(dbdns_rec.fqdn.name)
-                    except ProcessException as e:
-                        raise ArgumentError("Could not find host in DSDB: "
-                                            "%s" % e)
-                else:
-                    if delete_old_dsdb_entry:
-                        dsdb_runner.delete_host_details(dbdns_rec.fqdn, ip)
-                    dsdb_runner.update_host(dbhw_ent, oldinfo)
-                    dsdb_runner.commit_or_rollback("Could not add host to DSDB")
-        else:
-            if delete_old_dsdb_entry:
-                dsdb_runner.delete_host_details(dbdns_rec.fqdn, ip)
-            dsdb_runner.update_host(dbhw_ent, oldinfo)
-            dsdb_runner.commit_or_rollback("Could not add host to DSDB")
+        with plenaries.transaction():
+            if dbhw_ent.host and dbhw_ent.host.archetype.name == 'aurora':
+                try:
+                    dsdb_runner.show_host(dbdns_rec.fqdn.name)
+                except ProcessException as e:
+                    raise ArgumentError("Could not find host in DSDB: "
+                                        "%s" % e)
+            else:
+                if delete_old_dsdb_entry:
+                    dsdb_runner.delete_host_details(dbdns_rec.fqdn, ip)
+                dsdb_runner.update_host(dbhw_ent, oldinfo)
+                dsdb_runner.commit_or_rollback("Could not add host to DSDB")
 
         for name, value in audit_results:
             self.audit_result(session, name, value, **kwargs)

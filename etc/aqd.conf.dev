@@ -21,16 +21,12 @@ quattordir = %(basedir)s/quattor
 #knc = /ms/dev/kerberos/knc/1.4/install/exec/bin/knc
 run_git_daemon = True
 dsdb_use_testdb = True
-dsdb=/bin/echo
 #server_notifications = cdb2sql bootserver
 client_notifications = no
-environment = dev
-mean = %(srcdir)s/tests/fakebin/fake_mean
 
 [panc]
 version = beta
 pan_compiler = /ms/dist/elfms/PROJ/panc/%(version)s/lib/panc.jar
-
 
 [unittest]
 scratchdir = %(basedir)s/scratch
@@ -43,6 +39,10 @@ swrep_repository = git://%(swrep_repository_host)s/quattor/git/swrep_repository
 fake_hosts_location = %(srcdir)s/tests/fakebin/dsdb.d/show_host_-host_name_
 datadir = %(srcdir)s/tests/broker/data
 real_panc_location = /ms/dist/elfms/PROJ/panc/prod/lib/panc.jar
+
+[tool_locations]
+dsdb = /bin/echo
+mean = %(srcdir)s/tests/fakebin/fake_mean
 
 # This can be used for any components that use python logging
 # Valid values are INFO, DEBUG, and WARNING

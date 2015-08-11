@@ -36,6 +36,16 @@ class TestParameterDefinitionFeature(TestBrokerCommand):
 
         self.noouttest(cmd)
 
+    def test_105_show_testpath(self):
+        cmd = ["show_parameter_definition", "--feature", FEATURE, "--type=host",
+               "--path=testpath"]
+        out = self.commandtest(cmd)
+        self.searchoutput(out,
+                          r'Parameter Definition: testpath \[required\]\s*'
+                          r'Type: string\s*'
+                          r'Default: default',
+                          cmd)
+
     def test_110_add_existing(self):
         cmd = ["add_parameter_definition", "--feature", FEATURE, "--type=host",
                "--path=testpath", "--value_type=string", "--description=blaah",
@@ -307,6 +317,19 @@ class TestParameterDefinitionFeature(TestBrokerCommand):
                          "Unknown feature type 'no-such-type'. The valid "
                          "values are: hardware, host, interface.",
                          cmd)
+
+    def test_240_show_bad_path(self):
+        cmd = ["show_parameter_definition", "--feature", FEATURE,
+               "--type", "host", "--path", "path-does-not-exist"]
+        out = self.notfoundtest(cmd)
+        self.matchoutput(out, "Parameter Definition path-does-not-exist, "
+                         "parameter definition holder %s not found." % FEATURE, cmd)
+
+    def test_240_show_feature_no_params(self):
+        cmd = ["show_parameter_definition", "--feature", "pre_host",
+               "--type", "host", "--path", "path-does-not-exist"]
+        out = self.notfoundtest(cmd)
+        self.matchoutput(out, "Host Feature pre_host does not have parameters.", cmd)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestParameterDefinitionFeature)

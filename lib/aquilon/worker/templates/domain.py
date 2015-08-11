@@ -188,7 +188,12 @@ class TemplateDomain(object):
 
         formats.append("dep")
 
-        args = ["ant"]
+        if config.has_option("panc", "timeout"):
+            args = ["timeout", config.get("panc", "timeout")]
+            args.append(config.lookup_tool("ant"))
+        else:
+            args = ["ant"]
+
         args.append("--noconfig")
         args.append("-f")
         args.append(lookup_file_path("build.xml"))

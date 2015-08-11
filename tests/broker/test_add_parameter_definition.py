@@ -94,6 +94,17 @@ class TestAddParameterDefinition(TestBrokerCommand):
                 self.matchoutput(out, "You need to run 'aq flush --personalities' for "
                                  "the default value to take effect.", cmd)
 
+    def test_105_show_paramdef(self):
+        cmd = ["show_parameter_definition", "--archetype", "aquilon",
+               "--path", "teststring"]
+        out = self.commandtest(cmd)
+        self.searchoutput(out,
+                          r'Parameter Definition: teststring \[required\]\s*'
+                          r'Type: string\s*'
+                          r'Template: foo\s*'
+                          r'Default: default',
+                          cmd)
+
     def test_120_clean_path(self):
         for path in ["/startslash", "endslash/"]:
             cmd = ["add_parameter_definition", "--archetype", "aquilon",
@@ -166,6 +177,19 @@ class TestAddParameterDefinition(TestBrokerCommand):
             err = self.badrequesttest(cmd)
             self.matchoutput(err, "Invalid path %s specified, path cannot start with special characters" % path,
                              cmd)
+
+    def test_300_show_bad_path(self):
+        cmd = ["show_parameter_definition", "--archetype", "aquilon",
+               "--path", "path-does-not-exist"]
+        out = self.notfoundtest(cmd)
+        self.matchoutput(out, "Parameter Definition path-does-not-exist, "
+                         "parameter definition holder aquilon not found.", cmd)
+
+    def test_300_show_archetype_no_params(self):
+        cmd = ["show_parameter_definition", "--archetype", "windows",
+               "--path", "path-does-not-exist"]
+        out = self.notfoundtest(cmd)
+        self.matchoutput(out, "Archetype windows does not have parameters.", cmd)
 
     def test_400_verify_all(self):
         cmd = ["search_parameter_definition", "--archetype", "aquilon"]

@@ -219,6 +219,19 @@ class TestSetupParams(TestBrokerCommand):
             for params in paramlist:
                 self.add_param_def("vmhost", template, params)
 
+    def test_110_search_by_template(self):
+        command = ["search_parameter_definition", "--archetype", "aquilon",
+                   "--template", "espinfo"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "espinfo/function", command)
+        self.matchclean(out, "access", command)
+        self.matchclean(out, "actions", command)
+        self.matchclean(out, "windows", command)
+
+    def test_110_search_by_template_bad(self):
+        command = ["search_parameter_definition", "--archetype", "aquilon",
+                   "--template", "does-not-exist"]
+        self.noouttest(command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestSetupParams)

@@ -6346,12 +6346,12 @@
 	<optgroup mandatory="True" fields="all">
 	    <optgroup fields="one">
 		<optgroup fields="all">
-		    <option name="archetype" type="string" conflicts="feature type">Archetype</option>
-		    <option name="template" type="string" conflicts="feature">Name of structure template this parameter gets included in</option>
+		    <option name="archetype" type="string">Archetype</option>
+		    <option name="template" type="string">Name of structure template this parameter gets included in</option>
 		</optgroup>
 		<optgroup fields="all">
-		    <option name="feature" type="string" conflicts="archetype template">Feature</option>
-		    <option name="type" type="string" conflicts="archetype">Type of the feature: host, hardware or interface</option>
+		    <option name="feature" type="string">Feature</option>
+		    <option name="type" type="string">Type of the feature: host, hardware or interface</option>
 		</optgroup>
 	    </optgroup>
 	    <option name="path" type="string">Path of the parameter can contain regexp</option>
@@ -6373,10 +6373,10 @@
 	Delete parameter definition for a given object.
 	<optgroup mandatory="True">
 	    <optgroup fields="one">
-		<option name="archetype" type="string" conflicts="feature type">Archetype</option>
+		<option name="archetype" type="string">Archetype</option>
 		<optgroup fields="all">
-		    <option name="feature" type="string" conflicts="archetype template">Feature</option>
-		    <option name="type" type="string" conflicts="archetype">Type of the feature: host, hardware or interface</option>
+		    <option name="feature" type="string">Feature</option>
+		    <option name="type" type="string">Type of the feature: host, hardware or interface</option>
 		</optgroup>
 	    </optgroup>
 	    <option name="path" type="string">Path of the parameter</option>
@@ -6393,10 +6393,10 @@
 	Update parameter definition for a given object.
 	<optgroup mandatory="True">
 	    <optgroup fields="one">
-		<option name="archetype" type="string" conflicts="feature type">Archetype</option>
+		<option name="archetype" type="string">Archetype</option>
 		<optgroup fields="all">
-		    <option name="feature" type="string" conflicts="archetype template">Feature</option>
-		    <option name="type" type="string" conflicts="archetype">Type of the feature: host, hardware or interface</option>
+		    <option name="feature" type="string">Feature</option>
+		    <option name="type" type="string">Type of the feature: host, hardware or interface</option>
 		</optgroup>
 	    </optgroup>
 	    <option name="path" type="string">Path of the parameter</option>
@@ -6413,6 +6413,30 @@
 	<transport method="post" trigger="feature" path="feature/%(type)s/%(feature)s/parameter_definitions"/>
     </command>
 
+    <command name="show_parameter_definition">
+	Display a given parameter definition configured for a object
+	<p/>
+	Supported options for --format: raw, csv.
+	<p/>
+	The 'csv' format contains the following fields, in this order:
+	Definition Holder name, path, value type, default value, description, template, is_required
+	<optgroup mandatory="True" fields="all">
+	    <optgroup fields="one">
+		<option name="archetype" type="string">Archetype</option>
+		<optgroup fields="all">
+		    <option name="feature" type="string">Feature</option>
+		    <option name="type" type="string">Type of the feature: host, hardware or interface</option>
+		</optgroup>
+	    </optgroup>
+	    <option name="path" type="string">Path of the parameter</option>
+	</optgroup>
+	<transport method="get" trigger="archetype" path="archetype/%(archetype)s/parameter_definitions"/>
+	<transport method="get" trigger="feature" path="feature/%(type)s/%(feature)s/parameter_definitions"/>
+	<format name="proto" >
+	    <message_class name="ParamDefinitionList" module="aqdparamdefinitions_pb2"/>
+	</format>
+    </command>
+
     <command name="search_parameter_definition">
 	Display all parameter definition configured for a object
 	<p/>
@@ -6420,15 +6444,18 @@
 	<p/>
 	The 'csv' format contains the following fields, in this order:
 	Definition Holder name, path, value type, default value, description, template, is_required
-	<optgroup mandatory="True">
-	    <option name="archetype" type="string" conflicts="feature type">Archetype</option>
+	<optgroup mandatory="True" fields="one">
+	    <option name="archetype" type="string">Archetype</option>
 	    <optgroup fields="all">
-		<option name="feature" type="string" conflicts="archetype">Feature</option>
+		<option name="feature" type="string">Feature</option>
 		<option name="type" type="string">Type of the feature: host, hardware or interface</option>
 	    </optgroup>
 	</optgroup>
-	<transport method="get" trigger="archetype" path="archetype/%(archetype)s/parameter_definitions"/>
-	<transport method="get" trigger="feature" path="feature/%(type)s/%(feature)s/parameter_definitions"/>
+	<optgroup>
+	    <option name="template" type="string" requires="archetype">Look for definitions belonging to the given template</option>
+	</optgroup>
+	<transport method="get" trigger="archetype" path="find/archetype/%(archetype)s/parameter_definitions"/>
+	<transport method="get" trigger="feature" path="find/feature/%(type)s/%(feature)s/parameter_definitions"/>
 	<format name="proto" >
 	    <message_class name="ParamDefinitionList" module="aqdparamdefinitions_pb2"/>
 	</format>

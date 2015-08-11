@@ -246,7 +246,8 @@ class Plenary(object):
         remove this plenary template
         """
 
-        self.logger.debug("Removing %r [%s]", self, self.old_path)
+        if os.path.exists(self.old_path):
+            self.logger.debug("Removing %r [%s]", self, self.old_path)
         if remove_file(self.old_path, cleanup_directory=True,
                        logger=self.logger):
             self.removed = True
