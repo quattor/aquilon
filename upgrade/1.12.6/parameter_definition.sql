@@ -4,5 +4,7 @@ SET autocommit off;
 SET serveroutput on;
 
 ALTER TABLE param_definition ADD activation VARCHAR2(10 CHAR);
+UPDATE param_definition SET activation = 'rebuild' WHERE rebuild_required = 1;
+COMMIT;
 ALTER TABLE param_definition DROP COLUMN rebuild_required;
 QUIT;
