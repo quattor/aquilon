@@ -53,8 +53,8 @@ class ParamDefinitionFormatter(ObjectFormatter):
         if paramdef.description:
             skeleton.description = str(paramdef.description)
         if paramdef.activation:
-           act_type = skeleton.DESCRIPTOR.fields_by_name['activation'].enum_type
-           skeleton.activation = act_type.values_by_name[paramdef.activation.upper()].number
+            act_type = skeleton.DESCRIPTOR.fields_by_name['activation'].enum_type
+            skeleton.activation = act_type.values_by_name[paramdef.activation.upper()].number
 
     def csv_fields(self, paramdef):
         yield (paramdef.holder.holder_name,

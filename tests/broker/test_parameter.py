@@ -552,8 +552,8 @@ class TestParameter(TestBrokerCommand):
         cmd = CAT_CMD + ["--param_tmpl=foo"]
         out = self.commandtest(cmd)
         self.matchoutput(out,
-                          'structure template personality/testpersona/dev+next/foo;',
-                          cmd)
+                         'structure template personality/testpersona/dev+next/foo;',
+                         cmd)
         self.matchoutput(out, '"testboolean" = true;', cmd)
         self.matchoutput(out, '"testfloat" = 100.100;', cmd)
         self.matchoutput(out, '"testint" = 100;', cmd)

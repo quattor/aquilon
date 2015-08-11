@@ -74,8 +74,8 @@ default_features = {
     },
 }
 
-
 proto = None
+
 
 class TestAddFeature(TestBrokerCommand):
 
@@ -84,7 +84,6 @@ class TestAddFeature(TestBrokerCommand):
 
         super(TestAddFeature, self).setUp()
         proto = self.protocols['aqdsystems_pb2']
-
 
     def test_100_add_host_pre(self):
         command = ["add", "feature", "--feature", "pre_host", "--eon_id", 2,
@@ -114,7 +113,6 @@ class TestAddFeature(TestBrokerCommand):
         self.assertEqual(feature.visibility, feature.PUBLIC)
         self.assertEqual(feature.activation, proto.REBOOT)
         self.assertEqual(feature.deactivation, proto.REBOOT)
-
 
     def test_110_add_default_features(self):
         for feature_type in default_features:
@@ -416,7 +414,6 @@ class TestAddFeature(TestBrokerCommand):
                          "dispatch, reboot, rebuild.",
                          command)
 
-
     def test_270_bad_activation_update(self):
         command = ["update", "feature", "--feature", "pre_host", "--eon_id", 3,
                    "--type", "host", "--comments", "New feature comments",
@@ -436,7 +433,6 @@ class TestAddFeature(TestBrokerCommand):
                          "Unknown value for deactivation. Valid values are: "
                          "dispatch, reboot, rebuild.",
                          command)
-
 
     def test_300_update_feature(self):
         command = ["update", "feature", "--feature", "pre_host", "--eon_id", 3,

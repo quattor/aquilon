@@ -28,5 +28,5 @@ class CommandMakeClusterMetacluster(CommandMakeClusterCluster):
 
         self.deprecated_option("metacluster", "Please use "
                                "aq make_metacluster --metacluster instead.",
-                                **arguments)
+                               **arguments)
         return CommandMakeClusterCluster.render(self, **arguments)

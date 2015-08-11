@@ -80,6 +80,7 @@ class Feature(Base):
         valid_visibility = ", ".join(sorted(_VISIBILITY))
         raise ArgumentError("Unknown value for %s. Valid values are: "
                             "%s." % (key, valid_visibility))
+
     @validates('activation')
     def validate_activation(self, key, activation):
         """ Utility function for validating the value type """
@@ -90,9 +91,11 @@ class Feature(Base):
         valid_activation = ", ".join(sorted(_ACTIVATION_TYPE))
         raise ArgumentError("Unknown value for %s. Valid values are: "
                             "%s." % (key, valid_activation))
+
     @validates('deactivation')
     def validate_deactivation(self, key, deactivation):
         return self.validate_activation(key, deactivation)
+
 
 class HostFeature(Feature):
     _class_label = "Host Feature"

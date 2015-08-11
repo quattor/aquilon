@@ -60,4 +60,3 @@ class NetworkCompartment(Base):
             raise ArgumentError("Illegal network compartment tag '%s'." %
                                 value)
         return value
-

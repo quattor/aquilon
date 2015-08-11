@@ -22,6 +22,7 @@ ctype_map = {
     "hacluster": "compute",
 }
 
+
 class ClusterTestMixin(object):
     def verify_cat_clusters(self, name, archetype, persona, ctype=None,
                             metacluster=None, on_rack=False,
@@ -106,4 +107,3 @@ class ClusterTestMixin(object):
         self.matchclean(data, "resources/virtual_machine", data_command)
 
         return object_command, object, data_command, data
-

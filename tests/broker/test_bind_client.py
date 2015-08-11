@@ -166,7 +166,6 @@ class TestBindClient(TestBrokerCommand):
     #                      " ".join(clients))
 
 
-
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestBindClient)
     unittest.TextTestRunner(verbosity=2).run(suite)

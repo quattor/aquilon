@@ -56,10 +56,10 @@ class CommandAddFeature(BrokerCommand):
             visibility = "restricted"
 
         if not activation:
-           activation = "reboot"
+            activation = "reboot"
 
         if not deactivation:
-           deactivation = "reboot"
+            deactivation = "reboot"
 
         dbfeature = cls(name=feature, post_personality=post_personality,
                         owner_grn=dbgrn, visibility=visibility,

@@ -316,6 +316,7 @@ class NetworkList(list):
     """By convention, holds a list of networks to be formatted as alist"""
     pass
 
+
 class NetworkListFormatter(ListFormatter):
     def format_raw(self, objects, indent="", embedded=True, indirect_attrs=True):
         return "\n".join(indent + "%s/%s" % (network.ip, network.cidr)
@@ -333,6 +334,7 @@ class SimpleNetworkList(list):
     """By convention, holds a list of networks to be formatted in a simple
     network map type format."""
     pass
+
 
 class SimpleNetworkListFormatter(NetworkListFormatter):
     fields = ["Network", "IP", "Netmask", "Sysloc", "Country", "Side", "Network Type", "Discoverable", "Discovered", "Comments"]
@@ -353,4 +355,3 @@ class SimpleNetworkListFormatter(NetworkListFormatter):
         return "\n".join(details)
 
 ObjectFormatter.handlers[SimpleNetworkList] = SimpleNetworkListFormatter()
-

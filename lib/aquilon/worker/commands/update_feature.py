@@ -41,10 +41,10 @@ class CommandUpdateFeature(BrokerCommand):
             dbfeature.comments = comments
 
         if activation:
-            dbfeature.activation = activation;
+            dbfeature.activation = activation
 
         if deactivation:
-            dbfeature.deactivation = deactivation;
+            dbfeature.deactivation = deactivation
 
         session.flush()
 

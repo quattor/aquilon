@@ -41,7 +41,7 @@ class CommandAddParameterDefintionFeature(BrokerCommand):
 
         validate_param_definition(path, value_type, default)
 
-        ## activation field  has been skipped on purpose
+        # activation field has been skipped on purpose
         ParamDefinition.get_unique(session, path=path,
                                    holder=dbfeature.param_def_holder, preclude=True)
 

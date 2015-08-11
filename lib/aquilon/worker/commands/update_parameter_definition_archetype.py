@@ -49,7 +49,7 @@ class CommandUpdParameterDefintionArchetype(BrokerCommand):
             # a risky operation. If it is really needed, then the workaround is
             # to turn the activation flag off first, update the value, and
             # turn activation back again.
-            if db_paramdef.activation == 'rebuild' :
+            if db_paramdef.activation == 'rebuild':
                 raise UnimplementedError("Changing the default value of a "
                                          "parameter which requires rebuild "
                                          "would cause all existing hosts to "
