@@ -1,7 +1,7 @@
 # -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
 # ex: set expandtab softtabstop=4 shiftwidth=4:
 #
-# Copyright (C) 2008,2009,2010,2011,2012,2013,2014  Contributor
+# Copyright (C) 2015  Contributor
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,21 +14,21 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Contains the logic for `aq del required service`."""
+"""Contains the logic for `aq del required service --osname`."""
 
 from aquilon.exceptions_ import NotFoundException
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.commands.add_required_service import \
-        CommandAddRequiredService
+from aquilon.worker.commands.add_required_service_osname import \
+        CommandAddRequiredServiceOsname
 
 
-class CommandDelRequiredService(CommandAddRequiredService):
+class CommandDelRequiredServiceOsname(CommandAddRequiredServiceOsname):
 
-    required_parameters = ["service", "archetype"]
+    required_parameters = ["service", "archetype", "osname", "osversion"]
 
-    def _update_dbobj(self, dbarchetype, dbservice):
+    def _update_dbobj(self, dbos, dbservice):
         try:
-            dbarchetype.required_services.remove(dbservice)
+            dbos.required_services.remove(dbservice)
         except ValueError:
             raise NotFoundException("{0} required for {1:l} not found."
-                                    .format(dbservice, dbarchetype))
+                                    .format(dbservice, dbos))

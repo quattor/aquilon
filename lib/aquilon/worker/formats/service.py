@@ -36,6 +36,12 @@ class ServiceFormatter(ObjectFormatter):
         for archetype in sorted(service.archetypes, key=attrgetter("name")):
             details.append(indent + "  Required for {0:c}: {0.name}"
                            .format(archetype))
+        for os in sorted(service.operating_systems,
+                         key=attrgetter("name", "version", "archetype.name")):
+            details.append(indent +
+                           "  Required for {0:c}: {0.name} Version: {0.version}"
+                           " Archetype: {0.archetype.name}"
+                           .format(os))
         for dbstage in sorted(service.personality_stages,
                               key=attrgetter("archetype.name",
                                              "personality.name", "name")):

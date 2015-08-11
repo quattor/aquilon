@@ -48,6 +48,9 @@ instance_servers = {
     "dns": {
         "one-nyp": ["infra1.one-nyp.ms.com"],
     },
+    "ips": {
+        "northamerica": ["infra1.aqd-unittest.ms.com"],
+    },
     "lemon": {
         "ny-prod": ["nyaqd1.ms.com"],
     },

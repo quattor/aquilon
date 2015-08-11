@@ -37,11 +37,13 @@ from sqlalchemy.sql import or_, null
 from sqlalchemy.util import memoized_property
 
 from aquilon.aqdb.column_types.aqstr import AqStr
-from aquilon.aqdb.model import Base, Archetype, Personality, PersonalityStage
+from aquilon.aqdb.model import (Base, Archetype, Personality, PersonalityStage,
+                                OperatingSystem)
 
 _TN = 'service'
 _SLI = 'service_list_item'
 _PSLI = 'personality_service_list_item'
+_OSLI = 'os_service_list_item'
 
 
 class Service(Base):
@@ -126,3 +128,20 @@ Service.personality_stages = relation(PersonalityStage,
                                       secondary=__PersonalityServiceListItem.__table__,
                                       backref=backref("required_services",
                                                       passive_deletes=True))
+
+
+class __OSServiceListItem(Base):
+    __tablename__ = _OSLI
+
+    service_id = Column(ForeignKey(Service.id), nullable=False)
+
+    operating_system_id = Column(ForeignKey(OperatingSystem.id,
+                                            ondelete='CASCADE'),
+                                 nullable=False, index=True)
+
+    __table_args__ = (PrimaryKeyConstraint(service_id, operating_system_id),)
+
+Service.operating_systems = relation(OperatingSystem,
+                                     secondary=__OSServiceListItem.__table__,
+                                     backref=backref("required_services",
+                                                     passive_deletes=True))

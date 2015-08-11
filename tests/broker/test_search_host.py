@@ -257,6 +257,13 @@ class TestSearchHost(TestBrokerCommand):
         self.matchoutput(out, "unittest00.one-nyp.ms.com", command)
         self.matchoutput(out, "unittest02.one-nyp.ms.com", command)
 
+    def testosboundservice(self):
+        command = ["search_host", "--service", "ips"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "aquilon69.aqd-unittest.ms.com", command)
+        self.matchclean(out, "unittest00", command)
+        self.matchclean(out, "unittest02", command)
+
     def testserviceunavailable(self):
         command = "search host --service service-does-not-exist"
         out = self.notfoundtest(command.split(" "))

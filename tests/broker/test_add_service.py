@@ -43,6 +43,7 @@ default_services = {
 
     "dns": ["unittest", "one-nyp"],
     "esx_management_server": ["ut.a", "ut.b"],
+    "ips": ["northamerica"],
     "lemon": ["ny-prod"],
     "ntp": ["pa.ny.na"],
     "support-group": ["ec-service"],

@@ -32,6 +32,7 @@ services_to_delete = {
     "chooser_test": ["max_clients"],
     "dns": ["unittest", "one-nyp"],
     "esx_management_server": ["ut.a", "ut.b"],
+    "ips": ["northamerica"],
     "lemon": ["ny-prod"],
     "netmap": ["netmap-pers", "q.ny.ms.com", "p-q.ny.ms.com"],
     "support-group": ["ec-service"],

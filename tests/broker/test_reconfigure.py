@@ -578,6 +578,22 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
                    "--osname=linux", "--osversion=%s" % self.linux_version_prev]
         self.successtest(command)
 
+    def test_1170_os_required_service(self):
+        command = ["reconfigure", "--hostname", "aquilon69.aqd-unittest.ms.com",
+                   "--osname", "solaris", "--osversion", "11.1-x86_64"]
+        out = self.statustest(command)
+        self.matchoutput(out,
+                         "aquilon69.aqd-unittest.ms.com adding binding for "
+                         "service instance ips/northamerica",
+                         command)
+
+    def test_1175_cat_aquilon69(self):
+        command = ["cat", "--hostname", "aquilon69.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out,
+                         'include { "service/ips/northamerica/client/config" };',
+                         command)
+
     def test_2000_windows_wrong_os(self):
         command = ["reconfigure", "--hostname", "unittest01.one-nyp.ms.com",
                    "--osname", "linux", "--osversion", self.linux_version_prev]
