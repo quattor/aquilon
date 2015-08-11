@@ -96,10 +96,10 @@ class TestAddParameterDefinition(TestBrokerCommand):
 
     def test_105_show_paramdef(self):
         cmd = ["show_parameter_definition", "--archetype", "aquilon",
-               "--path", "teststring"]
+               "--path", "testrequired"]
         out = self.commandtest(cmd)
         self.searchoutput(out,
-                          r'Parameter Definition: teststring \[required\]\s*'
+                          r'Parameter Definition: testrequired \[required\]\s*'
                           r'Type: string\s*'
                           r'Template: foo\s*'
                           r'Default: default',
