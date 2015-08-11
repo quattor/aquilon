@@ -21,10 +21,10 @@ from aquilon.aqdb.model import Feature
 from aquilon.worker.dbwrappers.grn import lookup_grn
 
 
-class CommandAddFeature(BrokerCommand):
+class CommandUpdateFeature(BrokerCommand):
 
     def render(self, session, feature, type, comments,
-               grn, eon_id, visibility, logger, **arguments):
+               grn, eon_id, visibility, activation, deactivation, logger, **arguments):
 
         cls = Feature.polymorphic_subclass(type, "Unknown feature type")
         dbfeature = cls.get_unique(session, name=feature, compel=True)
@@ -36,8 +36,15 @@ class CommandAddFeature(BrokerCommand):
             dbgrn = lookup_grn(session, grn, eon_id, logger=logger,
                                config=self.config)
             dbfeature.owner_grn = dbgrn
+
         if comments is not None:
             dbfeature.comments = comments
+
+        if activation:
+            dbfeature.activation = activation;
+
+        if deactivation:
+            dbfeature.deactivation = deactivation;
 
         session.flush()
 

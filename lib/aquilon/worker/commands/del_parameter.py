@@ -31,7 +31,7 @@ class CommandDelParameter(CommandAddParameter):
         if not dbstage.paramholder or not dbstage.paramholder.parameter:
             raise NotFoundException("No parameter of path=%s defined." % path)
 
-        if dbparam_def.rebuild_required:
+        if dbparam_def.activation == 'rebuild':
             validate_rebuild_required(session, path, dbstage)
 
         if dblink:

@@ -167,20 +167,17 @@ class TestParameterFeature(TestBrokerCommand):
         self.searchoutput(out,
                           r'Feature Binding : hostfeature\s*'
                           r'Parameter Definition: testrequired \[required\]\s*'
-                          r'Type: string\s*'
-                          r'Rebuild Required: False\s*',
+                          r'Type: string\s*',
                           cmd)
         self.searchoutput(out,
                           r'Feature Binding : hardwarefeature\s*'
                           r'Parameter Definition: testrequired \[required\]\s*'
-                          r'Type: string\s*'
-                          r'Rebuild Required: False\s*',
+                          r'Type: string\s*',
                           cmd)
         self.searchoutput(out,
                           r'Feature Binding : interfacefeature\s*'
                           r'Parameter Definition: testrequired \[required\]\s*'
-                          r'Type: string\s*'
-                          r'Rebuild Required: False\s*',
+                          r'Type: string\s*',
                           cmd)
 
     def test_200_add_path_interface_feature(self):

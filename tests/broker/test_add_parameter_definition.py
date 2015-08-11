@@ -35,7 +35,7 @@ default_param_defs = {
     },
     "test_rebuild_required": {
         "type": "string",
-        "rebuild_required": True,
+        "activation": "rebuild",
     },
     "teststring": {
         "type": "string",
@@ -69,6 +69,12 @@ default_param_defs = {
 
 
 class TestAddParameterDefinition(TestBrokerCommand):
+    def setUp(self):
+        super(TestAddParameterDefinition, self).setUp()
+        self.proto = self.protocols['aqdsystems_pb2']
+
+        desc = self.proto.Feature.DESCRIPTOR
+        self.activation_type = desc.fields_by_name["activation"].enum_type
 
     def test_100_add_all(self):
         for path, params in default_param_defs.items():
@@ -80,8 +86,8 @@ class TestAddParameterDefinition(TestBrokerCommand):
                 cmd.extend(["--default", params["default"]])
             if params.get("required", False):
                 cmd.append("--required")
-            if params.get("rebuild_required", False):
-                cmd.append("--rebuild_required")
+            if "activation" in params:
+                cmd.extend(["--activation", params["activation"]])
 
             out = self.statustest(cmd)
             if "default" in params:
@@ -137,7 +143,7 @@ class TestAddParameterDefinition(TestBrokerCommand):
     def test_300_add_rebuild_default(self):
         cmd = ["add_parameter_definition", "--archetype", "aquilon",
                "--path=test_rebuild_required_default", "--default=default",
-               "--template=foo", "--value_type=string", "--rebuild_required"]
+               "--template=foo", "--value_type=string", "--activation=rebuild"]
         out = self.unimplementederrortest(cmd)
         self.matchoutput(out, "Setting a default value for a parameter which "
                          "requires rebuild would cause all existing hosts to "
@@ -173,11 +179,14 @@ class TestAddParameterDefinition(TestBrokerCommand):
             if "type" in params:
                 pattern += "Type: " + params["type"] + r"\s*"
             else:
-                pattern += "Type: string\s*"
+                pattern += r"Type: string\s*"
             pattern += r"Template: foo\s*"
             if "default" in params:
                 pattern += "Default: " + params["default"] + r"\s*"
-            pattern += r"Rebuild Required: %s\s*" % params.get("rebuild_required", False)
+            if "activation" in params:
+                pattern += "Activation: " + params["activation"] + r"\s*"
+            else:
+                pattern += r"Activation: dispatch\s*"
 
             self.searchoutput(out, pattern, cmd)
 
@@ -207,13 +216,16 @@ class TestAddParameterDefinition(TestBrokerCommand):
                 self.assertEqual(param_defs[path].default, "")
             self.assertEqual(param_defs[path].is_required,
                              params.get("required", False))
-            self.assertEqual(param_defs[path].rebuild_required,
-                             params.get("rebuild_required", False))
+            if "activation" in params:
+                val = self.activation_type.values_by_name[params["activation"].upper()]
+                self.assertEqual(param_defs[path].activation, val.number)
+            else:
+                self.assertEqual(param_defs[path].activation, self.proto.DISPATCH)
 
     def test_500_update(self):
         cmd = ["update_parameter_definition", "--archetype", "aquilon",
                "--path=testint", "--description=testint",
-               "--default=100", "--required"]
+               "--default=100", "--required", "--activation", "reboot"]
         out = self.statustest(cmd)
         self.matchoutput(out, "You need to run 'aq flush --personalities' for "
                          "the change of the default value to take effect.", cmd)
@@ -226,8 +238,8 @@ class TestAddParameterDefinition(TestBrokerCommand):
                           r'Type: int\s*'
                           r'Template: foo\s*'
                           r'Default: 100\s*'
-                          r'Description: testint\s*'
-                          r'Rebuild Required: False',
+                          r'Activation: reboot\s*'
+                          r'Description: testint\s*',
                           cmd)
 
 if __name__ == '__main__':

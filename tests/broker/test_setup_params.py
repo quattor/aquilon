@@ -193,8 +193,8 @@ class TestSetupParams(TestBrokerCommand):
                "--value_type", params["value_type"]]
         if "required" in params:
             cmd.append("--required")
-        if "rebuild_required" in params:
-            cmd.append("--rebuild_required")
+        if "activation" in params:
+            cmd.extend(["--activation", params["activation"]])
         if "default" in params:
             cmd.extend(["--default", params["default"]])
 

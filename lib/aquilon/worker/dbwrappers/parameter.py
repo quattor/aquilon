@@ -85,7 +85,7 @@ def del_all_feature_parameter(session, dblink):
     parameter = dblink.personality_stage.paramholder.parameter
     dbstage = dblink.personality_stage
     for paramdef in dblink.feature.param_def_holder.param_definitions:
-        if paramdef.rebuild_required:
+        if paramdef.activation == 'rebuild':
             validate_rebuild_required(session, paramdef.path, dbstage)
 
         parameter.del_path(Parameter.feature_path(dblink, paramdef.path),
@@ -132,7 +132,7 @@ def validate_parameter(session, dbparam_def, path, value, dbstage):
 
     retval = validate_value(path, dbparam_def.value_type, value)
 
-    if dbparam_def.rebuild_required:
+    if dbparam_def.activation == 'rebuild':
         validate_rebuild_required(session, path, dbstage)
 
     return retval

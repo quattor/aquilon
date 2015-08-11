@@ -26,7 +26,7 @@ class CommandUpdParameterDefintionArchetype(BrokerCommand):
     required_parameters = ["archetype", "path"]
 
     def render(self, session, logger, archetype, path, required,
-               rebuild_required, default, description, **kwargs):
+               activation, default, description, **kwargs):
         dbarchetype = Archetype.get_unique(session, archetype, compel=True)
         if not dbarchetype.is_compileable:
             raise ArgumentError("{0} is not compileable.".format(dbarchetype))
@@ -39,17 +39,17 @@ class CommandUpdParameterDefintionArchetype(BrokerCommand):
                                                  compel=True)
         if required is not None:
             db_paramdef.required = required
-        if rebuild_required is not None:
-            db_paramdef.rebuild_required = rebuild_required
+        if activation is not None:
+            db_paramdef.activation = activation
         if description is not None:
             db_paramdef.description = description
 
         if default:
             # Changing the default of a parameter which requires a rebuild is
             # a risky operation. If it is really needed, then the workaround is
-            # to turn the rebuild_required flag off first, update the value, and
-            # turn rebuild_required back again.
-            if db_paramdef.rebuild_required:
+            # to turn the activation flag off first, update the value, and
+            # turn activation back again.
+            if db_paramdef.activation == 'rebuild' :
                 raise UnimplementedError("Changing the default value of a "
                                          "parameter which requires rebuild "
                                          "would cause all existing hosts to "
