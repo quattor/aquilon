@@ -17,6 +17,7 @@
 # limitations under the License.
 """Module for testing the add feature command."""
 
+from collections import defaultdict
 import os.path
 
 if __name__ == "__main__":
@@ -25,6 +26,53 @@ if __name__ == "__main__":
 
 import unittest2 as unittest
 from brokertest import TestBrokerCommand
+
+default_features = {
+    "host": {
+        "pre_host_param": {
+            "visibility": "public",
+        },
+        "post_host": {
+            "visibility": "public",
+            "post_personality": True,
+        },
+        "myfeature": {
+            "visibility": "public",
+        },
+        "hostfeature": {
+            "visibility": "public",
+            "post_personality": True,
+        },
+        "shinynew": {
+            "visibility": "public",
+        },
+    },
+    "hardware": {
+        "bios_setup": {
+            "visibility": "public",
+        },
+        "disable_ht": {
+            "visibility": "owner_approved",
+        },
+        "hardwarefeature": {
+            "visibility": "public",
+        },
+        "shinynew": {
+            "visibility": "public",
+        },
+    },
+    "interface": {
+        "src_route": {
+            "visibility": "owner_only",
+        },
+        "interfacefeature": {
+            "visibility": "public",
+        },
+        "shinynew": {
+            "visibility": "public",
+        },
+    },
+}
 
 
 class TestAddFeature(TestBrokerCommand):
@@ -35,36 +83,7 @@ class TestAddFeature(TestBrokerCommand):
                    "--visibility", "public"]
         self.noouttest(command)
 
-    def test_100_add_host_pre_param(self):
-        command = ["add", "feature", "--feature", "pre_host_param", "--eon_id", 2,
-                   "--type", "host", "--visibility", "public"]
-        self.noouttest(command)
-
-    def test_100_add_host_post(self):
-        command = ["add", "feature", "--feature", "post_host", "--eon_id", 2,
-                   "--type", "host", "--post_personality",
-                   "--visibility", "public"]
-        self.noouttest(command)
-
-    def test_100_add_hw(self):
-        command = ["add", "feature", "--feature", "bios_setup",
-                   "--eon_id", 2, "--type", "hardware",
-                   "--visibility", "public"]
-        self.noouttest(command)
-
-    def test_100_add_hw2(self):
-        command = ["add", "feature", "--feature", "disable_ht",
-                   "--eon_id", 2, "--type", "hardware",
-                   "--visibility", "owner_approved"]
-        self.noouttest(command)
-
-    def test_100_add_iface(self):
-        command = ["add", "feature", "--feature", "src_route",
-                   "--eon_id", 2, "--type", "interface",
-                   "--visibility", "owner_only"]
-        self.noouttest(command)
-
-    def test_110_verify_pre(self):
+    def test_105_verify_host_pre(self):
         command = ["show", "feature", "--feature", "pre_host", "--type", "host"]
         out = self.commandtest(command)
         self.matchoutput(out, "Host Feature: pre_host", command)
@@ -83,7 +102,20 @@ class TestAddFeature(TestBrokerCommand):
         self.assertEqual(feature.owner_eonid, 2)
         self.assertEqual(feature.visibility, feature.PUBLIC)
 
-    def test_110_verify_post(self):
+    def test_110_add_default_features(self):
+        for feature_type in default_features:
+            for name, params in default_features[feature_type].items():
+                command = ["add_feature", "--feature", name,
+                           "--type", feature_type,
+                           "--grn", "grn:/ms/ei/aquilon/aqd"]
+                if "visibility" in params:
+                    command.extend(["--visibility", params["visibility"]])
+                if params.get("post_personality", False):
+                    command.append("--post_personality")
+
+                self.noouttest(command)
+
+    def test_115_verify_post_host(self):
         command = ["show", "feature", "--feature", "post_host", "--type", "host"]
         out = self.commandtest(command)
         self.matchoutput(out, "Host Feature: post_host", command)
@@ -102,7 +134,7 @@ class TestAddFeature(TestBrokerCommand):
         self.assertEqual(feature.owner_eonid, 2)
         self.assertEqual(feature.visibility, feature.PUBLIC)
 
-    def test_110_verify_hw(self):
+    def test_115_verify_hw(self):
         command = ["show", "feature", "--feature", "bios_setup",
                    "--type", "hardware"]
         out = self.commandtest(command)
@@ -121,7 +153,7 @@ class TestAddFeature(TestBrokerCommand):
         self.assertEqual(feature.owner_eonid, 2)
         self.assertEqual(feature.visibility, feature.PUBLIC)
 
-    def test_110_verify_iface(self):
+    def test_115_verify_iface(self):
         command = ["show", "feature", "--feature", "src_route",
                    "--type", "interface"]
         out = self.commandtest(command)
@@ -147,44 +179,52 @@ class TestAddFeature(TestBrokerCommand):
         self.matchoutput(out, "Host Feature: post_host", command)
         self.matchoutput(out, "Hardware Feature: bios_setup", command)
         self.matchoutput(out, "Interface Feature: src_route", command)
+        self.matchoutput(out, "Host Feature: shinynew", command)
+        self.matchoutput(out, "Hardware Feature: shinynew", command)
+        self.matchoutput(out, "Interface Feature: shinynew", command)
 
         command = ["show", "feature", "--all", "--format", "proto"]
-        features = dict((feature.name, feature)
-                        for feature in self.protobuftest(command))
-        self.assertIn("bios_setup", features)
-        feature = features["bios_setup"]
+        features = defaultdict(dict)
+        for feature in self.protobuftest(command):
+            features[feature.type][feature.name] = feature
+        self.assertIn("bios_setup", features["hardware"])
+        feature = features["hardware"]["bios_setup"]
         self.assertEqual(feature.name, "bios_setup")
         self.assertEqual(feature.type, "hardware")
         self.assertEqual(feature.owner_eonid, 2)
         self.assertEqual(feature.visibility, feature.PUBLIC)
-        self.assertIn("disable_ht", features)
-        feature = features["disable_ht"]
+        self.assertIn("disable_ht", features["hardware"])
+        feature = features["hardware"]["disable_ht"]
         self.assertEqual(feature.name, "disable_ht")
         self.assertEqual(feature.visibility, feature.OWNER_APPROVED)
-        self.assertIn("pre_host", features)
-        feature = features["pre_host"]
+        self.assertIn("pre_host", features["host"])
+        feature = features["host"]["pre_host"]
         self.assertEqual(feature.name, "pre_host")
         self.assertEqual(feature.type, "host")
         self.assertEqual(feature.post_personality, False)
         self.assertEqual(feature.owner_eonid, 2)
-        self.assertIn("pre_host_param", features)
-        feature = features["pre_host_param"]
+        self.assertIn("pre_host_param", features["host"])
+        feature = features["host"]["pre_host_param"]
         self.assertEqual(feature.name, "pre_host_param")
         self.assertEqual(feature.type, "host")
         self.assertEqual(feature.post_personality, False)
         self.assertEqual(feature.owner_eonid, 2)
-        self.assertIn("post_host", features)
-        feature = features["post_host"]
+        self.assertIn("post_host", features["host"])
+        feature = features["host"]["post_host"]
         self.assertEqual(feature.name, "post_host")
         self.assertEqual(feature.type, "host")
         self.assertEqual(feature.post_personality, True)
         self.assertEqual(feature.owner_eonid, 2)
-        self.assertIn("src_route", features)
-        feature = features["src_route"]
+        self.assertIn("src_route", features["interface"])
+        feature = features["interface"]["src_route"]
         self.assertEqual(feature.name, "src_route")
         self.assertEqual(feature.type, "interface")
         self.assertEqual(feature.owner_eonid, 2)
         self.assertEqual(feature.visibility, feature.OWNER_ONLY)
+
+        self.assertIn("shinynew", features["host"])
+        self.assertIn("shinynew", features["hardware"])
+        self.assertIn("shinynew", features["interface"])
 
     def test_200_post_hw(self):
         command = ["add", "feature", "--feature", "post_hw",
@@ -322,7 +362,6 @@ class TestAddFeature(TestBrokerCommand):
         self.matchoutput(out, "Post Personality: False", command)
         self.matchoutput(out, "Visibility: restricted", command)
         self.matchoutput(out, "Owned by GRN: grn:/ms/ei/aquilon/unittest", command)
-
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddFeature)

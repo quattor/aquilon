@@ -32,4 +32,14 @@ class CommandUnBindFeature(CommandBindFeature):
         # check any params defined for feature in personality and delete them
         del_all_feature_parameter(session, dblink)
 
+        # Ensure all collections are up-to-date in memory, because SQLAlchemy
+        # does not automatically remove deleted objects from loaded collections
+        if dblink.personality_stage:
+            dblink.personality_stage.features.remove(dblink)
+        if dblink.archetype:
+            dblink.archetype.features.remove(dblink)
+        if dblink.model:
+            dblink.model.features.remove(dblink)
         dbfeature.links.remove(dblink)
+
+        session.delete(dblink)

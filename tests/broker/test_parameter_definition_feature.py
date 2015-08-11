@@ -29,11 +29,6 @@ FEATURE = 'myfeature'
 
 class TestParameterDefinitionFeature(TestBrokerCommand):
 
-    def test_00_add_feature(self):
-        cmd = ["add_feature", "--feature", FEATURE, "--type=host", "--eon_id=2",
-               "--visibility", "public"]
-        self.noouttest(cmd)
-
     def test_100_add(self):
         cmd = ["add_parameter_definition", "--feature", FEATURE, "--type=host",
                "--path=testpath", "--value_type=string", "--description=blaah",
@@ -329,10 +324,6 @@ class TestParameterDefinitionFeature(TestBrokerCommand):
                          "Unknown feature type 'no-such-type'. The valid "
                          "values are: hardware, host, interface.",
                          cmd)
-
-    def test_300_del(self):
-        cmd = ["del_feature", "--feature", FEATURE, "--type=host"]
-        self.noouttest(cmd)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestParameterDefinitionFeature)

@@ -24,27 +24,16 @@ if __name__ == "__main__":
 import unittest2 as unittest
 from brokertest import TestBrokerCommand
 
-aquilon_personalities = None
 AUTHERR = "Changing feature bindings for a owner_only feature where owner grns do not match requires --justification."
 
 
 class TestUnbindFeature(TestBrokerCommand):
 
-    def setUp(self):
-        global aquilon_personalities
-
-        super(TestUnbindFeature, self).setUp()
-
-        if aquilon_personalities is None:
-            command = ["search", "personality", "--archetype", "aquilon",
-                       "--format", "proto"]
-            perslist = self.protobuftest(command)
-            aquilon_personalities = len(perslist)
-
     def verify_personality_flush(self, err, command):
+        command = ["search", "personality", "--archetype", "aquilon"]
+        perslist = self.commandtest(command).splitlines()
         self.matchoutput(err, "Flushed %d/%d templates" %
-                         (aquilon_personalities, aquilon_personalities),
-                         command)
+                         (len(perslist), len(perslist)), command)
 
     def test_100_unbind_archetype(self):
         command = ["unbind", "feature", "--feature", "pre_host",

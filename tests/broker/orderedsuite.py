@@ -166,6 +166,7 @@ from .test_constraints_metacluster import TestMetaClusterConstraints
 from .test_constraints_location import TestLocationConstraints
 from .test_constraints_dns import TestDnsConstraints
 from .test_constraints_network import TestNetworkConstraints
+from .test_constraints_parameter import TestParameterConstraints
 from .test_show_service_all import TestShowServiceAll
 from .test_show_campus import TestShowCampus
 from .test_show_fqdn import TestShowFqdn
@@ -280,7 +281,8 @@ from .test_stop import TestBrokerStop
 from .test_reset_advertised_status import TestResetAdvertisedStatus
 from .test_parameter import TestParameter
 from .test_parameter_feature import TestParameterFeature
-from .test_parameter_definition import TestParameterDefinition
+from .test_add_parameter_definition import TestAddParameterDefinition
+from .test_del_parameter_definition import TestDelParameterDefinition
 from .test_parameter_definition_feature import TestParameterDefinitionFeature
 from .test_documentation import TestDocumentation
 from .test_setup_params import TestSetupParams
@@ -313,14 +315,14 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestMergeConflicts,
                      TestGrns,
                      TestAddArchetype, TestAddOS,
-                     TestParameterDefinition, TestSetupParams,
+                     TestAddFeature, TestParameterDefinitionFeature,
+                     TestAddParameterDefinition, TestSetupParams,
                      TestAddService, TestAddPersonality, TestAddRequiredService,
                      TestOrganization, TestHub, TestContinent, TestCountry,
                      TestAddCampus, TestAddCity,
                      TestAddBuilding, TestAddRoom, TestAddBunker,
                      TestAddRack, TestAddDesk,
                      TestAddVendor, TestAddCpu, TestAddModel,
-                     TestAddFeature, TestParameterDefinitionFeature,
                      TestAddNetworkCompartment,
                      TestAddNetworkEnvironment, TestAddNetwork,
                      TestAddNSRecord, TestMapDnsDomain,
@@ -365,6 +367,7 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestAppliance,
                      TestUnbindClient, TestRebindClient, TestReconfigure,
                      TestChangeStatus, TestResetAdvertisedStatus,
+                     TestBindFeature,
                      TestParameter, TestParameterFeature,
                      TestJustification,
                      TestRefreshWindowsHosts,
@@ -376,6 +379,7 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestAddHostlink, TestAddRebootSchedule, TestAddRebootIntervention,
                      TestBindClientConstraints, TestBindServerConstraints,
                      TestArchetypeConstraints, TestPersonalityConstraints,
+                     TestParameterConstraints,
                      TestDomainConstraints,
                      TestVendorConstraints, TestModelConstraints,
                      TestMachineConstraints, TestNetworkDeviceConstraints,
@@ -403,7 +407,6 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestUpdateAlias, TestUpdateSrvRecord, TestUpdateAddress,
                      TestUpdateAddressAlias,
                      TestUpdateServiceAddress,
-                     TestBindFeature, TestUnbindFeature,
                      TestUpdateNetworkCompartment,
                      TestRefreshNetwork, TestUpdateNetwork, TestSplitMergeNetwork,
                      TestNetworkConstraints,
@@ -421,6 +424,7 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestConsistency,
                      TestUmaskConstraints,
                      TestUnbindServer, TestUnmapService,
+                     TestUnbindFeature,
                      TestDel10GigHardware, TestDelVirtualHardware,
                      TestUnbindCluster, TestUncluster,
                      TestDelShare, TestDelFilesystem,
@@ -440,6 +444,7 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestDelNetworkCompartment,
                      TestDelVlan,
                      TestDelModel, TestDelCpu, TestDelVendor,
+                     TestDelParameterDefinition,
                      TestDelFeature,
                      TestUnmapDnsDomain,
                      TestDelDesk, TestDelRack, TestDelBunker, TestDelRoom,

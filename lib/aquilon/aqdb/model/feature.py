@@ -175,22 +175,16 @@ class FeatureLink(Base):
                                     nullable=False))
 
     feature = relation(Feature, innerjoin=True,
-                       backref=backref('links',
-                                       cascade='all, delete-orphan'))
+                       backref=backref('links', passive_deletes=True))
 
     model = relation(Model,
-                     backref=backref('features',
-                                     cascade='all, delete-orphan',
-                                     passive_deletes=True))
+                     backref=backref('features', passive_deletes=True))
 
     archetype = relation(Archetype,
-                         backref=backref('features',
-                                         cascade='all, delete-orphan',
-                                         passive_deletes=True))
+                         backref=backref('features', passive_deletes=True))
 
     personality_stage = relation(PersonalityStage,
                                  backref=backref('features',
-                                                 cascade='all, delete-orphan',
                                                  passive_deletes=True))
 
     # The behavior of UNIQUE constraints in the presence of NULL columns is not
@@ -254,9 +248,7 @@ class FeatureLink(Base):
             return self.feature.cfg_path
 
     def copy(self):
-        # We have two foreign keys: feature and personality_stage. Since we
-        # want to use this method for cloning personalities, we copy the
-        # feature_id, but not the personality_stage_id.
         return type(self)(feature=self.feature, model=self.model,
+                          personality_stage=self.personality_stage,
                           archetype=self.archetype,
                           interface_name=self.interface_name)

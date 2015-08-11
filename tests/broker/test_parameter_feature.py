@@ -57,31 +57,16 @@ VAL_CMD = ["validate_parameter", "--personality", PERSONALITY]
 
 class TestParameterFeature(TestBrokerCommand):
 
-    def test_000_add_host_feature(self):
-        cmd = ["add_feature", "--feature", HOSTFEATURE, "--type", "host",
-               "--post_personality", "--eon_id", 2, "--visibility", "public"]
-        self.ignoreoutputtest(cmd)
-
     def test_010_bind_host_feature(self):
         cmd = ["bind_feature", "--feature", HOSTFEATURE, "--personality", PERSONALITY]
         self.ignoreoutputtest(cmd)
         self.load_paramdefs(HOSTFEATURE, 'host')
-
-    def test_030_add_hardware_feature(self):
-        cmd = ["add_feature", "--feature", HARDWAREFEATURE,
-               "--type", "hardware", "--eon_id", 2, "--visibility", "public"]
-        self.ignoreoutputtest(cmd)
 
     def test_040_bind_hardware_feature(self):
         cmd = ["bind_feature", "--feature", HARDWAREFEATURE, "--personality", PERSONALITY,
                "--archetype", ARCHETYPE, "--justification=tcm=12345678", "--model", "hs21-8853"]
         self.ignoreoutputtest(cmd)
         self.load_paramdefs(HARDWAREFEATURE, 'hardware')
-
-    def test_060_add_interface_feature(self):
-        cmd = ["add_feature", "--feature", INTERFACEFEATURE,
-               "--type", "interface", "--eon_id", 2, "--visibility", "public"]
-        self.ignoreoutputtest(cmd)
 
     def test_070_bind_interface_feature(self):
         cmd = ["bind_feature", "--feature", INTERFACEFEATURE,
@@ -285,7 +270,7 @@ class TestParameterFeature(TestBrokerCommand):
 
     def test_310_verify_feature_proto(self):
         cmd = SHOW_CMD + ["--format=proto"]
-        params = self.protobuftest(cmd, expect=14)
+        params = self.protobuftest(cmd, expect=13)
 
         param_values = {}
         for param in params:
@@ -293,7 +278,6 @@ class TestParameterFeature(TestBrokerCommand):
 
         self.assertEqual(set(param_values.keys()),
                          set(["espinfo/class",
-                              "espinfo/threshold",
                               "espinfo/function",
                               "espinfo/users",
                               "features/hostfeature/testboolean",
@@ -340,11 +324,16 @@ class TestParameterFeature(TestBrokerCommand):
                           r'"hardware1",\s*"hardware2"\s*\);\s*'
                           r'"/system/features/hardware/hardwarefeature/teststring" = "hardware_feature";\s*',
                           cmd)
-        self.searchoutput(out, r'include \{\s*'
-                               r'if \(\(value\("/hardware/manufacturer"\) == "ibm"\) &&\s*'
-                               r'\(value\("/hardware/template_name"\) == "hs21-8853"\)\)\{\s*'
-                               r'return\("features/hardware/hardwarefeature"\)\s*'
-                               r'\} else\{ return\(undef\); \};\s*};',
+        self.searchoutput(out,
+                          r'include \{\s*'
+                          r'if \(\(value\("/hardware/manufacturer"\) == "ibm"\) &&\s*'
+                          r'\(value\("/hardware/template_name"\) == "hs21-8853"\)\)\s*\{\s*'
+                          r'if \(exists\("features/hardware/hardwarefeature/config"\)\) \{\s*'
+                          r'"features/hardware/hardwarefeature/config";\s*'
+                          r'\} else \{\s*'
+                          r'"features/hardware/hardwarefeature";\s*'
+                          r'\};\s*'
+                          r'\} else \{\s*undef;\s*\};\s*\};',
                           cmd)
 
     def test_360_add_existing(self):
@@ -414,10 +403,6 @@ class TestParameterFeature(TestBrokerCommand):
     def test_600_add_same_name_feature(self):
         feature = "shinynew"
         for type in ["host", "hardware", "interface"]:
-            cmd = ["add_feature", "--feature", feature, "--type", type,
-                   "--eon_id", 2, "--visibility", "public"]
-            self.ignoreoutputtest(cmd)
-
             cmd = ["add_parameter_definition", "--feature", feature, "--type", type,
                    "--path", "car", "--value_type", "string"]
             self.noouttest(cmd)
@@ -481,9 +466,6 @@ class TestParameterFeature(TestBrokerCommand):
         cmd = ["unbind_feature", "--feature", HOSTFEATURE, "--personality", PERSONALITY]
         self.ignoreoutputtest(cmd)
 
-        cmd = ["del_feature", "--feature", HOSTFEATURE, "--type", "host"]
-        self.noouttest(cmd)
-
     def test_920_del_hardware_feature_params(self):
         cmd = DEL_CMD + ["--path=teststring", "--feature", HARDWAREFEATURE, "--model", "hs21-8853"]
         self.noouttest(cmd)
@@ -492,9 +474,6 @@ class TestParameterFeature(TestBrokerCommand):
         cmd = ["unbind_feature", "--feature", HARDWAREFEATURE, "--personality", PERSONALITY,
                "--archetype", ARCHETYPE, "--justification=tcm=12345678", "--model", "hs21-8853"]
         self.ignoreoutputtest(cmd)
-
-        cmd = ["del_feature", "--feature", HARDWAREFEATURE, "--type=hardware"]
-        self.noouttest(cmd)
 
     def test_930_del_interface_feature_params(self):
         cmd = DEL_CMD + ["--path=teststring", "--feature", INTERFACEFEATURE, "--interface=eth0"]
@@ -507,9 +486,6 @@ class TestParameterFeature(TestBrokerCommand):
 
         cmd = ["unbind_feature", "--feature", INTERFACEFEATURE, "--interface", "eth1",
                "--personality", PERSONALITY]
-        self.ignoreoutputtest(cmd)
-
-        cmd = ["del_feature", "--feature", INTERFACEFEATURE, "--type", "interface"]
         self.ignoreoutputtest(cmd)
 
     def test_950_del_same_name_feature_parameter(self):
@@ -538,9 +514,6 @@ class TestParameterFeature(TestBrokerCommand):
             if type == "hardware":
                 cmd.extend(["--model", "hs21-8853"])
             self.successtest(cmd)
-
-            cmd = ["del_feature", "--feature", feature, "--type", type]
-            self.ignoreoutputtest(cmd)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestParameterFeature)

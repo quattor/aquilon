@@ -15,18 +15,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from sqlalchemy.orm import contains_eager
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import ParamDefinition, Archetype
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.aqdb.model import (ParamDefinition, Archetype, PersonalityStage,
+                                Personality)
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.parameter import search_path_in_personas
+from aquilon.worker.templates import PlenaryCollection
+from aquilon.worker.templates.personality import (ParameterTemplate,
+                                                  PlenaryPersonalityParameter)
 
 
 class CommandDelParameterDefintionArchetype(BrokerCommand):
 
     required_parameters = ["path", "archetype"]
 
-    def render(self, session, archetype, path, **kwargs):
+    def render(self, session, logger, archetype, path, **kwargs):
         dbarchetype = Archetype.get_unique(session, archetype, compel=True)
         if not dbarchetype.param_def_holder:
             raise ArgumentError("No parameter definitions found for {0}."
@@ -41,7 +46,27 @@ class CommandDelParameterDefintionArchetype(BrokerCommand):
             raise ArgumentError("Parameter with path {0} used by following and cannot be deleted : ".format(path) +
                                 ", ".join("{0.holder_object:l}".format(h) for h in holder))
 
+        plenaries = PlenaryCollection(logger=logger)
+
+        q = session.query(ParamDefinition.id)
+        q = q.filter_by(holder=dbarchetype.param_def_holder)
+        q = q.filter_by(template=db_paramdef.template)
+        q = q.filter(ParamDefinition.id != db_paramdef.id)
+        if not q.count():
+            # This was the last definition for the given template - need to
+            # clean up
+            q = session.query(PersonalityStage)
+            q = q.join(Personality)
+            q = q.options(contains_eager('personality'))
+            q = q.filter_by(archetype=dbarchetype)
+            for dbstage in q:
+                ptmpl = ParameterTemplate(dbstage, db_paramdef.template, None)
+                ptmpl.force_delete = True
+                plenaries.append(PlenaryPersonalityParameter.get_plenary(ptmpl))
+
         session.delete(db_paramdef)
         session.flush()
+
+        plenaries.write()
 
         return

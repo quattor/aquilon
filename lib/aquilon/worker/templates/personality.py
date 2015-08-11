@@ -152,6 +152,7 @@ class ParameterTemplate(object):
         self.personality_stage = dbstage
         self.template = template
         self.values = values
+        self.force_delete = False
 
     def __str__(self):
         return "%s/%s" % (self.personality_stage.personality.name,
@@ -329,6 +330,10 @@ class PlenaryPersonalityParameter(StructurePlenary):
             pan_assign(lines, path, self.parameters[path])
 
     def is_deleted(self):
+        # Hack to allow unused templates to get cleaned up
+        if self.dbobj.force_delete:
+            return True
+
         dbobj = self.dbobj.personality_stage
         session = object_session(dbobj)
         return dbobj in session.deleted or inspect(dbobj).deleted

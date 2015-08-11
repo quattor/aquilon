@@ -24,10 +24,6 @@ if __name__ == "__main__":
 import unittest2 as unittest
 from broker.brokertest import TestBrokerCommand
 
-aquilon_hosts = None
-aquilon_personalities = None
-inventory_hosts = None
-hs21_hosts = None
 AUTHERR = "Changing feature bindings for a owner_only feature where owner grns do not match requires --justification."
 
 hardware_feature_str = r'include {\n'
@@ -46,40 +42,11 @@ r'};'
 
 class TestBindFeature(TestBrokerCommand):
 
-    def setUp(self):
-        # We don't want to query these for every test executed...
-        global aquilon_hosts, inventory_hosts, hs21_hosts, aquilon_personalities
-
-        super(TestBindFeature, self).setUp()
-
-        if aquilon_hosts is None:
-            command = ["search", "host", "--archetype", "aquilon",
-                       "--format", "proto"]
-            hostlist = self.protobuftest(command)
-            aquilon_hosts = len(hostlist)
-
-        if inventory_hosts is None:
-            command = ["search", "host", "--personality", "inventory",
-                       "--format", "proto"]
-            hostlist = self.protobuftest(command)
-            inventory_hosts = len(hostlist)
-
-        if hs21_hosts is None:
-            command = ["search", "host", "--archetype", "aquilon",
-                       "--model", "hs21-8853", "--format", "proto"]
-            hostlist = self.protobuftest(command)
-            hs21_hosts = len(hostlist)
-
-        if aquilon_personalities is None:
-            command = ["search", "personality", "--archetype", "aquilon",
-                       "--format", "proto"]
-            perslist = self.protobuftest(command)
-            aquilon_personalities = len(perslist)
-
     def verify_personality_flush(self, err, command):
+        command = ["search", "personality", "--archetype", "aquilon"]
+        perslist = self.commandtest(command).splitlines()
         self.matchoutput(err, "Flushed %d/%d templates" %
-                         (aquilon_personalities, aquilon_personalities),
-                         command)
+                         (len(perslist), len(perslist)), command)
 
     def test_100_bind_archetype(self):
         command = ["bind", "feature", "--feature", "pre_host",
