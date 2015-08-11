@@ -126,6 +126,7 @@ class CommandSearchNetwork(BrokerCommand):
                            joinedload("assignments.interface.hardware_entity"),
                            joinedload("assignments.dns_records"),
                            subqueryload("routers"),
+                           subqueryload("network_compartment"),
                            subqueryload("dynamic_stubs")])
             return NetworkHostList(q.all())
         return NetworkList(q.all())
