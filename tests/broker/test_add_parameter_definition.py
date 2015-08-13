@@ -17,12 +17,34 @@
 # limitations under the License.
 """Module for testing parameter definition support."""
 
+import json
+import re
+
 if __name__ == "__main__":
     import utils
     utils.import_depends()
 
 import unittest2 as unittest
 from broker.brokertest import TestBrokerCommand
+
+test_schema = {
+    "schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "properties": {
+        "key": {
+            "type": "string"
+        },
+        "values": {
+            "type": "array",
+            "items": {
+                "type": "integer"
+            },
+            "minItems": 1,
+            "uniqueItems": True
+        }
+    },
+    "additionalProperties": False
+}
 
 default_param_defs = {
     "testdefault": {
@@ -66,8 +88,9 @@ default_param_defs = {
     },
     "testjson": {
         "type": "json",
-        "default": '{"val1": "val2"}',
-        "invalid_default": "bad_json",
+        "default": '{"key": "param_key", "values": [0]}',
+        "schema": json.dumps(test_schema),
+        "invalid_default": "bad_json_string",
     },
 }
 
@@ -100,6 +123,8 @@ class TestAddParameterDefinition(TestBrokerCommand):
                 cmd.append("--required")
             if "activation" in params:
                 cmd.extend(["--activation", params["activation"]])
+            if "schema" in params:
+                cmd.extend(["--schema", params["schema"]])
 
             self.noouttest(cmd)
 
@@ -146,6 +171,8 @@ class TestAddParameterDefinition(TestBrokerCommand):
                 cmd.extend(["--default", params["default"]])
             if params.get("required", False):
                 cmd.append("--required")
+            if "schema" in params:
+                cmd.extend(["--schema", params["schema"]])
 
             self.noouttest(cmd)
 
@@ -327,11 +354,13 @@ class TestAddParameterDefinition(TestBrokerCommand):
             pattern += r"\s*"
             if "type" in params:
                 pattern += "Type: " + params["type"] + r"\s*"
+                if params["type"] == "json" and "schema" in params:
+                    pattern += r"Schema: \{\n(^            .*\n)+\s*\}\s*"
             else:
                 pattern += r"Type: string\s*"
             pattern += r"Template: foo\s*"
             if "default" in params:
-                pattern += "Default: " + params["default"] + r"\s*"
+                pattern += "Default: " + re.escape(params["default"]) + r"\s*"
             if "activation" in params:
                 pattern += "Activation: " + params["activation"] + r"\s*"
             else:
@@ -385,10 +414,12 @@ class TestAddParameterDefinition(TestBrokerCommand):
             pattern += r"\s*"
             if "type" in params:
                 pattern += "Type: " + params["type"] + r"\s*"
+                if params["type"] == "json" and "schema" in params:
+                    pattern += r"Schema: \{\n(^            .*\n)+\s*\}\s*"
             else:
                 pattern += r"Type: string\s*"
             if "default" in params:
-                pattern += "Default: " + params["default"] + r"\s*"
+                pattern += "Default: " + re.escape(params["default"]) + r"\s*"
 
             self.searchoutput(out, pattern, cmd)
 

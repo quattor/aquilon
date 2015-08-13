@@ -16,7 +16,9 @@
 # limitations under the License.
 """ Helper functions for managing parameters. """
 
+from jsonschema import validate, ValidationError
 import re
+from six import iteritems
 
 from sqlalchemy.orm import contains_eager, joinedload, subqueryload, undefer
 from sqlalchemy.sql import or_
@@ -42,6 +44,17 @@ def set_parameter(session, parameter, db_paramdef, path, value, compel=False,
     if isinstance(db_paramdef.holder, FeatureParamDef):
         path = Parameter.feature_path(db_paramdef.holder.feature, path)
     parameter.set_path(path, retval, compel, preclude)
+
+    if db_paramdef.schema:
+        base_path = db_paramdef.path
+        if isinstance(db_paramdef.holder, FeatureParamDef):
+            base_path = Parameter.feature_path(db_paramdef.holder.feature,
+                                               base_path)
+        new_value = parameter.get_path(base_path)
+        try:
+            validate(new_value, db_paramdef.schema)
+        except ValidationError as err:
+            raise ArgumentError(err)
 
 
 def del_all_feature_parameter(session, dblink):
@@ -222,3 +235,20 @@ def add_feature_paramdef_plenaries(session, dbfeature, plenaries):
     for dbstage in q:
         plenaries.append(PlenaryPersonalityPreFeature.get_plenary(dbstage))
         plenaries.append(PlenaryPersonalityPostFeature.get_plenary(dbstage))
+
+
+def update_paramdef_schema(session, db_paramdef, schema):
+    if db_paramdef.value_type != "json":
+        raise ArgumentError("Only JSON parameters may have a schema.")
+    db_paramdef.schema = schema
+
+    # Ensure that existing values do not conflict with the new schema
+    params = search_path_in_personas(session, db_paramdef.path,
+                                     db_paramdef.holder)
+    for param, value in iteritems(params):
+        try:
+            validate(value, schema)
+        except ValidationError as err:
+            raise ArgumentError("Existing value for {0:l} conflicts with the "
+                                "new schema: {1!s}"
+                                .format(param.holder_object, err))

@@ -29,8 +29,8 @@ class CommandAddParameterDefintionArchetype(BrokerCommand):
     required_parameters = ["archetype", "template", "path", "value_type"]
 
     def render(self, session, logger, archetype, template, path, value_type,
-               required, activation, default, description, user, justification,
-               reason, **kwargs):
+               schema, required, activation, default, description, user,
+               justification, reason, **kwargs):
         validate_template_name(template, "template")
         dbarchetype = Archetype.get_unique(session, archetype, compel=True)
         if not dbarchetype.is_compileable:
@@ -50,6 +50,9 @@ class CommandAddParameterDefintionArchetype(BrokerCommand):
                                      "existing hosts to require a rebuild, "
                                      "which is not supported.")
 
+        if schema and value_type != "json":
+            raise ArgumentError("Only JSON parameters may have a schema.")
+
         path = ParamDefinition.normalize_path(path)
         ParamDefinition.get_unique(session, path=path, holder=holder,
                                    preclude=True)
@@ -60,8 +63,8 @@ class CommandAddParameterDefintionArchetype(BrokerCommand):
             add_arch_paramdef_plenaries(session, dbarchetype, holder, plenaries)
 
         db_paramdef = ParamDefinition(path=path, holder=holder,
-                                      value_type=value_type, required=required,
-                                      activation=activation,
+                                      value_type=value_type, schema=schema,
+                                      required=required, activation=activation,
                                       description=description)
         # Set default separately - validation in the model depends on the other
         # attributes being already set

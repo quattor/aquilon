@@ -18,6 +18,7 @@
 
 from datetime import datetime
 import json
+from jsonschema import validate, ValidationError, Draft4Validator
 import re
 
 from sqlalchemy import (Column, Integer, DateTime, Sequence, String, Boolean,
@@ -26,7 +27,7 @@ from sqlalchemy.orm import relation, backref, deferred, validates
 from sqlalchemy.orm.collections import column_mapped_collection
 
 from aquilon.exceptions_ import ArgumentError, InternalError
-from aquilon.aqdb.column_types import AqStr, Enum
+from aquilon.aqdb.column_types import AqStr, Enum, JSONEncodedDict
 from aquilon.aqdb.model import Base, Archetype, Feature
 from aquilon.aqdb.model.feature import _ACTIVATION_TYPE
 from aquilon.utils import (force_json, force_int, force_float, force_boolean,
@@ -129,6 +130,7 @@ class ParamDefinition(Base):
     required = Column(Boolean(name="%s_required_ck" % _TN), default=False,
                       nullable=False)
     value_type = Column(Enum(16, _PATH_TYPES), nullable=False, default="string")
+    schema = Column(JSONEncodedDict, nullable=True)
     default = Column(Text, nullable=True)
     description = deferred(Column(String(255), nullable=True))
     holder_id = Column(ForeignKey(ParamDefHolder.id, ondelete='CASCADE'),
@@ -179,12 +181,31 @@ class ParamDefinition(Base):
             return None
 
         retval = self.parse_value("default for path=%s" % self.path, value)
+        if self.schema:
+            try:
+                validate(retval, self.schema)
+            except ValidationError as err:
+                raise ArgumentError(err)
 
         # Ensure JSON defaults get stored in a normalized form
         if self.value_type == "json":
             return json.dumps(retval, sort_keys=True)
         else:
             return value
+
+    @validates('schema')
+    def validate_schema(self, key, value):  # pylint: disable=W0613
+        if value is None:
+            return value
+        Draft4Validator.check_schema(value)
+
+        if self.default:
+            try:
+                validate(json.loads(self.default), value)
+            except ValidationError as err:
+                raise ArgumentError("The existing default value conflicts "
+                                    "with the new schema: %s" % err)
+        return value
 
     @validates('activation')
     def validate_activation(self, key, activation):
@@ -214,6 +235,9 @@ class ParamDefinition(Base):
         elif self.value_type == 'boolean':
             return force_boolean(label, value)
         elif self.value_type == 'json':
+            # Note: do not try to validate the schema here - "value" may be just
+            # a small fragment of the value associated with this parameter
+            # definition
             return force_json(label, value)
 
         raise InternalError("Unhandled type: %s" % self.value_type)

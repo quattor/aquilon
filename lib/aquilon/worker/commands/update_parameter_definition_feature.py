@@ -18,7 +18,8 @@
 from aquilon.aqdb.model import Feature, FeatureParamDef, ParamDefinition
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.change_management import validate_prod_feature
-from aquilon.worker.dbwrappers.parameter import add_feature_paramdef_plenaries
+from aquilon.worker.dbwrappers.parameter import (add_feature_paramdef_plenaries,
+                                                 update_paramdef_schema)
 from aquilon.worker.templates import PlenaryCollection
 
 
@@ -26,9 +27,9 @@ class CommandUpdParameterDefintionFeature(BrokerCommand):
 
     required_parameters = ["feature", "type", "path"]
 
-    def render(self, session, logger, feature, type, path, required, default,
-               clear_default, description, user, justification, reason,
-               **kwargs):
+    def render(self, session, logger, feature, type, path, schema, clear_schema,
+               required, default, clear_default, description, user,
+               justification, reason, **kwargs):
         cls = Feature.polymorphic_subclass(type, "Unknown feature type")
         dbfeature = cls.get_unique(session, name=feature, compel=True)
 
@@ -53,6 +54,10 @@ class CommandUpdParameterDefintionFeature(BrokerCommand):
             db_paramdef.required = required
         if description is not None:
             db_paramdef.description = description
+        if schema:
+            update_paramdef_schema(session, db_paramdef, schema)
+        elif clear_schema:
+            db_paramdef.schema = None
 
         session.flush()
 

@@ -16,8 +16,9 @@
 # limitations under the License.
 """Parameter Definition formatter."""
 
-from aquilon.worker.formats.formatters import ObjectFormatter
 from aquilon.aqdb.model import ParamDefinition
+from aquilon.worker.formats.formatters import ObjectFormatter
+from aquilon.worker.formats.parameter import indented_value
 
 
 class ParamDefinitionFormatter(ObjectFormatter):
@@ -31,6 +32,8 @@ class ParamDefinitionFormatter(ObjectFormatter):
 
         details.append(indent + "{0:c}: {0!s}{1}".format(paramdef, reqstr))
         details.append(indent + "  Type: %s" % paramdef.value_type)
+        if paramdef.schema:
+            details.extend(indented_value(indent + "  ", "Schema", paramdef.schema))
         if hasattr(paramdef.holder, 'template'):
             details.append(indent + "  Template: %s" % paramdef.holder.template)
         if paramdef.default is not None:
