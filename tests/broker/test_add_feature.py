@@ -29,6 +29,10 @@ from brokertest import TestBrokerCommand
 
 default_features = {
     "host": {
+        "pre_host": {
+            "visibility": "public",
+            "comments": "Some feature comments",
+        },
         "pre_host_param": {
             "visibility": "public",
         },
@@ -78,48 +82,18 @@ default_features = {
     },
 }
 
-proto = None
-
 
 class TestAddFeature(TestBrokerCommand):
 
     def setUp(self):
-        global proto
-
         super(TestAddFeature, self).setUp()
-        proto = self.protocols['aqdsystems_pb2']
+        self.proto = self.protocols['aqdsystems_pb2']
 
-    def test_100_add_host_pre(self):
-        command = ["add", "feature", "--feature", "pre_host", "--eon_id", 2,
-                   "--type", "host", "--comments", "Some feature comments",
-                   "--visibility", "public"]
-        self.noouttest(command)
+        desc = self.proto.Feature.DESCRIPTOR
+        self.activation_type = desc.fields_by_name["activation"].enum_type
+        self.visibility_type = desc.fields_by_name["visibility"].enum_type
 
-    def test_105_verify_host_pre(self):
-        command = ["show", "feature", "--feature", "pre_host", "--type", "host"]
-        out = self.commandtest(command)
-        self.output_equals(out, """
-            Host Feature: pre_host
-              Post Personality: False
-              Owned by GRN: grn:/ms/ei/aquilon/aqd
-              Visibility: public
-              Activation: reboot
-              Deactivation: reboot
-              Template: features/pre_host
-              Comments: Some feature comments
-            """, command)
-
-        command = ["show", "feature", "--feature", "pre_host", "--type", "host", "--format", "proto"]
-        feature = self.protobuftest(command, expect=1)[0]
-        self.assertEqual(feature.name, "pre_host")
-        self.assertEqual(feature.type, "host")
-        self.assertEqual(feature.post_personality, False)
-        self.assertEqual(feature.owner_eonid, 2)
-        self.assertEqual(feature.visibility, feature.PUBLIC)
-        self.assertEqual(feature.activation, proto.REBOOT)
-        self.assertEqual(feature.deactivation, proto.REBOOT)
-
-    def test_110_add_default_features(self):
+    def test_100_add_default_features(self):
         for feature_type in default_features:
             for name, params in default_features[feature_type].items():
                 command = ["add_feature", "--feature", name,
@@ -138,7 +112,21 @@ class TestAddFeature(TestBrokerCommand):
 
                 self.noouttest(command)
 
-    def test_115_verify_post_host(self):
+    def test_105_verify_pre_host(self):
+        command = ["show", "feature", "--feature", "pre_host", "--type", "host"]
+        out = self.commandtest(command)
+        self.output_equals(out, """
+            Host Feature: pre_host
+              Post Personality: False
+              Owned by GRN: grn:/ms/ei/aquilon/aqd
+              Visibility: public
+              Activation: reboot
+              Deactivation: reboot
+              Template: features/pre_host
+              Comments: Some feature comments
+            """, command)
+
+    def test_105_verify_post_host(self):
         command = ["show", "feature", "--feature", "post_host", "--type", "host"]
         out = self.commandtest(command)
         self.output_equals(out, """
@@ -151,19 +139,9 @@ class TestAddFeature(TestBrokerCommand):
               Template: features/post_host
             """, command)
 
-        command = ["show", "feature", "--feature", "post_host", "--type", "host", "--format", "proto"]
-        feature = self.protobuftest(command, expect=1)[0]
-        self.assertEqual(feature.name, "post_host")
-        self.assertEqual(feature.type, "host")
-        self.assertEqual(feature.post_personality, True)
-        self.assertEqual(feature.owner_eonid, 2)
-        self.assertEqual(feature.visibility, feature.PUBLIC)
-        self.assertEqual(feature.activation, proto.REBOOT)
-        self.assertEqual(feature.deactivation, proto.REBOOT)
 
-    def test_115_verify_hw(self):
-        command = ["show", "feature", "--feature", "bios_setup",
-                   "--type", "hardware"]
+    def test_105_verify_hw(self):
+        command = ["show", "feature", "--feature", "bios_setup", "--type", "hardware"]
         out = self.commandtest(command)
         self.output_equals(out, """
             Hardware Feature: bios_setup
@@ -174,18 +152,8 @@ class TestAddFeature(TestBrokerCommand):
               Template: features/hardware/bios_setup
             """, command)
 
-        command = ["show", "feature", "--feature", "bios_setup", "--type", "hardware", "--format", "proto"]
-        feature = self.protobuftest(command, expect=1)[0]
-        self.assertEqual(feature.name, "bios_setup")
-        self.assertEqual(feature.type, "hardware")
-        self.assertEqual(feature.owner_eonid, 2)
-        self.assertEqual(feature.visibility, feature.PUBLIC)
-        self.assertEqual(feature.activation, proto.REBOOT)
-        self.assertEqual(feature.deactivation, proto.REBOOT)
-
-    def test_115_verify_iface(self):
-        command = ["show", "feature", "--feature", "src_route",
-                   "--type", "interface"]
+    def test_105_verify_iface(self):
+        command = ["show", "feature", "--feature", "src_route", "--type", "interface"]
         out = self.commandtest(command)
         self.output_equals(out, """
             Interface Feature: src_route
@@ -195,15 +163,6 @@ class TestAddFeature(TestBrokerCommand):
               Deactivation: reboot
               Template: features/interface/src_route
             """, command)
-
-        command = ["show", "feature", "--feature", "src_route", "--type", "interface", "--format", "proto"]
-        feature = self.protobuftest(command, expect=1)[0]
-        self.assertEqual(feature.name, "src_route")
-        self.assertEqual(feature.type, "interface")
-        self.assertEqual(feature.owner_eonid, 2)
-        self.assertEqual(feature.visibility, feature.OWNER_ONLY)
-        self.assertEqual(feature.activation, proto.REBOOT)
-        self.assertEqual(feature.deactivation, proto.REBOOT)
 
     def test_120_show_all(self):
         command = ["show", "feature", "--all"]
@@ -216,66 +175,39 @@ class TestAddFeature(TestBrokerCommand):
         self.matchoutput(out, "Hardware Feature: shinynew", command)
         self.matchoutput(out, "Interface Feature: shinynew", command)
 
+    def test_120_show_all_proto(self):
         command = ["show", "feature", "--all", "--format", "proto"]
-        features = defaultdict(dict)
+        result = defaultdict(dict)
         for feature in self.protobuftest(command):
-            features[feature.type][feature.name] = feature
+            result[feature.type][feature.name] = feature
 
-        self.assertIn("bios_setup", features["hardware"])
-        feature = features["hardware"]["bios_setup"]
-        self.assertEqual(feature.name, "bios_setup")
-        self.assertEqual(feature.type, "hardware")
-        self.assertEqual(feature.owner_eonid, 2)
-        self.assertEqual(feature.visibility, feature.PUBLIC)
-        self.assertEqual(feature.activation, proto.REBOOT)
-        self.assertEqual(feature.deactivation, proto.REBOOT)
+        for feature_type, features in default_features.items():
+            for name, params in features.items():
+                self.assertIn(name, result[feature_type])
+                data = result[feature_type][name]
+                self.assertEqual(data.name, name)
+                self.assertEqual(data.type, feature_type)
+                self.assertEqual(data.owner_eonid, 2)
 
-        self.assertIn("disable_ht", features["hardware"])
-        feature = features["hardware"]["disable_ht"]
-        self.assertEqual(feature.name, "disable_ht")
-        self.assertEqual(feature.visibility, feature.OWNER_APPROVED)
-        self.assertEqual(feature.activation, proto.REBOOT)
-        self.assertEqual(feature.deactivation, proto.REBOOT)
+                if "activation" in params:
+                    val = self.activation_type.values_by_name[params["activation"].upper()]
+                    self.assertEqual(data.activation, val.number)
+                else:
+                    self.assertEqual(data.activation, self.proto.REBOOT)
+                if "deactivation" in params:
+                    val = self.activation_type.values_by_name[params["deactivation"].upper()]
+                    self.assertEqual(data.deactivation, val.number)
+                else:
+                    self.assertEqual(data.deactivation, self.proto.REBOOT)
+                if "visibility" in params:
+                    val = self.visibility_type.values_by_name[params["visibility"].upper()]
+                    self.assertEqual(data.visibility, val.number)
+                else:
+                    self.assertEqual(data.visibility, data.RESRICTED)
 
-        self.assertIn("pre_host", features["host"])
-        feature = features["host"]["pre_host"]
-        self.assertEqual(feature.name, "pre_host")
-        self.assertEqual(feature.type, "host")
-        self.assertEqual(feature.post_personality, False)
-        self.assertEqual(feature.owner_eonid, 2)
-        self.assertEqual(feature.activation, proto.REBOOT)
-        self.assertEqual(feature.deactivation, proto.REBOOT)
-
-        self.assertIn("pre_host_param", features["host"])
-        feature = features["host"]["pre_host_param"]
-        self.assertEqual(feature.name, "pre_host_param")
-        self.assertEqual(feature.type, "host")
-        self.assertEqual(feature.post_personality, False)
-        self.assertEqual(feature.owner_eonid, 2)
-        self.assertEqual(feature.activation, proto.REBOOT)
-        self.assertEqual(feature.deactivation, proto.REBOOT)
-
-        self.assertIn("post_host", features["host"])
-        feature = features["host"]["post_host"]
-        self.assertEqual(feature.name, "post_host")
-        self.assertEqual(feature.type, "host")
-        self.assertEqual(feature.post_personality, True)
-        self.assertEqual(feature.owner_eonid, 2)
-        self.assertEqual(feature.activation, proto.REBOOT)
-        self.assertEqual(feature.deactivation, proto.REBOOT)
-
-        self.assertIn("src_route", features["interface"])
-        feature = features["interface"]["src_route"]
-        self.assertEqual(feature.name, "src_route")
-        self.assertEqual(feature.type, "interface")
-        self.assertEqual(feature.owner_eonid, 2)
-        self.assertEqual(feature.visibility, feature.OWNER_ONLY)
-        self.assertEqual(feature.activation, proto.REBOOT)
-        self.assertEqual(feature.deactivation, proto.REBOOT)
-
-        self.assertIn("shinynew", features["host"])
-        self.assertIn("shinynew", features["hardware"])
-        self.assertIn("shinynew", features["interface"])
+        self.assertIn("shinynew", result["host"])
+        self.assertIn("shinynew", result["hardware"])
+        self.assertIn("shinynew", result["interface"])
 
     def test_200_post_hw(self):
         command = ["add", "feature", "--feature", "post_hw",
@@ -447,14 +379,16 @@ class TestAddFeature(TestBrokerCommand):
 
         command = ["show", "feature", "--feature", "pre_host", "--type", "host"]
         out = self.commandtest(command)
-        self.matchoutput(out, "Host Feature: pre_host", command)
-        self.matchoutput(out, "Template: features/pre_host", command)
-        self.matchoutput(out, "Comments: New feature comments", command)
-        self.matchoutput(out, "Post Personality: False", command)
-        self.matchoutput(out, "Visibility: restricted", command)
-        self.matchoutput(out, "Owned by GRN: grn:/ms/ei/aquilon/unittest", command)
-        self.matchoutput(out, "Activation: dispatch", command)
-        self.matchoutput(out, "Deactivation: rebuild", command)
+        self.output_equals(out, """
+            Host Feature: pre_host
+              Post Personality: False
+              Owned by GRN: grn:/ms/ei/aquilon/unittest
+              Visibility: restricted
+              Activation: dispatch
+              Deactivation: rebuild
+              Template: features/pre_host
+              Comments: New feature comments
+            """, command)
 
         command = ["show", "feature", "--feature", "pre_host", "--type", "host", "--format", "proto"]
         feature = self.protobuftest(command, expect=1)[0]
@@ -462,9 +396,8 @@ class TestAddFeature(TestBrokerCommand):
         self.assertEqual(feature.type, "host")
         self.assertEqual(feature.owner_eonid, 3)
         self.assertEqual(feature.visibility, feature.RESTRICTED)
-        self.assertEqual(feature.activation, proto.DISPATCH)
-        self.assertEqual(feature.deactivation, proto.REBUILD)
-
+        self.assertEqual(feature.activation, self.proto.DISPATCH)
+        self.assertEqual(feature.deactivation, self.proto.REBUILD)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddFeature)
