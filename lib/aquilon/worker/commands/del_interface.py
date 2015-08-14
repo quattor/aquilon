@@ -17,8 +17,9 @@
 """Contains the logic for `aq del interface`."""
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import Chassis, Machine, NetworkDevice, Interface
+from aquilon.aqdb.model import Interface
 from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.dbwrappers.hardware_entity import get_hardware
 from aquilon.worker.templates import (Plenary, PlenaryCollection)
 
 
@@ -26,26 +27,15 @@ class CommandDelInterface(BrokerCommand):
 
     required_parameters = []
 
-    def render(self, session, logger, interface, machine, network_device,
-               switch, chassis, mac, user, **arguments):
+    def render(self, session, logger, interface, switch, mac, user,
+               **arguments):
         if switch:
             self.deprecated_option("switch", "Please use --network_device "
                                    "instead.", logger=logger, user=user,
                                    **arguments)
-            if not network_device:
-                network_device = switch
-        self.require_one_of(machine=machine, network_device=network_device,
-                            chassis=chassis, mac=mac)
+            arguments["network_device"] = switch
 
-        if machine:
-            dbhw_ent = Machine.get_unique(session, machine, compel=True)
-        elif network_device:
-            dbhw_ent = NetworkDevice.get_unique(session, network_device, compel=True)
-        elif chassis:
-            dbhw_ent = Chassis.get_unique(session, chassis, compel=True)
-        else:
-            dbhw_ent = None
-
+        dbhw_ent = get_hardware(session, compel=False, **arguments)
         dbinterface = Interface.get_unique(session, hardware_entity=dbhw_ent,
                                            name=interface, mac=mac, compel=True)
         if not dbhw_ent:

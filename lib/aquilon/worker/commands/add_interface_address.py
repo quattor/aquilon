@@ -18,10 +18,11 @@
 
 from aquilon.utils import validate_nlist_key
 from aquilon.exceptions_ import ArgumentError, ProcessException
-from aquilon.aqdb.model import (HardwareEntity, NetworkEnvironment, Interface,
+from aquilon.aqdb.model import (NetworkDevice, NetworkEnvironment, Interface,
                                 SharedAddressAssignment)
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.dns import grab_address
+from aquilon.worker.dbwrappers.hardware_entity import get_hardware
 from aquilon.worker.dbwrappers.interface import (generate_ip,
                                                  assign_address)
 from aquilon.aqdb.model.network import get_net_id_from_ip
@@ -34,29 +35,15 @@ class CommandAddInterfaceAddress(BrokerCommand):
 
     required_parameters = ['interface']
 
-    def render(self, session, logger, machine, chassis, network_device, fqdn,
-               interface, label, network_environment, map_to_primary,
-               shared, priority, **kwargs):
-
-        if machine:
-            hwtype = 'machine'
-            hwname = machine
-        elif chassis:
-            hwtype = 'chassis'
-            hwname = chassis
-        elif network_device:
-            hwtype = 'network_device'
-            hwname = network_device
-
-        if shared and not network_device:
+    def render(self, session, logger, fqdn, interface, label,
+               network_environment, map_to_primary, shared, priority, **kwargs):
+        dbhw_ent = get_hardware(session, **kwargs)
+        if shared and not isinstance(dbhw_ent, NetworkDevice):
             raise ArgumentError("The --shared option can only be used with "
                                 "network devices.")
 
         dbnet_env = NetworkEnvironment.get_unique_or_default(session,
                                                              network_environment)
-
-        dbhw_ent = HardwareEntity.get_unique(session, hwname,
-                                             hardware_type=hwtype, compel=True)
         dbinterface = Interface.get_unique(session, hardware_entity=dbhw_ent,
                                            name=interface, compel=True)
 

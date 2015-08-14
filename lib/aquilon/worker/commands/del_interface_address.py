@@ -18,9 +18,10 @@
 
 from aquilon.worker.broker import BrokerCommand
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import (HardwareEntity, Interface, AddressAssignment,
-                                DnsDomain, Fqdn, ARecord, NetworkEnvironment)
+from aquilon.aqdb.model import (Interface, AddressAssignment, DnsDomain, Fqdn,
+                                ARecord, NetworkEnvironment)
 from aquilon.worker.dbwrappers.dns import delete_dns_record
+from aquilon.worker.dbwrappers.hardware_entity import get_hardware
 from aquilon.worker.dbwrappers.service_instance import check_no_provided_service
 from aquilon.worker.processes import DSDBRunner
 from aquilon.worker.templates import Plenary, PlenaryCollection
@@ -31,21 +32,9 @@ class CommandDelInterfaceAddress(BrokerCommand):
 
     required_parameters = ['interface']
 
-    def render(self, session, logger, machine, chassis, network_device, interface,
-               fqdn, ip, label, keep_dns, network_environment, **_):
-
-        if machine:
-            hwtype = 'machine'
-            hwname = machine
-        elif chassis:
-            hwtype = 'chassis'
-            hwname = chassis
-        elif network_device:
-            hwtype = 'network_device'
-            hwname = network_device
-
-        dbhw_ent = HardwareEntity.get_unique(session, hwname,
-                                             hardware_type=hwtype, compel=True)
+    def render(self, session, logger, interface, fqdn, ip, label, keep_dns,
+               network_environment, **kwargs):
+        dbhw_ent = get_hardware(session, **kwargs)
         dbinterface = Interface.get_unique(session, hardware_entity=dbhw_ent,
                                            name=interface, compel=True)
         dbnet_env = NetworkEnvironment.get_unique_or_default(session,
