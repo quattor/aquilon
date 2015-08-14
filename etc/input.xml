@@ -1818,7 +1818,7 @@
 	    <option name="master" type="string" conflicts="ip clear_master">Enslave interface to the given master</option>
 	    <option name="clear_master" type="flag" conflicts="master">Clear the bonding</option>
 	    <option name="model" type="string">Interface model name</option>
-	    <option name="vendor" type="string">Interface vendor name</option>
+	    <option name="vendor" type="string" requires="model">Interface vendor name</option>
 	    <option name="rename_to" type="string">New name of the interface</option>
 	    <option name="bus_address" type="string">Hardware bus address of the controller hosting the disk</option>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
@@ -2911,7 +2911,7 @@
 	    <option name="model" type="string">Chassis model</option>
 	    <option name="rack" type="string">Rack name</option>
 	    <option name="ip" type="ipv4">Primary IP address</option>
-	    <option name="vendor" type="string">Chassis vendor. Needed if the model name is not unique</option>
+	    <option name="vendor" type="string" requires="model">Chassis vendor. Needed if the model name is not unique</option>
 	    <option name="serial" type="string">Serial Number</option>
 	    <option name="comments" type="string">Comments</option>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
@@ -3889,7 +3889,7 @@
 	</optgroup>
 	<optgroup>
 	    <option name="model" type="string">machine model</option>
-	    <option name="vendor" type="string">machine vendor</option>
+	    <option name="vendor" type="string" requires="model">machine vendor</option>
 	    <option name="cpuname" type="string">cpu name</option>
 	    <option name="cpuvendor" type="string">cpu vendor</option>
 	    <option name="cpucount" type="int">cpu count</option>
@@ -4029,7 +4029,7 @@
 	    <option name="model" type="string">Network device model</option>
 	    <option name="type" type="string">Network device type (tor, bor, agg)</option>
 	    <option name="ip" type="ipv4">IP address</option>
-	    <option name="vendor" type="string">Network device vendor. Needed if the model name is not unique</option>
+	    <option name="vendor" type="string" requires="model">Network device vendor. Needed if the model name is not unique</option>
 	    <option name="serial" type="string">Serial Number</option>
 	    <option name="comments" type="string">Comments</option>
 	    <option name="rename_to" type="string">New name of the network device</option>
@@ -4057,7 +4057,7 @@
 	    <option name="model" type="string">Switch model</option>
 	    <option name="type" type="string">Switch type (tor, bor, agg)</option>
 	    <option name="ip" type="ipv4">IP address</option>
-	    <option name="vendor" type="string">Switch vendor. Needed if the model name is not unique</option>
+	    <option name="vendor" type="string" requires="model">Switch vendor. Needed if the model name is not unique</option>
 	    <option name="serial" type="string">Serial Number</option>
 	    <option name="comments" type="string">Comments</option>
 	    <option name="rename_to" type="string">New name of the switch</option>

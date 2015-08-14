@@ -34,8 +34,6 @@ class CommandUpdateChassis(BrokerCommand):
 
         oldinfo = DSDBRunner.snapshot_hw(dbchassis)
 
-        if vendor and not model:
-            model = dbchassis.model.name
         if model:
             dbmodel = Model.get_unique(session, name=model, vendor=vendor,
                                        model_type=ChassisType.Chassis,

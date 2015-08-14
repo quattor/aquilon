@@ -74,16 +74,6 @@ class TestUpdateChassis(TestBrokerCommand, VerifyChassisMixin):
                          "is not a chassis.",
                          command)
 
-    def test_200_no_model(self):
-        command = ["update", "chassis", "--vendor", "generic",
-                   "--chassis", "ut3c1.aqd-unittest.ms.com"]
-        out = self.notfoundtest(command)
-        self.matchoutput(out,
-                         "Model utchassis, vendor generic, "
-                         "model_type chassis not found.",
-                         command)
-
-
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUpdateChassis)
     unittest.TextTestRunner(verbosity=2).run(suite)

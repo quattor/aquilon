@@ -119,14 +119,6 @@ class TestUpdateNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
                          "ut3gd1r01.aqd-unittest.ms.com." % ip,
                          command)
 
-    def test_200_fail_no_model(self):
-        command = ["update", "network_device", "--vendor", "generic",
-                   "--network_device", "ut3gd1r01.aqd-unittest.ms.com"]
-        out = self.notfoundtest(command)
-        self.matchoutput(out,
-                         "Model uttorswitch, vendor generic not found.",
-                         command)
-
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUpdateNetworkDevice)
     unittest.TextTestRunner(verbosity=2).run(suite)

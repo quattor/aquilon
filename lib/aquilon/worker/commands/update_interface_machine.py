@@ -163,7 +163,7 @@ class CommandUpdateInterfaceMachine(BrokerCommand):
                                     "{1:l}.".format(mac, other))
             dbinterface.mac = mac
 
-        if model or vendor:
+        if model:
             if not dbinterface.model_allowed:
                 raise ArgumentError("Model/vendor can not be set for a {0:lc}."
                                     .format(dbinterface))
