@@ -39,12 +39,6 @@ class CommandAddParameterDefintionArchetype(BrokerCommand):
             holder = ArchetypeParamDef(template=template)
             dbarchetype.param_def_holders[template] = holder
 
-        # strip slash from path start and end
-        if path.startswith("/"):
-            path = path[1:]
-        if path.endswith("/"):
-            path = path[:-1]
-
         if not activation:
             activation = 'dispatch'
         if activation == 'rebuild' and default:
@@ -53,6 +47,7 @@ class CommandAddParameterDefintionArchetype(BrokerCommand):
                                      "existing hosts to require a rebuild, "
                                      "which is not supported.")
 
+        path = ParamDefinition.normalize_path(path)
         validate_param_definition(path, value_type, default)
 
         ParamDefinition.get_unique(session, path=path, holder=holder,

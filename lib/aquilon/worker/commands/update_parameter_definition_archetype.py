@@ -31,6 +31,7 @@ class CommandUpdParameterDefintionArchetype(BrokerCommand):
         if not dbarchetype.is_compileable:
             raise ArgumentError("{0} is not compileable.".format(dbarchetype))
 
+        path = ParamDefinition.normalize_path(path)
         for holder in dbarchetype.param_def_holders.values():
             db_paramdef = ParamDefinition.get_unique(session, path=path,
                                                      holder=holder)

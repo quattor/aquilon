@@ -33,6 +33,7 @@ class CommandDelParameterDefintionFeature(BrokerCommand):
             raise ArgumentError("No parameter definitions found for {0:l}."
                                 .format(dbfeature))
 
+        path = ParamDefinition.normalize_path(path)
         db_paramdef = ParamDefinition.get_unique(session, path=path,
                                                  holder=dbfeature.param_def_holder,
                                                  compel=True)

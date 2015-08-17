@@ -134,6 +134,7 @@ def get_paramdef_for_parameter(path, param_def_holder):
     if not param_def_holder:
         return None
 
+    path = ParamDefinition.normalize_path(path)
     param_definitions = param_def_holder.param_definitions
     match = None
 

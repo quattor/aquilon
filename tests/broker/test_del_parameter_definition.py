@@ -34,7 +34,7 @@ class TestDelParameterDefinition(TestBrokerCommand):
             self.noouttest(["del_parameter_definition", "--archetype", "aquilon",
                             "--path", path])
 
-        for path in ["startslash", "endslash"]:
+        for path in ["//startslash", "endslash//"]:
             self.noouttest(["del_parameter_definition", "--archetype", "aquilon",
                             "--path", path])
 
@@ -56,7 +56,7 @@ class TestDelParameterDefinition(TestBrokerCommand):
                    "--type=host", "--path", path]
             self.noouttest(cmd)
 
-        for path in ["startslash", "endslash"]:
+        for path in ["//startslash", "endslash//"]:
             cmd = ["del_parameter_definition", "--feature", "myfeature",
                    "--type=host", "--path", path]
             self.noouttest(cmd)

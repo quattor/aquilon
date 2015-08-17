@@ -15,9 +15,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 from aquilon.aqdb.model import Feature, FeatureParamDef, ParamDefinition
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.parameter import validate_param_definition
 
 
@@ -33,12 +32,7 @@ class CommandAddParameterDefintionFeature(BrokerCommand):
         if not dbfeature.param_def_holder:
             dbfeature.param_def_holder = FeatureParamDef()
 
-        # strip slash from path start and end
-        if path.startswith("/"):
-            path = path[1:]
-        if path.endswith("/"):
-            path = path[:-1]
-
+        path = ParamDefinition.normalize_path(path)
         validate_param_definition(path, value_type, default)
 
         # activation field has been skipped on purpose

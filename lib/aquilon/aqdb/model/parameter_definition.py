@@ -17,6 +17,7 @@
 """ Parameter data validation """
 
 from datetime import datetime
+import re
 
 from sqlalchemy import (Column, Integer, DateTime, Sequence, String, Boolean,
                         Text, ForeignKey, UniqueConstraint)
@@ -31,6 +32,7 @@ from aquilon.aqdb.model.feature import _ACTIVATION_TYPE
 _TN = 'param_definition'
 _PARAM_DEF_HOLDER = 'param_def_holder'
 _PATH_TYPES = ['list', 'string', 'int', 'float', 'boolean', 'json']
+_PATH_RE = re.compile(r'/+')
 
 
 class ParamDefHolder(Base):
@@ -139,6 +141,20 @@ class ParamDefinition(Base):
 
     __table_args__ = ({'oracle_compress': True,
                        'info': {'unique_fields': ['path', 'holder']}},)
+
+    @staticmethod
+    def normalize_path(path):
+        # Strip leading and trailing slashes, collapse multiple slashes into one
+        path = _PATH_RE.sub("/", path)
+        if path.startswith('/'):
+            path = path[1:]
+        if path.endswith('/'):
+            path = path[:-1]
+        return path
+
+    @validates('path')
+    def validate_path(self, key, value):
+        return self.normalize_path(value)
 
     @classmethod
     def validate_type(cls, value_type):
