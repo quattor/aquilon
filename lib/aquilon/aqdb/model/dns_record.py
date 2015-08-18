@@ -193,4 +193,6 @@ class DnsRecord(Base):
                 if existing.dns_record_type in _rr_conflict_map[own_type]:
                     raise ArgumentError("{0} already exist.".format(existing))
 
-        super(DnsRecord, self).__init__(fqdn=fqdn, **kwargs)
+        self.fqdn = fqdn
+
+        super(DnsRecord, self).__init__(**kwargs)
