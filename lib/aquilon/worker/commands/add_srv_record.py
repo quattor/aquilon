@@ -16,10 +16,13 @@
 # limitations under the License.
 """Contains the logic for `aq add srv record`."""
 
+from sqlalchemy.orm import contains_eager
+
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import SrvRecord, DnsDomain, DnsEnvironment
+from aquilon.aqdb.model import Fqdn, SrvRecord, DnsDomain, DnsEnvironment
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.dns import create_target_if_needed
+from aquilon.worker.dbwrappers.grn import lookup_grn
 
 
 class CommandAddSrvRecord(BrokerCommand):
@@ -28,7 +31,8 @@ class CommandAddSrvRecord(BrokerCommand):
                            "priority", "weight", "target", "port"]
 
     def render(self, session, logger, service, protocol, dns_domain, priority,
-               weight, target, port, dns_environment, ttl, comments, **kwargs):
+               weight, target, port, dns_environment, ttl, comments, grn,
+               eon_id, **kwargs):
         dbdns_env = DnsEnvironment.get_unique_or_default(session,
                                                          dns_environment)
         dbdns_domain = DnsDomain.get_unique(session, dns_domain, compel=True)
@@ -46,13 +50,42 @@ class CommandAddSrvRecord(BrokerCommand):
         service = service.strip().lower()
         target = target.strip().lower()
 
+        name = "_%s._%s" % (service, protocol)
+
+        dbgrn = None
+        if grn or eon_id:
+            dbgrn = lookup_grn(session, grn, eon_id, logger=logger,
+                               config=self.config)
+
+        # Make sure the GRN of the SRV record is consistent across the rrset
+        curr_rec = self.get_first_srv_record(session, name, dbdns_domain,
+                                             dbdns_env)
+        if curr_rec:
+            if not dbgrn:
+                dbgrn = curr_rec.owner_grn
+            elif dbgrn != curr_rec.owner_grn:
+                raise ArgumentError("{0} with target {1} is set to a "
+                                    "different GRN."
+                                    .format(curr_rec.fqdn, curr_rec.target.fqdn))
+
         dbtarget = create_target_if_needed(session, logger, target, dbdns_env)
         dbsrv_rec = SrvRecord(service=service, protocol=protocol,
                               priority=priority, weight=weight, target=dbtarget,
                               port=port, dns_domain=dbdns_domain, ttl=ttl,
-                              dns_environment=dbdns_env, comments=comments)
+                              dns_environment=dbdns_env, comments=comments,
+                              owner_grn=dbgrn)
         session.add(dbsrv_rec)
 
         session.flush()
 
         return
+
+    def get_first_srv_record(self, session, name, dbdns_domain, dbdns_env):
+        q = session.query(SrvRecord)
+        q = q.join((Fqdn, SrvRecord.fqdn_id == Fqdn.id))
+        q = q.options(contains_eager('fqdn'))
+        q = q.filter_by(dns_domain=dbdns_domain)
+        q = q.filter_by(name=name)
+        q = q.filter_by(dns_environment=dbdns_env)
+
+        return q.first()

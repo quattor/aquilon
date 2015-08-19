@@ -82,6 +82,64 @@ class TestUpdateSrvRecord(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchclean(out, "TTL", command)
 
+    def test_600_update_grn(self):
+        command = ["update", "srv", "record", "--service", "sip",
+                   "--protocol", "tcp", "--dns_domain", "aqd-unittest.ms.com",
+                   "--grn", "grn:/ms/ei/aquilon/unittest"]
+        self.noouttest(command)
+
+    def test_605_verify_update_grn(self):
+        command = ["show", "srv", "record", "--service", "sip",
+                   "--protocol", "tcp", "--dns_domain", "aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out,
+                         "Owned by GRN: grn:/ms/ei/aquilon/unittest",
+                         command)
+        self.matchclean(out,
+                        "Owned by GRN: grn:/ms/ei/aquilon/aqd",
+                        command)
+
+    def test_610_clear_grn(self):
+        command = ["update", "srv", "record", "--service", "sip",
+                   "--protocol", "tcp", "--dns_domain", "aqd-unittest.ms.com",
+                   "--clear_grn"]
+        self.noouttest(command)
+
+    def test_615_verify_clear_grn(self):
+        command = ["show", "srv", "record", "--service", "sip",
+                   "--protocol", "tcp", "--dns_domain", "aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchclean(out,
+                        "Owned by GRN: grn:/ms/ei/aquilon/aqd",
+                        command)
+
+    def test_620_update_eon_id(self):
+        command = ["update", "srv", "record", "--service", "sip",
+                   "--protocol", "tcp", "--dns_domain", "aqd-unittest.ms.com",
+                   "--eon_id", "2"]
+        self.noouttest(command)
+
+    def test_625_verify_update_grn(self):
+        command = ["show", "srv", "record", "--service", "sip",
+                   "--protocol", "tcp", "--dns_domain", "aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out,
+                         "Owned by GRN: grn:/ms/ei/aquilon/aqd",
+                         command)
+        self.matchclean(out,
+                        "Owned by GRN: grn:/ms/ei/aquilon/unittest",
+                        command)
+
+    def test_630_update_grn_with_target(self):
+        command = ["update", "srv", "record", "--service", "sip",
+                   "--protocol", "tcp", "--dns_domain", "aqd-unittest.ms.com",
+                   "--target", "arecord50.aqd-unittest.ms.com",
+                   "--grn", "grn:/ms/ei/aquilon/unittest"]
+        out = self.badoptiontest(command)
+        self.matchoutput(out,
+                         "Option or option group grn conflicts with target",
+                         command)
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUpdateSrvRecord)

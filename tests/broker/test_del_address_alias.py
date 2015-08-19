@@ -96,6 +96,25 @@ class TestDelAddressAlias(TestBrokerCommand):
                          "DNS domain aqd-unittest-ut-env.ms.com not found.",
                          command)
 
+    def test_600_del_addralias_with_grn(self):
+        command = ["del", "address", "alias",
+                   "--fqdn", "addralias3.aqd-unittest.ms.com"]
+        self.noouttest(command)
+
+    def test_605_verify_del_addralias_with_grn(self):
+        command = ["search", "dns",
+                   "--fqdn", "addralias3.aqd-unittest.ms.com"]
+        self.notfoundtest(command)
+
+    def test_610_del_addralias_with_grn(self):
+        command = ["del", "address", "alias",
+                   "--fqdn", "addralias4.aqd-unittest.ms.com"]
+        self.noouttest(command)
+
+    def test_615_verify_del_addralias_with_grn(self):
+        command = ["search", "dns",
+                   "--fqdn", "addralias4.aqd-unittest.ms.com"]
+        self.notfoundtest(command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelAddressAlias)

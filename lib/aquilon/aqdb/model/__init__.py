@@ -44,6 +44,9 @@ from aquilon.aqdb.model.bunker import Bunker
 from aquilon.aqdb.model.rack import Rack
 from aquilon.aqdb.model.desk import Desk
 
+# GRN
+from aquilon.aqdb.model.grn import Grn
+
 # NETWORK
 from aquilon.aqdb.model.dns_environment import DnsEnvironment
 from aquilon.aqdb.model.network_environment import NetworkEnvironment
@@ -53,6 +56,7 @@ from aquilon.aqdb.model.static_route import StaticRoute
 from aquilon.aqdb.model.dns_map import DnsMap
 from aquilon.aqdb.model.fqdn import Fqdn
 from aquilon.aqdb.model.dns_record import DnsRecord
+from aquilon.aqdb.model.dns_record_target_mixin import DnsRecordTargetMixin
 from aquilon.aqdb.model.a_record import ARecord, DynamicStub
 from aquilon.aqdb.model.reserved_name import ReservedName
 from aquilon.aqdb.model.address_alias import AddressAlias
@@ -62,7 +66,6 @@ from aquilon.aqdb.model.ns_record import NsRecord
 from aquilon.aqdb.model.router_address import RouterAddress
 
 # CONFIG
-from aquilon.aqdb.model.grn import Grn
 from aquilon.aqdb.model.archetype import Archetype
 from aquilon.aqdb.model.host_environment import HostEnvironment
 from aquilon.aqdb.model.personality import (Personality, PersonalityGrnMap,

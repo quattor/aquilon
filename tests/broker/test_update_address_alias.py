@@ -118,6 +118,74 @@ class TestUpdateAddressAlias(TestBrokerCommand):
                          "DNS domain aqd-unittest.ms.com not found.",
                          command)
 
+    def test_300_update_grn(self):
+        command = ["update", "address", "alias",
+                   "--fqdn", "addralias3.aqd-unittest.ms.com",
+                   "--grn", "grn:/ms/ei/aquilon/unittest"]
+        self.noouttest(command)
+
+    def test_305_verify_grn(self):
+        command = ["search", "dns", "--fullinfo",
+                   "--fqdn", "addralias3.aqd-unittest.ms.com",
+                   "--target", "arecord13.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out,
+                         "Owned by GRN: grn:/ms/ei/aquilon/unittest",
+                         command)
+
+        command = ["search", "dns", "--fullinfo",
+                   "--fqdn", "addralias3.aqd-unittest.ms.com",
+                   "--target", "arecord14.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out,
+                         "Owned by GRN: grn:/ms/ei/aquilon/unittest",
+                         command)
+
+    def test_310_clear_grn(self):
+        command = ["update", "address", "alias",
+                   "--fqdn", "addralias3.aqd-unittest.ms.com",
+                   "--clear_grn"]
+        self.noouttest(command)
+
+    def test_315_verify_clear_grn(self):
+        command = ["search", "dns", "--fullinfo",
+                   "--fqdn", "addralias3.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchclean(out, "Owned by GRN:", command)
+
+    def test_320_update_eon_id(self):
+        command = ["update", "address", "alias",
+                   "--fqdn", "addralias3.aqd-unittest.ms.com",
+                   "--eon_id", "2"]
+        self.noouttest(command)
+
+    def test_325_verify_eon_id(self):
+        command = ["search", "dns", "--fullinfo",
+                   "--fqdn", "addralias3.aqd-unittest.ms.com",
+                   "--target", "arecord13.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out,
+                         "Owned by GRN: grn:/ms/ei/aquilon/aqd",
+                         command)
+
+        command = ["search", "dns", "--fullinfo",
+                   "--fqdn", "addralias3.aqd-unittest.ms.com",
+                   "--target", "arecord14.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out,
+                         "Owned by GRN: grn:/ms/ei/aquilon/aqd",
+                         command)
+
+    def test_330_update_grn_with_target(self):
+        command = ["update", "address", "alias",
+                   "--fqdn", "addralias3.aqd-unittest.ms.com",
+                   "--target", "arecord14.aqd-unittest.ms.com",
+                   "--eon_id", "2"]
+        out = self.badoptiontest(command)
+        self.matchoutput(out,
+                         "Option or option group eon_id conflicts with target",
+                         command)
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestUpdateAddressAlias)

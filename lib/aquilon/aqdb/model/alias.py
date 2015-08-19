@@ -21,13 +21,13 @@ from sqlalchemy.orm import relation, backref, column_property
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.sql import select, func
 
-from aquilon.aqdb.model import DnsRecord, Fqdn
+from aquilon.aqdb.model import DnsRecord, Fqdn, DnsRecordTargetMixin
 
 _TN = 'alias'
 MAX_ALIAS_DEPTH = 4
 
 
-class Alias(DnsRecord):
+class Alias(DnsRecordTargetMixin, DnsRecord):
     """ Aliases a.k.a. CNAMES """
     __tablename__ = _TN
 
@@ -57,8 +57,9 @@ class Alias(DnsRecord):
             depth = max(depth, tgt.alias_depth)
         return depth + 1
 
-    def __init__(self, **kwargs):
-        super(Alias, self).__init__(**kwargs)
+    def __init__(self, fqdn, target, **kwargs):
+        self.target = target
+        super(Alias, self).__init__(fqdn=fqdn, **kwargs)
         if self.alias_depth > MAX_ALIAS_DEPTH:
             raise ValueError("Maximum alias depth exceeded")
 

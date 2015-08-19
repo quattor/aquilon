@@ -15,6 +15,9 @@ ${"{0:c}: {0.fqdn!s}".format(record)}
 %if record.ttl:
   TTL: ${record.ttl}
 %endif
+%if record.owner_grn:
+  Owned by GRN: ${record.owner_grn}
+%endif
 </%def>
 <%def name="dns_record_tail(record)">\
 %if record.comments:

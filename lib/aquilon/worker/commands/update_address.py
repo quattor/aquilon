@@ -23,13 +23,15 @@ from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.dns import (set_reverse_ptr,
                                            delete_target_if_needed,
                                            update_address)
+from aquilon.worker.dbwrappers.grn import lookup_grn
 from aquilon.worker.processes import DSDBRunner
 
 
 class CommandUpdateAddress(BrokerCommand):
 
     def render(self, session, logger, fqdn, ip, reverse_ptr, dns_environment,
-               network_environment, ttl, clear_ttl, comments, **arguments):
+               network_environment, ttl, clear_ttl, grn, eon_id, clear_grn,
+               comments, **arguments):
         dbnet_env, dbdns_env = get_net_dns_env(session, network_environment,
                                                dns_environment)
         dbdns_rec = ARecord.get_unique(session, fqdn=fqdn,
@@ -58,6 +60,13 @@ class CommandUpdateAddress(BrokerCommand):
             dbdns_rec.ttl = ttl
         elif clear_ttl:
             dbdns_rec.ttl = None
+
+        if grn or eon_id:
+            dbgrn = lookup_grn(session, grn, eon_id, logger=logger,
+                               config=self.config)
+            dbdns_rec.owner_grn = dbgrn
+        elif clear_grn:
+            dbdns_rec.owner_grn = None
 
         if comments is not None:
             dbdns_rec.comments = comments

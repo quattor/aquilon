@@ -4962,6 +4962,10 @@
 	    <option name="ttl" type="int">TTL</option>
 	    <option name="comments" type="string">Comments</option>
 	    <option name="reverse_ptr" type="string">Where the reverse record should point to</option>
+	    <optgroup fields="one">
+	      <option name="grn" type="string">GRN as string</option>
+	      <option name="eon_id" type="int">Numeric EON ID</option>
+	    </optgroup>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
 	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
 	</optgroup>
@@ -5008,6 +5012,11 @@
 	    <option name="reverse_ptr" type="string">Where the reverse record should point to</option>
 	    <option name="dns_environment" type="string">The name of the environment the address is in (defaults to 'internal')</option>
 	    <option name="network_environment" type="string">Network environment (default: internal)</option>
+	    <optgroup fields="one">
+	      <option name="grn" type="string">GRN as string</option>
+	      <option name="eon_id" type="int">Numeric EON ID</option>
+	      <option name="clear_grn" type="flag" conflicts="grn eon_id">Clear GRN value</option>
+	    </optgroup>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
 	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
 	</optgroup>
@@ -5065,6 +5074,10 @@
 	    <option name="comments" type="string">Comments</option>
 	    <option name="dns_environment" type="string">The name of the environment the address is in (defaults to 'internal')</option>
 	    <option name="target_environment" type="string">The name of the environment the target is in (defaults to be the same as the alias environment)</option>
+	    <optgroup fields="one">
+	      <option name="grn" type="string">GRN as string</option>
+	      <option name="eon_id" type="int">Numeric EON ID</option>
+	    </optgroup>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
 	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
 	</optgroup>
@@ -5095,6 +5108,10 @@
 	    <option name="comments" type="string">Comments</option>
 	    <option name="dns_environment" type="string">The name of the environment the address is in (defaults to 'internal')</option>
 	    <option name="target_environment" type="string">The name of the environment the target is in (defaults to be the same as the alias environment)</option>
+	    <optgroup fields="one">
+	      <option name="grn" type="string">GRN as string</option>
+	      <option name="eon_id" type="int">Numeric EON ID</option>
+	    </optgroup>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
 	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
 	</optgroup>
@@ -5120,14 +5137,19 @@
 	Update DNS address aliases.
 	<optgroup mandatory="True" fields="all">
 	    <option name="fqdn" type="string">The fully qualified domain name</option>
-	    <option name="target" type="string">The target of the A-Record</option>
 	</optgroup>
 	<optgroup>
-	    <option name="ttl" type="int">TTL</option>
-	    <option name="clear_ttl" type="flag" conflicts="ttl">Clear customized TTL value</option>
+	    <option name="target" type="string">The target of the A-Record</option>
+			<option name="ttl" type="int">TTL</option>
+			<option name="clear_ttl" type="flag" conflicts="ttl">Clear customized TTL value</option>
 	    <option name="comments" type="string">Comments</option>
 	    <option name="dns_environment" type="string">The name of the environment the address is in (defaults to 'internal')</option>
 	    <option name="target_environment" type="string">The name of the environment the target is in (defaults to be the same as the alias environment)</option>
+	    <optgroup name="grn/eon_id" fields="one">
+	      <option name="grn" type="string" conflicts="target">GRN as string</option>
+	      <option name="eon_id" type="int" conflicts="target">Numeric EON ID</option>
+	      <option name="clear_grn" type="flag" conflicts="grn eon_id target">Clear GRN value</option>
+	    </optgroup>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
 	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
 	</optgroup>
@@ -5157,6 +5179,11 @@
 	    <option name="comments" type="string">Comments</option>
 	    <option name="dns_environment" type="string">The name of the environment the address is in (defaults to 'internal')</option>
 	    <option name="target_environment" type="string">The name of the environment the target is in (defaults to be the same as the alias environment)</option>
+	    <optgroup fields="one">
+	      <option name="grn" type="string">GRN as string</option>
+	      <option name="eon_id" type="int">Numeric EON ID</option>
+	      <option name="clear_grn" type="flag" conflicts="grn eon_id">Clear GRN value</option>
+	    </optgroup>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
 	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
 	</optgroup>
@@ -5178,6 +5205,10 @@
 	    <option name="ttl" type="int">TTL</option>
 	    <option name="comments" type="string">Comments</option>
 	    <option name="dns_environment" type="string">The name of the environment the address is in (defaults to 'internal')</option>
+	    <optgroup fields="one">
+	      <option name="grn" type="string">GRN as string</option>
+	      <option name="eon_id" type="int">Numeric EON ID</option>
+	    </optgroup>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
 	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
 	</optgroup>
@@ -5221,9 +5252,9 @@
 	    <option name="service" type="string">The name of the service</option>
 	    <option name="protocol" type="string">The name of the protocol (tcp, udp)</option>
 	    <option name="dns_domain" type="string">The name of the DNS domain</option>
-	    <option name="target" type="string">The target of the SRV record</option>
 	</optgroup>
 	<optgroup>
+	    <option name="target" type="string">The target of the SRV record</option>
 	    <option name="priority" type="int">The new priority of the record</option>
 	    <option name="weight" type="int">The new weight of the record</option>
 	    <option name="port" type="int">The new port on the target where the service listens</option>
@@ -5231,6 +5262,11 @@
 	    <option name="clear_ttl" type="flag" conflicts="ttl">Clear customized TTL value</option>
 	    <option name="comments" type="string">Comments</option>
 	    <option name="dns_environment" type="string">The name of the environment the address is in (defaults to 'internal')</option>
+	    <optgroup name="grn/eon_id" fields="one">
+	      <option name="grn" type="string" conflicts="target">GRN as string</option>
+	      <option name="eon_id" type="int" conflicts="target">Numeric EON ID</option>
+	      <option name="clear_grn" type="flag" conflicts="grn eon_id">Clear GRN value</option>
+	    </optgroup>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
 	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
 	</optgroup>

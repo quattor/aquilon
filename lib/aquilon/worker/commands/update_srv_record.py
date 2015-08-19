@@ -16,37 +16,79 @@
 # limitations under the License.
 """Contains the logic for `aq update srv record`."""
 
-from aquilon.aqdb.model import SrvRecord
+from sqlalchemy.orm import contains_eager
+
+from aquilon.exceptions_ import ArgumentError
+from aquilon.aqdb.model import Fqdn, SrvRecord, DnsDomain, DnsEnvironment
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.dbwrappers.grn import lookup_grn
 
 
 class CommandUpdateSrvRecord(BrokerCommand):
 
-    required_parameters = ["service", "protocol", "dns_domain", "target"]
+    required_parameters = ["service", "protocol", "dns_domain"]
 
-    def render(self, session, service, protocol, dns_domain, target,
+    def render(self, session, logger, service, protocol, dns_domain, target,
                priority, weight, port, ttl, clear_ttl, comments,
-               dns_environment, **kwargs):
+               dns_environment, grn, eon_id, clear_grn, **kwargs):
         name = "_%s._%s" % (service.strip().lower(), protocol.strip().lower())
-        dbsrv_rec = SrvRecord.get_unique(session, name=name,
-                                         dns_domain=dns_domain,
-                                         dns_environment=dns_environment,
-                                         target=target, compel=True)
+        dbdns_env = DnsEnvironment.get_unique_or_default(session,
+                                                         dns_environment)
+        dbdns_domain = DnsDomain.get_unique(session, dns_domain, compel=True)
 
-        if priority:
-            dbsrv_rec.priority = priority
-        if weight:
-            dbsrv_rec.weight = weight
-        if port:
-            dbsrv_rec.port = port
+        dbdns_records = []
+        if target:
+            dbsrv_rec = SrvRecord.get_unique(session, name=name,
+                                             dns_domain=dbdns_domain,
+                                             dns_environment=dbdns_env,
+                                             target=target, compel=True)
+            dbdns_records.append(dbsrv_rec)
+        else:
+            records = self.get_records_in_rrset(session, name,
+                                                dbdns_domain, dbdns_env)
+            dbdns_records.extend(records)
+            if len(dbdns_records) == 0:
+                raise ArgumentError("No SRV record found.")
 
-        if ttl is not None:
-            dbsrv_rec.ttl = ttl
-        elif clear_ttl:
-            dbsrv_rec.ttl = None
+        dbgrn = None
+        update_grn = False
+        if grn or eon_id:
+            dbgrn = lookup_grn(session, grn, eon_id, logger=logger,
+                               config=self.config)
+            update_grn = True
+        elif clear_grn:
+            update_grn = True
 
-        if comments is not None:
-            dbsrv_rec.comments = comments
+        for dbsrv_rec in dbdns_records:
+            if priority:
+                dbsrv_rec.priority = priority
+            if weight:
+                dbsrv_rec.weight = weight
+            if port:
+                dbsrv_rec.port = port
+
+            if ttl is not None:
+                dbsrv_rec.ttl = ttl
+            elif clear_ttl:
+                dbsrv_rec.ttl = None
+
+            if update_grn:
+                dbsrv_rec.owner_grn = dbgrn
+
+            if comments is not None:
+                dbsrv_rec.comments = comments
 
         session.flush()
         return
+
+    def get_records_in_rrset(self, session, name, dbdns_domain,
+                             dbdns_env):
+
+        q = session.query(SrvRecord)
+        q = q.join((Fqdn, SrvRecord.fqdn_id == Fqdn.id))
+        q = q.options(contains_eager('fqdn'))
+        q = q.filter_by(dns_domain=dbdns_domain)
+        q = q.filter_by(name=name)
+        q = q.filter_by(dns_environment=dbdns_env)
+
+        return q.all()

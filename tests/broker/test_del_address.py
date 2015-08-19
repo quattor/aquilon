@@ -173,6 +173,27 @@ class TestDelAddress(TestBrokerCommand):
         command = ["show_address", "--fqdn=arecord40.aqd-unittest.ms.com"]
         self.notfoundtest(command)
 
+    def test_800_del_address_with_grn(self):
+        self.dsdb_expect_delete(self.net["unknown0"].usable[50])
+        command = ["del", "address", "--ip=%s" % self.net["unknown0"].usable[50]]
+        self.noouttest(command)
+        self.dsdb_verify()
+
+    def test_820_verify_delete_with_grn(self):
+        command = ["show_address", "--fqdn=arecord50.aqd-unittest.ms.com"]
+        self.notfoundtest(command)
+
+    def test_830_del_address_with_grn(self):
+        self.dsdb_expect_delete(self.net["unknown0"].usable[51])
+        command = ["del", "address", "--ip=%s" % self.net["unknown0"].usable[51]]
+        self.noouttest(command)
+        self.dsdb_verify()
+
+    def test_840_verify_delete_with_grn(self):
+        command = ["show_address", "--fqdn=arecord51.aqd-unittest.ms.com"]
+        self.notfoundtest(command)
+
+
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelAddress)
     unittest.TextTestRunner(verbosity=2).run(suite)

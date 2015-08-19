@@ -286,6 +286,81 @@ class TestAddAlias(TestBrokerCommand):
         command = ["del", "alias", "--fqdn", "alias1.aqd-unittest.ms.com"]
         out = self.commandtest(command)
 
+    def test_800_grn(self):
+        command = ["add", "alias",
+                   "--fqdn", "alias2host-grn.aqd-unittest.ms.com",
+                   "--target", "arecord50.aqd-unittest.ms.com",
+                   "--grn", "grn:/ms/ei/aquilon/aqd"]
+        self.noouttest(command)
+
+    def test_805_verify_grn(self):
+        command = ["search", "dns", "--fullinfo",
+                   "--fqdn", "alias2host-grn.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Owned by GRN: grn:/ms/ei/aquilon/aqd",
+                         command)
+
+    def test_810_eon_id(self):
+        command = ["add", "alias",
+                   "--fqdn", "alias2host-eon-id.aqd-unittest.ms.com",
+                   "--target", "arecord51.aqd-unittest.ms.com",
+                   "--eon_id", "3"]
+        self.noouttest(command)
+
+    def test_815_verify_eon_id(self):
+        command = ["search", "dns", "--fullinfo",
+                   "--fqdn", "alias2host-eon-id.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Owned by GRN: grn:/ms/ei/aquilon/unittest",
+                         command)
+
+    def test_850_grn_conflict_with_primary_name(self):
+        command = ["add" , "alias",
+                   "--fqdn", "alias2host-bad-target.aqd-unittest.ms.com",
+                   "--target", "unittest00.one-nyp.ms.com",
+                   "--grn", "grn:/ms/ei/aquilon/unittest"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Alias alias2host-bad-target.aqd-unittest.ms.com "
+                         "depends on DNS Record unittest00.one-nyp.ms.com. "
+                         "It conflicts with GRN grn:/ms/ei/aquilon/unittest: "
+                         "DNS Record unittest00.one-nyp.ms.com is a primary "
+                         "name. GRN should not be set but derived from the "
+                         "device.",
+                         command)
+
+    def test_860_grn_conflict_with_service_address(self):
+        command = ["add" , "alias",
+                   "--fqdn", "alias2host-bad-target.aqd-unittest.ms.com",
+                   "--target", "zebra2.aqd-unittest.ms.com",
+                   "--grn", "grn:/ms/ei/aquilon/unittest"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Alias alias2host-bad-target.aqd-unittest.ms.com "
+                         "depends on DNS Record zebra2.aqd-unittest.ms.com. "
+                         "It conflicts with GRN grn:/ms/ei/aquilon/unittest: "
+                         "DNS Record zebra2.aqd-unittest.ms.com is a service "
+                         "address. GRN should not be set but derived from the "
+                         "device.",
+                         command)
+
+    def test_870_grn_conflict_with_interface_address(self):
+        command = ["add" , "alias",
+                   "--fqdn", "alias2host-bad-target.aqd-unittest.ms.com",
+                   "--target", "unittest20-e1.aqd-unittest.ms.com",
+                   "--grn", "grn:/ms/ei/aquilon/unittest"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Alias alias2host-bad-target.aqd-unittest.ms.com "
+                         "depends on DNS Record "
+                         "unittest20-e1.aqd-unittest.ms.com. "
+                         "It conflicts with GRN grn:/ms/ei/aquilon/unittest: "
+                         "DNS Record unittest20-e1.aqd-unittest.ms.com is "
+                         "already be used by the interfaces "
+                         "unittest20.aqd-unittest.ms.com/eth1. GRN should not "
+                         "be set but derived from the device.",
+                         command)
+
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddAlias)
     unittest.TextTestRunner(verbosity=2).run(suite)

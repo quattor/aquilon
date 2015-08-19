@@ -20,6 +20,7 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import DnsRecord, Alias, Fqdn, DnsEnvironment
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.dns import create_target_if_needed
+from aquilon.worker.dbwrappers.grn import lookup_grn
 from aquilon.worker.processes import DSDBRunner
 
 
@@ -28,7 +29,7 @@ class CommandAddAlias(BrokerCommand):
     required_parameters = ["fqdn", "target"]
 
     def render(self, session, logger, fqdn, dns_environment, target,
-               target_environment, ttl, comments,
+               target_environment, ttl, grn, eon_id, comments,
                **kwargs):
         dbdns_env = DnsEnvironment.get_unique_or_default(session,
                                                          dns_environment)
@@ -48,9 +49,14 @@ class CommandAddAlias(BrokerCommand):
         DnsRecord.get_unique(session, fqdn=dbfqdn, preclude=True)
 
         dbtarget = create_target_if_needed(session, logger, target, dbtgt_env)
+
+        dbgrn = None
+        if grn or eon_id:
+            dbgrn = lookup_grn(session, grn, eon_id, logger=logger,
+                               config=self.config)
         try:
             db_record = Alias(fqdn=dbfqdn, target=dbtarget, ttl=ttl,
-                              comments=comments)
+                              owner_grn=dbgrn, comments=comments)
             session.add(db_record)
         except ValueError as err:
             raise ArgumentError(err.message)

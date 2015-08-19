@@ -20,6 +20,7 @@ from aquilon.aqdb.model.network_environment import get_net_dns_env
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.dns import (grab_address,
                                            set_reverse_ptr)
+from aquilon.worker.dbwrappers.grn import lookup_grn
 from aquilon.worker.dbwrappers.interface import generate_ip
 from aquilon.worker.processes import DSDBRunner
 
@@ -28,7 +29,7 @@ class CommandAddAddress(BrokerCommand):
 
     required_parameters = ["fqdn"]
 
-    def render(self, session, logger, fqdn, dns_environment,
+    def render(self, session, logger, fqdn, dns_environment, grn, eon_id,
                network_environment, reverse_ptr, ttl, comments, **arguments):
         dbnet_env, dbdns_env = get_net_dns_env(session, network_environment,
                                                dns_environment)
@@ -45,6 +46,11 @@ class CommandAddAddress(BrokerCommand):
 
         if ttl is not None:
             dbdns_rec.ttl = ttl
+
+        if grn or eon_id:
+            dbgrn = lookup_grn(session, grn, eon_id, logger=logger,
+                               config=self.config)
+            dbdns_rec.owner_grn = dbgrn
 
         session.flush()
 

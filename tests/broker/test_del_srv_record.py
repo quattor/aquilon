@@ -85,11 +85,21 @@ class TestDelSrvRecord(TestBrokerCommand):
                    "--protocol", "tcp", "--dns_domain", "aqd-unittest.ms.com"]
         self.noouttest(command)
 
-    def test_150_verify_allgone(self):
+    def test_300_del_record_with_grn(self):
+        command = ["del", "srv", "record", "--service", "sip",
+                   "--protocol", "tcp", "--dns_domain", "aqd-unittest.ms.com"]
+        self.noouttest(command)
+
+    def test_305_verify_del_record_with_grn(self):
+        command = ["show", "srv", "record", "--service", "sip",
+                   "--protocol", "tcp", "--dns_domain", "aqd-unittest.ms.com"]
+        self.notfoundtest(command)
+
+    def test_400_verify_allgone(self):
         command = ["search", "dns", "--record_type", "srv"]
         self.noouttest(command)
 
-    def test_200_del_nonexistent(self):
+    def test_410_del_nonexistent(self):
         command = ["del", "srv", "record", "--service", "kerberos",
                    "--protocol", "tcp", "--dns_domain", "aqd-unittest.ms.com"]
         out = self.notfoundtest(command)

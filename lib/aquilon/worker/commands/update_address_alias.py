@@ -18,14 +18,17 @@
 
 from aquilon.aqdb.model import Fqdn, AddressAlias
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.dbwrappers.grn import lookup_grn
+from aquilon.exceptions_ import ArgumentError
 
 
 class CommandUpdateAddressAlias(BrokerCommand):
 
-    required_parameters = ["fqdn", "target"]
+    required_parameters = ["fqdn"]
 
-    def render(self, session, fqdn, target, ttl, clear_ttl, comments,
-               dns_environment, target_environment, **kwargs):
+    def render(self, session, logger, fqdn, target, ttl, clear_ttl, comments,
+               dns_environment, target_environment, grn, eon_id, clear_grn,
+               **kwargs):
         if not target_environment:
             target_environment = dns_environment
 
@@ -33,20 +36,40 @@ class CommandUpdateAddressAlias(BrokerCommand):
                                  dns_environment=dns_environment,
                                  compel=True)
 
-        dbtarget = Fqdn.get_unique(session, fqdn=target,
-                                   dns_environment=target_environment,
-                                   compel=True)
+        dbdns_records = []
+        if target:
+            dbtarget = Fqdn.get_unique(session, fqdn=target,
+                                    dns_environment=target_environment,
+                                    compel=True)
 
-        dbaddr_alias = AddressAlias.get_unique(session, fqdn=dbfqdn,
-                                               target=dbtarget, compel=True)
+            dbaddr_alias = AddressAlias.get_unique(session, fqdn=dbfqdn,
+                                                target=dbtarget, compel=True)
+            dbdns_records.append(dbaddr_alias)
+        else:
+            dbdns_records = [rec for rec in dbfqdn.dns_records if isinstance(rec, AddressAlias)]
+            if len(dbdns_records) == 0:
+                raise ArgumentError("No address alias record found.")
 
-        if ttl is not None:
-            dbaddr_alias.ttl = ttl
-        elif clear_ttl:
-            dbaddr_alias.ttl = None
+        dbgrn = None
+        update_grn = False
+        if grn or eon_id:
+            dbgrn = lookup_grn(session, grn, eon_id, logger=logger,
+                               config=self.config)
+            update_grn = True
+        elif clear_grn:
+            update_grn = True
 
-        if comments is not None:
-            dbaddr_alias.comments = comments
+        for dbaddr_alias in dbdns_records:
+            if ttl is not None:
+                dbaddr_alias.ttl = ttl
+            elif clear_ttl:
+                dbaddr_alias.ttl = None
+
+            if update_grn:
+                dbaddr_alias.owner_grn = dbgrn
+
+            if comments is not None:
+                dbaddr_alias.comments = comments
 
         session.flush()
         return

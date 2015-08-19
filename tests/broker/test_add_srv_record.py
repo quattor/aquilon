@@ -198,6 +198,122 @@ class TestAddSrvRecord(TestBrokerCommand):
                          command)
         self.matchoutput(out, "Port: 8080", command)
 
+    def test_500_grn(self):
+        command = ["add", "srv", "record",
+                   "--service", "sip", "--protocol", "tcp",
+                   "--dns_domain", "aqd-unittest.ms.com",
+                   "--target", "arecord13.aqd-unittest.ms.com",
+                   "--port", 5060, "--priority", 10, "--weight", 10,
+                   "--grn", "grn:/ms/ei/aquilon/aqd"]
+        self.noouttest(command)
+
+    def test_505_verify_grn(self):
+        command = ["show", "srv", "record",
+                   "--service", "sip", "--protocol", "tcp",
+                   "--dns_domain", "aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Owned by GRN: grn:/ms/ei/aquilon/aqd", command)
+
+    def test_510_implicit_grn(self):
+        command = ["add", "srv", "record",
+                   "--service", "sip", "--protocol", "tcp",
+                   "--dns_domain", "aqd-unittest.ms.com",
+                   "--target", "arecord14.aqd-unittest.ms.com",
+                   "--port", 5060, "--priority", 10, "--weight", 10]
+        self.noouttest(command)
+
+    def test_515_verify_implicit_grn(self):
+        command = ["search", "dns", "--fullinfo",
+                   "--shortname", "_sip._tcp",
+                   "--dns_domain", "aqd-unittest.ms.com",
+                   "--target", "arecord14.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Owned by GRN: grn:/ms/ei/aquilon/aqd", command)
+
+    def test_520_eonid(self):
+        command = ["add", "srv", "record",
+                   "--service", "sip", "--protocol", "tcp",
+                   "--dns_domain", "aqd-unittest.ms.com",
+                   "--target", "arecord50.aqd-unittest.ms.com",
+                   "--port", 5060, "--priority", 10, "--weight", 10,
+                   "--eon_id", "2"]
+        self.noouttest(command)
+
+    def test_525_verify_eonid(self):
+        command = ["search", "dns", "--fullinfo",
+                   "--shortname", "_sip._tcp",
+                   "--dns_domain", "aqd-unittest.ms.com",
+                   "--target", "arecord50.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Owned by GRN: grn:/ms/ei/aquilon/aqd", command)
+
+    def test_530_conflict_of_inconsistent_grn(self):
+        command = ["add", "srv", "record",
+                   "--service", "sip", "--protocol", "tcp",
+                   "--dns_domain", "aqd-unittest.ms.com",
+                   "--target", "arecord51.aqd-unittest.ms.com",
+                   "--port", 5060, "--priority", 10, "--weight", 10,
+                   "--eon_id", "3"]
+        out = self.badrequesttest(command)
+        self.searchoutput(out,
+                          "Fqdn _sip._tcp.aqd-unittest.ms.com with target "
+                          "\w+.aqd-unittest.ms.com is set to a different GRN.",
+                          command)
+
+    def test_540_grn_conflict_with_primary_name(self):
+        command = ["add", "srv", "record",
+                   "--service", "sip",
+                   "--protocol", "udp",
+                   "--dns_domain", "aqd-unittest.ms.com",
+                   "--target", "unittest00.one-nyp.ms.com",
+                   "--port", 5060, "--priority", 5, "--weight", 20,
+                   "--grn", "grn:/ms/ei/aquilon/unittest"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "SRV Record _sip._udp.aqd-unittest.ms.com depends on "
+                         "DNS Record unittest00.one-nyp.ms.com. It conflicts "
+                         "with GRN grn:/ms/ei/aquilon/unittest: DNS Record "
+                         "unittest00.one-nyp.ms.com is a primary name. GRN "
+                         "should not be set but derived from the device.",
+                         command)
+
+    def test_550_grn_conflict_with_service_address(self):
+        command = ["add" , "srv", "record",
+                   "--service", "sip",
+                   "--protocol", "udp",
+                   "--dns_domain", "aqd-unittest.ms.com",
+                   "--target", "zebra2.aqd-unittest.ms.com",
+                   "--port", 5060, "--priority", 60, "--weight", 30,
+                   "--grn", "grn:/ms/ei/aquilon/unittest"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "SRV Record _sip._udp.aqd-unittest.ms.com depends on "
+                         "DNS Record zebra2.aqd-unittest.ms.com. It conflicts "
+                         "with GRN grn:/ms/ei/aquilon/unittest: DNS Record "
+                         "zebra2.aqd-unittest.ms.com is a service address. GRN "
+                         "should not be set but derived from the device.",
+                         command)
+
+    def test_560_grn_conflict_with_interface_name(self):
+        command = ["add" , "srv", "record",
+                   "--service", "sip",
+                   "--protocol", "udp",
+                   "--dns_domain", "aqd-unittest.ms.com",
+                   "--target", "unittest20-e1.aqd-unittest.ms.com",
+                   "--port", 5060, "--priority", 20, "--weight", 40,
+                   "--grn", "grn:/ms/ei/aquilon/unittest"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "SRV Record _sip._udp.aqd-unittest.ms.com depends on "
+                         "DNS Record unittest20-e1.aqd-unittest.ms.com. It "
+                         "conflicts with GRN grn:/ms/ei/aquilon/unittest: DNS "
+                         "Record unittest20-e1.aqd-unittest.ms.com is already "
+                         "be used by the interfaces "
+                         "unittest20.aqd-unittest.ms.com/eth1. "
+                         "GRN should not be set but derived from the device.",
+                         command)
+
+
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddSrvRecord)
     unittest.TextTestRunner(verbosity=2).run(suite)

@@ -108,6 +108,23 @@ class TestDelAlias(TestBrokerCommand):
         self.noouttest(["del_alias", "--fqdn", "srv-alias.one-nyp.ms.com"])
         self.noouttest(["del_alias", "--fqdn", "srv-alias2.one-nyp.ms.com"])
 
+    def test_400_del_alias_added_with_grn(self):
+        command = ["del", "alias", "--fqdn", "alias2host-grn.aqd-unittest.ms.com"]
+        self.noouttest(command)
+        self.dsdb_verify(empty=True)
+
+    def test_405_verify_alias_with_grn_gone(self):
+        command = ["search", "dns", "--fqdn", "alias2host-grn.aqd-unittest.ms.com"]
+        self.notfoundtest(command)
+
+    def test_410_del_alias_added_with_eon_id(self):
+        command = ["del", "alias", "--fqdn", "alias2host-eon-id.aqd-unittest.ms.com"]
+        self.noouttest(command)
+        self.dsdb_verify(empty=True)
+
+    def test_415_verify_alias_with_eon_id_gone(self):
+        command = ["search", "dns", "--fqdn", "alias2host-eon-id.aqd-unittest.ms.com"]
+        self.notfoundtest(command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelAlias)

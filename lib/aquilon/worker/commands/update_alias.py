@@ -20,6 +20,7 @@ from aquilon.aqdb.model import Alias, DnsEnvironment
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.dns import (create_target_if_needed,
                                            delete_target_if_needed)
+from aquilon.worker.dbwrappers.grn import lookup_grn
 from aquilon.worker.processes import DSDBRunner
 
 
@@ -28,8 +29,8 @@ class CommandUpdateAlias(BrokerCommand):
     required_parameters = ["fqdn"]
 
     def render(self, session, logger, fqdn, dns_environment, target,
-               target_environment, ttl, clear_ttl, comments,
-               **kwargs):
+               target_environment, ttl, clear_ttl, grn, eon_id, clear_grn,
+               comments, **kwargs):
         dbdns_env = DnsEnvironment.get_unique_or_default(session,
                                                          dns_environment)
 
@@ -44,6 +45,13 @@ class CommandUpdateAlias(BrokerCommand):
 
         old_target_fqdn = str(dbalias.target.fqdn)
         old_comments = dbalias.comments
+
+        if grn or eon_id:
+            dbgrn = lookup_grn(session, grn, eon_id, logger=logger,
+                               config=self.config)
+            dbalias.owner_grn = dbgrn
+        elif clear_grn:
+            dbalias.owner_grn = None
 
         if target or target_environment:
             old_target = dbalias.target

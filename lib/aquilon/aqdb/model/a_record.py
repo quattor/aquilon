@@ -102,6 +102,12 @@ class ARecord(DnsRecord):
                              (self.fqdn.dns_environment, value.dns_environment))
         return value
 
+    def check_grn_conflict(self, grn):
+        super(ARecord, self).check_grn_conflict(grn)
+        if self.service_address:
+            raise ArgumentError("{0} is a service address. GRN should not be set "
+                                "but derived from the device.".format(self))
+
 _dnsrec_table = DnsRecord.__table__  # pylint: disable=C0103
 _fqdn_table = Fqdn.__table__  # pylint: disable=C0103
 

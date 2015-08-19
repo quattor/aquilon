@@ -37,6 +37,11 @@
 		<arg choice="plain"><option>--ttl <replaceable>TTL</replaceable></option></arg>
 		<arg choice="plain"><option>--clear_ttl</option></arg>
 	    </group>
+	    <group>
+		<arg choice="plain"><option>--grn <replaceable>GRN</replaceable></option></arg>
+		<arg choice="plain"><option>--eon_id <replaceable>EONID</replaceable></option></arg>
+		<arg choice="plain"><option>--clear_grn</option></arg>
+	    </group>
 	    <arg><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
 	    <arg><option>--dns_environment <replaceable>DNSENV</replaceable></option></arg>
 	    <arg><option>--network_environment <replaceable>NETENV</replaceable></option></arg>
@@ -116,6 +121,29 @@
 		<listitem>
 		    <para>
 			Short description of the purpose of the address.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--grn <replaceable>GRN</replaceable></option>,
+		    <option>--eon_id <replaceable>EON_ID</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			The owner GRN of the personality to be created. Scripts should use the
+			numeric <replaceable>EON_ID</replaceable>, the textual <replaceable>GRN</replaceable> is
+			more suitable for humans.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+		<term>
+		    <option>--clear_grn</option>
+		</term>
+		<listitem>
+		    <para>
+			Clear the GRN.
 		    </para>
 		</listitem>
 	    </varlistentry>

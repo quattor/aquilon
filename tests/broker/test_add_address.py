@@ -301,6 +301,48 @@ class TestAddAddress(TestBrokerCommand):
         self.matchoutput(out, "TTL must be between 0 and 2147483647.",
                          command)
 
+    def test_800_grn(self):
+        self.dsdb_expect_add("arecord50.aqd-unittest.ms.com",
+                             self.net["unknown0"].usable[50])
+        command = ["add_address", "--ip=%s" % self.net["unknown0"].usable[50],
+                   "--fqdn=arecord50.aqd-unittest.ms.com",
+                   "--grn", "grn:/ms/ei/aquilon/aqd"]
+        self.noouttest(command)
+        self.dsdb_verify()
+
+    def test_820_verifygrn(self):
+        net = self.net["unknown0"]
+        command = ["show_address", "--fqdn=arecord50.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "DNS Record: arecord50.aqd-unittest.ms.com",
+                         command)
+        self.matchoutput(out, "IP: %s" % net.usable[50], command)
+        self.matchoutput(out, "Network: %s [%s]" % (net.name, net), command)
+        self.matchoutput(out, "Network Environment: internal", command)
+        self.matchoutput(out, "Owned by GRN: grn:/ms/ei/aquilon/aqd", command)
+        self.matchclean(out, "Reverse", command)
+
+    def test_830_eon_id(self):
+        self.dsdb_expect_add("arecord51.aqd-unittest.ms.com",
+                             self.net["unknown0"].usable[51])
+        command = ["add_address", "--ip=%s" % self.net["unknown0"].usable[51],
+                   "--fqdn=arecord51.aqd-unittest.ms.com",
+                   "--eon_id", "3"]
+        self.noouttest(command)
+        self.dsdb_verify()
+
+    def test_840_verifygrn(self):
+        net = self.net["unknown0"]
+        command = ["show_address", "--fqdn=arecord51.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "DNS Record: arecord51.aqd-unittest.ms.com",
+                         command)
+        self.matchoutput(out, "IP: %s" % net.usable[51], command)
+        self.matchoutput(out, "Network: %s [%s]" % (net.name, net), command)
+        self.matchoutput(out, "Network Environment: internal", command)
+        self.matchoutput(out, "Owned by GRN: grn:/ms/ei/aquilon/unittest", command)
+        self.matchclean(out, "Reverse", command)
+
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddAddress)
     unittest.TextTestRunner(verbosity=2).run(suite)

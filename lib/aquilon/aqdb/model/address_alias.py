@@ -21,12 +21,12 @@ from sqlalchemy.orm import relation, backref, column_property, object_session
 from sqlalchemy.sql import select, func
 
 from aquilon.exceptions_ import AquilonError, ArgumentError
-from aquilon.aqdb.model import DnsRecord, Fqdn, ARecord
+from aquilon.aqdb.model import DnsRecord, Fqdn, ARecord, DnsRecordTargetMixin
 
 _TN = 'address_alias'
 
 
-class AddressAlias(DnsRecord):
+class AddressAlias(DnsRecordTargetMixin, DnsRecord):
     """ DNS alias of A-record(s) """
     __tablename__ = _TN
     _class_label = "Address Alias"
@@ -82,7 +82,9 @@ class AddressAlias(DnsRecord):
                     raise ArgumentError("{0} with target {1} already exists."
                                         .format(rr, target.fqdn))
 
-        super(AddressAlias, self).__init__(fqdn=fqdn, target=target, **kwargs)
+        self.target = target
+
+        super(AddressAlias, self).__init__(fqdn=fqdn, **kwargs)
 
 # Most addresses will not have aliases. This bulk loadable property allows the
 # formatter to avoid querying the alias table for every displayed DNS record

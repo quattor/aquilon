@@ -26,7 +26,7 @@ from sqlalchemy.orm import (relation, deferred, backref, object_session,
 from sqlalchemy.ext.associationproxy import association_proxy
 
 from aquilon.exceptions_ import NotFoundException, ArgumentError
-from aquilon.aqdb.model import Base, Fqdn, DnsEnvironment
+from aquilon.aqdb.model import Base, Fqdn, DnsEnvironment, Grn
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.aqdb.column_types import AqStr
 
@@ -73,8 +73,13 @@ class DnsRecord(Base):
 
     ttl = Column(Integer, nullable=True)
 
+    owner_eon_id = Column(ForeignKey(Grn.eon_id, name='%s_owner_grn_fk' % _TN),
+                          nullable=True)
+
     fqdn = relation(Fqdn, lazy=False, innerjoin=True,
                     backref=backref('dns_records'))
+
+    owner_grn = relation(Grn)
 
     aliases = association_proxy('fqdn', 'aliases')
     srv_records = association_proxy('fqdn', 'srv_records')
@@ -146,6 +151,45 @@ class DnsRecord(Base):
                 raise ArgumentError("TTL must be between 0 and 2147483647.")
 
         return value
+
+    @validates('owner_grn')
+    def validate_grn(self, key, grn):
+        if grn:
+            session = object_session(self)
+            with session.no_autoflush:
+                self.check_grn_conflict(grn)
+
+        return grn
+
+    def check_grn_conflict(self, grn):
+        if self.hardware_entity:
+            raise ArgumentError("{0} is a primary name. GRN should not be set "
+                                "but derived from the device.".format(self))
+
+        if getattr(self, 'assignments', None):
+            ifaces = ", ".join(sorted(addr.interface.qualified_name
+                                    for addr in self.assignments))
+            raise ArgumentError("{0} is already be used by the interfaces "
+                                "{1!s}. GRN should not be set but derived "
+                                "from the device.".format(self, ifaces))
+
+    @property
+    def dependent_grn(self):
+        """ Returns the first GRN found set to this DnsRecord
+            or its parents
+        """
+        if self.owner_grn:
+            return self.owner_grn
+
+        for attr in ('aliases', 'srv_records', 'address_aliases'):
+            records = getattr(self, attr, None)
+            if records:
+                for rec in records:
+                    grn = rec.dependent_grn
+                    if grn:
+                        return grn
+
+        return None
 
     @property
     def all_aliases(self):

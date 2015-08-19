@@ -24,7 +24,7 @@ from sqlalchemy.ext.associationproxy import association_proxy
 
 from aquilon.exceptions_ import AquilonError, ArgumentError
 from aquilon.aqdb.model import (DnsRecord, Fqdn, ARecord, AddressAlias,
-                                Alias, ReservedName)
+                                Alias, ReservedName, DnsRecordTargetMixin)
 
 _TN = 'srv_record'
 _name_re = re.compile(r'_([^_.]+)\._([^_.]+)$')
@@ -32,7 +32,7 @@ _name_re = re.compile(r'_([^_.]+)\._([^_.]+)$')
 PROTOCOLS = ['tcp', 'udp']
 
 
-class SrvRecord(DnsRecord):
+class SrvRecord(DnsRecordTargetMixin, DnsRecord):
     __tablename__ = _TN
     _class_label = "SRV Record"
 
@@ -133,5 +133,7 @@ class SrvRecord(DnsRecord):
                    rr.protocol == protocol and rr.service == service:
                     raise ArgumentError("{0} already exists.".format(rr))
 
+        self.target = target 
+
         super(SrvRecord, self).__init__(fqdn=fqdn, priority=priority, weight=weight,
-                                        port=port, target=target, **kwargs)
+                                        port=port, **kwargs)

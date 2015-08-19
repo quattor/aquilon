@@ -155,6 +155,112 @@ class TestAddAddressAlias(TestBrokerCommand):
                          " addralias1.aqd-unittest.ms.com",
                          command)
 
+    def test_800_grn(self):
+        command = ["add", "address", "alias",
+                   "--fqdn", "addralias3.aqd-unittest.ms.com",
+                   "--target", "arecord13.aqd-unittest.ms.com",
+                   "--grn", "grn:/ms/ei/aquilon/aqd"]
+        self.noouttest(command)
+
+    def test_805_verify_grn(self):
+        command = ["search", "dns", "--fullinfo",
+                   "--fqdn", "addralias3.aqd-unittest.ms.com",
+                   "--target", "arecord13.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out,
+                         "Owned by GRN: grn:/ms/ei/aquilon/aqd",
+                         command)
+
+    def test_810_implicit_grn(self):
+        command = ["add", "address", "alias",
+                   "--fqdn", "addralias3.aqd-unittest.ms.com",
+                   "--target", "arecord14.aqd-unittest.ms.com"]
+        self.noouttest(command)
+
+    def test_815_verify_implicit_grn(self):
+        command = ["search", "dns", "--fullinfo",
+                   "--fqdn", "addralias3.aqd-unittest.ms.com",
+                   "--target", "arecord14.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out,
+                         "Owned by GRN: grn:/ms/ei/aquilon/aqd",
+                         command)
+
+    def test_820_eon_id(self):
+        command = ["add", "address", "alias",
+                   "--fqdn", "addralias4.aqd-unittest.ms.com",
+                   "--target", "arecord13.aqd-unittest.ms.com",
+                   "--eon_id", "3"]
+        self.noouttest(command)
+
+    def test_825_verify_eon_id(self):
+        command = ["search", "dns", "--fullinfo",
+                   "--fqdn", "addralias4.aqd-unittest.ms.com",
+                   "--target", "arecord13.aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out,
+                         "Owned by GRN: grn:/ms/ei/aquilon/unittest",
+                         command)
+
+    def test_830_conflict_with_inconsistent_grn(self):
+        command = ["add", "address", "alias",
+                   "--fqdn", "addralias4.aqd-unittest.ms.com",
+                   "--target", "arecord14.aqd-unittest.ms.com",
+                   "--eon_id", "2"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Fqdn addralias4.aqd-unittest.ms.com with target "
+                         "arecord13.aqd-unittest.ms.com is set to a "
+                         "different GRN.",
+                         command)
+
+    def test_850_grn_conflict_with_primary_name(self):
+        command = ["add", "address", "alias",
+                   "--fqdn", "bad-addralias.aqd-unittest.ms.com",
+                   "--target", "unittest00.one-nyp.ms.com",
+                   "--grn", "grn:/ms/ei/aquilon/unittest"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Address Alias bad-addralias.aqd-unittest.ms.com "
+                         "depends on DNS Record unittest00.one-nyp.ms.com. "
+                         "It conflicts with GRN grn:/ms/ei/aquilon/unittest: "
+                         "DNS Record unittest00.one-nyp.ms.com is a primary "
+                         "name. GRN should not be set but derived from the "
+                         "device.",
+                         command)
+
+    def test_860_grn_conflict_with_service_address(self):
+        command = ["add" , "address", "alias",
+                   "--fqdn", "bad-addralias.aqd-unittest.ms.com",
+                   "--target", "zebra2.aqd-unittest.ms.com",
+                   "--grn", "grn:/ms/ei/aquilon/unittest"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Address Alias bad-addralias.aqd-unittest.ms.com "
+                         "depends on DNS Record zebra2.aqd-unittest.ms.com. "
+                         "It conflicts with GRN grn:/ms/ei/aquilon/unittest: "
+                         "DNS Record zebra2.aqd-unittest.ms.com is a service "
+                         "address. GRN should not be set but derived from the "
+                         "device.",
+                         command)
+
+    def test_870_grn_conflict_with_interface_address(self):
+        command = ["add" , "address", "alias",
+                   "--fqdn", "bad-addralias.aqd-unittest.ms.com",
+                   "--target", "unittest20-e1.aqd-unittest.ms.com",
+                   "--grn", "grn:/ms/ei/aquilon/unittest"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Address Alias bad-addralias.aqd-unittest.ms.com "
+                         "depends on DNS Record "
+                         "unittest20-e1.aqd-unittest.ms.com. It conflicts "
+                         "with GRN grn:/ms/ei/aquilon/unittest: DNS Record "
+                         "unittest20-e1.aqd-unittest.ms.com is already be "
+                         "used by the interfaces "
+                         "unittest20.aqd-unittest.ms.com/eth1. GRN should "
+                         "not be set but derived from the device.",
+                         command)
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddAddressAlias)

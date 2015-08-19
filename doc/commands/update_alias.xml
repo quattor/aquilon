@@ -39,6 +39,11 @@
 	    <arg><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
 	    <arg><option>--dns_environment <replaceable>ENV</replaceable></option></arg>
 	    <arg><option>--target_environment <replaceable>ENV</replaceable></option></arg>
+	    <group>
+		<arg choice="plain"><option>--grn <replaceable>GRN</replaceable></option></arg>
+		<arg choice="plain"><option>--eon_id <replaceable>EONID</replaceable></option></arg>
+		<arg choice="plain"><option>--clear_grn</option></arg>
+	    </group>
 	    <xi:include href="../common/change_management.xml"/>
 	    <xi:include href="../common/global_options.xml"/>
 	</cmdsynopsis>
@@ -128,6 +133,29 @@
 		<listitem>
 		    <para>
 			New description of the alias.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--grn <replaceable>GRN</replaceable></option>,
+		    <option>--eon_id <replaceable>EON_ID</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			The owner GRN of the personality to be created. Scripts should use the
+			numeric <replaceable>EON_ID</replaceable>, the textual <replaceable>GRN</replaceable> is
+			more suitable for humans.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+		<term>
+		    <option>--clear_grn</option>
+		</term>
+		<listitem>
+		    <para>
+			Clear the GRN.
 		    </para>
 		</listitem>
 	    </varlistentry>
