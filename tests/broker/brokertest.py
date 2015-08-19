@@ -22,6 +22,8 @@ import unittest2 as unittest
 from subprocess import Popen, PIPE
 from lxml import etree
 import re
+from difflib import unified_diff
+from textwrap import dedent
 
 from aquilon.config import Config, lookup_file_path
 from aquilon.worker import depends  # pylint: disable=W0611
@@ -437,6 +439,22 @@ class TestBrokerCommand(unittest.TestCase):
         self.assertFalse(m,
                          "output for %s matches '%s':\n@@@\n'%s'\n@@@\n" %
                          (command, r, out))
+
+    def output_equals(self, out, s, command):
+        # Check if the output is the string 's'. Leading and trailing
+        # whitespace, as well as any common indentation, is ignored.
+        out = dedent(out).strip()
+        s = dedent(s).strip()
+        # Calculate the diff only if we have to...
+        if out != s:
+            diff = unified_diff(s.splitlines(),
+                                out.splitlines(),
+                                lineterm="",
+                                fromfile="Expected output",
+                                tofile="Command output")
+            self.assertEqual(out, s,
+                             "output for %s differs:\n%s"
+                             % (command, "\n".join(diff)))
 
     def parse_proto_msg(self, listclass, attr, msg, expect=None):
         protolist = listclass()

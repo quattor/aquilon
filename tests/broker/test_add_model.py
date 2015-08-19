@@ -34,9 +34,11 @@ class TestAddModel(TestBrokerCommand):
     def test_105_show_uttorswitch(self):
         command = "show model --model uttorswitch"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Vendor: hp Model: uttorswitch", command)
-        self.matchoutput(out, "Model Type: switch", command)
-        self.matchoutput(out, "Comments: Some model comments", command)
+        self.output_equals(out, """
+            Vendor: hp Model: uttorswitch
+              Model Type: switch
+              Comments: Some model comments
+            """, command)
 
     def test_110_add_utchassis(self):
         command = "add model --model utchassis --vendor aurora_vendor --type chassis"
@@ -45,8 +47,10 @@ class TestAddModel(TestBrokerCommand):
     def test_115_show_utchassis(self):
         command = "show model --model utchassis"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Vendor: aurora_vendor Model: utchassis", command)
-        self.matchoutput(out, "Model Type: chassis", command)
+        self.output_equals(out, """
+            Vendor: aurora_vendor Model: utchassis
+              Model Type: chassis
+            """, command)
 
     def test_120_add_utblade(self):
         command = "add model --model utblade --vendor aurora_vendor --type blade"
@@ -55,8 +59,10 @@ class TestAddModel(TestBrokerCommand):
     def test_125_show_utblade(self):
         command = "show model --model utblade"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Vendor: aurora_vendor Model: utblade", command)
-        self.matchoutput(out, "Model Type: blade", command)
+        self.output_equals(out, """
+            Vendor: aurora_vendor Model: utblade
+              Model Type: blade
+            """, command)
 
     def test_130_add_utrackmount(self):
         self.noouttest(["add_model", "--model", "utrackmount",
@@ -69,13 +75,16 @@ class TestAddModel(TestBrokerCommand):
     def test_135_show_utrackmount(self):
         command = ["show_model", "--model", "utrackmount"]
         out = self.commandtest(command)
-        self.matchoutput(out, "Vendor: utvendor Model: utrackmount", command)
-        self.matchoutput(out, "Model Type: rackmount", command)
-        self.matchoutput(out, "MachineSpecs for utvendor utrackmount:", command)
-        self.matchoutput(out, "Cpu: utcpu x 2", command)
-        self.matchoutput(out, "Memory: 65536 MB", command)
-        self.matchoutput(out, "Disk: sda 600 GB sas (local)", command)
-        self.matchoutput(out, "NIC count: 2", command)
+        self.output_equals(out, """
+            Vendor: utvendor Model: utrackmount
+              Model Type: rackmount
+              MachineSpecs for utvendor utrackmount:
+                Cpu: utcpu x 2
+                Memory: 65536 MB
+                NIC count: 2
+                NIC Vendor: generic Model: generic_nic
+                Disk: sda 600 GB sas (local)
+            """, command)
 
     def test_140_add_e1000(self):
         command = ["add", "model", "--type", "nic", "--model", "e1000",

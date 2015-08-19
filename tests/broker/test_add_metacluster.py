@@ -45,13 +45,21 @@ class TestAddMetaCluster(PersonalityTestMixin, TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         default_members = self.config.getint("archetype_metacluster",
                                              "max_members_default")
-        self.matchoutput(out, "MetaCluster: utmc1", command)
-        self.matchoutput(out, "Max members: %s" % default_members, command)
-        self.matchclean(out, "Comments", command)
-        self.matchclean(out, "Member:", command)
-        self.matchclean(out, "Share:", command)
-        self.matchoutput(out, "Domain: unittest", command)
-        self.matchoutput(out, "Build Status: build", command)
+        self.output_equals(out, """
+            MetaCluster: utmc1
+              Building: ut
+                Fullname: Unittest-building
+                Address: unittest address
+                Location Parents: [Organization ms, Hub ny, Continent na, Country us, Campus ny, City ny]
+              Max members: %s
+              Capacity limits: None
+              Resources used by VMs: None
+              Build Status: build
+              Cluster Personality: metacluster Archetype: metacluster
+                Environment: dev
+                Owned by GRN: grn:/ms/ei/aquilon/aqd
+              Domain: unittest
+            """ % default_members, command)
 
     def test_105_show_utmc1_proto(self):
         command = "show metacluster --metacluster utmc1 --format proto"
@@ -79,9 +87,22 @@ class TestAddMetaCluster(PersonalityTestMixin, TestBrokerCommand):
     def test_115_show_utmc2(self):
         command = "show metacluster --metacluster utmc2"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "MetaCluster: utmc2", command)
-        self.matchoutput(out, "Max members: 99", command)
-        self.matchoutput(out, "Comments: Some metacluster comments", command)
+        self.output_equals(out, """
+            MetaCluster: utmc2
+              Building: ut
+                Fullname: Unittest-building
+                Address: unittest address
+                Location Parents: [Organization ms, Hub ny, Continent na, Country us, Campus ny, City ny]
+              Max members: 99
+              Capacity limits: None
+              Resources used by VMs: None
+              Build Status: build
+              Cluster Personality: metacluster Archetype: metacluster
+                Environment: dev
+                Owned by GRN: grn:/ms/ei/aquilon/aqd
+              Domain: unittest
+              Comments: Some metacluster comments
+            """, command)
 
     def test_115_show_utmc2_proto(self):
         command = "show metacluster --metacluster utmc2 --format proto"

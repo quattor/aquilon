@@ -98,15 +98,16 @@ class TestAddFeature(TestBrokerCommand):
     def test_105_verify_host_pre(self):
         command = ["show", "feature", "--feature", "pre_host", "--type", "host"]
         out = self.commandtest(command)
-        self.matchoutput(out, "Host Feature: pre_host", command)
-        self.matchoutput(out, "Template: features/pre_host", command)
-        self.matchoutput(out, "Comments: Some feature comments", command)
-        self.matchoutput(out, "Post Personality: False", command)
-        self.matchoutput(out, "Visibility: public", command)
-        self.matchoutput(out, "Owned by GRN: grn:/ms/ei/aquilon/aqd", command)
-        self.matchoutput(out, "Activation: reboot", command)
-        self.matchoutput(out, "Deactivation: reboot", command)
-        self.matchclean(out, "Bound to", command)
+        self.output_equals(out, """
+            Host Feature: pre_host
+              Post Personality: False
+              Owned by GRN: grn:/ms/ei/aquilon/aqd
+              Visibility: public
+              Activation: reboot
+              Deactivation: reboot
+              Template: features/pre_host
+              Comments: Some feature comments
+            """, command)
 
         command = ["show", "feature", "--feature", "pre_host", "--type", "host", "--format", "proto"]
         feature = self.protobuftest(command, expect=1)[0]
@@ -140,15 +141,15 @@ class TestAddFeature(TestBrokerCommand):
     def test_115_verify_post_host(self):
         command = ["show", "feature", "--feature", "post_host", "--type", "host"]
         out = self.commandtest(command)
-        self.matchoutput(out, "Host Feature: post_host", command)
-        self.matchoutput(out, "Template: features/post_host", command)
-        self.matchoutput(out, "Post Personality: True", command)
-        self.matchoutput(out, "Visibility: public", command)
-        self.matchoutput(out, "Owned by GRN: grn:/ms/ei/aquilon/aqd", command)
-        self.matchoutput(out, "Activation: reboot", command)
-        self.matchoutput(out, "Deactivation: reboot", command)
-        self.matchclean(out, "Comments", command)
-        self.matchclean(out, "Bound to", command)
+        self.output_equals(out, """
+            Host Feature: post_host
+              Post Personality: True
+              Owned by GRN: grn:/ms/ei/aquilon/aqd
+              Visibility: public
+              Activation: reboot
+              Deactivation: reboot
+              Template: features/post_host
+            """, command)
 
         command = ["show", "feature", "--feature", "post_host", "--type", "host", "--format", "proto"]
         feature = self.protobuftest(command, expect=1)[0]
@@ -164,15 +165,14 @@ class TestAddFeature(TestBrokerCommand):
         command = ["show", "feature", "--feature", "bios_setup",
                    "--type", "hardware"]
         out = self.commandtest(command)
-        self.matchoutput(out, "Hardware Feature: bios_setup", command)
-        self.matchoutput(out, "Template: features/hardware/bios_setup", command)
-        self.matchclean(out, "Post Personality", command)
-        self.matchoutput(out, "Visibility: public", command)
-        self.matchoutput(out, "Owned by GRN: grn:/ms/ei/aquilon/aqd", command)
-        self.matchoutput(out, "Activation: reboot", command)
-        self.matchoutput(out, "Deactivation: reboot", command)
-        self.matchclean(out, "Comments", command)
-        self.matchclean(out, "Bound to", command)
+        self.output_equals(out, """
+            Hardware Feature: bios_setup
+              Owned by GRN: grn:/ms/ei/aquilon/aqd
+              Visibility: public
+              Activation: reboot
+              Deactivation: reboot
+              Template: features/hardware/bios_setup
+            """, command)
 
         command = ["show", "feature", "--feature", "bios_setup", "--type", "hardware", "--format", "proto"]
         feature = self.protobuftest(command, expect=1)[0]
@@ -187,15 +187,14 @@ class TestAddFeature(TestBrokerCommand):
         command = ["show", "feature", "--feature", "src_route",
                    "--type", "interface"]
         out = self.commandtest(command)
-        self.matchoutput(out, "Interface Feature: src_route", command)
-        self.matchoutput(out, "Template: features/interface/src_route", command)
-        self.matchclean(out, "Post Personality", command)
-        self.matchoutput(out, "Visibility: owner_only", command)
-        self.matchoutput(out, "Owned by GRN: grn:/ms/ei/aquilon/aqd", command)
-        self.matchoutput(out, "Activation: reboot", command)
-        self.matchoutput(out, "Deactivation: reboot", command)
-        self.matchclean(out, "Comments", command)
-        self.matchclean(out, "Bound to", command)
+        self.output_equals(out, """
+            Interface Feature: src_route
+              Owned by GRN: grn:/ms/ei/aquilon/aqd
+              Visibility: owner_only
+              Activation: reboot
+              Deactivation: reboot
+              Template: features/interface/src_route
+            """, command)
 
         command = ["show", "feature", "--feature", "src_route", "--type", "interface", "--format", "proto"]
         feature = self.protobuftest(command, expect=1)[0]

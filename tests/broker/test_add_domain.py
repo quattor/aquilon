@@ -46,13 +46,21 @@ class TestAddDomain(TestBrokerCommand):
     def test_115_verify_unittest(self):
         command = ["show_domain", "--domain=unittest"]
         out = self.commandtest(command)
-        self.matchoutput(out, "Domain: unittest", command)
-        self.matchoutput(out, "Owner: %s@%s" % (self.user, self.realm), command)
-        self.matchoutput(out, "Tracking: sandbox utsandbox", command)
-        self.matchoutput(out, "Comments: aqd unit test tracking domain",
-                         command)
-        self.matchoutput(out, "May Contain Hosts/Clusters: False", command)
-        self.matchoutput(out, "Archived: False", command)
+        self.output_equals(out, """
+            Domain: unittest [autosync]
+              Tracking: sandbox utsandbox
+              Rollback commit: None
+              Validated: True
+              Owner: %(user)s@%(realm)s
+              Compiler: %(compiler)s
+              Requires Change Manager: False
+              May Contain Hosts/Clusters: False
+              Archived: False
+              Comments: aqd unit test tracking domain
+            """ % {"user": self.user,
+                   "realm": self.realm,
+                   "compiler": self.config.get("panc", "pan_compiler")},
+            command)
 
     def test_115_verify_unittest_proto(self):
         command = ["show_domain", "--domain=unittest", "--format", "proto"]
@@ -72,9 +80,20 @@ class TestAddDomain(TestBrokerCommand):
     def test_115_verify_utprod(self):
         command = ["show_domain", "--domain=ut-prod"]
         out = self.commandtest(command)
-        self.matchoutput(out, "Domain: ut-prod", command)
-        self.matchoutput(out, "Tracking: domain prod", command)
-        self.matchoutput(out, "May Contain Hosts/Clusters: True", command)
+        self.output_equals(out, """
+            Domain: ut-prod [autosync]
+              Tracking: domain prod
+              Rollback commit: None
+              Validated: True
+              Owner: %(user)s@%(realm)s
+              Compiler: %(compiler)s
+              Requires Change Manager: False
+              May Contain Hosts/Clusters: True
+              Archived: False
+            """ % {"user": self.user,
+                   "realm": self.realm,
+                   "compiler": self.config.get("panc", "pan_compiler")},
+            command)
 
     def test_120_add_deployable(self):
         command = ["add_domain", "--domain=deployable", "--start=prod"]

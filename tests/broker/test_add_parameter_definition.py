@@ -98,12 +98,12 @@ class TestAddParameterDefinition(TestBrokerCommand):
         cmd = ["show_parameter_definition", "--archetype", "aquilon",
                "--path", "testrequired"]
         out = self.commandtest(cmd)
-        self.searchoutput(out,
-                          r'Parameter Definition: testrequired \[required\]\s*'
-                          r'Type: string\s*'
-                          r'Template: foo\s*'
-                          r'Activation: dispatch\s*',
-                          cmd)
+        self.output_equals(out, """
+            Parameter Definition: testrequired [required]
+              Type: string
+              Template: foo
+              Activation: dispatch
+            """, cmd)
 
     def test_120_clean_path(self):
         for path in ["/startslash", "endslash/"]:
@@ -144,10 +144,10 @@ class TestAddParameterDefinition(TestBrokerCommand):
         cmd = ["show_parameter_definition", "--feature", "myfeature", "--type=host",
                "--path=testrequired"]
         out = self.commandtest(cmd)
-        self.searchoutput(out,
-                          r'Parameter Definition: testrequired \[required\]\s*'
-                          r'Type: string\s*',
-                          cmd)
+        self.output_equals(out, """
+            Parameter Definition: testrequired [required]
+              Type: string
+            """, cmd)
 
     def test_220_clean_path(self):
         for path in ["/startslash", "endslash/"]:

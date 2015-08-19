@@ -59,9 +59,11 @@ class TestAddDnsDomain(TestBrokerCommand):
     def testverifyaddaqdunittestdomain(self):
         command = "show dns_domain --dns_domain aqd-unittest.ms.com"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "DNS Domain: aqd-unittest.ms.com", command)
-        self.matchoutput(out, "Restricted: False", command)
-        self.matchoutput(out, "Comments: Some DNS domain comments", command)
+        self.output_equals(out, """
+            DNS Domain: aqd-unittest.ms.com
+              Restricted: False
+              Comments: Some DNS domain comments
+            """, command)
 
     def testverifyaddaqdunittestdomaincsv(self):
         command = "show dns_domain --dns_domain aqd-unittest.ms.com --format=csv"
@@ -72,8 +74,10 @@ class TestAddDnsDomain(TestBrokerCommand):
     def testverifyaddrestricteddomain(self):
         command = "show dns_domain --dns_domain restrict.aqd-unittest.ms.com"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "DNS Domain: restrict.aqd-unittest.ms.com", command)
-        self.matchoutput(out, "Restricted: True", command)
+        self.output_equals(out, """
+            DNS Domain: restrict.aqd-unittest.ms.com
+              Restricted: True
+            """, command)
 
     def testverifyaddrestricteddomainproto(self):
         command = ["show_dns_domain",

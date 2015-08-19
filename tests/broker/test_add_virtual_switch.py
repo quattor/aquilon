@@ -47,10 +47,11 @@ class TestAddVirtualSwitch(TestBrokerCommand):
         net = self.net["autopg1"]
         command = ["show_virtual_switch", "--virtual_switch", "utvswitch"]
         out = self.commandtest(command)
-        self.matchoutput(out, "Virtual Switch: utvswitch", command)
-        self.matchoutput(out, "Port Group: user-v710", command)
-        self.matchoutput(out, "Network: %s" % net.ip, command)
-        self.matchclean(out, "Comments", command)
+        self.output_equals(out, """
+            Virtual Switch: utvswitch
+              Port Group: user-v710
+                Network: %s
+            """ % net.ip, command)
 
     def test_115_show_utvswitch_proto(self):
         net = self.net["autopg1"]

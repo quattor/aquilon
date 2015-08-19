@@ -39,8 +39,12 @@ class TestAddBuilding(TestBrokerCommand):
     def testverifyaddbu(self):
         command = "show building --building bu"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Building: bu", command)
-        self.matchoutput(out, "Address: 12 Cherry Lane", command)
+        self.output_equals(out, """
+            Building: bu
+              Fullname: bu
+              Address: 12 Cherry Lane
+              Location Parents: [Organization ms, Hub ny, Continent na, Country us, Campus ny, City ny]
+            """, command)
 
     def testaddbucards(self):
         self.dsdb_expect("add_building_aq -building_name cards -city ex "
@@ -54,8 +58,12 @@ class TestAddBuilding(TestBrokerCommand):
     def testverifyaddbucards(self):
         command = "show building --building cards"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Building: cards", command)
-        self.matchoutput(out, "Address: Nowhere", command)
+        self.output_equals(out, """
+            Building: cards
+              Fullname: cards
+              Address: Nowhere
+              Location Parents: [Organization ms, Hub ny, Continent na, Country us, Campus ta, City ex]
+            """, command)
 
     def testverifyaddbuproto(self):
         command = "show building --building bu --format proto"

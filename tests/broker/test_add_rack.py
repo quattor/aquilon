@@ -39,9 +39,13 @@ class TestAddRack(TestBrokerCommand):
     def testverifyaddut3(self):
         command = "show rack --rack ut3"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Rack: ut3", command)
-        self.matchoutput(out, "Row: a", command)
-        self.matchoutput(out, "Column: 3", command)
+        self.output_equals(out, """
+            Rack: ut3
+              Fullname: ut3
+              Row: a
+              Column: 3
+              Location Parents: [Organization ms, Hub ny, Continent na, Country us, Campus ny, City ny, Building ut, Room utroom1]
+            """, command)
 
     def testverifyaddut3proto(self):
         command = "show rack --rack ut3 --format proto"
