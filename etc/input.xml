@@ -6276,10 +6276,9 @@
 	</optgroup>
 	<optgroup>
 	    <option name="feature" type="string">Feature</option>
+	    <option name="type" type="string" requires="feature">Feature type</option>
 	    <option name="archetype" type="string">Archetype</option>
 	    <option name="personality_stage" type="string">Personality stage to use, defaults to 'next'.</option>
-	    <option name="interface" type="string">Interface of a machine</option>
-	    <option name="model" type="string">Name of a hardware model</option>
 	    <option name="value" type="string">Value for the parameter, type depending on the parameter definition</option>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
 	    <option name="reason" type="string">String to be specified if justification='emergency'</option>
@@ -6296,10 +6295,9 @@
 	</optgroup>
 	<optgroup>
 	    <option name="feature" type="string">Feature</option>
+	    <option name="type" type="string" requires="feature">Feature type</option>
 	    <option name="archetype" type="string">Archetype</option>
 	    <option name="personality_stage" type="string">Personality stage to use, defaults to 'next'.</option>
-	    <option name="interface" type="string">Interface of a machine</option>
-	    <option name="model" type="string">Name of a hardware model</option>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
 	    <option name="reason" type="string">String to be specified if justification='emergency'</option>
 	</optgroup>
@@ -6314,10 +6312,9 @@
 	</optgroup>
 	<optgroup>
 	    <option name="feature" type="string">Feature</option>
+	    <option name="type" type="string" requires="feature">Feature type</option>
 	    <option name="archetype" type="string">Archetype</option>
 	    <option name="personality_stage" type="string">Personality stage to use, defaults to 'next'.</option>
-	    <option name="interface" type="string">Interface of a machine</option>
-	    <option name="model" type="string">Name of a hardware model</option>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
 	    <option name="reason" type="string">String to be specified if justification='emergency'</option>
 	</optgroup>

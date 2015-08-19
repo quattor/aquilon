@@ -59,7 +59,8 @@ class CommandShowParameterPersonality(BrokerCommand):
                         continue
                     param_definitions = link.feature.param_def_holder.param_definitions
                     for param_def in param_definitions:
-                        path = Parameter.feature_path(link, param_def.path)
+                        path = Parameter.feature_path(link.feature,
+                                                      param_def.path)
                         value = param.get_path(path, compel=False)
                         if value is not None:
                             params.append((path, param_def, value))

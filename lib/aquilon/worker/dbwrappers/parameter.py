@@ -25,41 +25,15 @@ from aquilon.exceptions_ import NotFoundException, ArgumentError
 from aquilon.utils import (force_json_dict, force_int, force_float,
                            force_boolean)
 from aquilon.aqdb.model import (Personality, PersonalityStage, Parameter,
-                                Feature, FeatureLink, Host, Model,
-                                ParamDefinition, ArchetypeParamDef,
-                                FeatureParamDef, PersonalityParameter)
+                                FeatureLink, Host, ParamDefinition,
+                                ArchetypeParamDef, FeatureParamDef,
+                                PersonalityParameter)
 from aquilon.aqdb.model.hostlifecycle import Ready, Almostready
 from aquilon.worker.formats.parameter_definition import ParamDefinitionFormatter
 
 
-def get_feature_link(session, feature, model, interface_name, dbstage):
-    feature_type = 'host'
-    if interface_name:
-        feature_type = 'interface'
-    if model:
-        dbmodel = Model.get_unique(session, name=model,
-                                   compel=True)
-        if dbmodel.model_type.isNic():
-            feature_type = 'interface'
-        else:
-            if interface_name:
-                raise ArgumentError("{0} is not a network interface model."
-                                    .format(dbmodel))
-            feature_type = 'hardware'
-    else:
-        dbmodel = None
-
-    dbfeature = Feature.get_unique(session, name=feature,
-                                   feature_type=feature_type, compel=True)
-    dblink = FeatureLink.get_unique(session, feature=dbfeature,
-                                    interface_name=interface_name,
-                                    model=dbmodel,
-                                    personality_stage=dbstage, compel=True)
-    return dblink
-
-
-def set_parameter(session, param_holder, dblink, dbparam_def, path, value,
-                  compel=False, preclude=False):
+def set_parameter(session, param_holder, dbparam_def, path, value, compel=False,
+                  preclude=False):
     """
         Handles add parameter as well as update parameter. Parmeters for features
         will be stored as part of personality as features/<feature_name>/<path>
@@ -69,8 +43,8 @@ def set_parameter(session, param_holder, dblink, dbparam_def, path, value,
     retval = validate_parameter(session, dbparam_def, path, value,
                                 param_holder.personality_stage)
 
-    if dblink:
-        path = Parameter.feature_path(dblink, path)
+    if isinstance(dbparam_def.holder, FeatureParamDef):
+        path = Parameter.feature_path(dbparam_def.holder.feature, path)
     parameter.set_path(path, retval, compel, preclude)
 
 
@@ -88,7 +62,8 @@ def del_all_feature_parameter(session, dblink):
         if paramdef.activation == 'rebuild':
             validate_rebuild_required(session, paramdef.path, dbstage)
 
-        parameter.del_path(Parameter.feature_path(dblink, paramdef.path),
+        parameter.del_path(Parameter.feature_path(dblink.feature,
+                                                  paramdef.path),
                            compel=False)
 
 
@@ -182,7 +157,7 @@ def get_paramdef_for_parameter(path, param_def_holder):
     return match
 
 
-def validate_required_parameter(param_def_holder, parameter, dbfeaturelink=None):
+def validate_required_parameter(param_def_holder, parameter):
     errors = []
     formatter = ParamDefinitionFormatter()
     for param_def in param_def_holder.param_definitions:
@@ -191,8 +166,9 @@ def validate_required_parameter(param_def_holder, parameter, dbfeaturelink=None)
         if (not param_def.required) or param_def.default:
             continue
 
-        if dbfeaturelink:
-            path = parameter.feature_path(dbfeaturelink, param_def.path)
+        if isinstance(param_def_holder, FeatureParamDef):
+            path = parameter.feature_path(param_def_holder.feature,
+                                          param_def.path)
         else:
             path = param_def.path
 
@@ -221,25 +197,14 @@ def search_path_in_personas(session, path, param_def_holder):
     q = q.options(subqueryload('parameter'))
 
     holder = {}
-    trypath = []
-    if isinstance(param_def_holder, ArchetypeParamDef):
-        trypath.append(path)
+
+    if isinstance(param_def_holder, FeatureParamDef):
+        path = Parameter.feature_path(param_def_holder.feature, path)
+
     for param_holder in q:
         try:
-            if isinstance(param_def_holder, FeatureParamDef):
-                trypath = []
-                q = session.query(FeatureLink)
-                q = q.filter_by(feature=param_def_holder.feature,
-                                personality_stage=param_holder.personality_stage)
-
-                for link in q.all():
-                    trypath.append(Parameter.feature_path(link, path))
-
-            for tpath in trypath:
-                if param_holder.parameter:
-                    value = param_holder.parameter.get_path(tpath)
-                else:
-                    value = None
+            if param_holder.parameter:
+                value = param_holder.parameter.get_path(path)
                 if value is not None:
                     holder[param_holder] = {path: value}
         except NotFoundException:
@@ -272,9 +237,9 @@ def validate_personality_config(dbstage):
             continue
 
         tmp_error = validate_required_parameter(link.feature.param_def_holder,
-                                                parameter, link)
+                                                parameter)
         if tmp_error:
-            error.append("Feature Binding : %s" % link.feature)
+            error.append("Feature Binding: %s" % link.feature)
             error += tmp_error
     return error
 

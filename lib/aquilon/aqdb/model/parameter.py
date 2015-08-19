@@ -140,11 +140,11 @@ class Parameter(Base):
         return PATH_SEP.join(pparts)
 
     @staticmethod
-    def feature_path(featurelink, path):
+    def feature_path(dbfeature, path):
         """
         constructs the parameter path for feature namespace
         """
-        return PATH_SEP.join([featurelink.cfg_path, path])
+        return PATH_SEP.join([dbfeature.cfg_path, path])
 
     def get_path(self, path, compel=True, preclude=False):
         """ get value of paramter specified by path made of dict keys """
@@ -167,8 +167,8 @@ class Parameter(Base):
                 pass
         return None
 
-    def get_feature_path(self, dbfeaturelink, path, compel=True, preclude=False):
-        return self.get_path(Parameter.feature_path(dbfeaturelink, path),
+    def get_feature_path(self, dbfeature, path, compel=True, preclude=False):
+        return self.get_path(Parameter.feature_path(dbfeature, path),
                              compel, preclude)
 
     def set_path(self, path, value, compel=False, preclude=False):

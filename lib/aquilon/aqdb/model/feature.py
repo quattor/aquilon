@@ -258,13 +258,6 @@ class FeatureLink(Base):
 
         return result
 
-    @property
-    def cfg_path(self):
-        if isinstance(self.feature, InterfaceFeature) and self.interface_name:
-            return self.feature.cfg_path + "/" + self.interface_name
-        else:
-            return self.feature.cfg_path
-
     def copy(self):
         return type(self)(feature=self.feature, model=self.model,
                           personality_stage=self.personality_stage,

@@ -16,10 +16,10 @@
 # limitations under the License.
 
 from aquilon.exceptions_ import ArgumentError, NotFoundException
-from aquilon.aqdb.model import Personality, Parameter, PersonalityParameter
+from aquilon.aqdb.model import (Personality, Parameter, PersonalityParameter,
+                                Feature)
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.parameter import (set_parameter,
-                                                 get_feature_link,
                                                  get_paramdef_for_parameter)
 from aquilon.worker.dbwrappers.change_management import validate_personality_justification
 from aquilon.worker.templates import Plenary, PlenaryCollection
@@ -29,19 +29,18 @@ class CommandAddParameter(BrokerCommand):
 
     required_parameters = ['personality', 'path']
 
-    def process_parameter(self, session, dbstage, dblink, dbparam_def, path,
-                          value):
+    def process_parameter(self, session, dbstage, dbparam_def, path, value):
         if not dbstage.paramholder:
             dbstage.paramholder = PersonalityParameter()
         if not dbstage.paramholder.parameter:
             dbstage.paramholder.parameter = Parameter(value={})
 
-        set_parameter(session, dbstage.paramholder, dblink, dbparam_def, path,
-                      value, compel=False, preclude=True)
+        set_parameter(session, dbstage.paramholder, dbparam_def, path, value,
+                      compel=False, preclude=True)
 
     def render(self, session, logger, archetype, personality, personality_stage,
-               feature, model, interface, path, user, value=None,
-               justification=None, reason=None, **arguments):
+               feature, type, path, user, value=None, justification=None,
+               reason=None, **arguments):
         dbpersonality = Personality.get_unique(session, name=personality,
                                                archetype=archetype, compel=True)
         if not dbpersonality.archetype.is_compileable:
@@ -54,11 +53,10 @@ class CommandAddParameter(BrokerCommand):
                                            reason)
 
         if feature:
-            dblink = get_feature_link(session, feature, model, interface,
-                                      dbstage)
-            param_def_holder = dblink.feature.param_def_holder
+            dbfeature = Feature.get_unique(session, name=feature, feature_type=type,
+                                           compel=True)
+            param_def_holder = dbfeature.param_def_holder
         else:
-            dblink = None
             param_def_holder = dbpersonality.archetype.param_def_holder
 
         dbparam_def = get_paramdef_for_parameter(path, param_def_holder)
@@ -66,8 +64,7 @@ class CommandAddParameter(BrokerCommand):
             raise NotFoundException("Parameter %s does not match any "
                                     "parameter definitions." % path)
 
-        self.process_parameter(session, dbstage, dblink, dbparam_def, path,
-                               value)
+        self.process_parameter(session, dbstage, dbparam_def, path, value)
 
         session.flush()
 
