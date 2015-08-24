@@ -32,7 +32,7 @@ class CommandCompileHostname(BrokerCommand):
         dbhost = hostname_to_host(session, hostname)
         if pancdebug:
             pancinclude = r'.*'
-            pancexclude = r'components/spma/functions'
+            pancexclude = r'components/spma/functions.*'
         dom = TemplateDomain(dbhost.branch, dbhost.sandbox_author,
                              logger=logger)
         plenary = Plenary.get_plenary(dbhost, logger=logger)

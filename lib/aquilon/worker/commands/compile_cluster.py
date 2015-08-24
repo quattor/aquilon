@@ -42,7 +42,7 @@ class CommandCompileCluster(BrokerCommand):
 
         if pancdebug:
             pancinclude = r'.*'
-            pancexclude = r'components/spma/functions'
+            pancexclude = r'components/spma/functions.*'
         dom = TemplateDomain(dbcluster.branch, dbcluster.sandbox_author,
                              logger=logger)
 

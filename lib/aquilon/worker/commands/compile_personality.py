@@ -42,7 +42,7 @@ class CommandCompilePersonality(BrokerCommand):
                                                archetype=archetype, compel=True)
         if pancdebug:
             pancinclude = r'.*'
-            pancexclude = r'components/spma/functions'
+            pancexclude = r'components/spma/functions.*'
 
         q = session.query(Host)
 

@@ -70,7 +70,7 @@ class CommandCompile(BrokerCommand):
 
         if pancdebug:
             pancinclude = r'.*'
-            pancexclude = r'components/spma/functions'
+            pancexclude = r'components/spma/functions.*'
         dom = TemplateDomain(dbdomain, dbauthor, logger=logger)
         with CompileKey.merge([CompileKey(domain=dbdomain.name, logger=logger),
                                plenaries.get_key(exclusive=False)]):
