@@ -49,8 +49,8 @@ def get_parameters_by_feature(dbstage, dbfeaturelink):
     for param_def in param_def_holder.param_definitions:
         for param in parameters:
             if param:
-                value = param.get_feature_path(dbfeaturelink,
-                                               param_def.path, compel=False)
+                value = param.get_feature_path(dbfeaturelink, param_def.path,
+                                               compel=False)
             else:
                 value = None
             if value is None and param_def.default:

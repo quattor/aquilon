@@ -27,7 +27,7 @@ from aquilon.utils import (force_json_dict, force_int, force_float,
 from aquilon.aqdb.model import (Personality, PersonalityStage, Parameter,
                                 Feature, FeatureLink, Host, Model,
                                 ParamDefinition, ArchetypeParamDef,
-                                PersonalityParameter)
+                                FeatureParamDef, PersonalityParameter)
 from aquilon.aqdb.model.hostlifecycle import Ready, Almostready
 from aquilon.worker.formats.parameter_definition import ParamDefinitionFormatter
 
@@ -157,12 +157,7 @@ def validate_rebuild_required(session, path, dbstage):
                             (path, dbstage, dbstage))
 
 
-def get_paramdef_for_parameter(path, dbstage, dbfeaturelink):
-    if dbfeaturelink:
-        param_def_holder = dbfeaturelink.feature.param_def_holder
-    else:
-        param_def_holder = dbstage.archetype.param_def_holder
-
+def get_paramdef_for_parameter(path, param_def_holder):
     if not param_def_holder:
         return None
 
@@ -187,22 +182,24 @@ def get_paramdef_for_parameter(path, dbstage, dbfeaturelink):
     return match
 
 
-def validate_required_parameter(param_definitions, parameter, dbfeaturelink=None):
+def validate_required_parameter(param_def_holder, parameter, dbfeaturelink=None):
     errors = []
     formatter = ParamDefinitionFormatter()
-    for param_def in param_definitions:
+    for param_def in param_def_holder.param_definitions:
         # ignore not required fields or fields
         # which have defaults specified
         if (not param_def.required) or param_def.default:
             continue
 
-        if not parameter:
-            value = None
-        elif dbfeaturelink:
-            value = parameter.get_feature_path(dbfeaturelink, param_def.path,
-                                               compel=False)
+        if dbfeaturelink:
+            path = parameter.feature_path(dbfeaturelink, param_def.path)
         else:
-            value = parameter.get_path(param_def.path, compel=False)
+            path = param_def.path
+
+        if parameter:
+            value = parameter.get_path(path, compel=False)
+        else:
+            value = None
 
         if value is None:
             errors.append(formatter.format_raw(param_def))
@@ -229,7 +226,7 @@ def search_path_in_personas(session, path, param_def_holder):
         trypath.append(path)
     for param_holder in q:
         try:
-            if not isinstance(param_def_holder, ArchetypeParamDef):
+            if isinstance(param_def_holder, FeatureParamDef):
                 trypath = []
                 q = session.query(FeatureLink)
                 q = q.filter_by(feature=param_def_holder.feature,
@@ -266,18 +263,19 @@ def validate_personality_config(dbstage):
     error = []
 
     if dbarchetype.param_def_holder:
-        param_definitions = dbarchetype.param_def_holder.param_definitions
-        error += validate_required_parameter(param_definitions, parameter)
+        error += validate_required_parameter(dbarchetype.param_def_holder,
+                                             parameter)
 
     # features for personalities
     for link in dbarchetype.features + dbstage.features:
-        param_definitions = []
-        if link.feature.param_def_holder:
-            param_definitions = link.feature.param_def_holder.param_definitions
-            tmp_error = validate_required_parameter(param_definitions, parameter, link)
-            if tmp_error:
-                error.append("Feature Binding : %s" % link.feature)
-                error += tmp_error
+        if not link.feature.param_def_holder:
+            continue
+
+        tmp_error = validate_required_parameter(link.feature.param_def_holder,
+                                                parameter, link)
+        if tmp_error:
+            error.append("Feature Binding : %s" % link.feature)
+            error += tmp_error
     return error
 
 

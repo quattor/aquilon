@@ -56,10 +56,12 @@ class CommandAddParameter(BrokerCommand):
         if feature:
             dblink = get_feature_link(session, feature, model, interface,
                                       dbstage)
+            param_def_holder = dblink.feature.param_def_holder
         else:
             dblink = None
+            param_def_holder = dbpersonality.archetype.param_def_holder
 
-        dbparam_def = get_paramdef_for_parameter(path, dbstage, dblink)
+        dbparam_def = get_paramdef_for_parameter(path, param_def_holder)
         if not dbparam_def:
             raise NotFoundException("Parameter %s does not match any "
                                     "parameter definitions." % path)
