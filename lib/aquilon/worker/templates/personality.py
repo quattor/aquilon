@@ -35,10 +35,6 @@ from aquilon.worker.dbwrappers.parameter import validate_value
 LOGGER = logging.getLogger(__name__)
 
 
-def string_to_list(data):
-    return [item.strip() for item in data.split(',') if item]
-
-
 def get_parameters_by_feature(dbstage, dbfeaturelink):
     ret = {}
     param_def_holder = dbfeaturelink.feature.param_def_holder
@@ -57,8 +53,6 @@ def get_parameters_by_feature(dbstage, dbfeaturelink):
                 value = validate_value("default for path=%s" % param_def.path,
                                        param_def.value_type, param_def.default)
             if value is not None:
-                if param_def.value_type == 'list':
-                    value = string_to_list(value)
                 ret[param_def.path] = value
     return ret
 
@@ -306,10 +300,6 @@ class PlenaryPersonalityParameter(StructurePlenary):
                 value = validate_value("default for path=%s" % param_def.path,
                                        param_def.value_type, param_def.default)
             if value is not None:
-                # coerce string list to list
-                if param_def.value_type == 'list':
-                    value = string_to_list(value)
-
                 values = get_path_under_top(param_def.path, value)
                 for path in sorted(values.keys()):
                     pan_assign(lines, path, values[path])

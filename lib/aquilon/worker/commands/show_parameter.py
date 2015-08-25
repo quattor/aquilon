@@ -48,6 +48,8 @@ class CommandShowParameterPersonality(BrokerCommand):
                     for param_def in param_definitions:
                         value = param.get_path(param_def.path, compel=False)
                         if value is not None:
+                            if param_def.value_type == "list":
+                                value = ",".join(value)
                             params.append((param_def.path, param_def, value))
 
                 for link in dbstage.features:
@@ -59,6 +61,8 @@ class CommandShowParameterPersonality(BrokerCommand):
                                                       param_def.path)
                         value = param.get_path(path, compel=False)
                         if value is not None:
+                            if param_def.value_type == "list":
+                                value = ",".join(value)
                             params.append((path, param_def, value))
 
             if not params:

@@ -68,8 +68,10 @@ def del_all_feature_parameter(session, dblink):
 def validate_value(label, value_type, value):
     retval = None
 
-    if value_type == 'string' or value_type == 'list':
+    if value_type == 'string':
         retval = value
+    elif value_type == 'list':
+        retval = [item.strip() for item in value.split(",")]
     elif value_type == 'int':
         retval = force_int(label, value)
     elif value_type == 'float':

@@ -114,7 +114,7 @@ class TestParameterFeature(TestBrokerCommand):
                                r'"testboolean": false,\s*'
                                r'"testdefault": "host_feature",\s*'
                                r'"testint": 0,\s*'
-                               r'"testlist": "host1,host2",\s*'
+                               r'"testlist": \[\s*"host1",\s*"host2"\s*\],\s*'
                                r'"teststring": "override"\s*', cmd)
 
     def test_120_verify_cat_host_feature(self):
@@ -178,7 +178,7 @@ class TestParameterFeature(TestBrokerCommand):
         self.searchoutput(out, r'"interface": {\s*'
                                r'"interfacefeature": {\s*'
                                r'"testdefault": "interface_feature",\s*'
-                               r'"testlist": "intf1,intf2"\s*'
+                               r'"testlist": \[\s*"intf1",\s*"intf2"\s*\]\s*'
                                r'}\s*}'
                           , cmd)
 
@@ -224,7 +224,7 @@ class TestParameterFeature(TestBrokerCommand):
                           r'"hardware": {\s*'
                           r'"hardwarefeature": {\s*'
                           r'"testdefault": "hardware_feature",\s*'
-                          r'"testlist": "hardware1,hardware2"',
+                          r'"testlist": \[\s*"hardware1",\s*"hardware2"\s*\]',
                           cmd)
 
     def test_310_verify_feature_proto(self):
@@ -313,7 +313,7 @@ class TestParameterFeature(TestBrokerCommand):
                           r'"hardware": {\s*'
                           r'"hardwarefeature": {\s*'
                           r'"testdefault": "hardware_newstring",\s*'
-                          r'"testlist": "hardware1,hardware2"',
+                          r'"testlist": \[\s*"hardware1",\s*"hardware2"\s*\]',
                           cmd)
 
     def test_390_verify_cat_hardware_feature(self):
@@ -349,14 +349,17 @@ class TestParameterFeature(TestBrokerCommand):
         self.searchoutput(out, r'Differences for Parameters:\s*'
                                r'missing Parameters in Personality aquilon/eaitools@current:\s*'
                                r'//features/hardware/hardwarefeature/testdefault\s*'
-                               r'//features/hardware/hardwarefeature/testlist\s*'
+                               r'//features/hardware/hardwarefeature/testlist/0\s*'
+                               r'//features/hardware/hardwarefeature/testlist/1\s*'
                                r'//features/hostfeature/testboolean\s*'
                                r'//features/hostfeature/testdefault\s*'
                                r'//features/hostfeature/testint\s*'
-                               r'//features/hostfeature/testlist\s*'
+                               r'//features/hostfeature/testlist/0\s*'
+                               r'//features/hostfeature/testlist/1\s*'
                                r'//features/hostfeature/teststring\s*'
                                r'//features/interface/interfacefeature/testdefault\s*'
-                               r'//features/interface/interfacefeature/testlist\s*',
+                               r'//features/interface/interfacefeature/testlist/0\s*'
+                               r'//features/interface/interfacefeature/testlist/1\s*',
                           cmd)
 
     def test_600_add_same_name_feature(self):
