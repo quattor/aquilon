@@ -32,7 +32,7 @@ class Machine(HardwareEntity):
     machine_id = Column(ForeignKey(HardwareEntity.id, ondelete='CASCADE'),
                         primary_key=True)
 
-    cpu_id = Column(ForeignKey(Cpu.id), nullable=False)
+    cpu_id = Column(ForeignKey(Cpu.id), nullable=False, index=True)
 
     # TODO: constrain/smallint
     cpu_quantity = Column(Integer, nullable=False, default=2)

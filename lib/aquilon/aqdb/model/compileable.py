@@ -31,7 +31,8 @@ class CompileableMixin(object):
 
     @declared_attr
     def sandbox_author_id(cls):  # pylint: disable=E0213
-        return Column(ForeignKey(User.id, ondelete="SET NULL"), nullable=True)
+        return Column(ForeignKey(User.id, ondelete="SET NULL"),
+                      nullable=True, index=True)
 
     @declared_attr
     def personality_stage_id(cls):  # pylint: disable=E0213

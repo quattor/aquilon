@@ -48,7 +48,7 @@ class NetworkEnvironment(Base):
     id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
     name = Column(AqStr(64), nullable=False, unique=True)
 
-    location_id = Column(ForeignKey(Location.id), nullable=True)
+    location_id = Column(ForeignKey(Location.id), nullable=True, index=True)
 
     dns_environment_id = Column(ForeignKey(DnsEnvironment.id), nullable=False)
 

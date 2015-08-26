@@ -256,7 +256,8 @@ class __PersonalityRootUser(Base):
     personality_id = Column(ForeignKey(Personality.id, ondelete='CASCADE'),
                             nullable=False)
 
-    user_id = Column(ForeignKey(User.id, ondelete='CASCADE'), nullable=False)
+    user_id = Column(ForeignKey(User.id, ondelete='CASCADE'),
+                     nullable=False, index=True)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
@@ -275,7 +276,7 @@ class __PersonalityRootNetGroup(Base):
                             nullable=False)
 
     netgroup_id = Column(ForeignKey(NetGroupWhiteList.id, ondelete='CASCADE'),
-                         nullable=False)
+                         nullable=False, index=True)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))

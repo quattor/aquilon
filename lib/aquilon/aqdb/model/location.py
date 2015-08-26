@@ -19,7 +19,8 @@
 from datetime import datetime
 
 from sqlalchemy import (Integer, DateTime, Sequence, String, Column,
-                        ForeignKey, UniqueConstraint, PrimaryKeyConstraint)
+                        ForeignKey, UniqueConstraint, PrimaryKeyConstraint,
+                        Index)
 from sqlalchemy.orm import (relation, backref, object_session, deferred,
                             reconstructor)
 from sqlalchemy.sql import and_, or_, desc
@@ -55,6 +56,8 @@ class Location(Base):
     default_dns_domain = relation(DnsDomain)
 
     __table_args__ = (UniqueConstraint(name, location_type),
+                      Index("location_dns_domain_idx",
+                            default_dns_domain_id),
                       {'info': {'unique_fields': ['name', 'location_type']}},)
     __mapper_args__ = {'polymorphic_on': location_type}
 
