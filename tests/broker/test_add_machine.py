@@ -181,7 +181,8 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
                         "--chassis", "ut3c1.aqd-unittest.ms.com", "--slot", "3",
                         "--model", "hs21-8853", "--cpucount", "2",
                         "--cpuvendor", "intel", "--cpuname", "xeon_2660",
-                        "--memory", "8192", "--serial", "KPDZ406"])
+                        "--memory", "8192", "--serial", "KPDZ406",
+                        "--uuid", "a4ceec7b-2b86-4c94-9dd5-cafbd612581a"])
 
     def test_145_show_slot(self):
         command = "search machine --slot 3 --fullinfo"
@@ -219,6 +220,7 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
               Cpu: xeon_2660 x 2
               Memory: 8192 MB
               Disk: sda 68 GB scsi (local) [boot]
+              UUID: a4ceec7b-2b86-4c94-9dd5-cafbd612581a
             """, command)
 
     def test_145_cat_ut3c1n3(self):
@@ -252,6 +254,9 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
                           r'create\("hardware/cpu/intel/xeon_2660"\),\s*'
                           r'create\("hardware/cpu/intel/xeon_2660"\s*\)\s*\);',
                           command)
+        self.matchoutput(out,
+                         '"uuid" = "a4ceec7b-2b86-4c94-9dd5-cafbd612581a";',
+                         command)
 
     def test_150_add_ut3c1n4(self):
         self.noouttest(["add", "machine", "--machine", "ut3c1n4",

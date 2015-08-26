@@ -61,7 +61,7 @@ def validate_recipe(config, recipe):
 
 def create_machine(config, session, logger, machine, dblocation, dbmodel,
                    recipe=None, cpuname=None, cpuvendor=None, cpucount=None,
-                   memory=None, serial=None, uri=None, vmholder=None,
+                   memory=None, serial=None, uuid=None, uri=None, vmholder=None,
                    comments=None):
     if recipe is None:
         recipe = {}
@@ -103,7 +103,7 @@ def create_machine(config, session, logger, machine, dblocation, dbmodel,
 
     dbmachine = Machine(location=dblocation, model=dbmodel, label=machine,
                         cpu_model=dbcpu, cpu_quantity=cpucount, memory=memory,
-                        serial_no=serial, comments=comments)
+                        serial_no=serial, uuid=uuid, comments=comments)
     # Initialize the collections to prevent loading them from the DB
     dbmachine.disks = []
     dbmachine.interfaces = []

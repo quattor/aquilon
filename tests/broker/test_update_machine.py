@@ -28,7 +28,8 @@ from brokertest import TestBrokerCommand
 class TestUpdateMachine(TestBrokerCommand):
     def test_1000_update_ut3c1n3(self):
         self.noouttest(["update", "machine", "--machine", "ut3c1n3",
-                        "--slot", "10", "--serial", "USN99C5553"])
+                        "--slot", "10", "--serial", "USN99C5553",
+                        "--uuid", "097a2277-840d-4bd5-8327-cf133aa3c9d3"])
 
     def test_1005_show_ut3c1n3(self):
         command = "show machine --machine ut3c1n3"
@@ -41,6 +42,8 @@ class TestUpdateMachine(TestBrokerCommand):
         self.matchoutput(out, "Cpu: xeon_2660 x 2", command)
         self.matchoutput(out, "Memory: 8192 MB", command)
         self.matchoutput(out, "Serial: USN99C5553", command)
+        self.matchoutput(out, "UUID: 097a2277-840d-4bd5-8327-cf133aa3c9d3",
+                         command)
 
     def test_1005_cat_ut3c1n3(self):
         command = "cat --machine ut3c1n3"
@@ -62,6 +65,22 @@ class TestUpdateMachine(TestBrokerCommand):
                           command)
         self.matchoutput(out, '"chassis" = "ut3c1.aqd-unittest.ms.com";', command)
         self.matchoutput(out, '"slot" = 10;', command)
+        self.matchoutput(out,
+                         '"uuid" = "097a2277-840d-4bd5-8327-cf133aa3c9d3";',
+                         command)
+
+    def test_1006_clear_uuid(self):
+        command = ["update_machine", "--machine", "ut3c1n3", "--clear_uuid"]
+        self.noouttest(command)
+
+    def test_1007_verify_no_uuid(self):
+        command = ["show_machine", "--machine", "ut3c1n3"]
+        out = self.commandtest(command)
+        self.matchclean(out, "UUID", command)
+
+        command = ["cat", "--machine", "ut3c1n3"]
+        out = self.commandtest(command)
+        self.matchclean(out, "uuid", command)
 
     def test_1010_update_ut3c5n10(self):
         self.noouttest(["update", "machine",

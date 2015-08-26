@@ -1,0 +1,2 @@
+ALTER TABLE machine ADD "uuid" UUID;
+ALTER TABLE machine ADD CONSTRAINT machine_uuid_uk UNIQUE ("uuid");

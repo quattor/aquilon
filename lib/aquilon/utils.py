@@ -31,6 +31,7 @@ from six.moves import cStringIO as StringIO  # pylint: disable=F0401
 import time
 from itertools import islice
 from tempfile import mkstemp
+from uuid import UUID
 
 from ipaddr import IPv4Address, AddressValueError
 
@@ -186,8 +187,19 @@ def force_json_dict(label, value):
     try:
         value = json.loads(value)
     except ValueError as e:
-        raise ArgumentError("The json string specified for %s is invalid : %s"
+        raise ArgumentError("The json string specified for %s is invalid: %s"
                             % (label, e))
+    return value
+
+
+def force_uuid(label, value):
+    """Utility method to force incoming values to boolean and wrap errors."""
+    if value is None:
+        return None
+    try:
+        value = UUID(value)
+    except ValueError:
+        raise ArgumentError("Expected an UUID for %s." % label)
     return value
 
 
