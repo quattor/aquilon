@@ -62,7 +62,13 @@ class TestRefreshNetwork(TestBrokerCommand):
     # 100 sync up building np
     def test_100_syncfirst(self):
         command = "refresh network --building np"
-        self.statustest(command.split(" "))
+        out = self.statustest(command.split(" "))
+
+        net = self.net["refreshtest3"]
+        self.matchoutput(out,
+                         "Setting network refreshtest3 [%s/%d] "
+                         "compartment to interior.ut" % (net.ip, net.prefixlen),
+                         command)
 
     # 110 sync up building np expecting no output
     def test_110_syncclean(self):
