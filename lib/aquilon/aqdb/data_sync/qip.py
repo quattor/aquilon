@@ -219,10 +219,10 @@ class QIPRefresh(object):
                 compartment_name = qipinfo["UDF"]["COMPARTMENT"].strip().lower()
                 if compartment_name in self.compartments:
                     compartment = self.compartments[compartment_name]
-                elif compartment not in self.unknown_compartments:
+                elif compartment_name not in self.unknown_compartments:
                     self.logger.client_info("Unknown compartment %s,"
                                             " ignoring" % compartment_name)
-                    self.unknown_compartments.add(compartment)
+                    self.unknown_compartments.add(compartment_name)
 
         # FIXME: How to handle networks with no location? dsdb maps them to
         # sysloc "xx.ny.na", so mimic that for now
@@ -257,7 +257,7 @@ class QIPRefresh(object):
                                     .format(dbnetwork, qipinfo.side))
             dbnetwork.side = qipinfo.side
         if dbnetwork.network_compartment != qipinfo.compartment:
-            self.logger.client_info("Setting network {0!s} compartment to {1}"
+            self.logger.client_info("Setting network {0!s} compartment to {1!s}"
                                     .format(dbnetwork, qipinfo.compartment))
             dbnetwork.network_compartment = qipinfo.compartment
 
