@@ -16,19 +16,14 @@
 # limitations under the License.
 """Contains the logic for `aq add interface --machine`."""
 
-from sqlalchemy.orm import aliased
-from sqlalchemy.sql.expression import desc, type_coerce
-
-from aquilon.exceptions_ import ArgumentError, UnimplementedError
-from aquilon.aqdb.types import MACAddress
-from aquilon.aqdb.column_types import AqMac
-from aquilon.aqdb.model import Interface, Machine, ARecord, Fqdn, EsxCluster
+from aquilon.exceptions_ import ArgumentError
+from aquilon.aqdb.model import Interface, Machine, ARecord, Fqdn
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.dns import delete_dns_record
 from aquilon.worker.dbwrappers.interface import (get_or_create_interface,
                                                  describe_interface,
-                                                 set_port_group,
-                                                 assign_address)
+                                                 set_port_group, assign_address,
+                                                 generate_mac)
 from aquilon.worker.templates import Plenary, PlenaryCollection
 from aquilon.worker.processes import DSDBRunner
 
@@ -120,7 +115,7 @@ class CommandAddInterfaceMachine(BrokerCommand):
                 raise ArgumentError("MAC address %s is already in use: %s." %
                                     (mac, msg))
         elif automac:
-            mac = self.generate_mac(session, dbmachine)
+            mac = generate_mac(session, dbmachine)
             audit_results.append(('mac', mac))
         else:
             # Ignore now that MAC address can be NULL
@@ -240,66 +235,3 @@ class CommandAddInterfaceMachine(BrokerCommand):
         dbmanager = ARecord(fqdn=dbfqdn, ip=old_ip, network=old_network)
         session.add(dbmanager)
         return dbmanager
-
-    def generate_mac(self, session, dbmachine):
-        """ Generate a mac address for virtual hardware.
-
-        Algorithm:
-
-        * Query for first mac address in aqdb starting with vendor prefix,
-          order by mac descending.
-        * If no address, or address less than prefix start, use prefix start.
-        * If the found address is not suffix end, increment by one and use it.
-        * If the address is suffix end, requery for the full list and scan
-          through for holes. Use the first hole.
-        * If no holes, error. [In this case, we're still not completely dead
-          in the water - the mac address would just need to be given manually.]
-
-        """
-        if not dbmachine.vm_container:
-            raise ArgumentError("Can only automatically generate MAC "
-                                "addresses for virtual hardware.")
-        if not dbmachine.cluster or not isinstance(dbmachine.cluster,
-                                                   EsxCluster):
-            raise UnimplementedError("MAC address auto-generation has only "
-                                     "been enabled for ESX Clusters.")
-        # FIXME: These values should probably be configurable.
-        mac_prefix_esx = "00:50:56"
-        mac_start_esx = mac_prefix_esx + ":01:20:00"
-        mac_end_esx = mac_prefix_esx + ":3f:ff:ff"
-        mac_start = MACAddress(mac_start_esx)
-        mac_end = MACAddress(mac_end_esx)
-
-        q = session.query(Interface.mac)
-        q = q.filter(Interface.mac.between(mac_start, mac_end))
-        q = q.order_by(desc(Interface.mac))
-
-        # Prevent concurrent --automac invocations. We need a separate query for
-        # the FOR UPDATE, because a blocked query won't see the value inserted
-        # by the blocking query.
-        session.execute(q.with_lockmode("update"))
-
-        row = q.first()
-        if not row:
-            return mac_start
-        highest_mac = row.mac
-        if highest_mac < mac_start:
-            return mac_start
-        if highest_mac < mac_end:
-            return highest_mac + 1
-
-        Iface2 = aliased(Interface)
-        q1 = session.query(Iface2.mac)
-        q1 = q1.filter(Iface2.mac == Interface.mac + 1)
-
-        q2 = session.query(type_coerce(Interface.mac + 1, AqMac()).label("mac"))
-        q2 = q2.filter(Interface.mac.between(mac_start, mac_end - 1))
-        q2 = q2.filter(~q1.exists())
-        q2 = q2.order_by(Interface.mac)
-
-        hole = q2.first()
-        if hole:
-            return hole.mac
-
-        raise ArgumentError("All MAC addresses between %s and %s inclusive "
-                            "are currently in use." % (mac_start, mac_end))
