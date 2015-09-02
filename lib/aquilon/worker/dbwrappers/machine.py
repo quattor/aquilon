@@ -18,7 +18,10 @@
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.types import CpuType
-from aquilon.aqdb.model import Model, LocalDisk, Machine
+from aquilon.aqdb.model import (Model, LocalDisk, Machine, VirtualDisk, Share,
+                                Filesystem)
+from aquilon.aqdb.model.disk import controller_types
+from aquilon.worker.dbwrappers.resources import find_resource
 
 
 def create_machine(session, machine, dblocation, dbmodel, cpuname=None,
@@ -65,3 +68,59 @@ def create_machine(session, machine, dblocation, dbmodel, cpuname=None,
 
     session.flush()
     return dbmachine
+
+
+def add_disk(dbmachine, disk, controller, share=None, filesystem=None,
+             resourcegroup=None, address=None, size=None, boot=None,
+             snapshot=None, wwn=None, bus_address=None, iops_limit=None,
+             comments=None):
+    if controller not in controller_types:
+        raise ArgumentError("%s is not a valid controller type, use one "
+                            "of: %s." %
+                            (controller, ", ".join(sorted(controller_types))))
+
+    for dbdisk in dbmachine.disks:
+        if dbdisk.device_name == disk:
+            raise ArgumentError("{0} already has a disk named {1!s}."
+                                .format(dbmachine, dbdisk.device_name))
+        if dbdisk.bootable:
+            if boot is None:
+                boot = False
+            elif boot:
+                raise ArgumentError("{0} already has a boot disk."
+                                    .format(dbmachine))
+
+    if boot is None:
+        # Backward compatibility: "sda"/"c0d0" is bootable, except if there
+        # is already a boot disk
+        boot = (disk == "sda" or disk == "c0d0")
+
+    extra_params = {}
+    if share or filesystem:
+        cls = VirtualDisk
+        if not dbmachine.vm_container:
+            raise ArgumentError("{0} is not a virtual machine, it is not "
+                                "possible to define a virtual disk."
+                                .format(dbmachine))
+
+        if share:
+            res_cls = Share
+            res_name = share
+        else:
+            res_cls = Filesystem
+            res_name = filesystem
+
+        dbres = find_resource(res_cls,
+                              dbmachine.vm_container.holder.holder_object,
+                              resourcegroup, res_name)
+        extra_params["backing_store"] = dbres
+        extra_params["snapshotable"] = snapshot
+        extra_params["iops_limit"] = iops_limit
+    else:
+        cls = LocalDisk
+
+    dbdisk = cls(device_name=disk, controller_type=controller,
+                 capacity=size, bootable=boot, wwn=wwn, address=address,
+                 bus_address=bus_address, comments=comments, **extra_params)
+
+    dbmachine.disks.append(dbdisk)
