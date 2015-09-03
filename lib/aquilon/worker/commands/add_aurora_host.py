@@ -125,7 +125,8 @@ class CommandAddAuroraHost(CommandAddHost):
                 dbnetwork = get_net_id_from_ip(session, IPv4Address(host_ip), dbnet_env)
                 dblocation = dbnetwork.location.building
 
-            dbmachine = create_machine(session, machine, dblocation, dbmodel)
+            dbmachine = create_machine(self.config, session, logger, machine,
+                                       dblocation, dbmodel)
             # create_machine already does a save and a flush
             if dbslot:
                 dbslot.machine = dbmachine

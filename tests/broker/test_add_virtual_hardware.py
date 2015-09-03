@@ -17,6 +17,8 @@
 # limitations under the License.
 """Module for testing commands that add virtual hardware."""
 
+import json
+
 if __name__ == "__main__":
     import utils
     utils.import_depends()
@@ -295,9 +297,21 @@ class TestAddVirtualHardware(TestBrokerCommand):
     def test_200_add_utmc4_machines(self):
         for i in range(0, 18):
             cluster = "utecl%d" % (5 + (i // 3))
+            share = "utecl%d_share" % (5 + (i // 3))
             machine = "evm%d" % (10 + i)
+            recipe = {
+                "disks": {
+                    "sda": {
+                        "controller": "sata",
+                        "size": 15,
+                        "share": share,
+                        "address": "0:0",
+                    },
+                },
+            }
             self.noouttest(["add", "machine", "--machine", machine,
-                            "--cluster", cluster, "--model", "utmedium"])
+                            "--cluster", cluster, "--model", "utmedium",
+                            "--recipe", json.dumps(recipe)])
 
     def test_201_search_network_fail(self):
         command = ["search_network", "--machine=evm18"]
@@ -398,15 +412,6 @@ class TestAddVirtualHardware(TestBrokerCommand):
                    "--autopg"]
         self.noouttest(command)
         self.verifypg()
-
-    def test_230_add_utmc4_disks(self):
-        for i in range(0, 18):
-            share = "utecl%d_share" % (5 + (i // 3))
-            machine = "evm%d" % (10 + i)
-            self.noouttest(["add", "disk", "--machine", machine,
-                            "--disk", "sda", "--controller", "sata",
-                            "--size", "15", "--share", share,
-                            "--address", "0:0"])
 
     def test_240_add_utmc4_aux(self):
         net = self.net["vm_storage_net"]

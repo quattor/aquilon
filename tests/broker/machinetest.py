@@ -17,6 +17,7 @@
 """ Helper classes for machine testing """
 
 from collections import defaultdict
+import json
 
 
 class MachineData(object):
@@ -184,12 +185,13 @@ class MachineTestMixin(object):
             interfaces = guess_interfaces(kwargs)
 
         machdef = MachineData(name, model)
+        recipe = {}
 
         # We assume the vendor will be guessed
         add_machine_args = ["--machine", name, "--model", model]
 
-        for optional in ["cpucount", "cpuvendor", "cpuname",
-                         "memory", "chassis", "slot", "serial", "comments",
+        # Options which must be passed on the command line
+        for optional in ["chassis", "slot", "serial", "comments",
                          "cluster", "vmhost", "rack", "desk"]:
             if optional not in kwargs:
                 continue
@@ -197,44 +199,54 @@ class MachineTestMixin(object):
             setattr(machdef, optional, value)
             add_machine_args.extend(["--" + optional, value])
 
-        self.noouttest(["add_machine"] + add_machine_args)
+        # Options which can be passed as recipe
+        for optional in ["cpucount", "cpuvendor", "cpuname", "memory"]:
+            if optional not in kwargs:
+                continue
+            value = kwargs.pop(optional)
+            setattr(machdef, optional, value)
+            recipe[optional] = value
+
+        if interfaces:
+            recipe["interfaces"] = defaultdict(dict)
 
         for nic_name in interfaces:
             params = {}
-            add_iface_args = ["add_interface", "--machine", name,
-                              "--interface", nic_name]
 
             for arg_name in ["mac", "pg", "model", "vendor", "comments"]:
                 if nic_name + "_" + arg_name in kwargs:
                     value = kwargs.pop(nic_name + "_" + arg_name)
-                    add_iface_args.extend(["--" + arg_name, value])
                     params[arg_name] = value
+                    recipe["interfaces"][nic_name][arg_name] = value
 
             # Skip parameters not relevant for add_machine (e.g. IP address)
             for arg_name in kwargs.keys()[:]:
                 if arg_name.startswith(nic_name + "_"):
                     params[arg_name[len(nic_name) + 1:]] = kwargs.pop(arg_name)
 
-            self.noouttest(add_iface_args)
-
             machdef.interfaces[nic_name] = params
 
-        for disk_name in guess_disks(kwargs):
-            params = {}
-            add_disk_args = ["add_disk", "--machine", name,
-                             "--disk", disk_name]
+        disks = guess_disks(kwargs)
+        if disks:
+            recipe["disks"] = {}
 
+        for disk_name in disks:
+            params = {}
             for arg_name in ["size", "controller", "address", "wwn",
                              "bus_address", "share",
                              "filesystem", "resourcegroup"]:
                 if disk_name + "_" + arg_name in kwargs:
                     value = kwargs.pop(disk_name + "_" + arg_name)
-                    add_disk_args.extend(["--" + arg_name, value])
                     params[arg_name] = value
 
-            self.noouttest(add_disk_args)
-
             machdef.disks[disk_name] = params
+            recipe["disks"][disk_name] = params
+
+        if recipe:
+            add_machine_args.append("--recipe")
+            add_machine_args.append(json.dumps(recipe))
+
+        self.noouttest(["add_machine"] + add_machine_args)
 
         if kwargs:
             raise ValueError("Unprocessed arguments: %r" % kwargs)

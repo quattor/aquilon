@@ -19,9 +19,8 @@
 from sqlalchemy.orm import joinedload, subqueryload
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import (Chassis, ChassisSlot, Model, Machine,
-                                VirtualMachine)
-from aquilon.worker.broker import BrokerCommand
+from aquilon.aqdb.model import Chassis, ChassisSlot, Model, Machine
+from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.dbwrappers.machine import create_machine
 from aquilon.worker.dbwrappers.resources import get_resource_holder
@@ -33,8 +32,8 @@ class CommandAddMachine(BrokerCommand):
     required_parameters = ["machine", "model"]
 
     def render(self, session, logger, machine, model, vendor, serial, chassis,
-               slot, cpuname, cpuvendor, cpucount, memory, cluster, metacluster,
-               vmhost, uri, comments, **arguments):
+               slot, cpuname, cpuvendor, cpucount, memory, recipe, cluster,
+               metacluster, vmhost, uri, comments, **arguments):
         dblocation = get_location(session,
                                   query_options=[subqueryload('parents'),
                                                  joinedload('parents.dns_maps')],
@@ -89,16 +88,12 @@ class CommandAddMachine(BrokerCommand):
                                 "cluster or a host.")
 
         Machine.get_unique(session, machine, preclude=True)
-        dbmachine = create_machine(session, machine, dblocation, dbmodel,
-                                   cpuname, cpuvendor, cpucount, memory, serial,
-                                   comments)
-
-        if uri and not dbmodel.model_type.isVirtualAppliance():
-            raise ArgumentError("URI can be specified only for virtual "
-                                "appliances and the model's type is %s." %
-                                dbmodel.model_type)
-
-        dbmachine.uri = uri
+        dbmachine = create_machine(self.config, session, logger, machine,
+                                   dblocation, dbmodel, cpuname=cpuname,
+                                   cpuvendor=cpuvendor, cpucount=cpucount,
+                                   memory=memory, uri=uri, serial=serial,
+                                   recipe=recipe, vmholder=vmholder,
+                                   comments=comments)
 
         if chassis:
             # FIXME: Are virtual machines allowed to be in a chassis?
@@ -113,20 +108,13 @@ class CommandAddMachine(BrokerCommand):
             dbslot.machine = dbmachine
             session.add(dbslot)
 
-        if vmholder:
-            dbvm = VirtualMachine(machine=dbmachine, name=dbmachine.label,
-                                  holder=vmholder)
-            if hasattr(vmholder.holder_object, "validate") and \
-               callable(vmholder.holder_object.validate):
-                vmholder.holder_object.validate()
-
         session.flush()
 
         plenaries = PlenaryCollection(logger=logger)
         plenaries.append(Plenary.get_plenary(dbmachine))
         if vmholder:
             plenaries.append(Plenary.get_plenary(vmholder.holder_object))
-            plenaries.append(Plenary.get_plenary(dbvm))
+            plenaries.append(Plenary.get_plenary(dbmachine.vm_container))
 
         # The check to make sure a plenary file is not written out for
         # dummy aurora hardware is within the call to write().  This way

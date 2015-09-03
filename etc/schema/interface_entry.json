@@ -1,0 +1,42 @@
+{
+	"_comment": "The contents of this file must be in sync with the parameters of the add_interface command",
+	"$schema": "http://json-schema.org/draft-04/schema#",
+	"id": "interface_entry#",
+	"type": "object",
+	"properties": {
+		"iftype": {
+			"type": "string"
+		},
+		"boot": {
+			"type": "boolean"
+		},
+		"mac": {
+			"type": "string"
+		},
+		"automac": {
+			"type": "boolean"
+		},
+		"model": {
+			"type": "string"
+		},
+		"vendor": {
+			"type": "string"
+		},
+		"pg": {
+			"type": "string"
+		},
+		"autopg": {
+			"type": "boolean"
+		},
+		"bus_address": {
+			"type": "string"
+		},
+		"comments": {
+			"type": "string"
+		}
+	},
+	"dependencies": {
+		"vendor": [ "model" ]
+	},
+	"additionalProperties": false
+}

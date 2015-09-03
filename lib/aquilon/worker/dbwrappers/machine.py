@@ -16,10 +16,14 @@
 # limitations under the License.
 """Wrapper to make getting a machine simpler."""
 
-from aquilon.exceptions_ import ArgumentError
+import json
+import jsonschema
+import os.path
+
+from aquilon.exceptions_ import ArgumentError, AquilonError
 from aquilon.aqdb.types import CpuType
-from aquilon.aqdb.model import (Model, LocalDisk, Machine, VirtualDisk, Share,
-                                Filesystem)
+from aquilon.aqdb.model import (Model, LocalDisk, VirtualDisk, Machine,
+                                VirtualMachine, Share, Filesystem)
 from aquilon.aqdb.model.disk import controller_types
 from aquilon.worker.dbwrappers.interface import (get_or_create_interface,
                                                  generate_mac, set_port_group)
@@ -27,19 +31,58 @@ from aquilon.worker.dbwrappers.resources import find_resource
 from aquilon.utils import force_mac
 
 
-def create_machine(session, machine, dblocation, dbmodel, cpuname=None,
-                   cpuvendor=None, cpucount=None, memory=None, serial=None,
+def validate_recipe(config, recipe):
+    srcdir = config.get("broker", "srcdir")
+    schema_dir = os.path.join(srcdir, "etc", "schema")
+    schema_file = os.path.join(schema_dir, "machine_recipe.json")
+    resolver = jsonschema.RefResolver("file://" + schema_file, "machine_recipe.json")
+    format_checker = jsonschema.FormatChecker()
+
+    try:
+        with open(schema_file) as fp:
+            schema = json.load(fp)
+        jsonschema.Draft4Validator.check_schema(schema)
+    except Exception as err:
+        raise AquilonError("Failed to load %s: %s" % (schema_file, err))
+
+    try:
+        jsonschema.validate(recipe, schema, resolver=resolver,
+                            format_checker=format_checker)
+    except jsonschema.ValidationError as err:
+        raise ArgumentError("recipe validation failed: %s" % err)
+
+    # Type conversions not covered by the schema
+    if "interfaces" in recipe:
+        for iface, params in recipe["interfaces"].items():
+            if "mac" in params:
+                params["mac"] = force_mac("MAC address of " + iface,
+                                          params["mac"])
+
+
+def create_machine(config, session, logger, machine, dblocation, dbmodel,
+                   recipe=None, cpuname=None, cpuvendor=None, cpucount=None,
+                   memory=None, serial=None, uri=None, vmholder=None,
                    comments=None):
+    if recipe is None:
+        recipe = {}
+    else:
+        validate_recipe(config, recipe)
+
+    if cpuname is None:
+        cpuname = recipe.get("cpuname", None)
+        cpuvendor = recipe.get("cpuvendor", None)
     if cpuname:
         dbcpu = Model.get_unique(session, name=cpuname, vendor=cpuvendor,
                                  model_type=CpuType.Cpu, compel=True)
     else:
         if not dbmodel.machine_specs:
             raise ArgumentError("Model %s does not have machine specification "
-                                "defaults, please specify --cpuname and "
-                                "--cpuvendor." % dbmodel.name)
+                                "defaults, please specify --cpuvendor, "
+                                "--cpuname, or --cpuspeed." % dbmodel.name)
         dbcpu = dbmodel.machine_specs.cpu_model
 
+    if cpucount is None:
+        cpucount = recipe.get("cpucount", None)
     if cpucount is None:
         if dbmodel.machine_specs:
             cpucount = dbmodel.machine_specs.cpu_quantity
@@ -48,6 +91,8 @@ def create_machine(session, machine, dblocation, dbmodel, cpuname=None,
                                 "defaults, please specify --cpucount." %
                                 dbmodel.name)
 
+    if memory is None:
+        memory = recipe.get("memory", None)
     if memory is None:
         if dbmodel.machine_specs:
             memory = dbmodel.machine_specs.memory
@@ -59,6 +104,19 @@ def create_machine(session, machine, dblocation, dbmodel, cpuname=None,
     dbmachine = Machine(location=dblocation, model=dbmodel, label=machine,
                         cpu_model=dbcpu, cpu_quantity=cpucount, memory=memory,
                         serial_no=serial, comments=comments)
+    # Initialize the collections to prevent loading them from the DB
+    dbmachine.disks = []
+    dbmachine.interfaces = []
+
+    if uri is None:
+        uri = recipe.get("uri", None)
+    if uri:
+        if not dbmodel.model_type.isVirtualAppliance():
+            raise ArgumentError("URI can be specified only for virtual "
+                                "appliances and the model's type is %s." %
+                                dbmodel.model_type)
+        dbmachine.uri = uri
+
     session.add(dbmachine)
 
     if dbmodel.machine_specs and not dbmodel.model_type.isAuroraNode() \
@@ -68,6 +126,25 @@ def create_machine(session, machine, dblocation, dbmodel, cpuname=None,
                            controller_type=specs.controller_type,
                            capacity=specs.disk_capacity, bootable=True)
         session.add(dbdisk)
+
+    # The .vmholder attribure needs to be set before virtual disks can be added
+    if vmholder:
+        dbvm = VirtualMachine(machine=dbmachine, name=dbmachine.label,
+                              holder=vmholder)
+        session.add(dbvm)
+        if hasattr(vmholder.holder_object, "validate") and \
+           callable(vmholder.holder_object.validate):
+            vmholder.holder_object.validate()
+
+    if "disks" in recipe:
+        for disk_name, disk_params in recipe["disks"].items():
+            add_disk(dbmachine, disk_name, **disk_params)
+
+    if "interfaces" in recipe:
+        for iface_name, iface_params in recipe["interfaces"].items():
+            # Due to locking order, automac handling must come before autopg
+            add_interface(config, session, logger, dbmachine, iface_name,
+                          **iface_params)
 
     session.flush()
     return dbmachine
