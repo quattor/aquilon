@@ -246,26 +246,6 @@ def generate_ip(session, logger, dbinterface, ip=None, ipfromip=None,
     return ip
 
 
-def describe_interface(session, interface):
-    description = ["%s interface %s has MAC address %s and boot=%s" %
-                   (interface.interface_type, interface.name, interface.mac,
-                    interface.bootable)]
-    hw = interface.hardware_entity
-    description.append("is attached to {0:l}".format(hw))
-    for addr in interface.assignments:
-        for dns_rec in addr.dns_records:
-            if addr.label:
-                description.append("has address {0:a} label "
-                                   "{1}".format(dns_rec, addr.label))
-            else:
-                description.append("has address {0:a}".format(dns_rec))
-    ifaces = session.query(Interface).filter_by(mac=interface.mac).all()
-    if len(ifaces) == 1 and ifaces[0] != interface:
-        description.append("but MAC address %s is in use by %s" %
-                           (interface.mac, format(ifaces[0].hardware_entity)))
-    return ", ".join(description)
-
-
 def set_port_group_phys(session, dbinterface, port_group_name):
     # Physical interface must use a pre-registered port group name
     dbvi = VlanInfo.get_by_pg(session, port_group=port_group_name,
@@ -436,9 +416,8 @@ def get_or_create_interface(session, dbhw_ent, name=None, mac=None,
         dbinterface = q.first()
         if dbinterface and (dbinterface.hardware_entity != dbhw_ent or
                             (name and dbinterface.name != name)):
-            raise ArgumentError("MAC address %s is already in use: %s." %
-                                (mac, describe_interface(session,
-                                                         dbinterface)))
+            raise ArgumentError("MAC address {0!s} is already used by {1:l}."
+                                .format(mac, dbinterface))
 
     if name and not dbinterface:
         for iface in dbhw_ent.interfaces:

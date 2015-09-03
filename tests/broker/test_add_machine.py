@@ -310,28 +310,14 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
         self.matchoutput(out, "Machine: ut3s01p2", command)
         self.matchoutput(out, "Model Type: rackmount", command)
 
-    # When doing an end-to-end test, these two entries should be
-    # created as part of a sweep of a Dell rack.  They represent
-    # two mac addresses seen on the same port, only one of which
-    # is actually a host.  The other is a management interface.
-    def test_180_add_ut3s01p1a(self):
-        self.noouttest(["add", "machine", "--machine", "ut3s01p1a",
+    def test_180_add_ut3s01p1(self):
+        self.noouttest(["add", "machine", "--machine", "ut3s01p1",
                         "--rack", "ut3", "--model", "poweredge_6650"])
 
-    def test_181_show_ut3s01p1a(self):
-        command = "show machine --machine ut3s01p1a"
+    def test_181_show_ut3s01p1(self):
+        command = "show machine --machine ut3s01p1"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Machine: ut3s01p1a", command)
-        self.matchoutput(out, "Model Type: rackmount", command)
-
-    def test_182_add_ut3s01p1b(self):
-        self.noouttest(["add", "machine", "--machine", "ut3s01p1b",
-                        "--rack", "ut3", "--model", "poweredge_6650"])
-
-    def test_183_show_ut3s01p1b(self):
-        command = "show machine --machine ut3s01p1b"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Machine: ut3s01p1b", command)
+        self.matchoutput(out, "Machine: ut3s01p1", command)
         self.matchoutput(out, "Model Type: rackmount", command)
 
     # When doing an end-to-end test, these entries should be

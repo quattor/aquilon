@@ -104,7 +104,7 @@ class TestAddInterface(TestBrokerCommand):
                    "--machine", "ut3c5n10",
                    "--mac", self.net["verari_eth1"].usable[0].mac]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "MAC address %s is already in use" %
+        self.matchoutput(out, "MAC address %s is already used by" %
                          self.net["verari_eth1"].usable[0].mac, command)
 
     def testaddut3c5n10eth2_2(self):
@@ -320,7 +320,7 @@ class TestAddInterface(TestBrokerCommand):
                    "--mac", self.net["unknown0"].usable[0].mac]
         out = self.badrequesttest(command)
         self.matchoutput(out,
-                         "MAC address %s is already in use: " %
+                         "MAC address %s is already used by " %
                          self.net["unknown0"].usable[0].mac,
                          command)
 
@@ -395,7 +395,7 @@ class TestAddInterface(TestBrokerCommand):
                    "--chassis", "ut3c1.aqd-unittest.ms.com"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
-                         "MAC address %s is already in use: " %
+                         "MAC address %s is already used by " %
                          self.net["unknown0"].usable[6].mac,
                          command)
 
@@ -434,7 +434,7 @@ class TestAddInterface(TestBrokerCommand):
                    "--network_device", "ut3gd1r01.aqd-unittest.ms.com"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
-                         "MAC address %s is already in use: " %
+                         "MAC address %s is already used by " %
                          self.net["tor_net_0"].usable[0].mac,
                          command)
         self.check_plenary_contents('network_device', 'americas', 'ut', 'ut3gd1r01',
@@ -518,32 +518,17 @@ class TestAddInterface(TestBrokerCommand):
         self.matchoutput(out, "Interface: loop0 (no MAC addr)", command)
         self.matchclean(out, "loop1", command)
 
-    # These two will eventually be created when testing the addition
-    # of a whole rack of machines based on switch discovery.
-    def testaddut3s01p1aeth0(self):
+    def testaddut3s01p1eth0(self):
         self.noouttest(["add", "interface", "--interface", "eth0",
-                        "--machine", "ut3s01p1a",
+                        "--machine", "ut3s01p1",
                         "--mac", self.net["unknown0"].usable[7].mac])
 
-    def testverifyaddut3s01p1aeth0(self):
-        command = "show machine --machine ut3s01p1a"
+    def testverifyaddut3s01p1eth0(self):
+        command = "show machine --machine ut3s01p1"
         out = self.commandtest(command.split(" "))
         self.searchoutput(out,
                           r"Interface: eth0 %s \[boot, default_route\]" %
                           self.net["unknown0"].usable[7].mac.lower(),
-                          command)
-
-    def testaddut3s01p1beth0(self):
-        self.noouttest(["add", "interface", "--interface", "eth0",
-                        "--machine", "ut3s01p1b",
-                        "--mac", self.net["unknown0"].usable[8].mac])
-
-    def testverifyaddut3s01p1beth0(self):
-        command = "show machine --machine ut3s01p1b"
-        out = self.commandtest(command.split(" "))
-        self.searchoutput(out,
-                          r"Interface: eth0 %s \[boot, default_route\]" %
-                          self.net["unknown0"].usable[8].mac.lower(),
                           command)
 
     def testadd_no_mac(self):

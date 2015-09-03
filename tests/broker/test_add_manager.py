@@ -136,7 +136,11 @@ class TestAddManager(TestBrokerCommand):
                    "--hostname", "unittest12.aqd-unittest.ms.com",
                    "--mac", self.net["unknown0"].usable[7].mac]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "already has an interface with MAC", command)
+        self.matchoutput(out,
+                         "MAC address %s is already used by public interface "
+                         "eth0 of machine unittest12.aqd-unittest.ms.com." %
+                         self.net["unknown0"].usable[7].mac,
+                         command)
 
     def testfailaddunittest12bmc(self):
         command = ["add", "manager", "--ip", self.net["unknown0"].usable[0],
@@ -146,26 +150,19 @@ class TestAddManager(TestBrokerCommand):
                    "--mac", self.net["unknown0"].usable[0].mac]
         out = self.badrequesttest(command)
         self.matchoutput(out,
-                         "MAC address %s is already in use" %
+                         "MAC address %s is already used by public interface "
+                         "eth0 of machine unittest02.one-nyp.ms.com." %
                          self.net["unknown0"].usable[0].mac,
                          command)
 
-    # Taking advantage of the fact that this runs after add_machine
-    # and add_host, and that this *should* create a manager
-    # Lots of verifications steps for this single test...
     def testaddunittest12bmc(self):
         ip = self.net["unknown0"].usable[8]
-        self.dsdb_expect_delete(ip)
         self.dsdb_expect_add("unittest12r.aqd-unittest.ms.com", ip, "mgmt0",
                              ip.mac)
-        command = ["add", "interface", "--interface", "mgmt0",
+        command = ["add", "manager", "--interface", "mgmt0",
                    "--hostname", "unittest12.aqd-unittest.ms.com",
-                   "--mac", ip.mac]
-        (out, err) = self.successtest(command)
-        self.matchoutput(err, "Renaming machine ut3s01p1a to ut3s01p1.",
-                         command)
-        self.matchclean(err, "Could not reserve", command)
-        self.matchclean(err, "DSDB", command)
+                   "--ip", ip, "--mac", ip.mac]
+        self.successtest(command)
         self.dsdb_verify()
 
     # Test that the interface cannot be removed as long as the manager exists
@@ -176,22 +173,6 @@ class TestAddManager(TestBrokerCommand):
         self.matchoutput(out, "still has the following addresses configured",
                          command)
         self.matchoutput(out, str(self.net["unknown0"].usable[8]), command)
-
-    def testverifyunittest13removed(self):
-        command = "show host --hostname unittest13.one-nyp.ms.com"
-        self.notfoundtest(command.split(" "))
-
-    def testverifyut3s01p1bremoved(self):
-        command = "show machine --machine ut3s01p1b"
-        self.notfoundtest(command.split(" "))
-
-    def testverifyut3s01p1arenamed(self):
-        command = "show machine --machine ut3s01p1a"
-        self.notfoundtest(command.split(" "))
-        command = "show machine --machine ut3s01p1"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Machine: ut3s01p1", command)
-        self.matchoutput(out, "Model Type: rackmount", command)
 
     def testverifyunittest12(self):
         command = "show host --hostname unittest12.aqd-unittest.ms.com"
