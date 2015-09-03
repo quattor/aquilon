@@ -115,7 +115,7 @@ class CommandAddInterfaceMachine(BrokerCommand):
                 raise ArgumentError("MAC address %s is already in use: %s." %
                                     (mac, msg))
         elif automac:
-            mac = generate_mac(session, dbmachine)
+            mac = generate_mac(session, self.config, dbmachine)
             audit_results.append(('mac', mac))
         else:
             # Ignore now that MAC address can be NULL

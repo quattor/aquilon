@@ -27,13 +27,13 @@ import re
 from sqlalchemy.orm import aliased, object_session
 from sqlalchemy.sql.expression import desc, type_coerce
 
-from aquilon.exceptions_ import ArgumentError, InternalError, UnimplementedError
+from aquilon.exceptions_ import ArgumentError, InternalError, AquilonError
 from aquilon.aqdb.types import NicType, MACAddress
 from aquilon.aqdb.column_types import AqMac
 from aquilon.aqdb.model import (Interface, ManagementInterface, ObservedMac,
                                 Fqdn, ARecord, VlanInfo, AddressAssignment,
                                 Model, Bunker, Location, HardwareEntity,
-                                Network, Host, EsxCluster)
+                                Network, Host)
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.aqdb.model.vlan import VLAN_TYPES
 from aquilon.utils import first_of
@@ -697,7 +697,7 @@ def get_interfaces(dbhw_ent, interfaces, dbnetwork=None):
     return dbifaces
 
 
-def generate_mac(session, dbmachine):
+def generate_mac(session, config, dbmachine):
     """ Generate a mac address for virtual hardware.
 
     Algorithm:
@@ -715,16 +715,17 @@ def generate_mac(session, dbmachine):
     if not dbmachine.vm_container:
         raise ArgumentError("Can only automatically generate MAC "
                             "addresses for virtual hardware.")
-    if not dbmachine.cluster or not isinstance(dbmachine.cluster,
-                                               EsxCluster):
-        raise UnimplementedError("MAC address auto-generation has only "
-                                 "been enabled for ESX Clusters.")
-    # FIXME: These values should probably be configurable.
-    mac_prefix_esx = "00:50:56"
-    mac_start_esx = mac_prefix_esx + ":01:20:00"
-    mac_end_esx = mac_prefix_esx + ":3f:ff:ff"
-    mac_start = MACAddress(mac_start_esx)
-    mac_end = MACAddress(mac_end_esx)
+
+    try:
+        mac_start = MACAddress(config.get("broker", "auto_mac_start"))
+    except ValueError:  # pragma: no cover
+        raise AquilonError("The value of auto_mac_start in the [broker] "
+                           "section is not a valid MAC address.")
+    try:
+        mac_end = MACAddress(config.get("broker", "auto_mac_end"))
+    except ValueError:  # pragma: no cover
+        raise AquilonError("The value of auto_mac_end in the [broker] "
+                           "section is not a valid MAC address.")
 
     q = session.query(Interface.mac)
     q = q.filter(Interface.mac.between(mac_start, mac_end))
