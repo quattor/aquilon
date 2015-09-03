@@ -53,7 +53,7 @@ class CommandAddInterfaceMachine(BrokerCommand):
 
         if not iftype:
             iftype = 'public'
-            management_types = ['bmc', 'ilo', 'ipmi']
+            management_types = ['bmc', 'ilo', 'ipmi', 'mgmt']
             for mtype in management_types:
                 if interface.startswith(mtype):
                     iftype = 'management'
