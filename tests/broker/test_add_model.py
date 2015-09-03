@@ -83,7 +83,7 @@ class TestAddModel(TestBrokerCommand):
         command = ["add_model", "--model=utmedium", "--vendor=utvendor",
                    "--type=virtual_machine", "--cpuname=xeon_5150",
                    "--cpunum=1", "--mem=8192", "--disktype=virtual_disk",
-                   "--diskcontroller=sata", "--disksize=15", "--nics=1",
+                   "--diskcontroller=sata", "--disksize=15",
                    "--nicmodel", "default", "--nicvendor", "utvirt"]
         self.noouttest(command)
 
@@ -98,7 +98,7 @@ class TestAddModel(TestBrokerCommand):
         command = ["add_model", "--model=utlarge", "--vendor=utvendor",
                    "--type=virtual_machine", "--cpuname=xeon_5150",
                    "--cpunum=4", "--memory=16384", "--disktype=virtual_disk",
-                   "--diskcontroller=sata", "--disksize=45", "--nics=1"]
+                   "--diskcontroller=sata", "--disksize=45"]
         self.noouttest(command)
 
     def test_170_add_utcciss(self):
@@ -106,7 +106,7 @@ class TestAddModel(TestBrokerCommand):
                    "--type=rackmount", "--cpuname=xeon_2500", "--cpunum=2",
                    "--memory=49152", "--disktype=local",
                    "--diskcontroller=cciss",
-                   "--disksize=466", "--nics=2"]
+                   "--disksize=466"]
         self.noouttest(command)
 
     def test_175_show_utcciss(self):
@@ -117,7 +117,6 @@ class TestAddModel(TestBrokerCommand):
         self.matchoutput(out, "MachineSpecs for hp utccissmodel", command)
         self.matchoutput(out, "Cpu: xeon_2500 x 2", command)
         self.matchoutput(out, "Memory: 49152 MB", command)
-        self.matchoutput(out, "NIC count: 2", command)
         self.matchoutput(out, "Disk: c0d0 466 GB cciss (local)",
                          command)
 
@@ -125,14 +124,14 @@ class TestAddModel(TestBrokerCommand):
         command = ["add_model", "--model=utva", "--vendor=utvendor",
                    "--type=virtual_appliance", "--cpuname=utcpu",
                    "--cpunum=0", "--memory=0", "--disktype=virtual_disk",
-                   "--diskcontroller=sata", "--disksize=0", "--nics=0"]
+                   "--diskcontroller=sata", "--disksize=0"]
         self.noouttest(command)
 
     def test_181_add_unusedcpu(self):
         self.noouttest(["add_model", "--model", "unusedcpu", "--vendor", "utvendor",
                         "--type", "rackmount", "--cpuname", "unused",
                         "--cpunum", 0, "--memory", 0, "--disktype", "local",
-                        "--diskcontroller", "sata", "--disksize", 0, "--nics", 0])
+                        "--diskcontroller", "sata", "--disksize", 0])
 
     def test_200_search_type_switch(self):
         command = "search model --machine_type switch"
@@ -178,7 +177,7 @@ class TestAddModel(TestBrokerCommand):
         command = ["add_model", "--model=bad-disk-type", "--vendor=utvendor",
                    "--type=virtual_machine", "--cpuname=xeon_5150",
                    "--cpunum=1", "--mem=8192", "--disktype=bad-disk-type",
-                   "--diskcontroller=sata", "--disksize=15", "--nics=1"]
+                   "--diskcontroller=sata", "--disksize=15"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Invalid disk type 'bad-disk-type'.", command)
 

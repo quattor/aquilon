@@ -1283,7 +1283,6 @@
 	    <option name="disktype" type="string">installed disk type (generally 'local', use 'nas' for virtual disks on NAS)</option>
 	    <option name="diskcontroller" type="string">controller type (sata, scsi, etc.)</option>
 	    <option name="disksize" type="int">installed disk capacity (GB)</option>
-	    <option name="nics" type="int">number of NIC interfaces</option>
 	</optgroup>
 	<optgroup>
 	    <option name="cpuvendor" type="string">CPU vendor, if the name is not unique</option>
@@ -1359,7 +1358,6 @@
 	    <option name="disktype" type="string">installed disk type (generally 'local', use 'nas' for virtual disks on NAS)</option>
 	    <option name="diskcontroller" type="string">controller type (sata, scsi, etc.)</option>
 	    <option name="disksize" type="int">installed disk capacity (GB)</option>
-	    <option name="nics" type="int">number of NIC interfaces</option>
 	    <option name="nicmodel" type="string">NIC model name</option>
 	    <option name="nicvendor" type="string">NIC vendor</option>
 	    <option name="comments" type="string">Comments</option>
