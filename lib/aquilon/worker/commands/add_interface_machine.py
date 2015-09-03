@@ -16,12 +16,9 @@
 # limitations under the License.
 """Contains the logic for `aq add interface --machine`."""
 
-from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Machine
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.dbwrappers.interface import (get_or_create_interface,
-                                                 set_port_group,
-                                                 generate_mac)
+from aquilon.worker.dbwrappers.machine import add_interface
 from aquilon.worker.templates import Plenary, PlenaryCollection
 from aquilon.worker.processes import DSDBRunner
 
@@ -44,56 +41,17 @@ class CommandAddInterfaceMachine(BrokerCommand):
             if not iftype:
                 iftype = type
 
-        if not iftype:
-            iftype = 'public'
-            management_types = ['bmc', 'ilo', 'ipmi', 'mgmt']
-            for mtype in management_types:
-                if interface.startswith(mtype):
-                    iftype = 'management'
-                    break
-
-            if interface.startswith("bond"):
-                iftype = 'bonding'
-            elif interface.startswith("br"):
-                iftype = 'bridge'
-
-            # Test it last, VLANs can be added on top of almost anything
-            if '.' in interface:
-                iftype = 'vlan'
-
-        if iftype == "oa" or iftype == "loopback":
-            raise ArgumentError("Interface type '%s' is not valid for "
-                                "machines." % iftype)
-
-        bootable = None
-        if iftype == 'public':
-            if interface == 'eth0':
-                bootable = True
-            else:
-                bootable = False
-
-        if automac and not mac:
-            mac = generate_mac(session, self.config, dbmachine)
-            audit_results.append(('mac', mac))
-
-        dbinterface = get_or_create_interface(session, dbmachine,
-                                              name=interface,
-                                              vendor=vendor, model=model,
-                                              interface_type=iftype, mac=mac,
-                                              bootable=bootable,
-                                              bus_address=bus_address,
-                                              comments=comments, preclude=True)
+        dbinterface = add_interface(self.config, session, logger, dbmachine,
+                                    interface, vendor=vendor, model=model,
+                                    iftype=iftype, mac=mac, automac=automac,
+                                    pg=pg, autopg=autopg,
+                                    bus_address=bus_address, comments=comments)
 
         if automac:
+            audit_results.append(('mac', dbinterface.mac))
             logger.info("Selected MAC address {0!s} for {1:l}."
-                        .format(mac, dbinterface))
+                        .format(dbinterface.mac, dbinterface))
 
-        # Note: autopg handling must come after automac, to ensure lock ordering
-        # is consistent with update_interface, to avoid deadlocks
-        if pg or autopg:
-            if autopg:
-                pg = 'user'
-            set_port_group(session, logger, dbinterface, pg)
         if autopg:
             if dbinterface.port_group:
                 audit_results.append(('pg', dbinterface.port_group.name))

@@ -21,7 +21,10 @@ from aquilon.aqdb.types import CpuType
 from aquilon.aqdb.model import (Model, LocalDisk, Machine, VirtualDisk, Share,
                                 Filesystem)
 from aquilon.aqdb.model.disk import controller_types
+from aquilon.worker.dbwrappers.interface import (get_or_create_interface,
+                                                 generate_mac, set_port_group)
 from aquilon.worker.dbwrappers.resources import find_resource
+from aquilon.utils import force_mac
 
 
 def create_machine(session, machine, dblocation, dbmodel, cpuname=None,
@@ -124,3 +127,54 @@ def add_disk(dbmachine, disk, controller, share=None, filesystem=None,
                  bus_address=bus_address, comments=comments, **extra_params)
 
     dbmachine.disks.append(dbdisk)
+
+
+def add_interface(config, session, logger, dbmachine, interface, mac=None,
+                  automac=None, pg=None, autopg=None, vendor=None, model=None,
+                  iftype=None, boot=None, bus_address=None, comments=None):
+    if not iftype:
+        iftype = 'public'
+        management_types = ['bmc', 'ilo', 'ipmi', 'mgmt']
+        for mtype in management_types:
+            if interface.startswith(mtype):
+                iftype = 'management'
+                break
+
+        if interface.startswith("bond"):
+            iftype = 'bonding'
+        elif interface.startswith("br"):
+            iftype = 'bridge'
+
+        # Test it last, VLANs can be added on top of almost anything
+        if '.' in interface:
+            iftype = 'vlan'
+
+    if iftype == "oa" or iftype == "loopback":
+        raise ArgumentError("Interface type '%s' is not valid for "
+                            "machines." % iftype)
+
+    if automac:
+        mac = generate_mac(session, config, dbmachine)
+
+    if autopg and not pg:
+        pg = "user"
+
+    if boot is None and iftype == 'public':
+        if interface == 'eth0':
+            boot = True
+        else:
+            boot = False
+
+    dbinterface = get_or_create_interface(session, dbmachine, name=interface,
+                                          vendor=vendor, model=model,
+                                          bus_address=bus_address,
+                                          interface_type=iftype, mac=mac,
+                                          bootable=boot, comments=comments,
+                                          preclude=True)
+
+    if automac:
+        logger.info("Selected MAC address {0!s} for {1:l}."
+                    .format(mac, dbinterface))
+    if pg:
+        set_port_group(session, logger, dbinterface, pg)
+    return dbinterface
