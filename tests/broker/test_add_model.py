@@ -60,22 +60,13 @@ class TestAddModel(TestBrokerCommand):
 
     def test_130_add_utrackmount(self):
         self.noouttest(["add_model", "--model", "utrackmount",
-                        "--vendor", "utvendor", "--type", "rackmount",
-                        "--cpuname", "utcpu", "--cpunum", 2,
-                        "--memory", 64 * 1024, "--nics", 2,
-                        "--disktype", "local", "--diskcontroller", "sas",
-                        "--disksize", 600])
+                        "--vendor", "utvendor", "--type", "rackmount"])
 
     def test_135_show_utrackmount(self):
         command = ["show_model", "--model", "utrackmount"]
         out = self.commandtest(command)
         self.matchoutput(out, "Vendor: utvendor Model: utrackmount", command)
         self.matchoutput(out, "Model Type: rackmount", command)
-        self.matchoutput(out, "MachineSpecs for utvendor utrackmount:", command)
-        self.matchoutput(out, "Cpu: utcpu x 2", command)
-        self.matchoutput(out, "Memory: 65536 MB", command)
-        self.matchoutput(out, "Disk: sda 600 GB sas (local)", command)
-        self.matchoutput(out, "NIC count: 2", command)
 
     def test_140_add_e1000(self):
         command = ["add", "model", "--type", "nic", "--model", "e1000",

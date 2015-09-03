@@ -113,15 +113,12 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
                                  eth0_mac=self.net["zebra_eth0"].usable[2].mac,
                                  eth1_mac=self.net["zebra_eth1"].usable[2].mac)
 
-    # Used for house-of-cards location testing
-    def test_120_add_jack(self):
-        self.noouttest(["add", "machine", "--machine", "jack",
-                        "--rack", "cards1", "--model", "utrackmount"])
-
     # Used for filer - a fake machine for now
     def test_125_add_filer(self):
         self.noouttest(["add", "machine", "--machine", "filer1",
-                        "--rack", "ut3", "--model", "utrackmount"])
+                        "--rack", "ut3", "--model", "utrackmount",
+                        "--cpuname", "utcpu", "--cpucount", 2,
+                        "--memory", 65536])
 
     # Used for VPLS network tests
     def test_130_add_ut3c5n5(self):
@@ -369,7 +366,7 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
 
     def test_215_verify_reject_switch(self):
         command = "show machine --machine ut3gd2r01"
-        out = self.notfoundtest(command.split(" "))
+        self.notfoundtest(command.split(" "))
 
     def test_230_reject_missing_memory(self):
         command = ["add", "machine", "--machine", "ut3c1n6",
@@ -383,7 +380,7 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
 
     def test_235_verify_reject_missing_memory(self):
         command = "show machine --machine ut3c1n6"
-        out = self.notfoundtest(command.split(" "))
+        self.notfoundtest(command.split(" "))
 
     def test_240_reject_missing_model(self):
         command = ["add", "machine", "--machine", "ut3c1n7", "--rack", "ut3",
@@ -394,7 +391,7 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
 
     def test_245_verify_reject_missing_model(self):
         command = "show machine --machine ut3c1n7"
-        out = self.notfoundtest(command.split(" "))
+        self.notfoundtest(command.split(" "))
 
     def test_250_reject_machine_uri(self):
         command = ["add", "machine", "--machine", "ut3c1n10",
@@ -407,7 +404,7 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
 
     def test_255_verify_reject_machine_uri(self):
         command = "show machine --machine ut3c1n10"
-        out = self.notfoundtest(command.split(" "))
+        self.notfoundtest(command.split(" "))
 
     def test_260_reuse_chassis_slot(self):
         command = ["add", "machine", "--machine", "ut3c5n99",

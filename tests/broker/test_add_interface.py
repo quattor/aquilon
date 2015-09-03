@@ -549,22 +549,6 @@ class TestAddInterface(TestBrokerCommand):
     # Note: additional tests (mostly for --automac) are in the
     # test_add_virtual_hardware module.
 
-    def testaddjackmac(self):
-        self.noouttest(["add", "interface", "--interface", "eth0",
-                        "--machine", "jack",
-                        "--comments", "interface for jack",
-                        "--mac", self.net["unknown0"].usable[17].mac.upper()])
-
-    def testverifyjackmac(self):
-        command = "show machine --machine jack"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out,
-                         "Interface: eth0 %s" %
-                         self.net["unknown0"].usable[17].mac.lower(),
-                         command)
-        self.searchoutput(out, r"\s+Comments: interface for jack",
-                          command)
-
     def testaddfilermac(self):
         self.noouttest(["add", "interface", "--machine", "filer1",
                         "--interface", "e4a"])

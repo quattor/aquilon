@@ -446,9 +446,11 @@ class TestAddVirtualHardware(TestBrokerCommand):
 
     def test_260_verifycatmachines(self):
         for i in range(0, 8):
-            command = "cat --machine evm%s" % (10 + i)
+            machine = "evm%d" % (10 + i)
             port_group = "user-v71%d" % (i % 4)
-            out = self.commandtest(command.split(" "))
+            share = "utecl%d_share" % (5 + (i // 3))
+            command = ["cat", "--machine", machine]
+            out = self.commandtest(command)
             self.matchoutput(out, """"location" = "ut.ny.na";""", command)
             self.matchoutput(out,
                              'include { "hardware/machine/utvendor/utmedium" };',
@@ -469,6 +471,18 @@ class TestAddVirtualHardware(TestBrokerCommand):
                               r'"hwaddr", "00:50:56:[0-9a-f:]{8}",\s*'
                               r'"port_group", "%s"\s*\);'
                               % port_group,
+                              command)
+            self.searchoutput(out,
+                              r'"harddisks/\{sda\}" = nlist\(\s*'
+                              r'"address", "0:0",\s*'
+                              r'"boot", true,\s*'
+                              r'"capacity", 15\*GB,\s*'
+                              r'"interface", "sata",\s*'
+                              r'"mountpoint", "/vol/lnn30f1v1/%s",\s*'
+                              r'"path", "%s/sda.vmdk",\s*'
+                              r'"server", "lnn30f1",\s*'
+                              r'"sharename", "%s"\s*'
+                              r'\);' % (share, machine, share),
                               command)
 
     # Because the machines are allocated across portgroups, the IP addresses
