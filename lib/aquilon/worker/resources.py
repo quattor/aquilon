@@ -443,6 +443,18 @@ class ResourcesCommandEntry(CommandEntry):
         # Update the shortname of the command
         broker_command.command = name
 
+        # HTTP GET should only be used for queries, so force such commands to be
+        # read-only and require using the formatters.
+        if method.lower() == "get":
+            if not broker_command.requires_readonly:
+                log.msg("Command %s uses GET, setting it to read-only" %
+                        fullname)
+            broker_command.requires_readonly = True
+
+            # show_request must be able to override requires_format to False
+            if broker_command.requires_format is None:
+                broker_command.requires_format = True
+
         # Fill in the required arguments from the instance of BrokerComamnd
         # this will be extended when more options are found in add_option.
         self.argument_requirments = {"debug": False, "requestid": False}
@@ -503,6 +515,10 @@ class ResourcesCommandEntry(CommandEntry):
         return result
 
     def add_format(self, format, style):
+        # If input.xml specifies a format description, then we need to go
+        # through the formatter
+        self.broker_command.requires_format = True
+
         if hasattr(self.broker_command.formatter, "config_" + style):
             meth = getattr(self.broker_command.formatter, "config_" + style)
             meth(format, self.broker_command.command)

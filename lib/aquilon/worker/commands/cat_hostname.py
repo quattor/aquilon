@@ -16,7 +16,7 @@
 # limitations under the License.
 """Contains the logic for `aq cat --hostname`."""
 
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.host import hostname_to_host
 from aquilon.worker.dbwrappers.resources import get_resource
 from aquilon.worker.templates import (Plenary, PlenaryHostObject,
@@ -26,6 +26,9 @@ from aquilon.worker.templates import (Plenary, PlenaryHostObject,
 class CommandCatHostname(BrokerCommand):
 
     required_parameters = ["hostname"]
+
+    # We do not lock the plenary while reading it
+    _is_lock_free = True
 
     def render(self, session, logger, hostname, data, generate, **arguments):
         dbhost = hostname_to_host(session, hostname)

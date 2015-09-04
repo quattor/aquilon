@@ -16,7 +16,6 @@
 # limitations under the License.
 """Contains the logic for `aq cat --switch`."""
 
-
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.commands.cat_network_device import CommandCatNetworkDevice
 
@@ -24,6 +23,9 @@ from aquilon.worker.commands.cat_network_device import CommandCatNetworkDevice
 class CommandCatSwitch(CommandCatNetworkDevice):
 
     required_parameters = ["switch"]
+
+    # We do not lock the plenary while reading it
+    _is_lock_free = True
 
     def render(self, switch, **arguments):
         self.deprecated_option("switch", "Please use --network_device "

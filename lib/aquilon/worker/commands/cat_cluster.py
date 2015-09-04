@@ -28,6 +28,9 @@ class CommandCatCluster(BrokerCommand):
 
     required_parameters = ["cluster"]
 
+    # We do not lock the plenary while reading it
+    _is_lock_free = True
+
     def render(self, session, logger, cluster, data, client, generate, **arguments):
         dbcluster = Cluster.get_unique(session, cluster, compel=True)
         if isinstance(dbcluster, MetaCluster):

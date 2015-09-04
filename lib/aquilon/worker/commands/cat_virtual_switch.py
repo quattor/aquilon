@@ -22,9 +22,12 @@ from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.templates import PlenaryVirtualSwitchData
 
 
-class CommandCatSwitch(BrokerCommand):
+class CommandCatVirtualSwitch(BrokerCommand):
 
     required_parameters = ["virtual_switch"]
+
+    # We do not lock the plenary while reading it
+    _is_lock_free = True
 
     def render(self, session, logger, virtual_switch, data, generate,
                **arguments):

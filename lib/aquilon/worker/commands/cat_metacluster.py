@@ -28,6 +28,9 @@ class CommandCatMetaCluster(BrokerCommand):
 
     required_parameters = ["metacluster"]
 
+    # We do not lock the plenary while reading it
+    _is_lock_free = True
+
     def render(self, session, logger, metacluster, data, generate, **arguments):
         dbmeta = MetaCluster.get_unique(session, metacluster, compel=True)
         dbresource = get_resource(session, dbmeta, **arguments)

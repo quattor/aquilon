@@ -16,13 +16,11 @@
 # limitations under the License.
 """Contains the logic for `aq status`."""
 
-
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 
 
 class CommandStatus(BrokerCommand):
 
-    requires_format = True
     requires_readonly = True
 
     def render(self, session, dbuser, **arguments):

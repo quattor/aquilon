@@ -16,8 +16,7 @@
 # limitations under the License.
 """Contains the logic for `aq show active locks`."""
 
-
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.locks import lock_queue
 
 
@@ -38,4 +37,4 @@ class CommandShowActiveLocks(BrokerCommand):
                 if status and status.description:
                     description = status.description + ' '
             retval.append("%s%s %s" % (description, key.state, key))
-        return str("\n".join(retval))
+        return retval

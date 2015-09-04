@@ -98,7 +98,7 @@ class BrokerCommand(object):
 
     """
 
-    requires_format = False
+    requires_format = None
     """ Run command results through the formatter.
 
     It is automatically set to True for all cat, search, and show
@@ -157,31 +157,19 @@ class BrokerCommand(object):
             self.action = self.action[len(package_prefix):]
         # self.command is set correctly in resources.py after parsing input.xml
         self.command = self.action
-        # The readonly and format flags are done here for convenience
-        # and simplicity.  They could be overridden by the __init__
-        # method of any show/search/cat commands that do not want these
-        # defaults.  Some 'one-off' commands (like ping and status)
-        # just set the variables themselves.
-        if self.action.startswith("show") or self.action.startswith("search"):
+
+        # This is just a safety catch
+        if self.action.startswith("show") or \
+           self.action.startswith("search") or \
+           self.action.startswith("cat"):
             self.requires_readonly = True
-            self.requires_format = True
-        if self.action.startswith("cat"):
-            self.requires_format = True
-            self.requires_readonly = True
-            self._is_lock_free = True
-        if not self.requires_readonly \
-           and self.config.get('broker', 'mode') == 'readonly':
-            self.badmode = 'readonly'
-        else:
-            self.badmode = False
+
         if not self.defer_to_thread:
             if self.requires_azcheck or self.requires_transaction:  # pragma: no cover
                 self.defer_to_thread = True
                 log.msg("Forcing defer_to_thread to True because of "
                         "required authorization or transaction for %s" %
                         self.command)
-            # Not sure how to handle formatting with deferred...
-            self.requires_format = False
         # free = "True " if self.is_lock_free else "False"
         # log.msg("is_lock_free = %s [%s]" % (free, self.command))
 
@@ -213,6 +201,11 @@ class BrokerCommand(object):
         rollback_failed = False
         dbuser = None
         try:
+            if not self.requires_readonly \
+               and self.config.get('broker', 'mode') != 'readwrite':
+                raise UnimplementedError("Command %s not available on a "
+                                         "readonly broker." % self.command)
+
             if self.requires_transaction or self.requires_azcheck:
                 # Set up a session...
                 if not session:
@@ -259,10 +252,6 @@ class BrokerCommand(object):
                     self._set_readonly(session)
                 # begin() is only required if session transactional=False
                 # session.begin()
-            if self.badmode:  # pragma: no cover
-                raise UnimplementedError("Command %s not available on "
-                                         "a %s broker." %
-                                         (self.command, self.badmode))
             retval = self.render(user=user, dbuser=dbuser, request=request,
                                  requestid=requestid, logger=logger,
                                  session=session, **kwargs)

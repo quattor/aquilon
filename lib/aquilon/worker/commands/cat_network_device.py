@@ -17,7 +17,7 @@
 """Contains the logic for `aq cat --network_device`."""
 
 from aquilon.aqdb.model import NetworkDevice
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.templates import Plenary
 from aquilon.worker.templates.switchdata import PlenarySwitchData
 
@@ -25,6 +25,9 @@ from aquilon.worker.templates.switchdata import PlenarySwitchData
 class CommandCatNetworkDevice(BrokerCommand):
 
     required_parameters = ["network_device"]
+
+    # We do not lock the plenary while reading it
+    _is_lock_free = True
 
     def render(self, generate, session, logger, network_device, data, **kwargs):
         dbnetdev = NetworkDevice.get_unique(session, network_device, compel=True)
