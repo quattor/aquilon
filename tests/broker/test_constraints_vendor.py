@@ -37,33 +37,19 @@ class TestVendorConstraints(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "Vendor: hp", command)
 
-    def testdelvendorwithcpu(self):
-        command = "del vendor --vendor amd"
-        out = self.badrequesttest(command.split(" "))
-        self.matchoutput(out, "in use by a CPU", command)
-
-    def testverifydelvendorwithcpu(self):
-        command = ["show_vendor", "--vendor=intel"]
-        out = self.commandtest(command)
-        self.matchoutput(out, "Vendor: intel", command)
-
     # TODO: better place for this test
     def testdelxeon2500(self):
-        command = "del cpu --cpu xeon_2500 --vendor intel --speed 2500"
+        command = "del cpu --cpu xeon_2500 --vendor intel"
         out = self.badrequesttest(command.split(" "))
-        self.searchoutput(out,
-                          r"Cpu xeon_2500 is still used by \d+ machines, and "
-                          r"cannot be deleted.",
-                          command)
+        self.matchoutput(out, "Model intel/xeon_2500 is still in use and "
+                         "cannot be deleted.", command)
 
     # TODO: better place for this test
     def testdelxeon2660(self):
-        command = "del cpu --cpu unused --vendor utvendor --speed 3000"
+        command = "del cpu --cpu unused --vendor utvendor"
         out = self.badrequesttest(command.split(" "))
-        self.matchoutput(out,
-                         "Cpu unused is still used by the following "
-                         "models, and cannot be deleted: utvendor/unusedcpu.",
-                         command)
+        self.matchoutput(out, "Model utvendor/unused is still referenced by "
+                         "machine models and cannot be deleted.", command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(

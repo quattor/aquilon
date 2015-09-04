@@ -19,8 +19,9 @@
 import re
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import (Cpu, Chassis, ChassisSlot, Model, Machine,
+from aquilon.aqdb.model import (Chassis, ChassisSlot, Model, Machine,
                                 Resource, BundleResource, Share, Filesystem)
+from aquilon.aqdb.types import CpuType
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.hardware_entity import update_primary_ip
 from aquilon.worker.dbwrappers.interface import set_port_group, generate_ip
@@ -177,7 +178,7 @@ class CommandUpdateMachine(BrokerCommand):
 
     def render(self, session, logger, machine, model, vendor, serial, chassis,
                slot, clearchassis, multislot, vmhost, cluster, metacluster,
-               allow_metacluster_change, cpuname, cpuvendor, cpuspeed, cpucount,
+               allow_metacluster_change, cpuname, cpuvendor, cpucount,
                memory, ip, autoip, uri, remap_disk, comments, **arguments):
         dbmachine = Machine.get_unique(session, machine, compel=True)
         oldinfo = DSDBRunner.snapshot_hw(dbmachine)
@@ -265,10 +266,10 @@ class CommandUpdateMachine(BrokerCommand):
 
             dbmachine.model = dbmodel
 
-        if cpuname or cpuvendor or cpuspeed is not None:
-            dbcpu = Cpu.get_unique(session, name=cpuname, vendor=cpuvendor,
-                                   speed=cpuspeed, compel=True)
-            dbmachine.cpu = dbcpu
+        if cpuname or cpuvendor:
+            dbcpu = Model.get_unique(session, name=cpuname, vendor=cpuvendor,
+                                     model_type=CpuType.Cpu, compel=True)
+            dbmachine.cpu_model = dbcpu
 
         if cpucount is not None:
             dbmachine.cpu_quantity = cpucount

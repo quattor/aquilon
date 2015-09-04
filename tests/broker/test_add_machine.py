@@ -33,7 +33,7 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
                         "--chassis", "ut3c5", "--slot", 10,
                         "--model", "hs21-8853",
                         "--cpucount", "2", "--cpuvendor", "intel",
-                        "--cpuname", "xeon_2660", "--cpuspeed", "2660",
+                        "--cpuname", "xeon_2660",
                         "--memory", "8192", "--serial", "99C5553",
                         "--comments", "Some machine comments"])
 
@@ -172,7 +172,6 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
                         "--chassis", "ut3c1.aqd-unittest.ms.com", "--slot", "3",
                         "--model", "hs21-8853", "--cpucount", "2",
                         "--cpuvendor", "intel", "--cpuname", "xeon_2660",
-                        "--cpuspeed", "2660",
                         "--memory", "8192", "--serial", "KPDZ406"])
 
     def test_145_show_slot(self):
@@ -386,24 +385,11 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
         command = "show machine --machine ut3gd2r01"
         out = self.notfoundtest(command.split(" "))
 
-    # Testing that an invalid cpu returns an error (not an internal error)...
-    # (There should be no cpu with speed==2 in the database)
-    def test_220_reject_bad_cpuspeed(self):
-        self.badrequesttest(["add", "machine", "--machine", "ut3c1n5",
-                             "--rack", "ut3", "--model", "hs21-8853",
-                             "--cpucount", "2", "--cpuvendor", "intel",
-                             "--cpuname", "xeon_2660", "--cpuspeed", "2",
-                             "--memory", "8192", "--serial", "KPDZ406"])
-
-    def test_225_verify_reject_bad_cpuspeed(self):
-        command = "show machine --machine ut3c1n5"
-        out = self.notfoundtest(command.split(" "))
-
     def test_230_reject_missing_memory(self):
         command = ["add", "machine", "--machine", "ut3c1n6",
                    "--rack", "ut3", "--model", "utblade", "--cpucount", "2",
                    "--cpuvendor", "intel", "--cpuname", "xeon_2500",
-                   "--cpuspeed", "2500", "--serial", "AAAAAAA"]
+                   "--serial", "AAAAAAA"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "does not have machine specification defaults, please specify --memory",
@@ -442,7 +428,7 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
                    "--chassis", "ut3c5", "--slot", 10,
                    "--model", "hs21-8853",
                    "--cpucount", "2", "--cpuvendor", "intel",
-                   "--cpuname", "xeon_2660", "--cpuspeed", "2660",
+                   "--cpuname", "xeon_2660",
                    "--memory", "8192"]
         out = self.badrequesttest(command)
         self.matchoutput(out,

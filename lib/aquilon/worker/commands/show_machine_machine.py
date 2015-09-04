@@ -41,7 +41,7 @@ class CommandShowMachineMachine(BrokerCommand):
                    joinedload('interfaces.assignments.dns_records'),
                    joinedload('interfaces.model'),
                    joinedload('interfaces.model.vendor'),
-                   joinedload('cpu'),
+                   joinedload('cpu_model'),
                    joinedload('chassis_slot'),
                    joinedload('chassis_slot.chassis'),
                    subqueryload('disks'),

@@ -71,14 +71,14 @@ class TestClientFailure(TestBrokerCommand):
                          command)
 
     def testextraargs(self):
-        command = "show cpu --speed 2000 foo"
+        command = "show cpu --cpu 2000 foo"
         err = self.badoptiontest(command.split(" "), exit_code=1)
         self.matchoutput(err, "Extra arguments on the command line", command)
 
     def testinvalidinteger(self):
-        command = "show cpu --speed foo"
+        command = "search machine --cpucount foo"
         err = self.badoptiontest(command.split(" "))
-        self.matchoutput(err, "option --speed: invalid integer value: 'foo'",
+        self.matchoutput(err, "option --cpucount: invalid integer value: 'foo'",
                          command)
 
     def testhelp(self):

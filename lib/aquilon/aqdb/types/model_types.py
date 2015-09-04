@@ -59,3 +59,7 @@ class NetworkDeviceType(HardwareEntityType):
 
 class NicType(ModelType):
     Nic = 'nic'
+
+
+class CpuType(ModelType):
+    Cpu = 'cpu'

@@ -16,38 +16,17 @@
 # limitations under the License.
 """Contains the logic for `aq del cpu`."""
 
-
-from aquilon.exceptions_ import ArgumentError
+from aquilon.aqdb.types import CpuType
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.aqdb.model import Cpu, MachineSpecs, Model, Vendor, Machine
+from aquilon.worker.commands.del_model import CommandDelModel
 
 
-class CommandDelCpu(BrokerCommand):
+class CommandDelCpu(CommandDelModel):
 
-    required_parameters = ["cpu", "vendor", "speed"]
+    required_parameters = ["cpu", "vendor"]
+    model_type = CpuType.Cpu
 
-    def render(self, session, cpu, vendor, speed, **arguments):
-        dbcpu = Cpu.get_unique(session, name=cpu, vendor=vendor, speed=speed,
-                               compel=True)
-
-        q = session.query(Machine.machine_id)
-        q = q.filter_by(cpu=dbcpu)
-        cnt = q.count()
-        if cnt:
-            raise ArgumentError("{0} is still used by {1} machines, and "
-                                "cannot be deleted.".format(dbcpu, cnt))
-
-        q = session.query(MachineSpecs)
-        q = q.filter_by(cpu=dbcpu)
-        q = q.join((Model, MachineSpecs.model_id == Model.id), Vendor)
-        q = q.order_by(Vendor.name, Model.name)
-        if q.count():
-            models = ", ".join(sorted(spec.model.qualified_name for spec in q))
-            raise ArgumentError("{0} is still used by the following models, "
-                                "and cannot be deleted: {1!s}."
-                                .format(dbcpu, models))
-
-        session.delete(dbcpu)
-        session.flush()
-
-        return
+    def render(self, cpu, vendor, **arguments):
+        self.deprecated_command("The del_cpu command is deprecated. Please "
+                                "use del_model instead.", **arguments)
+        super(CommandDelCpu, self).render(model=cpu, vendor=vendor, **arguments)

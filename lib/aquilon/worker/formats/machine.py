@@ -57,7 +57,7 @@ class MachineFormatter(HardwareEntityFormatter):
         for slot in machine.chassis_slot:
             details.append(indent + "  {0:c}: {0!s}".format(slot.chassis))
             details.append(indent + "  Slot: %d" % slot.slot_number)
-        details.append(indent + "  Cpu: %s x %d" % (machine.cpu,
+        details.append(indent + "  Cpu: %s x %d" % (machine.cpu_model,
                                                     machine.cpu_quantity))
         details.append(indent + "  Memory: %d MB" % machine.memory)
         for d in sorted(machine.disks, key=attrgetter('device_name')):
@@ -124,7 +124,7 @@ class MachineFormatter(HardwareEntityFormatter):
                    indirect_attrs=True):
         super(MachineFormatter, self).fill_proto(machine, skeleton)
 
-        skeleton.cpu = str(machine.cpu.name)
+        skeleton.cpu = str(machine.cpu_model.name)
         skeleton.cpu_count = machine.cpu_quantity
         skeleton.memory = machine.memory
         if machine.uri:

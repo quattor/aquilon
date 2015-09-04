@@ -29,6 +29,6 @@ class CommandShowModelAll(BrokerCommand):
         q = q.join(Vendor)
         q = q.options(contains_eager('vendor'),
                       joinedload('machine_specs'),
-                      joinedload('machine_specs.cpu'))
+                      joinedload('machine_specs.cpu_model'))
         q = q.order_by(Vendor.name, Model.name)
         return q.all()

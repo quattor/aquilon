@@ -64,13 +64,7 @@ class TestClientBypass(TestBrokerCommand):
     def badrequesttest(self, path, **kwargs):
         return self.urltest(path, 400, **kwargs)
 
-    def testintarg1(self):
-        # search cpu --speed not-a-number
-        path = "/find/cpu"
-        out = self.badrequesttest(path, speed="not-a-number")
-        self.matchoutput(out, "Expected an integer for --speed.", path)
-
-    def testintarg2(self):
+    def testintarg(self):
         # search machine --cpucount not-a-number
         path = "/find/machine"
         out = self.badrequesttest(path, cpucount="not-a-number")

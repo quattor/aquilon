@@ -147,7 +147,7 @@ class MachineTestMixin(object):
         # We assume the vendor will be guessed
         add_machine_args = ["--machine", name, "--model", model]
 
-        for optional in ["cpucount", "cpuvendor", "cpuname", "cpuspeed",
+        for optional in ["cpucount", "cpuvendor", "cpuname",
                          "memory", "chassis", "slot", "serial", "comments",
                          "cluster", "vmhost", "rack", "desk"]:
             if optional not in kwargs:

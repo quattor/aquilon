@@ -19,8 +19,8 @@
 from sqlalchemy.orm import object_session, contains_eager
 
 from aquilon.exceptions_ import ArgumentError, UnimplementedError
-from aquilon.aqdb.types import NicType
-from aquilon.aqdb.model import (Vendor, Model, Cpu, MachineSpecs, Machine, Disk,
+from aquilon.aqdb.types import CpuType, NicType
+from aquilon.aqdb.model import (Vendor, Model, MachineSpecs, Machine, Disk,
                                 HardwareEntity, Interface)
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.templates import Plenary, PlenaryCollection
@@ -33,7 +33,7 @@ class CommandUpdateModel(BrokerCommand):
     # Quick hash of the arguments this method takes to the corresponding
     # aqdb label.
     argument_lookup = {'cpuname': 'name', 'cpuvendor': 'vendor',
-                       'cpuspeed': 'speed', 'cpunum': 'cpu_quantity',
+                       'cpunum': 'cpu_quantity',
                        'memory': 'memory', 'disktype': 'disk_type',
                        'diskcontroller': 'controller_type',
                        'disksize': 'disk_capacity', 'nics': 'nic_count',
@@ -94,7 +94,7 @@ class CommandUpdateModel(BrokerCommand):
             dbmodel.comments = comments
             # The comments also do not affect the templates.
 
-        cpu_args = ['cpuname', 'cpuvendor', 'cpuspeed']
+        cpu_args = ['cpuname', 'cpuvendor']
         cpu_info = dict((self.argument_lookup[arg], arguments[arg])
                         for arg in cpu_args)
         cpu_values = [v for v in cpu_info.values() if v is not None]
@@ -120,22 +120,24 @@ class CommandUpdateModel(BrokerCommand):
                                         "machine specs for the model.  Please "
                                         "give all CPU, disk, RAM, and NIC "
                                         "count information.")
-                dbcpu = Cpu.get_unique(session, compel=True, **cpu_info)
+                dbcpu = Model.get_unique(session, compel=True,
+                                         model_type=CpuType.Cpu, **cpu_info)
                 if nic_values:
                     dbnic = Model.get_unique(session, compel=True,
                                              model_type=NicType.Nic, **nic_info)
                 else:
                     dbnic = Model.default_nic_model(session)
-                dbmachine_specs = MachineSpecs(model=dbmodel, cpu=dbcpu,
+                dbmachine_specs = MachineSpecs(model=dbmodel, cpu_model=dbcpu,
                                                nic_model=dbnic, **specs)
                 session.add(dbmachine_specs)
 
         # Anything below that updates specs should have been verified above.
 
         if cpu_values:
-            dbcpu = Cpu.get_unique(session, compel=True, **cpu_info)
+            dbcpu = Model.get_unique(session, compel=True,
+                                     model_type=CpuType.Cpu, **cpu_info)
             self.update_machine_specs(model=dbmodel, dbmachines=dbmachines,
-                                      attr='cpu', value=dbcpu,
+                                      attr='cpu_model', value=dbcpu,
                                       fix_existing=fix_existing)
 
         for arg in ['memory', 'cpunum']:

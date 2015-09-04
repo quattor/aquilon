@@ -16,21 +16,23 @@
 # limitations under the License.
 """Contains the logic for `aq add cpu`."""
 
-
+from aquilon.aqdb.types import CpuType
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.aqdb.model import Cpu, Vendor
+from aquilon.worker.commands.add_model import CommandAddModel
 
 
-class CommandAddCpu(BrokerCommand):
+class CommandAddCpu(CommandAddModel):
 
-    required_parameters = ["cpu", "vendor", "speed"]
+    required_parameters = ["cpu", "vendor"]
 
-    def render(self, session, cpu, vendor, speed, comments, **arguments):
-        dbvendor = Vendor.get_unique(session, vendor, compel=True)
-
-        Cpu.get_unique(session, name=cpu, vendor=dbvendor, speed=speed,
-                       preclude=True)
-
-        dbcpu = Cpu(name=cpu, vendor=dbvendor, speed=speed, comments=comments)
-        session.add(dbcpu)
-        return
+    def render(self, cpu, **arguments):
+        self.deprecated_command("The add_cpu command is deprecated. Please "
+                                "use add_model instead.", **arguments)
+        return super(CommandAddCpu, self).render(model=cpu, type=CpuType.Cpu,
+                                                 cpuname=None, cpuvendor=None,
+                                                 cpunum=None, memory=None,
+                                                 disktype=None,
+                                                 diskcontroller=None,
+                                                 disksize=None, nics=None,
+                                                 nicmodel=None, nicvendor=None,
+                                                 **arguments)

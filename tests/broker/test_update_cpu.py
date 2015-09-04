@@ -29,23 +29,24 @@ class TestUpdateCpu(TestBrokerCommand):
 
     def test_100_clear_comments(self):
         command = ["update_cpu", "--cpu", "utcpu", "--vendor", "intel",
-                   "--speed", 1000, "--comments", ""]
-        self.noouttest(command)
+                   "--comments", ""]
+        self.statustest(command)
 
     def test_105_verify_update(self):
-        command = "show cpu --cpu utcpu --speed 1000 --vendor intel"
+        command = "show cpu --cpu utcpu --vendor intel"
         out = self.commandtest(command.split(" "))
         self.matchclean(out, "Comments", command)
 
     def test_110_update_cpu(self):
         command = ["update_cpu", "--cpu", "utcpu", "--vendor", "intel",
-                   "--speed", 1000, "--comments", "New CPU comments"]
-        self.noouttest(command)
+                   "--comments", "New CPU comments"]
+        self.statustest(command)
 
     def test_115_verify_update(self):
-        command = "show cpu --cpu utcpu --speed 1000 --vendor intel"
+        command = "show cpu --cpu utcpu --vendor intel"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Cpu: intel utcpu 1000 MHz", command)
+        self.matchoutput(out, "Vendor: intel Model: utcpu", command)
+        self.matchoutput(out, "Model Type: cpu", command)
         self.matchoutput(out, "Comments: New CPU comments", command)
 
 if __name__ == '__main__':

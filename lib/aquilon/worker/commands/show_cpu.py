@@ -18,23 +18,24 @@
 
 from sqlalchemy.orm import contains_eager, undefer
 
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.aqdb.model import Cpu, Vendor
+from aquilon.aqdb.types import CpuType
+from aquilon.aqdb.model import Model, Vendor
+from aquilon.worker.broker import BrokerCommand
 
 
 class CommandShowCpu(BrokerCommand):
 
-    def render(self, session, cpu, vendor, speed, **arguments):
-        q = session.query(Cpu)
+    def render(self, session, cpu, vendor, **arguments):
+        self.deprecated_command("The show_cpu command is deprecated. Please "
+                                "use show_model instead.", **arguments)
         if cpu:
-            q = q.filter_by(name=cpu)
-        if vendor:
-            dbvendor = Vendor.get_unique(session, vendor, compel=True)
-            q = q.filter_by(vendor=dbvendor)
-        if speed is not None:
-            q = q.filter_by(speed=speed)
+            return Model.get_unique(session, name=cpu, vendor=vendor,
+                                    model_type=CpuType.Cpu, compel=True)
+
+        q = session.query(Model)
+        q = q.filter(model_type=CpuType.Cpu)
         q = q.join(Vendor)
         q = q.options(undefer('comments'),
                       contains_eager('vendor'))
-        q = q.order_by(Vendor.name, Cpu.name)
+        q = q.order_by(Vendor.name, Model.name)
         return q.all()

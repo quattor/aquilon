@@ -94,7 +94,7 @@ class TestUpdateModel(TestBrokerCommand):
     def test_200_faildisktype(self):
         command = ["update_model", "--model=utmedium", "--vendor=utvendor",
                    "--cpuname=utcpu", "--cpuvendor=intel",
-                   "--cpuspeed=1000", "--disktype=local"]
+                   "--disktype=local"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "This cannot be converted automatically.",
                          command)
@@ -102,7 +102,7 @@ class TestUpdateModel(TestBrokerCommand):
     def test_210_updatedisktype(self):
         command = ["update_model", "--model=utmedium", "--vendor=utvendor",
                    "--cpuname=xeon_2660", "--cpuvendor=intel",
-                   "--cpuspeed=2660", "--disktype=local", "--leave_existing"]
+                   "--disktype=local", "--leave_existing"]
         self.noouttest(command)
 
     def test_220_verifyspecs(self):

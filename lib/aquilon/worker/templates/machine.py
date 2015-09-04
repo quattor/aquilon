@@ -74,8 +74,8 @@ class PlenaryMachineInfo(StructurePlenary):
         ram = [StructureTemplate("hardware/ram/generic",
                                  {"size": PanMetric(self.dbobj.memory, "MB")})]
         cpu = StructureTemplate("hardware/cpu/%s/%s" %
-                                (self.dbobj.cpu.vendor.name,
-                                 self.dbobj.cpu.name))
+                                (self.dbobj.cpu_model.vendor.name,
+                                 self.dbobj.cpu_model.name))
         cpus = [cpu] * self.dbobj.cpu_quantity
 
         disks = {}

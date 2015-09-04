@@ -25,7 +25,7 @@ from sqlalchemy import Column, Integer, DateTime, Sequence, String, ForeignKey
 from sqlalchemy.orm import relation, backref, deferred, validates
 
 from aquilon.aqdb.column_types import Enum
-from aquilon.aqdb.model import Base, Model, Cpu, Disk
+from aquilon.aqdb.model import Base, Model, Disk
 from aquilon.aqdb.model.disk import controller_types
 
 _TN = 'machine_specs'
@@ -41,7 +41,8 @@ class MachineSpecs(Base):
 
     model_id = Column(ForeignKey(Model.id), nullable=False, unique=True)
 
-    cpu_id = Column(ForeignKey(Cpu.id), nullable=False)
+    cpu_model_id = Column(ForeignKey(Model.id, name="%s_cpu_model_fk" % _TN),
+                          nullable=False)
 
     cpu_quantity = Column(Integer, nullable=False)  # Constrain to below 512?
 
@@ -61,7 +62,7 @@ class MachineSpecs(Base):
     # This is a one-to-one relation, so we need uselist=False on the backref
     model = relation(Model, innerjoin=True, foreign_keys=model_id,
                      backref=backref('machine_specs', uselist=False))
-    cpu = relation(Cpu, innerjoin=True)
+    cpu_model = relation(Model, innerjoin=True, foreign_keys=cpu_model_id)
     nic_model = relation(Model, foreign_keys=nic_model_id)
 
     @validates('disk_type')

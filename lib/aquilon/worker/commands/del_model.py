@@ -18,18 +18,19 @@
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand
-from aquilon.aqdb.model import (Vendor, Model, HardwareEntity, MachineSpecs,
-                                Interface)
+from aquilon.aqdb.model import (Vendor, Model, MachineSpecs, HardwareEntity,
+                                Machine, Interface)
 
 
 class CommandDelModel(BrokerCommand):
 
     required_parameters = ["model", "vendor"]
+    model_type = None
 
     def render(self, session, logger, model, vendor, **arguments):
         dbvendor = Vendor.get_unique(session, vendor, compel=True)
         dbmodel = Model.get_unique(session, name=model, vendor=dbvendor,
-                                   compel=True)
+                                   model_type=self.model_type, compel=True)
 
         if dbmodel.model_type.isNic():
             q = session.query(Interface.id)
@@ -39,6 +40,18 @@ class CommandDelModel(BrokerCommand):
                                     "deleted.".format(dbmodel))
             q = session.query(MachineSpecs.id)
             q = q.filter_by(nic_model=dbmodel)
+            if q.count():
+                raise ArgumentError("{0} is still referenced by machine models and "
+                                    "cannot be deleted.".format(dbmodel))
+        if dbmodel.model_type.isCpu():
+            q = session.query(Machine.machine_id)
+            q = q.filter_by(cpu_model=dbmodel)
+            if q.count():
+                raise ArgumentError("{0} is still in use and cannot be "
+                                    "deleted.".format(dbmodel))
+
+            q = session.query(MachineSpecs.id)
+            q = q.filter_by(cpu_model=dbmodel)
             if q.count():
                 raise ArgumentError("{0} is still referenced by machine models and "
                                     "cannot be deleted.".format(dbmodel))
@@ -55,5 +68,8 @@ class CommandDelModel(BrokerCommand):
                         "removing machine specifications." %
                         (dbmodel.model_type, dbvendor.name, dbmodel.name))
             session.delete(dbmodel.machine_specs)
+
         session.delete(dbmodel)
+        session.flush()
+
         return

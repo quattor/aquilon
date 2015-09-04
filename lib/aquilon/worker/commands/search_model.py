@@ -16,15 +16,16 @@
 # limitations under the License.
 """Contains the logic for `aq search model`."""
 
-from sqlalchemy.orm import aliased, joinedload, contains_eager
+from sqlalchemy.orm import joinedload, contains_eager
 
-from aquilon.aqdb.model import Model, Vendor, Cpu, MachineSpecs
+from aquilon.aqdb.types import CpuType, NicType
+from aquilon.aqdb.model import Model, Vendor, MachineSpecs
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.formats.list import StringAttributeList
 
 
 class CommandSearchModel(BrokerCommand):
-    def render(self, session, model, vendor, machine_type, cpuname, cpuvendor, cpuspeed,
+    def render(self, session, model, vendor, machine_type, cpuname, cpuvendor,
                cpunum, nicmodel, nicvendor, memory, disktype, diskcontroller,
                disksize, fullinfo, style, **arguments):
         q = session.query(Model)
@@ -42,37 +43,31 @@ class CommandSearchModel(BrokerCommand):
         q = q.options(contains_eager('vendor'))
         q = q.reset_joinpoint()
 
-        if cpuname or cpuvendor or cpuspeed or cpunum or \
+        if cpuname or cpuvendor or cpunum or \
            nicmodel or nicvendor or \
            memory or disktype or diskcontroller or disksize:
             q = q.join(Model.machine_specs)
             q = q.options(contains_eager('machine_specs'))
 
-            if cpuname or cpuvendor or cpuspeed is not None:
-                q = q.join(Cpu)
-                q = q.options(contains_eager('machine_specs.cpu'))
-                if cpuname:
-                    q = q.filter(Cpu.name == cpuname)
-                if cpuvendor:
-                    dbvendor = Vendor.get_unique(session, cpuvendor,
-                                                 compel=True)
-                    q = q.filter(Cpu.vendor == dbvendor)
-                if cpuspeed:
-                    q = q.filter(Cpu.speed == cpuspeed)
+            if cpuname or cpuvendor:
+                subq = Model.get_matching_query(session, name=cpuname,
+                                                vendor=cpuvendor,
+                                                model_type=CpuType.Cpu,
+                                                compel=True)
+                q = q.filter(MachineSpecs.cpu_model_id.in_(subq))
+
             if cpunum is not None:
                 q = q.filter_by(cpu_quantity=cpunum)
             if memory is not None:
                 q = q.filter_by(memory=memory)
+
             if nicmodel or nicvendor:
-                NicModel = aliased(Model)
-                q = q.join((NicModel, NicModel.id == MachineSpecs.nic_model_id))
-                q = q.options(contains_eager('machine_specs.nic_model'))
-                if nicmodel:
-                    q = q.filter(NicModel.name == nicmodel)
-                if nicvendor:
-                    dbvendor = Vendor.get_unique(session, nicvendor,
-                                                 compel=True)
-                    q = q.filter(NicModel.vendor == dbvendor)
+                subq = Model.get_matching_query(session, name=nicmodel,
+                                                vendor=nicvendor,
+                                                model_type=NicType.Nic,
+                                                compel=True)
+                q = q.filter(MachineSpecs.nic_model_id.in_(subq))
+
             if disktype:
                 q = q.filter_by(disk_type=disktype)
             if diskcontroller:
@@ -82,7 +77,7 @@ class CommandSearchModel(BrokerCommand):
         else:
             if fullinfo or style != 'raw':
                 q = q.options(joinedload('machine_specs'),
-                              joinedload('machine_specs.cpu'))
+                              joinedload('machine_specs.cpu_model'))
         q = q.order_by(Vendor.name, Model.name)
 
         if fullinfo or style != 'raw':
