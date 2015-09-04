@@ -431,8 +431,7 @@ class TestAddInterface(EventsTestMixin, TestBrokerCommand):
                    "--chassis", "ut3c1.aqd-unittest.ms.com"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
-                         "Cannot use argument --model when adding an interface "
-                         "to a chassis.",
+                         "Model/vendor can not be set for a on-board admin interface.",
                          command)
 
     def testfailaddinterfaceut3c1type(self):
@@ -441,8 +440,8 @@ class TestAddInterface(EventsTestMixin, TestBrokerCommand):
                    "--iftype", "vlan",
                    "--chassis", "ut3c1.aqd-unittest.ms.com"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "Only 'oa' is allowed as the interface type "
-                         "for chassis.", command)
+        self.matchoutput(out, "Only 'oa' is allowed as the interface type.",
+                         command)
 
     def testfailaddinterfaceut3dg1r01(self):
         command = ["add", "interface", "--interface", "xge1",
@@ -464,12 +463,9 @@ class TestAddInterface(EventsTestMixin, TestBrokerCommand):
                    "--iftype", "physical", "--model", "e1000",
                    "--network_device", "ut3gd1r01.aqd-unittest.ms.com"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "Cannot use argument --model when adding an "
-                         "interface to a network device.", command)
-        self.check_plenary_contents('network_device', 'americas', 'ut', 'ut3gd1r01',
-                                    clean='xge1')
-        self.check_plenary_contents('hostdata', 'ut3gd1r01.aqd-unittest.ms.com',
-                                    clean='xge1')
+        self.matchoutput(out,
+                         "Model/vendor can not be set for a physical interface.",
+                         command)
 
     def testfailaddinterfaceud3dg1r01type(self):
         command = ["add", "interface", "--interface", "xge1",
@@ -531,8 +527,14 @@ class TestAddInterface(EventsTestMixin, TestBrokerCommand):
         self.matchoutput(out,
                          "Interface: xge49 %s" % self.net["ut10_eth1"].usable[0].mac,
                          command)
-        self.matchoutput(out, "Interface: vlan110 (no MAC addr)", command)
-        self.matchoutput(out, "Interface: loop0 (no MAC addr)", command)
+        self.searchoutput(out,
+                          r"Interface: vlan110 \(no MAC addr\)\s*"
+                          r"Type: virtual$",
+                          command)
+        self.searchoutput(out,
+                          r"Interface: loop0 \(no MAC addr\)\s*"
+                          r"Type: loopback$",
+                          command)
         self.matchclean(out, "loop1", command)
 
     def testaddut3s01p1eth0(self):

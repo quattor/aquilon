@@ -1351,9 +1351,9 @@
 	</optgroup>
 	<transport trigger="machine" method="put" path="machine/%(machine)s/interface/%(interface)s"/>
 	<transport trigger="hostname" method="put" path="host/%(hostname)s/interface/%(interface)s"/>
-	<transport trigger="chassis" method="put" path="chassis/%(chassis)s/interface/%(interface)s"/>
 	<transport trigger="switch" method="put" path="switch/%(switch)s/interface/%(interface)s"/>
 	<transport trigger="network_device" method="put" path="network_device/%(network_device)s/interface/%(interface)s"/>
+	<transport method="put" path="interface/command/add"/>
     </command>
 
     <command name="add_network_environment">
@@ -1762,7 +1762,7 @@
 	<transport trigger="hostname" method="post" path="host/%(hostname)s/interface/%(interface)s"/>
 	<transport trigger="network_device" method="post" path="network_device/%(network_device)s/interface/%(interface)s"/>
 	<transport trigger="switch" method="post" path="switch/%(switch)s/interface/%(interface)s"/>
-	<transport trigger="chassis" method="post" path="chassis/%(chassis)s/interface/%(interface)s"/>
+	<transport method="post" path="interface/command/update"/>
     </command>
 
     <command name="del_interface">
