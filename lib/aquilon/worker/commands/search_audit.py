@@ -82,7 +82,7 @@ class CommandSearchAudit(BrokerCommand):
 
         if return_code is not None:
             if return_code == 0:
-                q = q.filter(~exists().where(Xtn.xtn_id == XtnEnd.xtn_id))
+                q = q.filter(~exists().where(Xtn.id == XtnEnd.xtn_id))
             else:
                 q = q.join(XtnEnd)
                 q = q.filter(XtnEnd.return_code == return_code)

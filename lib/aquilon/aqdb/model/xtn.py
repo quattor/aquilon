@@ -42,7 +42,7 @@ class Xtn(Base):
     """ auditing information from command invocations """
     __tablename__ = 'xtn'
 
-    xtn_id = Column(GUID, primary_key=True)
+    id = Column(GUID, primary_key=True)
     username = Column(String(65), nullable=False, default='nobody')
     command = Column(String(64), nullable=False)
     # This column is *massively* redundant, but we're fully denormalized
@@ -103,7 +103,7 @@ class Xtn(Base):
 class XtnEnd(Base):
     """ A record of a completed command/transaction """
     __tablename__ = 'xtn_end'
-    xtn_id = Column(ForeignKey(Xtn.xtn_id), primary_key=True)
+    xtn_id = Column(ForeignKey(Xtn.id), primary_key=True)
     return_code = Column(Integer, nullable=False)
     end_time = Column(UTCDateTime(timezone=True),
                       default=utcnow, nullable=False)
@@ -117,7 +117,7 @@ class XtnDetail(Base):
     """ Key/Value argument pairs for executed commands """
     __tablename__ = 'xtn_detail'
 
-    xtn_id = Column(ForeignKey(Xtn.xtn_id), nullable=False)
+    xtn_id = Column(ForeignKey(Xtn.id), nullable=False)
     name = Column(String(255), nullable=False)
     # Note: Oracle has limits on the maximum size of all columns in an index, so
     # we cannot make this column too large.
@@ -159,7 +159,7 @@ def start_xtn(session, xtn_id, username, command, is_readonly, details, ignore):
 
     # TODO: (maybe) use sql inserts instead of objects to avoid added overhead?
     # We would be able to exploit executemany() for all the xtn_detail rows
-    x = Xtn(xtn_id=xtn_id, command=command, username=username,
+    x = Xtn(id=xtn_id, command=command, username=username,
             is_readonly=is_readonly)
     session.add(x)
 
