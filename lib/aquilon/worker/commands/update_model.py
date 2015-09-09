@@ -40,7 +40,7 @@ class CommandUpdateModel(BrokerCommand):
                        'nicmodel': 'name', 'nicvendor': 'vendor'}
 
     def render(self, session, logger, model, vendor, newmodel, newvendor,
-               comments, leave_existing, **arguments):
+               comments, update_existing_machines, **arguments):
         for (arg, value) in arguments.items():
             # Cleaning the strings isn't strictly necessary but allows
             # for simple equality checks below and removes the need to
@@ -54,11 +54,10 @@ class CommandUpdateModel(BrokerCommand):
         dbmodel = Model.get_unique(session, name=model, vendor=vendor,
                                    compel=True)
 
-        if leave_existing and (newmodel or newvendor):
+        if not update_existing_machines and (newmodel or newvendor):
             raise ArgumentError("Cannot update model name or vendor without "
                                 "updating any existing machines.")
 
-        fix_existing = not leave_existing
         dbmachines = set()
 
         # The sub-branching here is a little difficult to read...
@@ -138,19 +137,20 @@ class CommandUpdateModel(BrokerCommand):
                                      model_type=CpuType.Cpu, **cpu_info)
             self.update_machine_specs(model=dbmodel, dbmachines=dbmachines,
                                       attr='cpu_model', value=dbcpu,
-                                      fix_existing=fix_existing)
+                                      fix_existing=update_existing_machines)
 
         for arg in ['memory', 'cpunum']:
             if arguments[arg] is not None:
                 self.update_machine_specs(model=dbmodel, dbmachines=dbmachines,
                                           attr=self.argument_lookup[arg],
                                           value=arguments[arg],
-                                          fix_existing=fix_existing)
+                                          fix_existing=update_existing_machines)
 
         if arguments['disktype']:
-            if fix_existing:
-                raise ArgumentError("Please specify --leave_existing to "
-                                    "change the model disktype.  This cannot "
+            if update_existing_machines:
+                raise ArgumentError("Please do not specify "
+                                    "--update_existing_machines to change "
+                                    "the model disktype.  This cannot "
                                     "be converted automatically.")
             dbmodel.machine_specs.disk_type = arguments['disktype']
 
@@ -159,12 +159,13 @@ class CommandUpdateModel(BrokerCommand):
                 self.update_disk_specs(model=dbmodel, dbmachines=dbmachines,
                                        attr=self.argument_lookup[arg],
                                        value=arguments[arg],
-                                       fix_existing=fix_existing)
+                                       fix_existing=update_existing_machines)
 
         if nic_values:
             dbnic = Model.get_unique(session, compel=True, **nic_info)
             self.update_interface_specs(model=dbmodel, dbmachines=dbmachines,
-                                        value=dbnic, fix_existing=fix_existing)
+                                        value=dbnic,
+                                        fix_existing=update_existing_machines)
 
         if arguments['nics'] is not None:
             dbmodel.machine_specs.nic_count = arguments['nics']

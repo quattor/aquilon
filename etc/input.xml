@@ -1363,7 +1363,9 @@
 	    <option name="nicmodel" type="string">NIC model name</option>
 	    <option name="nicvendor" type="string">NIC vendor</option>
 	    <option name="comments" type="string">Comments</option>
-	    <option name="leave_existing" type="boolean">Do not update machines using the old defaults to the new values</option>
+	    <option name="update_existing_machines" type="flag">Update
+        machines using the old defaults to the new values (default is
+        to not make any changes)</option>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
 	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
 	</optgroup>

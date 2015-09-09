@@ -46,6 +46,7 @@ class TestUpdateModel(TestBrokerCommand):
         command = ["update_model", "--model=utmedium", "--vendor=utvendor",
                    "--cpuname=utcpu", "--cpunum=1", "--memory=4096", "--nics=1",
                    "--disksize=45", "--diskcontroller=scsi",
+                   "--update_existing_machines",
                    "--comments", "New model comments"]
         self.noouttest(command)
 
@@ -84,7 +85,8 @@ class TestUpdateModel(TestBrokerCommand):
 
     def test_130_clear_comments(self):
         self.noouttest(["update_model", "--vendor", "utvendor",
-                        "--model", "utmedium", "--comments", ""])
+                        "--model", "utmedium", "--comments", "",
+                        "--update_existing_machines"])
 
     def test_135_verify_comments(self):
         command = ["show_model", "--vendor", "utvendor", "--model", "utmedium"]
@@ -94,7 +96,7 @@ class TestUpdateModel(TestBrokerCommand):
     def test_200_faildisktype(self):
         command = ["update_model", "--model=utmedium", "--vendor=utvendor",
                    "--cpuname=utcpu", "--cpuvendor=intel",
-                   "--disktype=local"]
+                   "--disktype=local", "--update_existing_machines"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "This cannot be converted automatically.",
                          command)
@@ -102,7 +104,7 @@ class TestUpdateModel(TestBrokerCommand):
     def test_210_updatedisktype(self):
         command = ["update_model", "--model=utmedium", "--vendor=utvendor",
                    "--cpuname=xeon_2660", "--cpuvendor=intel",
-                   "--disktype=local", "--leave_existing"]
+                   "--disktype=local"]
         self.noouttest(command)
 
     def test_220_verifyspecs(self):
@@ -139,7 +141,7 @@ class TestUpdateModel(TestBrokerCommand):
 
     def test_301_leavevendor(self):
         command = ["update_model", "--model=utmedium", "--vendor=utvendor",
-                   "--newmodel=utmedium-v1", "--leave_existing"]
+                   "--newmodel=utmedium-v1"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "Cannot update model name or vendor without "
@@ -148,14 +150,15 @@ class TestUpdateModel(TestBrokerCommand):
 
     def test_302_dupename(self):
         command = ["update_model", "--model=utblade", "--vendor=aurora_vendor",
-                   "--newmodel=utmedium", "--newvendor=utvendor"]
+                   "--newmodel=utmedium", "--newvendor=utvendor",
+                   "--update_existing_machines"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Model utmedium, vendor utvendor already exists.",
                          command)
 
     def test_310_updatename(self):
         command = ["update_model", "--model=utmedium", "--vendor=utvendor",
-                   "--newmodel=utmedium-v1"]
+                   "--newmodel=utmedium-v1", "--update_existing_machines"]
         self.noouttest(command)
 
     def test_311_verifyname(self):
@@ -172,7 +175,7 @@ class TestUpdateModel(TestBrokerCommand):
 
     def test_320_updatevendor(self):
         command = ["update_model", "--model=utmedium-v1", "--vendor=utvendor",
-                   "--newvendor=virtual"]
+                   "--newvendor=virtual", "--update_existing_machines"]
         self.noouttest(command)
 
     def test_321_verifyvendor(self):
@@ -189,7 +192,8 @@ class TestUpdateModel(TestBrokerCommand):
 
     def test_330_restore(self):
         command = ["update_model", "--model=utmedium-v1", "--vendor=virtual",
-                   "--newvendor=utvendor", "--newmodel=utmedium"]
+                   "--newvendor=utvendor", "--newmodel=utmedium",
+                   "--update_existing_machines"]
         self.noouttest(command)
 
     def test_331_verifyupdate(self):
@@ -220,7 +224,8 @@ class TestUpdateModel(TestBrokerCommand):
 
     def test_342_update_nic(self):
         command = ["update", "model", "--model", "utlarge", "--vendor", "utvendor",
-                   "--nicvendor", "utvirt", "--nicmodel", "default"]
+                   "--nicvendor", "utvirt", "--nicmodel", "default",
+                   "--update_existing_machines"]
         self.noouttest(command)
 
     def test_343_verify_model_update(self):
@@ -239,7 +244,8 @@ class TestUpdateModel(TestBrokerCommand):
                           command)
 
     def test_344_change_evm1_back(self):
-        command = ["update", "machine", "--machine", "evm1", "--model", "utmedium"]
+        command = ["update", "machine", "--machine", "evm1", "--model",
+                   "utmedium"]
         self.noouttest(command)
 
     def test_700_failnospecs(self):
@@ -257,8 +263,7 @@ class TestUpdateModel(TestBrokerCommand):
         command = ["update_model", "--model=utblade", "--vendor=aurora_vendor",
                    "--cpuname=utcpu", "--cpunum=2", "--memory=8192",
                    "--disktype=local", "--diskcontroller=scsi", "--disksize=30",
-                   "--nics=2", "--nicmodel=generic_nic", "--nicvendor=generic",
-                   "--leave_existing"]
+                   "--nics=2", "--nicmodel=generic_nic", "--nicvendor=generic"]
         self.noouttest(command)
 
     def test_810_verifyspecs(self):
