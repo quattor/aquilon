@@ -22,7 +22,7 @@ import re
 from sqlalchemy import (Column, Integer, DateTime, ForeignKey, Sequence,
                         UniqueConstraint, Index)
 from sqlalchemy.ext.associationproxy import association_proxy
-from sqlalchemy.orm import relation, backref, deferred
+from sqlalchemy.orm import relation, backref, deferred, validates
 from sqlalchemy.sql import and_
 
 from aquilon.exceptions_ import InternalError
@@ -53,6 +53,8 @@ class AddressAssignment(Base):
     _label_check = re.compile('^[a-z0-9]{0,16}$')
 
     id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
+
+    assignment_type = Column(AqStr(32), nullable=False)
 
     interface_id = Column(ForeignKey(Interface.id, ondelete='CASCADE'),
                           nullable=False)
@@ -97,6 +99,9 @@ class AddressAssignment(Base):
     __table_args__ = (UniqueConstraint(interface_id, ip),
                       UniqueConstraint(interface_id, _label),
                       Index("%s_network_ip_idx" % _ABV, network_id, ip))
+
+    __mapper_args__ = {'polymorphic_on': assignment_type,
+                       'polymorphic_identity': 'standard'}
 
     @property
     def logical_name(self):
@@ -163,3 +168,16 @@ ARecord.assignments = relation(
                      AddressAssignment.ip == ARecord.ip),
     foreign_keys=[AddressAssignment.ip, AddressAssignment.network_id],
     viewonly=True)
+
+
+class SharedAddressAssignment(AddressAssignment):
+    priority = Column(Integer)
+
+    # As priority is an additional col we cannot make it non-null
+    @validates('priority')
+    def _validate_priority(self, key, value):
+        if not value:
+            raise ValueError("Priority is required")
+
+    __mapper_args__ = {'polymorphic_identity': 'shared'}
+
