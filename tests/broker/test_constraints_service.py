@@ -80,8 +80,8 @@ class TestServiceConstraints(TestBrokerCommand):
         out = self.unauthorizedtest(command.split(" "), auth=True,
                                     msgcheck=False)
         self.matchoutput(out,
-                         "Changing the required services of an archetype "
-                         "requires --justification.",
+                         "The operation has production impact, "
+                         "--justification is required.",
                          command)
 
     def test_165_del_required_afs_no_justification(self):
@@ -89,8 +89,8 @@ class TestServiceConstraints(TestBrokerCommand):
         out = self.unauthorizedtest(command.split(" "), auth=True,
                                     msgcheck=False)
         self.matchoutput(out,
-                         "Changing the required services of an archetype "
-                         "requires --justification.",
+                         "The operation has production impact, "
+                         "--justification is required.",
                          command)
 
 if __name__ == '__main__':

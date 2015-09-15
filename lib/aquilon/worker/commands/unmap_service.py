@@ -21,7 +21,7 @@ from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import (ServiceMap, PersonalityServiceMap, Service,
                                 ServiceInstance, Archetype, Personality,
                                 NetworkEnvironment)
-from aquilon.worker.dbwrappers.change_management import validate_personality_justification
+from aquilon.worker.dbwrappers.change_management import validate_prod_personality
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.dbwrappers.network import get_network_byip
 
@@ -56,8 +56,7 @@ class CommandUnmapService(BrokerCommand):
                                                    compel=True)
 
             for dbstage in dbpersonality.stages.values():
-                validate_personality_justification(dbstage, user,
-                                                   justification, reason)
+                validate_prod_personality(dbstage, user, justification, reason)
 
             q = session.query(PersonalityServiceMap)
             q = q.filter_by(personality=dbpersonality)

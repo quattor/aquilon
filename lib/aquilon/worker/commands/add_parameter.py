@@ -21,7 +21,7 @@ from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.parameter import (set_parameter,
                                                  get_feature_link,
                                                  get_paramdef_for_parameter)
-from aquilon.worker.dbwrappers.change_management import validate_personality_justification
+from aquilon.worker.dbwrappers.change_management import validate_prod_personality
 from aquilon.worker.templates import Plenary, PlenaryCollection
 
 
@@ -50,8 +50,7 @@ class CommandAddParameter(BrokerCommand):
 
         dbstage = dbpersonality.active_stage(personality_stage)
 
-        validate_personality_justification(dbstage, user, justification,
-                                           reason)
+        validate_prod_personality(dbstage, user, justification, reason)
 
         if feature:
             dblink = get_feature_link(session, feature, model, interface,

@@ -22,7 +22,7 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import NetworkEnvironment, StaticRoute, Personality
 from aquilon.aqdb.model.network import get_net_id_from_ip
-from aquilon.worker.dbwrappers.change_management import validate_personality_justification
+from aquilon.worker.dbwrappers.change_management import validate_prod_personality
 from aquilon.worker.dbwrappers.network import get_network_byip
 
 
@@ -76,8 +76,7 @@ class CommandAddStaticRoute(BrokerCommand):
                                                    archetype=archetype,
                                                    compel=True)
             dbstage = dbpersonality.active_stage(personality_stage)
-            validate_personality_justification(dbstage, user, justification,
-                                               reason)
+            validate_prod_personality(dbstage, user, justification, reason)
         else:
             dbstage = None
 

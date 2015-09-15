@@ -16,12 +16,10 @@
 # limitations under the License.
 """Contains the logic for `aq add required service --osname`."""
 
-from aquilon.exceptions_ import ArgumentError, AuthorizationException
-from aquilon.aqdb.model import (Archetype, Personality, PersonalityStage,
-                                OperatingSystem, Service, Host)
-from aquilon.aqdb.model.host_environment import Production
+from aquilon.exceptions_ import ArgumentError
+from aquilon.aqdb.model import Archetype, OperatingSystem, Service
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.commands.deploy import validate_justification
+from aquilon.worker.dbwrappers.change_management import validate_prod_os
 
 
 class CommandAddRequiredServiceOsname(BrokerCommand):
@@ -41,18 +39,8 @@ class CommandAddRequiredServiceOsname(BrokerCommand):
                                           version=osversion,
                                           archetype=dbarchetype, compel=True)
         dbservice = Service.get_unique(session, service, compel=True)
-        prod = Production.get_instance(session)
 
-        q = session.query(Host.hardware_entity_id)
-        q = q.filter_by(operating_system=dbos)
-        q = q.join(PersonalityStage, Personality)
-        q = q.filter_by(host_environment=prod)
-        if q.count():
-            if not justification:
-                raise AuthorizationException("Changing the required services of "
-                                             "an operating system requires "
-                                             "--justification.")
-            validate_justification(user, justification, reason)
+        validate_prod_os(dbos, user, justification, reason)
 
         self._update_dbobj(dbos, dbservice)
         session.flush()
