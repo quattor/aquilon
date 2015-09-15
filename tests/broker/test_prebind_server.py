@@ -127,6 +127,12 @@ class TestPrebindServer(TestBrokerCommand):
                            self.net["aurora2"].usable[244]),
                           command)
 
+    # This test needs to go before clients are added
+    def test_300_early_constraint(self):
+        command = "del service --service aqd --instance ny-prod"
+        out = self.badrequesttest(command.split(" "))
+        self.matchoutput(out, "Service aqd, instance ny-prod is still being "
+                         "provided by servers", command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestPrebindServer)

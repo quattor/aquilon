@@ -55,14 +55,7 @@ class TestServiceConstraints(TestBrokerCommand):
         command = "del service --service chooser1"
         out = self.badrequesttest(command.split(" "))
         self.matchoutput(out, "Service chooser1 is still required by the "
-                         "following personalities: aquilon/unixeng-test@current.",
-                         command)
-
-    def test_140_del_service_instance_with_servers(self):
-        command = "del service --service aqd --instance ny-prod"
-        out = self.badrequesttest(command.split(" "))
-        self.matchoutput(out, "Service aqd, instance ny-prod is still being "
-                         "provided by servers", command)
+                         "following personalities: ", command)
 
     def test_145_verify_del_service_instance_with_servers(self):
         command = "show service --service aqd --instance ny-prod"
@@ -88,6 +81,24 @@ class TestServiceConstraints(TestBrokerCommand):
         command = "del required service --service afs --archetype aquilon"
         out = self.unauthorizedtest(command.split(" "), auth=True,
                                     msgcheck=False)
+        self.matchoutput(out,
+                         "The operation has production impact, "
+                         "--justification is required.",
+                         command)
+
+    def test_170_bind_server(self):
+        command = ['bind_server', '--service', 'dns', '--instance', 'unittest',
+                   '--hostname', 'unittest20.aqd-unittest.ms.com']
+        out = self.unauthorizedtest(command, auth=True, msgcheck=False)
+        self.matchoutput(out,
+                         "The operation has production impact, "
+                         "--justification is required.",
+                         command)
+
+    def test_175_unbind_server(self):
+        command = ['unbind_server', '--service', 'dns',
+                   '--instance', 'unittest', '--position', 1]
+        out = self.unauthorizedtest(command, auth=True, msgcheck=False)
         self.matchoutput(out,
                          "The operation has production impact, "
                          "--justification is required.",
