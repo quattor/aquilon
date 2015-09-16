@@ -304,20 +304,21 @@ class SimpleNetworkList(list):
 class SimpleNetworkListFormatter(ListFormatter):
     protocol = "aqdnetworks_pb2"
     fields = ["Network", "IP", "Netmask", "Sysloc", "Country", "Side", "Network Type", "Discoverable", "Discovered", "Comments"]
+    format_string = '%-16s  %-16s  %-16s  %-32s  %-8s  %-4s  %-14s  %-14s  %-14s  %s'
 
     def format_raw(self, nlist, indent=""):
-        details = [indent + "\t".join(self.fields)]
+        details = [indent + self.format_string % tuple(self.fields)]
         for network in nlist:
-            details.append(indent + str("\t".join([network.name,
-                                                   str(network.ip),
-                                                   str(network.netmask),
-                                                   str(network.location.sysloc()),
-                                                   str(network.location.country),
-                                                   network.side,
-                                                   network.network_type,
-                                                   "False",
-                                                   "False",
-                                                   str(network.comments)])))
+            details.append(indent + self.format_string % (network.name,
+                                                     str(network.ip),
+                                                     str(network.netmask),
+                                                     str(network.location.sysloc()),
+                                                     str(network.location.country),
+                                                     network.side,
+                                                     network.network_type,
+                                                     "False",
+                                                     "False",
+                                                     str(network.comments)))
         return "\n".join(details)
 
     def csv_fields(self, network):
