@@ -1,0 +1,13 @@
+-- Disable autocommit, abort if something goes wrong
+SET autocommit off;
+-- WHENEVER sqlerror EXIT FAILURE ROLLBACK;
+SET serveroutput on;
+
+ALTER TABLE ADDRESS_ASSIGNMENT ADD assignment_type VARCHAR2(32 CHAR);
+ALTER TABLE ADDRESS_ASSIGNMENT ADD priority INTEGER;
+UPDATE ADDRESS_ASSIGNMENT SET assignment_type = 'standard';
+COMMIT;
+
+ALTER TABLE "ADDRESS_ASSIGNMENT" MODIFY (assignment_type CONSTRAINT ADDR_ASSIGN_ASSIGNMENT_TYPE_NN NOT NULL);
+
+QUIT;
