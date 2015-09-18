@@ -20,7 +20,7 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import (Personality, ServiceMap, PersonalityServiceMap,
                                 ServiceInstance, NetworkEnvironment)
-from aquilon.worker.dbwrappers.change_management import validate_personality_justification
+from aquilon.worker.dbwrappers.change_management import validate_prod_personality
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.dbwrappers.network import get_network_byip
 
@@ -52,8 +52,7 @@ class CommandMapService(BrokerCommand):
                                                archetype=archetype, compel=True)
 
             for dbstage in dbpersona.stages.values():
-                validate_personality_justification(dbstage, user,
-                                                   justification, reason)
+                validate_prod_personality(dbstage, user, justification, reason)
 
             map_class = PersonalityServiceMap
             query = session.query(map_class).filter_by(personality=dbpersona)

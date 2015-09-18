@@ -24,7 +24,7 @@ from aquilon.aqdb.model import (Personality, PersonalityESXClusterInfo,
                                 HostEnvironment)
 from aquilon.aqdb.model.cluster import restricted_builtins
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.dbwrappers.change_management import validate_personality_justification
+from aquilon.worker.dbwrappers.change_management import validate_prod_personality
 from aquilon.worker.dbwrappers.grn import lookup_grn
 from aquilon.worker.templates import Plenary, PlenaryCollection
 
@@ -77,11 +77,9 @@ class CommandUpdatePersonality(BrokerCommand):
                 host_environment or grn or eon_id or
                 leave_existing is not None or comments is not None):
             for ver in dbpersona.stages.values():
-                validate_personality_justification(ver, user, justification,
-                                                   reason)
+                validate_prod_personality(ver, user, justification, reason)
         else:
-            validate_personality_justification(dbstage, user, justification,
-                                               reason)
+            validate_prod_personality(dbstage, user, justification, reason)
 
         if vmhost_capacity_function is not None or \
                 vmhost_overcommit_memory is not None:

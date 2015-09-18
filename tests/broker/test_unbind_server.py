@@ -171,7 +171,8 @@ class TestUnbindServer(TestBrokerCommand):
 
     def test_141_unbind_by_position(self):
         command = ["unbind_server", "--service", "dns",
-                   "--instance", "unittest", "--position", 1]
+                   "--instance", "unittest", "--position", 1,
+                   "--justification", "tcm=12345678"]
         self.statustest(command)
 
     def test_142_verify_unbind(self):
@@ -183,13 +184,15 @@ class TestUnbindServer(TestBrokerCommand):
 
     def test_143_unbind_bad_position(self):
         command = ["unbind_server", "--service", "dns",
-                   "--instance", "unittest", "--position", 1]
+                   "--instance", "unittest", "--position", 1,
+                   "--justification", "tcm=12345678"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Invalid server position.", command)
 
     def test_144_unbind_last_by_position(self):
         command = ["unbind_server", "--service", "dns",
-                   "--instance", "unittest", "--position", 0]
+                   "--instance", "unittest", "--position", 0,
+                   "--justification", "tcm=12345678"]
         err = self.statustest(command)
         self.check_last_server_msg(err, command, "dns", "unittest")
 
@@ -205,7 +208,8 @@ class TestUnbindServer(TestBrokerCommand):
             for instance, servers in instances.items():
                 for server in servers:
                     command = ["unbind_server", "--hostname", server,
-                               "--service", service, "--instance", instance]
+                               "--service", service, "--instance", instance,
+                               "--justification", "tcm=12345678"]
                     self.statustest(command)
 
             command = ["show_service", "--service", service]

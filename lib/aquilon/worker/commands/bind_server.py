@@ -20,6 +20,7 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import (ServiceInstance, ServiceInstanceServer,
                                 DnsEnvironment, Cluster, ServiceAddress, Alias)
 from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.dbwrappers.change_management import validate_prod_service_instance
 from aquilon.worker.dbwrappers.host import hostname_to_host
 from aquilon.worker.dbwrappers.resources import get_resource_holder
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
@@ -111,7 +112,8 @@ class CommandBindServer(BrokerCommand):
     required_parameters = ["service", "instance"]
 
     def render(self, session, logger, service, instance, position, hostname,
-               cluster, ip, resourcegroup, service_address, alias, **arguments):
+               cluster, ip, resourcegroup, service_address, alias,
+               justification, reason, user, **arguments):
         # Check for invalid combinations. We allow binding as a server:
         # - a host, in which case the primary IP address will be used
         # - an auxiliary IP address of a host
@@ -127,6 +129,8 @@ class CommandBindServer(BrokerCommand):
 
         dbinstance = ServiceInstance.get_unique(session, service=service,
                                                 name=instance, compel=True)
+
+        validate_prod_service_instance(dbinstance, user, justification, reason)
 
         plenaries = PlenaryCollection(logger=logger)
         plenaries.append(Plenary.get_plenary(dbinstance))

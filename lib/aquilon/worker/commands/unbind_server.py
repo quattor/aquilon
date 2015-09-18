@@ -18,9 +18,10 @@
 
 from aquilon.exceptions_ import ArgumentError, NotFoundException
 from aquilon.aqdb.model import Service, ServiceInstance
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
 from aquilon.worker.commands.bind_server import lookup_target, find_server
+from aquilon.worker.dbwrappers.change_management import validate_prod_service_instance
 
 
 class CommandUnbindServer(BrokerCommand):
@@ -28,7 +29,8 @@ class CommandUnbindServer(BrokerCommand):
     required_parameters = ["service"]
 
     def render(self, session, logger, service, instance, position, hostname,
-               cluster, ip, resourcegroup, service_address, alias, **arguments):
+               cluster, ip, resourcegroup, service_address, alias,
+               justification, reason, user, **arguments):
         dbservice = Service.get_unique(session, service, compel=True)
 
         if instance:
@@ -56,6 +58,8 @@ class CommandUnbindServer(BrokerCommand):
                                    alias)
 
         for dbinstance in dbinstances:
+            validate_prod_service_instance(dbinstance, user, justification, reason)
+
             if position is not None:
                 if position < 0 or position >= len(dbinstance.servers):
                     raise ArgumentError("Invalid server position.")

@@ -19,7 +19,7 @@
 from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import Personality, Service
-from aquilon.worker.dbwrappers.change_management import validate_personality_justification
+from aquilon.worker.dbwrappers.change_management import validate_prod_personality
 
 
 class CommandAddRequiredServicePersonality(BrokerCommand):
@@ -38,8 +38,7 @@ class CommandAddRequiredServicePersonality(BrokerCommand):
                                                archetype=archetype, compel=True)
         dbstage = dbpersonality.active_stage(personality_stage)
         dbservice = Service.get_unique(session, service, compel=True)
-        validate_personality_justification(dbstage, user, justification,
-                                           reason)
+        validate_prod_personality(dbstage, user, justification, reason)
 
         self._update_dbobj(dbstage, dbservice)
         session.flush()

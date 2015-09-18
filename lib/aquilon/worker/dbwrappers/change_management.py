@@ -18,15 +18,18 @@
 
 import re
 
+from sqlalchemy.orm.session import object_session
+
 from aquilon.exceptions_ import AuthorizationException, ArgumentError
-from aquilon.worker.dbwrappers.personality import is_prod_personality_used
+from aquilon.aqdb.model import Host, Cluster, Personality, PersonalityStage
+from aquilon.aqdb.model.host_environment import Production
 
 TCM_RE = re.compile(r"^tcm=([0-9]+)$", re.IGNORECASE)
 SN_RE = re.compile(r"^sn=([a-z]+[0-9]+)$", re.IGNORECASE)
 EMERG_RE = re.compile("emergency")
 
 
-def validate_justification(principal, justification, reason):
+def validate_justification(user, justification, reason):
     result = None
     for valid_re in [TCM_RE, SN_RE, EMERG_RE]:
         result = valid_re.search(justification)
@@ -43,12 +46,61 @@ def validate_justification(principal, justification, reason):
     # edm_validate(result.group(0))
 
 
-def validate_personality_justification(dbpersona, user, justification, reason):
-    if is_prod_personality_used(dbpersona):
-        if not justification:
-            raise AuthorizationException(
-                "{0} is marked production and is under "
-                "change management control. Please specify "
-                "--justification or --justification='emergency' and reason.".format(dbpersona))
+def enforce_justification(user, justification, reason):
+    if not justification:
+        raise AuthorizationException("The operation has production impact, "
+                                     "--justification is required.")
+    validate_justification(user, justification, reason)
 
-        validate_justification(user, justification, reason)
+
+def validate_prod_personality(dbstage, user, justification, reason):
+    session = object_session(dbstage)
+    if dbstage.personality.is_cluster:
+        q = session.query(Cluster.id)
+    else:
+        q = session.query(Host.hardware_entity_id)
+    q = q.filter_by(personality_stage=dbstage)
+    if isinstance(dbstage.host_environment, Production) and q.count() > 0:
+        enforce_justification(user, justification, reason)
+
+
+def validate_prod_archetype(dbarchetype, user, justification, reason):
+    session = object_session(dbarchetype)
+    prod = Production.get_instance(session)
+    if dbarchetype.cluster_type:
+        q = session.query(Cluster.id)
+    else:
+        q = session.query(Host.hardware_entity_id)
+    q = q.join(PersonalityStage, Personality)
+    q = q.filter_by(host_environment=prod, archetype=dbarchetype)
+    if q.count() > 0:
+        enforce_justification(user, justification, reason)
+
+
+def validate_prod_os(dbos, user, justification, reason):
+    session = object_session(dbos)
+    prod = Production.get_instance(session)
+    q = session.query(Host.hardware_entity_id)
+    q = q.filter_by(operating_system=dbos)
+    q = q.join(PersonalityStage, Personality)
+    q = q.filter_by(host_environment=prod)
+    if q.count() > 0:
+        enforce_justification(user, justification, reason)
+
+
+def validate_prod_service_instance(dbinstance, user, justification, reason):
+    session = object_session(dbinstance)
+    prod = Production.get_instance(session)
+
+    q1 = session.query(Cluster.id)
+    q1 = q1.filter(Cluster.services_used.contains(dbinstance))
+    q1 = q1.join(PersonalityStage, Personality)
+    q1 = q1.filter_by(host_environment=prod)
+
+    q2 = session.query(Host.hardware_entity_id)
+    q2 = q2.filter(Host.services_used.contains(dbinstance))
+    q2 = q2.join(PersonalityStage, Personality)
+    q2 = q2.filter_by(host_environment=prod)
+
+    if q1.count() > 0 or q2.count() > 0:
+        enforce_justification(user, justification, reason)

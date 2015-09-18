@@ -16,12 +16,10 @@
 # limitations under the License.
 """Contains the logic for `aq add required service`."""
 
-from aquilon.exceptions_ import ArgumentError, AuthorizationException
-from aquilon.aqdb.model import (Archetype, Personality, PersonalityStage,
-                                Service, Host, Cluster)
-from aquilon.aqdb.model.host_environment import Production
+from aquilon.exceptions_ import ArgumentError
+from aquilon.aqdb.model import Archetype, Service
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.dbwrappers.change_management import validate_justification
+from aquilon.worker.dbwrappers.change_management import validate_prod_archetype
 
 
 class CommandAddRequiredService(BrokerCommand):
@@ -38,22 +36,8 @@ class CommandAddRequiredService(BrokerCommand):
                reason, **arguments):
         dbarchetype = Archetype.get_unique(session, archetype, compel=True)
         dbservice = Service.get_unique(session, name=service, compel=True)
-        prod = Production.get_instance(session)
 
-        # Are any production hosts/clusters impacted?
-        if dbarchetype.cluster_type:
-            q = session.query(Cluster.id)
-        else:
-            q = session.query(Host.hardware_entity_id)
-        q = q.join(PersonalityStage, Personality)
-        q = q.filter_by(host_environment=prod, archetype=dbarchetype)
-
-        if q.count():
-            if not justification:
-                raise AuthorizationException("Changing the required services of "
-                                             "an archetype requires "
-                                             "--justification.")
-            validate_justification(user, justification, reason)
+        validate_prod_archetype(dbarchetype, user, justification, reason)
 
         self._update_dbobj(dbarchetype, dbservice)
 

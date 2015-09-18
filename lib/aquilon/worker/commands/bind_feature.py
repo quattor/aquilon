@@ -25,7 +25,7 @@ from aquilon.aqdb.model import (Feature, Archetype, Personality,
                                 CompileableMixin)
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.change_management import (validate_justification,
-                                                         validate_personality_justification)
+                                                         validate_prod_personality)
 from aquilon.worker.dbwrappers.feature import add_link, check_feature_template
 from aquilon.worker.templates import Plenary, PlenaryCollection
 
@@ -114,8 +114,7 @@ class CommandBindFeature(BrokerCommand):
                                                  "do not match requires --justification.")
                 validate_justification(user, justification, reason)
             else:
-                validate_personality_justification(dbstage, user,
-                                                   justification, reason)
+                validate_prod_personality(dbstage, user, justification, reason)
         else:
             if personalities and not justification:
                 raise AuthorizationException("Changing feature bindings for "
