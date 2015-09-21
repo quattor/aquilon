@@ -542,7 +542,7 @@ class TestUpdateMachine(TestBrokerCommand):
                    "--uri", "file:///somepath/to/ovf"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "URI can be specified only for virtual "
-                         "appliances and the model's type is blade",
+                         "machines and the model's type is blade",
                          command)
 
     def test_2035_verify_reject_machine_uri(self):

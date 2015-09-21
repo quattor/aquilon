@@ -111,9 +111,9 @@ def create_machine(config, session, logger, machine, dblocation, dbmodel,
     if uri is None:
         uri = recipe.get("uri", None)
     if uri:
-        if not dbmodel.model_type.isVirtualAppliance():
+        if not dbmodel.model_type.isVirtualMachineType():
             raise ArgumentError("URI can be specified only for virtual "
-                                "appliances and the model's type is %s." %
+                                "machines and the model's type is %s." %
                                 dbmodel.model_type)
         dbmachine.uri = uri
 

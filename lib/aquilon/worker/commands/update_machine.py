@@ -280,9 +280,9 @@ class CommandUpdateMachine(BrokerCommand):
         if comments is not None:
             dbmachine.comments = comments
 
-        if uri and not dbmachine.model.model_type.isVirtualAppliance():
+        if uri and not dbmachine.model.model_type.isVirtualMachineType():
             raise ArgumentError("URI can be specified only for virtual "
-                                "appliances and the model's type is %s" %
+                                "machines and the model's type is %s" %
                                 dbmachine.model.model_type)
 
         if uri:
