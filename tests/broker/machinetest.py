@@ -17,6 +17,7 @@
 """ Helper classes for machine testing """
 
 from collections import defaultdict
+import json
 
 
 class MachineData(object):
@@ -25,6 +26,7 @@ class MachineData(object):
         self.model = model
         self.comments = None
         self.interfaces = {}
+        self.disks = {}
         self.manager_iface = None
         self.manager_ip = None
         # Other attributes are created on-demand based on the parameters. If you
@@ -47,12 +49,20 @@ def guess_interfaces(kwargs, eth0_default=True):
     return sorted(ifnames)
 
 
+def guess_disks(kwargs):
+    disks = set()
+
+    disks.update(arg[0:-5] for arg in kwargs if arg.endswith("_size"))
+    return sorted(disks)
+
+
 class MachineTestMixin(object):
     def verify_show_machine(self, name, interfaces=None, zebra=False, model=None,
                             vendor=None, cluster=None, vmhost=None, memory=None,
                             **kwargs):
         if not interfaces:
             interfaces = guess_interfaces(kwargs)
+        disks = guess_disks(kwargs)
 
         # Now do some basic tests. We cannot test for information that was not
         # specified directly but comes from other sources (defaults, model
@@ -66,12 +76,18 @@ class MachineTestMixin(object):
         if vmhost:
             self.matchoutput(show_out, "Hosted by: Host %s" % vmhost, show_cmd)
 
-        for arg in ["desk", "chassis", "slot", "serial", "comments"]:
+        for arg in ["desk", "chassis", "slot", "serial"]:
             if arg in kwargs:
                 self.matchoutput(show_out, "%s: %s" %
                                  (arg.title(), kwargs[arg]), show_cmd)
             else:
                 self.matchclean(show_out, arg.title(), show_cmd)
+
+        # No matchclean() for comments - interfaces, disks, etc. may also have
+        # comments
+        if "comments" in kwargs:
+            self.matchoutput(show_out, "Comments: %s" % kwargs["comments"],
+                             show_cmd)
 
         # Specifying chassis will put the machine inside a rack, so we can't use
         # matchclean() if the rack was not specified explicitly
@@ -123,6 +139,7 @@ class MachineTestMixin(object):
                 regexp += r"\s+Vendor: %s Model: %s$" % (vendor, params["model"])
             else:
                 regexp += r"\s+Vendor: generic Model: generic_nic$"
+
             if "pg" in params:
                 regexp += r"\s+Port Group: %s" % params["pg"]
 
@@ -131,6 +148,31 @@ class MachineTestMixin(object):
                 regexp += r"\s+Provides: %s \[%s\]$" % (
                     params["fqdn"].replace(".", r"\."),
                     str(params["ip"]).replace(".", r"\."))
+            else:
+                # FIXME: If the IP was passed to create_host(), then it will not
+                # be part of the per-interface parameters
+                regexp += r"(\s+Network Environment:.*$\s+Provides:.*$)?"
+
+            if "comments" in params:
+                regexp += r"\s+Comments: %s$" % params["comments"]
+
+            self.searchoutput(show_out, regexp, show_cmd)
+
+        disk_params = defaultdict(dict)
+        for disk_name in disks:
+            for name, value in kwargs.items():
+                if name.startswith(disk_name + "_"):
+                    disk_params[disk_name][name[len(disk_name) + 1:]] = value
+
+        for disk_name, params in disk_params.items():
+            regexp = r"Disk: %s %d GB %s \(local\).*$\s*" % (
+                disk_name, params["size"], params["controller"])
+            if "address" in params:
+                regexp += "Address: " + params["address"] + r"\s*"
+            if "wwn" in params:
+                regexp += "WWN: " + params["wwn"] + r"\s*"
+            if "bus_address" in params:
+                regexp += "Controller Bus Address: " + params["bus_address"] + r"\s*"
 
             self.searchoutput(show_out, regexp, show_cmd)
 
@@ -143,12 +185,13 @@ class MachineTestMixin(object):
             interfaces = guess_interfaces(kwargs)
 
         machdef = MachineData(name, model)
+        recipe = {}
 
         # We assume the vendor will be guessed
         add_machine_args = ["--machine", name, "--model", model]
 
-        for optional in ["cpucount", "cpuvendor", "cpuname",
-                         "memory", "chassis", "slot", "serial", "comments",
+        # Options which must be passed on the command line
+        for optional in ["chassis", "slot", "serial", "comments",
                          "cluster", "vmhost", "rack", "desk"]:
             if optional not in kwargs:
                 continue
@@ -156,27 +199,54 @@ class MachineTestMixin(object):
             setattr(machdef, optional, value)
             add_machine_args.extend(["--" + optional, value])
 
-        self.noouttest(["add_machine"] + add_machine_args)
+        # Options which can be passed as recipe
+        for optional in ["cpucount", "cpuvendor", "cpuname", "memory"]:
+            if optional not in kwargs:
+                continue
+            value = kwargs.pop(optional)
+            setattr(machdef, optional, value)
+            recipe[optional] = value
+
+        if interfaces:
+            recipe["interfaces"] = defaultdict(dict)
 
         for nic_name in interfaces:
             params = {}
-            add_iface_args = ["add_interface", "--machine", name,
-                              "--interface", nic_name]
 
-            for arg_name in ["mac", "pg", "model", "vendor"]:
+            for arg_name in ["mac", "pg", "model", "vendor", "comments"]:
                 if nic_name + "_" + arg_name in kwargs:
                     value = kwargs.pop(nic_name + "_" + arg_name)
-                    add_iface_args.extend(["--" + arg_name, value])
                     params[arg_name] = value
+                    recipe["interfaces"][nic_name][arg_name] = value
 
-            # Skip unknown interface-related parameters
+            # Skip parameters not relevant for add_machine (e.g. IP address)
             for arg_name in kwargs.keys()[:]:
                 if arg_name.startswith(nic_name + "_"):
                     params[arg_name[len(nic_name) + 1:]] = kwargs.pop(arg_name)
 
-            self.noouttest(add_iface_args)
-
             machdef.interfaces[nic_name] = params
+
+        disks = guess_disks(kwargs)
+        if disks:
+            recipe["disks"] = {}
+
+        for disk_name in disks:
+            params = {}
+            for arg_name in ["size", "controller", "address", "wwn",
+                             "bus_address", "share",
+                             "filesystem", "resourcegroup"]:
+                if disk_name + "_" + arg_name in kwargs:
+                    value = kwargs.pop(disk_name + "_" + arg_name)
+                    params[arg_name] = value
+
+            machdef.disks[disk_name] = params
+            recipe["disks"][disk_name] = params
+
+        if recipe:
+            add_machine_args.append("--recipe")
+            add_machine_args.append(json.dumps(recipe))
+
+        self.noouttest(["add_machine"] + add_machine_args)
 
         if kwargs:
             raise ValueError("Unprocessed arguments: %r" % kwargs)
@@ -268,7 +338,11 @@ class MachineTestMixin(object):
             command.extend(["--zebra_interfaces", ",".join(interfaces)])
         else:
             # FIXME: do not hardcode eth0?
-            self.dsdb_expect_add(hostname, ip, "eth0", ip.mac, comments=machdef.comments)
+            if "eth0_comments" in orig_kwargs:
+                comments = orig_kwargs["eth0_comments"]
+            else:
+                comments = machdef.comments
+            self.dsdb_expect_add(hostname, ip, "eth0", ip.mac, comments=comments)
 
         self.noouttest(command)
 

@@ -36,7 +36,7 @@ class CommandUpdateModel(BrokerCommand):
                        'cpunum': 'cpu_quantity',
                        'memory': 'memory', 'disktype': 'disk_type',
                        'diskcontroller': 'controller_type',
-                       'disksize': 'disk_capacity', 'nics': 'nic_count',
+                       'disksize': 'disk_capacity',
                        'nicmodel': 'name', 'nicvendor': 'vendor'}
 
     def render(self, session, logger, model, vendor, newmodel, newvendor,
@@ -102,7 +102,7 @@ class CommandUpdateModel(BrokerCommand):
                         for arg in nic_args)
         nic_values = [v for v in nic_info.values() if v is not None]
         spec_args = ['cpunum', 'memory', 'disktype', 'diskcontroller',
-                     'disksize', 'nics']
+                     'disksize']
         specs = dict((self.argument_lookup[arg], arguments[arg])
                      for arg in spec_args)
         spec_values = [v for v in specs.values() if v is not None]
@@ -166,9 +166,6 @@ class CommandUpdateModel(BrokerCommand):
             self.update_interface_specs(model=dbmodel, dbmachines=dbmachines,
                                         value=dbnic,
                                         fix_existing=update_existing_machines)
-
-        if arguments['nics'] is not None:
-            dbmodel.machine_specs.nic_count = arguments['nics']
 
         session.flush()
 

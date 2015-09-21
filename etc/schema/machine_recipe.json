@@ -1,0 +1,48 @@
+{
+	"$schema": "http://json-schema.org/draft-04/schema#",
+	"title": "Aquilon machine manifest schema",
+	"type": "object",
+	"properties": {
+		"cpuname": {
+			"description": "Name of the CPU model",
+			"type": "string"
+		},
+		"cpuvendor": {
+			"description": "Name of the CPU vendor",
+			"type": "string"
+		},
+		"cpucount": {
+			"description": "Number of CPU sockets",
+			"type": "integer",
+			"minimum": 0
+		},
+		"memory": {
+			"description": "Amount of memory, in MiB",
+			"type": "integer",
+			"minimum": 0
+		},
+		"disks": {
+			"type": "object",
+			"patternProperties": {
+				"^[a-z0-9]+$": {
+					"$ref": "disk_entry.json#"
+				}
+			},
+			"additionalProperties": false
+		},
+		"interfaces": {
+			"type": "object",
+			"patternProperties": {
+				"^[a-z0-9]+$": {
+					"$ref": "interface_entry.json#"
+				}
+			},
+			"additionalProperties": false
+		},
+		"uri": {
+			"type": "string",
+			"format": "uri"
+		}
+	},
+	"additionalProperties": false
+}

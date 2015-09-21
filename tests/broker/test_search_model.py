@@ -107,7 +107,6 @@ class TestSearchModel(TestBrokerCommand):
         self.matchoutput(out, "MachineSpecs for hp utccissmodel", command)
         self.matchoutput(out, "Cpu: xeon_2500 x 2", command)
         self.matchoutput(out, "Memory: 49152 MB", command)
-        self.matchoutput(out, "NIC count: 2", command)
         self.matchoutput(out, "Disk: c0d0 466 GB cciss (local)",
                          command)
 
@@ -126,7 +125,6 @@ class TestSearchModel(TestBrokerCommand):
         self.matchoutput(out, "MachineSpecs for hp utccissmodel", command)
         self.matchoutput(out, "Cpu: xeon_2500 x 2", command)
         self.matchoutput(out, "Memory: 49152 MB", command)
-        self.matchoutput(out, "NIC count: 2", command)
         self.matchoutput(out, "Disk: c0d0 466 GB cciss (local)",
                          command)
 

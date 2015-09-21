@@ -91,7 +91,7 @@ class TestAddAquilonHost(TestBrokerCommand):
         self.noouttest(["add", "host", "--archetype", "aquilon",
                         "--hostname", "unittest12.aqd-unittest.ms.com",
                         "--ip", ip, "--buildstatus", "blind",
-                        "--machine", "ut3s01p1a", "--domain", "unittest"])
+                        "--machine", "ut3s01p1", "--domain", "unittest"])
         self.dsdb_verify()
 
     def test_115_show_unittest12(self):
@@ -101,35 +101,10 @@ class TestAddAquilonHost(TestBrokerCommand):
                          "Primary Name: unittest12.aqd-unittest.ms.com [%s]" %
                          self.net["unknown0"].usable[7],
                          command)
-        self.matchoutput(out, "Machine: ut3s01p1a", command)
+        self.matchoutput(out, "Machine: ut3s01p1", command)
         self.matchoutput(out, "Model Type: rackmount", command)
         self.matchoutput(out, "Archetype: aquilon", command)
         self.matchoutput(out, "Personality: inventory", command)
-        self.matchoutput(out, "Domain: unittest", command)
-        self.matchoutput(out, "Build Status: blind", command)
-
-    def test_120_add_unittest13(self):
-        ip = self.net["unknown0"].usable[8]
-        self.dsdb_expect_add("unittest13.aqd-unittest.ms.com", ip, "eth0",
-                             ip.mac)
-        self.noouttest(["add", "host", "--archetype", "aquilon",
-                        "--hostname", "unittest13.aqd-unittest.ms.com",
-                        "--ip", ip, "--buildstatus", "blind",
-                        "--machine", "ut3s01p1b", "--domain", "unittest",
-                        "--personality", "compileserver"])
-        self.dsdb_verify()
-
-    def test_125_show_unittest13(self):
-        command = "show host --hostname unittest13.aqd-unittest.ms.com"
-        out = self.commandtest(command.split(" "))
-        self.matchoutput(out,
-                         "Primary Name: unittest13.aqd-unittest.ms.com [%s]" %
-                         self.net["unknown0"].usable[8],
-                         command)
-        self.matchoutput(out, "Machine: ut3s01p1b", command)
-        self.matchoutput(out, "Model Type: rackmount", command)
-        self.matchoutput(out, "Archetype: aquilon", command)
-        self.matchoutput(out, "Personality: compileserver", command)
         self.matchoutput(out, "Domain: unittest", command)
         self.matchoutput(out, "Build Status: blind", command)
 

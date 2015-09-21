@@ -44,7 +44,7 @@ class TestUpdateModel(TestBrokerCommand):
 
     def test_100_updateexisting(self):
         command = ["update_model", "--model=utmedium", "--vendor=utvendor",
-                   "--cpuname=utcpu", "--cpunum=1", "--memory=4096", "--nics=1",
+                   "--cpuname=utcpu", "--cpunum=1", "--memory=4096",
                    "--disksize=45", "--diskcontroller=scsi",
                    "--update_existing_machines",
                    "--comments", "New model comments"]
@@ -57,7 +57,6 @@ class TestUpdateModel(TestBrokerCommand):
                          command)
         self.matchoutput(out, "Cpu: utcpu x 1", command)
         self.matchoutput(out, "Memory: 4096 MB", command)
-        self.matchoutput(out, "NIC count: 1", command)
         self.matchoutput(out, "Disk: sda 45 GB scsi (virtual_disk)", command)
         self.matchoutput(out, "Comments: New model comments", command)
 
@@ -114,7 +113,6 @@ class TestUpdateModel(TestBrokerCommand):
                          command)
         self.matchoutput(out, "Cpu: xeon_2660 x 1", command)
         self.matchoutput(out, "Memory: 4096 MB", command)
-        self.matchoutput(out, "NIC count: 1", command)
         self.matchoutput(out, "Disk: sda 45 GB scsi (local)", command)
 
     def test_230_verifymachine(self):
@@ -263,7 +261,7 @@ class TestUpdateModel(TestBrokerCommand):
         command = ["update_model", "--model=utblade", "--vendor=aurora_vendor",
                    "--cpuname=utcpu", "--cpunum=2", "--memory=8192",
                    "--disktype=local", "--diskcontroller=scsi", "--disksize=30",
-                   "--nics=2", "--nicmodel=generic_nic", "--nicvendor=generic"]
+                   "--nicmodel=generic_nic", "--nicvendor=generic"]
         self.noouttest(command)
 
     def test_810_verifyspecs(self):
@@ -273,14 +271,13 @@ class TestUpdateModel(TestBrokerCommand):
                          command)
         self.matchoutput(out, "Cpu: utcpu x 2", command)
         self.matchoutput(out, "Memory: 8192 MB", command)
-        self.matchoutput(out, "NIC count: 2", command)
         self.matchoutput(out, "Disk: sda 30 GB scsi (local)", command)
 
     def test_811_addspecsswitch(self):
         command = ['update_model', '--model=uttorswitch', '--vendor=hp',
                    '--cpuname=intel', '--cpunum=1', '--memory=1',
                    '--disktype=local', '--diskcontroller=sata',
-                   '--disksize=1', '--nics=1']
+                   '--disksize=1']
         out = self.badrequesttest(command)
         self.matchoutput(out, "Machine specfications are only valid "
                          "for machine types", command)

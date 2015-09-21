@@ -321,6 +321,8 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
         net = self.net.allocate_network(self, "cards_net", 28, "unknown",
                                         "building", "cards")
         self.create_machine("cardsmachine", "utrackmount", rack="cards1",
+                            cpuname="utcpu", cpucount=2, memory=65536,
+                            sda_size=600, sda_controller="sas",
                             eth0_mac=net.usable[0].mac)
 
     def test_171_host_prefix_no_domain(self):
@@ -418,10 +420,8 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
             if servers < 10:
                 servers += 1
                 hostname = "server%d.aqd-unittest.ms.com" % servers
-                manager = "server%dr.aqd-unittest.ms.com" % servers
             else:
                 hostname = "aquilon%d.aqd-unittest.ms.com" % i
-                manager = "aquilon%dr.aqd-unittest.ms.com" % i
             port = i - 50
             machine = "ut9s03p%d" % port
             self.create_host(hostname, net.usable[port], machine, rack="ut9",
@@ -630,6 +630,8 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
         ip = self.net["zebra_vip"].usable[3]
         self.create_host("infra1.aqd-unittest.ms.com", ip, "ut3c5n13",
                          model="utrackmount", chassis="ut3c5", slot=13,
+                         cpuname="utcpu", cpucount=2, memory=65536,
+                         sda_size=600, sda_controller="sas",
                          eth0_mac=eth0_ip.mac, eth0_ip=eth0_ip,
                          eth0_fqdn="infra1-e0.aqd-unittest.ms.com",
                          eth1_mac=eth1_ip.mac, eth1_ip=eth1_ip,
@@ -642,6 +644,8 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
         ip = self.net["zebra_vip"].usable[4]
         self.create_host("infra1.one-nyp.ms.com", ip, "np3c5n13",
                          model="utrackmount", chassis="np3c5", slot=13,
+                         cpuname="utcpu", cpucount=2, memory=65536,
+                         sda_size=600, sda_controller="sas",
                          eth0_mac=eth0_ip.mac, eth0_ip=eth0_ip,
                          eth0_fqdn="infra1-e0.one-nyp.ms.com",
                          eth1_mac=eth1_ip.mac, eth1_ip=eth1_ip,
@@ -650,15 +654,13 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
 
     def test_440_add_jack_host(self):
         ip = self.net["unknown0"].usable[17]
-        self.dsdb_expect_add("jack.cards.example.com", ip, "eth0", ip.mac,
-                             comments="interface for jack")
-        self.noouttest(["add", "host",
-                        "--hostname", "jack.cards.example.com",
-                        "--ip", ip, "--grn", "grn:/example/cards",
-                        "--machine", "jack", "--domain", "unittest",
-                        "--archetype", "aquilon",
-                        "--personality", "compileserver"])
-        self.dsdb_verify()
+        self.create_host("jack.cards.example.com", ip, "jack",
+                         model="utrackmount", rack="cards1",
+                         cpuname="utcpu", cpucount=2, memory=65536,
+                         sda_size=600, sda_controller="sas",
+                         eth0_mac=ip.mac, eth0_comments="interface for jack",
+                         grn="grn:/example/cards", domain="unittest",
+                         personality="compileserver")
 
     def test_445_verify_jack_grn(self):
         command = "show host --hostname jack.cards.example.com"

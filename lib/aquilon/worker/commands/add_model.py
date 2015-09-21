@@ -28,8 +28,7 @@ class CommandAddModel(BrokerCommand):
 
     def render(self, session, model, vendor, type, cpuname, cpuvendor,
                cpunum, memory, disktype, diskcontroller, disksize,
-               nics, nicmodel, nicvendor,
-               comments, **arguments):
+               nicmodel, nicvendor, comments, **arguments):
         dbvendor = Vendor.get_unique(session, vendor, compel=True)
         Model.get_unique(session, name=model, vendor=dbvendor, preclude=True)
 
@@ -62,6 +61,6 @@ class CommandAddModel(BrokerCommand):
                                            disk_type=disktype,
                                            controller_type=diskcontroller,
                                            disk_capacity=disksize,
-                                           nic_count=nics, nic_model=dbnic)
+                                           nic_model=dbnic)
             session.add(dbmachine_specs)
         return

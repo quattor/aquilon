@@ -24,7 +24,7 @@ thus the code here cannot use super().
 import sys
 import logging
 import errno
-from fcntl import fcntl, F_GETFL, F_SETFL, FD_CLOEXEC
+from fcntl import fcntl, F_GETFD, F_SETFD, FD_CLOEXEC
 
 from twisted.python import log, syslog, logfile
 from twisted.internet import reactor, error
@@ -98,6 +98,8 @@ class BridgeLogHandler(logging.Handler):
     def emit(self, record):
         log.msg(record.getMessage())
 
+def set_close_on_exec(fileno):
+    fcntl(fileno, F_SETFD, fcntl(fileno, F_GETFD, 0) | FD_CLOEXEC)
 
 def set_log_file(logFile, setStdout=True, start=True):
     """Set up twisted log files in a standard way.
@@ -116,8 +118,7 @@ def set_log_file(logFile, setStdout=True, start=True):
     log_file = logfile.LogFile.fromFullPath(logFile, rotateLength=0)
 
     # Make sure fork()ed processes don't inherit the log file.
-    fileno = log_file._file.fileno()
-    fcntl(fileno, F_SETFL, fcntl(fileno, F_GETFL, 0) | FD_CLOEXEC)
+    set_close_on_exec(log_file._file.fileno())
 
     observer = log.FileLogObserver(log_file).emit
     try:
@@ -134,6 +135,7 @@ def set_log_file(logFile, setStdout=True, start=True):
                 except:
                     pass
                 log_file._openFile()
+                set_close_on_exec(log_file._file.fileno())
             signal.signal(signal.SIGUSR1, restartLog)
     if start:
         log.startLoggingWithObserver(observer, setStdout=setStdout)

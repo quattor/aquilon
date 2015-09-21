@@ -113,7 +113,7 @@ class TestAddAuxiliary(TestBrokerCommand):
                    "--ip", self.net["tor_net_0"].usable[0]]
         out = self.badrequesttest(command)
         self.matchoutput(out,
-                         "MAC address %s is already in use" %
+                         "MAC address %s is already used by" %
                          self.net["tor_net_0"].usable[0].mac,
                          command)
 

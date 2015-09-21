@@ -24,11 +24,12 @@ from ipaddr import IPv4Address
 from operator import attrgetter
 import re
 
-from sqlalchemy.sql.expression import desc
-from sqlalchemy.orm import object_session
+from sqlalchemy.orm import aliased, object_session
+from sqlalchemy.sql.expression import desc, type_coerce
 
-from aquilon.aqdb.types import NicType
-from aquilon.exceptions_ import ArgumentError, InternalError
+from aquilon.exceptions_ import ArgumentError, InternalError, AquilonError
+from aquilon.aqdb.types import NicType, MACAddress
+from aquilon.aqdb.column_types import AqMac
 from aquilon.aqdb.model import (Interface, ManagementInterface, ObservedMac,
                                 Fqdn, ARecord, VlanInfo, AddressAssignment,
                                 Model, Bunker, Location, HardwareEntity,
@@ -245,26 +246,6 @@ def generate_ip(session, logger, dbinterface, ip=None, ipfromip=None,
     return ip
 
 
-def describe_interface(session, interface):
-    description = ["%s interface %s has MAC address %s and boot=%s" %
-                   (interface.interface_type, interface.name, interface.mac,
-                    interface.bootable)]
-    hw = interface.hardware_entity
-    description.append("is attached to {0:l}".format(hw))
-    for addr in interface.assignments:
-        for dns_rec in addr.dns_records:
-            if addr.label:
-                description.append("has address {0:a} label "
-                                   "{1}".format(dns_rec, addr.label))
-            else:
-                description.append("has address {0:a}".format(dns_rec))
-    ifaces = session.query(Interface).filter_by(mac=interface.mac).all()
-    if len(ifaces) == 1 and ifaces[0] != interface:
-        description.append("but MAC address %s is in use by %s" %
-                           (interface.mac, format(ifaces[0].hardware_entity)))
-    return ", ".join(description)
-
-
 def set_port_group_phys(session, dbinterface, port_group_name):
     # Physical interface must use a pre-registered port group name
     dbvi = VlanInfo.get_by_pg(session, port_group=port_group_name,
@@ -435,9 +416,8 @@ def get_or_create_interface(session, dbhw_ent, name=None, mac=None,
         dbinterface = q.first()
         if dbinterface and (dbinterface.hardware_entity != dbhw_ent or
                             (name and dbinterface.name != name)):
-            raise ArgumentError("MAC address %s is already in use: %s." %
-                                (mac, describe_interface(session,
-                                                         dbinterface)))
+            raise ArgumentError("MAC address {0!s} is already used by {1:l}."
+                                .format(mac, dbinterface))
 
     if name and not dbinterface:
         for iface in dbhw_ent.interfaces:
@@ -694,3 +674,68 @@ def get_interfaces(dbhw_ent, interfaces, dbnetwork=None):
         raise ArgumentError("The interface list cannot be empty.")
 
     return dbifaces
+
+
+def generate_mac(session, config, dbmachine):
+    """ Generate a mac address for virtual hardware.
+
+    Algorithm:
+
+    * Query for first mac address in aqdb starting with vendor prefix,
+      order by mac descending.
+    * If no address, or address less than prefix start, use prefix start.
+    * If the found address is not suffix end, increment by one and use it.
+    * If the address is suffix end, requery for the full list and scan
+      through for holes. Use the first hole.
+    * If no holes, error. [In this case, we're still not completely dead
+      in the water - the mac address would just need to be given manually.]
+
+    """
+    if not dbmachine.vm_container:
+        raise ArgumentError("Can only automatically generate MAC "
+                            "addresses for virtual hardware.")
+
+    try:
+        mac_start = MACAddress(config.get("broker", "auto_mac_start"))
+    except ValueError:  # pragma: no cover
+        raise AquilonError("The value of auto_mac_start in the [broker] "
+                           "section is not a valid MAC address.")
+    try:
+        mac_end = MACAddress(config.get("broker", "auto_mac_end"))
+    except ValueError:  # pragma: no cover
+        raise AquilonError("The value of auto_mac_end in the [broker] "
+                           "section is not a valid MAC address.")
+
+    q = session.query(Interface.mac)
+    q = q.filter(Interface.mac.between(mac_start, mac_end))
+    q = q.order_by(desc(Interface.mac))
+
+    # Prevent concurrent --automac invocations. We need a separate query for
+    # the FOR UPDATE, because a blocked query won't see the value inserted
+    # by the blocking query.
+    session.execute(q.with_lockmode("update"))
+
+    row = q.first()
+    if not row:
+        return mac_start
+    highest_mac = row.mac
+    if highest_mac < mac_start:
+        return mac_start
+    if highest_mac < mac_end:
+        return highest_mac + 1
+
+    Iface2 = aliased(Interface)
+    q1 = session.query(Iface2.mac)
+    q1 = q1.filter(Iface2.mac == Interface.mac + 1)
+
+    q2 = session.query(type_coerce(Interface.mac + 1, AqMac()).label("mac"))
+    q2 = q2.filter(Interface.mac.between(mac_start, mac_end - 1))
+    q2 = q2.filter(~q1.exists())
+    q2 = q2.order_by(Interface.mac)
+
+    hole = q2.first()
+    if hole:
+        return hole.mac
+
+    raise ArgumentError("All MAC addresses between %s and %s inclusive "
+                        "are currently in use." % (mac_start, mac_end))

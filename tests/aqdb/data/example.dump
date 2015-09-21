@@ -134,26 +134,25 @@ Model(vendor=@dell, name="optiplex_260", model_type="workstation")
 
 MachineSpecs(model=Model(name="hs20-884345u"),
              cpu_model=Model(name="xeon_2660"), cpu_quantity=2, memory=8192,
-             controller_type="scsi", disk_type="local", disk_capacity=36, nic_count=2)
+             controller_type="scsi", disk_type="local", disk_capacity=36)
 MachineSpecs(model=Model(name="hs21-8853"),
              cpu_model=Model(name="xeon_2660"), cpu_quantity=2, memory=8192,
-             controller_type="scsi", disk_type="local", disk_capacity=68, nic_count=2)
+             controller_type="scsi", disk_type="local", disk_capacity=68)
 MachineSpecs(model=Model(name="poweredge_6650"),
              cpu_model=Model(name="xeon_3000"), cpu_quantity=4, memory=16384,
-             controller_type="scsi", disk_type="local", disk_capacity=36, nic_count=2)
+             controller_type="scsi", disk_type="local", disk_capacity=36)
 MachineSpecs(model=Model(name="bl45p"),
              cpu_model=Model(name="opteron_2600"), cpu_quantity=2, memory=32768,
-             controller_type="scsi", disk_type="local", disk_capacity=36, nic_count=2)
+             controller_type="scsi", disk_type="local", disk_capacity=36)
 MachineSpecs(model=Model(name="bl260c"),
              cpu_model=Model(name="xeon_2500"), cpu_quantity=2, memory=24576,
-             controller_type="scsi", disk_type="local", disk_capacity=36, nic_count=2)
+             controller_type="scsi", disk_type="local", disk_capacity=36)
 MachineSpecs(model=Model(name="vb1205xm"),
              cpu_model=Model(name="xeon_2500"), cpu_quantity=2, memory=24576,
-             controller_type="scsi", disk_type="local", disk_capacity=36, nic_count=2)
+             controller_type="scsi", disk_type="local", disk_capacity=36)
 MachineSpecs(model=Model(name="v3160"),
              cpu_model=Model(name="opteron_2600"), cpu_quantity=2, memory=16384,
-             controller_type="fibrechannel", disk_type="local", disk_capacity=0, nic_count=8)
+             controller_type="fibrechannel", disk_type="local", disk_capacity=0)
 MachineSpecs(model=Model(name="v3170"),
              cpu_model=Model(name="opteron_2600"), cpu_quantity=2, memory=16384,
-             controller_type="fibrechannel", disk_type="local", disk_capacity=0, nic_count=8)
-
+             controller_type="fibrechannel", disk_type="local", disk_capacity=0)

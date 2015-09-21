@@ -52,7 +52,6 @@ class MachineSpecs(Base):
     disk_capacity = Column(Integer, nullable=False, default=36)
     controller_type = Column(Enum(64, controller_types), nullable=False)
 
-    nic_count = Column(Integer, nullable=False, default=2)
     nic_model_id = Column(ForeignKey(Model.id, name='%s_nic_model_fk' % _TN),
                           nullable=False, index=True)
 

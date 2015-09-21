@@ -1,0 +1,52 @@
+{
+	"_comment": "The contents of this file should be in sync with the parameters of the add_disk command",
+	"$schema": "http://json-schema.org/draft-04/schema#",
+	"id": "disk_entry#",
+	"type": "object",
+	"properties": {
+		"size": {
+			"description": "Disk size, in GiB",
+			"type": "integer",
+			"minimum": 0
+		},
+		"controller": {
+			"enum": [ "sata", "sas", "scsi", "cciss", "flash", "fibrechannel" ]
+		},
+		"boot": {
+			"type": "boolean"
+		},
+		"address": {
+			"type": "string",
+			"pattern": "^\\d+(:\\d+){1,3}$"
+		},
+		"bus_address": {
+			"type": "string"
+		},
+		"wwn": {
+			"type": "string"
+		},
+		"snapshot": {
+			"type": "boolean"
+		},
+		"share": {
+			"description": "NAS share where the virtual disk image is stored",
+			"type": "string"
+		},
+		"filesystem": {
+			"description": "Filesystem name where the virtual disk image is stored",
+			"type": "string"
+		},
+		"resourcegroup": {
+			"description": "Name of the resourcegroup which holds the share or filesystem",
+			"type": "string"
+		},
+		"iops_limit": {
+			"type": "integer",
+			"minimum": 0
+		},
+		"comments": {
+			"type": "string"
+		}
+	},
+	"required": [ "size", "controller" ]
+}

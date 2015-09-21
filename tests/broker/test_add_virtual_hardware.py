@@ -17,6 +17,8 @@
 # limitations under the License.
 """Module for testing commands that add virtual hardware."""
 
+import json
+
 if __name__ == "__main__":
     import utils
     utils.import_depends()
@@ -295,9 +297,21 @@ class TestAddVirtualHardware(TestBrokerCommand):
     def test_200_add_utmc4_machines(self):
         for i in range(0, 18):
             cluster = "utecl%d" % (5 + (i // 3))
+            share = "utecl%d_share" % (5 + (i // 3))
             machine = "evm%d" % (10 + i)
+            recipe = {
+                "disks": {
+                    "sda": {
+                        "controller": "sata",
+                        "size": 15,
+                        "share": share,
+                        "address": "0:0",
+                    },
+                },
+            }
             self.noouttest(["add", "machine", "--machine", machine,
-                            "--cluster", cluster, "--model", "utmedium"])
+                            "--cluster", cluster, "--model", "utmedium",
+                            "--recipe", json.dumps(recipe)])
 
     def test_201_search_network_fail(self):
         command = ["search_network", "--machine=evm18"]
@@ -399,15 +413,6 @@ class TestAddVirtualHardware(TestBrokerCommand):
         self.noouttest(command)
         self.verifypg()
 
-    def test_230_add_utmc4_disks(self):
-        for i in range(0, 18):
-            share = "utecl%d_share" % (5 + (i // 3))
-            machine = "evm%d" % (10 + i)
-            self.noouttest(["add", "disk", "--machine", machine,
-                            "--disk", "sda", "--controller", "sata",
-                            "--size", "15", "--share", share,
-                            "--address", "0:0"])
-
     def test_240_add_utmc4_aux(self):
         net = self.net["vm_storage_net"]
         for i in range(1, 25):
@@ -446,9 +451,11 @@ class TestAddVirtualHardware(TestBrokerCommand):
 
     def test_260_verifycatmachines(self):
         for i in range(0, 8):
-            command = "cat --machine evm%s" % (10 + i)
+            machine = "evm%d" % (10 + i)
             port_group = "user-v71%d" % (i % 4)
-            out = self.commandtest(command.split(" "))
+            share = "utecl%d_share" % (5 + (i // 3))
+            command = ["cat", "--machine", machine]
+            out = self.commandtest(command)
             self.matchoutput(out, """"location" = "ut.ny.na";""", command)
             self.matchoutput(out,
                              'include { "hardware/machine/utvendor/utmedium" };',
@@ -469,6 +476,18 @@ class TestAddVirtualHardware(TestBrokerCommand):
                               r'"hwaddr", "00:50:56:[0-9a-f:]{8}",\s*'
                               r'"port_group", "%s"\s*\);'
                               % port_group,
+                              command)
+            self.searchoutput(out,
+                              r'"harddisks/\{sda\}" = nlist\(\s*'
+                              r'"address", "0:0",\s*'
+                              r'"boot", true,\s*'
+                              r'"capacity", 15\*GB,\s*'
+                              r'"interface", "sata",\s*'
+                              r'"mountpoint", "/vol/lnn30f1v1/%s",\s*'
+                              r'"path", "%s/sda.vmdk",\s*'
+                              r'"server", "lnn30f1",\s*'
+                              r'"sharename", "%s"\s*'
+                              r'\);' % (share, machine, share),
                               command)
 
     # Because the machines are allocated across portgroups, the IP addresses
