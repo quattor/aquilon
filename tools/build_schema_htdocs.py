@@ -111,7 +111,7 @@ model_group = {
     'personality': {
         'title': 'Personalities',
         'classes': [Personality, PersonalityStage, Archetype, HostEnvironment, Grn,
-                    ParameterHolder, Parameter, PersonalityGrnMap,
+                    Parameter, PersonalityGrnMap,
                     __PersonalityRootUser, __PersonalityRootNetGroup],
     },
     'feature': {

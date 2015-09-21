@@ -19,6 +19,7 @@ from aquilon.exceptions_ import ArgumentError, UnimplementedError
 from aquilon.aqdb.model import Archetype, ArchetypeParamDef, ParamDefinition
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.parameter import validate_param_definition
+from aquilon.utils import validate_template_name
 
 
 class CommandAddParameterDefintionArchetype(BrokerCommand):
@@ -27,18 +28,16 @@ class CommandAddParameterDefintionArchetype(BrokerCommand):
 
     def render(self, session, logger, archetype, template, path, value_type,
                required, activation, default, description, **kwargs):
+        validate_template_name(template, "template")
         dbarchetype = Archetype.get_unique(session, archetype, compel=True)
         if not dbarchetype.is_compileable:
             raise ArgumentError("{0} is not compileable.".format(dbarchetype))
 
-        if not dbarchetype.param_def_holder:
-            dbarchetype.param_def_holder = ArchetypeParamDef()
-
-        # strip slash from path start and end
-        if path.startswith("/"):
-            path = path[1:]
-        if path.endswith("/"):
-            path = path[:-1]
+        try:
+            holder = dbarchetype.param_def_holders[template]
+        except KeyError:
+            holder = ArchetypeParamDef(template=template)
+            dbarchetype.param_def_holders[template] = holder
 
         if not activation:
             activation = 'dispatch'
@@ -48,16 +47,15 @@ class CommandAddParameterDefintionArchetype(BrokerCommand):
                                      "existing hosts to require a rebuild, "
                                      "which is not supported.")
 
+        path = ParamDefinition.normalize_path(path)
         validate_param_definition(path, value_type, default)
 
-        ParamDefinition.get_unique(session, path=path,
-                                   holder=dbarchetype.param_def_holder, preclude=True)
+        ParamDefinition.get_unique(session, path=path, holder=holder,
+                                   preclude=True)
 
-        db_paramdef = ParamDefinition(path=path,
-                                      holder=dbarchetype.param_def_holder,
+        db_paramdef = ParamDefinition(path=path, holder=holder,
                                       value_type=value_type, default=default,
-                                      required=required, template=template,
-                                      activation=activation,
+                                      required=required, activation=activation,
                                       description=description)
         session.add(db_paramdef)
 

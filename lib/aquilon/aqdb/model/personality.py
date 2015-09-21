@@ -207,10 +207,8 @@ class PersonalityStage(Base):
         new = self.__class__(name=name)
 
         with session.no_autoflush:
-            if self.paramholder:
-                new.paramholder = self.paramholder.copy()
-                if self.paramholder.parameter:
-                    new.paramholder.parameter = self.paramholder.parameter.copy()
+            if self.parameter:
+                new.parameter = self.parameter.copy()
 
             new.features.extend(link.copy() for link in self.features)
             new.required_services.extend(self.required_services)
@@ -258,7 +256,8 @@ class __PersonalityRootUser(Base):
     personality_id = Column(ForeignKey(Personality.id, ondelete='CASCADE'),
                             nullable=False)
 
-    user_id = Column(ForeignKey(User.id, ondelete='CASCADE'), nullable=False)
+    user_id = Column(ForeignKey(User.id, ondelete='CASCADE'),
+                     nullable=False, index=True)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
@@ -277,7 +276,7 @@ class __PersonalityRootNetGroup(Base):
                             nullable=False)
 
     netgroup_id = Column(ForeignKey(NetGroupWhiteList.id, ondelete='CASCADE'),
-                         nullable=False)
+                         nullable=False, index=True)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))

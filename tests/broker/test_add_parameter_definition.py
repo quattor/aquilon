@@ -67,6 +67,12 @@ default_param_defs = {
     },
 }
 
+param_features = {
+    "host": ["myfeature", "hostfeature"],
+    "hardware": ["hardwarefeature"],
+    "interface": ["interfacefeature"],
+}
+
 
 class TestAddParameterDefinition(TestBrokerCommand):
     def setUp(self):
@@ -98,12 +104,12 @@ class TestAddParameterDefinition(TestBrokerCommand):
         cmd = ["show_parameter_definition", "--archetype", "aquilon",
                "--path", "testrequired"]
         out = self.commandtest(cmd)
-        self.searchoutput(out,
-                          r'Parameter Definition: testrequired \[required\]\s*'
-                          r'Type: string\s*'
-                          r'Template: foo\s*'
-                          r'Activation: dispatch\s*',
-                          cmd)
+        self.output_equals(out, """
+            Parameter Definition: testrequired [required]
+              Type: string
+              Template: foo
+              Activation: dispatch
+            """, cmd)
 
     def test_120_clean_path(self):
         for path in ["/startslash", "endslash/"]:
@@ -123,6 +129,59 @@ class TestAddParameterDefinition(TestBrokerCommand):
                    "--path=%s" % path]
             self.noouttest(cmd)
 
+    def load_feature_paramdefs(self, feature, feature_type):
+        for path, params in default_param_defs.items():
+            # Activation cannot be set for feature parameters
+            if "activation" in params:
+                continue
+
+            cmd = ["add_parameter_definition", "--feature", feature,
+                   "--type", feature_type, "--path", path]
+            if "type" in params:
+                cmd.extend(["--value_type", params["type"]])
+            if "default" in params:
+                cmd.extend(["--default", params["default"]])
+            if params.get("required", False):
+                cmd.append("--required")
+
+            self.noouttest(cmd)
+
+    def test_200_add_feature_all(self):
+        for feature_type, features in param_features.items():
+            for feature in features:
+                self.load_feature_paramdefs(feature, feature_type)
+
+    def test_205_show_testrequired(self):
+        cmd = ["show_parameter_definition", "--feature", "myfeature", "--type=host",
+               "--path=testrequired"]
+        out = self.commandtest(cmd)
+        self.output_equals(out, """
+            Parameter Definition: testrequired [required]
+              Type: string
+            """, cmd)
+
+    def test_220_clean_path(self):
+        for path in ["/startslash", "endslash/"]:
+            cmd = ["add_parameter_definition", "--feature", "myfeature", "--type=host",
+                   "--path=%s" % path, "--value_type=string"]
+            self.noouttest(cmd)
+        cmd = ["search_parameter_definition", "--feature", "myfeature", "--type=host"]
+        out = self.commandtest(cmd)
+        self.searchoutput(out, r'Parameter Definition: startslash\s*', cmd)
+        self.searchoutput(out, r'Parameter Definition: endslash\s*', cmd)
+
+    def test_230_valid_path(self):
+        for path in ["multi/part1/part2", "noslash", "valid/with_under", "valid/with.dot",
+                     "valid/with-dash", "with_under", "with.dot", "with-dash"]:
+
+            cmd = ["add_parameter_definition", "--path=%s" % path,
+                   "--feature", "myfeature", "--type=host", "--value_type=string"]
+            self.noouttest(cmd)
+
+            cmd = ["del_parameter_definition", "--feature", "myfeature", "--type=host",
+                   "--path=%s" % path]
+            self.noouttest(cmd)
+
     def test_300_add_existing(self):
         cmd = ["add_parameter_definition", "--archetype", "aquilon",
                "--path=teststring", "--value_type=string", "--description=blaah",
@@ -133,6 +192,16 @@ class TestAddParameterDefinition(TestBrokerCommand):
                          "definition holder aquilon already exists.",
                          cmd)
 
+    def test_300_add_feature_existing(self):
+        cmd = ["add_parameter_definition", "--feature", "myfeature", "--type=host",
+               "--path=teststring", "--value_type=string", "--description=blaah",
+               "--required", "--default=default"]
+        err = self.badrequesttest(cmd)
+        self.matchoutput(err,
+                         "Parameter Definition teststring, parameter "
+                         "definition holder myfeature already exists.",
+                         cmd)
+
     def test_300_invalid_defaults(self):
         for path, params in default_param_defs.items():
             if "invalid_default" not in params:
@@ -141,6 +210,17 @@ class TestAddParameterDefinition(TestBrokerCommand):
             cmd = ["add_parameter_definition", "--archetype", "aquilon",
                    "--path", path, "--value_type", params["type"],
                    "--template", "foo", "--default", params["invalid_default"]]
+            out = self.badrequesttest(cmd)
+            self.matchoutput(out, "for default for path=%s" % path, cmd)
+
+    def test_300_invalid_feature_defaults(self):
+        for path, params in default_param_defs.items():
+            if "invalid_default" not in params:
+                continue
+
+            cmd = ["add_parameter_definition", "--feature", "myfeature", "--type", "host",
+                   "--path", path, "--value_type", params["type"],
+                   "--default", params["invalid_default"]]
             out = self.badrequesttest(cmd)
             self.matchoutput(out, "for default for path=%s" % path, cmd)
 
@@ -182,14 +262,70 @@ class TestAddParameterDefinition(TestBrokerCommand):
         cmd = ["show_parameter_definition", "--archetype", "aquilon",
                "--path", "path-does-not-exist"]
         out = self.notfoundtest(cmd)
-        self.matchoutput(out, "Parameter Definition path-does-not-exist, "
-                         "parameter definition holder aquilon not found.", cmd)
+        self.matchoutput(out,
+                         "Parameter definition path-does-not-exist not found.",
+                         cmd)
 
     def test_300_show_archetype_no_params(self):
         cmd = ["show_parameter_definition", "--archetype", "windows",
                "--path", "path-does-not-exist"]
         out = self.notfoundtest(cmd)
-        self.matchoutput(out, "Archetype windows does not have parameters.", cmd)
+        self.matchoutput(out,
+                         "Parameter definition path-does-not-exist not found.",
+                         cmd)
+
+    def test_300_invalid_path_feature(self):
+        for path in ["!badchar", "@badchar", "#badchar", "$badchar", "%badchar", "^badchar",
+                     "&badchar", "*badchar", ":badchar", ";badcharjk", "+badchar"]:
+            cmd = ["add_parameter_definition", "--feature", "myfeature", "--type=host",
+                   "--path=%s" % path, "--value_type=string"]
+            err = self.badrequesttest(cmd)
+            self.matchoutput(err, "Invalid path %s specified, path cannot start with special characters" % path,
+                             cmd)
+
+    def test_300_add_bad_feature_type(self):
+        cmd = ["add_parameter_definition", "--feature", "myfeature",
+               "--type=no-such-type",
+               "--path=testpath", "--value_type=string"]
+        err = self.badrequesttest(cmd)
+        self.matchoutput(err,
+                         "Unknown feature type 'no-such-type'. The valid "
+                         "values are: hardware, host, interface.",
+                         cmd)
+
+    def test_300_update_bad_feature_type(self):
+        cmd = ["update_parameter_definition", "--feature", "myfeature",
+               "--type=no-such-type", "--path=testpath"]
+        err = self.badrequesttest(cmd)
+        self.matchoutput(err,
+                         "Unknown feature type 'no-such-type'. The valid "
+                         "values are: hardware, host, interface.",
+                         cmd)
+
+    def test_300_search_bad_feature_type(self):
+        cmd = ["search_parameter_definition", "--feature", "myfeature",
+               "--type=no-such-type"]
+        err = self.badrequesttest(cmd)
+        self.matchoutput(err,
+                         "Unknown feature type 'no-such-type'. The valid "
+                         "values are: hardware, host, interface.",
+                         cmd)
+
+    def test_300_show_bad_path_feature(self):
+        cmd = ["show_parameter_definition", "--feature", "myfeature",
+               "--type", "host", "--path", "path-does-not-exist"]
+        out = self.notfoundtest(cmd)
+        self.matchoutput(out, "Parameter Definition path-does-not-exist, "
+                         "parameter definition holder myfeature not found.",
+                         cmd)
+
+    def test_300_show_feature_no_params(self):
+        cmd = ["show_parameter_definition", "--feature", "pre_host_no_params",
+               "--type", "host", "--path", "path-does-not-exist"]
+        out = self.notfoundtest(cmd)
+        self.matchoutput(out,
+                         "Host Feature pre_host_no_params does not have parameters.",
+                         cmd)
 
     def test_400_verify_all(self):
         cmd = ["search_parameter_definition", "--archetype", "aquilon"]
@@ -246,6 +382,52 @@ class TestAddParameterDefinition(TestBrokerCommand):
             else:
                 self.assertEqual(param_defs[path].activation, self.proto.DISPATCH)
 
+    def test_410_verify_feature_all(self):
+        cmd = ["search_parameter_definition", "--feature", "myfeature", "--type=host"]
+        out = self.commandtest(cmd)
+
+        for path, params in default_param_defs.items():
+            if "activation" in params:
+                continue
+
+            pattern = "Parameter Definition: " + path
+            if params.get("required", False):
+                pattern += r' \[required\]'
+            pattern += r"\s*"
+            if "type" in params:
+                pattern += "Type: " + params["type"] + r"\s*"
+            else:
+                pattern += r"Type: string\s*"
+            if "default" in params:
+                pattern += "Default: " + params["default"] + r"\s*"
+
+            self.searchoutput(out, pattern, cmd)
+
+        self.matchclean(out, "Activation", cmd)
+
+    def test_410_verify_feature_all_proto(self):
+        cmd = ["search_parameter_definition", "--feature", "myfeature", "--format=proto", "--type=host"]
+        result = self.protobuftest(cmd, expect=10)[:]
+        param_defs = dict((param_def.path, param_def) for param_def in result)
+
+        for path, params in default_param_defs.items():
+            if "activation" in params:
+                continue
+
+            self.assertIn(path, param_defs)
+            self.assertEqual(param_defs[path].template, "")
+            if "type" in params:
+                self.assertEqual(param_defs[path].value_type, params["type"])
+            else:
+                self.assertEqual(param_defs[path].value_type, "string")
+            if "default" in params:
+                self.assertEqual(param_defs[path].default, params["default"])
+            else:
+                self.assertEqual(param_defs[path].default, "")
+            self.assertEqual(param_defs[path].is_required,
+                             params.get("required", False))
+            #self.assertEqual(param_defs[path].activation, self.proto.NONE)
+
     def test_500_update(self):
         cmd = ["update_parameter_definition", "--archetype", "aquilon",
                "--path=testint", "--description=testint",
@@ -254,7 +436,7 @@ class TestAddParameterDefinition(TestBrokerCommand):
         self.matchoutput(out, "You need to run 'aq flush --personalities' for "
                          "the change of the default value to take effect.", cmd)
 
-    def test_510_verify_update(self):
+    def test_505_verify_update(self):
         cmd = ["search_parameter_definition", "--archetype", "aquilon"]
         out = self.commandtest(cmd)
         self.searchoutput(out,
@@ -263,6 +445,22 @@ class TestAddParameterDefinition(TestBrokerCommand):
                           r'Template: foo\s*'
                           r'Default: 100\s*'
                           r'Activation: reboot\s*'
+                          r'Description: testint\s*',
+                          cmd)
+
+    def test_510_update_feature(self):
+        cmd = ["update_parameter_definition", "--feature", "myfeature", "--type=host",
+               "--path=testint", "--description=testint",
+               "--default=100", "--required"]
+        self.noouttest(cmd)
+
+    def test_515_verify_update_feature(self):
+        cmd = ["search_parameter_definition", "--feature", "myfeature", "--type=host"]
+        out = self.commandtest(cmd)
+        self.searchoutput(out,
+                          r'Parameter Definition: testint \[required\]\s*'
+                          r'Type: int\s*'
+                          r'Default: 100\s*'
                           r'Description: testint\s*',
                           cmd)
 

@@ -33,7 +33,7 @@ class Machine(HardwareEntity):
                         primary_key=True)
 
     cpu_model_id = Column(ForeignKey(Model.id, name='machine_cpu_model_fk'),
-                          nullable=False)
+                          nullable=False, index=True)
 
     # TODO: constrain/smallint
     cpu_quantity = Column(Integer, nullable=False, default=2)

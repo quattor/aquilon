@@ -16,7 +16,7 @@
 # limitations under the License.
 """Contains the logic for `aq compile`."""
 
-from sqlalchemy.orm import joinedload, subqueryload
+from sqlalchemy.orm import joinedload
 from sqlalchemy.sql import and_
 
 from aquilon.aqdb.model import (PersonalityStage, Host, Cluster,
@@ -49,8 +49,7 @@ class CommandCompile(BrokerCommand):
             q = q.filter(and_(cls_.branch == dbdomain,
                               cls_.sandbox_author == dbauthor))
             q = q.reset_joinpoint()
-            q = q.options(joinedload('paramholder'),
-                          joinedload('paramholder.parameter'))
+            q = q.options(joinedload('parameter'))
 
             plenaries.extend(Plenary.get_plenary(dbstage) for dbstage in q)
 

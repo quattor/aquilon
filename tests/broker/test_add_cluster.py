@@ -44,16 +44,20 @@ class TestAddCluster(PersonalityTestMixin, TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         default_max = self.config.getint("archetype_hacluster",
                                          "max_members_default")
-        self.matchoutput(out, "High Availability Cluster: utvcs1", command)
-        self.matchoutput(out, "Building: ut", command)
-        self.matchoutput(out, "Max members: %s" % default_max, command)
-        self.matchoutput(out, "Down Hosts Threshold: 0", command)
-        self.matchoutput(out, "Build Status: build", command)
-        self.matchoutput(out, "Personality: hapersonality Archetype: hacluster",
-                         command)
-        self.matchoutput(out, "Domain: unittest", command)
-        self.matchclean(out, "Maintenance Threshold", command)
-        self.matchclean(out, "Comments", command)
+        self.output_equals(out, """
+            High Availability Cluster: utvcs1
+              Building: ut
+                Fullname: Unittest-building
+                Address: unittest address
+                Location Parents: [Organization ms, Hub ny, Continent na, Country us, Campus ny, City ny]
+              Max members: %s
+              Down Hosts Threshold: 0
+              Build Status: build
+              Cluster Personality: hapersonality Archetype: hacluster
+                Environment: dev
+                Owned by GRN: grn:/ms/ei/aquilon/aqd
+              Domain: unittest
+            """ % default_max, command)
 
     def test_12_verify_cat_utvcs1_client(self):
         command = ["cat", "--cluster", "utvcs1", "--client"]
@@ -109,16 +113,21 @@ class TestAddCluster(PersonalityTestMixin, TestBrokerCommand):
     def test_41_verify_utgrid1(self):
         command = "show cluster --cluster utgrid1"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Grid Cluster: utgrid1", command)
-        self.matchoutput(out, "Building: ut", command)
-        self.matchoutput(out, "Down Hosts Threshold: 0 (5%)", command)
-        self.matchoutput(out, "Maintenance Threshold: 0 (6%)", command)
-        self.matchoutput(out, "Build Status: build", command)
-        self.matchoutput(out, "Cluster Personality: hadoop Archetype: gridcluster",
-                         command)
-        self.matchoutput(out, "Domain: unittest", command)
-        self.matchclean(out, "Comments", command)
-        self.matchoutput(out, "Max members: unlimited", command)
+        self.output_equals(out, """
+            Grid Cluster: utgrid1
+              Building: ut
+                Fullname: Unittest-building
+                Address: unittest address
+                Location Parents: [Organization ms, Hub ny, Continent na, Country us, Campus ny, City ny]
+              Max members: unlimited
+              Down Hosts Threshold: 0 (5%)
+              Maintenance Threshold: 0 (6%)
+              Build Status: build
+              Cluster Personality: hadoop Archetype: gridcluster
+                Environment: dev
+                Owned by GRN: grn:/ms/ei/aquilon/aqd
+              Domain: unittest
+            """, command)
 
     def test_43_verifyshowutgrid1proto(self):
         command = ["show_cluster", "--cluster=utgrid1", "--format=proto"]

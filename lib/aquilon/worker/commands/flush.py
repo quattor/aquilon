@@ -249,7 +249,7 @@ class CommandFlush(BrokerCommand):
 
                 q = session.query(Archetype)
                 q = q.options(subqueryload('features'),
-                              joinedload('param_def_holder'))
+                              subqueryload('param_def_holders'))
                 archetypes = q.all()  # pylint: disable=W0612
 
                 q = session.query(ParamDefHolder)
@@ -260,8 +260,7 @@ class CommandFlush(BrokerCommand):
                 q = q.options(joinedload('personality'),
                               subqueryload('grns'),
                               subqueryload('features'),
-                              joinedload('paramholder'),
-                              joinedload('paramholder.parameter'),
+                              joinedload('parameter'),
                               subqueryload('personality.root_users'),
                               subqueryload('personality.root_netgroups'))
                 progress = ProgressReport(logger, q.count(), "personality")

@@ -114,7 +114,7 @@ class Network(Base):
                                     nullable=False)
 
     network_compartment_id = Column(ForeignKey(NetworkCompartment.id),
-                                    nullable=True)
+                                    nullable=True, index=True)
 
     location_id = Column(ForeignKey(Location.id), nullable=False, index=True)
 
@@ -131,7 +131,7 @@ class Network(Base):
 
     network_environment = relation(NetworkEnvironment, innerjoin=True)
 
-    network_compartment = relation(NetworkCompartment, innerjoin=True)
+    network_compartment = relation(NetworkCompartment)
 
     location = relation(Location, innerjoin=True)
 

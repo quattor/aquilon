@@ -97,7 +97,8 @@ class Interface(DeviceLinkMixin, Base):
     port_group_name = Column(AqStr(32), nullable=True)
 
     # FIXME: move to PublicInterface
-    port_group_id = Column(ForeignKey('port_group.id'), nullable=True)
+    port_group_id = Column(ForeignKey('port_group.id'), nullable=True,
+                           index=True)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))

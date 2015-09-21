@@ -17,20 +17,22 @@
 """ Parameter data validation """
 
 from datetime import datetime
+import re
 
 from sqlalchemy import (Column, Integer, DateTime, Sequence, String, Boolean,
-                        Text, ForeignKey)
+                        Text, ForeignKey, UniqueConstraint)
 from sqlalchemy.orm import relation, backref, deferred, validates
+from sqlalchemy.orm.collections import column_mapped_collection
 
-from aquilon.aqdb.model import Base, Archetype, Feature
-from aquilon.aqdb.column_types import Enum
 from aquilon.exceptions_ import ArgumentError, InternalError
-from aquilon.aqdb.column_types import AqStr
+from aquilon.aqdb.column_types import AqStr, Enum
+from aquilon.aqdb.model import Base, Archetype, Feature
 from aquilon.aqdb.model.feature import _ACTIVATION_TYPE
 
 _TN = 'param_definition'
 _PARAM_DEF_HOLDER = 'param_def_holder'
 _PATH_TYPES = ['list', 'string', 'int', 'float', 'boolean', 'json']
+_PATH_RE = re.compile(r'/+')
 
 
 class ParamDefHolder(Base):
@@ -48,7 +50,6 @@ class ParamDefHolder(Base):
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
 
-    __table_args = ({'info': {'unique_fields': ['id']}},)
     __mapper_args__ = {'polymorphic_on': type,
                        'with_polymorphic': '*'}
 
@@ -67,12 +68,18 @@ class ArchetypeParamDef(ParamDefHolder):
     __mapper_args__ = {'polymorphic_identity': 'archetype'}
 
     archetype_id = Column(ForeignKey(Archetype.id, ondelete='CASCADE'),
-                          nullable=True, unique=True)
+                          nullable=True)
+
+    template = Column(String(32))
 
     archetype = relation(Archetype,
-                         backref=backref('param_def_holder', uselist=False,
+                         backref=backref('param_def_holders',
                                          cascade='all, delete-orphan',
-                                         passive_deletes=True))
+                                         passive_deletes=True,
+                                         collection_class=column_mapped_collection(template)))
+
+    __extra_table_args__ = (UniqueConstraint(archetype_id, template,
+                                             name="%s_arch_tmpl_uk" % _PARAM_DEF_HOLDER),)
 
     @property
     def holder_name(self):
@@ -116,7 +123,6 @@ class ParamDefinition(Base):
 
     id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
     path = Column(String(255), nullable=False)
-    template = Column(String(32))
     required = Column(Boolean(name="%s_required_ck" % _TN), default=False,
                       nullable=False)
     value_type = Column(Enum(16, _PATH_TYPES), nullable=False, default="string")
@@ -135,6 +141,20 @@ class ParamDefinition(Base):
 
     __table_args__ = ({'oracle_compress': True,
                        'info': {'unique_fields': ['path', 'holder']}},)
+
+    @staticmethod
+    def normalize_path(path):
+        # Strip leading and trailing slashes, collapse multiple slashes into one
+        path = _PATH_RE.sub("/", path)
+        if path.startswith('/'):
+            path = path[1:]
+        if path.endswith('/'):
+            path = path[:-1]
+        return path
+
+    @validates('path')
+    def validate_path(self, key, value):
+        return self.normalize_path(value)
 
     @classmethod
     def validate_type(cls, value_type):

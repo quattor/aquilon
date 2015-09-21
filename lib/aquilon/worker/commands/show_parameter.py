@@ -30,9 +30,7 @@ class CommandShowParameterPersonality(BrokerCommand):
         dbpersonality = Personality.get_unique(session, name=personality,
                                                archetype=archetype, compel=True)
         dbstage = dbpersonality.default_stage(personality_stage)
-        if not dbstage.paramholder or \
-           not dbstage.paramholder.parameter or \
-           not dbstage.paramholder.parameter.value:
+        if not dbstage.parameter or not dbstage.parameter.value:
             raise NotFoundException("No parameters found for {0:l}."
                                     .format(dbstage))
 
@@ -44,14 +42,14 @@ class CommandShowParameterPersonality(BrokerCommand):
             params = PersonalityProtoParameter()
 
             param_definitions = None
-            param_def_holder = dbpersonality.archetype.param_def_holder
-
-            for param in [dbstage.paramholder.parameter]:
-                if param_def_holder:
+            for param in [dbstage.parameter]:
+                for param_def_holder in dbpersonality.archetype.param_def_holders.values():
                     param_definitions = param_def_holder.param_definitions
                     for param_def in param_definitions:
                         value = param.get_path(param_def.path, compel=False)
                         if value is not None:
+                            if param_def.value_type == "list":
+                                value = ",".join(value)
                             params.append((param_def.path, param_def, value))
 
                 for link in dbstage.features:
@@ -59,10 +57,12 @@ class CommandShowParameterPersonality(BrokerCommand):
                         continue
                     param_definitions = link.feature.param_def_holder.param_definitions
                     for param_def in param_definitions:
-                        value = param.get_feature_path(link, param_def.path,
-                                                       compel=False)
+                        path = Parameter.feature_path(link.feature,
+                                                      param_def.path)
+                        value = param.get_path(path, compel=False)
                         if value is not None:
-                            path = Parameter.feature_path(link, param_def.path)
+                            if param_def.value_type == "list":
+                                value = ",".join(value)
                             params.append((path, param_def, value))
 
             if not params:
@@ -70,4 +70,4 @@ class CommandShowParameterPersonality(BrokerCommand):
                                         .format(dbstage))
             return params
         else:
-            return [dbstage.paramholder.parameter]
+            return [dbstage.parameter]

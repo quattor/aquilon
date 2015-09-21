@@ -38,9 +38,15 @@ class TestAddNetworkEnvironment(TestBrokerCommand):
         command = ["show", "network", "environment",
                    "--network_environment", "excx"]
         out = self.commandtest(command)
-        self.matchoutput(out, "Network Environment: excx", command)
-        self.matchoutput(out, "Building: np", command)
-        self.matchoutput(out, "Comments: Some netenv comments", command)
+        self.output_equals(out, """
+            Network Environment: excx
+              DNS Environment: excx
+              Building: np
+                Fullname: one-nyp
+                Address: 1 NY Plaza
+                Location Parents: [Organization ms, Hub ny, Continent na, Country us, Campus ny, City ny]
+              Comments: Some netenv comments
+            """, command)
 
     def test_110_add_utcolo(self):
         command = ["add", "network", "environment",
@@ -53,9 +59,12 @@ class TestAddNetworkEnvironment(TestBrokerCommand):
         command = ["show", "network", "environment",
                    "--network_environment", "utcolo"]
         out = self.commandtest(command)
-        self.matchoutput(out, "Network Environment: utcolo", command)
-        self.matchclean(out, "Building:", command)
-        self.matchoutput(out, "Comments: Some other netenv comments", command)
+        self.output_equals(out, """
+            Network Environment: utcolo
+              DNS Environment: ut-env
+                Comments: Some DNS env comments
+              Comments: Some other netenv comments
+            """, command)
 
     def test_120_add_cardenv(self):
         command = ["add", "network", "environment",

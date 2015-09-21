@@ -102,8 +102,7 @@ from aquilon.aqdb.model.feature import (Feature, FeatureLink, HostFeature,
                                         HardwareFeature, InterfaceFeature)
 from aquilon.aqdb.model.parameter_definition import (ParamDefinition, ParamDefHolder,
                                                      ArchetypeParamDef, FeatureParamDef)
-from aquilon.aqdb.model.parameter import (Parameter, ParameterHolder,
-                                          PersonalityParameter)
+from aquilon.aqdb.model.parameter import Parameter, PersonalityParameter
 
 # SERVICE
 from aquilon.aqdb.model.service import Service

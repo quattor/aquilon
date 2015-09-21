@@ -53,7 +53,7 @@ class Branch(Base):
     autosync = Column(Boolean(name="%s_autosync_ck" % _TN), nullable=False,
                       default=True)
 
-    owner_id = Column(ForeignKey(UserPrincipal.id), nullable=False)
+    owner_id = Column(ForeignKey(UserPrincipal.id), nullable=False, index=True)
 
     formats = Column(AqStr(16), nullable=True)
 

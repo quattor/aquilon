@@ -26,11 +26,12 @@ class CommandShowParameterDefinitionArchetype(BrokerCommand):
 
     def render(self, session, archetype, path, **arguments):
         dbarchetype = Archetype.get_unique(session, archetype, compel=True)
-        if not dbarchetype.param_def_holder:
-            raise NotFoundException("{0} does not have parameters."
-                                    .format(dbarchetype))
+        for holder in dbarchetype.param_def_holders.values():
+            db_paramdef = ParamDefinition.get_unique(session, path=path,
+                                                     holder=holder)
+            if db_paramdef:
+                break
+        else:
+            raise NotFoundException("Parameter definition %s not found." % path)
 
-        dbparam_def = ParamDefinition.get_unique(session,
-                                                 holder=dbarchetype.param_def_holder,
-                                                 path=path, compel=True)
-        return dbparam_def
+        return db_paramdef

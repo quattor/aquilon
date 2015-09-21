@@ -24,29 +24,15 @@ if __name__ == "__main__":
 import unittest2 as unittest
 from brokertest import TestBrokerCommand
 
-default_features = {
-    "host": ["pre_host",
-             "pre_host_param",
-             "post_host",
-             "myfeature",
-             "hostfeature",
-             "shinynew"],
-    "hardware": ["bios_setup",
-                 "disable_ht",
-                 "hardwarefeature",
-                 "shinynew"],
-    "interface": ["src_route",
-                  "interfacefeature",
-                  "shinynew"],
-}
+from .test_add_feature import default_features
 
 
 class TestDelFeature(TestBrokerCommand):
 
     def test_100_del_features(self):
         for feature_type, features in default_features.items():
-            for feature in features:
-                self.noouttest(["del_feature", "--feature", feature,
+            for name in features:
+                self.noouttest(["del_feature", "--feature", name,
                                 "--type", feature_type])
 
     def test_110_verify_pre(self):

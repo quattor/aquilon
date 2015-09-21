@@ -42,7 +42,7 @@ class MachineSpecs(Base):
     model_id = Column(ForeignKey(Model.id), nullable=False, unique=True)
 
     cpu_model_id = Column(ForeignKey(Model.id, name="%s_cpu_model_fk" % _TN),
-                          nullable=False)
+                          nullable=False, index=True)
 
     cpu_quantity = Column(Integer, nullable=False)  # Constrain to below 512?
 
@@ -54,7 +54,7 @@ class MachineSpecs(Base):
 
     nic_count = Column(Integer, nullable=False, default=2)
     nic_model_id = Column(ForeignKey(Model.id, name='%s_nic_model_fk' % _TN),
-                          nullable=False)
+                          nullable=False, index=True)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))

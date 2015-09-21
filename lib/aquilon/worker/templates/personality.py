@@ -23,7 +23,7 @@ from six import iteritems
 from sqlalchemy.inspection import inspect
 from sqlalchemy.orm import object_session
 
-from aquilon.aqdb.model import PersonalityStage, Parameter, InterfaceFeature
+from aquilon.aqdb.model import PersonalityStage, Parameter
 from aquilon.worker.locks import NoLockKey, PlenaryKey
 from aquilon.worker.templates.base import (Plenary, StructurePlenary,
                                            TemplateFormatter, PlenaryCollection)
@@ -35,21 +35,17 @@ from aquilon.worker.dbwrappers.parameter import validate_value
 LOGGER = logging.getLogger(__name__)
 
 
-def string_to_list(data):
-    return [item.strip() for item in data.split(',') if item]
-
-
 def get_parameters_by_feature(dbstage, dbfeaturelink):
     ret = {}
     param_def_holder = dbfeaturelink.feature.param_def_holder
-    if not param_def_holder or not dbstage.paramholder:
+    if not param_def_holder or not dbstage.parameter:
         return ret
 
-    parameters = [dbstage.paramholder.parameter]
+    parameters = [dbstage.parameter]
     for param_def in param_def_holder.param_definitions:
         for param in parameters:
             if param:
-                value = param.get_feature_path(dbfeaturelink,
+                value = param.get_feature_path(dbfeaturelink.feature,
                                                param_def.path, compel=False)
             else:
                 value = None
@@ -57,8 +53,6 @@ def get_parameters_by_feature(dbstage, dbfeaturelink):
                 value = validate_value("default for path=%s" % param_def.path,
                                        param_def.value_type, param_def.default)
             if value is not None:
-                if param_def.value_type == 'list':
-                    value = string_to_list(value)
                 ret[param_def.path] = value
     return ret
 
@@ -68,16 +62,13 @@ def helper_feature_template(dbstage, featuretemplate, dbfeaturelink, lines):
     params = get_parameters_by_feature(dbstage, dbfeaturelink)
     base_path = "/system/" + dbfeature.cfg_path
 
-    if isinstance(dbfeature, InterfaceFeature) and dbfeaturelink.interface_name:
-        base_path = base_path + "/{%s}" % dbfeaturelink.interface_name
-
     for path in sorted(params.keys()):
         pan_assign(lines, base_path + "/" + path, params[path])
 
     lines.append(featuretemplate.format_raw(dbfeaturelink))
 
 
-def get_path_under_top(path, value, ret):
+def get_path_under_top(path, value):
     """ input variable of type xx/yy would be printed as yy only in the
         particular structure template
         if path is just xx and points to a dict
@@ -87,9 +78,10 @@ def get_path_under_top(path, value, ret):
             ie xx = yy
             then print xx = yy
     """
+    ret = {}
     pparts = Parameter.path_parts(path)
     if not pparts:
-        return
+        return ret
     top = pparts.pop(0)
     if pparts:
         ret[Parameter.topath(pparts)] = value
@@ -98,41 +90,6 @@ def get_path_under_top(path, value, ret):
             ret[k] = value[k]
     else:
         ret[top] = value
-
-
-def get_parameters_by_tmpl(dbstage):
-    ret = defaultdict(dict)
-
-    dbpersonality = dbstage.personality
-    param_def_holder = dbpersonality.archetype.param_def_holder
-    if not param_def_holder:
-        return ret
-
-    if dbstage.paramholder:
-        parameters = [dbstage.paramholder.parameter]
-    else:
-        parameters = []
-
-    for param_def in param_def_holder.param_definitions:
-        for param in parameters:
-            if param:
-                value = param.get_path(param_def.path, compel=False)
-            else:
-                value = None
-            if value is None and param_def.default:
-                value = validate_value("default for path=%s" % param_def.path,
-                                       param_def.value_type, param_def.default)
-            if value is not None:
-                # coerce string list to list
-                if param_def.value_type == 'list':
-                    value = string_to_list(value)
-
-                get_path_under_top(param_def.path, value,
-                                   ret[param_def.template])
-
-        # if all parameters are not defined still generate empty template
-        if param_def.template not in ret:
-            ret[param_def.template] = defaultdict()
     return ret
 
 
@@ -148,15 +105,13 @@ def staged_path(prefix, dbstage, suffix):
 # This class just wraps the (personality, template path) tuple to make parameter
 # plenaries behave the same way.
 class ParameterTemplate(object):
-    def __init__(self, dbstage, template, values):
+    def __init__(self, dbstage, param_def_holder):
         self.personality_stage = dbstage
-        self.template = template
-        self.values = values
-        self.force_delete = False
+        self.param_def_holder = param_def_holder
 
     def __str__(self):
         return "%s/%s" % (self.personality_stage.personality.name,
-                          self.template)
+                          self.param_def_holder.template)
 
 
 class PlenaryPersonality(PlenaryCollection):
@@ -175,8 +130,8 @@ class PlenaryPersonality(PlenaryCollection):
                                                               allow_incomplete=allow_incomplete))
 
         # mulitple structure templates for parameters
-        for path, values in get_parameters_by_tmpl(dbstage).items():
-            ptmpl = ParameterTemplate(dbstage, path, values)
+        for defholder in dbstage.archetype.param_def_holders.values():
+            ptmpl = ParameterTemplate(dbstage, defholder)
             self.append(PlenaryPersonalityParameter.get_plenary(ptmpl,
                                                                 allow_incomplete=allow_incomplete))
 
@@ -315,28 +270,48 @@ class PlenaryPersonalityParameter(StructurePlenary):
 
     @classmethod
     def template_name(cls, ptmpl):
-        return staged_path(cls.prefix, ptmpl.personality_stage, ptmpl.template)
+        return staged_path(cls.prefix, ptmpl.personality_stage,
+                           ptmpl.param_def_holder.template)
 
     @classmethod
     def loadpath(cls, ptmpl):
         return ptmpl.personality_stage.personality.archetype.name
 
-    def __init__(self, ptmpl, **kwargs):
-        super(PlenaryPersonalityParameter, self).__init__(ptmpl, **kwargs)
-        self.parameters = ptmpl.values
-
     def body(self, lines):
-        for path in sorted(self.parameters.keys()):
-            pan_assign(lines, path, self.parameters[path])
+        dbstage = self.dbobj.personality_stage
+        param_def_holder = self.dbobj.param_def_holder
+
+        if dbstage.parameter:
+            parameters = [dbstage.parameter]
+        else:
+            parameters = []
+
+        for param_def in sorted(param_def_holder.param_definitions,
+                                key=attrgetter('path')):
+            value = None
+
+            for param in parameters:
+                value = param.get_path(param_def.path, compel=False)
+                if value is not None:
+                    break
+
+            if value is None and param_def.default:
+                # XXX This is rather convert_value()
+                value = validate_value("default for path=%s" % param_def.path,
+                                       param_def.value_type, param_def.default)
+            if value is not None:
+                values = get_path_under_top(param_def.path, value)
+                for path in sorted(values.keys()):
+                    pan_assign(lines, path, values[path])
 
     def is_deleted(self):
-        # Hack to allow unused templates to get cleaned up
-        if self.dbobj.force_delete:
-            return True
+        for dbobj in (self.dbobj.personality_stage,
+                      self.dbobj.param_def_holder):
+            session = object_session(dbobj)
+            if dbobj in session.deleted or inspect(dbobj).deleted:
+                return True
 
-        dbobj = self.dbobj.personality_stage
-        session = object_session(dbobj)
-        return dbobj in session.deleted or inspect(dbobj).deleted
+        return False
 
     def is_dirty(self):
         session = object_session(self.dbobj.personality_stage)

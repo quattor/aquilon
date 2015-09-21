@@ -240,7 +240,7 @@ class TestParameter(TestBrokerCommand):
                          'espinfo: { '
                          '"class": "INFRASTRUCTURE", '
                          '"function": "production", '
-                         '"users": "someusers, otherusers" }',
+                         '"users": [ "someusers", "otherusers" ] }',
                          SHOW_CMD)
         self.check_match(out, '"testaction": { "command": "/bin/testaction", "user": "user2" }', SHOW_CMD)
         self.check_match(out, '"testaction2": { "command": "/bin/testaction2", "timeout": 100, "user": "user1" } }', SHOW_CMD)
@@ -260,7 +260,7 @@ class TestParameter(TestBrokerCommand):
         self.assertEqual(params['espinfo/class'], 'INFRASTRUCTURE')
 
         self.assertIn('espinfo/users', params)
-        self.assertEqual(params['espinfo/users'], 'someusers, otherusers')
+        self.assertEqual(params['espinfo/users'], 'someusers,otherusers')
 
         self.assertIn('action', params)
         self.assertEqual(params['action'], u'{"testaction": {"command": "/bin/testaction", "user": "user2"}, "testaction2": {"command": "/bin/testaction2", "user": "user1", "timeout": 100}}')
@@ -464,6 +464,7 @@ class TestParameter(TestBrokerCommand):
                           r'//action/testaction2/command\s*'
                           r'//action/testaction2/timeout\s*'
                           r'//action/testaction2/user\s*'
+                          r'//espinfo/users/1\s*'
                           r'//monitoring/metric/_20003/active\s*'
                           r'//monitoring/metric/_20003/class\s*'
                           r'//monitoring/metric/_20003/descr\s*'
@@ -476,7 +477,7 @@ class TestParameter(TestBrokerCommand):
                           r'//testrequired\s*'
                           r'matching Parameters with different values:\s*'
                           r'//espinfo/function value=production, othervalue=development\s*'
-                          r'//espinfo/users value=someusers, otherusers, othervalue=IT / TECHNOLOGY',
+                          r'//espinfo/users/0 value=someusers, othervalue=IT / TECHNOLOGY',
                           cmd)
 
     def test_520_copy_from(self):

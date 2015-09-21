@@ -57,10 +57,11 @@ class TestAddOS(TestBrokerCommand):
     def test_121_show_utos(self):
         command = "show os --archetype utarchetype1 --osname utos --osversion 1.0"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Operating System: utos", command)
-        self.matchoutput(out, "Version: 1.0", command)
-        self.matchoutput(out, "Archetype: utarchetype1", command)
-        self.matchclean(out, "linux", command)
+        self.output_equals(out, """
+            Operating System: utos
+              Version: 1.0
+              Archetype: utarchetype1
+            """, command)
 
     def test_121_show_utos_proto(self):
         command = ["show_os", "--archetype=utarchetype1", "--osname=utos",

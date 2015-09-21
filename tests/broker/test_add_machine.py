@@ -47,17 +47,29 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
     def test_105_show_ut3c5n10(self):
         command = "show machine --machine ut3c5n10"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Machine: ut3c5n10", command)
-        self.matchoutput(out, "Model Type: blade", command)
-        self.matchoutput(out, "Rack: ut3", command)
-        self.matchoutput(out, "Chassis: ut3c5.aqd-unittest.ms.com", command)
-        self.matchoutput(out, "Slot: 10", command)
-        self.matchoutput(out, "Vendor: ibm Model: hs21-8853", command)
-        self.matchoutput(out, "Cpu: xeon_2660 x 2", command)
-        self.matchoutput(out, "Memory: 8192 MB", command)
-        self.matchoutput(out, "Serial: 99C5553", command)
-        self.matchoutput(out, "Comments: Some machine comments", command)
-        self.matchclean(out, "Primary Name:", command)
+        self.output_equals(out, """
+            Machine: ut3c5n10
+              Building: ut
+              Campus: ny
+              City: ny
+              Organization: ms
+              Continent: na
+              Country: us
+              Hub: ny
+              Rack: ut3
+                Row: a
+                Column: 3
+              Room: utroom1
+              Vendor: ibm Model: hs21-8853
+                Model Type: blade
+              Serial: 99C5553
+              Comments: Some machine comments
+              Chassis: ut3c5.aqd-unittest.ms.com
+              Slot: 10
+              Cpu: xeon_2660 x 2
+              Memory: 8192 MB
+              Disk: sda 68 GB scsi (local) [boot]
+            """, command)
 
     def test_105_cat_ut3c5n10(self):
         command = "cat --machine ut3c5n10"
@@ -189,14 +201,28 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
     def test_145_show_ut3c1n3(self):
         command = "show machine --machine ut3c1n3"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Machine: ut3c1n3", command)
-        self.matchoutput(out, "Model Type: blade", command)
-        self.matchoutput(out, "Chassis: ut3c1.aqd-unittest.ms.com", command)
-        self.matchoutput(out, "Slot: 3", command)
-        self.matchoutput(out, "Vendor: ibm Model: hs21-8853", command)
-        self.matchoutput(out, "Cpu: xeon_2660 x 2", command)
-        self.matchoutput(out, "Memory: 8192 MB", command)
-        self.matchoutput(out, "Serial: KPDZ406", command)
+        self.output_equals(out, """
+            Machine: ut3c1n3
+              Building: ut
+              Campus: ny
+              City: ny
+              Organization: ms
+              Continent: na
+              Country: us
+              Hub: ny
+              Rack: ut3
+                Row: a
+                Column: 3
+              Room: utroom1
+              Vendor: ibm Model: hs21-8853
+                Model Type: blade
+              Serial: KPDZ406
+              Chassis: ut3c1.aqd-unittest.ms.com
+              Slot: 3
+              Cpu: xeon_2660 x 2
+              Memory: 8192 MB
+              Disk: sda 68 GB scsi (local) [boot]
+            """, command)
 
     def test_145_cat_ut3c1n3(self):
         command = "cat --machine ut3c1n3"

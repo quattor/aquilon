@@ -283,7 +283,6 @@ from .test_parameter import TestParameter
 from .test_parameter_feature import TestParameterFeature
 from .test_add_parameter_definition import TestAddParameterDefinition
 from .test_del_parameter_definition import TestDelParameterDefinition
-from .test_parameter_definition_feature import TestParameterDefinitionFeature
 from .test_documentation import TestDocumentation
 from .test_setup_params import TestSetupParams
 from .test_consistency import TestConsistency
@@ -315,7 +314,7 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestMergeConflicts,
                      TestGrns,
                      TestAddArchetype, TestAddOS,
-                     TestAddFeature, TestParameterDefinitionFeature,
+                     TestAddFeature,
                      TestAddParameterDefinition, TestSetupParams,
                      TestAddService, TestAddPersonality, TestAddRequiredService,
                      TestOrganization, TestHub, TestContinent, TestCountry,
