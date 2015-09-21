@@ -21,4 +21,7 @@ ALTER TABLE machine_specs MODIFY (cpu_model_id CONSTRAINT machine_specs_cpu_mode
 DROP TABLE cpu;
 DROP SEQUENCE cpu_id_seq;
 
+CREATE INDEX machine_cpu_model_idx ON machine (cpu_model_id);
+CREATE INDEX machine_specs_cpu_model_idx ON machine_specs (cpu_model_id);
+
 QUIT;

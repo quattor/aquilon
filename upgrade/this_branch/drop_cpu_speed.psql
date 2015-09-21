@@ -20,3 +20,6 @@ ALTER TABLE machine_specs ALTER cpu_model_id SET NOT NULL;
 
 DROP TABLE cpu;
 DROP SEQUENCE cpu_id_seq;
+
+CREATE INDEX machine_cpu_model_idx ON machine (cpu_model_id);
+CREATE INDEX machine_specs_cpu_model_idx ON machine_specs (cpu_model_id);

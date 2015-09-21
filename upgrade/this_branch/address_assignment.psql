@@ -1,0 +1,4 @@
+ALTER TABLE address_assignment ADD assignment_type VARCHAR(32);
+ALTER TABLE address_assignment ADD priority INTEGER;
+UPDATE address_assignment SET assignment_type = 'standard';
+ALTER TABLE address_assignment ALTER assignment_type SET NOT NULL;
