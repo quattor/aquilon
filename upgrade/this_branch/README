@@ -1,0 +1,8 @@
+Upgrade notes:
+--------------
+
+- Run the SQL upgrade scripts first. The order should not matter.
+- Run the zz_convert_list_params.py upgrade script. Without any extra
+  arguments, it will roll back the changes at the end.
+- If zz_convert_list_params.py run fine, then run it again with the "--commit"
+  option to make the changes permanent.
