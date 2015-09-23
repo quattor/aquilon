@@ -31,10 +31,10 @@ class ServiceAddress(Resource):
     resource_id = Column(ForeignKey(Resource.id), primary_key=True)
 
     dns_record_id = Column(ForeignKey(ARecord.dns_record_id),
-                           nullable=False, unique=True)
+                           nullable=False, index=True)
 
     dns_record = relation(ARecord, innerjoin=True,
-                          backref=backref('service_address', uselist=False,
+                          backref=backref('service_addresses',
                                           passive_deletes=True))
 
     __table_args__ = ({'info': {'unique_fields': ['name', 'holder']}},)

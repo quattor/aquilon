@@ -38,7 +38,7 @@ class CommandUpdateAddress(BrokerCommand):
                                        dns_environment=dbdns_env, compel=True)
 
         # Updating a service address involves template changes
-        if dbdns_rec.service_address:
+        if dbdns_rec.service_addresses:
             raise ArgumentError("{0} is a service address, use the "
                                 "update_service_address command to change it."
                                 .format(dbdns_rec))

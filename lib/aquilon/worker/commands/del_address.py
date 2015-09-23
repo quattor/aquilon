@@ -71,7 +71,7 @@ class CommandDelAddress(BrokerCommand):
                                 "deleted.".format(dbaddress,
                                                   dbaddress.hardware_entity))
 
-        if dbaddress.service_address:
+        if dbaddress.service_addresses:
             # TODO: print the holder object
             raise ArgumentError("DNS Record {0:a} is used as a service "
                                 "address, therefore it cannot be deleted."

@@ -104,7 +104,7 @@ class ARecord(DnsRecord):
 
     def check_grn_conflict(self, grn):
         super(ARecord, self).check_grn_conflict(grn)
-        if self.service_address:
+        if self.service_addresses:
             raise ArgumentError("{0} is a service address. GRN should not be set "
                                 "but derived from the device.".format(self))
 
