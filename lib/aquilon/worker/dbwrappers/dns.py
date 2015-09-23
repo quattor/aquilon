@@ -150,7 +150,8 @@ def _forbid_dyndns(dbdns_rec):
 def grab_address(session, fqdn, ip, network_environment=None,
                  dns_environment=None, comments=None,
                  allow_restricted_domain=False, allow_multi=False,
-                 allow_reserved=False, relaxed=False, preclude=False):
+                 allow_reserved=False, allow_shared=False, relaxed=False,
+                 preclude=False):
     """
     Take ownership of an address.
 
@@ -171,6 +172,8 @@ def grab_address(session, fqdn, ip, network_environment=None,
             different IP addresses. Deault is False.
         allow_reserved: if True, allow creating a ReservedName instead of an
             ARecord if no IP address was specified. Default is False.
+        allow_shared: if True, allow the same FQDN/IP to be used another time
+            even if its already allocated.
         preclude: if True, forbid taking over an existing DNS record, even if it
             is not referenced by any AddressAssignment records. Default is
             False.
@@ -321,7 +324,7 @@ def grab_address(session, fqdn, ip, network_environment=None,
             raise ArgumentError("IP address {0} is already in use by "
                                 "{1:l}.".format(ip, addr.interface))
 
-        if existing_record.service_addresses:
+        if existing_record.service_addresses and not allow_shared:
             raise ArgumentError("{0} is already being used as a service address."
                                 .format(existing_record))
 
