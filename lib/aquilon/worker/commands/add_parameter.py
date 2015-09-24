@@ -51,6 +51,9 @@ class CommandAddParameter(BrokerCommand):
         if feature:
             dbfeature = Feature.get_unique(session, name=feature, feature_type=type,
                                            compel=True)
+            if dbfeature not in [link.feature for link in dbstage.features]:
+                raise ArgumentError("{0} is not bound to {1:l}."
+                                    .format(dbfeature, dbstage))
             holders = [dbfeature.param_def_holder]
         else:
             holders = dbpersonality.archetype.param_def_holders.values()
