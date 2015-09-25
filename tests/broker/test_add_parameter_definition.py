@@ -464,6 +464,21 @@ class TestAddParameterDefinition(TestBrokerCommand):
                           r'Description: testint\s*',
                           cmd)
 
+    def test_520_update_norequired(self):
+        cmd = ["update_parameter_definition", "--feature", "myfeature", "--type=host",
+               "--path=testint", "--norequired"]
+        self.noouttest(cmd)
+
+    def test_525_verify_update_feature(self):
+        cmd = ["search_parameter_definition", "--feature", "myfeature", "--type=host"]
+        out = self.commandtest(cmd)
+        self.searchoutput(out,
+                          r'Parameter Definition: testint\s*'
+                          r'Type: int\s*'
+                          r'Default: 100\s*'
+                          r'Description: testint\s*',
+                          cmd)
+
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddParameterDefinition)
     unittest.TextTestRunner(verbosity=2).run(suite)
