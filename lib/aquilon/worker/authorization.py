@@ -372,6 +372,7 @@ class AuthorizationBroker(object):
                               'manage_hostname', 'manage_list',
                               'manage_cluster',
                               'map_grn', 'unmap_grn',
+                              'promote', 'demote',
                               'unmap_grn_clearall',
                               'make', 'make_cluster_cluster',
                               'make_cluster_metacluster']:
