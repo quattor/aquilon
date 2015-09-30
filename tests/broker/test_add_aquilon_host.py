@@ -21,7 +21,7 @@ if __name__ == "__main__":
     import utils
     utils.import_depends()
 
-import unittest2 as unittest
+import unittest
 from brokertest import TestBrokerCommand
 
 # TODO: this file should be merged into test_add_host.py

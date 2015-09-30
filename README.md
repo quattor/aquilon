@@ -6,11 +6,11 @@ Dependencies
 
 Add EPEL repository.
 
-Under Scientific Linux 6, install the following RPMs:
+Under Scientific Linux 7, install the following RPMs:
 
-*   python-2.6.5
-*   python-devel-2.6.5
-*   python-setuptools-0.6.10
+*   python
+*   python-devel
+*   python-setuptools
 *   python-dateutil
 *   python-cdb
 *   python-lxml
@@ -18,9 +18,9 @@ Under Scientific Linux 6, install the following RPMs:
 *   PyYAML
 *   protobuf-compiler (to build the protocol buffers)
 *   protobuf-python
-*   gcc-4.4.4
-*   git-1.7.1
-*   git-daemon-1.7.1
+*   gcc
+*   git
+*   git-daemon
 *   ant-contrib-1.0
 *   make
 
@@ -36,7 +36,7 @@ installation](http://tldp.org/HOWTO/Kerberos-Infrastructure-HOWTO/install.html).
 /etc/krb5.conf, change server to servername in [realms] section.
 
 
-If using a different distribution, you will need python 2.6.x and git
+If using a different distribution, you will need python 2.7.x and git
 1.7.x.
 
 * protobuf
@@ -93,7 +93,7 @@ installed - that's fine.  Some versions may fail to install, and the
 current stable version will be installed instead.
 
 ```bash
-python2.6 aq_env.py --python=python2.6 --prompt="(aquilon) " /usr/local/aquilon/pythonenv --system-site-packages
+python2.7 aq_env.py --python=python2.7 --prompt="(aquilon) " /usr/local/aquilon/pythonenv --system-site-packages
 ```
 
 (look in following for installed files
@@ -214,5 +214,5 @@ git daemon --export-all --base-path=/var /var/quattor/template-king/ &
 # production service...
 
 ```bash
-python2.6 /opt/aquilon/bin/twistd.py --logfile=/var/log/aqd.log aqd
+python2.7 /opt/aquilon/bin/twistd.py --logfile=/var/log/aqd.log aqd
 ```

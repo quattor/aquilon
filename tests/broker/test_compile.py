@@ -32,7 +32,7 @@ if __name__ == "__main__":
     utils.import_depends()
 
 import xml.etree.ElementTree as ET
-import unittest2 as unittest
+import unittest
 from brokertest import TestBrokerCommand
 from notificationtest import VerifyNotificationsMixin
 

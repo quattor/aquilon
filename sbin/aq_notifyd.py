@@ -24,7 +24,6 @@ from threading import Thread, Condition
 
 # -- begin path_setup --
 import ms.version
-ms.version.addpkg('argparse', '1.2.1')
 ms.version.addpkg('twisted', '12.0.0')
 ms.version.addpkg('zope.interface', '3.6.1')
 

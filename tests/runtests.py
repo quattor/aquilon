@@ -26,7 +26,7 @@ from shutil import rmtree
 from subprocess import call
 
 import depends  # pylint: disable=W0611
-import unittest2 as unittest
+import unittest
 
 import argparse
 

@@ -23,7 +23,6 @@ import logging
 # -- begin path_setup --
 import ms.version
 ms.version.addpkg('ipython', '1.1.0')
-ms.version.addpkg('argparse', '1.2.1')
 
 BINDIR = os.path.dirname(os.path.realpath(sys.argv[0]))
 LIBDIR = os.path.join(BINDIR, "..", "lib")

@@ -23,7 +23,7 @@ if __name__ == "__main__":
     from broker import utils
     utils.import_depends()
 
-import unittest2 as unittest
+import unittest
 from broker.brokertest import TestBrokerCommand
 from broker.grntest import VerifyGrnsMixin
 

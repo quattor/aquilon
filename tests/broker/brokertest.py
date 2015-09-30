@@ -18,7 +18,7 @@
 
 import os
 import sys
-import unittest2 as unittest
+import unittest
 from subprocess import Popen, PIPE
 from lxml import etree
 import re

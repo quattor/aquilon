@@ -21,7 +21,7 @@ if __name__ == "__main__":
     import utils
     utils.import_depends()
 
-import unittest2 as unittest
+import unittest
 from brokertest import TestBrokerCommand
 
 AUTHERR = "Changing feature bindings for a owner_only feature where owner grns do not match requires --justification."
