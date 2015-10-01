@@ -526,13 +526,17 @@ class TestBrokerCommand(unittest.TestCase):
             # Some reasonable defaults...
             path = ["/bin", "/usr/bin"]
 
-        # Path to the Python interpreter
-        path.insert(0, os.path.dirname(sys.executable))
+        # The 'aq' command need to run some external tools, so make sure those
+        # will be found
+        for exe in [sys.executable,
+                    cls.config.lookup_tool("git"),
+                    cls.config.lookup_tool("knc")]:
+            if exe[0] != "/":
+                continue
 
-        # The aq command calls git, so it must be part of $PATH
-        git_path = cls.config.lookup_tool("git")
-        if git_path[0] == "/":
-            path.insert(0, os.path.dirname(git_path))
+            dir = os.path.dirname(exe)
+            if dir not in path:
+                path.insert(0, dir)
 
         newenv["PATH"] = ":".join(path)
         return newenv
