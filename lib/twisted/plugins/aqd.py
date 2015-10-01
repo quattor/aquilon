@@ -22,7 +22,6 @@ import sys
 # This is done by the wrapper script.
 # import aquilon.worker.depends
 
-import coverage
 from zope.interface import implements
 from twisted.python import usage, log
 from twisted.plugin import IPlugin
@@ -89,6 +88,8 @@ class AQDMaker(object):
         # Start up coverage ASAP.
         coverage_dir = options["coveragedir"]
         if coverage_dir:
+            import coverage
+
             os.makedirs(coverage_dir, 0o755)
             if options["coveragerc"]:
                 coveragerc = options["coveragerc"]
