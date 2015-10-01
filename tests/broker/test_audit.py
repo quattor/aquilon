@@ -91,7 +91,7 @@ class TestAudit(TestBrokerCommand):
         """ test activity on building 'ut' took place """
         command = ["search_audit", "--keyword", "ut"]
         out = self.commandtest(command)
-        self.searchoutput(out, self.user, command)
+        self.searchoutput(out, self.principal, command)
         for line in out.splitlines():
             m = self.searchoutput(line, AUDIT_RAW_RE, command)
             self.searchoutput(m.group('args'), "--[a-z]+='ut'", line)
@@ -122,20 +122,20 @@ class TestAudit(TestBrokerCommand):
 
     def test_210_user(self):
         """ test search audit by user name """
-        command = ["search_audit", "--username", self.user]
+        command = ["search_audit", "--username", self.principal]
         out = self.commandtest(command)
-        self.searchoutput(out, self.user, command)
+        self.searchoutput(out, self.principal, command)
         for line in out.splitlines():
             m = self.searchoutput(line, AUDIT_RAW_RE, command)
-            self.assertEqual(m.group('user'), self.user,
+            self.assertEqual(m.group('principal'), self.principal,
                              "Expected user %s but got %s in line '%s'" %
-                             (self.user, m.group('user'), line))
+                             (self.principal, m.group('principal'), line))
 
     def test_220_cmd_protobuf(self):
         """ test search audit by command with protobuf output """
         # Need to truncate time to seconds.
         my_start_time = datetime.fromtimestamp(int(time()), tz=tzutc())
-        command = ["search_audit", "--username", self.user,
+        command = ["search_audit", "--username", self.principal,
                    "--command", "search_audit", "--format", "proto"]
         outlist = self.protobuftest(command)
         my_end_time = datetime.fromtimestamp(int(time()), tz=tzutc())
@@ -147,7 +147,7 @@ class TestAudit(TestBrokerCommand):
                             "Expected transaction start time %s >= "
                             "test start time %s" %
                             (tran_start_time, start_time))
-            self.assertTrue(tran.username.startswith(self.user + '@'))
+            self.assertEqual(tran.username, self.principal)
             self.assertTrue(tran.is_readonly)
             self.assertEqual(tran.command, 'search_audit')
             if tran.return_code:
@@ -192,13 +192,13 @@ class TestAudit(TestBrokerCommand):
 
     def test_230_timezone_proto(self):
         """ test start/end_times recorded are correctly """
-        cmd1 = ["search_audit", "--username", self.user, "--command",
+        cmd1 = ["search_audit", "--username", self.principal, "--command",
                 "search_audit", "--limit", "1"]
         my_start_time = int(time())
         out = self.commandtest(cmd1)
         my_end_time = int(time())
 
-        cmd2 = ["search_audit", "--username", self.user,
+        cmd2 = ["search_audit", "--username", self.principal,
                 "--command", "search_audit", "--format", "proto",
                 "--limit", "2"]
         outlist = self.protobuftest(cmd2)
@@ -215,7 +215,7 @@ class TestAudit(TestBrokerCommand):
 
     def test_231_timezone_raw(self):
         """ Test the raw output has the correct date/timezone info """
-        command = ["search_audit", "--username", self.user,
+        command = ["search_audit", "--username", self.principal,
                    "--command", "search_audit", "--limit", "1"]
 
         my_start_time = datetime.fromtimestamp(int(time()), tz=tzutc())
@@ -232,7 +232,7 @@ class TestAudit(TestBrokerCommand):
         """ test audit 'before' functionality """
         command = ["search_audit", "--before", midpoint]
         out = self.commandtest(command)
-        self.searchoutput(out, self.user, command)
+        self.searchoutput(out, self.principal, command)
         for line in out.splitlines():
             m = self.searchoutput(line, AUDIT_RAW_RE, command)
             start = parse(m.group('datetime'))
@@ -242,7 +242,7 @@ class TestAudit(TestBrokerCommand):
         """ test audit 'after' functionality """
         command = ["search_audit", "--after", midpoint]
         out = self.commandtest(command)
-        self.searchoutput(out, self.user, command)
+        self.searchoutput(out, self.principal, command)
         for line in out.splitlines():
             m = self.searchoutput(line, AUDIT_RAW_RE, command)
             start = parse(m.group('datetime'))
@@ -258,7 +258,7 @@ class TestAudit(TestBrokerCommand):
         """ test audit 'before' and 'after' simultaneously """
         command = ["search_audit", "--before", end_time, "--after", midpoint]
         out = self.commandtest(command)
-        self.searchoutput(out, self.user, command)
+        self.searchoutput(out, self.principal, command)
         for line in out.splitlines():
             m = self.searchoutput(line, AUDIT_RAW_RE, command)
             start = parse(m.group('datetime'))
@@ -306,7 +306,7 @@ class TestAudit(TestBrokerCommand):
         """ test search by return code """
         command = ["search_audit", "--command=add_network_device", "--return_code=200"]
         out = self.commandtest(command)
-        self.searchoutput(out, self.user, command)
+        self.searchoutput(out, self.principal, command)
         for line in out.splitlines():
             m = self.searchoutput(line, AUDIT_RAW_RE, command)
             self.assertEqual(m.group('returncode'), '200')
@@ -347,7 +347,7 @@ class TestAudit(TestBrokerCommand):
 
     def test_630_default_no_readonly(self):
         """ test default of writeable commands only """
-        command = ["search_audit", "--username", self.user]
+        command = ["search_audit", "--username", self.principal]
         out = self.commandtest(command)
         self.searchoutput(out, "200 aq add_building", command)
         self.searchclean(out, "200 aq show_building", command)

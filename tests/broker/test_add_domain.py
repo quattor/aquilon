@@ -51,14 +51,13 @@ class TestAddDomain(TestBrokerCommand):
               Tracking: sandbox utsandbox
               Rollback commit: None
               Validated: True
-              Owner: %(user)s@%(realm)s
+              Owner: %(principal)s
               Compiler: %(compiler)s
               Requires Change Manager: False
               May Contain Hosts/Clusters: False
               Archived: False
               Comments: aqd unit test tracking domain
-            """ % {"user": self.user,
-                   "realm": self.realm,
+            """ % {"principal": self.principal,
                    "compiler": self.config.get("panc", "pan_compiler")},
             command)
 
@@ -66,7 +65,7 @@ class TestAddDomain(TestBrokerCommand):
         command = ["show_domain", "--domain=unittest", "--format", "proto"]
         domain = self.protobuftest(command, expect=1)[0]
         self.assertEqual(domain.name, "unittest")
-        self.assertEqual(domain.owner, "%s@%s" % (self.user, self.realm))
+        self.assertEqual(domain.owner, self.principal)
         self.assertEqual(domain.tracked_branch, "utsandbox")
         self.assertEqual(domain.type, domain.DOMAIN)
         self.assertEqual(domain.allow_manage, False)
@@ -85,13 +84,12 @@ class TestAddDomain(TestBrokerCommand):
               Tracking: domain prod
               Rollback commit: None
               Validated: True
-              Owner: %(user)s@%(realm)s
+              Owner: %(principal)s
               Compiler: %(compiler)s
               Requires Change Manager: False
               May Contain Hosts/Clusters: True
               Archived: False
-            """ % {"user": self.user,
-                   "realm": self.realm,
+            """ % {"principal": self.principal,
                    "compiler": self.config.get("panc", "pan_compiler")},
             command)
 
@@ -159,7 +157,7 @@ class TestAddDomain(TestBrokerCommand):
         self.noouttest(command)
 
     def test_210_verifysearchowner(self):
-        command = ["search", "domain", "--owner", self.user]
+        command = ["search", "domain", "--owner", self.principal]
         out = self.commandtest(command)
         self.matchoutput(out, "unittest", command)
         self.matchoutput(out, "prod", command)

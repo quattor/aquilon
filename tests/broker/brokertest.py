@@ -16,6 +16,7 @@
 # limitations under the License.
 """Basic module for running tests on broker commands."""
 
+import pwd
 import os
 import sys
 import unittest
@@ -70,8 +71,10 @@ class TestBrokerCommand(unittest.TestCase):
         m = re.search(r'^\s*(?:Default p|P)rincipal:\s*'
                       r'(?P<principal>(?P<user>\S.*)@(?P<realm>.*?))$',
                       out, re.M)
-        cls.user = m.group('user')
+        cls.principal = m.group('principal')
         cls.realm = m.group('realm')
+
+        cls.user = pwd.getpwuid(os.getuid())[0]
 
         if not cls.user or not cls.realm:
             raise ValueError("Failed to detect the Kerberos principal.")
