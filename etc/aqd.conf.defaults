@@ -119,8 +119,6 @@ database_section = database_sqlite
 [broker]
 default_organization = ms
 servername = %(hostname)s
-# Set mode to readonly for a read-only broker.  Anything else is ignored.
-mode = readwrite
 umask = 0022
 kncport = 6900
 openport = 6901
