@@ -18,6 +18,7 @@
 import re
 from collections import Iterable, Mapping
 from numbers import Number
+from six import string_types
 
 # See the definition of a "term" in the "Path Literals" section of the Pan
 # language documentation
@@ -30,7 +31,7 @@ def pan(obj, indent=0):
     spaces = "  " * (indent + 1)
     accumulator = list()
 
-    if isinstance(obj, basestring):
+    if isinstance(obj, string_types):
         quote = '"'
         if '"' in obj:
             quote = "'"
@@ -56,7 +57,7 @@ def pan(obj, indent=0):
         # ordering. This also helps with the testsuite.
         for key in sorted(obj):
             val = pan(obj[key], indent + 1)
-            if isinstance(key, basestring):
+            if isinstance(key, string_types):
                 if not _valid_id.match(str(key)):  # pragma: no cover
                     raise ValueError("Invalid nlist key '%s'." % key)
             else:  # pragma: no cover
@@ -100,7 +101,7 @@ def pan_create(path, params=None, indent=0):
     if params:
         for key in sorted(params):
             val = pan(params[key], indent + 2)
-            if isinstance(key, basestring):
+            if isinstance(key, string_types):
                 if not _valid_id.match(str(key)):  # pragma: no cover
                     raise ValueError("Invalid nlist key '%s'." % key)
             else:  # pragma: no cover

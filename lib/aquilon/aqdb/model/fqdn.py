@@ -17,6 +17,7 @@
 """ Representation of Fully Qualified Domain Names """
 
 from datetime import datetime
+from six import string_types
 
 from sqlalchemy import (Integer, DateTime, Sequence, Column, ForeignKey,
                         UniqueConstraint)
@@ -101,7 +102,7 @@ class Fqdn(Base):
     def check_name(cls, name, dns_domain, ignore_name_check=False):
         """ Validate the name parameter """
 
-        if not isinstance(name, basestring):  # pragma: no cover
+        if not isinstance(name, string_types):  # pragma: no cover
             raise TypeError("%s: name must be a string." % cls.name)
         if not isinstance(dns_domain, DnsDomain):  # pragma: no cover
             raise TypeError("%s: dns_domain must be a DnsDomain." % cls.name)

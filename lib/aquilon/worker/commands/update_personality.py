@@ -196,7 +196,7 @@ class CommandUpdatePersonality(BrokerCommand):
                 try:
                     cluster.validate()
                 except ArgumentError as err:
-                    failures.append(err.message)
+                    failures.append(str(err))
             if failures:
                 raise ArgumentError("Validation failed for the following "
                                     "clusters:\n%s" % "\n".join(failures))

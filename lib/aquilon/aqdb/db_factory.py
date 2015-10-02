@@ -30,6 +30,8 @@ from aquilon.config import Config
 from aquilon.utils import monkeypatch
 from aquilon.exceptions_ import AquilonError
 
+from six import string_types
+
 from sqlalchemy.exc import DatabaseError
 from sqlalchemy import create_engine, text, event
 from sqlalchemy.engine.url import make_url
@@ -82,7 +84,7 @@ def post_create_table(self, table):  # pragma: no cover
     text = ""  # pylint: disable=W0621
     compress = table.kwargs.get("oracle_compress", False)
     if compress:
-        if isinstance(compress, basestring):
+        if isinstance(compress, string_types):
             text += " COMPRESS FOR " + compress.upper()
         else:
             text += " COMPRESS"
