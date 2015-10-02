@@ -39,11 +39,11 @@ class CommandUpdateAddressAlias(BrokerCommand):
         dbdns_records = []
         if target:
             dbtarget = Fqdn.get_unique(session, fqdn=target,
-                                    dns_environment=target_environment,
-                                    compel=True)
+                                       dns_environment=target_environment,
+                                       compel=True)
 
             dbaddr_alias = AddressAlias.get_unique(session, fqdn=dbfqdn,
-                                                target=dbtarget, compel=True)
+                                                   target=dbtarget, compel=True)
             dbdns_records.append(dbaddr_alias)
         else:
             dbdns_records = [rec for rec in dbfqdn.dns_records if isinstance(rec, AddressAlias)]

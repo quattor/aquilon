@@ -180,4 +180,3 @@ class SharedAddressAssignment(AddressAssignment):
             raise ValueError("Priority is required")
 
     __mapper_args__ = {'polymorphic_identity': 'shared'}
-

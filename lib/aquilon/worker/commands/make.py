@@ -16,7 +16,7 @@
 # limitations under the License.
 """Contains the logic for `aq make`."""
 
-from aquilon.exceptions_ import ArgumentError, IncompleteError
+from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import (Archetype, HostLifecycle,
                                 OperatingSystem, Personality)
 from aquilon.worker.broker import BrokerCommand

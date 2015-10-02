@@ -185,12 +185,13 @@ class TestParameterFeature(TestBrokerCommand):
     def test_210_verify_interface_feature(self):
         cmd = SHOW_CMD
         out = self.commandtest(cmd)
-        self.searchoutput(out, r'"interface": {\s*'
-                               r'"interfacefeature": {\s*'
-                               r'"testdefault": "interface_feature",\s*'
-                               r'"testlist": \[\s*"intf1",\s*"intf2"\s*\]\s*'
-                               r'}\s*}'
-                          , cmd)
+        self.searchoutput(out,
+                          r'"interface": {\s*'
+                          r'"interfacefeature": {\s*'
+                          r'"testdefault": "interface_feature",\s*'
+                          r'"testlist": \[\s*"intf1",\s*"intf2"\s*\]\s*'
+                          r'}\s*}',
+                          cmd)
 
     def test_220_verify_cat_interface_feature(self):
         cmd = CAT_CMD + ["--pre_feature"]

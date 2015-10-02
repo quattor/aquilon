@@ -93,10 +93,8 @@ class TestSearchNetwork(TestBrokerCommand):
         for net in self.net:
             if not net.autocreate:
                 continue
-            if ((net.loc_type == "building" and
-                 net.loc_name == "ut") or
-                (net.loc_type == "bunker" and
-                 net.loc_name == "bucket2.ut")):
+            if ((net.loc_type == "building" and net.loc_name == "ut") or
+                    (net.loc_type == "bunker" and net.loc_name == "bucket2.ut")):
                 self.matchoutput(out, str(net), command)
             else:
                 self.matchclean(out, str(net.ip), command)
@@ -168,9 +166,10 @@ class TestSearchNetwork(TestBrokerCommand):
             if not network.autocreate:
                 continue
             if network in expect:
-                self.matchoutput(out, "%s,%s,%s,ut.ny.na,us,a,%s,\n" % (
-                    network.name, network.ip, network.netmask, network.nettype),
-                    command)
+                self.matchoutput(out, "%s,%s,%s,ut.ny.na,us,a,%s,\n" %
+                                 (network.name, network.ip, network.netmask,
+                                  network.nettype),
+                                 command)
             else:
                 self.matchclean(out, str(network.ip), command)
 

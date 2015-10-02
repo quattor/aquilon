@@ -133,7 +133,7 @@ class SrvRecord(DnsRecordTargetMixin, DnsRecord):
                    rr.protocol == protocol and rr.service == service:
                     raise ArgumentError("{0} already exists.".format(rr))
 
-        self.target = target 
+        self.target = target
 
         super(SrvRecord, self).__init__(fqdn=fqdn, priority=priority, weight=weight,
                                         port=port, **kwargs)

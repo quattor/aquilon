@@ -21,8 +21,6 @@ from __future__ import print_function
 
 import sys
 import logging
-import optparse
-import getpass
 import os
 import subprocess
 
@@ -39,7 +37,7 @@ from sqlalchemy.orm import configure_mappers
 from aquilon.config import Config
 config = Config()
 
-from aquilon.aqdb.model import *
+from aquilon.aqdb.model import *  # pylint: disable=W0611
 from aquilon.aqdb.db_factory import DbFactory
 from aquilon.aqdb.utils import constraints as cnst
 from loader import load_from_file

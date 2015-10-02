@@ -98,8 +98,10 @@ class BridgeLogHandler(logging.Handler):
     def emit(self, record):
         log.msg(record.getMessage())
 
+
 def set_close_on_exec(fileno):
     fcntl(fileno, F_SETFD, fcntl(fileno, F_GETFD, 0) | FD_CLOEXEC)
+
 
 def set_log_file(logFile, setStdout=True, start=True):
     """Set up twisted log files in a standard way.

@@ -140,7 +140,6 @@ class TestAddFeature(TestBrokerCommand):
               Template: features/post_host
             """, command)
 
-
     def test_105_verify_hw(self):
         command = ["show", "feature", "--feature", "bios_setup", "--type", "hardware"]
         out = self.commandtest(command)
