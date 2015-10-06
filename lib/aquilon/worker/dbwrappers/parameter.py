@@ -18,7 +18,7 @@
 
 import re
 
-from sqlalchemy.orm import contains_eager
+from sqlalchemy.orm import contains_eager, joinedload, subqueryload, undefer
 from sqlalchemy.sql import or_
 
 from aquilon.exceptions_ import NotFoundException, ArgumentError
@@ -256,3 +256,41 @@ def validate_param_definition(path, value_type, default=None):
         validate_value("default for path=%s" % path, value_type, default)
 
     return path
+
+
+def add_arch_paramdef_plenaries(session, dbarchetype, param_def_holder,
+                                plenaries):
+    # Do the import here, to avoid circles...
+    from aquilon.worker.templates.personality import (ParameterTemplate,
+                                                      PlenaryPersonalityParameter)
+
+    q = session.query(PersonalityStage)
+    q = q.join(Personality)
+    q = q.filter_by(archetype=dbarchetype)
+    q = q.options(contains_eager('personality'),
+                  joinedload('parameter'))
+    for dbstage in q:
+        ptmpl = ParameterTemplate(dbstage, param_def_holder)
+        plenaries.append(PlenaryPersonalityParameter.get_plenary(ptmpl))
+
+
+def add_feature_paramdef_plenaries(session, dbfeature, plenaries):
+    # Do the import here, to avoid circles...
+    from aquilon.worker.templates.personality import (PlenaryPersonalityPreFeature,
+                                                      PlenaryPersonalityPostFeature)
+
+    q = session.query(PersonalityStage)
+
+    q = q.join(PersonalityStage.features)
+    q = q.filter_by(feature=dbfeature)
+    q = q.options(joinedload('personality'),
+                  joinedload('parameter'),
+                  subqueryload('features'),
+                  joinedload('features.feature'),
+                  undefer('features.feature.comments'),
+                  joinedload('features.feature.param_def_holder'),
+                  subqueryload('features.feature.param_def_holder.param_definitions'),
+                  joinedload('features.model'))
+    for dbstage in q:
+        plenaries.append(PlenaryPersonalityPreFeature.get_plenary(dbstage))
+        plenaries.append(PlenaryPersonalityPostFeature.get_plenary(dbstage))

@@ -15,16 +15,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from sqlalchemy.orm import contains_eager
-
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import (ParamDefinition, Archetype, PersonalityStage,
-                                Personality)
+from aquilon.aqdb.model import ParamDefinition, Archetype
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.dbwrappers.parameter import search_path_in_personas
+from aquilon.worker.dbwrappers.parameter import (search_path_in_personas,
+                                                 add_arch_paramdef_plenaries)
 from aquilon.worker.templates import PlenaryCollection
-from aquilon.worker.templates.personality import (ParameterTemplate,
-                                                  PlenaryPersonalityParameter)
 
 
 class CommandDelParameterDefintionArchetype(BrokerCommand):
@@ -52,22 +48,23 @@ class CommandDelParameterDefintionArchetype(BrokerCommand):
         plenaries = PlenaryCollection(logger=logger)
 
         param_def_holder = db_paramdef.holder
+        old_default = db_paramdef.default
         param_def_holder.param_definitions.remove(db_paramdef)
-        if not param_def_holder.param_definitions:
-            # This was the last definition for the given template - need to
-            # clean up
-            q = session.query(PersonalityStage)
-            q = q.join(Personality)
-            q = q.options(contains_eager('personality'))
-            q = q.filter_by(archetype=dbarchetype)
-            for dbstage in q:
-                ptmpl = ParameterTemplate(dbstage, param_def_holder)
-                plenaries.append(PlenaryPersonalityParameter.get_plenary(ptmpl))
 
+        if old_default is not None or not param_def_holder.param_definitions:
+            add_arch_paramdef_plenaries(session, dbarchetype, param_def_holder,
+                                        plenaries)
+
+        # This was the last definition for the given template - need to
+        # clean up
+        if not param_def_holder.param_definitions:
             dbarchetype.param_def_holders.remove(param_def_holder)
 
         session.flush()
 
-        plenaries.write()
+        written = plenaries.write()
+        if plenaries.plenaries:
+            logger.client_info("Flushed %d/%d templates." %
+                               (written, len(plenaries.plenaries)))
 
         return

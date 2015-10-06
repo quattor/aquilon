@@ -198,12 +198,7 @@ class TestSetupParams(TestBrokerCommand):
         if "default" in params:
             cmd.extend(["--default", params["default"]])
 
-        if "default" in params:
-            out = self.statustest(cmd)
-            self.matchoutput(out, "You need to run 'aq flush --personalities' "
-                             "for the default value to take effect.", cmd)
-        else:
-            self.noouttest(cmd)
+        self.noouttest(cmd)
 
     def test_100_add_parameter_definitions(self):
         for template, paramlist in AQUILON_PARAM_DEFS.items():

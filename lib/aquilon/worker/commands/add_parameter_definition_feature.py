@@ -17,15 +17,18 @@
 
 from aquilon.aqdb.model import Feature, FeatureParamDef, ParamDefinition
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.dbwrappers.parameter import validate_param_definition
+from aquilon.worker.dbwrappers.change_management import validate_prod_feature
+from aquilon.worker.dbwrappers.parameter import (validate_param_definition,
+                                                 add_feature_paramdef_plenaries)
+from aquilon.worker.templates import PlenaryCollection
 
 
 class CommandAddParameterDefintionFeature(BrokerCommand):
 
     required_parameters = ["feature", "type", "path", "value_type"]
 
-    def render(self, session, feature, type, path, value_type, required,
-               default, description, **kwargs):
+    def render(self, session, logger, feature, type, path, value_type, required,
+               default, description, user, justification, reason, **kwargs):
         cls = Feature.polymorphic_subclass(type, "Unknown feature type")
         dbfeature = cls.get_unique(session, name=feature, compel=True)
 
@@ -39,6 +42,12 @@ class CommandAddParameterDefintionFeature(BrokerCommand):
         ParamDefinition.get_unique(session, path=path,
                                    holder=dbfeature.param_def_holder, preclude=True)
 
+        plenaries = PlenaryCollection(logger=logger)
+
+        if default is not None:
+            validate_prod_feature(dbfeature, user, justification, reason)
+            add_feature_paramdef_plenaries(session, dbfeature, plenaries)
+
         db_paramdef = ParamDefinition(path=path,
                                       holder=dbfeature.param_def_holder,
                                       value_type=value_type, default=default,
@@ -47,5 +56,10 @@ class CommandAddParameterDefintionFeature(BrokerCommand):
         session.add(db_paramdef)
 
         session.flush()
+
+        written = plenaries.write()
+        if plenaries.plenaries:
+            logger.client_info("Flushed %d/%d templates." %
+                               (written, len(plenaries.plenaries)))
 
         return

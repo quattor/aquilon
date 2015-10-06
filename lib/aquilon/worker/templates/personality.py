@@ -244,6 +244,13 @@ class PlenaryPersonalityPreFeature(Plenary):
                            key=attrgetter("feature.name")):
             helper_feature_template(self.dbobj, feat_tmpl, link, lines)
 
+    def get_key(self, exclusive=True):
+        if self.is_deleted():
+            return NoLockKey(logger=self.logger)
+        else:
+            return PlenaryKey(personality=self.dbobj, logger=self.logger,
+                              exclusive=exclusive)
+
 
 class PlenaryPersonalityPostFeature(Plenary):
     prefix = "personality"
@@ -263,6 +270,13 @@ class PlenaryPersonalityPostFeature(Plenary):
                            key=attrgetter("feature.name")):
             if link.feature.post_personality:
                 helper_feature_template(self.dbobj, feat_tmpl, link, lines)
+
+    def get_key(self, exclusive=True):
+        if self.is_deleted():
+            return NoLockKey(logger=self.logger)
+        else:
+            return PlenaryKey(personality=self.dbobj, logger=self.logger,
+                              exclusive=exclusive)
 
 
 class PlenaryPersonalityParameter(StructurePlenary):
@@ -316,3 +330,10 @@ class PlenaryPersonalityParameter(StructurePlenary):
     def is_dirty(self):
         session = object_session(self.dbobj.personality_stage)
         return self.dbobj.personality_stage in session.dirty
+
+    def get_key(self, exclusive=True):
+        if self.is_deleted():
+            return NoLockKey(logger=self.logger)
+        else:
+            return PlenaryKey(personality=self.dbobj.personality_stage,
+                              logger=self.logger, exclusive=exclusive)

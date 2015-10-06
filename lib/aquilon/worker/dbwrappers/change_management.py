@@ -21,7 +21,8 @@ import re
 from sqlalchemy.orm.session import object_session
 
 from aquilon.exceptions_ import AuthorizationException, ArgumentError
-from aquilon.aqdb.model import Host, Cluster, Personality, PersonalityStage
+from aquilon.aqdb.model import (Host, Cluster, Archetype, Personality,
+                                PersonalityStage)
 from aquilon.aqdb.model.host_environment import Production
 
 TCM_RE = re.compile(r"^tcm=([0-9]+)$", re.IGNORECASE)
@@ -101,6 +102,35 @@ def validate_prod_service_instance(dbinstance, user, justification, reason):
     q2 = q2.filter(Host.services_used.contains(dbinstance))
     q2 = q2.join(PersonalityStage, Personality)
     q2 = q2.filter_by(host_environment=prod)
+
+    if q1.count() > 0 or q2.count() > 0:
+        enforce_justification(user, justification, reason)
+
+
+def validate_prod_feature(dbfeature, user, justification, reason):
+    session = object_session(dbfeature)
+    prod = Production.get_instance(session)
+
+    q = session.query(Archetype)
+    q = q.join(Archetype.features)
+    q = q.filter_by(feature=dbfeature)
+    for dbarchetype in q:
+        validate_prod_archetype(dbarchetype, user, justification, reason)
+
+    q1 = session.query(Cluster.id)
+    q1 = q1.join(PersonalityStage, Personality)
+    q1 = q1.filter_by(host_environment=prod)
+    q1 = q1.join(PersonalityStage.features)
+    q1 = q1.filter_by(feature=dbfeature)
+
+    # This ignores model and interface name restrictions. That means we may
+    # require --justification even if no actual host is impacted - we can live
+    # with that.
+    q2 = session.query(Host.hardware_entity_id)
+    q2 = q2.join(PersonalityStage, Personality)
+    q2 = q2.filter_by(host_environment=prod)
+    q2 = q2.join(PersonalityStage.features)
+    q2 = q2.filter_by(feature=dbfeature)
 
     if q1.count() > 0 or q2.count() > 0:
         enforce_justification(user, justification, reason)

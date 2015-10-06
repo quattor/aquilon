@@ -283,6 +283,7 @@ from .test_parameter import TestParameter
 from .test_parameter_feature import TestParameterFeature
 from .test_add_parameter_definition import TestAddParameterDefinition
 from .test_del_parameter_definition import TestDelParameterDefinition
+from .test_update_parameter_definition import TestUpdateParameterDefinition
 from .test_documentation import TestDocumentation
 from .test_setup_params import TestSetupParams
 from .test_consistency import TestConsistency
@@ -413,6 +414,7 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestUpdateNetworkEnvironment, TestUpdateDnsEnvironment,
                      TestUpdateRouterAddress,
                      TestUpdateArchetype,
+                     TestUpdateParameterDefinition,
                      TestUpdateMetaCluster, TestUpdateESXCluster,
                      TestUpdateCluster,
                      TestPxeswitch, TestManage, TestManageValidateBranch,
