@@ -41,6 +41,9 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
         self.noouttest(command)
         self.verifycatpersonality("aquilon", "utpersonality/dev", True, "dev",
                                   grn=GRN)
+        for plenary in ("pre_feature", "post_feature", "espinfo"):
+            self.check_plenary_exists("aquilon", "personality",
+                                      "utpersonality/dev", plenary)
 
     def test_105_verify_utpersonality(self):
         command = ["show_personality", "--personality=utpersonality/dev",
@@ -105,6 +108,9 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
                    "--host_environment=dev", "--staged",
                    "--comments", "Existing personality for netperssvcmap tests"]
         self.noouttest(command)
+        for plenary in ("pre_feature", "post_feature", "espinfo"):
+            self.check_plenary_exists("aquilon", "personality",
+                                      "eaitools+next", plenary)
         self.verifycatpersonality("aquilon", "eaitools", stage="next")
         # The basic parameter set needs to be initialized for further tests
         self.setup_personality("aquilon", "eaitools")

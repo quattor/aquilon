@@ -54,19 +54,25 @@ class CommandUpdatePersonality(BrokerCommand):
         dbpersona = Personality.get_unique(session, name=personality,
                                            archetype=archetype, compel=True)
 
+        plenaries = PlenaryCollection(logger=logger)
+
         if staged is not None:
             if staged is False:
-                if "previous" in dbpersona.stages:
-                    _check_stage_unused(session, dbpersona.stages["previous"])
-                    del dbpersona.stages["previous"]
-                if "next" in dbpersona.stages:
-                    _check_stage_unused(session, dbpersona.stages["next"])
-                    del dbpersona.stages["next"]
                 if "current" not in dbpersona.stages:
                     raise ArgumentError("{0} does not have stage current, "
                                         "you need to promote it before "
                                         "staging can be turned off."
                                         .format(dbpersona))
+                for stage in ("previous", "next"):
+                    try:
+                        dbstage = dbpersona.stages[stage]
+                    except KeyError:
+                        continue
+
+                    _check_stage_unused(session, dbstage)
+                    plenaries.append(Plenary.get_plenary(dbstage))
+                    del dbpersona.stages[stage]
+
             dbpersona.staged = staged
 
         dbstage = dbpersona.active_stage(personality_stage)
@@ -142,8 +148,6 @@ class CommandUpdatePersonality(BrokerCommand):
                 raise ArgumentError("{0} already has its environment set to "
                                     "{1!s}, and cannot be updated."
                                     .format(dbpersona, dbpersona.host_environment))
-
-        plenaries = PlenaryCollection(logger=logger)
 
         if grn or eon_id:
             dbgrn = lookup_grn(session, grn, eon_id, logger=logger,
