@@ -75,12 +75,14 @@ param_features = {
 
 
 class TestAddParameterDefinition(TestBrokerCommand):
-    def setUp(self):
-        super(TestAddParameterDefinition, self).setUp()
-        self.proto = self.protocols['aqdsystems_pb2']
 
-        desc = self.proto.Feature.DESCRIPTOR
-        self.activation_type = desc.fields_by_name["activation"].enum_type
+    @classmethod
+    def setUpClass(cls):
+        super(TestAddParameterDefinition, cls).setUpClass()
+
+        cls.proto = cls.protocols['aqdsystems_pb2']
+        desc = cls.proto.Feature.DESCRIPTOR
+        cls.activation_type = desc.fields_by_name["activation"].enum_type
 
     def test_100_add_all(self):
         for path, params in default_param_defs.items():
