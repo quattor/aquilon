@@ -74,6 +74,7 @@ from aquilon.aqdb.model.personality import (__PersonalityRootUser,
 from aquilon.aqdb.model.cluster import (__ClusterServiceBinding,
                                         HostClusterMember,
                                         __ClusterAllowedPersonality)
+from aquilon.aqdb.model.cluster_group import __ClusterGroupMember
 from aquilon.aqdb.model.metacluster import __MetaClusterMember
 from aquilon.aqdb.model.vlan import __ObservedVlan
 from aquilon.aqdb.model.virtual_switch import (__VSwitchClusterAssignment,
@@ -133,10 +134,11 @@ model_group = {
     },
     'cluster': {
         'title': 'Clusters',
-        'classes': [Cluster, ClusterLifecycle, StorageCluster, ComputeCluster,
-                    HostClusterMember, __ClusterAllowedPersonality, MetaCluster,
-                    __MetaClusterMember, EsxCluster, PersonalityClusterInfo,
-                    PersonalityESXClusterInfo,
+        'classes': [Cluster, EsxCluster, StorageCluster, ComputeCluster,
+                    __ClusterGroupMember, HostClusterMember,
+                    MetaCluster, __MetaClusterMember,
+                    ClusterLifecycle, __ClusterAllowedPersonality,
+                    PersonalityClusterInfo, PersonalityESXClusterInfo,
                     VirtualSwitch, __VSwitchClusterAssignment,
                     __VSwitchPGAssignment],
     },

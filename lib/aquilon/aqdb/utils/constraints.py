@@ -31,6 +31,8 @@ _table_abbrev = {
     'address_assignment': 'addr_assign',
     'archetype': 'arch',
     'cluster_service_binding': 'clstr_svc_bndg',
+    'cluster_group': 'clstr_grp',
+    'cluster_group_member': 'clstr_grp_mmbr',
     'dns_environment': 'dns_env',
     'dns_record': 'dnsrec',
     'hardware_entity': 'hw_ent',

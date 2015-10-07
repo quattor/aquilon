@@ -257,6 +257,47 @@ class TestUsecaseHACluster(TestBrokerCommand):
     # def test_167_make_hamc1(self):
     #     self.statustest(["make_cluster", "--cluster", "hamc1"])
 
+    def test_170_group_hacl1(self):
+        command = ["update_cluster", "--cluster", "hacl1",
+                   "--group_with", "hacl2"]
+        self.noouttest(command)
+
+    def test_171_verify_group(self):
+        command = ["show_cluster", "--cluster", "hacl1"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Grouped with High Availability Cluster: hacl2", command)
+
+        command = ["show_cluster", "--cluster", "hacl2"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Grouped with High Availability Cluster: hacl1", command)
+
+    def test_172_verify_search(self):
+        command = ["search_cluster", "--grouped_with", "hacl1"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "hacl2", command)
+        self.matchclean(out, "hacl1", command)
+
+    def test_172_group_mismatch(self):
+        command = ["update_cluster", "--cluster", "hacl2",
+                   "--group_with", "utecl1"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "High Availability Cluster hacl2 and ESX "
+                         "cluster utecl1 are already members of different "
+                         "cluster groups.", command)
+
+    def test_173_clear_group(self):
+        command = ["update_cluster", "--cluster", "hacl1", "--clear_group"]
+        self.noouttest(command)
+
+    def test_174_verify_ungroup(self):
+        command = ["show_cluster", "--cluster", "hacl1"]
+        out = self.commandtest(command)
+        self.matchclean(out, "Grouped", command)
+
+        command = ["show_cluster", "--cluster", "hacl2"]
+        out = self.commandtest(command)
+        self.matchclean(out, "Grouped", command)
+
     def test_200_try_deco_hacl1(self):
         command = ["change_status", "--cluster", "hacl1", "--buildstatus",
                    "decommissioned"]

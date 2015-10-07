@@ -325,6 +325,7 @@
 	    <option name="down_hosts_threshold" type="string">down_hosts_threshold</option>
 	    <option name="down_maint_threshold" type="string">down_maint_threshold</option>
 	    <option name="max_members" type="int">max_members</option>
+	    <option name="grouped_with" type="string">Clusters grouped with the given cluster</option>
 	    <option name="member_archetype" type="string">member_archetype</option>
 	    <option name="member_hostname" type="string">member_hostname</option>
 	    <option name="member_personality" type="string">member_personality</option>
@@ -4724,6 +4725,8 @@
 		<option name="rack" type="string">Rack</option>
 		<option name="desk" type="string">Desk</option>
 	    </optgroup>
+	    <option name="group_with" type="string">Group with the given cluster</option>
+	    <option name="clear_group" type="flag" conflicts="group_with">Remove the cluster from any cluster groups</option>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
 	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
 	</optgroup>

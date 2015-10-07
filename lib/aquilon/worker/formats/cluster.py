@@ -107,6 +107,12 @@ class ClusterFormatter(CompileableFormatter):
                 details.append(indent + "  Maintenance Threshold: %s" %
                                cluster.down_maint_threshold)
 
+        if cluster.cluster_group:
+            for member in cluster.cluster_group.members:
+                if member == cluster:
+                    continue
+                details.append("  Grouped with {0:c}: {0.name}".format(member))
+
         if cluster.resholder and cluster.resholder.resources:
             details.append(indent + "  Resources:")
             for resource in sorted(cluster.resholder.resources,

@@ -41,7 +41,7 @@ class TestUpdateCluster(TestBrokerCommand, PersonalityTestMixin):
         self.matchoutput(out, "Down Hosts Threshold: 0 (2%)", command)
         self.matchoutput(out, "Maintenance Threshold: 0 (6%)", command)
 
-    def test_200_updateutgrid1(self):
+    def test_1200_updateutgrid1(self):
         command = ["update_cluster", "--cluster=utgrid1",
                    "--down_hosts_threshold=2"]
         self.noouttest(command)
@@ -52,7 +52,7 @@ class TestUpdateCluster(TestBrokerCommand, PersonalityTestMixin):
         self.matchoutput(out, "Down Hosts Threshold: 2", command)
         self.matchoutput(out, "Maintenance Threshold: 0 (6%)", command)
 
-    def test_300_update_maint_threshold(self):
+    def test_130_update_maint_threshold(self):
         command = ["update_cluster", "--cluster=utgrid1",
                    "--maint_threshold=50%"]
         self.noouttest(command)
@@ -85,7 +85,7 @@ class TestUpdateCluster(TestBrokerCommand, PersonalityTestMixin):
         self.matchoutput(out, "Down Hosts Threshold: 2", command)
         self.matchoutput(out, "Maintenance Threshold: 0 (0%)", command)
 
-    def test_400_updatepersonality(self):
+    def test_140_updatepersonality(self):
         # Change metacluster personality and revert it.
         command = ["update_cluster", "--cluster", "utgrid1",
                    "--personality", "hadoop-test"]
@@ -102,6 +102,20 @@ class TestUpdateCluster(TestBrokerCommand, PersonalityTestMixin):
         command = ["show", "cluster", "--cluster", "utgrid1"]
         out = self.commandtest(command)
         self.matchoutput(out, "Personality: hadoop", command)
+
+    def test_150_group_utecl1(self):
+        command = ["update_cluster", "--cluster", "utecl1",
+                   "--group_with", "utecl2"]
+        self.noouttest(command)
+
+    def test_155_verify_group(self):
+        command = ["show_cluster", "--cluster", "utecl1"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Grouped with ESX Cluster: utecl2", command)
+
+        command = ["show_cluster", "--cluster", "utecl2"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Grouped with ESX Cluster: utecl1", command)
 
     def test_800_cleanup(self):
         self.drop_personality("gridcluster", "hadoop-test")

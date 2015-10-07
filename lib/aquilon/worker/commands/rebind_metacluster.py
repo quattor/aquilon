@@ -31,6 +31,8 @@ class CommandRebindMetaCluster(CommandUpdateCluster):
         return CommandUpdateCluster.render(self, session=session,
                                            cluster=cluster,
                                            metacluster=metacluster,
+                                           group_with=None,
+                                           clear_group=None,
                                            personality=None,
                                            personality_stage=None,
                                            max_members=None, fix_location=None,
