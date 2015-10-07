@@ -19,8 +19,7 @@ from aquilon.exceptions_ import ArgumentError, UnimplementedError
 from aquilon.aqdb.model import Archetype, ParamDefinition
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.change_management import validate_prod_archetype
-from aquilon.worker.dbwrappers.parameter import (validate_param_definition,
-                                                 add_arch_paramdef_plenaries)
+from aquilon.worker.dbwrappers.parameter import add_arch_paramdef_plenaries
 from aquilon.worker.templates import PlenaryCollection
 
 
@@ -63,10 +62,6 @@ class CommandUpdParameterDefintionArchetype(BrokerCommand):
             validate_prod_archetype(dbarchetype, user, justification, reason)
             add_arch_paramdef_plenaries(session, dbarchetype,
                                         db_paramdef.holder, plenaries)
-
-            if default is not None:
-                validate_param_definition(db_paramdef.path,
-                                          db_paramdef.value_type, default)
 
             db_paramdef.default = default
 

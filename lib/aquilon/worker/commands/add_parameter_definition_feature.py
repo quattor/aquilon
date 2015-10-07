@@ -36,7 +36,7 @@ class CommandAddParameterDefintionFeature(BrokerCommand):
             dbfeature.param_def_holder = FeatureParamDef()
 
         path = ParamDefinition.normalize_path(path)
-        validate_param_definition(path, value_type, default)
+        validate_param_definition(path)
 
         # activation field has been skipped on purpose
         ParamDefinition.get_unique(session, path=path,
@@ -50,9 +50,11 @@ class CommandAddParameterDefintionFeature(BrokerCommand):
 
         db_paramdef = ParamDefinition(path=path,
                                       holder=dbfeature.param_def_holder,
-                                      value_type=value_type, default=default,
-                                      required=required,
+                                      value_type=value_type, required=required,
                                       description=description)
+        # Set default separately - validation in the model depends on the other
+        # attributes being already set
+        db_paramdef.default = default
         session.add(db_paramdef)
 
         session.flush()

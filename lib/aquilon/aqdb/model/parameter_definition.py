@@ -28,6 +28,8 @@ from aquilon.exceptions_ import ArgumentError, InternalError
 from aquilon.aqdb.column_types import AqStr, Enum
 from aquilon.aqdb.model import Base, Archetype, Feature
 from aquilon.aqdb.model.feature import _ACTIVATION_TYPE
+from aquilon.utils import (force_json_dict, force_int, force_float,
+                           force_boolean)
 
 _TN = 'param_definition'
 _PARAM_DEF_HOLDER = 'param_def_holder'
@@ -165,6 +167,13 @@ class ParamDefinition(Base):
         raise ArgumentError("Unknown value type '%s'.  The valid types are: "
                             "%s." % (value, valid_types))
 
+    @validates('default')
+    def validate_default(self, key, value):  # pylint: disable=W0613
+        if value is not None:
+            self.parse_value("default for path=%s" % self.path, value)
+
+        return value
+
     @validates('activation')
     def validate_activation(self, key, activation):
         """ Utility function for validating the value type """
@@ -173,3 +182,26 @@ class ParamDefinition(Base):
         valid_activation = ", ".join(sorted(_ACTIVATION_TYPE))
         raise ArgumentError("Unknown value for %s. Valid values are: "
                             "%s." % (key, valid_activation))
+
+    @property
+    def parsed_default(self):
+        if self.default is None:
+            return None
+
+        return self.parse_value("default for path=%s" % self.path, self.default)
+
+    def parse_value(self, label, value):
+        if self.value_type == 'string':
+            return value
+        elif self.value_type == 'list':
+            return [item.strip() for item in value.split(",")]
+        elif self.value_type == 'int':
+            return force_int(label, value)
+        elif self.value_type == 'float':
+            return force_float(label, value)
+        elif self.value_type == 'boolean':
+            return force_boolean(label, value)
+        elif self.value_type == 'json':
+            return force_json_dict(label, value)
+
+        raise InternalError("Unhandled type: %s" % self.value_type)

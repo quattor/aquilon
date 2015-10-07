@@ -22,8 +22,6 @@ from sqlalchemy.orm import contains_eager, joinedload, subqueryload, undefer
 from sqlalchemy.sql import or_
 
 from aquilon.exceptions_ import NotFoundException, ArgumentError
-from aquilon.utils import (force_json_dict, force_int, force_float,
-                           force_boolean)
 from aquilon.aqdb.model import (Personality, PersonalityStage, Parameter,
                                 FeatureLink, Host, ParamDefinition,
                                 ArchetypeParamDef, FeatureParamDef,
@@ -38,8 +36,9 @@ def set_parameter(session, parameter, dbparam_def, path, value, compel=False,
         Handles add parameter as well as update parameter. Parmeters for features
         will be stored as part of personality as features/<feature_name>/<path>
     """
-    retval = validate_parameter(session, dbparam_def, path, value,
-                                parameter.personality_stage)
+    retval = dbparam_def.parse_value(path, value)
+    if dbparam_def.activation == 'rebuild':
+        validate_rebuild_required(session, path, parameter.personality_stage)
 
     if isinstance(dbparam_def.holder, FeatureParamDef):
         path = Parameter.feature_path(dbparam_def.holder.feature, path)
@@ -63,54 +62,6 @@ def del_all_feature_parameter(session, dblink):
         parameter.del_path(Parameter.feature_path(dblink.feature,
                                                   paramdef.path),
                            compel=False)
-
-
-def validate_value(label, value_type, value):
-    retval = None
-
-    if value_type == 'string':
-        retval = value
-    elif value_type == 'list':
-        retval = [item.strip() for item in value.split(",")]
-    elif value_type == 'int':
-        retval = force_int(label, value)
-    elif value_type == 'float':
-        retval = force_float(label, value)
-    elif value_type == 'boolean':
-        retval = force_boolean(label, value)
-    elif value_type == 'json':
-        retval = force_json_dict(label, value)
-
-    if retval is None:
-        raise ArgumentError("Value %s for path %s has to be of type %s." %
-                            (value, label, value_type))
-
-    return retval
-
-
-def validate_parameter(session, dbparam_def, path, value, dbstage):
-    """
-        Validates parameter before updating in db.
-        - checks if matching parameter definition exists
-        - if value is not specified on input if a default value
-          has been defined on the definition
-        - if rebuild_required validate do validation on host status
-    """
-
-    # check if default specified on parameter definition
-    if not value:
-        if dbparam_def.default is not None:
-            value = dbparam_def.default
-        else:
-            raise ArgumentError("Parameter %s does not have any value defined."
-                                % path)
-
-    retval = validate_value(path, dbparam_def.value_type, value)
-
-    if dbparam_def.activation == 'rebuild':
-        validate_rebuild_required(session, path, dbstage)
-
-    return retval
 
 
 def validate_rebuild_required(session, path, dbstage):
@@ -237,7 +188,7 @@ def validate_personality_config(dbstage):
     return error
 
 
-def validate_param_definition(path, value_type, default=None):
+def validate_param_definition(path):
     """
         Over here we are a bit restrictive then panc and do not allow
         underscores as path starters. So far we haven't needed those
@@ -249,11 +200,6 @@ def validate_param_definition(path, value_type, default=None):
 
     if not path[0].isalpha():
         raise ArgumentError("Invalid path {0} specified, path cannot start with special characters".format(path))
-
-    if default is not None:
-        validate_value("default for path=%s" % path, value_type, default)
-
-    return path
 
 
 def add_arch_paramdef_plenaries(session, dbarchetype, param_def_holder,

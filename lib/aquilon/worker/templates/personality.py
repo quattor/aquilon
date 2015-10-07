@@ -30,7 +30,6 @@ from aquilon.worker.templates.base import (Plenary, StructurePlenary,
 from aquilon.worker.templates.panutils import (pan_include, pan_variable,
                                                pan_assign, pan_append,
                                                pan_include_if_exists)
-from aquilon.worker.dbwrappers.parameter import validate_value
 
 LOGGER = logging.getLogger(__name__)
 
@@ -49,9 +48,10 @@ def get_parameters_by_feature(dbstage, dbfeaturelink):
                                                param_def.path, compel=False)
             else:
                 value = None
-            if value is None and param_def.default is not None:
-                value = validate_value("default for path=%s" % param_def.path,
-                                       param_def.value_type, param_def.default)
+
+            if value is None:
+                value = param_def.parsed_default
+
             if value is not None:
                 ret[param_def.path] = value
     return ret
@@ -309,10 +309,9 @@ class PlenaryPersonalityParameter(StructurePlenary):
                 if value is not None:
                     break
 
-            if value is None and param_def.default is not None:
-                # XXX This is rather convert_value()
-                value = validate_value("default for path=%s" % param_def.path,
-                                       param_def.value_type, param_def.default)
+            if value is None:
+                value = param_def.parsed_default
+
             if value is not None:
                 values = get_path_under_top(param_def.path, value)
                 for path in sorted(values.keys()):

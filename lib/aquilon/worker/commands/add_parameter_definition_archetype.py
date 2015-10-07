@@ -52,7 +52,7 @@ class CommandAddParameterDefintionArchetype(BrokerCommand):
                                      "which is not supported.")
 
         path = ParamDefinition.normalize_path(path)
-        validate_param_definition(path, value_type, default)
+        validate_param_definition(path)
 
         ParamDefinition.get_unique(session, path=path, holder=holder,
                                    preclude=True)
@@ -63,9 +63,13 @@ class CommandAddParameterDefintionArchetype(BrokerCommand):
             add_arch_paramdef_plenaries(session, dbarchetype, holder, plenaries)
 
         db_paramdef = ParamDefinition(path=path, holder=holder,
-                                      value_type=value_type, default=default,
-                                      required=required, activation=activation,
+                                      value_type=value_type, required=required,
+                                      activation=activation,
                                       description=description)
+        # Set default separately - validation in the model depends on the other
+        # attributes being already set
+        db_paramdef.default = default
+
         session.add(db_paramdef)
 
         session.flush()

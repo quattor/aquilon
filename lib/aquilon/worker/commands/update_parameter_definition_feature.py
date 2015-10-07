@@ -18,8 +18,7 @@
 from aquilon.aqdb.model import Feature, FeatureParamDef, ParamDefinition
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.change_management import validate_prod_feature
-from aquilon.worker.dbwrappers.parameter import (validate_param_definition,
-                                                 add_feature_paramdef_plenaries)
+from aquilon.worker.dbwrappers.parameter import add_feature_paramdef_plenaries
 from aquilon.worker.templates import PlenaryCollection
 
 
@@ -48,11 +47,6 @@ class CommandUpdParameterDefintionFeature(BrokerCommand):
         if default is not None or clear_default:
             validate_prod_feature(dbfeature, user, justification, reason)
             add_feature_paramdef_plenaries(session, dbfeature, plenaries)
-
-            if default is not None:
-                validate_param_definition(db_paramdef.path,
-                                          db_paramdef.value_type, default)
-
             db_paramdef.default = default
 
         if required is not None:

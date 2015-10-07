@@ -211,7 +211,8 @@ class TestAddParameterDefinition(TestBrokerCommand):
                 continue
 
             cmd = ["add_parameter_definition", "--archetype", "aquilon",
-                   "--path", path, "--value_type", params["type"],
+                   "--path", path + "_invalid_default",
+                   "--value_type", params["type"],
                    "--template", "foo", "--default", params["invalid_default"]]
             out = self.badrequesttest(cmd)
             self.matchoutput(out, "for default for path=%s" % path, cmd)
@@ -222,7 +223,8 @@ class TestAddParameterDefinition(TestBrokerCommand):
                 continue
 
             cmd = ["add_parameter_definition", "--feature", "myfeature", "--type", "host",
-                   "--path", path, "--value_type", params["type"],
+                   "--path", path + "_invalid_default",
+                   "--value_type", params["type"],
                    "--default", params["invalid_default"]]
             out = self.badrequesttest(cmd)
             self.matchoutput(out, "for default for path=%s" % path, cmd)
