@@ -58,6 +58,10 @@
 		Name of the kerberos service principal to authenticate to the server.
 		Should default correctly, only useful for development.
 	    </option>
+	    <option name="aqconf" type="string" conflicts="aqservice aquser aqport aqhost">
+		Pass a config file to client which indicates the broker to connect too.
+		Should default correctly, only useful for development.
+	    </option>
 	</optgroup>
     </command>
 
