@@ -250,8 +250,6 @@ def validate_param_definition(path, value_type, default=None):
     if not path[0].isalpha():
         raise ArgumentError("Invalid path {0} specified, path cannot start with special characters".format(path))
 
-    ParamDefinition.validate_type(value_type)
-
     if default is not None:
         validate_value("default for path=%s" % path, value_type, default)
 

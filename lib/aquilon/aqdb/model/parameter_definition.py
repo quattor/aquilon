@@ -153,24 +153,22 @@ class ParamDefinition(Base):
         return path
 
     @validates('path')
-    def validate_path(self, key, value):
+    def validate_path(self, key, value):  # pylint: disable=W0613
         return self.normalize_path(value)
 
-    @classmethod
-    def validate_type(cls, value_type):
+    @validates('value_type')
+    def validate_value_type(self, key, value):  # pylint: disable=W0613
         """ Utility function for validating the value type """
-        if value_type in _PATH_TYPES:
-            return
+        if value in _PATH_TYPES:
+            return value
         valid_types = ", ".join(sorted(_PATH_TYPES))
         raise ArgumentError("Unknown value type '%s'.  The valid types are: "
-                            "%s." % (value_type, valid_types))
+                            "%s." % (value, valid_types))
 
     @validates('activation')
     def validate_activation(self, key, activation):
         """ Utility function for validating the value type """
-        if not activation:
-            return
-        if activation in _ACTIVATION_TYPE:
+        if activation in _ACTIVATION_TYPE or activation is None:
             return activation
         valid_activation = ", ".join(sorted(_ACTIVATION_TYPE))
         raise ArgumentError("Unknown value for %s. Valid values are: "
