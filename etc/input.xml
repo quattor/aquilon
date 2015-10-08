@@ -6429,7 +6429,8 @@
 	</optgroup>
 	<optgroup>
 	    <option name="required" type="flag">Is this parameter required for object compilation </option>
-	    <option name="default" type="string">Default value </option>
+	    <option name="default" type="string">Default value</option>
+	    <option name="clear_default" type="flag" conflicts="default">Clear the default value</option>
 	    <option name="description" type="string">Description</option>
             <option name="activation" type="string" conflicts="feature type">Update how the parameter gets activated, valid values are rebuild, reboot, dispatch</option>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>

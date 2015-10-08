@@ -28,7 +28,8 @@ class CommandUpdParameterDefintionFeature(BrokerCommand):
     required_parameters = ["feature", "type", "path"]
 
     def render(self, session, logger, feature, type, path, required, default,
-               description, user, justification, reason, **kwargs):
+               clear_default, description, user, justification, reason,
+               **kwargs):
         cls = Feature.polymorphic_subclass(type, "Unknown feature type")
         dbfeature = cls.get_unique(session, name=feature, compel=True)
 
@@ -44,7 +45,7 @@ class CommandUpdParameterDefintionFeature(BrokerCommand):
 
         # Changing the default value impacts all personalities which do not
         # override it, so more scrunity is needed
-        if default is not None:
+        if default is not None or clear_default:
             validate_prod_feature(dbfeature, user, justification, reason)
             add_feature_paramdef_plenaries(session, dbfeature, plenaries)
 

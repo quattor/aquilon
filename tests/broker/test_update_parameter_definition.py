@@ -42,7 +42,8 @@ class TestUpdateParameterDefinition(TestBrokerCommand):
         self.matchoutput(out, "Flushed", cmd)
 
     def test_105_verify_update(self):
-        cmd = ["search_parameter_definition", "--archetype", "aquilon"]
+        cmd = ["show_parameter_definition", "--archetype", "aquilon",
+               "--path", "testint"]
         out = self.commandtest(cmd)
         self.searchoutput(out,
                           r'Parameter Definition: testint \[required\]\s*'
@@ -74,6 +75,30 @@ class TestUpdateParameterDefinition(TestBrokerCommand):
                           r'Default: 100\s*'
                           r'Description: testint\s*',
                           cmd)
+
+    def test_120_clear_default(self):
+        command = ["update_parameter_definition", "--archetype", "aquilon",
+                   "--path=testint", "--clear_default",
+                   "--justification", "tcm=12345678"]
+        self.statustest(command)
+
+    def test_125_verify_update(self):
+        cmd = ["show_parameter_definition", "--archetype", "aquilon",
+               "--path", "testint"]
+        out = self.commandtest(cmd)
+        self.matchclean(out, "Default:", cmd)
+
+    def test_125_cat_unixeng_test(self):
+        cmd = ["cat", "--archetype", "aquilon", "--personality", "unixeng-test",
+               "--param_tmpl", "foo"]
+        out = self.commandtest(cmd)
+        self.matchclean(out, '"testint"', cmd)
+
+    def test_129_restore_default(self):
+        command = ["update_parameter_definition", "--archetype", "aquilon",
+                   "--path=testint", "--default=100",
+                   "--justification", "tcm=12345678"]
+        self.statustest(command)
 
     def test_200_update_rebuild_required_default(self):
         cmd = ["update_parameter_definition", "--archetype", "aquilon",

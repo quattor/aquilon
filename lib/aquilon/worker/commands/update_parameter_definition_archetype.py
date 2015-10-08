@@ -29,7 +29,8 @@ class CommandUpdParameterDefintionArchetype(BrokerCommand):
     required_parameters = ["archetype", "path"]
 
     def render(self, session, logger, archetype, path, required, activation,
-               default, description, user, justification, reason, **kwargs):
+               default, clear_default, description, user, justification, reason,
+               **kwargs):
         dbarchetype = Archetype.get_unique(session, archetype, compel=True)
         if not dbarchetype.is_compileable:
             raise ArgumentError("{0} is not compileable.".format(dbarchetype))
@@ -47,7 +48,7 @@ class CommandUpdParameterDefintionArchetype(BrokerCommand):
 
         # Changing the default value impacts all personalities which do not
         # override it, so more scrunity is needed
-        if default is not None:
+        if default is not None or clear_default:
             # Changing the default of a parameter which requires a rebuild is
             # a risky operation. If it is really needed, then the workaround is
             # to turn the activation flag off first, update the value, and
