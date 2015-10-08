@@ -99,7 +99,7 @@ def validate_parameter(session, dbparam_def, path, value, dbstage):
 
     # check if default specified on parameter definition
     if not value:
-        if dbparam_def.default:
+        if dbparam_def.default is not None:
             value = dbparam_def.default
         else:
             raise ArgumentError("Parameter %s does not have any value defined."
@@ -163,7 +163,7 @@ def validate_required_parameter(param_def_holder, parameter):
     for param_def in param_def_holder.param_definitions:
         # ignore not required fields or fields
         # which have defaults specified
-        if (not param_def.required) or param_def.default:
+        if (not param_def.required) or param_def.default is not None:
             continue
 
         if isinstance(param_def_holder, FeatureParamDef):
@@ -252,7 +252,7 @@ def validate_param_definition(path, value_type, default=None):
 
     ParamDefinition.validate_type(value_type)
 
-    if default:
+    if default is not None:
         validate_value("default for path=%s" % path, value_type, default)
 
     return path

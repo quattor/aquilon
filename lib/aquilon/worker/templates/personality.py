@@ -49,7 +49,7 @@ def get_parameters_by_feature(dbstage, dbfeaturelink):
                                                param_def.path, compel=False)
             else:
                 value = None
-            if value is None and param_def.default:
+            if value is None and param_def.default is not None:
                 value = validate_value("default for path=%s" % param_def.path,
                                        param_def.value_type, param_def.default)
             if value is not None:
@@ -295,7 +295,7 @@ class PlenaryPersonalityParameter(StructurePlenary):
                 if value is not None:
                     break
 
-            if value is None and param_def.default:
+            if value is None and param_def.default is not None:
                 # XXX This is rather convert_value()
                 value = validate_value("default for path=%s" % param_def.path,
                                        param_def.value_type, param_def.default)

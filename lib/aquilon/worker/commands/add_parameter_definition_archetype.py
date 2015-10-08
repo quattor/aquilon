@@ -41,7 +41,7 @@ class CommandAddParameterDefintionArchetype(BrokerCommand):
 
         if not activation:
             activation = 'dispatch'
-        if activation == 'rebuild' and default:
+        if activation == 'rebuild' and default is not None:
             raise UnimplementedError("Setting a default value for a parameter "
                                      "which requires rebuild would cause all "
                                      "existing hosts to require a rebuild, "
@@ -61,7 +61,7 @@ class CommandAddParameterDefintionArchetype(BrokerCommand):
 
         session.flush()
 
-        if default:
+        if default is not None:
             logger.client_info("You need to run 'aq flush --personalities' for "
                                "the default value to take effect.")
 

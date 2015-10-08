@@ -47,7 +47,7 @@ class CommandUpdParameterDefintionArchetype(BrokerCommand):
         if description is not None:
             db_paramdef.description = description
 
-        if default:
+        if default is not None:
             # Changing the default of a parameter which requires a rebuild is
             # a risky operation. If it is really needed, then the workaround is
             # to turn the activation flag off first, update the value, and

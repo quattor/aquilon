@@ -38,7 +38,7 @@ class CommandUpdParameterDefintionFeature(BrokerCommand):
                                                  holder=dbfeature.param_def_holder,
                                                  compel=True)
 
-        if default:
+        if default is not None:
             validate_param_definition(db_paramdef.path, db_paramdef.value_type,
                                       default)
             db_paramdef.default = default

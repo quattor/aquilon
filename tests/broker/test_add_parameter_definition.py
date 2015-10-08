@@ -56,6 +56,10 @@ default_param_defs = {
         "default": "yes",
         "invalid_default": "bad_boolean",
     },
+    "testfalsedefault": {
+        "type": "boolean",
+        "default": "no",
+    },
     "testlist": {
         "type": "list",
         "default": "val1,val2",
@@ -357,7 +361,7 @@ class TestAddParameterDefinition(TestBrokerCommand):
 
     def test_400_verify_all_proto(self):
         cmd = ["search_parameter_definition", "--archetype", "aquilon", "--format=proto"]
-        result = self.protobuftest(cmd, expect=11)[:]
+        result = self.protobuftest(cmd, expect=12)[:]
         param_defs = dict((param_def.path, param_def) for param_def in result)
 
         self.assertIn('endslash', param_defs)
@@ -409,7 +413,7 @@ class TestAddParameterDefinition(TestBrokerCommand):
 
     def test_410_verify_feature_all_proto(self):
         cmd = ["search_parameter_definition", "--feature", "myfeature", "--format=proto", "--type=host"]
-        result = self.protobuftest(cmd, expect=10)[:]
+        result = self.protobuftest(cmd, expect=11)[:]
         param_defs = dict((param_def.path, param_def) for param_def in result)
 
         for path, params in default_param_defs.items():
