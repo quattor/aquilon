@@ -16,6 +16,8 @@
 # limitations under the License.
 """Contains the logic for `aq add personality`."""
 
+from sqlalchemy.orm import joinedload, subqueryload
+
 import re
 from six.moves.configparser import NoSectionError, NoOptionError  # pylint: disable=F0401
 
@@ -41,7 +43,13 @@ class CommandAddPersonality(BrokerCommand):
             raise ArgumentError("Personality name '%s' is not valid." %
                                 personality)
 
-        dbarchetype = Archetype.get_unique(session, archetype, compel=True)
+        options = [subqueryload('param_def_holders'),
+                   joinedload('param_def_holders.param_definitions'),
+                   subqueryload('required_services'),
+                   subqueryload('features'),
+                   joinedload('features.feature')]
+        dbarchetype = Archetype.get_unique(session, archetype, compel=True,
+                                           query_options=options)
         section = "archetype_" + dbarchetype.name
 
         # If we're cloning a personality, read defaults from the cloned
