@@ -58,6 +58,11 @@ class TestAddCpu(TestBrokerCommand):
                    "--comments", "Some CPU comments"]
         self.badrequesttest(command)
 
+    def test_300_show_all(self):
+        command = ["show_cpu", "--all"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "Vendor: intel Model: utcpu", command)
+
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddCpu)
     unittest.TextTestRunner(verbosity=2).run(suite)
