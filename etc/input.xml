@@ -287,6 +287,7 @@
 	    <option name="exact_location" type="flag">match the location exactly</option>
 	    <option name="chassis" type="string">Chassis name</option>
 	    <option name="slot" type="int">Chassis slot number</option>
+	    <option name="used" type="boolean" reverse="unused">Machine is used by a host</option>
 	</optgroup>
 	<format name="proto">
 	    <message_class name="MachineList" module="aqdsystems_pb2"/>
