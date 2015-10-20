@@ -28,6 +28,7 @@ from sqlalchemy.orm import aliased, object_session
 from sqlalchemy.sql.expression import desc, type_coerce
 
 from aquilon.exceptions_ import ArgumentError, InternalError, AquilonError
+from aquilon.config import Config
 from aquilon.aqdb.types import NicType, MACAddress
 from aquilon.aqdb.column_types import AqMac
 from aquilon.aqdb.model import (Interface, ManagementInterface, ObservedMac,
@@ -35,7 +36,6 @@ from aquilon.aqdb.model import (Interface, ManagementInterface, ObservedMac,
                                 Model, Bunker, Location, HardwareEntity,
                                 Network, Host)
 from aquilon.aqdb.model.network import get_net_id_from_ip
-from aquilon.aqdb.model.vlan import VLAN_TYPES
 from aquilon.utils import first_of
 
 
@@ -290,7 +290,11 @@ def set_port_group_vm(session, logger, dbinterface, port_group_name):
             raise ArgumentError("{0} is full for {1:l}.".format(selected_pg,
                                                                 allocator))
     else:
-        if port_group_name not in VLAN_TYPES:
+        config = Config()
+        vlan_types = [vlan.strip()
+                      for vlan in config.get("broker", "vlan_types").split(",")
+                      if vlan.strip()]
+        if port_group_name not in vlan_types:
             raise ArgumentError("Port group %s does not match either a "
                                 "registered port group name, or a port "
                                 "group type." % port_group_name)

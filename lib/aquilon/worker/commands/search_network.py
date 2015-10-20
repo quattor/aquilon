@@ -27,7 +27,6 @@ from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.location import get_location
-from aquilon.worker.formats.list import StringAttributeList
 from aquilon.worker.formats.network import NetworkHostList, NetworkList
 
 
@@ -102,9 +101,18 @@ class CommandSearchNetwork(BrokerCommand):
                                                       "network")]
                 q = q.filter(Network.id.in_(net_ids))
         if pg:
-            dbvi = VlanInfo.get_by_pg(session, pg, compel=ArgumentError)
             q = q.join(Network.port_group, aliased=True)
-            q = q.filter_by(network_tag=dbvi.vlan_id, usage=dbvi.vlan_type)
+            dbvi = VlanInfo.get_by_pg(session, pg, compel=False)
+
+            if dbvi:
+                q = q.filter_by(network_tag=dbvi.vlan_id, usage=dbvi.vlan_type)
+            else:
+                usage, network_tag = PortGroup.parse_name(pg)
+                if network_tag is not None:
+                    q = q.filter_by(network_tag=network_tag, usage=usage)
+                else:
+                    q = q.filter_by(usage=pg)
+
             q = q.reset_joinpoint()
         dblocation = get_location(session, **arguments)
         if dblocation:
