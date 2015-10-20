@@ -6428,7 +6428,7 @@
 	    <option name="path" type="string">Path of the parameter</option>
 	</optgroup>
 	<optgroup>
-	    <option name="required" type="flag">Is this parameter required for object compilation </option>
+	    <option name="required" type="boolean">Is this parameter required for object compilation</option>
 	    <option name="default" type="string">Default value</option>
 	    <option name="clear_default" type="flag" conflicts="default">Clear the default value</option>
 	    <option name="description" type="string">Description</option>

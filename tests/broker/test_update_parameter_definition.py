@@ -100,6 +100,21 @@ class TestUpdateParameterDefinition(TestBrokerCommand):
                    "--justification", "tcm=12345678"]
         self.statustest(command)
 
+    def test_130_update_norequired(self):
+        cmd = ["update_parameter_definition", "--feature", "myfeature", "--type=host",
+               "--path=testint", "--norequired"]
+        self.noouttest(cmd)
+
+    def test_135_verify_update_feature(self):
+        cmd = ["search_parameter_definition", "--feature", "myfeature", "--type=host"]
+        out = self.commandtest(cmd)
+        self.searchoutput(out,
+                          r'Parameter Definition: testint\s*'
+                          r'Type: int\s*'
+                          r'Default: 100\s*'
+                          r'Description: testint\s*',
+                          cmd)
+
     def test_200_update_rebuild_required_default(self):
         cmd = ["update_parameter_definition", "--archetype", "aquilon",
                "--path=test_rebuild_required", "--default=default"]
