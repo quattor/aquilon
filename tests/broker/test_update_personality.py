@@ -59,11 +59,11 @@ class TestUpdatePersonality(VerifyGrnsMixin, PersonalityTestMixin,
 
         command = ["update_personality", "--personality", "unused",
                    "--archetype=aquilon", "--cluster"]
-        out = self.successtest(command)
+        self.successtest(command)
 
         command = ["del_personality", "--personality", "unused",
                    "--archetype=aquilon"]
-        out = self.successtest(command)
+        self.successtest(command)
 
     def test_130_add_testovrpersona_dev(self):
         command = ["add_personality", "--archetype=aquilon", "--grn=grn:/ms/ei/aquilon/aqd",
@@ -114,7 +114,7 @@ class TestUpdatePersonality(VerifyGrnsMixin, PersonalityTestMixin,
     def test_139_delete_testovrpersona_dev(self):
         command = ["del_personality", "--personality=testovrpersona/dev",
                    "--archetype=aquilon"]
-        out = self.successtest(command)
+        self.successtest(command)
 
     def test_140_update_owner_grn(self):
         command = ["update_personality", "--personality", "compileserver",
@@ -263,8 +263,12 @@ class TestUpdatePersonality(VerifyGrnsMixin, PersonalityTestMixin,
                          "stage next.", command)
 
     def test_178_make_unstaged(self):
+        self.check_plenary_exists("aquilon", "personality",
+                                  "compileserver+next", "espinfo")
         self.noouttest(["update_personality", "--personality", "compileserver",
                         "--archetype", "aquilon", "--unstaged"])
+        self.check_plenary_gone("aquilon", "personality",
+                                "compileserver+next", "espinfo")
 
     def test_179_verify_unstaged(self):
         command = ["show_personality", "--personality", "compileserver",

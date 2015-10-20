@@ -18,7 +18,10 @@
 from aquilon.exceptions_ import ArgumentError, UnimplementedError
 from aquilon.aqdb.model import Archetype, ArchetypeParamDef, ParamDefinition
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.dbwrappers.parameter import validate_param_definition
+from aquilon.worker.dbwrappers.change_management import validate_prod_archetype
+from aquilon.worker.dbwrappers.parameter import (validate_param_definition,
+                                                 add_arch_paramdef_plenaries)
+from aquilon.worker.templates import PlenaryCollection
 from aquilon.utils import validate_template_name
 
 
@@ -27,7 +30,8 @@ class CommandAddParameterDefintionArchetype(BrokerCommand):
     required_parameters = ["archetype", "template", "path", "value_type"]
 
     def render(self, session, logger, archetype, template, path, value_type,
-               required, activation, default, description, **kwargs):
+               required, activation, default, description, user, justification,
+               reason, **kwargs):
         validate_template_name(template, "template")
         dbarchetype = Archetype.get_unique(session, archetype, compel=True)
         if not dbarchetype.is_compileable:
@@ -41,28 +45,38 @@ class CommandAddParameterDefintionArchetype(BrokerCommand):
 
         if not activation:
             activation = 'dispatch'
-        if activation == 'rebuild' and default:
+        if activation == 'rebuild' and default is not None:
             raise UnimplementedError("Setting a default value for a parameter "
                                      "which requires rebuild would cause all "
                                      "existing hosts to require a rebuild, "
                                      "which is not supported.")
 
         path = ParamDefinition.normalize_path(path)
-        validate_param_definition(path, value_type, default)
+        validate_param_definition(path)
 
         ParamDefinition.get_unique(session, path=path, holder=holder,
                                    preclude=True)
 
+        plenaries = PlenaryCollection(logger=logger)
+        if default is not None:
+            validate_prod_archetype(dbarchetype, user, justification, reason)
+            add_arch_paramdef_plenaries(session, dbarchetype, holder, plenaries)
+
         db_paramdef = ParamDefinition(path=path, holder=holder,
-                                      value_type=value_type, default=default,
-                                      required=required, activation=activation,
+                                      value_type=value_type, required=required,
+                                      activation=activation,
                                       description=description)
+        # Set default separately - validation in the model depends on the other
+        # attributes being already set
+        db_paramdef.default = default
+
         session.add(db_paramdef)
 
         session.flush()
 
-        if default:
-            logger.client_info("You need to run 'aq flush --personalities' for "
-                               "the default value to take effect.")
+        written = plenaries.write()
+        if plenaries.plenaries:
+            logger.client_info("Flushed %d/%d templates." %
+                               (written, len(plenaries.plenaries)))
 
         return

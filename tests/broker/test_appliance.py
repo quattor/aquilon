@@ -56,6 +56,14 @@ class TestAppliance(VerifyNotificationsMixin, PersonalityTestMixin,
         out = self.commandtest(command)
         self.matchoutput(out, '"uri" = "file:///somepath/to/ovf";', command)
 
+    def test_140_clear_uri(self):
+        command = ["update", "machine", "--machine", self.vapp, "--uri", ""]
+        self.noouttest(command)
+
+        command = ["show", "machine", "--machine", self.vapp]
+        out = self.commandtest(command)
+        self.matchclean(out, "URI", command)
+
     def test_150_update_uri(self):
         command = ["update", "machine", "--machine", self.vapp,
                    "--uri", "file:///otherpath/to/ovf"]

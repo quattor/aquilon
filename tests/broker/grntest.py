@@ -23,21 +23,19 @@ from six import iteritems
 
 class VerifyGrnsMixin(object):
 
-    def setUp(self):
-        super(VerifyGrnsMixin, self).setUp()
+    @classmethod
+    def setUpClass(cls):
+        super(VerifyGrnsMixin, cls).setUpClass()
 
-        if hasattr(self, "grns"):
-            return
-
-        self.grns = {}
-        self.eon_ids = {}
+        cls.grns = {}
+        cls.eon_ids = {}
         dir = os.path.dirname(os.path.realpath(__file__))
         with open(os.path.join(dir, "..", "fakebin", "eon-data",
                                "eon_catalog.csv")) as f:
             reader = DictReader(f)
             for row in reader:
-                self.grns[row["name"]] = int(row["id"])
-                self.eon_ids[int(row["id"])] = row["name"]
+                cls.grns[row["name"]] = int(row["id"])
+                cls.eon_ids[int(row["id"])] = row["name"]
 
     def check_grns(self, out, grn_maps, command):
         def check_grn_for_key(grn_list, key):

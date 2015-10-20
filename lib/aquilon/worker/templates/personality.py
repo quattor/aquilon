@@ -30,7 +30,6 @@ from aquilon.worker.templates.base import (Plenary, StructurePlenary,
 from aquilon.worker.templates.panutils import (pan_include, pan_variable,
                                                pan_assign, pan_append,
                                                pan_include_if_exists)
-from aquilon.worker.dbwrappers.parameter import validate_value
 
 LOGGER = logging.getLogger(__name__)
 
@@ -49,9 +48,10 @@ def get_parameters_by_feature(dbstage, dbfeaturelink):
                                                param_def.path, compel=False)
             else:
                 value = None
-            if value is None and param_def.default:
-                value = validate_value("default for path=%s" % param_def.path,
-                                       param_def.value_type, param_def.default)
+
+            if value is None:
+                value = param_def.parsed_default
+
             if value is not None:
                 ret[param_def.path] = value
     return ret
@@ -244,6 +244,13 @@ class PlenaryPersonalityPreFeature(Plenary):
                            key=attrgetter("feature.name")):
             helper_feature_template(self.dbobj, feat_tmpl, link, lines)
 
+    def get_key(self, exclusive=True):
+        if self.is_deleted():
+            return NoLockKey(logger=self.logger)
+        else:
+            return PlenaryKey(personality=self.dbobj, logger=self.logger,
+                              exclusive=exclusive)
+
 
 class PlenaryPersonalityPostFeature(Plenary):
     prefix = "personality"
@@ -263,6 +270,13 @@ class PlenaryPersonalityPostFeature(Plenary):
                            key=attrgetter("feature.name")):
             if link.feature.post_personality:
                 helper_feature_template(self.dbobj, feat_tmpl, link, lines)
+
+    def get_key(self, exclusive=True):
+        if self.is_deleted():
+            return NoLockKey(logger=self.logger)
+        else:
+            return PlenaryKey(personality=self.dbobj, logger=self.logger,
+                              exclusive=exclusive)
 
 
 class PlenaryPersonalityParameter(StructurePlenary):
@@ -295,10 +309,9 @@ class PlenaryPersonalityParameter(StructurePlenary):
                 if value is not None:
                     break
 
-            if value is None and param_def.default:
-                # XXX This is rather convert_value()
-                value = validate_value("default for path=%s" % param_def.path,
-                                       param_def.value_type, param_def.default)
+            if value is None:
+                value = param_def.parsed_default
+
             if value is not None:
                 values = get_path_under_top(param_def.path, value)
                 for path in sorted(values.keys()):
@@ -316,3 +329,10 @@ class PlenaryPersonalityParameter(StructurePlenary):
     def is_dirty(self):
         session = object_session(self.dbobj.personality_stage)
         return self.dbobj.personality_stage in session.dirty
+
+    def get_key(self, exclusive=True):
+        if self.is_deleted():
+            return NoLockKey(logger=self.logger)
+        else:
+            return PlenaryKey(personality=self.dbobj.personality_stage,
+                              logger=self.logger, exclusive=exclusive)

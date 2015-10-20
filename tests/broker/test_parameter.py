@@ -556,8 +556,9 @@ class TestParameter(TestBrokerCommand):
                          'structure template personality/testpersona/dev+next/foo;',
                          cmd)
         self.matchoutput(out, '"testboolean" = true;', cmd)
+        self.matchoutput(out, '"testfalsedefault" = false;', cmd)
         self.matchoutput(out, '"testfloat" = 100.100;', cmd)
-        self.matchoutput(out, '"testint" = 100;', cmd)
+        self.matchoutput(out, '"testint" = 60;', cmd)
         self.matchoutput(out, '"teststring" = "default";', cmd)
         self.matchoutput(out, '"testrequired" = "set";', cmd)
         # TODO: get_path_under_top() makes the value come out not quite as

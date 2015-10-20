@@ -85,13 +85,14 @@ default_features = {
 
 class TestAddFeature(TestBrokerCommand):
 
-    def setUp(self):
-        super(TestAddFeature, self).setUp()
-        self.proto = self.protocols['aqdsystems_pb2']
+    @classmethod
+    def setUpClass(cls):
+        super(TestAddFeature, cls).setUpClass()
 
-        desc = self.proto.Feature.DESCRIPTOR
-        self.activation_type = desc.fields_by_name["activation"].enum_type
-        self.visibility_type = desc.fields_by_name["visibility"].enum_type
+        cls.proto = cls.protocols['aqdsystems_pb2']
+        desc = cls.proto.Feature.DESCRIPTOR
+        cls.activation_type = desc.fields_by_name["activation"].enum_type
+        cls.visibility_type = desc.fields_by_name["visibility"].enum_type
 
     def test_100_add_default_features(self):
         for feature_type in default_features:

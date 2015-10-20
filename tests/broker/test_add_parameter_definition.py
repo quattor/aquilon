@@ -56,6 +56,10 @@ default_param_defs = {
         "default": "yes",
         "invalid_default": "bad_boolean",
     },
+    "testfalsedefault": {
+        "type": "boolean",
+        "default": "no",
+    },
     "testlist": {
         "type": "list",
         "default": "val1,val2",
@@ -75,12 +79,14 @@ param_features = {
 
 
 class TestAddParameterDefinition(TestBrokerCommand):
-    def setUp(self):
-        super(TestAddParameterDefinition, self).setUp()
-        self.proto = self.protocols['aqdsystems_pb2']
 
-        desc = self.proto.Feature.DESCRIPTOR
-        self.activation_type = desc.fields_by_name["activation"].enum_type
+    @classmethod
+    def setUpClass(cls):
+        super(TestAddParameterDefinition, cls).setUpClass()
+
+        cls.proto = cls.protocols['aqdsystems_pb2']
+        desc = cls.proto.Feature.DESCRIPTOR
+        cls.activation_type = desc.fields_by_name["activation"].enum_type
 
     def test_100_add_all(self):
         for path, params in default_param_defs.items():
@@ -95,10 +101,7 @@ class TestAddParameterDefinition(TestBrokerCommand):
             if "activation" in params:
                 cmd.extend(["--activation", params["activation"]])
 
-            out = self.statustest(cmd)
-            if "default" in params:
-                self.matchoutput(out, "You need to run 'aq flush --personalities' for "
-                                 "the default value to take effect.", cmd)
+            self.noouttest(cmd)
 
     def test_105_show_paramdef(self):
         cmd = ["show_parameter_definition", "--archetype", "aquilon",
@@ -208,7 +211,8 @@ class TestAddParameterDefinition(TestBrokerCommand):
                 continue
 
             cmd = ["add_parameter_definition", "--archetype", "aquilon",
-                   "--path", path, "--value_type", params["type"],
+                   "--path", path + "_invalid_default",
+                   "--value_type", params["type"],
                    "--template", "foo", "--default", params["invalid_default"]]
             out = self.badrequesttest(cmd)
             self.matchoutput(out, "for default for path=%s" % path, cmd)
@@ -219,7 +223,8 @@ class TestAddParameterDefinition(TestBrokerCommand):
                 continue
 
             cmd = ["add_parameter_definition", "--feature", "myfeature", "--type", "host",
-                   "--path", path, "--value_type", params["type"],
+                   "--path", path + "_invalid_default",
+                   "--value_type", params["type"],
                    "--default", params["invalid_default"]]
             out = self.badrequesttest(cmd)
             self.matchoutput(out, "for default for path=%s" % path, cmd)
@@ -239,15 +244,6 @@ class TestAddParameterDefinition(TestBrokerCommand):
         self.matchoutput(out, "Setting a default value for a parameter which "
                          "requires rebuild would cause all existing hosts to "
                          "require a rebuild, which is not supported.", cmd)
-
-    def test_300_update_rebuild_required_default(self):
-        cmd = ["update_parameter_definition", "--archetype", "aquilon",
-               "--path=test_rebuild_required", "--default=default"]
-        out = self.unimplementederrortest(cmd)
-        self.matchoutput(out, "Changing the default value of a parameter "
-                         "which requires rebuild would cause all existing "
-                         "hosts to require a rebuild, which is not supported.",
-                         cmd)
 
     def test_300_invalid_path(self):
         for path in ["!badchar", "@badchar", "#badchar", "$badchar", "%badchar", "^badchar",
@@ -287,15 +283,6 @@ class TestAddParameterDefinition(TestBrokerCommand):
         cmd = ["add_parameter_definition", "--feature", "myfeature",
                "--type=no-such-type",
                "--path=testpath", "--value_type=string"]
-        err = self.badrequesttest(cmd)
-        self.matchoutput(err,
-                         "Unknown feature type 'no-such-type'. The valid "
-                         "values are: hardware, host, interface.",
-                         cmd)
-
-    def test_300_update_bad_feature_type(self):
-        cmd = ["update_parameter_definition", "--feature", "myfeature",
-               "--type=no-such-type", "--path=testpath"]
         err = self.badrequesttest(cmd)
         self.matchoutput(err,
                          "Unknown feature type 'no-such-type'. The valid "
@@ -355,7 +342,7 @@ class TestAddParameterDefinition(TestBrokerCommand):
 
     def test_400_verify_all_proto(self):
         cmd = ["search_parameter_definition", "--archetype", "aquilon", "--format=proto"]
-        result = self.protobuftest(cmd, expect=11)[:]
+        result = self.protobuftest(cmd, expect=12)[:]
         param_defs = dict((param_def.path, param_def) for param_def in result)
 
         self.assertIn('endslash', param_defs)
@@ -407,7 +394,7 @@ class TestAddParameterDefinition(TestBrokerCommand):
 
     def test_410_verify_feature_all_proto(self):
         cmd = ["search_parameter_definition", "--feature", "myfeature", "--format=proto", "--type=host"]
-        result = self.protobuftest(cmd, expect=10)[:]
+        result = self.protobuftest(cmd, expect=11)[:]
         param_defs = dict((param_def.path, param_def) for param_def in result)
 
         for path, params in default_param_defs.items():
@@ -427,42 +414,6 @@ class TestAddParameterDefinition(TestBrokerCommand):
             self.assertEqual(param_defs[path].is_required,
                              params.get("required", False))
             #self.assertEqual(param_defs[path].activation, self.proto.NONE)
-
-    def test_500_update(self):
-        cmd = ["update_parameter_definition", "--archetype", "aquilon",
-               "--path=testint", "--description=testint",
-               "--default=100", "--required", "--activation", "reboot"]
-        out = self.statustest(cmd)
-        self.matchoutput(out, "You need to run 'aq flush --personalities' for "
-                         "the change of the default value to take effect.", cmd)
-
-    def test_505_verify_update(self):
-        cmd = ["search_parameter_definition", "--archetype", "aquilon"]
-        out = self.commandtest(cmd)
-        self.searchoutput(out,
-                          r'Parameter Definition: testint \[required\]\s*'
-                          r'Type: int\s*'
-                          r'Template: foo\s*'
-                          r'Default: 100\s*'
-                          r'Activation: reboot\s*'
-                          r'Description: testint\s*',
-                          cmd)
-
-    def test_510_update_feature(self):
-        cmd = ["update_parameter_definition", "--feature", "myfeature", "--type=host",
-               "--path=testint", "--description=testint",
-               "--default=100", "--required"]
-        self.noouttest(cmd)
-
-    def test_515_verify_update_feature(self):
-        cmd = ["search_parameter_definition", "--feature", "myfeature", "--type=host"]
-        out = self.commandtest(cmd)
-        self.searchoutput(out,
-                          r'Parameter Definition: testint \[required\]\s*'
-                          r'Type: int\s*'
-                          r'Default: 100\s*'
-                          r'Description: testint\s*',
-                          cmd)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddParameterDefinition)

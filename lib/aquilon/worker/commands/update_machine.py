@@ -285,7 +285,7 @@ class CommandUpdateMachine(BrokerCommand):
                                 "machines and the model's type is %s" %
                                 dbmachine.model.model_type)
 
-        if uri:
+        if uri is not None:
             dbmachine.uri = uri
 
         # FIXME: For now, if a machine has its interface(s) in a portgroup

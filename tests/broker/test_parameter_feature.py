@@ -72,6 +72,7 @@ class TestParameterFeature(TestBrokerCommand):
         out = self.commandtest(cmd)
         self.searchoutput(out,
                           r'"/system/features/hostfeature/testboolean" = true;\s*'
+                          r'"/system/features/hostfeature/testfalsedefault" = false;\s*'
                           r'"/system/features/hostfeature/testfloat" = 100\.100;\s*'
                           r'"/system/features/hostfeature/testint" = 60;\s*'
                           r'"/system/features/hostfeature/testjson" = nlist\(\s*"val1",\s*"val2"\s*\);\s*'
@@ -123,6 +124,7 @@ class TestParameterFeature(TestBrokerCommand):
         self.searchoutput(out,
                           r'"/system/features/hostfeature/testboolean" = false;\s*'
                           r'"/system/features/hostfeature/testdefault" = "host_feature";\s*'
+                          r'"/system/features/hostfeature/testfalsedefault" = false;\s*'
                           r'"/system/features/hostfeature/testfloat" = 100\.100;\s*'
                           r'"/system/features/hostfeature/testint" = 0;\s*'
                           r'"/system/features/hostfeature/testjson" = nlist\(\s*"val1",\s*"val2"\s*\);\s*'
@@ -196,6 +198,7 @@ class TestParameterFeature(TestBrokerCommand):
         self.searchoutput(out,
                           r'"/system/features/interface/interfacefeature/testboolean" = true;\s*'
                           r'"/system/features/interface/interfacefeature/testdefault" = "interface_feature";\s*'
+                          r'"/system/features/interface/interfacefeature/testfalsedefault" = false;\s*'
                           r'"/system/features/interface/interfacefeature/testfloat" = 100\.100;\s*'
                           r'"/system/features/interface/interfacefeature/testint" = 60;\s*'
                           r'"/system/features/interface/interfacefeature/testjson" = nlist\(\s*"val1",\s*"val2"\s*\);\s*'
@@ -283,6 +286,7 @@ class TestParameterFeature(TestBrokerCommand):
         self.searchoutput(out,
                           r'"/system/features/hardware/hardwarefeature/testboolean" = true;\s*'
                           r'"/system/features/hardware/hardwarefeature/testdefault" = "hardware_feature";\s*'
+                          r'"/system/features/hardware/hardwarefeature/testfalsedefault" = false;\s*'
                           r'"/system/features/hardware/hardwarefeature/testfloat" = 100\.100;\s*'
                           r'"/system/features/hardware/hardwarefeature/testint" = 60;\s*'
                           r'"/system/features/hardware/hardwarefeature/testjson" = nlist\(\s*"val1",\s*"val2"\s*\);\s*'
@@ -330,6 +334,7 @@ class TestParameterFeature(TestBrokerCommand):
         self.searchoutput(out,
                           r'"/system/features/hardware/hardwarefeature/testboolean" = true;\s*'
                           r'"/system/features/hardware/hardwarefeature/testdefault" = "hardware_newstring";\s*'
+                          r'"/system/features/hardware/hardwarefeature/testfalsedefault" = false;\s*'
                           r'"/system/features/hardware/hardwarefeature/testfloat" = 100\.100;\s*'
                           r'"/system/features/hardware/hardwarefeature/testint" = 60;\s*'
                           r'"/system/features/hardware/hardwarefeature/testjson" = nlist\(\s*"val1",\s*"val2"\s*\);\s*'

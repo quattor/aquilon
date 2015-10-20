@@ -15,18 +15,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import ParamDefinition, Feature
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.dbwrappers.parameter import search_path_in_personas
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.dbwrappers.change_management import validate_prod_feature
+from aquilon.worker.dbwrappers.parameter import (search_path_in_personas,
+                                                 add_feature_paramdef_plenaries)
+from aquilon.worker.templates import PlenaryCollection
 
 
 class CommandDelParameterDefintionFeature(BrokerCommand):
 
     required_parameters = ["path", "feature", "type"]
 
-    def render(self, session, feature, type, path, **kwargs):
+    def render(self, session, logger, feature, type, path, user, justification,
+               reason, **kwargs):
         cls = Feature.polymorphic_subclass(type, "Unknown feature type")
         dbfeature = cls.get_unique(session, name=feature, compel=True)
         if not dbfeature.param_def_holder:
@@ -44,7 +47,19 @@ class CommandDelParameterDefintionFeature(BrokerCommand):
             raise ArgumentError("Parameter with path {0} used by following and cannot be deleted : ".format(path) +
                                 ", ".join("{0.holder_object:l}".format(h) for h in holder))
 
+        plenaries = PlenaryCollection(logger=logger)
+
+        if db_paramdef.default is not None:
+            validate_prod_feature(dbfeature, user, justification, reason)
+            add_feature_paramdef_plenaries(session, dbfeature, plenaries)
+
         session.delete(db_paramdef)
+
         session.flush()
+
+        written = plenaries.write()
+        if plenaries.plenaries:
+            logger.client_info("Flushed %d/%d templates." %
+                               (written, len(plenaries.plenaries)))
 
         return

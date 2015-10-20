@@ -31,12 +31,12 @@ class TestDelParameterDefinition(TestBrokerCommand):
 
     def test_100_del_default(self):
         for path in default_param_defs:
-            self.noouttest(["del_parameter_definition", "--archetype", "aquilon",
-                            "--path", path])
+            self.statustest(["del_parameter_definition", "--archetype", "aquilon",
+                             "--path", path])
 
         for path in ["//startslash", "endslash//"]:
-            self.noouttest(["del_parameter_definition", "--archetype", "aquilon",
-                            "--path", path])
+            self.statustest(["del_parameter_definition", "--archetype", "aquilon",
+                             "--path", path])
 
     def test_105_verify_delete(self):
         command = ["search_parameter_definition", "--archetype", "aquilon"]
