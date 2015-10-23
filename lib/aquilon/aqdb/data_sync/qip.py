@@ -273,7 +273,8 @@ class QIPRefresh(object):
             self.logger.client_info("Removing router {0:s} from "
                                     "{1:l}".format(router.ip, dbnetwork))
             for dns_rec in router.dns_records:
-                delete_dns_record(dns_rec)
+                if dns_rec.is_unused:
+                    delete_dns_record(dns_rec)
             dbnetwork.routers.remove(router)
 
         for ip in new_rtrs - old_rtrs:

@@ -317,12 +317,21 @@ def grab_address(session, fqdn, ip, network_environment=None,
 
     if ip:
         q = session.query(AddressAssignment)
+        q = q.with_polymorphic('*')
         q = q.filter_by(network=dbnetwork)
         q = q.filter_by(ip=ip)
         addr = q.first()
         if addr:
-            raise ArgumentError("IP address {0} is already in use by "
-                                "{1:l}.".format(ip, addr.interface))
+            if allow_shared:
+                if not addr.is_shared:
+                    raise ArgumentError("IP address {0} is not shared and "
+                                        "already in use by {1:l}"
+                                        ".".format(ip, addr.interface))
+                # else: existing shared address, no problem
+            else:
+                raise ArgumentError("IP address {0} is already in use by "
+                                    "{1:l}.".format(ip, addr.interface))
+        # else: no existing address, no problem
 
         if existing_record.service_addresses and not allow_shared:
             raise ArgumentError("{0} is already being used as a service address."

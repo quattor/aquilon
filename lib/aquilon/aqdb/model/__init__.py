@@ -95,7 +95,8 @@ from aquilon.aqdb.model.interface import (Interface, PublicInterface,
                                           VlanInterface, BondingInterface,
                                           BridgeInterface, LoopbackInterface,
                                           VirtualInterface, PhysicalInterface)
-from aquilon.aqdb.model.address_assignment import AddressAssignment
+from aquilon.aqdb.model.address_assignment import (AddressAssignment,
+                                                   SharedAddressAssignment)
 
 # FEATURES
 from aquilon.aqdb.model.feature import (Feature, FeatureLink, HostFeature,

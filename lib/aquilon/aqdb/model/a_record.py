@@ -57,6 +57,15 @@ class ARecord(DnsRecord):
                                                         'dns_environment']}})
     __mapper_args__ = {'polymorphic_identity': _TN}
 
+    @property
+    def is_unused(self):
+        if self.assignments:
+            return False
+        elif self.service_addresses:
+            return False
+        else:
+            return True
+
     def __format__(self, format_spec):
         if format_spec != "a":
             return super(ARecord, self).__format__(format_spec)

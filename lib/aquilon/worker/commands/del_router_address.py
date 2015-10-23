@@ -50,8 +50,13 @@ class CommandDelRouterAddress(BrokerCommand):
             raise NotFoundException("IP address {0} is not a router on "
                                     "{1:l}.".format(ip, dbnetwork))
 
+        # Only remove the DNS record if its not assinged to an interface,
+        # or is a service address.  (This would be easier if service
+        # address were not split from assignments)
         for dns_rec in dbrouter.dns_records:
-            delete_dns_record(dns_rec)
+            if dns_rec.is_unused:
+                delete_dns_record(dns_rec, verify_assignments=True)
+
         dbnetwork.routers.remove(dbrouter)
         session.flush()
 

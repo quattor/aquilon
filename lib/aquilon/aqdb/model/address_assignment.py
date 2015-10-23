@@ -130,6 +130,10 @@ class AddressAssignment(Base):
         else:
             return self._label
 
+    @property
+    def is_shared(self):
+        return False
+
     def __init__(self, label=None, network=None, **kwargs):
         # This is dirty. We want to allow empty labels, but Oracle converts
         # empty strings to NULL, violating the NOT NULL constraint. We could
@@ -177,7 +181,12 @@ class SharedAddressAssignment(AddressAssignment):
     @validates('priority')
     def _validate_priority(self, key, value):
         if not value:
-            raise ValueError("Priority is required")
+            raise ValueError("Shared addresses require a priority")
+        return value
+
+    @property
+    def is_shared(self):
+        return True
 
     __mapper_args__ = {'polymorphic_identity': 'shared'}
 

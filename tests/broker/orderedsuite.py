@@ -276,6 +276,7 @@ from .test_audit import TestAudit
 from .test_usecase_database import TestUsecaseDatabase
 from .test_usecase_hacluster import TestUsecaseHACluster
 from .test_usecase_anycast import TestUsecaseAnycast
+from .test_usecase_networks import TestUsecaseNetworks
 from .test_grns import TestGrns
 from .test_map_grn import TestMapGrn
 from .test_stop import TestBrokerStop
@@ -423,6 +424,7 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestRefreshUser, TestRootAccess,
                      TestUsecaseDatabase, TestUsecaseHACluster,
                      TestUsecaseAnycast,
+                     TestUsecaseNetworks,
                      TestClientBypass,
                      TestConsistency,
                      TestUmaskConstraints,

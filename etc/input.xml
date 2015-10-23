@@ -1889,6 +1889,8 @@
 	    <option name="label" type="string">Interface alias of the new address</option>
 	    <option name="ipalgorithm" type="string">Algorithm for automatically choosing an IP.</option>
 	    <option name="map_to_primary" type="boolean">Should the reverse PTR point to the primary name?</option>
+	    <option name="shared" type="flag">Allow the address to be used multiple times</option>
+	    <option name="priority" type="int">Priority of shared address</option>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
 	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
 	</optgroup>

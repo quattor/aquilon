@@ -3,6 +3,16 @@
 # This file contains the pre-defined networks for the unit tests.
 #
 name,cidr,type,autocreate,loc_type,loc_name,side,comments
+netuc_netmgmt_1a,4.1.0.0/26,management,False,building,np,a,
+netuc_netmgmt_1b,4.1.0.64/26,management,False,building,np,b,
+netuc_transit_1a,4.1.1.0/26,transit,False,building,np,a,
+netuc_transit_2a,4.1.1.64/26,transit,False,building,np,a,
+netuc_transit_3a,4.1.1.128/26,transit,False,building,np,a,
+netuc_transit_4a,4.1.1.192/26,transit,False,building,np,a,
+netuc_transit_1b,4.1.2.0/26,transit,False,building,np,b,
+netuc_transit_2b,4.1.2.64/26,transit,False,building,np,b,
+netuc_transit_3b,4.1.2.128/26,transit,False,building,np,b,
+netuc_transit_4b,4.1.2.192/26,transit,False,building,np,b,
 unknown0,4.2.1.0/26,unknown,True,building,ut,a,,
 unknown1,4.2.1.64/26,unknown,True,building,ut,a,,
 tor_net_0,4.2.1.128/26,tor_net,True,building,ut,a,,

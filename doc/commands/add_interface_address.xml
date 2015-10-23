@@ -46,6 +46,8 @@
 	    <group>
 		<arg choice="plain"><option>--map_to_primary</option></arg>
 		<arg choice="plain"><option>--nomap_to_primary</option></arg>
+		<arg><option>--shared</option></arg>
+	        <arg choice="plain"><option>--priority <replaceable>PRIO</replaceable></option></arg>
 	    </group>
 	    <xi:include href="../common/change_management.xml"/>
 	    <xi:include href="../common/global_options.xml"/>
@@ -162,6 +164,29 @@
 			Flag to control if the reverse PTR record of the address should point to the
 			primary name instead the name given in <replaceable>FQDN</replaceable>. Default
 			is to point to the primary name.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--shared</option>
+		</term>
+		<listitem>
+		    <para>
+			Indicate that the address assigned to this interface can also be assinged
+			to other interfaces.  This is primary inteded for HSRP/VRRP addresses which
+			can exist on more than one network device at a time.  Specifying this option
+			requires <option>--priority</option>.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--priority <replaceable>PRIO</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Specify the relative priority of a shared address.
 		    </para>
 		</listitem>
 	    </varlistentry>

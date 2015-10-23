@@ -125,6 +125,9 @@ class CommandDelInterfaceAddress(BrokerCommand):
 
         dsdb_runner = DSDBRunner(logger=logger)
 
+        if addr.is_shared and not other_uses:
+            dsdb_runner.delete_host_details(fqdn, ip)
+
         with plenaries.transaction():
             if dbhw_ent.host:
                 if dbhw_ent.host.archetype.name == 'aurora':

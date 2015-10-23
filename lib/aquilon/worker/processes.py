@@ -561,11 +561,14 @@ class DSDBRunner(object):
         # create an entry in DSDB.  The following loop makes a snapshot of
         # expected state of the information in DSDB.
         for addr in dbhw_ent.all_addresses():
-            # Do not propergate to DSDB if the network is not internal, or
-            # there are no FQDN's associated with this address.
+            # Do not propergate to DSDB if the network is not internal,
+            # there are no FQDN's associated with this address, or
+            # the address is shared with other devices.
             if not addr.network.is_internal:
                 continue
             if not addr.fqdns:
+                continue
+            if addr.is_shared:
                 continue
 
             # In AQDB there may be multiple domain names associated with
