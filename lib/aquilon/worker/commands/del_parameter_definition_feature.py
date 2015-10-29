@@ -41,11 +41,13 @@ class CommandDelParameterDefintionFeature(BrokerCommand):
                                                  holder=dbfeature.param_def_holder,
                                                  compel=True)
 
-        # validate if this path is being used
-        holder = search_path_in_personas(session, path, dbfeature.param_def_holder)
-        if holder:
-            raise ArgumentError("Parameter with path {0} used by following and cannot be deleted: ".format(path) +
-                                ", ".join("{0.holder_object:l}".format(h) for h in holder))
+        # Validate if this path is still being used
+        params = search_path_in_personas(session, path, dbfeature.param_def_holder)
+        if params:
+            holders = ["{0.holder_object:l}".format(param) for param in params]
+            raise ArgumentError("Parameter with path {0} used by following and "
+                                "cannot be deleted: {1!s}"
+                                .format(path, ", ".join(sorted(holders))))
 
         plenaries = PlenaryCollection(logger=logger)
 

@@ -146,7 +146,7 @@ def search_path_in_personas(session, path, param_def_holder):
         q = q.join(FeatureLink)
         q = q.filter_by(feature=param_def_holder.feature)
 
-    holder = {}
+    params = {}
 
     if isinstance(param_def_holder, FeatureParamDef):
         path = Parameter.feature_path(param_def_holder.feature, path)
@@ -155,10 +155,10 @@ def search_path_in_personas(session, path, param_def_holder):
         try:
             value = parameter.get_path(path)
             if value is not None:
-                holder[parameter] = {path: value}
+                params[parameter] = value
         except NotFoundException:
             pass
-    return holder
+    return params
 
 
 def validate_personality_config(dbstage):

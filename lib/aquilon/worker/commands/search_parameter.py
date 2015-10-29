@@ -45,4 +45,4 @@ class CommandSearchParameter(BrokerCommand):
             raise NotFoundException("Parameter definition %s not found." % path)
 
         params = search_path_in_personas(session, path, db_paramdef.holder)
-        return SimpleParameterList(iteritems(params))
+        return SimpleParameterList(path, iteritems(params))

@@ -119,15 +119,18 @@ class DiffFormatter(ObjectFormatter):
 ObjectFormatter.handlers[DiffData] = DiffFormatter()
 
 
-class SimpleParameterList(list):
-    pass
+class SimpleParameterList(object):
+    def __init__(self, path, params):
+        self.path = path
+        self.params = params
 
 
 class SimpleParameterListFormatter(ListFormatter):
-    def format_raw(self, hlist, indent="", embedded=True, indirect_attrs=True):
+    def format_raw(self, paramlist, indent="", embedded=True, indirect_attrs=True):
         details = []
-        for k, v in hlist:
-            dbstage = k.holder_object
+        path = paramlist.path
+        for dbparam, value in paramlist.params:
+            dbstage = dbparam.holder_object
             if dbstage.personality.is_cluster:
                 description = "Cluster"
             else:
@@ -140,12 +143,7 @@ class SimpleParameterListFormatter(ListFormatter):
             if dbstage.staged:
                 details.append(indent + "  Stage: {0.name}".format(dbstage))
 
-            for ikey, ivalue in v.items():
-                details.extend(indented_value(indent + "  ", ikey, ivalue))
+            details.extend(indented_value(indent + "  ", path, value))
         return "\n".join(details)
-
-    def format_proto(self, hostlist, container, embedded=True,
-                     indirect_attrs=True):
-        pass
 
 ObjectFormatter.handlers[SimpleParameterList] = SimpleParameterListFormatter()
