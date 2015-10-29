@@ -96,21 +96,6 @@ AQUILON_PARAM_DEFS = {
     ],
     "actions": [
         {
-            "path": r"actions/\w+/user",
-            "value_type": "string",
-            "description": "action user"
-        },
-        {
-            "path": r"actions/\w+/command",
-            "value_type": "string",
-            "description": "action command"
-        },
-        {
-            "path": r"actions/\w+",
-            "value_type": "json",
-            "description": "per action block"
-        },
-        {
             "path": "actions",
             "value_type": "json",
             "schema": json.dumps(actions_schema)

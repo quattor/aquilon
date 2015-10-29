@@ -17,7 +17,6 @@
 """ Helper functions for managing parameters. """
 
 from jsonschema import validate, ValidationError
-import re
 from six import iteritems
 
 from sqlalchemy.orm import contains_eager, joinedload, subqueryload, undefer
@@ -98,24 +97,17 @@ def get_paramdef_for_parameter(path, param_def_holder):
     if not param_def_holder:
         return None
 
-    param_definitions = param_def_holder.param_definitions
-    match = None
+    for db_paramdef in param_def_holder.param_definitions:
+        if path == db_paramdef.path:
+            return db_paramdef
 
-    # the specified path of the parameter should either be an actual match
-    # or match input specified regexp.
-    # The regexp is done only after all actual paths dont find a match
-    # e.g action/\w+/user will never be an actual match
-    for paramdef in param_definitions:
-        if path == paramdef.path:
-            match = paramdef
-            break
-    else:
-        for paramdef in param_definitions:
-            if re.match(paramdef.path + '$', path):
-                match = paramdef
-                break
+        # Allow "indexing into" JSON parameters
+        if db_paramdef.value_type != "json":
+            continue
+        if path.startswith(db_paramdef.path):
+            return db_paramdef
 
-    return match
+    return None
 
 
 def validate_required_parameter(param_def_holder, parameter):

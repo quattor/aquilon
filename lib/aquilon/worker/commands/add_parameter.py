@@ -28,6 +28,7 @@ from aquilon.worker.templates import Plenary, PlenaryCollection
 class CommandAddParameter(BrokerCommand):
 
     required_parameters = ['personality', 'path']
+    strict_path = True
 
     def process_parameter(self, session, dbstage, db_paramdef, path, value):
         if not dbstage.parameter:
@@ -58,7 +59,7 @@ class CommandAddParameter(BrokerCommand):
         else:
             holders = dbpersonality.archetype.param_def_holders.values()
 
-        path = ParamDefinition.normalize_path(path)
+        path = ParamDefinition.normalize_path(path, strict=self.strict_path)
 
         for param_def_holder in holders:
             db_paramdef = get_paramdef_for_parameter(path, param_def_holder)

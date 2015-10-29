@@ -27,6 +27,7 @@ from aquilon.worker.dbwrappers.parameter import validate_rebuild_required
 class CommandDelParameter(CommandAddParameter):
 
     required_parameters = ['personality', 'path']
+    strict_path = False
 
     def process_parameter(self, session, dbstage, db_paramdef, path,
                           value=None):

@@ -90,7 +90,7 @@ default_param_defs = {
         "type": "json",
         "default": '{"key": "param_key", "values": [0]}',
         "schema": json.dumps(test_schema),
-        "invalid_default": "bad_json_string",
+        "invalid_default": "bad json value",
     },
 }
 

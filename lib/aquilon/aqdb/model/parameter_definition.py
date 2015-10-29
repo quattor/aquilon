@@ -153,13 +153,16 @@ class ParamDefinition(Base):
         return [part for part in path.split("/") if part]
 
     @staticmethod
-    def normalize_path(path):
+    def normalize_path(path, strict=True):
         parts = ParamDefinition.split_path(path)
-        # FIXME: we eventually want to enforce all path components are sane, but
-        # for now, there can be regexes
-        #for part in parts:
-        #    validate_nlist_key("a path component", part)
-        validate_nlist_key("a path component", parts[0])
+        # Normally, we want all path components to be valid. However, deleting
+        # an invalid path which somehow got there could turn out to be useful,
+        # so there's a way to turn stict verification off.
+        if strict:
+            for part in parts:
+                validate_nlist_key("a path component", part)
+        else:
+            validate_nlist_key("a path component", parts[0])
         return "/".join(parts)
 
     @validates('path')
@@ -238,6 +241,14 @@ class ParamDefinition(Base):
             # Note: do not try to validate the schema here - "value" may be just
             # a small fragment of the value associated with this parameter
             # definition
-            return force_json(label, value)
+            try:
+                return force_json(label, value)
+            except ArgumentError:
+                # Usability improvement: accept bare strings which do not
+                # contain any special characters interpreted by the JSON
+                # decoder. This should allow e.g. usernames or file names.
+                if re.match(r"^[a-zA-Z_/][a-zA-Z0-9_/.-]*$", value):
+                    return value
+                raise
 
         raise InternalError("Unhandled type: %s" % self.value_type)
