@@ -31,7 +31,7 @@ class CommandShowParameterDefinitionFeature(BrokerCommand):
             raise NotFoundException("{0} does not have parameters."
                                     .format(dbfeature))
 
-        dbparam_def = ParamDefinition.get_unique(session,
+        db_paramdef = ParamDefinition.get_unique(session,
                                                  holder=dbfeature.param_def_holder,
                                                  path=path, compel=True)
-        return dbparam_def
+        return db_paramdef

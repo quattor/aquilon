@@ -30,18 +30,18 @@ from aquilon.aqdb.model.hostlifecycle import Ready, Almostready
 from aquilon.worker.formats.parameter_definition import ParamDefinitionFormatter
 
 
-def set_parameter(session, parameter, dbparam_def, path, value, compel=False,
+def set_parameter(session, parameter, db_paramdef, path, value, compel=False,
                   preclude=False):
     """
         Handles add parameter as well as update parameter. Parmeters for features
         will be stored as part of personality as features/<feature_name>/<path>
     """
-    retval = dbparam_def.parse_value(path, value)
-    if dbparam_def.activation == 'rebuild':
+    retval = db_paramdef.parse_value(path, value)
+    if db_paramdef.activation == 'rebuild':
         validate_rebuild_required(session, path, parameter.personality_stage)
 
-    if isinstance(dbparam_def.holder, FeatureParamDef):
-        path = Parameter.feature_path(dbparam_def.holder.feature, path)
+    if isinstance(db_paramdef.holder, FeatureParamDef):
+        path = Parameter.feature_path(db_paramdef.holder.feature, path)
     parameter.set_path(path, retval, compel, preclude)
 
 

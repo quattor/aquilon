@@ -26,14 +26,14 @@ class CommandDelParameter(CommandAddParameter):
 
     required_parameters = ['personality', 'path']
 
-    def process_parameter(self, session, dbstage, dbparam_def, path,
+    def process_parameter(self, session, dbstage, db_paramdef, path,
                           value=None):
         if not dbstage.parameter:
             raise NotFoundException("No parameter of path=%s defined." % path)
 
-        if dbparam_def.activation == 'rebuild':
+        if db_paramdef.activation == 'rebuild':
             validate_rebuild_required(session, path, dbstage)
 
-        if isinstance(dbparam_def.holder, FeatureParamDef):
-            path = Parameter.feature_path(dbparam_def.holder.feature, path)
+        if isinstance(db_paramdef.holder, FeatureParamDef):
+            path = Parameter.feature_path(db_paramdef.holder.feature, path)
         dbstage.parameter.del_path(path)
