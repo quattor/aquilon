@@ -4,20 +4,20 @@
 <!ENTITY aqd_version SYSTEM "../version.txt">
 ]>
 <refentry xml:id="aq_add_reboot_schedule"
-          xmlns="http://docbook.org/ns/docbook"
+	  xmlns="http://docbook.org/ns/docbook"
 	  xmlns:xi="http://www.w3.org/2001/XInclude">
     <refmeta>
-        <refentrytitle>aq_add_reboot_schedule</refentrytitle>
-        <manvolnum>1</manvolnum>
-        <refmiscinfo class="version">&aqd_version;</refmiscinfo>
-        <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
+	<refentrytitle>aq_add_reboot_schedule</refentrytitle>
+	<manvolnum>1</manvolnum>
+	<refmiscinfo class="version">&aqd_version;</refmiscinfo>
+	<refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
     </refmeta>
 
     <refnamediv>
-        <refname>aq add reboot schedule</refname>
-        <refpurpose>
+	<refname>aq add reboot schedule</refname>
+	<refpurpose>
 	    Add a reboot schedule resource onto a host or cluster.
-        </refpurpose>
+	</refpurpose>
 	<refclass>Aquilon</refclass>
     </refnamediv>
 
@@ -33,7 +33,7 @@
 	    <group choice="req">
 		<arg choice="plain"><option>--hostname <replaceable>HOSTNAME</replaceable></option></arg>
 		<arg choice="plain"><option>--cluster <replaceable>CLUSTER</replaceable></option></arg>
-            </group>
+	    </group>
 	    <arg choice="plain"><option>--week <replaceable>WHEN</replaceable></option></arg>
 	    <arg choice="plain"><option>--day <replaceable>WHEN</replaceable></option></arg>
 	    <arg><option>--time <replaceable>WHEN</replaceable></option></arg>
@@ -44,7 +44,7 @@
     </refsynopsisdiv>
 
     <refsect1>
-        <title>Description</title>
+	<title>Description</title>
 	<para>
 	    The <command>aq add_reboot_schedule</command> command adds a
 	    reboot schedule onto a host or a cluster.
@@ -60,8 +60,8 @@
     </refsect1>
 
     <refsect1>
-        <title>Templates</title>
-        <para>
+	<title>Templates</title>
+	<para>
 	    This command will modify the templates for the host or
 	    cluster (depending on which option was given) and the resource
 	    template for the reboot schedule itself.
@@ -69,21 +69,21 @@
     </refsect1>
 
     <refsect1>
-        <title>Options</title>
+	<title>Options</title>
 	<variablelist>
 	    <title>Command-specific options</title>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--hostname <replaceable>HOSTNAME</replaceable></option>,
 		</term>
 		<listitem>
 		    <para>
-		        Specify the target host for the reboot schedule.
+			Specify the target host for the reboot schedule.
 		    </para>
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--cluster <replaceable>CLUSTER</replaceable></option>
 		</term>
 		<listitem>
@@ -93,7 +93,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--week <replaceable>WHEN</replaceable></option>
 		</term>
 		<listitem>
@@ -104,7 +104,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--day <replaceable>WHEN</replaceable></option>
 		</term>
 		<listitem>
@@ -117,7 +117,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--time <replaceable>WHEN</replaceable></option>
 		</term>
 		<listitem>
@@ -129,7 +129,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--comments <replaceable>WHY</replaceable></option>
 		</term>
 		<listitem>

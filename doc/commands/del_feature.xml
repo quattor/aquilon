@@ -4,20 +4,20 @@
 <!ENTITY aqd_version SYSTEM "../version.txt">
 ]>
 <refentry xml:id="aq_del_feature"
-          xmlns="http://docbook.org/ns/docbook"
+	  xmlns="http://docbook.org/ns/docbook"
 	  xmlns:xi="http://www.w3.org/2001/XInclude">
     <refmeta>
-        <refentrytitle>aq_del_feature</refentrytitle>
-        <manvolnum>1</manvolnum>
-        <refmiscinfo class="version">&aqd_version;</refmiscinfo>
-        <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
+	<refentrytitle>aq_del_feature</refentrytitle>
+	<manvolnum>1</manvolnum>
+	<refmiscinfo class="version">&aqd_version;</refmiscinfo>
+	<refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
     </refmeta>
 
     <refnamediv>
-        <refname>aq del feature</refname>
-        <refpurpose>
+	<refname>aq del feature</refname>
+	<refpurpose>
 	    Delete a feature
-        </refpurpose>
+	</refpurpose>
 	<refclass>Aquilon</refclass>
     </refnamediv>
 
@@ -38,7 +38,7 @@
     </refsynopsisdiv>
 
     <refsect1>
-        <title>Description</title>
+	<title>Description</title>
 	<para>
 	    The <command>aq del feature</command> command deletes an existing feature. If the feature
 	    is bound to anything then it cannot be deleted.
@@ -46,11 +46,11 @@
     </refsect1>
 
     <refsect1>
-        <title>Options</title>
+	<title>Options</title>
 	<variablelist>
 	    <title>Command-specific options</title>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--feature <replaceable>NAME</replaceable></option>
 		</term>
 		<listitem>
@@ -60,7 +60,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--type <replaceable>TYPE</replaceable></option>
 		</term>
 		<listitem>

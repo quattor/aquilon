@@ -4,27 +4,27 @@
 <!ENTITY aqd_version SYSTEM "../version.txt">
 ]>
 <refentry xml:id="aq_add_hostlink"
-          xmlns="http://docbook.org/ns/docbook"
+	  xmlns="http://docbook.org/ns/docbook"
 	  xmlns:xi="http://www.w3.org/2001/XInclude">
     <refmeta>
-        <refentrytitle>aq_add_hostlink</refentrytitle>
-        <manvolnum>1</manvolnum>
-        <refmiscinfo class="version">&aqd_version;</refmiscinfo>
-        <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
+	<refentrytitle>aq_add_hostlink</refentrytitle>
+	<manvolnum>1</manvolnum>
+	<refmiscinfo class="version">&aqd_version;</refmiscinfo>
+	<refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
     </refmeta>
     <!--Tried to use this fix the warnings, but it just created another set!
     <info>
       <author>
-        <personname><firstname>Nathan</firstname>
-        <surname>Dimmock</surname></personname>
+	<personname><firstname>Nathan</firstname>
+	<surname>Dimmock</surname></personname>
       </author>
       <author><orgname>Morgan Stanley</orgname></author>
     </info>-->
     <refnamediv>
-        <refname>aq add hostlink</refname>
-        <refpurpose>
+	<refname>aq add hostlink</refname>
+	<refpurpose>
 	    Add a hostlink resource onto a host, cluster or metacluster
-        </refpurpose>
+	</refpurpose>
 	<refclass>Aquilon</refclass>
     </refnamediv>
 
@@ -54,7 +54,7 @@
     </refsynopsisdiv>
 
     <refsect1>
-        <title>Description</title>
+	<title>Description</title>
 	<para>
 	    The <command>aq add_hostlink</command> command adds a hostlink
 	    resource onto a host, cluster or metacluster. A hostlink allows the
@@ -66,8 +66,8 @@
     </refsect1>
 
     <refsect1>
-        <title>Templates</title>
-        <para>
+	<title>Templates</title>
+	<para>
 	    This command will modify the templates for the host, cluster or
 	    metacluster (depending on which option was given) and the resource
 	    template for the hostlink itself.
@@ -75,21 +75,21 @@
     </refsect1>
 
     <refsect1>
-        <title>Options</title>
+	<title>Options</title>
 	<variablelist>
 	    <title>Command-specific options</title>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--hostname <replaceable>HOSTNAME</replaceable></option>,
 		</term>
 		<listitem>
 		    <para>
-		        Specify the target host for the hostlink.
+			Specify the target host for the hostlink.
 		    </para>
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--cluster <replaceable>CLUSTER</replaceable></option>
 		</term>
 		<listitem>
@@ -99,7 +99,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--metacluster <replaceable>METACLUSTER</replaceable></option>
 		</term>
 		<listitem>
@@ -109,7 +109,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--resourcegroup
 		    <replaceable>RESOURCEGROUP</replaceable></option>
 		</term>
@@ -120,7 +120,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--group <replaceable>GROUP</replaceable></option>
 		</term>
 		<listitem>
@@ -132,7 +132,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--hostlink <replaceable>NAME</replaceable></option>
 		</term>
 		<listitem>
@@ -144,7 +144,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--owner <replaceable>USER</replaceable></option>
 		</term>
 		<listitem>
@@ -154,7 +154,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--target <replaceable>PATH</replaceable></option>
 		</term>
 		<listitem>
@@ -164,7 +164,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--comments <replaceable>COMMENTS</replaceable></option>
 		</term>
 		<listitem>

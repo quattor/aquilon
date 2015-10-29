@@ -4,20 +4,20 @@
 <!ENTITY aqd_version SYSTEM "../version.txt">
 ]>
 <refentry xml:id="aq_flush"
-          xmlns="http://docbook.org/ns/docbook"
+	  xmlns="http://docbook.org/ns/docbook"
 	  xmlns:xi="http://www.w3.org/2001/XInclude">
     <refmeta>
-        <refentrytitle>aq_flush</refentrytitle>
-        <manvolnum>1</manvolnum>
-        <refmiscinfo class="version">&aqd_version;</refmiscinfo>
-        <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
+	<refentrytitle>aq_flush</refentrytitle>
+	<manvolnum>1</manvolnum>
+	<refmiscinfo class="version">&aqd_version;</refmiscinfo>
+	<refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
     </refmeta>
 
     <refnamediv>
-        <refname>aq flush</refname>
-        <refpurpose>
+	<refname>aq flush</refname>
+	<refpurpose>
 	    Flush the plenary templates
-        </refpurpose>
+	</refpurpose>
 	<refclass>Aquilon</refclass>
     </refnamediv>
 
@@ -31,15 +31,15 @@
 		<synopfragmentref linkend="change-management">Change management</synopfragmentref>
 	    </group>
 	    <group choice="req">
-	        <arg choice="plain"><option>--hosts</option></arg>
-	        <arg choice="plain"><option>--machines</option></arg>
-	        <arg choice="plain"><option>--personalities</option></arg>
-	        <arg choice="plain"><option>--clusters</option></arg>
-	        <arg choice="plain"><option>--services</option></arg>
-	        <arg choice="plain"><option>--resources</option></arg>
-	        <arg choice="plain"><option>--locations</option></arg>
-	        <arg choice="plain"><option>--network_devices</option></arg>
-	        <arg choice="plain"><option>--virtual_switches</option></arg>
+		<arg choice="plain"><option>--hosts</option></arg>
+		<arg choice="plain"><option>--machines</option></arg>
+		<arg choice="plain"><option>--personalities</option></arg>
+		<arg choice="plain"><option>--clusters</option></arg>
+		<arg choice="plain"><option>--services</option></arg>
+		<arg choice="plain"><option>--resources</option></arg>
+		<arg choice="plain"><option>--locations</option></arg>
+		<arg choice="plain"><option>--network_devices</option></arg>
+		<arg choice="plain"><option>--virtual_switches</option></arg>
 	    </group>
 	    <xi:include href="../common/change_management.xml"/>
 	    <xi:include href="../common/global_options.xml"/>
@@ -51,7 +51,7 @@
     </refsynopsisdiv>
 
     <refsect1>
-        <title>Description</title>
+	<title>Description</title>
 	<para>
 	    The <command>aq flush</command> command refreshes the plenary
 	    templates. If the contents of a plenary template does not change,
@@ -75,11 +75,11 @@
     </refsect1>
 
     <refsect1>
-        <title>Options</title>
+	<title>Options</title>
 	<variablelist>
 	    <title>Command-specific options</title>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--hosts</option>
 		</term>
 		<listitem>
@@ -89,7 +89,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--machines</option>
 		</term>
 		<listitem>
@@ -99,7 +99,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--personalities</option>
 		</term>
 		<listitem>
@@ -109,7 +109,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--clusters</option>
 		</term>
 		<listitem>
@@ -119,7 +119,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--services</option>
 		</term>
 		<listitem>
@@ -129,7 +129,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--resources</option>
 		</term>
 		<listitem>
@@ -139,7 +139,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--locations</option>
 		</term>
 		<listitem>
@@ -149,7 +149,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--network_devices</option>
 		</term>
 		<listitem>
@@ -159,7 +159,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--virtual_switches</option>
 		</term>
 		<listitem>
@@ -169,7 +169,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--all</option>
 		</term>
 		<listitem>

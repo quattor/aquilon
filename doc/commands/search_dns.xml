@@ -4,20 +4,20 @@
 <!ENTITY aqd_version SYSTEM "../version.txt">
 ]>
 <refentry xml:id="aq_search_dns"
-          xmlns="http://docbook.org/ns/docbook"
+	  xmlns="http://docbook.org/ns/docbook"
 	  xmlns:xi="http://www.w3.org/2001/XInclude">
     <refmeta>
-        <refentrytitle>aq_search_dns</refentrytitle>
-        <manvolnum>1</manvolnum>
-        <refmiscinfo class="version">&aqd_version;</refmiscinfo>
-        <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
+	<refentrytitle>aq_search_dns</refentrytitle>
+	<manvolnum>1</manvolnum>
+	<refmiscinfo class="version">&aqd_version;</refmiscinfo>
+	<refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
     </refmeta>
 
     <refnamediv>
-        <refname>aq search dns</refname>
-        <refpurpose>
+	<refname>aq search dns</refname>
+	<refpurpose>
 	    Look up DNS-related information
-        </refpurpose>
+	</refpurpose>
 	<refclass>Aquilon</refclass>
     </refnamediv>
 
@@ -57,7 +57,7 @@
     </refsynopsisdiv>
 
     <refsect1>
-        <title>Description</title>
+	<title>Description</title>
 	<para>
 	    The <command>aq search dns</command> command allows looking up DNS records based on
 	    several criteria. By default, only the FQDNs of matching entries are returned. Specifying
@@ -67,11 +67,11 @@
     </refsect1>
 
     <refsect1>
-        <title>Options</title>
+	<title>Options</title>
 	<variablelist>
 	    <title>Command-specific options</title>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--fqdn <replaceable>FQDN</replaceable></option>
 		</term>
 		<listitem>
@@ -83,7 +83,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--shortname <replaceable>NAME</replaceable></option>
 		</term>
 		<listitem>
@@ -93,7 +93,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--dns_domain <replaceable>DOMAIN</replaceable></option>
 		</term>
 		<listitem>
@@ -103,7 +103,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--record_type <replaceable>RRTYPE</replaceable></option>
 		</term>
 		<listitem>
@@ -115,7 +115,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--ip <replaceable>IPADDR</replaceable></option>
 		</term>
 		<listitem>
@@ -125,7 +125,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--network <replaceable>NAME</replaceable></option>
 		</term>
 		<listitem>
@@ -135,7 +135,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--target <replaceable>FQDN</replaceable></option>
 		</term>
 		<listitem>
@@ -145,7 +145,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--target_domain <replaceable>DOMAIN</replaceable></option>
 		</term>
 		<listitem>
@@ -155,7 +155,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--reverse_ptr <replaceable>FQDN</replaceable></option>
 		</term>
 		<listitem>
@@ -166,7 +166,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--primary_name</option>, <option>--noprimary_name</option>
 		</term>
 		<listitem>
@@ -178,7 +178,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--used</option>, <option>--unused</option>
 		</term>
 		<listitem>
@@ -191,7 +191,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--reverse_override</option>, <option>--noreverse_override</option>
 		</term>
 		<listitem>
@@ -203,7 +203,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--network_environment <replaceable>NETENV</replaceable></option>
 		</term>
 		<listitem>
@@ -217,7 +217,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--dns_environment <replaceable>DNSENV</replaceable></option>
 		</term>
 		<listitem>
@@ -230,7 +230,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--target_environment <replaceable>DNSENV</replaceable></option>
 		</term>
 		<listitem>
@@ -242,7 +242,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--fullinfo</option>
 		</term>
 		<listitem>

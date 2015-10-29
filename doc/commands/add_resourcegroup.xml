@@ -4,20 +4,20 @@
 <!ENTITY aqd_version SYSTEM "../version.txt">
 ]>
 <refentry xml:id="aq_add_resourcegroup"
-          xmlns="http://docbook.org/ns/docbook"
+	  xmlns="http://docbook.org/ns/docbook"
 	  xmlns:xi="http://www.w3.org/2001/XInclude">
     <refmeta>
-        <refentrytitle>aq_add_resourcegroup</refentrytitle>
-        <manvolnum>1</manvolnum>
-        <refmiscinfo class="version">&aqd_version;</refmiscinfo>
-        <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
+	<refentrytitle>aq_add_resourcegroup</refentrytitle>
+	<manvolnum>1</manvolnum>
+	<refmiscinfo class="version">&aqd_version;</refmiscinfo>
+	<refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
     </refmeta>
 
     <refnamediv>
-        <refname>aq add resourcegroup</refname>
-        <refpurpose>
+	<refname>aq add resourcegroup</refname>
+	<refpurpose>
 	    Add a resourcegroup onto a host, cluster or metacluster
-        </refpurpose>
+	</refpurpose>
 	<refclass>Aquilon</refclass>
     </refnamediv>
 
@@ -44,7 +44,7 @@
     </refsynopsisdiv>
 
     <refsect1>
-        <title>Description</title>
+	<title>Description</title>
 	<para>
 	    The <command>aq add resourcegroup</command> command adds a resourcegroup onto a host,
 	    cluster or metacluster. A resourcegroup is a collection or bundle of resources which work together.
@@ -52,29 +52,29 @@
     </refsect1>
 
     <refsect1>
-        <title>Templates</title>
-        <para>
+	<title>Templates</title>
+	<para>
 	    This command will modify the templates for the host, cluster or metacluster (depending on which
 	    option was given).
 	</para>
     </refsect1>
 
     <refsect1>
-        <title>Options</title>
+	<title>Options</title>
 	<variablelist>
 	    <title>Command-specific options</title>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--hostname <replaceable>HOST</replaceable></option>,
 		</term>
 		<listitem>
 		    <para>
-		        The name of the host which will hold this resourcegroup.
+			The name of the host which will hold this resourcegroup.
 		    </para>
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--cluster <replaceable>CLUSTER</replaceable></option>
 		</term>
 		<listitem>
@@ -84,7 +84,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--metacluster <replaceable>METACLUSTER</replaceable></option>
 		</term>
 		<listitem>
@@ -94,7 +94,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--resourcegroup <replaceable>NAME</replaceable></option>
 		</term>
 		<listitem>
@@ -106,7 +106,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--required_type <replaceable>TYPE</replaceable></option>
 		</term>
 		<listitem>
@@ -117,7 +117,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--comments <replaceable>COMMENTS</replaceable></option>
 		</term>
 		<listitem>

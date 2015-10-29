@@ -256,8 +256,8 @@ class TestAddSrvRecord(TestBrokerCommand):
                    "--eon_id", "3"]
         out = self.badrequesttest(command)
         self.searchoutput(out,
-                          "Fqdn _sip._tcp.aqd-unittest.ms.com with target "
-                          "\w+.aqd-unittest.ms.com is set to a different GRN.",
+                          r"Fqdn _sip._tcp.aqd-unittest.ms.com with target "
+                          r"\w+.aqd-unittest.ms.com is set to a different GRN.",
                           command)
 
     def test_540_grn_conflict_with_primary_name(self):
@@ -278,7 +278,7 @@ class TestAddSrvRecord(TestBrokerCommand):
                          command)
 
     def test_550_grn_conflict_with_service_address(self):
-        command = ["add" , "srv", "record",
+        command = ["add", "srv", "record",
                    "--service", "sip",
                    "--protocol", "udp",
                    "--dns_domain", "aqd-unittest.ms.com",
@@ -295,7 +295,7 @@ class TestAddSrvRecord(TestBrokerCommand):
                          command)
 
     def test_560_grn_conflict_with_interface_name(self):
-        command = ["add" , "srv", "record",
+        command = ["add", "srv", "record",
                    "--service", "sip",
                    "--protocol", "udp",
                    "--dns_domain", "aqd-unittest.ms.com",

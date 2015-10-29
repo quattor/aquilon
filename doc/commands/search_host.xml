@@ -4,30 +4,30 @@
 <!ENTITY aqd_version SYSTEM "../version.txt">
 ]>
 <refentry xml:id="aq_search_host"
-          xmlns="http://docbook.org/ns/docbook"
-          xmlns:xi="http://www.w3.org/2001/XInclude">
+	  xmlns="http://docbook.org/ns/docbook"
+	  xmlns:xi="http://www.w3.org/2001/XInclude">
     <refmeta>
-        <refentrytitle>aq_search_host</refentrytitle>
-        <manvolnum>1</manvolnum>
-        <refmiscinfo class="version">&aqd_version;</refmiscinfo>
-        <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
+	<refentrytitle>aq_search_host</refentrytitle>
+	<manvolnum>1</manvolnum>
+	<refmiscinfo class="version">&aqd_version;</refmiscinfo>
+	<refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
     </refmeta>
 
     <refnamediv>
-        <refname>aq search host</refname>
-        <refpurpose>
-            Search for hosts matching some criteria
-        </refpurpose>
-        <refclass>Aquilon</refclass>
+	<refname>aq search host</refname>
+	<refpurpose>
+	    Search for hosts matching some criteria
+	</refpurpose>
+	<refclass>Aquilon</refclass>
     </refnamediv>
 
     <refsynopsisdiv>
-        <cmdsynopsis>
-            <command>aq search host</command>
-            <group>
-                <synopfragmentref linkend="global-options">Global options</synopfragmentref>
-            </group>
-            <group choice="req">
+	<cmdsynopsis>
+	    <command>aq search host</command>
+	    <group>
+		<synopfragmentref linkend="global-options">Global options</synopfragmentref>
+	    </group>
+	    <group choice="req">
 		<arg><option>--hostname <replaceable>FQDN</replaceable></option></arg>
 		<arg><option>--machine <replaceable>LABEL</replaceable></option></arg>
 		<arg><option>--dns_domain <replaceable>DOMAIN</replaceable></option></arg>
@@ -66,28 +66,28 @@
 		<arg><option>--server_of_instance <replaceable>NAME</replaceable></option></arg>
 		<arg><option>--grn <replaceable>GRN</replaceable></option></arg>
 		<arg><option>--eon_id <replaceable>EONID</replaceable></option></arg>
-            </group>
+	    </group>
 	    <arg><option>--fullinfo</option></arg>
 	    <group>
 		<synopfragmentref linkend="location-options">Location options</synopfragmentref>
 		<arg><option>--exact_location</option></arg>
 	    </group>
-            <xi:include href="../common/location_options.xml"/>
-            <xi:include href="../common/global_options.xml"/>
-        </cmdsynopsis>
+	    <xi:include href="../common/location_options.xml"/>
+	    <xi:include href="../common/global_options.xml"/>
+	</cmdsynopsis>
     </refsynopsisdiv>
 
     <refsect1>
-        <title>Description</title>
-        <para>
+	<title>Description</title>
+	<para>
 	    The <command>aq search host</command> command searches for hosts
 	    matching the specified criteria.
-        </para>
+	</para>
     </refsect1>
 
     <refsect1>
-        <title>Options</title>
-        <variablelist>
+	<title>Options</title>
+	<variablelist>
 	    <title>Command-specific options</title>
 	    <varlistentry>
 		<term>
@@ -151,7 +151,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--network_environment <replaceable>NETENV</replaceable></option>
 		</term>
 		<listitem>

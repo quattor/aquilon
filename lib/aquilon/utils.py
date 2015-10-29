@@ -186,7 +186,7 @@ def force_json_dict(label, value):
     try:
         value = json.loads(value)
     except ValueError as e:
-        raise ArgumentError("The json string specified for %s is invalid : %s"
+        raise ArgumentError("The json string specified for %s is invalid: %s"
                             % (label, e))
     return value
 

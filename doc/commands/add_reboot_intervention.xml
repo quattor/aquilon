@@ -4,20 +4,20 @@
 <!ENTITY aqd_version SYSTEM "../version.txt">
 ]>
 <refentry xml:id="aq_add_reboot_intervention"
-          xmlns="http://docbook.org/ns/docbook"
+	  xmlns="http://docbook.org/ns/docbook"
 	  xmlns:xi="http://www.w3.org/2001/XInclude">
     <refmeta>
-        <refentrytitle>aq_add_reboot_intervention</refentrytitle>
-        <manvolnum>1</manvolnum>
-        <refmiscinfo class="version">&aqd_version;</refmiscinfo>
-        <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
+	<refentrytitle>aq_add_reboot_intervention</refentrytitle>
+	<manvolnum>1</manvolnum>
+	<refmiscinfo class="version">&aqd_version;</refmiscinfo>
+	<refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
     </refmeta>
 
     <refnamediv>
-        <refname>aq add reboot intervention</refname>
-        <refpurpose>
+	<refname>aq add reboot intervention</refname>
+	<refpurpose>
 	    Add a reboot intervention resource onto a host or cluster.
-        </refpurpose>
+	</refpurpose>
 	<refclass>Aquilon</refclass>
     </refnamediv>
 
@@ -30,7 +30,7 @@
 	    <group choice="req">
 		<arg choice="plain"><option>--hostname <replaceable>HOSTNAME</replaceable></option></arg>
 		<arg choice="plain"><option>--cluster <replaceable>CLUSTER</replaceable></option></arg>
-            </group>
+	    </group>
 	    <arg choice="plain"><option>--expiry <replaceable>WHEN</replaceable></option></arg>
 	    <arg choice="plain"><option>--justification <replaceable>TOKENS</replaceable></option></arg>
 	    <arg><option>--reason <replaceable>REASON</replaceable></option></arg>
@@ -41,7 +41,7 @@
     </refsynopsisdiv>
 
     <refsect1>
-        <title>Description</title>
+	<title>Description</title>
 	<para>
 	    The <command>aq add_reboot_intervention</command> command adds a
 	    reboot intervention resource onto a host or a cluster. This
@@ -59,8 +59,8 @@
     </refsect1>
 
     <refsect1>
-        <title>Templates</title>
-        <para>
+	<title>Templates</title>
+	<para>
 	    This command will modify the templates for the host or
 	    cluster (depending on which option was given) and the resource
 	    template for the intervention itself.
@@ -68,21 +68,21 @@
     </refsect1>
 
     <refsect1>
-        <title>Options</title>
+	<title>Options</title>
 	<variablelist>
 	    <title>Command-specific options</title>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--hostname <replaceable>HOSTNAME</replaceable></option>,
 		</term>
 		<listitem>
 		    <para>
-		        Specify the target host for the intervention.
+			Specify the target host for the intervention.
 		    </para>
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--cluster <replaceable>CLUSTER</replaceable></option>
 		</term>
 		<listitem>
@@ -92,7 +92,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--expiry <replaceable>WHEN</replaceable></option>
 		</term>
 		<listitem>
@@ -105,7 +105,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--start_time <replaceable>WHEN</replaceable></option>
 		</term>
 		<listitem>
@@ -116,7 +116,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--comments <replaceable>WHY</replaceable></option>
 		</term>
 		<listitem>

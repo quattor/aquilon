@@ -4,20 +4,20 @@
 <!ENTITY aqd_version SYSTEM "../version.txt">
 ]>
 <refentry xml:id="aq_add_network_compartment"
-          xmlns="http://docbook.org/ns/docbook"
+	  xmlns="http://docbook.org/ns/docbook"
 	  xmlns:xi="http://www.w3.org/2001/XInclude">
     <refmeta>
-        <refentrytitle>aq_add_network_compartment</refentrytitle>
-        <manvolnum>1</manvolnum>
-        <refmiscinfo class="version">&aqd_version;</refmiscinfo>
-        <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
+	<refentrytitle>aq_add_network_compartment</refentrytitle>
+	<manvolnum>1</manvolnum>
+	<refmiscinfo class="version">&aqd_version;</refmiscinfo>
+	<refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
     </refmeta>
 
     <refnamediv>
-        <refname>aq add network compartment</refname>
-        <refpurpose>
+	<refname>aq add network compartment</refname>
+	<refpurpose>
 	    Create a new network compartment
-        </refpurpose>
+	</refpurpose>
 	<refclass>Aquilon</refclass>
     </refnamediv>
 
@@ -38,13 +38,13 @@
     </refsynopsisdiv>
 
     <refsect1>
-        <title>Description</title>
+	<title>Description</title>
 	<para>
 	    The <command>aq add network compartment</command> command creates a new network
 	    compartment.
 	</para>
 	<para>
-            For networks compartmentalization is the establishment of boundaries
+	    For networks compartmentalization is the establishment of boundaries
 	    between networks having different security constraints.  That is to
 	    say that a firewall exists between two networks in different network
 	    compartments.
@@ -52,11 +52,11 @@
     </refsect1>
 
     <refsect1>
-        <title>Options</title>
+	<title>Options</title>
 	<variablelist>
 	    <title>Command-specific options</title>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--network_compartment <replaceable>NETCOMP</replaceable></option>
 		</term>
 		<listitem>
@@ -66,7 +66,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--comments <replaceable>COMMENTS</replaceable></option>
 		</term>
 		<listitem>

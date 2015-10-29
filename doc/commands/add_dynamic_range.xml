@@ -4,20 +4,20 @@
 <!ENTITY aqd_version SYSTEM "../version.txt">
 ]>
 <refentry xml:id="aq_add_dynamic_range"
-          xmlns="http://docbook.org/ns/docbook"
+	  xmlns="http://docbook.org/ns/docbook"
 	  xmlns:xi="http://www.w3.org/2001/XInclude">
     <refmeta>
-        <refentrytitle>aq_add_dynamic_range</refentrytitle>
-        <manvolnum>1</manvolnum>
-        <refmiscinfo class="version">&aqd_version;</refmiscinfo>
-        <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
+	<refentrytitle>aq_add_dynamic_range</refentrytitle>
+	<manvolnum>1</manvolnum>
+	<refmiscinfo class="version">&aqd_version;</refmiscinfo>
+	<refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
     </refmeta>
 
     <refnamediv>
-        <refname>aq add dynamic range</refname>
-        <refpurpose>
+	<refname>aq add dynamic range</refname>
+	<refpurpose>
 	    Set up an IP address range for dynamic DHCP
-        </refpurpose>
+	</refpurpose>
 	<refclass>Aquilon</refclass>
     </refnamediv>
 
@@ -46,7 +46,7 @@
     </refsynopsisdiv>
 
     <refsect1>
-        <title>Description</title>
+	<title>Description</title>
 	<para>
 	    The <command>aq add dynamic range</command> command sets up an IP address range to be used
 	    for dynamic DHCP.
@@ -66,11 +66,11 @@
     </refsect1>
 
     <refsect1>
-        <title>Options</title>
+	<title>Options</title>
 	<variablelist>
 	    <title>Command-specific options</title>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--startip <replaceable>IP</replaceable></option>,
 		    <option>--endip <replaceable>IP</replaceable></option>
 		</term>
@@ -84,7 +84,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--fillnetwork <replaceable>NETWORK</replaceable></option>
 		</term>
 		<listitem>
@@ -103,7 +103,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--dns_domain <replaceable>DNS_DOMAIN</replaceable></option>
 		</term>
 		<listitem>
@@ -117,7 +117,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--prefix <replaceable>PREFIX</replaceable></option>
 		</term>
 		<listitem>
