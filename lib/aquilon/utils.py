@@ -180,14 +180,14 @@ def force_list(label, value):
     return [x for x in lines if x and not x.startswith("#")]
 
 
-def force_json_dict(label, value):
+def force_json(label, value):
     if value is None:
         return None
     try:
         value = json.loads(value)
     except ValueError as e:
-        raise ArgumentError("The json string specified for %s is invalid: %s"
-                            % (label, e))
+        raise ArgumentError("Expected a JSON-encoded value for %s: %s" %
+                            (label, e))
     return value
 
 

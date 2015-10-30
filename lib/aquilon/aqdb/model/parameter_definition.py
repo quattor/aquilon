@@ -28,8 +28,7 @@ from aquilon.exceptions_ import ArgumentError, InternalError
 from aquilon.aqdb.column_types import AqStr, Enum
 from aquilon.aqdb.model import Base, Archetype, Feature
 from aquilon.aqdb.model.feature import _ACTIVATION_TYPE
-from aquilon.utils import (force_json_dict, force_int, force_float,
-                           force_boolean)
+from aquilon.utils import force_json, force_int, force_float, force_boolean
 
 _TN = 'param_definition'
 _PARAM_DEF_HOLDER = 'param_def_holder'
@@ -202,6 +201,6 @@ class ParamDefinition(Base):
         elif self.value_type == 'boolean':
             return force_boolean(label, value)
         elif self.value_type == 'json':
-            return force_json_dict(label, value)
+            return force_json(label, value)
 
         raise InternalError("Unhandled type: %s" % self.value_type)

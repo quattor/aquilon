@@ -61,7 +61,7 @@ from aquilon.worker.broker import BrokerCommand, ERROR_TO_CODE
 from aquilon.worker import commands
 from aquilon.worker.processes import cache_version
 from aquilon.utils import (force_int, force_float, force_boolean, force_ipv4,
-                           force_mac, force_ascii, force_list, force_json_dict)
+                           force_mac, force_ascii, force_list, force_json)
 
 # Regular Expression for matching variables in a path definition.
 # Currently only supports stuffing a single variable in a path
@@ -417,7 +417,7 @@ class ResourcesCommandEntry(CommandEntry):
         'flag': force_boolean,
         'ipv4': force_ipv4,
         'mac': force_mac,
-        'json': force_json_dict,
+        'json': force_json,
         'string': force_ascii,
         'file': force_ascii,
         'list': force_list
