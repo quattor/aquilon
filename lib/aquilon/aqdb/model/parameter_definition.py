@@ -17,6 +17,7 @@
 """ Parameter data validation """
 
 from datetime import datetime
+import json
 import re
 
 from sqlalchemy import (Column, Integer, DateTime, Sequence, String, Boolean,
@@ -168,10 +169,16 @@ class ParamDefinition(Base):
 
     @validates('default')
     def validate_default(self, key, value):  # pylint: disable=W0613
-        if value is not None:
-            self.parse_value("default for path=%s" % self.path, value)
+        if value is None:
+            return None
 
-        return value
+        retval = self.parse_value("default for path=%s" % self.path, value)
+
+        # Ensure JSON defaults get stored in a normalized form
+        if self.value_type == "json":
+            return json.dumps(retval, sort_keys=True)
+        else:
+            return value
 
     @validates('activation')
     def validate_activation(self, key, activation):
