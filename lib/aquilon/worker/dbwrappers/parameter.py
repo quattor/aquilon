@@ -31,8 +31,7 @@ from aquilon.aqdb.model.hostlifecycle import Ready, Almostready
 from aquilon.worker.formats.parameter_definition import ParamDefinitionFormatter
 
 
-def set_parameter(session, parameter, db_paramdef, path, value, compel=False,
-                  preclude=False):
+def set_parameter(session, parameter, db_paramdef, path, value, update=False):
     """
         Handles add parameter as well as update parameter. Parmeters for features
         will be stored as part of personality as features/<feature_name>/<path>
@@ -43,7 +42,7 @@ def set_parameter(session, parameter, db_paramdef, path, value, compel=False,
 
     if isinstance(db_paramdef.holder, FeatureParamDef):
         path = Parameter.feature_path(db_paramdef.holder.feature, path)
-    parameter.set_path(path, retval, compel, preclude)
+    parameter.set_path(path, retval, update)
 
     if db_paramdef.schema:
         base_path = db_paramdef.path

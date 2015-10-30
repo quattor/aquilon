@@ -17,6 +17,7 @@
 """ Configuration  Parameter data """
 
 from datetime import datetime
+from six.moves import range
 
 from sqlalchemy import Column, Integer, DateTime, Sequence, ForeignKey
 from sqlalchemy.orm import relation, backref, deferred
@@ -27,6 +28,17 @@ from aquilon.aqdb.column_types import JSONEncodedDict, AqStr
 from aquilon.aqdb.model import Base, PersonalityStage, ParamDefinition
 
 _TN = 'parameter'
+
+
+class ParameterPathNotFound(Exception):
+    """
+    Custom exception used by the path walker.
+
+    It does not have to carry any extra information around - the error which
+    will eventually be generated should always contain the original path
+    requested by the user.
+    """
+    pass
 
 
 class Parameter(Base):
@@ -59,101 +71,144 @@ class Parameter(Base):
         """
         return "/".join([dbfeature.cfg_path, path])
 
-    def get_path(self, path, compel=True, preclude=False):
-        """ get value of paramter specified by path made of dict keys """
+    def path_walk(self, path, vivify=False):
+        """
+        Walk the path given as parameter, and return the list of intermediate
+        values being walked over. If vivify is True, then non-existend nodes
+        will be created as needed.
 
-        ref = self.value
+        Returned is a list of (path_part, path_value) pairs, so that
+        path_value[path_part] is always the object referenced by the given path
+        component. path_value is always a reference into self.value, so
+        modifying path_value[path_part] modifies self.value.
+        """
+
+        # Initial conditions: path cannot be empty, and self.value is always a
+        # dict.
+        if not path:  # pragma: no cover
+            raise InternalError("Path must not be empty")
+
+        current = self.value
+        route = []
+        parts = ParamDefinition.split_path(path)
+
+        def handle_vivify(idx, current):
+            # We need to look ahead at the next path component to figure out if
+            # the component to be vivified should be a leaf, a dictionary or a
+            # list
+            try:
+                next_part = parts[idx + 1]
+            except IndexError:
+                # Leaf
+                return None
+
+            # Not leaf - can be either a dict or list, depending on if the next
+            # path component is a number or not
+            try:
+                next_part = int(next_part)
+            except ValueError:
+                return {}
+
+            # Ok, it's a list - only the first item in the list can be
+            # auto-vifified
+            if next_part != 0:
+                raise ParameterPathNotFound
+            return []
+
+        # We need look-ahead for auto-vivification, so we loop over the indexes
+        # rather than the list directly
+        for idx in range(0, len(parts)):
+            part = parts[idx]
+
+            if isinstance(current, dict):
+                if part not in current:
+                    if vivify:
+                        current[part] = handle_vivify(idx, current)
+                    else:
+                        raise ParameterPathNotFound
+            elif isinstance(current, list):
+                try:
+                    part = int(part)
+                    if part < 0:
+                        raise ValueError
+                except ValueError:
+                    raise ArgumentError("Invalid list index '%s'." % part)
+                if part > len(current):
+                    raise ParameterPathNotFound
+                elif part == len(current):
+                    if vivify:
+                        current.append(handle_vivify(idx, current))
+                    else:
+                        raise ParameterPathNotFound
+            else:
+                raise ArgumentError("Value %r cannot be indexed." % current)
+
+            route.append((part, current))
+            current = current[part]
+
+        return route
+
+    def get_path(self, path, compel=True):
         try:
-            parts = ParamDefinition.split_path(path)
-            for part in parts:
-                ref = ref[part]
-            if ref is not None:
-                if preclude:
-                    raise ArgumentError("Parameter with path=%s already exists."
-                                        % path)
-                return ref
-        except KeyError:
+            route = self.path_walk(path)
+        except ParameterPathNotFound:
             if compel:
                 raise NotFoundException("No parameter of path=%s defined." %
                                         path)
             else:
-                pass
-        return None
+                return None
 
-    def get_feature_path(self, dbfeature, path, compel=True, preclude=False):
-        return self.get_path(Parameter.feature_path(dbfeature, path),
-                             compel, preclude)
+        index, value = route.pop()
+        return value[index]
 
-    def set_path(self, path, value, compel=False, preclude=False):
-        """
-        add/or update a new parameter key
+    def get_feature_path(self, dbfeature, path, compel=True):
+        return self.get_path(Parameter.feature_path(dbfeature, path), compel)
 
-        value in dict specified by path made of dict keys
-        """
+    def set_path(self, path, value, update=False):
+        try:
+            route = self.path_walk(path, not update)
+        except ParameterPathNotFound:
+            raise NotFoundException("No parameter of path=%s defined." % path)
 
-        self.get_path(path, compel, preclude)
+        index, lastvalue = route.pop()
+        # We don't want to allow overwriting False or "". So we need to spell
+        # out the emptiness criteria, instead of just evaluating
+        # lastvalue[index] as a boolean
+        if not update and not (lastvalue[index] is None or
+                               (isinstance(lastvalue[index], dict) and
+                                len(lastvalue[index]) == 0) or
+                               (isinstance(lastvalue[index], list) and
+                                len(lastvalue[index]) == 0)):
+            raise ArgumentError("Parameter with path=%s already exists." % path)
 
-        pparts = ParamDefinition.split_path(path)
-        lastnode = pparts.pop()
-
-        # traverse the given path to add the given value
-        # we need to know the lastnode so we can appropriately
-        # associate a string value or json value
-
-        dref = self.value
-        for ppart in pparts:
-            if ppart not in dref:
-                dref[ppart] = {}
-            dref = dref[ppart]
-
-        dref[lastnode] = value
+        lastvalue[index] = value
 
         # coerce mutation of parameter since sqlalchemy
         # cannot recognize parameter change
         self.value.changed()  # pylint: disable=E1101
 
-    def __del_path(self, path):
-        """ method to do the actual deletion """
-
-        pparts = ParamDefinition.split_path(path)
-        lastnode = pparts.pop()
-        dref = self.value
-        try:
-            for ppart in pparts:
-                dref = dref[ppart]
-            del dref[lastnode]
-        except KeyError:
-            raise NotFoundException("No parameter of path=%s defined." % path)
-
     def del_path(self, path, compel=True):
-        """ delete parameter specified at a path """
-
-        if not self.value:
-            if compel:
-                raise NotFoundException("No parameter of path=%s defined." % path)
-            return
-
-        pparts = ParamDefinition.split_path(path)
         try:
-            # delete the specified path
-            self.__del_path(path)
-
-            # after deleting the leaf check if the parent node is empty
-            # if so delete it
-            while pparts.pop():
-                if not pparts:
-                    break
-                newpath = "/".join(pparts)
-                if self.get_path(newpath):
-                    break
-                self.__del_path(newpath)
-
-            # coerce mutation of parameter since sqlalchemy
-            # cannot recognize parameter change
-            self.value.changed()  # pylint: disable=E1101
-        except:
+            route = self.path_walk(path)
+        except ParameterPathNotFound:
             if compel:
                 raise NotFoundException("No parameter of path=%s defined." % path)
+            else:
+                return
+
+        while route:
+            index, lastvalue = route.pop()
+            del lastvalue[index]
+
+            # We want to remove dictionaries which become empty, but not lists
+            if isinstance(lastvalue, dict) and len(lastvalue) == 0:
+                continue
+
+            break
+
+        # coerce mutation of parameter since sqlalchemy
+        # cannot recognize parameter change
+        self.value.changed()  # pylint: disable=E1101
 
     @staticmethod
     def flatten(data, key="", path="", flattened=None):

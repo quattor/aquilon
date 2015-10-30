@@ -30,4 +30,4 @@ class CommandUpdateParameter(CommandAddParameter):
             raise NotFoundException("No parameter of path=%s defined." % path)
 
         set_parameter(session, dbstage.parameter, db_paramdef, path, value,
-                      compel=True)
+                      update=True)

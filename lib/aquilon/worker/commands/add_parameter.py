@@ -33,8 +33,7 @@ class CommandAddParameter(BrokerCommand):
         if not dbstage.parameter:
             dbstage.parameter = PersonalityParameter(value={})
 
-        set_parameter(session, dbstage.parameter, db_paramdef, path, value,
-                      compel=False, preclude=True)
+        set_parameter(session, dbstage.parameter, db_paramdef, path, value)
 
     def render(self, session, logger, archetype, personality, personality_stage,
                feature, type, path, user, value=None, justification=None,
