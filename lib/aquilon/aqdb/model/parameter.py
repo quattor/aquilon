@@ -22,13 +22,11 @@ from sqlalchemy import Column, Integer, DateTime, Sequence, ForeignKey
 from sqlalchemy.orm import relation, backref, deferred
 from sqlalchemy.ext.mutable import MutableDict
 
-from aquilon.aqdb.column_types import JSONEncodedDict
-from aquilon.aqdb.model import Base, PersonalityStage
 from aquilon.exceptions_ import NotFoundException, ArgumentError, InternalError
-from aquilon.aqdb.column_types import AqStr
+from aquilon.aqdb.column_types import JSONEncodedDict, AqStr
+from aquilon.aqdb.model import Base, PersonalityStage, ParamDefinition
 
 _TN = 'parameter'
-PATH_SEP = '/'
 
 
 class Parameter(Base):
@@ -55,43 +53,18 @@ class Parameter(Base):
         raise InternalError("Abstract base method called")
 
     @staticmethod
-    def path_parts(path):
-        """
-        converts parts of a specified path
-
-        e.g path:/system/foo returns ['system','foo']
-        """
-        pparts = path.split(PATH_SEP)
-
-        # ignore the leading and trailing slash
-        if pparts[0] == "":
-            pparts = pparts[1:]
-        if pparts[-1] == "":
-            pparts = pparts[:-1]
-        return pparts
-
-    @staticmethod
-    def topath(pparts):
-        """
-        converts dict keys to a path
-
-        e.g [system][key] returns system/key
-        """
-        return PATH_SEP.join(pparts)
-
-    @staticmethod
     def feature_path(dbfeature, path):
         """
         constructs the parameter path for feature namespace
         """
-        return PATH_SEP.join([dbfeature.cfg_path, path])
+        return "/".join([dbfeature.cfg_path, path])
 
     def get_path(self, path, compel=True, preclude=False):
         """ get value of paramter specified by path made of dict keys """
 
         ref = self.value
         try:
-            parts = Parameter.path_parts(path)
+            parts = ParamDefinition.split_path(path)
             for part in parts:
                 ref = ref[part]
             if ref is not None:
@@ -120,7 +93,7 @@ class Parameter(Base):
 
         self.get_path(path, compel, preclude)
 
-        pparts = Parameter.path_parts(path)
+        pparts = ParamDefinition.split_path(path)
         lastnode = pparts.pop()
 
         # traverse the given path to add the given value
@@ -142,7 +115,7 @@ class Parameter(Base):
     def __del_path(self, path):
         """ method to do the actual deletion """
 
-        pparts = Parameter.path_parts(path)
+        pparts = ParamDefinition.split_path(path)
         lastnode = pparts.pop()
         dref = self.value
         try:
@@ -160,7 +133,7 @@ class Parameter(Base):
                 raise NotFoundException("No parameter of path=%s defined." % path)
             return
 
-        pparts = Parameter.path_parts(path)
+        pparts = ParamDefinition.split_path(path)
         try:
             # delete the specified path
             self.__del_path(path)
@@ -170,7 +143,7 @@ class Parameter(Base):
             while pparts.pop():
                 if not pparts:
                     break
-                newpath = Parameter.topath(pparts)
+                newpath = "/".join(pparts)
                 if self.get_path(newpath):
                     break
                 self.__del_path(newpath)
@@ -188,14 +161,14 @@ class Parameter(Base):
             flattened = {}
         if isinstance(data, list):
             for i, item in enumerate(data):
-                Parameter.flatten(item, "%d" % i, path + PATH_SEP + key,
+                Parameter.flatten(item, "%d" % i, path + "/" + key,
                                   flattened)
         elif isinstance(data, dict):
             for new_key, value in data.items():
-                Parameter.flatten(value, new_key, path + PATH_SEP + key,
+                Parameter.flatten(value, new_key, path + "/" + key,
                                   flattened)
         else:
-            flattened[((path + PATH_SEP) if path else "") + key] = data
+            flattened[((path + "/") if path else "") + key] = data
         return flattened
 
     def copy(self):

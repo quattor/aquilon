@@ -251,7 +251,8 @@ class TestAddParameterDefinition(TestBrokerCommand):
             cmd = ["add_parameter_definition", "--archetype", "aquilon",
                    "--path=%s" % path, "--template=foo", "--value_type=string"]
             err = self.badrequesttest(cmd)
-            self.matchoutput(err, "Invalid path %s specified, path cannot start with special characters" % path,
+            self.matchoutput(err,
+                             "'%s' is not a valid value for a path component." % path,
                              cmd)
 
     def test_300_show_bad_path(self):
@@ -276,7 +277,8 @@ class TestAddParameterDefinition(TestBrokerCommand):
             cmd = ["add_parameter_definition", "--feature", "myfeature", "--type=host",
                    "--path=%s" % path, "--value_type=string"]
             err = self.badrequesttest(cmd)
-            self.matchoutput(err, "Invalid path %s specified, path cannot start with special characters" % path,
+            self.matchoutput(err,
+                             "'%s' is not a valid value for a path component." % path,
                              cmd)
 
     def test_300_add_bad_feature_type(self):

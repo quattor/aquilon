@@ -23,9 +23,8 @@ from sqlalchemy.sql import or_
 
 from aquilon.exceptions_ import NotFoundException, ArgumentError
 from aquilon.aqdb.model import (Personality, PersonalityStage, Parameter,
-                                FeatureLink, Host, ParamDefinition,
-                                ArchetypeParamDef, FeatureParamDef,
-                                PersonalityParameter)
+                                PersonalityParameter, FeatureLink, Host,
+                                ArchetypeParamDef, FeatureParamDef)
 from aquilon.aqdb.model.hostlifecycle import Ready, Almostready
 from aquilon.worker.formats.parameter_definition import ParamDefinitionFormatter
 
@@ -87,7 +86,6 @@ def get_paramdef_for_parameter(path, param_def_holder):
     if not param_def_holder:
         return None
 
-    path = ParamDefinition.normalize_path(path)
     param_definitions = param_def_holder.param_definitions
     match = None
 
@@ -186,20 +184,6 @@ def validate_personality_config(dbstage):
             error.append("Feature Binding: %s" % link.feature)
             error += tmp_error
     return error
-
-
-def validate_param_definition(path):
-    """
-        Over here we are a bit restrictive then panc and do not allow
-        underscores as path starters. So far we haven't needed those
-        but this restriction can be relaxed in the future if needed.
-        Suggestions were to validate each path component to validate
-        against valid pan id but we are using regexp in certain cases
-        as parameter paths i.e actions so this would not work.
-    """
-
-    if not path[0].isalpha():
-        raise ArgumentError("Invalid path {0} specified, path cannot start with special characters".format(path))
 
 
 def add_arch_paramdef_plenaries(session, dbarchetype, param_def_holder,

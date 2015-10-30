@@ -19,8 +19,7 @@ from aquilon.exceptions_ import ArgumentError, UnimplementedError
 from aquilon.aqdb.model import Archetype, ArchetypeParamDef, ParamDefinition
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.change_management import validate_prod_archetype
-from aquilon.worker.dbwrappers.parameter import (validate_param_definition,
-                                                 add_arch_paramdef_plenaries)
+from aquilon.worker.dbwrappers.parameter import add_arch_paramdef_plenaries
 from aquilon.worker.templates import PlenaryCollection
 from aquilon.utils import validate_template_name
 
@@ -52,8 +51,6 @@ class CommandAddParameterDefintionArchetype(BrokerCommand):
                                      "which is not supported.")
 
         path = ParamDefinition.normalize_path(path)
-        validate_param_definition(path)
-
         ParamDefinition.get_unique(session, path=path, holder=holder,
                                    preclude=True)
 

@@ -29,7 +29,8 @@ from aquilon.exceptions_ import ArgumentError, InternalError
 from aquilon.aqdb.column_types import AqStr, Enum
 from aquilon.aqdb.model import Base, Archetype, Feature
 from aquilon.aqdb.model.feature import _ACTIVATION_TYPE
-from aquilon.utils import force_json, force_int, force_float, force_boolean
+from aquilon.utils import (force_json, force_int, force_float, force_boolean,
+                           validate_nlist_key)
 
 _TN = 'param_definition'
 _PARAM_DEF_HOLDER = 'param_def_holder'
@@ -145,14 +146,19 @@ class ParamDefinition(Base):
                        'info': {'unique_fields': ['path', 'holder']}},)
 
     @staticmethod
+    def split_path(path):
+        # Ignore leading and trailing slashes, collapse multiple slashes into one
+        return [part for part in path.split("/") if part]
+
+    @staticmethod
     def normalize_path(path):
-        # Strip leading and trailing slashes, collapse multiple slashes into one
-        path = _PATH_RE.sub("/", path)
-        if path.startswith('/'):
-            path = path[1:]
-        if path.endswith('/'):
-            path = path[:-1]
-        return path
+        parts = ParamDefinition.split_path(path)
+        # FIXME: we eventually want to enforce all path components are sane, but
+        # for now, there can be regexes
+        #for part in parts:
+        #    validate_nlist_key("a path component", part)
+        validate_nlist_key("a path component", parts[0])
+        return "/".join(parts)
 
     @validates('path')
     def validate_path(self, key, value):  # pylint: disable=W0613

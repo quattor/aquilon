@@ -18,8 +18,7 @@
 from aquilon.aqdb.model import Feature, FeatureParamDef, ParamDefinition
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.change_management import validate_prod_feature
-from aquilon.worker.dbwrappers.parameter import (validate_param_definition,
-                                                 add_feature_paramdef_plenaries)
+from aquilon.worker.dbwrappers.parameter import add_feature_paramdef_plenaries
 from aquilon.worker.templates import PlenaryCollection
 
 
@@ -36,9 +35,7 @@ class CommandAddParameterDefintionFeature(BrokerCommand):
             dbfeature.param_def_holder = FeatureParamDef()
 
         path = ParamDefinition.normalize_path(path)
-        validate_param_definition(path)
 
-        # activation field has been skipped on purpose
         ParamDefinition.get_unique(session, path=path,
                                    holder=dbfeature.param_def_holder, preclude=True)
 
@@ -48,6 +45,7 @@ class CommandAddParameterDefintionFeature(BrokerCommand):
             validate_prod_feature(dbfeature, user, justification, reason)
             add_feature_paramdef_plenaries(session, dbfeature, plenaries)
 
+        # Activation field has been skipped on purpose
         db_paramdef = ParamDefinition(path=path,
                                       holder=dbfeature.param_def_holder,
                                       value_type=value_type, required=required,

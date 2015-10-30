@@ -16,7 +16,8 @@
 # limitations under the License.
 
 from aquilon.exceptions_ import ArgumentError, NotFoundException
-from aquilon.aqdb.model import Personality, PersonalityParameter, Feature
+from aquilon.aqdb.model import (Personality, PersonalityParameter,
+                                ParamDefinition, Feature)
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.parameter import (set_parameter,
                                                  get_paramdef_for_parameter)
@@ -57,6 +58,8 @@ class CommandAddParameter(BrokerCommand):
             holders = [dbfeature.param_def_holder]
         else:
             holders = dbpersonality.archetype.param_def_holders.values()
+
+        path = ParamDefinition.normalize_path(path)
 
         for param_def_holder in holders:
             db_paramdef = get_paramdef_for_parameter(path, param_def_holder)
