@@ -86,9 +86,6 @@ class BrokerCommand(object):
 
     """
 
-    requires_azcheck = True
-    """ Opt out of authorization checks by setting this flag to False."""
-
     requires_transaction = True
     """ This sets up a session and cleans up when finished.
 
@@ -129,7 +126,7 @@ class BrokerCommand(object):
     _is_lock_free = None
 
     # Run the render method on a separate thread.  This will be forced
-    # to True if requires_azcheck or requires_transaction.
+    # to True if requires_transaction.
     defer_to_thread = True
 
     def __init__(self):
@@ -158,14 +155,14 @@ class BrokerCommand(object):
         # self.command is set correctly in resources.py after parsing input.xml
         self.command = self.action
 
-        # This is just a safety catch
+        # Simplify the initialization of common command categories
         if self.action.startswith("show") or \
            self.action.startswith("search") or \
            self.action.startswith("cat"):
             self.requires_readonly = True
 
         if not self.defer_to_thread:
-            if self.requires_azcheck or self.requires_transaction:  # pragma: no cover
+            if self.requires_transaction:  # pragma: no cover
                 self.defer_to_thread = True
                 log.msg("Forcing defer_to_thread to True because of "
                         "required authorization or transaction for %s" %
@@ -196,23 +193,25 @@ class BrokerCommand(object):
                                  self.__class__.__module__)
 
     def invoke_render(self, user=None, request=None, requestid=None,
-                      logger=None, session=None, **kwargs):
+                      logger=None, **kwargs):
         raising_exception = None
         rollback_failed = False
         dbuser = None
-        try:
-            if not self.requires_readonly \
-               and self.config.get('broker', 'mode') != 'readwrite':
-                raise UnimplementedError("Command %s not available on a "
-                                         "readonly broker." % self.command)
+        session = None
 
-            if self.requires_transaction or self.requires_azcheck:
+        if not self.requires_readonly \
+           and self.config.get('broker', 'mode') != 'readwrite':
+            # pragma: no cover
+            raise UnimplementedError("Command %s not available on a "
+                                     "read-only broker." % self.command)
+
+        try:
+            if self.requires_transaction:
                 # Set up a session...
-                if not session:
-                    if self.is_lock_free:
-                        session = self.dbf.NLSession()
-                    else:
-                        session = self.dbf.Session()
+                if self.is_lock_free:
+                    session = self.dbf.NLSession()
+                else:
+                    session = self.dbf.Session()
 
                 # Force connecting to the DB
                 try:
@@ -244,9 +243,8 @@ class BrokerCommand(object):
                                                       commitoncreate=True,
                                                       logger=logger)
 
-                if self.requires_azcheck:
-                    self.az.check(principal=user, dbuser=dbuser,
-                                  action=self.action, resource=request.path)
+                self.az.check(principal=user, dbuser=dbuser,
+                              action=self.action, resource=request.path)
 
                 if self.requires_readonly:
                     self._set_readonly(session)

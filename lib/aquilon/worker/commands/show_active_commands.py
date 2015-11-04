@@ -26,7 +26,6 @@ from aquilon.worker.messages import StatusCatalog
 class CommandShowActiveCommands(BrokerCommand):
 
     requires_transaction = False
-    requires_azcheck = False
     defer_to_thread = False
 
     incoming_re = re.compile(r'Incoming command #(?P<id>\d+)'

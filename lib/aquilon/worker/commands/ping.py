@@ -23,7 +23,6 @@ class CommandPing(BrokerCommand):
 
     requires_transaction = False
     requires_readonly = True
-    requires_azcheck = False
     defer_to_thread = False
 
     def render(self, **arguments):
