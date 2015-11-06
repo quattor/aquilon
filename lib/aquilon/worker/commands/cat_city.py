@@ -17,13 +17,16 @@
 """Contains the logic for `aq cat --city`."""
 
 from aquilon.aqdb.model import City
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.templates import Plenary
 
 
 class CommandCatCity(BrokerCommand):
 
     required_parameters = ["city"]
+
+    # We do not lock the plenary while reading it
+    _is_lock_free = True
 
     def render(self, generate, session, logger, city, **kwargs):
         dbcity = City.get_unique(session, city, compel=True)

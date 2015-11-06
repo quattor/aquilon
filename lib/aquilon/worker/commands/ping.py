@@ -16,16 +16,13 @@
 # limitations under the License.
 """Contains the logic for `aq ping`."""
 
-
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 
 
 class CommandPing(BrokerCommand):
 
     requires_transaction = False
     requires_readonly = True
-    requires_azcheck = False
-    requires_format = True
     defer_to_thread = False
 
     def render(self, **arguments):

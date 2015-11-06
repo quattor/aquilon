@@ -53,7 +53,6 @@ class StatusWriter(StatusSubscriber):
 
 class CommandShowRequest(BrokerCommand):
 
-    requires_azcheck = False
     requires_transaction = False
     requires_format = False
     defer_to_thread = False

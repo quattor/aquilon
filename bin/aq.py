@@ -43,7 +43,7 @@ if LIBDIR not in sys.path:
 # -- end path_setup --
 
 from aquilon.client import depends  # pylint: disable=W0611
-from aquilon.config import lookup_file_path
+from aquilon.config import lookup_file_path,get_username
 from aquilon.exceptions_ import AquilonError
 from aquilon.client.knchttp import KNCHTTPConnection
 from aquilon.client.chunked import ChunkedHTTPConnection
@@ -51,6 +51,7 @@ from aquilon.client.optparser import OptParser, ParsingError
 from aquilon.python_patches import load_uuid_quickly
 
 from six.moves.urllib_parse import urlencode, quote  # pylint: disable=F0401
+from six.moves.configparser import SafeConfigParser  # pylint: disable=F0401
 import six.moves.http_client as httplib  # pylint: disable=F0401
 from six import iteritems
 
@@ -316,6 +317,22 @@ class StatusThread(Thread):
 def quoteOptions(options):
     return "&".join(quote(k) + "=" + quote(v) for k, v in iteritems(options))
 
+def get_default_opts(auth_option, conf_file=None):
+
+    config = SafeConfigParser()
+
+    if not conf_file:
+        conf_file = lookup_file_path("aq.conf")
+
+    if conf_file:
+        config.read(conf_file)
+        config_options = {}
+        if not auth_option and config.has_section("readonly"):
+            config_options = dict(config.items("readonly"))
+        if not config_options and config.has_section("defaults"):
+            config_options = dict(config.items("defaults"))
+        return config_options
+
 
 if __name__ == "__main__":
     # Set up the search path for man pages. "man" does not like ".." in the
@@ -338,29 +355,28 @@ if __name__ == "__main__":
               file=sys.stderr)
         sys.exit(1)
 
-    # Setting this as a global default.  It might make sense to set
-    # the default to the current running user when running out of a
-    # shadow, though.
-    default_aqservice = "cdb"
+    ## if a client config file is specified on command line
+    ## that should overide  env or default options.
+    if globalOptions.get('aqconf'):
+        globalOptions.update(get_default_opts(globalOptions.get('auth'),
+                                              globalOptions.get('aqconf')))
+    else:
+        defaultOpts = get_default_opts(globalOptions.get('auth'))
 
     # Default for /ms/dist
     if re.match(r"/ms(/.(global|local)/[^/]+)?/dist/", BINDIR):
-        default_aqhost = "nyaqd1"
+        default_aqhost = defaultOpts.get('aqhost')
     # Default for /ms/dev
     elif re.match(r"/ms(/.(global|local)/[^/]+)?/dev/", BINDIR):
-        default_aqhost = "nyaqd1"
+        default_aqhost = defaultOpts.get('aqhost')
     else:
         default_aqhost = socket.gethostname()
-
-    if not globalOptions.get('auth'):
-        default_aqport = 6901
-    else:
-        default_aqport = 6900
 
     host = globalOptions.get('aqhost') or os.environ.get('AQHOST', None) or \
         default_aqhost
     port = globalOptions.get('aqport') or os.environ.get('AQPORT', None) or \
-        default_aqport
+        defaultOpts.get('aqport') or 6900
+
     if globalOptions.get('aqservice'):
         aqservice = globalOptions.get('aqservice')
     elif os.environ.get('AQSERVICE', None):
@@ -374,7 +390,8 @@ if __name__ == "__main__":
               "AQSERVICE", file=sys.stderr)
         aqservice = os.environ['AQUSER']
     else:
-        aqservice = default_aqservice
+        aqservice = defaultOpts.get('aqservice') or get_username()
+
     if 'AQSLOWSTATUS' in os.environ and not globalOptions.get('slowstatus'):
         serial = str(os.environ['AQSLOWSTATUS']).strip().lower()
         false_values = ['false', 'f', 'no', 'n', '0', '']

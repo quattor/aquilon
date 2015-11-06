@@ -17,13 +17,16 @@
 """Contains the logic for `aq cat --machine`."""
 
 from aquilon.aqdb.model import Machine
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.templates import Plenary
 
 
 class CommandCatMachine(BrokerCommand):
 
     required_parameters = ["machine"]
+
+    # We do not lock the plenary while reading it
+    _is_lock_free = True
 
     def render(self, session, logger, machine, generate, **kwargs):
         dbmachine = Machine.get_unique(session, machine, compel=True)

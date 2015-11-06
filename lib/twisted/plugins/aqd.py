@@ -43,7 +43,8 @@ from aquilon.worker.base_protocol import AQDSite
 class Options(usage.Options):
     optFlags = [["noauth", None, "Do not start the knc listener."],
                 ["authonly", None, "Only use knc, do not start an open port."],
-                ["usesock", None, "use a unix socket to connect"]]
+                ["usesock", None, "use a unix socket to connect"],
+                ["readonly", None, "run as a readonly broker"]]
     optParameters = [["config", None, None, "Configuration file to use."],
                      ["coveragedir", None, None, "Code Coverage directory."],
                      ["coveragerc", None, None, "Coverage test config file."]]
@@ -135,16 +136,18 @@ class AQDMaker(object):
         integrate_logging(config)
 
         progname = os.path.split(sys.argv[0])[1]
-        if progname == 'aqd':
-            if config.get('broker', 'mode') != 'readwrite':
-                log.msg("Broker started with aqd symlink, "
-                        "setting config mode to readwrite")
-                config.set('broker', 'mode', 'readwrite')
-        if progname == 'aqd_readonly':
-            if config.get('broker', 'mode') != 'readonly':
-                log.msg("Broker started with aqd_readonly symlink, "
-                        "setting config mode to readonly")
-                config.set('broker', 'mode', 'readonly')
+
+        if options["readonly"] or progname == 'aqd_readonly':
+           log.msg("Broker started with aqd symlink, "
+                   "setting config mode to readonly")
+           config.set('broker', 'mode', 'readonly')
+
+        # default mode
+        if not config.has_option('broker', 'mode'):
+            log.msg("Broker started with aqd symlink, "
+                    "setting config mode to readwrite")
+            config.set('broker', 'mode', 'readwrite')
+
         log.msg("Loading broker in mode %s" % config.get('broker', 'mode'))
 
         # Dynamic import means that we can parse config options before

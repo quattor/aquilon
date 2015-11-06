@@ -17,7 +17,7 @@
 """Contains the logic for `aq cat --service`."""
 
 from aquilon.aqdb.model import Service
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.templates.service import (PlenaryServiceToplevel,
                                               PlenaryServiceClientDefault,
                                               PlenaryServiceServerDefault)
@@ -26,6 +26,9 @@ from aquilon.worker.templates.service import (PlenaryServiceToplevel,
 class CommandCatService(BrokerCommand):
 
     required_parameters = ["service"]
+
+    # We do not lock the plenary while reading it
+    _is_lock_free = True
 
     def render(self, session, logger, service, server, default, generate, **kwargs):
         dbservice = Service.get_unique(session, service, compel=True)

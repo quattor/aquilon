@@ -30,6 +30,9 @@ class CommandCatPersonality(BrokerCommand):
 
     required_parameters = ["personality"]
 
+    # We do not lock the plenary while reading it
+    _is_lock_free = True
+
     def render(self, generate, session, logger, personality,
                personality_stage, archetype, pre_feature, post_feature,
                param_tmpl, **kwargs):

@@ -24,7 +24,6 @@ from aquilon.worker.broker import BrokerCommand
 class CommandAddVlan(BrokerCommand):
 
     required_parameters = ["vlan", "name"]
-    requires_format = False
 
     def render(self, session, vlan, name, vlan_type, **kwargs):
 

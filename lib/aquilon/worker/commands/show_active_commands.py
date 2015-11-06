@@ -16,18 +16,16 @@
 # limitations under the License.
 """Contains the logic for `aq show active commands`."""
 
-
 import re
 from logging import DEBUG, INFO
 
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.messages import StatusCatalog
 
 
 class CommandShowActiveCommands(BrokerCommand):
 
     requires_transaction = False
-    requires_azcheck = False
     defer_to_thread = False
 
     incoming_re = re.compile(r'Incoming command #(?P<id>\d+)'
@@ -64,4 +62,4 @@ class CommandShowActiveCommands(BrokerCommand):
                         # the status description that's already been printed.
                         continue
                     retval.append('(%s) %s' % (auditid, message))
-        return str("\n".join(retval))
+        return retval

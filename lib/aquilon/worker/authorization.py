@@ -276,6 +276,8 @@ class AuthorizationBroker(object):
                               'del_parameter',
                               'bind_feature', 'unbind_feature',
                               'map_service',
+                              'add_required_service_personality',
+                              'del_required_service_personality',
                               'promote', 'demote',
                               'add_alias', 'del_alias', 'update_alias']:
                 self.raise_auth_error(principal, action, resource)
