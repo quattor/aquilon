@@ -6157,6 +6157,8 @@
 	<optgroup mandatory="True" fields="all">
 	    <option name="feature" type="string">The name of the feature</option>
 	    <option name="type" type="string">Type of the feature: host, hardware or interface</option>
+	    <option name="activation" type="string">How the feature gets activated, valid values are rebuild, reboot, dispatch</option>
+	    <option name="deactivation" type="string">How the feature gets removed, valid values are rebuild, reboot, dispatch</option>
 	    <optgroup fields="one">
 		<option name="grn" type="string" conflicts="eon_id">GRN as string</option>
 		<option name="eon_id" type="int" conflicts="grn">Numeric EON ID</option>
@@ -6165,11 +6167,10 @@
 	<optgroup>
 	    <option name="post_personality" type="flag">Call the feature after the personality</option>
 	    <option name="comments" type="string">Comments</option>
-	    <option name="visibility" type="string">scope of the feature values are public(default), restricted, owner_only, owner_approved</option>
+	    <option name="visibility" type="string">scope of the feature
+        values are public, restricted (default), owner_only, owner_approved</option>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
 	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
-	    <option name="activation" type="string">How the feature gets activated, valid values are rebuild, reboot(default), dispatch</option>
-	    <option name="deactivation" type="string">How the feature gets removed, valid values are rebuild, reboot(default), dispatch</option>
 	</optgroup>
 	<transport method="put" path="feature/%(type)s/%(feature)s"/>
     </command>
