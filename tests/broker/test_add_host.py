@@ -186,7 +186,17 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
         self.matchoutput(out, "Adding hosts to domain nomanage "
                          "is not allowed.", command)
 
-    def test_123_add_unittest16_good(self):
+    def test_123_add_unittest16_bad_hostname(self):
+        net = self.net["tor_net_0"]
+        command = ["add", "host", "--hostname", "1unittest16.aqd-unittest.ms.com",
+                   "--ipfromip", net.usable[0], "--ipalgorithm", "lowest",
+                   "--machine", "ut8s02p2", "--domain", "unittest",
+                   "--archetype", "aquilon"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "'1unittest16.aqd-unittest.ms.com' is not a valid "
+                         "value for hostname.", command)
+
+    def test_124_add_unittest16_good(self):
         net = self.net["tor_net_0"]
         self.dsdb_expect_add("unittest16.aqd-unittest.ms.com", net.usable[2],
                              "eth0", net.usable[2].mac)

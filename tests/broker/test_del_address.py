@@ -193,6 +193,16 @@ class TestDelAddress(TestBrokerCommand):
         command = ["show_address", "--fqdn=arecord51.aqd-unittest.ms.com"]
         self.notfoundtest(command)
 
+    def test_850_del_address_with_digit_prefix(self):
+        fqdn = "1record42.aqd-unittest.ms.com"
+        dns_env = "external"
+        command = ["del", "address", "--fqdn", fqdn,
+                   "--dns_environment", dns_env]
+        self.noouttest(command)
+
+        command = ["show", "address", "--fqdn", fqdn,
+                   "--dns_environment", dns_env]
+        self.notfoundtest(command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelAddress)
