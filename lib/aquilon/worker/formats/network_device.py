@@ -18,10 +18,12 @@
 
 from collections import defaultdict
 from operator import attrgetter
+from six import iteritems
 
 from aquilon.aqdb.model import NetworkDevice
 from aquilon.worker.formats.formatters import ObjectFormatter
 from aquilon.worker.formats.hardware_entity import HardwareEntityFormatter
+from aquilon.exceptions_ import ProtocolError
 
 
 class NetworkDeviceFormatter(HardwareEntityFormatter):
@@ -78,5 +80,81 @@ class NetworkDeviceFormatter(HardwareEntityFormatter):
                 details.extend([None, None])
 
             yield details
+
+    def fill_proto(self, device, skeleton, embedded=True,
+                   indirect_attrs=True):
+        skeleton.primary_name = str(device.primary_name)
+        if indirect_attrs:
+            self._fill_hardware_proto(device, skeleton.hardware)
+            self._fill_system_proto(device.host, skeleton.system)
+
+    def _fill_hardware_proto(self, hwent, skeleton, embedded=True,
+                             indirect_attrs=True):
+
+        skeleton.hardware_type = skeleton.NETWORK_DEVICE
+        skeleton.label = str(hwent.label)
+
+        if hwent.serial_no:
+            skeleton.serial_no = str(hwent.serial_no)
+
+        self.redirect_proto(hwent.model, skeleton.model, indirect_attrs=False)
+        self.redirect_proto(hwent.location, skeleton.location,  indirect_attrs=False)
+
+        if indirect_attrs:
+            for iface in sorted(hwent.interfaces, key=attrgetter('name')):
+                int_msg = skeleton.interfaces.add()
+                int_msg.device = str(iface.name)
+                self.redirect_proto(iface, int_msg)
+                self._fill_address_assignment_proto(iface, int_msg.address_assignments)
+
+    def _fill_address_assignment_proto(self, iface, skeleton, embedded=True,
+                                       indirect_attrs=True):
+        for addr in iface.assignments:
+            addr_msg = skeleton.add()
+            if addr.assignment_type == 'standard':
+                addr_msg.assignment_type = addr_msg.STANDARD
+            elif addr.assignment_type == 'shared':
+                addr_msg.assignment_type = addr_msg.SHARED
+            else:
+                raise ProtocolError("Unknown address assignmment type %s." %
+                                    addr.assignment_type)
+            if addr.label:
+                addr_msg.label = addr.label
+            addr_msg.ip = str(addr.ip)
+            addr_msg.fqdn.extend([str(fqdn) for fqdn in addr.fqdns])
+            for dns_record in addr.dns_records:
+                if dns_record.alias_cnt:
+                    addr_msg.aliases.extend([str(a.fqdn) for a in
+                                             dns_record.all_aliases])
+            if hasattr(addr, "priority"):
+                addr_msg.priority = addr.priority
+
+    def _fill_system_proto(self, host, skeleton, embedded=True,
+                           indirect_attrs=True):
+
+        self.redirect_proto(host.branch, skeleton.domain)
+        skeleton.status = str(host.status)
+        self.redirect_proto(host.personality_stage, skeleton.personality)
+
+        self.redirect_proto(host.operating_system, skeleton.operating_system)
+
+        if host.cluster and not embedded:
+            skeleton.cluster = host.cluster.name
+
+        if host.resholder:
+            self.redirect_proto(host.resholder.resources, skeleton.resources)
+
+        self.redirect_proto(host.services_used, skeleton.services_used,
+                            indirect_attrs=False)
+        self.redirect_proto([srv.service_instance for srv in host.services_provided],
+                            skeleton.services_provided, indirect_attrs=False)
+
+        skeleton.owner_eonid = host.effective_owner_grn.eon_id
+        for target, eon_id_set in iteritems(host.effective_grns):
+            for grn_rec in eon_id_set:
+                map = skeleton.eonid_maps.add()
+                map.target = target
+                map.eonid = grn_rec.eon_id
+
 
 ObjectFormatter.handlers[NetworkDevice] = NetworkDeviceFormatter()
