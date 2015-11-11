@@ -92,6 +92,7 @@ typemap = {
     "resource": aqdsystems_pb2.ResourceList(),
     "feature": aqdsystems_pb2.FeatureList(),
     "virtual_switch": aqdsystems_pb2.VirtualSwitchList(),
+    "network_device": aqdsystems_pb2.NetworkDeviceList(),
 }
 
 input = sys.stdin

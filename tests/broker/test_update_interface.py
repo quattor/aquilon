@@ -129,9 +129,6 @@ class TestUpdateInterface(TestBrokerCommand):
         self.assertEqual(machine.interfaces[2].ip, "")
         self.assertEqual(machine.interfaces[2].fqdn, "")
         self.assertEqual(machine.interfaces[2].bootable, False)
-        self.assertEqual(machine.interfaces[2].model.name, "generic_nic")
-        self.assertEqual(machine.interfaces[2].model.vendor, "generic")
-        self.assertEqual(machine.interfaces[2].model.model_type, "nic")
         self.assertEqual(machine.interfaces[2].bus_address, "")
         self.assertEqual(machine.interfaces[3].device, "ilo")
         self.assertEqual(machine.interfaces[3].mac,
@@ -140,9 +137,6 @@ class TestUpdateInterface(TestBrokerCommand):
                          str(self.net["unknown0"].usable[9]))
         self.assertEqual(machine.interfaces[3].fqdn, "unittest02rsa.one-nyp.ms.com")
         self.assertEqual(machine.interfaces[3].bootable, False)
-        self.assertEqual(machine.interfaces[3].model.name, "generic_nic")
-        self.assertEqual(machine.interfaces[3].model.vendor, "generic")
-        self.assertEqual(machine.interfaces[3].model.model_type, "nic")
         self.assertEqual(machine.interfaces[3].bus_address, "")
 
     def test_122_update_ut3c5n10_eth1(self):
