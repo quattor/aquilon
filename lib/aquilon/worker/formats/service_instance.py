@@ -95,8 +95,6 @@ class ServiceInstanceFormatter(ObjectFormatter):
                                         indirect_attrs=False)
                 # TODO: extra IP address/service address information
                 # TODO: cluster-provided services
-            # TODO: make this conditional to avoid performance problems
-            # self.redirect_proto(client.hosts, si_msg.clients)
 
     # Applies to service_instance/share as well.
     @classmethod
