@@ -23,6 +23,7 @@ from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.aqdb.model import Network, NetworkEnvironment, NetworkCompartment
 from aquilon.aqdb.model.network import get_net_id_from_ip
+from aquilon.worker.templates import Plenary, PlenaryCollection
 
 
 class CommandAddNetwork(BrokerCommand):
@@ -96,4 +97,9 @@ class CommandAddNetwork(BrokerCommand):
 
         session.add(net)
         session.flush()
+
+        plenaries = PlenaryCollection(logger=logger)
+        plenaries.append(Plenary.get_plenary(net))
+        plenaries.write()
+
         return

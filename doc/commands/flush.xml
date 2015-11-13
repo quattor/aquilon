@@ -38,6 +38,7 @@
 	        <arg choice="plain"><option>--services</option></arg>
 	        <arg choice="plain"><option>--resources</option></arg>
 	        <arg choice="plain"><option>--locations</option></arg>
+	        <arg choice="plain"><option>--networks</option></arg>
 	        <arg choice="plain"><option>--network_devices</option></arg>
 	        <arg choice="plain"><option>--virtual_switches</option></arg>
 	    </group>
@@ -145,6 +146,16 @@
 		<listitem>
 		    <para>
 			Refresh the location plenaries.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--networks</option>
+		</term>
+		<listitem>
+		    <para>
+			Refresh the network plenaries.
 		    </para>
 		</listitem>
 	    </varlistentry>

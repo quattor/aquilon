@@ -131,6 +131,7 @@
 	    <option name="services" type="flag">flush the service templates</option>
 	    <option name="resources" type="flag">flush the resource templates</option>
 	    <option name="locations" type="flag">flush templates related to locations. This is only cities for now</option>
+	    <option name="networks" type="flag">flush templates related to networks</option>
 	    <option name="network_devices" type="flag">flush templates related to network devices</option>
 	    <option name="virtual_switches" type="flag">flush templates of virtual switches</option>
 	    <option name="all" type="flag">flush all templates</option>
@@ -2784,6 +2785,7 @@
 	    <option name="service" type="string">Name of the service</option>
 	    <option name="city" type="string">Name of the city</option>
 	    <option name="network_device" type="string">Name of the network device</option>
+	    <option name="networkip" type="ipv4">IP address of a network</option>
 	    <option name="switch" type="string">[Deprecated] Name of the switch</option>
 	    <option name="personality" type="string">Name of personality</option>
 	    <option name="virtual_switch" type="string">Virtual Switch name</option>
@@ -2817,6 +2819,9 @@
 	    <option name="service_address" type="string" requires="hostname cluster metacluster">Name of a service address</option>
 	    <option name="share" type="string" requires="hostname cluster metacluster">Name of a resource group</option>
 	</optgroup>
+	<optgroup>
+	    <option name="network_environment" type="string" requires="networkip">Network environment (default: internal)</option>
+	</optgroup>
 	<transport trigger="machine" method="get" path="machine/%(machine)s/plenary"/>
 	<transport trigger="hostname" method="get" path="host/%(hostname)s/plenary"/>
 	<transport trigger="cluster" method="get" path="cluster/%(cluster)s/plenary"/>
@@ -2825,6 +2830,7 @@
 	<transport trigger="instance" method="get" path="service/%(service)s/instance/%(instance)s/plenary"/>
 	<transport trigger="city" method="get" path="location/city/%(city)s/plenary"/>
 	<transport trigger="network_device" method="get" path="network_device/%(network_device)s/plenary"/>
+	<transport trigger="networkip" method="get" path="network/plenary/%(networkip)s"/>
 	<transport trigger="switch" method="get" path="switch/%(switch)s/plenary"/>
 	<transport trigger="personality" method="get"  path="personality/personality/%(personality)s/plenary"/>
 	<transport trigger="virtual_switch" method="get" path="virtual_switch/%(virtual_switch)s/plenary"/>

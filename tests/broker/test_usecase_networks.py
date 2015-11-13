@@ -235,6 +235,7 @@ class TestUsecaseNetworks(TestBrokerCommand):
             if network.comments:
                 command.extend(["--comments", network.comments])
             self.noouttest(command)
+            self.check_plenary_exists('network', 'internal', str(network.ip), 'config')
 
     def test_201_add_routers(self):
         if 'skip_add' in flags:
@@ -327,6 +328,50 @@ class TestUsecaseNetworks(TestBrokerCommand):
 
     ########## TESTING STAGE ##########
 
+    def test_301_network_plenary(self):
+        for (net_name, net_attrs) in config['gateways'].iteritems():
+            net = self.net[net_name]
+
+            pri_router = net_attrs[0][0]
+            pri_router_fqdn = pri_router + '.' + config['domain']
+            pri_router_if = net_attrs[0][1]
+            _pri_router_ip = config['devices'][pri_router]['interfaces'][pri_router_if]
+            pri_router_ip = self.net[_pri_router_ip['net']][_pri_router_ip['ipidx']]
+
+            sec_router = net_attrs[1][0]
+            sec_router_fqdn = sec_router + '.' + config['domain']
+            sec_router_if = net_attrs[1][1]
+            _sec_router_ip = config['devices'][sec_router]['interfaces'][sec_router_if]
+            sec_router_ip = self.net[_sec_router_ip['net']][_sec_router_ip['ipidx']]
+
+            command = ["cat", "--networkip", str(net.ip)]
+            out = self.commandtest(command)
+
+            m = lambda x: self.matchoutput(out, x, command)
+            m('structure template network/internal/%s/config' % net.ip)
+            m('"name" = "%s"' % net.name)
+            m('"network" = "%s"' % net.ip)
+            m('"netmask" = "%s"' % net.netmask)
+            m('"broadcast" = "%s"' % net.broadcast)
+            m('"prefix_length" = %d' % net.prefixlen)
+            m('"type" = "%s"' % net.nettype)
+            m('"side" = "%s"' % net.side)
+            m('"sysloc/building" = "%s"' % net.loc_name)
+            m('"network_environment/name" = "internal"')
+
+            s = lambda x: self.searchoutput(out, x, command)
+            assignment = lambda lhs, rhs: r'"%s"\s*=\s*%s' % (lhs, rhs)
+            nlisti = lambda (k, v): r'"%s",\s*"%s"\s*' % (k, v)
+            nlist = lambda *l: r'nlist\(\s*' + r',\s*'.join(map(nlisti, l)) + r'\)\s*'
+            slist = lambda *l: r'list\(\s*' + r',\s*'.join(l) + r'\)\s*'
+            s(assignment(r'router_address/%s/providers' % net[1],
+              slist(nlist(("interface", pri_router_if),
+                          ("ip", pri_router_ip),
+                          ("router", pri_router_fqdn)),
+                    nlist(("interface", sec_router_if),
+                          ("ip", sec_router_ip),
+                          ("router", sec_router_fqdn)))))
+
     ########## DELETEION STAGE ##########
 
     def test_804_del_default_route(self):
@@ -413,6 +458,7 @@ class TestUsecaseNetworks(TestBrokerCommand):
                 continue
             command = ["del_network", "--ip=%s" % network.ip]
             self.noouttest(command)
+            self.check_plenary_gone('network', 'internal', str(network.ip), 'config')
 
     ########## CLEANUP STAGE ##########
 
