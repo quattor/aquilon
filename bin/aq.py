@@ -365,15 +365,16 @@ if __name__ == "__main__":
 
     # Default for /ms/dist
     if re.match(r"/ms(/.(global|local)/[^/]+)?/dist/", BINDIR):
-        default_aqhost = defaultOpts.get('aqhost')
+        default_aqhost = defaultOpts.get('aqhost') or 'nyaqd1'
     # Default for /ms/dev
     elif re.match(r"/ms(/.(global|local)/[^/]+)?/dev/", BINDIR):
-        default_aqhost = defaultOpts.get('aqhost')
+        default_aqhost = defaultOpts.get('aqhost') or 'nyaqd1'
     else:
         default_aqhost = socket.gethostname()
 
     host = globalOptions.get('aqhost') or os.environ.get('AQHOST', None) or \
         default_aqhost
+
     port = globalOptions.get('aqport') or os.environ.get('AQPORT', None) or \
         defaultOpts.get('aqport') or 6900
 
