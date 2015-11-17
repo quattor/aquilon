@@ -366,11 +366,14 @@ if __name__ == "__main__":
     # Default for /ms/dist
     if re.match(r"/ms(/.(global|local)/[^/]+)?/dist/", BINDIR):
         default_aqhost = defaultOpts.get('aqhost') or 'nyaqd1'
+        default_aqservice = 'cdb'
     # Default for /ms/dev
     elif re.match(r"/ms(/.(global|local)/[^/]+)?/dev/", BINDIR):
         default_aqhost = defaultOpts.get('aqhost') or 'nyaqd1'
+        default_aqservice = 'cdb'
     else:
         default_aqhost = socket.gethostname()
+        default_aqservice = get_username()
 
     host = globalOptions.get('aqhost') or os.environ.get('AQHOST', None) or \
         default_aqhost
@@ -391,7 +394,7 @@ if __name__ == "__main__":
               "AQSERVICE", file=sys.stderr)
         aqservice = os.environ['AQUSER']
     else:
-        aqservice = defaultOpts.get('aqservice') or get_username()
+        aqservice = defaultOpts.get('aqservice') or default_aqservice or get_username()
 
     if 'AQSLOWSTATUS' in os.environ and not globalOptions.get('slowstatus'):
         serial = str(os.environ['AQSLOWSTATUS']).strip().lower()
