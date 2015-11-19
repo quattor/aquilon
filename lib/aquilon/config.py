@@ -59,7 +59,7 @@ def lookup_file_path(name):
 
     paths_to_try = [os.path.join("/etc", "aquilon", name),
                     os.path.join("/usr", "share", "aquilon", "etc", name),
-                    os.path.join("../../../aqd-vcs/prod/etc", name),
+                    os.path.join(_SRCDIR,"../../../aqd-vcs/prod/etc", name),
                     os.path.join(_SRCDIR, "etc", name)]
     for path in paths_to_try:
         if os.path.exists(path):

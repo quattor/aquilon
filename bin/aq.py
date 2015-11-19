@@ -379,7 +379,12 @@ if __name__ == "__main__":
         default_aqhost
 
     port = globalOptions.get('aqport') or os.environ.get('AQPORT', None) or \
-        defaultOpts.get('aqport') or 6900
+        defaultOpts.get('aqport')
+
+    if globalOptions.get('auth'):
+       port = port or 6900
+    else:
+       port = port or 6901
 
     if globalOptions.get('aqservice'):
         aqservice = globalOptions.get('aqservice')
