@@ -39,8 +39,6 @@
 	    <arg><option>--max_members <replaceable>NUMBER</replaceable></option></arg>
 	    <arg><option>--switch <replaceable>SWITCH</replaceable></option></arg>
 	    <arg><option>--virtual_switch <replaceable>VSWITCH</replaceable></option></arg>
-	    <arg><option>--memory_capacity <replaceable>CAPACITY</replaceable></option></arg>
-	    <arg><option>--clear_overrides</option></arg>
 	    <arg><option>--fix_location</option></arg>
 	    <arg><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
 	    <xi:include href="../common/change_management.xml"/>
@@ -171,29 +169,6 @@
 		    <para>
 			If <replaceable>VSWITCH</replaceable> is the empty string, then the existing
 			virtual switch association is removed.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-	        <term>
-		    <option>--memory_capacity <replaceable>CAPACITY</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			Override the memory capacity of the cluster. The capacity is normally calculated from
-			the amount of memory of the members of the cluster, using the formula configured for the personality.
-			This option allows overriding that formula.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-	        <term>
-		    <option>--clear_overrides</option>
-		</term>
-		<listitem>
-		    <para>
-			Clear any existing capacity overrides, and revert to using the memory capacity configured for
-			the personality when calculating the capacity of the cluster.
 		    </para>
 		</listitem>
 	    </varlistentry>

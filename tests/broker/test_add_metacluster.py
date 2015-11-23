@@ -52,8 +52,6 @@ class TestAddMetaCluster(PersonalityTestMixin, TestBrokerCommand):
                 Address: unittest address
                 Location Parents: [Organization ms, Hub ny, Continent na, Country us, Campus ny, City ny]
               Max members: %s
-              Capacity limits: None
-              Resources used by VMs: None
               Build Status: build
               Cluster Personality: metacluster Archetype: metacluster
                 Environment: dev
@@ -94,8 +92,6 @@ class TestAddMetaCluster(PersonalityTestMixin, TestBrokerCommand):
                 Address: unittest address
                 Location Parents: [Organization ms, Hub ny, Continent na, Country us, Campus ny, City ny]
               Max members: 99
-              Capacity limits: None
-              Resources used by VMs: None
               Build Status: build
               Cluster Personality: metacluster Archetype: metacluster
                 Environment: dev

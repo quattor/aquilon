@@ -53,30 +53,6 @@ class TestClusterConstraints(TestBrokerCommand):
                          "remove it from the cluster first.",
                          command)
 
-    def test_120_update_vmhost_memory(self):
-        command = ["update", "machine", "--machine", "ut10s04p1",
-                   "--memory", 8192]
-        out = self.badrequesttest(command)
-        self.matchoutput(out,
-                         "ESX Cluster utecl2 is over capacity regarding memory",
-                         command)
-
-    def test_130_update_vm_meory(self):
-        command = ["update", "machine", "--machine", "evm1",
-                   "--memory", 81920]
-        out = self.badrequesttest(command)
-        self.matchoutput(out,
-                         "ESX Cluster utecl1 is over capacity regarding memory",
-                         command)
-
-    def test_140_unbind_machine(self):
-        command = ["uncluster", "--hostname", "evh51.aqd-unittest.ms.com",
-                   "--cluster", "utecl5", "--personality", "generic"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out,
-                         "ESX Cluster utecl5 is over capacity regarding memory",
-                         command)
-
     def test_150_failrebindhost(self):
         command = ["cluster", "--cluster=utecl1",
                    "--host=evh1.aqd-unittest.ms.com"]

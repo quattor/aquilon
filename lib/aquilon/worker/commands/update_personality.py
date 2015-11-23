@@ -16,13 +16,9 @@
 # limitations under the License.
 """Contains the logic for `aq update personality`."""
 
-from sqlalchemy.orm import joinedload, subqueryload
-
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import (Personality, PersonalityESXClusterInfo,
-                                PersonalityStage, Cluster, Host,
+from aquilon.aqdb.model import (Personality, PersonalityStage, Cluster, Host,
                                 HostEnvironment)
-from aquilon.aqdb.model.cluster import restricted_builtins
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.change_management import validate_prod_personality
 from aquilon.worker.dbwrappers.grn import lookup_grn
@@ -46,8 +42,7 @@ class CommandUpdatePersonality(BrokerCommand):
 
     required_parameters = ["personality", "archetype"]
 
-    def render(self, session, logger, personality, personality_stage,
-               archetype, vmhost_capacity_function, vmhost_overcommit_memory,
+    def render(self, session, logger, personality, personality_stage, archetype,
                cluster_required, config_override, host_environment, grn, eon_id,
                leave_existing, staged, justification, reason, comments, user,
                **arguments):
@@ -86,43 +81,6 @@ class CommandUpdatePersonality(BrokerCommand):
                 validate_prod_personality(ver, user, justification, reason)
         else:
             validate_prod_personality(dbstage, user, justification, reason)
-
-        if vmhost_capacity_function is not None or \
-                vmhost_overcommit_memory is not None:
-            if "esx" not in dbstage.cluster_infos:
-                dbstage.cluster_infos["esx"] = PersonalityESXClusterInfo()
-
-        if vmhost_capacity_function:
-            # Basic sanity tests to see if the function works
-            try:
-                global_vars = {'__builtins__': restricted_builtins}
-                local_vars = {'memory': 10}
-                capacity = eval(vmhost_capacity_function, global_vars,
-                                local_vars)
-            except Exception as err:
-                raise ArgumentError("Failed to evaluate the function: %s" % err)
-            if not isinstance(capacity, dict):
-                raise ArgumentError("The function should return a dictonary.")
-            for name, value in capacity.items():
-                if not isinstance(name, str) or (not isinstance(value, int) and
-                                                 not isinstance(value, float)):
-                    raise ArgumentError("The function should return a dictionary "
-                                        "with all keys being strings, and all "
-                                        "values being numbers.")
-
-            # TODO: Should this be mandatory? It is for now.
-            if "memory" not in capacity:
-                raise ArgumentError("The memory constraint is missing from "
-                                    "the returned dictionary.")
-
-            dbstage.cluster_infos["esx"].vmhost_capacity_function = vmhost_capacity_function
-        elif vmhost_capacity_function == "":
-            dbstage.cluster_infos["esx"].vmhost_capacity_function = None
-
-        if vmhost_overcommit_memory:
-            if vmhost_overcommit_memory < 1:
-                raise ArgumentError("The memory overcommit factor must be >= 1.")
-            dbstage.cluster_infos["esx"].vmhost_overcommit_memory = vmhost_overcommit_memory
 
         if cluster_required is not None and \
            dbpersona.cluster_required != cluster_required:
@@ -177,29 +135,6 @@ class CommandUpdatePersonality(BrokerCommand):
         plenaries.extend(map(Plenary.get_plenary, dbpersona.stages.values()))
 
         session.flush()
-
-        if dbpersona.is_cluster:
-            q = session.query(Cluster)
-            q = q.with_polymorphic("*")
-            # The validation will touch all member hosts/machines, so it's better to
-            # pre-load everything
-            q = q.options(subqueryload('_hosts'),
-                          joinedload('_hosts.host'),
-                          joinedload('_hosts.host.hardware_entity'),
-                          joinedload('resholder'),
-                          subqueryload('resholder.resources'))
-            # TODO: preload virtual machines
-            q = q.filter_by(personality_stage=dbstage)
-            clusters = q.all()
-            failures = []
-            for cluster in clusters:
-                try:
-                    cluster.validate()
-                except ArgumentError as err:
-                    failures.append(err.message)
-            if failures:
-                raise ArgumentError("Validation failed for the following "
-                                    "clusters:\n%s" % "\n".join(failures))
 
         plenaries.write()
 

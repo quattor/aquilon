@@ -31,20 +31,6 @@ class MetaClusterFormatter(CompileableFormatter):
         details.append(self.redirect_raw(metacluster.location_constraint,
                                          indent + "  "))
         details.append(indent + "  Max members: %s" % metacluster.max_clusters)
-        caps = metacluster.get_total_capacity()
-        if caps:
-            capstr = ", ".join("%s: %s" % (name, value) for name, value in
-                               caps.items())
-        else:
-            capstr = None
-        details.append(indent + "  Capacity limits: %s" % capstr)
-        usage = metacluster.get_total_usage()
-        if usage:
-            usagestr = ", ".join("%s: %s" % (name, value) for name, value
-                                 in usage.items())
-        else:
-            usagestr = None
-        details.append(indent + "  Resources used by VMs: %s" % usagestr)
         details.append(self.redirect_raw(metacluster.status, indent + "  "))
         details.append(self.redirect_raw(metacluster.personality_stage,
                                          indent + "  "))

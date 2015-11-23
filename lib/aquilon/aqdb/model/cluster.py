@@ -31,35 +31,6 @@ from aquilon.aqdb.model import (Base, Host, Location, Personality,
                                 ClusterLifecycle, ServiceInstance,
                                 NetworkDevice, CompileableMixin)
 
-# List of functions allowed to be used in vmhost_capacity_function
-restricted_builtins = {'None': None,
-                       'dict': dict,
-                       'divmod': divmod,
-                       'float': float,
-                       'int': int,
-                       'len': len,
-                       'long': long,
-                       'max': max,
-                       'min': min,
-                       'pow': pow,
-                       'round': round}
-
-
-def convert_resources(resources):
-    """ Convert a list of dicts to a dict of lists """
-    # Turn this: [{'a': 1, 'b': 1},
-    #             {'a': 2, 'b': 2}]
-    #
-    # Into this: {'a': [1, 2],
-    #             'b': [1, 2]}
-    resmap = {}
-    for res in resources:
-        for name, value in res.items():
-            if name not in resmap:
-                resmap[name] = []
-            resmap[name].append(value)
-    return resmap
-
 # Cluster is a reserved word in Oracle
 _TN = 'clstr'
 _ETN = 'esx_cluster'
@@ -145,13 +116,6 @@ class Cluster(CompileableMixin, Base):
         if percent.group(2):
             is_percent = True
         return (is_percent, thresh_value)
-
-    @property
-    def personality_info(self):
-        if self.cluster_type in self.personality_stage.cluster_infos:
-            return self.personality_stage.cluster_infos[self.cluster_type]
-        else:
-            return None
 
     @property
     def minimum_location(self):
@@ -300,9 +264,6 @@ class EsxCluster(Cluster):
     esx_cluster_id = Column(ForeignKey(Cluster.id, ondelete='CASCADE'),
                             primary_key=True)
 
-    # Memory capacity override
-    memory_capacity = Column(Integer, nullable=True)
-
     network_device_id = Column(ForeignKey(NetworkDevice.hardware_entity_id),
                                nullable=True, index=True)
 
@@ -312,117 +273,8 @@ class EsxCluster(Cluster):
     __table_args__ = ({'info': {'unique_fields': ['name']}},)
     __mapper_args__ = {'polymorphic_identity': 'esx'}
 
-    @property
-    def vmhost_capacity_function(self):
-        """ Return the compiled VM host capacity function """
-        info = self.personality_info
-        if info:
-            return info.compiled_vmhost_capacity_function
-        else:
-            return None
-
-    @property
-    def virtmachine_capacity_function(self):
-        """ Return the compiled virtual machine capacity function """
-        # Only identity mapping for now
-        return None
-
-    def get_total_capacity(self, down_hosts_threshold=None):
-        """ Return the total capacity available for use by virtual machines """
-        if down_hosts_threshold is None:
-            down_hosts_threshold = self.down_hosts_threshold
-
-        if len(self.hosts) <= down_hosts_threshold:
-            if self.memory_capacity is not None:
-                return {'memory': self.memory_capacity}
-            return {'memory': 0}
-
-        func = self.vmhost_capacity_function
-        if self.personality_info:
-            overcommit = self.personality_info.vmhost_overcommit_memory
-        else:
-            overcommit = 1
-
-        # No access for anything except built-in functions
-        global_vars = {'__builtins__': restricted_builtins}
-
-        resources = []
-        for host in self.hosts:
-            # This is the list of variables we want to pass to the capacity
-            # function
-            local_vars = {'memory': host.hardware_entity.memory}
-            if func:
-                rec = eval(func, global_vars, local_vars)
-            else:
-                rec = local_vars
-
-            # Apply the memory overcommit factor. Force the result to be
-            # an integer since it looks better on display
-            if 'memory' in rec:
-                rec['memory'] = int(rec['memory'] * overcommit)
-
-            resources.append(rec)
-
-        # Convert the list of dicts to a dict of lists
-        resmap = convert_resources(resources)
-
-        # Drop the <down_hosts_threshold> largest elements from every list, and
-        # sum the rest
-        for name in resmap:
-            reslist = sorted(resmap[name])
-            if down_hosts_threshold > 0:
-                reslist = reslist[:-down_hosts_threshold]
-            resmap[name] = sum(reslist)
-
-        # Process overrides
-        if self.memory_capacity is not None:
-            resmap['memory'] = self.memory_capacity
-
-        return resmap
-
-    def get_capacity_overrides(self):
-        """Used by the raw formatter to flag a capacity as overridden."""
-        return {'memory': self.memory_capacity}
-
-    def get_total_usage(self):
-        """ Return the amount of resources used by the virtual machines """
-        func = self.virtmachine_capacity_function
-
-        # No access for anything except built-in functions
-        global_vars = {'__builtins__': restricted_builtins}
-
-        resmap = {}
-        for machine in self.virtual_machines:
-            # This is the list of variables we want to pass to the capacity
-            # function
-            local_vars = {'memory': machine.memory}
-            if func:
-                res = eval(func, global_vars, local_vars)
-            else:
-                res = local_vars
-            for name, value in res.items():
-                if name not in resmap:
-                    resmap[name] = value
-                else:
-                    resmap[name] += value
-        return resmap
-
     def validate(self):
         super(EsxCluster, self).validate()
-
-        # Preload resources
-        resource_by_id = {}
-        if self.resholder:
-            from aquilon.aqdb.model import VirtualMachine, ClusterResource
-            session = object_session(self)
-            q = session.query(VirtualMachine)
-            q = q.join(ClusterResource)
-            q = q.filter_by(cluster=self)
-            q = q.options([joinedload('machine'),
-                           joinedload('machine.primary_name'),
-                           joinedload('machine.primary_name.fqdn')])
-            for res in q:
-                resource_by_id[res.id] = res
 
         # It doesn't matter how many vmhosts we have if there are no
         # virtual machines.
@@ -444,16 +296,6 @@ class EsxCluster(Cluster):
                                 "vmhosts and a down_hosts_threshold of %s" %
                                 (format(self), len(self.hosts), dhtstr))
 
-        capacity = self.get_total_capacity()
-        usage = self.get_total_usage()
-        for name, value in usage.items():
-            # Skip resources that are not restricted
-            if name not in capacity:
-                continue
-            if value > capacity[name]:
-                raise ArgumentError("{0} is over capacity regarding {1}: "
-                                    "wanted {2}, but the limit is {3}."
-                                    .format(self, name, value, capacity[name]))
         return
 
 

@@ -28,7 +28,6 @@ from sqlalchemy.orm import (relation, backref, deferred, validates,
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Base, Cluster
-from aquilon.aqdb.model.cluster import convert_resources
 
 _MCT = 'metacluster'
 _MCM = 'metacluster_member'
@@ -62,47 +61,6 @@ class MetaCluster(Cluster):
             else:
                 location = cluster.location_constraint
         return location
-
-    def get_total_capacity(self):
-        # Key: building; value: list of cluster capacities inside that building
-        building_capacity = {}
-        for cluster in self.members:
-            building = cluster.location_constraint.building
-            if building not in building_capacity:
-                building_capacity[building] = {}
-
-            if not hasattr(cluster, 'get_total_capacity'):
-                continue
-
-            cap = cluster.get_total_capacity()
-            for name, value in cap.items():
-                if name in building_capacity[building]:
-                    building_capacity[building][name] += value
-                else:
-                    building_capacity[building][name] = value
-
-        # Convert the per-building dict of resources to per-resource list of
-        # building-provided values
-        resmap = convert_resources(building_capacity.values())
-
-        for name in resmap:
-            reslist = sorted(resmap[name])
-            resmap[name] = sum(reslist)
-
-        return resmap
-
-    def get_total_usage(self):
-        usage = {}
-        for cluster in self.members:
-            if not hasattr(cluster, 'get_total_usage'):
-                continue
-
-            for name, value in cluster.get_total_usage().items():
-                if name in usage:
-                    usage[name] += value
-                else:
-                    usage[name] = value
-        return usage
 
     def all_objects(self):
         yield self

@@ -17,17 +17,17 @@
 """Contains the logic for `aq search cluster`."""
 
 from sqlalchemy.orm import aliased
-from sqlalchemy.sql import or_, null
+from sqlalchemy.sql import or_
 
 from aquilon.exceptions_ import NotFoundException
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.formats.list import StringAttributeList
-from aquilon.aqdb.model import (Cluster, EsxCluster, MetaCluster, Archetype,
-                                Personality, PersonalityStage, Machine, Host,
-                                NetworkDevice, HardwareEntity, ClusterLifecycle,
-                                Service, ServiceInstance, Share,
-                                ClusterResource, VirtualMachine, BundleResource,
-                                ResourceGroup, User)
+from aquilon.aqdb.model import (Cluster, MetaCluster, Archetype, Personality,
+                                PersonalityStage, Machine, Host, NetworkDevice,
+                                HardwareEntity, ClusterLifecycle, Service,
+                                ServiceInstance, Share, ClusterResource,
+                                VirtualMachine, BundleResource, ResourceGroup,
+                                User)
 from aquilon.worker.dbwrappers.host import hostname_to_host
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
 from aquilon.worker.dbwrappers.location import get_location
@@ -43,7 +43,7 @@ class CommandSearchCluster(BrokerCommand):
                allowed_archetype, allowed_personality,
                down_hosts_threshold, down_maint_threshold, max_members,
                member_archetype, member_hostname, member_personality,
-               capacity_override, cluster, esx_guest, instance,
+               cluster, esx_guest, instance,
                metacluster, esx_metacluster, service, share, esx_share,
                esx_switch, esx_virtual_machine,
                fullinfo, style, **arguments):
@@ -164,8 +164,6 @@ class CommandSearchCluster(BrokerCommand):
             q = q.join(ClusterResource, VirtualMachine, Machine, aliased=True)
             q = q.filter_by(host=dbguest)
             q = q.reset_joinpoint()
-        if capacity_override:
-            q = q.filter(EsxCluster.memory_capacity != null())
         if esx_switch:
             dbnetdev = NetworkDevice.get_unique(session, esx_switch, compel=True)
             q = q.filter_by(network_device=dbnetdev)

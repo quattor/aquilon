@@ -116,8 +116,6 @@ from aquilon.aqdb.model.disk import Disk, LocalDisk
 from aquilon.aqdb.model.clusterlifecycle import ClusterLifecycle
 from aquilon.aqdb.model.cluster import (Cluster, EsxCluster,
                                         ComputeCluster, StorageCluster)
-from aquilon.aqdb.model.personality_cluster_info import (PersonalityClusterInfo,
-                                                         PersonalityESXClusterInfo)
 
 from aquilon.aqdb.model.virtual_switch import VirtualSwitch
 from aquilon.aqdb.model.metacluster import MetaCluster
