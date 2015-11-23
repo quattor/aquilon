@@ -33,7 +33,7 @@ class CommandShowCpu(BrokerCommand):
                                     model_type=CpuType.Cpu, compel=True)
 
         q = session.query(Model)
-        q = q.filter(model_type=CpuType.Cpu)
+        q = q.filter_by(model_type=CpuType.Cpu)
         q = q.join(Vendor)
         q = q.options(undefer('comments'),
                       contains_eager('vendor'))
