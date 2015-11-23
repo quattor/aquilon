@@ -280,7 +280,10 @@ class AuthorizationBroker(object):
                               'del_required_service_personality',
                               'del_personality_personality_stage',
                               'promote', 'demote',
-                              'add_alias', 'del_alias', 'update_alias']:
+                              'add_alias', 'del_alias', 'update_alias',
+                              'add_desk',
+                              'add_machine', 'add_machine_prefix',
+                              'add_host', 'add_host_prefix', 'add_windows_host']:
                 self.raise_auth_error(principal, action, resource)
 
         if dbuser.role.name == 'itsec':
