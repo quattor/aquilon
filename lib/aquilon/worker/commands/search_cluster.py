@@ -22,12 +22,12 @@ from sqlalchemy.sql import or_
 from aquilon.exceptions_ import NotFoundException
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.formats.list import StringAttributeList
-from aquilon.aqdb.model import (Cluster, MetaCluster, Archetype, Personality,
-                                PersonalityStage, Machine, Host, NetworkDevice,
-                                HardwareEntity, ClusterLifecycle, Service,
-                                ServiceInstance, Share, ClusterResource,
-                                VirtualMachine, BundleResource, ResourceGroup,
-                                User)
+from aquilon.aqdb.model import (Cluster, MetaCluster, ClusterGroup, Archetype,
+                                Personality, PersonalityStage, Machine, Host,
+                                NetworkDevice, HardwareEntity, ClusterLifecycle,
+                                Service, ServiceInstance, Share,
+                                ClusterResource, VirtualMachine, BundleResource,
+                                ResourceGroup, User)
 from aquilon.worker.dbwrappers.host import hostname_to_host
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
 from aquilon.worker.dbwrappers.location import get_location
@@ -40,7 +40,7 @@ class CommandSearchCluster(BrokerCommand):
     def render(self, session, logger,
                archetype, cluster_type, personality, personality_stage,
                domain, sandbox, branch, sandbox_author, buildstatus,
-               allowed_archetype, allowed_personality,
+               allowed_archetype, allowed_personality, grouped_with,
                down_hosts_threshold, down_maint_threshold, max_members,
                member_archetype, member_hostname, member_personality,
                cluster, esx_guest, instance,
@@ -260,6 +260,14 @@ class CommandSearchCluster(BrokerCommand):
                        aliased=True)
             q = q.filter_by(archetype=dbma)
             q = q.reset_joinpoint()
+
+        if grouped_with:
+            dbother = Cluster.get_unique(session, grouped_with, compel=True)
+            q = q.join(Cluster.cluster_group, ClusterGroup.members, aliased=True)
+            q = q.filter_by(id=dbother.id)
+            q = q.reset_joinpoint()
+            # Do not include the grouped cluster itself
+            q = q.filter(Cluster.id != dbother.id)
 
         q = q.order_by(cls.name)
 

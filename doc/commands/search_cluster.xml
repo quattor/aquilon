@@ -55,6 +55,7 @@
 	    <group>
 		<arg><option>--cluster <replaceable>CLUSTER</replaceable></option></arg>
 		<arg><option>--metacluster <replaceable>METACLUSTER</replaceable></option></arg>
+		<arg><option>--grouped_with <replaceable>CLUSTER</replaceable></option></arg>
 		<arg><option>--esx_metacluster <replaceable>METACLUSTER</replaceable></option></arg>
 		<arg><option>--esx_virtual_machine <replaceable>ESX_VIRTUAL_MACHINE</replaceable></option></arg>
 		<arg><option>--esx_guest <replaceable>ESX_GUEST</replaceable></option></arg>
@@ -198,6 +199,39 @@
 		    </para>
 		</listitem>
 	    </varlistentry>
+	    <varlistentry>
+		<term>
+		    <option>--cluster <replaceable>CLUSTER</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			The exact name of the cluster.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+		<term>
+		    <option>--metacluster <replaceable>METACLUSTER</replaceable></option>,
+		    <option>--esx_metacluster <replaceable>METACLUSTER</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			The exact name of the metacluster holding this cluster. The <option>--esx_metacluster</option>
+			form is deprecated.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+		<term>
+		    <option>--grouped_with <replaceable>CLUSTER</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Match clusters which are grouped with <replaceable>CLUSTER</replaceable>.
+			If <replaceable>CLUSTER</replaceable> is not a member of any cluster groups, then the result will be empty.
+		    </para>
+		</listitem>
+	    </varlistentry>
 	</variablelist>
 
 	<variablelist>
@@ -230,28 +264,6 @@
 
 	<variablelist>
 	    <title>ESX specific options</title>
-	    <varlistentry>
-		<term>
-		    <option>--cluster <replaceable>CLUSTER</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			The exact name of the cluster.
-		    </para>
-		</listitem>
-	    </varlistentry>
-	    <varlistentry>
-		<term>
-		    <option>--metacluster <replaceable>METACLUSTER</replaceable></option>,
-		    <option>--esx_metacluster <replaceable>METACLUSTER</replaceable></option>
-		</term>
-		<listitem>
-		    <para>
-			The exact name of the metacluster holding this cluster. The <option>--esx_metacluster</option>
-			form is deprecated.
-		    </para>
-		</listitem>
-	    </varlistentry>
 	    <varlistentry>
 		<term>
 		    <option>--esx_virtual_machine <replaceable>ESX_METACLUSTER</replaceable></option>

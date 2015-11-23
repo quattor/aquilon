@@ -40,6 +40,10 @@
 	    <arg><option>--switch <replaceable>SWITCH</replaceable></option></arg>
 	    <arg><option>--virtual_switch <replaceable>VSWITCH</replaceable></option></arg>
 	    <arg><option>--fix_location</option></arg>
+	    <group>
+		<arg choice="plain"><option>--group_with <replaceable>OTHER_CLUSTER</replaceable></option></arg>
+		<arg choice="plain"><option>--clear_group</option></arg>
+	    </group>
 	    <arg><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
 	    <xi:include href="../common/change_management.xml"/>
 	    <xi:include href="../common/location_options.xml"/>
@@ -190,6 +194,30 @@
 		<listitem>
 		    <para>
 			Update the comments of the cluster.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--group_with <replaceable>OTHER_CLUSTER</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Place <replaceable>CLUSTER</replaceable> and <replaceable>OTHER_CLUSTER</replaceable> in the same cluster group.
+			At least one of the two should not be part of a cluster group when the command is executed. If both clusters are
+			already grouped, and the two groups are disjoint, then an error is returned, so it is not possible to combine
+			existing cluster groups with this command.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--clear_group</option>
+		</term>
+		<listitem>
+		    <para>
+			Remove <replaceable>CLUSTER</replaceable> from the cluster group it is currently the member of. If only one cluster
+			is left in the group after this operation, then the cluster group is deleted.
 		    </para>
 		</listitem>
 	    </varlistentry>

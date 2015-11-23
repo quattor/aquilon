@@ -17,7 +17,7 @@
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import (Cluster, EsxCluster, MetaCluster, Personality,
-                                NetworkDevice, VirtualSwitch)
+                                NetworkDevice, VirtualSwitch, ClusterGroup)
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
@@ -89,7 +89,8 @@ class CommandUpdateCluster(BrokerCommand):
 
     def render(self, session, logger, cluster, personality, personality_stage,
                max_members, fix_location, down_hosts_threshold, maint_threshold,
-               comments, switch, virtual_switch, metacluster, **arguments):
+               comments, switch, virtual_switch, metacluster, group_with,
+               clear_group, **arguments):
         dbcluster = Cluster.get_unique(session, cluster, compel=True)
         self.check_cluster_type(dbcluster, forbid=MetaCluster)
         plenaries = PlenaryCollection(logger=logger)
@@ -152,6 +153,42 @@ class CommandUpdateCluster(BrokerCommand):
                 old_metacluster.validate()
             if dbmetacluster:
                 dbmetacluster.validate()
+
+        if group_with:
+            dbother = Cluster.get_unique(session, group_with, compel=True)
+            self.check_cluster_type(dbother, forbid=MetaCluster)
+
+            cgroups = set()
+            if dbcluster.cluster_group:
+                cgroups.add(dbcluster.cluster_group)
+            if dbother.cluster_group:
+                cgroups.add(dbother.cluster_group)
+
+            if len(cgroups) > 1:
+                raise ArgumentError("{0} and {1:l} are already members of "
+                                    "different cluster groups."
+                                    .format(dbcluster, dbother))
+
+            try:
+                cgroup = cgroups.pop()
+            except KeyError:
+                cgroup = ClusterGroup()
+
+            if dbcluster not in cgroup.members:
+                cgroup.members.append(dbcluster)
+
+            if dbother not in cgroup.members:
+                cgroup.members.append(dbother)
+
+        if clear_group:
+            if not dbcluster.cluster_group:
+                raise ArgumentError("{0} is not grouped.".format(dbcluster))
+
+            cgroup = dbcluster.cluster_group
+            cgroup.members.remove(dbcluster)
+            session.flush()
+            if len(cgroup.members) <= 1:
+                session.delete(cgroup)
 
         session.flush()
         dbcluster.validate()

@@ -28,4 +28,6 @@ class CommandUpdateESXCluster(CommandUpdateCluster):
                                 "Please use update_cluster instead.",
                                 **arguments)
 
-        return CommandUpdateCluster.render(self, metacluster=None, **arguments)
+        return CommandUpdateCluster.render(self, metacluster=None,
+                                           group_with=None, clear_group=None,
+                                           **arguments)
