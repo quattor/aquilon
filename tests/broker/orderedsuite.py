@@ -26,7 +26,7 @@ and 'unbind', 'map' and 'unmap', etc.
 
 from __future__ import absolute_import
 
-import unittest2 as unittest
+import unittest
 
 from .test_start import TestBrokerStart
 from .test_ping import TestPing

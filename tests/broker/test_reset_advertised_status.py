@@ -23,7 +23,7 @@ if __name__ == "__main__":
     import broker.utils
     broker.utils.import_depends()
 
-import unittest2 as unittest
+import unittest
 from broker.brokertest import TestBrokerCommand
 
 

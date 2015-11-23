@@ -26,7 +26,7 @@ if __name__ == "__main__":
     import utils
     utils.import_depends()
 
-import unittest2 as unittest
+import unittest
 from ipaddr import IPv4Address, IPv4Network
 
 from brokertest import TestBrokerCommand

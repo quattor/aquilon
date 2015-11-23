@@ -21,7 +21,7 @@ if __name__ == '__main__':
     from broker import utils
     utils.import_depends()
 
-import unittest2 as unittest
+import unittest
 from broker.brokertest import TestBrokerCommand
 
 
@@ -315,7 +315,7 @@ class TestAddAlias(TestBrokerCommand):
                          command)
 
     def test_850_grn_conflict_with_primary_name(self):
-        command = ["add" , "alias",
+        command = ["add", "alias",
                    "--fqdn", "alias2host-bad-target.aqd-unittest.ms.com",
                    "--target", "unittest00.one-nyp.ms.com",
                    "--grn", "grn:/ms/ei/aquilon/unittest"]
@@ -330,7 +330,7 @@ class TestAddAlias(TestBrokerCommand):
                          command)
 
     def test_860_grn_conflict_with_service_address(self):
-        command = ["add" , "alias",
+        command = ["add", "alias",
                    "--fqdn", "alias2host-bad-target.aqd-unittest.ms.com",
                    "--target", "zebra2.aqd-unittest.ms.com",
                    "--grn", "grn:/ms/ei/aquilon/unittest"]
@@ -345,7 +345,7 @@ class TestAddAlias(TestBrokerCommand):
                          command)
 
     def test_870_grn_conflict_with_interface_address(self):
-        command = ["add" , "alias",
+        command = ["add", "alias",
                    "--fqdn", "alias2host-bad-target.aqd-unittest.ms.com",
                    "--target", "unittest20-e1.aqd-unittest.ms.com",
                    "--grn", "grn:/ms/ei/aquilon/unittest"]

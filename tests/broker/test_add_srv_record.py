@@ -21,7 +21,7 @@ if __name__ == '__main__':
     import utils
     utils.import_depends()
 
-import unittest2 as unittest
+import unittest
 from brokertest import TestBrokerCommand
 
 
@@ -278,7 +278,7 @@ class TestAddSrvRecord(TestBrokerCommand):
                          command)
 
     def test_550_grn_conflict_with_service_address(self):
-        command = ["add" , "srv", "record",
+        command = ["add", "srv", "record",
                    "--service", "sip",
                    "--protocol", "udp",
                    "--dns_domain", "aqd-unittest.ms.com",
@@ -295,7 +295,7 @@ class TestAddSrvRecord(TestBrokerCommand):
                          command)
 
     def test_560_grn_conflict_with_interface_name(self):
-        command = ["add" , "srv", "record",
+        command = ["add", "srv", "record",
                    "--service", "sip",
                    "--protocol", "udp",
                    "--dns_domain", "aqd-unittest.ms.com",

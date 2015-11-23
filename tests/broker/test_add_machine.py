@@ -21,7 +21,7 @@ if __name__ == "__main__":
     import utils
     utils.import_depends()
 
-import unittest2 as unittest
+import unittest
 from brokertest import TestBrokerCommand
 from machinetest import MachineTestMixin
 from networktest import DummyIP

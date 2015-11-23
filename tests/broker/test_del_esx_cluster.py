@@ -17,13 +17,11 @@
 # limitations under the License.
 """Module for testing the del esx cluster command."""
 
-import os
-
 if __name__ == "__main__":
     import utils
     utils.import_depends()
 
-import unittest2 as unittest
+import unittest
 from brokertest import TestBrokerCommand
 
 

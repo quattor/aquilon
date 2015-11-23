@@ -16,8 +16,6 @@
 # limitations under the License.
 """Contains the logic for `aq add network_compartment`."""
 
-
-from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import NetworkCompartment
 

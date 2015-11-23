@@ -24,7 +24,7 @@ if __name__ == "__main__":
     import utils
     utils.import_depends()
 
-import unittest2 as unittest
+import unittest
 from brokertest import TestBrokerCommand
 
 
@@ -64,8 +64,8 @@ class TestGet(TestBrokerCommand):
                    "--sandbox", "testuser3/badbranch"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
-                         "Principal %s@%s cannot add or get a sandbox on "
-                         "behalf of 'testuser3'." % (self.user, self.realm),
+                         "Principal %s cannot add or get a sandbox on "
+                         "behalf of 'testuser3'." % self.principal,
                          command)
 
     def testgetbaduser(self):

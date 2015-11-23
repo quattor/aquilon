@@ -23,7 +23,7 @@ if __name__ == "__main__":
     import utils
     utils.import_depends()
 
-import unittest2 as unittest
+import unittest
 from brokertest import TestBrokerCommand
 
 
@@ -32,11 +32,9 @@ class TestAddSandbox(TestBrokerCommand):
     def test_100_default_untrusted(self):
         # When the broker auto-creates a realm, it should be untrusted by
         # default
-        command = ["show", "realm", "--realm",
-                   self.realm]
+        command = ["show", "realm", "--realm", self.realm]
         out = self.commandtest(command)
-        self.matchoutput(out, "Realm: %s" %
-                         self.realm, command)
+        self.matchoutput(out, "Realm: %s" % self.realm, command)
         self.matchoutput(out, "Trusted: False", command)
 
     def test_101_add_untrusted(self):
@@ -52,11 +50,9 @@ class TestAddSandbox(TestBrokerCommand):
         self.noouttest(command)
 
     def test_103_verify_trust(self):
-        command = ["show", "realm", "--realm",
-                   self.realm]
+        command = ["show", "realm", "--realm", self.realm]
         out = self.commandtest(command)
-        self.matchoutput(out, "Realm: %s" %
-                         self.realm, command)
+        self.matchoutput(out, "Realm: %s" % self.realm, command)
         self.matchoutput(out, "Trusted: True", command)
 
     def test_103_flip_untrusted(self):
@@ -64,8 +60,7 @@ class TestAddSandbox(TestBrokerCommand):
                    "--realm", self.realm]
         self.noouttest(command)
 
-        command = ["show", "realm", "--realm",
-                   self.realm]
+        command = ["show", "realm", "--realm", self.realm]
         out = self.commandtest(command)
         self.matchoutput(out, "Trusted: False", command)
 
@@ -90,7 +85,7 @@ class TestAddSandbox(TestBrokerCommand):
         command = "show sandbox --sandbox utsandbox"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Sandbox: utsandbox", command)
-        self.matchoutput(out, "Owner: %s@%s" % (self.user, self.realm), command)
+        self.matchoutput(out, "Owner: %s" % self.principal, command)
         self.matchoutput(out, "Comments: Sandbox used for aqd unit tests",
                          command)
         self.matchoutput(out, "Base Commit: %s" % head, command)
@@ -100,7 +95,7 @@ class TestAddSandbox(TestBrokerCommand):
         command = ["show_sandbox", "--sandbox", "utsandbox", "--format", "proto"]
         domain = self.protobuftest(command, expect=1)[0]
         self.assertEqual(domain.name, "utsandbox")
-        self.assertEqual(domain.owner, "%s@%s" % (self.user, self.realm))
+        self.assertEqual(domain.owner, self.principal)
         self.assertEqual(domain.type, domain.SANDBOX)
 
     def test_115_verify_utsandbox_path(self):
@@ -192,7 +187,7 @@ class TestAddSandbox(TestBrokerCommand):
         self.matchoutput(out, "Sandbox: changetest2", command)
 
     def test_170_verify_search(self):
-        command = ["search", "sandbox", "--owner", self.user]
+        command = ["search", "sandbox", "--owner", self.principal]
         out = self.commandtest(command)
         self.matchoutput(out, "utsandbox", command)
 
@@ -201,8 +196,8 @@ class TestAddSandbox(TestBrokerCommand):
                    "--sandbox", "testuser3/badbranch"]
         err = self.badrequesttest(command)
         self.matchoutput(err,
-                         "Principal %s@%s cannot add or get a sandbox on "
-                         "behalf of 'testuser3'." % (self.user, self.realm),
+                         "Principal %s cannot add or get a sandbox on "
+                         "behalf of 'testuser3'." % self.principal,
                          command)
 
     def test_200_fail_invalid(self):

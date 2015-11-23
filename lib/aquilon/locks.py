@@ -19,7 +19,7 @@ import logging
 from threading import Condition
 from collections import defaultdict
 from itertools import chain
-from six import iteritems, itervalues
+from six import iteritems, itervalues, string_types
 
 from aquilon.exceptions_ import InternalError
 
@@ -135,7 +135,7 @@ class LockKey(object):
             for keys in chain(itervalues(self.exclusive),
                               itervalues(self.shared)):
                 for key in keys:
-                    if not isinstance(key, basestring):
+                    if not isinstance(key, string_types):
                         raise ValueError("Lock key contains %r" % key)
 
         self.state = state

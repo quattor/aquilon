@@ -25,7 +25,7 @@ from six.moves.urllib_parse import urlencode, quote  # pylint: disable=F0401
 from six.moves.urllib_request import urlopen  # pylint: disable=F0401
 from six.moves.urllib_error import HTTPError  # pylint: disable=F0401
 
-import unittest2 as unittest
+import unittest
 from brokertest import TestBrokerCommand
 
 

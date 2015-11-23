@@ -17,11 +17,91 @@
 
 import re
 from aquilon.exceptions_ import ArgumentError
-from six import iteritems
+from six import iteritems, add_metaclass
 
 _StringEnum_Classes = {}
 
 
+class EnumMeta(type):
+    def __new__(mcs, clsname, bases, attrs):
+        # We get called when StringEnum is created, in this case there
+        # is nothing else for us to do, so we just create the class
+        if clsname == 'StringEnum':
+            return type.__new__(mcs, clsname, bases, attrs)
+
+        # Prevent any additional information from being stored
+        attrs['__slots__'] = ['_StringEnum__name', '_StringEnum__value',
+                              '_StringEnum__dynamic']
+
+        # Construct the new class, we return this at the end
+        cls = type.__new__(mcs, clsname, bases, attrs)
+
+        # Record the fact we just created this subtype
+        _StringEnum_Classes[clsname] = cls
+
+        # Traverse through the inheritance tree.  We are looking to find
+        # the higest instance of a StringEnum.  The lookup of that class
+        # is then used to populate the static classes.
+        parents = []
+        super = cls
+        while True:
+            found = False
+            for base in reversed(super.__bases__):
+                if hasattr(base, '_StringEnum__lookup'):
+                    parents.append(base)
+                    super = base
+                    found = True
+                    break
+            if not found:
+                break
+
+        # Build a lookup table that maps the 'value' of the enum to
+        # the statis instance we are about to create
+        lookup = {}
+        cls._StringEnum__lookup = lookup
+
+        # Returs an 'isa' function for a given name, note this is
+        # retquired to avoid scope issues of key
+        def _make_isa_inst(obj):
+            return lambda self: self is obj
+
+        # Process all of the attributes of the class that is being
+        # constructed, building the class as we go
+        for name, value in iteritems(attrs):
+            # Skip any reserved names
+            if name.startswith('_'):
+                continue
+
+            # String attibutes create a static instance of this class
+            if isinstance(value, str):
+                # Create a new object storing the name and value
+                ivalue = object.__new__(cls)
+                ivalue._StringEnum__name = name
+                ivalue._StringEnum__value = value
+                ivalue._StringEnum__dynamic = False
+                # Retain a mapping between the value and the instance
+                lookup[value] = ivalue
+                # Update the attribute to be the static class
+                setattr(cls, name, ivalue)
+                # Provide an 'isa' function for this name
+                setattr(super, 'is%s' % name, _make_isa_inst(ivalue))
+
+        def _make_isa_set(lookup):
+            return lambda self: self._StringEnum__value in lookup
+        setattr(super, 'is%s' % clsname, _make_isa_set(lookup))
+
+        # Run throuh our inheritance tree adding our types to our
+        # parents are we go.  This ensures the super types always
+        # can instanciate us as a subtype
+        for parent in parents:
+            plookup = getattr(parent, '_StringEnum__lookup')
+            plookup.update(lookup)
+
+        # Return the newly created type
+        return cls
+
+
+@add_metaclass(EnumMeta)
 class StringEnum(object):
     def __new__(cls, value):
         if not isinstance(value, str):
@@ -88,81 +168,3 @@ class StringEnum(object):
                                                       value))
             return value
         raise TypeError("%s or String expected" % cls.__name__)
-
-    class __metaclass__(type):
-        def __new__(mcs, clsname, bases, attrs):
-            # We get called when StringEnum is created, in this case there
-            # is nothing else for us to do, so we just create the class
-            if clsname == 'StringEnum':
-                return type.__new__(mcs, clsname, bases, attrs)
-
-            # Prevent any additional information from being stored
-            attrs['__slots__'] = ['_StringEnum__name', '_StringEnum__value',
-                                  '_StringEnum__dynamic']
-
-            # Construct the new class, we return this at the end
-            cls = type.__new__(mcs, clsname, bases, attrs)
-
-            # Record the fact we just created this subtype
-            _StringEnum_Classes[clsname] = cls
-
-            # Traverse through the inheritance tree.  We are looking to find
-            # the higest instance of a StringEnum.  The lookup of that class
-            # is then used to populate the static classes.
-            parents = []
-            super = cls
-            while True:
-                found = False
-                for base in reversed(super.__bases__):
-                    if hasattr(base, '_StringEnum__lookup'):
-                        parents.append(base)
-                        super = base
-                        found = True
-                        break
-                if not found:
-                    break
-
-            # Build a lookup table that maps the 'value' of the enum to
-            # the statis instance we are about to create
-            lookup = {}
-            cls._StringEnum__lookup = lookup
-
-            # Returs an 'isa' function for a given name, note this is
-            # retquired to avoid scope issues of key
-            def _make_isa_inst(obj):
-                return lambda self: self is obj
-
-            # Process all of the attributes of the class that is being
-            # constructed, building the class as we go
-            for name, value in iteritems(attrs):
-                # Skip any reserved names
-                if name.startswith('_'):
-                    continue
-
-                # String attibutes create a static instance of this class
-                if isinstance(value, str):
-                    # Create a new object storing the name and value
-                    ivalue = object.__new__(cls)
-                    ivalue._StringEnum__name = name
-                    ivalue._StringEnum__value = value
-                    ivalue._StringEnum__dynamic = False
-                    # Retain a mapping between the value and the instance
-                    lookup[value] = ivalue
-                    # Update the attribute to be the static class
-                    setattr(cls, name, ivalue)
-                    # Provide an 'isa' function for this name
-                    setattr(super, 'is%s' % name, _make_isa_inst(ivalue))
-
-            def _make_isa_set(lookup):
-                return lambda self: self._StringEnum__value in lookup
-            setattr(super, 'is%s' % clsname, _make_isa_set(lookup))
-
-            # Run throuh our inheritance tree adding our types to our
-            # parents are we go.  This ensures the super types always
-            # can instanciate us as a subtype
-            for parent in parents:
-                plookup = getattr(parent, '_StringEnum__lookup')
-                plookup.update(lookup)
-
-            # Return the newly created type
-            return cls

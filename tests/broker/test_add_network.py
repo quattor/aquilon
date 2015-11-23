@@ -21,7 +21,7 @@ if __name__ == "__main__":
     import utils
     utils.import_depends()
 
-import unittest2 as unittest
+import unittest
 from brokertest import TestBrokerCommand
 
 
@@ -193,10 +193,8 @@ class TestAddNetwork(TestBrokerCommand):
             if not network.autocreate:
                 continue
 
-            if ((network.loc_type == "building" and
-                 network.loc_name == "ut") or
-                (network.loc_type == "bunker" and
-                 network.loc_name == "bucket2.ut")):
+            if ((network.loc_type == "building" and network.loc_name == "ut") or
+                    (network.loc_type == "bunker" and network.loc_name == "bucket2.ut")):
                 self.matchoutput(out, str(network.ip), command)
             else:
                 self.matchclean(out, str(network.ip), command)
@@ -210,10 +208,10 @@ class TestAddNetwork(TestBrokerCommand):
             if not network.autocreate:
                 continue
             if network.loc_type == "building" and network.loc_name == "ut":
-                self.matchoutput(out, "%s,%s,%s,ut.ny.na,us,a,%s,%s\n" % (
-                    network.name, network.ip, network.netmask, network.nettype,
-                    network.comments or ""),
-                    command)
+                self.matchoutput(out, "%s,%s,%s,ut.ny.na,us,a,%s,%s\n" %
+                                 (network.name, network.ip, network.netmask,
+                                  network.nettype, network.comments or ""),
+                                 command)
             else:
                 self.matchclean(out, str(network.ip), command)
 

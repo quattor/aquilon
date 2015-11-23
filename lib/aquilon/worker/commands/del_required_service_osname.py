@@ -19,7 +19,7 @@
 from aquilon.exceptions_ import NotFoundException
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.commands.add_required_service_osname import \
-        CommandAddRequiredServiceOsname
+    CommandAddRequiredServiceOsname
 
 
 class CommandDelRequiredServiceOsname(CommandAddRequiredServiceOsname):

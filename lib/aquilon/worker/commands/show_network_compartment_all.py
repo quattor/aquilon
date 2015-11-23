@@ -16,7 +16,7 @@
 # limitations under the License.
 """Contains the logic for `aq show network_compartment --all`."""
 
-from sqlalchemy.orm import undefer, joinedload
+from sqlalchemy.orm import undefer
 
 from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import NetworkCompartment

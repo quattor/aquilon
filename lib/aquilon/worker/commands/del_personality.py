@@ -23,7 +23,6 @@ from aquilon.aqdb.model import (Personality, PersonalityStage, CompileableMixin,
                                 Cluster)
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.templates import Plenary, PlenaryCollection
-from aquilon.worker.locks import CompileKey
 
 
 class CommandDelPersonality(BrokerCommand):

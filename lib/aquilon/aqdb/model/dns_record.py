@@ -168,7 +168,7 @@ class DnsRecord(Base):
 
         if getattr(self, 'assignments', None):
             ifaces = ", ".join(sorted(addr.interface.qualified_name
-                                    for addr in self.assignments))
+                                      for addr in self.assignments))
             raise ArgumentError("{0} is already be used by the interfaces "
                                 "{1!s}. GRN should not be set but derived "
                                 "from the device.".format(self, ifaces))

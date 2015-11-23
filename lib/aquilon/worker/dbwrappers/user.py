@@ -64,10 +64,10 @@ class UserSync(object):
                 self.success.append(msg)
                 return 1
             except DatabaseError as err:
-                # err.message contains the name of the failed constraint, that's
+                # err contains the name of the failed constraint, that's
                 # enough to figure out what went wrong
-                self.logger.info("Failed: %s (%s)", msg, err.message.strip())
-                self.errors.append("%s (%s)" % (msg, err.message.strip()))
+                self.logger.info("Failed: %s (%s)", msg, err)
+                self.errors.append("%s (%s)" % (msg, err))
                 self.session.rollback()
                 return 0
             except Exception as err:

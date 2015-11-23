@@ -59,7 +59,7 @@ class CommandAddAlias(BrokerCommand):
                               owner_grn=dbgrn, comments=comments)
             session.add(db_record)
         except ValueError as err:
-            raise ArgumentError(err.message)
+            raise ArgumentError(err)
 
         session.flush()
 

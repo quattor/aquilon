@@ -17,6 +17,7 @@
 """List formatter."""
 
 from operator import attrgetter
+from six import string_types
 
 from sqlalchemy.orm.collections import InstrumentedList
 from sqlalchemy.orm.query import Query
@@ -80,7 +81,7 @@ ObjectFormatter.handlers[StringList] = StringListFormatter()
 
 class StringAttributeList(list):
     def __init__(self, items, attr):
-        if isinstance(attr, basestring):
+        if isinstance(attr, string_types):
             self.getter = attrgetter(attr)
         else:
             self.getter = attr

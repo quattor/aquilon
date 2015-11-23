@@ -24,7 +24,7 @@ if __name__ == "__main__":
     import utils
     utils.import_depends()
 
-import unittest2 as unittest
+import unittest
 from brokertest import TestBrokerCommand
 
 default_features = {
@@ -169,7 +169,6 @@ class TestAddFeature(TestBrokerCommand):
               Deactivation: reboot
               Template: features/post_host
             """, command)
-
 
     def test_105_verify_hw(self):
         command = ["show", "feature", "--feature", "bios_setup", "--type", "hardware"]

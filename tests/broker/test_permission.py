@@ -26,7 +26,7 @@ if __name__ == "__main__":
     import utils
     utils.import_depends()
 
-import unittest2 as unittest
+import unittest
 from brokertest import TestBrokerCommand
 
 
@@ -236,15 +236,14 @@ class TestPermission(TestBrokerCommand):
         self.demote_current_user()
 
     def test_autherror_200(self):
-        principal = "%s@%s" % (self.user, self.realm)
-
-        command = ["permission", "--role=aqd_admin", "--principal", principal]
+        command = ["permission", "--role=aqd_admin", "--principal", self.principal]
         err = self.unauthorizedtest(command, auth=True)
         message = self.config.get("broker", "authorization_error")
         self.matchoutput(err,
                          "Unauthorized access attempt by %s to permission on "
-                         "/principal/%s%%40%s/role/aqd_admin.  %s" %
-                         (principal, self.user, self.realm, message),
+                         "/principal/%s/role/aqd_admin.  %s" %
+                         (self.principal, self.principal.replace('@', '%40'),
+                          message),
                          command)
 
     def test_autherror_900(self):

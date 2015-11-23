@@ -19,6 +19,7 @@
 from sqlalchemy.orm import object_session, validates
 from aquilon.exceptions_ import ArgumentError
 
+
 class DnsRecordTargetMixin(object):
 
     @validates('target')
