@@ -32,55 +32,85 @@ default_features = {
         "pre_host": {
             "visibility": "public",
             "comments": "Some feature comments",
+            "activation": "reboot",
+            "deactivation": "reboot",
         },
         "pre_host_param": {
             "visibility": "public",
+            "activation": "reboot",
+            "deactivation": "reboot",
         },
         "post_host": {
             "visibility": "public",
             "post_personality": True,
+            "activation": "reboot",
+            "deactivation": "reboot",
         },
         "pre_host_no_params": {
             "visibility": "public",
             "comments": "Feature which will not have any parameters",
+            "activation": "reboot",
+            "deactivation": "reboot",
         },
         "myfeature": {
             "visibility": "public",
+            "activation": "reboot",
+            "deactivation": "reboot",
         },
         "hostfeature": {
             "visibility": "public",
             "post_personality": True,
+            "activation": "reboot",
+            "deactivation": "reboot",
         },
         "shinynew": {
             "visibility": "public",
+            "activation": "reboot",
+            "deactivation": "reboot",
         },
     },
     "hardware": {
         "bios_setup": {
             "visibility": "public",
+            "activation": "reboot",
+            "deactivation": "reboot",
         },
         "disable_ht": {
             "visibility": "owner_approved",
+            "activation": "reboot",
+            "deactivation": "reboot",
         },
         "hardwarefeature": {
             "visibility": "public",
+            "activation": "reboot",
+            "deactivation": "reboot",
         },
         "shinynew": {
             "visibility": "public",
+            "activation": "reboot",
+            "deactivation": "reboot",
         },
     },
     "interface": {
         "src_route": {
             "visibility": "owner_only",
+            "activation": "reboot",
+            "deactivation": "reboot",
         },
         "interfacefeature": {
             "visibility": "public",
+            "activation": "reboot",
+            "deactivation": "reboot",
         },
         "shinynew": {
             "visibility": "public",
+            "activation": "dispatch",
+            "deactivation": "rebuild",
         },
     },
 }
+
+default_activation = ["--activation", "reboot", "--deactivation", "reboot"]
 
 
 class TestAddFeature(TestBrokerCommand):
@@ -213,6 +243,7 @@ class TestAddFeature(TestBrokerCommand):
     def test_200_post_hw(self):
         command = ["add", "feature", "--feature", "post_hw",
                    "--eon_id", 2, "--type", "hardware", "--post_personality"]
+        command.extend(default_activation)
         out = self.unimplementederrortest(command)
         self.matchoutput(out, "The post_personality attribute is implemented "
                          "only for host features.", command)
@@ -220,6 +251,7 @@ class TestAddFeature(TestBrokerCommand):
     def test_200_post_iface(self):
         command = ["add", "feature", "--feature", "post_iface",
                    "--eon_id", 2, "--type", "interface", "--post_personality"]
+        command.extend(default_activation)
         out = self.unimplementederrortest(command)
         self.matchoutput(out, "The post_personality attribute is implemented "
                          "only for host features.", command)
@@ -227,6 +259,7 @@ class TestAddFeature(TestBrokerCommand):
     def test_200_hw_prefix(self):
         command = ["add", "feature", "--feature", "hardware/host",
                    "--eon_id", 2, "--type", "host"]
+        command.extend(default_activation)
         out = self.badrequesttest(command)
         self.matchoutput(out, "The 'hardware/' and 'interface/' prefixes "
                          "are not available for host features.", command)
@@ -234,6 +267,7 @@ class TestAddFeature(TestBrokerCommand):
     def test_200_iface_prefix(self):
         command = ["add", "feature", "--feature", "interface/host",
                    "--eon_id", 2, "--type", "host"]
+        command.extend(default_activation)
         out = self.badrequesttest(command)
         self.matchoutput(out, "The 'hardware/' and 'interface/' prefixes "
                          "are not available for host features.", command)
@@ -241,7 +275,9 @@ class TestAddFeature(TestBrokerCommand):
     def test_200_dotdot_begin(self):
         # Use os.path.join() to test the natural path separator of the platform
         path = os.path.join("..", "foo")
-        command = ["add", "feature", "--feature", path, "--type", "host", "--eon_id", 2]
+        command = ["add", "feature", "--feature", path, "--type", "host",
+                   "--eon_id", 2]
+        command.extend(default_activation)
         out = self.badrequesttest(command)
         self.matchoutput(out, "Path components in the feature name must not "
                          "start with a dot.", command)
@@ -249,19 +285,23 @@ class TestAddFeature(TestBrokerCommand):
     def test_200_dotdot_middle(self):
         # Use os.path.join() to test the natural path separator of the platform
         path = os.path.join("foo", "..", "bar")
-        command = ["add", "feature", "--feature", path, "--type", "host", "--eon_id", 2]
+        command = ["add", "feature", "--feature", path, "--type", "host",
+                   "--eon_id", 2]
+        command.extend(default_activation)
         out = self.badrequesttest(command)
         self.matchoutput(out, "Path components in the feature name must not "
                          "start with a dot.", command)
 
     def test_200_hidden_begin(self):
         command = ["add", "feature", "--feature", ".foo", "--type", "host", "--eon_id", 2]
+        command.extend(default_activation)
         out = self.badrequesttest(command)
         self.matchoutput(out, "Path components in the feature name must not "
                          "start with a dot.", command)
 
     def test_200_hidden_middle(self):
         command = ["add", "feature", "--feature", "foo/.bar", "--type", "host", "--eon_id", 2]
+        command.extend(default_activation)
         out = self.badrequesttest(command)
         self.matchoutput(out, "Path components in the feature name must not "
                          "start with a dot.", command)
@@ -303,12 +343,14 @@ class TestAddFeature(TestBrokerCommand):
 
     def test_230_add_again(self):
         command = ["add", "feature", "--feature", "pre_host", "--type", "host", "--eon_id", 2]
+        command.extend(default_activation)
         out = self.badrequesttest(command)
         self.matchoutput(out, "Host Feature pre_host already exists.", command)
 
     def test_240_add_bad_type(self):
         command = ["add", "feature", "--feature", "bad-type",
                    "--type", "no-such-type", "--eon_id", 2]
+        command.extend(default_activation)
         out = self.badrequesttest(command)
         self.matchoutput(out, "Unknown feature type 'no-such-type'. The "
                          "valid values are: hardware, host, interface.",
@@ -326,6 +368,7 @@ class TestAddFeature(TestBrokerCommand):
         command = ["add", "feature", "--feature", "bad_visibility",
                    "--eon_id", 2, "--type", "hardware",
                    "--visibility", "bad_visibility"]
+        command.extend(default_activation)
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "Unknown value for visibility. Valid values are: "
@@ -335,7 +378,9 @@ class TestAddFeature(TestBrokerCommand):
     def test_255_bad_activation(self):
         command = ["add", "feature", "--feature", "bad_visibility",
                    "--eon_id", 2, "--type", "hardware",
-                   "--visibility", "restricted", "--activation", "bad_activation"]
+                   "--visibility", "restricted",
+                   "--activation", "bad_activation",
+                   "--deactivation", "reboot"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "Unknown value for activation. Valid values are: "
@@ -345,7 +390,9 @@ class TestAddFeature(TestBrokerCommand):
     def test_260_bad_deactivation(self):
         command = ["add", "feature", "--feature", "bad_visibility",
                    "--eon_id", 2, "--type", "hardware",
-                   "--visibility", "restricted", "--deactivation", "bad_activation"]
+                   "--visibility", "restricted",
+                   "--activation", "reboot",
+                   "--deactivation", "bad_activation"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "Unknown value for deactivation. Valid values are: "

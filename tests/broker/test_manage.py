@@ -203,7 +203,8 @@ class TestManage(PersonalityTestMixin, TestBrokerCommand):
         self.create_personality("aquilon", "featuretest")
         self.noouttest(["add_feature", "--feature", "notemplate",
                         "--type", "host", "--eon_id", 2,
-                        "--visibility", "public"])
+                        "--visibility", "public",
+                        "--activation", "rebuild", "--deactivation", "reboot"])
         self.noouttest(["manage", "--hostname", "aquilon68.aqd-unittest.ms.com",
                         "--domain", "unittest", "--force"])
         self.statustest(["reconfigure", "--hostname", "aquilon68.aqd-unittest.ms.com",
