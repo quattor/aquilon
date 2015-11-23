@@ -313,6 +313,26 @@ class TestAddSrvRecord(TestBrokerCommand):
                          "GRN should not be set but derived from the device.",
                          command)
 
+    def test_600_add_tls_srvrec(self):
+        command = ["add", "srv", "record", "--service", "collab",
+                   "--protocol", "tls", "--dns_domain", "aqd-unittest.ms.com",
+                   "--target", "arecord14.aqd-unittest.ms.com",
+                   "--port", 8080, "--priority", 0, "--weight", 0]
+        self.noouttest(command)
+
+    def test_610_show_tls_srvrec(self):
+        command = ["show", "srv", "record", "--service", "collab",
+                   "--protocol", "tls", "--dns_domain", "aqd-unittest.ms.com"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "SRV Record: _collab._tls.aqd-unittest.ms.com",
+                         command)
+        self.matchoutput(out, "Service: collab", command)
+        self.matchoutput(out, "Protocol: tls", command)
+        self.matchoutput(out, "Priority: 0", command)
+        self.matchoutput(out, "Weight: 0", command)
+        self.matchoutput(out, "Target: arecord14.aqd-unittest.ms.com", command)
+        self.matchoutput(out, "Port: 8080", command)
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddSrvRecord)

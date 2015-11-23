@@ -29,7 +29,7 @@ from aquilon.aqdb.model import (DnsRecord, Fqdn, ARecord, AddressAlias,
 _TN = 'srv_record'
 _name_re = re.compile(r'_([^_.]+)\._([^_.]+)$')
 
-PROTOCOLS = ['tcp', 'udp']
+PROTOCOLS = ['tcp', 'udp', 'tls']
 
 
 class SrvRecord(DnsRecordTargetMixin, DnsRecord):
