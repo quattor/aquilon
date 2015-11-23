@@ -211,5 +211,7 @@ class PlenaryMachineInfo(StructurePlenary):
 
         if self.dbobj.uri:
             pan_assign(lines, "uri", self.dbobj.uri)
+        if self.dbobj.uuid:
+            pan_assign(lines, "uuid", self.dbobj.uuid)
 
 Plenary.handlers[Machine] = PlenaryMachineInfo

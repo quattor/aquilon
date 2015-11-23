@@ -261,6 +261,7 @@
 	    <option name="interface_bus_address" type="string">Interface at the given bus address</option>
 	    <option name="pg" type="string">port group of an attached interface</option>
 	    <option name="serial" type="string">serial number</option>
+	    <option name="uuid" type="uuid">Machine UUID</option>
 	    <option name="disk_name" type="string">Disk name</option>
 	    <option name="disk_size" type="int">Disk size</option>
 	    <option name="disk_controller" type="string">Disk controller</option>
@@ -3849,6 +3850,7 @@
 	    <option name="cpucount" type="int">cpu count</option>
 	    <option name="memory" type="int">memory in MB</option>
 	    <option name="serial" type="string">Serial number</option>
+	    <option name="uuid" type="uuid">Machine UUID</option>
 	    <option name="comments" type="string">Comments</option>
 	    <option name="uri" type="string">URI to point to a template describing the virtual appliance</option>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
@@ -3887,6 +3889,8 @@
 	    <option name="cpucount" type="int">cpu count</option>
 	    <option name="memory" type="int">memory in MB</option>
 	    <option name="serial" type="string">serial number</option>
+	    <option name="uuid" type="uuid">Machine UUID</option>
+	    <option name="clear_uuid" type="flag">Clear the machine UUID</option>
 	    <option name="clearchassis" type="boolean">remove chassis and slot information</option>
 	    <option name="multislot" type="boolean">use to record machine as taking multiple slots in a chassis</option>
 	    <option name="allow_metacluster_change" type="boolean">when changing clusters, allow the cluster to be in a different metacluster</option>

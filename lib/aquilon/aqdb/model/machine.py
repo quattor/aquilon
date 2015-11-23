@@ -19,6 +19,7 @@
 from sqlalchemy import Column, Integer, ForeignKey, String
 from sqlalchemy.orm import relation
 
+from aquilon.aqdb.column_types import GUID2
 from aquilon.aqdb.model import Model, HardwareEntity
 
 
@@ -40,9 +41,11 @@ class Machine(HardwareEntity):
 
     memory = Column(Integer, nullable=False, default=512)
 
-    cpu_model = relation(Model, innerjoin=True, foreign_keys=cpu_model_id)
+    uuid = Column(GUID2, nullable=True, unique=True)
 
     uri = Column(String(255), nullable=True)
+
+    cpu_model = relation(Model, innerjoin=True, foreign_keys=cpu_model_id)
 
     @property
     def cluster(self):

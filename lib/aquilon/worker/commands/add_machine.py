@@ -31,9 +31,9 @@ class CommandAddMachine(BrokerCommand):
 
     required_parameters = ["machine", "model"]
 
-    def render(self, session, logger, machine, model, vendor, serial, chassis,
-               slot, cpuname, cpuvendor, cpucount, memory, recipe, cluster,
-               metacluster, vmhost, uri, comments, **arguments):
+    def render(self, session, logger, machine, model, vendor, serial, uuid,
+               chassis, slot, cpuname, cpuvendor, cpucount, memory, recipe,
+               cluster, metacluster, vmhost, uri, comments, **arguments):
         dblocation = get_location(session,
                                   query_options=[subqueryload('parents'),
                                                  joinedload('parents.dns_maps')],
@@ -92,7 +92,7 @@ class CommandAddMachine(BrokerCommand):
                                    dblocation, dbmodel, cpuname=cpuname,
                                    cpuvendor=cpuvendor, cpucount=cpucount,
                                    memory=memory, uri=uri, serial=serial,
-                                   recipe=recipe, vmholder=vmholder,
+                                   uuid=uuid, recipe=recipe, vmholder=vmholder,
                                    comments=comments)
 
         if chassis:

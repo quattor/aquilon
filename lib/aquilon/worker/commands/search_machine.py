@@ -47,7 +47,7 @@ class CommandSearchMachine(BrokerCommand):
 
     def render(self, session, hostname, machine, cpuname, cpuvendor, cpucount,
                memory, cluster, metacluster, vmhost, share, disk_share,
-               disk_filesystem, chassis, slot, fullinfo, style, **arguments):
+               disk_filesystem, uuid, chassis, slot, fullinfo, style, **arguments):
         if share:
             self.deprecated_option("share", "Please use --disk_share instead.",
                                    **arguments)
@@ -71,6 +71,8 @@ class CommandSearchMachine(BrokerCommand):
             q = q.filter_by(cpu_quantity=cpucount)
         if memory is not None:
             q = q.filter_by(memory=memory)
+        if uuid is not None:
+            q = q.filter_by(uuid=uuid)
 
         if cluster:
             dbcluster = Cluster.get_unique(session, cluster, compel=True)

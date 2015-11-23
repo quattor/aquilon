@@ -176,10 +176,11 @@ class CommandUpdateMachine(BrokerCommand):
 
     required_parameters = ["machine"]
 
-    def render(self, session, logger, machine, model, vendor, serial, chassis,
-               slot, clearchassis, multislot, vmhost, cluster, metacluster,
-               allow_metacluster_change, cpuname, cpuvendor, cpucount,
-               memory, ip, autoip, uri, remap_disk, comments, **arguments):
+    def render(self, session, logger, machine, model, vendor, serial, uuid,
+               clear_uuid, chassis, slot, clearchassis, multislot, vmhost,
+               cluster, metacluster, allow_metacluster_change, cpuname,
+               cpuvendor, cpucount, memory, ip, autoip, uri, remap_disk,
+               comments, **arguments):
         dbmachine = Machine.get_unique(session, machine, compel=True)
         oldinfo = DSDBRunner.snapshot_hw(dbmachine)
         old_location = dbmachine.location
@@ -279,6 +280,11 @@ class CommandUpdateMachine(BrokerCommand):
             dbmachine.serial_no = serial
         if comments is not None:
             dbmachine.comments = comments
+
+        if uuid is not None:
+            dbmachine.uuid = uuid
+        elif clear_uuid:
+            dbmachine.uuid = None
 
         if uri and not dbmachine.model.model_type.isVirtualMachineType():
             raise ArgumentError("URI can be specified only for virtual "

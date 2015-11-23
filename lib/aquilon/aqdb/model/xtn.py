@@ -42,7 +42,7 @@ class Xtn(Base):
     """ auditing information from command invocations """
     __tablename__ = 'xtn'
 
-    xtn_id = Column(GUID(), primary_key=True)
+    xtn_id = Column(GUID, primary_key=True)
     username = Column(String(65), nullable=False, default='nobody')
     command = Column(String(64), nullable=False)
     # This column is *massively* redundant, but we're fully denormalized

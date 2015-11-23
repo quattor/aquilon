@@ -92,6 +92,9 @@ class MachineFormatter(HardwareEntityFormatter):
             if d.comments:
                 details.append(indent + "    Comments: %s" % d.comments)
 
+        if machine.uuid:
+            details.append(indent + "  UUID: %s" % machine.uuid)
+
         if machine.uri:
             details.append(indent + "  URI: %s" % machine.uri)
 
@@ -129,6 +132,10 @@ class MachineFormatter(HardwareEntityFormatter):
         skeleton.memory = machine.memory
         if machine.uri:
             skeleton.uri = machine.uri
+
+        # XXX Needs protocol support
+        #if machine.uuid:
+        #    skeleton.uuid = machine.uuid
 
         if indirect_attrs:
             for disk in sorted(machine.disks, key=attrgetter('device_name')):

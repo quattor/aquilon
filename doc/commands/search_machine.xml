@@ -50,6 +50,7 @@
 		<arg><option>--interface_bus_address <replaceable>URI</replaceable></option></arg>
 		<arg><option>--pg <replaceable>PG</replaceable></option></arg>
 		<arg><option>--serial <replaceable>SERIAL</replaceable></option></arg>
+		<arg><option>--uuid <replaceable>UUID</replaceable></option></arg>
 		<arg><option>--chassis <replaceable>FQDN</replaceable></option></arg>
 		<arg><option>--slot <replaceable>NUMBER</replaceable></option></arg>
 		<arg><option>--disk_name <replaceable>NAME</replaceable></option></arg>
@@ -134,7 +135,7 @@
 		</term>
 		<listitem>
 		    <para>
-			Look for hosts using a machine from the vendor <replaceable>NAME</replaceable>.
+			Look for machines from the vendor <replaceable>NAME</replaceable>.
 		    </para>
 		</listitem>
 	    </varlistentry>
@@ -144,7 +145,17 @@
 		</term>
 		<listitem>
 		    <para>
-			Look for hosts using a machine with the serial number <replaceable>SERIAL</replaceable>.
+			Look for a machine with the serial number <replaceable>SERIAL</replaceable>.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+		<term>
+		    <option>--uuid <replaceable>UUID</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Look for a machine with the UUID <replaceable>UUID</replaceable>.
 		    </para>
 		</listitem>
 	    </varlistentry>
@@ -244,9 +255,9 @@
 		</term>
 		<listitem>
 		    <para>
-			Return the full description of the host if the raw output format is used, rather than
-			just the host name. Note that using this option can be expensive if the number of matched
-			hosts is big.
+			Return the full description of the machine if the raw output format is used, rather than
+			just the name. Note that using this option can be expensive if the number of matched
+			objects is big.
 		    </para>
 		</listitem>
 	    </varlistentry>
