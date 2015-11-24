@@ -218,6 +218,8 @@ class TestAddFeature(TestBrokerCommand):
                 self.assertEqual(data.name, name)
                 self.assertEqual(data.type, feature_type)
                 self.assertEqual(data.owner_eonid, 2)
+                if "comments" in params:
+                    self.assertEqual(data.comments, params["comments"])
 
                 if "activation" in params:
                     val = self.activation_type.values_by_name[params["activation"].upper()]
@@ -445,6 +447,7 @@ class TestAddFeature(TestBrokerCommand):
         self.assertEqual(feature.visibility, feature.RESTRICTED)
         self.assertEqual(feature.activation, self.proto.DISPATCH)
         self.assertEqual(feature.deactivation, self.proto.REBUILD)
+        self.assertEqual(feature.comments, "New feature comments")
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddFeature)

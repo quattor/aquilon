@@ -65,6 +65,8 @@ class FeatureFormatter(ObjectFormatter):
         skeleton.type = str(feature.feature_type)
         skeleton.post_personality = feature.post_personality
         skeleton.owner_eonid = feature.owner_eon_id
+        if feature.comments:
+            skeleton.comments = feature.comments
         desc = skeleton.DESCRIPTOR
         skeleton.visibility = desc.enum_values_by_name[feature.visibility.upper()].number
         act_type = skeleton.DESCRIPTOR.fields_by_name['activation'].enum_type
