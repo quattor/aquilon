@@ -17,8 +17,7 @@
 """Contains the logic for `aq update building`."""
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import (HardwareEntity, ServiceMap,
-                                PersonalityServiceMap)
+from aquilon.aqdb.model import HardwareEntity, ServiceMap
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.location import get_location, update_location
 from aquilon.worker.processes import DSDBRunner
@@ -66,10 +65,7 @@ class CommandUpdateBuilding(BrokerCommand):
                                             dbbuilding.hub))
 
             # issue svcmap warnings
-            maps = 0
-            for map_type in [ServiceMap, PersonalityServiceMap]:
-                maps = maps + session.query(map_type).\
-                    filter_by(location=old_city).count()
+            maps = session.query(ServiceMap).filter_by(location=old_city).count()
 
             if maps:
                 logger.client_info("There are {0} service(s) mapped to the "

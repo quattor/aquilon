@@ -17,14 +17,24 @@
 """ServiceMap formatter."""
 
 from aquilon.worker.formats.formatters import ObjectFormatter
-from aquilon.aqdb.model import ServiceMap, PersonalityServiceMap
+from aquilon.aqdb.model import ServiceMap
 
 
 class ServiceMapFormatter(ObjectFormatter):
     def format_raw(self, sm, indent="", embedded=True, indirect_attrs=True):
-        return indent + \
-            "Archetype: aquilon Service: %s Instance: %s Map: %s" % (
-                sm.service.name, sm.service_instance.name, format(sm.mapped_to))
+        details = []
+        if sm.personality:
+            details.append("{0:c}: {0.name} {1:c}: {1.name}"
+                           .format(sm.personality.archetype, sm.personality))
+        else:
+            details.append("Archetype: aquilon")
+
+        details.append("{0:c}: {0.name} Instance: {1.name}"
+                       .format(sm.service_instance.service,
+                               sm.service_instance))
+        details.append("Map: {0}".format(sm.mapped_to))
+
+        return indent + " ".join(details)
 
     def fill_proto(self, service_map, skeleton, embedded=True,
                    indirect_attrs=True):
@@ -38,21 +48,10 @@ class ServiceMapFormatter(ObjectFormatter):
         self.redirect_proto(service_map.service_instance, skeleton.service,
                             indirect_attrs=False)
 
-        if hasattr(service_map, "personality"):
+        if service_map.personality:
             self.redirect_proto(service_map.personality, skeleton.personality,
                                 indirect_attrs=False)
         else:
             skeleton.personality.archetype.name = 'aquilon'
 
 ObjectFormatter.handlers[ServiceMap] = ServiceMapFormatter()
-
-
-class PersonalityServiceMapFormatter(ServiceMapFormatter):
-    def format_raw(self, sm, indent="", embedded=True, indirect_attrs=True):
-        return "%sArchetype: %s Personality: %s " \
-               "Service: %s Instance: %s Map: %s" % (
-                   indent, sm.personality.archetype.name, sm.personality.name,
-                   sm.service.name, sm.service_instance.name,
-                   format(sm.mapped_to))
-
-ObjectFormatter.handlers[PersonalityServiceMap] = PersonalityServiceMapFormatter()

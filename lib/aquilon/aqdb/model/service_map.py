@@ -22,10 +22,10 @@ from sqlalchemy import (Column, Integer, Sequence, DateTime, ForeignKey,
                         UniqueConstraint)
 from sqlalchemy.orm import relation, deferred, backref
 
-from aquilon.aqdb.model import Base, Location, ServiceInstance, Network
+from aquilon.aqdb.model import (Base, Location, ServiceInstance, Network,
+                                Personality)
 
 _TN = 'service_map'
-_ABV = 'svc_map'
 
 
 class ServiceMap(Base):
@@ -42,6 +42,9 @@ class ServiceMap(Base):
                                             ondelete='CASCADE'),
                                  nullable=False)
 
+    personality_id = Column(ForeignKey(Personality.id, ondelete='CASCADE'),
+                            nullable=True, index=True)
+
     location_id = Column(ForeignKey(Location.id, ondelete='CASCADE'),
                          nullable=True, index=True)
 
@@ -51,16 +54,17 @@ class ServiceMap(Base):
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
 
-    location = relation(Location)
     service_instance = relation(ServiceInstance, innerjoin=True,
                                 backref=backref('service_map',
                                                 cascade="all, delete-orphan",
                                                 passive_deletes=True))
+    personality = relation(Personality)
+    location = relation(Location)
     network = relation(Network)
 
-    __table_args__ = (UniqueConstraint(service_instance_id, location_id,
-                                       network_id,
-                                       name='%s_loc_net_inst_uk' % _ABV),)
+    __table_args__ = (UniqueConstraint(service_instance_id, personality_id,
+                                       location_id, network_id,
+                                       name='%s_uk' % _TN),)
 
     @property
     def service(self):

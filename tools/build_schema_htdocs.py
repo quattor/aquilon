@@ -124,7 +124,7 @@ model_group = {
         'classes': [Service, __PersonalityServiceListItem, __ServiceListItem,
                     __OSServiceListItem, ServiceInstance, __BuildItem,
                     ServiceInstanceServer, __ClusterServiceBinding,
-                    PersonalityServiceMap, ServiceMap],
+                    ServiceMap],
     },
     'dns': {
         'title': 'DNS',

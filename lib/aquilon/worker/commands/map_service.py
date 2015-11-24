@@ -18,8 +18,8 @@
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand
-from aquilon.aqdb.model import (Personality, ServiceMap, PersonalityServiceMap,
-                                ServiceInstance, NetworkEnvironment)
+from aquilon.aqdb.model import (Personality, ServiceMap, ServiceInstance,
+                                NetworkEnvironment)
 from aquilon.worker.dbwrappers.change_management import validate_prod_personality
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.dbwrappers.network import get_network_byip
@@ -46,6 +46,7 @@ class CommandMapService(BrokerCommand):
             raise ArgumentError("Specifying --personality requires you to "
                                 "also specify --archetype.")
 
+        query = session.query(ServiceMap)
         kwargs = {}
         if archetype and personality:
             dbpersona = Personality.get_unique(session, name=personality,
@@ -54,22 +55,17 @@ class CommandMapService(BrokerCommand):
             for dbstage in dbpersona.stages.values():
                 validate_prod_personality(dbstage, user, justification, reason)
 
-            map_class = PersonalityServiceMap
-            query = session.query(map_class).filter_by(personality=dbpersona)
+            query = query.filter_by(personality=dbpersona)
 
             kwargs["personality"] = dbpersona
-        else:
-            map_class = ServiceMap
-            query = session.query(map_class)
 
         dbmap = query.filter_by(location=dblocation,
                                 service_instance=dbinstance,
                                 network=dbnetwork).first()
 
         if not dbmap:
-            dbmap = map_class(service_instance=dbinstance,
-                              location=dblocation,
-                              network=dbnetwork, **kwargs)
+            dbmap = ServiceMap(service_instance=dbinstance, location=dblocation,
+                               network=dbnetwork, **kwargs)
 
         session.add(dbmap)
         session.flush()

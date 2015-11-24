@@ -17,9 +17,8 @@
 
 from collections import defaultdict
 
-from aquilon.aqdb.model import (Parameter, Personality,
-                                PersonalityServiceMap)
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.aqdb.model import Parameter, Personality, ServiceMap
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.formats.parameter import DiffData
 
 
@@ -70,7 +69,7 @@ class CommandShowDiff(BrokerCommand):
         ret["Required Services"][dtype] = services
 
         # service maps
-        q = session.query(PersonalityServiceMap).filter_by(personality=dbpersona)
+        q = session.query(ServiceMap).filter_by(personality=dbpersona)
 
         smaps = dict(("{0} {1}".format(sm.service_instance, sm.location), True) for sm in q.all())
 

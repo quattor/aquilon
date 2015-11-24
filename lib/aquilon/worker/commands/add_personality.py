@@ -21,8 +21,7 @@ from six.moves.configparser import NoSectionError, NoOptionError  # pylint: disa
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import (Archetype, Personality, PersonalityStage,
-                                PersonalityGrnMap, HostEnvironment,
-                                PersonalityServiceMap)
+                                PersonalityGrnMap, HostEnvironment, ServiceMap)
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.grn import lookup_grn
 from aquilon.worker.templates import Plenary, PlenaryCollection
@@ -111,13 +110,13 @@ class CommandAddPersonality(BrokerCommand):
             dbstage = dbfrom_vers.copy(name=initial_stage)
             dbpersona.stages[initial_stage] = dbstage
 
-            q = session.query(PersonalityServiceMap)
+            q = session.query(ServiceMap)
             q = q.filter_by(personality=dbfrom_persona)
             for src_map in q:
-                dst_map = PersonalityServiceMap(service_instance=src_map.service_instance,
-                                                location=src_map.location,
-                                                network=src_map.network,
-                                                personality=dbpersona)
+                dst_map = ServiceMap(service_instance=src_map.service_instance,
+                                     location=src_map.location,
+                                     network=src_map.network,
+                                     personality=dbpersona)
                 session.add(dst_map)
 
             # TODO: should we copy root users and netgroups? Not doing so is

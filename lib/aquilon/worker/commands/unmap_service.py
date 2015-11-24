@@ -18,7 +18,7 @@
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand
-from aquilon.aqdb.model import (ServiceMap, PersonalityServiceMap, Service,
+from aquilon.aqdb.model import (ServiceMap, ServiceMap, Service,
                                 ServiceInstance, Archetype, Personality,
                                 NetworkEnvironment)
 from aquilon.worker.dbwrappers.change_management import validate_prod_personality
@@ -43,6 +43,8 @@ class CommandUnmapService(BrokerCommand):
         else:
             dbnetwork = None
 
+        q = session.query(ServiceMap)
+
         if personality:
             if not archetype:
                 # Can't get here with the standard aq client.
@@ -58,10 +60,7 @@ class CommandUnmapService(BrokerCommand):
             for dbstage in dbpersonality.stages.values():
                 validate_prod_personality(dbstage, user, justification, reason)
 
-            q = session.query(PersonalityServiceMap)
             q = q.filter_by(personality=dbpersonality)
-        else:
-            q = session.query(ServiceMap)
 
         q = q.filter_by(location=dblocation, service_instance=dbinstance,
                         network=dbnetwork)

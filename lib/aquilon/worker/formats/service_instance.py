@@ -59,14 +59,15 @@ class ServiceInstanceFormatter(ObjectFormatter):
         for srv in si.servers:
             details.append(self.redirect_raw(srv, indent + "  "))
         for map in si.service_map:
-            details.append(indent + "  Service Map: {0}".format(map.mapped_to))
-        for pmap in si.personality_service_map:
-            details.append(indent +
-                           "  Personality Service Map: %s "
-                           "(Archetype %s Personality %s)" %
-                           (format(pmap.mapped_to),
-                            pmap.personality.archetype.name,
-                            pmap.personality.name))
+            if map.personality:
+                details.append(indent +
+                               "  Service Map: %s "
+                               "(Archetype: %s, Personality: %s)" %
+                               (format(map.mapped_to),
+                                map.personality.archetype.name,
+                                map.personality.name))
+            else:
+                details.append(indent + "  Service Map: {0}".format(map.mapped_to))
         details.append(indent + "  Maximum Client Count: %s" %
                        ServiceInstanceFormatter.get_max_client_count(si))
         details.append(indent + "  Client Count: %d" % si.client_count)

@@ -22,7 +22,7 @@ from sqlalchemy.orm.attributes import set_committed_value
 from aquilon.exceptions_ import NotFoundException
 from aquilon.aqdb.model import (Archetype, Personality, Service,
                                 ServiceInstance, ServiceMap,
-                                PersonalityServiceMap, NetworkEnvironment)
+                                NetworkEnvironment)
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.dbwrappers.network import get_network_byip
@@ -66,79 +66,68 @@ class CommandShowMap(BrokerCommand):
         else:
             dbnetwork = None
 
-        queries = []
+        q = session.query(ServiceMap)
         # The current logic basically shoots for exact match when given
         # (like exact personality maps only or exact archetype maps
         # only), or "any" if an exact spec isn't given.
         if personality:
             # Alternately, this could throw an error and ask for archetype.
-            q = session.query(PersonalityServiceMap)
             q = q.filter_by(personality=dbpersonality)
-            queries.append(q)
         elif archetype:
             # Alternately, this could throw an error and ask for personality.
-            q = session.query(PersonalityServiceMap)
             PersAlias = aliased(Personality)
             q = q.join(PersAlias)
             q = q.filter_by(archetype=dbarchetype)
             q = q.options(contains_eager('personality', alias=PersAlias))
             q = q.reset_joinpoint()
-            queries.append(q)
         else:
-            queries.append(session.query(ServiceMap))
-            q = session.query(PersonalityServiceMap)
             q = q.options(subqueryload('personality'))
-            queries.append(q)
 
         results = []
 
-        # Now apply the other criteria to the queries
-        for q in queries:
+        # Now apply the other criteria to the query
+        if dbinstance:
+            q = q.filter_by(service_instance=dbinstance)
+        elif dbservice:
+            SIAlias = aliased(ServiceInstance)
+            q = q.join(SIAlias)
+            q = q.filter_by(service=dbservice)
+            q = q.options(contains_eager('service_instance', alias=SIAlias))
+            q = q.reset_joinpoint()
+        else:
+            q = q.options(subqueryload('service_instance'))
+
+        # Nothing fancy for now - just show any relevant explicit bindings.
+        if dblocation:
+            if include_parents:
+                base_cls = q.column_descriptions[0]["expr"]
+                col = base_cls.location_id
+                q = q.filter(col.in_(dblocation.parent_ids()))
+            else:
+                q = q.filter_by(location=dblocation)
+        else:
+            q = q.options(joinedload("location"))
+
+        if dbnetwork:
+            q = q.filter_by(network=dbnetwork)
+        else:
+            q = q.options(joinedload("network"))
+
+        # Populate properties we already know
+        for entry in q:
             if dbinstance:
-                q = q.filter_by(service_instance=dbinstance)
-            elif dbservice:
-                SIAlias = aliased(ServiceInstance)
-                q = q.join(SIAlias)
-                q = q.filter_by(service=dbservice)
-                q = q.options(contains_eager('service_instance', alias=SIAlias))
-                q = q.reset_joinpoint()
-            else:
-                q = q.options(subqueryload('service_instance'))
-
-            # Nothing fancy for now - just show any relevant explicit bindings.
-            if dblocation:
-                if include_parents:
-                    base_cls = q.column_descriptions[0]["expr"]
-                    col = base_cls.location_id
-                    q = q.filter(col.in_(dblocation.parent_ids()))
-                else:
-                    q = q.filter_by(location=dblocation)
-            else:
-                q = q.options(joinedload("location"))
-
+                set_committed_value(entry, 'service_instance', dbinstance)
+            if dblocation and not include_parents:
+                set_committed_value(entry, 'location', dblocation)
+            if dbpersonality:
+                set_committed_value(entry, 'personality', dbpersonality)
             if dbnetwork:
-                q = q.filter_by(network=dbnetwork)
-            else:
-                q = q.options(joinedload("network"))
+                set_committed_value(entry, 'network', dbnetwork)
 
-            # Populate properties we already know
-            for entry in q:
-                if dbinstance:
-                    set_committed_value(entry, 'service_instance', dbinstance)
-                if dblocation and not include_parents:
-                    set_committed_value(entry, 'location', dblocation)
-                if dbpersonality:
-                    set_committed_value(entry, 'personality', dbpersonality)
-                if dbnetwork:
-                    set_committed_value(entry, 'network', dbnetwork)
-
-                results.append(entry)
+            results.append(entry)
 
         if service and instance and dblocation:
-            # This should be an exact match.  (Personality doesn't
-            # matter... either it was given and it should be an
-            # exact match for PersonalityServiceMap or it wasn't
-            # and this should be an exact match for ServiceMap.)
+            # This should be an exact match.
             if not results:
                 raise NotFoundException("No matching map found.")
         return results

@@ -39,9 +39,6 @@ class CommandShowServiceAll(BrokerCommand):
                       subqueryload('instances.service_map'),
                       joinedload('instances.service_map.location'),
                       joinedload('instances.service_map.network'),
-                      subqueryload('instances.personality_service_map'),
-                      joinedload('instances.personality_service_map.personality'),
-                      joinedload('instances.personality_service_map.location'),
-                      joinedload('instances.personality_service_map.network'))
+                      joinedload('instances.service_map.personality'))
         q = q.order_by(Service.name, ServiceInstance.name)
         return q.all()

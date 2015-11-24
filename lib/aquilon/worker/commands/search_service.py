@@ -150,10 +150,7 @@ class CommandSearchService(BrokerCommand):
                           subqueryload('service_map'),
                           joinedload('service_map.location'),
                           joinedload('service_map.network'),
-                          subqueryload('personality_service_map'),
-                          joinedload('personality_service_map.personality'),
-                          joinedload('personality_service_map.location'),
-                          joinedload('personality_service_map.network'))
+                          joinedload('service_map.personality'))
             return q.all()
         else:
             return StringAttributeList(q.all(), "qualified_name")

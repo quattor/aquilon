@@ -57,8 +57,6 @@ class CommandShowService(BrokerCommand):
                       joinedload('servers.host'),
                       joinedload('servers.host.hardware_entity'),
                       subqueryload('service_map'),
-                      joinedload('service_map.location'),
-                      subqueryload('personality_service_map'),
-                      joinedload('personality_service_map.location'))
+                      joinedload('service_map.location'))
         q = q.order_by(Service.name, ServiceInstance.name)
         return q.all()

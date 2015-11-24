@@ -55,7 +55,6 @@ _table_abbrev = {
     'personality_rootuser': 'pers_rootuser',
     'personality_rootnetgroup': 'pers_rootng',
     'personality_service_list_item': 'psli',
-    'personality_service_map': 'pers_svc_map',
     'personality_stage': 'pers_st',
     'reboot_intervention': 'reboot_iv',
     'service': 'svc',

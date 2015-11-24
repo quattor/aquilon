@@ -151,7 +151,7 @@ class ServiceInstance(Base):
         # Can't import these on init as ServiceInstance is a dependency.
         # Could think about moving this method definition out to one of
         # these classes.
-        from aquilon.aqdb.model import ServiceMap, PersonalityServiceMap
+        from aquilon.aqdb.model import ServiceMap
 
         session = object_session(dblocation)
 
@@ -172,11 +172,18 @@ class ServiceInstance(Base):
         instance_cache = {}
         instance_priority = defaultdict(lambda: maxsize)
 
-        search_maps = []
+        queries = []
+
         if dbpersonality:
-            search_maps.append(PersonalityServiceMap)
-        search_maps.append(ServiceMap)
-        for map_type in search_maps:
+            q = session.query(ServiceMap.location_id, ServiceInstance)
+            q = q.filter(ServiceMap.personality == dbpersonality)
+            queries.append(q)
+
+        q = session.query(ServiceMap.location_id, ServiceInstance)
+        q = q.filter(ServiceMap.personality == None)
+        queries.append(q)
+
+        for q in queries:
             # search only for missing ids
             missing_ids = [dbservice.id for dbservice in dbservices
                            if dbservice not in instance_cache]
@@ -187,20 +194,17 @@ class ServiceInstance(Base):
                 continue
 
             # get map by locations
-            q = session.query(map_type.location_id, ServiceInstance)
-            q = q.filter(map_type.service_instance_id == ServiceInstance.id)
-            if map_type == PersonalityServiceMap:
-                q = q.filter_by(personality=dbpersonality)
+            q = q.filter(ServiceMap.service_instance_id == ServiceInstance.id)
             q = q.filter(ServiceInstance.service_id.in_(missing_ids))
             q = q.options(defer(ServiceInstance.comments),
                           undefer(ServiceInstance._client_count),
                           lazyload(ServiceInstance.service))
 
             if dbnetwork:
-                q = q.filter(or_(map_type.location_id.in_(location_ids),
-                                 map_type.network_id == dbnetwork.id))
+                q = q.filter(or_(ServiceMap.location_id.in_(location_ids),
+                                 ServiceMap.network_id == dbnetwork.id))
             else:
-                q = q.filter(map_type.location_id.in_(location_ids))
+                q = q.filter(ServiceMap.location_id.in_(location_ids))
 
             for location_id, si in q:
                 priority = loc_priorities[location_id]
