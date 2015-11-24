@@ -124,6 +124,21 @@ class TestAddAddress(TestBrokerCommand):
                          "[Result: ip=%s]" % self.net["unknown0"].usable[15],
                          command)
 
+    def test_330_add_name_with_digit_prefix(self):
+        fqdn = "1record42.aqd-unittest.ms.com"
+        ip = self.net["unknown0"].usable[42]
+        dns_env = "external"
+        command = ["add_address", "--ip", ip, "--fqdn", fqdn,
+                   "--dns_environment", dns_env]
+        self.noouttest(command)
+
+        command = ["show_address", "--fqdn", fqdn,
+                   "--dns_environment", dns_env]
+        out = self.commandtest(command)
+        self.matchoutput(out, "DNS Record: %s" % fqdn, command)
+        self.matchoutput(out, "IP: %s" % ip, command)
+        self.matchclean(out, "Reverse", command)
+
     def test_400_dsdbfailure(self):
         self.dsdb_expect_add("arecord16.aqd-unittest.ms.com",
                              self.net["unknown0"].usable[16], fail=True)

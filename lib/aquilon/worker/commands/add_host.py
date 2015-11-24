@@ -19,6 +19,7 @@
 from aquilon.exceptions_ import ArgumentError, ProcessException
 from aquilon.aqdb.model import (Machine, ServiceAddress, HostResource,
                                 Archetype)
+from aquilon.utils import validate_nlist_key
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.dns import grab_address
 from aquilon.worker.dbwrappers.interface import (generate_ip, assign_address,
@@ -68,6 +69,8 @@ class CommandAddHost(BrokerCommand):
                 raise ArgumentError("Having IP addresses assigned before "
                                     "the host object is created is not "
                                     "supported for Aurora hosts.")
+
+        validate_nlist_key('hostname', hostname)
 
         dsdb_runner = DSDBRunner(logger=logger)
         if dbarchetype.name == 'aurora':

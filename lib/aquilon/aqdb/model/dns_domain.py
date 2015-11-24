@@ -56,8 +56,9 @@ class DnsDomain(Base):
     __tablename__ = _TN
     _class_label = 'DNS Domain'
 
-    # RFC 1035
-    _name_check = re.compile('^[a-zA-Z]([-a-zA-Z0-9]*[a-zA-Z0-9])?$')
+    # RFC 1035, but loosing the restrction to allow the first character
+    # to be digits.
+    _name_check = re.compile('^[a-zA-Z0-9]([-a-zA-Z0-9]*[a-zA-Z0-9])?$')
 
     id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
     name = Column(AqStr(64), nullable=False, unique=True)
