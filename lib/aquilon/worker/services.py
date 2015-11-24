@@ -220,7 +220,8 @@ class Chooser(object):
 
     def cache_service_maps(self, dbservices):
         self.service_maps = ServiceInstance.get_mapped_instance_cache(
-            self.dbobj.personality_stage, self.location, dbservices, self.network)
+            dbservices, self.dbobj.personality_stage.personality, self.location,
+            self.network)
 
     def find_service_instances(self, dbservice):
         """This finds the "closest" service instances, based on the known maps.

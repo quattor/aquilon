@@ -145,7 +145,7 @@ class ServiceInstance(Base):
         return self.service.max_clients
 
     @classmethod
-    def get_mapped_instance_cache(cls, dbstage, dblocation, dbservices,
+    def get_mapped_instance_cache(cls, dbservices, dbpersonality, dblocation,
                                   dbnetwork=None):
         """Returns dict of requested services to closest mapped instances."""
         # Can't import these on init as ServiceInstance is a dependency.
@@ -173,7 +173,7 @@ class ServiceInstance(Base):
         instance_priority = defaultdict(lambda: maxsize)
 
         search_maps = []
-        if dbstage:
+        if dbpersonality:
             search_maps.append(PersonalityServiceMap)
         search_maps.append(ServiceMap)
         for map_type in search_maps:
@@ -190,7 +190,7 @@ class ServiceInstance(Base):
             q = session.query(map_type.location_id, ServiceInstance)
             q = q.filter(map_type.service_instance_id == ServiceInstance.id)
             if map_type == PersonalityServiceMap:
-                q = q.filter_by(personality=dbstage.personality)
+                q = q.filter_by(personality=dbpersonality)
             q = q.filter(ServiceInstance.service_id.in_(missing_ids))
             q = q.options(defer(ServiceInstance.comments),
                           undefer(ServiceInstance._client_count),
