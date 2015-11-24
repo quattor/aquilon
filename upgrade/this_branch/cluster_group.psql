@@ -1,6 +1,6 @@
 CREATE TABLE cluster_group (
 	id INTEGER NOT NULL,
-	creation_date DATE NOT NULL,
+	creation_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
 	CONSTRAINT cluster_group_pk PRIMARY KEY (id)
 );
 
