@@ -23,20 +23,54 @@ from sys import maxsize
 from sqlalchemy import (Column, Integer, Sequence, DateTime, ForeignKey,
                         UniqueConstraint)
 from sqlalchemy.orm import (relation, deferred, backref, defer, undefer,
-                            lazyload, object_session)
-from sqlalchemy.sql import or_
+                            lazyload, contains_eager, object_session)
+from sqlalchemy.sql import or_, null
 
-from aquilon.aqdb.model import (Base, Location, ServiceInstance, Network,
-                                Personality)
+from aquilon.exceptions_ import InternalError
+from aquilon.aqdb.model import (Base, Location, Desk, Rack, Room, Bunker,
+                                Building, City, Campus, Country, Continent, Hub,
+                                Company, ServiceInstance, Network, Personality)
 
 _TN = 'service_map'
+
+# TODO: We could calculate this map by building a graph of Location subclasses
+# using Location.valid_parents as edges, and then doing a topological sort
+# NOTE: The actual values here are unimportant, what matters is their order
+_LOCATION_PRIORITY = {
+    # Rack and Desk are at the same level
+    Rack: 1000,
+    Desk: 1000,
+    Room: 1100,
+    Bunker: 1200,
+    Building: 1300,
+    City: 1400,
+    Campus: 1500,
+    Country: 1600,
+    Continent: 1700,
+    Hub: 1800,
+    Company: 1900,
+}
+
+# NOTE: The actual value here is unimportant, what matters is the order wrt.
+# location-based priorities
+_NETWORK_PRIORITY = 100
+
+# NOTE: The actual values here are unimportant, only their order matters
+_TARGET_PERSONALITY = 100
+_TARGET_GLOBAL = 1000
 
 
 class ServiceMap(Base):
     """ Service Map: mapping a service_instance to a location.
         The rows in this table assert that an instance is a valid useable
         default that clients can choose as their provider during service
-        autoconfiguration. """
+        autoconfiguration.
+
+        The contained information is actually a triplet:
+            - The service instance to use,
+            - Rules for the scope where the map is valid,
+            - Rules for which objects does the map apply.
+    """
 
     __tablename__ = _TN
 
@@ -75,13 +109,33 @@ class ServiceMap(Base):
         return self.service_instance.service
 
     @property
-    def mapped_to(self):
-        if self.location:
-            mapped_to = self.location
+    def scope_priority(self):
+        if self.network:
+            return _NETWORK_PRIORITY
         else:
-            mapped_to = self.network
+            try:
+                return _LOCATION_PRIORITY[type(self.location)]
+            except KeyError:  # pragma: no cover
+                raise InternalError("The service map is not prepared to handle "
+                                    "location class %r" % type(self.location))
 
-        return mapped_to
+    @property
+    def object_priority(self):
+        if self.personality:
+            return _TARGET_PERSONALITY
+        else:
+            return _TARGET_GLOBAL
+
+    @property
+    def priority(self):
+        return (self.object_priority, self.scope_priority)
+
+    @property
+    def scope(self):
+        if self.location:
+            return self.location
+        else:
+            return self.network
 
     def __init__(self, network=None, location=None, **kwargs):
         super(ServiceMap, self).__init__(network=network, location=location,
@@ -103,63 +157,42 @@ class ServiceMap(Base):
 
         location_ids = [loc.id for loc in dblocation.parents]
         location_ids.append(dblocation.id)
-        location_ids.reverse()
 
-        # Calculate the priority of services mapped to a given location. We'll
-        # pick the instance mapped at the location of lowest priority
-        loc_priorities = {}
-        for idx, loc_id in enumerate(location_ids):
-            loc_priorities[loc_id] = idx
+        q = session.query(ServiceMap)
 
-        # Prefer network-based maps over location-based maps
-        loc_priorities[None] = -1
-
-        # Use maxsize as priority to mark empty slots
-        instance_cache = {}
-        instance_priority = defaultdict(lambda: maxsize)
-
-        queries = []
-
+        # Rules for filtering by target object
         if dbpersonality:
-            q = session.query(ServiceMap.location_id, ServiceInstance)
-            q = q.filter(ServiceMap.personality == dbpersonality)
-            queries.append(q)
+            q = q.filter(or_(ServiceMap.personality_id == null(),
+                             ServiceMap.personality_id == dbpersonality.id))
+        else:
+            q = q.filter_by(personality=None)
 
-        q = session.query(ServiceMap.location_id, ServiceInstance)
-        q = q.filter(ServiceMap.personality == None)
-        queries.append(q)
+        # Rules for filtering by location/scope
+        if dbnetwork:
+            q = q.filter(or_(ServiceMap.location_id.in_(location_ids),
+                             ServiceMap.network_id == dbnetwork.id))
+        else:
+            q = q.filter(ServiceMap.location_id.in_(location_ids))
 
-        for q in queries:
-            # search only for missing ids
-            missing_ids = [dbservice.id for dbservice in dbservices
-                           if dbservice not in instance_cache]
+        q = q.join(ServiceInstance)
+        q = q.filter(ServiceInstance.service_id.in_(srv.id for srv in dbservices))
+        q = q.options(contains_eager('service_instance'),
+                      defer('service_instance.comments'),
+                      undefer('service_instance._client_count'),
+                      lazyload('service_instance.service'))
 
-            # An empty "WHERE ... IN (...)" clause might be expensive to
-            # evaluate even if it returns nothing, so avoid doing that.
-            if not missing_ids:
-                continue
+        instance_cache = {}
+        instance_priority = defaultdict(lambda: (maxsize,))
 
-            # get map by locations
-            q = q.filter(ServiceMap.service_instance_id == ServiceInstance.id)
-            q = q.filter(ServiceInstance.service_id.in_(missing_ids))
-            q = q.options(defer(ServiceInstance.comments),
-                          undefer(ServiceInstance._client_count),
-                          lazyload(ServiceInstance.service))
+        # For every service, we want the instance(s) with the lowest priority
+        for map in q:
+            si = map.service_instance
+            service = si.service
 
-            if dbnetwork:
-                q = q.filter(or_(ServiceMap.location_id.in_(location_ids),
-                                 ServiceMap.network_id == dbnetwork.id))
-            else:
-                q = q.filter(ServiceMap.location_id.in_(location_ids))
-
-            for location_id, si in q:
-                priority = loc_priorities[location_id]
-                service = si.service
-
-                if instance_priority[service] > priority:
-                    instance_cache[service] = [si]
-                    instance_priority[service] = priority
-                elif instance_priority[service] == priority:
-                    instance_cache[service].append(si)
+            if instance_priority[service] > map.priority:
+                instance_cache[service] = [si]
+                instance_priority[service] = map.priority
+            elif instance_priority[service] == map.priority:
+                instance_cache[service].append(si)
 
         return instance_cache

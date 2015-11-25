@@ -63,11 +63,11 @@ class ServiceInstanceFormatter(ObjectFormatter):
                 details.append(indent +
                                "  Service Map: %s "
                                "(Archetype: %s, Personality: %s)" %
-                               (format(map.mapped_to),
+                               (format(map.scope),
                                 map.personality.archetype.name,
                                 map.personality.name))
             else:
-                details.append(indent + "  Service Map: {0}".format(map.mapped_to))
+                details.append(indent + "  Service Map: {0}".format(map.scope))
         details.append(indent + "  Maximum Client Count: %s" %
                        ServiceInstanceFormatter.get_max_client_count(si))
         details.append(indent + "  Client Count: %d" % si.client_count)

@@ -30,7 +30,7 @@ class ServiceMapFormatter(ObjectFormatter):
         details.append("{0:c}: {0.name} Instance: {1.name}"
                        .format(sm.service_instance.service,
                                sm.service_instance))
-        details.append("Map: {0}".format(sm.mapped_to))
+        details.append("Map: {0}".format(sm.scope))
 
         return indent + " ".join(details)
 
