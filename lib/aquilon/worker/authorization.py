@@ -261,6 +261,7 @@ class AuthorizationBroker(object):
         if dbuser.role.name == 'laf':
             if action not in ['reconfigure', 'reconfigure_list',
                               'reconfigure_membersof',
+                              'pxeswitch', 'pxeswitch_list',
                               'add_reboot_intervention',
                               'compile', 'compile_hostname',
                               'compile_personality',
