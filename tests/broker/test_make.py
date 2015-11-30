@@ -56,8 +56,7 @@ class TestMake(TestBrokerCommand):
                    "--networkip=%s" % ip]
         out = self.commandtest(command)
         self.matchoutput(out,
-                         "Archetype: aquilon Service: afs "
-                         "Instance: afs-by-net Map: Network netsvcmap",
+                         "Service: afs Instance: afs-by-net Map: Network netsvcmap",
                          command)
 
     def testmakeafsbynet_3_verifymapservice_proto(self):

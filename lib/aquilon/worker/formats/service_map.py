@@ -26,8 +26,6 @@ class ServiceMapFormatter(ObjectFormatter):
         if sm.personality:
             details.append("{0:c}: {0.name} {1:c}: {1.name}"
                            .format(sm.personality.archetype, sm.personality))
-        else:
-            details.append("Archetype: aquilon")
 
         details.append("{0:c}: {0.name} Instance: {1.name}"
                        .format(sm.service_instance.service,
@@ -51,7 +49,5 @@ class ServiceMapFormatter(ObjectFormatter):
         if service_map.personality:
             self.redirect_proto(service_map.personality, skeleton.personality,
                                 indirect_attrs=False)
-        else:
-            skeleton.personality.archetype.name = 'aquilon'
 
 ObjectFormatter.handlers[ServiceMap] = ServiceMapFormatter()

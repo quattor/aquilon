@@ -100,7 +100,7 @@ class TestMapService(TestBrokerCommand):
 
     def test_105_verify_defaults(self):
         command = ["show_map", "--all"]
-        mapstr = "Archetype: aquilon Service: %s Instance: %s Map: %s %s"
+        mapstr = "Service: %s Instance: %s Map: %s %s"
         out = self.commandtest(command)
         for service, maps in default_maps.items():
             for instance, locations in maps.items():
@@ -115,16 +115,14 @@ class TestMapService(TestBrokerCommand):
         command = "show map --service afs --instance q.ny.ms.com --building ut"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
-                         "Archetype: aquilon Service: afs "
-                         "Instance: q.ny.ms.com Map: Building ut",
+                         "Service: afs Instance: q.ny.ms.com Map: Building ut",
                          command)
 
     def test_105_verify_dns_ut(self):
         command = ["show", "map", "--building", "ut", "--service", "dns"]
         out = self.commandtest(command)
         self.matchoutput(out,
-                         "Archetype: aquilon Service: dns "
-                         "Instance: unittest Map: Building ut",
+                         "Service: dns Instance: unittest Map: Building ut",
                          command)
         self.matchclean(out, "cards", command)
         self.matchclean(out, "one-nyp", command)
@@ -133,12 +131,10 @@ class TestMapService(TestBrokerCommand):
         command = ["show", "map", "--service", "dns", "--instance", "unittest"]
         out = self.commandtest(command)
         self.matchoutput(out,
-                         "Archetype: aquilon Service: dns "
-                         "Instance: unittest Map: Building ut",
+                         "Service: dns Instance: unittest Map: Building ut",
                          command)
         self.matchoutput(out,
-                         "Archetype: aquilon Service: dns "
-                         "Instance: unittest Map: Building cards",
+                         "Service: dns Instance: unittest Map: Building cards",
                          command)
         self.matchclean(out, "one-nyp", command)
 
@@ -147,12 +143,10 @@ class TestMapService(TestBrokerCommand):
                    "--instance", "unittest"]
         out = self.commandtest(command)
         self.matchoutput(out,
-                         "Archetype: aquilon Service: bootserver "
-                         "Instance: unittest Map: Building ut",
+                         "Service: bootserver Instance: unittest Map: Building ut",
                          command)
         self.matchoutput(out,
-                         "Archetype: aquilon Service: bootserver "
-                         "Instance: unittest Map: Building cards",
+                         "Service: bootserver Instance: unittest Map: Building cards",
                          command)
         self.matchclean(out, "Building np", command)
 
@@ -175,25 +169,20 @@ class TestMapService(TestBrokerCommand):
         command = "show map --service utsvc"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
-                         "Archetype: aquilon Service: utsvc "
-                         "Instance: utsi1 Map: Building ut",
+                         "Service: utsvc Instance: utsi1 Map: Building ut",
                          command)
         self.matchoutput(out,
-                         "Archetype: aquilon Service: utsvc "
-                         "Instance: utsi1 Map: Building cards",
+                         "Service: utsvc Instance: utsi1 Map: Building cards",
                          command)
         self.matchoutput(out,
-                         "Archetype: aquilon Service: utsvc "
-                         "Instance: utsi2 Map: Building ut",
+                         "Service: utsvc Instance: utsi2 Map: Building ut",
                          command)
         self.matchoutput(out,
-                         "Archetype: aquilon Service: utsvc "
-                         "Instance: utsi1 Map: Building np",
+                         "Service: utsvc Instance: utsi1 Map: Building np",
                          command)
         # See testmaputsi2
         # self.matchoutput(out,
-        #                 "Archetype: aquilon Service: utsvc "
-        #                 "Instance: utsi2 Map: Building np",
+        #                 "Service: utsvc Instance: utsi2 Map: Building np",
         #                 command)
 
     def test_120_map_chooser(self):
@@ -283,24 +272,19 @@ class TestMapService(TestBrokerCommand):
         command = ["show_map", "--rack", "ut3", "--include_parents"]
         out = self.commandtest(command)
         self.matchoutput(out,
-                         "Archetype: aquilon Service: afs "
-                         "Instance: q.ny.ms.com Map: Building ut",
+                         "Service: afs Instance: q.ny.ms.com Map: Building ut",
                          command)
         self.matchoutput(out,
-                         "Archetype: aquilon Service: bootserver "
-                         "Instance: unittest Map: Building ut",
+                         "Service: bootserver Instance: unittest Map: Building ut",
                          command)
         self.matchoutput(out,
-                         "Archetype: aquilon Service: ntp "
-                         "Instance: pa.ny.na Map: City ny",
+                         "Service: ntp Instance: pa.ny.na Map: City ny",
                          command)
         self.matchoutput(out,
-                         "Archetype: aquilon Service: aqd "
-                         "Instance: ny-prod Map: Campus ny",
+                         "Service: aqd Instance: ny-prod Map: Campus ny",
                          command)
         self.matchoutput(out,
-                         "Archetype: aquilon Service: dns "
-                         "Instance: unittest Map: Building ut",
+                         "Service: dns Instance: unittest Map: Building ut",
                          command)
         self.matchoutput(out,
                          "Archetype: aquilon Personality: lemon-collector-oracle "
