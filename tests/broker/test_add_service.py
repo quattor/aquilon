@@ -49,7 +49,8 @@ default_services = {
     "ntp": ["pa.ny.na"],
 
     # Testing chooser scope rules
-    "scope_test": ["scope-building", "target-personality", "scope-network"],
+    "scope_test": ["scope-building", "target-personality", "scope-network",
+                   "target-environment"],
 
     "support-group": ["ec-service"],
     "syslogng": ["ny-prod"],

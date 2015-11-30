@@ -72,6 +72,11 @@ class TestUnmapService(TestBrokerCommand):
                         "--archetype", "aquilon"])
 
         self.noouttest(["unmap", "service", "--building", "ut",
+                        "--service", "scope_test",
+                        "--instance", "target-environment",
+                        "--host_environment", "dev"])
+
+        self.noouttest(["unmap", "service", "--building", "ut",
                         "--service", "scope_test", "--instance", "scope-building"])
 
     def testverifyunmapafsbynetpers(self):

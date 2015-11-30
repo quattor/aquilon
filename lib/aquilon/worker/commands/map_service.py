@@ -17,9 +17,11 @@
 """Contains the logic for `aq map service`."""
 
 from aquilon.worker.broker import BrokerCommand
-from aquilon.aqdb.model import (Personality, ServiceMap, ServiceInstance,
-                                NetworkEnvironment)
-from aquilon.worker.dbwrappers.change_management import validate_prod_personality
+from aquilon.aqdb.model import (Personality, HostEnvironment, ServiceMap,
+                                ServiceInstance, NetworkEnvironment)
+from aquilon.aqdb.model.host_environment import Production
+from aquilon.worker.dbwrappers.change_management import (validate_prod_personality,
+                                                         enforce_justification)
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.dbwrappers.network import get_network_byip
 
@@ -28,15 +30,17 @@ class CommandMapService(BrokerCommand):
 
     required_parameters = ["service", "instance"]
 
-    def doit(self, session, dbmap, dbinstance, dblocation, dbnetwork,
-             dbpersona):
+    def doit(self, session, dbmap, dbinstance, dblocation, dbnetwork, dbpersona,
+             dbenv):
         if not dbmap:
             dbmap = ServiceMap(service_instance=dbinstance, location=dblocation,
-                               network=dbnetwork, personality=dbpersona)
+                               network=dbnetwork, personality=dbpersona,
+                               host_environment=dbenv)
             session.add(dbmap)
 
     def render(self, session, service, instance, archetype, personality,
-               networkip, justification, reason, user, **kwargs):
+               host_environment, networkip, justification, reason, user,
+               **kwargs):
         dbinstance = ServiceInstance.get_unique(session, service=service,
                                                 name=instance, compel=True)
         dblocation = get_location(session, **kwargs)
@@ -47,22 +51,29 @@ class CommandMapService(BrokerCommand):
         else:
             dbnetwork = None
 
+        dbpersona = None
+        dbenv = None
+
         if personality:
             dbpersona = Personality.get_unique(session, name=personality,
                                                archetype=archetype, compel=True)
 
             for dbstage in dbpersona.stages.values():
                 validate_prod_personality(dbstage, user, justification, reason)
-        else:
-            dbpersona = None
+        elif host_environment:
+            dbenv = HostEnvironment.get_instance(session, host_environment)
+            if isinstance(dbenv, Production):
+                enforce_justification(user, justification, reason)
 
         q = session.query(ServiceMap)
         q = q.filter_by(service_instance=dbinstance,
                         location=dblocation, network=dbnetwork,
-                        personality=dbpersona)
+                        personality=dbpersona,
+                        host_environment=dbenv)
 
         dbmap = q.first()
-        self.doit(session, dbmap, dbinstance, dblocation, dbnetwork, dbpersona)
+        self.doit(session, dbmap, dbinstance, dblocation, dbnetwork, dbpersona,
+                  dbenv)
 
         session.flush()
 

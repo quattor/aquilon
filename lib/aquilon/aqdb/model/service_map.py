@@ -21,15 +21,16 @@ from datetime import datetime
 from sys import maxsize
 
 from sqlalchemy import (Column, Integer, Sequence, DateTime, ForeignKey,
-                        UniqueConstraint)
+                        UniqueConstraint, CheckConstraint)
 from sqlalchemy.orm import (relation, deferred, backref, defer, undefer,
                             lazyload, contains_eager, object_session)
-from sqlalchemy.sql import or_, null
+from sqlalchemy.sql import and_, or_, null, case
 
-from aquilon.exceptions_ import InternalError
+from aquilon.exceptions_ import InternalError, AquilonError
 from aquilon.aqdb.model import (Base, Location, Desk, Rack, Room, Bunker,
                                 Building, City, Campus, Country, Continent, Hub,
-                                Company, ServiceInstance, Network, Personality)
+                                Company, ServiceInstance, Network, Personality,
+                                HostEnvironment)
 
 _TN = 'service_map'
 
@@ -56,7 +57,8 @@ _LOCATION_PRIORITY = {
 _NETWORK_PRIORITY = 100
 
 # NOTE: The actual values here are unimportant, only their order matters
-_TARGET_PERSONALITY = 100
+_TARGET_PERSONALITY = 10
+_TARGET_ENVIRONMENT = 100
 _TARGET_GLOBAL = 1000
 
 
@@ -83,6 +85,8 @@ class ServiceMap(Base):
     personality_id = Column(ForeignKey(Personality.id, ondelete='CASCADE'),
                             nullable=True, index=True)
 
+    host_environment_id = Column(ForeignKey(HostEnvironment.id), nullable=True)
+
     location_id = Column(ForeignKey(Location.id, ondelete='CASCADE'),
                          nullable=True, index=True)
 
@@ -97,12 +101,19 @@ class ServiceMap(Base):
                                                 cascade="all, delete-orphan",
                                                 passive_deletes=True))
     personality = relation(Personality)
+    host_environment = relation(HostEnvironment)
     location = relation(Location)
     network = relation(Network)
 
-    __table_args__ = (UniqueConstraint(service_instance_id, personality_id,
+    __table_args__ = (UniqueConstraint(service_instance_id,
+                                       personality_id, host_environment_id,
                                        location_id, network_id,
-                                       name='%s_uk' % _TN),)
+                                       name='%s_uk' % _TN),
+                      # At most one of personality_id and host_environment_id
+                      # can be not NULL
+                      CheckConstraint(case([(personality_id != null(), 1)], else_=0) +
+                                      case([(host_environment_id != null(), 1)], else_=0) <= 1,
+                                      name='%s_target_ck' % _TN))
 
     @property
     def service(self):
@@ -123,6 +134,8 @@ class ServiceMap(Base):
     def object_priority(self):
         if self.personality:
             return _TARGET_PERSONALITY
+        elif self.host_environment:
+            return _TARGET_ENVIRONMENT
         else:
             return _TARGET_GLOBAL
 
@@ -137,16 +150,24 @@ class ServiceMap(Base):
         else:
             return self.network
 
-    def __init__(self, network=None, location=None, **kwargs):
-        super(ServiceMap, self).__init__(network=network, location=location,
-                                         **kwargs)
+    def __init__(self, service_instance, network=None, location=None, personality=None,
+                 host_environment=None):
         if network and location:  # pragma: no cover
-            raise ValueError("A service can't be mapped to a Network and a "
-                             "Location at the same time")
+            raise AquilonError("A service can't be mapped to a Network and a "
+                               "Location at the same time")
 
         if network is None and location is None:  # pragma: no cover
-            raise ValueError("A service should by mapped to a Network or a "
-                             "Location")
+            raise AquilonError("A service should by mapped to a Network or a "
+                               "Location")
+
+        if personality and host_environment:  # pragma: no cover
+            raise AquilonError("A service can't be mapped to a Personality and "
+                               "a HostEnvironment at the same time")
+
+        super(ServiceMap, self).__init__(service_instance=service_instance,
+                                         network=network, location=location,
+                                         personality=personality,
+                                         host_environment=host_environment)
 
     @staticmethod
     def get_mapped_instance_cache(dbservices, dbpersonality, dblocation,
@@ -161,11 +182,14 @@ class ServiceMap(Base):
         q = session.query(ServiceMap)
 
         # Rules for filtering by target object
+        target_rules = [and_(ServiceMap.personality_id == null(),
+                             ServiceMap.host_environment_id == null())]
         if dbpersonality:
-            q = q.filter(or_(ServiceMap.personality_id == null(),
-                             ServiceMap.personality_id == dbpersonality.id))
-        else:
-            q = q.filter_by(personality=None)
+            target_rules.append(ServiceMap.personality == dbpersonality)
+            target_rules.append(ServiceMap.host_environment ==
+                                dbpersonality.host_environment)
+
+        q = q.filter(or_(*target_rules))
 
         # Rules for filtering by location/scope
         if dbnetwork:

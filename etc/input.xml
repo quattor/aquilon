@@ -2276,9 +2276,12 @@
 		<option name="networkip" type="ipv4">Network IP address</option>
 	    </optgroup>
 	</optgroup>
-	<optgroup fields="all">
-	    <option name="archetype" type="string">archetype name</option>
-	    <option name="personality" type="string">personality name</option>
+	<optgroup fields="one">
+	    <optgroup fields="all">
+		<option name="archetype" type="string">Archetype name</option>
+		<option name="personality" type="string">Personality name</option>
+	    </optgroup>
+	    <option name="host_environment" type="string">Host environment</option>
 	</optgroup>
 	<optgroup>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
@@ -2294,6 +2297,7 @@
 	    <option name="instance" type="string">instance name</option>
 	    <option name="archetype" type="string">archetype name</option>
 	    <option name="personality" type="string">personality name</option>
+	    <option name="host_environment" type="string">host environment</option>
 	    <optgroup fields="one">
 		<option name="organization" type="string">Organization</option>
 		<option name="hub" type="string">Hub</option>
@@ -2340,9 +2344,12 @@
 		<option name="networkip" type="ipv4">Network IP address</option>
 	    </optgroup>
 	</optgroup>
-	<optgroup fields="all">
-	    <option name="archetype" type="string">archetype name</option>
-	    <option name="personality" type="string">personality name</option>
+	<optgroup fields="one">
+	    <optgroup fields="all">
+		<option name="archetype" type="string">Archetype name</option>
+		<option name="personality" type="string">Personality name</option>
+	    </optgroup>
+	    <option name="host_environment" type="string">Host environment</option>
 	</optgroup>
 	<optgroup>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>

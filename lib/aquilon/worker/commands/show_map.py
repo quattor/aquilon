@@ -20,8 +20,8 @@ from sqlalchemy.orm import contains_eager, joinedload, subqueryload, aliased
 from sqlalchemy.orm.attributes import set_committed_value
 
 from aquilon.exceptions_ import NotFoundException
-from aquilon.aqdb.model import (Archetype, Personality, Service,
-                                ServiceInstance, ServiceMap,
+from aquilon.aqdb.model import (Archetype, Personality, HostEnvironment,
+                                Service, ServiceInstance, ServiceMap,
                                 NetworkEnvironment)
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.location import get_location
@@ -33,7 +33,7 @@ class CommandShowMap(BrokerCommand):
     required_parameters = []
 
     def render(self, session, service, instance, archetype, personality,
-               networkip, include_parents, **arguments):
+               host_environment, networkip, include_parents, **arguments):
         if service:
             dbservice = Service.get_unique(session, service, compel=True)
         else:
@@ -60,6 +60,11 @@ class CommandShowMap(BrokerCommand):
         else:
             dbpersonality = None
 
+        if host_environment:
+            dbenv = HostEnvironment.get_instance(session, host_environment)
+        else:
+            dbenv = None
+
         if networkip:
             dbnet_env = NetworkEnvironment.get_unique_or_default(session)
             dbnetwork = get_network_byip(session, networkip, dbnet_env)
@@ -82,6 +87,9 @@ class CommandShowMap(BrokerCommand):
             q = q.reset_joinpoint()
         else:
             q = q.options(subqueryload('personality'))
+
+        if host_environment:
+            q = q.filter_by(host_environment=dbenv)
 
         results = []
 

@@ -26,6 +26,8 @@ class ServiceMapFormatter(ObjectFormatter):
         if sm.personality:
             details.append("{0:c}: {0.name} {1:c}: {1.name}"
                            .format(sm.personality.archetype, sm.personality))
+        if sm.host_environment:
+            details.append("{0:c}: {0.name}".format(sm.host_environment))
 
         details.append("{0:c}: {0.name} Instance: {1.name}"
                        .format(sm.service_instance.service,

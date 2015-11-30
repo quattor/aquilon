@@ -112,7 +112,30 @@ class TestMake(TestBrokerCommand):
                          "Uses Service: scope_test Instance: scope-building",
                          command)
 
-    def test_121_personality_precedence(self):
+    def test_121_environment_precedence(self):
+        """Maps a location based environment service map to be overridden by a
+        location based personality service map"""
+        self.noouttest(["map", "service", "--building", "ut",
+                        "--host_environment", "dev",
+                        "--service", "scope_test",
+                        "--instance", "target-environment"])
+
+        command = ["make", "--hostname", "netmap-pers.aqd-unittest.ms.com"]
+        out = self.statustest(command)
+        self.matchoutput(out,
+                         "removing binding for service instance scope_test/scope-building",
+                         command)
+        self.matchoutput(out,
+                         "adding binding for service instance scope_test/target-environment",
+                         command)
+
+        command = "show host --hostname netmap-pers.aqd-unittest.ms.com"
+        out = self.commandtest(command.split(" "))
+        self.matchoutput(out,
+                         "Uses Service: scope_test Instance: target-environment",
+                         command)
+
+    def test_122_personality_precedence(self):
         """Maps a location based personality service map to be overridden by a
         network based personality service map"""
         self.noouttest(["map", "service", "--building", "ut", "--personality",
@@ -123,7 +146,7 @@ class TestMake(TestBrokerCommand):
         command = ["make", "--hostname", "netmap-pers.aqd-unittest.ms.com"]
         out = self.statustest(command)
         self.matchoutput(out,
-                         "removing binding for service instance scope_test/scope-building",
+                         "removing binding for service instance scope_test/target-environment",
                          command)
         self.matchoutput(out,
                          "adding binding for service instance scope_test/target-personality",
@@ -135,7 +158,7 @@ class TestMake(TestBrokerCommand):
                          "Uses Service: scope_test Instance: target-personality",
                          command)
 
-    def test_122_network_precedence(self):
+    def test_123_network_precedence(self):
         ip = self.net["netperssvcmap"].subnet()[0].ip
 
         self.noouttest(["map", "service", "--networkip", ip,
@@ -143,7 +166,7 @@ class TestMake(TestBrokerCommand):
                         "--personality", "eaitools",
                         "--archetype", "aquilon"])
 
-    def test_123_verify_network_map(self):
+    def test_124_verify_network_map(self):
         ip = self.net["netperssvcmap"].subnet()[0].ip
 
         command = ["show_map", "--service=scope_test", "--instance=scope-network",
@@ -156,7 +179,7 @@ class TestMake(TestBrokerCommand):
                          "Instance: scope-network Map: Network netperssvcmap",
                          command)
 
-    def test_123_verify_network_map_proto(self):
+    def test_124_verify_network_map_proto(self):
         ip = self.net["netperssvcmap"].subnet()[0].ip
 
         command = ["show_map", "--service=scope_test", "--instance=scope-network",
@@ -173,7 +196,7 @@ class TestMake(TestBrokerCommand):
         self.assertEqual(service_map.personality.name, 'eaitools')
         self.assertEqual(service_map.personality.archetype.name, 'aquilon')
 
-    def test_124_make_network(self):
+    def test_125_make_network(self):
         command = ["make", "--hostname", "netmap-pers.aqd-unittest.ms.com"]
         out = self.statustest(command)
         self.matchoutput(out,
