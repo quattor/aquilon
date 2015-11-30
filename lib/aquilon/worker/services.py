@@ -21,7 +21,7 @@ from random import choice
 from sqlalchemy.orm.session import object_session
 
 from aquilon.exceptions_ import ArgumentError, InternalError
-from aquilon.aqdb.model import Host, Cluster, ServiceInstance, MetaCluster
+from aquilon.aqdb.model import Host, Cluster, ServiceMap, MetaCluster
 from aquilon.worker.templates import (Plenary, PlenaryCollection,
                                       PlenaryServiceInstanceServer)
 
@@ -219,7 +219,7 @@ class Chooser(object):
         self.check_errors()
 
     def cache_service_maps(self, dbservices):
-        self.service_maps = ServiceInstance.get_mapped_instance_cache(
+        self.service_maps = ServiceMap.get_mapped_instance_cache(
             dbservices, self.dbobj.personality_stage.personality, self.location,
             self.network)
 

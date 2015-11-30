@@ -16,16 +16,13 @@
 # limitations under the License.
 """ see class.__doc__ for description """
 
-from collections import defaultdict
 from datetime import datetime
 from six import itervalues
-from sys import maxsize
 
 from sqlalchemy import (Column, Integer, Sequence, String, DateTime,
                         ForeignKey, UniqueConstraint, PrimaryKeyConstraint)
 from sqlalchemy.orm import (relation, contains_eager, column_property, backref,
-                            deferred, defer, undefer, aliased, lazyload,
-                            object_session)
+                            deferred, aliased, object_session)
 from sqlalchemy.sql import select, func, or_, null
 
 from aquilon.aqdb.model import (Base, Service, Host, DnsRecord, DnsDomain,
@@ -143,80 +140,6 @@ class ServiceInstance(Base):
         if self.max_clients is not None:
             return self.max_clients
         return self.service.max_clients
-
-    @classmethod
-    def get_mapped_instance_cache(cls, dbservices, dbpersonality, dblocation,
-                                  dbnetwork=None):
-        """Returns dict of requested services to closest mapped instances."""
-        # Can't import these on init as ServiceInstance is a dependency.
-        # Could think about moving this method definition out to one of
-        # these classes.
-        from aquilon.aqdb.model import ServiceMap
-
-        session = object_session(dblocation)
-
-        location_ids = [loc.id for loc in dblocation.parents]
-        location_ids.append(dblocation.id)
-        location_ids.reverse()
-
-        # Calculate the priority of services mapped to a given location. We'll
-        # pick the instance mapped at the location of lowest priority
-        loc_priorities = {}
-        for idx, loc_id in enumerate(location_ids):
-            loc_priorities[loc_id] = idx
-
-        # Prefer network-based maps over location-based maps
-        loc_priorities[None] = -1
-
-        # Use maxsize as priority to mark empty slots
-        instance_cache = {}
-        instance_priority = defaultdict(lambda: maxsize)
-
-        queries = []
-
-        if dbpersonality:
-            q = session.query(ServiceMap.location_id, ServiceInstance)
-            q = q.filter(ServiceMap.personality == dbpersonality)
-            queries.append(q)
-
-        q = session.query(ServiceMap.location_id, ServiceInstance)
-        q = q.filter(ServiceMap.personality == None)
-        queries.append(q)
-
-        for q in queries:
-            # search only for missing ids
-            missing_ids = [dbservice.id for dbservice in dbservices
-                           if dbservice not in instance_cache]
-
-            # An empty "WHERE ... IN (...)" clause might be expensive to
-            # evaluate even if it returns nothing, so avoid doing that.
-            if not missing_ids:
-                continue
-
-            # get map by locations
-            q = q.filter(ServiceMap.service_instance_id == ServiceInstance.id)
-            q = q.filter(ServiceInstance.service_id.in_(missing_ids))
-            q = q.options(defer(ServiceInstance.comments),
-                          undefer(ServiceInstance._client_count),
-                          lazyload(ServiceInstance.service))
-
-            if dbnetwork:
-                q = q.filter(or_(ServiceMap.location_id.in_(location_ids),
-                                 ServiceMap.network_id == dbnetwork.id))
-            else:
-                q = q.filter(ServiceMap.location_id.in_(location_ids))
-
-            for location_id, si in q:
-                priority = loc_priorities[location_id]
-                service = si.service
-
-                if instance_priority[service] > priority:
-                    instance_cache[service] = [si]
-                    instance_priority[service] = priority
-                elif instance_priority[service] == priority:
-                    instance_cache[service].append(si)
-
-        return instance_cache
 
 
 class __BuildItem(Base):

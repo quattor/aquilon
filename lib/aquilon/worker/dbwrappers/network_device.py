@@ -16,7 +16,6 @@
 # limitations under the License.
 """ Helper functions for managing switches """
 
-
 import re
 
 from json import JSONDecoder
@@ -27,7 +26,7 @@ from operator import attrgetter
 
 from aquilon.exceptions_ import (InternalError, NotFoundException,
                                  ProcessException, ArgumentError)
-from aquilon.aqdb.model import (Service, ServiceInstance, NetworkEnvironment,
+from aquilon.aqdb.model import (Service, ServiceMap, NetworkEnvironment,
                                 AddressAssignment, ARecord, Model,
                                 RouterAddress)
 from aquilon.aqdb.model.network import get_net_id_from_ip
@@ -47,8 +46,8 @@ def determine_helper_hostname(session, logger, config, dbnetdev):
         return
     helper_service = Service.get_unique(session, helper_name,
                                         compel=InternalError)
-    mapped_instances = ServiceInstance.get_mapped_instance_cache(
-        [helper_service], None, dbnetdev.location)
+    mapped_instances = ServiceMap.get_mapped_instance_cache([helper_service], None,
+                                                            dbnetdev.location)
     for dbsi in mapped_instances.get(helper_service, []):
         if dbsi.servers:
             # Poor man's load balancing...

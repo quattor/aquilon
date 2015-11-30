@@ -16,11 +16,15 @@
 # limitations under the License.
 """ Maps service instances to locations. See class.__doc__ """
 
+from collections import defaultdict
 from datetime import datetime
+from sys import maxsize
 
 from sqlalchemy import (Column, Integer, Sequence, DateTime, ForeignKey,
                         UniqueConstraint)
-from sqlalchemy.orm import relation, deferred, backref
+from sqlalchemy.orm import (relation, deferred, backref, defer, undefer,
+                            lazyload, object_session)
+from sqlalchemy.sql import or_
 
 from aquilon.aqdb.model import (Base, Location, ServiceInstance, Network,
                                 Personality)
@@ -89,3 +93,73 @@ class ServiceMap(Base):
         if network is None and location is None:  # pragma: no cover
             raise ValueError("A service should by mapped to a Network or a "
                              "Location")
+
+    @staticmethod
+    def get_mapped_instance_cache(dbservices, dbpersonality, dblocation,
+                                  dbnetwork=None):
+        """Returns dict of requested services to closest mapped instances."""
+
+        session = object_session(dblocation)
+
+        location_ids = [loc.id for loc in dblocation.parents]
+        location_ids.append(dblocation.id)
+        location_ids.reverse()
+
+        # Calculate the priority of services mapped to a given location. We'll
+        # pick the instance mapped at the location of lowest priority
+        loc_priorities = {}
+        for idx, loc_id in enumerate(location_ids):
+            loc_priorities[loc_id] = idx
+
+        # Prefer network-based maps over location-based maps
+        loc_priorities[None] = -1
+
+        # Use maxsize as priority to mark empty slots
+        instance_cache = {}
+        instance_priority = defaultdict(lambda: maxsize)
+
+        queries = []
+
+        if dbpersonality:
+            q = session.query(ServiceMap.location_id, ServiceInstance)
+            q = q.filter(ServiceMap.personality == dbpersonality)
+            queries.append(q)
+
+        q = session.query(ServiceMap.location_id, ServiceInstance)
+        q = q.filter(ServiceMap.personality == None)
+        queries.append(q)
+
+        for q in queries:
+            # search only for missing ids
+            missing_ids = [dbservice.id for dbservice in dbservices
+                           if dbservice not in instance_cache]
+
+            # An empty "WHERE ... IN (...)" clause might be expensive to
+            # evaluate even if it returns nothing, so avoid doing that.
+            if not missing_ids:
+                continue
+
+            # get map by locations
+            q = q.filter(ServiceMap.service_instance_id == ServiceInstance.id)
+            q = q.filter(ServiceInstance.service_id.in_(missing_ids))
+            q = q.options(defer(ServiceInstance.comments),
+                          undefer(ServiceInstance._client_count),
+                          lazyload(ServiceInstance.service))
+
+            if dbnetwork:
+                q = q.filter(or_(ServiceMap.location_id.in_(location_ids),
+                                 ServiceMap.network_id == dbnetwork.id))
+            else:
+                q = q.filter(ServiceMap.location_id.in_(location_ids))
+
+            for location_id, si in q:
+                priority = loc_priorities[location_id]
+                service = si.service
+
+                if instance_priority[service] > priority:
+                    instance_cache[service] = [si]
+                    instance_priority[service] = priority
+                elif instance_priority[service] == priority:
+                    instance_cache[service].append(si)
+
+        return instance_cache
