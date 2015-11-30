@@ -135,6 +135,8 @@ class InterfaceFormatter(ObjectFormatter):
         if interface.mac:
             skeleton.mac = str(interface.mac)
 
+        skeleton.interface_type = interface.interface_type
+
         if interface.bus_address:
             skeleton.bus_address = str(interface.bus_address)
 
@@ -145,7 +147,8 @@ class InterfaceFormatter(ObjectFormatter):
         elif interface.port_group_name:
             skeleton.port_group_name = interface.port_group_name
 
-        self.redirect_proto(interface.model, skeleton.model)
+        if interface.model_allowed and indirect_attrs:
+            self.redirect_proto(interface.model, skeleton.model)
 
 ObjectFormatter.handlers[Interface] = InterfaceFormatter()
 ObjectFormatter.handlers[PublicInterface] = InterfaceFormatter()

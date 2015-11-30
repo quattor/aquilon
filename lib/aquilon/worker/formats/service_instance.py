@@ -16,6 +16,8 @@
 # limitations under the License.
 """ServiceInstance formatter."""
 
+from operator import attrgetter
+
 from aquilon.worker.formats.formatters import ObjectFormatter
 from aquilon.aqdb.model import ServiceInstance, ServiceInstanceServer
 
@@ -89,14 +91,61 @@ class ServiceInstanceFormatter(ObjectFormatter):
         si_msg.name = str(si.name)
 
         if indirect_attrs:
-            for srv in si.servers:
-                if srv.host:
+            for srv in sorted(si.servers, key=attrgetter("position")):
+                # In all of the following we always calculate a target IP and
+                # FQDN.  All of the above cases can be infered by the
+                # information provided. The valid combinations are as follows:
+                #  - Alias
+                #  - Host
+                #  - Host + address_assignment
+                #  - Host + service_address
+                #  - Cluster + service_address
+                target_ip = None
+                target_fqdn = None
+                srv_msg = si_msg.provider.add()
+
+                if srv.alias:
+                    target_fqdn = srv.alias.fqdn.name
+                    # There is no IP address for an alias
+                elif srv.host:
+                    # Add minimum amount of the host message.  This should be
+                    # just the FQDN, but we have to add hostname (short)
+                    # as its required.  The ip is added so you can determin if
+                    # a address_assignment has been used.
+                    hw = srv.host.hardware_entity
+                    host_msg = srv_msg.host
+                    host_msg.hostname = str(hw.primary_name.fqdn.name)
+                    host_msg.fqdn = str(hw.primary_name.fqdn)
+                    host_msg.ip = str(hw.primary_ip)
+                    # Default to the hosts primary IP and name
+                    target_ip = host_msg.ip
+                    target_fqdn = host_msg.fqdn
+                    # TODO: The following is being kept for backwards
+                    # compatability the ServiceInstanceProvider is preferable
                     self.redirect_proto(srv.host, si_msg.servers.add(),
                                         indirect_attrs=False)
-                # TODO: extra IP address/service address information
-                # TODO: cluster-provided services
-            # TODO: make this conditional to avoid performance problems
-            # self.redirect_proto(client.hosts, si_msg.clients)
+                elif srv.cluster:
+                    clus_msg = srv_msg.cluster
+                    clus_msg.name = str(srv.cluster.name)
+                    # Clusters must have a service_address so we leave the
+                    # target addresses to be filled in later
+
+                # Where address_assignment or service_address are supplied
+                # these should override the default targets
+                if srv.address_assignment:
+                    target_ip = str(srv.address_assignment.ip)
+                    target_fqdn = str(srv.address_assignment.fqdns[0])
+                elif srv.service_address:
+                    srv_msg.service_address.ip = str(srv.service_address.ip)
+                    srv_msg.service_address.fqdn = str(srv.service_address.dns_record)
+                    target_ip = str(srv.service_address.ip)
+                    target_fqdn = str(srv.service_address.dns_record.fqdn)
+
+                # Finally add the target ip and fqdn
+                if target_ip:
+                    srv_msg.target_ip = target_ip
+                srv_msg.target_fqdn = target_fqdn
+
 
     # Applies to service_instance/share as well.
     @classmethod

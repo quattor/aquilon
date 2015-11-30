@@ -4085,6 +4085,9 @@
 	</optgroup>
 	<transport trigger="network_device" method="get" path="network_device/%(network_device)s"/>
 	<transport trigger="all" method="get" path="network_device"/>
+	<format name="proto" >
+	    <message_class name="NetworkDeviceList" module="aqdsystems_pb2"/>
+	</format>
     </command>
 
     <command name="show_switch">
@@ -4151,6 +4154,9 @@
 	    <option name="all" type="flag">show all</option>
 	</optgroup>
 	<transport method="get" path="find/network_device"/>
+	<format name="proto" >
+	    <message_class name="NetworkDeviceList" module="aqdsystems_pb2"/>
+	</format>
     </command>
 
     <command name="search_switch">

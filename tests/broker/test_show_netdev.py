@@ -58,13 +58,24 @@ class TestShowNetworkDevice(TestBrokerCommand):
         self.matchoutput(out, "Rack: ut3", command)
         self.matchoutput(out, "Vendor: hp Model: uttorswitch", command)
 
+    def testshowswitchproto(self):
+        command = ["show_network_device", "--format=proto",
+                   "--network_device=ut3gd1r04.aqd-unittest.ms.com"]
+        netdev = self.protobuftest(command, expect=1)[0]
+        self.assertEqual(netdev.primary_name, "ut3gd1r04.aqd-unittest.ms.com")
+        self.assertEqual(netdev.hardware.label, "ut3gd1r04")
+        self.assertEqual(netdev.hardware.model.name, "uttorswitch")
+        self.assertEqual(netdev.hardware.location.fullname, "ut3")
+        self.assertEqual(netdev.hardware.interfaces[0].device, "loop0")
+
     def testshowswitchallcsv(self):
-        # Verify both with and without an interface
         command = ["show_network_device", "--all", "--format=csv"]
+        out = self.commandtest(command)
 
     def testshowswitchswitchcsv(self):
         command = ["show_network_device", "--network_device=ut3gd1r04.aqd-unittest.ms.com",
                    "--format=csv"]
+        out = self.commandtest(command)
 
 
 if __name__ == '__main__':
