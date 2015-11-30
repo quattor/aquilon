@@ -105,7 +105,7 @@ class ServiceInstanceFormatter(ObjectFormatter):
                 srv_msg = si_msg.provider.add()
 
                 if srv.alias:
-                    target_fqdn = srv.alias.fqdn.name
+                    target_fqdn = str(srv.alias.fqdn)
                     # There is no IP address for an alias
                 elif srv.host:
                     # Add minimum amount of the host message.  This should be
