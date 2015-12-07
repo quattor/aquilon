@@ -58,6 +58,7 @@ class CommandShowPersonality(BrokerCommand):
                       subqueryload('grns'),
                       subqueryload('features'),
                       joinedload('features.feature'),
+                      joinedload('cluster_infos'),
                       subqueryload('personality.root_users'),
                       subqueryload('personality.root_netgroups'))
 

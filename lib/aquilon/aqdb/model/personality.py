@@ -214,6 +214,9 @@ class PersonalityStage(Base):
             new.required_services.extend(self.required_services)
             new.grns.extend(grn_link.copy() for grn_link in self.grns)
 
+            for cluster_type, info in self.cluster_infos.items():
+                new.cluster_infos[cluster_type] = info.copy()
+
             q = session.query(StaticRoute)
             q = q.filter_by(personality_stage=self)
             for src_route in q:

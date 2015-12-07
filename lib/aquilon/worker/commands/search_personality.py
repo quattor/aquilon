@@ -73,7 +73,8 @@ class CommandSearchPersonality(BrokerCommand):
             q = q.options(subqueryload('required_services'),
                           subqueryload('grns'),
                           subqueryload('features'),
-                          joinedload('features.feature'))
+                          joinedload('features.feature'),
+                          joinedload('cluster_infos'))
             return q.all()
         else:
             return StringAttributeList(q.all(), "qualified_name")
