@@ -231,11 +231,9 @@ class TemplateDomain(object):
 
         self.logger.info("starting compile")
         try:
-            start_time = time.time()
             run_command(args, env=panc_env, logger=self.logger,
                         path=config.get("broker", "quattordir"),
                         stream_level=CLIENT_INFO)
-            end_time = time.time()
         except ProcessException:
             raise ArgumentError("Compilation failed, see the compiler "
                                 "messages for details.")
@@ -249,7 +247,6 @@ class TemplateDomain(object):
         # bit works around the issue by making sure further modifications
         # to the source templates will have a different second value than
         # anything this compilation used.
-        if long(start_time) == long(end_time):
-            time.sleep(1)
+        time.sleep(1)
 
         trigger_notifications(config, self.logger, CLIENT_INFO)
