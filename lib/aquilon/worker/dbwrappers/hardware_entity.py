@@ -22,7 +22,7 @@ from sqlalchemy.sql import and_, or_
 from aquilon.exceptions_ import ArgumentError, AquilonError
 from aquilon.aqdb.model import (HardwareEntity, Model, ReservedName, Network,
                                 AddressAssignment, ARecord, Fqdn, Interface,
-                                VlanInfo, PortGroup, NetworkEnvironment)
+                                VlanInfo, PortGroup, NetworkEnvironment, Host)
 from aquilon.aqdb.model.dns_domain import parse_fqdn
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.worker.dbwrappers.dns import convert_reserved_to_arecord
@@ -42,6 +42,7 @@ def search_hardware_entity_query(session, hardware_type=HardwareEntity,
                                  interface_name=None, interface_model=None,
                                  interface_vendor=None,
                                  interface_bus_address=None,
+                                 used=None,
                                  **kwargs):
     q = session.query(hardware_type)
     if hardware_type is HardwareEntity:
@@ -101,8 +102,17 @@ def search_hardware_entity_query(session, hardware_type=HardwareEntity,
             q = q.filter(or_(PGAlias.network == dbnetwork,
                              AAAlias.network == dbnetwork))
         q = q.reset_joinpoint()
+
     if serial:
         q = q.filter_by(serial_no=serial)
+
+    if used is True:
+        q = q.join(Host, aliased=True)
+        q = q.reset_joinpoint()
+    elif used is False:
+        q = q.outerjoin(Host, aliased=True)
+        q = q.filter_by(hardware_entity_id=None)
+
     if not subquery:
         # Oracle does not like "ORDER BY" in a sub-select, so we have to
         # suppress it if we want to use this query as a subquery

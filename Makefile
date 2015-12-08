@@ -1,7 +1,6 @@
 SHELL  = /bin/ksh
 COMMON = ../install/common
 QACOMMENT = -comment cmrs=qa
-QCELLS = q.ny,q.ln,q.hk,q.tk
 TCM_COMMENT = "-comment tcm FILL IT IN NOW"
 PYTHON_DEFAULT = /usr/bin/env python
 #PYTHON = /ms/dist/python/PROJ/core/2.7.9/bin/python
@@ -165,7 +164,7 @@ to_nolock:
 
 .PHONY: distqa
 distqa: to_nolock
-	vms dist ${META} ${PROJ} ${REL} -- -cells ${QCELLS} ${QACOMMENT}
+	vms dist ${META} ${PROJ} ${REL} -- -qacells ${QACOMMENT}
 
 .PHONY: distworld
 distworld: to_nolock

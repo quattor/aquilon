@@ -224,6 +224,23 @@ class TestSearchMachine(TestBrokerCommand):
         self.matchoutput(out, "evm42", command)
         self.matchclean(out, "ut14s1p0", command)
 
+    def testused(self):
+        command = ["search_machine", "--used"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "ut9s03p1", command)
+        self.matchoutput(out, "ut3c5n10", command)
+        self.matchclean(out, "ut3c1n9", command)
+        self.matchclean(out, "utnorack", command)
+
+    def testunused(self):
+        command = ["search_machine", "--unused"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "evm2", command)
+        self.matchoutput(out, "ut3c1n9", command)
+        self.matchoutput(out, "utnorack", command)
+        self.matchclean(out, "ut9s03p1", command)
+        self.matchclean(out, "ut3c5n10", command)
+
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestSearchMachine)
     unittest.TextTestRunner(verbosity=2).run(suite)

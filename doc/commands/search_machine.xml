@@ -64,6 +64,10 @@
 		    <arg choice="plain"><option>--share <replaceable>NAME</replaceable></option></arg>
 		</group>
 		<arg><option>--disk_filesystem <replaceable>NAME</replaceable></option></arg>
+		<group>
+		    <arg choice="plain"><option>--used</option></arg>
+		    <arg choice="plain"><option>--unused</option></arg>
+		</group>
 	    </group>
 	    <arg><option>--fullinfo</option></arg>
 	    <group>
@@ -464,6 +468,16 @@
 		<listitem>
 		    <para>
 			Look for virtual machines having disk images bound to a filesystem resource called <replaceable>NAME</replaceable>.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+		<term>
+		    <option>--used</option>, <option>--unused</option>
+		</term>
+		<listitem>
+		    <para>
+			Look for machines which are used/not used by a host.
 		    </para>
 		</listitem>
 	    </varlistentry>
