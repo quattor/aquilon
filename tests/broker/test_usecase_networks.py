@@ -22,7 +22,7 @@ if __name__ == "__main__":
     import utils
     utils.import_depends()
 
-import unittest2 as unittest
+import unittest
 from brokertest import TestBrokerCommand
 
 # This test case sets up a network that look like the following:
