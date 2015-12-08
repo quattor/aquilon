@@ -49,6 +49,8 @@ _table_abbrev = {
     'param_definition': 'param_def',
     'param_def_holder': 'pd_holder',
     'personality': 'pers',
+    'personality_cluster_info': 'pers_clstr',
+    'personality_esx_cluster_info': 'pers_esxclstr',
     'personality_grn_map': 'pers_grn_map',
     'personality_rootuser': 'pers_rootuser',
     'personality_rootnetgroup': 'pers_rootng',
@@ -73,7 +75,6 @@ _col_abbrev = {
     'location_constraint_id': 'loc_constr_id',
     'rebuild_required': 'rebld_req',
     'requires_change_manager': 'req_chg_mgr',
-    'vmhost_overcommit_memory': 'vm_ovrcmt_mem',
 }
 
 

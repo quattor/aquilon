@@ -3681,6 +3681,7 @@
 	</optgroup>
 	<optgroup>
 	    <option name="personality_stage" type="string">Personality stage to use, defaults to 'next'.</option>
+	    <option name="vmhost_capacity_function" type="string">Function for calculating VM host capacity units</option>
 	    <option name="cluster_required" type="boolean" default='False'>Does this personality require hosts to be clustered?</option>
 	    <option name="config_override" type="boolean">Include external personality config override template</option>
 	    <option name="host_environment" type="string">Environment for Hosts assigned to this personality [dev|qa|uat|prod|infra]</option>

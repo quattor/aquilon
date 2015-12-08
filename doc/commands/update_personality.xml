@@ -50,6 +50,7 @@
 		<arg choice="plain"><option>--staged</option></arg>
 		<arg choice="plain"><option>--unstaged</option></arg>
 	    </group>
+	    <arg><option>--vmhost_capacity_function <replaceable>VMHOST_CAPACITY_FUNCTION</replaceable></option></arg>
 	    <arg><option>--host_environment <replaceable>HOST_ENVIRONMENT</replaceable></option></arg>
 	    <arg><option>--comments <replaceable>COMMENTS</replaceable></option></arg>
 	    <xi:include href="../common/change_management.xml"/>
@@ -154,6 +155,16 @@
 		    <para>
 			This flag turns personality staging on or off. Staging can only be turned off
 			if both the <literal>previous</literal> and the <literal>next</literal> stages are unused.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+	        <term>
+		    <option>--vmhost_capacity_function <replaceable>VMHOST_CAPACITY_FUNCTION</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+                        Function for calculating VM host capacity units.
 		    </para>
 		</listitem>
 	    </varlistentry>

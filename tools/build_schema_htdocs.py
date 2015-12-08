@@ -135,6 +135,7 @@ model_group = {
     'cluster': {
         'title': 'Clusters',
         'classes': [Cluster, EsxCluster, StorageCluster, ComputeCluster,
+                    PersonalityClusterInfo, PersonalityESXClusterInfo,
                     __ClusterGroupMember, HostClusterMember,
                     MetaCluster, __MetaClusterMember,
                     ClusterLifecycle, __ClusterAllowedPersonality,

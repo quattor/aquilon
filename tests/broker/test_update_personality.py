@@ -29,6 +29,21 @@ from broker.personalitytest import PersonalityTestMixin
 
 class TestUpdatePersonality(VerifyGrnsMixin, PersonalityTestMixin,
                             TestBrokerCommand):
+    def test_100_update_capacity(self):
+        command = ["update_personality", "--personality", "vulcan-10g-server-prod",
+                   "--archetype", "esx_cluster",
+                   "--vmhost_capacity_function", "{'memory': (memory - 1500) * 0.94}",
+                   "--justification", "tcm=12345678"]
+        self.noouttest(command)
+
+    def test_115_verify_update_capacity(self):
+        command = ["show_personality", "--personality", "vulcan-10g-server-prod",
+                   "--archetype", "esx_cluster"]
+        out = self.commandtest(command)
+        self.matchoutput(out,
+                         "VM host capacity function: {'memory': (memory - 1500) * 0.94}",
+                         command)
+
     def test_120_update_cluster_requirement(self):
         command = ["add_personality", "--archetype=aquilon", "--grn=grn:/ms/ei/aquilon/aqd",
                    "--personality=unused", "--host_environment=infra"]
@@ -163,6 +178,9 @@ class TestUpdatePersonality(VerifyGrnsMixin, PersonalityTestMixin,
         out = self.commandtest(command)
         self.matchoutput(out, "Environment: prod", command)
         self.matchoutput(out, "Owned by GRN: grn:/ms/ei/aquilon/aqd", command)
+        self.matchoutput(out,
+                         "VM host capacity function: {'memory': (memory - 1500) * 0.94}",
+                         command)
 
         command = ["show_personality", "--personality", "vulcan-1g-clone",
                    "--archetype", "esx_cluster", "--format=proto"]
@@ -172,6 +190,7 @@ class TestUpdatePersonality(VerifyGrnsMixin, PersonalityTestMixin,
         self.assertEqual(personality.stage, "")
         self.assertEqual(personality.owner_eonid, self.grns["grn:/ms/ei/aquilon/aqd"])
         self.assertEqual(personality.host_environment, "prod")
+        self.assertEqual(personality.vmhost_capacity_function, "{'memory': (memory - 1500) * 0.94}")
 
     def test_159_cleanup_clone(self):
         self.noouttest(["del_personality", "--personality", "vulcan-1g-clone",
@@ -249,6 +268,44 @@ class TestUpdatePersonality(VerifyGrnsMixin, PersonalityTestMixin,
 
     def test_179_cat_unstaged(self):
         self.verifycatpersonality("aquilon", "compileserver")
+
+    def test_200_invalid_function(self):
+        """ Verify that the list of built-in functions is restricted """
+        command = ["update_personality", "--personality", "vulcan-10g-server-prod",
+                   "--archetype", "esx_cluster",
+                   "--vmhost_capacity_function", "locals()",
+                   "--justification", "tcm=12345678"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "name 'locals' is not defined", command)
+
+    def test_200_invalid_type(self):
+        command = ["update_personality", "--personality", "vulcan-10g-server-prod",
+                   "--archetype", "esx_cluster",
+                   "--vmhost_capacity_function", "memory - 100",
+                   "--justification", "tcm=12345678"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "The function should return a dictonary.", command)
+
+    def test_200_invalid_dict(self):
+        command = ["update_personality", "--personality", "vulcan-10g-server-prod",
+                   "--archetype", "esx_cluster",
+                   "--vmhost_capacity_function", "{'memory': 'bar'}",
+                   "--justification", "tcm=12345678"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "The function should return a dictionary with all "
+                         "keys being strings, and all values being numbers.",
+                         command)
+
+    def test_200_missing_memory(self):
+        command = ["update_personality", "--personality", "vulcan-10g-server-prod",
+                   "--archetype", "esx_cluster",
+                   "--vmhost_capacity_function", "{'foo': 5}",
+                   "--justification", "tcm=12345678"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "The memory constraint is missing from the returned "
+                         "dictionary.", command)
 
     def test_200_update_cluster_inuse(self):
         command = ["update_personality", "--personality=vulcan-10g-server-prod",

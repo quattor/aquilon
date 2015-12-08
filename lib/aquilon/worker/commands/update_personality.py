@@ -18,11 +18,24 @@
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import (Personality, PersonalityStage, Cluster, Host,
-                                HostEnvironment)
+                                HostEnvironment, PersonalityESXClusterInfo)
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.change_management import validate_prod_personality
 from aquilon.worker.dbwrappers.grn import lookup_grn
 from aquilon.worker.templates import Plenary, PlenaryCollection
+
+# List of functions allowed to be used in vmhost_capacity_function
+restricted_builtins = {'None': None,
+                       'dict': dict,
+                       'divmod': divmod,
+                       'float': float,
+                       'int': int,
+                       'len': len,
+                       'long': long,
+                       'max': max,
+                       'min': min,
+                       'pow': pow,
+                       'round': round}
 
 
 def _check_stage_unused(session, dbstage):
@@ -43,9 +56,9 @@ class CommandUpdatePersonality(BrokerCommand):
     required_parameters = ["personality", "archetype"]
 
     def render(self, session, logger, personality, personality_stage, archetype,
-               cluster_required, config_override, host_environment, grn, eon_id,
-               leave_existing, staged, justification, reason, comments, user,
-               **arguments):
+               vmhost_capacity_function, cluster_required, config_override,
+               host_environment, grn, eon_id, leave_existing, staged,
+               justification, reason, comments, user, **arguments):
         dbpersona = Personality.get_unique(session, name=personality,
                                            archetype=archetype, compel=True)
 
@@ -131,6 +144,36 @@ class CommandUpdatePersonality(BrokerCommand):
 
         if comments is not None:
             dbpersona.comments = comments
+
+        if vmhost_capacity_function is not None:
+            if "esx" not in dbstage.cluster_infos:
+                dbstage.cluster_infos["esx"] = PersonalityESXClusterInfo()
+
+            # Basic sanity tests to see if the function works
+            try:
+                global_vars = {'__builtins__': restricted_builtins}
+                local_vars = {'memory': 10}
+                capacity = eval(vmhost_capacity_function, global_vars,
+                                local_vars)
+            except Exception as err:
+                raise ArgumentError("Failed to evaluate the function: %s" % err)
+            if not isinstance(capacity, dict):
+                raise ArgumentError("The function should return a dictonary.")
+            for name, value in capacity.items():
+                if not isinstance(name, str) or (not isinstance(value, int) and
+                                                 not isinstance(value, float)):
+                    raise ArgumentError("The function should return a dictionary "
+                                        "with all keys being strings, and all "
+                                        "values being numbers.")
+
+            # TODO: Should this be mandatory? It is for now.
+            if "memory" not in capacity:
+                raise ArgumentError("The memory constraint is missing from "
+                                    "the returned dictionary.")
+
+            dbstage.cluster_infos["esx"].vmhost_capacity_function = vmhost_capacity_function
+        elif vmhost_capacity_function == "":
+            dbstage.cluster_infos["esx"].vmhost_capacity_function = None
 
         plenaries.extend(map(Plenary.get_plenary, dbpersona.stages.values()))
 
