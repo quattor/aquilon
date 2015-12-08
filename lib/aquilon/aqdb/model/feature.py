@@ -67,6 +67,7 @@ class Feature(Base):
         # make polymorphism work
         return self.validate_link(key, link)
 
+    # pylint: disable=W0613
     def validate_link(self, key, link):  # pragma: no cover
         return link
 

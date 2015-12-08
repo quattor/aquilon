@@ -55,7 +55,7 @@ class NetworkCompartment(Base):
     _name_check = re.compile(r"^[a-z][a-z0-9_]+(\.[a-z0-9_]+)*$")
 
     @validates('name')
-    def validate_name(self, key, value):
+    def validate_name(self, key, value):  # pylint: disable=W0613
         if not self._name_check.match(value):
             raise ArgumentError("Illegal network compartment tag '%s'." %
                                 value)

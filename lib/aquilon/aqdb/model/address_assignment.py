@@ -179,7 +179,7 @@ class SharedAddressAssignment(AddressAssignment):
 
     # As priority is an additional col we cannot make it non-null
     @validates('priority')
-    def _validate_priority(self, key, value):
+    def _validate_priority(self, key, value):  # pylint: disable=W0613
         if not value:
             raise ValueError("Shared addresses require a priority")
         return value

@@ -23,7 +23,7 @@ from aquilon.exceptions_ import ArgumentError
 class DnsRecordTargetMixin(object):
 
     @validates('target')
-    def validate_target(self, key, target):
+    def validate_target(self, key, target):  # pylint: disable=W0613
         if not target:
             raise ValueError("target cannot be empty")
 

@@ -143,7 +143,7 @@ class DnsRecord(Base):
         return str(self.fqdn)
 
     @validates('ttl')
-    def validate_ttl(self, key, value):
+    def validate_ttl(self, key, value):  # pylint: disable=W0613
         if value is not None:
             value = int(value)
             if value < 0 or value > 2147483647:
@@ -153,7 +153,7 @@ class DnsRecord(Base):
         return value
 
     @validates('owner_grn')
-    def validate_grn(self, key, grn):
+    def validate_grn(self, key, grn):  # pylint: disable=W0613
         if grn:
             session = object_session(self)
             with session.no_autoflush:
@@ -161,7 +161,7 @@ class DnsRecord(Base):
 
         return grn
 
-    def check_grn_conflict(self, grn):
+    def check_grn_conflict(self, grn):  # pylint: disable=W0613
         if self.hardware_entity:
             raise ArgumentError("{0} is a primary name. GRN should not be set "
                                 "but derived from the device.".format(self))

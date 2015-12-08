@@ -17,7 +17,7 @@
 """ Configuration  Parameter data """
 
 from datetime import datetime
-from six.moves import range
+from six.moves import range  # pylint: disable=F0401
 
 from sqlalchemy import Column, Integer, DateTime, Sequence, ForeignKey
 from sqlalchemy.orm import relation, backref, deferred
