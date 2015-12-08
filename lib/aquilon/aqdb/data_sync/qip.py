@@ -26,6 +26,7 @@ from aquilon.aqdb.model import (NetworkEnvironment, Network, RouterAddress,
                                 Building, Bunker, NetworkCompartment)
 from aquilon.worker.dbwrappers.dns import delete_dns_record
 from aquilon.worker.dbwrappers.network import fix_foreign_links
+from aquilon.worker.templates.base import Plenary, PlenaryCollection
 
 from sqlalchemy.orm import subqueryload
 from sqlalchemy.sql import update, and_, or_
@@ -99,19 +100,26 @@ class QIPRefresh(object):
         # Save how many networks we had initially
         self.networks_before = len(self.aqnetworks)
 
+        # Plenaries that need to be updated
+        self.plenaries = PlenaryCollection(logger=logger)
+
     def error(self, msg):
         self.logger.error(msg)
         self.errors.append(msg)
 
     def commit_if_needed(self):
         try:
-            if self.dryrun:
+            if self.dryrun or self.incremental:
                 self.session.flush()
             if self.incremental:
+                self.plenaries.write()
                 self.session.commit()
         except Exception as err:  # pragma: no cover
             self.error(str(err))
             self.session.rollback()
+        finally:
+            if self.incremental:
+                self.plenaries = PlenaryCollection(logger=self.logger)
 
     def parse_line(self, line):
         """
@@ -240,6 +248,8 @@ class QIPRefresh(object):
     def update_network(self, dbnetwork, qipinfo):
         """ Update the network parameters except the netmask """
 
+        self.plenaries.append(Plenary.get_plenary(dbnetwork))
+
         if dbnetwork.name != qipinfo.name:
             self.logger.client_info("Setting network {0!s} name to {1}"
                                     .format(dbnetwork, qipinfo.name))
@@ -273,7 +283,8 @@ class QIPRefresh(object):
             self.logger.client_info("Removing router {0:s} from "
                                     "{1:l}".format(router.ip, dbnetwork))
             for dns_rec in router.dns_records:
-                delete_dns_record(dns_rec)
+                if dns_rec.is_unused:
+                    delete_dns_record(dns_rec)
             dbnetwork.routers.remove(router)
 
         for ip in new_rtrs - old_rtrs:
@@ -293,6 +304,7 @@ class QIPRefresh(object):
         self.logger.client_info("Adding network {0!s}".format(dbnetwork))
         for ip in qipinfo.routers:
             self.add_router(dbnetwork, ip)
+        self.plenaries.append(Plenary.get_plenary(dbnetwork))
         self.session.flush()
         return dbnetwork
 
@@ -320,6 +332,8 @@ class QIPRefresh(object):
             dbnetwork.routers = []
             self.logger.client_info("Deleting network {0!s}".format(dbnetwork))
             self.session.delete(dbnetwork)
+
+        self.plenaries.append(Plenary.get_plenary(dbnetwork))
 
     def add_router(self, dbnetwork, ip):
         dbnetwork.routers.append(RouterAddress(ip=ip,
@@ -482,6 +496,7 @@ class QIPRefresh(object):
 
             self.commit_if_needed()
         self.session.flush()
+        self.plenaries.write()
 
         if self.errors:
             if self.incremental:

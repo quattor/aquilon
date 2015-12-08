@@ -18,13 +18,16 @@
 
 from aquilon.utils import validate_nlist_key
 from aquilon.exceptions_ import ArgumentError, ProcessException
-from aquilon.aqdb.model import HardwareEntity, NetworkEnvironment, Interface
+from aquilon.aqdb.model import (HardwareEntity, NetworkEnvironment, Interface,
+                                SharedAddressAssignment)
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.dns import grab_address
 from aquilon.worker.dbwrappers.interface import (generate_ip,
                                                  assign_address)
+from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.worker.processes import DSDBRunner
 from aquilon.worker.templates import Plenary, PlenaryCollection
+from sqlalchemy.sql.expression import desc
 
 
 class CommandAddInterfaceAddress(BrokerCommand):
@@ -32,7 +35,8 @@ class CommandAddInterfaceAddress(BrokerCommand):
     required_parameters = ['interface']
 
     def render(self, session, logger, machine, chassis, network_device, fqdn,
-               interface, label, network_environment, map_to_primary, **kwargs):
+               interface, label, network_environment, map_to_primary,
+               shared, priority, **kwargs):
 
         if machine:
             hwtype = 'machine'
@@ -43,6 +47,10 @@ class CommandAddInterfaceAddress(BrokerCommand):
         elif network_device:
             hwtype = 'network_device'
             hwname = network_device
+
+        if shared and not network_device:
+            raise ArgumentError("The --shared option can only be used with "
+                                "network devices.")
 
         dbnet_env = NetworkEnvironment.get_unique_or_default(session,
                                                              network_environment)
@@ -66,6 +74,20 @@ class CommandAddInterfaceAddress(BrokerCommand):
         else:
             relaxed = False
 
+        if shared and not fqdn:
+            dbnetwork = get_net_id_from_ip(session, ip, network_environment)
+            q = session.query(SharedAddressAssignment)
+            q = q.filter_by(network=dbnetwork)
+            q = q.filter_by(ip=ip)
+            q = q.order_by(desc(SharedAddressAssignment.priority))
+            dbsaddr = q.first()
+            # Its common the --ip address is used (without --fqdn) for shared
+            # addresses.  The problem is that the following fqdn logic will
+            # create the wrong fqdn for existing addresses, which in turn
+            # wll cause grab_address to fail.
+            if dbsaddr:
+                fqdn = dbsaddr.fqdns[0].fqdn
+
         if not fqdn:
             if not dbhw_ent.primary_name:
                 raise ArgumentError("{0} has no primary name, can not "
@@ -87,7 +109,7 @@ class CommandAddInterfaceAddress(BrokerCommand):
 
         # TODO: add allow_multi=True
         dbdns_rec, newly_created = grab_address(session, fqdn, ip, dbnet_env,
-                                                relaxed=relaxed)
+                                                relaxed=relaxed, allow_shared=shared)
         ip = dbdns_rec.ip
         dbnetwork = dbdns_rec.network
         delete_old_dsdb_entry = not newly_created and not dbdns_rec.assignments
@@ -131,7 +153,8 @@ class CommandAddInterfaceAddress(BrokerCommand):
                                                     dbnetwork,
                                                     dbnetwork.network_environment))
 
-        assign_address(dbinterface, ip, dbnetwork, label=label, logger=logger)
+        assign_address(dbinterface, ip, dbnetwork, label=label, shared=shared,
+                       priority=priority, logger=logger)
         session.flush()
 
         plenaries = PlenaryCollection(logger=logger)
@@ -140,6 +163,9 @@ class CommandAddInterfaceAddress(BrokerCommand):
             plenaries.append(Plenary.get_plenary(dbhw_ent.host))
 
         dsdb_runner = DSDBRunner(logger=logger)
+
+        if shared and newly_created:
+            dsdb_runner.add_host_details(dbdns_rec, ip, comments=dbinterface.comments)
 
         with plenaries.transaction():
             if dbhw_ent.host and dbhw_ent.host.archetype.name == 'aurora':

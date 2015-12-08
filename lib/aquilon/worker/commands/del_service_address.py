@@ -53,13 +53,13 @@ class CommandDelServiceAddress(BrokerCommand):
         plenaries.append(Plenary.get_plenary(dbsrv))
 
         holder.resources.remove(dbsrv)
-        if not keep_dns:
+        if not dbdns_rec.service_addresses and not keep_dns:
             delete_dns_record(dbdns_rec)
 
         session.flush()
 
         with plenaries.transaction():
-            if not keep_dns:
+            if not dbdns_rec.service_addresses and not keep_dns:
                 dsdb_runner.delete_host_details(old_fqdn, old_ip)
             dsdb_runner.commit_or_rollback("Could not delete host from DSDB")
 

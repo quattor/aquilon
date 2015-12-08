@@ -95,6 +95,9 @@ class InterfaceFormatter(ObjectFormatter):
             tags = []
             if addr.label:
                 tags.append("label: %s" % addr.label)
+            if addr.is_shared:
+                tags.append("shared")
+                tags.append("priority: %s" % str(addr.priority))
             if tags:
                 tagstr = " (%s)" % ", ".join(tags)
             else:

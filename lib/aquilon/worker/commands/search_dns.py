@@ -122,7 +122,7 @@ class CommandSearchDns(BrokerCommand):
             q = q.outerjoin(AAlias,
                             and_(ARecord.network_id == AAlias.network_id,
                                  ARecord.ip == AAlias.ip))
-            q = q.outerjoin(SAlias, ARecord.service_address)
+            q = q.outerjoin(SAlias, ARecord.service_addresses)
             if used:
                 q = q.filter(or_(AAlias.id != null(),
                                  SAlias.id != null()))

@@ -33,6 +33,7 @@ from aquilon.aqdb.types import NicType, MACAddress
 from aquilon.aqdb.column_types import AqMac
 from aquilon.aqdb.model import (Interface, ManagementInterface, ObservedMac,
                                 Fqdn, ARecord, VlanInfo, AddressAssignment,
+                                SharedAddressAssignment,
                                 Model, Bunker, Location, HardwareEntity,
                                 Network, Host)
 from aquilon.aqdb.model.network import get_net_id_from_ip
@@ -573,7 +574,8 @@ def enforce_bucket_alignment(dbrack, dbnetwork, logger):
                                expected_bunker))
 
 
-def assign_address(dbinterface, ip, dbnetwork, label=None, logger=None):
+def assign_address(dbinterface, ip, dbnetwork, label=None, shared=False,
+                   priority=None, logger=None):
     assert isinstance(dbinterface, Interface)
 
     dns_environment = dbnetwork.network_environment.dns_environment
@@ -601,9 +603,15 @@ def assign_address(dbinterface, ip, dbnetwork, label=None, logger=None):
             raise ArgumentError("{0} already has IP address {1} "
                                 "configured.".format(dbinterface, ip))
 
-    dbinterface.assignments.append(AddressAssignment(ip=ip, network=dbnetwork,
-                                                     label=label,
-                                                     dns_environment=dns_environment))
+    if shared:
+        dbinterface.assignments.append(SharedAddressAssignment(ip=ip, network=dbnetwork,
+                                                               label=label,
+                                                               dns_environment=dns_environment,
+                                                               priority=priority))
+    else:
+        dbinterface.assignments.append(AddressAssignment(ip=ip, network=dbnetwork,
+                                                         label=label,
+                                                         dns_environment=dns_environment))
     dbinterface.check_pg_consistency(logger=logger)
 
 

@@ -30,7 +30,7 @@ from aquilon.aqdb.model import (Service, Machine, Chassis, Host,
                                 Rack, Resource, HostResource, ClusterResource,
                                 BundleResource, VirtualMachine, Filesystem,
                                 ServiceAddress, Share, Disk, Model, Interface,
-                                AddressAssignment,
+                                AddressAssignment, Network,
                                 ServiceInstance, NetworkDevice, VirtualSwitch,
                                 PortGroup, ParamDefHolder, Feature)
 from aquilon.aqdb.data_sync.storage import StormapParser
@@ -117,7 +117,7 @@ class CommandFlush(BrokerCommand):
                                 slaves_by_id.get(iface_id, None))
 
     def render(self, session, logger, services, personalities, machines,
-               clusters, hosts, locations, resources, network_devices,
+               clusters, hosts, locations, resources, networks, network_devices,
                virtual_switches, all, **arguments):
         if all:
             services = True
@@ -398,6 +398,21 @@ class CommandFlush(BrokerCommand):
                         written += plenary._write()
                     except Exception as e:
                         failed.append("{0} failed: {1}".format(dbresource, e))
+
+            if networks:
+                logger.client_info("Flushing networks.")
+                q = session.query(Network)
+                q = q.options(subqueryload('network_environment'),
+                              subqueryload('network_compartment'),
+                              subqueryload('location'))
+                progress = ProgressReport(logger, q.count(), "networks")
+                for dbnetwork in q:
+                    progress.step()
+                    try:
+                        plenary = Plenary.get_plenary(dbnetwork, logger=logger)
+                        written += plenary._write()
+                    except Exception as e:
+                        failed.append("{0} failed: {1}".format(dbnetwork, e))
 
             if network_devices:
                 logger.client_info("Flushing network devices.")

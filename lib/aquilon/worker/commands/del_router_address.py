@@ -21,13 +21,14 @@ from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.dbwrappers.dns import delete_dns_record
 from aquilon.aqdb.model import ARecord, NetworkEnvironment
 from aquilon.aqdb.model.network import get_net_id_from_ip
+from aquilon.worker.templates.base import Plenary, PlenaryCollection
 
 
 class CommandDelRouterAddress(BrokerCommand):
 
     required_parameters = []
 
-    def render(self, session, dbuser,
+    def render(self, session, logger, dbuser,
                ip, fqdn, network_environment, **arguments):
         dbnet_env = NetworkEnvironment.get_unique_or_default(session,
                                                              network_environment)
@@ -50,11 +51,19 @@ class CommandDelRouterAddress(BrokerCommand):
             raise NotFoundException("IP address {0} is not a router on "
                                     "{1:l}.".format(ip, dbnetwork))
 
+        # Only remove the DNS record if its not assinged to an interface,
+        # or is a service address.  (This would be easier if service
+        # address were not split from assignments)
         for dns_rec in dbrouter.dns_records:
-            delete_dns_record(dns_rec)
+            if dns_rec.is_unused:
+                delete_dns_record(dns_rec, verify_assignments=True)
+
         dbnetwork.routers.remove(dbrouter)
         session.flush()
 
         # TODO: update the templates of Zebra hosts on the network
+        plenaries = PlenaryCollection(logger=logger)
+        plenaries.append(Plenary.get_plenary(dbnetwork))
+        plenaries.write()
 
         return

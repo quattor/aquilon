@@ -23,6 +23,7 @@ from aquilon.worker.templates.personality import (PlenaryPersonality,
                                                   PlenaryPersonalityBase)
 from aquilon.worker.templates.switchdata import PlenarySwitchData
 from aquilon.worker.templates.machine import PlenaryMachineInfo
+from aquilon.worker.templates.network import PlenaryNetwork
 from aquilon.worker.templates.resource import PlenaryResource
 from aquilon.worker.templates.service import (PlenaryService,
                                               PlenaryServiceToplevel,

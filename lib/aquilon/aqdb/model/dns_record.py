@@ -215,6 +215,13 @@ class DnsRecord(Base):
         # Ensure a deterministic order of all address aliases
         return sorted(self.address_aliases, key=lambda x: str(x.fqdn))
 
+    @property
+    def is_unused(self):
+        # TODO: This property is intended for ARecord's where we are
+        # guarding delete_dns_record.  At the moment we assume that
+        # a record is used.  We should probably check all_aliases.
+        return False
+
     def __init__(self, fqdn=None, **kwargs):
         if not fqdn:  # pragma: no cover
             raise ValueError("fqdn cannot be empty")

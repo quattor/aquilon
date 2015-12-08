@@ -33,7 +33,8 @@ class CommandAddServiceAddress(BrokerCommand):
 
     def render(self, session, logger, service_address, ip, name, interfaces,
                hostname, cluster, metacluster, resourcegroup,
-               network_environment, map_to_primary, comments, **arguments):
+               network_environment, map_to_primary, shared, comments,
+               **arguments):
 
         validate_nlist_key("name", name)
 
@@ -53,9 +54,15 @@ class CommandAddServiceAddress(BrokerCommand):
         ServiceAddress.get_unique(session, name=name, holder=holder,
                                   preclude=True)
 
+        if shared:
+            if not isinstance(toplevel_holder, Host):
+                raise ArgumentError("The --shared option works only "
+                                    "for host-based service addresses.")
+
         # TODO: add allow_multi=True
         dbdns_rec, newly_created = grab_address(session, service_address, ip,
-                                                network_environment)
+                                                network_environment,
+                                                allow_shared=shared)
         ip = dbdns_rec.ip
 
         if map_to_primary:
@@ -92,10 +99,13 @@ class CommandAddServiceAddress(BrokerCommand):
         plenaries.append(Plenary.get_plenary(dbsrv))
 
         with plenaries.transaction():
-            if not newly_created:
+            if not newly_created and not shared:
                 dsdb_runner.delete_host_details(dbsrv.dns_record, dbsrv.ip)
 
-            dsdb_runner.add_host_details(dbsrv.dns_record, dbsrv.ip, comments=comments)
+            if newly_created:
+                dsdb_runner.add_host_details(dbsrv.dns_record, dbsrv.ip,
+                                             comments=comments)
+
             dsdb_runner.commit_or_rollback("Could not add host to DSDB")
 
         return

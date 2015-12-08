@@ -77,6 +77,16 @@
 	</cmdsynopsis>
 	<cmdsynopsis>
 	    <command>aq cat</command>
+	    <group choice="req">
+		<arg choice="plain"><option>--networkip<replaceable>IP</replaceable></option></arg>
+	    </group>
+	    <group>
+		<arg choice="plain"><option>--network_environment<replaceable>NETENV</replaceable></option></arg>
+	    </group>
+	    <arg><option>--generate</option></arg>
+	</cmdsynopsis>
+	<cmdsynopsis>
+	    <command>aq cat</command>
 	    <arg choice="plain"><option>--personality <replaceable>PERSONALITY</replaceable></option></arg>
 	    <arg><option>--personality_stage <replaceable>STAGE</replaceable></option></arg>
 	    <arg><option>--archetype <replaceable>ARCHETYPE</replaceable></option></arg>
@@ -239,6 +249,21 @@
 		<listitem>
 		    <para>
 			Display the plenary of the named network device.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	</variablelist>
+	<variablelist>
+	    <title>Looking at network plenaries</title>
+	    <varlistentry>
+	        <term>
+		    <option>--networkip <replaceable>IP</replaceable></option>
+		    <option>--network_environment<replaceable>NETENV</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Display the plenary of the network.  If the <option>--network_environment</option> is
+			not given then it defaults to "internal".
 		    </para>
 		</listitem>
 	    </varlistentry>

@@ -57,6 +57,15 @@ class ARecord(DnsRecord):
                                                         'dns_environment']}})
     __mapper_args__ = {'polymorphic_identity': _TN}
 
+    @property
+    def is_unused(self):
+        if self.assignments:
+            return False
+        elif self.service_addresses:
+            return False
+        else:
+            return True
+
     def __format__(self, format_spec):
         if format_spec != "a":
             return super(ARecord, self).__format__(format_spec)
@@ -104,7 +113,7 @@ class ARecord(DnsRecord):
 
     def check_grn_conflict(self, grn):
         super(ARecord, self).check_grn_conflict(grn)
-        if self.service_address:
+        if self.service_addresses:
             raise ArgumentError("{0} is a service address. GRN should not be set "
                                 "but derived from the device.".format(self))
 
