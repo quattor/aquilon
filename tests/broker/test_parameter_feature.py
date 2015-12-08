@@ -17,6 +17,8 @@
 # limitations under the License.
 """Module for testing parameter support for features."""
 
+import json
+
 if __name__ == "__main__":
     import utils
     utils.import_depends()
@@ -75,7 +77,9 @@ class TestParameterFeature(TestBrokerCommand):
                           r'"/system/features/hostfeature/testfalsedefault" = false;\s*'
                           r'"/system/features/hostfeature/testfloat" = 100\.100;\s*'
                           r'"/system/features/hostfeature/testint" = 60;\s*'
-                          r'"/system/features/hostfeature/testjson" = nlist\(\s*"val1",\s*"val2"\s*\);\s*'
+                          r'"/system/features/hostfeature/testjson" = nlist\(\s*'
+                          r'"key",\s*"param_key",\s*'
+                          r'"values",\s*list\(\s*0\s*\)\s*\);\s*'
                           r'"/system/features/hostfeature/testlist" = list\(\s*"val1",\s*"val2"\s*\);\s*'
                           r'"/system/features/hostfeature/teststring" = "default";\s*'
                           r'include \{ "features/hostfeature/config" \};',
@@ -108,15 +112,22 @@ class TestParameterFeature(TestBrokerCommand):
         cmd = ADD_CMD + ["--path", path, "--value", value, "--feature", HOSTFEATURE]
         self.noouttest(cmd)
 
+        path = "testjson"
+        value = '{"key": "other_key", "values": [1, 2]}'
+        cmd = ADD_CMD + ["--path", path, "--value", value, "--feature", HOSTFEATURE]
+        self.noouttest(cmd)
+
     def test_115_verify_host_feature(self):
         cmd = SHOW_CMD
         out = self.commandtest(cmd)
-        self.searchoutput(out, r'"hostfeature": {\s*'
-                               r'"testboolean": false,\s*'
-                               r'"testdefault": "host_feature",\s*'
-                               r'"testint": 0,\s*'
-                               r'"testlist": \[\s*"host1",\s*"host2"\s*\],\s*'
-                               r'"teststring": "override"\s*', cmd)
+        self.searchoutput(out,
+                          r'"hostfeature": {\s*'
+                          r'"testboolean": false,\s*'
+                          r'"testdefault": "host_feature",\s*'
+                          r'"testint": 0,\s*'
+                          r'"testjson": {\s*"key":\s*"other_key",\s*"values":\s*\[\s*1,\s*2\s*\]\s*},\s*'
+                          r'"testlist": \[\s*"host1",\s*"host2"\s*\],\s*'
+                          r'"teststring": "override"\s*', cmd)
 
     def test_120_verify_cat_host_feature(self):
         cmd = CAT_CMD + ["--post_feature"]
@@ -127,7 +138,9 @@ class TestParameterFeature(TestBrokerCommand):
                           r'"/system/features/hostfeature/testfalsedefault" = false;\s*'
                           r'"/system/features/hostfeature/testfloat" = 100\.100;\s*'
                           r'"/system/features/hostfeature/testint" = 0;\s*'
-                          r'"/system/features/hostfeature/testjson" = nlist\(\s*"val1",\s*"val2"\s*\);\s*'
+                          r'"/system/features/hostfeature/testjson" = nlist\(\s*'
+                          r'"key",\s*"other_key",\s*'
+                          r'"values",\s*list\(\s*1,\s*2\s*\)\s*\);\s*'
                           r'"/system/features/hostfeature/testlist" = list\(\s*"host1",\s*"host2"\s*\);\s*'
                           r'"/system/features/hostfeature/teststring" = "override";\s*'
                           r'include \{ "features/hostfeature/config" \};',
@@ -202,7 +215,9 @@ class TestParameterFeature(TestBrokerCommand):
                           r'"/system/features/interface/interfacefeature/testfalsedefault" = false;\s*'
                           r'"/system/features/interface/interfacefeature/testfloat" = 100\.100;\s*'
                           r'"/system/features/interface/interfacefeature/testint" = 60;\s*'
-                          r'"/system/features/interface/interfacefeature/testjson" = nlist\(\s*"val1",\s*"val2"\s*\);\s*'
+                          r'"/system/features/interface/interfacefeature/testjson" = nlist\(\s*'
+                          r'"key",\s*"param_key",\s*'
+                          r'"values",\s*list\(\s*0\s*\)\s*\);\s*'
                           r'"/system/features/interface/interfacefeature/testlist" = list\(\s*"intf1",\s*"intf2"\s*\);\s*'
                           r'"/system/features/interface/interfacefeature/teststring" = "default";\s*'
                           r'variable CURRENT_INTERFACE = "eth0";\s*'
@@ -241,7 +256,7 @@ class TestParameterFeature(TestBrokerCommand):
 
     def test_310_verify_feature_proto(self):
         cmd = SHOW_CMD + ["--format=proto"]
-        params = self.protobuftest(cmd, expect=12)
+        params = self.protobuftest(cmd, expect=13)
 
         param_values = {}
         for param in params:
@@ -254,6 +269,7 @@ class TestParameterFeature(TestBrokerCommand):
                               "features/hostfeature/testboolean",
                               "features/hostfeature/testdefault",
                               "features/hostfeature/testint",
+                              "features/hostfeature/testjson",
                               "features/hostfeature/testlist",
                               "features/hostfeature/teststring",
                               "features/hardware/hardwarefeature/testlist",
@@ -268,6 +284,12 @@ class TestParameterFeature(TestBrokerCommand):
                          'override')
         self.assertEqual(param_values['features/hostfeature/testint'],
                          '0')
+
+        # The order of the keys is not deterministic, so we cannot do
+        # string-wise comparison here
+        self.assertEqual(json.loads(param_values['features/hostfeature/testjson']),
+                         json.loads('{"key": "other_key", "values": [1, 2]}'))
+
         self.assertEqual(param_values['features/hostfeature/testlist'],
                          'host1,host2')
         self.assertEqual(param_values['features/hostfeature/testdefault'],
@@ -290,7 +312,9 @@ class TestParameterFeature(TestBrokerCommand):
                           r'"/system/features/hardware/hardwarefeature/testfalsedefault" = false;\s*'
                           r'"/system/features/hardware/hardwarefeature/testfloat" = 100\.100;\s*'
                           r'"/system/features/hardware/hardwarefeature/testint" = 60;\s*'
-                          r'"/system/features/hardware/hardwarefeature/testjson" = nlist\(\s*"val1",\s*"val2"\s*\);\s*'
+                          r'"/system/features/hardware/hardwarefeature/testjson" = nlist\(\s*'
+                          r'"key",\s*"param_key",\s*'
+                          r'"values",\s*list\(\s*0\s*\)\s*\);\s*'
                           r'"/system/features/hardware/hardwarefeature/testlist" = list\(\s*"hardware1",\s*"hardware2"\s*\);\s*'
                           r'"/system/features/hardware/hardwarefeature/teststring" = "default";\s*',
                           cmd)
@@ -338,10 +362,67 @@ class TestParameterFeature(TestBrokerCommand):
                           r'"/system/features/hardware/hardwarefeature/testfalsedefault" = false;\s*'
                           r'"/system/features/hardware/hardwarefeature/testfloat" = 100\.100;\s*'
                           r'"/system/features/hardware/hardwarefeature/testint" = 60;\s*'
-                          r'"/system/features/hardware/hardwarefeature/testjson" = nlist\(\s*"val1",\s*"val2"\s*\);\s*'
+                          r'"/system/features/hardware/hardwarefeature/testjson" = nlist\(\s*'
+                          r'"key",\s*"param_key",\s*'
+                          r'"values",\s*list\(\s*0\s*\)\s*\);\s*'
                           r'"/system/features/hardware/hardwarefeature/testlist" = list\(\s*"hardware1",\s*"hardware2"\s*\);\s*'
                           r'"/system/features/hardware/hardwarefeature/teststring" = "default";\s*',
                           cmd)
+
+    def test_400_json_validation(self):
+        cmd = ["update_parameter", "--archetype", ARCHETYPE,
+               "--personality", PERSONALITY, "--feature", HOSTFEATURE,
+               "--type", "host", "--path", "testjson",
+               "--value", '{"key": "val3", "values": []}']
+        out = self.badrequesttest(cmd)
+        self.matchoutput(out, "Failed validating", cmd)
+
+    def test_400_update_json_schema_value_conflict(self):
+        new_schema = {
+            "schema": "http://json-schema.org/draft-04/schema#",
+            "type": "object",
+            "properties": {
+                "key": {
+                    "type": "string"
+                },
+                "values": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer",
+                    },
+                    "maxItems": 1,
+                },
+            },
+            "additionalProperties": False,
+        }
+
+        cmd = ["update_parameter_definition",
+               "--feature", HOSTFEATURE, "--type", "host",
+               "--path", "testjson", "--schema", json.dumps(new_schema)]
+        out = self.badrequesttest(cmd)
+        self.matchoutput(out,
+                         "Existing value for personality aquilon/%s@next "
+                         "conflicts with the new schema: [1, 2] is too long" %
+                         PERSONALITY,
+                         cmd)
+
+    def test_400_update_json_schema_default_conflict(self):
+        new_schema = {
+            "schema": "http://json-schema.org/draft-04/schema#",
+            "type": "object",
+            "properties": {
+                "key": {
+                    "type": "string"
+                },
+            },
+            "additionalProperties": False,
+        }
+
+        cmd = ["update_parameter_definition",
+               "--feature", HOSTFEATURE, "--type", "host",
+               "--path", "testjson", "--schema", json.dumps(new_schema)]
+        out = self.badrequesttest(cmd)
+        self.matchoutput(out, "The existing default value conflicts with the new schema", cmd)
 
     def test_500_verify_diff(self):
         cmd = ["show_diff", "--archetype", ARCHETYPE, "--personality", PERSONALITY,
@@ -368,6 +449,9 @@ class TestParameterFeature(TestBrokerCommand):
                                r'//features/hostfeature/testboolean\s*'
                                r'//features/hostfeature/testdefault\s*'
                                r'//features/hostfeature/testint\s*'
+                               r'//features/hostfeature/testjson/key\s*'
+                               r'//features/hostfeature/testjson/values/0\s*'
+                               r'//features/hostfeature/testjson/values/1\s*'
                                r'//features/hostfeature/testlist/0\s*'
                                r'//features/hostfeature/testlist/1\s*'
                                r'//features/hostfeature/teststring\s*'

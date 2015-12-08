@@ -483,7 +483,7 @@
 	    <option name="vendor" type="string">Machine vendor name</option>
 	    <option name="serial" type="string">Machine serial number</option>
 	    <option name="cluster" type="string">Cluster or metacluster name</option>
-            <option name="metacluster" type="string">Metacluster name</option>
+	    <option name="metacluster" type="string">Metacluster name</option>
 	    <option name="guest_on_cluster" type="string">Host is a virtual machine guest on this cluster</option>
 	    <option name="guest_on_share" type="string">Host is a virtual machine using this share</option>
 	    <option name="member_cluster_share" type="string">Host is a member of a cluster with machines using this share</option>
@@ -1365,9 +1365,10 @@
 	    <option name="nicmodel" type="string">NIC model name</option>
 	    <option name="nicvendor" type="string">NIC vendor</option>
 	    <option name="comments" type="string">Comments</option>
-	    <option name="update_existing_machines" type="flag">Update
-        machines using the old defaults to the new values (default is
-        to not make any changes)</option>
+	    <option name="update_existing_machines" type="flag">
+		Update machines using the old defaults to the new values (default is to not make any
+		changes)
+	    </option>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
 	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
 	</optgroup>
@@ -2848,7 +2849,9 @@
     </command>
 
     <command name="add_chassis">
-	Add a new chassis to the database.  A chassis can contain multiple blades. Management tasks for the blades are typically performed by connecting to the chassis itself, and so the chassis name must exist within DNS.
+	Add a new chassis to the database.  A chassis can contain multiple blades. Management tasks
+	for the blades are typically performed by connecting to the chassis itself, and so the
+	chassis name must exist within DNS.
 	<optgroup mandatory="True" fields="all">
 	    <option name="chassis" type="string">FQDN name of the new chassis</option>
 	    <option name="rack" type="string">Name of the rack location for this chassis</option>
@@ -6397,6 +6400,7 @@
 	    <option name="required" type="flag">Is this parameter required for object compilation </option>
 	    <option name="default" type="string">Default value </option>
 	    <option name="description" type="string">Description</option>
+	    <option name="schema" type="json">Schema for JSON parameters</option>
 	    <option name="activation" type="string" conflicts="feature type">How the parameter gets activated, valid values are rebuild, reboot, dispatch(default)</option>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
 	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
@@ -6442,7 +6446,9 @@
 	    <option name="default" type="string">Default value</option>
 	    <option name="clear_default" type="flag" conflicts="default">Clear the default value</option>
 	    <option name="description" type="string">Description</option>
-            <option name="activation" type="string" conflicts="feature type">Update how the parameter gets activated, valid values are rebuild, reboot, dispatch</option>
+	    <option name="schema" type="json">Schema for JSON parameters</option>
+	    <option name="clear_schema" type="flag">Clear existing JSON schema</option>
+	    <option name="activation" type="string" conflicts="feature type">Update how the parameter gets activated, valid values are rebuild, reboot, dispatch</option>
 	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
 	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
 	</optgroup>

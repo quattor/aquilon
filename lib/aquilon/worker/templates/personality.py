@@ -23,7 +23,7 @@ from six import iteritems
 from sqlalchemy.inspection import inspect
 from sqlalchemy.orm import object_session
 
-from aquilon.aqdb.model import PersonalityStage, Parameter
+from aquilon.aqdb.model import PersonalityStage, ParamDefinition
 from aquilon.worker.locks import NoLockKey, PlenaryKey
 from aquilon.worker.templates.base import (Plenary, StructurePlenary,
                                            TemplateFormatter, PlenaryCollection)
@@ -79,12 +79,12 @@ def get_path_under_top(path, value):
             then print xx = yy
     """
     ret = {}
-    pparts = Parameter.path_parts(path)
+    pparts = ParamDefinition.split_path(path)
     if not pparts:
         return ret
     top = pparts.pop(0)
     if pparts:
-        ret[Parameter.topath(pparts)] = value
+        ret["/".join(pparts)] = value
     elif isinstance(value, dict):
         for k in value:
             ret[k] = value[k]

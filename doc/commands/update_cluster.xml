@@ -4,20 +4,20 @@
 <!ENTITY aqd_version SYSTEM "../version.txt">
 ]>
 <refentry xml:id="aq_update_cluster"
-          xmlns="http://docbook.org/ns/docbook"
+	  xmlns="http://docbook.org/ns/docbook"
 	  xmlns:xi="http://www.w3.org/2001/XInclude">
     <refmeta>
-        <refentrytitle>aq_update_cluster</refentrytitle>
-        <manvolnum>1</manvolnum>
-        <refmiscinfo class="version">&aqd_version;</refmiscinfo>
-        <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
+	<refentrytitle>aq_update_cluster</refentrytitle>
+	<manvolnum>1</manvolnum>
+	<refmiscinfo class="version">&aqd_version;</refmiscinfo>
+	<refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
     </refmeta>
 
     <refnamediv>
-        <refname>aq update cluster</refname>
-        <refpurpose>
+	<refname>aq update cluster</refname>
+	<refpurpose>
 	    Update parameters of a cluster
-        </refpurpose>
+	</refpurpose>
 	<refclass>Aquilon</refclass>
     </refnamediv>
 
@@ -52,7 +52,7 @@
     </refsynopsisdiv>
 
     <refsect1>
-        <title>Description</title>
+	<title>Description</title>
 	<para>
 	    The <command>aq update cluster</command> command updates the parameters of a cluster.
 	    If called without any options, the command will just refresh the plenary templates of the cluster.
@@ -60,11 +60,11 @@
     </refsect1>
 
     <refsect1>
-        <title>Options</title>
+	<title>Options</title>
 	<variablelist>
 	    <title>Command-specific options</title>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--cluster <replaceable>CLUSTER</replaceable></option>
 		</term>
 		<listitem>
@@ -74,7 +74,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--personality <replaceable>PERSONALITY</replaceable></option>
 		</term>
 		<listitem>
@@ -97,7 +97,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--metacluster <replaceable>NAME</replaceable></option>
 		</term>
 		<listitem>
@@ -108,7 +108,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--down_hosts_threshold <replaceable>THRESHOLD</replaceable></option>
 		</term>
 		<listitem>
@@ -120,7 +120,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--maint_threshold <replaceable>THRESHOLD</replaceable></option>
 		</term>
 		<listitem>
@@ -136,7 +136,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--max_members <replaceable>NUMBER</replaceable></option>
 		</term>
 		<listitem>
@@ -147,7 +147,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--switch <replaceable>SWITCH</replaceable></option>
 		</term>
 		<listitem>
@@ -162,7 +162,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--virtual_switch <replaceable>VSWITCH</replaceable></option>
 		</term>
 		<listitem>

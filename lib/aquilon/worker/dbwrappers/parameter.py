@@ -16,33 +16,43 @@
 # limitations under the License.
 """ Helper functions for managing parameters. """
 
-import re
+from jsonschema import validate, ValidationError
+from six import iteritems
 
 from sqlalchemy.orm import contains_eager, joinedload, subqueryload, undefer
 from sqlalchemy.sql import or_
 
 from aquilon.exceptions_ import NotFoundException, ArgumentError
 from aquilon.aqdb.model import (Personality, PersonalityStage, Parameter,
-                                FeatureLink, Host, ParamDefinition,
-                                ArchetypeParamDef, FeatureParamDef,
-                                PersonalityParameter)
+                                PersonalityParameter, FeatureLink, Host,
+                                ArchetypeParamDef, FeatureParamDef)
 from aquilon.aqdb.model.hostlifecycle import Ready, Almostready
 from aquilon.worker.formats.parameter_definition import ParamDefinitionFormatter
 
 
-def set_parameter(session, parameter, dbparam_def, path, value, compel=False,
-                  preclude=False):
+def set_parameter(session, parameter, db_paramdef, path, value, update=False):
     """
         Handles add parameter as well as update parameter. Parmeters for features
         will be stored as part of personality as features/<feature_name>/<path>
     """
-    retval = dbparam_def.parse_value(path, value)
-    if dbparam_def.activation == 'rebuild':
+    retval = db_paramdef.parse_value(path, value)
+    if db_paramdef.activation == 'rebuild':
         validate_rebuild_required(session, path, parameter.personality_stage)
 
-    if isinstance(dbparam_def.holder, FeatureParamDef):
-        path = Parameter.feature_path(dbparam_def.holder.feature, path)
-    parameter.set_path(path, retval, compel, preclude)
+    if isinstance(db_paramdef.holder, FeatureParamDef):
+        path = Parameter.feature_path(db_paramdef.holder.feature, path)
+    parameter.set_path(path, retval, update)
+
+    if db_paramdef.schema:
+        base_path = db_paramdef.path
+        if isinstance(db_paramdef.holder, FeatureParamDef):
+            base_path = Parameter.feature_path(db_paramdef.holder.feature,
+                                               base_path)
+        new_value = parameter.get_path(base_path)
+        try:
+            validate(new_value, db_paramdef.schema)
+        except ValidationError as err:
+            raise ArgumentError(err)
 
 
 def del_all_feature_parameter(session, dblink):
@@ -87,25 +97,17 @@ def get_paramdef_for_parameter(path, param_def_holder):
     if not param_def_holder:
         return None
 
-    path = ParamDefinition.normalize_path(path)
-    param_definitions = param_def_holder.param_definitions
-    match = None
+    for db_paramdef in param_def_holder.param_definitions:
+        if path == db_paramdef.path:
+            return db_paramdef
 
-    # the specified path of the parameter should either be an actual match
-    # or match input specified regexp.
-    # The regexp is done only after all actual paths dont find a match
-    # e.g action/\w+/user will never be an actual match
-    for paramdef in param_definitions:
-        if path == paramdef.path:
-            match = paramdef
-            break
-    else:
-        for paramdef in param_definitions:
-            if re.match(paramdef.path + '$', path):
-                match = paramdef
-                break
+        # Allow "indexing into" JSON parameters
+        if db_paramdef.value_type != "json":
+            continue
+        if path.startswith(db_paramdef.path):
+            return db_paramdef
 
-    return match
+    return None
 
 
 def validate_required_parameter(param_def_holder, parameter):
@@ -146,7 +148,7 @@ def search_path_in_personas(session, path, param_def_holder):
         q = q.join(FeatureLink)
         q = q.filter_by(feature=param_def_holder.feature)
 
-    holder = {}
+    params = {}
 
     if isinstance(param_def_holder, FeatureParamDef):
         path = Parameter.feature_path(param_def_holder.feature, path)
@@ -155,10 +157,10 @@ def search_path_in_personas(session, path, param_def_holder):
         try:
             value = parameter.get_path(path)
             if value is not None:
-                holder[parameter] = {path: value}
+                params[parameter] = value
         except NotFoundException:
             pass
-    return holder
+    return params
 
 
 def validate_personality_config(dbstage):
@@ -186,20 +188,6 @@ def validate_personality_config(dbstage):
             error.append("Feature Binding: %s" % link.feature)
             error += tmp_error
     return error
-
-
-def validate_param_definition(path):
-    """
-        Over here we are a bit restrictive then panc and do not allow
-        underscores as path starters. So far we haven't needed those
-        but this restriction can be relaxed in the future if needed.
-        Suggestions were to validate each path component to validate
-        against valid pan id but we are using regexp in certain cases
-        as parameter paths i.e actions so this would not work.
-    """
-
-    if not path[0].isalpha():
-        raise ArgumentError("Invalid path {0} specified, path cannot start with special characters".format(path))
 
 
 def add_arch_paramdef_plenaries(session, dbarchetype, param_def_holder,
@@ -238,3 +226,20 @@ def add_feature_paramdef_plenaries(session, dbfeature, plenaries):
     for dbstage in q:
         plenaries.append(PlenaryPersonalityPreFeature.get_plenary(dbstage))
         plenaries.append(PlenaryPersonalityPostFeature.get_plenary(dbstage))
+
+
+def update_paramdef_schema(session, db_paramdef, schema):
+    if db_paramdef.value_type != "json":
+        raise ArgumentError("Only JSON parameters may have a schema.")
+    db_paramdef.schema = schema
+
+    # Ensure that existing values do not conflict with the new schema
+    params = search_path_in_personas(session, db_paramdef.path,
+                                     db_paramdef.holder)
+    for param, value in iteritems(params):
+        try:
+            validate(value, schema)
+        except ValidationError as err:
+            raise ArgumentError("Existing value for {0:l} conflicts with the "
+                                "new schema: {1!s}"
+                                .format(param.holder_object, err))

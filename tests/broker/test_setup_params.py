@@ -17,12 +17,68 @@
 # limitations under the License.
 """Module for testing parameter support."""
 
+import json
+
 if __name__ == "__main__":
     import utils
     utils.import_depends()
 
 import unittest
 from broker.brokertest import TestBrokerCommand
+
+actions_schema = {
+    "schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "definitions": {
+        "dependency_list": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                            },
+                            "uniqueItems": True,
+        },
+    },
+    "patternProperties": {
+        "^[a-zA-Z_][a-zA-Z0-9_.-]*$": {
+            "type": "object",
+            "properties": {
+                "user": {
+                    "type": "string",
+                },
+                "command": {
+                    "type": "string",
+                },
+                "dir": {
+                    "type": "string",
+                    "pattern": "^/.*$",
+                },
+                "timeout": {
+                    "type": "integer",
+                    "minValue": 0,
+                },
+                "priority": {
+                    "description": "Deprecated - has no effect",
+                    "type": "integer",
+                },
+                "dependencies": {
+                    "type": "object",
+                    "properties": {
+                        "pre": {
+                            "$ref": "#/definitions/dependency_list",
+                        },
+                        "post": {
+                            "$ref": "#/definitions/dependency_list",
+                        },
+                    },
+                    "additionalProperties": False,
+                },
+            },
+            "required": ["user", "command"],
+            "additionalProperties": False,
+        },
+    },
+    "additionalProperties": False,
+}
 
 # validation parameters by templates
 AQUILON_PARAM_DEFS = {
@@ -40,24 +96,9 @@ AQUILON_PARAM_DEFS = {
     ],
     "actions": [
         {
-            "path": r"action/\w+/user",
-            "value_type": "string",
-            "description": "action user"
-        },
-        {
-            "path": r"action/\w+/command",
-            "value_type": "string",
-            "description": "action command"
-        },
-        {
-            "path": r"action/\w+",
+            "path": "actions",
             "value_type": "json",
-            "description": "per action block"
-        },
-        {
-            "path": "action",
-            "value_type": "json",
-            "description": "per action block"
+            "schema": json.dumps(actions_schema)
         },
     ],
     "startup": [
@@ -191,12 +232,14 @@ class TestSetupParams(TestBrokerCommand):
         cmd = ["add_parameter_definition", "--archetype", archetype,
                "--path", params["path"], "--template", template,
                "--value_type", params["value_type"]]
-        if "required" in params:
+        if "default" in params:
+            cmd.extend(["--default", params["default"]])
+        if params.get("required", False):
             cmd.append("--required")
         if "activation" in params:
             cmd.extend(["--activation", params["activation"]])
-        if "default" in params:
-            cmd.extend(["--default", params["default"]])
+        if "schema" in params:
+            cmd.extend(["--schema", params["schema"]])
 
         self.noouttest(cmd)
 

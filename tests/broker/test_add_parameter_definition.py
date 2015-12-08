@@ -17,12 +17,34 @@
 # limitations under the License.
 """Module for testing parameter definition support."""
 
+import json
+import re
+
 if __name__ == "__main__":
     import utils
     utils.import_depends()
 
 import unittest
 from broker.brokertest import TestBrokerCommand
+
+test_schema = {
+    "schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "properties": {
+        "key": {
+            "type": "string"
+        },
+        "values": {
+            "type": "array",
+            "items": {
+                "type": "integer"
+            },
+            "minItems": 1,
+            "uniqueItems": True
+        }
+    },
+    "additionalProperties": False
+}
 
 default_param_defs = {
     "testdefault": {
@@ -66,8 +88,9 @@ default_param_defs = {
     },
     "testjson": {
         "type": "json",
-        "default": '{"val1": "val2"}',
-        "invalid_default": "bad_json",
+        "default": '{"key": "param_key", "values": [0]}',
+        "schema": json.dumps(test_schema),
+        "invalid_default": "bad json value",
     },
 }
 
@@ -100,6 +123,8 @@ class TestAddParameterDefinition(TestBrokerCommand):
                 cmd.append("--required")
             if "activation" in params:
                 cmd.extend(["--activation", params["activation"]])
+            if "schema" in params:
+                cmd.extend(["--schema", params["schema"]])
 
             self.noouttest(cmd)
 
@@ -146,6 +171,8 @@ class TestAddParameterDefinition(TestBrokerCommand):
                 cmd.extend(["--default", params["default"]])
             if params.get("required", False):
                 cmd.append("--required")
+            if "schema" in params:
+                cmd.extend(["--schema", params["schema"]])
 
             self.noouttest(cmd)
 
@@ -251,7 +278,8 @@ class TestAddParameterDefinition(TestBrokerCommand):
             cmd = ["add_parameter_definition", "--archetype", "aquilon",
                    "--path=%s" % path, "--template=foo", "--value_type=string"]
             err = self.badrequesttest(cmd)
-            self.matchoutput(err, "Invalid path %s specified, path cannot start with special characters" % path,
+            self.matchoutput(err,
+                             "'%s' is not a valid value for a path component." % path,
                              cmd)
 
     def test_300_show_bad_path(self):
@@ -276,7 +304,8 @@ class TestAddParameterDefinition(TestBrokerCommand):
             cmd = ["add_parameter_definition", "--feature", "myfeature", "--type=host",
                    "--path=%s" % path, "--value_type=string"]
             err = self.badrequesttest(cmd)
-            self.matchoutput(err, "Invalid path %s specified, path cannot start with special characters" % path,
+            self.matchoutput(err,
+                             "'%s' is not a valid value for a path component." % path,
                              cmd)
 
     def test_300_add_bad_feature_type(self):
@@ -325,11 +354,13 @@ class TestAddParameterDefinition(TestBrokerCommand):
             pattern += r"\s*"
             if "type" in params:
                 pattern += "Type: " + params["type"] + r"\s*"
+                if params["type"] == "json" and "schema" in params:
+                    pattern += r"Schema: \{\n(^            .*\n)+\s*\}\s*"
             else:
                 pattern += r"Type: string\s*"
             pattern += r"Template: foo\s*"
             if "default" in params:
-                pattern += "Default: " + params["default"] + r"\s*"
+                pattern += "Default: " + re.escape(params["default"]) + r"\s*"
             if "activation" in params:
                 pattern += "Activation: " + params["activation"] + r"\s*"
             else:
@@ -383,10 +414,12 @@ class TestAddParameterDefinition(TestBrokerCommand):
             pattern += r"\s*"
             if "type" in params:
                 pattern += "Type: " + params["type"] + r"\s*"
+                if params["type"] == "json" and "schema" in params:
+                    pattern += r"Schema: \{\n(^            .*\n)+\s*\}\s*"
             else:
                 pattern += r"Type: string\s*"
             if "default" in params:
-                pattern += "Default: " + params["default"] + r"\s*"
+                pattern += "Default: " + re.escape(params["default"]) + r"\s*"
 
             self.searchoutput(out, pattern, cmd)
 

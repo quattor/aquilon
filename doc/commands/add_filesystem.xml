@@ -4,20 +4,20 @@
 <!ENTITY aqd_version SYSTEM "../version.txt">
 ]>
 <refentry xml:id="aq_add_filesystem"
-          xmlns="http://docbook.org/ns/docbook"
+	  xmlns="http://docbook.org/ns/docbook"
 	  xmlns:xi="http://www.w3.org/2001/XInclude">
     <refmeta>
-        <refentrytitle>aq_add_filesystem</refentrytitle>
-        <manvolnum>1</manvolnum>
-        <refmiscinfo class="version">&aqd_version;</refmiscinfo>
-        <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
+	<refentrytitle>aq_add_filesystem</refentrytitle>
+	<manvolnum>1</manvolnum>
+	<refmiscinfo class="version">&aqd_version;</refmiscinfo>
+	<refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
     </refmeta>
 
     <refnamediv>
-        <refname>aq add filesystem</refname>
-        <refpurpose>
+	<refname>aq add filesystem</refname>
+	<refpurpose>
 	    Add a filesystem resource
-        </refpurpose>
+	</refpurpose>
 	<refclass>Aquilon</refclass>
     </refnamediv>
 
@@ -35,7 +35,7 @@
 		<arg choice="plain"><option>--cluster <replaceable>CLUSTER</replaceable></option></arg>
 		<arg choice="plain"><option>--metacluster <replaceable>METACLUSTER</replaceable></option></arg>
 		<arg choice="plain"><option>--resourcegroup <replaceable>RESOURCEGROUP</replaceable></option></arg>
-            </group>
+	    </group>
 	    <arg choice="plain"><option>--filesystem <replaceable>NAME</replaceable></option></arg>
 	    <arg choice="plain"><option>--type <replaceable>TYPE</replaceable></option></arg>
 	    <arg choice="plain"><option>--mountpoint <replaceable>PATHNAME</replaceable></option></arg>
@@ -54,7 +54,7 @@
     </refsynopsisdiv>
 
     <refsect1>
-        <title>Description</title>
+	<title>Description</title>
 	<para>
 	    The <command>aq add_filesystem</command> command adds a
 	    filesystem resource onto a host or a cluster.
@@ -71,7 +71,7 @@
     </refsect1>
 
     <refsect1>
-        <title>Templates</title>
+	<title>Templates</title>
 	<para>
 	    This command will modify the templates for the host or
 	    cluster (depending on which option was given) and the resource
@@ -80,21 +80,21 @@
     </refsect1>
 
     <refsect1>
-        <title>Options</title>
+	<title>Options</title>
 	<variablelist>
 	    <title>Command-specific options</title>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--hostname <replaceable>HOSTNAME</replaceable></option>,
 		</term>
 		<listitem>
 		    <para>
-		        Specify the target host for the filesystem.
+			Specify the target host for the filesystem.
 		    </para>
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--cluster <replaceable>CLUSTER</replaceable></option>
 		</term>
 		<listitem>
@@ -104,7 +104,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--metacluster <replaceable>METACLUSTER</replaceable></option>
 		</term>
 		<listitem>
@@ -114,7 +114,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--resourcegroup <replaceable>RESOURCEGROUP</replaceable></option>
 		</term>
 		<listitem>
@@ -124,7 +124,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--filesystem <replaceable>NAME</replaceable></option>
 		</term>
 		<listitem>
@@ -137,7 +137,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--type <replaceable>TYPE</replaceable></option>
 		</term>
 		<listitem>
@@ -148,7 +148,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--mountpoint <replaceable>MOUNTPOINT</replaceable></option>
 		</term>
 		<listitem>
@@ -159,7 +159,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--blockdevice <replaceable>DEVICEPATH</replaceable></option>
 		</term>
 		<listitem>
@@ -170,7 +170,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--bootmount</option>
 		    <option>--nobootmount</option>
 		</term>
@@ -181,7 +181,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--dumpfreq <replaceable>FREQ</replaceable></option>
 		</term>
 		<listitem>
@@ -193,7 +193,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--fsckpass <replaceable>PASSNO</replaceable></option>
 		</term>
 		<listitem>
@@ -205,7 +205,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--options <replaceable>OPTIONS</replaceable></option>
 		</term>
 		<listitem>
@@ -218,7 +218,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--comments <replaceable>COMMENTS</replaceable></option>
 		</term>
 		<listitem>

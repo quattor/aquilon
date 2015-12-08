@@ -4,20 +4,20 @@
 <!ENTITY aqd_version SYSTEM "../version.txt">
 ]>
 <refentry xml:id="aq_bind_server"
-          xmlns="http://docbook.org/ns/docbook"
+	  xmlns="http://docbook.org/ns/docbook"
 	  xmlns:xi="http://www.w3.org/2001/XInclude">
     <refmeta>
-        <refentrytitle>aq_bind_server</refentrytitle>
-        <manvolnum>1</manvolnum>
-        <refmiscinfo class="version">&aqd_version;</refmiscinfo>
-        <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
+	<refentrytitle>aq_bind_server</refentrytitle>
+	<manvolnum>1</manvolnum>
+	<refmiscinfo class="version">&aqd_version;</refmiscinfo>
+	<refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
     </refmeta>
 
     <refnamediv>
-        <refname>aq bind server</refname>
-        <refpurpose>
+	<refname>aq bind server</refname>
+	<refpurpose>
 	    Bind a server to a service instance
-        </refpurpose>
+	</refpurpose>
 	<refclass>Aquilon</refclass>
     </refnamediv>
 
@@ -63,7 +63,7 @@
     </refsynopsisdiv>
 
     <refsect1>
-        <title>Description</title>
+	<title>Description</title>
 	<para>
 	    The <command>aq bind server</command> command binds a server providing some service to a specific service instance.
 	    A service may be provided by a host, a service address of a cluster, or an alias. If the service is provided by
@@ -82,11 +82,11 @@
     </refsect1>
 
     <refsect1>
-        <title>Options</title>
+	<title>Options</title>
 	<variablelist>
 	    <title>Command-specific options</title>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--service <replaceable>SERVICE</replaceable></option>,
 		    <option>--instance <replaceable>INSTANCE</replaceable></option>
 		</term>
@@ -97,7 +97,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--hostname <replaceable>HOST</replaceable></option>
 		</term>
 		<listitem>
@@ -112,7 +112,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--ip <replaceable>IPADDR</replaceable></option>
 		</term>
 		<listitem>
@@ -123,7 +123,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--cluster <replaceable>CLUSTER</replaceable></option>
 		</term>
 		<listitem>
@@ -135,7 +135,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--service_address <replaceable>NAME</replaceable></option>
 		</term>
 		<listitem>
@@ -147,7 +147,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--resourcegroup <replaceable>GROUP</replaceable></option>
 		</term>
 		<listitem>
@@ -158,7 +158,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--position <replaceable>POSITION</replaceable></option>
 		</term>
 		<listitem>
@@ -176,7 +176,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--alias <replaceable>ALIAS</replaceable></option>
 		</term>
 		<listitem>

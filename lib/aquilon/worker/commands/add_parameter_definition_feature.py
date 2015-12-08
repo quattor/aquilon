@@ -15,11 +15,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Feature, FeatureParamDef, ParamDefinition
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.change_management import validate_prod_feature
-from aquilon.worker.dbwrappers.parameter import (validate_param_definition,
-                                                 add_feature_paramdef_plenaries)
+from aquilon.worker.dbwrappers.parameter import add_feature_paramdef_plenaries
 from aquilon.worker.templates import PlenaryCollection
 
 
@@ -27,18 +27,20 @@ class CommandAddParameterDefintionFeature(BrokerCommand):
 
     required_parameters = ["feature", "type", "path", "value_type"]
 
-    def render(self, session, logger, feature, type, path, value_type, required,
-               default, description, user, justification, reason, **kwargs):
+    def render(self, session, logger, feature, type, path, value_type, schema,
+               required, default, description, user, justification, reason,
+               **kwargs):
         cls = Feature.polymorphic_subclass(type, "Unknown feature type")
         dbfeature = cls.get_unique(session, name=feature, compel=True)
 
         if not dbfeature.param_def_holder:
             dbfeature.param_def_holder = FeatureParamDef()
 
-        path = ParamDefinition.normalize_path(path)
-        validate_param_definition(path)
+        if schema and value_type != "json":
+            raise ArgumentError("Only JSON parameters may have a schema.")
 
-        # activation field has been skipped on purpose
+        path = ParamDefinition.normalize_path(path)
+
         ParamDefinition.get_unique(session, path=path,
                                    holder=dbfeature.param_def_holder, preclude=True)
 
@@ -48,9 +50,11 @@ class CommandAddParameterDefintionFeature(BrokerCommand):
             validate_prod_feature(dbfeature, user, justification, reason)
             add_feature_paramdef_plenaries(session, dbfeature, plenaries)
 
+        # Activation field has been skipped on purpose
         db_paramdef = ParamDefinition(path=path,
                                       holder=dbfeature.param_def_holder,
-                                      value_type=value_type, required=required,
+                                      value_type=value_type, schema=schema,
+                                      required=required,
                                       description=description)
         # Set default separately - validation in the model depends on the other
         # attributes being already set

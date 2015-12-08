@@ -4,20 +4,20 @@
 <!ENTITY aqd_version SYSTEM "../version.txt">
 ]>
 <refentry xml:id="aq_unbind_server"
-          xmlns="http://docbook.org/ns/docbook"
+	  xmlns="http://docbook.org/ns/docbook"
 	  xmlns:xi="http://www.w3.org/2001/XInclude">
     <refmeta>
-        <refentrytitle>aq_unbind_server</refentrytitle>
-        <manvolnum>1</manvolnum>
-        <refmiscinfo class="version">&aqd_version;</refmiscinfo>
-        <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
+	<refentrytitle>aq_unbind_server</refentrytitle>
+	<manvolnum>1</manvolnum>
+	<refmiscinfo class="version">&aqd_version;</refmiscinfo>
+	<refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
     </refmeta>
 
     <refnamediv>
-        <refname>aq unbind server</refname>
-        <refpurpose>
+	<refname>aq unbind server</refname>
+	<refpurpose>
 	    Unbind a server from a service instance
-        </refpurpose>
+	</refpurpose>
 	<refclass>Aquilon</refclass>
     </refnamediv>
 
@@ -73,7 +73,7 @@
     </refsynopsisdiv>
 
     <refsect1>
-        <title>Description</title>
+	<title>Description</title>
 	<para>
 	    The <command>aq unbind server</command> command deletes the binding of a server to a service instance. It
 	    should be called with the same argument as the original <command>aq bind server</command> was, with a few
@@ -82,11 +82,11 @@
     </refsect1>
 
     <refsect1>
-        <title>Options</title>
+	<title>Options</title>
 	<variablelist>
 	    <title>Command-specific options</title>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--service <replaceable>SERVICE</replaceable></option>
 		</term>
 		<listitem>
@@ -98,7 +98,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--instance <replaceable>INSTANCE</replaceable></option>
 		</term>
 		<listitem>
@@ -108,7 +108,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--all</option>
 		</term>
 		<listitem>
@@ -119,7 +119,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--hostname <replaceable>HOST</replaceable></option>
 		</term>
 		<listitem>
@@ -129,7 +129,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--ip <replaceable>IPADDR</replaceable></option>
 		</term>
 		<listitem>
@@ -140,7 +140,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--cluster <replaceable>CLUSTER</replaceable></option>
 		</term>
 		<listitem>
@@ -151,7 +151,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--service_address <replaceable>NAME</replaceable></option>
 		</term>
 		<listitem>
@@ -162,7 +162,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--resourcegroup <replaceable>GROUP</replaceable></option>
 		</term>
 		<listitem>
@@ -173,7 +173,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--alias <replaceable>ALIAS</replaceable></option>
 		</term>
 		<listitem>
@@ -183,7 +183,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--position <replaceable>POSITION</replaceable></option>
 		</term>
 		<listitem>

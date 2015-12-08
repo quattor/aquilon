@@ -16,7 +16,8 @@
 # limitations under the License.
 
 from aquilon.exceptions_ import ArgumentError, NotFoundException
-from aquilon.aqdb.model import Personality, PersonalityParameter, Feature
+from aquilon.aqdb.model import (Personality, PersonalityParameter,
+                                ParamDefinition, Feature)
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.parameter import (set_parameter,
                                                  get_paramdef_for_parameter)
@@ -27,13 +28,13 @@ from aquilon.worker.templates import Plenary, PlenaryCollection
 class CommandAddParameter(BrokerCommand):
 
     required_parameters = ['personality', 'path']
+    strict_path = True
 
-    def process_parameter(self, session, dbstage, dbparam_def, path, value):
+    def process_parameter(self, session, dbstage, db_paramdef, path, value):
         if not dbstage.parameter:
             dbstage.parameter = PersonalityParameter(value={})
 
-        set_parameter(session, dbstage.parameter, dbparam_def, path, value,
-                      compel=False, preclude=True)
+        set_parameter(session, dbstage.parameter, db_paramdef, path, value)
 
     def render(self, session, logger, archetype, personality, personality_stage,
                feature, type, path, user, value=None, justification=None,
@@ -58,15 +59,17 @@ class CommandAddParameter(BrokerCommand):
         else:
             holders = dbpersonality.archetype.param_def_holders.values()
 
+        path = ParamDefinition.normalize_path(path, strict=self.strict_path)
+
         for param_def_holder in holders:
-            dbparam_def = get_paramdef_for_parameter(path, param_def_holder)
-            if dbparam_def:
+            db_paramdef = get_paramdef_for_parameter(path, param_def_holder)
+            if db_paramdef:
                 break
         else:
             raise NotFoundException("Parameter %s does not match any "
                                     "parameter definitions." % path)
 
-        self.process_parameter(session, dbstage, dbparam_def, path, value)
+        self.process_parameter(session, dbstage, db_paramdef, path, value)
 
         session.flush()
 

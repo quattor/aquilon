@@ -25,9 +25,9 @@ class CommandUpdateParameter(CommandAddParameter):
 
     required_parameters = ['personality', 'path']
 
-    def process_parameter(self, session, dbstage, dbparam_def, path, value):
+    def process_parameter(self, session, dbstage, db_paramdef, path, value):
         if not dbstage.parameter:
             raise NotFoundException("No parameter of path=%s defined." % path)
 
-        set_parameter(session, dbstage.parameter, dbparam_def, path, value,
-                      compel=True)
+        set_parameter(session, dbstage.parameter, db_paramdef, path, value,
+                      update=True)

@@ -4,30 +4,30 @@
 <!ENTITY aqd_version SYSTEM "../version.txt">
 ]>
 <refentry xml:id="aq_search_machine"
-          xmlns="http://docbook.org/ns/docbook"
-          xmlns:xi="http://www.w3.org/2001/XInclude">
+	  xmlns="http://docbook.org/ns/docbook"
+	  xmlns:xi="http://www.w3.org/2001/XInclude">
     <refmeta>
-        <refentrytitle>aq_search_machine</refentrytitle>
-        <manvolnum>1</manvolnum>
-        <refmiscinfo class="version">&aqd_version;</refmiscinfo>
-        <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
+	<refentrytitle>aq_search_machine</refentrytitle>
+	<manvolnum>1</manvolnum>
+	<refmiscinfo class="version">&aqd_version;</refmiscinfo>
+	<refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
     </refmeta>
 
     <refnamediv>
-        <refname>aq search machine</refname>
-        <refpurpose>
-            Search for machines matching some criteria
-        </refpurpose>
-        <refclass>Aquilon</refclass>
+	<refname>aq search machine</refname>
+	<refpurpose>
+	    Search for machines matching some criteria
+	</refpurpose>
+	<refclass>Aquilon</refclass>
     </refnamediv>
 
     <refsynopsisdiv>
-        <cmdsynopsis>
-            <command>aq search machine</command>
-            <group>
-                <synopfragmentref linkend="global-options">Global options</synopfragmentref>
-            </group>
-            <group choice="req">
+	<cmdsynopsis>
+	    <command>aq search machine</command>
+	    <group>
+		<synopfragmentref linkend="global-options">Global options</synopfragmentref>
+	    </group>
+	    <group choice="req">
 		<arg><option>--hostname <replaceable>FQDN</replaceable></option></arg>
 		<arg><option>--machine <replaceable>LABEL</replaceable></option></arg>
 		<arg><option>--cpuname <replaceable>NAME</replaceable></option></arg>
@@ -64,28 +64,28 @@
 		    <arg choice="plain"><option>--share <replaceable>NAME</replaceable></option></arg>
 		</group>
 		<arg><option>--disk_filesystem <replaceable>NAME</replaceable></option></arg>
-            </group>
+	    </group>
 	    <arg><option>--fullinfo</option></arg>
 	    <group>
 		<synopfragmentref linkend="location-options">Location options</synopfragmentref>
 		<arg><option>--exact_location</option></arg>
 	    </group>
-            <xi:include href="../common/location_options.xml"/>
-            <xi:include href="../common/global_options.xml"/>
-        </cmdsynopsis>
+	    <xi:include href="../common/location_options.xml"/>
+	    <xi:include href="../common/global_options.xml"/>
+	</cmdsynopsis>
     </refsynopsisdiv>
 
     <refsect1>
-        <title>Description</title>
-        <para>
+	<title>Description</title>
+	<para>
 	    The <command>aq search machine</command> command searches for machines
 	    matching the specified criteria.
-        </para>
+	</para>
     </refsect1>
 
     <refsect1>
-        <title>Options</title>
-        <variablelist>
+	<title>Options</title>
+	<variablelist>
 	    <title>Command-specific options</title>
 	    <varlistentry>
 		<term>
@@ -272,7 +272,7 @@
 		</listitem>
 	    </varlistentry>
 	</variablelist>
-        <variablelist>
+	<variablelist>
 	    <title>Options related to network interfaces</title>
 	    <para>
 		Options in this section are cumulative in the sense that the same interface must match
@@ -301,7 +301,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--network_environment <replaceable>ENV</replaceable></option>
 		</term>
 		<listitem>
@@ -374,7 +374,7 @@
 		</listitem>
 	    </varlistentry>
 	</variablelist>
-        <variablelist>
+	<variablelist>
 	    <title>Options related to disks</title>
 	    <para>
 		Options in this sections are cumulative in the sense that the same disk must match all the criteria.

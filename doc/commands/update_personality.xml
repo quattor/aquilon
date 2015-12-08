@@ -4,20 +4,20 @@
 <!ENTITY aqd_version SYSTEM "../version.txt">
 ]>
 <refentry xml:id="aq_update_personality"
-          xmlns="http://docbook.org/ns/docbook"
+	  xmlns="http://docbook.org/ns/docbook"
 	  xmlns:xi="http://www.w3.org/2001/XInclude">
     <refmeta>
-        <refentrytitle>aq_update_personality</refentrytitle>
-        <manvolnum>1</manvolnum>
-        <refmiscinfo class="version">&aqd_version;</refmiscinfo>
-        <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
+	<refentrytitle>aq_update_personality</refentrytitle>
+	<manvolnum>1</manvolnum>
+	<refmiscinfo class="version">&aqd_version;</refmiscinfo>
+	<refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
     </refmeta>
 
     <refnamediv>
-        <refname>aq update personality</refname>
-        <refpurpose>
+	<refname>aq update personality</refname>
+	<refpurpose>
 	    update certain personality options
-        </refpurpose>
+	</refpurpose>
 	<refclass>Aquilon</refclass>
     </refnamediv>
 
@@ -38,12 +38,12 @@
 		<arg choice="plain"><option>--eon_id <replaceable>EON_ID</replaceable></option></arg>
 	    </group>
 	    <arg><option>--leave_existing</option></arg>
-            <group>
+	    <group>
 		<arg choice="plain"><option>--cluster_required</option></arg>
 		<arg choice="plain"><option>--nocluster_required</option></arg>
 	    </group>
-            <group>
-	        <arg choice="plain"><option>--config_override</option></arg>
+	    <group>
+		<arg choice="plain"><option>--config_override</option></arg>
 		<arg choice="plain"><option>--noconfig_override</option></arg>
 	    </group>
 	    <group>
@@ -58,18 +58,18 @@
     </refsynopsisdiv>
 
     <refsect1>
-        <title>Description</title>
+	<title>Description</title>
 	<para>
 	    The <command>aq update personality</command> Updates certain config options on personality.
 	</para>
     </refsect1>
 
     <refsect1>
-        <title>Options</title>
+	<title>Options</title>
 	<variablelist>
 	    <title>Command-specific options</title>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--personality <replaceable>PERSONALITY</replaceable></option>
 		</term>
 		<listitem>
@@ -90,12 +90,12 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
-                    <option>--archetype <replaceable>ARCHETYPE</replaceable></option>
+		<term>
+		    <option>--archetype <replaceable>ARCHETYPE</replaceable></option>
 		</term>
 		<listitem>
 		    <para>
-                        The name of the archteype, if the personality name is not unique.
+			The name of the archteype, if the personality name is not unique.
 		    </para>
 		</listitem>
 	    </varlistentry>
@@ -113,7 +113,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--leave_existing</option>
 		</term>
 		<listitem>
@@ -124,17 +124,17 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--cluster_required</option>, <option>--nocluster_required</option>
 		</term>
 		<listitem>
 		    <para>
-                        This flag specifies if this personality require hosts to be clustered.
+			This flag specifies if this personality require hosts to be clustered.
 		    </para>
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--config_override</option>, <option>--noconfig_override</option>
 		</term>
 		<listitem>
@@ -169,7 +169,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 			<option>--host_environment <replaceable>HOST_ENVIRONMENT</replaceable></option>
 		</term>
 		<listitem>

@@ -17,6 +17,8 @@
 # limitations under the License.
 """Module for testing parameter support."""
 
+import json
+
 if __name__ == "__main__":
     import utils
     utils.import_depends()
@@ -76,73 +78,55 @@ class TestParameter(TestBrokerCommand):
                          "No parameters found for personality %s/%s@next." %
                          (ARCHETYPE, PERSONALITY), cmd)
 
-    def test_100_add_re_path(self):
-        action = "testaction"
-        path = "action/%s/user" % action
-        command = ADD_CMD + ["--path", path, "--value", "user1"]
-        self.noouttest(command)
-
-    def test_101_promote(self):
+    def test_010_promote(self):
         self.noouttest(["promote", "--personality", PERSONALITY,
                         "--archetype", "aquilon"])
 
-    def test_105_add_re_path_2(self):
-        action = "testaction"
-        path = "action/%s/command" % action
-        command = ADD_CMD + ["--path", path, "--value", "/bin/%s" % action]
+    def test_100_add_testaction(self):
+        path = "actions/testaction"
+        value = {"user": "user1", "command": "/bin/testaction"}
+        command = ADD_CMD + ["--path", path, "--value", json.dumps(value)]
         self.noouttest(command)
 
-    def test_106_verify_stage_diff(self):
-        # The parameter should not be present in 'current'
-        command = ["show_parameter", "--personality", PERSONALITY,
-                   "--archetype", "aquilon", "--personality_stage", "current"]
-        out = self.commandtest(command)
-        self.matchclean(out, '"command": "/bin/testaction"', command)
+    def test_105_verify_testaction(self):
+        action = "testaction"
+        expected = 'actions: { "%s": { "command": "/bin/%s", "user": "user1" } }' % (action, action)
+        out = self.commandtest(SHOW_CMD)
+        self.check_match(out, expected, SHOW_CMD)
 
-        command = ["show_parameter", "--personality", PERSONALITY,
-                   "--archetype", "aquilon", "--personality_stage", "next"]
-        out = self.commandtest(command)
-        self.matchoutput(out, '"command": "/bin/testaction"', command)
+    def test_105_verify_testaction_proto(self):
+        cmd = SHOW_CMD + ["--format=proto"]
+        params = self.protobuftest(cmd, expect=1)
+        self.assertEqual(params[0].path, 'actions')
+        self.assertEqual(params[0].value, '{"testaction": {"command": "/bin/testaction", "user": "user1"}}')
 
-    def test_100_add_noncompileable(self):
+    def test_110_add_noncompileable(self):
         command = ["add", "parameter", "--path", "foo", "--value", "bar",
                    "--archetype", "windows", "--personality", "generic"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "Archetype windows is not compileable.", command)
 
-    def test_120_add_existing_re_path(self):
+    def test_120_add_existing_leaf_path(self):
         action = "testaction"
-        path = "action/%s/user" % action
+        path = "actions/%s/user" % action
         command = ADD_CMD + ["--path", path, "--value", "user1"]
         err = self.badrequesttest(command)
         self.matchoutput(err, "Parameter with path=%s already exists"
                          % path, command)
 
-    def test_130_verify_re(self):
+    def test_130_update_existing_leaf_path(self):
         action = "testaction"
-        out = self.commandtest(SHOW_CMD)
-        expected = 'action: { "%s": { "command": "/bin/%s", "user": "user1" } }' % (action, action)
-        self.check_match(out, expected, SHOW_CMD)
-
-    def test_132_verify_proto(self):
-        cmd = SHOW_CMD + ["--format=proto"]
-        params = self.protobuftest(cmd, expect=1)
-        self.assertEqual(params[0].path, 'action')
-        self.assertEqual(params[0].value, '{"testaction": {"command": "/bin/testaction", "user": "user1"}}')
-
-    def test_140_update_existing_re_path(self):
-        action = "testaction"
-        path = "action/%s/user" % action
+        path = "actions/%s/user" % action
         command = UPD_CMD + ["--path", path, "--value", "user2"]
         self.noouttest(command)
 
         out = self.commandtest(SHOW_CMD)
-        expected = 'action: { "%s": { "command": "/bin/%s", "user": "user2" } }' % (action, action)
+        expected = 'actions: { "%s": { "command": "/bin/%s", "user": "user2" } }' % (action, action)
         self.check_match(out, expected, SHOW_CMD)
 
-    def test_150_add_re_json_path(self):
+    def test_150_add_testaction2(self):
         action = "testaction2"
-        path = "action/%s" % action
+        path = "actions/%s" % action
         value = '{ "command": "/bin/%s", "timeout": 100, "user": "user1" }' % action
         command = ADD_CMD + ["--path", path, "--value", value]
         self.noouttest(command)
@@ -150,30 +134,28 @@ class TestParameter(TestBrokerCommand):
         out = self.commandtest(SHOW_CMD)
         self.check_match(out, value, SHOW_CMD)
 
-    def test_160_add_existing_re_json_path(self):
+    def test_160_add_existing_json_path(self):
         action = "testaction2"
-        path = "action/%s" % action
+        path = "actions/%s" % action
         value = '{ "command": "/bin/%s", "user": "user1", "timeout": 100 }' % action
         command = ADD_CMD + ["--path", path, "--value", value]
         err = self.badrequesttest(command)
-        self.matchoutput(err, "Parameter with path=action/testaction2 already exists", command)
+        self.matchoutput(err, "Parameter with path=actions/testaction2 already exists", command)
 
-    def test_170_upd_nonexisting_re_path(self):
+    def test_170_upd_nonexisting_leaf_path(self):
         action = "testaction"
-        path = "action/%s/badpath" % action
+        path = "actions/%s/badpath" % action
         command = UPD_CMD + ["--path", path, "--value", "badvalue"]
         err = self.notfoundtest(command)
-        self.matchoutput(err,
-                         "Parameter %s does not match any parameter definitions" % path, command)
+        self.matchoutput(err, "No parameter of path=%s defined." % path, command)
 
-    def test_180_add_nonexisting_re_path(self):
+    def test_180_add_disallowed_leaf_path(self):
         action = "testaction"
         path = "actions/%s/badpath" % action
         value = 800
         command = ADD_CMD + ["--path", path, "--value", value]
-        err = self.notfoundtest(command)
-        self.matchoutput(err,
-                         "Parameter %s does not match any parameter definitions" % path, command)
+        err = self.badrequesttest(command)
+        self.matchoutput(err, "Additional properties are not allowed", command)
 
     def test_190_add_metric(self):
         value = """
@@ -262,8 +244,8 @@ class TestParameter(TestBrokerCommand):
         self.assertIn('espinfo/users', params)
         self.assertEqual(params['espinfo/users'], 'someusers,otherusers')
 
-        self.assertIn('action', params)
-        self.assertEqual(params['action'], u'{"testaction": {"command": "/bin/testaction", "user": "user2"}, "testaction2": {"command": "/bin/testaction2", "user": "user1", "timeout": 100}}')
+        self.assertIn('actions', params)
+        self.assertEqual(params['actions'], u'{"testaction": {"command": "/bin/testaction", "user": "user2"}, "testaction2": {"command": "/bin/testaction2", "user": "user1", "timeout": 100}}')
 
         self.assertIn('monitoring/metric', params)
         self.assertEqual(params['monitoring/metric'], u'{"_20003": {"name": "SwapUsed", "descr": "Swap space used [%]", "smooth": {"maxdiff": 3.0, "typeString": false, "maxtime": 3600}, "latestonly": false, "period": 300, "active": false, "class": "system.swapUsed"}}')
@@ -459,11 +441,11 @@ class TestParameter(TestBrokerCommand):
         self.searchoutput(out,
                           r'Differences for Parameters:\s*'
                           r'missing Parameters in Personality aquilon/eaitools@current:\s*'
-                          r'//action/testaction/command\s*'
-                          r'//action/testaction/user\s*'
-                          r'//action/testaction2/command\s*'
-                          r'//action/testaction2/timeout\s*'
-                          r'//action/testaction2/user\s*'
+                          r'//actions/testaction/command\s*'
+                          r'//actions/testaction/user\s*'
+                          r'//actions/testaction2/command\s*'
+                          r'//actions/testaction2/timeout\s*'
+                          r'//actions/testaction2/user\s*'
                           r'//espinfo/users/1\s*'
                           r'//monitoring/metric/_20003/active\s*'
                           r'//monitoring/metric/_20003/class\s*'
@@ -521,12 +503,12 @@ class TestParameter(TestBrokerCommand):
                           cmd)
 
     def test_535_search_parameter(self):
-        cmd = ["search_parameter", "--archetype", ARCHETYPE, "--path", "action"]
+        cmd = ["search_parameter", "--archetype", ARCHETYPE, "--path", "actions"]
         out = self.commandtest(cmd)
         self.searchoutput(out,
                           r'Host Personality: testpersona/dev Archetype: aquilon\s*'
                           r'Stage: next\s*'
-                          r'action: {\s*'
+                          r'actions: {\s*'
                           r'"testaction": {\s*"command": "/bin/testaction",\s*"user": "user2"\s*},\s*'
                           r'"testaction2": {\s*"command": "/bin/testaction2",\s*"timeout": 100,\s*"user": "user1"\s*}\s*}',
                           cmd)
@@ -562,12 +544,10 @@ class TestParameter(TestBrokerCommand):
         self.matchoutput(out, '"teststring" = "default";', cmd)
         self.matchoutput(out, '"testrequired" = "set";', cmd)
         # TODO: get_path_under_top() makes the value come out not quite as
-        # expected
-        #self.searchoutput(out,
-        #                  r'"testjson" = nlist\(\s*"val1",\s*"val2"\s*\);',
-        #                  cmd)
+        # expected - the "testjson" prefix is missing
         self.searchoutput(out,
-                          r'"val1" = "val2";',
+                          r'"key" = "param_key";\s*'
+                          r'"values" = list\(\s*0\s*\);\s*',
                           cmd)
         self.searchoutput(out,
                           r'"testlist" = list\(\s*"val1",\s*"val2"\s*\);',
@@ -583,11 +563,12 @@ class TestParameter(TestBrokerCommand):
 
     def test_600_del_path(self):
         action = "testaction"
-        path = "action/%s/user" % action
+        path = "actions/%s/user" % action
         command = DEL_CMD + ["--path", path]
-        self.noouttest(command)
+        err = self.badrequesttest(command)
+        self.matchoutput(err, "'user' is a required property", command)
 
-        path = "action/%s/command" % action
+        path = "actions/" + action
         command = DEL_CMD + ["--path", path]
         self.noouttest(command)
 
@@ -600,8 +581,8 @@ class TestParameter(TestBrokerCommand):
                          command)
 
     def test_620_del_path_json(self):
-        command = DEL_CMD + ["--path", "action"]
-        err = self.noouttest(command)
+        command = DEL_CMD + ["--path", "actions"]
+        self.noouttest(command)
 
     def test_630_verify_show(self):
         out = self.commandtest(SHOW_CMD)

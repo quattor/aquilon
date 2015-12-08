@@ -4,8 +4,8 @@
 <!ENTITY aqd_version SYSTEM "../version.txt">
 ]>
 <refentry xml:id="aq_manage"
-          xmlns="http://docbook.org/ns/docbook"
-          xmlns:xi="http://www.w3.org/2001/XInclude">
+	  xmlns="http://docbook.org/ns/docbook"
+	  xmlns:xi="http://www.w3.org/2001/XInclude">
     <refmeta>
 	<refentrytitle>aq_manage</refentrytitle>
 	<manvolnum>1</manvolnum>
@@ -22,38 +22,38 @@
     </refnamediv>
 
     <refsynopsisdiv>
-        <cmdsynopsis>
-            <command>aq manage </command>
-            <group>
+	<cmdsynopsis>
+	    <command>aq manage </command>
+	    <group>
 		<synopfragmentref linkend="global-options">Global options</synopfragmentref>
-            </group>
+	    </group>
 	    <group>
 		<synopfragmentref linkend="change-management">Change management</synopfragmentref>
 	    </group>
-            <group choice="req">
+	    <group choice="req">
 		<arg choice="plain"><option>--hostname <replaceable>HOSTNAME</replaceable></option></arg>
 		<arg choice="plain"><option>--list <replaceable>FILENAME</replaceable></option></arg>
 		<arg choice="plain"><option>--cluster <replaceable>CLUSTER</replaceable></option></arg>
 		<arg choice="plain"><option>--metacluster <replaceable>METACLUSTER</replaceable></option></arg>
-            </group>
-            <group choice="req">
+	    </group>
+	    <group choice="req">
 		<arg choice="plain"><option>--domain <replaceable>DOMAIN</replaceable></option></arg>
 		<arg choice="plain"><option>--sandbox <replaceable>SANDBOX</replaceable></option></arg>
-            </group>
+	    </group>
 	    <arg><option>--force</option></arg>
 	    <xi:include href="../common/change_management.xml"/>
-            <xi:include href="../common/global_options.xml"/>
-        </cmdsynopsis>
+	    <xi:include href="../common/global_options.xml"/>
+	</cmdsynopsis>
     </refsynopsisdiv>
 
     <refsect1>
-        <title>Description</title>
-        <para>
-            The <command>aq manage</command> command takes a host or cluster, and makes it build its
-            configuration using the specified template domain or sandbox. This
-            allows you to test building hosts using alternate templates, or to move
-            a host back to a default production domain once testing has completed.
-        </para>
+	<title>Description</title>
+	<para>
+	    The <command>aq manage</command> command takes a host or cluster, and makes it build its
+	    configuration using the specified template domain or sandbox. This
+	    allows you to test building hosts using alternate templates, or to move
+	    a host back to a default production domain once testing has completed.
+	</para>
 	<para>
 	    The <command>aq manage</command> command by default verifies that the required templates
 	    exist in any domains used by any hosts or clusters affected by the new binding. Note
@@ -73,18 +73,18 @@
     </refsect1>
 
     <refsect1>
-        <title>Templates</title>
-        <para>
+	<title>Templates</title>
+	<para>
 	    This command will modify the templates for the host or
 	    cluster (depending on which option was given).
 	</para>
     </refsect1>
 
     <refsect1>
-        <title>Options</title>
-        <variablelist>
-            <title>Command-specific options</title>
-            <varlistentry>
+	<title>Options</title>
+	<variablelist>
+	    <title>Command-specific options</title>
+	    <varlistentry>
 		<term>
 		    <option>--hostname <replaceable>HOSTNAME</replaceable></option>,
 		</term>
@@ -93,8 +93,8 @@
 			Move the named <replaceable>HOSTNAME</replaceable> to the target domain or sandbox.
 		    </para>
 		</listitem>
-            </varlistentry>
-            <varlistentry>
+	    </varlistentry>
+	    <varlistentry>
 		<term>
 		    <option>--list <replaceable>FILENAME</replaceable></option>
 		</term>
@@ -104,94 +104,94 @@
 			target domain or sandbox.
 		    </para>
 		</listitem>
-            </varlistentry>
-            <varlistentry>
-                <term>
-                    <option>--cluster <replaceable>CLUSTER</replaceable></option>
-                </term>
-                <listitem>
+	    </varlistentry>
+	    <varlistentry>
+		<term>
+		    <option>--cluster <replaceable>CLUSTER</replaceable></option>
+		</term>
+		<listitem>
 		    <para>
 			Move the named <replaceable>CLUSTER</replaceable> and all its to the target
 			domain or sandbox.
 		    </para>
-                </listitem>
-            </varlistentry>
-            <varlistentry>
-                <term>
-                    <option>--metacluster <replaceable>METACLUSTER</replaceable></option>
-                </term>
-                <listitem>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+		<term>
+		    <option>--metacluster <replaceable>METACLUSTER</replaceable></option>
+		</term>
+		<listitem>
 		    <para>
 			Move the named <replaceable>METACLUSTER</replaceable> and all its members to the
 			target domain or sandbox.
 		    </para>
-                </listitem>
-            </varlistentry>
-            <varlistentry>
-                <term>
-                    <option>--domain <replaceable>DOMAIN</replaceable></option>
-                </term>
-                <listitem>
-                    <para>
-                        Specifies the domain to manage the host(s) or cluster to.
-                    </para>
-                </listitem>
-            </varlistentry>
-            <varlistentry>
-                <term>
-                    <option>--sandbox <replaceable>SANDBOX</replaceable></option>
-                </term>
-                <listitem>
-                    <para>
-                        Specifies the user sandbox to manage the host(s) or cluster to.
-                    </para>
-                </listitem>
-            </varlistentry>
-            <varlistentry>
-                <term>
-                    <option>--force</option>
-                </term>
-                <listitem>
-                    <para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+		<term>
+		    <option>--domain <replaceable>DOMAIN</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Specifies the domain to manage the host(s) or cluster to.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+		<term>
+		    <option>--sandbox <replaceable>SANDBOX</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Specifies the user sandbox to manage the host(s) or cluster to.
+		    </para>
+		</listitem>
+	    </varlistentry>
+	    <varlistentry>
+		<term>
+		    <option>--force</option>
+		</term>
+		<listitem>
+		    <para>
 			Disable sanity checks, and move the objects to the target domain/sandbox
 			anyway.
-                    </para>
-                </listitem>
-            </varlistentry>
-        </variablelist>
+		    </para>
+		</listitem>
+	    </varlistentry>
+	</variablelist>
 	<xi:include href="../common/change_management_desc.xml"/>
-        <xi:include href="../common/global_options_desc.xml"/>
+	<xi:include href="../common/global_options_desc.xml"/>
     </refsect1>
 
      <refsect1>
-        <title>Examples</title>
-        <example>
-            <title>Manage host to user sandbox</title>
-            <programlisting>
+	<title>Examples</title>
+	<example>
+	    <title>Manage host to user sandbox</title>
+	    <programlisting>
 aq manage --hostname foo.example.com --sandbox user/mysandbox
-            </programlisting>
-        </example>
+	    </programlisting>
+	</example>
 
 	<example>
-            <title>Manage cluster to user sandbox</title>
-            <programlisting>
+	    <title>Manage cluster to user sandbox</title>
+	    <programlisting>
 aq manage --cluster mycluster --sandbox user/mysandbox
-            </programlisting>
-        </example>
+	    </programlisting>
+	</example>
 
-        <example>
-            <title>Manage a list of hosts user sandbox</title>
-            <programlisting>
+	<example>
+	    <title>Manage a list of hosts user sandbox</title>
+	    <programlisting>
 aq manage --list host.txt --sandbox user/mysandbox
-            </programlisting>
-        </example>
+	    </programlisting>
+	</example>
     </refsect1>
 
     <refsect1>
-        <title>See also</title>
-        <para>
-            <citerefentry><refentrytitle>aq_compile</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-        </para>
+	<title>See also</title>
+	<para>
+	    <citerefentry><refentrytitle>aq_compile</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+	</para>
     </refsect1>
 </refentry>
 

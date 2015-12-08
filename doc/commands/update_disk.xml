@@ -4,20 +4,20 @@
 <!ENTITY aqd_version SYSTEM "../version.txt">
 ]>
 <refentry xml:id="aq_update_disk"
-          xmlns="http://docbook.org/ns/docbook"
+	  xmlns="http://docbook.org/ns/docbook"
 	  xmlns:xi="http://www.w3.org/2001/XInclude">
     <refmeta>
-        <refentrytitle>aq_update_disk</refentrytitle>
-        <manvolnum>1</manvolnum>
-        <refmiscinfo class="version">&aqd_version;</refmiscinfo>
-        <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
+	<refentrytitle>aq_update_disk</refentrytitle>
+	<manvolnum>1</manvolnum>
+	<refmiscinfo class="version">&aqd_version;</refmiscinfo>
+	<refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
     </refmeta>
 
     <refnamediv>
-        <refname>aq update disk</refname>
-        <refpurpose>
+	<refname>aq update disk</refname>
+	<refpurpose>
 	    Update the parameters of a disk
-        </refpurpose>
+	</refpurpose>
 	<refclass>Aquilon</refclass>
     </refnamediv>
 
@@ -61,14 +61,14 @@
     </refsynopsisdiv>
 
     <refsect1>
-        <title>Description</title>
+	<title>Description</title>
 	<para>
 	    The <command>aq update disk</command> command updates the parameters of an existing disk.
 	</para>
     </refsect1>
 
     <refsect1>
-        <title>Options</title>
+	<title>Options</title>
 	<variablelist>
 	    <title>Command-specific options</title>
 	    <varlistentry>
@@ -82,7 +82,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--disk <replaceable>DISK</replaceable></option>
 		</term>
 		<listitem>
@@ -92,7 +92,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--rename_to <replaceable>NEW_DISK</replaceable></option>
 		</term>
 		<listitem>
@@ -102,7 +102,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--controller <replaceable>CTRL</replaceable></option>
 		</term>
 		<listitem>
@@ -113,7 +113,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--size <replaceable>SIZE</replaceable></option>
 		</term>
 		<listitem>
@@ -123,7 +123,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--wwn <replaceable>WWN</replaceable></option>
 		</term>
 		<listitem>
@@ -136,7 +136,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--address <replaceable>C:T:L</replaceable></option>
 		</term>
 		<listitem>
@@ -148,7 +148,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--bus_address <replaceable>URI</replaceable></option>
 		</term>
 		<listitem>
@@ -160,7 +160,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--boot</option>, <option>--noboot</option>
 		</term>
 		<listitem>
@@ -175,7 +175,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--snapshot</option>, <option>--nosnapshot</option>
 		</term>
 		<listitem>
@@ -186,7 +186,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--share <replaceable>SHARE</replaceable></option>,
 		    <option>--filesystem <replaceable>FS</replaceable></option>,
 		    <option>--resourcegroup <replaceable>RG</replaceable></option>
@@ -208,7 +208,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--comments <replaceable>COMMENTS</replaceable></option>
 		</term>
 		<listitem>
@@ -218,7 +218,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--iops_limit <replaceable>IOPS_LIMIT</replaceable></option>
 		</term>
 		<listitem>

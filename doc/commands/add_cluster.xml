@@ -4,20 +4,20 @@
 <!ENTITY aqd_version SYSTEM "../version.txt">
 ]>
 <refentry xml:id="aq_add_cluster"
-          xmlns="http://docbook.org/ns/docbook"
+	  xmlns="http://docbook.org/ns/docbook"
 	  xmlns:xi="http://www.w3.org/2001/XInclude">
     <refmeta>
-        <refentrytitle>aq_add_cluster</refentrytitle>
-        <manvolnum>1</manvolnum>
-        <refmiscinfo class="version">&aqd_version;</refmiscinfo>
-        <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
+	<refentrytitle>aq_add_cluster</refentrytitle>
+	<manvolnum>1</manvolnum>
+	<refmiscinfo class="version">&aqd_version;</refmiscinfo>
+	<refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
     </refmeta>
 
     <refnamediv>
-        <refname>aq add cluster</refname>
-        <refpurpose>
+	<refname>aq add cluster</refname>
+	<refpurpose>
 	    Add a new cluster
-        </refpurpose>
+	</refpurpose>
 	<refclass>Aquilon</refclass>
     </refnamediv>
 
@@ -59,7 +59,7 @@
     </refsynopsisdiv>
 
     <refsect1>
-        <title>Description</title>
+	<title>Description</title>
 	<para>
 	    The <command>aq add cluster</command> command creates a
 	    new cluster. Clusters can take various styles, defined by
@@ -70,10 +70,10 @@
     </refsect1>
 
     <refsect1>
-        <title>Templates</title>
+	<title>Templates</title>
 	<para>
 	    This command will create the following cluster templates:
-        </para>
+	</para>
 	<variablelist>
 	    <varlistentry>
 		<term>clusters/<replaceable>CLUSTER</replaceable></term>
@@ -81,7 +81,7 @@
 		    An object template that produces a output configuration
 		    profile for the cluster.
 		</para></listitem>
-          </varlistentry>
+	  </varlistentry>
 	  <varlistentry>
 		<term>cluster/<replaceable>CLUSTER</replaceable>/client</term>
 		<listitem><para>
@@ -95,28 +95,28 @@
 		    Hosts which are members of the cluster will automatically
 		    include this template.
 		</para></listitem>
-          </varlistentry>
+	  </varlistentry>
 	</variablelist>
     </refsect1>
 
     <refsect1>
-        <title>Options</title>
+	<title>Options</title>
 	<variablelist>
 	    <title>Command-specific options</title>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--cluster <replaceable>CLUSTER</replaceable></option>,
 		</term>
 		<listitem>
 		    <para>
-		        Specify the name of the new cluster. Cluster names are
+			Specify the name of the new cluster. Cluster names are
 			unique across all cluster types. The name of a cluster
 			may only consist of alphanumeric characters.
 		    </para>
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--prefix <replaceable>PREFIX</replaceable></option>,
 		</term>
 		<listitem>
@@ -127,7 +127,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--down_hosts_threshold <replaceable>THRESHOLD</replaceable></option>
 		</term>
 		<listitem>
@@ -147,7 +147,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--archetype <replaceable>ARCHETYPE</replaceable></option>
 		    <option>--personality <replaceable>PERSONALITY</replaceable></option>
 		</term>
@@ -175,7 +175,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--domain <replaceable>DOMAIN</replaceable></option>
 		    <option>--sandbox <replaceable>SANDBOX</replaceable></option>
 		</term>
@@ -187,7 +187,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--maint_threshold <replaceable>THRESHOLD</replaceable></option>
 		</term>
 		<listitem>
@@ -205,7 +205,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--max_members <replaceable>MAX</replaceable></option>
 		</term>
 		<listitem>
@@ -215,7 +215,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--buildstatus <replaceable>STATUS</replaceable></option>
 		</term>
 		<listitem>
@@ -225,7 +225,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--metacluster <replaceable>METACLUSTER</replaceable></option>
 		</term>
 		<listitem>
@@ -235,7 +235,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--vm_to_host_ratio <replaceable>VM_COUNT</replaceable>:<replaceable>HOST_COUNT</replaceable></option>
 		</term>
 		<listitem>
@@ -245,7 +245,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--switch <replaceable>SWITCH</replaceable></option>
 		</term>
 		<listitem>
@@ -257,7 +257,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--comments <replaceable>COMMENTS</replaceable></option>
 		</term>
 		<listitem>

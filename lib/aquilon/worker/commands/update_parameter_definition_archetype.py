@@ -19,7 +19,8 @@ from aquilon.exceptions_ import ArgumentError, UnimplementedError
 from aquilon.aqdb.model import Archetype, ParamDefinition
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.change_management import validate_prod_archetype
-from aquilon.worker.dbwrappers.parameter import add_arch_paramdef_plenaries
+from aquilon.worker.dbwrappers.parameter import (add_arch_paramdef_plenaries,
+                                                 update_paramdef_schema)
 from aquilon.worker.templates import PlenaryCollection
 
 
@@ -27,9 +28,9 @@ class CommandUpdParameterDefintionArchetype(BrokerCommand):
 
     required_parameters = ["archetype", "path"]
 
-    def render(self, session, logger, archetype, path, required, activation,
-               default, clear_default, description, user, justification, reason,
-               **kwargs):
+    def render(self, session, logger, archetype, path, schema, clear_schema,
+               required, activation, default, clear_default, description, user,
+               justification, reason, **kwargs):
         dbarchetype = Archetype.get_unique(session, archetype, compel=True)
         if not dbarchetype.is_compileable:
             raise ArgumentError("{0} is not compileable.".format(dbarchetype))
@@ -71,6 +72,10 @@ class CommandUpdParameterDefintionArchetype(BrokerCommand):
             db_paramdef.activation = activation
         if description is not None:
             db_paramdef.description = description
+        if schema:
+            update_paramdef_schema(session, db_paramdef, schema)
+        elif clear_schema:
+            db_paramdef.schema = None
 
         session.flush()
 

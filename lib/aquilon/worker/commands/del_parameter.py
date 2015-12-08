@@ -15,7 +15,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from aquilon.exceptions_ import NotFoundException
+from jsonschema import validate, ValidationError
+
+from aquilon.exceptions_ import NotFoundException, ArgumentError
 from aquilon.aqdb.model import Parameter, FeatureParamDef
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.commands.add_parameter import CommandAddParameter
@@ -25,15 +27,28 @@ from aquilon.worker.dbwrappers.parameter import validate_rebuild_required
 class CommandDelParameter(CommandAddParameter):
 
     required_parameters = ['personality', 'path']
+    strict_path = False
 
-    def process_parameter(self, session, dbstage, dbparam_def, path,
+    def process_parameter(self, session, dbstage, db_paramdef, path,
                           value=None):
         if not dbstage.parameter:
             raise NotFoundException("No parameter of path=%s defined." % path)
 
-        if dbparam_def.activation == 'rebuild':
+        if db_paramdef.activation == 'rebuild':
             validate_rebuild_required(session, path, dbstage)
 
-        if isinstance(dbparam_def.holder, FeatureParamDef):
-            path = Parameter.feature_path(dbparam_def.holder.feature, path)
+        if isinstance(db_paramdef.holder, FeatureParamDef):
+            path = Parameter.feature_path(db_paramdef.holder.feature, path)
         dbstage.parameter.del_path(path)
+
+        if db_paramdef.schema:
+            base_path = db_paramdef.path
+            if isinstance(db_paramdef.holder, FeatureParamDef):
+                base_path = Parameter.feature_path(db_paramdef.holder.feature,
+                                                   base_path)
+            new_value = dbstage.parameter.get_path(base_path, compel=False)
+            if new_value is not None:
+                try:
+                    validate(new_value, db_paramdef.schema)
+                except ValidationError as err:
+                    raise ArgumentError(err)

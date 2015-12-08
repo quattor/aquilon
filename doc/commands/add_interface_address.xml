@@ -4,20 +4,20 @@
 <!ENTITY aqd_version SYSTEM "../version.txt">
 ]>
 <refentry xml:id="aq_add_interface_address"
-          xmlns="http://docbook.org/ns/docbook"
+	  xmlns="http://docbook.org/ns/docbook"
 	  xmlns:xi="http://www.w3.org/2001/XInclude">
     <refmeta>
-        <refentrytitle>aq_add_interface_address</refentrytitle>
-        <manvolnum>1</manvolnum>
-        <refmiscinfo class="version">&aqd_version;</refmiscinfo>
-        <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
+	<refentrytitle>aq_add_interface_address</refentrytitle>
+	<manvolnum>1</manvolnum>
+	<refmiscinfo class="version">&aqd_version;</refmiscinfo>
+	<refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
     </refmeta>
 
     <refnamediv>
-        <refname>aq add interface address</refname>
-        <refpurpose>
+	<refname>aq add interface address</refname>
+	<refpurpose>
 	    Assign an IP address to an interface
-        </refpurpose>
+	</refpurpose>
 	<refclass>Aquilon</refclass>
     </refnamediv>
 
@@ -31,10 +31,10 @@
 		<synopfragmentref linkend="change-management">Change management</synopfragmentref>
 	    </group>
 	    <group choice="req">
-	        <arg choice="plain"><option>--machine <replaceable>MACHINE</replaceable></option></arg>
-	        <arg choice="plain"><option>--chassis <replaceable>CHASSIS</replaceable></option></arg>
-	        <arg choice="plain"><option>--switch <replaceable>SWITCH</replaceable></option></arg>
-	        <arg choice="plain"><option>--network_device <replaceable>NETDEV</replaceable></option></arg>
+		<arg choice="plain"><option>--machine <replaceable>MACHINE</replaceable></option></arg>
+		<arg choice="plain"><option>--chassis <replaceable>CHASSIS</replaceable></option></arg>
+		<arg choice="plain"><option>--switch <replaceable>SWITCH</replaceable></option></arg>
+		<arg choice="plain"><option>--network_device <replaceable>NETDEV</replaceable></option></arg>
 	    </group>
 	    <arg choice="plain"><option>--interface <replaceable>IFACE</replaceable></option></arg>
 	    <arg><option>--fqdn <replaceable>FQDN</replaceable></option></arg>
@@ -54,7 +54,7 @@
     </refsynopsisdiv>
 
     <refsect1>
-        <title>Description</title>
+	<title>Description</title>
 	<para>
 	    The <command>aq add interface address</command> command assigns an IP address to
 	    an interface.
@@ -67,11 +67,11 @@
     </refsect1>
 
     <refsect1>
-        <title>Options</title>
+	<title>Options</title>
 	<variablelist>
 	    <title>Command-specific options</title>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--machine <replaceable>MACHINE</replaceable></option>,
 		    <option>--chassis <replaceable>CHASSIS</replaceable></option>,
 		    <option>--switch <replaceable>SWITCH</replaceable></option>
@@ -79,14 +79,14 @@
 		</term>
 		<listitem>
 		    <para>
-		        Specify the hardware entity you wish to add the IP address to. You can use either
+			Specify the hardware entity you wish to add the IP address to. You can use either
 			the hardware label or the primary name for <replaceable>MACHINE</replaceable>,
 			<replaceable>CHASISS</replaceable> and <replaceable>NETDEV</replaceable>.
 		    </para>
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--interface <replaceable>IFACE</replaceable></option>
 		</term>
 		<listitem>
@@ -96,7 +96,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--fqdn <replaceable>FQDN</replaceable></option>
 		</term>
 		<listitem>
@@ -121,7 +121,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--label <replaceable>LABEL</replaceable></option>
 		</term>
 		<listitem>
@@ -138,7 +138,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--network_environment <replaceable>NETENV</replaceable></option>
 		</term>
 		<listitem>
@@ -154,7 +154,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--map_to_primary</option>, <option>--nomap_to_primary</option>
 		</term>
 		<listitem>

@@ -17,6 +17,8 @@
 """ Parameter data validation """
 
 from datetime import datetime
+import json
+from jsonschema import validate, ValidationError, Draft4Validator
 import re
 
 from sqlalchemy import (Column, Integer, DateTime, Sequence, String, Boolean,
@@ -25,11 +27,11 @@ from sqlalchemy.orm import relation, backref, deferred, validates
 from sqlalchemy.orm.collections import column_mapped_collection
 
 from aquilon.exceptions_ import ArgumentError, InternalError
-from aquilon.aqdb.column_types import AqStr, Enum
+from aquilon.aqdb.column_types import AqStr, Enum, JSONEncodedDict
 from aquilon.aqdb.model import Base, Archetype, Feature
 from aquilon.aqdb.model.feature import _ACTIVATION_TYPE
-from aquilon.utils import (force_json_dict, force_int, force_float,
-                           force_boolean)
+from aquilon.utils import (force_json, force_int, force_float, force_boolean,
+                           validate_nlist_key)
 
 _TN = 'param_definition'
 _PARAM_DEF_HOLDER = 'param_def_holder'
@@ -128,6 +130,7 @@ class ParamDefinition(Base):
     required = Column(Boolean(name="%s_required_ck" % _TN), default=False,
                       nullable=False)
     value_type = Column(Enum(16, _PATH_TYPES), nullable=False, default="string")
+    schema = Column(JSONEncodedDict, nullable=True)
     default = Column(Text, nullable=True)
     description = deferred(Column(String(255), nullable=True))
     holder_id = Column(ForeignKey(ParamDefHolder.id, ondelete='CASCADE'),
@@ -145,14 +148,22 @@ class ParamDefinition(Base):
                        'info': {'unique_fields': ['path', 'holder']}},)
 
     @staticmethod
-    def normalize_path(path):
-        # Strip leading and trailing slashes, collapse multiple slashes into one
-        path = _PATH_RE.sub("/", path)
-        if path.startswith('/'):
-            path = path[1:]
-        if path.endswith('/'):
-            path = path[:-1]
-        return path
+    def split_path(path):
+        # Ignore leading and trailing slashes, collapse multiple slashes into one
+        return [part for part in path.split("/") if part]
+
+    @staticmethod
+    def normalize_path(path, strict=True):
+        parts = ParamDefinition.split_path(path)
+        # Normally, we want all path components to be valid. However, deleting
+        # an invalid path which somehow got there could turn out to be useful,
+        # so there's a way to turn stict verification off.
+        if strict:
+            for part in parts:
+                validate_nlist_key("a path component", part)
+        else:
+            validate_nlist_key("a path component", parts[0])
+        return "/".join(parts)
 
     @validates('path')
     def validate_path(self, key, value):  # pylint: disable=W0613
@@ -169,9 +180,34 @@ class ParamDefinition(Base):
 
     @validates('default')
     def validate_default(self, key, value):  # pylint: disable=W0613
-        if value is not None:
-            self.parse_value("default for path=%s" % self.path, value)
+        if value is None:
+            return None
 
+        retval = self.parse_value("default for path=%s" % self.path, value)
+        if self.schema:
+            try:
+                validate(retval, self.schema)
+            except ValidationError as err:
+                raise ArgumentError(err)
+
+        # Ensure JSON defaults get stored in a normalized form
+        if self.value_type == "json":
+            return json.dumps(retval, sort_keys=True)
+        else:
+            return value
+
+    @validates('schema')
+    def validate_schema(self, key, value):  # pylint: disable=W0613
+        if value is None:
+            return value
+        Draft4Validator.check_schema(value)
+
+        if self.default:
+            try:
+                validate(json.loads(self.default), value)
+            except ValidationError as err:
+                raise ArgumentError("The existing default value conflicts "
+                                    "with the new schema: %s" % err)
         return value
 
     @validates('activation')
@@ -202,6 +238,17 @@ class ParamDefinition(Base):
         elif self.value_type == 'boolean':
             return force_boolean(label, value)
         elif self.value_type == 'json':
-            return force_json_dict(label, value)
+            # Note: do not try to validate the schema here - "value" may be just
+            # a small fragment of the value associated with this parameter
+            # definition
+            try:
+                return force_json(label, value)
+            except ArgumentError:
+                # Usability improvement: accept bare strings which do not
+                # contain any special characters interpreted by the JSON
+                # decoder. This should allow e.g. usernames or file names.
+                if re.match(r"^[a-zA-Z_/][a-zA-Z0-9_/.-]*$", value):
+                    return value
+                raise
 
         raise InternalError("Unhandled type: %s" % self.value_type)

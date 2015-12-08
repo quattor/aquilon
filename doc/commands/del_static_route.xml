@@ -4,20 +4,20 @@
 <!ENTITY aqd_version SYSTEM "../version.txt">
 ]>
 <refentry xml:id="aq_del_static_route"
-          xmlns="http://docbook.org/ns/docbook"
+	  xmlns="http://docbook.org/ns/docbook"
 	  xmlns:xi="http://www.w3.org/2001/XInclude">
     <refmeta>
-        <refentrytitle>aq_del_static_route</refentrytitle>
-        <manvolnum>1</manvolnum>
-        <refmiscinfo class="version">&aqd_version;</refmiscinfo>
-        <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
+	<refentrytitle>aq_del_static_route</refentrytitle>
+	<manvolnum>1</manvolnum>
+	<refmiscinfo class="version">&aqd_version;</refmiscinfo>
+	<refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
     </refmeta>
 
     <refnamediv>
-        <refname>aq del static route</refname>
-        <refpurpose>
+	<refname>aq del static route</refname>
+	<refpurpose>
 	    Deletes a static route
-        </refpurpose>
+	</refpurpose>
 	<refclass>Aquilon</refclass>
     </refnamediv>
 
@@ -33,8 +33,8 @@
 	    <arg choice="plain"><option>--gateway <replaceable>GW</replaceable></option></arg>
 	    <arg choice="plain"><option>--ip <replaceable>IP</replaceable></option></arg>
 	    <group choice="req">
-	        <arg choice="plain"><option>--netmask <replaceable>MASK</replaceable></option></arg>
-	        <arg choice="plain"><option>--prefixlen <replaceable>PREFIX</replaceable></option></arg>
+		<arg choice="plain"><option>--netmask <replaceable>MASK</replaceable></option></arg>
+		<arg choice="plain"><option>--prefixlen <replaceable>PREFIX</replaceable></option></arg>
 	    </group>
 	    <group>
 		<arg choice="plain"><option>--personality <replaceable>PERS</replaceable></option></arg>
@@ -48,7 +48,7 @@
     </refsynopsisdiv>
 
     <refsect1>
-        <title>Description</title>
+	<title>Description</title>
 	<para>
 	    The <command>aq del static route</command> command deletes a static route.
 	</para>
@@ -59,11 +59,11 @@
     </refsect1>
 
     <refsect1>
-        <title>Options</title>
+	<title>Options</title>
 	<variablelist>
 	    <title>Command-specific options</title>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--gateway <replaceable>GW</replaceable></option>
 		</term>
 		<listitem>
@@ -73,7 +73,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--ip <replaceable>IP</replaceable></option>
 		</term>
 		<listitem>
@@ -85,7 +85,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--netmask <replaceable>MASK</replaceable></option>,
 		    <option>--prefixlen <replaceable>PREFIX</replaceable></option>
 		</term>
@@ -98,7 +98,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--network_environment <replaceable>NETENV</replaceable></option>
 		</term>
 		<listitem>
@@ -109,17 +109,17 @@
 		    </para>
 		</listitem>
 	    </varlistentry>
-            <varlistentry>
-                <term>
-                    <option>--personality <replaceable>PERS</replaceable></option>
-                </term>
-                <listitem>
-                    <para>
-                        Name of a personality. If specified only static routes will the supplied
+	    <varlistentry>
+		<term>
+		    <option>--personality <replaceable>PERS</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Name of a personality. If specified only static routes will the supplied
 			personality will be deleted.
-                    </para>
-                </listitem>
-            </varlistentry>
+		    </para>
+		</listitem>
+	    </varlistentry>
 	    <varlistentry>
 		<term>
 		    <option>--personality_stage <replaceable>STAGE</replaceable></option>
@@ -130,18 +130,18 @@
 		    </para>
 		</listitem>
 	    </varlistentry>
-            <varlistentry>
-                <term>
-                    <option>--archetype <replaceable>ARCH</replaceable></option>
-                </term>
-                <listitem>
-                    <para>
-                        Name of an archetype. If <option>--personality</option> is used, then
-                        this option is used as a qualifier to select the right archetype if
-                        the name of the personality is not unique.
-                    </para>
-                </listitem>
-            </varlistentry>
+	    <varlistentry>
+		<term>
+		    <option>--archetype <replaceable>ARCH</replaceable></option>
+		</term>
+		<listitem>
+		    <para>
+			Name of an archetype. If <option>--personality</option> is used, then
+			this option is used as a qualifier to select the right archetype if
+			the name of the personality is not unique.
+		    </para>
+		</listitem>
+	    </varlistentry>
 	</variablelist>
 	<xi:include href="../common/change_management_desc.xml"/>
 	<xi:include href="../common/global_options_desc.xml"/>

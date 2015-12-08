@@ -4,20 +4,20 @@
 <!ENTITY aqd_version SYSTEM "../version.txt">
 ]>
 <refentry xml:id="aq_split_network"
-          xmlns="http://docbook.org/ns/docbook"
+	  xmlns="http://docbook.org/ns/docbook"
 	  xmlns:xi="http://www.w3.org/2001/XInclude">
     <refmeta>
-        <refentrytitle>aq_split_network</refentrytitle>
-        <manvolnum>1</manvolnum>
-        <refmiscinfo class="version">&aqd_version;</refmiscinfo>
-        <refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
+	<refentrytitle>aq_split_network</refentrytitle>
+	<manvolnum>1</manvolnum>
+	<refmiscinfo class="version">&aqd_version;</refmiscinfo>
+	<refmiscinfo class="manual">Aquilon Commands</refmiscinfo>
     </refmeta>
 
     <refnamediv>
-        <refname>aq split network</refname>
-        <refpurpose>
+	<refname>aq split network</refname>
+	<refpurpose>
 	    Split an existing network to smaller subnets
-        </refpurpose>
+	</refpurpose>
 	<refclass>Aquilon</refclass>
     </refnamediv>
 
@@ -32,8 +32,8 @@
 	    </group>
 	    <arg choice="plain"><option>--ip <replaceable>IP</replaceable></option></arg>
 	    <group choice="req">
-	        <arg choice="plain"><option>--netmask <replaceable>NETMASK</replaceable></option></arg>
-	        <arg choice="plain"><option>--prefixlen <replaceable>LENGTH</replaceable></option></arg>
+		<arg choice="plain"><option>--netmask <replaceable>NETMASK</replaceable></option></arg>
+		<arg choice="plain"><option>--prefixlen <replaceable>LENGTH</replaceable></option></arg>
 	    </group>
 	    <arg><option>--network_environment <replaceable>NETENV</replaceable></option></arg>
 	    <xi:include href="../common/change_management.xml"/>
@@ -42,7 +42,7 @@
     </refsynopsisdiv>
 
     <refsect1>
-        <title>Description</title>
+	<title>Description</title>
 	<para>
 	    The <command>aq split network</command> command splits an existing network to smaller subnets.
 	</para>
@@ -59,11 +59,11 @@
     </refsect1>
 
     <refsect1>
-        <title>Options</title>
+	<title>Options</title>
 	<variablelist>
 	    <title>Command-specific options</title>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--ip <replaceable>IP</replaceable></option>
 		</term>
 		<listitem>
@@ -73,7 +73,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--netmask <replaceable>NETMASK</replaceable></option>
 		</term>
 		<listitem>
@@ -85,7 +85,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--prefixlen <replaceable>LENGTH</replaceable></option>
 		</term>
 		<listitem>
@@ -97,7 +97,7 @@
 		</listitem>
 	    </varlistentry>
 	    <varlistentry>
-	        <term>
+		<term>
 		    <option>--network_environment <replaceable>NETENV</replaceable></option>
 		</term>
 		<listitem>
