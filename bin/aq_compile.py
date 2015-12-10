@@ -107,6 +107,9 @@ def run_domain_compile(options, config):
     else:
         args.append("-Dpanc.batch.size=%s" % config.get("panc", "batch_size"))
 
+    if options.cleandeps:
+        args.append("-Dclean.dep.files=%s" % options.cleandeps)
+
     print("Running %s" % " ".join(args))
     return call(args, env=panc_env, cwd=options.basedir)
 
@@ -140,6 +143,8 @@ def main():
                         help="location of the swrep templates")
     parser.add_argument("--batch_size", action="store", type=int,
                         help="compiler batch size")
+    parser.add_argument("--cleandeps", action="store_true", default=None,
+                        help="Remove pan dependency files before compiling")
 
     options = parser.parse_args()
     config = Config(configfile=options.config)
