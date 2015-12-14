@@ -141,6 +141,10 @@ class Resource(Base):
                                                   'holder']}})
     __mapper_args__ = {'polymorphic_on': resource_type}
 
+    def __init__(self, name=None, **kwargs):
+        name = AqStr.normalize(name)
+        super(Resource, self).__init__(name=name, **kwargs)
+
     @validates('holder')
     def _validate_holder(self, key, value):
         return self.validate_holder(key, value)
