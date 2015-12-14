@@ -23,15 +23,18 @@ from six import iteritems
 from sqlalchemy.orm import (joinedload, subqueryload, lazyload, contains_eager,
                             undefer)
 from sqlalchemy.orm.attributes import set_committed_value
+from sqlalchemy.sql import and_
 
 from aquilon.exceptions_ import PartialError, IncompleteError
 from aquilon.aqdb.model import (Service, Machine, Chassis, Host,
                                 PersonalityStage, Archetype, Cluster, City,
-                                Rack, Resource, HostResource, ClusterResource,
-                                BundleResource, VirtualMachine, Filesystem,
-                                ServiceAddress, Share, Disk, Model, Interface,
-                                AddressAssignment, Network,
-                                ServiceInstance, NetworkDevice, VirtualSwitch,
+                                Rack, Bunker, Building, Resource, HostResource,
+                                ClusterResource, BundleResource, VirtualMachine,
+                                Filesystem, ServiceAddress, Share, Disk, Model,
+                                Interface, AddressAssignment, Network,
+                                NetworkEnvironment, NetworkCompartment,
+                                ServiceInstance, HardwareEntity, NetworkDevice,
+                                RouterAddress, VirtualSwitch,
                                 PortGroup, ParamDefHolder, Feature)
 from aquilon.aqdb.data_sync.storage import StormapParser
 from aquilon.worker.broker import BrokerCommand
@@ -129,6 +132,7 @@ class CommandFlush(BrokerCommand):
             resources = True
             network_devices = True
             virtual_switches = True
+            networks = True
 
         with CompileKey(logger=logger):
             logger.client_info("Loading data.")
@@ -401,10 +405,33 @@ class CommandFlush(BrokerCommand):
 
             if networks:
                 logger.client_info("Flushing networks.")
+
+                # pylint: disable=W0612
+                compartments = session.query(NetworkCompartment).all()
+
+                # pylint: disable=W0612
+                envs = session.query(NetworkEnvironment).all()
+
+                # Load the most common location types
+                q = session.query(Building)
+                q = q.options(subqueryload('parents'))
+                buildings = q.all()  # pylint: disable=W0612
+                q = session.query(Bunker)
+                q = q.options(subqueryload('parents'))
+                bunkers = q.all()  # pylint: disable=W0612
+
+                q = session.query(HardwareEntity)
+                q = q.join(Interface, AddressAssignment)
+                q = q.join((RouterAddress, and_(AddressAssignment.network_id == RouterAddress.network_id,
+                                                AddressAssignment.ip == RouterAddress.ip)))
+                q = q.options(subqueryload('interfaces'),
+                              subqueryload('interfaces.assignments'),
+                              joinedload('primary_name'))
+                routers = q.all()  # pylint: disable=W0612
+
                 q = session.query(Network)
-                q = q.options(subqueryload('network_environment'),
-                              subqueryload('network_compartment'),
-                              subqueryload('location'))
+                q = q.options(subqueryload('routers'),
+                              subqueryload('routers.dns_records'))
                 progress = ProgressReport(logger, q.count(), "networks")
                 for dbnetwork in q:
                     progress.step()
