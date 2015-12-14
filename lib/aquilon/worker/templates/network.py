@@ -85,10 +85,10 @@ class PlenaryNetwork(StructurePlenary):
                             rinfo['ip'] = interface_address_assignment.ip
                             break
                     rtrs.append(rinfo)
-            pan_assign(lines, "router_address/%s/providers" % router_address.ip, rtrs)
+            pan_assign(lines, "router_address/{%s}/providers" % router_address.ip, rtrs)
             if router_address.location:
                 add_location_info(lines, router_address.location,
-                                  prefix="router_address/%s/providers/" % router_address.ip)
+                                  prefix="router_address/{%s}/providers/" % router_address.ip)
 
 
 Plenary.handlers[Network] = PlenaryNetwork
