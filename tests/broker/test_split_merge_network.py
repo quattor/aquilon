@@ -43,6 +43,9 @@ class TestSplitMergeNetwork(TestBrokerCommand):
                             "--building", "nettest", "--side", "b",
                             "--comments", "Original %s" % ipnet])
 
+            self.check_plenary_exists("network", "internal", str(ipnet.ip),
+                                      "config")
+
     def test_110_add_dns_records(self):
         self.dsdb_expect_add("merge1.aqd-unittest.ms.com", "0.2.2.200")
         self.noouttest(["add", "address", "--ip", "0.2.2.200",
@@ -65,6 +68,9 @@ class TestSplitMergeNetwork(TestBrokerCommand):
                    "--netmask", "255.255.255.0"]
         self.noouttest(command)
 
+        self.check_plenary_exists("network", "internal", "0.2.2.0", "config")
+        self.check_plenary_gone("network", "internal", "0.2.2.192", "config")
+
     def test_210_supernet1(self):
         command = ["show", "network", "--ip", "0.2.2.0"]
         out = self.commandtest(command)
@@ -86,6 +92,9 @@ class TestSplitMergeNetwork(TestBrokerCommand):
     def test_250_merge2(self):
         command = ["merge", "network", "--ip", "0.2.3.128", "--prefixlen", "24"]
         self.noouttest(command)
+
+        self.check_plenary_exists("network", "internal", "0.2.3.0", "config")
+        self.check_plenary_gone("network", "internal", "0.2.3.128", "config")
 
     def test_260_supernet2(self):
         command = ["show", "network", "--ip", "0.2.3.0"]
@@ -131,6 +140,9 @@ class TestSplitMergeNetwork(TestBrokerCommand):
                 # Check the name
                 self.matchoutput(out, "Network: 0.2.2.0_%d" % idx, command)
                 idx += 1
+
+            self.check_plenary_exists("network", "internal", str(subnet.ip),
+                                      "config")
 
     def test_311_dns_record(self):
         command = ["show", "fqdn", "--fqdn", "merge1.aqd-unittest.ms.com"]
