@@ -15,15 +15,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 import logging
 
 from aquilon.aqdb.model import Network
+from aquilon.worker.locks import NoLockKey, PlenaryKey
 from aquilon.worker.templates import (Plenary, StructurePlenary,
                                       add_location_info)
 from aquilon.worker.templates.panutils import pan_assign
-
-LOGGER = logging.getLogger(__name__)
 
 
 class PlenaryNetwork(StructurePlenary):
@@ -34,6 +32,13 @@ class PlenaryNetwork(StructurePlenary):
         return "%s/%s/%s/config" % (cls.prefix,
                                     dbnetwork.network_environment.name,
                                     dbnetwork.ip)
+
+    def get_key(self, exclusive=True):
+        if self.is_deleted():
+            return NoLockKey(logger=self.logger)
+        else:
+            return PlenaryKey(network=self.dbobj, logger=self.logger,
+                              exclusive=exclusive)
 
     def body(self, lines):
         pan_assign(lines, "name", self.dbobj.name)
@@ -85,10 +90,10 @@ class PlenaryNetwork(StructurePlenary):
                             rinfo['ip'] = interface_address_assignment.ip
                             break
                     rtrs.append(rinfo)
-            pan_assign(lines, "router_address/%s/providers" % router_address.ip, rtrs)
+            pan_assign(lines, "router_address/{%s}/providers" % router_address.ip, rtrs)
             if router_address.location:
                 add_location_info(lines, router_address.location,
-                                  prefix="router_address/%s/providers/" % router_address.ip)
+                                  prefix="router_address/{%s}/providers/" % router_address.ip)
 
 
 Plenary.handlers[Network] = PlenaryNetwork

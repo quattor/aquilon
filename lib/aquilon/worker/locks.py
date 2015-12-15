@@ -86,7 +86,7 @@ class CompileKey(LockKey):
 
 
 class PlenaryKey(LockKey):
-    def __init__(self, personality=None, service_instance=None,
+    def __init__(self, personality=None, service_instance=None, network=None,
                  cluster_member=None, network_device=None, virtual_switch=None,
                  exclusive=True,
                  logger=LOGGER, loglevel=CLIENT_INFO):
@@ -114,6 +114,9 @@ class PlenaryKey(LockKey):
             lockset["network_device"].add(str(network_device))
         if virtual_switch:
             lockset["virtual_switch"].add(str(virtual_switch))
+        if network:
+            lockset["network"].add("%s/%s" % (network.network_environment,
+                                              network.ip))
 
         # Make sure plenary updates conflict with the global compile lock, which
         # is used by e.g. the flush command.

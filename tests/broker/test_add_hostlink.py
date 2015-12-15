@@ -43,12 +43,13 @@ class TestAddHostlink(TestBrokerCommand):
         command = ["show_hostlink", "--hostlink=app1",
                    "--hostname=server1.aqd-unittest.ms.com"]
         out = self.commandtest(command)
-        self.matchoutput(out, "Hostlink: app1", command)
-        self.matchoutput(out, "Comments: Some hostlink comments", command)
-        self.matchoutput(out, "Bound to: Host server1.aqd-unittest.ms.com",
-                         command)
-        self.matchoutput(out, "Target Path: /var/spool/hostlinks/app1", command)
-        self.matchoutput(out, "Owner: user1", command)
+        self.output_equals(out, """
+            Hostlink: app1
+              Comments: Some hostlink comments
+              Bound to: Host server1.aqd-unittest.ms.com
+              Target Path: /var/spool/hostlinks/app1
+              Owner: user1
+            """, command)
 
     def test_110_show_host(self):
         command = ["show_host", "--hostname=server1.aqd-unittest.ms.com"]
@@ -78,6 +79,20 @@ class TestAddHostlink(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, '"system/resources/hostlink" = append(create("resource/host/server1.aqd-unittest.ms.com/hostlink/app1/config"))', command)
 
+    def test_120_add_camelcase(self):
+        command = ["add_hostlink", "--hostlink=CaMeLcAsE",
+                   "--target=/var/spool/hostlinks/CaMeLcAsE",
+                   "--hostname=server1.aqd-unittest.ms.com",
+                   "--owner=user1"]
+        self.successtest(command)
+
+        self.check_plenary_exists("resource", "host",
+                                  "server1.aqd-unittest.ms.com", "hostlink",
+                                  "camelcase", "config")
+        self.check_plenary_gone("resource", "host",
+                                "server1.aqd-unittest.ms.com", "hostlink",
+                                "CaMeLcAsE", "config")
+
     def test_200_add_existing(self):
         command = ["add_hostlink", "--hostlink=app1",
                    "--target=/var/spool/hostlinks/app1",
@@ -101,6 +116,14 @@ class TestAddHostlink(TestBrokerCommand):
         self.successtest(command)
 
         self.check_plenary_gone(*path, directory_gone=True)
+
+    def test_305_del_camelcase(self):
+        path = ["resource", "host", "server1.aqd-unittest.ms.com",
+                "hostlink", "camelcase", "config"]
+        self.check_plenary_exists(*path)
+        self.successtest(["del_hostlink", "--hostlink", "CaMeLcAsE",
+                          "--hostname", "server1.aqd-unittest.ms.com"])
+        self.check_plenary_gone(*path)
 
     def test_310_verify_del(self):
         command = ["show_host", "--hostname", "server1.aqd-unittest.ms.com"]

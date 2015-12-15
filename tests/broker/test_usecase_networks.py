@@ -365,7 +365,7 @@ class TestUsecaseNetworks(TestBrokerCommand):
             nlisti = lambda (k, v): r'"%s",\s*"%s"\s*' % (k, v)
             nlist = lambda *l: r'nlist\(\s*' + r',\s*'.join(map(nlisti, l)) + r'\)\s*'
             slist = lambda *l: r'list\(\s*' + r',\s*'.join(l) + r'\)\s*'
-            s(assignment(r'router_address/%s/providers' % net[1],
+            s(assignment(r'router_address/{%s}/providers' % net[1],
               slist(nlist(("interface", pri_router_if),
                           ("ip", pri_router_ip),
                           ("router", pri_router_fqdn)),
