@@ -101,6 +101,15 @@ def create_machine(config, session, logger, machine, dblocation, dbmodel,
                                 "defaults, please specify --memory (in MB)." %
                                 dbmodel.name)
 
+    # Return a nicely formatted error message if the UUID is already in use
+    if uuid:
+        q = session.query(Machine)
+        q = q.filter_by(uuid=uuid)
+        existing = q.first()
+        if existing:
+            raise ArgumentError("{0} is already using UUID {1!s}."
+                                .format(existing, uuid))
+
     dbmachine = Machine(location=dblocation, model=dbmodel, label=machine,
                         cpu_model=dbcpu, cpu_quantity=cpucount, memory=memory,
                         serial_no=serial, uuid=uuid, comments=comments)
