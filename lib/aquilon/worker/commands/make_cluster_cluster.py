@@ -20,7 +20,7 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import Cluster, MetaCluster
 from aquilon.worker.templates import PlenaryCollection, TemplateDomain
-from aquilon.worker.services import Chooser
+from aquilon.worker.services import Chooser, ChooserCache
 
 
 class CommandMakeClusterCluster(BrokerCommand):
@@ -46,12 +46,14 @@ class CommandMakeClusterCluster(BrokerCommand):
 
         # TODO: this duplicates the logic from reconfigure_list.py; it should be
         # refactored later
+        chooser_cache = ChooserCache()
         choosers = []
         failed = []
         for dbobj in dbcluster.all_objects():
             if dbobj.archetype.is_compileable:
                 chooser = Chooser(dbobj, logger=logger,
-                                  required_only=not keepbindings)
+                                  required_only=not keepbindings,
+                                  cache=chooser_cache)
                 choosers.append(chooser)
                 try:
                     chooser.set_required()

@@ -30,7 +30,7 @@ from aquilon.worker.dbwrappers.host import (hostlist_to_hosts,
                                             check_hostlist_size,
                                             validate_branch_author)
 from aquilon.worker.templates import PlenaryCollection, TemplateDomain
-from aquilon.worker.services import Chooser
+from aquilon.worker.services import Chooser, ChooserCache
 
 
 class CommandReconfigureList(BrokerCommand):
@@ -170,11 +170,13 @@ class CommandReconfigureList(BrokerCommand):
         session.flush()
 
         logger.client_info("Verifying service bindings.")
+        chooser_cache = ChooserCache()
         choosers = []
         for dbhost in dbhosts:
             if dbhost.archetype.is_compileable:
                 chooser = Chooser(dbhost, logger=logger,
-                                  required_only=not keepbindings)
+                                  required_only=not keepbindings,
+                                  cache=chooser_cache)
                 choosers.append(chooser)
                 try:
                     chooser.set_required()

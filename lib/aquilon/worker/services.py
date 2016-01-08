@@ -16,6 +16,7 @@
 # limitations under the License.
 """Provides various utilities around services."""
 
+from collections import defaultdict
 from random import choice
 
 from sqlalchemy.orm.session import object_session
@@ -24,6 +25,41 @@ from aquilon.exceptions_ import ArgumentError, InternalError
 from aquilon.aqdb.model import Host, Cluster, ServiceMap, MetaCluster
 from aquilon.worker.templates import (Plenary, PlenaryCollection,
                                       PlenaryServiceInstanceServer)
+
+
+class ChooserCache(object):
+    def __init__(self):
+        self.service_maps = defaultdict(dict)
+        self.client_counts = dict()
+
+    def cache_service_maps(self, services, key):
+        # key is (personality, location, network)
+        missing_services = set(srv for srv in services
+                               if key not in self.service_maps[srv])
+        if not missing_services:
+            return
+
+        maps = ServiceMap.get_mapped_instance_cache(missing_services, key[0],
+                                                    key[1], key[2])
+        for dbsrv in maps:
+            self.service_maps[dbsrv][key] = maps[dbsrv]
+
+    def client_count(self, dbsi):
+        try:
+            return self.client_counts[dbsi]
+        except KeyError:
+            self.client_counts[dbsi] = dbsi.client_count
+            return self.client_counts[dbsi]
+
+    def allocate(self, dbsi, footprint):
+        if dbsi not in self.client_counts:
+            self.client_counts[dbsi] = dbsi.client_count
+        self.client_counts[dbsi] += footprint
+
+    def unallocate(self, dbsi, footprint):
+        if dbsi not in self.client_counts:
+            self.client_counts[dbsi] = dbsi.client_count
+        self.client_counts[dbsi] -= footprint
 
 
 class Chooser(object):
@@ -43,7 +79,7 @@ class Chooser(object):
 
         return chooser
 
-    def __init__(self, dbobj, logger, required_only=False):
+    def __init__(self, dbobj, logger, required_only=False, cache=None):
         """Initialize the chooser.
 
         To clear out bindings that are not required, pass in
@@ -73,9 +109,14 @@ class Chooser(object):
         self.session = object_session(dbobj)
         self.required_only = required_only
         self.logger = logger
-        self.service_maps = None
         self.network = None
         self.location = None
+        self.map_key = None
+
+        if cache is None:
+            self.cache = ChooserCache()
+        else:
+            self.cache = cache
 
         # Stores interim service instance lists
         self.staging_services = {}
@@ -118,14 +159,17 @@ class Chooser(object):
         self.required_services = dbobj.required_services
 
     def apply_changes(self):
+
         for instance in self.instances_unbound:
             self.logger.client_info("{0} removing binding for {1:l}"
                                     .format(self.dbobj, instance))
             self.dbobj.services_used.remove(instance)
+            self.cache.unallocate(instance, self.get_footprint(instance))
         for instance in self.instances_bound:
             self.logger.client_info("{0} adding binding for {1:l}"
                                     .format(self.dbobj, instance))
             self.dbobj.services_used.append(instance)
+            self.cache.allocate(instance, self.get_footprint(instance))
 
     def verify_init(self):
         """This is more of a verify-and-finalize method..."""
@@ -143,6 +187,9 @@ class Chooser(object):
                     # has not yet been set up.  Will error out later.
                     self.aligned_services[service] = (None, parent)
 
+        self.map_key = (self.dbobj.personality_stage.personality, self.location,
+                        self.network)
+
     def error(self, msg, *args, **kwargs):
         """Errors are consolidated so that many can be reported at once."""
         formatted = msg % args
@@ -154,7 +201,7 @@ class Chooser(object):
         self.verify_init()
         self.prestash_primary()
         self.logger.debug("Setting required services")
-        self.cache_service_maps(self.required_services)
+        self.cache.cache_service_maps(self.required_services, self.map_key)
         for dbservice in self.required_services:
             self.find_service_instances(dbservice)
         self.check_errors()
@@ -195,7 +242,7 @@ class Chooser(object):
             self.logger.debug("Setting service %s with auto-bind",
                               service.name)
             self.staging_services[service] = None
-            self.cache_service_maps([service])
+            self.cache.cache_service_maps([service], self.map_key)
             self.find_service_instances(service)
         self.check_errors()
         self.choose_aligned(service)
@@ -218,18 +265,13 @@ class Chooser(object):
         self.apply_changes()
         self.check_errors()
 
-    def cache_service_maps(self, dbservices):
-        self.service_maps = ServiceMap.get_mapped_instance_cache(
-            dbservices, self.dbobj.personality_stage.personality, self.location,
-            self.network)
-
     def find_service_instances(self, dbservice):
         """This finds the "closest" service instances, based on the known maps.
 
         It expects that cache_service_maps has been run.
 
         """
-        instances = self.service_maps.get(dbservice, [])
+        instances = self.cache.service_maps[dbservice].get(self.map_key, [])
         if instances:
             for instance in instances:
                 self.logger.debug("Found {0:l} in the maps.".format(instance))
@@ -290,7 +332,7 @@ class Chooser(object):
         maxed_out_instances = set()
         for instance in self.staging_services[dbservice][:]:
             max_clients = instance.enforced_max_clients
-            current_clients = instance.client_count
+            current_clients = self.cache.client_count(instance)
             if self.instance_full(instance, max_clients, current_clients):
                 self.staging_services[dbservice].remove(instance)
                 maxed_out_instances.add(instance)
@@ -415,7 +457,7 @@ class Chooser(object):
         least_clients = None
         least_loaded = []
         for instance in self.staging_services[dbservice]:
-            client_count = instance.client_count
+            client_count = self.cache.client_count(instance)
             if not least_loaded or client_count < least_clients:
                 least_clients = client_count
                 least_loaded = [instance]

@@ -19,7 +19,7 @@
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Cluster, Service, ServiceInstance
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.services import Chooser
+from aquilon.worker.services import Chooser, ChooserCache
 from aquilon.worker.templates import PlenaryCollection
 
 
@@ -38,13 +38,15 @@ class CommandBindClientCluster(BrokerCommand):
         else:
             dbinstance = None
 
+        chooser_cache = ChooserCache()
         choosers = []
         failed = []
         # FIXME: this logic should be in the chooser
         for dbobj in dbcluster.all_objects():
             # Always add the binding on the cluster we were called on
             if dbobj == dbcluster or dbservice in dbobj.required_services:
-                chooser = Chooser(dbobj, logger=logger, required_only=False)
+                chooser = Chooser(dbobj, logger=logger, required_only=False,
+                                  cache=chooser_cache)
                 choosers.append(chooser)
                 try:
                     chooser.set_single(dbservice, dbinstance, force=force)
