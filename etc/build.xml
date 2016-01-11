@@ -126,7 +126,7 @@
 		</for>
 		<!-- <echo message="source.includes: ${source.includes}"/> -->
 		<!-- <echo message="compiled.includes: ${compiled.includes}"/> -->
-		<panc outputDir="${compiled.profiles}" verbose="true" checkDependencies="${panc.checkDependencies}" formats="${panc.formats}" debugNsInclude="${panc.debug.include}" debugNsExclude="${panc.debug.exclude}">
+		<panc outputDir="${compiled.profiles}" verbose="true" batchSize="${panc.batch.size}" checkDependencies="${panc.checkDependencies}" formats="${panc.formats}" debugNsInclude="${panc.debug.include}" debugNsExclude="${panc.debug.exclude}">
 			<path refid="pan.objectloadpath" />
 			<fileset dir="${source.profiles}" includes="${source.includes}" />
 		</panc>
