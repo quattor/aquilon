@@ -28,35 +28,35 @@ from brokertest import TestBrokerCommand
 class TestChooserConstraints(TestBrokerCommand):
 
     def test_000_setupservice(self):
-        command = ["update_service", "--service=chooser_test",
+        command = ["update_service", "--service=capacity_test",
                    "--instance=max_clients", "--max_clients=1"]
         self.noouttest(command)
 
     def test_010_setuphost(self):
         # Bind a host to that instance
         command = ["bind_client", "--hostname=aquilon61.aqd-unittest.ms.com",
-                   "--service=chooser_test", "--instance=max_clients"]
+                   "--service=capacity_test", "--instance=max_clients"]
         err = self.statustest(command)
         self.matchoutput(err,
                          "aquilon61.aqd-unittest.ms.com adding binding for "
-                         "service instance chooser_test/max_clients",
+                         "service instance capacity_test/max_clients",
                          command)
 
     def test_100_failmaxclients(self):
         # Try to bind a second host to that instance
         command = ["bind_client", "--hostname=aquilon62.aqd-unittest.ms.com",
-                   "--service=chooser_test", "--instance=max_clients"]
+                   "--service=capacity_test", "--instance=max_clients"]
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "The available instances ['max_clients'] for service "
-                         "chooser_test are at full capacity.",
+                         "capacity_test are at full capacity.",
                          command)
 
     def test_110_rebind(self):
         # Rebind the first host - should be no change/errors
         # This is for coverage to check the edge condition.
         command = ["rebind_client", "--hostname=aquilon61.aqd-unittest.ms.com",
-                   "--service=chooser_test"]
+                   "--service=capacity_test"]
         err = self.statustest(command)
         self.matchclean(err, "removing binding", command)
         self.matchclean(err, "adding binding", command)
@@ -65,7 +65,7 @@ class TestChooserConstraints(TestBrokerCommand):
         command = ["show_host", "--hostname=aquilon61.aqd-unittest.ms.com"]
         out = self.commandtest(command)
         self.matchoutput(out,
-                         "Uses Service: chooser_test Instance: max_clients",
+                         "Uses Service: capacity_test Instance: max_clients",
                          command)
 
     def test_130_cleanup_host(self):
@@ -73,7 +73,7 @@ class TestChooserConstraints(TestBrokerCommand):
         err = self.statustest(command)
         self.matchoutput(err,
                          "aquilon61.aqd-unittest.ms.com removing binding for "
-                         "service instance chooser_test/max_clients",
+                         "service instance capacity_test/max_clients",
                          command)
 
 if __name__ == '__main__':

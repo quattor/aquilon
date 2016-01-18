@@ -30,6 +30,9 @@ default_services = {
     # This service will not have any instances...
     "badservice": [],
 
+    # User for testing the chooser capacity limits
+    "capacity_test": ["max_clients"],
+
     # Testing server affinity - ut.a will be available to all
     # three of chooser[123], but it will be the only instance
     # (with corresponding server) in common to all three.
@@ -38,8 +41,6 @@ default_services = {
     "chooser2": ["ut.a", "ut.c"],
     # Skipping ut.c for chooser3
     "chooser3": ["ut.a", "ut.b"],
-
-    "chooser_test": ["max_clients"],
 
     "dns": ["unittest", "one-nyp"],
     "esx_management_server": ["ut.a", "ut.b"],

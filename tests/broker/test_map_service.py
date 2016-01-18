@@ -45,7 +45,7 @@ default_maps = {
             "building": ["np"],
         },
     },
-    "chooser_test": {
+    "capacity_test": {
         "max_clients": {
             "building": ["ut"],
         },
