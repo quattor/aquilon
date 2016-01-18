@@ -102,7 +102,7 @@ class TestMake(TestBrokerCommand):
         """Maps a location based service map just to be overridden by a location
         based personality service map"""
         self.noouttest(["map", "service", "--building", "ut",
-                        "--service", "netmap", "--instance", "q.ny.ms.com"])
+                        "--service", "scope_test", "--instance", "scope-building"])
 
         command = ["make", "--hostname", "netmap-pers.aqd-unittest.ms.com"]
         (out, err) = self.successtest(command)
@@ -110,7 +110,7 @@ class TestMake(TestBrokerCommand):
         command = "show host --hostname netmap-pers.aqd-unittest.ms.com"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
-                         "Uses Service: netmap Instance: q.ny.ms.com",
+                         "Uses Service: scope_test Instance: scope-building",
                          command)
 
     def testmakenetmappers_2_maplocsvc_pers(self):
@@ -118,7 +118,8 @@ class TestMake(TestBrokerCommand):
         network based personality service map"""
         self.noouttest(["map", "service", "--building", "ut", "--personality",
                         "eaitools", "--archetype", "aquilon",
-                        "--service", "netmap", "--instance", "p-q.ny.ms.com"])
+                        "--service", "scope_test",
+                        "--instance", "target-personality"])
 
         command = ["make", "--hostname", "netmap-pers.aqd-unittest.ms.com"]
         (out, err) = self.successtest(command)
@@ -126,34 +127,34 @@ class TestMake(TestBrokerCommand):
         command = "show host --hostname netmap-pers.aqd-unittest.ms.com"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
-                         "Uses Service: netmap Instance: p-q.ny.ms.com",
+                         "Uses Service: scope_test Instance: target-personality",
                          command)
 
     def testmakenetmappers_3_mapservice(self):
         ip = self.net["netperssvcmap"].subnet()[0].ip
 
         self.noouttest(["map", "service", "--networkip", ip,
-                        "--service", "netmap", "--instance", "netmap-pers",
+                        "--service", "scope_test", "--instance", "scope-network",
                         "--personality", "eaitools",
                         "--archetype", "aquilon"])
 
     def testmakenetmappers_4_verifymapservice(self):
         ip = self.net["netperssvcmap"].subnet()[0].ip
 
-        command = ["show_map", "--service=netmap", "--instance=netmap-pers",
+        command = ["show_map", "--service=scope_test", "--instance=scope-network",
                    "--networkip=%s" % ip, "--personality", "eaitools",
                    "--archetype", "aquilon"]
         out = self.commandtest(command)
         self.matchoutput(out,
                          "Archetype: aquilon Personality: eaitools "
-                         "Service: netmap "
-                         "Instance: netmap-pers Map: Network netperssvcmap",
+                         "Service: scope_test "
+                         "Instance: scope-network Map: Network netperssvcmap",
                          command)
 
     def testmakenetmappers_5_verifymapservice_proto(self):
         ip = self.net["netperssvcmap"].subnet()[0].ip
 
-        command = ["show_map", "--service=netmap", "--instance=netmap-pers",
+        command = ["show_map", "--service=scope_test", "--instance=scope-network",
                    "--networkip=%s" % ip, "--personality", "eaitools",
                    "--archetype", "aquilon", "--format=proto"]
         service_map = self.protobuftest(command, expect=1)[0]
@@ -161,9 +162,9 @@ class TestMake(TestBrokerCommand):
         self.assertEqual(service_map.network.cidr, 27)
         self.assertEqual(service_map.network.type, "unknown")
         self.assertEqual(service_map.network.env_name, 'internal')
-        self.assertEqual(service_map.service.name, 'netmap')
+        self.assertEqual(service_map.service.name, 'scope_test')
         self.assertEqual(service_map.service.serviceinstances[0].name,
-                         'netmap-pers')
+                         'scope-network')
         self.assertEqual(service_map.personality.name, 'eaitools')
         self.assertEqual(service_map.personality.archetype.name, 'aquilon')
 
@@ -174,7 +175,7 @@ class TestMake(TestBrokerCommand):
         command = "show host --hostname netmap-pers.aqd-unittest.ms.com"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out,
-                         "Uses Service: netmap Instance: netmap-pers",
+                         "Uses Service: scope_test Instance: scope-network",
                          command)
 
     def testmakevmhosts(self):

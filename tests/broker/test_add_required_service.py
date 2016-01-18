@@ -139,17 +139,17 @@ class TestAddRequiredService(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchoutput(out, "Service: utsvc", command)
 
-    def test_140_add_netmap(self):
+    def test_140_add_scope_test(self):
         command = ["add_required_service", "--personality=eaitools",
-                   "--service=netmap", "--archetype=aquilon"]
+                   "--service=scope_test", "--archetype=aquilon"]
         self.noouttest(command)
 
-    def test_145_verify_netmap(self):
+    def test_145_verify_scope_test(self):
         command = ["show_personality", "--archetype=aquilon",
                    "--personality=eaitools",
                    "--personality_stage=next"]
         out = self.commandtest(command)
-        self.matchoutput(out, "Service: netmap", command)
+        self.matchoutput(out, "Service: scope_test", command)
 
     def test_150_copy_personality(self):
         self.noouttest(["add_personality", "--personality", "required_svc_test",
@@ -162,7 +162,7 @@ class TestAddRequiredService(TestBrokerCommand):
                    "--personality=required_svc_test",
                    "--personality_stage=next"]
         out = self.commandtest(command)
-        self.matchoutput(out, "Service: netmap", command)
+        self.matchoutput(out, "Service: scope_test", command)
         self.matchoutput(out, "Stage: next", command)
 
         self.successtest(["del_personality", "--personality", "required_svc_test",

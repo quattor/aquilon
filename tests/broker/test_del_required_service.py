@@ -44,8 +44,8 @@ class TestDelRequiredService(TestBrokerCommand):
         command += " --justification tcm=12345678"
         self.notfoundtest(command.split(" "))
 
-    def test_120_del_required_netmap(self):
-        command = ["del_required_service", "--service=netmap",
+    def test_120_del_required_scope_test(self):
+        command = ["del_required_service", "--service=scope_test",
                    "--personality=eaitools", "--archetype=aquilon"]
         self.noouttest(command)
 

@@ -61,30 +61,31 @@ class TestUnmapService(TestBrokerCommand):
     def testunmapafsbynetpers(self):
         ip = self.net["netperssvcmap"].subnet()[0].ip
         self.noouttest(["unmap", "service", "--networkip", ip,
-                        "--service", "netmap", "--instance", "netmap-pers",
+                        "--service", "scope_test", "--instance", "scope-network",
                         "--personality", "eaitools",
                         "--archetype", "aquilon"])
 
         self.noouttest(["unmap", "service", "--building", "ut",
-                        "--service", "netmap", "--instance", "p-q.ny.ms.com",
+                        "--service", "scope_test",
+                        "--instance", "target-personality",
                         "--personality", "eaitools",
                         "--archetype", "aquilon"])
 
         self.noouttest(["unmap", "service", "--building", "ut",
-                        "--service", "netmap", "--instance", "q.ny.ms.com"])
+                        "--service", "scope_test", "--instance", "scope-building"])
 
     def testverifyunmapafsbynetpers(self):
         ip = self.net["netperssvcmap"].subnet()[0].ip
         command = ["show_map",
-                   "--service=netmap", "--instance=netmap-pers",
+                   "--service=scope_test", "--instance=scope-network",
                    "--networkip=%s" % ip, "--personality", "compileserver",
                    "--archetype", "aquilon"]
         self.notfoundtest(command)
 
-        command = ["show_map", "--service=netmap", "--instance=netmap-pers"]
+        command = ["show_map", "--service=scope_test", "--instance=scope-network"]
         self.noouttest(command)
 
-        command = ["show_map", "--service=netmap", "--instance=q.ny.ms.com"]
+        command = ["show_map", "--service=scope_test", "--instance=scope-building"]
         self.noouttest(command)
 
     def testunmapdns(self):

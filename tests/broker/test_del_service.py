@@ -34,7 +34,7 @@ services_to_delete = {
     "esx_management_server": ["ut.a", "ut.b"],
     "ips": ["northamerica"],
     "lemon": ["ny-prod"],
-    "netmap": ["netmap-pers", "q.ny.ms.com", "p-q.ny.ms.com"],
+    "scope_test": ["scope-building", "target-personality", "scope-network"],
     "support-group": ["ec-service"],
     "syslogng": ["ny-prod"],
     "unmapped": ["instance1"],

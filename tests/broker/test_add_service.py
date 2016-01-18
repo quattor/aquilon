@@ -47,6 +47,10 @@ default_services = {
     "ips": ["northamerica"],
     "lemon": ["ny-prod"],
     "ntp": ["pa.ny.na"],
+
+    # Testing chooser scope rules
+    "scope_test": ["scope-building", "target-personality", "scope-network"],
+
     "support-group": ["ec-service"],
     "syslogng": ["ny-prod"],
 
@@ -145,24 +149,6 @@ class TestAddService(TestBrokerCommand):
         command = ["add", "service", "--service", "afs",
                    "--instance", "afs-by-net2",
                    "--comments", "afs-by-net duplicate"]
-        self.noouttest(command)
-
-    def test_130_add_netmappers_instances(self):
-        self.noouttest(["add_service", "--service", "netmap"])
-
-        command = ["add", "service", "--service", "netmap",
-                   "--instance", "q.ny.ms.com",
-                   "--comments", "For location based maps"]
-        self.noouttest(command)
-
-        command = ["add", "service", "--service", "netmap",
-                   "--instance", "p-q.ny.ms.com",
-                   "--comments", "For location based maps with personality"]
-        self.noouttest(command)
-
-        command = ["add", "service", "--service", "netmap",
-                   "--instance", "netmap-pers",
-                   "--comments", "For network based maps"]
         self.noouttest(command)
 
     def test_140_add_bootserver(self):

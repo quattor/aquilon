@@ -431,7 +431,7 @@ class TestParameterFeature(TestBrokerCommand):
         out = self.commandtest(cmd)
         self.searchoutput(out, r'Differences for Required Services:\s*'
                                r'missing Required Services in Personality aquilon/%s@next:\s*'
-                               r'netmap\s*'
+                               r'scope_test\s*'
                                r'missing Required Services in Personality aquilon/eaitools@current:\s*'
                                r'chooser1\s*chooser2\s*chooser3' % PERSONALITY,
                           cmd)
