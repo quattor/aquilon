@@ -15,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from sqlalchemy.orm import undefer, joinedload
+from sqlalchemy.orm import undefer, joinedload, subqueryload
 
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.aqdb.model import Feature
@@ -28,6 +28,10 @@ class CommandShowFeature(BrokerCommand):
     def render(self, session, feature, type, **arguments):
         cls = Feature.polymorphic_subclass(type, "Unknown feature type")
         options = [undefer('comments'),
-                   joinedload('owner_grn')]
+                   joinedload('owner_grn'),
+                   subqueryload('links'),
+                   joinedload('links.personality_stage'),
+                   joinedload('links.personality_stage.personality'),
+                   joinedload('links.model')]
         return cls.get_unique(session, name=feature, compel=True,
                               query_options=options)
