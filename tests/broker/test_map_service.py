@@ -264,6 +264,18 @@ class TestMapService(TestBrokerCommand):
         out = self.badoptiontest(command)
         self.matchoutput(out, "Not all mandatory options specified!", command)
 
+    def test_200_scope_conflict(self):
+        ip = self.net["netsvcmap"].subnet()[0].ip
+
+        command = ["map", "service", "--networkip", ip,
+                   "--service", "afs", "--instance", "afs-by-net",
+                   "--building", "whatever"]
+        out = self.badoptiontest(command)
+
+        self.matchoutput(out,
+                         "Please provide exactly one of the required options!",
+                         command)
+
     def test_300_show_map_building_proto(self):
         command = "show map --building ut --format proto"
         self.protobuftest(command.split(" "))

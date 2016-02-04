@@ -29,11 +29,16 @@ from brokertest import TestBrokerCommand
 
 class TestMake(TestBrokerCommand):
 
+    def test_100_make_10gig_hosts(self):
+        for i in range(51, 75):
+            command = ["make", "--hostname", "evh%s.aqd-unittest.ms.com" % i]
+            self.statustest(command)
+
     # network based service mappings
-    def testmakeafsbynet_1_checkloc(self):
+    def test_110_scope_pre_checks(self):
         # Must by issued before map service.
         command = ["make", "--hostname", "afs-by-net.aqd-unittest.ms.com"]
-        (out, err) = self.successtest(command)
+        self.statustest(command)
 
         command = "show host --hostname afs-by-net.aqd-unittest.ms.com"
         out = self.commandtest(command.split(" "))
@@ -41,7 +46,7 @@ class TestMake(TestBrokerCommand):
                          "Uses Service: afs Instance: q.ny.ms.com",
                          command)
 
-    def testmakeafsbynet_2_mapservice(self):
+    def test_111_scope_add_network_maps(self):
         ip = self.net["netsvcmap"].subnet()[0].ip
 
         self.noouttest(["map", "service", "--networkip", ip,
@@ -49,7 +54,7 @@ class TestMake(TestBrokerCommand):
         self.noouttest(["map", "service", "--networkip", ip,
                         "--service", "afs", "--instance", "afs-by-net2"])
 
-    def testmakeafsbynet_3_verifymapservice(self):
+    def test_112_scope_verify_maps(self):
         ip = self.net["netsvcmap"].subnet()[0].ip
 
         command = ["show_map", "--service=afs", "--instance=afs-by-net",
@@ -59,7 +64,7 @@ class TestMake(TestBrokerCommand):
                          "Service: afs Instance: afs-by-net Map: Network netsvcmap",
                          command)
 
-    def testmakeafsbynet_3_verifymapservice_proto(self):
+    def test_112_scope_verify_maps_proto(self):
         ip = self.net["netsvcmap"].subnet()[0].ip
 
         command = ["show_map", "--service=afs", "--instance=afs-by-net",
@@ -73,10 +78,15 @@ class TestMake(TestBrokerCommand):
         self.assertEqual(service_map.service.serviceinstances[0].name,
                          'afs-by-net')
 
-    def testmakeafsbynet_4_make(self):
+    def test_113_scope_make(self):
         command = ["make", "--hostname", "afs-by-net.aqd-unittest.ms.com"]
-        (out, err) = self.successtest(command)
+        out = self.statustest(command)
+        self.matchoutput(out, "removing binding for service instance afs/q.ny.ms.com",
+                         command)
+        self.matchoutput(out, "adding binding for service instance afs/afs-by-net",
+                         command)
 
+    def test_114_scope_verify(self):
         command = "show host --hostname afs-by-net.aqd-unittest.ms.com"
         out = self.commandtest(command.split(" "))
         # This can be either afs-by-net or afs-by-net2
@@ -84,28 +94,17 @@ class TestMake(TestBrokerCommand):
                          "Uses Service: afs Instance: afs-by-net",
                          command)
 
-    def testmakeafsbynet_5_mapconflicts(self):
-        ip = self.net["netsvcmap"].subnet()[0].ip
-
-        command = ["map", "service", "--networkip", ip,
-                   "--service", "afs", "--instance", "afs-by-net",
-                   "--building", "whatever"]
-        out = self.badoptiontest(command)
-
-        self.matchoutput(out,
-                         "Please provide exactly one of the required options!",
-                         command)
-
-    # network / personality based service mappings
-
-    def testmakenetmappers_1_maplocsvc_nopers(self):
+    def test_120_setup(self):
         """Maps a location based service map just to be overridden by a location
         based personality service map"""
         self.noouttest(["map", "service", "--building", "ut",
                         "--service", "scope_test", "--instance", "scope-building"])
 
         command = ["make", "--hostname", "netmap-pers.aqd-unittest.ms.com"]
-        (out, err) = self.successtest(command)
+        out = self.statustest(command)
+        self.matchoutput(out,
+                         "adding binding for service instance scope_test/scope-building",
+                         command)
 
         command = "show host --hostname netmap-pers.aqd-unittest.ms.com"
         out = self.commandtest(command.split(" "))
@@ -113,7 +112,7 @@ class TestMake(TestBrokerCommand):
                          "Uses Service: scope_test Instance: scope-building",
                          command)
 
-    def testmakenetmappers_2_maplocsvc_pers(self):
+    def test_121_personality_precedence(self):
         """Maps a location based personality service map to be overridden by a
         network based personality service map"""
         self.noouttest(["map", "service", "--building", "ut", "--personality",
@@ -122,7 +121,13 @@ class TestMake(TestBrokerCommand):
                         "--instance", "target-personality"])
 
         command = ["make", "--hostname", "netmap-pers.aqd-unittest.ms.com"]
-        (out, err) = self.successtest(command)
+        out = self.statustest(command)
+        self.matchoutput(out,
+                         "removing binding for service instance scope_test/scope-building",
+                         command)
+        self.matchoutput(out,
+                         "adding binding for service instance scope_test/target-personality",
+                         command)
 
         command = "show host --hostname netmap-pers.aqd-unittest.ms.com"
         out = self.commandtest(command.split(" "))
@@ -130,7 +135,7 @@ class TestMake(TestBrokerCommand):
                          "Uses Service: scope_test Instance: target-personality",
                          command)
 
-    def testmakenetmappers_3_mapservice(self):
+    def test_122_network_precedence(self):
         ip = self.net["netperssvcmap"].subnet()[0].ip
 
         self.noouttest(["map", "service", "--networkip", ip,
@@ -138,7 +143,7 @@ class TestMake(TestBrokerCommand):
                         "--personality", "eaitools",
                         "--archetype", "aquilon"])
 
-    def testmakenetmappers_4_verifymapservice(self):
+    def test_123_verify_network_map(self):
         ip = self.net["netperssvcmap"].subnet()[0].ip
 
         command = ["show_map", "--service=scope_test", "--instance=scope-network",
@@ -151,7 +156,7 @@ class TestMake(TestBrokerCommand):
                          "Instance: scope-network Map: Network netperssvcmap",
                          command)
 
-    def testmakenetmappers_5_verifymapservice_proto(self):
+    def test_123_verify_network_map_proto(self):
         ip = self.net["netperssvcmap"].subnet()[0].ip
 
         command = ["show_map", "--service=scope_test", "--instance=scope-network",
@@ -168,9 +173,15 @@ class TestMake(TestBrokerCommand):
         self.assertEqual(service_map.personality.name, 'eaitools')
         self.assertEqual(service_map.personality.archetype.name, 'aquilon')
 
-    def testmakenetmappers_6_make(self):
+    def test_124_make_network(self):
         command = ["make", "--hostname", "netmap-pers.aqd-unittest.ms.com"]
-        (out, err) = self.successtest(command)
+        out = self.statustest(command)
+        self.matchoutput(out,
+                         "removing binding for service instance scope_test/target-personality",
+                         command)
+        self.matchoutput(out,
+                         "adding binding for service instance scope_test/scope-network",
+                         command)
 
         command = "show host --hostname netmap-pers.aqd-unittest.ms.com"
         out = self.commandtest(command.split(" "))
@@ -178,11 +189,11 @@ class TestMake(TestBrokerCommand):
                          "Uses Service: scope_test Instance: scope-network",
                          command)
 
-    def testmakevmhosts(self):
+    def test_130_make_vm_hosts(self):
         for i in range(1, 6):
             command = ["make", "--hostname", "evh%s.aqd-unittest.ms.com" % i,
                        "--osname", "esxi", "--osversion", "5.0.0"]
-            (out, err) = self.successtest(command)
+            err = self.statustest(command)
             self.matchclean(err, "removing binding", command)
 
             self.assertTrue(os.path.exists(os.path.join(
@@ -200,12 +211,7 @@ class TestMake(TestBrokerCommand):
             self.assertTrue(results, "No service plenary data that includes"
                             "evh%s.aqd-unittest.ms.com" % i)
 
-    def testmake10gighosts(self):
-        for i in range(51, 75):
-            command = ["make", "--hostname", "evh%s.aqd-unittest.ms.com" % i]
-            (out, err) = self.successtest(command)
-
-    def testmakeutmc9(self):
+    def test_135_make_utmc9(self):
         command = ["make", "--hostname", "evh82.aqd-unittest.ms.com"]
         self.statustest(command)
 
@@ -213,17 +219,21 @@ class TestMake(TestBrokerCommand):
         out = self.commandtest(command)
         self.matchclean(out, "Uses Service: vcenter Instance: ut", command)
 
-    def testmakeccisshost(self):
+    def test_140_make_cciss_host(self):
         command = ["make", "--hostname=unittest18.aqd-unittest.ms.com"]
-        (out, err) = self.successtest(command)
+        err = self.statustest(command)
         self.matchoutput(err, "3/3 compiled", command)
 
-    def testmakezebra(self):
+    def test_145_make_aurora(self):
+        command = ["make", "--hostname", self.aurora_with_node + ".ms.com"]
+        self.statustest(command)
+
+    def test_150_make_zebra(self):
         command = ["make", "--hostname", "unittest20.aqd-unittest.ms.com"]
-        (out, err) = self.successtest(command)
+        err = self.statustest(command)
         self.matchoutput(err, "3/3 compiled", command)
 
-    def testverifyunittest20(self):
+    def test_151_verify_unittest20(self):
         eth0_ip = self.net["zebra_eth0"].usable[0]
         eth0_broadcast = self.net["zebra_eth0"].broadcast
         eth0_netmask = self.net["zebra_eth0"].netmask
@@ -341,12 +351,12 @@ class TestMake(TestBrokerCommand):
         self.matchoutput(out, '"fqdn" = "zebra3.aqd-unittest.ms.com";',
                          command)
 
-    def testmakeunittest21(self):
+    def test_152_make_unittest21(self):
         command = ["make", "--hostname", "unittest21.aqd-unittest.ms.com"]
-        (out, err) = self.successtest(command)
+        err = self.statustest(command)
         self.matchoutput(err, "3/3 compiled", command)
 
-    def testverifyunittest21(self):
+    def test_153_verify_unittest21(self):
         net = self.net["zebra_eth0"]
         command = ["cat", "--hostname", "unittest21.aqd-unittest.ms.com",
                    "--data"]
@@ -359,12 +369,12 @@ class TestMake(TestBrokerCommand):
                           r'"%s",\s*"%s"\s*\)\s*\);' % (net[1], net[2]),
                           command)
 
-    def testmakeunittest23(self):
+    def test_154_make_unittest23(self):
         command = ["make", "--hostname", "unittest23.aqd-unittest.ms.com"]
-        (out, err) = self.successtest(command)
+        err = self.statustest(command)
         self.matchoutput(err, "3/3 compiled", command)
 
-    def testverifyunittest23(self):
+    def test_155_verify_unittest23(self):
         # Verify that the host chooses the closest router
         command = ["cat", "--hostname", "unittest23.aqd-unittest.ms.com",
                    "--data"]
@@ -391,12 +401,12 @@ class TestMake(TestBrokerCommand):
                           r'"eth0", list\(\s*"%s"\s*\)\s*\);' % router,
                           command)
 
-    def testmakeunittest24(self):
+    def test_156_make_unittest24(self):
         command = ["make", "--hostname", "unittest24.aqd-unittest.ms.com"]
-        (out, err) = self.successtest(command)
+        err = self.statustest(command)
         self.matchoutput(err, "2/2 compiled", command)
 
-    def testverifyunittest24(self):
+    def test_157_verify_unittest24(self):
         # Verify that the host chooses the closest router
         command = ["cat", "--hostname", "unittest24.aqd-unittest.ms.com",
                    "--data"]
@@ -423,12 +433,12 @@ class TestMake(TestBrokerCommand):
                           r'"eth0", list\(\s*"%s"\s*\)\s*\);' % router,
                           command)
 
-    def testmakeunittest25(self):
+    def test_158_make_unittest25(self):
         command = ["make", "--hostname", "unittest25.aqd-unittest.ms.com"]
-        (out, err) = self.successtest(command)
+        err = self.statustest(command)
         self.matchoutput(err, "3/3 compiled", command)
 
-    def testverifyunittest25(self):
+    def test_159_verify_unittest25(self):
         # Verify that the host chooses the closest router
         command = ["cat", "--hostname", "unittest25.aqd-unittest.ms.com",
                    "--data"]
@@ -450,11 +460,6 @@ class TestMake(TestBrokerCommand):
                           command)
         self.matchoutput(out, '"system/network/default_gateway" = "%s";' %
                          self.net["unknown0"].gateway, command)
-
-    def testmakeaurora(self):
-        command = ["make", "--hostname", self.aurora_with_node + ".ms.com"]
-        self.successtest(command)
-
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestMake)
