@@ -37,8 +37,8 @@ class OSFormatter(ObjectFormatter):
         return "\n".join(details)
 
     def fill_proto(self, os, skeleton, embedded=True, indirect_attrs=True):
-        skeleton.name = str(os.name)
-        skeleton.version = str(os.version)
+        skeleton.name = os.name
+        skeleton.version = os.version
         # We don't need the services here, so don't call redirect_proto()
         self.redirect_proto(os.archetype, skeleton.archetype,
                             indirect_attrs=False)

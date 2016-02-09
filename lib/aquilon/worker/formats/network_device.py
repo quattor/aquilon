@@ -92,10 +92,10 @@ class NetworkDeviceFormatter(HardwareEntityFormatter):
                              indirect_attrs=True):
 
         skeleton.hardware_type = skeleton.NETWORK_DEVICE
-        skeleton.label = str(hwent.label)
+        skeleton.label = hwent.label
 
         if hwent.serial_no:
-            skeleton.serial_no = str(hwent.serial_no)
+            skeleton.serial_no = hwent.serial_no
 
         self.redirect_proto(hwent.model, skeleton.model, indirect_attrs=False)
         self.redirect_proto(hwent.location, skeleton.location,  indirect_attrs=False)
@@ -103,7 +103,7 @@ class NetworkDeviceFormatter(HardwareEntityFormatter):
         if indirect_attrs:
             for iface in sorted(hwent.interfaces, key=attrgetter('name')):
                 int_msg = skeleton.interfaces.add()
-                int_msg.device = str(iface.name)
+                int_msg.device = iface.name
                 self.redirect_proto(iface, int_msg)
                 self._fill_address_assignment_proto(iface, int_msg.address_assignments)
 
@@ -133,7 +133,7 @@ class NetworkDeviceFormatter(HardwareEntityFormatter):
                            indirect_attrs=True):
 
         self.redirect_proto(host.branch, skeleton.domain)
-        skeleton.status = str(host.status)
+        skeleton.status = host.status.name
         self.redirect_proto(host.personality_stage, skeleton.personality)
 
         self.redirect_proto(host.operating_system, skeleton.operating_system)

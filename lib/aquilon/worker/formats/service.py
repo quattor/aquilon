@@ -61,9 +61,9 @@ class ServiceFormatter(ObjectFormatter):
         # skeleton can be either NamedServiceInstance or Service, depending on
         # the caller
         if skeleton.DESCRIPTOR.name == 'NamedServiceInstance':
-            skeleton.service = str(service.name)
+            skeleton.service = service.name
         else:
-            skeleton.name = str(service.name)
+            skeleton.name = service.name
 
             if indirect_attrs:
                 self.redirect_proto(service.instances, skeleton.serviceinstances)

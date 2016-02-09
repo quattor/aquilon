@@ -28,7 +28,7 @@ class ClusterFormatter(CompileableFormatter):
                    indirect_attrs=True):
         super(ClusterFormatter, self).fill_proto(cluster, skeleton)
 
-        skeleton.name = str(cluster.name)
+        skeleton.name = cluster.name
         skeleton.threshold = cluster.down_hosts_threshold
         skeleton.threshold_is_percent = cluster.down_hosts_percent
         if cluster.down_maint_threshold is not None:
@@ -44,7 +44,7 @@ class ClusterFormatter(CompileableFormatter):
             skeleton.max_members = cluster.max_hosts
 
         if cluster.metacluster:
-            skeleton.metacluster = str(cluster.metacluster.name)
+            skeleton.metacluster = cluster.metacluster.name
 
         if cluster.resholder and cluster.resholder.resources:
             self.redirect_proto(cluster.resholder.resources, skeleton.resources)

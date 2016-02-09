@@ -54,7 +54,7 @@ class ParameterProtoFormatter(ListFormatter):
                      indirect_attrs=True):
         for path, param_def, value in params:
             skeleton = container.add()
-            skeleton.path = str(path)
+            skeleton.path = path
             if param_def.value_type == 'json':
                 skeleton.value = json.dumps(value)
             else:

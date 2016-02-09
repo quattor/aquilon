@@ -25,10 +25,10 @@ class ArchetypeFormatter(ObjectFormatter):
 
     def fill_proto(self, archetype, skeleton, embedded=True,
                    indirect_attrs=True):
-        skeleton.name = str(archetype.name)
+        skeleton.name = archetype.name
         skeleton.compileable = archetype.is_compileable
         if archetype.cluster_type:
-            skeleton.cluster_type = str(archetype.cluster_type)
+            skeleton.cluster_type = archetype.cluster_type
 
         if indirect_attrs:
             self.redirect_proto(archetype.required_services,

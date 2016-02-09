@@ -61,14 +61,14 @@ class HardwareEntityFormatter(ObjectFormatter):
         return "\n".join(details)
 
     def fill_proto(self, hwent, skeleton, embedded=True, indirect_attrs=True):
-        skeleton.name = str(hwent.label)
+        skeleton.name = hwent.label
         if hwent.host:
             skeleton.host = str(hwent.primary_name)
 
         self.redirect_proto(hwent.location, skeleton.location)
 
         if hwent.serial_no:
-            skeleton.serial_no = str(hwent.serial_no)
+            skeleton.serial_no = hwent.serial_no
 
         self.redirect_proto(hwent.model, skeleton.model, indirect_attrs=False)
 
@@ -78,7 +78,7 @@ class HardwareEntityFormatter(ObjectFormatter):
                 for addr in iface.assignments:
                     has_addrs = True
                     int_msg = skeleton.interfaces.add()
-                    int_msg.device = str(addr.logical_name)
+                    int_msg.device = addr.logical_name
                     self.redirect_proto(iface, int_msg)
                     int_msg.ip = str(addr.ip)
                     int_msg.fqdn = str(addr.fqdns[0])
@@ -90,7 +90,7 @@ class HardwareEntityFormatter(ObjectFormatter):
                 # Add entries for interfaces that do not have any addresses
                 if not has_addrs:
                     int_msg = skeleton.interfaces.add()
-                    int_msg.device = str(iface.name)
+                    int_msg.device = iface.name
                     self.redirect_proto(iface, int_msg)
 
     @staticmethod

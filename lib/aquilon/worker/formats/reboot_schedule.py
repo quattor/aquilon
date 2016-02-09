@@ -31,8 +31,8 @@ class RebootScheduleFormatter(ResourceFormatter):
 
     def fill_proto(self, rs, skeleton, embedded=True, indirect_attrs=True):
         super(RebootScheduleFormatter, self).fill_proto(rs, skeleton)
-        skeleton.reboot_schedule.week = str(rs.week)
-        skeleton.reboot_schedule.day = str(rs.day)
-        skeleton.reboot_schedule.time = str(rs.time)
+        skeleton.reboot_schedule.week = rs.week
+        skeleton.reboot_schedule.day = rs.day
+        skeleton.reboot_schedule.time = rs.time
 
 ObjectFormatter.handlers[RebootSchedule] = RebootScheduleFormatter()

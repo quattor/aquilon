@@ -46,15 +46,15 @@ class ParamDefinitionFormatter(ObjectFormatter):
 
     def fill_proto(self, paramdef, skeleton, embedded=True,
                    indirect_attrs=True):
-        skeleton.path = str(paramdef.path)
-        skeleton.value_type = str(paramdef.value_type)
+        skeleton.path = paramdef.path
+        skeleton.value_type = paramdef.value_type
         skeleton.is_required = paramdef.required
         if hasattr(paramdef.holder, 'template'):
-            skeleton.template = str(paramdef.holder.template)
+            skeleton.template = paramdef.holder.template
         if paramdef.default is not None:
-            skeleton.default = str(paramdef.default)
+            skeleton.default = paramdef.default
         if paramdef.description:
-            skeleton.description = str(paramdef.description)
+            skeleton.description = paramdef.description
         if paramdef.activation:
             act_type = skeleton.DESCRIPTOR.fields_by_name['activation'].enum_type
             skeleton.activation = act_type.values_by_name[paramdef.activation.upper()].number

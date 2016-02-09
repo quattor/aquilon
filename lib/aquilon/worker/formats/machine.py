@@ -127,7 +127,7 @@ class MachineFormatter(HardwareEntityFormatter):
                    indirect_attrs=True):
         super(MachineFormatter, self).fill_proto(machine, skeleton)
 
-        skeleton.cpu = str(machine.cpu_model.name)
+        skeleton.cpu = machine.cpu_model.name
         skeleton.cpu_count = machine.cpu_quantity
         skeleton.memory = machine.memory
         if machine.uri:
@@ -140,15 +140,15 @@ class MachineFormatter(HardwareEntityFormatter):
         if indirect_attrs:
             for disk in sorted(machine.disks, key=attrgetter('device_name')):
                 disk_msg = skeleton.disks.add()
-                disk_msg.device_name = str(disk.device_name)
+                disk_msg.device_name = disk.device_name
                 disk_msg.capacity = disk.capacity
-                disk_msg.disk_type = str(disk.controller_type)
+                disk_msg.disk_type = disk.controller_type
                 if disk.wwn:
-                    disk_msg.wwn = str(disk.wwn)
+                    disk_msg.wwn = disk.wwn
                 if disk.address:
-                    disk_msg.address = str(disk.address)
+                    disk_msg.address = disk.address
                 if disk.bus_address:
-                    disk_msg.bus_address = str(disk.bus_address)
+                    disk_msg.bus_address = disk.bus_address
                 if isinstance(disk, VirtualDisk):
                     if disk.snapshotable is not None:
                         disk_msg.snapshotable = disk.snapshotable

@@ -75,7 +75,7 @@ class MetaClusterFormatter(CompileableFormatter):
                    indirect_attrs=True):
         super(MetaClusterFormatter, self).fill_proto(metacluster, skeleton)
 
-        skeleton.name = str(metacluster.name)
+        skeleton.name = metacluster.name
         self.redirect_proto(metacluster.members, skeleton.clusters)
         self.redirect_proto(metacluster.location_constraint,
                             skeleton.location_constraint)

@@ -141,7 +141,7 @@ class NetworkFormatter(ObjectFormatter):
                network.side, network.network_type, network.comments)
 
     def fill_proto(self, net, skeleton, embedded=True, indirect_attrs=True):
-        skeleton.name = str(net.name)
+        skeleton.name = net.name
         skeleton.ip = str(net.ip)
         skeleton.cidr = net.cidr
         skeleton.bcast = str(net.broadcast)
@@ -150,12 +150,12 @@ class NetworkFormatter(ObjectFormatter):
         skeleton.sysloc = str(net.location.sysloc())
         self.redirect_proto(net.location, skeleton.location,
                             indirect_attrs=False)
-        skeleton.type = str(net.network_type)
-        skeleton.env_name = str(net.network_environment.name)
+        skeleton.type = net.network_type
+        skeleton.env_name = net.network_environment.name
 
         skeleton.routers.extend(str(router.ip) for router in net.routers)
         if net.network_compartment:
-            skeleton.compartment = str(net.network_compartment.name)
+            skeleton.compartment = net.network_compartment.name
 
         # Look for dynamic DHCP ranges
         range_msg = None
@@ -291,16 +291,16 @@ class NetworkHostListFormatter(ListFormatter):
                                             host_msg.personality,
                                             indirect_attrs=False)
 
-                host_msg.hostname = str(addr.dns_records[0].fqdn.name)
+                host_msg.hostname = addr.dns_records[0].fqdn.name
                 host_msg.fqdn = str(addr.dns_records[0].fqdn)
-                host_msg.dns_domain = str(addr.dns_records[0].fqdn.dns_domain)
+                host_msg.dns_domain = addr.dns_records[0].fqdn.dns_domain.name
 
                 host_msg.ip = str(addr.ip)
 
                 if mac:
                     host_msg.mac = str(mac)
 
-                host_msg.machine.name = str(hwent.label)
+                host_msg.machine.name = hwent.label
 
                 # aqdhcpd uses the interface list when excluding hosts it is not
                 # authoritative for
@@ -344,16 +344,16 @@ class SimpleNetworkListFormatter(NetworkListFormatter):
     def format_raw(self, nlist, indent="", embedded=True, indirect_attrs=True):
         details = [indent + "\t".join(self.fields)]
         for network in sorted(nlist, key=attrgetter("ip")):
-            details.append(indent + str("\t".join([network.name,
-                                                   str(network.ip),
-                                                   str(network.netmask),
-                                                   str(network.location.sysloc()),
-                                                   str(network.location.country),
-                                                   network.side,
-                                                   network.network_type,
-                                                   "False",
-                                                   "False",
-                                                   str(network.comments)])))
+            details.append(indent + "\t".join([network.name,
+                                               str(network.ip),
+                                               str(network.netmask),
+                                               str(network.location.sysloc()),
+                                               str(network.location.country),
+                                               network.side,
+                                               network.network_type,
+                                               "False",
+                                               "False",
+                                               str(network.comments)]))
         return "\n".join(details)
 
 ObjectFormatter.handlers[SimpleNetworkList] = SimpleNetworkListFormatter()

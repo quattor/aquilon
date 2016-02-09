@@ -25,9 +25,9 @@ from aquilon.aqdb.model import Xtn
 class TransactionFormatter(ObjectFormatter):
     def fill_proto(self, xtn, skeleton, embedded=True, indirect_attrs=True):
         skeleton.start_time = calendar.timegm(xtn.start_time.utctimetuple())
-        skeleton.username = str(xtn.username)
-        skeleton.command = str(xtn.command)
-        skeleton.return_code = int(xtn.return_code)
+        skeleton.username = xtn.username
+        skeleton.command = xtn.command
+        skeleton.return_code = xtn.return_code
         if xtn.end:
             skeleton.end_time = calendar.timegm(
                 xtn.end.end_time.utctimetuple())

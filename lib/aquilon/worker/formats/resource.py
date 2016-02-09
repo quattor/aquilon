@@ -38,7 +38,7 @@ class ResourceFormatter(ObjectFormatter):
 
     def fill_proto(self, resource, skeleton, embedded=True,
                    indirect_attrs=True):
-        skeleton.name = str(resource.name)
-        skeleton.type = str(resource.resource_type)
+        skeleton.name = resource.name
+        skeleton.type = resource.resource_type
 
 ObjectFormatter.handlers[Resource] = ResourceFormatter()
