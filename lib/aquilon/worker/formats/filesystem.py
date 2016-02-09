@@ -40,7 +40,8 @@ class FilesystemFormatter(ResourceFormatter):
         skeleton.fsdata.fstype = fs.fstype
         skeleton.fsdata.blockdevice = fs.blockdev
         skeleton.fsdata.mountpoint = fs.mountpoint
-        skeleton.fsdata.opts = str(fs.mountoptions)
+        if fs.mountoptions:
+            skeleton.fsdata.opts = fs.mountoptions
         skeleton.fsdata.freq = fs.dumpfreq
         skeleton.fsdata.passno = fs.passno
 

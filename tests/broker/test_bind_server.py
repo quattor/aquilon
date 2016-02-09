@@ -144,6 +144,14 @@ class TestBindServer(TestBrokerCommand):
                          "instance utsi1: %s\n" %
                          " ".join(list(servers)))
 
+        self.assertEqual(len(si.provider), 3)
+        self.assertEqual(si.provider[0].target_fqdn, "unittest02.one-nyp.ms.com")
+        self.assertEqual(si.provider[0].host.fqdn, "unittest02.one-nyp.ms.com")
+        self.assertEqual(si.provider[1].target_fqdn, "server1.aqd-unittest.ms.com")
+        self.assertEqual(si.provider[1].host.fqdn, "server1.aqd-unittest.ms.com")
+        self.assertEqual(si.provider[2].target_fqdn, "unittest00.one-nyp.ms.com")
+        self.assertEqual(si.provider[2].host.fqdn, "unittest00.one-nyp.ms.com")
+
     def test_300_cat_utsi2(self):
         command = "cat --service utsvc --instance utsi2"
         out = self.commandtest(command.split(" "))
@@ -185,6 +193,69 @@ class TestBindServer(TestBrokerCommand):
                           r'Server Binding: unittest00-e1.one-nyp.ms.com \[host: unittest00.one-nyp.ms.com, IP: %s\]\n\s*'
                           % (zebra2_ip, unittest00_e1_ip),
                           command)
+
+    def test_300_show_utsi2_proto(self):
+        unittest20_ip = self.net["zebra_vip"].usable[2]
+        zebra2_ip = self.net["zebra_vip"].usable[1]
+        unittest00_ip = self.net["unknown0"].usable[2]
+        unittest00_e1_ip = self.net["unknown0"].usable[3]
+
+        command = "show service --service utsvc --instance utsi2 --format proto"
+        svc = self.protobuftest(command.split(" "), expect=1)[0]
+        self.assertEqual(svc.name, "utsvc",
+                         "Service name mismatch: %s instead of utsvc\n" %
+                         svc.name)
+        si = svc.serviceinstances[0]
+        self.assertEqual(si.name, "utsi2",
+                         "Service name mismatch: %s instead of utsi2\n" %
+                         si.name)
+
+        # Compat server list
+        servers = [srv.fqdn for srv in si.servers]
+        expected = ["unittest00.one-nyp.ms.com",
+                    "unittest20.aqd-unittest.ms.com",
+                    "unittest00.one-nyp.ms.com"]
+        self.assertEqual(servers, expected,
+                         "Wrong list of servers for service utsvc "
+                         "instance utsi2: %s\n" %
+                         " ".join(list(servers)))
+
+        # New-style provider list
+        self.assertEqual(len(si.provider), 5)
+        self.assertEqual(si.provider[0].target_fqdn, "unittest00.one-nyp.ms.com")
+        self.assertEqual(si.provider[0].target_ip, str(unittest00_ip))
+        self.assertEqual(si.provider[0].host.fqdn, "unittest00.one-nyp.ms.com")
+        self.assertEqual(si.provider[0].host.ip, str(unittest00_ip))
+        self.assertEqual(si.provider[0].service_address.fqdn, "")
+        self.assertEqual(si.provider[0].service_address.ip, "")
+
+        self.assertEqual(si.provider[1].target_fqdn, "srv-alias.one-nyp.ms.com")
+        self.assertEqual(si.provider[1].target_ip, "")
+        self.assertEqual(si.provider[1].host.fqdn, "")
+        self.assertEqual(si.provider[1].host.ip, "")
+        self.assertEqual(si.provider[1].service_address.fqdn, "")
+        self.assertEqual(si.provider[1].service_address.ip, "")
+
+        self.assertEqual(si.provider[2].target_fqdn, "srv-alias2.one-nyp.ms.com")
+        self.assertEqual(si.provider[2].target_ip, "")
+        self.assertEqual(si.provider[2].host.fqdn, "")
+        self.assertEqual(si.provider[2].host.ip, "")
+        self.assertEqual(si.provider[2].service_address.fqdn, "")
+        self.assertEqual(si.provider[2].service_address.ip, "")
+
+        self.assertEqual(si.provider[3].target_fqdn, "zebra2.aqd-unittest.ms.com")
+        self.assertEqual(si.provider[3].target_ip, str(zebra2_ip))
+        self.assertEqual(si.provider[3].host.fqdn, "unittest20.aqd-unittest.ms.com")
+        self.assertEqual(si.provider[3].host.ip, str(unittest20_ip))
+        self.assertEqual(si.provider[3].service_address.fqdn, "zebra2.aqd-unittest.ms.com")
+        self.assertEqual(si.provider[3].service_address.ip, str(zebra2_ip))
+
+        self.assertEqual(si.provider[4].target_fqdn, "unittest00-e1.one-nyp.ms.com")
+        self.assertEqual(si.provider[4].target_ip, str(unittest00_e1_ip))
+        self.assertEqual(si.provider[4].host.fqdn, "unittest00.one-nyp.ms.com")
+        self.assertEqual(si.provider[4].host.ip, str(unittest00_ip))
+        self.assertEqual(si.provider[4].service_address.fqdn, "")
+        self.assertEqual(si.provider[4].service_address.ip, "")
 
     def test_300_show_service_server(self):
         command = "show service --server unittest00.one-nyp.ms.com"

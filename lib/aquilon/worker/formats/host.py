@@ -35,7 +35,11 @@ class HostFormatter(CompileableFormatter):
         skeleton.hostname = dbhw_ent.primary_name.fqdn.name
         skeleton.fqdn = str(dbhw_ent.primary_name.fqdn)
         skeleton.dns_domain = dbhw_ent.primary_name.fqdn.dns_domain.name
-        skeleton.sysloc = str(dbhw_ent.location.sysloc())
+
+        sysloc = dbhw_ent.location.sysloc()
+        if sysloc:
+            skeleton.sysloc = sysloc
+
         if dbhw_ent.primary_ip:
             skeleton.ip = str(dbhw_ent.primary_ip)
         for iface in dbhw_ent.interfaces:

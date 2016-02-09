@@ -55,6 +55,20 @@ class TestAddFilesystem(TestBrokerCommand):
         self.matchoutput(out, "Fsck Pass: 3", command)
         self.matchoutput(out, "Comments: Some filesystem comments", command)
 
+        command = ["show_filesystem", "--filesystem", "fs1",
+                   "--hostname", "server1.aqd-unittest.ms.com",
+                   "--format", "proto"]
+        fs = self.protobuftest(command, expect=1)[0]
+        self.assertEqual(fs.name, "fs1")
+        self.assertEqual(fs.type, "filesystem")
+        self.assertEqual(fs.fsdata.mount, True)
+        self.assertEqual(fs.fsdata.fstype, "ext3")
+        self.assertEqual(fs.fsdata.blockdevice, "/dev/foo/bar")
+        self.assertEqual(fs.fsdata.mountpoint, "/mnt")
+        self.assertEqual(fs.fsdata.opts, "ro")
+        self.assertEqual(fs.fsdata.freq, 1)
+        self.assertEqual(fs.fsdata.passno, 3)
+
         command = ["cat", "--filesystem=fs1",
                    "--hostname=server1.aqd-unittest.ms.com"]
         out = self.commandtest(command)
@@ -95,6 +109,25 @@ class TestAddFilesystem(TestBrokerCommand):
         self.matchoutput(out, "Dump Freq: 0", command)
         self.matchoutput(out, "Fsck Pass: 2", command)
         self.matchclean(out, "Comments", command)
+
+        command = ["show_filesystem", "--filesystem", "fs2",
+                   "--hostname", "server1.aqd-unittest.ms.com",
+                   "--format", "proto"]
+        fs = self.protobuftest(command, expect=1)[0]
+        self.assertEqual(fs.name, "fs2")
+        self.assertEqual(fs.type, "filesystem")
+        self.assertEqual(fs.fsdata.mount, True)
+        self.assertEqual(fs.fsdata.fstype, "ext3")
+        self.assertEqual(fs.fsdata.blockdevice, "/dev/foo/bar")
+        self.assertEqual(fs.fsdata.mountpoint, "/mnt")
+        self.assertEqual(fs.fsdata.opts, "")
+        self.assertEqual(fs.fsdata.freq, 0)
+        self.assertEqual(fs.fsdata.passno, 2)
+
+        command = ["cat", "--hostname", "server1.aqd-unittest.ms.com",
+                   "--filesystem", "fs2"]
+        out = self.commandtest(command)
+        self.matchoutput(out, '"mountopts" = "";', command)
 
     def test_11_addexisting(self):
         command = ["add_filesystem", "--filesystem=fs2", "--type=ext3",

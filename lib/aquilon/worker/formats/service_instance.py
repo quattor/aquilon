@@ -95,8 +95,8 @@ class ServiceInstanceFormatter(ObjectFormatter):
                 # In all of the following we always calculate a target IP and
                 # FQDN.  All of the above cases can be infered by the
                 # information provided. The valid combinations are as follows:
-                #  - Alias
-                #  - Host
+                #  - Alias (no IP address)
+                #  - Host (with or without an IP address)
                 #  - Host + address_assignment
                 #  - Host + service_address
                 #  - Cluster + service_address
@@ -115,11 +115,15 @@ class ServiceInstanceFormatter(ObjectFormatter):
                     hw = srv.host.hardware_entity
                     host_msg = srv_msg.host
                     host_msg.hostname = hw.primary_name.fqdn.name
-                    host_msg.fqdn = str(hw.primary_name.fqdn)
-                    host_msg.ip = str(hw.primary_ip)
+
                     # Default to the hosts primary IP and name
-                    target_ip = host_msg.ip
+                    host_msg.fqdn = str(hw.primary_name.fqdn)
                     target_fqdn = host_msg.fqdn
+
+                    if hw.primary_ip:
+                        host_msg.ip = str(hw.primary_ip)
+                        target_ip = host_msg.ip
+
                     # TODO: The following is being kept for backwards
                     # compatability the ServiceInstanceProvider is preferable
                     self.redirect_proto(srv.host, si_msg.servers.add(),
@@ -145,7 +149,6 @@ class ServiceInstanceFormatter(ObjectFormatter):
                 if target_ip:
                     srv_msg.target_ip = target_ip
                 srv_msg.target_fqdn = target_fqdn
-
 
     # Applies to service_instance/share as well.
     @classmethod

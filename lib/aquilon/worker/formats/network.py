@@ -146,8 +146,13 @@ class NetworkFormatter(ObjectFormatter):
         skeleton.cidr = net.cidr
         skeleton.bcast = str(net.broadcast)
         skeleton.netmask = str(net.netmask)
-        skeleton.side = str(net.side)
-        skeleton.sysloc = str(net.location.sysloc())
+        if net.side:
+            skeleton.side = net.side
+
+        sysloc = net.location.sysloc()
+        if sysloc:
+            skeleton.sysloc = sysloc
+
         self.redirect_proto(net.location, skeleton.location,
                             indirect_attrs=False)
         skeleton.type = net.network_type
