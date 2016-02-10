@@ -339,4 +339,4 @@ sqlalchemy.orm    = WARNING
 aquilon = INFO
 
 [protocols]
-directory = /ms/dist/aquilon/PROJ/protocols/1.25/common/lib/python
+directory = /ms/dist/aquilon/PROJ/protocols/1.26/common/lib/python
