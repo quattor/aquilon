@@ -2317,6 +2317,7 @@
 	<optgroup>
 	    <option name="include_parents" type="flag">Include mappings of parent locations</option>
 	</optgroup>
+	<transport method="get" trigger="all" path="show/map_all"/>
 	<transport method="get" path="show/map"/>
 	<format name="proto" >
 	    <message_class name="ServiceMapList" module="aqdservices_pb2"/>
