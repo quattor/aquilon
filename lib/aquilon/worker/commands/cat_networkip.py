@@ -29,7 +29,6 @@ class CommandCatNetwork(BrokerCommand):
                networkip, network_environment, **kwargs):
         dbnet_env = NetworkEnvironment.get_unique_or_default(session,
                                                              network_environment)
-        self.az.check_network_environment(dbuser, dbnet_env)
 
         dbnet = Network.get_unique(session, ip=networkip,
                                    network_environment=dbnet_env,
