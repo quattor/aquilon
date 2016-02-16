@@ -165,7 +165,14 @@ class CommandAddInterfaceAddress(BrokerCommand):
         dsdb_runner = DSDBRunner(logger=logger)
 
         if shared and newly_created:
-            dsdb_runner.add_host_details(dbdns_rec, ip, comments=dbinterface.comments)
+            # Mimic the logic from DSDBRunner.snapshot_hw()
+            if dbinterface.comments:
+                comments = dbinterface.comments
+            elif dbinterface.interface_type != 'management':
+                comments = dbhw_ent.comments
+            else:
+                comments = None
+            dsdb_runner.add_host_details(dbdns_rec, ip, comments=comments)
 
         with plenaries.transaction():
             if dbhw_ent.host and dbhw_ent.host.archetype.name == 'aurora':
