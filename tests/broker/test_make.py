@@ -135,6 +135,15 @@ class TestMake(TestBrokerCommand):
                          "Uses Service: scope_test Instance: target-environment",
                          command)
 
+        command = ["show_map", "--service", "scope_test",
+                   "--instance", "target-environment", "--format", "proto"]
+        maps = self.protobuftest(command, expect=1)
+        self.assertEqual(maps[0].location.name, "ut")
+        self.assertEqual(maps[0].location.location_type, "building")
+        self.assertEqual(maps[0].host_environment, "dev")
+        self.assertEqual(maps[0].personality.name, "")
+        self.assertEqual(maps[0].network.ip, "")
+
     def test_122_personality_precedence(self):
         """Maps a location based personality service map to be overridden by a
         network based personality service map"""

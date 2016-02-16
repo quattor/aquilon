@@ -51,5 +51,7 @@ class ServiceMapFormatter(ObjectFormatter):
         if service_map.personality:
             self.redirect_proto(service_map.personality, skeleton.personality,
                                 indirect_attrs=False)
+        elif service_map.host_environment:
+            skeleton.host_environment = service_map.host_environment.name
 
 ObjectFormatter.handlers[ServiceMap] = ServiceMapFormatter()
