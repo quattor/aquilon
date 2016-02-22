@@ -47,12 +47,12 @@ class DomainFormatter(ObjectFormatter):
         return "\n".join(details)
 
     def fill_proto(self, domain, skeleton, embedded=True, indirect_attrs=True):
-        skeleton.name = str(domain.name)
+        skeleton.name = domain.name
         skeleton.owner = str(domain.owner)
         skeleton.type = skeleton.DOMAIN
         skeleton.allow_manage = domain.allow_manage
         if domain.tracked_branch:
-            skeleton.tracked_branch = str(domain.tracked_branch.name)
+            skeleton.tracked_branch = domain.tracked_branch.name
 
 ObjectFormatter.handlers[Domain] = DomainFormatter()
 
@@ -89,7 +89,7 @@ class SandboxFormatter(ObjectFormatter):
 
     def fill_proto(self, sandbox, skeleton, embedded=True,
                    indirect_attrs=True):
-        skeleton.name = str(sandbox.name)
+        skeleton.name = sandbox.name
         skeleton.owner = str(sandbox.owner)
         skeleton.type = skeleton.SANDBOX
 

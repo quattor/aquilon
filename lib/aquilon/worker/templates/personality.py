@@ -187,7 +187,7 @@ class PlenaryPersonalityBase(Plenary):
         if user_list:
             pan_assign(lines, "/system/root_users", user_list)
 
-        ng_list = sorted(str(ng) for ng in dbpers.root_netgroups)
+        ng_list = sorted(ng.name for ng in dbpers.root_netgroups)
         if ng_list:
             pan_assign(lines, "/system/root_netgroups", ng_list)
 

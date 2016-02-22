@@ -79,25 +79,25 @@ class ServiceInstanceFormatter(ObjectFormatter):
         # skeleton can be either NamedServiceInstance, ServiceInstance or
         # Service, depending on the caller
         if skeleton.DESCRIPTOR.name == 'NamedServiceInstance':
-            skeleton.service = str(si.service.name)
-            skeleton.instance = str(si.name)
+            skeleton.service = si.service.name
+            skeleton.instance = si.name
             return
 
         if skeleton.DESCRIPTOR.name == 'ServiceInstance':
             si_msg = skeleton
         else:
-            skeleton.name = str(si.service.name)
+            skeleton.name = si.service.name
             si_msg = skeleton.serviceinstances.add()
 
-        si_msg.name = str(si.name)
+        si_msg.name = si.name
 
         if indirect_attrs:
             for srv in sorted(si.servers, key=attrgetter("position")):
                 # In all of the following we always calculate a target IP and
                 # FQDN.  All of the above cases can be infered by the
                 # information provided. The valid combinations are as follows:
-                #  - Alias
-                #  - Host
+                #  - Alias (no IP address)
+                #  - Host (with or without an IP address)
                 #  - Host + address_assignment
                 #  - Host + service_address
                 #  - Cluster + service_address
@@ -115,19 +115,23 @@ class ServiceInstanceFormatter(ObjectFormatter):
                     # a address_assignment has been used.
                     hw = srv.host.hardware_entity
                     host_msg = srv_msg.host
-                    host_msg.hostname = str(hw.primary_name.fqdn.name)
-                    host_msg.fqdn = str(hw.primary_name.fqdn)
-                    host_msg.ip = str(hw.primary_ip)
+                    host_msg.hostname = hw.primary_name.fqdn.name
+
                     # Default to the hosts primary IP and name
-                    target_ip = host_msg.ip
+                    host_msg.fqdn = str(hw.primary_name.fqdn)
                     target_fqdn = host_msg.fqdn
+
+                    if hw.primary_ip:
+                        host_msg.ip = str(hw.primary_ip)
+                        target_ip = host_msg.ip
+
                     # TODO: The following is being kept for backwards
                     # compatability the ServiceInstanceProvider is preferable
                     self.redirect_proto(srv.host, si_msg.servers.add(),
                                         indirect_attrs=False)
                 elif srv.cluster:
                     clus_msg = srv_msg.cluster
-                    clus_msg.name = str(srv.cluster.name)
+                    clus_msg.name = srv.cluster.name
                     # Clusters must have a service_address so we leave the
                     # target addresses to be filled in later
 
@@ -146,7 +150,6 @@ class ServiceInstanceFormatter(ObjectFormatter):
                 if target_ip:
                     srv_msg.target_ip = target_ip
                 srv_msg.target_fqdn = target_fqdn
-
 
     # Applies to service_instance/share as well.
     @classmethod

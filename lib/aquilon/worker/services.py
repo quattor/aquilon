@@ -344,8 +344,7 @@ class Chooser(object):
         if len(self.staging_services[dbservice]) < 1:
             self.error("The available instances %s for service %s are "
                        "at full capacity.",
-                       [str(instance.name)
-                        for instance in maxed_out_instances],
+                       [instance.name for instance in maxed_out_instances],
                        dbservice.name)
         return
 

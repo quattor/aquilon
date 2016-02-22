@@ -32,10 +32,14 @@ class HostFormatter(CompileableFormatter):
         super(HostFormatter, self).fill_proto(host, skeleton)
         skeleton.type = "host"  # Deprecated
         dbhw_ent = host.hardware_entity
-        skeleton.hostname = str(dbhw_ent.primary_name.fqdn.name)
+        skeleton.hostname = dbhw_ent.primary_name.fqdn.name
         skeleton.fqdn = str(dbhw_ent.primary_name.fqdn)
-        skeleton.dns_domain = str(dbhw_ent.primary_name.fqdn.dns_domain.name)
-        skeleton.sysloc = str(dbhw_ent.location.sysloc())
+        skeleton.dns_domain = dbhw_ent.primary_name.fqdn.dns_domain.name
+
+        sysloc = dbhw_ent.location.sysloc()
+        if sysloc:
+            skeleton.sysloc = sysloc
+
         if dbhw_ent.primary_ip:
             skeleton.ip = str(dbhw_ent.primary_ip)
         for iface in dbhw_ent.interfaces:
@@ -188,9 +192,9 @@ class GrnHostListFormatter(ListFormatter):
             # FIXME: this is wrong, hostname should be the short name
             msg.hostname = str(dbhw_ent.primary_name)
             msg.fqdn = str(dbhw_ent.primary_name)
-            msg.dns_domain = str(dbhw_ent.primary_name.fqdn.dns_domain.name)
+            msg.dns_domain = dbhw_ent.primary_name.fqdn.dns_domain.name
             self.redirect_proto(host.branch, msg.domain)
-            msg.status = str(host.status.name)
+            msg.status = host.status.name
             msg.owner_eonid = host.effective_owner_grn.eon_id
 
             self.redirect_proto(host.personality_stage, msg.personality,

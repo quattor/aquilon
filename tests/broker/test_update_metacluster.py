@@ -89,6 +89,16 @@ class TestUpdateMetaCluster(TestBrokerCommand, PersonalityTestMixin):
         out = self.commandtest(command)
         self.matchoutput(out, "City: ny", command)
 
+        command = ["cat", "--metacluster", "utmc1", "--data"]
+        out = self.commandtest(command)
+        self.matchoutput(out,
+                         '"system/metacluster/sysloc/city" = "ny";',
+                         command)
+        self.matchclean(out, "system/metacluster/sysloc/building", command)
+        self.matchoutput(out,
+                         '"system/metacluster/sysloc/location" = null',
+                         command)
+
         # reverting this move
         command = ["update_metacluster", "--metacluster", "utmc1",
                    "--fix_location"]

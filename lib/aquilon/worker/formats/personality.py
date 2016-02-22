@@ -25,10 +25,10 @@ from aquilon.worker.formats.formatters import ObjectFormatter
 class PersonalityFormatter(ObjectFormatter):
     def fill_proto(self, personality, skeleton, embedded=True,
                    indirect_attrs=True):
-        skeleton.name = str(personality)
+        skeleton.name = personality.name
         self.redirect_proto(personality.archetype, skeleton.archetype,
                             indirect_attrs=indirect_attrs)
-        skeleton.host_environment = str(personality.host_environment)
+        skeleton.host_environment = personality.host_environment.name
         skeleton.owner_eonid = personality.owner_eon_id
 
         if personality.comments:
@@ -120,7 +120,7 @@ class PersonalityStageFormatter(PersonalityFormatter):
                                                           indirect_attrs=indirect_attrs)
 
         if persst.staged:
-            skeleton.stage = str(persst.name)
+            skeleton.stage = persst.name
 
         if indirect_attrs:
             self.redirect_proto(persst.required_services,
@@ -133,7 +133,7 @@ class PersonalityStageFormatter(PersonalityFormatter):
                 if link.model:
                     self.redirect_proto(link.model, feat_msg.model)
                 if link.interface_name:
-                    feat_msg.interface_name = str(link.interface_name)
+                    feat_msg.interface_name = link.interface_name
 
             for grn_rec in sorted(persst.grns,
                                   key=attrgetter("target", "eon_id")):

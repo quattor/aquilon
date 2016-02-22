@@ -120,7 +120,7 @@ def get_branch_dependencies(dbbranch):
 
     if dbbranch.trackers:
         ret.append("%s is tracked by %s." %
-                   (format(dbbranch), [str(t.name) for t in dbbranch.trackers]))
+                   (format(dbbranch), [t.name for t in dbbranch.trackers]))
     return ret
 
 

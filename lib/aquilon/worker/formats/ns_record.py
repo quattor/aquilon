@@ -43,11 +43,10 @@ class SimpleNSRecordListFormatter(ListFormatter):
     def format_raw(self, snsrlist, indent="", embedded=True,
                    indirect_attrs=True):
         # return [self.redirect_raw(ns) for ns in snsrlist]
-        # return str("\n".join(
-        #    [indent + ns.dns_domain.name + ": " + ns.a_record.fqdn for ns in snsrlist]))
+        # return "\n".join(
+        #    [indent + ns.dns_domain.name + ": " + ns.a_record.fqdn for ns in snsrlist])
 
-        return str("\n".join(
-            indent + self.redirect_raw(ns) for ns in snsrlist))
+        return "\n".join(indent + self.redirect_raw(ns) for ns in snsrlist)
 
 
 ObjectFormatter.handlers[SimpleNSRecordList] = SimpleNSRecordListFormatter()

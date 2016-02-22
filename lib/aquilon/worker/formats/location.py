@@ -46,9 +46,9 @@ class LocationFormatter(ObjectFormatter):
         return "\n".join(details)
 
     def fill_proto(self, loc, skeleton, embedded=True, indirect_attrs=True):
-        skeleton.name = str(loc.name)
-        skeleton.location_type = str(loc.location_type)
-        skeleton.fullname = str(loc.fullname)
+        skeleton.name = loc.name
+        skeleton.location_type = loc.location_type
+        skeleton.fullname = loc.fullname
         if isinstance(loc, Rack) and loc.rack_row and loc.rack_column:
             skeleton.row = loc.rack_row
             skeleton.col = loc.rack_column

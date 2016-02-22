@@ -20,8 +20,8 @@ from aquilon.worker.formats.formatters import ObjectFormatter
 
 class CompileableFormatter(ObjectFormatter):
     def fill_proto(self, object, skeleton, embedded=True, indirect_attrs=True):
-        skeleton.status = str(object.status)
+        skeleton.status = object.status.name
         self.redirect_proto(object.personality_stage, skeleton.personality)
         self.redirect_proto(object.branch, skeleton.domain)
         if object.sandbox_author:
-            skeleton.sandbox_author = str(object.sandbox_author)
+            skeleton.sandbox_author = object.sandbox_author.name

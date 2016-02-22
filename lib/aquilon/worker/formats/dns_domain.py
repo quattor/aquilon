@@ -43,7 +43,7 @@ class DnsDomainFormatter(ObjectFormatter):
 
     def fill_proto(self, dns_domain, skeleton, embedded=True,
                    indirect_attrs=True):
-        skeleton.name = str(dns_domain.name)
+        skeleton.name = dns_domain.name
         skeleton.restricted = dns_domain.restricted
 
 ObjectFormatter.handlers[DnsDomain] = DnsDomainFormatter()

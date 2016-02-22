@@ -97,7 +97,7 @@ class InterfaceFormatter(ObjectFormatter):
                 tags.append("label: %s" % addr.label)
             if addr.is_shared:
                 tags.append("shared")
-                tags.append("priority: %s" % str(addr.priority))
+                tags.append("priority: %s" % addr.priority)
             if tags:
                 tagstr = " (%s)" % ", ".join(tags)
             else:
@@ -141,7 +141,7 @@ class InterfaceFormatter(ObjectFormatter):
         skeleton.interface_type = interface.interface_type
 
         if interface.bus_address:
-            skeleton.bus_address = str(interface.bus_address)
+            skeleton.bus_address = interface.bus_address
 
         if interface.port_group:
             skeleton.port_group_usage = interface.port_group.usage

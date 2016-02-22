@@ -61,8 +61,8 @@ class FeatureFormatter(ObjectFormatter):
 
     def fill_proto(self, feature, skeleton, embedded=True,
                    indirect_attrs=True):
-        skeleton.name = str(feature.name)
-        skeleton.type = str(feature.feature_type)
+        skeleton.name = feature.name
+        skeleton.type = feature.feature_type
         skeleton.post_personality = feature.post_personality
         skeleton.owner_eonid = feature.owner_eon_id
         if feature.comments:

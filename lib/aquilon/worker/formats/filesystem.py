@@ -37,10 +37,11 @@ class FilesystemFormatter(ResourceFormatter):
     def fill_proto(self, fs, skeleton, embedded=True, indirect_attrs=True):
         super(FilesystemFormatter, self).fill_proto(fs, skeleton)
         skeleton.fsdata.mount = fs.mount
-        skeleton.fsdata.fstype = str(fs.fstype)
-        skeleton.fsdata.blockdevice = str(fs.blockdev)
-        skeleton.fsdata.mountpoint = str(fs.mountpoint)
-        skeleton.fsdata.opts = str(fs.mountoptions)
+        skeleton.fsdata.fstype = fs.fstype
+        skeleton.fsdata.blockdevice = fs.blockdev
+        skeleton.fsdata.mountpoint = fs.mountpoint
+        if fs.mountoptions:
+            skeleton.fsdata.opts = fs.mountoptions
         skeleton.fsdata.freq = fs.dumpfreq
         skeleton.fsdata.passno = fs.passno
 

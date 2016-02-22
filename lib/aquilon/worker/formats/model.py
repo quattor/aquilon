@@ -24,7 +24,7 @@ class ModelFormatter(ObjectFormatter):
     def format_raw(self, model, indent="", embedded=True, indirect_attrs=True):
         details = [indent + "{0:c}: {0.name} {1:c}: {1.name}"
                    .format(model.vendor, model)]
-        details.append(indent + "  Model Type: %s" % str(model.model_type))
+        details.append(indent + "  Model Type: %s" % model.model_type)
 
         if model.comments:
             details.append(indent + "  Comments: %s" % model.comments)
@@ -50,8 +50,8 @@ class ModelFormatter(ObjectFormatter):
         return "\n".join(details)
 
     def fill_proto(self, model, skeleton, embedded=True, indirect_attrs=True):
-        skeleton.name = str(model.name)
-        skeleton.vendor = str(model.vendor.name)
+        skeleton.name = model.name
+        skeleton.vendor = model.vendor.name
         skeleton.model_type = str(model.model_type)
 
 ObjectFormatter.handlers[Model] = ModelFormatter()

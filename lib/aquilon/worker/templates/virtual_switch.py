@@ -34,7 +34,7 @@ class PlenaryVirtualSwitchData(StructurePlenary):
 
     @classmethod
     def template_name(cls, dbvswitch):
-        return cls.prefix + "/" + str(dbvswitch.name)
+        return cls.prefix + "/" + dbvswitch.name
 
     def get_key(self, exclusive=True):
         if inspect(self.dbobj).deleted:

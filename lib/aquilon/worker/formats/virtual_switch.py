@@ -43,12 +43,12 @@ class VirtualSwitchFormatter(ObjectFormatter):
 
     def fill_proto(self, vswitch, skeleton, embedded=True,
                    indirect_attrs=True):
-        skeleton.name = str(vswitch.name)
+        skeleton.name = vswitch.name
         for pg in vswitch.port_groups:
             pg_msg = skeleton.portgroups.add()
             pg_msg.ip = str(pg.network.ip)
             pg_msg.cidr = pg.network.cidr
             pg_msg.network_tag = pg.network_tag
-            pg_msg.usage = str(pg.usage)
+            pg_msg.usage = pg.usage
 
 ObjectFormatter.handlers[VirtualSwitch] = VirtualSwitchFormatter()

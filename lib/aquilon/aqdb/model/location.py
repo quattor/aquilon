@@ -101,7 +101,7 @@ class Location(Base):
             if not value:
                 return None
             names.append(value.name)
-        return str('.'.join(names))
+        return '.'.join(names)
 
     def get_parts(self):
         parts = list(self.parents)
