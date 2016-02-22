@@ -39,4 +39,28 @@ class AqStr(sqlalchemy.types.TypeDecorator):
         return str(value)
 
     def copy(self):
-        return AqStr(self.impl.length)
+        return self.__class__(self.impl.length)
+
+
+class EmptyStr(AqStr):
+
+    def process_bind_param(self, value, dialect):
+        if dialect.name == "oracle" and value is not None:
+            if value == "":
+                value = "-"
+            elif value.startswith("-"):
+                value = "-" + value
+
+        return super(EmptyStr, self).process_bind_param(value, dialect)
+
+    def process_result_value(self, value, dialect):
+        if dialect.name == "oracle" and value is not None:
+            if value.startswith("-"):
+                value = value[1:]
+
+        return super(EmptyStr, self).process_result_value(value, dialect)
+
+    def __init__(self, length, *args, **kwargs):
+        # Reserve space for escaping the first character
+        # FIXME: make increasing the length Oracle-specific
+        super(EmptyStr, self).__init__(length + 1, *args, **kwargs)

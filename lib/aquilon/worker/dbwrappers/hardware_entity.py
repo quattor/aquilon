@@ -74,11 +74,23 @@ def search_hardware_entity_query(session, hardware_type=HardwareEntity,
         if interface_bus_address:
             q = q.filter_by(bus_address=interface_bus_address)
         if pg:
-            dbvi = VlanInfo.get_by_pg(session, pg, compel=ArgumentError)
-            q = q.join(PortGroup, aliased=True, from_joinpoint=True)
-            q = q.filter(or_(IfaceAlias.port_group_name == pg,
-                             and_(PortGroup.network_tag == dbvi.vlan_id,
-                                  PortGroup.usage == dbvi.vlan_type)))
+            filters = [IfaceAlias.port_group_name == pg]
+
+            dbvi = VlanInfo.get_by_pg(session, pg, compel=False)
+            if dbvi:
+                filters.append(and_(PortGroup.network_tag == dbvi.vlan_id,
+                                    PortGroup.usage == dbvi.vlan_type))
+            else:
+                usage, network_tag = PortGroup.parse_name(pg)
+                if network_tag is not None:
+                    filters.append(and_(PortGroup.network_tag == network_tag,
+                                        PortGroup.usage == usage))
+                else:
+                    filters.append(PortGroup.usage == pg)
+
+            q = q.outerjoin(PortGroup, aliased=True, from_joinpoint=True)
+            q = q.filter(or_(*filters))
+            q = q.reset_joinpoint()
         if interface_model or interface_vendor:
             subq = Model.get_matching_query(session, name=interface_model,
                                             vendor=interface_vendor,

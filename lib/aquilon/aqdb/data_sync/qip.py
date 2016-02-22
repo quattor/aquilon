@@ -248,7 +248,10 @@ class QIPRefresh(object):
     def update_network(self, dbnetwork, qipinfo):
         """ Update the network parameters except the netmask """
 
-        self.plenaries.append(Plenary.get_plenary(dbnetwork))
+        # We don't want to add the plenary to self.plenaries if we aren't going
+        # to change anything
+        plenary = Plenary.get_plenary(dbnetwork)
+        updated = False
 
         if dbnetwork.name != qipinfo.name:
             self.logger.client_info("Setting network {0!s} name to {1}"
@@ -271,6 +274,9 @@ class QIPRefresh(object):
                                     .format(dbnetwork, qipinfo.compartment))
             dbnetwork.network_compartment = qipinfo.compartment
 
+        if dbnetwork in self.session.dirty:
+            updated = True
+
         old_rtrs = set(dbnetwork.router_ips)
         new_rtrs = set(qipinfo.routers)
 
@@ -286,9 +292,14 @@ class QIPRefresh(object):
                 if dns_rec.is_unused:
                     delete_dns_record(dns_rec)
             dbnetwork.routers.remove(router)
+            updated = True
 
         for ip in new_rtrs - old_rtrs:
             self.add_router(dbnetwork, ip)
+            updated = True
+
+        if updated:
+            self.plenaries.append(plenary)
 
         # TODO: add support for updating router locations
 
@@ -324,6 +335,8 @@ class QIPRefresh(object):
             in_use = True
 
         if not in_use:
+            self.plenaries.append(Plenary.get_plenary(dbnetwork))
+
             for router in dbnetwork.routers:
                 self.logger.client_info("Removing router {0:s} from "
                                         "{1:l}".format(router.ip, dbnetwork))
@@ -332,8 +345,6 @@ class QIPRefresh(object):
             dbnetwork.routers = []
             self.logger.client_info("Deleting network {0!s}".format(dbnetwork))
             self.session.delete(dbnetwork)
-
-        self.plenaries.append(Plenary.get_plenary(dbnetwork))
 
     def add_router(self, dbnetwork, ip):
         dbnetwork.routers.append(RouterAddress(ip=ip,

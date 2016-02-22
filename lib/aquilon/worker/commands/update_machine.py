@@ -281,7 +281,13 @@ class CommandUpdateMachine(BrokerCommand):
         if comments is not None:
             dbmachine.comments = comments
 
-        if uuid is not None:
+        if uuid:
+            q = session.query(Machine)
+            q = q.filter_by(uuid=uuid)
+            existing = q.first()
+            if existing:
+                raise ArgumentError("{0} is already using UUID {1!s}."
+                                    .format(existing, uuid))
             dbmachine.uuid = uuid
         elif clear_uuid:
             dbmachine.uuid = None

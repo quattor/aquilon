@@ -207,6 +207,26 @@ class TestSearchMachine(TestBrokerCommand):
         self.matchclean(out, "evm20", command)
         self.matchclean(out, "evm21", command)
 
+    def testpgwildcard(self):
+        command = ["search_machine", "--pg", "user"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "evm10", command)
+        self.matchoutput(out, "evm14", command)
+        self.matchoutput(out, "evm19", command)
+        self.matchoutput(out, "evm20", command)
+        self.matchoutput(out, "evm21", command)
+        self.matchoutput(out, "evm23", command)
+        self.matchclean(out, "ut11s01", command)
+        self.matchclean(out, "ut12s02", command)
+
+    def testphyspg(self):
+        command = ["search_machine", "--pg", "storage-v701"]
+        out = self.commandtest(command)
+        for port in range(1, 13):
+            for template in ['ut11s01p%d', 'ut12s02p%d']:
+                self.matchoutput(out, template % port, command)
+        self.matchclean(out, "evm", command)
+
     def testnetworkip(self):
         command = ["search_machine", "--networkip", self.net["ut01ga2s01_v710"].ip]
         out = self.commandtest(command)

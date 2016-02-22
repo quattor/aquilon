@@ -450,6 +450,14 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
                          "already has machine ut3c5n10.",
                          command)
 
+    def test_265_duplicate_uuid(self):
+        command = ["add", "machine", "--machine", "ut3c1n10",
+                   "--rack", "ut3", "--model", "hs21-8853",
+                   "--uuid", "a4ceec7b-2b86-4c94-9dd5-cafbd612581a"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Machine ut3c1n3 is already using UUID "
+                         "a4ceec7b-2b86-4c94-9dd5-cafbd612581a.", command)
+
     # FIXME: Missing a test for adding a macihne to a chassis where the
     # fqdn given for the chassis isn't *actually* a chassis.
     # FIXME: Missing a test for chassis without a slot.  (May not be possible

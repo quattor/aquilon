@@ -30,7 +30,6 @@ class CommandSearchParameterDefinitionFeature(BrokerCommand):
         dbfeature = cls.get_unique(session, name=feature, compel=True)
         q = session.query(ParamDefinition)
         q = q.join(ParamDefinition.holder.of_type(FeatureParamDef))
-        q = q.join(FeatureParamDef)
         q = q.options(contains_eager('holder'),
                       undefer('description'))
         q = q.filter_by(feature=dbfeature)

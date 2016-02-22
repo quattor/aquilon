@@ -14,7 +14,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from aquilon.aqdb.column_types.aqstr import AqStr
+from aquilon.aqdb.column_types.aqstr import AqStr, EmptyStr
 from aquilon.aqdb.column_types.aqmac import AqMac
 from aquilon.aqdb.column_types.IPV4 import IPV4
 from aquilon.aqdb.column_types.enum import Enum

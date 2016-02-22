@@ -146,7 +146,7 @@ class InterfaceFormatter(ObjectFormatter):
         if interface.port_group:
             skeleton.port_group_usage = interface.port_group.usage
             skeleton.port_group_tag = interface.port_group.network_tag
-            skeleton.port_group_name = interface.port_group.legacy_vlan.port_group
+            skeleton.port_group_name = interface.port_group.name
         elif interface.port_group_name:
             skeleton.port_group_name = interface.port_group_name
 
