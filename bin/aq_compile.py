@@ -18,7 +18,7 @@
 """
 Compile templates outside of the broker
 
-This script is inteded to be used primarily by the template unit test. It could
+This script is intended to be used primarily by the template unit test. It could
 be extended later if that turns out to be useful.
 """
 
@@ -110,6 +110,19 @@ def run_domain_compile(options, config):
     if options.cleandeps:
         args.append("-Dclean.dep.files=%s" % options.cleandeps)
 
+    pancinclude = options.panc_include
+    pancexclude = options.panc_exclude
+
+    if options.pancdebug:
+        pancinclude = r'.*'
+        pancexclude = r'components/spma/functions.*'
+
+    if pancinclude:
+        args.append("-Dpanc.debug.include=%s" % pancinclude)
+
+    if pancexclude:
+        args.append("-Dpanc.debug.exclude=%s" % pancexclude)
+
     print("Running %s" % " ".join(args))
     return call(args, env=panc_env, cwd=options.basedir)
 
@@ -143,6 +156,16 @@ def main():
                         help="location of the swrep templates")
     parser.add_argument("--batch_size", action="store", type=int,
                         help="compiler batch size")
+    parser.add_argument("--panc_include", action="store",
+                        help="Regex for templates to include in debug " +
+                             "output (None included by default)")
+    parser.add_argument("--panc_exclude", action="store",
+                        help="Regex for templates to exclude in debug " +
+                             "output (only useful if pancinclude has " +
+                             "been given)")
+    parser.add_argument("--pancdebug", action="store_true", default=None,
+                        help="Alias for pancinclude=.* and " +
+                             "pancexclude=components/spma/functions.*")
     parser.add_argument("--cleandeps", action="store_true", default=None,
                         help="Remove pan dependency files before compiling")
 
