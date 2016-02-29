@@ -32,9 +32,9 @@ class TestDelParameterDefinition(TestBrokerCommand):
     def test_100_del_default(self):
         for path in default_param_defs:
             self.statustest(["del_parameter_definition", "--archetype", "aquilon",
-                             "--path", path])
+                             "--path", "foo/" + path])
 
-        for path in ["//startslash", "endslash//"]:
+        for path in ["//foo/startslash", "foo/endslash//"]:
             self.statustest(["del_parameter_definition", "--archetype", "aquilon",
                              "--path", path])
 

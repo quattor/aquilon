@@ -29,13 +29,13 @@ class TestUpdateParameterDefinition(TestBrokerCommand):
 
     def test_100_update_arch_paramdef_no_justification(self):
         command = ["update_parameter_definition", "--archetype", "aquilon",
-                   "--path=testint", "--default=100"]
+                   "--path=foo/testint", "--default=100"]
         out = self.unauthorizedtest(command, auth=True, msgcheck=False)
         self.matchoutput(out, "--justification is required", command)
 
     def test_101_update_arch_paramdef(self):
         cmd = ["update_parameter_definition", "--archetype", "aquilon",
-               "--path=testint", "--description=testint",
+               "--path=foo/testint", "--description=testint",
                "--default=100", "--required", "--activation", "reboot",
                "--justification", "tcm=12345678"]
         out = self.statustest(cmd)
@@ -43,10 +43,10 @@ class TestUpdateParameterDefinition(TestBrokerCommand):
 
     def test_105_verify_update(self):
         cmd = ["show_parameter_definition", "--archetype", "aquilon",
-               "--path", "testint"]
+               "--path", "foo/testint"]
         out = self.commandtest(cmd)
         self.searchoutput(out,
-                          r'Parameter Definition: testint \[required\]\s*'
+                          r'Parameter Definition: foo/testint \[required\]\s*'
                           r'Type: int\s*'
                           r'Template: foo\s*'
                           r'Default: 100\s*'
@@ -78,13 +78,13 @@ class TestUpdateParameterDefinition(TestBrokerCommand):
 
     def test_120_clear_default(self):
         command = ["update_parameter_definition", "--archetype", "aquilon",
-                   "--path=testint", "--clear_default",
+                   "--path=foo/testint", "--clear_default",
                    "--justification", "tcm=12345678"]
         self.statustest(command)
 
     def test_125_verify_update(self):
         cmd = ["show_parameter_definition", "--archetype", "aquilon",
-               "--path", "testint"]
+               "--path", "foo/testint"]
         out = self.commandtest(cmd)
         self.matchclean(out, "Default:", cmd)
 
@@ -96,7 +96,7 @@ class TestUpdateParameterDefinition(TestBrokerCommand):
 
     def test_129_restore_default(self):
         command = ["update_parameter_definition", "--archetype", "aquilon",
-                   "--path=testint", "--default=100",
+                   "--path=foo/testint", "--default=100",
                    "--justification", "tcm=12345678"]
         self.statustest(command)
 
@@ -117,7 +117,7 @@ class TestUpdateParameterDefinition(TestBrokerCommand):
 
     def test_200_update_rebuild_required_default(self):
         cmd = ["update_parameter_definition", "--archetype", "aquilon",
-               "--path=test_rebuild_required", "--default=default"]
+               "--path=foo/test_rebuild_required", "--default=default"]
         out = self.unimplementederrortest(cmd)
         self.matchoutput(out, "Changing the default value of a parameter "
                          "which requires rebuild would cause all existing "

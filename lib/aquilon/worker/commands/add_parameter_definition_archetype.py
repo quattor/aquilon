@@ -54,6 +54,11 @@ class CommandAddParameterDefintionArchetype(BrokerCommand):
             raise ArgumentError("Only JSON parameters may have a schema.")
 
         path = ParamDefinition.normalize_path(path)
+
+        if not (path == template or path.startswith(template + "/")):
+            raise ArgumentError("The first component of the path must be "
+                                "the name of the template.")
+
         ParamDefinition.get_unique(session, path=path, holder=holder,
                                    preclude=True)
 

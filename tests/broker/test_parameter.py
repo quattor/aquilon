@@ -282,7 +282,7 @@ class TestParameter(TestBrokerCommand):
         out = self.badrequesttest(VAL_CMD)
         self.searchoutput(out,
                           r'Following required parameters have not been specified:\s*'
-                          r'Parameter Definition: testrequired \[required\]\s*'
+                          r'Parameter Definition: foo/testrequired \[required\]\s*'
                           r'Type: string\s*'
                           r'Template: foo',
                           VAL_CMD)
@@ -315,7 +315,7 @@ class TestParameter(TestBrokerCommand):
         self.matchclean(out, '"function": "production"', command)
 
     def test_320_add_all_required(self):
-        path = "testrequired"
+        path = "foo/testrequired"
         value = "set"
         command = ADD_CMD + ["--path", path, "--value", value]
         self.noouttest(command)
@@ -341,11 +341,11 @@ class TestParameter(TestBrokerCommand):
                    "--buildstatus", "almostready"]
         self.successtest(command)
 
-        path = "test_rebuild_required"
+        path = "foo/test_rebuild_required"
         command = ADD_CMD + ["--path", path, "--value=test", ]
         err = self.badrequesttest(command)
         self.searchoutput(err,
-                          r'Modifying parameter test_rebuild_required value needs a host rebuild. '
+                          r'Modifying parameter foo/test_rebuild_required value needs a host rebuild. '
                           r'There are hosts associated to the personality in non-ready state. '
                           r'Please set these host to status of rebuild to continue.',
                           command)
@@ -369,11 +369,11 @@ class TestParameter(TestBrokerCommand):
                    "--buildstatus", "ready"]
         self.successtest(command)
 
-        path = "test_rebuild_required"
+        path = "foo/test_rebuild_required"
         command = ADD_CMD + ["--path", path, "--value=test"]
         err = self.badrequesttest(command)
         self.searchoutput(err,
-                          r'Modifying parameter test_rebuild_required value needs a host rebuild. '
+                          r'Modifying parameter foo/test_rebuild_required value needs a host rebuild. '
                           r'There are hosts associated to the personality in non-ready state. '
                           r'Please set these host to status of rebuild to continue.',
                           command)
@@ -383,7 +383,7 @@ class TestParameter(TestBrokerCommand):
                    "--buildstatus", "rebuild"]
         self.successtest(command)
 
-        path = "test_rebuild_required"
+        path = "foo/test_rebuild_required"
         command = ADD_CMD + ["--path", path, "--value=test"]
         self.successtest(command)
 
@@ -392,11 +392,11 @@ class TestParameter(TestBrokerCommand):
                    "--buildstatus", "ready"]
         self.successtest(command)
 
-        path = "test_rebuild_required"
+        path = "foo/test_rebuild_required"
         command = UPD_CMD + ["--path", path, "--value=test"]
         err = self.badrequesttest(command)
         self.searchoutput(err,
-                          r'Modifying parameter test_rebuild_required value needs a host rebuild. '
+                          r'Modifying parameter foo/test_rebuild_required value needs a host rebuild. '
                           r'There are hosts associated to the personality in non-ready state. '
                           r'Please set these host to status of rebuild to continue.',
                           command)
@@ -406,7 +406,7 @@ class TestParameter(TestBrokerCommand):
                    "--buildstatus", "rebuild"]
         self.successtest(command)
 
-        path = "test_rebuild_required"
+        path = "foo/test_rebuild_required"
         command = UPD_CMD + ["--path", path, "--value=test"]
         self.successtest(command)
 
@@ -415,11 +415,11 @@ class TestParameter(TestBrokerCommand):
                    "--buildstatus", "ready"]
         self.successtest(command)
 
-        path = "test_rebuild_required"
+        path = "foo/test_rebuild_required"
         command = DEL_CMD + ["--path", path]
         err = self.badrequesttest(command)
         self.searchoutput(err,
-                          r'Modifying parameter test_rebuild_required value needs a host rebuild. '
+                          r'Modifying parameter foo/test_rebuild_required value needs a host rebuild. '
                           r'There are hosts associated to the personality in non-ready state. '
                           r'Please set these host to status of rebuild to continue.',
                           command)
@@ -429,7 +429,7 @@ class TestParameter(TestBrokerCommand):
                    "--buildstatus", "rebuild"]
         self.successtest(command)
 
-        path = "test_rebuild_required"
+        path = "foo/test_rebuild_required"
         command = DEL_CMD + ["--path", path]
         self.successtest(command)
 
@@ -447,6 +447,7 @@ class TestParameter(TestBrokerCommand):
                           r'//actions/testaction2/timeout\s*'
                           r'//actions/testaction2/user\s*'
                           r'//espinfo/users/1\s*'
+                          r'//foo/testrequired\s*'
                           r'//monitoring/metric/_20003/active\s*'
                           r'//monitoring/metric/_20003/class\s*'
                           r'//monitoring/metric/_20003/descr\s*'
@@ -456,7 +457,6 @@ class TestParameter(TestBrokerCommand):
                           r'//monitoring/metric/_20003/smooth/maxdiff\s*'
                           r'//monitoring/metric/_20003/smooth/maxtime\s*'
                           r'//monitoring/metric/_20003/smooth/typeString\s*'
-                          r'//testrequired\s*'
                           r'matching Parameters with different values:\s*'
                           r'//espinfo/function value=production, othervalue=development\s*'
                           r'//espinfo/users/0 value=someusers, othervalue=IT / TECHNOLOGY',
@@ -543,11 +543,10 @@ class TestParameter(TestBrokerCommand):
         self.matchoutput(out, '"testint" = 60;', cmd)
         self.matchoutput(out, '"teststring" = "default";', cmd)
         self.matchoutput(out, '"testrequired" = "set";', cmd)
-        # TODO: get_path_under_top() makes the value come out not quite as
-        # expected - the "testjson" prefix is missing
         self.searchoutput(out,
-                          r'"key" = "param_key";\s*'
-                          r'"values" = list\(\s*0\s*\);\s*',
+                          r'"testjson" = nlist\(\s*'
+                          r'"key", "param_key",\s*'
+                          r'"values", list\(\s*0\s*\)\s*\);\s*',
                           cmd)
         self.searchoutput(out,
                           r'"testlist" = list\(\s*"val1",\s*"val2"\s*\);',
