@@ -45,15 +45,15 @@ class TestRefreshUser(TestBrokerCommand):
 
     def test_110_grant_testuser4_root(self):
         command = ["grant_root_access", "--user", "testuser4",
-                   "--personality", "compileserver", "--justification", "tcm=12345678"]
+                   "--personality", "utunused/dev", "--justification", "tcm=12345678"]
         self.successtest(command)
 
     def test_111_verify_testuser4_root(self):
-        command = ["show_personality", "--personality", "compileserver"]
+        command = ["show_personality", "--personality", "utunused/dev"]
         out = self.commandtest(command)
         self.matchoutput(out, "Root Access User: testuser4", command)
 
-        command = ["cat", "--personality", "compileserver",
+        command = ["cat", "--personality", "utunused/dev",
                    "--archetype", "aquilon"]
         out = self.commandtest(command)
         self.matchoutput(out, "testuser4", command)
@@ -96,11 +96,11 @@ class TestRefreshUser(TestBrokerCommand):
         self.searchoutput(out, r'Home Directory: /tmp/foo$', command)
 
     def test_220_verify_testuser4_root_gone(self):
-        command = ["show_personality", "--personality", "compileserver"]
+        command = ["show_personality", "--personality", "utunused/dev"]
         out = self.commandtest(command)
         self.matchclean(out, "testuser4", command)
 
-        command = ["cat", "--personality", "compileserver",
+        command = ["cat", "--personality", "utunused/dev",
                    "--archetype", "aquilon"]
         out = self.commandtest(command)
         self.matchclean(out, "testuser4", command)

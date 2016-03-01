@@ -57,7 +57,7 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
         self.matchclean(out, "Stage:", command)
         self.matchoutput(out, "Comments: Some personality comments", command)
         self.matchoutput(out, "Owned by GRN: %s" % GRN, command)
-        self.matchoutput(out, "Used by GRN: %s" % GRN, command)
+        self.matchoutput(out, "Used by GRN: %s [target: esp]" % GRN, command)
         self.matchclean(out, "inventory", command)
 
     def test_105_verify_utpersonality_proto(self):
@@ -253,7 +253,6 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
         personalities = {
             'compileserver': {},
             'inventory': {},
-            'lemon-collector-oracle': {},
             'unixeng-test': {'staged': True},
             'nostage': {'staged': True},
             'clustered': {'cluster_required': True},
