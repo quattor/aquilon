@@ -252,7 +252,6 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
         personalities = {
             'compileserver': {},
             'inventory': {},
-            'sybase-test': {},
             'lemon-collector-oracle': {},
             'unixeng-test': {'staged': True},
             'nostage': {'staged': True},
