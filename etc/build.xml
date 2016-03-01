@@ -97,7 +97,7 @@
 	<!-- See comment above delete.object.dep. -->
 	<target name="delete.domain.deps" description="remove domain dep files" if="clean.dep.files">
 		<delete failonerror="false">
-			<fileset dir="${compiled.profiles}" includes="*.dep" />
+			<fileset dir="${compiled.profiles}" includes="**/*.dep" />
 		</delete>
 	</target>
 

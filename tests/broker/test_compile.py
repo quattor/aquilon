@@ -19,6 +19,7 @@
 
 import os
 import gzip
+import re
 from six.moves import cStringIO as StringIO  # pylint: disable=F0401
 from six.moves.cPickle import Pickler, Unpickler  # pylint: disable=F0401
 from six import itervalues
@@ -252,6 +253,12 @@ class TestCompile(VerifyNotificationsMixin, TestBrokerCommand):
         command = ['compile', '--domain=unittest', '--cleandeps']
         out = self.statustest(command)
         self.matchoutput(out, "0 errors", command)
+
+        res = re.search(r"(\d+)/(\d+) object template\(s\) being processed",
+                        out, re.M)
+        self.assertEqual(res.group(1), res.group(2),
+                         "All objects need to be recompiled")
+
         self.matchclean(out, "aqd unittest debug for aquilon base", command)
         self.matchclean(out, "aqd unittest debug for aquilon final", command)
 
@@ -273,6 +280,11 @@ class TestCompile(VerifyNotificationsMixin, TestBrokerCommand):
         self.matchoutput(out, "aqd unittest debug for aquilon base", command)
         self.matchoutput(out, "aqd unittest debug for aquilon final", command)
         self.matchclean(out, "Assigning repositories to packages...", command)
+
+        res = re.search(r"(\d+)/(\d+) object template\(s\) being processed",
+                        out, re.M)
+        self.assertEqual(res.group(1), res.group(2),
+                         "All objects need to be recompiled")
 
     # If this fails on the 'Assigning...' line then all four tests
     # (510, 520, 530, 540) should be revisited.  See comments above 510.
