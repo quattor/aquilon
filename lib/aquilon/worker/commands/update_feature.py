@@ -15,19 +15,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import Feature
 from aquilon.worker.dbwrappers.grn import lookup_grn
+from aquilon.worker.dbwrappers.parameter import add_feature_paramdef_plenaries
+from aquilon.worker.templates import PlenaryCollection
 
 
 class CommandUpdateFeature(BrokerCommand):
 
-    def render(self, session, feature, type, comments,
-               grn, eon_id, visibility, activation, deactivation, logger, **arguments):
+    def render(self, session, logger, feature, type, comments, grn, eon_id,
+               visibility, activation, deactivation, **arguments):
 
         cls = Feature.polymorphic_subclass(type, "Unknown feature type")
         dbfeature = cls.get_unique(session, name=feature, compel=True)
+
+        plenaries = PlenaryCollection(logger=logger)
+        add_feature_paramdef_plenaries(session, dbfeature, plenaries)
 
         if visibility:
             dbfeature.visibility = visibility
@@ -47,5 +51,11 @@ class CommandUpdateFeature(BrokerCommand):
             dbfeature.deactivation = deactivation
 
         session.flush()
+
+        # Refresh plenaries as the feature comment is stored there
+        written = plenaries.write()
+        if plenaries.plenaries:
+            logger.client_info("Flushed %d/%d templates." %
+                               (written, len(plenaries.plenaries)))
 
         return

@@ -114,6 +114,7 @@ from .test_update_service_address import TestUpdateServiceAddress
 from .test_add_manager import TestAddManager
 from .test_add_static_route import TestAddStaticRoute
 from .test_add_feature import TestAddFeature
+from .test_update_feature import TestUpdateFeature
 from .test_bind_feature import TestBindFeature
 from .test_unbind_feature import TestUnbindFeature
 from .test_map_service import TestMapService
@@ -420,6 +421,7 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestUpdateNetworkEnvironment, TestUpdateDnsEnvironment,
                      TestUpdateRouterAddress,
                      TestUpdateArchetype,
+                     TestUpdateFeature,
                      TestUpdateParameterDefinition, TestUpdateParameter,
                      TestUpdateMetaCluster, TestUpdateESXCluster,
                      TestUpdateCluster,
