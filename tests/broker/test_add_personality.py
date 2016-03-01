@@ -34,22 +34,23 @@ GRN = "grn:/ms/ei/aquilon/aqd"
 class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
                          TestBrokerCommand):
     def test_100_add_utpersonality(self):
-        command = ["add_personality", "--personality=utpersonality/dev",
+        # Unused personality with basic settings
+        command = ["add_personality", "--personality=utunused/dev",
                    "--archetype=aquilon", "--grn=%s" % GRN, "--config_override",
                    "--host_environment=dev",
                    "--comments", "Some personality comments"]
         self.noouttest(command)
-        self.verifycatpersonality("aquilon", "utpersonality/dev", True, "dev",
+        self.verifycatpersonality("aquilon", "utunused/dev", True, "dev",
                                   grn=GRN)
         for plenary in ("pre_feature", "post_feature", "espinfo"):
             self.check_plenary_exists("aquilon", "personality",
-                                      "utpersonality/dev", plenary)
+                                      "utunused/dev", plenary)
 
     def test_105_verify_utpersonality(self):
-        command = ["show_personality", "--personality=utpersonality/dev",
+        command = ["show_personality", "--personality=utunused/dev",
                    "--archetype=aquilon"]
         out = self.commandtest(command)
-        self.matchoutput(out, "Personality: utpersonality/dev Archetype: aquilon",
+        self.matchoutput(out, "Personality: utunused/dev Archetype: aquilon",
                          command)
         self.matchoutput(out, "Config override: enabled", command)
         self.matchoutput(out, "Environment: dev", command)
@@ -61,10 +62,10 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
 
     def test_105_verify_utpersonality_proto(self):
         command = ["show_personality", "--archetype=aquilon",
-                   "--personality=utpersonality/dev", "--format=proto"]
+                   "--personality=utunused/dev", "--format=proto"]
         personality = self.protobuftest(command, expect=1)[0]
         self.assertEqual(personality.archetype.name, "aquilon")
-        self.assertEqual(personality.name, "utpersonality/dev")
+        self.assertEqual(personality.name, "utunused/dev")
         self.assertEqual(personality.stage, "")
         self.assertEqual(personality.config_override, True)
         self.assertEqual(personality.cluster_required, False)
@@ -73,17 +74,17 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
         self.assertEqual(personality.host_environment, "dev")
 
     def test_110_add_utpersonality_clone(self):
-        command = ["add_personality", "--personality", "utpersonality-clone/dev",
-                   "--archetype", "aquilon", "--copy_from", "utpersonality/dev"]
+        command = ["add_personality", "--personality", "utunused-clone/dev",
+                   "--archetype", "aquilon", "--copy_from", "utunused/dev"]
         out = self.statustest(command)
-        self.matchoutput(out, "Personality aquilon/utpersonality/dev has "
+        self.matchoutput(out, "Personality aquilon/utunused/dev has "
                          "config_override set", command)
 
     def test_115_verify_utpersonality_clone(self):
-        command = ["show_personality", "--personality", "utpersonality-clone/dev",
+        command = ["show_personality", "--personality", "utunused-clone/dev",
                    "--archetype", "aquilon"]
         out = self.commandtest(command)
-        self.matchoutput(out, "Personality: utpersonality-clone/dev Archetype: aquilon",
+        self.matchoutput(out, "Personality: utunused-clone/dev Archetype: aquilon",
                          command)
         self.matchoutput(out, "Environment: dev", command)
         self.matchclean(out, "Stage:", command)
@@ -94,7 +95,7 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
 
     def test_119_delete_utpersonality_clone(self):
         self.noouttest(["del_personality", "--archetype", "aquilon",
-                        "--personality", "utpersonality-clone/dev"])
+                        "--personality", "utunused-clone/dev"])
 
     def test_120_add_netinfra(self):
         command = ["add_personality", "--personality=generic",
@@ -343,7 +344,7 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
     def test_300_show_personality_all(self):
         command = "show_personality --all"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Personality: utpersonality/dev Archetype: aquilon",
+        self.matchoutput(out, "Personality: utunused/dev Archetype: aquilon",
                          command)
         self.matchoutput(out, "Personality: generic Archetype: aurora",
                          command)
@@ -360,14 +361,14 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
                 archetypes[archetype][personality.name] = {personality.stage: personality}
         self.assertTrue("aquilon" in archetypes,
                         "No personality with archetype aquilon in list.")
-        self.assertTrue("utpersonality/dev" in archetypes["aquilon"],
-                        "No aquilon/utpersonality/dev in personality list.")
+        self.assertTrue("utunused/dev" in archetypes["aquilon"],
+                        "No aquilon/utunused/dev in personality list.")
         self.assertTrue("aurora" in archetypes,
                         "No personality with archetype aurora")
         self.assertTrue("generic" in archetypes["aurora"],
                         "No aurora/generic in personality list.")
         self.assertFalse("current" in
-                         archetypes["aquilon"]["utpersonality/dev"])
+                         archetypes["aquilon"]["utunused/dev"])
         self.assertFalse("current" in archetypes["aquilon"]["eaitools"])
         self.assertTrue("next" in archetypes["aquilon"]["eaitools"])
         self.assertFalse("current" in archetypes["aquilon"]["unixeng-test"])
@@ -376,7 +377,7 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
     def test_300_show_personality_archetype(self):
         command = "show_personality --archetype aquilon"
         out = self.commandtest(command.split(" "))
-        self.matchoutput(out, "Personality: utpersonality/dev Archetype: aquilon",
+        self.matchoutput(out, "Personality: utunused/dev Archetype: aquilon",
                          command)
         self.matchoutput(out, "Personality: inventory Archetype: aquilon",
                          command)

@@ -325,7 +325,7 @@ class TestCompile(VerifyNotificationsMixin, TestBrokerCommand):
                          command)
 
     def test_575_compile_personality_no_host(self):
-        command = ['compile', '--personality=utpersonality/dev', '--archetype=aquilon',
+        command = ['compile', '--personality=utunused/dev', '--archetype=aquilon',
                    '--domain=ut-prod']
         out = self.statustest(command)
         self.matchoutput(out, "No object profiles: nothing to do.", command)

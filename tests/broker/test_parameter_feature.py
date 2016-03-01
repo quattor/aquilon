@@ -64,10 +64,10 @@ class TestParameterFeature(TestBrokerCommand):
         self.successtest(cmd)
 
     def test_090_verify_feature_proto_noerr(self):
-        cmd = ["show", "parameter", "--personality", "utpersonality/dev", "--format=proto"]
+        cmd = ["show", "parameter", "--personality", "utunused/dev", "--format=proto"]
         out = self.notfoundtest(cmd)
         self.matchoutput(out, "Not Found: No parameters found for personality "
-                         "aquilon/utpersonality/dev", cmd)
+                         "aquilon/utunused/dev", cmd)
 
     def test_100_verify_cat_host_feature_defaults(self):
         cmd = CAT_CMD + ["--post_feature"]
