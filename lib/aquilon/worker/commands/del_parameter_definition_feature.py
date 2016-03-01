@@ -55,7 +55,7 @@ class CommandDelParameterDefintionFeature(BrokerCommand):
             validate_prod_feature(dbfeature, user, justification, reason)
             add_feature_paramdef_plenaries(session, dbfeature, plenaries)
 
-        session.delete(db_paramdef)
+        dbfeature.param_def_holder.param_definitions.remove(db_paramdef)
 
         session.flush()
 
