@@ -73,30 +73,6 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
         self.assertEqual(personality.owner_eonid, self.grns[GRN])
         self.assertEqual(personality.host_environment, "dev")
 
-    def test_110_add_utpersonality_clone(self):
-        command = ["add_personality", "--personality", "utunused-clone/dev",
-                   "--archetype", "aquilon", "--copy_from", "utunused/dev"]
-        out = self.statustest(command)
-        self.matchoutput(out, "Personality aquilon/utunused/dev has "
-                         "config_override set", command)
-
-    def test_115_verify_utpersonality_clone(self):
-        command = ["show_personality", "--personality", "utunused-clone/dev",
-                   "--archetype", "aquilon"]
-        out = self.commandtest(command)
-        self.matchoutput(out, "Personality: utunused-clone/dev Archetype: aquilon",
-                         command)
-        self.matchoutput(out, "Environment: dev", command)
-        self.matchclean(out, "Stage:", command)
-        self.matchoutput(out, "Comments: Some personality comments", command)
-        self.matchoutput(out, "Owned by GRN: %s" % GRN, command)
-        self.matchoutput(out, "Used by GRN: %s" % GRN, command)
-        self.matchclean(out, "Config override", command)
-
-    def test_119_delete_utpersonality_clone(self):
-        self.noouttest(["del_personality", "--archetype", "aquilon",
-                        "--personality", "utunused-clone/dev"])
-
     def test_120_add_netinfra(self):
         command = ["add_personality", "--personality=generic",
                    "--archetype=netinfra", "--eon_id=10",
@@ -438,21 +414,6 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
     def test_400_cat_bad_stage(self):
         command = ["cat", "--personality", "nostage", "--archetype", "aquilon",
                    "--personality_stage", "no-such-stage"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out, "'no-such-stage' is not a valid personality "
-                         "stage.", command)
-
-    def test_400_copy_missing_stage(self):
-        command = ["add_personality", "--personality", "copy-test",
-                   "--archetype", "aquilon", "--copy_from", "nostage"]
-        out = self.notfoundtest(command)
-        self.matchoutput(out, "Personality aquilon/nostage does not have "
-                         "stage current.", command)
-
-    def test_400_copy_bad_stage(self):
-        command = ["add_personality", "--personality", "copy-test",
-                   "--archetype", "aquilon", "--copy_from", "nostage",
-                   "--copy_stage", "no-such-stage"]
         out = self.badrequesttest(command)
         self.matchoutput(out, "'no-such-stage' is not a valid personality "
                          "stage.", command)

@@ -231,23 +231,6 @@ class TestMapService(TestBrokerCommand):
         self.assertEqual(map.personality.name, 'utunused/dev')
         self.assertEqual(map.personality.archetype.name, 'aquilon')
 
-    def test_140_add_test_map(self):
-        command = ["add_personality", "--personality", "svc_map_test",
-                   "--eon_id", "2", "--archetype", "aquilon",
-                   "--copy_from", "utunused/dev",
-                   "--host_environment", "dev"]
-        out = self.statustest(command)
-        self.matchoutput(out, "Personality aquilon/utunused/dev has "
-                         "config_override set", command)
-
-        command = ["show_map", "--archetype=aquilon",
-                   "--service=utsvc"]
-        out = self.commandtest(command)
-        self.matchoutput(out,
-                         "Archetype: aquilon Personality: svc_map_test "
-                         "Service: utsvc Instance: utsi2 Map: Organization ms",
-                         command)
-
     def test_200_verify_nomatch(self):
         command = "show map --service afs --instance q.ny.ms.com --organization ms"
         out = self.notfoundtest(command.split(" "))
@@ -315,14 +298,6 @@ class TestMapService(TestBrokerCommand):
                          "Archetype: aquilon Personality: utunused/dev "
                          "Service: utsvc Instance: utsi2 Map: Organization ms",
                          command)
-        self.matchoutput(out,
-                         "Archetype: aquilon Personality: svc_map_test "
-                         "Service: utsvc Instance: utsi2 Map: Organization ms",
-                         command)
-
-    def test_800_cleanup(self):
-        self.successtest(["del_personality", "--personality", "svc_map_test",
-                          "--archetype", "aquilon"])
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestMapService)

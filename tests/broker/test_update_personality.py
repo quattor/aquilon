@@ -145,34 +145,6 @@ class TestUpdatePersonality(VerifyGrnsMixin, PersonalityTestMixin,
         self.searchclean(out, r'"system/owner_eon_id" = %d;' %
                          self.grns["grn:/ms/ei/aquilon/ut2"], command)
 
-    def test_150_clone_attributes(self):
-        self.noouttest(["add_personality", "--personality", "vulcan-1g-clone",
-                        "--archetype", "esx_cluster",
-                        "--copy_from", "vulcan-10g-server-prod"])
-
-        command = ["show_personality", "--personality", "vulcan-1g-clone",
-                   "--archetype", "esx_cluster"]
-        out = self.commandtest(command)
-        self.matchoutput(out, "Environment: prod", command)
-        self.matchoutput(out, "Owned by GRN: grn:/ms/ei/aquilon/aqd", command)
-        self.matchoutput(out,
-                         "VM host capacity function: {'memory': (memory - 1500) * 0.94}",
-                         command)
-
-        command = ["show_personality", "--personality", "vulcan-1g-clone",
-                   "--archetype", "esx_cluster", "--format=proto"]
-        personality = self.protobuftest(command, expect=1)[0]
-        self.assertEqual(personality.archetype.name, "esx_cluster")
-        self.assertEqual(personality.name, "vulcan-1g-clone")
-        self.assertEqual(personality.stage, "")
-        self.assertEqual(personality.owner_eonid, self.grns["grn:/ms/ei/aquilon/aqd"])
-        self.assertEqual(personality.host_environment, "prod")
-        self.assertEqual(personality.vmhost_capacity_function, "{'memory': (memory - 1500) * 0.94}")
-
-    def test_159_cleanup_clone(self):
-        self.noouttest(["del_personality", "--personality", "vulcan-1g-clone",
-                        "--archetype", "esx_cluster"])
-
     def test_170_make_staged(self):
         self.noouttest(["update_personality", "--personality", "compileserver",
                         "--archetype", "aquilon", "--staged"])

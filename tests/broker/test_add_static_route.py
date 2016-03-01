@@ -104,11 +104,6 @@ class TestAddStaticRoute(TestBrokerCommand, MachineTestMixin):
                          "did you mean 192.168.95.0.",
                          command)
 
-    def test_140_clone_personality(self):
-        self.noouttest(["add_personality", "--personality", "inventory-clone",
-                        "--archetype", "aquilon", "--copy_from", "inventory",
-                        "--staged"])
-
     def test_200_show_host(self):
         gw = self.net["routing1"].usable[-1]
         command = ["show", "host", "--hostname", "unittest26.aqd-unittest.ms.com"]
@@ -125,11 +120,6 @@ class TestAddStaticRoute(TestBrokerCommand, MachineTestMixin):
         self.searchoutput(out,
                           r'Static Route: 192\.168\.248\.0/24 gateway %s'
                           r'\s*Personality: inventory Archetype: aquilon$' % gw,
-                          command)
-        self.searchoutput(out,
-                          r'Static Route: 192\.168\.248\.0/24 gateway %s'
-                          r'\s*Personality: inventory-clone Archetype: aquilon$'
-                          r'\s*Stage: next$' % gw,
                           command)
         self.searchoutput(out,
                           r'Static Route: 192\.168\.250\.0/23 gateway %s'
@@ -308,10 +298,6 @@ class TestAddStaticRoute(TestBrokerCommand, MachineTestMixin):
         out = self.badrequesttest(command)
         self.matchoutput(out, "'no-such-stage' is not a valid personality "
                          "stage.", command)
-
-    def test_800_cleanup_clone(self):
-        self.noouttest(["del_personality", "--archetype", "aquilon",
-                        "--personality", "inventory-clone"])
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddStaticRoute)

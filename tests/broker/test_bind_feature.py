@@ -406,42 +406,6 @@ class TestBindFeature(TestBrokerCommand):
         self.matchclean(out, 'variable CURRENT_INTERFACE = "eth0";', command)
         self.matchoutput(out, 'variable CURRENT_INTERFACE = "eth1";', command)
 
-    def test_170_clone_personality(self):
-        self.noouttest(["add_personality", "--personality", "inventory-clone",
-                        "--copy_from", "inventory", "--archetype", "aquilon",
-                        "--staged"])
-
-    def test_171_verify_clone(self):
-        command = ["show", "personality", "--personality", "inventory-clone",
-                   "--personality_stage", "next"]
-        out = self.commandtest(command)
-        self.matchoutput(out, "Host Feature: post_host [post_personality]",
-                         command)
-
-    def test_171_verify_clone_proto(self):
-        command = ["show", "personality", "--personality", "inventory-clone",
-                   "--personality_stage", "next", "--format=proto"]
-        personality = self.protobuftest(command, expect=1)[0]
-        feature = personality.features[0]
-        self.assertEqual(feature.name, "post_host")
-        self.assertEqual(feature.type, "host")
-        self.assertEqual(feature.post_personality, True)
-        self.assertEqual(feature.interface_name, "")
-        self.assertEqual(feature.model.name, "")
-        self.assertEqual(feature.model.vendor, "")
-
-    def test_171_verify_show_feature(self):
-        command = ["show", "feature", "--feature", "post_host", "--type", "host"]
-        out = self.commandtest(command)
-        self.searchoutput(out, r"Bound to: Personality aquilon/inventory$",
-                          command)
-        self.searchoutput(out, r"Bound to: Personality aquilon/inventory-clone@next$",
-                          command)
-
-    def test_179_cleanup_clone(self):
-        self.noouttest(["del_personality", "--archetype", "aquilon",
-                        "--personality", "inventory-clone"])
-
     def test_200_only_interface(self):
         command = ["bind", "feature", "--feature", "src_route",
                    "--interface", "eth0"]

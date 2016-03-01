@@ -48,6 +48,7 @@ from .test_merge_conflicts import TestMergeConflicts
 from .test_add_archetype import TestAddArchetype
 from .test_add_os import TestAddOS
 from .test_add_personality import TestAddPersonality
+from .test_copy_personality import TestCopyPersonality
 from .test_search_personality import TestSearchPersonality
 from .test_add_service import TestAddService
 from .test_update_service import TestUpdateService
@@ -386,7 +387,7 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestVendorConstraints, TestModelConstraints,
                      TestMachineConstraints, TestNetworkDeviceConstraints,
                      TestInterfaceConstraints,
-                     TestUpdatePersonality,
+                     TestUpdatePersonality, TestCopyPersonality,
                      TestClusterConstraints, TestMetaClusterConstraints,
                      TestLocationConstraints,
                      TestDnsConstraints,
