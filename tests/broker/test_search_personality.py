@@ -32,7 +32,7 @@ class TestSearchPersonality(VerifyGrnsMixin, TestBrokerCommand):
     def test_100_by_grn(self):
         command = ["search", "personality", "--grn", "grn:/ms/ei/aquilon/aqd"]
         out = self.commandtest(command)
-        self.matchoutput(out, "aquilon/eaitools@current", command)
+        self.matchoutput(out, "aquilon/utpers-dev@current", command)
         self.matchoutput(out, "aquilon/utunused/dev", command)
         self.matchoutput(out, "esx_cluster/esx_server", command)
         self.matchoutput(out, "esx_cluster/vulcan-10g-server-prod", command)
@@ -59,13 +59,13 @@ class TestSearchPersonality(VerifyGrnsMixin, TestBrokerCommand):
                    "--host_environment", "dev", "--grn", "grn:/ms/ei/aquilon/aqd"]
         out = self.commandtest(command)
         self.matchoutput(out, "aquilon/utunused/dev", command)
-        self.matchoutput(out, "aquilon/eaitools@current", command)
+        self.matchoutput(out, "aquilon/utpers-dev@current", command)
         self.matchclean(out, "vulcan-10g-server-prod", command)
 
     def test_100_by_eon_id(self):
         command = ["search", "personality", "--eon_id", 2]
         out = self.commandtest(command)
-        self.matchoutput(out, "aquilon/eaitools@current", command)
+        self.matchoutput(out, "aquilon/utpers-dev@current", command)
         self.matchoutput(out, "aquilon/utunused/dev", command)
         self.matchoutput(out, "esx_cluster/esx_server", command)
         self.matchoutput(out, "esx_cluster/vulcan-10g-server-prod", command)
@@ -76,7 +76,7 @@ class TestSearchPersonality(VerifyGrnsMixin, TestBrokerCommand):
         command = ["search", "personality", "--host_environment", "dev", "--eon_id", 2]
         out = self.commandtest(command)
         self.matchoutput(out, "aquilon/utunused/dev", command)
-        self.matchoutput(out, "aquilon/eaitools@current", command)
+        self.matchoutput(out, "aquilon/utpers-dev@current", command)
         self.matchclean(out, "vulcan-10g-server-prod", command)
 
     def test_100_fullinfo(self):
@@ -108,9 +108,9 @@ class TestSearchPersonality(VerifyGrnsMixin, TestBrokerCommand):
         self.assertEqual(personality.owner_eonid, 2)
         self.assertEqual(personality.host_environment, "dev")
 
-        personality = pers_by_name_ver["eaitools"]["current"]
+        personality = pers_by_name_ver["utpers-dev"]["current"]
         self.assertEqual(personality.archetype.name, "aquilon")
-        self.assertEqual(personality.name, "eaitools")
+        self.assertEqual(personality.name, "utpers-dev")
         self.assertEqual(personality.stage, "current")
         self.assertEqual(personality.owner_eonid, 2)
         self.assertEqual(personality.host_environment, "dev")

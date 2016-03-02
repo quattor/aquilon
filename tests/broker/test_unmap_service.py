@@ -62,13 +62,13 @@ class TestUnmapService(TestBrokerCommand):
         ip = self.net["netperssvcmap"].subnet()[0].ip
         self.noouttest(["unmap", "service", "--networkip", ip,
                         "--service", "scope_test", "--instance", "scope-network",
-                        "--personality", "eaitools",
+                        "--personality", "utpers-dev",
                         "--archetype", "aquilon"])
 
         self.noouttest(["unmap", "service", "--building", "ut",
                         "--service", "scope_test",
                         "--instance", "target-personality",
-                        "--personality", "eaitools",
+                        "--personality", "utpers-dev",
                         "--archetype", "aquilon"])
 
         self.noouttest(["unmap", "service", "--building", "ut",

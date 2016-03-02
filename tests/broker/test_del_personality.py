@@ -47,7 +47,7 @@ class TestDelPersonality(PersonalityTestMixin, TestBrokerCommand):
         self.notfoundtest(command)
 
     def test_110_del_eaipersonality(self):
-        command = ["del_personality", "--personality=eaitools",
+        command = ["del_personality", "--personality=utpers-dev",
                    "--archetype=aquilon"]
         self.noouttest(command)
 

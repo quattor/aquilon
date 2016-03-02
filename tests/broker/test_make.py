@@ -148,7 +148,7 @@ class TestMake(TestBrokerCommand):
         """Maps a location based personality service map to be overridden by a
         network based personality service map"""
         self.noouttest(["map", "service", "--building", "ut", "--personality",
-                        "eaitools", "--archetype", "aquilon",
+                        "utpers-dev", "--archetype", "aquilon",
                         "--service", "scope_test",
                         "--instance", "target-personality"])
 
@@ -172,18 +172,18 @@ class TestMake(TestBrokerCommand):
 
         self.noouttest(["map", "service", "--networkip", ip,
                         "--service", "scope_test", "--instance", "scope-network",
-                        "--personality", "eaitools",
+                        "--personality", "utpers-dev",
                         "--archetype", "aquilon"])
 
     def test_124_verify_network_map(self):
         ip = self.net["netperssvcmap"].subnet()[0].ip
 
         command = ["show_map", "--service=scope_test", "--instance=scope-network",
-                   "--networkip=%s" % ip, "--personality", "eaitools",
+                   "--networkip=%s" % ip, "--personality", "utpers-dev",
                    "--archetype", "aquilon"]
         out = self.commandtest(command)
         self.matchoutput(out,
-                         "Archetype: aquilon Personality: eaitools "
+                         "Archetype: aquilon Personality: utpers-dev "
                          "Service: scope_test "
                          "Instance: scope-network Map: Network netperssvcmap",
                          command)
@@ -192,7 +192,7 @@ class TestMake(TestBrokerCommand):
         ip = self.net["netperssvcmap"].subnet()[0].ip
 
         command = ["show_map", "--service=scope_test", "--instance=scope-network",
-                   "--networkip=%s" % ip, "--personality", "eaitools",
+                   "--networkip=%s" % ip, "--personality", "utpers-dev",
                    "--archetype", "aquilon", "--format=proto"]
         service_map = self.protobuftest(command, expect=1)[0]
         self.assertEqual(service_map.network.ip, str(ip))
@@ -202,7 +202,7 @@ class TestMake(TestBrokerCommand):
         self.assertEqual(service_map.service.name, 'scope_test')
         self.assertEqual(service_map.service.serviceinstances[0].name,
                          'scope-network')
-        self.assertEqual(service_map.personality.name, 'eaitools')
+        self.assertEqual(service_map.personality.name, 'utpers-dev')
         self.assertEqual(service_map.personality.archetype.name, 'aquilon')
 
     def test_125_make_network(self):

@@ -79,33 +79,32 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
                    "--host_environment=dev"]
         self.noouttest(command)
 
-    def test_125_add_eaitools(self):
-        command = ["add_personality", "--personality=eaitools",
+    def test_125_add_utpers_dev(self):
+        command = ["add_personality", "--personality=utpers-dev",
                    "--archetype=aquilon", "--eon_id=2",
-                   "--host_environment=dev", "--staged",
-                   "--comments", "Existing personality for netperssvcmap tests"]
+                   "--host_environment=dev", "--staged"]
         self.noouttest(command)
         for plenary in ("pre_feature", "post_feature", "espinfo"):
             self.check_plenary_exists("aquilon", "personality",
-                                      "eaitools+next", plenary)
-        self.verifycatpersonality("aquilon", "eaitools", stage="next")
+                                      "utpers-dev+next", plenary)
+        self.verifycatpersonality("aquilon", "utpers-dev", stage="next")
         # The basic parameter set needs to be initialized for further tests
-        self.setup_personality("aquilon", "eaitools")
+        self.setup_personality("aquilon", "utpers-dev")
 
-    def test_126_verify_eaitools(self):
-        command = ["show_personality", "--personality", "eaitools",
+    def test_126_verify_utpers_dev(self):
+        command = ["show_personality", "--personality", "utpers-dev",
                    "--archetype", "aquilon"]
         out = self.notfoundtest(command)
-        self.matchoutput(out, "Personality aquilon/eaitools does not have "
+        self.matchoutput(out, "Personality aquilon/utpers-dev does not have "
                          "stage current.", command)
 
-    def test_126_verify_eaitools_next(self):
-        command = ["show_personality", "--personality", "eaitools",
+    def test_126_verify_utpers_dev_next(self):
+        command = ["show_personality", "--personality", "utpers-dev",
                    "--archetype", "aquilon", "--personality_stage", "next"]
         out = self.commandtest(command)
         self.matchoutput(out, "Stage: next", command)
 
-        command = ["show_parameter", "--personality", "eaitools",
+        command = ["show_parameter", "--personality", "utpers-dev",
                    "--archetype", "aquilon", "--personality_stage", "next"]
         out = self.commandtest(command)
         self.matchoutput(out, "espinfo", command)
@@ -343,8 +342,8 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
                         "No aurora/generic in personality list.")
         self.assertFalse("current" in
                          archetypes["aquilon"]["utunused/dev"])
-        self.assertFalse("current" in archetypes["aquilon"]["eaitools"])
-        self.assertTrue("next" in archetypes["aquilon"]["eaitools"])
+        self.assertFalse("current" in archetypes["aquilon"]["utpers-dev"])
+        self.assertTrue("next" in archetypes["aquilon"]["utpers-dev"])
         self.assertFalse("current" in archetypes["aquilon"]["unixeng-test"])
         self.assertTrue("next" in archetypes["aquilon"]["unixeng-test"])
 

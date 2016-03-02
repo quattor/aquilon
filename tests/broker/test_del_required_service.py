@@ -46,11 +46,11 @@ class TestDelRequiredService(TestBrokerCommand):
 
     def test_120_del_required_scope_test(self):
         command = ["del_required_service", "--service=scope_test",
-                   "--personality=eaitools", "--archetype=aquilon"]
+                   "--personality=utpers-dev", "--archetype=aquilon"]
         self.noouttest(command)
 
         self.noouttest(["promote", "--archetype", "aquilon",
-                        "--personality", "eaitools"])
+                        "--personality", "utpers-dev"])
 
     def test_130_del_required_all(self):
         for archetype, services in archetype_required.items():

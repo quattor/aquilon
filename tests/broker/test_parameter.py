@@ -29,7 +29,7 @@ from broker.brokertest import TestBrokerCommand
 PERSONALITY = 'testpersona/dev'
 
 ARCHETYPE = 'aquilon'
-OTHER_PERSONALITY = 'eaitools'
+OTHER_PERSONALITY = 'utpers-dev'
 
 
 SHOW_CMD = ["show", "parameter", "--personality", PERSONALITY,
@@ -440,7 +440,7 @@ class TestParameter(TestBrokerCommand):
         out = self.commandtest(cmd)
         self.searchoutput(out,
                           r'Differences for Parameters:\s*'
-                          r'missing Parameters in Personality aquilon/eaitools@current:\s*'
+                          r'missing Parameters in Personality aquilon/utpers-dev@current:\s*'
                           r'//actions/testaction/command\s*'
                           r'//actions/testaction/user\s*'
                           r'//actions/testaction2/command\s*'
@@ -497,7 +497,7 @@ class TestParameter(TestBrokerCommand):
                           r'espinfo/function: "production"',
                           cmd)
         self.searchoutput(out,
-                          r'Host Personality: eaitools Archetype: aquilon\s*'
+                          r'Host Personality: utpers-dev Archetype: aquilon\s*'
                           r'Stage: current\s*'
                           r'espinfo/function: "development"',
                           cmd)

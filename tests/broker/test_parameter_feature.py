@@ -31,7 +31,7 @@ ARCHETYPE = 'aquilon'
 HOSTFEATURE = 'hostfeature'
 HARDWAREFEATURE = 'hardwarefeature'
 INTERFACEFEATURE = 'interfacefeature'
-OTHER_PERSONALITY = 'eaitools'
+OTHER_PERSONALITY = 'utpers-dev'
 
 SHOW_CMD = ["show", "parameter", "--personality", PERSONALITY,
             "--personality_stage", "next"]
@@ -432,17 +432,17 @@ class TestParameterFeature(TestBrokerCommand):
         self.searchoutput(out, r'Differences for Required Services:\s*'
                                r'missing Required Services in Personality aquilon/%s@next:\s*'
                                r'scope_test\s*'
-                               r'missing Required Services in Personality aquilon/eaitools@current:\s*'
+                               r'missing Required Services in Personality aquilon/utpers-dev@current:\s*'
                                r'chooser1\s*chooser2\s*chooser3' % PERSONALITY,
                           cmd)
         self.searchoutput(out, r'Differences for Features:\s*'
-                               r'missing Features in Personality aquilon/eaitools@current:\s*'
+                               r'missing Features in Personality aquilon/utpers-dev@current:\s*'
                                r'hardwarefeature\s*'
                                r'hostfeature\s*'
                                r'interfacefeature\s*',
                           cmd)
         self.searchoutput(out, r'Differences for Parameters:\s*'
-                               r'missing Parameters in Personality aquilon/eaitools@current:\s*'
+                               r'missing Parameters in Personality aquilon/utpers-dev@current:\s*'
                                r'//features/hardware/hardwarefeature/testdefault\s*'
                                r'//features/hardware/hardwarefeature/testlist/0\s*'
                                r'//features/hardware/hardwarefeature/testlist/1\s*'
