@@ -430,14 +430,17 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
             if servers < 10:
                 servers += 1
                 hostname = "server%d.aqd-unittest.ms.com" % servers
+                personality = "utpers-prod"
             else:
                 hostname = "aquilon%d.aqd-unittest.ms.com" % i
+                personality = None
             port = i - 50
             machine = "ut9s03p%d" % port
             self.create_host(hostname, net.usable[port], machine, rack="ut9",
                              model="bl260c", sandbox="%s/utsandbox" % self.user,
                              manager_iface="ilo",
-                             manager_ip=mgmt_net.usable[port])
+                             manager_ip=mgmt_net.usable[port],
+                             personality=personality)
 
     def test_305_search_sandbox_used(self):
         command = ["search_sandbox", "--used"]

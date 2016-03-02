@@ -196,6 +196,8 @@ class MachineTestMixin(object):
             if optional not in kwargs:
                 continue
             value = kwargs.pop(optional)
+            if value is None:
+                continue
             setattr(machdef, optional, value)
             add_machine_args.extend(["--" + optional, value])
 
@@ -204,6 +206,8 @@ class MachineTestMixin(object):
             if optional not in kwargs:
                 continue
             value = kwargs.pop(optional)
+            if value is None:
+                continue
             setattr(machdef, optional, value)
             recipe[optional] = value
 
@@ -216,13 +220,18 @@ class MachineTestMixin(object):
             for arg_name in ["mac", "pg", "model", "vendor", "comments"]:
                 if nic_name + "_" + arg_name in kwargs:
                     value = kwargs.pop(nic_name + "_" + arg_name)
+                    if value is None:
+                        continue
                     params[arg_name] = value
                     recipe["interfaces"][nic_name][arg_name] = value
 
             # Skip parameters not relevant for add_machine (e.g. IP address)
             for arg_name in kwargs.keys()[:]:
                 if arg_name.startswith(nic_name + "_"):
-                    params[arg_name[len(nic_name) + 1:]] = kwargs.pop(arg_name)
+                    value = kwargs.pop(arg_name)
+                    if value is None:
+                        continue
+                    params[arg_name[len(nic_name) + 1:]] = value
 
             machdef.interfaces[nic_name] = params
 
@@ -237,6 +246,8 @@ class MachineTestMixin(object):
                              "filesystem", "resourcegroup"]:
                 if disk_name + "_" + arg_name in kwargs:
                     value = kwargs.pop(disk_name + "_" + arg_name)
+                    if value is None:
+                        continue
                     params[arg_name] = value
 
             machdef.disks[disk_name] = params
@@ -331,6 +342,8 @@ class MachineTestMixin(object):
         command = ["add_host", "--hostname", hostname, "--ip", ip,
                    "--machine", machine, "--archetype", archetype]
         for arg, value in host_kwargs.items():
+            if value is None:
+                continue
             command.extend(["--" + arg, value])
 
         if zebra:
