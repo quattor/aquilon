@@ -232,8 +232,7 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
             'unixeng-test': {'staged': True},
             'nostage': {'staged': True},
             'clustered': {'cluster_required': True},
-            'infra': {'grn': 'grn:/ms/ei/aquilon/aqd',
-                      'environment': 'prod'}
+            'utpers-prod': {'environment': 'prod'},
         }
         for personality, kwargs in personalities.items():
             self.create_personality("aquilon", personality, **kwargs)

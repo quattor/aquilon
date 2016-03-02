@@ -646,7 +646,7 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
                          eth0_fqdn="infra1-e0.aqd-unittest.ms.com",
                          eth1_mac=eth1_ip.mac, eth1_ip=eth1_ip,
                          eth1_fqdn="infra1-e1.aqd-unittest.ms.com",
-                         zebra=True, personality="infra")
+                         zebra=True, personality="utpers-prod")
 
     def test_435_add_npinfra(self):
         eth0_ip = self.net["unknown0"].usable[35]
@@ -660,7 +660,7 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
                          eth0_fqdn="infra1-e0.one-nyp.ms.com",
                          eth1_mac=eth1_ip.mac, eth1_ip=eth1_ip,
                          eth1_fqdn="infra1-e1.one-nyp.ms.com",
-                         zebra=True, personality="infra")
+                         zebra=True, personality="utpers-prod")
 
     def test_440_add_jack_host(self):
         ip = self.net["unknown0"].usable[17]
