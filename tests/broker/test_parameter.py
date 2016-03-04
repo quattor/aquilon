@@ -46,6 +46,22 @@ CAT_CMD = ["cat", "--personality", PERSONALITY, "--personality_stage", "next"]
 VAL_CMD = ["validate_parameter", "--personality", PERSONALITY,
            "--personality_stage", "next"]
 
+test_metric = {
+    '_20003': {
+        'active': False,
+        'class': 'system.swapUsed',
+        'descr': 'Swap space used [%]',
+        'latestonly': False,
+        'name': 'SwapUsed',
+        'period': 300,
+        'smooth': {
+            'maxdiff': 3.0,
+            'maxtime': 3600,
+            'typeString': False
+        }
+    }
+}
+
 
 class TestParameter(TestBrokerCommand):
 
@@ -98,7 +114,12 @@ class TestParameter(TestBrokerCommand):
         cmd = SHOW_CMD + ["--format=proto"]
         params = self.protobuftest(cmd, expect=1)
         self.assertEqual(params[0].path, 'actions')
-        self.assertEqual(params[0].value, '{"testaction": {"command": "/bin/testaction", "user": "user1"}}')
+        self.assertEqual(json.loads(params[0].value), {
+            "testaction": {
+                "command": "/bin/testaction",
+                "user": "user1"
+            }
+        })
 
     def test_110_add_noncompileable(self):
         command = ["add", "parameter", "--path", "foo", "--value", "bar",
@@ -158,25 +179,8 @@ class TestParameter(TestBrokerCommand):
         self.matchoutput(err, "Additional properties are not allowed", command)
 
     def test_190_add_metric(self):
-        value = """
-{
-    "_20003": {
-        "name": "SwapUsed",
-        "descr": "Swap space used [%]",
-        "smooth": {
-            "maxdiff": 3.0,
-            "typeString": false,
-            "maxtime": 3600
-        },
-        "latestonly": false,
-        "period": 300,
-        "active": false,
-        "class": "system.swapUsed"
-    }
-}
-"""
         command = ADD_CMD + ["--path", "monitoring/metric",
-                             "--value", value]
+                             "--value", json.dumps(test_metric)]
         self.noouttest(command)
 
     def test_200_add_path(self):
@@ -245,10 +249,20 @@ class TestParameter(TestBrokerCommand):
         self.assertEqual(params['espinfo/users'], 'someusers,otherusers')
 
         self.assertIn('actions', params)
-        self.assertEqual(params['actions'], u'{"testaction": {"command": "/bin/testaction", "user": "user2"}, "testaction2": {"command": "/bin/testaction2", "user": "user1", "timeout": 100}}')
+        self.assertEqual(json.loads(params['actions']), {
+            "testaction": {
+                "command": "/bin/testaction",
+                "user": "user2"
+            },
+            "testaction2": {
+                "command": "/bin/testaction2",
+                "user": "user1",
+                "timeout": 100
+            }
+        })
 
         self.assertIn('monitoring/metric', params)
-        self.assertEqual(params['monitoring/metric'], u'{"_20003": {"name": "SwapUsed", "descr": "Swap space used [%]", "smooth": {"maxdiff": 3.0, "typeString": false, "maxtime": 3600}, "latestonly": false, "period": 300, "active": false, "class": "system.swapUsed"}}')
+        self.assertEqual(json.loads(params['monitoring/metric']), test_metric)
 
     def test_250_verify_actions(self):
         ACT_CAT_CMD = CAT_CMD + ["--param_tmpl=actions"]
