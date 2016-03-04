@@ -20,7 +20,7 @@ import socket
 
 from sqlalchemy.orm import object_session, joinedload, lazyload
 from sqlalchemy.orm.exc import NoResultFound
-from sqlalchemy.sql import or_, and_
+from sqlalchemy.sql import or_
 
 from aquilon.exceptions_ import ArgumentError, AquilonError, NotFoundException
 from aquilon.aqdb.model import (Fqdn, DnsDomain, DnsRecord, ARecord,
@@ -98,11 +98,12 @@ def delete_dns_record(dbdns_rec, locked=False, verify_assignments=False):
     session.flush()
 
     # Delete the FQDN if it is orphaned
-    q = session.query(Fqdn)
-    q = q.filter(and_(Fqdn.id == dbfqdn.id,
-                      ~Fqdn.dns_records.any()))
-    q = q.delete(synchronize_session=False)
-    session.expunge(dbfqdn)
+    q = session.query(DnsRecord)
+    q = q.filter_by(fqdn=dbfqdn)
+    if q.count() == 0:
+        session.delete(dbfqdn)
+    else:
+        session.expire(dbfqdn, ['dns_records'])
 
     # Delete the orphaned targets
     for tgt in targets:
