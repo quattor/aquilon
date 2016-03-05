@@ -88,8 +88,6 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
             self.check_plenary_exists("aquilon", "personality",
                                       "utpers-dev+next", plenary)
         self.verifycatpersonality("aquilon", "utpers-dev", stage="next")
-        # The basic parameter set needs to be initialized for further tests
-        self.setup_personality("aquilon", "utpers-dev")
 
     def test_126_verify_utpers_dev(self):
         command = ["show_personality", "--personality", "utpers-dev",
@@ -103,11 +101,6 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
                    "--archetype", "aquilon", "--personality_stage", "next"]
         out = self.commandtest(command)
         self.matchoutput(out, "Stage: next", command)
-
-        command = ["show_parameter", "--personality", "utpers-dev",
-                   "--archetype", "aquilon", "--personality_stage", "next"]
-        out = self.commandtest(command)
-        self.matchoutput(out, "espinfo", command)
 
     def test_130_add_windows_desktop(self):
         command = ["add", "personality", "--personality", "desktop",

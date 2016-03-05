@@ -282,7 +282,9 @@ from .test_grns import TestGrns
 from .test_map_grn import TestMapGrn
 from .test_stop import TestBrokerStop
 from .test_reset_advertised_status import TestResetAdvertisedStatus
-from .test_parameter import TestParameter
+from .test_add_parameter import TestAddParameter
+from .test_del_parameter import TestDelParameter
+from .test_update_parameter import TestUpdateParameter
 from .test_parameter_feature import TestParameterFeature
 from .test_add_parameter_definition import TestAddParameterDefinition
 from .test_del_parameter_definition import TestDelParameterDefinition
@@ -321,6 +323,7 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestAddFeature,
                      TestAddParameterDefinition, TestSetupParams,
                      TestAddService, TestAddPersonality, TestAddRequiredService,
+                     TestAddParameter,
                      TestOrganization, TestHub, TestContinent, TestCountry,
                      TestAddCampus, TestAddCity,
                      TestAddBuilding, TestAddRoom, TestAddBunker,
@@ -370,7 +373,7 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestUnbindClient, TestRebindClient, TestReconfigure,
                      TestChangeStatus, TestResetAdvertisedStatus,
                      TestBindFeature,
-                     TestParameter, TestParameterFeature,
+                     TestParameterFeature,
                      TestJustification,
                      TestRefreshWindowsHosts,
                      TestChooserConstraints,
@@ -417,7 +420,7 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestUpdateNetworkEnvironment, TestUpdateDnsEnvironment,
                      TestUpdateRouterAddress,
                      TestUpdateArchetype,
-                     TestUpdateParameterDefinition,
+                     TestUpdateParameterDefinition, TestUpdateParameter,
                      TestUpdateMetaCluster, TestUpdateESXCluster,
                      TestUpdateCluster,
                      TestPxeswitch, TestManage, TestManageValidateBranch,
@@ -450,7 +453,7 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestDelNetworkCompartment,
                      TestDelVlan,
                      TestDelModel, TestDelCpu, TestDelVendor,
-                     TestDelParameterDefinition,
+                     TestDelParameter, TestDelParameterDefinition,
                      TestDelFeature,
                      TestUnmapDnsDomain,
                      TestDelDesk, TestDelRack, TestDelBunker, TestDelRoom,

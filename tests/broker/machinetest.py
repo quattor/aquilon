@@ -322,8 +322,8 @@ class MachineTestMixin(object):
 
         # Separate the host-specific arguments
         host_kwargs = {}
-        for arg in ["domain", "sandbox", "personality", "osname", "osversion",
-                    "buildstatus", "grn", "eon_id"]:
+        for arg in ["domain", "sandbox", "personality", "personality_stage",
+                    "osname", "osversion", "buildstatus", "grn", "eon_id"]:
             if arg in kwargs:
                 host_kwargs[arg] = kwargs.pop(arg)
 

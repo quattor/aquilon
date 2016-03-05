@@ -131,6 +131,25 @@ class TestCopyPersonality(VerifyGrnsMixin, TestBrokerCommand):
                           r'\s*Stage: next$' % gw,
                           command)
 
+    def test_140_copy_stage(self):
+        command = ["add_personality", "--personality", "utpers-dev-clone",
+                   "--archetype", "aquilon",
+                   "--copy_from", "utpers-dev", "--copy_stage", "next"]
+        self.noouttest(command)
+
+        command = ["show_diff", "--archetype", "aquilon",
+                   "--personality", "utpers-dev", "--personality_stage", "next",
+                   "--other", "utpers-dev-clone", "--other_stage", "next"]
+        self.noouttest(command)
+
+        command = ["show_diff", "--archetype", "aquilon",
+                   "--personality", "utpers-dev", "--personality_stage", "current",
+                   "--other", "utpers-dev-clone", "--other_stage", "next"]
+        out = self.commandtest(command)
+        self.matchoutput(out,
+                         "missing Parameters in Personality aquilon/utpers-dev@current:",
+                         command)
+
     def test_200_copy_missing_stage(self):
         command = ["add_personality", "--personality", "copy-test",
                    "--archetype", "aquilon", "--copy_from", "nostage"]
@@ -149,6 +168,8 @@ class TestCopyPersonality(VerifyGrnsMixin, TestBrokerCommand):
     def test_800_cleanup(self):
         self.noouttest(["del_personality", "--archetype", "aquilon",
                         "--personality", "utunused-clone/dev"])
+        self.noouttest(["del_personality", "--archetype", "aquilon",
+                        "--personality", "utpers-dev-clone"])
         self.noouttest(["del_personality", "--archetype", "aquilon",
                         "--personality", "inventory-clone"])
         self.noouttest(["del_personality", "--archetype", "esx_cluster",

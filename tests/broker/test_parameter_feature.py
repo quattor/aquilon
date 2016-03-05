@@ -429,35 +429,40 @@ class TestParameterFeature(TestBrokerCommand):
                "--personality_stage", "next", "--other", OTHER_PERSONALITY]
 
         out = self.commandtest(cmd)
-        self.searchoutput(out, r'Differences for Required Services:\s*'
-                               r'missing Required Services in Personality aquilon/%s@next:\s*'
-                               r'scope_test\s*'
-                               r'missing Required Services in Personality aquilon/utpers-dev@current:\s*'
-                               r'chooser1\s*chooser2\s*chooser3' % PERSONALITY,
+        self.searchoutput(out,
+                          r'Differences for Required Services:\s*'
+                          r'missing Required Services in Personality aquilon/%s@next:\s*'
+                          r'scope_test\s*'
+                          r'missing Required Services in Personality aquilon/utpers-dev@current:\s*'
+                          r'chooser1\s*chooser2\s*chooser3' % PERSONALITY,
                           cmd)
-        self.searchoutput(out, r'Differences for Features:\s*'
-                               r'missing Features in Personality aquilon/utpers-dev@current:\s*'
-                               r'hardwarefeature\s*'
-                               r'hostfeature\s*'
-                               r'interfacefeature\s*',
+        self.searchoutput(out,
+                          r'Differences for Features:\s*'
+                          r'missing Features in Personality aquilon/utpers-dev@current:\s*'
+                          r'hardwarefeature\s*'
+                          r'hostfeature\s*'
+                          r'interfacefeature\s*',
                           cmd)
-        self.searchoutput(out, r'Differences for Parameters:\s*'
-                               r'missing Parameters in Personality aquilon/utpers-dev@current:\s*'
-                               r'//features/hardware/hardwarefeature/testdefault\s*'
-                               r'//features/hardware/hardwarefeature/testlist/0\s*'
-                               r'//features/hardware/hardwarefeature/testlist/1\s*'
-                               r'//features/hostfeature/testboolean\s*'
-                               r'//features/hostfeature/testdefault\s*'
-                               r'//features/hostfeature/testint\s*'
-                               r'//features/hostfeature/testjson/key\s*'
-                               r'//features/hostfeature/testjson/values/0\s*'
-                               r'//features/hostfeature/testjson/values/1\s*'
-                               r'//features/hostfeature/testlist/0\s*'
-                               r'//features/hostfeature/testlist/1\s*'
-                               r'//features/hostfeature/teststring\s*'
-                               r'//features/interface/interfacefeature/testdefault\s*'
-                               r'//features/interface/interfacefeature/testlist/0\s*'
-                               r'//features/interface/interfacefeature/testlist/1\s*',
+        self.searchoutput(out,
+                          r'Differences for Parameters:\s*'
+                          r'missing Parameters in Personality aquilon/unixeng-test@next:\s*'
+                          r'//espinfo/users/1\s*'
+                          r'missing Parameters in Personality aquilon/utpers-dev@current:\s*'
+                          r'//features/hardware/hardwarefeature/testdefault\s*'
+                          r'//features/hardware/hardwarefeature/testlist/0\s*'
+                          r'//features/hardware/hardwarefeature/testlist/1\s*'
+                          r'//features/hostfeature/testboolean\s*'
+                          r'//features/hostfeature/testdefault\s*'
+                          r'//features/hostfeature/testint\s*'
+                          r'//features/hostfeature/testjson/key\s*'
+                          r'//features/hostfeature/testjson/values/0\s*'
+                          r'//features/hostfeature/testjson/values/1\s*'
+                          r'//features/hostfeature/testlist/0\s*'
+                          r'//features/hostfeature/testlist/1\s*'
+                          r'//features/hostfeature/teststring\s*'
+                          r'//features/interface/interfacefeature/testdefault\s*'
+                          r'//features/interface/interfacefeature/testlist/0\s*'
+                          r'//features/interface/interfacefeature/testlist/1\s*',
                           cmd)
 
     def test_600_add_same_name_feature(self):

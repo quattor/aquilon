@@ -634,7 +634,7 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
         ip = self.net["netperssvcmap"].usable[0]
         self.create_host("netmap-pers.aqd-unittest.ms.com", ip, "ut3c5n12",
                          model="hs21-8853", chassis="ut3c5", slot=12,
-                         personality="utpers-dev",
+                         personality="utpers-dev", personality_stage="next",
                          comments="For net/pers based service mappings")
 
     def test_430_add_utinfra(self):

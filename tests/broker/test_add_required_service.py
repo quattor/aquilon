@@ -168,10 +168,6 @@ class TestAddRequiredService(TestBrokerCommand):
         self.successtest(["del_personality", "--personality", "required_svc_test",
                           "--archetype", "aquilon"])
 
-    def test_155_promote_utpers_dev(self):
-        self.noouttest(["promote", "--personality", "utpers-dev",
-                        "--archetype", "aquilon"])
-
     def test_160_add_badservice(self):
         command = ["add_required_service", "--service=badservice",
                    "--personality=badpersonality2", "--archetype=aquilon"]
