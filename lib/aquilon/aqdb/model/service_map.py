@@ -170,6 +170,40 @@ class ServiceMap(Base):
                                          host_environment=host_environment)
 
     @staticmethod
+    def get_location_mapped_instances(dbservice, dblocation):
+        # Simplified service map lookup - single service, location-based maps
+        # only, no client bindings
+        session = object_session(dbservice)
+
+        location_ids = [loc.id for loc in dblocation.parents]
+        location_ids.append(dblocation.id)
+
+        q = session.query(ServiceMap)
+        q = q.filter(and_(ServiceMap.personality_id == null(),
+                          ServiceMap.host_environment_id == null()))
+        q = q.filter(ServiceMap.location_id.in_(location_ids))
+        q = q.join(ServiceInstance)
+        q = q.filter_by(service=dbservice)
+        q = q.options(contains_eager('service_instance'),
+                      defer('service_instance.comments'),
+                      lazyload('service_instance.service'))
+
+        instances = []
+        min_seen_priority = (maxsize,)
+
+        # We want the instance(s) with the lowest priority
+        for map in q:
+            si = map.service_instance
+
+            if min_seen_priority > map.priority:
+                instances = [si]
+                min_seen_priority = map.priority
+            elif min_seen_priority == map.priority:
+                instances.append(si)
+
+        return instances
+
+    @staticmethod
     def get_mapped_instance_cache(dbservices, dbstage, dblocation,
                                   dbnetwork=None):
         """Returns dict of requested services to closest mapped instances."""
@@ -184,14 +218,11 @@ class ServiceMap(Base):
         q = q.filter(ServiceInstance.service_id.in_(srv.id for srv in dbservices))
 
         # Rules for filtering by target object
-        target_rules = [and_(ServiceMap.personality_id == null(),
-                             ServiceMap.host_environment_id == null())]
-        if dbstage:
-            target_rules.append(ServiceMap.personality == dbstage.personality)
-            target_rules.append(ServiceMap.host_environment ==
-                                dbstage.personality.host_environment)
-
-        q = q.filter(or_(*target_rules))
+        q = q.filter(or_(
+            and_(ServiceMap.personality_id == null(),
+                 ServiceMap.host_environment_id == null()),
+            ServiceMap.personality == dbstage.personality,
+            ServiceMap.host_environment == dbstage.personality.host_environment))
 
         # Rules for filtering by location/scope
         if dbnetwork:
