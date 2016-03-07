@@ -39,10 +39,25 @@ class TestDelRequiredService(TestBrokerCommand):
         command += " --justification tcm=12345678"
         self.noouttest(command.split(" "))
 
-    def test_110_del_required_afs_again(self):
-        command = "del required service --service afs --archetype aquilon"
-        command += " --justification tcm=12345678"
-        self.notfoundtest(command.split(" "))
+    def test_110_del_afs_personality(self):
+        self.noouttest(["del_required_service", "--service", "afs",
+                        "--archetype", "aquilon",
+                        "--personality", "unixeng-test"])
+        self.noouttest(["del_required_service", "--service", "afs",
+                        "--archetype", "aquilon",
+                        "--personality", "utpers-dev"])
+
+        command = ["show_service", "--service", "afs"]
+        out = self.commandtest(command)
+        self.searchoutput(out,
+                          r'Required for Personality: unixeng-test Archetype: aquilon\s*'
+                          r'Stage: current',
+                          command)
+        self.searchoutput(out,
+                          r'Required for Personality: utpers-dev Archetype: aquilon\s*'
+                          r'Stage: previous',
+                          command)
+        self.matchclean(out, "Stage: next", command)
 
     def test_120_del_required_scope_test(self):
         command = ["del_required_service", "--service=scope_test",
@@ -151,6 +166,22 @@ class TestDelRequiredService(TestBrokerCommand):
                          "Service ips required for operating system "
                          "aquilon/solaris-11.1-x86_64 not found.",
                          command)
+
+    def test_300_cleanup_afs(self):
+        # The previous stages still keep the service bound - edit them directly,
+        # bypassing the staging workflow
+        self.noouttest(["del_required_service", "--service", "afs",
+                        "--archetype", "aquilon",
+                        "--personality", "unixeng-test",
+                        "--personality_stage", "previous"])
+        self.noouttest(["del_required_service", "--service", "afs",
+                        "--archetype", "aquilon",
+                        "--personality", "utpers-dev",
+                        "--personality_stage", "previous"])
+
+        command = ["show_service", "--service", "afs"]
+        out = self.commandtest(command)
+        self.matchclean(out, "Required for", command)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelRequiredService)

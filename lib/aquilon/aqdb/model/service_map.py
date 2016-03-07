@@ -25,12 +25,13 @@ from sqlalchemy import (Column, Integer, Sequence, DateTime, ForeignKey,
 from sqlalchemy.orm import (relation, deferred, backref, defer, undefer,
                             lazyload, contains_eager, object_session)
 from sqlalchemy.sql import and_, or_, null, case
+from sqlalchemy.sql.functions import coalesce
 
 from aquilon.exceptions_ import InternalError, AquilonError
 from aquilon.aqdb.model import (Base, Location, Desk, Rack, Room, Bunker,
                                 Building, City, Campus, Country, Continent, Hub,
                                 Company, ServiceInstance, Network, Personality,
-                                HostEnvironment)
+                                PersonalityServiceListItem, HostEnvironment)
 
 _TN = 'service_map'
 
@@ -213,16 +214,23 @@ class ServiceMap(Base):
         location_ids = [loc.id for loc in dblocation.parents]
         location_ids.append(dblocation.id)
 
+        PSLI = PersonalityServiceListItem
+
         q = session.query(ServiceMap)
         q = q.join(ServiceInstance)
         q = q.filter(ServiceInstance.service_id.in_(srv.id for srv in dbservices))
+
+        q = q.outerjoin(PSLI, and_(PSLI.personality_stage_id == dbstage.id,
+                                   PSLI.service_id == ServiceInstance.service_id))
 
         # Rules for filtering by target object
         q = q.filter(or_(
             and_(ServiceMap.personality_id == null(),
                  ServiceMap.host_environment_id == null()),
             ServiceMap.personality == dbstage.personality,
-            ServiceMap.host_environment == dbstage.personality.host_environment))
+            ServiceMap.host_environment_id == coalesce(
+                PSLI.host_environment_id,
+                dbstage.personality.host_environment.id)))
 
         # Rules for filtering by location/scope
         if dbnetwork:

@@ -431,10 +431,12 @@ class TestParameterFeature(TestBrokerCommand):
         out = self.commandtest(cmd)
         self.searchoutput(out,
                           r'Differences for Required Services:\s*'
-                          r'missing Required Services in Personality aquilon/%s@next:\s*'
+                          r'missing Required Services in Personality aquilon/unixeng-test@next:\s*'
                           r'scope_test\s*'
                           r'missing Required Services in Personality aquilon/utpers-dev@current:\s*'
-                          r'chooser1\s*chooser2\s*chooser3' % PERSONALITY,
+                          r'chooser1\s*chooser2\s*chooser3\s*'
+                          r'matching Required Services with different values:\s*'
+                          r'afs value=None, othervalue=qa\s*',
                           cmd)
         self.searchoutput(out,
                           r'Differences for Features:\s*'

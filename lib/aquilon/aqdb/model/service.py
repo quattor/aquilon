@@ -39,7 +39,7 @@ from sqlalchemy.util import memoized_property
 
 from aquilon.aqdb.column_types.aqstr import AqStr
 from aquilon.aqdb.model import (Base, Archetype, Personality, PersonalityStage,
-                                OperatingSystem)
+                                OperatingSystem, HostEnvironment)
 
 _TN = 'service'
 _SLI = 'service_list_item'
@@ -124,6 +124,8 @@ class PersonalityServiceListItem(Base):
                                              ondelete='CASCADE'),
                                   nullable=False, index=True)
 
+    host_environment_id = Column(ForeignKey(HostEnvironment.id), nullable=True)
+
     service = relation(Service, innerjoin=True,
                        backref=backref("personality_assignments"))
 
@@ -133,10 +135,13 @@ class PersonalityServiceListItem(Base):
                                                  cascade="all, delete-orphan",
                                                  passive_deletes=True))
 
+    host_environment = relation(HostEnvironment)
+
     __table_args__ = (PrimaryKeyConstraint(service_id, personality_stage_id),)
 
     def copy(self):
-        return type(self)(service=self.service)
+        return type(self)(service=self.service,
+                          host_environment=self.host_environment)
 
 
 class __OSServiceListItem(Base):

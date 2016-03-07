@@ -26,9 +26,13 @@ class CommandDelRequiredServicePersonality(CommandAddRequiredServicePersonality)
 
     required_parameters = ["service", "archetype", "personality"]
 
-    def _update_dbobj(self, dbstage, dbservice):
+    def _update_dbobj(self, logger, dbstage, dbservice, dbenv):
         try:
             del dbstage.required_services[dbservice]
         except KeyError:
             raise NotFoundException("{0} is not required for {1:l}."
                                     .format(dbservice, dbstage))
+
+    def render(self, **kwargs):
+        super(CommandDelRequiredServicePersonality,
+              self).render(environment_override=None, **kwargs)

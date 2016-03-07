@@ -53,6 +53,9 @@ class ServiceFormatter(ObjectFormatter):
             if dbpsli.personality_stage.staged:
                 details.append(indent + "    Stage: %s" %
                                dbpsli.personality_stage.name)
+            if dbpsli.host_environment:
+                details.append(indent + "    Environment Override: %s" %
+                               dbpsli.host_environment.name)
         if service.comments:
             details.append(indent + "  Comments: %s" % service.comments)
         for instance in service.instances:

@@ -65,7 +65,8 @@ class CommandShowDiff(BrokerCommand):
         ret["Features"][dtype] = features
 
         # process required_services
-        services = {srv.name: True for srv in dbstage.required_services}
+        services = {srv.name: link.host_environment.name if link.host_environment else None
+                    for srv, link in dbstage.required_services.items()}
         ret["Required Services"][dtype] = services
 
         # service maps

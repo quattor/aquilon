@@ -70,9 +70,12 @@ class PersonalityStageFormatter(PersonalityFormatter):
 
         if personality.cluster_required:
             details.append(indent + "  Requires clustered hosts")
-        for service in persst.required_services:
+        for service, info in persst.required_services.items():
             details.append(indent + "  Required Service: {0.name}"
                            .format(service))
+            if info.host_environment:
+                details.append(indent + "    Environment Override: {0.name}"
+                               .format(info.host_environment))
 
         for usr in personality.root_users:
             details.append(indent + "  Root Access User: %s" % usr)
