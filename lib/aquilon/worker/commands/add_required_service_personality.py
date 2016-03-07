@@ -18,7 +18,8 @@
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.worker.broker import BrokerCommand
-from aquilon.aqdb.model import Personality, Service
+from aquilon.aqdb.model import (Personality, Service,
+                                PersonalityServiceListItem)
 from aquilon.worker.dbwrappers.change_management import validate_prod_personality
 
 
@@ -30,7 +31,9 @@ class CommandAddRequiredServicePersonality(BrokerCommand):
         if dbservice in dbstage.required_services:
             raise ArgumentError("{0} is already required by {1:l}."
                                 .format(dbservice, dbstage))
-        dbstage.required_services.append(dbservice)
+        psli = PersonalityServiceListItem(personality_stage=dbstage,
+                                          service=dbservice)
+        dbstage.required_services[dbservice] = psli
 
     def render(self, session, service, archetype, personality,
                personality_stage, justification, reason, user, **arguments):

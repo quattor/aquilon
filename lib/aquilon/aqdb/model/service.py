@@ -33,6 +33,7 @@ from datetime import datetime
 from sqlalchemy import (Column, Integer, Sequence, String, DateTime, Boolean,
                         ForeignKey, PrimaryKeyConstraint)
 from sqlalchemy.orm import relation, backref, deferred, aliased, object_session
+from sqlalchemy.orm.collections import attribute_mapped_collection
 from sqlalchemy.sql import or_, null
 from sqlalchemy.util import memoized_property
 
@@ -77,7 +78,8 @@ class Service(Base):
 
         # Check if the service instance is used by any cluster-bound personality
         q = session.query(PersonalityStage.id)
-        q = q.outerjoin(PersService, PersonalityStage.required_services)
+        q = q.outerjoin(PersonalityServiceListItem)
+        q = q.outerjoin(PersService, PersonalityServiceListItem.service)
         q = q.reset_joinpoint()
         q = q.join(Personality, Archetype)
         q = q.filter(Archetype.cluster_type != null())
@@ -108,7 +110,7 @@ Service.archetypes = relation(Archetype, secondary=__ServiceListItem.__table__,
                                               passive_deletes=True))
 
 
-class __PersonalityServiceListItem(Base):
+class PersonalityServiceListItem(Base):
     """ A personality service list item is an individual member of a list
        of required services for a given personality. They represent required
        services that need to be assigned/selected in order to build
@@ -122,12 +124,19 @@ class __PersonalityServiceListItem(Base):
                                              ondelete='CASCADE'),
                                   nullable=False, index=True)
 
+    service = relation(Service, innerjoin=True,
+                       backref=backref("personality_assignments"))
+
+    personality_stage = relation(PersonalityStage, innerjoin=True,
+                                 backref=backref("required_services",
+                                                 collection_class=attribute_mapped_collection('service'),
+                                                 cascade="all, delete-orphan",
+                                                 passive_deletes=True))
+
     __table_args__ = (PrimaryKeyConstraint(service_id, personality_stage_id),)
 
-Service.personality_stages = relation(PersonalityStage,
-                                      secondary=__PersonalityServiceListItem.__table__,
-                                      backref=backref("required_services",
-                                                      passive_deletes=True))
+    def copy(self):
+        return type(self)(service=self.service)
 
 
 class __OSServiceListItem(Base):

@@ -123,7 +123,7 @@ class PersonalityStageFormatter(PersonalityFormatter):
             skeleton.stage = persst.name
 
         if indirect_attrs:
-            self.redirect_proto(persst.required_services,
+            self.redirect_proto(persst.required_services.keys(),
                                 skeleton.required_services,
                                 indirect_attrs=False)
 

@@ -125,8 +125,9 @@ class Host(CompileableMixin, Base):
 
     @property
     def required_services(self):
-        rqs = super(Host, self).required_services
-        rqs.update(self.operating_system.required_services)
+        # Order matters in case the same key is present in both
+        rqs = {dbsrv: None for dbsrv in self.operating_system.required_services}
+        rqs.update(super(Host, self).required_services)
         return rqs
 
 

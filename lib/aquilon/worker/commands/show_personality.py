@@ -55,6 +55,7 @@ class CommandShowPersonality(BrokerCommand):
         q = q.options(contains_eager('personality'),
                       contains_eager('personality.archetype'),
                       subqueryload('required_services'),
+                      joinedload('required_services.service'),
                       subqueryload('grns'),
                       subqueryload('features'),
                       joinedload('features.feature'),
