@@ -170,7 +170,7 @@ class ServiceMap(Base):
                                          host_environment=host_environment)
 
     @staticmethod
-    def get_mapped_instance_cache(dbservices, dbpersonality, dblocation,
+    def get_mapped_instance_cache(dbservices, dbstage, dblocation,
                                   dbnetwork=None):
         """Returns dict of requested services to closest mapped instances."""
 
@@ -180,14 +180,16 @@ class ServiceMap(Base):
         location_ids.append(dblocation.id)
 
         q = session.query(ServiceMap)
+        q = q.join(ServiceInstance)
+        q = q.filter(ServiceInstance.service_id.in_(srv.id for srv in dbservices))
 
         # Rules for filtering by target object
         target_rules = [and_(ServiceMap.personality_id == null(),
                              ServiceMap.host_environment_id == null())]
-        if dbpersonality:
-            target_rules.append(ServiceMap.personality == dbpersonality)
+        if dbstage:
+            target_rules.append(ServiceMap.personality == dbstage.personality)
             target_rules.append(ServiceMap.host_environment ==
-                                dbpersonality.host_environment)
+                                dbstage.personality.host_environment)
 
         q = q.filter(or_(*target_rules))
 
@@ -198,8 +200,6 @@ class ServiceMap(Base):
         else:
             q = q.filter(ServiceMap.location_id.in_(location_ids))
 
-        q = q.join(ServiceInstance)
-        q = q.filter(ServiceInstance.service_id.in_(srv.id for srv in dbservices))
         q = q.options(contains_eager('service_instance'),
                       defer('service_instance.comments'),
                       undefer('service_instance._client_count'),
