@@ -42,11 +42,11 @@ r'};'
 
 class TestBindFeature(TestBrokerCommand):
 
-    def verify_personality_flush(self, err, command):
+    def verify_personality_flush(self, err, orig_command):
         command = ["search", "personality", "--archetype", "aquilon"]
         perslist = self.commandtest(command).splitlines()
         self.matchoutput(err, "Flushed %d/%d templates" %
-                         (len(perslist), len(perslist)), command)
+                         (len(perslist), len(perslist)), orig_command)
 
     def test_100_bind_archetype(self):
         command = ["bind", "feature", "--feature", "pre_host",
