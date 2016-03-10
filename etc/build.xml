@@ -97,7 +97,7 @@
 	<!-- See comment above delete.object.dep. -->
 	<target name="delete.domain.deps" description="remove domain dep files" if="clean.dep.files">
 		<delete failonerror="false">
-			<fileset dir="${compiled.profiles}" includes="*.dep" />
+			<fileset dir="${compiled.profiles}" includes="**/*.dep" />
 		</delete>
 	</target>
 
@@ -154,35 +154,10 @@
 		Copy only relevant compiled profiles into the web directory.
 		-->
 		<copy todir="${distributed.profiles}" preservelastmodified="true" overwrite="${force.build}">
-			<!--
-			The relevant ant scripting sections in the manual:
-			CoreTypes/selectors.html#scriptselector
-			OptionalTasks/script.html
-			-->
 			<fileset dir="${compiled.profiles}" includes="**/*">
-				<scriptselector language="javascript"> <![CDATA[
-					var File = java.io.File;
-					// importClass(java.lang.System);
-
-					var thisfile = self.getFile().getPath();
-					var prefix = self.getProject().getProperty("compiled.profiles").toString();
-					// This could be more rigorous...
-					var base = thisfile.substring(prefix.length());
-					var source = self.getProject().getProperty("source.profiles");
-					var suffixes = self.getProject().getProperty("profile.suffixes").toString().split(",");
-					var extension = self.getProject().getProperty("panc.template_extension").toString();
-					self.setSelected(false);
-					for (var i = 0; i < suffixes.length; i++) {
-						var suffix = suffixes[i];
-						if (!base.endsWith(suffix)) {
-							// System.out.println(base + " does not end with " + suffix);
-							continue;
-						}
-						var counterpart = new File(source, base.replaceAll(suffix + "$", extension));
-						// System.out.println("Comparing '" + thisfile + "' with source '" + counterpart + "' and exists=" + counterpart.exists());
-						self.setSelected(counterpart.exists());
-					}
-				]]></scriptselector>
+				<present present="both" targetdir="${source.profiles}">
+					<mapper type="regexp" from="^(.*)\.(?:xml|json)(?:\.gz)?$$" to="\1${panc.template_extension}"/>
+				</present>
 			</fileset>
 		</copy>
 	</target>
