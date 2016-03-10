@@ -41,13 +41,8 @@ class ExportHandler(object):
     def create(self, obj, **kwargs):
         pass
 
-    """Called before an object is updated.
-       The return value is passed to update."""
-    def snapshot(self, obj, **kwargs):
-        pass
-
     """Called when an object is updated."""
-    def update(self, obj, snapshot, **kwargs):
+    def update(self, obj, **kwargs):
         pass
 
     """Called when an object is deleted."""
@@ -159,22 +154,6 @@ class Exporter(object):
         self._do_create_or_delete('create', obj)
 
     """
-    Before an object it modified may be "snapshoted".  This gives exporters
-    a chance to record their state before the object is modified.
-    """
-    # TODO: This needs to be hooked into model/base.py.  For the time being
-    # session.info['exporter'].snapshot(obj) needs to be called.
-    def snapshot(self, obj):
-        oname = obj.__class__.__name__
-        oid = id(obj)
-        if oname in self._handlers:
-            for handler in self._handlers[oname]:
-                hname = handler.__class__.__name__
-                if oid in self._stash[hname]:
-                    raise InternalError('snapshot allready called for this object')
-                self._stash[hname][oid] = handler.snapshot(obj, **self._kwargs)
-
-    """
     Indicate that the passed object has been updated.
     """
     def update(self, obj):
@@ -183,10 +162,7 @@ class Exporter(object):
         if oname in self._handlers:
             for handler in self._handlers[oname]:
                 hname = handler.__class__.__name__
-                snapshot = None
-                if oid in self._stash[hname]:
-                    snapshot = self._stash[hname][oid]
-                action = handler.update(obj, snapshot, **self._kwargs)
+                action = handler.update(obj, **self._kwargs)
                 self._queue_action(handler, action)
 
     """

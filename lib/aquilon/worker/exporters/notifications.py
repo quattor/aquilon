@@ -153,7 +153,7 @@ class NotificationExportHandler(ExportHandler, ProtocolBufferMixin):
     def create(self, obj, **kwargs):
         return self.new_notification('CREATE', obj, kwargs)
 
-    def update(self, obj, snapshot, **kwargs):
+    def update(self, obj, **kwargs):
         return self.new_notification('UPDATE', obj, kwargs)
 
     def delete(self, obj, **kwargs):
