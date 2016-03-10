@@ -171,7 +171,7 @@ class Location(Base):
                                   LocationLink.parent_id == plink.parent.id))
                 # See above: we depend on the caching ability of the session, so
                 # we can't use q.delete()
-                for clink in q.all():
+                for clink in q:
                     session.delete(clink)
 
             # Add links to the new parent

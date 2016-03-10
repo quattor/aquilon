@@ -39,7 +39,7 @@ class CommandUpdateShare(BrokerCommand):
                                 "cannot be modified" % share)
         plenaries = PlenaryCollection(logger=logger)
 
-        for dbshare in q.all():
+        for dbshare in q:
             if latency_threshold:
                 dbshare.latency_threshold = latency_threshold
 

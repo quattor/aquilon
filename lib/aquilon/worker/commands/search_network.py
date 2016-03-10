@@ -86,7 +86,7 @@ class CommandSearchNetwork(BrokerCommand):
             dnsq = dnsq.filter_by(name=short)
             dnsq = dnsq.filter_by(dns_domain=dbdns_domain)
             networks = [get_net_id_from_ip(session, addr.ip, dbnet_env).id
-                        for addr in dnsq.all()]
+                        for addr in dnsq]
             q = q.filter(Network.id.in_(networks))
         if cluster:
             dbcluster = Cluster.get_unique(session, cluster, compel=True)

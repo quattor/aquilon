@@ -157,7 +157,7 @@ class UserSync(object):
         q = self.session.query(User)
         by_name = {}
         by_uid = {}
-        for dbuser in q.all():
+        for dbuser in q:
             by_name[dbuser.name] = dbuser
             by_uid[dbuser.uid] = dbuser
 

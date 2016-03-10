@@ -233,7 +233,7 @@ class NetworkHostListFormatter(ListFormatter):
                           subqueryload('host'),
                           subqueryload('host.personality_stage'))
             hwent_by_id = {}
-            for dbhwent in q.all():
+            for dbhwent in q:
                 hwent_by_id[dbhwent.id] = dbhwent
 
                 iface_by_id = {}

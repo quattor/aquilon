@@ -79,7 +79,7 @@ class CommandUpdateModel(BrokerCommand):
             dbmodel.name = newmodel
         if newvendor or newmodel:
             q = session.query(Machine).filter_by(model=dbmodel)
-            dbmachines.update(q.all())
+            dbmachines.update(q)
 
         # For now, can't update model_type.  There are too many spots
         # that special case things like aurora_node or virtual_machine to
@@ -182,7 +182,7 @@ class CommandUpdateModel(BrokerCommand):
             oldattr = getattr(model.machine_specs, attr)
             filters = {'model': model, attr: oldattr}
             q = session.query(Machine).filter_by(**filters)
-            for dbmachine in q.all():
+            for dbmachine in q:
                 setattr(dbmachine, attr, value)
                 dbmachines.add(dbmachine)
 
@@ -200,7 +200,7 @@ class CommandUpdateModel(BrokerCommand):
             q = q.filter_by(**filters)
             q = q.join(Machine)
             q = q.filter_by(model=model)
-            for dbdisk in q.all():
+            for dbdisk in q:
                 setattr(dbdisk, disk_attr, value)
                 dbmachines.add(dbdisk.machine)
 
@@ -218,7 +218,7 @@ class CommandUpdateModel(BrokerCommand):
             q = q.join(HardwareEntity)
             q = q.filter(HardwareEntity.model == model)
             q = q.options(contains_eager('hardware_entity'))
-            for dbiface in q.all():
+            for dbiface in q:
                 dbiface.model = value
                 dbmachines.add(dbiface.hardware_entity)
 

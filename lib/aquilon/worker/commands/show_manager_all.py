@@ -37,4 +37,4 @@ class CommandShowManagerAll(BrokerCommand):
         q = q.options(contains_eager('fqdn'),
                       contains_eager('fqdn.dns_domain'))
         q = q.order_by(Fqdn.name, DnsDomain.name)
-        return [rec.fqdn for rec in q.all()]
+        return [rec.fqdn for rec in q]
