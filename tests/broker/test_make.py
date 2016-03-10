@@ -124,6 +124,18 @@ class TestMake(TestBrokerCommand):
                         "--service", "scope_test",
                         "--instance", "target-qa"])
 
+        command = ["show_service", "--service", "scope_test", "--instance", "target-dev"]
+        out = self.commandtest(command)
+        self.matchoutput(out,
+                         "Service Map: Building ut (Host Environment: dev)",
+                         command)
+
+        command = ["show_map", "--service", "scope_test", "--instance", "target-dev"]
+        out = self.commandtest(command)
+        self.matchoutput(out,
+                         "Host Environment: dev Service: scope_test Instance: target-dev Map: Building ut",
+                         command)
+
         command = ["show_map", "--service", "scope_test",
                    "--instance", "target-dev", "--format", "proto"]
         maps = self.protobuftest(command, expect=1)

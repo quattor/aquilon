@@ -66,6 +66,9 @@ class ServiceInstanceFormatter(ObjectFormatter):
                                (format(map.scope),
                                 map.personality.archetype.name,
                                 map.personality.name))
+            elif map.host_environment:
+                details.append(indent + "  Service Map: {0} ({1:c}: {1.name})"
+                               .format(map.scope, map.host_environment))
             else:
                 details.append(indent + "  Service Map: {0}".format(map.scope))
         details.append(indent + "  Maximum Client Count: %s" %
