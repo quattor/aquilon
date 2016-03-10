@@ -55,10 +55,10 @@ class TestParameterConstraints(TestBrokerCommand):
     def test_131_add_rebuild_required_almostready(self):
         command = ["add_parameter", "--personality", "utpers-dev",
                    "--archetype", "aquilon",
-                   "--path", "test_rebuild_required", "--value", "test"]
+                   "--path", "foo/test_rebuild_required", "--value", "test"]
         err = self.badrequesttest(command)
         self.searchoutput(err,
-                          r'Modifying parameter test_rebuild_required value needs a host rebuild. '
+                          r'Modifying parameter foo/test_rebuild_required value needs a host rebuild. '
                           r'There are hosts associated to the personality in non-ready state. '
                           r'Please set these host to status of rebuild to continue.',
                           command)
@@ -80,10 +80,10 @@ class TestParameterConstraints(TestBrokerCommand):
 
         command = ["add_parameter", "--personality", "utpers-dev",
                    "--archetype", "aquilon",
-                   "--path", "test_rebuild_required", "--value", "test"]
+                   "--path", "foo/test_rebuild_required", "--value", "test"]
         err = self.badrequesttest(command)
         self.searchoutput(err,
-                          r'Modifying parameter test_rebuild_required value needs a host rebuild. '
+                          r'Modifying parameter foo/test_rebuild_required value needs a host rebuild. '
                           r'There are hosts associated to the personality in non-ready state. '
                           r'Please set these host to status of rebuild to continue.',
                           command)
@@ -95,13 +95,13 @@ class TestParameterConstraints(TestBrokerCommand):
 
         command = ["add_parameter", "--personality", "utpers-dev",
                    "--archetype", "aquilon",
-                   "--path", "test_rebuild_required", "--value", "test"]
+                   "--path", "foo/test_rebuild_required", "--value", "test"]
         self.noouttest(command)
 
     def test_135_update_rebuild_required_non_ready(self):
         command = ["update_parameter", "--personality", "utpers-dev",
                    "--archetype", "aquilon",
-                   "--path", "test_rebuild_required", "--value", "test"]
+                   "--path", "foo/test_rebuild_required", "--value", "test"]
         self.noouttest(command)
 
     def test_135_update_rebuild_required_ready(self):
@@ -111,20 +111,20 @@ class TestParameterConstraints(TestBrokerCommand):
 
         command = ["update_parameter", "--personality", "utpers-dev",
                    "--archetype", "aquilon",
-                   "--path", "test_rebuild_required", "--value", "test"]
+                   "--path", "foo/test_rebuild_required", "--value", "test"]
         err = self.badrequesttest(command)
         self.searchoutput(err,
-                          r'Modifying parameter test_rebuild_required value needs a host rebuild. '
+                          r'Modifying parameter foo/test_rebuild_required value needs a host rebuild. '
                           r'There are hosts associated to the personality in non-ready state. '
                           r'Please set these host to status of rebuild to continue.',
                           command)
 
     def test_136_del_rebuild_required_ready(self):
         command = ["del_parameter", "--personality", "utpers-dev",
-                   "--archetype", "aquilon", "--path", "test_rebuild_required"]
+                   "--archetype", "aquilon", "--path", "foo/test_rebuild_required"]
         err = self.badrequesttest(command)
         self.searchoutput(err,
-                          r'Modifying parameter test_rebuild_required value needs a host rebuild. '
+                          r'Modifying parameter foo/test_rebuild_required value needs a host rebuild. '
                           r'There are hosts associated to the personality in non-ready state. '
                           r'Please set these host to status of rebuild to continue.',
                           command)
@@ -136,7 +136,7 @@ class TestParameterConstraints(TestBrokerCommand):
 
         self.noouttest(["del_parameter", "--personality", "utpers-dev",
                         "--archetype", "aquilon",
-                        "--path", "test_rebuild_required"])
+                        "--path", "foo/test_rebuild_required"])
 
     def test_140_del_required(self):
         self.noouttest(["del_parameter", "--personality", "utpers-dev",

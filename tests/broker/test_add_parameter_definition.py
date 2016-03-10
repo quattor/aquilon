@@ -114,7 +114,7 @@ class TestAddParameterDefinition(TestBrokerCommand):
     def test_100_add_all(self):
         for path, params in default_param_defs.items():
             cmd = ["add_parameter_definition", "--archetype", "aquilon",
-                   "--path", path, "--template", "foo"]
+                   "--path", "foo/" + path, "--template", "foo"]
             if "type" in params:
                 cmd.extend(["--value_type", params["type"]])
             if "default" in params:
@@ -130,31 +130,31 @@ class TestAddParameterDefinition(TestBrokerCommand):
 
     def test_105_show_paramdef(self):
         cmd = ["show_parameter_definition", "--archetype", "aquilon",
-               "--path", "testrequired"]
+               "--path", "foo/testrequired"]
         out = self.commandtest(cmd)
         self.output_equals(out, """
-            Parameter Definition: testrequired [required]
+            Parameter Definition: foo/testrequired [required]
               Type: string
               Template: foo
               Activation: dispatch
             """, cmd)
 
     def test_120_clean_path(self):
-        for path in ["/startslash", "endslash/"]:
+        for path in ["/foo/startslash", "foo/endslash/"]:
             cmd = ["add_parameter_definition", "--archetype", "aquilon",
                    "--path=%s" % path, "--template=foo", "--value_type=string"]
             self.noouttest(cmd)
 
     def test_130_valid_path(self):
-        for path in ["multi/part1/part2", "noslash", "valid/with_under", "valid/with.dot",
+        for path in ["multi/part1/part2", "foo", "valid/with_under", "valid/with.dot",
                      "valid/with-dash", "with_under", "with.dot", "with-dash"]:
 
             cmd = ["add_parameter_definition", "--archetype", "aquilon",
-                   "--path=%s" % path, "--template=foo", "--value_type=string"]
+                   "--path=foo/%s" % path, "--template=foo", "--value_type=string"]
             self.noouttest(cmd)
 
             cmd = ["del_parameter_definition", "--archetype", "aquilon",
-                   "--path=%s" % path]
+                   "--path=foo/%s" % path]
             self.noouttest(cmd)
 
     def load_feature_paramdefs(self, feature, feature_type):
@@ -214,11 +214,11 @@ class TestAddParameterDefinition(TestBrokerCommand):
 
     def test_300_add_existing(self):
         cmd = ["add_parameter_definition", "--archetype", "aquilon",
-               "--path=teststring", "--value_type=string", "--description=blaah",
+               "--path=foo/teststring", "--value_type=string", "--description=blaah",
                "--template=foo", "--required", "--default=default"]
         err = self.badrequesttest(cmd)
         self.matchoutput(err,
-                         "Parameter Definition teststring, parameter "
+                         "Parameter Definition foo/teststring, parameter "
                          "definition holder aquilon already exists.",
                          cmd)
 
@@ -238,11 +238,11 @@ class TestAddParameterDefinition(TestBrokerCommand):
                 continue
 
             cmd = ["add_parameter_definition", "--archetype", "aquilon",
-                   "--path", path + "_invalid_default",
+                   "--path", "foo/" + path + "_invalid_default",
                    "--value_type", params["type"],
                    "--template", "foo", "--default", params["invalid_default"]]
             out = self.badrequesttest(cmd)
-            self.matchoutput(out, "for default for path=%s" % path, cmd)
+            self.matchoutput(out, "for default for path=foo/%s" % path, cmd)
 
     def test_300_invalid_feature_defaults(self):
         for path, params in default_param_defs.items():
@@ -258,14 +258,14 @@ class TestAddParameterDefinition(TestBrokerCommand):
 
     def test_300_add_noncompileable_arch(self):
         cmd = ["add_parameter_definition", "--archetype", "windows",
-               "--path=testint", "--description=blaah",
+               "--path=foo/testint", "--description=blaah",
                "--template=foo", "--value_type=int", "--default=60"]
         out = self.badrequesttest(cmd)
         self.matchoutput(out, "Archetype windows is not compileable.", cmd)
 
     def test_300_add_rebuild_default(self):
         cmd = ["add_parameter_definition", "--archetype", "aquilon",
-               "--path=test_rebuild_required_default", "--default=default",
+               "--path=foo/test_rebuild_required_default", "--default=default",
                "--template=foo", "--value_type=string", "--activation=rebuild"]
         out = self.unimplementederrortest(cmd)
         self.matchoutput(out, "Setting a default value for a parameter which "
@@ -276,7 +276,7 @@ class TestAddParameterDefinition(TestBrokerCommand):
         for path in ["!badchar", "@badchar", "#badchar", "$badchar", "%badchar", "^badchar",
                      "&badchar", "*badchar" ":badchar", ";badcharjk", "+badchar"]:
             cmd = ["add_parameter_definition", "--archetype", "aquilon",
-                   "--path=%s" % path, "--template=foo", "--value_type=string"]
+                   "--path=foo/%s" % path, "--template=foo", "--value_type=string"]
             err = self.badrequesttest(cmd)
             self.matchoutput(err,
                              "'%s' is not a valid value for a path component." % path,
@@ -348,7 +348,7 @@ class TestAddParameterDefinition(TestBrokerCommand):
 
         out = self.commandtest(cmd)
         for path, params in default_param_defs.items():
-            pattern = "Parameter Definition: " + path
+            pattern = "Parameter Definition: foo/" + path
             if params.get("required", False):
                 pattern += r' \[required\]'
             pattern += r"\s*"
@@ -368,37 +368,39 @@ class TestAddParameterDefinition(TestBrokerCommand):
 
             self.searchoutput(out, pattern, cmd)
 
-        self.searchoutput(out, r'Parameter Definition: startslash\s*', cmd)
-        self.searchoutput(out, r'Parameter Definition: endslash\s*', cmd)
+        self.searchoutput(out, r'Parameter Definition: foo/startslash\s*', cmd)
+        self.searchoutput(out, r'Parameter Definition: foo/endslash\s*', cmd)
 
     def test_400_verify_all_proto(self):
         cmd = ["search_parameter_definition", "--archetype", "aquilon", "--format=proto"]
         result = self.protobuftest(cmd, expect=12)[:]
         param_defs = dict((param_def.path, param_def) for param_def in result)
 
-        self.assertIn('endslash', param_defs)
-        self.assertEqual(param_defs['endslash'].value_type, 'string')
-        self.assertIn('startslash', param_defs)
-        self.assertEqual(param_defs['startslash'].value_type, 'string')
+        self.assertIn('foo/endslash', param_defs)
+        self.assertEqual(param_defs['foo/endslash'].value_type, 'string')
+        self.assertIn('foo/startslash', param_defs)
+        self.assertEqual(param_defs['foo/startslash'].value_type, 'string')
 
         for path, params in default_param_defs.items():
-            self.assertIn(path, param_defs)
-            self.assertEqual(param_defs[path].template, "foo")
+            self.assertIn("foo/" + path, param_defs)
+            paramdef = param_defs["foo/" + path]
+
+            self.assertEqual(paramdef.template, "foo")
             if "type" in params:
-                self.assertEqual(param_defs[path].value_type, params["type"])
+                self.assertEqual(paramdef.value_type, params["type"])
             else:
-                self.assertEqual(param_defs[path].value_type, "string")
+                self.assertEqual(paramdef.value_type, "string")
             if "default" in params:
-                self.assertEqual(param_defs[path].default, params["default"])
+                self.assertEqual(paramdef.default, params["default"])
             else:
-                self.assertEqual(param_defs[path].default, "")
-            self.assertEqual(param_defs[path].is_required,
+                self.assertEqual(paramdef.default, "")
+            self.assertEqual(paramdef.is_required,
                              params.get("required", False))
             if "activation" in params:
                 val = self.activation_type.values_by_name[params["activation"].upper()]
-                self.assertEqual(param_defs[path].activation, val.number)
+                self.assertEqual(paramdef.activation, val.number)
             else:
-                self.assertEqual(param_defs[path].activation, self.proto.DISPATCH)
+                self.assertEqual(paramdef.activation, self.proto.DISPATCH)
 
     def test_410_verify_feature_all(self):
         cmd = ["search_parameter_definition", "--feature", "myfeature", "--type=host"]

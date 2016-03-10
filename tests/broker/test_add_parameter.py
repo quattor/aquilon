@@ -140,11 +140,10 @@ class TestAddParameter(VerifyGrnsMixin, PersonalityTestMixin,
         self.matchoutput(out, '"testfloat" = 100.100;', command)
         self.matchoutput(out, '"testint" = 60;', command)
         self.matchoutput(out, '"teststring" = "default";', command)
-        # TODO: get_path_under_top() makes the value come out not quite as
-        # expected - the "testjson" prefix is missing
         self.searchoutput(out,
-                          r'"key" = "param_key";\s*'
-                          r'"values" = list\(\s*0\s*\);\s*',
+                          r'"testjson" = nlist\(\s*'
+                          r'"key", "param_key",\s*'
+                          r'"values", list\(\s*0\s*\)\s*\);\s*',
                           command)
         self.searchoutput(out,
                           r'"testlist" = list\(\s*"val1",\s*"val2"\s*\);',
@@ -170,7 +169,7 @@ class TestAddParameter(VerifyGrnsMixin, PersonalityTestMixin,
         out = self.badrequesttest(command)
         self.searchoutput(out,
                           r'Following required parameters have not been specified:\s*'
-                          r'Parameter Definition: testrequired \[required\]\s*'
+                          r'Parameter Definition: foo/testrequired \[required\]\s*'
                           r'Type: string\s*'
                           r'Template: foo',
                           command)
@@ -290,7 +289,7 @@ class TestAddParameter(VerifyGrnsMixin, PersonalityTestMixin,
 
     def test_150_add_all_required(self):
         self.noouttest(["add_parameter", "--personality", "utpers-dev",
-                        "--archetype", "aquilon", "--path", "testrequired",
+                        "--archetype", "aquilon", "--path", "foo/testrequired",
                         "--value", "set"])
 
     def test_155_validate(self):
@@ -375,6 +374,7 @@ class TestAddParameter(VerifyGrnsMixin, PersonalityTestMixin,
                           r'//actions/testaction2/timeout\s*'
                           r'//actions/testaction2/user\s*'
                           r'//espinfo/users/1\s*'
+                          r'//foo/testrequired\s*'
                           r'//monitoring/metric/_20003/active\s*'
                           r'//monitoring/metric/_20003/class\s*'
                           r'//monitoring/metric/_20003/descr\s*'
@@ -384,7 +384,6 @@ class TestAddParameter(VerifyGrnsMixin, PersonalityTestMixin,
                           r'//monitoring/metric/_20003/smooth/maxdiff\s*'
                           r'//monitoring/metric/_20003/smooth/maxtime\s*'
                           r'//monitoring/metric/_20003/smooth/typeString\s*'
-                          r'//testrequired\s*'
                           r'matching Parameters with different values:\s*'
                           r'//espinfo/function value=crash, othervalue=development\s*'
                           r'//espinfo/users/0 value=someusers, othervalue=IT / TECHNOLOGY',

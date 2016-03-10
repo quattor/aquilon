@@ -29,7 +29,7 @@ class TestDelParameter(TestBrokerCommand):
 
     def test_100_del_testrequired(self):
         self.noouttest(["del_parameter", "--personality", "utpers-dev",
-                        "--archetype", "aquilon", "--path", "testrequired"])
+                        "--archetype", "aquilon", "--path", "foo/testrequired"])
 
     def test_110_del_single_action(self):
         self.noouttest(["del_parameter", "--personality", "utpers-dev",
