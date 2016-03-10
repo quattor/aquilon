@@ -31,10 +31,6 @@ Implementers should inherit from this class in order to hook into lifecycle
 events within the broker.  To acheive this the class needs to be registered
 with the Exporter using either the register_exporter decorator or the
 Exporter.register class method (see the latter for the calling convention).
-
-Each of the methods of this class should return either an ExporterTransaction
-or a ExporterNotification, depending if external state is being modified, or
-only notifications are required.  None may be returned is neithing is required.
 """
 class ExportHandler(object):
     """Called when an object is created."""
@@ -49,30 +45,10 @@ class ExportHandler(object):
     def delete(self, obj, **kwargs):
         pass
 
-    """Called by the Exporter to apply a transaction"""
-    def commit(self, action, **kwargs):
-        raise NotImplementedError
-
-    """Called by the Exporter to undo a transaction"""
-    def rollback(self, action, **kwargs):
-        raise NotImplementedError
-
     """Called by the Exporter to emmit the notifications"""
     def publish(self, notifications, **kwargs):
         raise NotImplementedError
 
-
-"""
-Exporter Transaction
-
-Implementers should inherit from this class in order to manage transactions
-with external systems.  The exporter will call the handler commit method
-for all of the transactions it has stored.  Any errors will cause the
-corrisponding rollback method to be called.  On success the exporter will
-the process all of the notifications has stored.
-"""
-class ExporterTransaction(object):
-    pass
 
 """
 Exporter Notification
@@ -86,7 +62,7 @@ class ExporterNotification(object):
 """
 Exporter
 
-The exporter manages transactions and notifications for ExportHandler classes
+The exporter manages notifications for ExportHandler classes
 (see above).  ExportHandler are registed as follow:
 
     @register_exporter('SomeClass')
@@ -121,7 +97,7 @@ class Exporter(object):
     """
     def __init__(self, **kwargs):
         self._kwargs = kwargs
-        # Indexed by handler, contains transactions and notifications
+        # Indexed by handler, contains notifications
         self._actions = defaultdict(lambda: defaultdict(list))
         self._stash = defaultdict(dict)
         self._logger = kwargs.get('logger', LOGGER)
@@ -133,8 +109,6 @@ class Exporter(object):
             return
         if isinstance(action, ExporterNotification):
             self._actions[handler]['notifications'].append(action)
-        elif isinstance(action, ExporterTransaction):
-            self._actions[handler]['transactions'].append(action)
         else:
             raise InternalError('ExportHandler returned an unknown action')
 
@@ -172,18 +146,6 @@ class Exporter(object):
         self._do_create_or_delete('delete', obj)
 
     """
-    Commit the changes
-    """
-    def commit(self):
-        for handler, actions in self._actions.items():
-            transactions = actions['transactions']
-            rollback = actions['rollback']
-            for action in transactions:
-                # Exceptions in the following are propergated
-                handler.commit(action, **self._kwargs)
-                rollback.append(action)
-
-    """
     Publish any queued notifications
     """
     def publish(self):
@@ -194,38 +156,15 @@ class Exporter(object):
             except Exception as e:
                 self._logger.info("Caught notification error: %s", e)
 
-    """
-    Perform any rollback opperations
-    """
-    def rollback(self):
-        undo_failed = False
-        for handler, actions in self._actions.items():
-            rollback = actions['rollback']
-            for action in rollback.reverse():
-                try:
-                    handler.rollback(action, **self._kwargs)
-                except Exception as e:
-                    self._logger.warning('Caught exporter rollback error: %s', e)
-                    undo_failed = True
-
-        if undo_failed:
-            raise RollbackException()
-
     # The following methods implment a context hander.  This can be used
     # to wrap the commit and rollback methods
 
     def __enter__(self):
-        try:
-            self.commit()
-        except Exception as e:
-            self._logger.info("Exporter commit failed: %s", e)
-            self.rollback()
+        pass
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         # exc_type is !None if an exception occured
-        if exc_type:
-            self.rollback()
-        else:
+        if not exc_type:
             self.publish()
 
     """
