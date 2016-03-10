@@ -94,17 +94,17 @@ class CommandUpdateModel(BrokerCommand):
             # The comments also do not affect the templates.
 
         cpu_args = ['cpuname', 'cpuvendor']
-        cpu_info = dict((self.argument_lookup[arg], arguments[arg])
-                        for arg in cpu_args)
+        cpu_info = {self.argument_lookup[arg]: arguments[arg]
+                    for arg in cpu_args}
         cpu_values = [v for v in cpu_info.values() if v is not None]
         nic_args = ['nicmodel', 'nicvendor']
-        nic_info = dict((self.argument_lookup[arg], arguments[arg])
-                        for arg in nic_args)
+        nic_info = {self.argument_lookup[arg]: arguments[arg]
+                    for arg in nic_args}
         nic_values = [v for v in nic_info.values() if v is not None]
         spec_args = ['cpunum', 'memory', 'disktype', 'diskcontroller',
                      'disksize']
-        specs = dict((self.argument_lookup[arg], arguments[arg])
-                     for arg in spec_args)
+        specs = {self.argument_lookup[arg]: arguments[arg]
+                 for arg in spec_args}
         spec_values = [v for v in specs.values() if v is not None]
 
         if not dbmodel.machine_specs:

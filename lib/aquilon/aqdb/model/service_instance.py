@@ -80,8 +80,6 @@ class ServiceInstance(Base):
 
         session = object_session(self)
 
-        clusters = {}
-
         # Meta
         McAlias = aliased(MetaCluster)
         q = session.query(Cluster.name, Cluster.max_hosts)
@@ -90,8 +88,7 @@ class ServiceInstance(Base):
         q = q.filter(McAlias.services_used.contains(self))
         q = q.filter(McAlias.personality_stage_id.in_(persst_ids))
 
-        for name, max_host in q.all():
-            clusters[name] = max_host
+        clusters = {name: max_host for name, max_host in q}
 
         # Esx et al.
         q = session.query(Cluster.name, Cluster.max_hosts)

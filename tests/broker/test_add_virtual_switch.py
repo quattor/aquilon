@@ -76,7 +76,7 @@ class TestAddVirtualSwitch(TestBrokerCommand):
         vswitch = self.protobuftest(command, expect=1)[0]
         self.assertEqual(vswitch.name, "utvswitch")
         self.assertEqual(len(vswitch.portgroups), 2)
-        pgs = dict((pg.ip, pg) for pg in vswitch.portgroups)
+        pgs = {pg.ip: pg for pg in vswitch.portgroups}
         for net, (usage, network_tag) in nets.items():
             self.assertIn(str(net.ip), pgs)
             self.assertEqual(pgs[str(net.ip)].cidr, net.prefixlen)

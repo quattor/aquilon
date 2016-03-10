@@ -374,7 +374,7 @@ class TestAddParameterDefinition(TestBrokerCommand):
     def test_400_verify_all_proto(self):
         cmd = ["search_parameter_definition", "--archetype", "aquilon", "--format=proto"]
         result = self.protobuftest(cmd, expect=12)[:]
-        param_defs = dict((param_def.path, param_def) for param_def in result)
+        param_defs = {param_def.path: param_def for param_def in result}
 
         self.assertIn('foo/endslash', param_defs)
         self.assertEqual(param_defs['foo/endslash'].value_type, 'string')
@@ -430,7 +430,7 @@ class TestAddParameterDefinition(TestBrokerCommand):
     def test_410_verify_feature_all_proto(self):
         cmd = ["search_parameter_definition", "--feature", "myfeature", "--format=proto", "--type=host"]
         result = self.protobuftest(cmd, expect=11)[:]
-        param_defs = dict((param_def.path, param_def) for param_def in result)
+        param_defs = {param_def.path: param_def for param_def in result}
 
         for path, params in default_param_defs.items():
             if "activation" in params:

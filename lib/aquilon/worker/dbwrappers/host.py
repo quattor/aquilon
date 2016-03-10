@@ -265,8 +265,8 @@ def hostlist_to_hosts(session, hostlist, query_options=None,
 
 
 def preload_machine_data(session, dbhosts):
-    hw_by_id = dict((dbhost.hardware_entity.id, dbhost.hardware_entity)
-                    for dbhost in dbhosts)
+    hw_by_id = {dbhost.hardware_entity.id: dbhost.hardware_entity
+                for dbhost in dbhosts}
 
     # Not all hosts are bound to machines, so load the machine-specific
     # attributes separately
