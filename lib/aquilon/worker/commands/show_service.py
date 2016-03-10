@@ -27,7 +27,23 @@ class CommandShowService(BrokerCommand):
 
     def render(self, session, service, instance, server, client, **arguments):
         if service:
-            dbservice = Service.get_unique(session, service, compel=True)
+            if not client and not server and not instance:
+                options = [subqueryload('instances'),
+                           undefer('instances._client_count'),
+                           subqueryload('instances.servers'),
+                           joinedload('instances.servers.host'),
+                           joinedload('instances.servers.host.hardware_entity'),
+                           subqueryload('instances.service_map'),
+                           joinedload('instances.service_map.location'),
+                           joinedload('instances.service_map.personality'),
+                           joinedload('instances.service_map.network'),
+                           subqueryload('personality_assignments'),
+                           joinedload('personality_assignments.personality_stage'),
+                           joinedload('personality_assignments.personality_stage.personality')]
+            else:
+                options = None
+            dbservice = Service.get_unique(session, service, compel=True,
+                                           query_options=options)
             if not client and not server and not instance:
                 return dbservice
 
@@ -57,6 +73,8 @@ class CommandShowService(BrokerCommand):
                       joinedload('servers.host'),
                       joinedload('servers.host.hardware_entity'),
                       subqueryload('service_map'),
-                      joinedload('service_map.location'))
+                      joinedload('service_map.location'),
+                      joinedload('service_map.personality'),
+                      joinedload('service_map.network'))
         q = q.order_by(Service.name, ServiceInstance.name)
         return q.all()
