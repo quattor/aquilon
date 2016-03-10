@@ -200,50 +200,36 @@ class TestMapService(TestBrokerCommand):
         self.noouttest(["map", "service", "--organization", "ms",
                         "--service", "utsvc", "--instance", "utsi2",
                         "--archetype", "aquilon",
-                        "--personality", "lemon-collector-oracle"])
+                        "--personality", "utunused/dev"])
 
     def test_135_verify_personality_map(self):
         command = ["show_map", "--archetype=aquilon",
-                   "--personality=lemon-collector-oracle", "--service=utsvc"]
+                   "--personality=utunused/dev", "--service=utsvc"]
         out = self.commandtest(command)
         self.matchoutput(out,
-                         "Archetype: aquilon Personality: lemon-collector-oracle "
+                         "Archetype: aquilon Personality: utunused/dev "
                          "Service: utsvc Instance: utsi2 Map: Organization ms",
                          command)
 
     def test_135_verify_personality_no_archetype(self):
         command = ["show_map",
-                   "--personality=lemon-collector-oracle", "--service=utsvc"]
+                   "--personality=utunused/dev", "--service=utsvc"]
         out = self.commandtest(command)
         self.matchoutput(out,
-                         "Archetype: aquilon Personality: lemon-collector-oracle "
+                         "Archetype: aquilon Personality: utunused/dev "
                          "Service: utsvc Instance: utsi2 Map: Organization ms",
                          command)
 
     def test_135_verify_personality_map_proto(self):
         command = ["show_map", "--format=proto", "--archetype=aquilon",
-                   "--personality=lemon-collector-oracle", "--service=utsvc"]
+                   "--personality=utunused/dev", "--service=utsvc"]
         map = self.protobuftest(command, expect=1)[0]
         self.assertEqual(map.location.name, 'ms')
         self.assertEqual(map.location.location_type, 'company')
         self.assertEqual(map.service.name, 'utsvc')
         self.assertEqual(map.service.serviceinstances[0].name, 'utsi2')
-        self.assertEqual(map.personality.name, 'lemon-collector-oracle')
+        self.assertEqual(map.personality.name, 'utunused/dev')
         self.assertEqual(map.personality.archetype.name, 'aquilon')
-
-    def test_140_add_test_map(self):
-        self.noouttest(["add_personality", "--personality", "svc_map_test",
-                        "--eon_id", "2", "--archetype", "aquilon",
-                        "--copy_from", "lemon-collector-oracle",
-                        "--host_environment", "dev"])
-
-        command = ["show_map", "--archetype=aquilon",
-                   "--service=utsvc"]
-        out = self.commandtest(command)
-        self.matchoutput(out,
-                         "Archetype: aquilon Personality: svc_map_test "
-                         "Service: utsvc Instance: utsi2 Map: Organization ms",
-                         command)
 
     def test_200_verify_nomatch(self):
         command = "show map --service afs --instance q.ny.ms.com --organization ms"
@@ -299,7 +285,7 @@ class TestMapService(TestBrokerCommand):
                          "Service: dns Instance: unittest Map: Building ut",
                          command)
         self.matchoutput(out,
-                         "Archetype: aquilon Personality: lemon-collector-oracle "
+                         "Archetype: aquilon Personality: utunused/dev "
                          "Service: utsvc Instance: utsi2 Map: Organization ms",
                          command)
         self.matchclean(out, "Building np", command)
@@ -309,17 +295,9 @@ class TestMapService(TestBrokerCommand):
         command = ["show_map", "--archetype=aquilon", "--service=utsvc"]
         out = self.commandtest(command)
         self.matchoutput(out,
-                         "Archetype: aquilon Personality: lemon-collector-oracle "
+                         "Archetype: aquilon Personality: utunused/dev "
                          "Service: utsvc Instance: utsi2 Map: Organization ms",
                          command)
-        self.matchoutput(out,
-                         "Archetype: aquilon Personality: svc_map_test "
-                         "Service: utsvc Instance: utsi2 Map: Organization ms",
-                         command)
-
-    def test_800_cleanup(self):
-        self.successtest(["del_personality", "--personality", "svc_map_test",
-                          "--archetype", "aquilon"])
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestMapService)

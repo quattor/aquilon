@@ -62,13 +62,13 @@ class TestUnmapService(TestBrokerCommand):
         ip = self.net["netperssvcmap"].subnet()[0].ip
         self.noouttest(["unmap", "service", "--networkip", ip,
                         "--service", "scope_test", "--instance", "scope-network",
-                        "--personality", "eaitools",
+                        "--personality", "utpers-dev",
                         "--archetype", "aquilon"])
 
         self.noouttest(["unmap", "service", "--building", "ut",
                         "--service", "scope_test",
                         "--instance", "target-personality",
-                        "--personality", "eaitools",
+                        "--personality", "utpers-dev",
                         "--archetype", "aquilon"])
 
         self.noouttest(["unmap", "service", "--building", "ut",
@@ -211,11 +211,11 @@ class TestUnmapService(TestBrokerCommand):
     def testunmapwithpersona(self):
         self.noouttest(["unmap", "service", "--organization", "ms", "--service",
                         "utsvc", "--instance", "utsi2", "--archetype",
-                        "aquilon", "--personality", "lemon-collector-oracle"])
+                        "aquilon", "--personality", "utunused/dev"])
 
     def testverifyunmapwithpersona(self):
         command = ["show_map", "--archetype=aquilon",
-                   "--personality=lemon-collector-oracle", "--service=utsvc"]
+                   "--personality=utunused/dev", "--service=utsvc"]
         out = self.commandtest(command)
         self.matchoutput(out, "", command)
 

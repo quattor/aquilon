@@ -45,16 +45,16 @@ class TestRootAccess(TestBrokerCommand):
 
     def test_210_map_personality_user(self):
         command = ["grant_root_access", "--user", "testuser1",
-                   "--personality", "compileserver", "--justification", "tcm=12345678"]
+                   "--personality", "utunused/dev", "--justification", "tcm=12345678"]
         self.noouttest(command)
 
         command = ["grant_root_access", "--user", "testuser2",
-                   "--personality", "compileserver", "--justification", "tcm=12345678"]
+                   "--personality", "utunused/dev", "--justification", "tcm=12345678"]
         self.noouttest(command)
 
     def test_220_map_personality_invaliduser(self):
         command = ["grant_root_access", "--user", "testinvaliduser",
-                   "--personality", "compileserver", "--justification", "tcm=12345678"]
+                   "--personality", "utunused/dev", "--justification", "tcm=12345678"]
         out = self.notfoundtest(command)
         self.matchoutput(out, "User testinvaliduser not found", command)
 
@@ -72,28 +72,28 @@ class TestRootAccess(TestBrokerCommand):
 
     def test_240_map_personality_netgroup(self):
         command = ["grant_root_access", "--netgroup", "netgroup1",
-                   "--personality", "compileserver", "--justification", "tcm=12345678"]
+                   "--personality", "utunused/dev", "--justification", "tcm=12345678"]
         self.noouttest(command)
 
         command = ["grant_root_access", "--netgroup", "netgroup2",
-                   "--personality", "compileserver", "--justification", "tcm=12345678"]
+                   "--personality", "utunused/dev", "--justification", "tcm=12345678"]
         self.noouttest(command)
 
     def test_250_map_personality_invalidnetgroup(self):
         command = ["grant_root_access", "--netgroup", "testinvalidnetgroup",
-                   "--personality", "compileserver", "--justification", "tcm=12345678"]
+                   "--personality", "utunused/dev", "--justification", "tcm=12345678"]
         out = self.notfoundtest(command)
         self.matchoutput(out, "", command)
 
     def test_270_verify_personality(self):
-        command = ["show", "personality", "--personality", "compileserver"]
+        command = ["show", "personality", "--personality", "utunused/dev"]
         out = self.commandtest(command)
         self.matchoutput(out, "Root Access User: testuser1", command)
         self.matchoutput(out, "Root Access User: testuser2", command)
         self.matchoutput(out, "Root Access Netgroup: netgroup1", command)
         self.matchoutput(out, "Root Access Netgroup: netgroup2", command)
 
-        command = ["cat", "--archetype=aquilon", "--personality=compileserver"]
+        command = ["cat", "--archetype=aquilon", "--personality=utunused/dev"]
         out = self.commandtest(command)
         self.searchoutput(out, r'"/system/root_users" = list\(\s*'
                                r'"testuser1",\s*'
@@ -106,12 +106,12 @@ class TestRootAccess(TestBrokerCommand):
 
     def test_310_unmap_personality_user(self):
         command = ["revoke_root_access", "--user", "testuser1",
-                   "--personality", "compileserver", "--justification", "tcm=12345678"]
+                   "--personality", "utunused/dev", "--justification", "tcm=12345678"]
         self.noouttest(command)
 
     def test_320_unmap_personality_invaliduser(self):
         command = ["revoke_root_access", "--user", "testinvaliduser",
-                   "--personality", "compileserver", "--justification", "tcm=12345678"]
+                   "--personality", "utunused/dev", "--justification", "tcm=12345678"]
         out = self.notfoundtest(command)
         self.matchoutput(out, "User testinvaliduser not found", command)
 
@@ -123,22 +123,22 @@ class TestRootAccess(TestBrokerCommand):
 
     def test_340_unmap_personality_netgroup(self):
         command = ["revoke_root_access", "--netgroup", "netgroup1",
-                   "--personality", "compileserver", "--justification", "tcm=12345678"]
+                   "--personality", "utunused/dev", "--justification", "tcm=12345678"]
         self.noouttest(command)
 
     def test_350_unmap_personality_invalidnetgroup(self):
         command = ["grant_root_access", "--netgroup", "testinvalidnetgroup",
-                   "--personality", "compileserver", "--justification", "tcm=12345678"]
+                   "--personality", "utunused/dev", "--justification", "tcm=12345678"]
         out = self.notfoundtest(command)
         self.matchoutput(out, "Netgroup testinvalidnetgroup not found", command)
 
     def test_360_verify_personality(self):
-        command = ["show", "personality", "--personality", "compileserver"]
+        command = ["show", "personality", "--personality", "utunused/dev"]
         out = self.commandtest(command)
         self.matchoutput(out, "Root Access User: testuser2", command)
         self.matchoutput(out, "Netgroup: netgroup2", command)
 
-        command = ["cat", "--archetype=aquilon", "--personality=compileserver"]
+        command = ["cat", "--archetype=aquilon", "--personality=utunused/dev"]
         out = self.commandtest(command)
         self.searchoutput(out, r'"/system/root_users" = list\(\s*'
                                r'"testuser2"\s*\);',
@@ -149,7 +149,7 @@ class TestRootAccess(TestBrokerCommand):
 
     def test_370_unmap_personality_user(self):
         command = ["revoke_root_access", "--user", "testuser2",
-                   "--personality", "compileserver", "--justification", "tcm=12345678"]
+                   "--personality", "utunused/dev", "--justification", "tcm=12345678"]
         (out, err) = self.successtest(command)
 
     def test_380_del_netgroup_stillmapped(self):
@@ -157,25 +157,25 @@ class TestRootAccess(TestBrokerCommand):
         out = self.badrequesttest(command)
         self.matchoutput(out,
                          "Netgroup netgroup2 used by following and cannot be "
-                         "deleted: Personality aquilon/compileserver",
+                         "deleted: Personality aquilon/utunused/dev",
                          command)
 
         command = ["revoke_root_access", "--netgroup", "netgroup2",
-                   "--personality", "compileserver", "--justification", "tcm=12345678"]
+                   "--personality", "utunused/dev", "--justification", "tcm=12345678"]
         (out, err) = self.successtest(command)
 
         command = ["del", "netgroup_whitelist", "--netgroup", "netgroup2"]
         out = self.noouttest(command)
 
     def test_390_verify_personality(self):
-        command = ["show", "personality", "--personality", "compileserver"]
+        command = ["show", "personality", "--personality", "utunused/dev"]
         out = self.commandtest(command)
         self.matchclean(out, "testuser1", command)
         self.matchclean(out, "testuser2", command)
         self.matchclean(out, "netgroup1", command)
         self.matchclean(out, "netgroup2", command)
 
-        command = ["cat", "--archetype=aquilon", "--personality=compileserver"]
+        command = ["cat", "--archetype=aquilon", "--personality=utunused/dev"]
         out = self.commandtest(command)
         self.matchclean(out, "testuser1", command)
         self.matchclean(out, "testuser2", command)

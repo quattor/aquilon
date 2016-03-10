@@ -40,6 +40,132 @@ class TestParameterConstraints(TestBrokerCommand):
     #    out = self.badrequesttest(cmd)
     #    self.matchoutput(out, "Parameter with path teststring used by following and cannot be deleted", cmd)
 
+    def test_120_json_schema_validation(self):
+        command = ["del_parameter", "--personality", "utpers-dev",
+                   "--archetype", "aquilon", "--path", "actions/testaction/user"]
+        err = self.badrequesttest(command)
+        self.matchoutput(err, "'user' is a required property", command)
+
+    def test_130_prepare_host(self):
+        command = ["reconfigure", "--hostname", "aquilon71.aqd-unittest.ms.com",
+                   "--personality", "utpers-dev", "--personality_stage", "next",
+                   "--buildstatus", "almostready"]
+        self.successtest(command)
+
+    def test_131_add_rebuild_required_almostready(self):
+        command = ["add_parameter", "--personality", "utpers-dev",
+                   "--archetype", "aquilon",
+                   "--path", "test_rebuild_required", "--value", "test"]
+        err = self.badrequesttest(command)
+        self.searchoutput(err,
+                          r'Modifying parameter test_rebuild_required value needs a host rebuild. '
+                          r'There are hosts associated to the personality in non-ready state. '
+                          r'Please set these host to status of rebuild to continue.',
+                          command)
+
+    def test_132_validate_modifying_other_params_works(self):
+        self.noouttest(["add_parameter", "--personality", "utpers-dev",
+                        "--archetype", "aquilon", "--path", "espinfo/description",
+                        "--value", "some description"])
+        self.noouttest(["update_parameter", "--personality", "utpers-dev",
+                        "--archetype", "aquilon", "--path", "espinfo/description",
+                        "--value", "new description"])
+        self.noouttest(["del_parameter", "--personality", "utpers-dev",
+                        "--archetype", "aquilon", "--path", "espinfo/description"])
+
+    def test_133_add_rebuild_required_ready(self):
+        command = ["change_status", "--hostname", "aquilon71.aqd-unittest.ms.com",
+                   "--buildstatus", "ready"]
+        self.successtest(command)
+
+        command = ["add_parameter", "--personality", "utpers-dev",
+                   "--archetype", "aquilon",
+                   "--path", "test_rebuild_required", "--value", "test"]
+        err = self.badrequesttest(command)
+        self.searchoutput(err,
+                          r'Modifying parameter test_rebuild_required value needs a host rebuild. '
+                          r'There are hosts associated to the personality in non-ready state. '
+                          r'Please set these host to status of rebuild to continue.',
+                          command)
+
+    def test_134_add_rebuild_required_non_ready(self):
+        command = ["change_status", "--hostname", "aquilon71.aqd-unittest.ms.com",
+                   "--buildstatus", "rebuild"]
+        self.successtest(command)
+
+        command = ["add_parameter", "--personality", "utpers-dev",
+                   "--archetype", "aquilon",
+                   "--path", "test_rebuild_required", "--value", "test"]
+        self.noouttest(command)
+
+    def test_135_update_rebuild_required_non_ready(self):
+        command = ["update_parameter", "--personality", "utpers-dev",
+                   "--archetype", "aquilon",
+                   "--path", "test_rebuild_required", "--value", "test"]
+        self.noouttest(command)
+
+    def test_135_update_rebuild_required_ready(self):
+        command = ["change_status", "--hostname", "aquilon71.aqd-unittest.ms.com",
+                   "--buildstatus", "ready"]
+        self.successtest(command)
+
+        command = ["update_parameter", "--personality", "utpers-dev",
+                   "--archetype", "aquilon",
+                   "--path", "test_rebuild_required", "--value", "test"]
+        err = self.badrequesttest(command)
+        self.searchoutput(err,
+                          r'Modifying parameter test_rebuild_required value needs a host rebuild. '
+                          r'There are hosts associated to the personality in non-ready state. '
+                          r'Please set these host to status of rebuild to continue.',
+                          command)
+
+    def test_136_del_rebuild_required_ready(self):
+        command = ["del_parameter", "--personality", "utpers-dev",
+                   "--archetype", "aquilon", "--path", "test_rebuild_required"]
+        err = self.badrequesttest(command)
+        self.searchoutput(err,
+                          r'Modifying parameter test_rebuild_required value needs a host rebuild. '
+                          r'There are hosts associated to the personality in non-ready state. '
+                          r'Please set these host to status of rebuild to continue.',
+                          command)
+
+    def test_137_del_rebuild_required_non_ready(self):
+        command = ["change_status", "--hostname", "aquilon71.aqd-unittest.ms.com",
+                   "--buildstatus", "rebuild"]
+        self.successtest(command)
+
+        self.noouttest(["del_parameter", "--personality", "utpers-dev",
+                        "--archetype", "aquilon",
+                        "--path", "test_rebuild_required"])
+
+    def test_140_del_required(self):
+        self.noouttest(["del_parameter", "--personality", "utpers-dev",
+                        "--archetype", "aquilon", "--path", "espinfo/function"])
+
+    def test_141_reconfigure_fail(self):
+        command = ["reconfigure", "--hostname", "unittest17.aqd-unittest.ms.com",
+                   "--personality", "utpers-dev", "--personality_stage", "next"]
+        err = self.badrequesttest(command)
+        self.matchoutput(err, "'/system/personality/function' does not have an associated value", command)
+        self.matchoutput(err, "BUILD FAILED", command)
+
+    def test_145_verify_stage_diff(self):
+        # The parameter should still be present in 'current'
+        command = ["show_parameter", "--personality", "utpers-dev",
+                   "--archetype", "aquilon", "--personality_stage", "current"]
+        out = self.commandtest(command)
+        self.matchoutput(out, '"function": "crash"', command)
+
+        command = ["show_parameter", "--personality", "utpers-dev",
+                   "--archetype", "aquilon", "--personality_stage", "next"]
+        out = self.commandtest(command)
+        self.matchclean(out, 'function', command)
+
+    def test_149_add_all_required(self):
+        self.noouttest(["add_parameter", "--personality", "utpers-dev",
+                        "--archetype", "aquilon", "--path", "espinfo/function",
+                        "--value", "crash"])
+
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestParameterConstraints)
     unittest.TextTestRunner(verbosity=2).run(suite)

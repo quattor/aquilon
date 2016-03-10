@@ -48,6 +48,7 @@ from .test_merge_conflicts import TestMergeConflicts
 from .test_add_archetype import TestAddArchetype
 from .test_add_os import TestAddOS
 from .test_add_personality import TestAddPersonality
+from .test_copy_personality import TestCopyPersonality
 from .test_search_personality import TestSearchPersonality
 from .test_add_service import TestAddService
 from .test_update_service import TestUpdateService
@@ -281,7 +282,9 @@ from .test_grns import TestGrns
 from .test_map_grn import TestMapGrn
 from .test_stop import TestBrokerStop
 from .test_reset_advertised_status import TestResetAdvertisedStatus
-from .test_parameter import TestParameter
+from .test_add_parameter import TestAddParameter
+from .test_del_parameter import TestDelParameter
+from .test_update_parameter import TestUpdateParameter
 from .test_parameter_feature import TestParameterFeature
 from .test_add_parameter_definition import TestAddParameterDefinition
 from .test_del_parameter_definition import TestDelParameterDefinition
@@ -320,6 +323,7 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestAddFeature,
                      TestAddParameterDefinition, TestSetupParams,
                      TestAddService, TestAddPersonality, TestAddRequiredService,
+                     TestAddParameter,
                      TestOrganization, TestHub, TestContinent, TestCountry,
                      TestAddCampus, TestAddCity,
                      TestAddBuilding, TestAddRoom, TestAddBunker,
@@ -369,7 +373,7 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestUnbindClient, TestRebindClient, TestReconfigure,
                      TestChangeStatus, TestResetAdvertisedStatus,
                      TestBindFeature,
-                     TestParameter, TestParameterFeature,
+                     TestParameterFeature,
                      TestJustification,
                      TestRefreshWindowsHosts,
                      TestChooserConstraints,
@@ -386,7 +390,7 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestVendorConstraints, TestModelConstraints,
                      TestMachineConstraints, TestNetworkDeviceConstraints,
                      TestInterfaceConstraints,
-                     TestUpdatePersonality,
+                     TestUpdatePersonality, TestCopyPersonality,
                      TestClusterConstraints, TestMetaClusterConstraints,
                      TestLocationConstraints,
                      TestDnsConstraints,
@@ -416,7 +420,7 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestUpdateNetworkEnvironment, TestUpdateDnsEnvironment,
                      TestUpdateRouterAddress,
                      TestUpdateArchetype,
-                     TestUpdateParameterDefinition,
+                     TestUpdateParameterDefinition, TestUpdateParameter,
                      TestUpdateMetaCluster, TestUpdateESXCluster,
                      TestUpdateCluster,
                      TestPxeswitch, TestManage, TestManageValidateBranch,
@@ -449,7 +453,7 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestDelNetworkCompartment,
                      TestDelVlan,
                      TestDelModel, TestDelCpu, TestDelVendor,
-                     TestDelParameterDefinition,
+                     TestDelParameter, TestDelParameterDefinition,
                      TestDelFeature,
                      TestUnmapDnsDomain,
                      TestDelDesk, TestDelRack, TestDelBunker, TestDelRoom,

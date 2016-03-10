@@ -519,7 +519,7 @@ class TestSearchHost(TestBrokerCommand):
         self.matchclean(out, "unittest00.one-nyp.ms.com", command)
         self.matchoutput(out, "unittest12.aqd-unittest.ms.com", command)
         self.matchoutput(out, "aquilon61.aqd-unittest.ms.com", command)
-        self.matchoutput(out, "server1.aqd-unittest.ms.com", command)
+        self.matchclean(out, "server1.aqd-unittest.ms.com", command)
         self.matchclean(out, "evh1.aqd-unittest.ms.com", command)
 
     def testlocationunavailable(self):

@@ -34,18 +34,6 @@ class TestMapGrn(VerifyGrnsMixin, PersonalityTestMixin, TestBrokerCommand):
     grn_list = ["grn:/ms/ei/aquilon/aqd", "grn:/ms/ei/aquilon/unittest"]
     grn_maps = {"esp": grn_list, "atarget": ["grn:/example/cards"]}
 
-    def test_100_add_personality(self):
-        self.create_personality("aquilon", "utesppers/dev", grn=GRN,
-                                comments="Personality target test")
-
-        command = ["show_personality", "--personality=utesppers/dev",
-                   "--archetype=aquilon"]
-        out = self.commandtest(command)
-        self.matchoutput(out, "Used by GRN: grn:/ms/ei/aquilon/unittest [target: esp]",
-                         command)
-
-        self.drop_personality("aquilon", "utesppers/dev")
-
     def test_100_map_bad_personality(self):
         command = ["map", "grn", "--grn", "grn:/ms/ei/aquilon/aqd",
                    "--personality", "compileserver", "--target", "badtarget"]

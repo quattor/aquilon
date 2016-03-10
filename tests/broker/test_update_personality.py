@@ -44,69 +44,46 @@ class TestUpdatePersonality(VerifyGrnsMixin, PersonalityTestMixin,
                          "VM host capacity function: {'memory': (memory - 1500) * 0.94}",
                          command)
 
-    def test_120_update_cluster_requirement(self):
-        command = ["add_personality", "--archetype=aquilon", "--grn=grn:/ms/ei/aquilon/aqd",
-                   "--personality=unused", "--host_environment=infra"]
+    def test_120_update_basic_attributes(self):
+        command = ["update_personality", "--personality", "utunused/dev",
+                   "--archetype=aquilon",
+                   "--cluster_required",
+                   "--noconfig_override",
+                   "--comments", "New personality comments"]
         self.successtest(command)
 
-        command = ["update_personality", "--personality", "unused",
-                   "--archetype=aquilon", "--cluster"]
-        self.successtest(command)
-
-        command = ["del_personality", "--personality", "unused",
-                   "--archetype=aquilon"]
-        self.successtest(command)
-
-    def test_130_add_testovrpersona_dev(self):
-        command = ["add_personality", "--archetype=aquilon", "--grn=grn:/ms/ei/aquilon/aqd",
-                   "--personality=testovrpersona/dev", "--host_environment=dev"]
-        self.successtest(command)
-
-        command = ["show_personality", "--personality=testovrpersona/dev",
+    def test_121_verify_updates(self):
+        command = ["show_personality", "--personality=utunused/dev",
                    "--archetype=aquilon"]
         out = self.commandtest(command)
+
+        self.matchoutput(out, "Personality: utunused/dev Archetype: aquilon",
+                         command)
+        self.matchoutput(out, "Comments: New personality comments", command)
+        self.matchoutput(out, "Requires clustered hosts", command)
         self.matchclean(out, "override", command)
 
-        self.verifycatpersonality("aquilon", "testovrpersona/dev")
+        self.verifycatpersonality("aquilon", "utunused/dev")
 
-    def test_131_update_config_override(self):
-        command = ["update_personality", "--personality=testovrpersona/dev",
-                   "--archetype=aquilon", "--config_override"]
+    def test_125_restore_utpersonality_dev(self):
+        # Well, except the comments, which are removed
+        command = ["update_personality", "--personality", "utunused/dev",
+                   "--archetype=aquilon",
+                   "--nocluster_required",
+                   "--config_override",
+                   "--comments", ""]
         self.successtest(command)
 
-        command = ["show_personality", "--personality=testovrpersona/dev",
+    def test_126_verify_utpersonality_dev(self):
+        command = ["show_personality", "--personality=utunused/dev",
                    "--archetype=aquilon"]
         out = self.commandtest(command)
+        self.matchclean(out, "Comments", command)
+        self.matchclean(out, "Requires clustered hosts", command)
         self.matchoutput(out, "Config override: enabled", command)
 
-        self.verifycatpersonality("aquilon", "testovrpersona/dev",
+        self.verifycatpersonality("aquilon", "utunused/dev",
                                   config_override=True)
-
-    def test_132_remove_config_override(self):
-        command = ["update_personality", "--personality=testovrpersona/dev",
-                   "--archetype=aquilon", "--noconfig_override"]
-        self.successtest(command)
-
-        command = ["show_personality", "--personality=testovrpersona/dev",
-                   "--archetype=aquilon"]
-        out = self.commandtest(command)
-        self.matchclean(out, "override", command)
-
-        self.verifycatpersonality("aquilon", "testovrpersona/dev")
-
-    def test_133_update_hostenv_testovrpersona(self):
-        command = ["update_personality", "--personality=testovrpersona/dev",
-                   "--archetype=aquilon", "--host_environment=infra"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out,
-                         "Personality aquilon/testovrpersona/dev already has "
-                         "its environment set to dev, and cannot be updated.",
-                         command)
-
-    def test_139_delete_testovrpersona_dev(self):
-        command = ["del_personality", "--personality=testovrpersona/dev",
-                   "--archetype=aquilon"]
-        self.successtest(command)
 
     def test_140_update_owner_grn(self):
         command = ["update_personality", "--personality", "compileserver",
@@ -167,57 +144,6 @@ class TestUpdatePersonality(VerifyGrnsMixin, PersonalityTestMixin,
         out = self.commandtest(command)
         self.searchclean(out, r'"system/owner_eon_id" = %d;' %
                          self.grns["grn:/ms/ei/aquilon/ut2"], command)
-
-    def test_150_clone_attributes(self):
-        self.noouttest(["add_personality", "--personality", "vulcan-1g-clone",
-                        "--archetype", "esx_cluster",
-                        "--copy_from", "vulcan-10g-server-prod"])
-
-        command = ["show_personality", "--personality", "vulcan-1g-clone",
-                   "--archetype", "esx_cluster"]
-        out = self.commandtest(command)
-        self.matchoutput(out, "Environment: prod", command)
-        self.matchoutput(out, "Owned by GRN: grn:/ms/ei/aquilon/aqd", command)
-        self.matchoutput(out,
-                         "VM host capacity function: {'memory': (memory - 1500) * 0.94}",
-                         command)
-
-        command = ["show_personality", "--personality", "vulcan-1g-clone",
-                   "--archetype", "esx_cluster", "--format=proto"]
-        personality = self.protobuftest(command, expect=1)[0]
-        self.assertEqual(personality.archetype.name, "esx_cluster")
-        self.assertEqual(personality.name, "vulcan-1g-clone")
-        self.assertEqual(personality.stage, "")
-        self.assertEqual(personality.owner_eonid, self.grns["grn:/ms/ei/aquilon/aqd"])
-        self.assertEqual(personality.host_environment, "prod")
-        self.assertEqual(personality.vmhost_capacity_function, "{'memory': (memory - 1500) * 0.94}")
-
-    def test_159_cleanup_clone(self):
-        self.noouttest(["del_personality", "--personality", "vulcan-1g-clone",
-                        "--archetype", "esx_cluster"])
-
-    def test_160_update_comments(self):
-        self.noouttest(["update_personality", "--personality", "utpersonality/dev",
-                        "--archetype", "aquilon",
-                        "--comments", "New personality comments"])
-
-    def test_161_verify_update(self):
-        command = ["show_personality", "--personality=utpersonality/dev",
-                   "--archetype=aquilon"]
-        out = self.commandtest(command)
-        self.matchoutput(out, "Personality: utpersonality/dev Archetype: aquilon",
-                         command)
-        self.matchoutput(out, "Comments: New personality comments", command)
-
-    def test_165_clear_comments(self):
-        self.noouttest(["update_personality", "--personality", "utpersonality/dev",
-                        "--archetype", "aquilon", "--comments", ""])
-
-    def test_166_verify_clear(self):
-        command = ["show_personality", "--personality=utpersonality/dev",
-                   "--archetype=aquilon"]
-        out = self.commandtest(command)
-        self.matchclean(out, "Comments", command)
 
     def test_170_make_staged(self):
         self.noouttest(["update_personality", "--personality", "compileserver",
@@ -330,6 +256,15 @@ class TestUpdatePersonality(VerifyGrnsMixin, PersonalityTestMixin,
         self.matchoutput(out,
                          "Personality aquilon/nostage does not have stage "
                          "previous.",
+                         command)
+
+    def test_200_change_environment(self):
+        command = ["update_personality", "--personality=utunused/dev",
+                   "--archetype=aquilon", "--host_environment=infra"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out,
+                         "Personality aquilon/utunused/dev already has "
+                         "its environment set to dev, and cannot be updated.",
                          command)
 
 if __name__ == '__main__':

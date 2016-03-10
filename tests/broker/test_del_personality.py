@@ -31,7 +31,7 @@ from broker.personalitytest import PersonalityTestMixin
 class TestDelPersonality(PersonalityTestMixin, TestBrokerCommand):
 
     def test_100_del_utpersonality(self):
-        command = ["del_personality", "--personality=utpersonality/dev",
+        command = ["del_personality", "--personality=utunused/dev",
                    "--archetype=aquilon"]
         self.noouttest(command)
 
@@ -47,7 +47,7 @@ class TestDelPersonality(PersonalityTestMixin, TestBrokerCommand):
         self.notfoundtest(command)
 
     def test_110_del_eaipersonality(self):
-        command = ["del_personality", "--personality=eaitools",
+        command = ["del_personality", "--personality=utpers-dev",
                    "--archetype=aquilon"]
         self.noouttest(command)
 

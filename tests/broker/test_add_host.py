@@ -430,14 +430,17 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
             if servers < 10:
                 servers += 1
                 hostname = "server%d.aqd-unittest.ms.com" % servers
+                personality = "utpers-prod"
             else:
                 hostname = "aquilon%d.aqd-unittest.ms.com" % i
+                personality = None
             port = i - 50
             machine = "ut9s03p%d" % port
             self.create_host(hostname, net.usable[port], machine, rack="ut9",
                              model="bl260c", sandbox="%s/utsandbox" % self.user,
                              manager_iface="ilo",
-                             manager_ip=mgmt_net.usable[port])
+                             manager_ip=mgmt_net.usable[port],
+                             personality=personality)
 
     def test_305_search_sandbox_used(self):
         command = ["search_sandbox", "--used"]
@@ -631,7 +634,7 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
         ip = self.net["netperssvcmap"].usable[0]
         self.create_host("netmap-pers.aqd-unittest.ms.com", ip, "ut3c5n12",
                          model="hs21-8853", chassis="ut3c5", slot=12,
-                         personality="eaitools",
+                         personality="utpers-dev", personality_stage="next",
                          comments="For net/pers based service mappings")
 
     def test_430_add_utinfra(self):
@@ -646,7 +649,7 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
                          eth0_fqdn="infra1-e0.aqd-unittest.ms.com",
                          eth1_mac=eth1_ip.mac, eth1_ip=eth1_ip,
                          eth1_fqdn="infra1-e1.aqd-unittest.ms.com",
-                         zebra=True, personality="infra")
+                         zebra=True, personality="utpers-prod")
 
     def test_435_add_npinfra(self):
         eth0_ip = self.net["unknown0"].usable[35]
@@ -660,7 +663,7 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
                          eth0_fqdn="infra1-e0.one-nyp.ms.com",
                          eth1_mac=eth1_ip.mac, eth1_ip=eth1_ip,
                          eth1_fqdn="infra1-e1.one-nyp.ms.com",
-                         zebra=True, personality="infra")
+                         zebra=True, personality="utpers-prod")
 
     def test_440_add_jack_host(self):
         ip = self.net["unknown0"].usable[17]

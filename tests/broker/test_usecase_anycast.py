@@ -17,8 +17,6 @@
 # limitations under the License.
 """Module for testing how a logical DB might be configured."""
 
-import os.path
-
 if __name__ == "__main__":
     import utils
     utils.import_depends()
@@ -50,7 +48,7 @@ class TestUsecaseAnycast(MachineTestMixin, TestBrokerCommand):
                          eth0_fqdn="infra2-e0.aqd-unittest.ms.com",
                          eth1_mac=eth1_ip.mac, eth1_ip=eth1_ip,
                          eth1_fqdn="infra2-e1.aqd-unittest.ms.com",
-                         zebra=True, personality="infra")
+                         zebra=True, personality="utpers-prod")
         command = ["make", "--hostname", "infra2.aqd-unittest.ms.com"]
         self.statustest(command)
 
@@ -66,7 +64,7 @@ class TestUsecaseAnycast(MachineTestMixin, TestBrokerCommand):
                          eth0_fqdn="infra3-e0.aqd-unittest.ms.com",
                          eth1_mac=eth1_ip.mac, eth1_ip=eth1_ip,
                          eth1_fqdn="infra3-e1.aqd-unittest.ms.com",
-                         zebra=True, personality="infra")
+                         zebra=True, personality="utpers-prod")
         command = ["make", "--hostname", "infra3.aqd-unittest.ms.com"]
         self.statustest(command)
 

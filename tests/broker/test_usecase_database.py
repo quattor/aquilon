@@ -44,11 +44,6 @@ class TestUsecaseDatabase(TestBrokerCommand):
                    "--hostname=server1.aqd-unittest.ms.com"]
         self.noouttest(command)
 
-    def test_105_reconfigure(self):
-        command = ["reconfigure", "--personality=sybase-test",
-                   "--hostname=server1.aqd-unittest.ms.com"]
-        self.statustest(command)
-
     def test_110_verify_show(self):
         command = ["show_host", "--hostname=server1.aqd-unittest.ms.com"]
         out = self.commandtest(command)

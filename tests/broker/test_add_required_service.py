@@ -140,13 +140,13 @@ class TestAddRequiredService(TestBrokerCommand):
         self.matchoutput(out, "Service: utsvc", command)
 
     def test_140_add_scope_test(self):
-        command = ["add_required_service", "--personality=eaitools",
+        command = ["add_required_service", "--personality=utpers-dev",
                    "--service=scope_test", "--archetype=aquilon"]
         self.noouttest(command)
 
     def test_145_verify_scope_test(self):
         command = ["show_personality", "--archetype=aquilon",
-                   "--personality=eaitools",
+                   "--personality=utpers-dev",
                    "--personality_stage=next"]
         out = self.commandtest(command)
         self.matchoutput(out, "Service: scope_test", command)
@@ -154,7 +154,7 @@ class TestAddRequiredService(TestBrokerCommand):
     def test_150_copy_personality(self):
         self.noouttest(["add_personality", "--personality", "required_svc_test",
                         "--eon_id", "2", "--archetype", "aquilon",
-                        "--copy_from", "eaitools",
+                        "--copy_from", "utpers-dev",
                         "--copy_stage", "next",
                         "--host_environment", "dev"])
 
@@ -167,10 +167,6 @@ class TestAddRequiredService(TestBrokerCommand):
 
         self.successtest(["del_personality", "--personality", "required_svc_test",
                           "--archetype", "aquilon"])
-
-    def test_155_promote_eaitools(self):
-        self.noouttest(["promote", "--personality", "eaitools",
-                        "--archetype", "aquilon"])
 
     def test_160_add_badservice(self):
         command = ["add_required_service", "--service=badservice",
