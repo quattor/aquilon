@@ -82,6 +82,22 @@ class EventsTestMixin(object):
     def event_del_dns(self, fqdn, dns_enviornment='internal'):
         self._event_append_dns(fqdn, 'DELETE', dns_enviornment)
 
+    def _event_append_hardware(self, label, action):
+        self._expected_events.append({'action': action,
+                                      'entityType': 'HARDWARE_ENTITY',
+                                      'hardwareEntity': {
+                                        'label': label.lower()
+                                      }})
+
+    def event_add_hardware(self, label):
+        self._event_append_hardware(label, 'CREATE')
+
+    def event_upd_hardware(self, label):
+        self._event_append_hardware(label, 'UPDATE')
+
+    def event_del_hardware(self, label):
+        self._event_append_hardware(label, 'DELETE')
+
     def events_verify(self, strict=False):
         """Check for all expected events"""
         # As the event files are written by another process there is the
@@ -101,6 +117,7 @@ class EventsTestMixin(object):
                         data = json.load(fh)
                         remaining[:] = [e for e in remaining
                                         if not dict_match(e, data)]
+                    os.unlink(jsonfile)
                 except ValueError as e:
                     continue
                 except IOError as e:
@@ -116,4 +133,8 @@ class EventsTestMixin(object):
         # If there are any events remaining then we have failed to match
         if remaining:
             self.fail('Unmatched events: {}'.format(str(remaining)))
+
+        # Some tests call verify multiple times.  To avoid any false
+        # results we reset again here just to make sure
+        self.events_reset()
 

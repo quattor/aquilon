@@ -26,7 +26,7 @@ from brokertest import TestBrokerCommand
 from machinetest import MachineTestMixin
 
 
-class TestAddStaticRoute(TestBrokerCommand, MachineTestMixin):
+class TestAddStaticRoute(MachineTestMixin, TestBrokerCommand):
 
     def test_001_add_test_host(self):
         eth0_ip = self.net["unknown0"].usable[37]

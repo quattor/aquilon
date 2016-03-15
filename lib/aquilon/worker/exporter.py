@@ -115,8 +115,9 @@ class Exporter(object):
     # Handle the create and delete methods; they are essentially the same
     # so method implements the common functionality.
     def _do_create_or_delete(self, task, obj):
-        name = obj.__class__.__name__
-        if name in self._handlers:
+        for name in [c.__name__ for c in obj.__class__.__mro__]:
+            if name not in self._handlers:
+                continue
             for handler in self._handlers[name]:
                 action = getattr(handler, task)(obj, **self._kwargs)
                 self._queue_action(handler, action)
@@ -131,11 +132,11 @@ class Exporter(object):
     Indicate that the passed object has been updated.
     """
     def update(self, obj):
-        oname = obj.__class__.__name__
-        oid = id(obj)
-        if oname in self._handlers:
+        for oname in [c.__name__ for c in obj.__class__.__mro__]:
+            if oname not in self._handlers:
+                continue
+            oid = id(obj)
             for handler in self._handlers[oname]:
-                hname = handler.__class__.__name__
                 action = handler.update(obj, **self._kwargs)
                 self._queue_action(handler, action)
 

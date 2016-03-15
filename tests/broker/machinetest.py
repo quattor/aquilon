@@ -18,6 +18,7 @@
 
 from collections import defaultdict
 import json
+from eventstest import EventsTestMixin
 
 
 class MachineData(object):
@@ -56,7 +57,7 @@ def guess_disks(kwargs):
     return sorted(disks)
 
 
-class MachineTestMixin(object):
+class MachineTestMixin(EventsTestMixin):
     def verify_show_machine(self, name, interfaces=None, zebra=False, model=None,
                             vendor=None, cluster=None, vmhost=None, memory=None,
                             **kwargs):
@@ -246,7 +247,9 @@ class MachineTestMixin(object):
             add_machine_args.append("--recipe")
             add_machine_args.append(json.dumps(recipe))
 
+        self.event_add_hardware(name)
         self.noouttest(["add_machine"] + add_machine_args)
+        self.events_verify()
 
         if kwargs:
             raise ValueError("Unprocessed arguments: %r" % kwargs)
@@ -344,7 +347,9 @@ class MachineTestMixin(object):
                 comments = machdef.comments
             self.dsdb_expect_add(hostname, ip, "eth0", ip.mac, comments=comments)
 
+        self.event_upd_hardware(machine)
         self.noouttest(command)
+        self.events_verify()
 
         for nic_name, params in machdef.interfaces.items():
             if "ip" not in params:
@@ -405,6 +410,7 @@ class MachineTestMixin(object):
                 self.dsdb_verify()
 
         self.dsdb_expect_delete(ip)
+        self.event_del_hardware(machine)
         self.statustest(["del_host", "--hostname", hostname])
         if manager_ip:
             self.dsdb_expect_delete(manager_ip)
@@ -413,3 +419,4 @@ class MachineTestMixin(object):
                             (short, domain)])
         self.noouttest(["del_machine", "--machine", machine])
         self.dsdb_verify()
+        self.events_verify()
