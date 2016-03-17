@@ -35,7 +35,7 @@ services_to_delete = {
     "ips": ["northamerica"],
     "lemon": ["ny-prod"],
     "scope_test": ["scope-building", "target-personality", "scope-network",
-                   "target-environment"],
+                   "target-dev", "target-qa"],
     "support-group": ["ec-service"],
     "syslogng": ["ny-prod"],
     "unmapped": ["instance1"],

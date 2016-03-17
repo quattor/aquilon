@@ -58,7 +58,7 @@ class CommandUpdateNetwork(BrokerCommand):
 
         plenaries = PlenaryCollection(logger=logger)
 
-        for dbnetwork in q.all():
+        for dbnetwork in q:
             if type:
                 dbnetwork.network_type = type
             if side:

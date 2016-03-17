@@ -65,8 +65,7 @@ class StormapParser(object):
             if not header:
                 continue
 
-            columns = dict((name, idx) for idx, name in
-                           enumerate(header.split('|')))
+            columns = {name: idx for idx, name in enumerate(header.split('|'))}
             self.header_defs.append(DataBlock(start_index=start_index,
                                               columns=columns))
 

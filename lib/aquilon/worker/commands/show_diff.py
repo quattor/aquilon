@@ -61,22 +61,23 @@ class CommandShowDiff(BrokerCommand):
         ret["Parameters"][dtype] = params
 
         # process features
-        features = dict((fl.feature.name, True) for fl in dbstage.features)
+        features = {fl.feature.name: True for fl in dbstage.features}
         ret["Features"][dtype] = features
 
         # process required_services
-        services = dict((srv.name, True) for srv in dbstage.required_services)
+        services = {srv.name: link.host_environment.name if link.host_environment else None
+                    for srv, link in dbstage.required_services.items()}
         ret["Required Services"][dtype] = services
 
         # service maps
         q = session.query(ServiceMap).filter_by(personality=dbpersona)
 
-        smaps = dict(("{0} {1}".format(sm.service_instance, sm.location), True) for sm in q.all())
+        smaps = {"{0} {1}".format(sm.service_instance, sm.location): True for sm in q}
 
         ret["ServiceMap"][dtype] = smaps
 
         # grns
-        grns = dict((grn_rec.grn, True) for grn_rec in dbstage.grns)
+        grns = {grn_rec.grn: True for grn_rec in dbstage.grns}
         ret["Grns"][dtype] = grns
 
         # options

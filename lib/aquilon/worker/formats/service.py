@@ -42,14 +42,20 @@ class ServiceFormatter(ObjectFormatter):
                            "  Required for {0:c}: {0.name} Version: {0.version}"
                            " Archetype: {0.archetype.name}"
                            .format(os))
-        for dbstage in sorted(service.personality_stages,
-                              key=attrgetter("archetype.name",
-                                             "personality.name", "name")):
+        for dbpsli in sorted(service.personality_assignments,
+                             key=attrgetter("personality_stage.archetype.name",
+                                            "personality_stage.personality.name",
+                                            "personality_stage.name")):
             details.append(indent +
                            "  Required for {0:c}: {0.name} {1:c}: {1.name}"
-                           .format(dbstage.personality, dbstage.archetype))
-            if dbstage.staged:
-                details.append(indent + "    Stage: %s" % dbstage.name)
+                           .format(dbpsli.personality_stage.personality,
+                                   dbpsli.personality_stage.archetype))
+            if dbpsli.personality_stage.staged:
+                details.append(indent + "    Stage: %s" %
+                               dbpsli.personality_stage.name)
+            if dbpsli.host_environment:
+                details.append(indent + "    Environment Override: %s" %
+                               dbpsli.host_environment.name)
         if service.comments:
             details.append(indent + "  Comments: %s" % service.comments)
         for instance in service.instances:

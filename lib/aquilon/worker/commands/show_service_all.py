@@ -31,7 +31,8 @@ class CommandShowServiceAll(BrokerCommand):
         q = q.join(ServiceInstance)
         q = q.options(contains_eager('instances'),
                       subqueryload('archetypes'),
-                      subqueryload('personality_stages'),
+                      subqueryload('personality_assignments'),
+                      joinedload('personality_assignments.personality_stage'),
                       undefer('instances._client_count'),
                       subqueryload('instances.servers'),
                       joinedload('instances.servers.host'),

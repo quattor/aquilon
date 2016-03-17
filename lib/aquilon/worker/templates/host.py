@@ -309,7 +309,7 @@ class PlenaryHostObject(ObjectPlenary):
         required_services = self.dbobj.required_services
 
         for si in self.dbobj.services_used:
-            required_services.discard(si.service)
+            required_services.pop(si.service, None)
             services.append(PlenaryServiceInstanceClientDefault.template_name(si))
         if required_services:
             missing = ", ".join(sorted(srv.name for srv in required_services))

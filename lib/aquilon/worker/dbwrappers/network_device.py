@@ -46,9 +46,9 @@ def determine_helper_hostname(session, logger, config, dbnetdev):
         return
     helper_service = Service.get_unique(session, helper_name,
                                         compel=InternalError)
-    mapped_instances = ServiceMap.get_mapped_instance_cache([helper_service], None,
-                                                            dbnetdev.location)
-    for dbsi in mapped_instances.get(helper_service, []):
+    instances = ServiceMap.get_location_mapped_instances(helper_service,
+                                                         dbnetdev.location)
+    for dbsi in instances:
         if dbsi.servers:
             # Poor man's load balancing...
             jump = choice(dbsi.servers).fqdn

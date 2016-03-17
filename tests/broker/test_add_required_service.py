@@ -39,10 +39,34 @@ class TestAddRequiredService(TestBrokerCommand):
         command += " --justification tcm=12345678"
         self.noouttest(command.split(" "))
 
+    def test_101_add_afs_redundant(self):
+        command = ["add_required_service", "--service", "afs",
+                   "--archetype", "aquilon", "--personality", "unixeng-test"]
+        out = self.statustest(command)
+        self.matchoutput(out,
+                         "Warning: Service afs is already required by "
+                         "archetype aquilon. Did you mean to use "
+                         "--environment_override?",
+                         command)
+
+    def test_102_add_afs_override(self):
+        command = ["add_required_service", "--service", "afs",
+                   "--archetype", "aquilon", "--personality", "utpers-dev",
+                   "--environment_override", "qa"]
+        self.noouttest(command)
+
     def test_105_verify_afs(self):
         command = "show service --service afs"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Required for Archetype: aquilon", command)
+        self.matchoutput(out,
+                         "Required for Personality: unixeng-test Archetype: aquilon",
+                         command)
+        self.searchoutput(out,
+                          r'Required for Personality: utpers-dev Archetype: aquilon\s*'
+                          r'Stage: next\s*'
+                          r'Environment Override: qa',
+                          command)
 
     def test_110_add_defaults(self):
         # Setup required services, as expected by the templates.
@@ -112,16 +136,27 @@ class TestAddRequiredService(TestBrokerCommand):
                           r"\s+Stage: next$",
                           command)
 
-    def test_125_show_diff(self):
+    def test_125_show_stage_diff(self):
         command = ["show_diff", "--personality", "unixeng-test",
                    "--archetype", "aquilon",
                    "--personality_stage", "current", "--other_stage", "next"]
         out = self.commandtest(command)
         self.searchoutput(out,
                           r'missing Required Services in Personality aquilon/unixeng-test@current:$'
+                          r'\s*afs$'
                           r'\s*chooser1$'
                           r'\s*chooser2$'
                           r'\s*chooser3$',
+                          command)
+
+    def test_125_show_override_diff(self):
+        command = ["show_diff", "--archetype", "aquilon",
+                   "--personality", "unixeng-test", "--personality_stage", "next",
+                   "--other", "utpers-dev", "--other_stage", "next"]
+        out = self.commandtest(command)
+        self.searchoutput(out,
+                          r'matching Required Services with different values:\s*'
+                          r'afs value=None, othervalue=qa$',
                           command)
 
     def test_129_promite_unixeng_test(self):

@@ -707,10 +707,10 @@ class DSDBRunner(object):
 
             # Create a dict with entries in old_ifdata prefiexd with 'old_'
             # and entries in new_ifdata prefixed with 'new_'
-            kwargs = dict((p + k, v)
-                          for (p, d) in [('old_', old_ifdata),
-                                         ('new_', new_ifdata)]
-                          for k, v in iteritems(d))
+            kwargs = {p + k: v
+                      for (p, d) in [('old_', old_ifdata),
+                                     ('new_', new_ifdata)]
+                      for k, v in iteritems(d)}
 
             if old_ifdata['ip'] != new_ifdata['ip'] or \
                old_ifdata['mac'] != new_ifdata['mac'] or \

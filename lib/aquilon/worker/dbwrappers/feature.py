@@ -102,7 +102,7 @@ def add_link(session, logger, dbfeature, params):
         q = q.filter_by(interface_name=None)
         q = q.join(PersonalityStage, Personality)
         q = q.filter_by(archetype=params["archetype"])
-        for link in q.all():
+        for link in q:
             logger.client_info("Warning: {0:l} is bound to {1:l} which "
                                "is now redundant; consider removing it."
                                .format(dbfeature, link.personality_stage))

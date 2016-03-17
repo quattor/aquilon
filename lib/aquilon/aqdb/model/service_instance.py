@@ -80,8 +80,6 @@ class ServiceInstance(Base):
 
         session = object_session(self)
 
-        clusters = {}
-
         # Meta
         McAlias = aliased(MetaCluster)
         q = session.query(Cluster.name, Cluster.max_hosts)
@@ -90,8 +88,7 @@ class ServiceInstance(Base):
         q = q.filter(McAlias.services_used.contains(self))
         q = q.filter(McAlias.personality_stage_id.in_(persst_ids))
 
-        for name, max_host in q.all():
-            clusters[name] = max_host
+        clusters = {name: max_host for name, max_host in q}
 
         # Esx et al.
         q = session.query(Cluster.name, Cluster.max_hosts)
@@ -99,7 +96,7 @@ class ServiceInstance(Base):
         q = q.filter(Cluster.services_used.contains(self))
         q = q.filter(Cluster.personality_stage_id.in_(persst_ids))
 
-        for name, max_host in q.all():
+        for name, max_host in q:
             clusters[name] = max_host
 
         adjusted_count = sum(itervalues(clusters))
@@ -124,7 +121,7 @@ class ServiceInstance(Base):
         q = q.options(contains_eager('fqdn'))
         q = q.options(contains_eager('fqdn.dns_domain'))
         q = q.order_by(DnsDomain.name, Fqdn.name)
-        return [str(sys.fqdn) for sys in q.all()]
+        return [str(sys.fqdn) for sys in q]
 
     @property
     def cluster_names(self):
@@ -133,7 +130,7 @@ class ServiceInstance(Base):
         session = object_session(self)
         q = session.query(Cluster.name)
         q = q.filter(Cluster.services_used.contains(self))
-        return [name for record in q.all() for name in record]
+        return [name for record in q for name in record]
 
     @property
     def enforced_max_clients(self):

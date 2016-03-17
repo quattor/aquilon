@@ -187,7 +187,7 @@ class Chooser(object):
                     # has not yet been set up.  Will error out later.
                     self.aligned_services[service] = (None, parent)
 
-        self.map_key = (self.dbobj.personality_stage.personality, self.location,
+        self.map_key = (self.dbobj.personality_stage, self.location,
                         self.network)
 
     def error(self, msg, *args, **kwargs):

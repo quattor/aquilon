@@ -106,7 +106,7 @@ from aquilon.aqdb.model.parameter_definition import (ParamDefinition, ParamDefHo
 from aquilon.aqdb.model.parameter import Parameter, PersonalityParameter
 
 # SERVICE
-from aquilon.aqdb.model.service import Service
+from aquilon.aqdb.model.service import Service, PersonalityServiceListItem
 from aquilon.aqdb.model.service_instance import ServiceInstance
 from aquilon.aqdb.model.service_map import ServiceMap
 

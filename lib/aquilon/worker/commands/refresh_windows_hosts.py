@@ -92,7 +92,7 @@ class CommandRefreshWindowsHosts(BrokerCommand):
 
         q = session.query(Host)
         q = q.filter_by(comments='Created by refresh_windows_host')
-        for dbhost in q.all():
+        for dbhost in q:
             dbmachine = dbhost.hardware_entity
             mac_addresses = [iface.mac for iface in dbmachine.interfaces]
             if dbhost.fqdn in windows_hosts and \

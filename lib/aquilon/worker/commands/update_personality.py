@@ -134,7 +134,7 @@ class CommandUpdatePersonality(BrokerCommand):
                 q = q.filter_by(owner_grn=old_grn)
                 q = q.join(PersonalityStage)
                 q = q.filter_by(personality=dbpersona)
-                for dbhost in q.all():
+                for dbhost in q:
                     dbhost.owner_grn = dbgrn
                     plenaries.append(Plenary.get_plenary(dbhost))
 

@@ -50,7 +50,7 @@ default_services = {
 
     # Testing chooser scope rules
     "scope_test": ["scope-building", "target-personality", "scope-network",
-                   "target-environment"],
+                   "target-dev", "target-qa"],
 
     "support-group": ["ec-service"],
     "syslogng": ["ny-prod"],

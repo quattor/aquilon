@@ -1,0 +1,4 @@
+ALTER TABLE personality_service_list_item ADD host_environment_id INTEGER;
+ALTER TABLE personality_service_list_item ADD CONSTRAINT psli_host_environment_fk FOREIGN KEY (host_environment_id) REFERENCES host_environment (id);
+
+QUIT;
