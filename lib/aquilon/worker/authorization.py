@@ -89,6 +89,9 @@ class AuthorizationBroker(object):
             if dbuser.role.name not in ['aqd_admin']:
                 raise AuthorizationException(
                     "Must have the aqd_admin role to %s." % action)
+        if dbuser.role.name == 'aqweb':
+            if action not in ['change_status']:
+                self.raise_auth_error(principal, action, resource)
         if dbuser.role.name == 'winops':
             if action not in ['add_host', 'add_host_prefix', 'add_windows_host',
                               'make_cluster_cluster',
