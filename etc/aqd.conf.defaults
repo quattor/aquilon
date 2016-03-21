@@ -43,9 +43,11 @@ server = LNTO_AQUILON_NY
 #dbuser = %(user)s
 dbuser =
 #password_file =
+# Default schema, if different from what's configured at the DB level
+#default_schema = %(user)s
 # Schema the xtn_log tables exist in, if separate from the rest of the tables.
 # There is no default - the value is only used if set.
-#audit_schema = %(user)
+#audit_schema = %(user)s
 dsn = oracle://%(dbuser)s:PASSWORD@%(server)s
 module = orcl/client/11.2.0.1.0
 
@@ -80,9 +82,11 @@ dbuser = %(user)s
 dbname =
 #password_file =
 dsn = postgresql+psycopg2://%(dbuser)s:PASSWORD@%(server)s/%(dbname)s
+# Default schema to use
+#default_schema = %(user)s
 # Schema the xtn_log tables exist in, if separate from the rest of the tables.
 # There is no default - the value is only used if set.
-#audit_schema = %(user)
+#audit_schema = %(user)s
 
 # There are two pools - one for commands that use locks and one for
 # commands that don't.  These values apply to each pool.

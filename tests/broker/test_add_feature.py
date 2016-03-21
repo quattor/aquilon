@@ -400,55 +400,6 @@ class TestAddFeature(TestBrokerCommand):
                          "dispatch, reboot, rebuild.",
                          command)
 
-    def test_270_bad_activation_update(self):
-        command = ["update", "feature", "--feature", "pre_host", "--eon_id", 3,
-                   "--type", "host", "--comments", "New feature comments",
-                   "--visibility", "restricted", "--activation", "bad_activation"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out,
-                         "Unknown value for activation. Valid values are: "
-                         "dispatch, reboot, rebuild.",
-                         command)
-
-    def test_275_bad_deactivation_update(self):
-        command = ["update", "feature", "--feature", "pre_host", "--eon_id", 3,
-                   "--type", "host", "--comments", "New feature comments",
-                   "--visibility", "restricted", "--deactivation", "bad_deactivation"]
-        out = self.badrequesttest(command)
-        self.matchoutput(out,
-                         "Unknown value for deactivation. Valid values are: "
-                         "dispatch, reboot, rebuild.",
-                         command)
-
-    def test_300_update_feature(self):
-        command = ["update", "feature", "--feature", "pre_host", "--eon_id", 3,
-                   "--type", "host", "--comments", "New feature comments",
-                   "--visibility", "restricted", "--activation", "dispatch", "--deactivation", "rebuild"]
-        self.noouttest(command)
-
-        command = ["show", "feature", "--feature", "pre_host", "--type", "host"]
-        out = self.commandtest(command)
-        self.output_equals(out, """
-            Host Feature: pre_host
-              Post Personality: False
-              Owned by GRN: grn:/ms/ei/aquilon/unittest
-              Visibility: restricted
-              Activation: dispatch
-              Deactivation: rebuild
-              Template: features/pre_host
-              Comments: New feature comments
-            """, command)
-
-        command = ["show", "feature", "--feature", "pre_host", "--type", "host", "--format", "proto"]
-        feature = self.protobuftest(command, expect=1)[0]
-        self.assertEqual(feature.name, "pre_host")
-        self.assertEqual(feature.type, "host")
-        self.assertEqual(feature.owner_eonid, 3)
-        self.assertEqual(feature.visibility, feature.RESTRICTED)
-        self.assertEqual(feature.activation, self.proto.DISPATCH)
-        self.assertEqual(feature.deactivation, self.proto.REBUILD)
-        self.assertEqual(feature.comments, "New feature comments")
-
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddFeature)
     unittest.TextTestRunner(verbosity=2).run(suite)

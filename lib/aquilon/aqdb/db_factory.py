@@ -199,6 +199,17 @@ def oracle_show_plan(conn, cursor, statement, parameters, context, executemany):
     delattr(context, "_oracle_sqlid")
 
 
+def oracle_set_default_schema(dbapi_con, con_record):  # pylint: disable=W0613
+    log = logging.getLogger(__name__)
+    config = Config()
+    schema = config.get("database", "default_schema")
+    stmt = 'ALTER SESSION SET current_schema = ' + schema
+    cursor = dbapi_con.cursor()
+    log.info(stmt)
+    cursor.execute(stmt)
+    cursor.close()
+
+
 def postgres_show_plan(conn, cursor, statement, parameters, context, executemany):
     # pylint: disable=W0613
     cmd = statement.split()[0]
@@ -233,6 +244,17 @@ def postgres_show_plan(conn, cursor, statement, parameters, context, executemany
         cursor.execute("RELEASE SAVEPOINT explain_plan")
 
 
+def postgres_set_default_schema(dbapi_con, con_record):  # pylint: disable=W0613
+    log = logging.getLogger(__name__)
+    config = Config()
+    schema = config.get("database", "default_schema")
+    stmt = 'SET search_path TO %s,public' % schema
+    cursor = dbapi_con.cursor()
+    log.info(stmt)
+    cursor.execute(stmt)
+    cursor.close()
+
+
 def timer_start(conn, cursor, statement, parameters, context, executemany):
     # pylint: disable=W0613
     conn.info.setdefault('query_start_time', []).append(time.time())
@@ -261,6 +283,8 @@ class DbFactory(object):
         if engine.dialect.name == "oracle":
             event.listen(engine, "connect", oracle_set_module)
             event.listen(engine, "checkin", oracle_reset_action)
+            if config.has_option("database", "default_schema"):
+                event.listen(engine, "connect", oracle_set_default_schema)
             if show_plan:
                 event.listen(engine, "connect", oracle_enable_statistics)
                 event.listen(engine, "before_cursor_execute", oracle_remember_sqlid)
@@ -275,6 +299,8 @@ class DbFactory(object):
             if show_plan:
                 event.listen(engine, "before_cursor_execute", sqlite_show_plan)
         elif engine.dialect.name == "postgresql":
+            if config.has_option("database", "default_schema"):
+                event.listen(engine, "connect", postgres_set_default_schema)
             if show_plan:
                 event.listen(engine, "before_cursor_execute", postgres_show_plan)
 
