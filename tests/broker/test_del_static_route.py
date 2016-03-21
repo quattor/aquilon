@@ -26,7 +26,7 @@ from brokertest import TestBrokerCommand
 from machinetest import MachineTestMixin
 
 
-class TestDelStaticRoute(TestBrokerCommand, MachineTestMixin):
+class TestDelStaticRoute(MachineTestMixin, TestBrokerCommand):
 
     def testdelroute1(self):
         gw = self.net["routing1"].usable[-1]

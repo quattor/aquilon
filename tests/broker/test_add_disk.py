@@ -23,22 +23,27 @@ if __name__ == "__main__":
 
 import unittest
 from brokertest import TestBrokerCommand
+from eventstest import EventsTestMixin
 
 
-class TestAddDisk(TestBrokerCommand):
+class TestAddDisk(EventsTestMixin, TestBrokerCommand):
 
     def test_100_add_ut3c5n10_disk(self):
+        self.event_upd_hardware('ut3c5n10')
         self.noouttest(["add", "disk", "--machine", "ut3c5n10",
                         "--disk", "sdb", "--controller", "scsi",
                         "--address", "0:0:1:0",
                         "--size", "34", "--comments", "Some disk comments"])
+        self.events_verify()
 
     def test_110_add_ut3c1n3_disk(self):
+        self.event_upd_hardware('ut3c1n3')
         command = ["add", "disk", "--machine", "ut3c1n3", "--disk", "c0d0",
                    "--controller", "cciss", "--size", "34",
                    "--wwn", "600508b112233445566778899aabbccd",
                    "--bus_address", "pci:0000:01:00.0"]
         self.noouttest(command)
+        self.events_verify()
 
     def test_200_bad_controller(self):
         command = ["add_disk", "--machine=ut3c5n10", "--disk=sdc",

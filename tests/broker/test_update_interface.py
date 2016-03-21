@@ -23,9 +23,10 @@ if __name__ == "__main__":
 
 import unittest
 from brokertest import TestBrokerCommand
+from eventstest import EventsTestMixin
 
 
-class TestUpdateInterface(TestBrokerCommand):
+class TestUpdateInterface(EventsTestMixin, TestBrokerCommand):
 
     badhost = "unittest02.one-nyp.ms.com"
 
@@ -47,12 +48,14 @@ class TestUpdateInterface(TestBrokerCommand):
 
     def test_105_update_ut3c5n10_eth0_mac_good(self):
         mac = self.net["unknown0"].usable[11].mac
+        self.event_upd_hardware('ut3c5n10')
         self.dsdb_expect_update("unittest02.one-nyp.ms.com", "eth0", mac=mac,
                                 comments="New interface comments")
         self.noouttest(["update", "interface", "--interface", "eth0",
                         "--machine", "ut3c5n10", "--mac", mac,
                         "--comments", "New interface comments"])
         self.dsdb_verify()
+        self.events_verify()
 
     def test_110_update_ut3c5n10_eth0_ip_bad(self):
         oldip = self.net["unknown0"].usable[0]
@@ -86,8 +89,10 @@ class TestUpdateInterface(TestBrokerCommand):
                    "--mac", self.net["unknown0"].usable[12].mac,
                    "--boot", "--model", "e1000",
                    "--bus_address", "pci:0000:0b:00.1"]
+        self.event_upd_hardware('ut3c5n10')
         (out, err) = self.successtest(command)
         self.matchoutput(err, 'no longer provides the default route', command)
+        self.events_verify()
 
     def test_121_verify_show_ut3c5n10_interfaces(self):
         command = "show host --hostname unittest02.one-nyp.ms.com"
@@ -143,13 +148,17 @@ class TestUpdateInterface(TestBrokerCommand):
         command = ["update", "interface", "--interface", "eth1",
                    "--hostname", "unittest02.one-nyp.ms.com",
                    "--default_route"]
+        self.event_upd_hardware('ut3c5n10')
         self.noouttest(command)
+        self.events_verify()
 
     def test_123_update_ut3c5n10_eth0(self):
         command = ["update", "interface", "--interface", "eth0",
                    "--hostname", "unittest02.one-nyp.ms.com",
                    "--nodefault_route"]
+        self.event_upd_hardware('ut3c5n10')
         self.noouttest(command)
+        self.events_verify()
 
     def test_130_update_switch1(self):
         mac = self.net["ut_net_mgmt"].usable[1].mac
@@ -274,12 +283,14 @@ class TestUpdateInterface(TestBrokerCommand):
                           command)
 
     def test_172_rename_host_if(self):
+        self.event_upd_hardware('evm20')
         command = ["update_interface", "--machine", "evm20",
                    "--interface", "eth0", "--rename_to", "eth1"]
         self.dsdb_expect_rename("ivirt11.aqd-unittest.ms.com", iface="eth0",
                                 new_iface="eth1")
         self.noouttest(command)
         self.dsdb_verify()
+        self.events_verify()
 
     def test_173_verify_rename(self):
         command = ["cat", "--data", "--hostname", "ivirt11.aqd-unittest.ms.com"]

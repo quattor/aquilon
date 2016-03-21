@@ -23,12 +23,15 @@ if __name__ == "__main__":
 
 import unittest
 from brokertest import TestBrokerCommand
+from eventstest import EventsTestMixin
 
 
-class TestDelDisk(TestBrokerCommand):
+class TestDelDisk(EventsTestMixin, TestBrokerCommand):
 
     def test_100_del_ut3c1n3_sda(self):
+        self.event_upd_hardware('ut3c1n3')
         self.noouttest(["del", "disk", "--machine", "ut3c1n3", "--disk", "sda"])
+        self.events_verify()
 
     def test_105_show_ut3c1n3(self):
         command = "show machine --machine ut3c1n3"
@@ -52,7 +55,9 @@ class TestDelDisk(TestBrokerCommand):
                           command)
 
     def test_110_del_ut3c1n3_all(self):
+        self.event_upd_hardware('ut3c1n3')
         self.noouttest(["del", "disk", "--machine", "ut3c1n3", "--all"])
+        self.events_verify()
 
     def test_115_show_ut3c1n3(self):
         command = "show machine --machine ut3c1n3"

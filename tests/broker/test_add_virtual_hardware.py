@@ -25,14 +25,17 @@ if __name__ == "__main__":
 
 import unittest
 from brokertest import TestBrokerCommand
+from eventstest import EventsTestMixin
 
 
-class TestAddVirtualHardware(TestBrokerCommand):
+class TestAddVirtualHardware(EventsTestMixin, TestBrokerCommand):
 
     def test_100_add_utecl1_machines(self):
         for i in range(1, 9):
+            self.event_add_hardware("evm%s" % i)
             self.noouttest(["add", "machine", "--machine", "evm%s" % i,
                             "--cluster", "utecl1", "--model", "utmedium"])
+            self.events_verify()
 
     def test_101_add_next_machine(self):
         command = ["add", "machine", "--prefix", "evm",
@@ -73,17 +76,24 @@ class TestAddVirtualHardware(TestBrokerCommand):
 
     def test_110_add_interfaces_automac(self):
         for i in range(1, 8):
-            self.noouttest(["add", "interface", "--machine", "evm%s" % i,
+            machine = "evm%s" % i
+            self.event_upd_hardware(machine)
+            self.noouttest(["add", "interface", "--machine", machine,
                             "--interface", "eth0", "--automac"])
+            self.events_verify()
 
     def test_111_add_evm9_interface(self):
+        self.event_upd_hardware('evm9')
         self.noouttest(["add", "interface", "--machine", "evm9",
                         "--interface", "eth0", "--mac", "00:50:56:3f:ff:ff"])
+        self.events_verify()
 
     def test_112_add_interface_automac_hole(self):
         # This should now fill in the 'hole' between 7 and 9
+        self.event_upd_hardware('evm8')
         self.noouttest(["add", "interface", "--machine", "evm8",
                         "--interface", "eth0", "--automac"])
+        self.events_verify()
 
     def test_113_verifyaudit(self):
         for i in range(1, 9):
@@ -102,10 +112,13 @@ class TestAddVirtualHardware(TestBrokerCommand):
     def test_120_adddisks(self):
         # The first 8 shares should work...
         for i in range(1, 9):
-            self.noouttest(["add", "disk", "--machine", "evm%s" % i,
+            machine = "evm%s" % i
+            self.event_upd_hardware(machine)
+            self.noouttest(["add", "disk", "--machine", machine,
                             "--disk", "sda", "--controller", "sata",
                             "--size", "15", "--share", "test_share_%s" % i,
                             "--address", "0:0"])
+            self.events_verify()
 
     def test_125_searchhostmemberclustershare(self):
         command = ["search_host", "--member_cluster_share=test_share_1"]
@@ -257,10 +270,12 @@ class TestAddVirtualHardware(TestBrokerCommand):
                              machine, command)
 
     def test_140_add_windows(self):
+        self.event_upd_hardware('evm1')
         command = ["add_windows_host", "--hostname=aqddesk1.msad.ms.com",
                    "--osversion=nt61e",
                    "--machine=evm1", "--comments=Windows Virtual Desktop"]
         self.noouttest(command)
+        self.events_verify()
 
     def test_145_verify_windows_vm(self):
         command = ["cat", "--cluster", "utecl1", "--virtual_machine", "evm1"]
@@ -309,9 +324,11 @@ class TestAddVirtualHardware(TestBrokerCommand):
                     },
                 },
             }
+            self.event_add_hardware(machine)
             self.noouttest(["add", "machine", "--machine", machine,
                             "--cluster", cluster, "--model", "utmedium",
                             "--recipe", json.dumps(recipe)])
+            self.events_verify()
 
     def test_201_search_network_fail(self):
         command = ["search_network", "--machine=evm18"]
@@ -325,8 +342,10 @@ class TestAddVirtualHardware(TestBrokerCommand):
         # Skip index 8 and 17 - these will fail.
         for i in range(0, 8) + range(9, 17):
             machine = "evm%d" % (10 + i)
+            self.event_upd_hardware(machine)
             self.noouttest(["add", "interface", "--machine", machine,
                             "--interface", "eth0", "--automac", "--autopg"])
+            self.events_verify()
 
     def test_211_evm18_no_pg(self):
         command = ["add", "interface", "--machine", "evm18",
@@ -391,20 +410,25 @@ class TestAddVirtualHardware(TestBrokerCommand):
         self.assertEqual(machine.interfaces[0].port_group_name, "user-v710")
 
     def test_222_updateclear(self):
+        self.event_upd_hardware('evm10')
         command = ["update_interface", "--machine=evm10", "--interface=eth0",
                    "--pg", ""]
         self.noouttest(command)
+        self.events_verify()
         command = ["show_machine", "--machine=evm10"]
         out = self.commandtest(command)
         self.matchclean(out, "Port Group", command)
 
     def test_223_updatemanual(self):
+        self.event_upd_hardware('evm10')
         command = ["update_interface", "--machine=evm10", "--interface=eth0",
                    "--pg", "user-v710"]
         self.noouttest(command)
         self.verifypg()
+        self.events_verify()
 
     def test_224_updateauto(self):
+        self.event_upd_hardware('evm10')
         command = ["update_interface", "--machine=evm10", "--interface=eth0",
                    "--pg", ""]
         self.noouttest(command)
@@ -412,6 +436,7 @@ class TestAddVirtualHardware(TestBrokerCommand):
                    "--autopg"]
         self.noouttest(command)
         self.verifypg()
+        self.events_verify()
 
     def test_240_add_utmc4_aux(self):
         net = self.net["vm_storage_net"]
@@ -441,8 +466,11 @@ class TestAddVirtualHardware(TestBrokerCommand):
 
     def test_250_delmachines(self):
         # Need to remove machines without interfaces or the make will fail.
+        self.event_del_hardware('evm18')
+        self.event_del_hardware('evm27')
         self.noouttest(["del", "machine", "--machine", "evm18"])
         self.noouttest(["del", "machine", "--machine", "evm27"])
+        self.events_verify()
 
     def test_255_makecluster(self):
         for i in range(5, 11):
@@ -526,16 +554,19 @@ class TestAddVirtualHardware(TestBrokerCommand):
                                  "%s:%02x" % (mac_prefix, mac_idx))
             mac_idx += 1
 
+            self.event_upd_hardware(machine)
             command = ["add_host", "--hostname", hostname,
                        "--machine", machine, "--autoip", "--domain=unittest",
                        "--archetype=aquilon", "--personality=inventory"]
             (out, err) = self.successtest(command)
+            self.events_verify()
         self.dsdb_verify()
 
     def test_271_add_host_prefix(self):
         ip = self.net["ut01ga2s02_v713"].usable[1]
         mac = "00:50:56:01:20:17"
         self.dsdb_expect_add("ivirt17.aqd-unittest.ms.com", ip, "eth0", mac)
+        self.event_upd_hardware('evm26')
         command = ["add", "host", "--prefix", "ivirt", "--machine", "evm26",
                    "--autoip", "--domain", "unittest",
                    "--archetype", "aquilon", "--personality", "inventory"]
@@ -544,6 +575,7 @@ class TestAddVirtualHardware(TestBrokerCommand):
         # city
         self.matchoutput(out, "ivirt17.aqd-unittest.ms.com", command)
         self.dsdb_verify()
+        self.events_verify()
 
     def test_275_verify_add_host(self):
         # This test also verifies the --autoip allocation logic
@@ -592,39 +624,52 @@ class TestAddVirtualHardware(TestBrokerCommand):
         ip = self.net["ut01ga2s02_v713"].usable[1]
         command = ["del_host", "--hostname", "ivirt17.aqd-unittest.ms.com"]
 
+        self.event_upd_hardware('evm26')
         self.dsdb_expect_delete(ip)
         self.statustest(command)
         self.dsdb_verify()
+        self.events_verify()
 
     def test_291_del_evm26(self):
         machine = "evm26"
+        self.event_del_hardware(machine)
         self.noouttest(["del_machine", "--machine", machine])
+        self.events_verify()
 
     def test_300_add_utmc8_machines(self):
+        self.event_add_hardware('evm40')
         self.noouttest(["add", "machine", "--machine", "evm40",
                         "--cluster", "utecl12", "--model", "utmedium"])
+        self.event_add_hardware('evm41')
         self.noouttest(["add", "machine", "--machine", "evm41",
                         "--cluster", "utecl12", "--model", "utmedium"])
-
+        self.event_add_hardware('evm42')
         self.noouttest(["add", "machine", "--machine", "evm42",
                         "--cluster", "utecl13", "--model", "utmedium"])
+        self.events_verify()
 
     # Autopg test
     def test_310_add_utmc8_interfaces(self):
+        self.event_upd_hardware('evm40')
         self.noouttest(["add", "interface", "--machine", "evm40",
                         "--interface", "eth0", "--automac", "--autopg"])
+        self.events_verify()
 
         # Consume available IP addresses
         self.dsdb_expect_add("evm40-ip1.aqd-unittest.ms.com",
                              self.net["autopg1"].usable[0], "eth0_ip1")
         self.dsdb_expect_add("evm40-ip2.aqd-unittest.ms.com",
                              self.net["autopg1"].usable[1], "eth0_ip2")
+        self.event_upd_hardware('evm40')
         self.noouttest(["add_interface_address", "--machine", "evm40",
                         "--interface", "eth0", "--label", "ip1", "--autoip",
                         "--fqdn", "evm40-ip1.aqd-unittest.ms.com"])
+        self.events_verify()
+        self.event_upd_hardware('evm40')
         self.noouttest(["add_interface_address", "--machine", "evm40",
                         "--interface", "eth0", "--label", "ip2", "--autoip",
                         "--fqdn", "evm40-ip2.aqd-unittest.ms.com"])
+        self.events_verify()
         self.dsdb_verify()
 
         # All IPs gone, this should fail
@@ -639,10 +684,14 @@ class TestAddVirtualHardware(TestBrokerCommand):
         # Free up the IP addresses
         self.dsdb_expect_delete(self.net["autopg1"].usable[0])
         self.dsdb_expect_delete(self.net["autopg1"].usable[1])
+        self.event_upd_hardware('evm40')
         self.noouttest(["del_interface_address", "--machine", "evm40",
                         "--interface", "eth0", "--label", "ip1"])
+        self.events_verify()
+        self.event_upd_hardware('evm40')
         self.noouttest(["del_interface_address", "--machine", "evm40",
                         "--interface", "eth0", "--label", "ip2"])
+        self.events_verify()
         self.dsdb_verify()
 
         # There's just one pg, so this should fail
@@ -655,8 +704,10 @@ class TestAddVirtualHardware(TestBrokerCommand):
                          command)
 
         # Now it should succeed
+        self.event_upd_hardware('evm41')
         self.noouttest(["add", "interface", "--machine", "evm41",
                         "--interface", "eth0", "--automac", "--autopg"])
+        self.events_verify()
 
         # The third one shall fail
         command = ["add", "interface", "--machine", "evm42",
@@ -675,11 +726,14 @@ class TestAddVirtualHardware(TestBrokerCommand):
 
     def test_320_add_utmc8_disks(self):
         for i in range(0, 3):
-            self.noouttest(["add", "disk", "--machine", "evm%d" % (i + 40),
+            machine = "evm%d" % (i + 40)
+            self.event_upd_hardware(machine)
+            self.noouttest(["add", "disk", "--machine", machine,
                             "--disk", "sda", "--controller", "scsi",
                             "--snapshot", "--share", "test_v2_share",
                             "--size", "34", "--resourcegroup", "utmc8as1",
                             "--address", "0:0", "--iops_limit", "20"])
+            self.events_verify()
 
     def test_325_verify_evm40(self):
         command = "show machine --machine evm40"
@@ -729,14 +783,18 @@ class TestAddVirtualHardware(TestBrokerCommand):
 
     def test_400_add_utmc9_machines(self):
         for i in range(0, 3):
-            command = ["add", "machine", "--machine", "evm%d" % (i + 50),
+            machine = "evm%d" % (i + 50)
+            self.event_add_hardware(machine)
+            command = ["add", "machine", "--machine", machine,
                        "--vmhost", "evh82.aqd-unittest.ms.com", "--model", "utmedium"]
             self.noouttest(command)
 
     def test_410_move_vm_to_cluster(self):
         # Test migration when there are no disks and no interfaces yet
+        self.event_upd_hardware('evm50')
         self.noouttest(["update", "machine", "--machine", "evm50",
                         "--cluster", "utecl15"])
+        self.events_verify()
 
     def test_411_show_evm50(self):
         command = ["show", "machine", "--machine", "evm50"]
@@ -751,8 +809,10 @@ class TestAddVirtualHardware(TestBrokerCommand):
         self.matchclean(out, "evm50", command)
 
     def test_412_move_vm_back_to_vmhost(self):
+        self.event_upd_hardware('evm50')
         self.noouttest(["update", "machine", "--machine", "evm50",
                         "--vmhost", "evh82.aqd-unittest.ms.com"])
+        self.events_verify()
 
         command = ["show", "machine", "--machine", "evm50"]
         out = self.commandtest(command)
@@ -761,10 +821,13 @@ class TestAddVirtualHardware(TestBrokerCommand):
 
     def test_420_add_utmc9_disks(self):
         for i in range(0, 3):
-            self.noouttest(["add", "disk", "--machine", "evm%d" % (i + 50),
+            machine = "evm%d" % (i + 50)
+            self.event_upd_hardware(machine)
+            self.noouttest(["add", "disk", "--machine", machine,
                             "--disk", "sda", "--controller", "scsi",
                             "--filesystem", "utfs1", "--address", "0:0",
                             "--size", "34"])
+            self.events_verify()
 
     def test_425_verify_utmc9_disks(self):
         for i in range(0, 3):
@@ -823,8 +886,11 @@ class TestAddVirtualHardware(TestBrokerCommand):
 
     def test_430_add_utmc9_interfaces(self):
         for i in range(0, 2):
-            self.noouttest(["add", "interface", "--machine", "evm%d" % (i + 50),
+            machine = "evm%d" % (i + 50)
+            self.event_upd_hardware(machine)
+            self.noouttest(["add", "interface", "--machine", machine,
                             "--interface", "eth0", "--automac", "--autopg"])
+            self.events_verify()
 
     def test_440_cat_evh82(self):
         command = ["cat", "--hostname", "evh82.aqd-unittest.ms.com", "--generate", "--data"]
@@ -842,6 +908,7 @@ class TestAddVirtualHardware(TestBrokerCommand):
     def test_450_add_utmc9_host(self):
         net = self.net["autopg2"]
         ip = self.net["unknown0"].usable[-1]
+        self.event_upd_hardware('evm50')
         self.dsdb_expect_add("evm50.aqd-unittest.ms.com", ip, "eth0",
                              "00:50:56:01:20:19")
         command = ["add", "host", "--hostname", "evm50.aqd-unittest.ms.com",
@@ -859,6 +926,7 @@ class TestAddVirtualHardware(TestBrokerCommand):
                          (net, ip),
                          command)
         self.dsdb_verify()
+        self.events_verify()
 
     def test_451_fix_pg_mismatch(self):
         new_ip = self.net["autopg2"].usable[0]

@@ -27,10 +27,11 @@ import unittest
 from brokertest import TestBrokerCommand
 from notificationtest import VerifyNotificationsMixin
 from personalitytest import PersonalityTestMixin
+from eventstest import EventsTestMixin
 
 
 class TestAppliance(VerifyNotificationsMixin, PersonalityTestMixin,
-                    TestBrokerCommand):
+                    EventsTestMixin, TestBrokerCommand):
 
     cluster = "utecl10"
     vapp = "utvapp0"
@@ -41,10 +42,12 @@ class TestAppliance(VerifyNotificationsMixin, PersonalityTestMixin,
                                 grn="grn:/ms/ei/aquilon/aqd")
 
     def test_110_add_appliance(self):
+        self.event_add_hardware(self.vapp)
         command = ["add", "machine", "--machine", self.vapp,
                    "--cluster", self.cluster, "--model", "utva",
                    "--uri", "file:///somepath/to/ovf"]
         self.noouttest(command)
+        self.events_verify()
 
     def test_120_verify_appliance(self):
         command = ["show", "machine", "--machine", self.vapp]
@@ -57,17 +60,21 @@ class TestAppliance(VerifyNotificationsMixin, PersonalityTestMixin,
         self.matchoutput(out, '"uri" = "file:///somepath/to/ovf";', command)
 
     def test_140_clear_uri(self):
+        self.event_upd_hardware(self.vapp)
         command = ["update", "machine", "--machine", self.vapp, "--uri", ""]
         self.noouttest(command)
+        self.events_verify()
 
         command = ["show", "machine", "--machine", self.vapp]
         out = self.commandtest(command)
         self.matchclean(out, "URI", command)
 
     def test_150_update_uri(self):
+        self.event_upd_hardware(self.vapp)
         command = ["update", "machine", "--machine", self.vapp,
                    "--uri", "file:///otherpath/to/ovf"]
         self.noouttest(command)
+        self.events_verify()
 
         command = ["show", "machine", "--machine", self.vapp]
         out = self.commandtest(command)
@@ -75,11 +82,14 @@ class TestAppliance(VerifyNotificationsMixin, PersonalityTestMixin,
         self.searchoutput(out, r"URI: file:///otherpath/to/ovf", command)
 
     def test_200_add_appliance_host_if(self):
+        self.event_upd_hardware(self.vapp)
         self.noouttest(["add", "interface", "--machine", self.vapp,
                         "--interface", "eth0", "--automac", "--autopg"])
+        self.events_verify()
 
     def test_210_add_appliance_host(self):
         ip = self.net["ut01ga2s02_v713"].usable[1]
+        self.event_upd_hardware(self.vapp)
         self.dsdb_expect_add("utva.aqd-unittest.ms.com", ip, "eth0",
                              "00:50:56:01:20:1b")
         command = ["add", "host", "--hostname", "utva.aqd-unittest.ms.com",
@@ -91,6 +101,7 @@ class TestAppliance(VerifyNotificationsMixin, PersonalityTestMixin,
                    "--osname", "utos", "--osversion", "1.0"]
         self.noouttest(command)
         self.dsdb_verify()
+        self.events_verify()
 
     # TODO do we need this?
     # def test_280_makecluster(self):
@@ -99,15 +110,19 @@ class TestAppliance(VerifyNotificationsMixin, PersonalityTestMixin,
 
     def test_300_del_appl_host(self):
         basetime = datetime.now()
+        self.event_upd_hardware(self.vapp)
         self.dsdb_expect_delete(self.net["ut01ga2s02_v713"].usable[1])
         command = ["del", "host", "--hostname", "utva.aqd-unittest.ms.com"]
         self.statustest(command)
         self.wait_notification(basetime, 1)
         self.dsdb_verify()
+        self.events_verify()
 
     def test_310_del_appliance(self):
+        self.event_del_hardware(self.vapp)
         command = ["del", "machine", "--machine", self.vapp]
         self.noouttest(command)
+        self.events_verify()
 
     def test_320_del_personality(self):
         command = ["del_personality", "--archetype", "utappliance",

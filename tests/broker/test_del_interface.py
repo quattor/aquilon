@@ -23,20 +23,25 @@ if __name__ == "__main__":
 
 import unittest
 from brokertest import TestBrokerCommand
+from eventstest import EventsTestMixin
 
 
-class TestDelInterface(TestBrokerCommand):
+class TestDelInterface(EventsTestMixin, TestBrokerCommand):
 
     # Not testing del interface for ut3c5n10... testing that those
     # interfaces are removed automatically when the machine is removed.
 
     def testdelut3c1n3eth0(self):
+        self.event_upd_hardware('ut3c1n3')
         self.noouttest(["del", "interface", "--interface", "eth0",
                         "--machine", "ut3c1n3"])
+        self.events_verify()
 
     def testdelut3c1n3eth1(self):
+        self.event_upd_hardware('ut3c1n3')
         self.noouttest(["del", "interface",
                         "--mac", self.net["unknown0"].usable[3].mac.upper()])
+        self.events_verify()
 
     def testnotamachine(self):
         command = ["del", "interface", "--interface", "xge49",
