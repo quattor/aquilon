@@ -18,7 +18,7 @@
 
 import os
 import re
-from tempfile import mkstemp, mkdtemp
+from tempfile import NamedTemporaryFile, mkdtemp
 from base64 import b64decode
 
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
@@ -27,7 +27,7 @@ from aquilon.aqdb.model import Sandbox
 from aquilon.worker.dbwrappers.branch import force_my_sandbox
 from aquilon.worker.processes import run_git, sync_domain
 from aquilon.worker.logger import CLIENT_INFO
-from aquilon.utils import write_file, remove_file, remove_dir
+from aquilon.utils import remove_dir
 
 
 class CommandPublish(BrokerCommand):
@@ -42,10 +42,6 @@ class CommandPublish(BrokerCommand):
             dbsandbox = Sandbox.get_unique(session, sandbox, compel=True)
         elif branch:
             dbsandbox = Sandbox.get_unique(session, branch, compel=True)
-
-        handle, filename = mkstemp()  # pylint: disable=W0612
-        contents = b64decode(bundle)
-        write_file(filename, contents, logger=logger)
 
         if sync and not dbsandbox.is_sync_valid and dbsandbox.trackers:
             # FIXME: Maybe raise an ArgumentError and request that the
@@ -63,6 +59,10 @@ class CommandPublish(BrokerCommand):
         kingdir = self.config.get("broker", "kingdir")
         rundir = self.config.get("broker", "rundir")
 
+        tmpfile = NamedTemporaryFile()
+        tmpfile.write(b64decode(bundle))
+        tmpfile.flush()
+
         tempdir = mkdtemp(prefix="publish_", suffix="_%s" % dbsandbox.name,
                           dir=rundir)
         try:
@@ -70,10 +70,10 @@ class CommandPublish(BrokerCommand):
                      kingdir, dbsandbox.name],
                     path=tempdir, logger=logger)
             temprepo = os.path.join(tempdir, dbsandbox.name)
-            run_git(["bundle", "verify", filename],
+            run_git(["bundle", "verify", tmpfile.name],
                     path=temprepo, logger=logger)
             ref = "HEAD:%s" % (dbsandbox.name)
-            command = ["pull", filename, ref]
+            command = ["pull", tmpfile.name, ref]
             if rebase:
                 command.append("--force")
             run_git(command, path=temprepo, logger=logger,
@@ -109,7 +109,7 @@ class CommandPublish(BrokerCommand):
         except ProcessException as e:
             raise ArgumentError("\n%s%s" % (e.out, e.err))
         finally:
-            remove_file(filename, logger=logger)
+            tmpfile.close()
             remove_dir(tempdir, logger=logger)
 
         client_command = "git fetch"
