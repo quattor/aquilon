@@ -23,7 +23,6 @@ from struct import pack
 from twisted.python import log
 from twisted.internet import reactor
 from twisted.internet.protocol import ClientCreator, Protocol
-from twisted.internet.endpoints import UNIXClientEndpoint
 
 from aquilon.config import Config
 from aquilon.exceptions_ import ProtocolError
@@ -59,11 +58,11 @@ class ProtocolBufferMixin(object):
         return getattr(self.__loaded_protocols[module], msgclass)
 
 
-"""
-A Pending notification.  This class is used to store a single protobuf
-message that should be sent over the notification interface.
-"""
 class PendingNotificationEvent(ExporterNotification):
+    """
+    A Pending notification.  This class is used to store a single protobuf
+    message that should be sent over the notification interface.
+    """
     __slots__ = ['_message']
 
     def __init__(self, message):
@@ -73,16 +72,25 @@ class PendingNotificationEvent(ExporterNotification):
         return self._message.SerializeToString()
 
 
-"""
-Twisted protocol class compatible with Int32StringReceiver.  This the
-sendMessage method expects a PendingNotificationEvent which will then
-be written to the transport.
-"""
 class PublishProtocol(Protocol):
+    """
+    Twisted protocol class compatible with Int32StringReceiver.  This the
+    sendMessage method expects a PendingNotificationEvent which will then
+    be written to the transport.
+    """
     def sendMessage(self, msg):
         data = msg.serialize()
         dlen = pack('!I', len(data))
         self.transport.write(dlen + data)
+
+
+def send_messages(proto, messages):
+    try:
+        for msg in messages:
+            proto.sendMessage(msg)
+    finally:
+        # Don't leak the socket
+        proto.transport.loseConnection()
 
 
 @register_exporter('Fqdn', 'HardwareEntity', 'Interface', 'Disk')
@@ -99,7 +107,7 @@ class NotificationExportHandler(ExportHandler, ProtocolBufferMixin):
         # all of the queued notifications.  This will be processed after
         # the request has finished.  Any errors are logged, but ignored.
         d = self._creator.connectUNIX(sockname, timeout) # pid
-        d.addCallback(lambda proto: map(proto.sendMessage, notifications))
+        d.addCallback(send_messages, notifications)
         d.addErrback(lambda e: log.msg('Notification push failed: %s', e.getErrorMessage()))
 
     def fill_fqdn(self, msg, obj):
@@ -135,8 +143,9 @@ class NotificationExportHandler(ExportHandler, ProtocolBufferMixin):
         for cls in obj.__class__.__mro__:
             if hasattr(cls, '__tablename__'):
                 fill = getattr(self, 'fill_' + cls.__tablename__, None)
-                if fill: break
-        if not fill: # pragma: no cover
+                if fill:
+                    break
+        else:  # pragma: no cover
             raise ProtocolError("No filler for %s" % repr(obj))
 
         # Get the protocol buffer message class and construct a new message
