@@ -16,7 +16,7 @@
 # limitations under the License.
 """Wrappers to make getting and using hosts simpler."""
 
-from collections import defaultdict
+from collections import defaultdict, Counter
 from six import itervalues
 from types import ListType
 
@@ -342,30 +342,26 @@ def check_hostlist_size(command, config, hostlist):
     return
 
 
-def validate_branch_author(dbhosts):
-    branches = defaultdict(ListType)
-    authors = defaultdict(ListType)
-    for dbhost in dbhosts:
-        branches[(dbhost.branch, dbhost.sandbox_author)].append(dbhost)
-        authors[dbhost.sandbox_author].append(dbhost)
+def validate_branch_author(dbobjects):
+    branches = Counter((dbobj.branch, dbobj.sandbox_author)
+                       for dbobj in dbobjects)
+    authors = Counter(dbobj.sandbox_author for dbobj in dbobjects)
 
     if len(branches) > 1:
         stats = []
-        for branch, sandbox_author in sorted(branches,
-                                             key=lambda x: -len(branches[x])):
-            cnt = len(branches[(branch, sandbox_author)])
+        for (branch, sandbox_author), cnt in branches.most_common():
             if isinstance(branch, Sandbox):
-                stats.append("%d hosts in sandbox %s/%s" %
+                stats.append("%d objects in sandbox %s/%s" %
                              (cnt, sandbox_author, branch))
             else:
-                stats.append("{0:d} hosts in {1:l}".format(cnt, branch))
-        raise ArgumentError("All hosts must be in the same domain or "
+                stats.append("{0:d} objects in {1:l}".format(cnt, branch))
+        raise ArgumentError("All objects must be in the same domain or "
                             "sandbox:\n%s" % "\n".join(stats))
+
     if len(authors) > 1:
-        keys = sorted(authors, key=lambda x: len(authors[x]))
-        stats = ["%s hosts with sandbox author %s" %
-                 (len(authors[author]), author.name) for author in keys]
-        raise ArgumentError("All hosts must be managed by the same "
+        stats = ["%s objects with sandbox author %s" %
+                 (cnt, author.name) for cnt, author in authors.most_common()]
+        raise ArgumentError("All objects must be managed by the same "
                             "sandbox author:\n%s" % "\n".join(stats))
 
     return (branches.popitem()[0][0], authors.popitem()[0])

@@ -325,9 +325,9 @@ class TestCompile(VerifyNotificationsMixin, TestBrokerCommand):
 
         command = ['compile', '--personality=compileserver', '--archetype=aquilon']
         err = self.badrequesttest(command)
-        self.matchoutput(err, 'Bad Request: All hosts must be in the same domain or sandbox:',
+        self.matchoutput(err, 'All objects must be in the same domain or sandbox:',
                          command)
-        self.matchoutput(err, '1 hosts in domain ut-prod', command)
+        self.matchoutput(err, '1 objects in domain ut-prod', command)
 
     def test_570_compile_personality_domain(self):
         command = ['compile', '--personality=compileserver', '--archetype=aquilon',
