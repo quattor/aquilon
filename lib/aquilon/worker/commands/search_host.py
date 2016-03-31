@@ -100,10 +100,11 @@ class CommandSearchHost(BrokerCommand):
             q = q.filter(HardwareEntity.serial_no == serial)
 
         # DNS IP address related filters
-        if mac or ip or networkip or hostname or dns_domain or shortname:
+        if mac or ip or networkip or hostname or dns_domain or \
+           shortname or network_environment:
             # Inner joins are cheaper than outer joins, so make some effort to
             # use inner joins when possible
-            if mac or ip or networkip:
+            if mac or ip or networkip or network_environment:
                 q = q.join(Interface, aliased=True)
             else:
                 q = q.outerjoin(Interface, aliased=True)
@@ -113,17 +114,21 @@ class CommandSearchHost(BrokerCommand):
                                        **arguments)
                 q = q.filter(Interface.mac == mac)
 
-            if ip or networkip:
-                q = q.join(AddressAssignment, Network, from_joinpoint=True)
+            AAlias = aliased(AddressAssignment)
+
+            if ip or networkip or network_environment:
+                q = q.join(AAlias, from_joinpoint=True)
             else:
-                q = q.outerjoin(AddressAssignment, Network, from_joinpoint=True)
+                q = q.outerjoin(AAlias, from_joinpoint=True)
 
             if ip:
-                q = q.filter(AddressAssignment.ip == ip)
-                q = q.filter(Network.network_environment == dbnet_env)
-            if networkip:
+                q = q.filter(AAlias.ip == ip)
+            elif networkip:
                 dbnetwork = get_network_byip(session, networkip, dbnet_env)
-                q = q.filter(AddressAssignment.network == dbnetwork)
+                q = q.filter(AAlias.network == dbnetwork)
+            elif network_environment:
+                q = q.join(AAlias.network, aliased=True)
+                q = q.filter(Network.network_environment == dbnet_env)
 
             dbdns_domain = None
             if hostname:
@@ -136,8 +141,8 @@ class CommandSearchHost(BrokerCommand):
                 ARecFqdn = aliased(Fqdn)
 
                 q = q.outerjoin((ARecAlias,
-                                 and_(ARecAlias.ip == AddressAssignment.ip,
-                                      ARecAlias.network_id == AddressAssignment.network_id)),
+                                 and_(ARecAlias.ip == AAlias.ip,
+                                      ARecAlias.network_id == AAlias.network_id)),
                                 (ARecFqdn, ARecAlias.fqdn_id == ARecFqdn.id))
                 if shortname:
                     q = q.filter(or_(ARecFqdn.name == shortname,
