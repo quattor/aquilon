@@ -22,8 +22,7 @@ from sqlalchemy import (Column, String, DateTime, ForeignKey,
 from sqlalchemy.orm import relation, deferred, backref
 from sqlalchemy.sql import and_
 
-from aquilon.aqdb.model import (Base, Network, Location, ARecord,
-                                DnsEnvironment, Fqdn)
+from aquilon.aqdb.model import Base, Network, Location, DnsEnvironment
 from aquilon.aqdb.model.a_record import dns_fqdn_mapper
 from aquilon.aqdb.column_types import IPV4
 
@@ -64,11 +63,13 @@ class RouterAddress(Base):
 
     location = relation(Location)
 
-    dns_records = relation(dns_fqdn_mapper, uselist=True,
-                           primaryjoin=and_(network_id == ARecord.network_id,
-                                            ip == ARecord.ip,
-                                            dns_environment_id == Fqdn.dns_environment_id),
-                           foreign_keys=[ARecord.ip, Fqdn.dns_environment_id],
+    dns_records = relation(dns_fqdn_mapper,
+                           primaryjoin=and_(network_id == dns_fqdn_mapper.c.network_id,
+                                            ip == dns_fqdn_mapper.c.ip,
+                                            dns_environment_id == dns_fqdn_mapper.c.dns_environment_id),
+                           foreign_keys=[dns_fqdn_mapper.c.ip,
+                                         dns_fqdn_mapper.c.network_id,
+                                         dns_fqdn_mapper.c.dns_environment_id],
                            viewonly=True)
 
     __table_args__ = (PrimaryKeyConstraint(network_id, ip),
