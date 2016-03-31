@@ -27,8 +27,7 @@ from sqlalchemy.sql import and_
 
 from aquilon.exceptions_ import InternalError
 from aquilon.aqdb.column_types import IPV4, AqStr, EmptyStr
-from aquilon.aqdb.model import (Base, Interface, ARecord, DnsEnvironment,
-                                Network)
+from aquilon.aqdb.model import Base, Interface, ARecord, Network
 from aquilon.aqdb.model.a_record import dns_fqdn_mapper
 
 _TN = 'address_assignment'
@@ -65,12 +64,6 @@ class AddressAssignment(Base):
 
     network_id = Column(ForeignKey(Network.id), nullable=False)
 
-    # This should be the same as
-    # network.network_environment.dns_environment_id, but using that would mean
-    # joining two extra tables in the dns_records relation
-    dns_environment_id = Column(ForeignKey(DnsEnvironment.id), nullable=False,
-                                index=True)
-
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
 
@@ -78,18 +71,14 @@ class AddressAssignment(Base):
                          backref=backref('assignments', order_by=[label],
                                          cascade='all, delete-orphan'))
 
-    dns_environment = relation(DnsEnvironment, innerjoin=True)
-
     # Setting viewonly is very important here as we do not want the removal of
     # an AddressAssignment record to change the linked DNS record(s)
     # Can't use backref or back_populates due to the different mappers
     dns_records = relation(dns_fqdn_mapper,
                            primaryjoin=and_(network_id == dns_fqdn_mapper.c.network_id,
-                                            ip == dns_fqdn_mapper.c.ip,
-                                            dns_environment_id == dns_fqdn_mapper.c.dns_environment_id),
+                                            ip == dns_fqdn_mapper.c.ip),
                            foreign_keys=[dns_fqdn_mapper.c.ip,
-                                         dns_fqdn_mapper.c.network_id,
-                                         dns_fqdn_mapper.c.dns_environment_id],
+                                         dns_fqdn_mapper.c.network_id],
                            viewonly=True)
 
     fqdns = association_proxy('dns_records', 'fqdn')

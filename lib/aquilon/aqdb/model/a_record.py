@@ -20,10 +20,10 @@ from sqlalchemy import Column, ForeignKey, Index
 from sqlalchemy.orm import (relation, backref, mapper, deferred, object_session,
                             validates)
 from sqlalchemy.orm.attributes import instance_state
-from sqlalchemy.sql import join
+from sqlalchemy.sql import join, and_
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import Network, DnsRecord, Fqdn
+from aquilon.aqdb.model import Network, NetworkEnvironment, DnsRecord, Fqdn
 from aquilon.aqdb.column_types import IPV4
 
 _TN = 'a_record'
@@ -118,17 +118,36 @@ class ARecord(DnsRecord):
             raise ArgumentError("{0} is a service address. GRN should not be set "
                                 "but derived from the device.".format(self))
 
+# Create a secondary mapper to allow filtering DNS entries based on the DNS
+# environment associated with the network the address is allocated from:
+#
+#  +------------------+  (IP, network_id)  +--------+          +----+
+#  |Address allocation|  ----------------  |A record|  ------  |FQDN|
+#  +------------------+                    +--------+          +----+
+#                                             |                  |
+#                                (network_id) |                  | (dns_environment_id)
+#                                             |                  |
+#                                          +-------+           +-------------------+
+#                                          |Network|  -------  |Network environment|
+#                                          +-------+           +-------------------+
+#
+# So, we want to be able to create joins between an allocated address (IP and
+# network_id pair embedded into an object) and an A record, but we don't want to
+# mix different DNS views together, so the join needs to be restricted to a
+# single DNS environment. The mapper below implements the right side of the
+# above graph (everything except the address allocation object) with the
+# required filtering.
 __j = join(ARecord, Fqdn, ARecord.fqdn_id == Fqdn.id)
+__j = __j.join(NetworkEnvironment,
+               Fqdn.dns_environment_id == NetworkEnvironment.dns_environment_id)
+__j = __j.join(Network, and_(Network.id == ARecord.network_id,
+                             Network.network_environment_id == NetworkEnvironment.id))
 
-# Create a secondary mapper on the join of the ARecord and Fqdn tables
 dns_fqdn_mapper = mapper(ARecord, __j,
-                         # Fqdn.creation_date conflicts with DnsRecord; the rest
-                         # are not needed since we cannot use them anyway - the
-                         # ARecord.fqdn relation will result in joining the fqdn
-                         # table a second time.
-                         exclude_properties=[__j.c.fqdn_creation_date,
-                                             __j.c.fqdn_name,
-                                             __j.c.fqdn_dns_domain_id],
+                         # Only map the columns from the join which ARecord
+                         # would normally have
+                         include_properties=(DnsRecord.__table__.c.values() +
+                                             ARecord.__table__.c.values()),
                          properties={
                              # Both DnsRecord and Fqdn have a column named 'id'.
                              # Tell the ORM that DnsRecord.fqdn_id and Fqdn.id are

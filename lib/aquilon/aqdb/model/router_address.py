@@ -22,7 +22,7 @@ from sqlalchemy import (Column, String, DateTime, ForeignKey,
 from sqlalchemy.orm import relation, deferred, backref
 from sqlalchemy.sql import and_
 
-from aquilon.aqdb.model import Base, Network, Location, DnsEnvironment
+from aquilon.aqdb.model import Base, Network, Location
 from aquilon.aqdb.model.a_record import dns_fqdn_mapper
 from aquilon.aqdb.column_types import IPV4
 
@@ -42,9 +42,6 @@ class RouterAddress(Base):
     # to uniquely identify the router
     network_id = Column(ForeignKey(Network.id), nullable=False)
 
-    dns_environment_id = Column(ForeignKey(DnsEnvironment.id),
-                                nullable=False, index=True)
-
     # We don't want deleting a location to disrupt networking, so use "ON DELETE
     # SET NULL" here
     location_id = Column(ForeignKey(Location.id, ondelete="SET NULL"),
@@ -59,19 +56,14 @@ class RouterAddress(Base):
                        backref=backref('routers', cascade="all, delete-orphan",
                                        order_by=[ip]))
 
-    dns_environment = relation(DnsEnvironment, innerjoin=True)
-
     location = relation(Location)
 
     dns_records = relation(dns_fqdn_mapper,
                            primaryjoin=and_(network_id == dns_fqdn_mapper.c.network_id,
-                                            ip == dns_fqdn_mapper.c.ip,
-                                            dns_environment_id == dns_fqdn_mapper.c.dns_environment_id),
+                                            ip == dns_fqdn_mapper.c.ip),
                            foreign_keys=[dns_fqdn_mapper.c.ip,
-                                         dns_fqdn_mapper.c.network_id,
-                                         dns_fqdn_mapper.c.dns_environment_id],
+                                         dns_fqdn_mapper.c.network_id],
                            viewonly=True)
 
     __table_args__ = (PrimaryKeyConstraint(network_id, ip),
-                      {'info': {'unique_fields': ['ip', 'network'],
-                                'extra_search_fields': ['dns_environment']}})
+                      {'info': {'unique_fields': ['ip', 'network']}})
