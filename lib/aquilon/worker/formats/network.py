@@ -231,7 +231,8 @@ class NetworkHostListFormatter(ListFormatter):
             q = q.filter(HardwareEntity.id.in_(hw_ids))
             q = q.options(subqueryload('interfaces'),
                           subqueryload('host'),
-                          subqueryload('host.personality_stage'))
+                          subqueryload('host.personality_stage'),
+                          subqueryload('host.operating_system'))
             hwent_by_id = {}
             for dbhwent in q.all():
                 hwent_by_id[dbhwent.id] = dbhwent
@@ -294,6 +295,9 @@ class NetworkHostListFormatter(ListFormatter):
                                             indirect_attrs=False)
                         self.redirect_proto(hwent.host.personality_stage,
                                             host_msg.personality,
+                                            indirect_attrs=False)
+                        self.redirect_proto(hwent.host.operating_system,
+                                            host_msg.operating_system,
                                             indirect_attrs=False)
 
                 host_msg.hostname = addr.dns_records[0].fqdn.name
