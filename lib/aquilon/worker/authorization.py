@@ -312,6 +312,64 @@ class AuthorizationBroker(object):
                               'del_alias', 'del_manager']:
                 self.raise_auth_error(principal, action, resource)
 
+        if dbuser.role.name == 'sec_platform_eng':
+            if action not in ['add_address', 'del_address',
+                              'add_disk', 'update_disk', 'del_disk', 'del_disk_disk',
+                              'add_host', 'del_host',
+                              'add_interface_machine', 'update_interface',
+                              'del_interface_machine',
+                              'add_interface_address',
+                              'del_interface_address',
+                              'add_machine', 'update_machine', 'del_machine',
+                              'add_manager', 'del_manager',
+                              'manage',
+                              'reconfigure', 'reconfigure_list',
+                              'reconfigure_membersof',
+                              'make', 'change_status',
+                              'add_sandbox', 'del_sandbox',
+                              'publish', 'deploy',
+                              'compile', 'compile_hostname',
+                              'compile_cluster', 'compile_metacluster',
+                              'compile_personality',
+                              'bind_client', 'unbind_client',
+                              'rebind_client',
+                              'bind_server',
+                              'add_feature', 'update_feature', 'del_feature',
+                              'bind_feature', 'unbind_feature',
+                              'add_alias', 'del_alias',
+                              'map_service', 'unmap_service',
+                              'pxeswitch',
+                              'add_parameter', 'update_parameter', 'del_parameter',
+                              'add_parameter_definition',
+                              'update_parameter_definition',
+                              'del_parameter_definition',
+                              'add_personality', 'update_personality', 'del_personality',
+                              'add_service']:
+                self.raise_auth_error(principal, action, resource)
+
+        if dbuser.role.name == 'sec_platform_ops':
+            if action not in ['pxeswitch', 'pxeswitch_list',
+                              'compile', 'compile_hostname',
+                              'compile_cluster', 'compile_metacluster',
+                              'compile_personality',
+                              'change_status', 'make', 'reconfigure',
+                              'reconfigure_list', 'reconfigure_membersof',
+                              'add_interface_machine',
+                              'add_interface_hostname',
+                              'update_interface_hostname',
+                              'update_interface_machine',
+                              'del_interface',
+                              'add_interface_address',
+                              'del_interface_address',
+                              'add_disk', 'del_disk', 'del_disk_disk',
+                              'update_disk',
+                              'add_machine', 'del_machine',
+                              'update_machine', 'update_machine_hostname',
+                              'add_host', 'add_host_prefix', 'del_host',
+                              'add_alias', 'del_alias',
+                              'add_manager', 'del_manager']:
+                self.raise_auth_error(principal, action, resource)
+
         if dbuser.role.name == 'unixops_l2':
             if action not in ['add_host', 'add_host_prefix', 'add_windows_host',
                               'del_host', 'del_windows_host',
