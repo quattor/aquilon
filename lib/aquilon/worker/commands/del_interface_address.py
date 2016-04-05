@@ -120,6 +120,7 @@ class CommandDelInterfaceAddress(BrokerCommand):
 
         plenaries = PlenaryCollection(logger=logger)
         plenaries.append(Plenary.get_plenary(dbhw_ent))
+        plenaries.append(Plenary.get_plenary(dbnetwork))
         if dbhw_ent.host:
             plenaries.append(Plenary.get_plenary(dbhw_ent.host))
 

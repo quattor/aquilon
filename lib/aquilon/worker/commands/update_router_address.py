@@ -21,11 +21,12 @@ from aquilon.aqdb.model import RouterAddress, Building, ARecord
 from aquilon.aqdb.model.network_environment import get_net_dns_env
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.templates.base import Plenary, PlenaryCollection
 
 
 class CommandUpdateRouterAddress(BrokerCommand):
 
-    def render(self, session, fqdn, ip, building, clear_location,
+    def render(self, session, logger, fqdn, ip, building, clear_location,
                network_environment, dns_environment, comments, **arguments):
         dbnet_env, dbdns_env = get_net_dns_env(session, network_environment,
                                                dns_environment)
@@ -50,5 +51,10 @@ class CommandUpdateRouterAddress(BrokerCommand):
 
         if comments is not None:
             router.comments = comments
+
+        # Refresh the plenaries even if nothing in the DB has changed
+        plenaries = PlenaryCollection(logger=logger)
+        plenaries.append(Plenary.get_plenary(dbnetwork))
+        plenaries.write()
 
         session.flush()
