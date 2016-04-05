@@ -739,6 +739,47 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
         self.matchclean(out, "evh1.aqd-unittest.ms.com", command)
         self.matchclean(out, "ut10s04", command)
 
+    def test_800_show_ut3c5(self):
+        ip = self.net["unknown0"].usable[6]
+        hostname = self.config.get("unittest", "hostname")
+        command = ["show_chassis", "--chassis", "ut3c5"]
+        out = self.commandtest(command)
+        self.output_equals(out, """
+            Chassis: ut3c5
+              Primary Name: ut3c5.aqd-unittest.ms.com [%s]
+              Building: ut
+              Campus: ny
+              City: ny
+              Organization: ms
+              Continent: na
+              Country: us
+              Hub: ny
+              Rack: ut3
+                Row: a
+                Column: 3
+              Room: utroom1
+              Vendor: hp Model: c-class
+                Model Type: chassis
+              Serial: ABC5678
+              Comments: Some new chassis comments
+              Interface: oa %s
+                Type: oa
+                Network Environment: internal
+                Provides: ut3c5.aqd-unittest.ms.com [%s]
+              Slot #2: ut3c5n2 (unittest20.aqd-unittest.ms.com)
+              Slot #3: ut3c5n3 (unittest21.aqd-unittest.ms.com)
+              Slot #4: ut3c5n4 (unittest22.aqd-unittest.ms.com)
+              Slot #5: ut3c5n5 (unittest23.aqd-unittest.ms.com)
+              Slot #6: ut3c5n6 (%s)
+              Slot #7: ut3c5n7 (unittest25.aqd-unittest.ms.com)
+              Slot #8: ut3c5n8 (unittest26.aqd-unittest.ms.com)
+              Slot #10: ut3c5n10 (unittest02.one-nyp.ms.com)
+              Slot #11: ut3c5n11 (afs-by-net.aqd-unittest.ms.com)
+              Slot #12: ut3c5n12 (netmap-pers.aqd-unittest.ms.com)
+              Slot #13: ut3c5n13 (infra1.aqd-unittest.ms.com)
+            """ % (ip, ip.mac, ip, hostname),
+            command)
+
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddHost)
     unittest.TextTestRunner(verbosity=2).run(suite)

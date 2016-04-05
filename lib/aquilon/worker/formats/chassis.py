@@ -28,10 +28,15 @@ class ChassisFormatter(HardwareEntityFormatter):
 
         for slot in chassis.slots:
             if slot.machine:
-                details.append(indent + "  Slot #%d: %s" % (slot.slot_number,
-                                                            slot.machine.label))
+                if slot.machine.primary_name:
+                    hostname = slot.machine.primary_name
+                else:
+                    hostname = "no hostname"
+
+                details.append(indent + "  Slot #%d: %s (%s)" %
+                               (slot.slot_number, slot.machine.label, hostname))
             else:
-                details.append(indent + "  Slot #%d Unknown" % slot.slot_number)
+                details.append(indent + "  Slot #%d: Empty" % slot.slot_number)
 
         return "\n".join(details)
 

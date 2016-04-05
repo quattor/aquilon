@@ -156,9 +156,11 @@ class PlenaryHostData(StructurePlenary):
                     else:
                         gateway = None
 
-                    # TODO: generate appropriate routing policy if there are
-                    # multiple interfaces marked as default_route
-                    if not default_gateway and is_default_route(dbinterface):
+                    # If there are multiple interfaces providing the defult
+                    # route, then prefer the boot interface. It's up to the
+                    # templates to set up multipath routing if that's desired.
+                    if is_default_route(dbinterface) and (not default_gateway or
+                                                          dbinterface.bootable):
                         default_gateway = gateway
 
                     ifdesc["ip"] = addr.ip

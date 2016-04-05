@@ -609,6 +609,13 @@ class TestSearchHost(TestBrokerCommand):
         self.matchoutput(out, "evh80.aqd-unittest.ms.com", command)
         self.matchoutput(out, "evh81.aqd-unittest.ms.com", command)
 
+    def testnetworkenv(self):
+        command = ["search_host", "--network_environment", "utcolo"]
+        out = self.commandtest(command)
+        self.output_equals(out, """
+            unittest25.aqd-unittest.ms.com
+            """, command)
+
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestSearchHost)
     unittest.TextTestRunner(verbosity=5).run(suite)
