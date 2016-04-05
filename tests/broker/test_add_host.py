@@ -63,6 +63,21 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
         self.matchoutput(out, "Advertise Status: False", command)
         self.matchoutput(out, "Host Comments: Some host comments", command)
 
+    def test_105_verify_unittest02_network_osversion(self):
+        osver = self.config.get("unittest", "linux_version_prev")
+        command = ["show", "network",
+                   "--ip", str(self.net["unknown0"].ip),
+                   "--format", "proto",
+                   "--hosts"]
+        network = self.protobuftest(command)[0]
+        found = False
+        for i in network.hosts:
+            if i.fqdn == 'unittest02.one-nyp.ms.com':
+                self.assertEqual(i.operating_system.version, osver)
+                found = True
+        if not found:
+            self.fail("Unable to determine osversion for '%s'" % i.fqdn)
+
     def test_105_verify_unittest02_machine(self):
         command = "show machine --machine ut3c5n10"
         out = self.commandtest(command.split(" "))
