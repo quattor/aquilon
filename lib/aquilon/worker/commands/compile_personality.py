@@ -16,7 +16,9 @@
 # limitations under the License.
 """Contains the logic for `aq compile --personality`."""
 
-from aquilon.aqdb.model import Host, Personality, PersonalityStage
+from sqlalchemy.orm import joinedload, subqueryload
+
+from aquilon.aqdb.model import Host, Cluster, Personality, PersonalityStage
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
 from aquilon.worker.dbwrappers.host import validate_branch_author
@@ -44,7 +46,20 @@ class CommandCompilePersonality(BrokerCommand):
             pancinclude = r'.*'
             pancexclude = r'components/spma/functions.*'
 
-        q = session.query(Host)
+        if dbpersonality.archetype.cluster_type:
+            q = session.query(Cluster)
+            q = q.options(subqueryload('_hosts'),
+                          joinedload('_hosts.host'),
+                          joinedload('_hosts.host.hardware_entity'))
+        else:
+            q = session.query(Host)
+            q = q.options(joinedload('hardware_entity'),
+                          joinedload('_cluster'),
+                          joinedload('_cluster.cluster'))
+
+        q = q.options(subqueryload('services_used'),
+                      subqueryload('services_provided'),
+                      subqueryload('virtual_switch'))
 
         if dbdomain:
             q = q.filter_by(branch=dbdomain)
@@ -57,17 +72,18 @@ class CommandCompilePersonality(BrokerCommand):
             q = q.filter_by(name=personality_stage)
         q = q.filter_by(personality=dbpersonality)
 
-        host_list = q.all()
+        objects = q.all()
 
-        if not host_list:
+        if not objects:
             logger.client_info('No object profiles: nothing to do.')
             return
 
         # If the domain was not specified, set it to the domain of first host
-        dbdomain, dbauthor = validate_branch_author(host_list)
+        dbdomain, dbauthor = validate_branch_author(objects)
 
         plenaries = PlenaryCollection(logger=logger)
-        plenaries.extend(map(Plenary.get_plenary, host_list))
+        for dbobj in objects:
+            plenaries.extend(map(Plenary.get_plenary, dbobj.all_objects()))
 
         dom = TemplateDomain(dbdomain, dbauthor, logger=logger)
         with plenaries.get_key():

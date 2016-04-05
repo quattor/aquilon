@@ -664,9 +664,9 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
         scratchfile = self.writescratch("diffdomains", "\n".join(hosts))
         command = ["reconfigure", "--list", scratchfile]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "All hosts must be in the same domain or sandbox:", command)
-        self.matchoutput(out, "3 hosts in sandbox %s/utsandbox" % self.user, command)
-        self.matchoutput(out, "2 hosts in domain unittest", command)
+        self.matchoutput(out, "All objects must be in the same domain or sandbox:", command)
+        self.matchoutput(out, "3 objects in sandbox %s/utsandbox" % self.user, command)
+        self.matchoutput(out, "2 objects in domain unittest", command)
 
     def test_2000_missing_required_service(self):
         hosts = ["aquilon91.aqd-unittest.ms.com"]

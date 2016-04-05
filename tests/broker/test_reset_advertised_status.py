@@ -197,7 +197,7 @@ class TestResetAdvertisedStatus(TestBrokerCommand):
         # reset advertised state to build
         command = ["reset_advertised_status", "--list", scratchfile]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "Bad Request: All hosts must be in the same domain or sandbox:",
+        self.matchoutput(out, "All objects must be in the same domain or sandbox:",
                          command)
 
     def test_141_sandbox_mismatch_cleanup(self):

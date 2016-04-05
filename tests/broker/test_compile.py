@@ -148,7 +148,7 @@ class TestCompile(VerifyNotificationsMixin, TestBrokerCommand):
         self.matchoutput(out, "0/1 object template(s) being processed",
                          command)
 
-    def test_300_compile_host_cleandeps(self):
+    def test_305_compile_host_cleandeps(self):
         command = ["compile", "--hostname", "unittest02.one-nyp.ms.com",
                    "--cleandeps"]
         out = self.statustest(command)
@@ -325,9 +325,9 @@ class TestCompile(VerifyNotificationsMixin, TestBrokerCommand):
 
         command = ['compile', '--personality=compileserver', '--archetype=aquilon']
         err = self.badrequesttest(command)
-        self.matchoutput(err, 'Bad Request: All hosts must be in the same domain or sandbox:',
+        self.matchoutput(err, 'All objects must be in the same domain or sandbox:',
                          command)
-        self.matchoutput(err, '1 hosts in domain ut-prod', command)
+        self.matchoutput(err, '1 objects in domain ut-prod', command)
 
     def test_570_compile_personality_domain(self):
         command = ['compile', '--personality=compileserver', '--archetype=aquilon',
@@ -376,7 +376,44 @@ class TestCompile(VerifyNotificationsMixin, TestBrokerCommand):
         self.matchoutput(out, "'no-such-stage' is not a valid personality "
                          "stage.", command)
 
-    def test_600_aqcompile(self):
+    def test_600_compile_cluster_pers_multi_domain(self):
+        command = ["compile", "--personality", "vulcan-10g-server-prod",
+                   "--archetype", "esx_cluster"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "All objects must be in the same domain or sandbox",
+                         command)
+        self.matchoutput(out, "11 objects in domain unittest", command)
+        self.matchoutput(out, "1 objects in sandbox %s/utsandbox" % self.user,
+                         command)
+
+    def test_605_compile_cluster_pers(self):
+        command = ["compile", "--personality", "vulcan-10g-server-prod",
+                   "--archetype", "esx_cluster", "--domain", "unittest"]
+        out = self.statustest(command)
+        # The only thing we really care about here is the number of objects
+        # being larger than the number of clusters, to verify cluster members
+        # are also included
+        self.matchoutput(out, "0/41 object template(s) being processed", command)
+
+    def test_610_compile_metacluster_multi_domain(self):
+        command = ["compile", "--personality", "metacluster"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "All objects must be in the same domain or sandbox",
+                         command)
+        self.matchoutput(out, "6 objects in domain unittest", command)
+        self.matchoutput(out, "1 objects in sandbox %s/utsandbox" % self.user,
+                         command)
+
+    def test_615_compile_metacluster_pers(self):
+        command = ["compile", "--personality", "metacluster",
+                   "--domain", "unittest"]
+        out = self.statustest(command)
+        # The only thing we really care about here is the number of objects
+        # being larger than the number of metaclusters, to verify members are
+        # also included
+        self.matchoutput(out, "0/47 object template(s) being processed", command)
+
+    def test_700_aqcompile(self):
         aqcompile = os.path.join(self.config.get("broker", "srcdir"),
                                  "bin", "aq_compile.py")
         basedir = self.config.get("broker", "quattordir")

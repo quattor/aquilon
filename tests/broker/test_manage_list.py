@@ -133,7 +133,7 @@ class TestManageList(TestBrokerCommand):
                    "%s/changetest1" % self.user]
         out = self.badrequesttest(command)
         self.matchoutput(out,
-                         "All hosts must be in the same domain or sandbox",
+                         "All objects must be in the same domain or sandbox",
                          command)
 
     def test_108_fail_manage_list_cluster(self):
