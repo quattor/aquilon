@@ -606,12 +606,10 @@ def assign_address(dbinterface, ip, dbnetwork, label=None, shared=False,
     if shared:
         dbinterface.assignments.append(SharedAddressAssignment(ip=ip, network=dbnetwork,
                                                                label=label,
-                                                               dns_environment=dns_environment,
                                                                priority=priority))
     else:
         dbinterface.assignments.append(AddressAssignment(ip=ip, network=dbnetwork,
-                                                         label=label,
-                                                         dns_environment=dns_environment))
+                                                         label=label))
     dbinterface.check_pg_consistency(logger=logger)
 
 

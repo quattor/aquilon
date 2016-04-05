@@ -18,7 +18,7 @@
 import sys
 from inspect import isclass
 
-from sqlalchemy.schema import CreateTable, Index, Table, MetaData
+from sqlalchemy.schema import CreateTable, MetaData
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm.session import Session, object_session
@@ -29,14 +29,6 @@ from sqlalchemy.inspection import inspect
 from aquilon.exceptions_ import InternalError, NotFoundException, ArgumentError
 from aquilon.aqdb.utils.constraints import (ref_constraint_name,
                                             multi_col_constraint_name)
-
-
-# Register our custom dialect-specific options. It would be nicer to have this
-# in db_factory.py where the implementation lives, but that's not imported early
-# enough.
-Index.argument_for("oracle", "compress", None)
-Index.argument_for("oracle", "bitmap", None)
-Table.argument_for("oracle", "compress", None)
 
 
 def _raise_custom(cls, defcls, msg):

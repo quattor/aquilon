@@ -21,75 +21,23 @@ import os
 import sys
 import logging
 import time
-from numbers import Number
 import hashlib
 import struct
 
 from aquilon.aqdb import depends  # pylint: disable=W0611
 from aquilon.config import Config
-from aquilon.utils import monkeypatch
 from aquilon.exceptions_ import AquilonError
-
-from six import string_types
 
 from sqlalchemy.exc import DatabaseError
 from sqlalchemy import create_engine, text, event
 from sqlalchemy.engine.url import make_url
-from sqlalchemy.ext.compiler import compiles
 from sqlalchemy.inspection import inspect
 from sqlalchemy.orm import scoped_session, sessionmaker
-from sqlalchemy.schema import CreateIndex, Sequence
-from sqlalchemy.dialects.oracle.base import OracleDDLCompiler
+from sqlalchemy.schema import Sequence
 
 # Global cache of SQL statement hashes, used to implement unique query plan
 # logging
 query_hashes = None
-
-
-# Add support for Oracle-specific index extensions
-@compiles(CreateIndex, 'oracle')
-def visit_create_index(create, compiler, **kw):  # pragma: no cover
-    # pylint: disable=W0613
-    index = create.element
-    compiler._verify_index_table(index)
-    preparer = compiler.preparer
-
-    text = "CREATE "  # pylint: disable=W0621
-    if index.unique:
-        text += "UNIQUE "
-    if index.kwargs.get("oracle_bitmap", False):
-        text += "BITMAP "
-
-    text += "INDEX %s ON %s (%s)" \
-        % (compiler._prepared_index_name(index, include_schema=True),
-           preparer.format_table(index.table, use_schema=True),
-           ', '.join(compiler.sql_compiler.process(expr, include_table=False,
-                                                   literal_binds=True)
-                     for expr in index.expressions))
-
-    compress = index.kwargs.get("oracle_compress", False)
-    if compress:
-        if isinstance(compress, Number):
-            text += " COMPRESS %d" % compress
-        else:
-            text += " COMPRESS"
-
-    return text
-
-
-# Add support for table compression
-@monkeypatch(OracleDDLCompiler)
-def post_create_table(self, table):  # pragma: no cover
-    # pylint: disable=W0613
-    text = ""  # pylint: disable=W0621
-    compress = table.kwargs.get("oracle_compress", False)
-    if compress:
-        if isinstance(compress, string_types):
-            text += " COMPRESS FOR " + compress.upper()
-        else:
-            text += " COMPRESS"
-
-    return text
 
 
 def sqlite_foreign_keys(dbapi_con, con_record):  # pylint: disable=W0613

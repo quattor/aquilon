@@ -22,8 +22,8 @@ import heapq
 
 from aquilon.exceptions_ import PartialError
 from aquilon.aqdb.model import (NetworkEnvironment, Network, RouterAddress,
-                                ARecord, DnsEnvironment, AddressAssignment,
-                                Building, Bunker, NetworkCompartment)
+                                ARecord, AddressAssignment, Building, Bunker,
+                                NetworkCompartment)
 from aquilon.worker.dbwrappers.dns import delete_dns_record
 from aquilon.worker.dbwrappers.network import fix_foreign_links
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
@@ -73,8 +73,6 @@ class QIPRefresh(object):
         self.net_env = NetworkEnvironment.get_unique_or_default(session)
 
         self.errors = []
-
-        self.dns_env = DnsEnvironment.get_unique_or_default(session)
 
         # Cache building and bunker information. Load all buildings even if
         # we're interested in only one, so we can verify subnetdata.txt
@@ -345,8 +343,7 @@ class QIPRefresh(object):
             self.session.delete(dbnetwork)
 
     def add_router(self, dbnetwork, ip):
-        dbnetwork.routers.append(RouterAddress(ip=ip,
-                                               dns_environment=self.dns_env))
+        dbnetwork.routers.append(RouterAddress(ip=ip))
         self.logger.client_info("Adding router {0:s} to "
                                 "{1:l}".format(ip, dbnetwork))
 

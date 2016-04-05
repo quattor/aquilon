@@ -21,7 +21,7 @@ import re
 
 from sqlalchemy import (Column, Integer, DateTime, ForeignKey, CheckConstraint,
                         PrimaryKeyConstraint, Index, Sequence)
-from sqlalchemy.orm import relation, backref, deferred
+from sqlalchemy.orm import relation, backref, deferred, foreign, remote
 from sqlalchemy.sql import and_
 
 from aquilon.exceptions_ import InternalError
@@ -98,10 +98,9 @@ class PortGroup(Base):
                                        passive_deletes=True))
 
     # This is needed only for legacy naming
-    legacy_vlan = relation(VlanInfo, uselist=False,
-                           primaryjoin=and_(usage == VlanInfo.vlan_type,
-                                            network_tag == VlanInfo.vlan_id),
-                           foreign_keys=[VlanInfo.vlan_type, VlanInfo.vlan_id],
+    legacy_vlan = relation(VlanInfo,
+                           primaryjoin=and_(foreign(usage) == remote(VlanInfo.vlan_type),
+                                            foreign(network_tag) == remote(VlanInfo.vlan_id)),
                            viewonly=True)
 
     @property

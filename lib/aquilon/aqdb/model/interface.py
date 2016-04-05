@@ -24,7 +24,7 @@ import re
 from sqlalchemy import (Column, Integer, DateTime, Sequence, String, Boolean,
                         ForeignKey, UniqueConstraint, CheckConstraint)
 from sqlalchemy.orm import (relation, backref, validates, object_session,
-                            deferred)
+                            deferred, foreign, remote)
 from sqlalchemy.orm.collections import attribute_mapped_collection
 from sqlalchemy.sql import desc, case, and_, or_, null
 
@@ -114,8 +114,7 @@ class Interface(DeviceLinkMixin, Base):
     model = relation(Model, innerjoin=True)
 
     master = relation('Interface',
-                      remote_side=id,
-                      primaryjoin=master_id == id,
+                      primaryjoin=foreign(master_id) == remote(id),
                       backref=backref('slaves'))
 
     # FIXME: move to PublicInterface
@@ -300,8 +299,7 @@ class VlanInterface(Interface):
     vlan_id = Column(Integer)
 
     parent = relation(Interface,
-                      remote_side=Interface.id,
-                      primaryjoin=parent_id == Interface.id,
+                      primaryjoin=foreign(parent_id) == remote(Interface.id),
                       backref=backref('vlans',
                                       collection_class=attribute_mapped_collection('vlan_id')))
 
