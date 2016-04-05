@@ -47,11 +47,9 @@ class Branch(Base):
 
     compiler = Column(String(255), nullable=False)
 
-    is_sync_valid = Column(Boolean(name="%s_is_sync_valid_ck" % _TN),
-                           nullable=False, default=True)
+    is_sync_valid = Column(Boolean, nullable=False, default=True)
 
-    autosync = Column(Boolean(name="%s_autosync_ck" % _TN), nullable=False,
-                      default=True)
+    autosync = Column(Boolean, nullable=False, default=True)
 
     owner_id = Column(ForeignKey(UserPrincipal.id), nullable=False, index=True)
 
@@ -93,14 +91,11 @@ class Domain(Branch):
                                nullable=True, index=True)
     rollback_commit = Column(AqStr(40), nullable=True)
 
-    requires_change_manager = Column(Boolean(name="%s_req_chg_mgr_ck" % _DMN),
-                                     nullable=False, default=False)
+    requires_change_manager = Column(Boolean, nullable=False, default=False)
 
-    allow_manage = Column(Boolean(name="%s_allow_manage_ck" % _DMN),
-                          nullable=False, default=True)
+    allow_manage = Column(Boolean, nullable=False, default=True)
 
-    archived = Column(Boolean(name="%s_archived_ck" % _DMN),
-                      nullable=False, default=False)
+    archived = Column(Boolean, nullable=False, default=False)
 
     tracked_branch = relation(Branch, foreign_keys=tracked_branch_id,
                               backref=backref('trackers'))

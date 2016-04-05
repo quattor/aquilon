@@ -40,7 +40,7 @@ class Grn(Base):
 
     # If False, then assigning new objects to this GRN should fail, but old
     # objects may still point to it
-    disabled = Column(Boolean(name="%s_disabled_ck" % _TN), nullable=False)
+    disabled = Column(Boolean, nullable=False)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))

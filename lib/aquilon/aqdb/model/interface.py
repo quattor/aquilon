@@ -68,14 +68,13 @@ class Interface(DeviceLinkMixin, Base):
 
     name = Column(AqStr(32), nullable=False)  # like e0, hme1, etc.
 
-    mac = Column(AqMac(name="%s_mac_ck" % _TN), nullable=True, unique=True)
+    mac = Column(AqMac, nullable=True, unique=True)
 
     model_id = Column(ForeignKey(Model.id), nullable=False, index=True)
 
     # PXE boot control. Does not affect how the OS configures the interface.
     # FIXME: move to PublicInterface
-    bootable = Column(Boolean(name="%s_bootable_ck" % _TN), nullable=False,
-                      default=False)
+    bootable = Column(Boolean, nullable=False, default=False)
 
     default_route = Column(Boolean(name="%s_default_route_ck" % _TN),
                            nullable=False, default=False)

@@ -31,8 +31,7 @@ _TN = 'disk'
 class VirtualDisk(Disk):
     _address_re = re.compile(r"\d+:\d+$")
 
-    snapshotable = Column(Boolean(name="%s_snapshotable_ck" % _TN),
-                          nullable=True)
+    snapshotable = Column(Boolean, nullable=True)
 
     iops_limit = Column(Integer, nullable=True)
 

@@ -127,8 +127,7 @@ class ParamDefinition(Base):
 
     id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
     path = Column(String(255), nullable=False)
-    required = Column(Boolean(name="%s_required_ck" % _TN), default=False,
-                      nullable=False)
+    required = Column(Boolean, default=False, nullable=False)
     value_type = Column(Enum(16, _PATH_TYPES), nullable=False, default="string")
     schema = Column(JSONEncodedDict, nullable=True)
     default = Column(Text, nullable=True)

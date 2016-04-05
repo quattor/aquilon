@@ -63,8 +63,7 @@ class DnsDomain(Base):
     id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
     name = Column(AqStr(64), nullable=False, unique=True)
 
-    restricted = Column(Boolean(name="%s_restricted_ck" % _TN),
-                        nullable=False, default=False)
+    restricted = Column(Boolean, nullable=False, default=False)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))

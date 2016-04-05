@@ -47,8 +47,7 @@ class VlanInfo(Base):
     vlan_type = Column(AqStr(32), nullable=False)
 
     __table_args__ = (CheckConstraint(and_(vlan_id >= 0,
-                                           vlan_id < MAX_VLANS),
-                                      name='%s_vlan_id_ck' % _VTN),
+                                           vlan_id < MAX_VLANS)),
                       {'info': {'unique_fields': ['port_group'],
                                 'extra_search_fields': ['vlan_id']}})
 

@@ -437,6 +437,10 @@ def uk_name(constraint, table):
     return multi_col_constraint_name(table.name, constraint.columns, 'uk')
 
 
+def ck_name(constraint, table):
+    return multi_col_constraint_name(table.name, constraint.columns, 'ck')
+
+
 def idx_name(idx, table):
     return multi_col_constraint_name(table.name, idx.columns, 'idx')
 
@@ -445,10 +449,12 @@ convention = {
     'pk_name': pk_name,
     'fk_name': fk_name,
     'uk_name': uk_name,
+    'ck_name': ck_name,
     'idx_name': idx_name,
     'pk': '%(pk_name)s',
     'fk': '%(fk_name)s',
     'uq': '%(uk_name)s',
+    'ck': '%(ck_name)s',
     'ix': '%(idx_name)s',
 }
 
