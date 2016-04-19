@@ -32,9 +32,15 @@ class CommandAddSrvRecord(BrokerCommand):
 
     def render(self, session, logger, service, protocol, dns_domain, priority,
                weight, target, port, dns_environment, ttl, comments, grn,
-               eon_id, **kwargs):
+               eon_id, target_environment, **kwargs):
         dbdns_env = DnsEnvironment.get_unique_or_default(session,
                                                          dns_environment)
+
+        if target_environment:
+            dbtgt_env = DnsEnvironment.get_unique(session, target_environment)
+        else:
+            dbtgt_env = dbdns_env
+
         dbdns_domain = DnsDomain.get_unique(session, dns_domain, compel=True)
         if dbdns_domain.restricted:
             raise ArgumentError("{0} is restricted, SRV records are not allowed."
@@ -68,7 +74,7 @@ class CommandAddSrvRecord(BrokerCommand):
                                     "different GRN."
                                     .format(curr_rec.fqdn, curr_rec.target.fqdn))
 
-        dbtarget = create_target_if_needed(session, logger, target, dbdns_env)
+        dbtarget = create_target_if_needed(session, logger, target, dbtgt_env)
         dbsrv_rec = SrvRecord(service=service, protocol=protocol,
                               priority=priority, weight=weight, target=dbtarget,
                               port=port, dns_domain=dbdns_domain, ttl=ttl,
