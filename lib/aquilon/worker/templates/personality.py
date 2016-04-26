@@ -22,8 +22,7 @@ from six import iteritems
 
 from sqlalchemy.inspection import inspect
 
-from aquilon.aqdb.model import (PersonalityStage, ParamDefinition,
-                                PersonalityParameter)
+from aquilon.aqdb.model import PersonalityStage, PersonalityParameter
 from aquilon.worker.locks import NoLockKey, PlenaryKey
 from aquilon.worker.templates.base import (Plenary, StructurePlenary,
                                            TemplateFormatter, PlenaryCollection)
@@ -68,31 +67,6 @@ def helper_feature_template(dbstage, featuretemplate, dbfeaturelink, lines):
             pan_assign(lines, base_path + "/" + key, params[key])
 
     lines.append(featuretemplate.format_raw(dbfeaturelink))
-
-
-def get_path_under_top(path, value):
-    """ input variable of type xx/yy would be printed as yy only in the
-        particular structure template
-        if path is just xx and points to a dict
-            i.e action = {startup: {a: b}}
-            then print as action/startup = pancized({a: b}
-        if path is just xx and points to non dict
-            ie xx = yy
-            then print xx = yy
-    """
-    ret = {}
-    pparts = ParamDefinition.split_path(path)
-    if not pparts:
-        return ret
-    top = pparts.pop(0)
-    if pparts:
-        ret["/".join(pparts)] = value
-    elif isinstance(value, dict):
-        for k in value:
-            ret[k] = value[k]
-    else:
-        ret[top] = value
-    return ret
 
 
 def staged_path(prefix, dbstage, suffix):
@@ -300,10 +274,23 @@ class PlenaryPersonalityParameter(StructurePlenary):
             if value is None:
                 value = param_def.parsed_default
 
-            if value is not None:
-                values = get_path_under_top(param_def.path, value)
-                for path in sorted(values.keys()):
-                    pan_assign(lines, path, values[path])
+            if value is None:
+                continue
+
+            # Do a single-level expansion of JSON parameters. This should be
+            # more efficient to compile according to the Pan documentation, and
+            # it also avoids trying to assign a value to an empty path if a
+            # single parameter definition covers the whole template
+            if isinstance(value, dict):
+                for k in sorted(value):
+                    v = value[k]
+
+                    if param_def.path:
+                        pan_assign(lines, param_def.path + "/" + k, v)
+                    else:
+                        pan_assign(lines, k, v)
+            else:
+                pan_assign(lines, param_def.path, value)
 
     def get_key(self, exclusive=True):
         if self.is_deleted():

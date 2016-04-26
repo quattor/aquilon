@@ -77,8 +77,9 @@ class CommandAddParameterDefintionArchetype(BrokerCommand):
             if value_type != "json":
                 raise ArgumentError("Only the JSON type can be used for "
                                     "top-level parameter definitions.")
+            path = ""
         elif path.startswith(template + "/"):
-            pass
+            path = path[len(template) + 1:]
         else:
             raise ArgumentError("The first component of the path must be "
                                 "the name of the template.")

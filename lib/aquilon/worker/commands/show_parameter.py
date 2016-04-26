@@ -41,6 +41,12 @@ class CommandShowParameterPersonality(BrokerCommand):
             for param_def_holder, param in dbstage.parameters.items():
                 param_definitions = param_def_holder.param_definitions
                 for param_def in param_definitions:
+                    # Backwards compatibility corner case - if the definition
+                    # covers the whole template but no values are set, then omit
+                    # it from the output
+                    if not param_def.path and not param.value:
+                        continue
+
                     value = param.get_path(param_def.path, compel=False)
                     if value is not None:
                         if param_def.value_type == "list":
@@ -50,7 +56,12 @@ class CommandShowParameterPersonality(BrokerCommand):
                             path = "%s/%s" % (param_def_holder.feature.cfg_path,
                                               param_def.path)
                         else:
-                            path = param_def.path
+                            # Backwards compatibility path fixup
+                            if param_def.path:
+                                path = "%s/%s" % (param_def_holder.template,
+                                                  param_def.path)
+                            else:
+                                path = param_def_holder.template
 
                         params.append((path, param_def, value))
 

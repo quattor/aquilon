@@ -131,7 +131,7 @@ class TestAddParameterDefinition(TestBrokerCommand):
                "--path", "foo/testrequired"]
         out = self.commandtest(cmd)
         self.output_equals(out, """
-            Parameter Definition: foo/testrequired [required]
+            Parameter Definition: testrequired [required]
               Type: string
               Template: foo
               Activation: dispatch
@@ -383,7 +383,7 @@ class TestAddParameterDefinition(TestBrokerCommand):
 
         out = self.commandtest(cmd)
         for path, params in default_param_defs.items():
-            pattern = "Parameter Definition: foo/" + path
+            pattern = "Parameter Definition: " + path
             if params.get("required", False):
                 pattern += r' \[required\]'
             pattern += r"\s*"
@@ -401,8 +401,8 @@ class TestAddParameterDefinition(TestBrokerCommand):
 
             self.searchoutput(out, pattern, cmd)
 
-        self.searchoutput(out, r'Parameter Definition: foo/startslash\s*', cmd)
-        self.searchoutput(out, r'Parameter Definition: foo/endslash\s*', cmd)
+        self.searchoutput(out, r'Parameter Definition: startslash\s*', cmd)
+        self.searchoutput(out, r'Parameter Definition: endslash\s*', cmd)
 
     def test_400_verify_all_proto(self):
         cmd = ["search_parameter_definition", "--archetype", "aquilon", "--format=proto"]

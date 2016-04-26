@@ -148,6 +148,9 @@ class Parameter(Base):
         return route
 
     def get_path(self, path, compel=True):
+        if not path:
+            return self.value
+
         try:
             route = self.path_walk(path)
         except ParameterPathNotFound:
@@ -161,6 +164,13 @@ class Parameter(Base):
         return value[index]
 
     def set_path(self, path, value, update=False):
+        if not path:
+            if self.value and not update:
+                raise ArgumentError("Parameter value already exists.")
+            self.value = value
+            self.value.changed()  # pylint: disable=E1101
+            return
+
         try:
             route = self.path_walk(path, not update)
         except ParameterPathNotFound:
@@ -184,6 +194,11 @@ class Parameter(Base):
         self.value.changed()  # pylint: disable=E1101
 
     def del_path(self, path, compel=True):
+        if not path:
+            self.value = {}
+            self.value.changed()  # pylint: disable=E1101
+            return
+
         try:
             route = self.path_walk(path)
         except ParameterPathNotFound:

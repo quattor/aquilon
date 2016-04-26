@@ -31,11 +31,11 @@ actions_schema = {
     "type": "object",
     "definitions": {
         "dependency_list": {
-                            "type": "array",
-                            "items": {
-                                "type": "string",
-                            },
-                            "uniqueItems": True,
+            "type": "array",
+            "items": {
+                "type": "string",
+            },
+            "uniqueItems": True,
         },
     },
     "patternProperties": {
@@ -258,7 +258,7 @@ class TestSetupParams(TestBrokerCommand):
         command = ["search_parameter_definition", "--archetype", "aquilon",
                    "--template", "espinfo"]
         out = self.commandtest(command)
-        self.matchoutput(out, "espinfo/function", command)
+        self.matchoutput(out, "function", command)
         self.matchclean(out, "access", command)
         self.matchclean(out, "actions", command)
         self.matchclean(out, "windows", command)

@@ -31,7 +31,8 @@ import aquilon.worker.depends
 from sqlalchemy.orm import joinedload, subqueryload
 
 from aquilon.aqdb.db_factory import DbFactory
-from aquilon.aqdb.model import (Base, PersonalityParameter, PersonalityStage,
+from aquilon.aqdb.model import (Base, ParamDefinition, ArchetypeParamDef,
+                                PersonalityParameter, PersonalityStage,
                                 Archetype, Feature)
 
 
@@ -66,7 +67,8 @@ def clean_params(dbstage):
         param = dbstage.parameters[param_def_holder]
         new_param = PersonalityParameter(value={})
         for paramdef in param_def_holder.param_definitions:
-            value = param.get_path(paramdef.path, compel=False)
+            path = param_def_holder.template + "/" + paramdef.path
+            value = param.get_path(path, compel=False)
             if value is not None:
                 new_param.set_path(paramdef.path, value)
         print "  --> Old: %r" % param.value
@@ -108,12 +110,21 @@ def main():
     #with session.no_autoflush:
     #    clean_params(dbstage)
 
-    q = session.query(PersonalityStage)
-    q = q.options(joinedload('personality'),
-                  subqueryload('features'),
-                  subqueryload('parameters'))
-
     with session.no_autoflush:
+        q = session.query(ParamDefinition)
+        q = q.join(ParamDefinition.holder.of_type(ArchetypeParamDef))
+        for paramdef in q:
+            if "/" in paramdef.path:
+                _, new_path = paramdef.path.split("/", 1)
+                paramdef.path = new_path
+            else:
+                paramdef.path = ""
+
+        q = session.query(PersonalityStage)
+        q = q.options(joinedload('personality'),
+                      subqueryload('features'),
+                      subqueryload('parameters'))
+
         for dbstage in q:
             clean_params(dbstage)
 

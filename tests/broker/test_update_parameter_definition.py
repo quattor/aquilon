@@ -38,7 +38,7 @@ class TestUpdateParameterDefinition(TestBrokerCommand):
                "--path", "foo/testint"]
         out = self.commandtest(cmd)
         self.searchoutput(out,
-                          r'Parameter Definition: foo/testint \[required\]\s*'
+                          r'Parameter Definition: testint \[required\]\s*'
                           r'Type: int\s*'
                           r'Template: foo\s*'
                           r'Activation: reboot\s*'

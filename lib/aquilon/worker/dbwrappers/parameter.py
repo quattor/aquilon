@@ -109,13 +109,14 @@ def lookup_paramdef(holder_object, path, strict=True):
         if not param_def_holder:
             raise NotFoundException("No parameter definitions found for {0:l}."
                                     .format(holder_object))
+        rel_path = path
     else:
         # Archetype - the path in the parameter definition contains the name of
         # the template, but the relative path we want to return should not
         if "/" in path:
-            template, _ = path.split("/", 1)
+            template, rel_path = path.split("/", 1)
         else:
-            template = path
+            template, rel_path = path, ""
 
         try:
             param_def_holder = holder_object.param_def_holders[template]
@@ -123,18 +124,16 @@ def lookup_paramdef(holder_object, path, strict=True):
             raise ArgumentError("Unknown parameter template %s." % template)
 
     for db_paramdef in param_def_holder.param_definitions:
-        if path == db_paramdef.path:
-            # TODO: In the future, we may return a relative path here
-            return db_paramdef, path
+        if rel_path == db_paramdef.path:
+            return db_paramdef, rel_path
 
         # Allow "indexing into" JSON parameters, but only if the path is not
         # strictly for the definition
         if strict or db_paramdef.value_type != "json":
             continue
 
-        if path.startswith(db_paramdef.path + "/"):
-            # TODO: In the future, we may return a relative path here
-            return db_paramdef, path
+        if db_paramdef.path == "" or rel_path.startswith(db_paramdef.path + "/"):
+            return db_paramdef, rel_path
 
     raise NotFoundException("Path {0!s} does not match any parameter "
                             "definitions of {1:l}."
