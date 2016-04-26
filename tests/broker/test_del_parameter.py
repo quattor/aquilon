@@ -65,12 +65,21 @@ class TestDelParameter(TestBrokerCommand):
         self.matchclean(out, "testaction", command)
         self.matchclean(out, "=", command)
 
+    def test_200_del_bad_path(self):
+        command = ["del_parameter", "--personality", "utpers-dev",
+                   "--archetype", "aquilon", "--path", "bad-path"]
+        err = self.badrequesttest(command)
+        self.matchoutput(err,
+                         "Unknown parameter template bad-path.",
+                         command)
+
     def test_200_del_unknown_path(self):
         command = ["del_parameter", "--personality", "utpers-dev",
-                   "--archetype", "aquilon", "--path", "no-such-path"]
+                   "--archetype", "aquilon", "--path", "foo/no-such-path"]
         err = self.notfoundtest(command)
         self.matchoutput(err,
-                         "Parameter no-such-path does not match any parameter definitions.",
+                         "Path foo/no-such-path does not match any parameter "
+                         "definitions of archetype aquilon.",
                          command)
 
 if __name__ == '__main__':

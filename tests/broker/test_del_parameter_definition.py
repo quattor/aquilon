@@ -82,8 +82,8 @@ class TestDelParameterDefinition(TestBrokerCommand):
                "--type", "host", "--path", "path-does-not-exist"]
         out = self.notfoundtest(cmd)
         self.matchoutput(out,
-                         "Parameter Definition path-does-not-exist, "
-                         "parameter definition holder myfeature not found.",
+                         "Path path-does-not-exist does not match any "
+                         "parameter definitions of host feature myfeature.",
                          cmd)
 
 if __name__ == '__main__':

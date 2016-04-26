@@ -93,21 +93,50 @@ def validate_rebuild_required(session, path, dbstage):
                             (path, dbstage, dbstage))
 
 
-def get_paramdef_for_parameter(path, param_def_holder):
-    if not param_def_holder:
-        return None
+def lookup_paramdef(holder_object, path, strict=True):
+    """
+    Return the definition belonging the given parameter path.
+
+    If the strict parameter is false, then the path may point inside a
+    JSON-typed definition.
+    """
+
+    if hasattr(holder_object, 'param_def_holder'):
+        # Feature
+        param_def_holder = holder_object.param_def_holder
+        if not param_def_holder:
+            raise NotFoundException("No parameter definitions found for {0:l}."
+                                    .format(holder_object))
+    else:
+        # Archetype - the path in the parameter definition contains the name of
+        # the template, but the relative path we want to return should not
+        if "/" in path:
+            template, _ = path.split("/", 1)
+        else:
+            template = path
+
+        try:
+            param_def_holder = holder_object.param_def_holders[template]
+        except KeyError:
+            raise ArgumentError("Unknown parameter template %s." % template)
 
     for db_paramdef in param_def_holder.param_definitions:
         if path == db_paramdef.path:
-            return db_paramdef
+            # TODO: In the future, we may return a relative path here
+            return db_paramdef, path
 
-        # Allow "indexing into" JSON parameters
-        if db_paramdef.value_type != "json":
+        # Allow "indexing into" JSON parameters, but only if the path is not
+        # strictly for the definition
+        if strict or db_paramdef.value_type != "json":
             continue
-        if path.startswith(db_paramdef.path):
-            return db_paramdef
 
-    return None
+        if path.startswith(db_paramdef.path + "/"):
+            # TODO: In the future, we may return a relative path here
+            return db_paramdef, path
+
+    raise NotFoundException("Path {0!s} does not match any parameter "
+                            "definitions of {1:l}."
+                            .format(path, holder_object))
 
 
 def validate_required_parameter(param_def_holder, parameter):

@@ -284,18 +284,19 @@ class TestAddParameterDefinition(TestBrokerCommand):
 
     def test_300_show_bad_path(self):
         cmd = ["show_parameter_definition", "--archetype", "aquilon",
-               "--path", "path-does-not-exist"]
+               "--path", "foo/path-does-not-exist"]
         out = self.notfoundtest(cmd)
         self.matchoutput(out,
-                         "Parameter definition path-does-not-exist not found.",
+                         "Path foo/path-does-not-exist does not match any "
+                         "parameter definitions of archetype aquilon.",
                          cmd)
 
     def test_300_show_archetype_no_params(self):
         cmd = ["show_parameter_definition", "--archetype", "windows",
                "--path", "path-does-not-exist"]
-        out = self.notfoundtest(cmd)
+        out = self.badrequesttest(cmd)
         self.matchoutput(out,
-                         "Parameter definition path-does-not-exist not found.",
+                         "Unknown parameter template path-does-not-exist.",
                          cmd)
 
     def test_300_invalid_path_feature(self):
@@ -331,8 +332,9 @@ class TestAddParameterDefinition(TestBrokerCommand):
         cmd = ["show_parameter_definition", "--feature", "myfeature",
                "--type", "host", "--path", "path-does-not-exist"]
         out = self.notfoundtest(cmd)
-        self.matchoutput(out, "Parameter Definition path-does-not-exist, "
-                         "parameter definition holder myfeature not found.",
+        self.matchoutput(out,
+                         "Path path-does-not-exist does not match any "
+                         "parameter definitions of host feature myfeature.",
                          cmd)
 
     def test_300_show_feature_no_params(self):
@@ -340,7 +342,8 @@ class TestAddParameterDefinition(TestBrokerCommand):
                "--type", "host", "--path", "path-does-not-exist"]
         out = self.notfoundtest(cmd)
         self.matchoutput(out,
-                         "Host Feature pre_host_no_params does not have parameters.",
+                         "No parameter definitions found for host feature "
+                         "pre_host_no_params.",
                          cmd)
 
     def test_400_verify_all(self):

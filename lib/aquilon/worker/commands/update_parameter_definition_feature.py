@@ -15,10 +15,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from aquilon.aqdb.model import Feature, FeatureParamDef, ParamDefinition
+from aquilon.aqdb.model import Feature, ParamDefinition
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.change_management import validate_prod_feature
 from aquilon.worker.dbwrappers.parameter import (add_feature_paramdef_plenaries,
+                                                 lookup_paramdef,
                                                  update_paramdef_schema)
 from aquilon.worker.templates import PlenaryCollection
 
@@ -32,14 +33,8 @@ class CommandUpdParameterDefintionFeature(BrokerCommand):
                justification, reason, **kwargs):
         cls = Feature.polymorphic_subclass(type, "Unknown feature type")
         dbfeature = cls.get_unique(session, name=feature, compel=True)
-
-        if not dbfeature.param_def_holder:
-            dbfeature.param_def_holder = FeatureParamDef()
-
         path = ParamDefinition.normalize_path(path)
-        db_paramdef = ParamDefinition.get_unique(session, path=path,
-                                                 holder=dbfeature.param_def_holder,
-                                                 compel=True)
+        db_paramdef, _ = lookup_paramdef(dbfeature, path)
 
         plenaries = PlenaryCollection(logger=logger)
 

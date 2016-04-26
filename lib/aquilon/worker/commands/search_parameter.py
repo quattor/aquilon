@@ -17,12 +17,10 @@
 
 from six import iteritems
 
-from sqlalchemy.orm.exc import NoResultFound
-
-from aquilon.exceptions_ import NotFoundException
-from aquilon.aqdb.model import ParamDefinition, Archetype, ArchetypeParamDef
+from aquilon.aqdb.model import Archetype
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.dbwrappers.parameter import search_path_in_personas
+from aquilon.worker.dbwrappers.parameter import (search_path_in_personas,
+                                                 lookup_paramdef)
 from aquilon.worker.formats.parameter import SimpleParameterList
 
 
@@ -35,14 +33,6 @@ class CommandSearchParameter(BrokerCommand):
         if not dbarchetype.param_def_holders:
             return
 
-        q = session.query(ParamDefinition)
-        q = q.filter_by(path=path)
-        q = q.join(ArchetypeParamDef)
-        q = q.filter_by(archetype=dbarchetype)
-        try:
-            db_paramdef = q.one()
-        except NoResultFound:
-            raise NotFoundException("Parameter definition %s not found." % path)
-
+        db_paramdef, _ = lookup_paramdef(dbarchetype, path)
         params = search_path_in_personas(session, db_paramdef)
         return SimpleParameterList(path, iteritems(params))

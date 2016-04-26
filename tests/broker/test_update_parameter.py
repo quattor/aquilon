@@ -63,7 +63,8 @@ class TestUpdateParameter(TestBrokerCommand):
                    "--path", "espinfo/badpath", "--value", "badvalue"]
         err = self.notfoundtest(command)
         self.matchoutput(err,
-                         "Parameter espinfo/badpath does not match any parameter definitions.",
+                         "Path espinfo/badpath does not match any parameter "
+                         "definitions of archetype aquilon.",
                          command)
 
 if __name__ == '__main__':

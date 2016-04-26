@@ -20,6 +20,7 @@ from aquilon.aqdb.model import Archetype, ParamDefinition
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.change_management import validate_prod_archetype
 from aquilon.worker.dbwrappers.parameter import (add_arch_paramdef_plenaries,
+                                                 lookup_paramdef,
                                                  update_paramdef_schema)
 from aquilon.worker.templates import PlenaryCollection
 
@@ -36,13 +37,7 @@ class CommandUpdParameterDefintionArchetype(BrokerCommand):
             raise ArgumentError("{0} is not compileable.".format(dbarchetype))
 
         path = ParamDefinition.normalize_path(path)
-        for holder in dbarchetype.param_def_holders.values():
-            db_paramdef = ParamDefinition.get_unique(session, path=path,
-                                                     holder=holder)
-            if db_paramdef:
-                break
-        else:
-            raise ArgumentError("Parameter definition %s not found." % path)
+        db_paramdef, _ = lookup_paramdef(dbarchetype, path)
 
         plenaries = PlenaryCollection(logger=logger)
 

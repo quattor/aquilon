@@ -19,6 +19,7 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import ParamDefinition, Archetype
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.parameter import (search_path_in_personas,
+                                                 lookup_paramdef,
                                                  add_arch_paramdef_plenaries)
 from aquilon.worker.templates import PlenaryCollection
 
@@ -30,14 +31,7 @@ class CommandDelParameterDefintionArchetype(BrokerCommand):
     def render(self, session, logger, archetype, path, **kwargs):
         dbarchetype = Archetype.get_unique(session, archetype, compel=True)
         path = ParamDefinition.normalize_path(path, strict=False)
-
-        for holder in dbarchetype.param_def_holders.values():
-            db_paramdef = ParamDefinition.get_unique(session, path=path,
-                                                     holder=holder)
-            if db_paramdef:
-                break
-        else:
-            raise ArgumentError("Parameter definition %s not found." % path)
+        db_paramdef, _ = lookup_paramdef(dbarchetype, path)
 
         # Validate if this path is still being used
         params = search_path_in_personas(session, db_paramdef)

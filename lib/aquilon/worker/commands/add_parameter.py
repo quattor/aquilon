@@ -15,12 +15,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from aquilon.exceptions_ import ArgumentError, NotFoundException
+from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import (Personality, PersonalityParameter,
                                 ParamDefinition, Feature)
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.parameter import (set_parameter,
-                                                 get_paramdef_for_parameter)
+                                                 lookup_paramdef)
 from aquilon.worker.dbwrappers.change_management import validate_prod_personality
 from aquilon.worker.templates import Plenary, PlenaryCollection
 
@@ -49,27 +49,21 @@ class CommandAddParameter(BrokerCommand):
 
         validate_prod_personality(dbstage, user, justification, reason)
 
+        path = ParamDefinition.normalize_path(path, strict=self.strict_path)
+
         if feature:
             dbfeature = Feature.get_unique(session, name=feature, feature_type=type,
                                            compel=True)
             if dbfeature not in [link.feature for link in dbstage.features]:
                 raise ArgumentError("{0} is not bound to {1:l}."
                                     .format(dbfeature, dbstage))
-            holders = [dbfeature.param_def_holder]
+            holder_object = dbfeature
         else:
-            holders = dbpersonality.archetype.param_def_holders.values()
+            holder_object = dbpersonality.archetype
 
-        path = ParamDefinition.normalize_path(path, strict=self.strict_path)
+        db_paramdef, rel_path = lookup_paramdef(holder_object, path, False)
 
-        for param_def_holder in holders:
-            db_paramdef = get_paramdef_for_parameter(path, param_def_holder)
-            if db_paramdef:
-                break
-        else:
-            raise NotFoundException("Parameter %s does not match any "
-                                    "parameter definitions." % path)
-
-        self.process_parameter(session, dbstage, db_paramdef, path, value)
+        self.process_parameter(session, dbstage, db_paramdef, rel_path, value)
 
         session.flush()
 
