@@ -29,8 +29,12 @@ from broker.brokertest import TestBrokerCommand
 class TestDelParameter(TestBrokerCommand):
 
     def test_100_del_testrequired(self):
+        self.check_plenary_exists("aquilon", "personality", "utpers-dev+next",
+                                  "foo")
         self.noouttest(["del_parameter", "--personality", "utpers-dev",
                         "--archetype", "aquilon", "--path", "foo/testrequired"])
+        self.check_plenary_gone("aquilon", "personality", "utpers-dev+next",
+                                "foo")
 
     def test_110_del_single_action(self):
         self.noouttest(["del_parameter", "--personality", "utpers-dev",
@@ -50,6 +54,8 @@ class TestDelParameter(TestBrokerCommand):
         self.matchclean(out, "testaction2", command)
 
     def test_115_del_actions(self):
+        self.check_plenary_exists("aquilon", "personality", "utpers-dev+next", "actions")
+
         self.noouttest(["del_parameter", "--personality", "utpers-dev",
                         "--archetype", "aquilon", "--path", "actions"])
 
@@ -62,9 +68,12 @@ class TestDelParameter(TestBrokerCommand):
         command = ["cat", "--personality", "utpers-dev",
                    "--archetype", "aquilon", "--personality_stage", "next",
                    "--param_tmpl", "actions"]
-        out = self.commandtest(command)
-        self.matchclean(out, "testaction", command)
-        self.matchclean(out, "=", command)
+        out = self.notfoundtest(command)
+        self.matchoutput(out, "No parameters found for template actions.",
+                         command)
+
+        self.check_plenary_gone("aquilon", "personality", "utpers-dev+next",
+                                "actions")
 
     def test_200_del_bad_path(self):
         command = ["del_parameter", "--personality", "utpers-dev",

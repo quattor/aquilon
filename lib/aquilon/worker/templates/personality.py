@@ -22,7 +22,8 @@ from operator import attrgetter
 from sqlalchemy.inspection import inspect
 from sqlalchemy.orm import joinedload, subqueryload
 
-from aquilon.aqdb.model import PersonalityStage, PersonalityParameter
+from aquilon.aqdb.model import (PersonalityStage, PersonalityParameter,
+                                ArchetypeParamDef)
 from aquilon.aqdb.model.feature import host_features
 from aquilon.worker.locks import NoLockKey, PlenaryKey
 from aquilon.worker.templates.base import (Plenary, StructurePlenary,
@@ -73,16 +74,10 @@ class PlenaryPersonality(PlenaryCollection):
 
         self.append(PlenaryPersonalityBase.get_plenary(dbstage,
                                                        allow_incomplete=allow_incomplete))
-
-        for template, defholder in dbstage.archetype.param_def_holders.items():
-            if defholder not in dbstage.parameters:
-                logger.client_info("{0} does not have parameters for "
-                                   "template {1!s}.".format(dbstage, template))
-                continue
-
-            plenary = PlenaryPersonalityParameter.get_plenary(dbstage.parameters[defholder],
-                                                              allow_incomplete=allow_incomplete)
-            self.append(plenary)
+        self.extend(PlenaryPersonalityParameter.get_plenary(dbparam,
+                                                            allow_incomplete=allow_incomplete)
+                    for defholder, dbparam in dbstage.parameters.items()
+                    if isinstance(defholder, ArchetypeParamDef))
 
     def get_key(self, exclusive=True):
         if inspect(self.dbobj).deleted:

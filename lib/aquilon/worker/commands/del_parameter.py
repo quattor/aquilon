@@ -27,8 +27,8 @@ class CommandDelParameter(CommandAddParameter):
 
     required_parameters = ['personality', 'path']
 
-    def process_parameter(self, session, dbstage, db_paramdef, path,
-                          value=None):
+    def process_parameter(self, session, dbstage, db_paramdef, path, value,
+                          plenaries):
         try:
             parameter = dbstage.parameters[db_paramdef.holder]
         except KeyError:
@@ -39,7 +39,9 @@ class CommandDelParameter(CommandAddParameter):
 
         parameter.del_path(path)
 
-        if db_paramdef.schema:
+        if not parameter.value:
+            del dbstage.parameters[db_paramdef.holder]
+        elif db_paramdef.schema:
             new_value = parameter.get_path(db_paramdef.path, compel=False)
             if new_value is not None:
                 try:

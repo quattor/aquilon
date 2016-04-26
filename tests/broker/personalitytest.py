@@ -76,7 +76,8 @@ class PersonalityTestMixin(object):
         command = ["add_personality", "--archetype", archetype,
                    "--personality", name, "--grn", grn,
                    "--host_environment", environment]
-        if cluster_required or archetype in clustered_archetypes:
+        if cluster_required or (cluster_required is None and
+                                archetype in clustered_archetypes):
             command.append("--cluster_required")
 
         if staged is not None:

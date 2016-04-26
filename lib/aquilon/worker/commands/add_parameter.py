@@ -17,7 +17,7 @@
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import (Personality, PersonalityParameter,
-                                ParamDefinition, Feature)
+                                ParamDefinition, ArchetypeParamDef, Feature)
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.change_management import validate_prod_personality
 from aquilon.worker.dbwrappers.feature import get_affected_plenaries
@@ -30,13 +30,22 @@ class CommandAddParameter(BrokerCommand):
 
     required_parameters = ['personality', 'path']
 
-    def process_parameter(self, session, dbstage, db_paramdef, path, value):
+    def process_parameter(self, session, dbstage, db_paramdef, path, value,
+                          plenaries):
         try:
             parameter = dbstage.parameters[db_paramdef.holder]
         except KeyError:
             parameter = PersonalityParameter(param_def_holder=db_paramdef.holder,
                                              value={})
             dbstage.parameters[db_paramdef.holder] = parameter
+
+            # Since the parameter is new, the PlenaryPersonality collection does
+            # not have it, so we need to add it explicitly for the template to
+            # get created on the disk. It would be nice if PlanaryPersonality
+            # would be able to handle this internally, but that would need
+            # deeper surgery.
+            if isinstance(db_paramdef.holder, ArchetypeParamDef):
+                plenaries.append(Plenary.get_plenary(parameter))
 
         set_parameter(session, parameter, db_paramdef, path, value)
 
@@ -78,7 +87,8 @@ class CommandAddParameter(BrokerCommand):
 
         db_paramdef, rel_path = lookup_paramdef(holder_object, path, False)
 
-        self.process_parameter(session, dbstage, db_paramdef, rel_path, value)
+        self.process_parameter(session, dbstage, db_paramdef, rel_path, value,
+                               plenaries)
 
         session.flush()
 
