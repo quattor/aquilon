@@ -65,7 +65,7 @@ class TestUpdatePersonality(VerifyGrnsMixin, PersonalityTestMixin,
 
         self.verifycatpersonality("aquilon", "utunused/dev")
 
-    def test_125_restore_utpersonality_dev(self):
+    def test_125_restore_utunused_dev(self):
         # Well, except the comments, which are removed
         command = ["update_personality", "--personality", "utunused/dev",
                    "--archetype=aquilon",
@@ -74,7 +74,7 @@ class TestUpdatePersonality(VerifyGrnsMixin, PersonalityTestMixin,
                    "--comments", ""]
         self.successtest(command)
 
-    def test_126_verify_utpersonality_dev(self):
+    def test_126_verify_utunused_dev(self):
         command = ["show_personality", "--personality=utunused/dev",
                    "--archetype=aquilon"]
         out = self.commandtest(command)

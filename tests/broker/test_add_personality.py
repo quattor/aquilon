@@ -33,7 +33,7 @@ GRN = "grn:/ms/ei/aquilon/aqd"
 
 class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
                          TestBrokerCommand):
-    def test_100_add_utpersonality(self):
+    def test_100_add_utunused(self):
         # Unused personality with basic settings
         command = ["add_personality", "--personality=utunused/dev",
                    "--archetype=aquilon", "--grn=%s" % GRN, "--config_override",
@@ -46,7 +46,7 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
             self.check_plenary_exists("aquilon", "personality",
                                       "utunused/dev", plenary)
 
-    def test_105_verify_utpersonality(self):
+    def test_105_verify_utunused(self):
         command = ["show_personality", "--personality=utunused/dev",
                    "--archetype=aquilon"]
         out = self.commandtest(command)
@@ -60,7 +60,7 @@ class TestAddPersonality(VerifyGrnsMixin, PersonalityTestMixin,
         self.matchoutput(out, "Used by GRN: %s [target: esp]" % GRN, command)
         self.matchclean(out, "inventory", command)
 
-    def test_105_verify_utpersonality_proto(self):
+    def test_105_verify_utunused_proto(self):
         command = ["show_personality", "--archetype=aquilon",
                    "--personality=utunused/dev", "--format=proto"]
         personality = self.protobuftest(command, expect=1)[0]
