@@ -40,7 +40,7 @@ class CommandDelParameterDefintionArchetype(BrokerCommand):
             raise ArgumentError("Parameter definition %s not found." % path)
 
         # Validate if this path is still being used
-        params = search_path_in_personas(session, path, db_paramdef.holder)
+        params = search_path_in_personas(session, db_paramdef)
         if params:
             holders = ["{0.holder_object:l}".format(param) for param in params]
             raise ArgumentError("Parameter with path {0} used by following and "

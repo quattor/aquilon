@@ -136,22 +136,23 @@ def validate_required_parameter(param_def_holder, parameter):
     return errors
 
 
-def search_path_in_personas(session, path, param_def_holder):
+def search_path_in_personas(session, db_paramdef):
     q = session.query(PersonalityParameter)
     q = q.join(PersonalityStage)
     q = q.options(contains_eager('personality_stage'))
-    if isinstance(param_def_holder, ArchetypeParamDef):
+    if isinstance(db_paramdef.holder, ArchetypeParamDef):
         q = q.join(Personality)
         q = q.options(contains_eager('personality_stage.personality'))
-        q = q.filter_by(archetype=param_def_holder.archetype)
+        q = q.filter_by(archetype=db_paramdef.holder.archetype)
     else:
         q = q.join(FeatureLink)
-        q = q.filter_by(feature=param_def_holder.feature)
+        q = q.filter_by(feature=db_paramdef.holder.feature)
 
     params = {}
 
-    if isinstance(param_def_holder, FeatureParamDef):
-        path = Parameter.feature_path(param_def_holder.feature, path)
+    path = db_paramdef.path
+    if isinstance(db_paramdef.holder, FeatureParamDef):
+        path = Parameter.feature_path(db_paramdef.holder.feature, path)
 
     for parameter in q:
         try:
@@ -234,8 +235,7 @@ def update_paramdef_schema(session, db_paramdef, schema):
     db_paramdef.schema = schema
 
     # Ensure that existing values do not conflict with the new schema
-    params = search_path_in_personas(session, db_paramdef.path,
-                                     db_paramdef.holder)
+    params = search_path_in_personas(session, db_paramdef)
     for param, value in iteritems(params):
         try:
             validate(value, schema)
