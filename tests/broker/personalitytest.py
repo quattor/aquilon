@@ -21,6 +21,7 @@ default_parameters = {
         "espinfo/function": "development",
         "espinfo/class": "INFRASTRUCTURE",
         "espinfo/users": "IT / TECHNOLOGY",
+        "windows/windows": '[{"duration": 8, "start": "08:00", "day": "Sun"}]',
     },
     'hacluster': {
         "espinfo/class": "INFRASTRUCTURE",

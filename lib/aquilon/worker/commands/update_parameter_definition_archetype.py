@@ -18,48 +18,26 @@
 from aquilon.exceptions_ import ArgumentError, UnimplementedError
 from aquilon.aqdb.model import Archetype, ParamDefinition
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.dbwrappers.change_management import validate_prod_archetype
-from aquilon.worker.dbwrappers.parameter import (add_arch_paramdef_plenaries,
-                                                 lookup_paramdef,
+from aquilon.worker.dbwrappers.parameter import (lookup_paramdef,
                                                  update_paramdef_schema)
-from aquilon.worker.templates import PlenaryCollection
 
 
 class CommandUpdParameterDefintionArchetype(BrokerCommand):
 
     required_parameters = ["archetype", "path"]
 
-    def render(self, session, logger, archetype, path, schema, clear_schema,
-               required, activation, default, clear_default, description, user,
-               justification, reason, **kwargs):
+    def render(self, session, archetype, path, schema, clear_schema, required,
+               activation, default, clear_default, description, **kwargs):
         dbarchetype = Archetype.get_unique(session, archetype, compel=True)
         if not dbarchetype.is_compileable:
             raise ArgumentError("{0} is not compileable.".format(dbarchetype))
 
+        if default is not None or clear_default:
+            raise UnimplementedError("Archetype-wide parameter definitions "
+                                     "cannot have default values.")
+
         path = ParamDefinition.normalize_path(path)
         db_paramdef, _ = lookup_paramdef(dbarchetype, path)
-
-        plenaries = PlenaryCollection(logger=logger)
-
-        # Changing the default value impacts all personalities which do not
-        # override it, so more scrunity is needed
-        if default is not None or clear_default:
-            # Changing the default of a parameter which requires a rebuild is
-            # a risky operation. If it is really needed, then the workaround is
-            # to turn the activation flag off first, update the value, and
-            # turn activation back again.
-            if db_paramdef.activation == 'rebuild':
-                raise UnimplementedError("Changing the default value of a "
-                                         "parameter which requires rebuild "
-                                         "would cause all existing hosts to "
-                                         "require a rebuild, which is not "
-                                         "supported.")
-
-            validate_prod_archetype(dbarchetype, user, justification, reason)
-            add_arch_paramdef_plenaries(session, dbarchetype,
-                                        db_paramdef.holder, plenaries)
-
-            db_paramdef.default = default
 
         if required is not None:
             db_paramdef.required = required
@@ -73,10 +51,5 @@ class CommandUpdParameterDefintionArchetype(BrokerCommand):
             db_paramdef.schema = None
 
         session.flush()
-
-        written = plenaries.write()
-        if plenaries.plenaries:
-            logger.client_info("Flushed %d/%d templates." %
-                               (written, len(plenaries.plenaries)))
 
         return

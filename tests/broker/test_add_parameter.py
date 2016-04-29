@@ -128,47 +128,15 @@ class TestAddParameter(VerifyGrnsMixin, PersonalityTestMixin,
                           r'"users" = list\(\s*"someusers",\s*"otherusers"\s*\);',
                           command)
 
-    def test_125_cat_defaults_foo(self):
-        command = ["cat", "--personality", "utpers-dev", "--archetype", "aquilon",
-                   "--param_tmpl", "foo"]
-        out = self.commandtest(command)
-        self.matchoutput(out,
-                         'structure template personality/utpers-dev/foo;',
-                         command)
-        self.matchoutput(out, '"testboolean" = true;', command)
-        self.matchoutput(out, '"testfalsedefault" = false;', command)
-        self.matchoutput(out, '"testfloat" = 100.100;', command)
-        self.matchoutput(out, '"testint" = 60;', command)
-        self.matchoutput(out, '"teststring" = "default";', command)
-        self.searchoutput(out,
-                          r'"testjson" = nlist\(\s*'
-                          r'"key", "param_key",\s*'
-                          r'"values", list\(\s*0\s*\)\s*\);\s*',
-                          command)
-        self.searchoutput(out,
-                          r'"testlist" = list\(\s*"val1",\s*"val2"\s*\);',
-                          command)
-
-        self.matchclean(out, "testdefault", command)
-        self.matchclean(out, "testrequired", command)
-        self.matchclean(out, "test_rebuild_required", command)
-
-    def test_125_cat_defaults_windows(self):
-        command = ["cat", "--personality", "utpers-dev", "--archetype", "aquilon",
-                   "--param_tmpl", "windows"]
-        out = self.commandtest(command)
-        self.matchoutput(out,
-                         "structure template personality/utpers-dev/windows;",
-                         command)
-        self.searchoutput(out,
-                          r'"windows" = list\(\s*nlist\(\s*"day", "Sun",\s*"duration", 8,\s*"start", "08:00"\s*\)\s*\);',
-                          command)
-
     def test_130_validate(self):
         command = ["validate_parameter", "--personality", "utpers-dev"]
         out = self.badrequesttest(command)
         self.searchoutput(out,
                           r'Following required parameters have not been specified:\s*'
+                          r'Parameter Definition: windows/windows \[required\]\s*'
+                          r'Type: json\s*'
+                          r'Template: windows\s*'
+                          r'Activation: dispatch\s*'
                           r'Parameter Definition: foo/testrequired \[required\]\s*'
                           r'Type: string\s*'
                           r'Template: foo',
@@ -291,6 +259,9 @@ class TestAddParameter(VerifyGrnsMixin, PersonalityTestMixin,
         self.noouttest(["add_parameter", "--personality", "utpers-dev",
                         "--archetype", "aquilon", "--path", "foo/testrequired",
                         "--value", "set"])
+        self.noouttest(["add_parameter", "--personality", "utpers-dev",
+                        "--archetype", "aquilon", "--path", "windows/windows",
+                        "--value", '[{"duration": 8, "start": "08:00", "day": "Sun"}]'])
 
     def test_155_validate(self):
         command = ["validate_parameter", "--personality", "utpers-dev",

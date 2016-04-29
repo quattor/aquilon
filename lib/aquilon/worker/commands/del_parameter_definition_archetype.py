@@ -32,6 +32,7 @@ class CommandDelParameterDefintionArchetype(BrokerCommand):
         dbarchetype = Archetype.get_unique(session, archetype, compel=True)
         path = ParamDefinition.normalize_path(path, strict=False)
         db_paramdef, _ = lookup_paramdef(dbarchetype, path)
+        param_def_holder = db_paramdef.holder
 
         # Validate if this path is still being used
         params = search_path_in_personas(session, db_paramdef)
@@ -43,17 +44,13 @@ class CommandDelParameterDefintionArchetype(BrokerCommand):
 
         plenaries = PlenaryCollection(logger=logger)
 
-        param_def_holder = db_paramdef.holder
-        old_default = db_paramdef.default
         param_def_holder.param_definitions.remove(db_paramdef)
-
-        if old_default is not None or not param_def_holder.param_definitions:
-            add_arch_paramdef_plenaries(session, dbarchetype, param_def_holder,
-                                        plenaries)
 
         # This was the last definition for the given template - need to
         # clean up
         if not param_def_holder.param_definitions:
+            add_arch_paramdef_plenaries(session, dbarchetype, param_def_holder,
+                                        plenaries)
             dbarchetype.param_def_holders.remove(param_def_holder)
 
         session.flush()

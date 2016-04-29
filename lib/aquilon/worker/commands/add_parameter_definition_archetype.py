@@ -18,7 +18,6 @@
 from aquilon.exceptions_ import ArgumentError, UnimplementedError
 from aquilon.aqdb.model import Archetype, ArchetypeParamDef, ParamDefinition
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.dbwrappers.change_management import validate_prod_archetype
 from aquilon.worker.dbwrappers.parameter import add_arch_paramdef_plenaries
 from aquilon.worker.templates import PlenaryCollection
 from aquilon.utils import validate_template_name
@@ -29,26 +28,27 @@ class CommandAddParameterDefintionArchetype(BrokerCommand):
     required_parameters = ["archetype", "template", "path", "value_type"]
 
     def render(self, session, logger, archetype, template, path, value_type,
-               schema, required, activation, default, description, user,
-               justification, reason, **kwargs):
+               schema, required, activation, default, description, **kwargs):
         validate_template_name(template, "template")
         dbarchetype = Archetype.get_unique(session, archetype, compel=True)
         if not dbarchetype.is_compileable:
             raise ArgumentError("{0} is not compileable.".format(dbarchetype))
+
+        if default is not None:
+            raise UnimplementedError("Archetype-wide parameter definitions "
+                                     "cannot have default values.")
+
+        plenaries = PlenaryCollection(logger=logger)
 
         try:
             holder = dbarchetype.param_def_holders[template]
         except KeyError:
             holder = ArchetypeParamDef(template=template)
             dbarchetype.param_def_holders[template] = holder
+            add_arch_paramdef_plenaries(session, dbarchetype, holder, plenaries)
 
         if not activation:
             activation = 'dispatch'
-        if activation == 'rebuild' and default is not None:
-            raise UnimplementedError("Setting a default value for a parameter "
-                                     "which requires rebuild would cause all "
-                                     "existing hosts to require a rebuild, "
-                                     "which is not supported.")
 
         if schema and value_type != "json":
             raise ArgumentError("Only JSON parameters may have a schema.")
@@ -62,19 +62,10 @@ class CommandAddParameterDefintionArchetype(BrokerCommand):
         ParamDefinition.get_unique(session, path=path, holder=holder,
                                    preclude=True)
 
-        plenaries = PlenaryCollection(logger=logger)
-        if default is not None:
-            validate_prod_archetype(dbarchetype, user, justification, reason)
-            add_arch_paramdef_plenaries(session, dbarchetype, holder, plenaries)
-
         db_paramdef = ParamDefinition(path=path, holder=holder,
                                       value_type=value_type, schema=schema,
                                       required=required, activation=activation,
                                       description=description)
-        # Set default separately - validation in the model depends on the other
-        # attributes being already set
-        db_paramdef.default = default
-
         session.add(db_paramdef)
 
         session.flush()

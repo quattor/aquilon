@@ -27,19 +27,11 @@ from broker.brokertest import TestBrokerCommand
 
 class TestUpdateParameterDefinition(TestBrokerCommand):
 
-    def test_100_update_arch_paramdef_no_justification(self):
-        command = ["update_parameter_definition", "--archetype", "aquilon",
-                   "--path=foo/testint", "--default=100"]
-        out = self.unauthorizedtest(command, auth=True, msgcheck=False)
-        self.matchoutput(out, "--justification is required", command)
-
-    def test_101_update_arch_paramdef(self):
+    def test_100_update_arch_paramdef(self):
         cmd = ["update_parameter_definition", "--archetype", "aquilon",
-               "--path=foo/testint", "--description=testint",
-               "--default=100", "--required", "--activation", "reboot",
-               "--justification", "tcm=12345678"]
+               "--path=foo/testint", "--description=testint", "--required",
+               "--activation", "reboot", "--justification", "tcm=12345678"]
         out = self.statustest(cmd)
-        self.matchoutput(out, "Flushed", cmd)
 
     def test_105_verify_update(self):
         cmd = ["show_parameter_definition", "--archetype", "aquilon",
@@ -49,16 +41,9 @@ class TestUpdateParameterDefinition(TestBrokerCommand):
                           r'Parameter Definition: foo/testint \[required\]\s*'
                           r'Type: int\s*'
                           r'Template: foo\s*'
-                          r'Default: 100\s*'
                           r'Activation: reboot\s*'
                           r'Description: testint\s*',
                           cmd)
-
-    def test_105_cat_unixeng_test(self):
-        cmd = ["cat", "--archetype", "aquilon", "--personality", "unixeng-test",
-               "--param_tmpl", "foo"]
-        out = self.commandtest(cmd)
-        self.matchoutput(out, '"testint" = 100;', cmd)
 
     def test_110_update_feature_paramdef(self):
         cmd = ["update_parameter_definition", "--feature", "myfeature", "--type=host",
@@ -76,30 +61,6 @@ class TestUpdateParameterDefinition(TestBrokerCommand):
                           r'Description: testint\s*',
                           cmd)
 
-    def test_120_clear_default(self):
-        command = ["update_parameter_definition", "--archetype", "aquilon",
-                   "--path=foo/testint", "--clear_default",
-                   "--justification", "tcm=12345678"]
-        self.statustest(command)
-
-    def test_125_verify_update(self):
-        cmd = ["show_parameter_definition", "--archetype", "aquilon",
-               "--path", "foo/testint"]
-        out = self.commandtest(cmd)
-        self.matchclean(out, "Default:", cmd)
-
-    def test_125_cat_unixeng_test(self):
-        cmd = ["cat", "--archetype", "aquilon", "--personality", "unixeng-test",
-               "--param_tmpl", "foo"]
-        out = self.commandtest(cmd)
-        self.matchclean(out, '"testint"', cmd)
-
-    def test_129_restore_default(self):
-        command = ["update_parameter_definition", "--archetype", "aquilon",
-                   "--path=foo/testint", "--default=100",
-                   "--justification", "tcm=12345678"]
-        self.statustest(command)
-
     def test_130_update_norequired(self):
         cmd = ["update_parameter_definition", "--feature", "myfeature", "--type=host",
                "--path=testint", "--norequired"]
@@ -115,13 +76,12 @@ class TestUpdateParameterDefinition(TestBrokerCommand):
                           r'Description: testint\s*',
                           cmd)
 
-    def test_200_update_rebuild_required_default(self):
+    def test_200_update_archetype_default(self):
         cmd = ["update_parameter_definition", "--archetype", "aquilon",
                "--path=foo/test_rebuild_required", "--default=default"]
         out = self.unimplementederrortest(cmd)
-        self.matchoutput(out, "Changing the default value of a parameter "
-                         "which requires rebuild would cause all existing "
-                         "hosts to require a rebuild, which is not supported.",
+        self.matchoutput(out, "Archetype-wide parameter definitions cannot "
+                         "have default values.",
                          cmd)
 
     def test_200_update_bad_feature_type(self):

@@ -164,7 +164,6 @@ AQUILON_PARAM_DEFS = {
             "path": "windows/windows",
             "value_type": "json",
             "required": True,
-            "default": '[{"duration": 8, "start": "08:00", "day": "Sun"}]'
         }
     ],
 }
@@ -232,8 +231,6 @@ class TestSetupParams(TestBrokerCommand):
         cmd = ["add_parameter_definition", "--archetype", archetype,
                "--path", params["path"], "--template", template,
                "--value_type", params["value_type"]]
-        if "default" in params:
-            cmd.extend(["--default", params["default"]])
         if params.get("required", False):
             cmd.append("--required")
         if "activation" in params:

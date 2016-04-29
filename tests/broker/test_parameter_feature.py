@@ -256,7 +256,7 @@ class TestParameterFeature(TestBrokerCommand):
 
     def test_310_verify_feature_proto(self):
         cmd = SHOW_CMD + ["--format=proto"]
-        params = self.protobuftest(cmd, expect=13)
+        params = self.protobuftest(cmd, expect=14)
 
         param_values = {}
         for param in params:
@@ -276,6 +276,7 @@ class TestParameterFeature(TestBrokerCommand):
                               "features/hardware/hardwarefeature/testdefault",
                               "features/interface/interfacefeature/testlist",
                               "features/interface/interfacefeature/testdefault",
+                              "windows/windows",
                              ]))
 
         self.assertEqual(param_values['features/hostfeature/testboolean'],

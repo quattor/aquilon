@@ -117,8 +117,6 @@ class TestAddParameterDefinition(TestBrokerCommand):
                    "--path", "foo/" + path, "--template", "foo"]
             if "type" in params:
                 cmd.extend(["--value_type", params["type"]])
-            if "default" in params:
-                cmd.extend(["--default", params["default"]])
             if params.get("required", False):
                 cmd.append("--required")
             if "activation" in params:
@@ -215,7 +213,7 @@ class TestAddParameterDefinition(TestBrokerCommand):
     def test_300_add_existing(self):
         cmd = ["add_parameter_definition", "--archetype", "aquilon",
                "--path=foo/teststring", "--value_type=string", "--description=blaah",
-               "--template=foo", "--required", "--default=default"]
+               "--template=foo", "--required"]
         err = self.badrequesttest(cmd)
         self.matchoutput(err,
                          "Parameter Definition foo/teststring, parameter "
@@ -225,24 +223,12 @@ class TestAddParameterDefinition(TestBrokerCommand):
     def test_300_add_feature_existing(self):
         cmd = ["add_parameter_definition", "--feature", "myfeature", "--type=host",
                "--path=teststring", "--value_type=string", "--description=blaah",
-               "--required", "--default=default"]
+               "--required"]
         err = self.badrequesttest(cmd)
         self.matchoutput(err,
                          "Parameter Definition teststring, parameter "
                          "definition holder myfeature already exists.",
                          cmd)
-
-    def test_300_invalid_defaults(self):
-        for path, params in default_param_defs.items():
-            if "invalid_default" not in params:
-                continue
-
-            cmd = ["add_parameter_definition", "--archetype", "aquilon",
-                   "--path", "foo/" + path + "_invalid_default",
-                   "--value_type", params["type"],
-                   "--template", "foo", "--default", params["invalid_default"]]
-            out = self.badrequesttest(cmd)
-            self.matchoutput(out, "for default for path=foo/%s" % path, cmd)
 
     def test_300_invalid_feature_defaults(self):
         for path, params in default_param_defs.items():
@@ -259,18 +245,19 @@ class TestAddParameterDefinition(TestBrokerCommand):
     def test_300_add_noncompileable_arch(self):
         cmd = ["add_parameter_definition", "--archetype", "windows",
                "--path=foo/testint", "--description=blaah",
-               "--template=foo", "--value_type=int", "--default=60"]
+               "--template=foo", "--value_type=int"]
         out = self.badrequesttest(cmd)
         self.matchoutput(out, "Archetype windows is not compileable.", cmd)
 
-    def test_300_add_rebuild_default(self):
+    def test_300_add_archetype_default(self):
         cmd = ["add_parameter_definition", "--archetype", "aquilon",
-               "--path=foo/test_rebuild_required_default", "--default=default",
-               "--template=foo", "--value_type=string", "--activation=rebuild"]
+               "--path=foo/test_arch_default", "--default=default",
+               "--template=foo", "--value_type=string"]
         out = self.unimplementederrortest(cmd)
-        self.matchoutput(out, "Setting a default value for a parameter which "
-                         "requires rebuild would cause all existing hosts to "
-                         "require a rebuild, which is not supported.", cmd)
+        self.matchoutput(out,
+                         "Archetype-wide parameter definitions cannot have "
+                         "default values.",
+                         cmd)
 
     def test_300_invalid_path(self):
         for path in ["!badchar", "@badchar", "#badchar", "$badchar", "%badchar", "^badchar",
@@ -362,8 +349,6 @@ class TestAddParameterDefinition(TestBrokerCommand):
             else:
                 pattern += r"Type: string\s*"
             pattern += r"Template: foo\s*"
-            if "default" in params:
-                pattern += "Default: " + re.escape(params["default"]) + r"\s*"
             if "activation" in params:
                 pattern += "Activation: " + params["activation"] + r"\s*"
             else:
@@ -393,10 +378,7 @@ class TestAddParameterDefinition(TestBrokerCommand):
                 self.assertEqual(paramdef.value_type, params["type"])
             else:
                 self.assertEqual(paramdef.value_type, "string")
-            if "default" in params:
-                self.assertEqual(paramdef.default, params["default"])
-            else:
-                self.assertEqual(paramdef.default, "")
+            self.assertEqual(paramdef.default, "")
             self.assertEqual(paramdef.is_required,
                              params.get("required", False))
             if "activation" in params:
