@@ -55,12 +55,19 @@ class CommandAddParameterDefintionArchetype(BrokerCommand):
 
         path = ParamDefinition.normalize_path(path)
 
-        if not (path == template or path.startswith(template + "/")):
+        if path == template:
+            # A structure template is always an nlist, so top-level parameter
+            # definitions must be JSON objects (dictionaries).
+            if value_type != "json":
+                raise ArgumentError("Only the JSON type can be used for "
+                                    "top-level parameter definitions.")
+        elif path.startswith(template + "/"):
+            pass
+        else:
             raise ArgumentError("The first component of the path must be "
                                 "the name of the template.")
 
-        ParamDefinition.get_unique(session, path=path, holder=holder,
-                                   preclude=True)
+        holder.check_new_path(path)
 
         db_paramdef = ParamDefinition(path=path, holder=holder,
                                       value_type=value_type, schema=schema,

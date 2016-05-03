@@ -65,6 +65,15 @@ class ParamDefHolder(Base):
     def holder_object(self):  # pragma: no cover
         raise InternalError("Abstract base method called")
 
+    def check_new_path(self, path):
+        # path is expected to be normalized
+        for db_paramdef in self.param_definitions:
+            if path == db_paramdef.path or \
+               path.startswith(db_paramdef.path + "/") or \
+               db_paramdef.path.startswith(path + "/"):
+                raise ArgumentError("The path cannot be a strict subset or "
+                                    "superset of an existing definition.")
+
 
 class ArchetypeParamDef(ParamDefHolder):
     """ valid parameter paths which can be associated with this archetype """

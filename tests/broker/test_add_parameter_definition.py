@@ -216,8 +216,28 @@ class TestAddParameterDefinition(TestBrokerCommand):
                "--template=foo", "--required"]
         err = self.badrequesttest(cmd)
         self.matchoutput(err,
-                         "Parameter Definition foo/teststring, parameter "
-                         "definition holder aquilon already exists.",
+                         "The path cannot be a strict subset or superset "
+                         "of an existing definition.",
+                         cmd)
+
+    def test_300_path_conflict_sub(self):
+        cmd = ["add_parameter_definition", "--archetype", "aquilon",
+               "--path", "foo/testjson/subpath", "--template", "foo",
+               "--value_type", "list"]
+        out = self.badrequesttest(cmd)
+        self.matchoutput(out,
+                         "The path cannot be a strict subset or superset "
+                         "of an existing definition.",
+                         cmd)
+
+    def test_300_path_conflict_super(self):
+        cmd = ["add_parameter_definition", "--archetype", "aquilon",
+               "--path", "foo", "--template", "foo",
+               "--value_type", "json"]
+        out = self.badrequesttest(cmd)
+        self.matchoutput(out,
+                         "The path cannot be a strict subset or superset "
+                         "of an existing definition.",
                          cmd)
 
     def test_300_add_feature_existing(self):
@@ -226,8 +246,18 @@ class TestAddParameterDefinition(TestBrokerCommand):
                "--required"]
         err = self.badrequesttest(cmd)
         self.matchoutput(err,
-                         "Parameter Definition teststring, parameter "
-                         "definition holder myfeature already exists.",
+                         "The path cannot be a strict subset or superset "
+                         "of an existing definition.",
+                         cmd)
+
+    def test_300_path_conflict_feature(self):
+        cmd = ["add_parameter_definition",
+               "--feature", "myfeature", "--type=host",
+               "--path=testjson/subpath", "--value_type=string"]
+        out = self.badrequesttest(cmd)
+        self.matchoutput(out,
+                         "The path cannot be a strict subset or superset "
+                         "of an existing definition.",
                          cmd)
 
     def test_300_invalid_feature_defaults(self):
@@ -268,6 +298,16 @@ class TestAddParameterDefinition(TestBrokerCommand):
             self.matchoutput(err,
                              "'%s' is not a valid value for a path component." % path,
                              cmd)
+
+    def test_300_wrong_toplevel_type(self):
+        cmd = ["add_parameter_definition", "--archetype", "aquilon",
+               "--path", "bad_toplevel_type", "--template", "bad_toplevel_type",
+               "--value_type", "list"]
+        out = self.badrequesttest(cmd)
+        self.matchoutput(out,
+                         "Only the JSON type can be used for top-level "
+                         "parameter definitions.",
+                         cmd)
 
     def test_300_show_bad_path(self):
         cmd = ["show_parameter_definition", "--archetype", "aquilon",
