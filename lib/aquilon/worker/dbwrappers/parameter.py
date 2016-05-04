@@ -56,22 +56,26 @@ def set_parameter(session, parameter, db_paramdef, path, value, update=False):
 
 
 def del_all_feature_parameter(session, dblink):
-    # TODO: if the feature is bound to the whole archetype, then we should clean
-    # up all personalities here
-    if not dblink or not dblink.personality_stage or \
-       not dblink.personality_stage.parameter or \
-       not dblink.feature.param_def_holder:
+    dbstage = dblink.personality_stage
+    defholder = dblink.feature.param_def_holder
+
+    if not dbstage or not defholder or not dbstage.parameter:
         return
 
     parameter = dblink.personality_stage.parameter
-    dbstage = dblink.personality_stage
-    for paramdef in dblink.feature.param_def_holder.param_definitions:
-        if paramdef.activation == 'rebuild':
-            validate_rebuild_required(session, paramdef.path, dbstage)
 
-        parameter.del_path(Parameter.feature_path(dblink.feature,
-                                                  paramdef.path),
-                           compel=False)
+    for link in dbstage.features:
+        # If the feature is still bound, then leave the parameters alone
+        if link.feature == dblink.feature and link != dblink:
+            break
+    else:
+        for paramdef in defholder.param_definitions:
+            path = Parameter.feature_path(dblink.feature, paramdef.path)
+            value = parameter.get_path(path, compel=False)
+            if value is not None:
+                if paramdef.activation == 'rebuild':
+                    validate_rebuild_required(session, path, dbstage)
+                parameter.del_path(path)
 
 
 def validate_rebuild_required(session, path, dbstage):
