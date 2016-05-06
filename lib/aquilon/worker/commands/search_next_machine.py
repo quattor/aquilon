@@ -16,8 +16,7 @@
 # limitations under the License.
 """Contains the logic for `aq search next --machine`."""
 
-
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import Machine
 from aquilon.worker.dbwrappers.search import search_next
 
@@ -26,7 +25,7 @@ class CommandSearchNextMachine(BrokerCommand):
 
     required_parameters = ['machine']
 
-    def render(self, session, machine, start, number, pack, **arguments):
+    def render(self, session, machine, start, number, pack, **_):
         result = search_next(session=session, cls=Machine, attr=Machine.label,
                              value=machine, start=start, pack=pack)
         if number:

@@ -38,8 +38,7 @@ class TestDelWindowsHost(TestBrokerCommand):
     def testdelunittest01(self):
         self.dsdb_expect_delete(self.net["unknown0"].usable[10])
         command = "del windows host --hostname unittest01.one-nyp.ms.com"
-        (out, err) = self.successtest(command.split(" "))
-        self.assertEmptyOut(out, command)
+        self.statustest(command.split(" "))
         self.dsdb_verify()
         self.check_plenary_gone("hostdata", "unittest01.one-nyp.ms.com")
 

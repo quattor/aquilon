@@ -70,12 +70,12 @@ class TestShowNetworkDevice(TestBrokerCommand):
 
     def testshowswitchallcsv(self):
         command = ["show_network_device", "--all", "--format=csv"]
-        out = self.commandtest(command)
+        self.commandtest(command)
 
     def testshowswitchswitchcsv(self):
         command = ["show_network_device", "--network_device=ut3gd1r04.aqd-unittest.ms.com",
                    "--format=csv"]
-        out = self.commandtest(command)
+        self.commandtest(command)
 
 
 if __name__ == '__main__':

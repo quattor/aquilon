@@ -17,12 +17,12 @@
 """Contains the logic for `aq show room --room`."""
 
 from aquilon.aqdb.model import Room
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 
 
 class CommandShowRoomRoom(BrokerCommand):
 
     required_parameters = ["room"]
 
-    def render(self, session, room, **arguments):
+    def render(self, session, room, **_):
         return Room.get_unique(session, room, compel=True)

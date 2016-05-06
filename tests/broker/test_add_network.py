@@ -66,7 +66,7 @@ class TestAddNetwork(TestBrokerCommand):
         command = ["add", "network", "--network", net.name,
                    "--ip", "192.168.10.0", "--netmask", "255.255.255.0",
                    "--building", "ut", "--type", net.nettype]
-        (out, err) = self.successtest(command)
+        err = self.statustest(command)
         self.matchoutput(err, "WARNING: Network name %s is already used for "
                          "address %s." % (net.name, str(net)), command)
 

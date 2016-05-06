@@ -15,8 +15,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import logging
-
 from aquilon.aqdb.model import Network
 from aquilon.worker.locks import NoLockKey, PlenaryKey
 from aquilon.worker.templates import (Plenary, StructurePlenary,

@@ -16,11 +16,10 @@
 # limitations under the License.
 """Contains the logic for `aq permission`."""
 
-
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.aqdb.model import Role
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.user_principal import (
     get_or_create_user_principal)
-from aquilon.aqdb.model import Role
 
 
 class CommandPermission(BrokerCommand):
@@ -28,7 +27,7 @@ class CommandPermission(BrokerCommand):
     required_parameters = ["principal", "role"]
 
     def render(self, session, logger, principal, role, createuser, createrealm,
-               comments, **arguments):
+               comments, **_):
         dbrole = Role.get_unique(session, role, compel=True)
         dbuser = get_or_create_user_principal(session, principal, createuser,
                                               createrealm, comments=comments,

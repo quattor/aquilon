@@ -131,7 +131,7 @@ class TestConsistency(TestBrokerCommand):
         kingdir = self.config.get("broker", "kingdir")
         command = ["log", "--no-color", "-n", "1", self.config.get("broker",
                                                                    "trash_branch")]
-        out, err = self.gitcommand(command, cwd=kingdir)
+        out, _ = self.gitcommand(command, cwd=kingdir)
         self.matchoutput(out, "Delete orphaned branch branch-only", command)
 
     def test_120_repair_domain(self):

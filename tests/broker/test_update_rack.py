@@ -77,7 +77,7 @@ class TestUpdateRack(TestBrokerCommand):
     def testalphacolumn(self):
         """ we now accept characters for rack columns   """
         command = ["update", "rack", "--rack", "np999", "--column", "a"]
-        err = self.noouttest(command)
+        self.noouttest(command)
 
     def testverifyshowallcsv(self):
         command = "show rack --all --format=csv"

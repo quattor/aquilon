@@ -27,8 +27,7 @@ class CommandMakeClusterCluster(BrokerCommand):
 
     required_parameters = ["cluster"]
 
-    def render(self, session, logger, cluster, metacluster, keepbindings,
-               **arguments):
+    def render(self, session, logger, cluster, metacluster, keepbindings, **_):
         if cluster:
             # TODO: disallow metaclusters here
             dbcluster = Cluster.get_unique(session, cluster, compel=True)

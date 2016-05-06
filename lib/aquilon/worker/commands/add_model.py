@@ -28,7 +28,7 @@ class CommandAddModel(BrokerCommand):
 
     def render(self, session, model, vendor, type, cpuname, cpuvendor,
                cpunum, memory, disktype, diskcontroller, disksize,
-               nicmodel, nicvendor, comments, **arguments):
+               nicmodel, nicvendor, comments, **_):
         dbvendor = Vendor.get_unique(session, vendor, compel=True)
         Model.get_unique(session, name=model, vendor=dbvendor, preclude=True)
 

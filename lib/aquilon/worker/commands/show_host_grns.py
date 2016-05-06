@@ -16,8 +16,7 @@
 # limitations under the License.
 """Contains the logic for `aq show host --hostname`."""
 
-
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.host import hostname_to_host
 from aquilon.worker.formats.host import GrnHostList
 
@@ -26,6 +25,6 @@ class CommandShowHostGrns(BrokerCommand):
 
     required_parameters = ["hostname"]
 
-    def render(self, session, hostname, **kwargs):
+    def render(self, session, hostname, **_):
         host = hostname_to_host(session, hostname)
         return GrnHostList([host])

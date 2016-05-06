@@ -23,7 +23,7 @@ class CommandDelUser(BrokerCommand):
 
     required_parameters = ["username"]
 
-    def render(self, session, username, **arguments):
+    def render(self, session, username, **_):
         dbuser = User.get_unique(session, username, compel=True)
         session.delete(dbuser)
         session.flush()

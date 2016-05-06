@@ -28,7 +28,7 @@ from brokertest import TestBrokerCommand
 class TestFlush(TestBrokerCommand):
 
     def testflushunittest(self):
-        (out, err) = self.successtest(["flush", "--all"])
+        self.statustest(["flush", "--all"])
 
 
 if __name__ == '__main__':

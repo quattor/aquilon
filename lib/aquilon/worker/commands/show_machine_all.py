@@ -17,13 +17,13 @@
 """Contains the logic for `aq show machine --all`."""
 
 from aquilon.aqdb.model import Machine
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.formats.list import StringAttributeList
 
 
 class CommandShowMachineAll(BrokerCommand):
 
-    def render(self, session, **arguments):
+    def render(self, session, **_):
         q = session.query(Machine.label)
         q = q.order_by(Machine.label)
         return StringAttributeList(q.all(), "label")

@@ -25,7 +25,7 @@ class CommandDelVlan(BrokerCommand):
 
     required_parameters = ["vlan"]
 
-    def render(self, session, vlan, **arguments):
+    def render(self, session, vlan, **_):
         dbvi = VlanInfo.get_by_vlan(session, vlan_id=vlan, compel=ArgumentError)
 
         q1 = session.query(PortGroup.id)

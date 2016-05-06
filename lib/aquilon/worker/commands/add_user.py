@@ -27,7 +27,7 @@ class CommandAddUser(BrokerCommand):
     required_parameters = ["username"]
 
     def render(self, session, username, uid, autouid, gid, full_name,
-               home_directory, **arguments):
+               home_directory, **_):
         User.get_unique(session, username, preclude=True)
 
         if autouid:

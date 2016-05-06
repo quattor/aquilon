@@ -16,9 +16,8 @@
 # limitations under the License.
 """Contains the logic for `aq add dns_domain`."""
 
-
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.aqdb.model import DnsDomain
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.processes import DSDBRunner
 
 
@@ -26,8 +25,7 @@ class CommandAddDnsDomain(BrokerCommand):
 
     required_parameters = ["dns_domain"]
 
-    def render(self, session, logger, dns_domain, restricted, comments,
-               **arguments):
+    def render(self, session, logger, dns_domain, restricted, comments, **_):
         DnsDomain.get_unique(session, dns_domain, preclude=True)
 
         dbdns_domain = DnsDomain(name=dns_domain, comments=comments)

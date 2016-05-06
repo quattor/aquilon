@@ -19,7 +19,7 @@
 from sqlalchemy.orm import undefer, lazyload
 from sqlalchemy.orm.attributes import set_committed_value
 
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.exceptions_ import NotFoundException
 from aquilon.aqdb.model import (DnsRecord, ARecord, Alias, SrvRecord,
                                 DnsEnvironment, NetworkEnvironment,
@@ -36,7 +36,7 @@ class CommandShowDnsRecord(BrokerCommand):
     required_parameters = ["fqdn"]
 
     def render(self, session, fqdn, record_type, dns_environment,
-               network_environment=None, **arguments):
+               network_environment=None, **_):
 
         if network_environment:
             if not isinstance(network_environment, NetworkEnvironment):

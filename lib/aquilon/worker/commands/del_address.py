@@ -30,7 +30,7 @@ from aquilon.worker.dbwrappers.dns import delete_dns_record
 
 class CommandDelAddress(BrokerCommand):
     def render(self, session, logger, fqdn, ip, dns_environment,
-               network_environment, **arguments):
+               network_environment, **_):
         dbnet_env, dbdns_env = get_net_dns_env(session, network_environment,
                                                dns_environment)
 

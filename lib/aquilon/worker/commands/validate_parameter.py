@@ -26,7 +26,7 @@ class CommandValidateParameter(BrokerCommand):
     required_parameters = ["personality"]
 
     def render(self, session, logger, personality, personality_stage,
-               archetype, **arguments):
+               archetype, **_):
         dbpersonality = Personality.get_unique(session, name=personality,
                                                archetype=archetype, compel=True)
 

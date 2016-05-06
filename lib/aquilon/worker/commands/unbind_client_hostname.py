@@ -29,7 +29,7 @@ class CommandUnbindClientHostname(BrokerCommand):
 
     required_parameters = ["hostname", "service"]
 
-    def get_dbobj(self, session, hostname=None, **arguments):
+    def get_dbobj(self, session, hostname=None, **_):
         return hostname_to_host(session, hostname)
 
     def render(self, session, logger, service, **arguments):

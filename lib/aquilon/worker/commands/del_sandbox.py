@@ -28,7 +28,7 @@ class CommandDelSandbox(BrokerCommand):
 
     required_parameters = ["sandbox"]
 
-    def render(self, session, logger, dbuser, sandbox, **arguments):
+    def render(self, session, logger, dbuser, sandbox, **_):
         if not dbuser.realm.trusted:
             raise AuthorizationException("{0} is not trusted to handle "
                                          "sandboxes.".format(dbuser.realm))

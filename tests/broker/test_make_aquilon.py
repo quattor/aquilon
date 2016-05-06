@@ -52,7 +52,7 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
         command = ["make", "--archetype", "aquilon",
                    "--hostname", "unittest02.one-nyp.ms.com",
                    "--osname", "linux", "--osversion", self.linux_version_prev]
-        (out, err) = self.successtest(command)
+        err = self.statustest(command)
         self.matchoutput(err,
                          "unittest02.one-nyp.ms.com adding binding for "
                          "service instance aqd/ny-prod",
@@ -163,7 +163,7 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
                    "--hostname", "unittest00.one-nyp.ms.com",
                    "--buildstatus", "build", "--personality", "compileserver",
                    "--osname", "linux", "--osversion", self.linux_version_prev]
-        (out, err) = self.successtest(command)
+        err = self.statustest(command)
         self.matchoutput(err,
                          "unittest00.one-nyp.ms.com adding binding for "
                          "service instance aqd/ny-prod",
@@ -325,7 +325,7 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
         hosts = ["aquilon%d.aqd-unittest.ms.com" % i for i in range(61, 66)]
         scratchfile = self.writescratch("hpinventory", "\n".join(hosts))
         command = ["reconfigure", "--list", scratchfile]
-        (out, err) = self.successtest(command)
+        err = self.statustest(command)
         for hostname in hosts:
             h = hostname.strip()
             self.matchoutput(err, "%s adding binding" % h, command)
@@ -338,7 +338,7 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
                    "--buildstatus=build", "--archetype=aquilon",
                    "--osname=linux",
                    "--osversion=%s" % self.linux_version_prev]
-        (out, err) = self.successtest(command)
+        err = self.statustest(command)
         for hostname in hosts:
             h = hostname.strip()
             self.matchoutput(err, "%s adding binding" % h, command)
@@ -349,7 +349,7 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
         scratchfile = self.writescratch("hpunixeng", "\n".join(hosts))
         command = ["reconfigure", "--list", scratchfile,
                    "--archetype=aquilon", "--personality=unixeng-test"]
-        (out, err) = self.successtest(command)
+        err = self.statustest(command)
         for hostname in hosts:
             h = hostname.strip()
             self.matchoutput(err, "%s adding binding" % h, command)
@@ -392,13 +392,13 @@ class TestMakeAquilon(VerifyNotificationsMixin, TestBrokerCommand):
     def testmakecardedhost(self):
         command = ["make", "--archetype", "aquilon",
                    "--hostname", "jack.cards.example.com"]
-        (out, err) = self.successtest(command)
+        self.statustest(command)
 
     def testmakewithos(self):
         command = ["make", "--archetype", "aquilon",
                    "--hostname", "unittest17.aqd-unittest.ms.com",
                    "--osname", "linux", "--osversion", self.linux_version_prev]
-        (out, err) = self.successtest(command)
+        self.statustest(command)
 
     def testverifyunittest17(self):
         command = "show host --hostname unittest17.aqd-unittest.ms.com"

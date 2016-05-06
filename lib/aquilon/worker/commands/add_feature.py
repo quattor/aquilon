@@ -32,7 +32,7 @@ class CommandAddFeature(BrokerCommand):
     required_parameters = ['feature', 'type']
 
     def render(self, session, feature, type, post_personality, comments,
-               grn, eon_id, visibility, activation, deactivation, logger, **arguments):
+               grn, eon_id, visibility, activation, deactivation, logger, **_):
         cls = Feature.polymorphic_subclass(type, "Unknown feature type")
 
         if _name_re.search(feature):

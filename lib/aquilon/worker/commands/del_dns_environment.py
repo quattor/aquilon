@@ -25,7 +25,7 @@ class CommandDelDnsEnvironment(BrokerCommand):
 
     required_parameters = ["dns_environment"]
 
-    def render(self, session, dns_environment, **arguments):
+    def render(self, session, dns_environment, **_):
         db_dnsenv = DnsEnvironment.get_unique(session, dns_environment,
                                               compel=True)
 

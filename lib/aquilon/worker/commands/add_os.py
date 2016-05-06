@@ -25,7 +25,7 @@ class CommandAddOS(BrokerCommand):
     required_parameters = ["osname", "osversion", "archetype"]
 
     def render(self, session, osname, osversion, archetype, copy_version,
-               comments, **arguments):
+               comments, **_):
         validate_nlist_key("--osname", osname)
         validate_template_name("--osversion", osversion)
 

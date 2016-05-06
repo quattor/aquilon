@@ -24,7 +24,7 @@ class CommandAddNetgroupWhitelist(BrokerCommand):
 
     required_parameters = ["netgroup"]
 
-    def render(self, session, netgroup, **arguments):
+    def render(self, session, netgroup, **_):
         NetGroupWhiteList.get_unique(session, name=netgroup, preclude=True)
         dbng = NetGroupWhiteList(name=netgroup)
         session.add(dbng)

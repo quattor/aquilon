@@ -17,7 +17,7 @@
 """Contains the logic for `aq update service`."""
 
 from aquilon.aqdb.model import Service
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
 
 
@@ -26,7 +26,7 @@ class CommandUpdateService(BrokerCommand):
     required_parameters = ["service"]
 
     def render(self, session, logger, service, max_clients, default,
-               need_client_list, comments, **arguments):
+               need_client_list, comments, **_):
         dbservice = Service.get_unique(session, name=service, compel=True)
 
         if default:

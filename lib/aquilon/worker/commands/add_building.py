@@ -16,9 +16,8 @@
 # limitations under the License.
 """Contains the logic for `aq add building`."""
 
-
 from aquilon.aqdb.model import Building, City
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.location import add_location
 from aquilon.worker.processes import DSDBRunner
 
@@ -28,7 +27,7 @@ class CommandAddBuilding(BrokerCommand):
     required_parameters = ["building", "city", "address"]
 
     def render(self, session, logger, building, city, fullname, comments,
-               address, **arguments):
+               address, **_):
         dbcity = City.get_unique(session, city, compel=True)
         add_location(session, Building, building, dbcity, fullname=fullname,
                      address=address, comments=comments)

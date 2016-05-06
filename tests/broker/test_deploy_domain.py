@@ -47,7 +47,7 @@ class TestDeployDomain(TestBrokerCommand):
     def test_110_verifydeploylog(self):
         kingdir = self.config.get("broker", "kingdir")
         command = ["log", "--no-color", "-n", "1", "deployable"]
-        (out, err) = self.gitcommand(command, cwd=kingdir)
+        out, _ = self.gitcommand(command, cwd=kingdir)
         self.matchoutput(out, "User:", command)
         self.matchoutput(out, "Request ID:", command)
         self.matchoutput(out, "Reason: Test reason", command)
@@ -60,7 +60,7 @@ class TestDeployDomain(TestBrokerCommand):
     def test_120_deployfail(self):
         command = ["deploy", "--source", "changetest1",
                    "--target", "prod"]
-        (out, err) = self.failuretest(command, 4)
+        _, err = self.failuretest(command, 4)
         self.matchoutput(err,
                          "Domain prod is under change management control.  "
                          "Please specify --justification.",
@@ -68,15 +68,15 @@ class TestDeployDomain(TestBrokerCommand):
 
     def test_120_deploydryrun(self):
         kingdir = self.config.get("broker", "kingdir")
-        (old_prod, err) = self.gitcommand(["rev-list", "--max-count=1", "prod"],
-                                          cwd=kingdir)
+        old_prod, _ = self.gitcommand(["rev-list", "--max-count=1", "prod"],
+                                      cwd=kingdir)
 
         command = ["deploy", "--source", "changetest1",
                    "--target", "prod", "--dryrun"]
         self.successtest(command)
 
-        (new_prod, err) = self.gitcommand(["rev-list", "--max-count=1", "prod"],
-                                          cwd=kingdir)
+        new_prod, _ = self.gitcommand(["rev-list", "--max-count=1", "prod"],
+                                      cwd=kingdir)
         self.assertEqual(old_prod, new_prod,
                          "Domain prod changed despite --dryrun")
 
@@ -117,13 +117,13 @@ class TestDeployDomain(TestBrokerCommand):
 
         # The change must be in prod...
         command = ["log", "--no-color", "-n", "1", "prod"]
-        (out, err) = self.gitcommand(command, cwd=kingdir)
+        out, _ = self.gitcommand(command, cwd=kingdir)
         self.matchoutput(out, "Justification: tcm=12345678", command)
         self.matchoutput(out, "Reason: Just because", command)
 
         # ... but not in ut-prod
         command = ["log", "--no-color", "-n", "1", "ut-prod"]
-        (out, err) = self.gitcommand(command, cwd=kingdir)
+        out, _ = self.gitcommand(command, cwd=kingdir)
         self.matchclean(out, "tcm=12345678", command)
 
     def test_300_add_advanced(self):

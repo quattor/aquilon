@@ -24,7 +24,7 @@ from aquilon.aqdb.model import Archetype
 
 class CommandShowArchetypeAll(BrokerCommand):
 
-    def render(self, session, **arguments):
+    def render(self, session, **_):
         q = session.query(Archetype)
         q = q.options(undefer(Archetype.comments),
                       subqueryload('required_services'),

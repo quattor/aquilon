@@ -32,8 +32,7 @@ class CommandAddStaticRoute(BrokerCommand):
 
     def render(self, session, logger, gateway, networkip, ip, netmask,
                prefixlen, network_environment, comments, personality,
-               personality_stage, archetype, justification, reason, user,
-               **arguments):
+               personality_stage, archetype, justification, reason, user, **_):
         dbnet_env = NetworkEnvironment.get_unique_or_default(session,
                                                              network_environment)
 

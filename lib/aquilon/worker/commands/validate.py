@@ -16,20 +16,18 @@
 # limitations under the License.
 """Contains the logic for `aq validate`."""
 
-
 from aquilon.aqdb.model import Branch
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 
 
 class CommandValidate(BrokerCommand):
 
     required_arguments = ["branch"]
 
-    def render(self, session, logger, branch, comments, **arguments):
+    def render(self, session, logger, branch, **_):
         dbbranch = Branch.get_unique(session, branch, compel=True)
         if dbbranch.is_sync_valid:
             logger.warning("{0} already marked as valid.".format(dbbranch))
-        # For now, comments just get stored in the audit log.
         dbbranch.is_sync_valid = True
         session.flush()
         # FIXME: Run tests?

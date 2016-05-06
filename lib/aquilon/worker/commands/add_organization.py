@@ -16,15 +16,15 @@
 # limitations under the License.
 """Contains the logic for `aq add organization`."""
 
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.aqdb.model import Company
+from aquilon.worker.broker import BrokerCommand
 
 
 class CommandAddOrganization(BrokerCommand):
 
     required_parameters = ["organization"]
 
-    def render(self, session, organization, fullname, comments, **arguments):
+    def render(self, session, organization, fullname, comments, **_):
         Company.get_unique(session, organization, preclude=True)
 
         if not fullname:

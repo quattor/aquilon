@@ -27,7 +27,7 @@ class CommandResetAdvertisedStatus(BrokerCommand):
 
     required_parameters = ["hostname"]
 
-    def render(self, session, logger, hostname, **arguments):
+    def render(self, session, logger, hostname, **_):
         dbhost = hostname_to_host(session, hostname)
         if dbhost.status.name == 'ready':
             raise ArgumentError("{0:l} is in ready status, "

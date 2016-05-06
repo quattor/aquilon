@@ -25,5 +25,5 @@ class CommandPing(BrokerCommand):
     requires_readonly = True
     defer_to_thread = False
 
-    def render(self, **arguments):
+    def render(self, **_):
         return "pong"

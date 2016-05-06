@@ -23,7 +23,7 @@ class CommandUpdateRealm(BrokerCommand):
 
     required_parameters = ["realm"]
 
-    def render(self, session, realm, trusted, comments, **kwargs):
+    def render(self, session, realm, trusted, comments, **_):
         dbrealm = Realm.get_unique(session, realm, compel=True)
 
         if trusted is not None:

@@ -18,7 +18,7 @@
 
 from aquilon.exceptions_ import NotFoundException
 from aquilon.aqdb.model import SrvRecord, Fqdn
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.dns import delete_dns_record
 
 
@@ -27,7 +27,7 @@ class CommandDelSrvRecord(BrokerCommand):
     required_parameters = ["service", "protocol", "dns_domain"]
 
     def render(self, session, service, protocol, dns_domain, target,
-               dns_environment, **kwargs):
+               dns_environment, **_):
         name = "_%s._%s" % (service.strip().lower(), protocol.strip().lower())
         dbfqdn = Fqdn.get_unique(session, name=name, dns_domain=dns_domain,
                                  dns_environment=dns_environment)

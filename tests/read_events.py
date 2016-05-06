@@ -132,7 +132,7 @@ def main():
     if opts.daemon:
         rundir = config.get('broker', 'rundir')
         if not os.path.exists(rundir):
-             os.makedirs(rundir)
+            os.makedirs(rundir)
         pidfile = os.path.join(rundir, 'read_events.pid')
         daemonize(pidfile, sockname, storedir)
     else:

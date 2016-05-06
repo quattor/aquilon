@@ -19,7 +19,7 @@
 from sqlalchemy.sql import null
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import Chassis, ChassisSlot
 from aquilon.worker.processes import DSDBRunner
 from aquilon.worker.dbwrappers.dns import delete_dns_record
@@ -30,7 +30,7 @@ class CommandDelChassis(BrokerCommand):
 
     required_parameters = ["chassis"]
 
-    def render(self, session, logger, chassis, clear_slots, **arguments):
+    def render(self, session, logger, chassis, clear_slots, **_):
         dbchassis = Chassis.get_unique(session, chassis, compel=True)
 
         check_only_primary_ip(dbchassis)

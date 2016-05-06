@@ -18,7 +18,7 @@
 """contains logic for aq search rack"""
 
 from aquilon.aqdb.model import Location, Rack
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.formats.list import StringAttributeList
 

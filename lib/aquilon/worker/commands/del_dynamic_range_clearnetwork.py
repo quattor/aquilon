@@ -28,7 +28,7 @@ class CommandDelDynamicRangeClearnetwork(CommandDelDynamicRange):
 
     required_parameters = ["clearnetwork"]
 
-    def render(self, session, logger, clearnetwork, **arguments):
+    def render(self, session, logger, clearnetwork, **_):
         dbnet_env = NetworkEnvironment.get_unique_or_default(session)
         dbnetwork = Network.get_unique(session, clearnetwork,
                                        network_environment=dbnet_env,

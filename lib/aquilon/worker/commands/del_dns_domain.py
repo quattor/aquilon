@@ -26,7 +26,7 @@ class CommandDelDnsDomain(BrokerCommand):
 
     required_parameters = ["dns_domain"]
 
-    def render(self, session, logger, dns_domain, **arguments):
+    def render(self, session, logger, dns_domain, **_):
         dbdns_domain = DnsDomain.get_unique(session, dns_domain, compel=True)
 
         q = session.query(Fqdn.id)

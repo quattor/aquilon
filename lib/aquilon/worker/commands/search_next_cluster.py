@@ -16,9 +16,8 @@
 # limitations under the License.
 """Contains the logic for `aq search next --cluster`."""
 
-
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.aqdb.model import Cluster
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.search import search_next
 
 
@@ -26,7 +25,7 @@ class CommandSearchNextCluster(BrokerCommand):
 
     required_parameters = ['cluster']
 
-    def render(self, session, cluster, start, number, pack, **arguments):
+    def render(self, session, cluster, start, number, pack, **_):
         result = search_next(session=session, cls=Cluster, attr=Cluster.name,
                              value=cluster, start=start, pack=pack)
         if number:

@@ -23,7 +23,7 @@ from aquilon.worker.formats.list import StringAttributeList
 
 class CommandShowNetgroupWhitelist(BrokerCommand):
 
-    def render(self, session, **arguments):
+    def render(self, session, **_):
         q = session.query(NetGroupWhiteList.name)
         q = q.order_by(NetGroupWhiteList.name)
         return StringAttributeList(q.all(), 'name')

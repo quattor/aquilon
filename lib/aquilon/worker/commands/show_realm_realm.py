@@ -26,6 +26,6 @@ class CommandShowRealmRealm(BrokerCommand):
 
     required_parameters = ["realm"]
 
-    def render(self, session, realm, **arguments):
+    def render(self, session, realm, **_):
         return Realm.get_unique(session, realm, compel=True,
                                 query_options=[undefer(Realm.comments)])

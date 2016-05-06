@@ -43,7 +43,7 @@ class TestDelNetwork(TestBrokerCommand):
             if not network.autocreate:
                 continue
             command = "show network --ip %s --hosts" % network.ip
-            out = self.notfoundtest(command.split(" "))
+            self.notfoundtest(command.split(" "))
 
     def testshownetwork(self):
         command = "show network --building ut"

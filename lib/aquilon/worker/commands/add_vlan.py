@@ -25,7 +25,7 @@ class CommandAddVlan(BrokerCommand):
 
     required_parameters = ["vlan", "name"]
 
-    def render(self, session, vlan, name, vlan_type, **kwargs):
+    def render(self, session, vlan, name, vlan_type, **_):
 
         validate_nlist_key("name", name)
 

@@ -30,8 +30,7 @@ class TestDelVirtualHardware(EventsTestMixin, TestBrokerCommand):
 
     def test_100_del_windows_hosts(self):
         command = "del_host --hostname aqddesk1.msad.ms.com"
-        (out, err) = self.successtest(command.split(" "))
-        self.assertEmptyOut(out, command)
+        self.statustest(command.split(" "))
         self.check_plenary_gone("hostdata", "aqddesk1.msad.ms.com")
 
     def test_101_readd_windows_host(self):
@@ -52,8 +51,7 @@ class TestDelVirtualHardware(EventsTestMixin, TestBrokerCommand):
     def test_105_redel_windows_hosts(self):
         self.event_upd_hardware('evm1')
         command = "del_host --hostname aqdtop1.msad.ms.com"
-        (out, err) = self.successtest(command.split(" "))
-        self.assertEmptyOut(out, command)
+        self.statustest(command.split(" "))
         self.events_verify()
 
     def test_110_del_utecl1_machines(self):

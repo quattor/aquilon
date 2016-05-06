@@ -24,7 +24,7 @@ from aquilon.worker.broker import BrokerCommand
 
 class CommandShowServiceAll(BrokerCommand):
 
-    def render(self, session, all, **arguments):
+    def render(self, session, all, **_):
         # Try to load as much as we can as bulk queries since loading the
         # objects one by one is much more expensive
         q = session.query(Service)

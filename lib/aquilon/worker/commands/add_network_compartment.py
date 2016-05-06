@@ -24,7 +24,7 @@ class CommandAddNetworkCompartment(BrokerCommand):
 
     required_parameters = ["network_compartment"]
 
-    def render(self, session, network_compartment, comments, **arguments):
+    def render(self, session, network_compartment, comments, **_):
         NetworkCompartment.get_unique(session, network_compartment,
                                       preclude=True)
 

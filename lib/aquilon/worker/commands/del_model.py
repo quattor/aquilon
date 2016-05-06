@@ -27,7 +27,7 @@ class CommandDelModel(BrokerCommand):
     required_parameters = ["model", "vendor"]
     model_type = None
 
-    def render(self, session, logger, model, vendor, **arguments):
+    def render(self, session, logger, model, vendor, **_):
         dbvendor = Vendor.get_unique(session, vendor, compel=True)
         dbmodel = Model.get_unique(session, name=model, vendor=dbvendor,
                                    model_type=self.model_type, compel=True)

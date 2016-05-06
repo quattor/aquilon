@@ -28,7 +28,7 @@ class CommandUpdateArchetype(BrokerCommand):
     required_parameters = ["archetype"]
 
     def render(self, session, archetype, compilable, cluster_type,
-               description, comments, **kwargs):
+               description, comments, **_):
         dbarchetype = Archetype.get_unique(session, archetype, compel=True)
 
         if compilable is not None:

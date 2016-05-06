@@ -29,7 +29,7 @@ class TestShowFqdn(TestBrokerCommand):
 
     def testshowfqdnall(self):
         command = "show fqdn --all"
-        (out, err) = self.successtest(command.split(" "))
+        out = self.commandtest(command.split(" "))
         # The aq client does not ask for this...
         # self.matchoutput(err, "The show_fqdn command is deprecated.", command)
 

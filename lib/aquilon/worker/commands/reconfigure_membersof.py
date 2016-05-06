@@ -25,7 +25,7 @@ class CommandReconfigureMembersof(CommandReconfigureList):
 
     required_parameters = ["membersof"]
 
-    def get_hostlist(self, session, membersof, **arguments):  # pylint: disable=W0613
+    def get_hostlist(self, session, membersof, **_):
         # TODO: add eager loading options
         dbcluster = Cluster.get_unique(session, membersof, compel=True)
         if isinstance(dbcluster, MetaCluster):

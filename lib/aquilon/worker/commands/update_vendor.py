@@ -23,7 +23,7 @@ class CommandUpdateVendor(BrokerCommand):
 
     required_parameters = ["vendor"]
 
-    def render(self, session, vendor, comments, **arguments):
+    def render(self, session, vendor, comments, **_):
         dbvendor = Vendor.get_unique(session, vendor, compel=True)
 
         if comments is not None:

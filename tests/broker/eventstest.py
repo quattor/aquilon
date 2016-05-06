@@ -39,7 +39,7 @@ class EventsTestMixin(object):
 
     @classmethod
     def setUpClass(cls):
-	super(EventsTestMixin, cls).setUpClass()
+        super(EventsTestMixin, cls).setUpClass()
         # Setup the list of expected events (._expected_events) and the path
         # where the events will be queued for checking (_event_dir)
         cls._expected_events = []
@@ -53,7 +53,7 @@ class EventsTestMixin(object):
             os.makedirs(cls._event_dir)
 
     def setUp(self):
-	super(EventsTestMixin, self).setUp()
+        super(EventsTestMixin, self).setUp()
         self.events_reset()
 
     def events_reset(self):
@@ -69,9 +69,10 @@ class EventsTestMixin(object):
         self._expected_events.append({'action': action,
                                       'entityType': 'DNS_RECORD',
                                       'dnsRecord': {
-                                        'environmentName': dns_enviornment,
-                                        'fqdn': fqdn
-                                      }})
+                                          'environmentName': dns_enviornment,
+                                          'fqdn': fqdn
+                                      },
+                                     })
 
     def event_add_dns(self, fqdn, dns_enviornment='internal'):
         self._event_append_dns(fqdn, 'CREATE', dns_enviornment)
@@ -86,8 +87,9 @@ class EventsTestMixin(object):
         self._expected_events.append({'action': action,
                                       'entityType': 'HARDWARE_ENTITY',
                                       'hardwareEntity': {
-                                        'label': label.lower()
-                                      }})
+                                          'label': label.lower(),
+                                      },
+                                     })
 
     def event_add_hardware(self, label):
         self._event_append_hardware(label, 'CREATE')
@@ -105,7 +107,7 @@ class EventsTestMixin(object):
         # check.  To accomodate this we will have two passes at processing
         # the events, after which we will consider it a failure.
         remaining = self._expected_events[:]
-        for _passno in range(1,30):
+        for _ in range(1, 30):
             # Find all of the JSON event files in the event directory and
             # process them one by one looking for matches
             jsonfiles = [p for p in [os.path.join(self._event_dir, f)

@@ -19,7 +19,7 @@
 from sqlalchemy.orm import subqueryload, joinedload, contains_eager, undefer
 
 from aquilon.aqdb.model import NetworkDevice, DnsRecord, Fqdn, DnsDomain
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.hardware_entity import search_hardware_entity_query
 from aquilon.worker.formats.list import StringAttributeList
 

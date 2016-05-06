@@ -49,10 +49,8 @@ class TestDelCampus(TestBrokerCommand):
         errstr = "campus %s doesn't exist" % test_campus
         self.dsdb_expect_del_campus(test_campus, fail=True, errstr=errstr)
         command = "del campus --campus %s" % test_campus
-        (out, err) = self.successtest(command.split(" "))
-        self.assertEmptyOut(out, command)
+        self.statustest(command.split(" "))
         self.dsdb_verify()
-
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestDelCampus)

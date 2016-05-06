@@ -29,11 +29,11 @@ class UTCDateTime(types.TypeDecorator):
 
     impl = types.DateTime
 
-    def process_bind_param(self, value, engine):
+    def process_bind_param(self, value, engine):  # pylint: disable=W0613
         if value is not None:
             return value.astimezone(tzutc())
 
-    def process_result_value(self, value, engine):
+    def process_result_value(self, value, engine):  # pylint: disable=W0613
         if value is not None:
             # If the underlying data type used for implementing DateTime handles
             # time zone (like PostgreSQL), then just convert it to UTC. If SQLA

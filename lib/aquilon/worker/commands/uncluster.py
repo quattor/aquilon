@@ -27,7 +27,7 @@ class CommandUncluster(BrokerCommand):
     required_parameters = ["hostname", "cluster"]
 
     def render(self, session, logger, hostname, cluster, personality,
-               personality_stage, **arguments):
+               personality_stage, **_):
         dbcluster = Cluster.get_unique(session, cluster, compel=True)
         dbhost = hostname_to_host(session, hostname)
         if not dbhost.cluster:

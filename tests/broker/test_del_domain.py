@@ -76,7 +76,7 @@ class TestDelDomain(TestBrokerCommand):
         trash_branch = self.config.get("broker", "trash_branch")
         kingdir = self.config.get("broker", "kingdir")
         command = ["log", "--no-color", "-n", "1", trash_branch]
-        out, err = self.gitcommand(command, cwd=kingdir)
+        out, _ = self.gitcommand(command, cwd=kingdir)
 
         self.matchoutput(out, "Delete archived branch deployable", command)
         self.matchoutput(out, "Justification: tcm=123456", command)

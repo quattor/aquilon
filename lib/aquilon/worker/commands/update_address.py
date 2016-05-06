@@ -19,7 +19,7 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import ARecord
 from aquilon.aqdb.model.network import get_net_id_from_ip
 from aquilon.aqdb.model.network_environment import get_net_dns_env
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.dns import (set_reverse_ptr,
                                            delete_target_if_needed,
                                            update_address)
@@ -31,7 +31,7 @@ class CommandUpdateAddress(BrokerCommand):
 
     def render(self, session, logger, fqdn, ip, reverse_ptr, dns_environment,
                network_environment, ttl, clear_ttl, grn, eon_id, clear_grn,
-               comments, **arguments):
+               comments, **_):
         dbnet_env, dbdns_env = get_net_dns_env(session, network_environment,
                                                dns_environment)
         dbdns_rec = ARecord.get_unique(session, fqdn=fqdn,

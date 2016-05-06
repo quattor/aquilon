@@ -43,7 +43,7 @@ class TestSearchRack(TestBrokerCommand):
 
     def test_102_empty_byrack(self):
         command = ["search", "rack", "--rack", "npxx"]
-        out = self.noouttest(command)
+        self.noouttest(command)
 
     def test_103_bybuilding(self):
         command = ["search", "rack", "--building", "np",

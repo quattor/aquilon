@@ -76,7 +76,6 @@ class TestDelAddress(TestBrokerCommand):
         self.dsdb_verify()
 
     def testfailbadenv(self):
-        default = self.config.get("site", "default_dns_environment")
         command = ["del_address", "--ip=%s" % self.net["unknown0"].usable[15],
                    "--fqdn=arecord15.aqd-unittest.ms.com",
                    "--dns_environment=environment-does-not-exist"]
@@ -133,7 +132,7 @@ class TestDelAddress(TestBrokerCommand):
 
         command = ["show_address", "--fqdn", fqdn,
                    "--network_environment", "cardenv"]
-        out = self.notfoundtest(command)
+        self.notfoundtest(command)
 
     def test_delreservedreverse(self):
         self.dsdb_expect_delete(self.net["unknown0"].usable[32])
@@ -161,7 +160,7 @@ class TestDelAddress(TestBrokerCommand):
         self.dsdb_verify(empty=True)
 
         command = ["show_address", "--fqdn=%s" % fqdn]
-        out = self.notfoundtest(command)
+        self.notfoundtest(command)
 
     def test_700_del_address_with_ttl(self):
         self.dsdb_expect_delete(self.net["unknown0"].usable[40])

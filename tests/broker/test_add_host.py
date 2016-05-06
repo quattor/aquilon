@@ -70,13 +70,12 @@ class TestAddHost(MachineTestMixin, TestBrokerCommand):
                    "--format", "proto",
                    "--hosts"]
         network = self.protobuftest(command)[0]
-        found = False
         for i in network.hosts:
             if i.fqdn == 'unittest02.one-nyp.ms.com':
                 self.assertEqual(i.operating_system.version, osver)
-                found = True
-        if not found:
-            self.fail("Unable to determine osversion for '%s'" % i.fqdn)
+                break
+        else:
+            self.fail("Unable to determine osversion")
 
     def test_105_verify_unittest02_machine(self):
         command = "show machine --machine ut3c5n10"

@@ -40,7 +40,7 @@ class CommandPollNetworkDevice(BrokerCommand):
 
     required_parameters = ["rack"]
 
-    def render(self, session, logger, rack, type, clear, vlan, **arguments):
+    def render(self, session, logger, rack, type, clear, vlan, **_):
         dblocation = get_location(session, rack=rack)
         NetworkDevice.check_type(type)
         q = session.query(NetworkDevice)

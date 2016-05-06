@@ -29,7 +29,7 @@ class CommandCatNetworkDevice(BrokerCommand):
     # We do not lock the plenary while reading it
     _is_lock_free = True
 
-    def render(self, generate, session, logger, network_device, data, **kwargs):
+    def render(self, generate, session, logger, network_device, data, **_):
         dbnetdev = NetworkDevice.get_unique(session, network_device, compel=True)
         if data:
             plenary_info = PlenarySwitchData.get_plenary(dbnetdev, logger=logger)

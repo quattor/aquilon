@@ -18,16 +18,16 @@
 
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.aqdb.model import (Location, Network, NetworkEnvironment, Cluster,
                                 HardwareEntity)
+from aquilon.worker.broker import BrokerCommand
 
 
 class CommandDelLocation(BrokerCommand):
 
     required_parameters = ["name", "type"]
 
-    def render(self, session, name, type, **arguments):
+    def render(self, session, name, type, **_):
         dblocation = Location.get_unique(session, name=name, location_type=type,
                                          compel=True)
 

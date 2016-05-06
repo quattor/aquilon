@@ -18,7 +18,7 @@
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import DnsRecord, Alias, Fqdn, DnsEnvironment
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.dns import create_target_if_needed
 from aquilon.worker.dbwrappers.grn import lookup_grn
 from aquilon.worker.processes import DSDBRunner
@@ -29,8 +29,7 @@ class CommandAddAlias(BrokerCommand):
     required_parameters = ["fqdn", "target"]
 
     def render(self, session, logger, fqdn, dns_environment, target,
-               target_environment, ttl, grn, eon_id, comments,
-               **kwargs):
+               target_environment, ttl, grn, eon_id, comments, **_):
         dbdns_env = DnsEnvironment.get_unique_or_default(session,
                                                          dns_environment)
         if target_environment:

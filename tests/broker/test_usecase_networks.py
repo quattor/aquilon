@@ -17,8 +17,6 @@
 # limitations under the License.
 """Module for testing to setup network devices"""
 
-import os.path
-
 if __name__ == "__main__":
     import utils
     utils.import_depends()
@@ -366,12 +364,12 @@ class TestUsecaseNetworks(TestBrokerCommand):
             nlist = lambda *l: r'nlist\(\s*' + r',\s*'.join(map(nlisti, l)) + r'\)\s*'
             slist = lambda *l: r'list\(\s*' + r',\s*'.join(l) + r'\)\s*'
             s(assignment(r'router_address/{%s}/providers' % net[1],
-              slist(nlist(("interface", pri_router_if),
-                          ("ip", pri_router_ip),
-                          ("router", pri_router_fqdn)),
-                    nlist(("interface", sec_router_if),
-                          ("ip", sec_router_ip),
-                          ("router", sec_router_fqdn)))))
+                         slist(nlist(("interface", pri_router_if),
+                                     ("ip", pri_router_ip),
+                                     ("router", pri_router_fqdn)),
+                               nlist(("interface", sec_router_if),
+                                     ("ip", sec_router_ip),
+                                     ("router", sec_router_fqdn)))))
 
     ########## DELETEION STAGE ##########
 

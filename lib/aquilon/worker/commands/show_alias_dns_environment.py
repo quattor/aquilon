@@ -16,7 +16,6 @@
 # limitations under the License.
 """Contains the logic for `aq show alias`."""
 
-
 from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.worker.commands.show_dns_record import CommandShowDnsRecord
 

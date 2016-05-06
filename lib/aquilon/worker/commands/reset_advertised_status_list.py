@@ -29,7 +29,7 @@ class CommandResetAdvertisedStatusList(BrokerCommand):
 
     required_parameters = ["list"]
 
-    def render(self, session, logger, list, **arguments):
+    def render(self, session, logger, list, **_):
         check_hostlist_size(self.command, self.config, list)
         dbhosts = hostlist_to_hosts(session, list)
 

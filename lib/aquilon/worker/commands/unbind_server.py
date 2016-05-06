@@ -30,7 +30,7 @@ class CommandUnbindServer(BrokerCommand):
 
     def render(self, session, logger, service, instance, position, hostname,
                cluster, ip, resourcegroup, service_address, alias,
-               justification, reason, user, **arguments):
+               justification, reason, user, **_):
         dbservice = Service.get_unique(session, service, compel=True)
 
         if instance:

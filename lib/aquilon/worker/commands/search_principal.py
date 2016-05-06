@@ -19,13 +19,13 @@
 from sqlalchemy.orm import subqueryload, undefer
 
 from aquilon.aqdb.model import UserPrincipal, Role, Realm
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.formats.list import StringList
 
 
 class CommandSearchPrincipal(BrokerCommand):
 
-    def render(self, session, role, realm, fullinfo, style, **arguments):
+    def render(self, session, role, realm, fullinfo, style, **_):
         q = session.query(UserPrincipal)
         if role:
             dbrole = Role.get_unique(session, role, compel=True)

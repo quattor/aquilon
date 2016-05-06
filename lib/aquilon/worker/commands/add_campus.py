@@ -17,7 +17,7 @@
 """Contains the logic for `aq add campus`."""
 
 from aquilon.aqdb.model import Country, Campus
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.location import add_location
 from aquilon.worker.processes import DSDBRunner
 
@@ -26,8 +26,7 @@ class CommandAddCampus(BrokerCommand):
 
     required_parameters = ["country", "campus"]
 
-    def render(self, session, logger, campus, country, fullname, comments,
-               **arguments):
+    def render(self, session, logger, campus, country, fullname, comments, **_):
         dbcountry = Country.get_unique(session, country, compel=True)
         add_location(session, Campus, campus, dbcountry, fullname=fullname,
                      comments=comments)

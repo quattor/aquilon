@@ -22,7 +22,7 @@ from aquilon.aqdb.model import VlanInfo
 
 class CommandShowVlanAll(BrokerCommand):
 
-    def render(self, session, **arguments):
+    def render(self, session, **_):
 
         q = session.query(VlanInfo)
         q = q.order_by(VlanInfo.vlan_id)

@@ -25,7 +25,7 @@ class CommandShowMetaClusterMetaCluster(BrokerCommand):
 
     required_parameters = ['metacluster']
 
-    def render(self, session, metacluster, **arguments):
+    def render(self, session, metacluster, **_):
         options = [subqueryload('members'),
                    subqueryload('members._hosts'),
                    joinedload('members._hosts.host'),

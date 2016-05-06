@@ -46,7 +46,7 @@ class CommandAddRequiredServicePersonality(BrokerCommand):
 
     def render(self, session, logger, service, archetype, personality,
                personality_stage, environment_override, justification, reason,
-               user, **arguments):
+               user, **_):
         dbpersonality = Personality.get_unique(session, name=personality,
                                                archetype=archetype, compel=True)
         dbstage = dbpersonality.active_stage(personality_stage)

@@ -117,7 +117,8 @@ def oracle_enable_statistics(dbapi_con, con_record):  # pylint: disable=W0613
 
 
 def oracle_remember_sqlid(conn, cursor, statement, parameters, context,
-                          executemany):  # pylint: disable=W0613
+                          executemany):
+    # pylint: disable=W0613
     if statement.lower().startswith("set "):
         return
     sqlid = stmt_2_sqlid(statement)

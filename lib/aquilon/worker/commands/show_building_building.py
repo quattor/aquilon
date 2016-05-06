@@ -17,12 +17,12 @@
 """Contains the logic for `aq show building --building`."""
 
 from aquilon.aqdb.model import Building
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 
 
 class CommandShowBuildingBuilding(BrokerCommand):
 
     required_parameters = ["building"]
 
-    def render(self, session, building, **arguments):
+    def render(self, session, building, **_):
         return Building.get_unique(session, building, compel=True)

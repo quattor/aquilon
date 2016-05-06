@@ -17,7 +17,7 @@
 """Contains a wrapper for `aq add service --instance`."""
 
 from aquilon.aqdb.model import Service, ServiceInstance
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
 
 
@@ -25,8 +25,7 @@ class CommandAddServiceInstance(BrokerCommand):
 
     required_parameters = ["service", "instance"]
 
-    def render(self, session, logger, service, instance, comments,
-               **arguments):
+    def render(self, session, logger, service, instance, comments, **_):
         dbservice = Service.get_unique(session, service, compel=True)
         ServiceInstance.get_unique(session, service=dbservice, name=instance,
                                    preclude=True)

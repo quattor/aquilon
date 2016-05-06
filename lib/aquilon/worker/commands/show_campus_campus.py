@@ -17,12 +17,12 @@
 """Contains the logic for `aq show campus --campus`."""
 
 from aquilon.aqdb.model import Campus
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 
 
 class CommandShowCampusCampus(BrokerCommand):
 
     required_parameters = ["campus"]
 
-    def render(self, session, campus, **arguments):
+    def render(self, session, campus, **_):
         return Campus.get_unique(session, campus, compel=True)

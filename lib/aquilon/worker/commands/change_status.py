@@ -26,7 +26,7 @@ class CommandChangeStatus(BrokerCommand):
 
     required_parameters = ["hostname"]
 
-    def render(self, session, logger, hostname, buildstatus, **arguments):
+    def render(self, session, logger, hostname, buildstatus, **_):
         dbhost = hostname_to_host(session, hostname)
         dbstatus = HostLifecycle.get_instance(session, buildstatus)
         changed = dbhost.status.transition(dbhost, dbstatus)

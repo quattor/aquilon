@@ -461,7 +461,7 @@ class DSDBRunner(object):
         self.add_action(command, rollback)
 
     def add_host_details(self, fqdn, ip, iface=None, mac=None, primary=None,
-                         comments=None, **kwargs):
+                         comments=None, **_):
         command = ["add_host", "-host_name", fqdn,
                    "-ip_address", ip, "-status", "aq"]
         if iface:
@@ -478,7 +478,7 @@ class DSDBRunner(object):
 
     def update_host_details(self, fqdn, iface=None, new_ip=None, new_mac=None,
                             new_comments=None, old_ip=None, old_mac=None,
-                            old_comments=None, **kwargs):
+                            old_comments=None, **_):
         command = ["update_aqd_host", "-host_name", fqdn]
         if iface:
             iface = self.normalize_iface(iface)
@@ -499,7 +499,7 @@ class DSDBRunner(object):
         self.add_action(command, rollback)
 
     def update_host_iface_name(self, old_fqdn, new_fqdn,
-                               old_iface, new_iface, **kwargs):
+                               old_iface, new_iface, **_):
         old_iface = self.normalize_iface(old_iface)
         new_iface = self.normalize_iface(new_iface)
         command = ["update_aqd_host", "-host_name", old_fqdn]
@@ -517,7 +517,7 @@ class DSDBRunner(object):
         self.add_action(command, rollback)
 
     def delete_host_details(self, fqdn, ip, iface=None, mac=None, primary=None,
-                            comments=None, **kwargs):
+                            comments=None, **_):
         command = ["delete_host", "-ip_address", ip]
         rollback = ["add_host", "-host_name", fqdn,
                     "-ip_address", ip, "-status", "aq"]

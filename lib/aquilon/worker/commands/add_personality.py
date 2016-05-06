@@ -35,7 +35,7 @@ class CommandAddPersonality(BrokerCommand):
 
     def render(self, session, logger, personality, archetype, grn, eon_id,
                host_environment, comments, cluster_required, copy_from,
-               copy_stage, config_override, staged, **arguments):
+               copy_stage, config_override, staged, **_):
         if not VALID_PERSONALITY_RE.match(personality):
             raise ArgumentError("Personality name '%s' is not valid." %
                                 personality)

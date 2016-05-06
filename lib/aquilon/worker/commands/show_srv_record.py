@@ -16,11 +16,10 @@
 # limitations under the License.
 """Contains the logic for `aq show srv record`."""
 
-
 from sqlalchemy.orm import contains_eager
 
 from aquilon.exceptions_ import NotFoundException
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import SrvRecord, DnsDomain, DnsEnvironment, Fqdn
 
 
@@ -29,7 +28,7 @@ class CommandShowSrvRecord(BrokerCommand):
     required_parameters = ["service", "protocol", "dns_domain"]
 
     def render(self, session, service, protocol, dns_domain, dns_environment,
-               **kwargs):
+               **_):
         dbdns_env = DnsEnvironment.get_unique_or_default(session,
                                                          dns_environment)
         dbdns_domain = DnsDomain.get_unique(session, dns_domain, compel=True)

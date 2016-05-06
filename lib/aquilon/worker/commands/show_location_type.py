@@ -21,14 +21,14 @@ from sqlalchemy.orm import subqueryload
 
 from aquilon.exceptions_ import NotFoundException
 from aquilon.aqdb.model import Location
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 
 
 class CommandShowLocationType(BrokerCommand):
 
     required_parameters = ["type"]
 
-    def render(self, session, type, name, **arguments):
+    def render(self, session, type, name, **_):
         cls = Location.polymorphic_subclass(type, "Unknown location type")
         query = session.query(cls)
         query = query.options(subqueryload('parents'),

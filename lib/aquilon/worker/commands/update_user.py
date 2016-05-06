@@ -24,7 +24,7 @@ class CommandUpdateUser(BrokerCommand):
     required_parameters = ["username"]
 
     def render(self, session, username, uid, gid, full_name, home_directory,
-               **arguments):
+               **_):
         dbuser = User.get_unique(session, username, compel=True)
 
         # 0 is a valid value for uid

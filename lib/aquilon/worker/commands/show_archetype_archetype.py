@@ -17,14 +17,14 @@
 
 from sqlalchemy.orm import undefer
 
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.aqdb.model import Archetype
+from aquilon.worker.broker import BrokerCommand
 
 
 class CommandShowArchetypeArchetype(BrokerCommand):
 
     required_parameters = ["archetype"]
 
-    def render(self, session, archetype, **arguments):
+    def render(self, session, archetype, **_):
         return Archetype.get_unique(session, archetype, compel=True,
                                     query_options=[undefer('comments')])

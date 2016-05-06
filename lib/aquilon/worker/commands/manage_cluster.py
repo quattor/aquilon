@@ -26,7 +26,7 @@ class CommandManageCluster(CommandManageList):
 
     required_parameters = ["cluster"]
 
-    def get_objects(self, session, logger, cluster, **arguments):  # pylint: disable=W0613
+    def get_objects(self, session, logger, cluster, **_):
         dbcluster = Cluster.get_unique(session, cluster, compel=True)
         if isinstance(dbcluster, MetaCluster):
             logger.client_info("Please use the --metacluster option for "

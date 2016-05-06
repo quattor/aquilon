@@ -26,7 +26,7 @@ class CommandManageHostname(CommandManageList):
 
     required_parameters = ["hostname"]
 
-    def get_objects(self, session, hostname, **arguments):  # pylint: disable=W0613
+    def get_objects(self, session, hostname, **_):
         dbhost = hostname_to_host(session, hostname)
         if dbhost.cluster:
             raise ArgumentError("Cluster nodes must be managed at the "

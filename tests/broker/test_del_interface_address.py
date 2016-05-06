@@ -77,7 +77,6 @@ class TestDelInterfaceAddress(TestBrokerCommand):
         self.dsdb_verify()
 
     def testdelbylabelagain(self):
-        ip = self.net["zebra_eth1"].usable[3]
         command = ["del", "interface", "address", "--machine", "ut3c5n2",
                    "--interface", "eth1", "--label", "e1"]
         out = self.badrequesttest(command)
@@ -95,9 +94,7 @@ class TestDelInterfaceAddress(TestBrokerCommand):
         self.dsdb_verify()
 
     def testverifyunittest20(self):
-        ip = self.net["zebra_vip"].usable[2]
-        command = ["cat", "--hostname", "unittest20.aqd-unittest.ms.com",
-                   "--data"]
+        command = ["cat", "--hostname", "unittest20.aqd-unittest.ms.com", "--data"]
         out = self.commandtest(command)
         self.searchoutput(out,
                           r'"system/resources/service_address" = '

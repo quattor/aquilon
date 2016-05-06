@@ -24,6 +24,6 @@ class CommandShowVendorAll(BrokerCommand):
 
     required_parameters = []
 
-    def render(self, session, **arguments):
+    def render(self, session, **_):
         vlist = session.query(Vendor).order_by(Vendor.name).all()
         return vlist

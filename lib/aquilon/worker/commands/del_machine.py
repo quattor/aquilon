@@ -27,7 +27,7 @@ class CommandDelMachine(BrokerCommand):
 
     required_parameters = ["machine"]
 
-    def render(self, session, logger, machine, **arguments):
+    def render(self, session, logger, machine, **_):
         dbmachine = Machine.get_unique(session, machine, compel=True)
 
         plenaries = PlenaryCollection(logger=logger)

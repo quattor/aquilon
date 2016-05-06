@@ -23,7 +23,7 @@ class CommandUpdateDnsEnvironment(BrokerCommand):
 
     required_parameters = ["dns_environment"]
 
-    def render(self, session, dns_environment, comments, **arguments):
+    def render(self, session, dns_environment, comments, **_):
         dbdns_env = DnsEnvironment.get_unique(session, dns_environment,
                                               compel=True)
 

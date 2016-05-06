@@ -24,7 +24,7 @@ class CommandShowParameterDefinitionArchetype(BrokerCommand):
 
     required_parameters = ["archetype", "path"]
 
-    def render(self, session, archetype, path, **arguments):
+    def render(self, session, archetype, path, **_):
         dbarchetype = Archetype.get_unique(session, archetype, compel=True)
         for holder in dbarchetype.param_def_holders.values():
             db_paramdef = ParamDefinition.get_unique(session, path=path,

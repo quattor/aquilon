@@ -25,7 +25,7 @@ class CommandManageMetaCluster(CommandManageList):
 
     required_parameters = ["metacluster"]
 
-    def get_objects(self, session, metacluster, **arguments):  # pylint: disable=W0613
+    def get_objects(self, session, metacluster, **_):
         dbmeta = MetaCluster.get_unique(session, metacluster, compel=True)
         return (dbmeta.branch, dbmeta.sandbox_author,
                 list(dbmeta.all_objects()))

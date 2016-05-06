@@ -24,7 +24,7 @@ class CommandStatus(BrokerCommand):
 
     requires_readonly = True
 
-    def render(self, session, dbuser, **arguments):
+    def render(self, session, dbuser, **_):
         stat = []
         stat.append("Aquilon Broker %s" % self.config.get("broker", "version"))
         stat.append("Server: %s" % self.config.get("broker", "servername"))

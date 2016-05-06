@@ -25,7 +25,7 @@ class CommandDelNetgroupWhitelist(BrokerCommand):
 
     required_parameters = ["netgroup"]
 
-    def render(self, session, netgroup, **arguments):
+    def render(self, session, netgroup, **_):
         dbng = NetGroupWhiteList.get_unique(session, name=netgroup,
                                             compel=True)
 

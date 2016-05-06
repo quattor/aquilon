@@ -209,8 +209,7 @@ class TestAddAddress(TestBrokerCommand):
         command = ["add", "address", "--fqdn", "arecord17.aqd-unittest.ms.com",
                    "--reverse_ptr", "reverse.restrict.aqd-unittest.ms.com",
                    "--ip", ip]
-        out, err = self.successtest(command)
-        self.assertEmptyOut(out, command)
+        err = self.statustest(command)
         self.matchoutput(err,
                          "WARNING: Will create a reference to "
                          "reverse.restrict.aqd-unittest.ms.com, but trying to "

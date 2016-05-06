@@ -117,7 +117,7 @@ def get_vm_pg_allocator(dbmachine):
 
 def generate_ip(session, logger, dbinterface, ip=None, ipfromip=None,
                 ipfromsystem=None, autoip=None, ipalgorithm=None, compel=False,
-                network_environment=None, audit_results=None, **kwargs):
+                network_environment=None, audit_results=None, **_):
     ip_options = [ip, ipfromip, ipfromsystem, autoip]
     numopts = sum(1 if opt else 0 for opt in ip_options)
     if numopts > 1:
@@ -577,8 +577,6 @@ def enforce_bucket_alignment(dbrack, dbnetwork, logger):
 def assign_address(dbinterface, ip, dbnetwork, label=None, shared=False,
                    priority=None, logger=None):
     assert isinstance(dbinterface, Interface)
-
-    dns_environment = dbnetwork.network_environment.dns_environment
 
     if dbinterface.master:
         raise ArgumentError("Slave interfaces cannot hold addresses.")

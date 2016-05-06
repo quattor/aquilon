@@ -29,7 +29,7 @@ class TestSearchSystem(TestBrokerCommand):
 
     def testfqdnavailable(self):
         command = "search system --fqdn unittest00.one-nyp.ms.com"
-        out = self.commandtest(command.split(" "))
+        self.commandtest(command.split(" "))
 
     def testfqdnunavailablerealdomain(self):
         command = "search system --fqdn does-not-exist.one-nyp.ms.com"

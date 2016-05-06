@@ -23,7 +23,7 @@ from sqlalchemy.sql.expression import asc, desc, or_, exists
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Xtn, XtnDetail, XtnEnd
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 
 _IGNORED_COMMANDS = ('show_active_locks', 'show_active_commands', 'cat',
                      'search_audit')
@@ -34,7 +34,7 @@ class CommandSearchAudit(BrokerCommand):
     required_parameters = []
 
     def render(self, session, keyword, argument, username, command, before,
-               after, return_code, limit, reverse_order, **arguments):
+               after, return_code, limit, reverse_order, **_):
 
         q = session.query(Xtn)
 

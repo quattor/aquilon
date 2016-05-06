@@ -30,7 +30,7 @@ class CommandDelHost(BrokerCommand):
 
     required_parameters = ["hostname"]
 
-    def render(self, session, logger, hostname, **arguments):
+    def render(self, session, logger, hostname, **_):
         # Check dependencies, translate into user-friendly message
         dbhost = hostname_to_host(session, hostname)
         dbmachine = dbhost.hardware_entity

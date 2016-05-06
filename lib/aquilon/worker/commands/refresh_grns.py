@@ -16,14 +16,14 @@
 # limitations under the License.
 """ Contains the logic of "aq refresh grns" """
 
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.grn import update_grn_map
 from aquilon.worker.locks import SyncKey
 
 
 class CommandRefreshGrns(BrokerCommand):
 
-    def render(self, session, logger, **arguments):
+    def render(self, session, logger, **_):
         with SyncKey("grn", logger=logger):
             update_grn_map(self.config, session, logger)
 

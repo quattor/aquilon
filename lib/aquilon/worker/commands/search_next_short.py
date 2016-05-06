@@ -16,9 +16,8 @@
 # limitations under the License.
 """Contains the logic for `aq search next --short`."""
 
-
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.aqdb.model import Fqdn, DnsDomain
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.search import search_next
 
 
@@ -26,8 +25,7 @@ class CommandSearchNextShort(BrokerCommand):
 
     required_parameters = ['short', 'dns_domain']
 
-    def render(self, session, short, dns_domain, start, number, pack,
-               **arguments):
+    def render(self, session, short, dns_domain, start, number, pack, **_):
         dbdns_domain = DnsDomain.get_unique(session, dns_domain, compel=True)
         result = search_next(session=session, cls=Fqdn, attr=Fqdn.name,
                              value=short, dns_domain=dbdns_domain,

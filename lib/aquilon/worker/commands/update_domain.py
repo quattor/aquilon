@@ -16,10 +16,9 @@
 # limitations under the License.
 """Contains the logic for `aq update domain`."""
 
-
 from aquilon.exceptions_ import ArgumentError, AuthorizationException
 from aquilon.aqdb.model import Domain
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.branch import (expand_compiler,
                                               has_compileable_objects)
 
@@ -30,7 +29,7 @@ class CommandUpdateDomain(BrokerCommand):
 
     def render(self, session, dbuser, domain, comments, compiler_version,
                autosync, change_manager, allow_manage, profile_formats,
-               archived, **arguments):
+               archived, **_):
         dbdomain = Domain.get_unique(session, domain, compel=True)
 
         # FIXME: proper authorization

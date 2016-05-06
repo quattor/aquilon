@@ -108,7 +108,7 @@ class TestAddBuilding(TestBrokerCommand):
 
     def test_verifyaddtu(self):
         command = "show building --building tu"
-        out, err = self.successtest(command.split(" "))
+        out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Building: tu", command)
         self.matchoutput(out, "Address: 14 Test Lane", command)
 

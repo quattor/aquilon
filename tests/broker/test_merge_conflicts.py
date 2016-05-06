@@ -44,13 +44,13 @@ class TestMergeConflicts(TestBrokerCommand):
         p = Popen(("/bin/rm", "-rf",
                    os.path.join(self.sandboxdir, "changetest3")),
                   stdout=1, stderr=2)
-        rc = p.wait()
+        p.wait()
 
     def test_001_clearchangetest4sandbox(self):
         p = Popen(("/bin/rm", "-rf",
                    os.path.join(self.sandboxdir, "changetest4")),
                   stdout=1, stderr=2)
-        rc = p.wait()
+        p.wait()
 
     def test_001_getchangetest3sandbox(self):
         self.successtest(["get", "--sandbox", "changetest3"])
@@ -161,7 +161,7 @@ class TestMergeConflicts(TestBrokerCommand):
         sandboxdir = os.path.join(self.sandboxdir, "changetest4")
         self.gitcommand(["fetch"], cwd=sandboxdir)
         command = ["merge", "origin/changetest3"]
-        (out, err) = self.gitcommand_expectfailure(command, cwd=sandboxdir)
+        out, _ = self.gitcommand_expectfailure(command, cwd=sandboxdir)
         self.matchoutput(out, "Automatic merge failed;", command)
 
         # The file will now have merge conflicts.  Cheat by grabbing

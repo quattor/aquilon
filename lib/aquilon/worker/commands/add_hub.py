@@ -18,7 +18,7 @@
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Company, Hub
-from aquilon.worker.commands import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.commands import BrokerCommand
 from aquilon.worker.dbwrappers.location import add_location
 
 
@@ -26,7 +26,7 @@ class CommandAddHub(BrokerCommand):
 
     required_parameters = ["hub"]
 
-    def render(self, session, organization, hub, fullname, comments, **arguments):
+    def render(self, session, organization, hub, fullname, comments, **_):
         organization = organization or self.config.get("broker",
                                                        "default_organization")
         if not organization:

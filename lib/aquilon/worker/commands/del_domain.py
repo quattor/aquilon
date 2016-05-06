@@ -28,7 +28,7 @@ class CommandDelDomain(BrokerCommand):
     required_parameters = ["domain"]
 
     def render(self, session, logger, domain, justification, reason, user,
-               requestid, **arguments):
+               requestid, **_):
         dbdomain = Domain.get_unique(session, domain, compel=True)
 
         # Deleting non-tracking domains may lose history, so more controls are

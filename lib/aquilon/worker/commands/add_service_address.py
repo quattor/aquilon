@@ -33,8 +33,7 @@ class CommandAddServiceAddress(BrokerCommand):
 
     def render(self, session, logger, service_address, ip, name, interfaces,
                hostname, cluster, metacluster, resourcegroup,
-               network_environment, map_to_primary, shared, comments,
-               **arguments):
+               network_environment, map_to_primary, shared, comments, **_):
 
         validate_nlist_key("name", name)
 

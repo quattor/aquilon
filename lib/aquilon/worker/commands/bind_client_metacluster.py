@@ -28,7 +28,7 @@ class CommandBindClientMetacluster(BrokerCommand):
     required_parameters = ["metacluster", "service"]
 
     def render(self, session, logger, metacluster, service, instance,
-               force=False, **arguments):
+               force=False, **_):
         dbmeta = MetaCluster.get_unique(session, metacluster, compel=True)
         dbservice = Service.get_unique(session, service, compel=True)
         if instance:

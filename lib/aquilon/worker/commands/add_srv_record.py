@@ -32,7 +32,7 @@ class CommandAddSrvRecord(BrokerCommand):
 
     def render(self, session, logger, service, protocol, dns_domain, priority,
                weight, target, port, dns_environment, ttl, comments, grn,
-               eon_id, **kwargs):
+               eon_id, **_):
         dbdns_env = DnsEnvironment.get_unique_or_default(session,
                                                          dns_environment)
         dbdns_domain = DnsDomain.get_unique(session, dns_domain, compel=True)

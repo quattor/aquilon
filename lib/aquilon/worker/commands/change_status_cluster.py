@@ -25,8 +25,7 @@ class CommandChangeClusterStatus(BrokerCommand):
 
     required_parameters = ["cluster"]
 
-    def render(self, session, logger, cluster, metacluster, buildstatus,
-               **arguments):
+    def render(self, session, logger, cluster, metacluster, buildstatus, **_):
         if cluster:
             # TODO: disallow metaclusters here
             dbcluster = Cluster.get_unique(session, cluster, compel=True)

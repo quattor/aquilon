@@ -181,7 +181,7 @@ class BrokerCommand(object):
 
         request._audit_result.append((key, value))
 
-    def render(self, **arguments):  # pragma: no cover
+    def render(self, **_):  # pragma: no cover
         """ Implement this method to create a functional broker command.
 
         The base __init__ method wraps all implementations using
@@ -397,7 +397,7 @@ class BrokerCommand(object):
         return True
 
     @classmethod
-    def deprecated_command(cls, msg, logger=None, user=None, **kwargs):
+    def deprecated_command(cls, msg, logger=None, user=None, **_):
         if not logger:  # pragma: no cover
             raise AquilonError("Too few arguments to deprecated_command")
 
@@ -412,7 +412,7 @@ class BrokerCommand(object):
         logger.client_info(msg)
 
     @classmethod
-    def deprecated_option(cls, option, msg="", logger=None, user=None, **kwargs):
+    def deprecated_option(cls, option, msg="", logger=None, user=None, **_):
         if not option or not logger:  # pragma: no cover
             raise AquilonError("Too few arguments to deprecated_option")
 

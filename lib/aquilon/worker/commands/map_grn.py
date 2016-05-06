@@ -42,7 +42,7 @@ class CommandMapGrn(BrokerCommand):
 
     def render(self, session, logger, target, grn, eon_id, hostname, list,
                membersof, personality, personality_stage, archetype,
-               justification, reason, user, **arguments):
+               justification, reason, user, **_):
         dbgrn = lookup_grn(session, grn, eon_id, logger=logger,
                            config=self.config,
                            usable_only=self.require_usable_grn)

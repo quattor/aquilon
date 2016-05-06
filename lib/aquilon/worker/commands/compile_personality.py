@@ -32,7 +32,7 @@ class CommandCompilePersonality(BrokerCommand):
 
     def render(self, session, logger, domain, sandbox, archetype, personality,
                personality_stage, pancinclude, pancexclude, pancdebug,
-               cleandeps, **arguments):
+               cleandeps, **_):
         dbdomain = None
         dbauthor = None
         if domain or sandbox:

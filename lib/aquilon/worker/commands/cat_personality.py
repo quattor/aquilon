@@ -35,7 +35,7 @@ class CommandCatPersonality(BrokerCommand):
 
     def render(self, generate, session, logger, personality,
                personality_stage, archetype, pre_feature, post_feature,
-               param_tmpl, **kwargs):
+               param_tmpl, **_):
         dbpersonality = Personality.get_unique(session, archetype=archetype,
                                                name=personality, compel=True)
         dbstage = dbpersonality.default_stage(personality_stage)

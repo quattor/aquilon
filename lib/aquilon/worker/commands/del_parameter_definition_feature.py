@@ -29,7 +29,7 @@ class CommandDelParameterDefintionFeature(BrokerCommand):
     required_parameters = ["path", "feature", "type"]
 
     def render(self, session, logger, feature, type, path, user, justification,
-               reason, **kwargs):
+               reason, **_):
         cls = Feature.polymorphic_subclass(type, "Unknown feature type")
         dbfeature = cls.get_unique(session, name=feature, compel=True)
         if not dbfeature.param_def_holder:

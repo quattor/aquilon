@@ -18,7 +18,7 @@
 
 from sqlalchemy.orm import joinedload, undefer
 
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import NetworkEnvironment
 
 
@@ -26,7 +26,7 @@ class CommandShowNetworkEnvironmentNetworkEnvironment(BrokerCommand):
 
     required_parameters = ["network_environment"]
 
-    def render(self, session, network_environment, **arguments):
+    def render(self, session, network_environment, **_):
         options = [undefer("comments"),
                    joinedload("dns_environment"),
                    undefer("dns_environment.comments")]

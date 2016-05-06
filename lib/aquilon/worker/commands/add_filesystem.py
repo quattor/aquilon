@@ -30,7 +30,7 @@ class CommandAddFilesystem(CommandAddResource):
 
     def add_resource(self, session, logger, filesystem, type, mountpoint,
                      blockdevice, bootmount, dumpfreq, fsckpass, options,
-                     comments, **kwargs):
+                     comments, **_):
         if dumpfreq is None:
             dumpfreq = 0
         if fsckpass is None:

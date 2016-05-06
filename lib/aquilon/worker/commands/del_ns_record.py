@@ -15,16 +15,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 from aquilon.aqdb.model import DnsDomain, NsRecord, ARecord
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 
 
 class CommandDelNsRecord(BrokerCommand):
 
     required_parameters = ["dns_domain", "fqdn"]
 
-    def render(self, session, fqdn, dns_domain, **arguments):
+    def render(self, session, fqdn, dns_domain, **_):
         dbdns_domain = DnsDomain.get_unique(session, dns_domain, compel=True)
 
         dba_rec = ARecord.get_unique(session, fqdn=fqdn, compel=True)

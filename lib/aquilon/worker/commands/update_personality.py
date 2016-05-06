@@ -58,7 +58,7 @@ class CommandUpdatePersonality(BrokerCommand):
     def render(self, session, logger, personality, personality_stage, archetype,
                vmhost_capacity_function, cluster_required, config_override,
                host_environment, grn, eon_id, leave_existing, staged,
-               justification, reason, comments, user, **arguments):
+               justification, reason, comments, user, **_):
         dbpersona = Personality.get_unique(session, name=personality,
                                            archetype=archetype, compel=True)
 

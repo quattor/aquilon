@@ -71,12 +71,12 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
                           command)
 
     def test_1002_map_dns_domain(self):
-        out = self.successtest(['map_dns_domain', '--building=ut',
-                                '--dns_domain=aqd-unittest.ms.com'])
+        self.noouttest(['map_dns_domain', '--building=ut',
+                        '--dns_domain=aqd-unittest.ms.com'])
 
     def test_1003_reconfigure_aquilon95(self):
         command = ["reconfigure", "--hostname=aquilon95.aqd-unittest.ms.com"]
-        (out, err) = self.successtest(command)
+        err = self.statustest(command)
         self.matchoutput(err, "1/1 object template", command)
 
     def test_1004_verify_machine_plenary(self):
@@ -89,12 +89,12 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
                           command)
 
     def test_1005_unmap_dns_domain(self):
-        out = self.successtest(['unmap_dns_domain', '--building=ut',
-                                '--dns_domain=aqd-unittest.ms.com'])
+        self.noouttest(['unmap_dns_domain', '--building=ut',
+                        '--dns_domain=aqd-unittest.ms.com'])
 
     def test_1006_reconfigure_aquilon95(self):
         command = ["reconfigure", "--hostname=aquilon95.aqd-unittest.ms.com"]
-        (out, err) = self.successtest(command)
+        err = self.statustest(command)
         self.matchoutput(err, "1/1 object template", command)
 
     def test_1007_verify_machine_plenary(self):
@@ -140,7 +140,7 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
         hosts = ["aquilon95.aqd-unittest.ms.com"]
         scratchfile = self.writescratch("grnlist", "\n".join(hosts))
         command = ["reconfigure", "--list", scratchfile, "--cleargrn"]
-        out = self.successtest(command)
+        self.statustest(command)
 
     def test_1025_reconfigurelist_cleargrn_post(self):
         hosts = ["aquilon95.aqd-unittest.ms.com"]
@@ -193,7 +193,7 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
         command = ["reconfigure", "--hostname", "unittest02.one-nyp.ms.com",
                    "--buildstatus", "ready", "--grn", "grn:/ms/ei/aquilon/aqd",
                    "--comments", "New host comments"]
-        (out, err) = self.successtest(command)
+        err = self.statustest(command)
         self.matchoutput(err,
                          "unittest02.one-nyp.ms.com adding binding for "
                          "service instance afs/q.ny.ms.com",
@@ -290,7 +290,7 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
     def test_1056_clear_comments(self):
         command = ["reconfigure", "--hostname", "unittest02.one-nyp.ms.com",
                    "--comments", ""]
-        (out, err) = self.successtest(command)
+        self.statustest(command)
 
     def test_1057_verify_comments(self):
         command = ["show_host", "--hostname", "unittest02.one-nyp.ms.com"]
@@ -301,7 +301,7 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
     def test_1060_reconfigur_eunittest00(self):
         basetime = datetime.now()
         command = ["reconfigure", "--hostname", "unittest00.one-nyp.ms.com"]
-        (out, err) = self.successtest(command)
+        err = self.statustest(command)
         self.matchoutput(err, "1/1 object template", command)
         self.matchclean(err, "removing binding", command)
         self.matchclean(err, "adding binding", command)
@@ -432,7 +432,7 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
         command = ["reconfigure",
                    "--hostname", "aquilon61.aqd-unittest.ms.com",
                    "--osname", "linux", "--osversion", self.linux_version_curr]
-        (out, err) = self.successtest(command)
+        err = self.statustest(command)
         self.matchoutput(err, "1/1 object template", command)
         self.matchclean(err, "removing binding", command)
         self.matchclean(err, "adding binding", command)
@@ -441,7 +441,7 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
         command = ["reconfigure",
                    "--hostname", "unittest17.aqd-unittest.ms.com",
                    "--osname", "linux", "--osversion", self.linux_version_curr]
-        (out, err) = self.successtest(command)
+        err = self.statustest(command)
         self.matchoutput(err, "1/1 object template", command)
         self.matchclean(err, "removing binding", command)
         self.matchclean(err, "adding binding", command)
@@ -450,7 +450,7 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
         command = ["reconfigure", "--keepbindings",
                    "--hostname", "aquilon86.aqd-unittest.ms.com",
                    "--personality", "inventory"]
-        (out, err) = self.successtest(command)
+        err = self.statustest(command)
         self.matchoutput(err, "1/1 object template", command)
         self.matchclean(err, "removing binding", command)
         self.matchclean(err, "adding binding", command)
@@ -459,7 +459,7 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
         command = ["reconfigure",
                    "--hostname", "aquilon87.aqd-unittest.ms.com",
                    "--personality", "inventory"]
-        (out, err) = self.successtest(command)
+        err = self.statustest(command)
         self.matchoutput(err, "removing binding for service instance chooser1", command)
         self.matchoutput(err, "removing binding for service instance chooser2", command)
         self.matchoutput(err, "removing binding for service instance chooser3", command)
@@ -523,14 +523,14 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
         command = ["reconfigure", "--debug",
                    "--hostname", "aquilon88.aqd-unittest.ms.com",
                    "--personality", "inventory"]
-        (out, err) = self.successtest(command)
+        _, err = self.successtest(command)
         self.matchoutput(err, "Creating service chooser", command)
 
     def test_1120_reconfigure_aligned(self):
         for i in range(1, 5):
             command = ["reconfigure",
                        "--hostname", "evh%s.aqd-unittest.ms.com" % i]
-            (out, err) = self.successtest(command)
+            self.statustest(command)
 
     def test_1125_verify_aligned(self):
         # Check that utecl1 is now aligned to a service and that

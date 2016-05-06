@@ -382,7 +382,7 @@ class Base(object):
         return mapper.polymorphic_map[value].class_
 
     @classmethod
-    def populate_const_table(cls, table, connection, **kwargs):  # pragma: no cover
+    def populate_const_table(cls, table, connection, **_):  # pragma: no cover
         if not cls.populate_table_on_create:
             return
 

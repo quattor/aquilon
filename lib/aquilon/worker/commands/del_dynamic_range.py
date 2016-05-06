@@ -29,7 +29,7 @@ class CommandDelDynamicRange(BrokerCommand):
 
     required_parameters = ["startip", "endip"]
 
-    def render(self, session, logger, startip, endip, **arguments):
+    def render(self, session, logger, startip, endip, **_):
         dbnet_env = NetworkEnvironment.get_unique_or_default(session)
         startnet = get_net_id_from_ip(session, startip, dbnet_env)
         endnet = get_net_id_from_ip(session, endip, dbnet_env)

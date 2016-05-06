@@ -47,7 +47,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
 
         command = ["add", "feature", "--feature", "testfeature",
                    "--type", "host", "--grn", GRN, "--visibility", "public",
-                    "--activation", "reboot", "--deactivation", "reboot"]
+                   "--activation", "reboot", "--deactivation", "reboot"]
         self.noouttest(command)
 
     def test_105_setup_next(self):
@@ -63,7 +63,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
         command = ["reconfigure", "--hostname", h,
                    "--archetype", "aquilon",
                    "--personality", PPROD, "--personality_stage", "next"]
-        out = self.successtest(command)
+        self.statustest(command)
 
     def test_200_update_personality(self):
         command = ["update_personality",
@@ -76,7 +76,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
                    "--archetype", "aquilon",
                    "--personality", PPROD,
                    "--justification", "tcm=12345678"]
-        out = self.successtest(command)
+        self.noouttest(command)
 
     def test_210_add_parameter(self):
         command = ["add_parameter",
@@ -93,7 +93,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
                    "--path", "access/users",
                    "--value", "test",
                    "--justification", "tcm=12345678"]
-        out = self.successtest(command)
+        self.noouttest(command)
 
     def test_215_update_parameter(self):
         command = ["update_parameter",
@@ -110,7 +110,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
                    "--path", "access/users",
                    "--value", "test",
                    "--justification", "tcm=12345678"]
-        out = self.successtest(command)
+        self.noouttest(command)
 
     def test_220_del_parameter(self):
         command = ["del_parameter",
@@ -125,7 +125,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
                    "--personality", PPROD,
                    "--path", "access/users",
                    "--justification", "tcm=12345678"]
-        out = self.successtest(command)
+        self.noouttest(command)
 
     def test_230_map_grn(self):
         command = ["map_grn",
@@ -142,7 +142,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
                    "--grn", GRN,
                    "--target", "esp",
                    "--justification", "tcm=12345678"]
-        out = self.successtest(command)
+        self.noouttest(command)
 
     def test_240_unmap_grn(self):
         command = ["unmap_grn",
@@ -159,7 +159,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
                    "--grn", GRN,
                    "--target", "esp",
                    "--justification", "tcm=12345678"]
-        out = self.successtest(command)
+        self.noouttest(command)
 
     def test_270_add_required_svc(self):
         command = ["add_required_service", "--service=chooser1",
@@ -170,7 +170,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
         command = ["add_required_service", "--service=chooser1",
                    "--archetype=aquilon", "--personality", PPROD,
                    "--justification", "tcm=12345678"]
-        out = self.successtest(command)
+        self.noouttest(command)
 
     def test_280_del_required_svc(self):
         command = ["del_required_service", "--service=chooser1",
@@ -181,7 +181,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
         command = ["del_required_service", "--service=chooser1",
                    "--archetype=aquilon", "--personality", PPROD,
                    "--justification", "tcm=12345678"]
-        out = self.successtest(command)
+        self.noouttest(command)
 
     def test_290_add_static_route(self):
         gw = self.net["routing1"].usable[-1]
@@ -195,7 +195,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
                    "--ip", "192.168.248.0", "--prefixlen", "24",
                    "--personality", PPROD,
                    "--justification", "tcm=12345678"]
-        out = self.successtest(command)
+        self.noouttest(command)
 
     def test_300_del_static_route(self):
         gw = self.net["routing1"].usable[-1]
@@ -209,7 +209,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
                    "--ip", "192.168.248.0", "--prefixlen", "24",
                    "--personality", PPROD,
                    "--justification", "tcm=12345678"]
-        out = self.successtest(command)
+        self.noouttest(command)
 
     def test_310_map_service(self):
         command = ["map", "service", "--organization", "ms",
@@ -222,7 +222,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
                    "--service", "utsvc", "--instance", "utsi2",
                    "--archetype", "aquilon", "--personality", PPROD,
                    "--justification", "tcm=12345678"]
-        out = self.successtest(command)
+        self.noouttest(command)
 
     def test_320_unmap_service(self):
         command = ["unmap", "service", "--organization", "ms",
@@ -235,7 +235,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
                    "--service", "utsvc", "--instance", "utsi2",
                    "--archetype", "aquilon", "--personality", PPROD,
                    "--justification", "tcm=12345678"]
-        out = self.successtest(command)
+        self.noouttest(command)
 
     def test_330_bind_feature(self):
         command = ["bind", "feature", "--feature", "testfeature",
@@ -246,7 +246,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
         command = ["bind", "feature", "--feature", "testfeature",
                    "--archetype", "aquilon", "--personality", PPROD,
                    "--justification", "tcm=12345678"]
-        out = self.successtest(command)
+        self.statustest(command)
 
     def test_340_unbind_feature(self):
         command = ["unbind", "feature", "--feature", "testfeature",
@@ -257,7 +257,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
         command = ["unbind", "feature", "--feature", "testfeature",
                    "--archetype", "aquilon", "--personality", PPROD,
                    "--justification", "tcm=12345678"]
-        out = self.successtest(command)
+        self.statustest(command)
 
     def test_400_host_setup(self):
         h = "aquilon91.aqd-unittest.ms.com"
@@ -265,13 +265,13 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
         command = ["reconfigure", "--hostname", h,
                    "--archetype", "aquilon",
                    "--personality", QPROD, "--personality_stage", "next"]
-        out = self.successtest(command)
+        self.statustest(command)
 
     def test_405_update_personality(self):
         command = ["update_personality",
                    "--archetype", "aquilon",
                    "--personality", QPROD]
-        out = self.successtest(command)
+        self.noouttest(command)
 
     def test_410_add_parameter(self):
         command = ["add_parameter",
@@ -279,7 +279,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
                    "--personality", QPROD,
                    "--path", "access/users",
                    "--value", "test"]
-        out = self.successtest(command)
+        self.noouttest(command)
 
     def test_415_update_parameter(self):
         command = ["update_parameter",
@@ -287,14 +287,14 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
                    "--personality", QPROD,
                    "--path", "access/users",
                    "--value", "test"]
-        out = self.successtest(command)
+        self.noouttest(command)
 
     def test_420_del_parameter(self):
         command = ["del_parameter",
                    "--archetype", "aquilon",
                    "--personality", QPROD,
                    "--path", "access/users"]
-        out = self.successtest(command)
+        self.noouttest(command)
 
     def test_430_map_grn(self):
         command = ["map_grn",
@@ -302,7 +302,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
                    "--personality", QPROD,
                    "--grn", GRN,
                    "--target", "esp"]
-        out = self.successtest(command)
+        self.noouttest(command)
 
     def test_440_unmap_grn(self):
         command = ["unmap_grn",
@@ -310,53 +310,53 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
                    "--personality", QPROD,
                    "--grn", GRN,
                    "--target", "esp"]
-        out = self.successtest(command)
+        self.noouttest(command)
 
     def test_470_add_required_svc(self):
         command = ["add_required_service", "--service=chooser1",
                    "--archetype=aquilon", "--personality", QPROD]
-        out = self.successtest(command)
+        self.noouttest(command)
 
     def test_480_del_required_svc(self):
         command = ["del_required_service", "--service=chooser1",
                    "--archetype=aquilon", "--personality", QPROD]
-        out = self.successtest(command)
+        self.noouttest(command)
 
     def test_490_add_static_route(self):
         gw = self.net["routing1"].usable[-1]
         command = ["add", "static", "route", "--gateway", gw,
                    "--ip", "192.168.248.0", "--prefixlen", "24",
                    "--personality", QPROD]
-        out = self.successtest(command)
+        self.noouttest(command)
 
     def test_500_del_static_route(self):
         gw = self.net["routing1"].usable[-1]
         command = ["del", "static", "route", "--gateway", gw,
                    "--ip", "192.168.248.0", "--prefixlen", "24",
                    "--personality", QPROD]
-        out = self.successtest(command)
+        self.noouttest(command)
 
     def test_510_map_service(self):
         command = ["map", "service", "--organization", "ms",
                    "--service", "utsvc", "--instance", "utsi2",
                    "--archetype", "aquilon", "--personality", QPROD]
-        out = self.successtest(command)
+        self.noouttest(command)
 
     def test_520_unmap_service(self):
         command = ["unmap", "service", "--organization", "ms",
                    "--service", "utsvc", "--instance", "utsi2",
                    "--archetype", "aquilon", "--personality", QPROD]
-        out = self.successtest(command)
+        self.noouttest(command)
 
     def test_530_bind_feature(self):
         command = ["bind", "feature", "--feature", "testfeature",
                    "--archetype", "aquilon", "--personality", QPROD]
-        out = self.successtest(command)
+        self.statustest(command)
 
     def test_540_unbind_feature(self):
         command = ["unbind", "feature", "--feature", "testfeature",
                    "--archetype", "aquilon", "--personality", QPROD]
-        out = self.successtest(command)
+        self.statustest(command)
 
     def test_600_host_setup(self):
         h = "aquilon91.aqd-unittest.ms.com"
@@ -364,7 +364,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
         command = ["reconfigure", "--hostname", h,
                    "--archetype", "aquilon",
                    "--personality", PPROD, "--personality_stage", "next"]
-        out = self.successtest(command)
+        self.statustest(command)
 
     def test_600_update_personality_reason(self):
         command = ["update_personality",
@@ -379,7 +379,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
                    "--personality", PPROD,
                    "--justification", "emergency",
                    "--reason", "reason flag check"]
-        out = self.successtest(command)
+        self.noouttest(command)
 
     def test_610_add_parameter_reason(self):
         command = ["add_parameter",
@@ -398,7 +398,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
                    "--value", "test",
                    "--justification", "emergency",
                    "--reason", "reason flag check"]
-        out = self.successtest(command)
+        self.noouttest(command)
 
     def test_620_update_parameter_reason(self):
         command = ["update_parameter",
@@ -417,7 +417,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
                    "--value", "test",
                    "--justification", "emergency",
                    "--reason", "reason flag check"]
-        out = self.successtest(command)
+        self.noouttest(command)
 
     def test_630_del_parameter_reason(self):
         command = ["del_parameter",
@@ -434,7 +434,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
                    "--path", "access/netgroup",
                    "--justification", "emergency",
                    "--reason", "reason flag check"]
-        out = self.successtest(command)
+        self.noouttest(command)
 
     def test_640_map_grn_reason(self):
         command = ["map_grn",
@@ -453,7 +453,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
                    "--target", "esp",
                    "--justification", "emergency",
                    "--reason", "reason flag check"]
-        out = self.successtest(command)
+        self.noouttest(command)
 
     def test_650_map_grn_reason(self):
         command = ["unmap_grn",
@@ -472,7 +472,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
                    "--target", "esp",
                    "--justification", "emergency",
                    "--reason", "reason flag check"]
-        out = self.successtest(command)
+        self.noouttest(command)
 
     def test_660_add_required_svc_reason(self):
         command = ["add_required_service", "--service=chooser1",
@@ -485,7 +485,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
                    "--archetype=aquilon", "--personality", PPROD,
                    "--justification", "emergency",
                    "--reason", "reason flag check"]
-        out = self.successtest(command)
+        self.noouttest(command)
 
     def test_670_del_required_svc_reason(self):
         command = ["del_required_service", "--service=chooser1",
@@ -498,7 +498,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
                    "--archetype=aquilon", "--personality", PPROD,
                    "--justification", "emergency",
                    "--reason", "reason flag check"]
-        out = self.successtest(command)
+        self.noouttest(command)
 
     def test_680_add_static_route_reason(self):
         gw = self.net["routing1"].usable[-1]
@@ -514,7 +514,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
                    "--personality", PPROD,
                    "--justification", "emergency",
                    "--reason", "reason flag check"]
-        out = self.successtest(command)
+        self.noouttest(command)
 
     def test_690_del_static_route_reason(self):
         gw = self.net["routing1"].usable[-1]
@@ -530,7 +530,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
                    "--personality", PPROD,
                    "--justification", "emergency",
                    "--reason", "reason flag check"]
-        out = self.successtest(command)
+        self.noouttest(command)
 
     def test_700_add_service_reason(self):
         command = ["map", "service", "--organization", "ms",
@@ -545,7 +545,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
                    "--archetype", "aquilon", "--personality", PPROD,
                    "--justification", "emergency",
                    "--reason", "reason flag check"]
-        out = self.successtest(command)
+        self.noouttest(command)
 
     def test_710_del_service_reason(self):
         command = ["unmap", "service", "--organization", "ms",
@@ -560,7 +560,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
                    "--archetype", "aquilon", "--personality", PPROD,
                    "--justification", "emergency",
                    "--reason", "reason flag check"]
-        out = self.successtest(command)
+        self.noouttest(command)
 
     def test_720_add_feature_reason(self):
         command = ["bind", "feature", "--feature", "testfeature",
@@ -573,7 +573,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
                    "--archetype", "aquilon", "--personality", PPROD,
                    "--justification", "emergency",
                    "--reason", "reason flag check"]
-        out = self.successtest(command)
+        self.statustest(command)
 
     def test_730_del_feature_reason(self):
         command = ["unbind", "feature", "--feature", "testfeature",
@@ -586,7 +586,7 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
                    "--archetype", "aquilon", "--personality", PPROD,
                    "--justification", "emergency",
                    "--reason", "reason flag check"]
-        out = self.successtest(command)
+        self.statustest(command)
 
     def test_800_bind_feature_restricted(self):
         command = ["add", "feature", "--feature", "nonpublicfeature",
@@ -597,11 +597,11 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
     def test_810_bind_feature_restricted_qa(self):
         command = ["bind", "feature", "--feature", "nonpublicfeature",
                    "--archetype", "aquilon", "--personality", QPROD]
-        out = self.successtest(command)
+        self.statustest(command)
 
         command = ["unbind", "feature", "--feature", "nonpublicfeature",
                    "--archetype", "aquilon", "--personality", QPROD]
-        out = self.successtest(command)
+        self.statustest(command)
 
     def test_820_bind_feature_restricted_prod(self):
         command = ["bind", "feature", "--feature", "nonpublicfeature",
@@ -612,12 +612,12 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
         command = ["bind", "feature", "--feature", "nonpublicfeature",
                    "--archetype", "aquilon", "--personality", PPROD,
                    "--justification", "tcm=12345678"]
-        out = self.successtest(command)
+        self.statustest(command)
 
         command = ["unbind", "feature", "--feature", "nonpublicfeature",
                    "--archetype", "aquilon", "--personality", PPROD,
                    "--justification", "tcm=12345678"]
-        out = self.successtest(command)
+        self.statustest(command)
 
     def test_850_bind_feature_restricted(self):
         command = ["del", "feature", "--feature", "nonpublicfeature",
@@ -631,15 +631,15 @@ class TestJustification(PersonalityTestMixin, TestBrokerCommand):
         command = ["reconfigure", "--hostname", h,
                    "--archetype", "aquilon",
                    "--personality", p]
-        out = self.successtest(command)
+        self.statustest(command)
 
         command = ["del_personality", "--archetype", "aquilon",
                    "--personality", "justify-qa"]
-        out = self.successtest(command)
+        self.noouttest(command)
 
         command = ["del_personality", "--archetype", "aquilon",
                    "--personality", "justify-prod"]
-        out = self.successtest(command)
+        self.noouttest(command)
 
         command = ["del", "feature", "--feature", "testfeature",
                    "--type", "host"]

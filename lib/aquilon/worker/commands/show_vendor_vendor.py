@@ -15,14 +15,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.aqdb.model import Vendor
+from aquilon.worker.broker import BrokerCommand
 
 
 class CommandShowVendorVendor(BrokerCommand):
 
     required_parameters = ["vendor"]
 
-    def render(self, session, vendor, **arguments):
+    def render(self, session, vendor, **_):
         return Vendor.get_unique(session, vendor, compel=True)

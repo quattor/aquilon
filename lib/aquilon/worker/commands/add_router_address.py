@@ -17,7 +17,7 @@
 """Contains the logic for `aq add router address`."""
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import (RouterAddress, Building, ARecord, Fqdn,
                                 NetworkEnvironment)
 from aquilon.aqdb.model.dns_domain import parse_fqdn
@@ -30,7 +30,7 @@ class CommandAddRouterAddress(BrokerCommand):
     required_parameters = ["fqdn"]
 
     def render(self, session, logger, dbuser,
-               fqdn, building, ip, network_environment, comments, **arguments):
+               fqdn, building, ip, network_environment, comments, **_):
         dbnet_env = NetworkEnvironment.get_unique_or_default(session,
                                                              network_environment)
         self.az.check_network_environment(dbuser, dbnet_env)

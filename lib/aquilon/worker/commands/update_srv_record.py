@@ -20,7 +20,7 @@ from sqlalchemy.orm import contains_eager
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Fqdn, SrvRecord, DnsDomain, DnsEnvironment
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.grn import lookup_grn
 
 
@@ -30,7 +30,7 @@ class CommandUpdateSrvRecord(BrokerCommand):
 
     def render(self, session, logger, service, protocol, dns_domain, target,
                priority, weight, port, ttl, clear_ttl, comments,
-               dns_environment, grn, eon_id, clear_grn, **kwargs):
+               dns_environment, grn, eon_id, clear_grn, **_):
         name = "_%s._%s" % (service.strip().lower(), protocol.strip().lower())
         dbdns_env = DnsEnvironment.get_unique_or_default(session,
                                                          dns_environment)

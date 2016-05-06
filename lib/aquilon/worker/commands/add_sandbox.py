@@ -35,7 +35,7 @@ class CommandAddSandbox(CommandGet):
     requires_format = True
 
     def render(self, session, logger, dbuser, sandbox, start, get, comments,
-               **arguments):
+               **_):
         if not dbuser:
             raise AuthorizationException("Cannot create a sandbox without an "
                                          "authenticated connection.")

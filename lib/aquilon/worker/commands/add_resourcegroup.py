@@ -29,7 +29,7 @@ class CommandAddResourceGroup(CommandAddResource):
     resource_name = "resourcegroup"
 
     def add_resource(self, session, logger, resourcegroup, required_type,
-                     comments, **kwargs):
+                     comments, **_):
         if required_type is not None:
             rqtype = Resource.polymorphic_subclass(required_type,
                                                    "Unknown resource type")

@@ -32,8 +32,7 @@ class CommandDelInterfaceAddress(BrokerCommand):
     required_parameters = ['interface']
 
     def render(self, session, logger, machine, chassis, network_device, interface,
-               fqdn, ip, label, keep_dns, network_environment,
-               **kwargs):
+               fqdn, ip, label, keep_dns, network_environment, **_):
 
         if machine:
             hwtype = 'machine'

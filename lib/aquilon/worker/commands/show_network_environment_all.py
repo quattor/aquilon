@@ -26,7 +26,7 @@ class CommandShowNetworkEnvironmentAll(BrokerCommand):
 
     required_parameters = []
 
-    def render(self, session, **arguments):
+    def render(self, session, **_):
         q = session.query(NetworkEnvironment)
         q = q.options(undefer('comments'),
                       joinedload('dns_environment'),

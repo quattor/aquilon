@@ -30,7 +30,7 @@ class CommandAddParameterDefintionArchetype(BrokerCommand):
 
     def render(self, session, logger, archetype, template, path, value_type,
                schema, required, activation, default, description, user,
-               justification, reason, **kwargs):
+               justification, reason, **_):
         validate_template_name(template, "template")
         dbarchetype = Archetype.get_unique(session, archetype, compel=True)
         if not dbarchetype.is_compileable:

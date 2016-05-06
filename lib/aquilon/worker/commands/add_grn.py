@@ -17,14 +17,14 @@
 """Contains the logic for `aq add grn`."""
 
 from aquilon.aqdb.model import Grn
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 
 
 class CommandAddGrn(BrokerCommand):
 
     required_parameters = ["grn", "eon_id"]
 
-    def render(self, session, grn, eon_id, disabled, **arguments):
+    def render(self, session, grn, eon_id, disabled, **_):
         Grn.get_unique(session, grn=grn, preclude=True)
         Grn.get_unique(session, eon_id=eon_id, preclude=True)
 

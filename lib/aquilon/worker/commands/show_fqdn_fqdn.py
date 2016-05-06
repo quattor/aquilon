@@ -16,9 +16,8 @@
 # limitations under the License.
 """Contains the logic for `aq show fqdn --fqdn`."""
 
-
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.aqdb.model import DnsEnvironment, Fqdn, DnsRecord
+from aquilon.worker.broker import BrokerCommand
 
 
 class CommandShowFqdnFqdn(BrokerCommand):

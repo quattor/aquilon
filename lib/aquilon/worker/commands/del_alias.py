@@ -17,7 +17,7 @@
 """Contains the logic for `aq del alias`."""
 
 from aquilon.aqdb.model import DnsEnvironment, Alias
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.dns import delete_dns_record
 from aquilon.worker.dbwrappers.service_instance import check_no_provided_service
 from aquilon.worker.processes import DSDBRunner
@@ -27,7 +27,7 @@ class CommandDelAlias(BrokerCommand):
 
     required_parameters = ["fqdn"]
 
-    def render(self, session, logger, fqdn, dns_environment, **kwargs):
+    def render(self, session, logger, fqdn, dns_environment, **_):
         dbdns_env = DnsEnvironment.get_unique_or_default(session,
                                                          dns_environment)
         dbdns_rec = Alias.get_unique(session, fqdn=fqdn,

@@ -26,7 +26,7 @@ class CommandShowNetworkCompartmentAll(BrokerCommand):
 
     required_parameters = []
 
-    def render(self, session, **arguments):
+    def render(self, session, **_):
         q = session.query(NetworkCompartment)
         q = q.options(undefer('comments'))
         q = q.order_by(NetworkCompartment.name)

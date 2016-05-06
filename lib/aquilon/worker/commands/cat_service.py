@@ -30,7 +30,7 @@ class CommandCatService(BrokerCommand):
     # We do not lock the plenary while reading it
     _is_lock_free = True
 
-    def render(self, session, logger, service, server, default, generate, **kwargs):
+    def render(self, session, logger, service, server, default, generate, **_):
         dbservice = Service.get_unique(session, service, compel=True)
         if default:
             if server:

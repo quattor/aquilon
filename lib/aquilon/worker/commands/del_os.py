@@ -15,16 +15,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 from aquilon.aqdb.model import OperatingSystem, Archetype
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 
 
 class CommandDelOS(BrokerCommand):
 
     required_parameters = ["osname", "osversion", "archetype"]
 
-    def render(self, session, osname, osversion, archetype, **arguments):
+    def render(self, session, osname, osversion, archetype, **_):
         dbarchetype = Archetype.get_unique(session, archetype, compel=True)
         dbos = OperatingSystem.get_unique(session, name=osname,
                                           version=osversion,

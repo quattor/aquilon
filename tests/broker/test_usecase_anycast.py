@@ -91,7 +91,7 @@ class TestUsecaseAnycast(MachineTestMixin, TestBrokerCommand):
                        "--interfaces", "eth0,eth1",
                        "--ip", anycast['sa_ip'](self),
                        "--shared"]
-            out = self.statustest(command)
+            self.statustest(command)
         self.dsdb_verify()
 
     def test_400_bind_server(self):
@@ -130,7 +130,7 @@ class TestUsecaseAnycast(MachineTestMixin, TestBrokerCommand):
             command = ["del", "service", "address",
                        "--hostname", server,
                        "--name", anycast['sa_name']]
-            out = self.statustest(command)
+            self.statustest(command)
         self.dsdb_verify()
 
     def test_701_verify_service_address(self):

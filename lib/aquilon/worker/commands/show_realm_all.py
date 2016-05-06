@@ -25,6 +25,6 @@ class CommandShowRealmAll(BrokerCommand):
 
     required_parameters = []
 
-    def render(self, session, **arguments):
+    def render(self, session, **_):
         q = session.query(Realm).order_by(Realm.name)
         return StringAttributeList(q.all(), "name")

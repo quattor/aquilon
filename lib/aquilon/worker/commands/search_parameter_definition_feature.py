@@ -25,7 +25,7 @@ class CommandSearchParameterDefinitionFeature(BrokerCommand):
 
     required_parameters = ["feature", "type"]
 
-    def render(self, session, feature, type, **arguments):
+    def render(self, session, feature, type, **_):
         cls = Feature.polymorphic_subclass(type, "Unknown feature type")
         dbfeature = cls.get_unique(session, name=feature, compel=True)
         q = session.query(ParamDefinition)

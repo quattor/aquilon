@@ -28,7 +28,7 @@ class CommandPromote(BrokerCommand):
 
     required_parameters = ["personality", "archetype"]
 
-    def render(self, session, logger, personality, archetype, **arguments):
+    def render(self, session, logger, personality, archetype, **_):
         dbpersonality = Personality.get_unique(session, name=personality,
                                                archetype=archetype, compel=True)
         if "next" not in dbpersonality.stages:

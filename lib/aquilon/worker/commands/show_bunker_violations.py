@@ -21,15 +21,16 @@ from operator import attrgetter
 
 from sqlalchemy.orm import (contains_eager, subqueryload, joinedload, defer,
                             aliased)
+
 from aquilon.aqdb.types import VirtualMachineType
 from aquilon.aqdb.model import (AddressAssignment, Network, Location, Bunker,
                                 Rack, Building, HardwareEntity, Interface,
                                 Model, NetworkEnvironment)
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 
 
 class CommandShowBunkerViolations(BrokerCommand):
-    def render(self, session, management_interfaces, **arguments):
+    def render(self, session, management_interfaces, **_):
         bunker_bucket = {None: None}
         rack_bucket = defaultdict(dict)
 

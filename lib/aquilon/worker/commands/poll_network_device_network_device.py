@@ -27,7 +27,7 @@ class CommandPollNetworkDeviceNetworkDevice(CommandPollNetworkDevice):
 
     required_parameters = ["network_device"]
 
-    def render(self, session, logger, network_device, type, clear, vlan, **arguments):
+    def render(self, session, logger, network_device, type, clear, vlan, **_):
         NetworkDevice.check_type(type)
         dbnetdev = NetworkDevice.get_unique(session, network_device, compel=True)
         if type is not None and dbnetdev.switch_type != type:

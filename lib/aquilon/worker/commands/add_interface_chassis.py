@@ -17,10 +17,9 @@
 """ Contains the logic for `aq add interface --chassis`.
     Duplicates logic used in `aq add interface --tor_switch`."""
 
-
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Chassis
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.interface import get_or_create_interface
 from aquilon.worker.processes import DSDBRunner
 

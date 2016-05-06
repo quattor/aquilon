@@ -26,5 +26,5 @@ class CommandUnbindClientCluster(CommandUnbindClientHostname):
 
     required_parameters = ["cluster", "service"]
 
-    def get_dbobj(self, session, cluster=None, **arguments):
+    def get_dbobj(self, session, cluster=None, **_):
         return Cluster.get_unique(session, cluster, compel=True)

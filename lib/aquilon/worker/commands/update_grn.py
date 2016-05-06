@@ -17,14 +17,13 @@
 """Contains the logic for `aq update grn`."""
 
 from aquilon.aqdb.model import Grn
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.grn import lookup_grn
 
 
 class CommandUpdateGrn(BrokerCommand):
 
-    def render(self, session, logger, grn, eon_id, rename_to, disabled,
-               **arguments):
+    def render(self, session, logger, grn, eon_id, rename_to, disabled, **_):
         dbgrn = lookup_grn(session, grn, eon_id, logger=logger,
                            config=self.config, usable_only=False)
         if rename_to:

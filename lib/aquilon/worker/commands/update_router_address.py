@@ -27,7 +27,7 @@ from aquilon.worker.templates.base import Plenary, PlenaryCollection
 class CommandUpdateRouterAddress(BrokerCommand):
 
     def render(self, session, logger, fqdn, ip, building, clear_location,
-               network_environment, dns_environment, comments, **arguments):
+               network_environment, dns_environment, comments, **_):
         dbnet_env, dbdns_env = get_net_dns_env(session, network_environment,
                                                dns_environment)
         if fqdn:

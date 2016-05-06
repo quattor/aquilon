@@ -31,7 +31,7 @@ class TestRebindClient(TestBrokerCommand):
         command = ["rebind", "client",
                    "--hostname", "unittest02.one-nyp.ms.com",
                    "--service", "afs", "--instance", "q.ln.ms.com"]
-        (out, err) = self.successtest(command)
+        err = self.statustest(command)
         self.matchoutput(err,
                          "unittest02.one-nyp.ms.com adding binding for "
                          "service instance afs/q.ln.ms.com",

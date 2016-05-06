@@ -18,7 +18,7 @@
 
 from sqlalchemy.orm import undefer, joinedload
 
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.host import hostname_to_host
 
 
@@ -26,7 +26,7 @@ class CommandShowHostHostname(BrokerCommand):
 
     required_parameters = ["hostname"]
 
-    def render(self, session, hostname, **kwargs):
+    def render(self, session, hostname, **_):
         # hostname_to_host() runs a query for HardwareEntity, so options should
         # be relative to that
         options = [undefer('comments'),

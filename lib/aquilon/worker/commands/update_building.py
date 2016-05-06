@@ -29,7 +29,7 @@ class CommandUpdateBuilding(BrokerCommand):
     required_parameters = ["building"]
 
     def render(self, session, logger, building, city, address,
-               fullname, default_dns_domain, comments, **arguments):
+               fullname, default_dns_domain, comments, **_):
         dbbuilding = get_location(session, building=building)
 
         old_city = dbbuilding.city
