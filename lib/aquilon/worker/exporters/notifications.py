@@ -29,9 +29,11 @@ from aquilon.exceptions_ import ProtocolError
 from aquilon.worker.exporter import (ExportHandler, ExporterNotification,
                                      register_exporter)
 
+
 # TODO: This should be merged with formats/formatters.py
 class ProtocolBufferMixin(object):
     __loaded_protocols = {}
+
     def get_protobuf_msgclass(self, module, msgclass):
         if module in self.__loaded_protocols and \
            self.__loaded_protocols[module] is False:  # pragma: no cover
@@ -102,11 +104,11 @@ class NotificationExportHandler(ExportHandler, ProtocolBufferMixin):
 
     def publish(self, notifications, **kwargs):
         sockname = os.path.join(self.config.get("broker", "sockdir"), "events")
-        timeout = 1 # TODO: should be configurable
+        timeout = 1  # TODO: should be configurable
         # The following construts a Deffered that, connect and then send
         # all of the queued notifications.  This will be processed after
         # the request has finished.  Any errors are logged, but ignored.
-        d = self._creator.connectUNIX(sockname, timeout) # pid
+        d = self._creator.connectUNIX(sockname, timeout)  # pid
         d.addCallback(send_messages, notifications)
         d.addErrback(lambda e: log.msg('Notification push failed: %s', e.getErrorMessage()))
 
@@ -189,5 +191,3 @@ class NotificationExportHandler(ExportHandler, ProtocolBufferMixin):
 
     def delete(self, obj, **kwargs):
         return self.new_notification('DELETE', obj, kwargs)
-
-
