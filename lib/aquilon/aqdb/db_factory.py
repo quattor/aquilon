@@ -408,3 +408,42 @@ class DbFactory(object):
         else:
             raise ValueError('Can not drop %s databases' %
                              self.engine.dialect.name)
+
+
+def db_prompt(session):
+    """
+    Return a string describing the database connection.
+
+    There are no assumptions about the format, other than it should be
+    relatively short and descriptive, so it can be used as part of a
+    command-line prompt.
+    """
+    engine = session.bind
+
+    if engine.dialect.name == 'sqlite':
+        prompt = str(engine.url).split('///')[1]
+    elif engine.dialect.name == 'oracle':  # pragma: no cover
+        stmt = "SELECT sys_context('userenv', 'session_user') FROM DUAL"
+        user = session.execute(stmt).scalar()
+        stmt = "SELECT sys_context('userenv', 'current_schema') FROM DUAL"
+        schema = session.execute(stmt).scalar()
+        stmt = "SELECT sys_context('userenv', 'instance_name') FROM DUAL"
+        instance = session.execute(stmt).scalar()
+        stmt = "SELECT sys_context('userenv', 'db_name') FROM DUAL"
+        dbname = session.execute(stmt).scalar()
+
+        if user != schema:
+            prompt = '%s@%s/%s[%s]' % (user, instance, dbname, schema)
+        else:
+            prompt = '%s@%s/%s' % (user, instance, dbname)
+    elif engine.dialect.name == 'postgresql':  # pragma: no cover
+        stmt = "SELECT current_user"
+        user = session.execute(stmt).scalar()
+        host = engine.url.host or ""
+        stmt = "SELECT current_database()"
+        dbname = session.execute(stmt).scalar()
+        prompt = '%s@%s/%s' % (user, host, dbname)
+    else:  # pragma: no cover
+        raise AquilonError("Unknown database dialect: %s." % engine.dialect.name)
+
+    return prompt

@@ -16,6 +16,7 @@
 # limitations under the License.
 """Contains the logic for `aq status`."""
 
+from aquilon.aqdb.db_factory import db_prompt
 from aquilon.worker.broker import BrokerCommand
 
 
@@ -27,7 +28,7 @@ class CommandStatus(BrokerCommand):
         stat = []
         stat.append("Aquilon Broker %s" % self.config.get("broker", "version"))
         stat.append("Server: %s" % self.config.get("broker", "servername"))
-        stat.append("Database: %s" % self.config.get("database", "dsn"))
+        stat.append("Database: %s" % db_prompt(session))
         stat.append("Sandboxes: %s" % self.config.get("broker", "templatesdir"))
         if dbuser:
             stat.append("Connected as: %s [%s]" % (dbuser, dbuser.role.name))
