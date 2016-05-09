@@ -229,6 +229,23 @@ class TestAddMachine(MachineTestMixin, TestBrokerCommand):
               UUID: a4ceec7b-2b86-4c94-9dd5-cafbd612581a
             """, command)
 
+    def test_145_show_ut3c1n3_proto(self):
+        command = ["show_machine", "--machine", "ut3c1n3", "--format", "proto"]
+        machine = self.protobuftest(command, expect=1)[0]
+        self.assertEqual(machine.name, "ut3c1n3")
+        self.assertEqual(machine.host, "")
+        self.assertEqual(machine.location.location_type, "rack")
+        self.assertEqual(machine.location.name, "ut3")
+        self.assertEqual(machine.location.row, "a")
+        self.assertEqual(machine.location.col, "3")
+        self.assertEqual(machine.model.vendor, "ibm")
+        self.assertEqual(machine.model.name, "hs21-8853")
+        self.assertEqual(machine.cpu, "xeon_2660")
+        self.assertEqual(machine.memory, 8192)
+        self.assertEqual(machine.cpu_count, 2)
+        self.assertEqual(machine.serial_no, "KPDZ406")
+        self.assertEqual(machine.uuid, "a4ceec7b-2b86-4c94-9dd5-cafbd612581a")
+
     def test_145_cat_ut3c1n3(self):
         command = "cat --machine ut3c1n3"
         out = self.commandtest(command.split(" "))

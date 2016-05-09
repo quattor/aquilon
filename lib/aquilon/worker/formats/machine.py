@@ -132,10 +132,8 @@ class MachineFormatter(HardwareEntityFormatter):
         skeleton.memory = machine.memory
         if machine.uri:
             skeleton.uri = machine.uri
-
-        # XXX Needs protocol support
-        #if machine.uuid:
-        #    skeleton.uuid = machine.uuid
+        if machine.uuid:
+            skeleton.uuid = str(machine.uuid)
 
         if indirect_attrs:
             for disk in sorted(machine.disks, key=attrgetter('device_name')):

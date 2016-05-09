@@ -70,6 +70,8 @@ class ServiceFormatter(ObjectFormatter):
             skeleton.service = service.name
         else:
             skeleton.name = service.name
+            if service.max_clients is not None:
+                skeleton.default_max_clients = service.max_clients
 
             if indirect_attrs:
                 self.redirect_proto(service.instances, skeleton.serviceinstances)

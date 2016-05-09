@@ -117,6 +117,11 @@ class TestUpdateCluster(TestBrokerCommand, PersonalityTestMixin):
         out = self.commandtest(command)
         self.matchoutput(out, "Grouped with ESX Cluster: utecl1", command)
 
+        command = ["show_cluster", "--cluster", "utecl2", "--format", "proto"]
+        clstr = self.protobuftest(command, expect=1)[0]
+        self.assertEqual(len(clstr.grouped_cluster), 1)
+        self.assertEqual(clstr.grouped_cluster[0].name, "utecl1")
+
     def test_800_cleanup(self):
         self.drop_personality("gridcluster", "hadoop-test")
 
