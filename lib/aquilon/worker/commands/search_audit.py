@@ -53,8 +53,11 @@ class CommandSearchAudit(BrokerCommand):
 
         if username is not None:
             username = username.lower().strip()
-            q = q.filter(or_(Xtn.username == username,
-                             Xtn.username.like(username + '@%')))
+            # 'nobody' is special, it is stored without any realm
+            if '@' in username or username == 'nobody':
+                q = q.filter_by(username=str(username))
+            else:
+                q = q.filter(Xtn.username.like(username + '@%'))
 
         # TODO: These should be typed in input.xml as datetime and use
         # the standard broker methods for dealing with input validation.
