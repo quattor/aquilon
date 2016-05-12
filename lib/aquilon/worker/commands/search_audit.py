@@ -46,7 +46,7 @@ class CommandSearchAudit(BrokerCommand):
                 # Filter our command list
                 q = q.filter(~Xtn.command.in_(_IGNORED_COMMANDS))
             else:
-                q = q.filter_by(command=command)
+                q = q.filter_by(command=str(command))
         else:
             # filter out read only
             q = q.filter_by(is_readonly=False)

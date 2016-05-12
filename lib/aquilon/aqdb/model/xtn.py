@@ -57,8 +57,8 @@ class Xtn(Base):
     # Given that, we don't really *need* the foreign key, but we'll keep it
     # unless it proves otherwise cumbersome for performance (mainly insert).
 
-    __table_args__ = (Index('xtn_username_idx', username, oracle_compress=True),
-                      Index('xtn_command_idx', command, oracle_compress=True),
+    __table_args__ = (Index('xtn_username_idx', username, oracle_bitmap=True),
+                      Index('xtn_command_idx', command, oracle_bitmap=True),
                       Index('xtn_is_readonly_idx', is_readonly,
                             oracle_bitmap=True),
                       Index('xtn_start_time_idx', desc(start_time)),
@@ -109,7 +109,7 @@ class XtnEnd(Base):
                       default=utcnow, nullable=False)
 
     __table_args__ = (Index('xtn_end_return_code_idx', return_code,
-                            oracle_compress=True),
+                            oracle_bitmap=True),
                       {'oracle_compress': 'OLTP'})
 
 
@@ -124,8 +124,8 @@ class XtnDetail(Base):
     value = Column(String(3000), nullable=False)
 
     __table_args__ = (PrimaryKeyConstraint(xtn_id, name, value),
-                      Index('xtn_detail_name_idx', name, oracle_compress=True),
-                      Index('xtn_detail_value_idx', value, oracle_compress=True),
+                      Index('xtn_detail_name_idx', name, oracle_bitmap=True),
+                      Index('xtn_detail_value_idx', value, oracle_bitmap=True),
                       {'oracle_compress': 'OLTP'})
 
 Xtn.args = relationship(XtnDetail, lazy="joined", order_by=[XtnDetail.name])
