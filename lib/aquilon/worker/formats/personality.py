@@ -126,9 +126,11 @@ class PersonalityStageFormatter(PersonalityFormatter):
             skeleton.stage = persst.name
 
         if indirect_attrs:
-            self.redirect_proto(persst.required_services.keys(),
-                                skeleton.required_services,
-                                indirect_attrs=False)
+            for dbsrv, info in persst.required_services.items():
+                srvrec = skeleton.required_services.add()
+                srvrec.service = dbsrv.name
+                if info.host_environment:
+                    srvrec.host_environment = info.host_environment.name
 
             for link in persst.features:
                 feat_msg = skeleton.features.add()
