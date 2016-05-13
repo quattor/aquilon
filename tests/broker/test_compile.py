@@ -145,34 +145,34 @@ class TestCompile(VerifyNotificationsMixin, TestBrokerCommand):
         command = ["compile", "--hostname", "unittest02.one-nyp.ms.com"]
         out = self.statustest(command)
         # This should have been compiled above...
-        self.matchoutput(out, "0/1 object template(s) being processed",
+        self.matchoutput(out, "0/1 template(s) being processed",
                          command)
 
     def test_305_compile_host_cleandeps(self):
         command = ["compile", "--hostname", "unittest02.one-nyp.ms.com",
                    "--cleandeps"]
         out = self.statustest(command)
-        self.matchoutput(out, "1/1 object template(s) being processed",
+        self.matchoutput(out, "1/1 template(s) being processed",
                          command)
         self.matchoutput(out, "1/1 compiled", command)
 
     def test_310_compile_cluster(self):
         command = ["compile", "--cluster", "utecl1"]
         out = self.statustest(command)
-        self.matchoutput(out, "0/4 object template(s) being processed",
+        self.matchoutput(out, "0/4 template(s) being processed",
                          command)
 
     def test_315_compile_cluster_cleandeps(self):
         command = ["compile", "--cluster", "utecl1", "--cleandeps"]
         out = self.statustest(command)
-        self.matchoutput(out, "4/4 object template(s) being processed",
+        self.matchoutput(out, "4/4 template(s) being processed",
                          command)
         self.matchoutput(out, "4/4 compiled", command)
 
     def test_320_compile_metacluster(self):
         command = ["compile", "--metacluster", "utmc1"]
         out = self.statustest(command)
-        self.matchoutput(out, "0/9 object template(s) being processed",
+        self.matchoutput(out, "0/9 template(s) being processed",
                          command)
 
     def test_321_compile_metacluster_fallback(self):
@@ -184,7 +184,7 @@ class TestCompile(VerifyNotificationsMixin, TestBrokerCommand):
     def test_325_compile_metacluster_cleandeps(self):
         command = ["compile", "--metacluster", "utmc1", "--cleandeps"]
         out = self.statustest(command)
-        self.matchoutput(out, "9/9 object template(s) being processed",
+        self.matchoutput(out, "9/9 template(s) being processed",
                          command)
         self.matchoutput(out, "9/9 compiled", command)
 
@@ -254,7 +254,7 @@ class TestCompile(VerifyNotificationsMixin, TestBrokerCommand):
         out = self.statustest(command)
         self.matchoutput(out, "0 errors", command)
 
-        res = re.search(r"(\d+)/(\d+) object template\(s\) being processed",
+        res = re.search(r"(\d+)/(\d+) template\(s\) being processed",
                         out, re.M)
         self.assertEqual(res.group(1), res.group(2),
                          "All objects need to be recompiled")
@@ -281,7 +281,7 @@ class TestCompile(VerifyNotificationsMixin, TestBrokerCommand):
         self.matchoutput(out, "aqd unittest debug for aquilon final", command)
         self.matchclean(out, "Assigning repositories to packages...", command)
 
-        res = re.search(r"(\d+)/(\d+) object template\(s\) being processed",
+        res = re.search(r"(\d+)/(\d+) template\(s\) being processed",
                         out, re.M)
         self.assertEqual(res.group(1), res.group(2),
                          "All objects need to be recompiled")
@@ -308,14 +308,14 @@ class TestCompile(VerifyNotificationsMixin, TestBrokerCommand):
     def test_550_compile_personality(self):
         command = "compile --personality compileserver --archetype aquilon"
         out = self.statustest(command.split(" "))
-        self.matchoutput(out, "0/10 object template(s) being processed",
+        self.matchoutput(out, "0/10 template(s) being processed",
                          command)
 
     def test_555_compile_personality_cleandeps(self):
         command = ["compile", "--personality", "compileserver",
                    "--archetype", "aquilon", "--cleandeps"]
         out = self.statustest(command)
-        self.matchoutput(out, "10/10 object template(s) being processed",
+        self.matchoutput(out, "10/10 template(s) being processed",
                          command)
         self.matchoutput(out, "10/10 compiled", command)
 
@@ -333,7 +333,7 @@ class TestCompile(VerifyNotificationsMixin, TestBrokerCommand):
         command = ['compile', '--personality=compileserver', '--archetype=aquilon',
                    '--domain=ut-prod']
         out = self.statustest(command)
-        self.matchoutput(out, "1/1 object template(s) being processed",
+        self.matchoutput(out, "1/1 template(s) being processed",
                          command)
 
     def test_575_compile_personality_no_host(self):
@@ -393,7 +393,7 @@ class TestCompile(VerifyNotificationsMixin, TestBrokerCommand):
         # The only thing we really care about here is the number of objects
         # being larger than the number of clusters, to verify cluster members
         # are also included
-        self.matchoutput(out, "0/41 object template(s) being processed", command)
+        self.matchoutput(out, "0/41 template(s) being processed", command)
 
     def test_610_compile_metacluster_multi_domain(self):
         command = ["compile", "--personality", "metacluster"]
@@ -411,7 +411,7 @@ class TestCompile(VerifyNotificationsMixin, TestBrokerCommand):
         # The only thing we really care about here is the number of objects
         # being larger than the number of metaclusters, to verify members are
         # also included
-        self.matchoutput(out, "0/47 object template(s) being processed", command)
+        self.matchoutput(out, "0/47 template(s) being processed", command)
 
     def test_700_aqcompile(self):
         aqcompile = os.path.join(self.config.get("broker", "srcdir"),
