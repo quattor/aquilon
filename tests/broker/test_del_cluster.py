@@ -79,6 +79,9 @@ class TestDelCluster(TestBrokerCommand):
         self.check_plenary_gone("cluster", "camelcase", "client",
                                 directory_gone=True)
 
+    def test_150_del_campus_test(self):
+        self.statustest(["del_cluster", "--cluster", "campus-test"])
+
     def test_200_delnotfound(self):
         command = ["del_cluster", "--cluster=grid_cluster-does-not-exist"]
         self.notfoundtest(command)

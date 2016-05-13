@@ -59,6 +59,13 @@ class TestRefreshNetwork(TestBrokerCommand):
         self.matchoutput(out, "Network: %s [%s/%d]" % (net_name, net_ip,
                                                        prefix), command)
 
+        command = ["cat", "--networkip", net_ip]
+        out = self.commandtest(command)
+        self.matchoutput(out, '"prefix_length" = %s;' % prefix, command)
+        net = IPv4Network("%s/%s" % (net_ip, prefix))
+        self.matchoutput(out, '"netmask" = "%s";' % net.netmask, command)
+        self.matchoutput(out, '"broadcast" = "%s";' % net.broadcast, command)
+
     # 100 sync up building np
     def test_100_syncfirst(self):
         command = "refresh network --building np"

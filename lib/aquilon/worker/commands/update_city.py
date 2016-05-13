@@ -16,8 +16,11 @@
 # limitations under the License.
 """Contains the logic for `aq update city`."""
 
+from sqlalchemy.orm import with_polymorphic
+
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import Machine
+from aquilon.aqdb.model import (HardwareEntity, Machine, NetworkDevice, Cluster,
+                                Network)
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.processes import DSDBRunner
 from aquilon.worker.dbwrappers.location import get_location, update_location
@@ -32,8 +35,8 @@ class CommandUpdateCity(BrokerCommand):
                default_dns_domain, comments, **arguments):
         dbcity = get_location(session, city=city)
 
-        # Updating machine templates is expensive, so only do that if needed
-        update_machines = False
+        plenaries = PlenaryCollection(logger=logger)
+        plenaries.append(Plenary.get_plenary(dbcity))
 
         if timezone is not None:
             dbcity.timezone = timezone
@@ -46,7 +49,15 @@ class CommandUpdateCity(BrokerCommand):
         dsdb_runner = DSDBRunner(logger=logger)
         if campus is not None:
             dbcampus = get_location(session, campus=campus)
+
+            HWS = with_polymorphic(HardwareEntity, [Machine, NetworkDevice])
+            q = session.query(HWS)
+            # HW types which have plenary templates
+            q = q.filter(HWS.hardware_type.in_(['machine', 'network_device']))
+            q = q.filter(HWS.location_id.in_(dbcity.offspring_ids()))
+
             # This one would change the template's locations hence forbidden
+            # FIXME: allow the change if there are no machines affected
             if dbcampus.hub != dbcity.hub:
                 # Doing this both to reduce user error and to limit
                 # testing required.
@@ -55,10 +66,19 @@ class CommandUpdateCity(BrokerCommand):
                                         dbcampus, dbcampus.hub,
                                         dbcity, dbcity.hub))
 
+            plenaries.extend(map(Plenary.get_plenary, q))
+
+            q = session.query(Cluster)
+            q = q.filter(Cluster.location_constraint_id.in_(dbcity.offspring_ids()))
+            plenaries.extend(map(Plenary.get_plenary, q))
+
+            q = session.query(Network)
+            q = q.filter(Network.location_id.in_(dbcity.offspring_ids()))
+            plenaries.extend(map(Plenary.get_plenary, q))
+
             if dbcity.campus:
                 prev_campus = dbcity.campus
             dbcity.update_parent(parent=dbcampus)
-            update_machines = True
 
         session.flush()
 
@@ -68,15 +88,6 @@ class CommandUpdateCity(BrokerCommand):
             else:
                 prev_name = None
             dsdb_runner.update_city(city, dbcampus.name, prev_name)
-
-        plenaries = PlenaryCollection(logger=logger)
-        plenaries.append(Plenary.get_plenary(dbcity))
-
-        if update_machines:
-            q = session.query(Machine)
-            q = q.filter(Machine.location_id.in_(dbcity.offspring_ids()))
-            logger.client_info("Updating %d machines..." % q.count())
-            plenaries.extend(map(Plenary.get_plenary, q))
 
         with plenaries.transaction(verbose=True):
             dsdb_runner.commit_or_rollback()
