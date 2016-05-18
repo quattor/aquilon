@@ -33,7 +33,7 @@ class CommandSearchPersonality(BrokerCommand):
 
     def render(self, session, personality, personality_stage, archetype, grn,
                eon_id, host_environment, config_override, required_service,
-               fullinfo, style, **_):
+               environment_override, fullinfo, style, **_):
         q = session.query(PersonalityStage)
         if personality_stage:
             Personality.force_valid_stage(personality_stage)
@@ -65,6 +65,10 @@ class CommandSearchPersonality(BrokerCommand):
             dbsrv = Service.get_unique(session, required_service, compel=True)
             q = q.join(PersonalityServiceListItem, aliased=True)
             q = q.filter_by(service=dbsrv)
+            if environment_override:
+                dbenv = HostEnvironment.get_instance(session,
+                                                     environment_override)
+                q = q.filter_by(host_environment=dbenv)
             q = q.reset_joinpoint()
 
         q = q.join(Archetype)

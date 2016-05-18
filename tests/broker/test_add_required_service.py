@@ -55,7 +55,7 @@ class TestAddRequiredService(TestBrokerCommand):
                    "--environment_override", "qa"]
         self.noouttest(command)
 
-    def test_105_verify_afs(self):
+    def test_105_show_afs(self):
         command = "show service --service afs"
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Required for Archetype: aquilon", command)
@@ -67,6 +67,21 @@ class TestAddRequiredService(TestBrokerCommand):
                           r'Stage: next\s*'
                           r'Environment Override: qa',
                           command)
+
+    def test_105_search_personality(self):
+        command = ["search_personality", "--required_service", "afs"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "aquilon/utpers-dev", command)
+        self.matchoutput(out, "aquilon/unixeng-test", command)
+
+        command = ["search_personality", "--required_service", "afs",
+                   "--environment_override", "qa"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "aquilon/utpers-dev", command)
+        self.matchclean(out, "unixeng-test", command)
+
+        self.noouttest(["search_personality", "--required_service", "afs",
+                        "--environment_override", "prod"])
 
     def test_110_add_defaults(self):
         # Setup required services, as expected by the templates.
