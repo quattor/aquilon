@@ -53,7 +53,7 @@ class TestAddCity(TestBrokerCommand):
                    "--timezone", "EDT", "--fullname", "New Exampleton",
                    "--comments", "Some other city comments"]
         out = self.statustest(command)
-        self.matchoutput(out, "Flushed 1 templates.", command)
+        self.matchoutput(out, "Flushed 1/1 templates.", command)
 
     def test_115_verify_update(self):
         command = "show city --city ex"

@@ -64,9 +64,6 @@ class CommandDelParameterDefintionArchetype(BrokerCommand):
 
         session.flush()
 
-        written = plenaries.write()
-        if plenaries.plenaries:
-            logger.client_info("Flushed %d/%d templates." %
-                               (written, len(plenaries.plenaries)))
+        plenaries.write(verbose=True)
 
         return

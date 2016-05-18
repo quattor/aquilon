@@ -78,6 +78,7 @@ class CommandUpdateCity(BrokerCommand):
             logger.client_info("Updating %d machines..." % q.count())
             plenaries.extend(map(Plenary.get_plenary, q))
 
-        count = plenaries.write()
-        dsdb_runner.commit_or_rollback()
-        logger.client_info("Flushed %d templates." % count)
+        with plenaries.transaction(verbose=True):
+            dsdb_runner.commit_or_rollback()
+
+        return
