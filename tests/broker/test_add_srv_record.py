@@ -333,6 +333,53 @@ class TestAddSrvRecord(TestBrokerCommand):
         self.matchoutput(out, "Target: arecord14.aqd-unittest.ms.com", command)
         self.matchoutput(out, "Port: 8080", command)
 
+    def test_700_add_with_dns_env(self):
+        command = ["add", "srv", "record", "--service", "collab",
+                   "--protocol", "tls", "--dns_domain", "aqd-unittest.ms.com",
+                   "--target", "addralias1.aqd-unittest-ut-env.ms.com",
+                   "--port", 8080, "--priority", 0, "--weight", 0,
+                   "--dns_environment", "ut-env"]
+        self.noouttest(command)
+
+    def test_710_show_with_dns_env(self):
+        command = ["show", "srv", "record", "--service", "collab",
+                   "--protocol", "tls", "--dns_domain", "aqd-unittest.ms.com",
+                   "--dns_environment", "ut-env"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "SRV Record: _collab._tls.aqd-unittest.ms.com",
+                         command)
+        self.matchoutput(out, "Service: collab", command)
+        self.matchoutput(out, "Protocol: tls", command)
+        self.matchoutput(out, "Priority: 0", command)
+        self.matchoutput(out, "Weight: 0", command)
+        self.matchoutput(out, "Target: addralias1.aqd-unittest-ut-env.ms.com", command)
+        self.matchoutput(out, "Port: 8080", command)
+        self.matchoutput(out, "DNS Environment: ut-env", command)
+
+    def test_800_add_with_diff_target_dns_env(self):
+        command = ["add", "srv", "record", "--service", "collab2",
+                   "--protocol", "tls", "--dns_domain", "aqd-unittest.ms.com",
+                   "--target", "addralias1.aqd-unittest-ut-env.ms.com",
+                   "--port", 2364, "--priority", 20, "--weight", 30,
+                   "--dns_environment", "internal",
+                   "--target_environment", "ut-env"]
+        self.noouttest(command)
+
+    def test_810_show_with_diff_target_dns_env(self):
+        command = ["show", "srv", "record", "--service", "collab2",
+                   "--protocol", "tls", "--dns_domain", "aqd-unittest.ms.com",
+                   "--dns_environment", "internal"]
+        out = self.commandtest(command)
+        self.matchoutput(out, "SRV Record: _collab2._tls.aqd-unittest.ms.com",
+                         command)
+        self.matchoutput(out, "Service: collab2", command)
+        self.matchoutput(out, "Protocol: tls", command)
+        self.matchoutput(out, "Priority: 20", command)
+        self.matchoutput(out, "Weight: 30", command)
+        self.matchoutput(out, "Target: addralias1.aqd-unittest-ut-env.ms.com [environment: ut-env]", command)
+        self.matchoutput(out, "Port: 2364", command)
+        self.matchoutput(out, "DNS Environment: internal", command)
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddSrvRecord)

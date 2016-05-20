@@ -27,12 +27,17 @@ class CommandDelSrvRecord(BrokerCommand):
     required_parameters = ["service", "protocol", "dns_domain"]
 
     def render(self, session, service, protocol, dns_domain, target,
-               dns_environment, **kwargs):
+               dns_environment, target_environment, **kwargs):
         name = "_%s._%s" % (service.strip().lower(), protocol.strip().lower())
         dbfqdn = Fqdn.get_unique(session, name=name, dns_domain=dns_domain,
                                  dns_environment=dns_environment)
         if target:
-            dbtarget = Fqdn.get_unique(session, target, compel=True)
+            if not target_environment:
+                target_environment = dns_environment
+
+            dbtarget = Fqdn.get_unique(session, fqdn=target,
+                                       dns_environment=target_environment,
+                                       compel=True)
         else:
             dbtarget = None
 

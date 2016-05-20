@@ -4,6 +4,6 @@ ${dns_common.dns_record_head(record)}\
   Protocol: ${record.protocol}
   Priority: ${record.priority}
   Weight: ${record.weight}
-  Target: ${record.target.fqdn}
+  Target: ${record.target.fqdn + ("" if record.fqdn.dns_environment == record.target.dns_environment else " [environment: " + record.target.dns_environment.name + "]")}
   Port: ${record.port}
 ${dns_common.dns_record_tail(record)}\

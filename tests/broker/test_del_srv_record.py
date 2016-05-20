@@ -105,6 +105,32 @@ class TestDelSrvRecord(TestBrokerCommand):
                    "--protocol", "tls", "--dns_domain", "aqd-unittest.ms.com"]
         self.notfoundtest(command)
 
+    def test_320_del_with_dns_env(self):
+        command = ["del", "srv", "record", "--service", "collab",
+                   "--protocol", "tls", "--dns_domain", "aqd-unittest.ms.com",
+                   "--dns_environment", "ut-env"]
+        self.noouttest(command)
+
+    def test_325_verify_del_with_dns_env(self):
+        command = ["show", "srv", "record", "--service", "collab",
+                   "--protocol", "tls", "--dns_domain", "aqd-unittest.ms.com",
+                   "--dns_environment", "ut-env"]
+        self.notfoundtest(command)
+
+    def test_330_del_with_diff_target_env(self):
+        command = ["del", "srv", "record", "--service", "collab2",
+                   "--protocol", "tls", "--dns_domain", "aqd-unittest.ms.com",
+                   "--dns_environment", "internal",
+                   "--target", "addralias1.aqd-unittest-ut-env.ms.com",
+                   "--target_environment", "ut-env"]
+        self.noouttest(command)
+
+    def test_335_verify_del_with_dff_target_dns_env(self):
+        command = ["show", "srv", "record", "--service", "collab2",
+                   "--protocol", "tls", "--dns_domain", "aqd-unittest.ms.com",
+                   "--dns_environment", "internal"]
+        self.notfoundtest(command)
+
     def test_400_verify_allgone(self):
         command = ["search", "dns", "--record_type", "srv"]
         self.noouttest(command)
