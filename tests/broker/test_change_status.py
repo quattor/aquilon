@@ -42,7 +42,7 @@ class TestChangeStatus(TestBrokerCommand):
                        "--buildstatus", status]
 
             out, err = self.successtest(command)
-            self.matchoutput(err, "1/1 object template", command)
+            self.matchoutput(err, "1/1 template", command)
 
             command = "show host --hostname unittest02.one-nyp.ms.com"
             out = self.commandtest(command.split(" "))

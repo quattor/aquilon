@@ -77,6 +77,12 @@ class TestSplitMergeNetwork(TestBrokerCommand):
         self.matchoutput(out, "Netmask: 255.255.255.0", command)
         self.matchoutput(out, "Routers: 0.2.2.1 (None)", command)
 
+        command = ["cat", "--networkip", "0.2.2.0"]
+        out = self.commandtest(command)
+        self.matchoutput(out, '"netmask" = "255.255.255.0";', command)
+        self.matchoutput(out, '"broadcast" = "0.2.2.255";', command)
+        self.matchoutput(out, '"prefix_length" = 24;', command)
+
     def test_211_subnet1_gone(self):
         self.notfoundtest(["show", "network", "--ip", "0.2.2.192"])
 
@@ -105,6 +111,12 @@ class TestSplitMergeNetwork(TestBrokerCommand):
         self.matchoutput(out, "Sysloc: nettest.ny.na", command)
         self.matchoutput(out, "Comments: Original 0.2.3.128/25", command)
         self.matchclean(out, "Routers", command)
+
+        command = ["cat", "--networkip", "0.2.3.0"]
+        out = self.commandtest(command)
+        self.matchoutput(out, '"netmask" = "255.255.255.0";', command)
+        self.matchoutput(out, '"broadcast" = "0.2.3.255";', command)
+        self.matchoutput(out, '"prefix_length" = 24;', command)
 
     def test_261_subnet2_gone(self):
         self.notfoundtest(["show", "network", "--ip", "0.2.3.64"])
@@ -143,6 +155,12 @@ class TestSplitMergeNetwork(TestBrokerCommand):
 
             self.check_plenary_exists("network", "internal", str(subnet.ip),
                                       "config")
+
+            command = ["cat", "--networkip", subnet.ip]
+            out = self.commandtest(command)
+            self.matchoutput(out, '"netmask" = "%s";' % subnet.netmask, command)
+            self.matchoutput(out, '"broadcast" = "%s";' % subnet.broadcast, command)
+            self.matchoutput(out, '"prefix_length" = 26;', command)
 
     def test_311_dns_record(self):
         command = ["show", "fqdn", "--fqdn", "merge1.aqd-unittest.ms.com"]

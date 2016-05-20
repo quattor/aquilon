@@ -128,10 +128,7 @@ class CommandBindFeature(BrokerCommand):
         plenaries = PlenaryCollection(logger=logger)
         plenaries.extend(map(Plenary.get_plenary, personalities))
 
-        written = plenaries.write()
-        logger.client_info("Flushed %d/%d templates." %
-                           (written, len(plenaries.plenaries)))
-        return
+        plenaries.write(verbose=True)
 
     def do_link(self, session, logger, dbfeature, params):
         # Check that the feature templates exist in all affected domains. We

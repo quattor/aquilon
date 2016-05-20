@@ -16,8 +16,11 @@
 # limitations under the License.
 """Contains the logic for `aq update building`."""
 
+from sqlalchemy.orm import with_polymorphic
+
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import HardwareEntity, ServiceMap
+from aquilon.aqdb.model import (HardwareEntity, Machine, NetworkDevice,
+                                ServiceMap, Cluster, Network)
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.location import get_location, update_location
 from aquilon.worker.processes import DSDBRunner
@@ -49,11 +52,11 @@ class CommandUpdateBuilding(BrokerCommand):
         if city:
             dbcity = get_location(session, city=city)
 
-            q = session.query(HardwareEntity)
+            HWS = with_polymorphic(HardwareEntity, [Machine, NetworkDevice])
+            q = session.query(HWS)
             # HW types which have plenary templates
-            q = q.filter(HardwareEntity.hardware_type.in_(['machine',
-                                                           'network_device']))
-            q = q.filter(HardwareEntity.location_id.in_(dbbuilding.offspring_ids()))
+            q = q.filter(HWS.hardware_type.in_(['machine', 'network_device']))
+            q = q.filter(HWS.location_id.in_(dbbuilding.offspring_ids()))
 
             # This one would change the template's locations hence forbidden
             if dbcity.hub != dbbuilding.hub and q.count():
@@ -74,6 +77,16 @@ class CommandUpdateBuilding(BrokerCommand):
                                    "the new location as needed."
                                    .format(maps, dbbuilding.city))
 
+            plenaries.extend(map(Plenary.get_plenary, q))
+
+            q = session.query(Cluster)
+            q = q.filter(Cluster.location_constraint_id.in_(dbbuilding.offspring_ids()))
+            plenaries.extend(map(Plenary.get_plenary, q))
+
+            q = session.query(Network)
+            q = q.filter(Network.location_id.in_(dbbuilding.offspring_ids()))
+            plenaries.extend(map(Plenary.get_plenary, q))
+
             dbbuilding.update_parent(parent=dbcity)
 
             if old_city.campus and (old_city.campus != dbcity.campus):
@@ -81,8 +94,6 @@ class CommandUpdateBuilding(BrokerCommand):
 
             if dbcity.campus and (old_city.campus != dbcity.campus):
                 dsdb_runner.add_campus_building(dbcity.campus, building)
-
-            plenaries.extend(map(Plenary.get_plenary, q))
 
         session.flush()
 

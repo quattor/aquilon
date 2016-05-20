@@ -53,7 +53,7 @@ class TestAddCity(TestBrokerCommand):
                    "--timezone", "EDT", "--fullname", "New Exampleton",
                    "--comments", "Some other city comments"]
         out = self.statustest(command)
-        self.matchoutput(out, "Flushed 1 templates.", command)
+        self.matchoutput(out, "Flushed 1/1 templates.", command)
 
     def test_115_verify_update(self):
         command = "show city --city ex"
@@ -167,6 +167,21 @@ class TestAddCity(TestBrokerCommand):
         self.noouttest(command)
         self.dsdb_verify()
 
+        # add cluster
+        command = ["add_cluster", "--cluster", "campus-test",
+                   "--archetype", "hacluster", "--personality", "hapersonality",
+                   "--domain", "unittest", "--down_hosts_threshold", 0,
+                   "--building", "bx"]
+        self.noouttest(command)
+
+        command = ["cat", "--cluster", "campus-test", "--data"]
+        out = self.commandtest(command)
+        self.matchoutput(out, '"system/cluster/sysloc/building" = "bx";',
+                         command)
+        self.matchoutput(out, '"system/cluster/sysloc/city" = "e4";',
+                         command)
+        self.matchclean(out, "system/cluster/sysloc/campus", command)
+
         # update city
         self.dsdb_expect("update_city_aq -city e4 -campus na")
         command = ["update", "city", "--city", "e4", "--campus", "na"]
@@ -182,6 +197,11 @@ class TestAddCity(TestBrokerCommand):
         out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Location Parents: [Organization ms, Hub ny, "
                          "Continent na, Country us, Campus na, City e4]",
+                         command)
+
+        command = ["cat", "--cluster", "campus-test", "--data"]
+        out = self.commandtest(command)
+        self.matchoutput(out, '"system/cluster/sysloc/campus" = "na";',
                          command)
 
     def test_410_update_city_no_campus(self):

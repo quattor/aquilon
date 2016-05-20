@@ -533,7 +533,7 @@ class PlenaryCollection(object):
             raise ArgumentError("\n".join(errors))
         return total
 
-    def write(self, locked=False, remove_profile=True):
+    def write(self, locked=False, remove_profile=True, verbose=False):
         # If locked is True, assume error handling happens higher
         # in the stack.
         total = 0
@@ -556,6 +556,10 @@ class PlenaryCollection(object):
         finally:
             if not locked:
                 lock_queue.release(key)
+
+        if verbose and self.plenaries:
+            self.logger.client_info("Flushed %d/%d templates." %
+                                    (total, len(self.plenaries)))
         return total
 
     def read(self):
@@ -604,12 +608,16 @@ class PlenaryCollection(object):
         self.plenaries = list(set(walk_plenaries(self)))
 
     @contextmanager
-    def transaction(self):
+    def transaction(self, verbose=False):
         with self.get_key():
             self.stash()
             try:
-                self.write(locked=True)
+                count = self.write(locked=True)
                 yield
+                # Do the logging only if the transaction succeeded
+                if verbose:
+                    self.logger.client_info("Flushed %d/%d templates." %
+                                            (count, len(self.plenaries)))
             except:
                 self.restore_stash()
                 raise

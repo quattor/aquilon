@@ -77,7 +77,7 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
     def test_1003_reconfigure_aquilon95(self):
         command = ["reconfigure", "--hostname=aquilon95.aqd-unittest.ms.com"]
         err = self.statustest(command)
-        self.matchoutput(err, "1/1 object template", command)
+        self.matchoutput(err, "1/1 template", command)
 
     def test_1004_verify_machine_plenary(self):
         command = ["cat", "--machine=ut9s03p45"]
@@ -95,7 +95,7 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
     def test_1006_reconfigure_aquilon95(self):
         command = ["reconfigure", "--hostname=aquilon95.aqd-unittest.ms.com"]
         err = self.statustest(command)
-        self.matchoutput(err, "1/1 object template", command)
+        self.matchoutput(err, "1/1 template", command)
 
     def test_1007_verify_machine_plenary(self):
         command = ["cat", "--machine=ut9s03p45"]
@@ -168,13 +168,13 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
         # have not been bound to clusters yet.
         command = ["reconfigure", "--membersof", "utecl1"]
         out = self.statustest(command)
-        self.matchoutput(out, "/3 object template(s) being processed",
+        self.matchoutput(out, "/3 template(s) being processed",
                          command)
 
     def test_1040_reconfigure_membersof_metacluster(self):
         command = ["reconfigure", "--membersof", "utmc1"]
         out = self.statustest(command)
-        self.matchoutput(out, "/5 object template(s) being processed",
+        self.matchoutput(out, "/5 template(s) being processed",
                          command)
 
     def test_1050_cat_unittest02_pre(self):
@@ -302,7 +302,7 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
         basetime = datetime.now()
         command = ["reconfigure", "--hostname", "unittest00.one-nyp.ms.com"]
         err = self.statustest(command)
-        self.matchoutput(err, "1/1 object template", command)
+        self.matchoutput(err, "1/1 template", command)
         self.matchclean(err, "removing binding", command)
         self.matchclean(err, "adding binding", command)
         self.matchoutput(err, "Index rebuild and notifications will happen in "
@@ -433,7 +433,7 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
                    "--hostname", "aquilon61.aqd-unittest.ms.com",
                    "--osname", "linux", "--osversion", self.linux_version_curr]
         err = self.statustest(command)
-        self.matchoutput(err, "1/1 object template", command)
+        self.matchoutput(err, "1/1 template", command)
         self.matchclean(err, "removing binding", command)
         self.matchclean(err, "adding binding", command)
 
@@ -442,7 +442,7 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
                    "--hostname", "unittest17.aqd-unittest.ms.com",
                    "--osname", "linux", "--osversion", self.linux_version_curr]
         err = self.statustest(command)
-        self.matchoutput(err, "1/1 object template", command)
+        self.matchoutput(err, "1/1 template", command)
         self.matchclean(err, "removing binding", command)
         self.matchclean(err, "adding binding", command)
 
@@ -451,7 +451,7 @@ class TestReconfigure(VerifyGrnsMixin, VerifyNotificationsMixin,
                    "--hostname", "aquilon86.aqd-unittest.ms.com",
                    "--personality", "inventory"]
         err = self.statustest(command)
-        self.matchoutput(err, "1/1 object template", command)
+        self.matchoutput(err, "1/1 template", command)
         self.matchclean(err, "removing binding", command)
         self.matchclean(err, "adding binding", command)
 
