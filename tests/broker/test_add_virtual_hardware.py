@@ -72,7 +72,7 @@ class TestAddVirtualHardware(EventsTestMixin, TestBrokerCommand):
         # This should succeed, silently skipping all VMs (no interfaces or
         # disks).
         command = ["make_cluster", "--cluster=utecl1"]
-        (out, err) = self.successtest(command)
+        self.statustest(command)
 
     def test_110_add_interfaces_automac(self):
         for i in range(1, 8):
@@ -558,7 +558,7 @@ class TestAddVirtualHardware(EventsTestMixin, TestBrokerCommand):
             command = ["add_host", "--hostname", hostname,
                        "--machine", machine, "--autoip", "--domain=unittest",
                        "--archetype=aquilon", "--personality=inventory"]
-            (out, err) = self.successtest(command)
+            self.noouttest(command)
             self.events_verify()
         self.dsdb_verify()
 
@@ -617,7 +617,7 @@ class TestAddVirtualHardware(EventsTestMixin, TestBrokerCommand):
         for i in range(0, 8) + range(9, 17):
             hostname = "ivirt%d.aqd-unittest.ms.com" % (1 + i)
             command = ["make", "--hostname", hostname]
-            (out, err) = self.successtest(command)
+            self.statustest(command)
 
     # Drop evm26 for appliance reuse
     def test_290_del_ivirt17(self):

@@ -28,7 +28,7 @@ class CommandCatMachine(BrokerCommand):
     # We do not lock the plenary while reading it
     _is_lock_free = True
 
-    def render(self, session, logger, machine, generate, **kwargs):
+    def render(self, session, logger, machine, generate, **_):
         dbmachine = Machine.get_unique(session, machine, compel=True)
         plenary_info = Plenary.get_plenary(dbmachine, logger=logger)
 

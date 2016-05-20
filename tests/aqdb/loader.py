@@ -180,8 +180,8 @@ def load_from_file(session, filename, verbose=False):
         session.rollback()
         raise SystemExit(err)
     except Exception:
-        print(("%s caught exception, bailing out." %
-              lexer.error_leader(lexer.filename)))
+        print("%s caught exception, bailing out." %
+              lexer.error_leader(lexer.filename))
         session.rollback()
         raise
 

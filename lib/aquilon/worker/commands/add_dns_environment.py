@@ -25,7 +25,7 @@ class CommandAddDnsEnvironment(BrokerCommand):
 
     required_parameters = ["dns_environment"]
 
-    def render(self, session, dns_environment, comments, **arguments):
+    def render(self, session, dns_environment, comments, **_):
         validate_nlist_key("DNS environment", dns_environment)
         DnsEnvironment.get_unique(session, dns_environment, preclude=True)
 

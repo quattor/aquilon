@@ -17,7 +17,7 @@
 """Contains the logic for `aq add room`."""
 
 from aquilon.aqdb.model import Building, Room
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.location import add_location
 
 
@@ -25,7 +25,7 @@ class CommandAddRoom(BrokerCommand):
 
     required_parameters = ["room", "building"]
 
-    def render(self, session, room, building, fullname, comments, **arguments):
+    def render(self, session, room, building, fullname, comments, **_):
         dbbuilding = Building.get_unique(session, building, compel=True)
         add_location(session, Room, room, dbbuilding, fullname=fullname,
                      comments=comments)

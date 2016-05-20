@@ -28,7 +28,7 @@ class CommandCatCity(BrokerCommand):
     # We do not lock the plenary while reading it
     _is_lock_free = True
 
-    def render(self, generate, session, logger, city, **kwargs):
+    def render(self, generate, session, logger, city, **_):
         dbcity = City.get_unique(session, city, compel=True)
         plenary_info = Plenary.get_plenary(dbcity, logger=logger)
 

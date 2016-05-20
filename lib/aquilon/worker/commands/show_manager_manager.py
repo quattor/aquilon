@@ -16,17 +16,16 @@
 # limitations under the License.
 """Contains the logic for `aq show manager --manager`."""
 
-
 from aquilon.exceptions_ import ArgumentError
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.aqdb.model import ARecord
+from aquilon.worker.broker import BrokerCommand
 
 
 class CommandShowManagerManager(BrokerCommand):
 
     required_parameters = ["manager"]
 
-    def render(self, session, manager, **kwargs):
+    def render(self, session, manager, **_):
         dbdns_rec = ARecord.get_unique(session, fqdn=manager, compel=True)
         if not dbdns_rec.assignments:
             raise ArgumentError("Address {0:a} is not assigned to any "

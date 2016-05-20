@@ -81,7 +81,7 @@ class AuthorizationBroker(object):
                 raise AuthorizationException(
                     "Must have the gatekeeper or aqd_admin role to %s." %
                     action)
-        if action in ['flush', 'refresh_windows_hosts']:
+        if action in ['flush']:
             if dbuser.role.name not in ['aqd_admin']:
                 raise AuthorizationException(
                     "Must have the aqd_admin role to %s." % action)

@@ -33,7 +33,7 @@ class CommandSearchPersonality(BrokerCommand):
 
     def render(self, session, personality, personality_stage, archetype, grn,
                eon_id, host_environment, config_override, required_service,
-               fullinfo, style, **arguments):
+               fullinfo, style, **_):
         q = session.query(PersonalityStage)
         if personality_stage:
             Personality.force_valid_stage(personality_stage)

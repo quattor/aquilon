@@ -32,7 +32,7 @@ class CommandMake(BrokerCommand):
 
     def render(self, session, logger, hostname, osname, osversion, archetype,
                personality, personality_stage, buildstatus, keepbindings, grn,
-               eon_id, cleargrn, comments, **arguments):
+               eon_id, cleargrn, comments, **_):
         dbhost = hostname_to_host(session, hostname)
         old_archetype = dbhost.archetype
 

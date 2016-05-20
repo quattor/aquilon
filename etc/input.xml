@@ -860,23 +860,6 @@
 	<transport method="post" path="command/refresh_network"/>
     </command>
 
-    <command name="refresh_windows_hosts">
-	Refresh Windows host entries based on information in the data warehouse.
-	<p/>
-	The data warehouse contains a merge of host/machine/interface data
-	from both aqdb and Windows hosts using those interfaces.  This syncs
-	up any non-conflicting data.
-	<p/>
-	The add_windows_host and del_windows_host commands can be used to
-	create entries manually.
-	<optgroup>
-	    <option name="dryrun" type="boolean">Report what will change</option>
-	    <option name="justification" type="string">Authorization tokens (e.g. TCM number or "emergency") to validate the request</option>
-	    <option name="reason" type="string">Human readable description of why the operation was performed</option>
-	</optgroup>
-	<transport method="post" path="command/refresh_windows_hosts"/>
-    </command>
-
     <command name="add_cpu">
 	Add a new CPU type to the database.
 	<optgroup mandatory="True" fields="all">

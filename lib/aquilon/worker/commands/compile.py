@@ -34,8 +34,7 @@ class CommandCompile(BrokerCommand):
     requires_readonly = True
 
     def render(self, session, logger, domain, sandbox,
-               pancinclude, pancexclude, pancdebug, cleandeps,
-               **arguments):
+               pancinclude, pancexclude, pancdebug, cleandeps, **_):
         dbdomain, dbauthor = get_branch_and_author(session, domain=domain,
                                                    sandbox=sandbox, compel=True)
 

@@ -16,9 +16,8 @@
 # limitations under the License.
 """Contains the logic for `aq search next --metacluster`."""
 
-
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.aqdb.model import MetaCluster
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.search import search_next
 
 
@@ -26,7 +25,7 @@ class CommandSearchNextMetaCluster(BrokerCommand):
 
     required_parameters = ['metacluster']
 
-    def render(self, session, metacluster, start, number, pack, **arguments):
+    def render(self, session, metacluster, start, number, pack, **_):
         result = search_next(session=session, cls=MetaCluster,
                              attr=MetaCluster.name, value=metacluster,
                              start=start, pack=pack)

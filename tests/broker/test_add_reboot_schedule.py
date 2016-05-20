@@ -30,7 +30,7 @@ class TestAddRebootSchedule(TestBrokerCommand):
     def test_100_nonexistent(self):
         command = ["show_reboot_schedule",
                    "--hostname=server1.aqd-unittest.ms.com"]
-        out = self.notfoundtest(command)
+        self.notfoundtest(command)
 
     def test_110_add_schedule(self):
         command = ["add_reboot_schedule",

@@ -25,7 +25,7 @@ class CommandShowClusterAll(BrokerCommand):
 
     query_class = Cluster
 
-    def render(self, session, **arguments):
+    def render(self, session, **_):
         q = session.query(self.query_class.name).order_by(self.query_class.name)
         if self.query_class == Cluster:
             q = q.filter(Cluster.cluster_type != 'meta')

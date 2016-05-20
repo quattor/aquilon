@@ -43,7 +43,7 @@ if LIBDIR not in sys.path:
 # -- end path_setup --
 
 from aquilon.client import depends  # pylint: disable=W0611
-from aquilon.config import lookup_file_path,get_username
+from aquilon.config import lookup_file_path, get_username
 from aquilon.exceptions_ import AquilonError
 from aquilon.client.knchttp import KNCHTTPConnection
 from aquilon.client.chunked import ChunkedHTTPConnection
@@ -317,6 +317,7 @@ class StatusThread(Thread):
 def quoteOptions(options):
     return "&".join(quote(k) + "=" + quote(v) for k, v in iteritems(options))
 
+
 def get_default_opts(auth_option, conf_file=None):
 
     config = SafeConfigParser()
@@ -355,8 +356,8 @@ if __name__ == "__main__":
               file=sys.stderr)
         sys.exit(1)
 
-    ## if a client config file is specified on command line
-    ## that should overide  env or default options.
+    # if a client config file is specified on command line
+    # that should overide  env or default options.
     if globalOptions.get('aqconf'):
         globalOptions.update(get_default_opts(globalOptions.get('auth'),
                                               globalOptions.get('aqconf')))
@@ -382,9 +383,9 @@ if __name__ == "__main__":
         defaultOpts.get('aqport')
 
     if globalOptions.get('auth'):
-       port = port or 6900
+        port = port or 6900
     else:
-       port = port or 6901
+        port = port or 6901
 
     if globalOptions.get('aqservice'):
         aqservice = globalOptions.get('aqservice')

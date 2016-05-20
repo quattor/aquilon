@@ -19,7 +19,7 @@
 from sqlalchemy.orm import undefer
 
 from aquilon.exceptions_ import ArgumentError, NotFoundException
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.user_principal import (
     get_or_create_user_principal)
 
@@ -28,7 +28,7 @@ class CommandShowPrincipalPrincipal(BrokerCommand):
 
     required_parameters = ["principal"]
 
-    def render(self, session, principal, **arguments):
+    def render(self, session, principal, **_):
         try:
             options = [undefer("comments")]
             return get_or_create_user_principal(session, principal, False,

@@ -15,9 +15,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 from aquilon.aqdb.model import MetaCluster
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.commands.del_cluster import del_cluster
 
 
@@ -25,7 +24,7 @@ class CommandDelMetaCluster(BrokerCommand):
 
     required_parameters = ["metacluster"]
 
-    def render(self, session, logger, metacluster, **arguments):
+    def render(self, session, logger, metacluster, **_):
         dbmetacluster = MetaCluster.get_unique(session, metacluster,
                                                compel=True)
         del_cluster(session, logger, dbmetacluster, self.config)

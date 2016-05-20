@@ -33,7 +33,7 @@ class CommandShowActiveCommands(BrokerCommand):
                              r' aq (?P<command>\S+)'
                              r' with arguments {(?P<bareargs>.*)}')
 
-    def render(self, debug, **arguments):
+    def render(self, debug, **_):
         catalog = StatusCatalog()
         retval = []
         if debug:

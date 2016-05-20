@@ -16,13 +16,12 @@
 # limitations under the License.
 """Contains the logic for `aq update chassis`."""
 
-
 from aquilon.aqdb.types import ChassisType
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.aqdb.model import Model, Chassis
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.dbwrappers.hardware_entity import update_primary_ip
 from aquilon.worker.processes import DSDBRunner
-from aquilon.aqdb.model import Model, Chassis
 
 
 class CommandUpdateChassis(BrokerCommand):
@@ -30,7 +29,7 @@ class CommandUpdateChassis(BrokerCommand):
     required_parameters = ["chassis"]
 
     def render(self, session, logger, chassis, model, rack, ip, vendor, serial,
-               comments, **arguments):
+               comments, **_):
         dbchassis = Chassis.get_unique(session, chassis, compel=True)
 
         oldinfo = DSDBRunner.snapshot_hw(dbchassis)

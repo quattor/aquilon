@@ -18,13 +18,13 @@
 
 from sqlalchemy.orm import undefer
 
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import DnsEnvironment
 
 
 class CommandShowDnsEnvironmentAll(BrokerCommand):
 
-    def render(self, session, **arguments):
+    def render(self, session, **_):
         q = session.query(DnsEnvironment)
         q = q.options(undefer('comments'))
         q = q.order_by(DnsEnvironment.name)

@@ -29,7 +29,7 @@ class CommandShowSandboxSandbox(BrokerCommand):
 
     required_parameters = ["sandbox"]
 
-    def render(self, session, sandbox, pathonly, **arguments):
+    def render(self, session, sandbox, pathonly, **_):
         branch, dbauthor = parse_sandbox(session, sandbox)
         dbsandbox = Sandbox.get_unique(session, branch, compel=True,
                                        query_options=[undefer('comments'),

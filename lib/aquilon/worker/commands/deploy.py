@@ -35,7 +35,7 @@ class CommandDeploy(BrokerCommand):
     required_parameters = ["source", "target"]
 
     def render(self, session, logger, source, target, sync, dryrun,
-               justification, reason, user, requestid, **arguments):
+               justification, reason, user, requestid, **_):
         # Most of the logic here is duplicated in publish
         dbsource = Branch.get_unique(session, source, compel=True)
 

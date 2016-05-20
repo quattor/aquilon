@@ -17,12 +17,12 @@
 
 from ipaddr import IPv4Address
 
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import (DynamicStub, ARecord, DnsDomain, Fqdn,
                                 AddressAssignment, NetworkEnvironment,
                                 DnsEnvironment)
 from aquilon.aqdb.model.network import get_net_id_from_ip
-from aquilon.exceptions_ import ArgumentError
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.interface import check_ip_restrictions
 from aquilon.worker.dbwrappers.location import get_default_dns_domain
 from aquilon.worker.processes import DSDBRunner
@@ -32,8 +32,7 @@ class CommandAddDynamicRange(BrokerCommand):
 
     required_parameters = ["startip", "endip"]
 
-    def render(self, session, logger, startip, endip, dns_domain, prefix,
-               **arguments):
+    def render(self, session, logger, startip, endip, dns_domain, prefix, **_):
         if not prefix:
             prefix = 'dynamic'
         dbnet_env = NetworkEnvironment.get_unique_or_default(session)

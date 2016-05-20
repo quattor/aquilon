@@ -24,5 +24,5 @@ class CommandShowVirtualSwitchVirtualSwitch(BrokerCommand):
 
     required_parameters = ["virtual_switch"]
 
-    def render(self, session, virtual_switch, **kwargs):
+    def render(self, session, virtual_switch, **_):
         return VirtualSwitch.get_unique(session, virtual_switch, compel=True)

@@ -30,7 +30,7 @@ class CommandDelServiceAddress(BrokerCommand):
     required_parameters = ["name"]
 
     def render(self, session, logger, name, hostname, cluster, metacluster,
-               resourcegroup, keep_dns, **arguments):
+               resourcegroup, keep_dns, **_):
         if name == "hostname":
             raise ArgumentError("The primary address of the host cannot "
                                 "be deleted.")

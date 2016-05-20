@@ -15,16 +15,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.aqdb.model import Feature
 from aquilon.exceptions_ import ArgumentError
+from aquilon.aqdb.model import Feature
+from aquilon.worker.broker import BrokerCommand
 
 
 class CommandDelFeature(BrokerCommand):
 
     required_parameters = ['feature', 'type']
 
-    def render(self, session, feature, type, **arguments):
+    def render(self, session, feature, type, **_):
         cls = Feature.polymorphic_subclass(type, "Unknown feature type")
         dbfeature = cls.get_unique(session, name=feature, compel=True)
 

@@ -195,7 +195,7 @@ class TestAudit(TestBrokerCommand):
         cmd1 = ["search_audit", "--username", self.principal, "--command",
                 "search_audit", "--limit", "1"]
         my_start_time = int(time())
-        out = self.commandtest(cmd1)
+        self.commandtest(cmd1)
         my_end_time = int(time())
 
         cmd2 = ["search_audit", "--username", self.principal,

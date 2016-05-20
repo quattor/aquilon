@@ -19,14 +19,14 @@
 from sqlalchemy.orm import subqueryload, contains_eager, undefer
 
 from aquilon.aqdb.model import UserPrincipal, Realm
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 
 
 class CommandShowPrincipalAll(BrokerCommand):
 
     required_parameters = []
 
-    def render(self, session, **arguments):
+    def render(self, session, **_):
         q = session.query(UserPrincipal)
         q = q.join(Realm)
         q = q.options(undefer(UserPrincipal.comments),

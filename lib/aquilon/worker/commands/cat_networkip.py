@@ -17,7 +17,7 @@
 """Contains the logic for `aq cat --networkip`."""
 
 from aquilon.aqdb.model import Network, NetworkEnvironment
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.templates import Plenary
 
 
@@ -25,8 +25,8 @@ class CommandCatNetwork(BrokerCommand):
 
     required_parameters = ["networkip"]
 
-    def render(self, dbuser, session, logger, generate,
-               networkip, network_environment, **kwargs):
+    def render(self, session, logger, generate, networkip, network_environment,
+               **_):
         dbnet_env = NetworkEnvironment.get_unique_or_default(session,
                                                              network_environment)
 

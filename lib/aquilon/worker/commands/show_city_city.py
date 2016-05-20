@@ -17,12 +17,12 @@
 """Contains the logic for `aq show city --city`."""
 
 from aquilon.aqdb.model import City
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 
 
 class CommandShowCityCity(BrokerCommand):
 
     required_parameters = ["city"]
 
-    def render(self, session, city, **arguments):
+    def render(self, session, city, **_):
         return City.get_unique(session, city, compel=True)

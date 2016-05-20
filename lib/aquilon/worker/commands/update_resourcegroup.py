@@ -28,8 +28,7 @@ class CommandUpdateResourceGroup(CommandUpdateResource):
     resource_class = ResourceGroup
     resource_name = "resourcegroup"
 
-    def update_resource(self, dbresource, session, logger, required_type,
-                        **kwargs):
+    def update_resource(self, dbresource, session, logger, required_type, **_):
         if required_type is not None:
             if required_type:
                 rqtype = Resource.polymorphic_subclass(required_type,

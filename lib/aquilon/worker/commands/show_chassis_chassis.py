@@ -18,7 +18,7 @@
 
 from sqlalchemy.orm import undefer
 
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import Chassis
 
 
@@ -26,6 +26,6 @@ class CommandShowChassisChassis(BrokerCommand):
 
     required_parameters = ["chassis"]
 
-    def render(self, session, chassis, **arguments):
+    def render(self, session, chassis, **_):
         return Chassis.get_unique(session, chassis, compel=True,
                                   query_options=[undefer('comments')])

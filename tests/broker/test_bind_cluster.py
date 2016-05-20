@@ -63,7 +63,7 @@ class TestBindCluster(TestBrokerCommand):
         command = ["rebind_cluster", "--cluster=utecl1",
                    "--service=esx_management_server", "--instance=%s" % next]
         # Do we need any checks on this output?
-        (out, err) = self.successtest(command)
+        self.statustest(command)
 
         command = ["show_cluster", "--cluster=utecl1"]
         out = self.commandtest(command)

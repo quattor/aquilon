@@ -33,7 +33,7 @@ class CommandCluster(BrokerCommand):
     required_parameters = ["hostname", "cluster"]
 
     def render(self, session, logger, hostname, cluster, personality,
-               personality_stage, **arguments):
+               personality_stage, **_):
         dbhost = hostname_to_host(session, hostname)
         dbcluster = Cluster.get_unique(session, cluster, compel=True)
 

@@ -21,7 +21,7 @@ import re
 from tempfile import NamedTemporaryFile, mkdtemp
 from base64 import b64decode
 
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.exceptions_ import ProcessException, ArgumentError
 from aquilon.aqdb.model import Sandbox
 from aquilon.worker.dbwrappers.branch import force_my_sandbox
@@ -35,7 +35,7 @@ class CommandPublish(BrokerCommand):
     required_parameters = ["bundle"]
 
     def render(self, session, logger, dbuser, branch, sandbox, bundle, sync,
-               rebase, **arguments):
+               rebase, **_):
         if sandbox:
             # pylint: disable=W0612
             sandbox, dbauthor = force_my_sandbox(session, dbuser, sandbox)

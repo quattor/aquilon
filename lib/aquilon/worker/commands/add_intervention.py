@@ -33,7 +33,7 @@ class CommandAddIntervention(CommandAddResource):
 
     def add_resource(self, session, logger, intervention, expiry, start_time,
                      allowusers, allowgroups, disabled_actions, comments,
-                     justification, **kwargs):
+                     justification, **_):
         try:
             expire_when = parse(expiry)
         except (ValueError, TypeError) as err:

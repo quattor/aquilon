@@ -34,22 +34,21 @@ class TestGet(TestBrokerCommand):
         p = Popen(("/bin/rm", "-rf",
                    os.path.join(self.sandboxdir, "changetest1")),
                   stdout=1, stderr=2)
-        rc = p.wait()
+        p.wait()
 
     def testclearchangetest2domain(self):
         p = Popen(("/bin/rm", "-rf",
                    os.path.join(self.sandboxdir, "changetest2")),
                   stdout=1, stderr=2)
-        rc = p.wait()
+        p.wait()
 
     def testgetchangetest1domain(self):
-        (out, err) = self.successtest(["get", "--sandbox", "changetest1"])
+        self.successtest(["get", "--sandbox", "changetest1"])
         self.assertTrue(os.path.exists(os.path.join(self.sandboxdir,
                                                     "changetest1")))
 
     def testgetchangetest2domain(self):
-        (out, err) = self.successtest(["get",
-                                       "--sandbox=%s/changetest2" % self.user])
+        self.successtest(["get", "--sandbox=%s/changetest2" % self.user])
         self.assertTrue(os.path.exists(os.path.join(self.sandboxdir,
                                                     "changetest2")))
 

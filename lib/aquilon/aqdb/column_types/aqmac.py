@@ -31,11 +31,9 @@ class AqMac(SchemaType, TypeDecorator):
 
     impl = BigInteger
 
-    def __init__(self, name=None, **kw):
+    def __init__(self, **kw):
         SchemaType.__init__(self, **kw)
         TypeDecorator.__init__(self)
-
-        self.name = name
 
     @property
     def python_type(self):
@@ -62,10 +60,6 @@ class AqMac(SchemaType, TypeDecorator):
         return super(AqMac, self).coerce_compared_value(op, value)
 
     def _set_table(self, column, table):
-        if not self.name:
-            return
-
         c = CheckConstraint(and_(type_coerce(column, self) >= 0,
-                                 type_coerce(column, self) < 2 ** 48),
-                            name=self.name)
+                                 type_coerce(column, self) < 2 ** 48))
         table.append_constraint(c)

@@ -32,7 +32,7 @@ class CommandUpdateServiceAddress(BrokerCommand):
 
     def render(self, session, logger, ip, name, interfaces, hostname, cluster,
                metacluster, resourcegroup, network_environment, map_to_primary,
-               comments, **arguments):
+               comments, **_):
         holder = get_resource_holder(session, logger, hostname, cluster,
                                      metacluster, resourcegroup, compel=True)
         dbsrv = ServiceAddress.get_unique(session, name=name, holder=holder,

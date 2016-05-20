@@ -25,7 +25,7 @@ class CommandShowUserAll(BrokerCommand):
 
     required_parameters = []
 
-    def render(self, session, **arguments):
+    def render(self, session, **_):
         q = session.query(User.name)
         q = q.order_by(User.name)
         return StringAttributeList(q.all(), 'name')

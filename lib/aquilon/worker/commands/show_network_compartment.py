@@ -26,7 +26,7 @@ class CommandShowNetworkCompartment(BrokerCommand):
 
     required_parameters = ["network_compartment"]
 
-    def render(self, session, network_compartment, **arguments):
+    def render(self, session, network_compartment, **_):
         options = [undefer("comments")]
         dbnet_comp = NetworkCompartment.get_unique(session, network_compartment,
                                                    compel=True,

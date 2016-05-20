@@ -29,7 +29,7 @@ class CommandUpdParameterDefintionFeature(BrokerCommand):
 
     def render(self, session, logger, feature, type, path, schema, clear_schema,
                required, default, clear_default, description, user,
-               justification, reason, **kwargs):
+               justification, reason, **_):
         cls = Feature.polymorphic_subclass(type, "Unknown feature type")
         dbfeature = cls.get_unique(session, name=feature, compel=True)
 

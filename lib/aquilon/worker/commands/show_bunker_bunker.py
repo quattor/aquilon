@@ -17,12 +17,12 @@
 """Contains the logic for `aq show bunker --bunker`."""
 
 from aquilon.aqdb.model import Bunker
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 
 
 class CommandShowBunkerBunker(BrokerCommand):
 
     required_parameters = ["bunker"]
 
-    def render(self, session, bunker, **arguments):
+    def render(self, session, bunker, **_):
         return Bunker.get_unique(session, bunker, compel=True)

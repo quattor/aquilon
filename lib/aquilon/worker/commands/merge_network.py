@@ -21,7 +21,7 @@ from sqlalchemy.sql import and_
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Network, NetworkEnvironment
 from aquilon.aqdb.model.network import get_net_id_from_ip
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.dns import delete_dns_record
 from aquilon.worker.dbwrappers.network import fix_foreign_links
 from aquilon.worker.templates import Plenary, PlenaryCollection
@@ -32,7 +32,7 @@ class CommandMergeNetwork(BrokerCommand):
     requierd_parameters = ["ip"]
 
     def render(self, session, dbuser, logger,
-               ip, netmask, prefixlen, network_environment, **arguments):
+               ip, netmask, prefixlen, network_environment, **_):
         if netmask:
             # There must me a faster way, but this is the easy one
             net = IPv4Network("127.0.0.0/%s" % netmask)

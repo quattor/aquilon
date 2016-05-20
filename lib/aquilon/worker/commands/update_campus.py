@@ -26,7 +26,7 @@ class CommandUpdateCampus(BrokerCommand):
     required_parameters = ["campus"]
 
     def render(self, session, campus, fullname, default_dns_domain, comments,
-               **arguments):
+               **_):
         dbcampus = Campus.get_unique(session, campus, compel=True)
 
         update_location(dbcampus, default_dns_domain=default_dns_domain,

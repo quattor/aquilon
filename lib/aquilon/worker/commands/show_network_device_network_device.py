@@ -19,7 +19,7 @@
 from sqlalchemy.orm import joinedload, subqueryload, undefer
 
 from aquilon.aqdb.model import NetworkDevice
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.network_device import discover_network_device
 from aquilon.worker.formats.list import StringList
 
@@ -28,7 +28,7 @@ class CommandShowNetworkDevice(BrokerCommand):
 
     required_parameters = ["network_device"]
 
-    def render(self, session, logger, network_device, discover, **arguments):
+    def render(self, session, logger, network_device, discover, **_):
         if discover:
             options = []
         else:

@@ -27,7 +27,7 @@ class CommandBindClientHostname(BrokerCommand):
     required_parameters = ["hostname", "service"]
 
     def render(self, session, logger, hostname, service, instance, force=False,
-               **arguments):
+               **_):
         dbhost = hostname_to_host(session, hostname)
         dbservice = Service.get_unique(session, service, compel=True)
         chooser = Chooser(dbhost, logger=logger, required_only=False)

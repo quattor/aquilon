@@ -56,8 +56,7 @@ class Disk(DeviceLinkMixin, Base):
     machine_id = Column(ForeignKey(Machine.machine_id, ondelete='CASCADE'),
                         nullable=False)
 
-    bootable = Column(Boolean(name="%s_bootable_ck" % _TN), nullable=False,
-                      default=False)
+    bootable = Column(Boolean, nullable=False, default=False)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))

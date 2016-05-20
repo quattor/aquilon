@@ -39,7 +39,7 @@ from IPython.config.loader import Config as IPyConfig
 from IPython import embed
 
 from aquilon.config import Config  # pylint: disable=W0611
-from aquilon.aqdb.db_factory import DbFactory
+from aquilon.aqdb.db_factory import DbFactory, db_prompt
 
 # Make all classes from the model available inside the shell
 from aquilon.aqdb.model import *  # pylint: disable=W0401,W0614
@@ -71,26 +71,7 @@ def main():
             '%(asctime)s %(levelname)s %(name)s %(message)s'))
         rootlogger.addHandler(handler)
 
-    if db.engine.dialect.name == 'sqlite':
-        prompt = str(db.engine.url).split('///')[1]
-    elif db.engine.dialect.name == 'oracle':
-        stmt = "SELECT sys_context('userenv', 'session_user') FROM DUAL"
-        user = session.execute(stmt).scalar()
-        stmt = "SELECT sys_context('userenv', 'instance_name') FROM DUAL"
-        instance = session.execute(stmt).scalar()
-        stmt = "SELECT sys_context('userenv', 'db_name') FROM DUAL"
-        dbname = session.execute(stmt).scalar()
-
-        prompt = '%s@%s/%s' % (user, instance, dbname)
-    else:
-        # couldn't use the underlying dbapi connection.current_schema
-        # from the engine as it too is ''
-        user = db.engine.url.username or os.environ.get("USER")
-        host = db.engine.url.host or 'LOCALHOST'
-        prompt = '%s@%s' % (user, host)
-        if db.engine.url.database:
-            prompt += '/%s'
-    prompt += '> '
+    prompt = db_prompt(session) + '> '
 
     ipycfg = IPyConfig()
     ipycfg.PromptManager.in_template = prompt

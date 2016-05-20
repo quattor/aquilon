@@ -83,10 +83,10 @@ class TestUpdateNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
         command = ["update_interface", "--network_device=ut3gd1r06.aqd-unittest.ms.com",
                    "--interface=xge49", "--mac", mac]
         self.noouttest(command)
-        (out, cmd) = self.verifynetdev("ut3gd1r06.aqd-unittest.ms.com",
-                                       "generic", "temp_switch", "ut3", "a", "3",
-                                       switch_type='tor',
-                                       ip=ip, mac=mac, interface="xge49")
+        self.verifynetdev("ut3gd1r06.aqd-unittest.ms.com",
+                          "generic", "temp_switch", "ut3", "a", "3",
+                          switch_type='tor',
+                          ip=ip, mac=mac, interface="xge49")
         self.dsdb_verify()
         self.check_plenary_contents('network_device', 'americas', 'ut', 'ut3gd1r06',
                                     contains=str(mac))

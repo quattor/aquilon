@@ -17,7 +17,7 @@
 
 from sqlalchemy.orm import undefer, joinedload, subqueryload
 
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import Feature
 
 
@@ -25,7 +25,7 @@ class CommandShowFeature(BrokerCommand):
 
     required_parameters = ['feature', 'type']
 
-    def render(self, session, feature, type, **arguments):
+    def render(self, session, feature, type, **_):
         cls = Feature.polymorphic_subclass(type, "Unknown feature type")
         options = [undefer('comments'),
                    joinedload('owner_grn'),

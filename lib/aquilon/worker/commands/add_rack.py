@@ -16,7 +16,7 @@
 # limitations under the License.
 """Contains the logic for `aq add rack --building`."""
 
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.rack import get_or_create_rack
 
 
@@ -24,8 +24,8 @@ class CommandAddRack(BrokerCommand):
 
     required_parameters = ["rackid", "building", "row", "column"]
 
-    def render(self, session, rackid, building, room, bunker, row, column, fullname, comments,
-               **arguments):
+    def render(self, session, rackid, building, room, bunker, row, column,
+               fullname, comments, **_):
         get_or_create_rack(session=session, rackid=rackid, rackrow=row,
                            rackcolumn=column, building=building, room=room,
                            bunker=bunker, fullname=fullname, comments=comments,

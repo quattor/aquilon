@@ -18,8 +18,8 @@
 
 from sqlalchemy.orm import joinedload, subqueryload, undefer
 
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.aqdb.model import Network, NetworkEnvironment
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.dbwrappers.network import get_network_byname, get_network_byip
 from aquilon.worker.formats.network import SimpleNetworkList
@@ -30,8 +30,8 @@ class CommandShowNetwork(BrokerCommand):
 
     required_parameters = []
 
-    def render(self, session, network, ip, network_environment, all, style,
-               hosts, exact_location, **arguments):
+    def render(self, session, network, ip, network_environment, all, hosts,
+               exact_location, **arguments):
         options = [undefer('comments'),
                    joinedload('location'),
                    undefer('routers.comments'),

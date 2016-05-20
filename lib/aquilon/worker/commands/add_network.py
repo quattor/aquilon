@@ -19,10 +19,10 @@ import math
 from ipaddr import IPv4Network, AddressValueError, NetmaskValueError
 
 from aquilon.exceptions_ import ArgumentError, NotFoundException
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.dbwrappers.location import get_location
 from aquilon.aqdb.model import Network, NetworkEnvironment, NetworkCompartment
 from aquilon.aqdb.model.network import get_net_id_from_ip
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.templates import Plenary, PlenaryCollection
 
 

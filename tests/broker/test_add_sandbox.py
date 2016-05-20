@@ -78,8 +78,8 @@ class TestAddSandbox(TestBrokerCommand):
 
     def test_115_verify_utsandbox(self):
         kingdir = self.config.get("broker", "kingdir")
-        out, err = self.gitcommand(["show-ref", "--hash", "refs/heads/prod"],
-                                   cwd=kingdir)
+        out, _ = self.gitcommand(["show-ref", "--hash", "refs/heads/prod"],
+                                 cwd=kingdir)
         head = out.strip()
 
         command = "show sandbox --sandbox utsandbox"
@@ -132,7 +132,7 @@ class TestAddSandbox(TestBrokerCommand):
     def test_130_addchangetest2(self):
         command = ["add", "sandbox", "--sandbox", "changetest2"]
         # Progress report may be displayed on stderr, ignore it
-        out, err = self.successtest(command)
+        out, _ = self.successtest(command)
         sandboxdir = os.path.join(self.sandboxdir, "changetest2")
         self.matchoutput(out, "Created sandbox: %s" % sandboxdir, command)
         self.assertTrue(os.path.exists(sandboxdir),
@@ -147,7 +147,7 @@ class TestAddSandbox(TestBrokerCommand):
         # For testing mixed-case add.
         command = ["add", "sandbox", "--sandbox", "CamelCaseTest1"]
         # Progress report may be displayed on stderr, ignore it
-        out, err = self.successtest(command)
+        out, _ = self.successtest(command)
         sandboxdir = os.path.join(self.sandboxdir, "camelcasetest1")
         self.matchoutput(out, "Created sandbox: %s" % sandboxdir, command)
         self.assertTrue(os.path.exists(sandboxdir),
@@ -157,7 +157,7 @@ class TestAddSandbox(TestBrokerCommand):
         # For testing deletion of a sandbox added with mixed case.
         command = ["add", "sandbox", "--sandbox", "CamelCaseTest2"]
         # Progress report may be displayed on stderr, ignore it
-        out, err = self.successtest(command)
+        out, _ = self.successtest(command)
         sandboxdir = os.path.join(self.sandboxdir, "camelcasetest2")
         self.matchoutput(out, "Created sandbox: %s" % sandboxdir, command)
         self.assertTrue(os.path.exists(sandboxdir),
@@ -166,7 +166,7 @@ class TestAddSandbox(TestBrokerCommand):
     def test_160_verify_lower_branchname(self):
         command = ['branch', '-r']
         sandboxdir = os.path.join(self.sandboxdir, "camelcasetest1")
-        out, err = self.gitcommand(command, cwd=sandboxdir)
+        out, _ = self.gitcommand(command, cwd=sandboxdir)
         self.matchoutput(out, "origin/camelcasetest1", command)
 
     def test_160_verify_show_mixedcase(self):

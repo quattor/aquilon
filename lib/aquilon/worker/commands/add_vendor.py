@@ -24,7 +24,7 @@ class CommandAddVendor(BrokerCommand):
 
     required_parameters = ["vendor"]
 
-    def render(self, session, vendor, comments, **arguments):
+    def render(self, session, vendor, comments, **_):
         validate_template_name("--vendor", vendor)
         Vendor.get_unique(session, vendor, preclude=True)
 

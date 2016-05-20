@@ -37,7 +37,7 @@ from sqlalchemy.orm import configure_mappers
 from aquilon.config import Config
 config = Config()
 
-from aquilon.aqdb.model import *  # pylint: disable=W0611
+from aquilon.aqdb.model import *  # pylint: disable=W0401,W0614
 from aquilon.aqdb.db_factory import DbFactory
 from aquilon.aqdb.utils import constraints as cnst
 from loader import load_from_file

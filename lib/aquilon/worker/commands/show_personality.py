@@ -26,8 +26,7 @@ class CommandShowPersonality(BrokerCommand):
 
     required_parameters = []
 
-    def render(self, session, personality, personality_stage, archetype,
-               **arguments):
+    def render(self, session, personality, personality_stage, archetype, **_):
         if archetype:
             dbarchetype = Archetype.get_unique(session, archetype, compel=True)
         else:

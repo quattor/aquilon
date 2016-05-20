@@ -40,7 +40,7 @@ class CommandSearchDns(BrokerCommand):
     def render(self, session, fqdn, dns_environment, dns_domain, shortname,
                record_type, ip, network, network_environment, target,
                target_domain, target_environment, primary_name, used,
-               reverse_override, reverse_ptr, fullinfo, style, **kwargs):
+               reverse_override, reverse_ptr, fullinfo, style, **_):
         if record_type:
             record_type = record_type.strip().lower()
             if record_type in DNS_RRTYPE_MAP:

@@ -16,10 +16,9 @@
 # limitations under the License.
 """Contains the logic for `aq update sandbox`."""
 
-
 from aquilon.exceptions_ import AuthorizationException, ArgumentError
 from aquilon.aqdb.model import Sandbox
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.branch import (expand_compiler,
                                               has_compileable_objects)
 
@@ -29,7 +28,7 @@ class CommandUpdateSandbox(BrokerCommand):
     required_parameters = ["sandbox"]
 
     def render(self, session, dbuser, sandbox, comments, compiler_version,
-               autosync, profile_formats, **arguments):
+               autosync, profile_formats, **_):
         dbsandbox = Sandbox.get_unique(session, sandbox, compel=True)
 
         # FIXME: proper authorization

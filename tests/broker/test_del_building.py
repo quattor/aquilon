@@ -62,7 +62,7 @@ class TestDelBuilding(TestBrokerCommand):
         self.dsdb_expect(dsdb_command, True, errstr)
         self.dsdb_expect_del_campus_building("ta", "bz")
         command = "del building --building bz"
-        out, err = self.successtest(command.split(" "))
+        err = self.statustest(command.split(" "))
         self.matchoutput(err,
                          "DSDB does not have building bz defined, proceeding.",
                          command)

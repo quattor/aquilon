@@ -18,13 +18,13 @@
 
 from sqlalchemy.orm import joinedload, undefer
 
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import Domain
 
 
 class CommandShowDomainAll(BrokerCommand):
 
-    def render(self, session, **arguments):
+    def render(self, session, **_):
         q = session.query(Domain)
         q = q.options(undefer('comments'),
                       joinedload('owner'),

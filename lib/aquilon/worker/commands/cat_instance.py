@@ -32,7 +32,7 @@ class CommandCatInstance(BrokerCommand):
     _is_lock_free = True
 
     def render(self, session, logger, service, instance, default, server,
-               generate, **kwargs):
+               generate, **_):
         dbservice = Service.get_unique(session, service, compel=True)
         dbsi = ServiceInstance.get_unique(session, service=dbservice,
                                           name=instance, compel=True)

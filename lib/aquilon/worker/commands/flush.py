@@ -121,7 +121,7 @@ class CommandFlush(BrokerCommand):
 
     def render(self, session, logger, services, personalities, machines,
                clusters, hosts, locations, resources, networks, network_devices,
-               virtual_switches, all, **arguments):
+               virtual_switches, all, **_):
         if all:
             services = True
             personalities = True

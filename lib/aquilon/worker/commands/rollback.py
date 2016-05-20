@@ -16,13 +16,12 @@
 # limitations under the License.
 """Contains the logic for `aq rollback`."""
 
-
 import os
 import re
 
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.exceptions_ import ProcessException, ArgumentError
 from aquilon.aqdb.model import Domain
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.processes import run_git
 from aquilon.worker.locks import CompileKey
 
@@ -31,7 +30,7 @@ class CommandRollback(BrokerCommand):
 
     required_parameters = ["domain"]
 
-    def render(self, session, logger, domain, ref, lastsync, **arguments):
+    def render(self, session, logger, domain, ref, lastsync, **_):
         dbdomain = Domain.get_unique(session, domain, compel=True)
         if not dbdomain.tracked_branch:
             # Could check dbdomain.trackers and rollback all of them...

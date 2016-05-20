@@ -24,7 +24,7 @@ from aquilon.worker.dbwrappers.grn import lookup_grn
 
 class CommandDelGrn(BrokerCommand):
 
-    def render(self, session, logger, grn, eon_id, **arguments):
+    def render(self, session, logger, grn, eon_id, **_):
         dbgrn = lookup_grn(session, grn, eon_id, logger=logger,
                            config=self.config, usable_only=False)
 

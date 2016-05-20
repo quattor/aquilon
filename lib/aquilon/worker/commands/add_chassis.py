@@ -16,12 +16,11 @@
 # limitations under the License.
 """Contains the logic for `aq add chassis`."""
 
-
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.types import ChassisType
 from aquilon.aqdb.model import Chassis, Model
 from aquilon.aqdb.model.network import get_net_id_from_ip
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.dns import grab_address
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.dbwrappers.interface import (get_or_create_interface,
@@ -35,7 +34,7 @@ class CommandAddChassis(BrokerCommand):
     required_parameters = ["chassis", "rack", "model"]
 
     def render(self, session, logger, chassis, label, rack, model, vendor,
-               ip, interface, mac, serial, comments, **arguments):
+               ip, interface, mac, serial, comments, **_):
         dbdns_rec, _ = grab_address(session, chassis, ip,
                                     allow_restricted_domain=True,
                                     allow_reserved=True, preclude=True)

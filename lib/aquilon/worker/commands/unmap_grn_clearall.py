@@ -29,7 +29,7 @@ class CommandUnMapGrnClearAll(BrokerCommand):
     required_parameters = ["target"]
 
     def render(self, session, logger, target, hostname, list, membersof,
-               personality, personality_stage, archetype, **arguments):
+               personality, personality_stage, archetype, **_):
 
         target_type = "personality" if personality else "host"
 

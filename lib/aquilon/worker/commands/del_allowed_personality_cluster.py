@@ -27,7 +27,7 @@ class CommandDelAllowedPersonalityCluster(BrokerCommand):
     required_parameters = ["archetype", "personality", "cluster"]
 
     def render(self, session, logger, archetype, personality, cluster,
-               metacluster, **kwargs):
+               metacluster, **_):
         dbpers = Personality.get_unique(session, name=personality,
                                         archetype=archetype, compel=True)
         if cluster:

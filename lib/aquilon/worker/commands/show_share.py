@@ -20,7 +20,7 @@ from sqlalchemy.orm.attributes import set_committed_value
 
 from aquilon.aqdb.model import Share
 from aquilon.aqdb.data_sync.storage import StormapParser
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.resources import get_resource_holder
 
 
@@ -29,7 +29,7 @@ class CommandShowShare(BrokerCommand):
     required_parameters = []
 
     def render(self, session, logger, share, hostname, resourcegroup, cluster,
-               metacluster, all, **arguments):
+               metacluster, all, **_):
         q = session.query(Share)
         if share:
             q = q.filter_by(name=share)

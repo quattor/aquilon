@@ -27,7 +27,7 @@ class CommandShowDiff(BrokerCommand):
     required_parameters = ["archetype", "personality"]
 
     def render(self, session, archetype, personality, personality_stage,
-               other, other_archetype, other_stage, **arguments):
+               other, other_archetype, other_stage, **_):
 
         dbpersona = Personality.get_unique(session, name=personality,
                                            archetype=archetype, compel=True)

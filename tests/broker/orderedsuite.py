@@ -135,7 +135,6 @@ from .test_unbind_client import TestUnbindClient
 from .test_rebind_client import TestRebindClient
 from .test_reconfigure import TestReconfigure
 from .test_change_status import TestChangeStatus
-from .test_refresh_windows_hosts import TestRefreshWindowsHosts
 from .test_constraints_chooser import TestChooserConstraints
 from .test_vulcan_localdisk import TestVulcanLocalDisk
 from .test_vulcan2 import TestVulcan20
@@ -376,7 +375,6 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestBindFeature,
                      TestParameterFeature,
                      TestJustification,
-                     TestRefreshWindowsHosts,
                      TestChooserConstraints,
                      TestCompile,
                      TestProfile,

@@ -30,7 +30,7 @@ class CommandUpdParameterDefintionArchetype(BrokerCommand):
 
     def render(self, session, logger, archetype, path, schema, clear_schema,
                required, activation, default, clear_default, description, user,
-               justification, reason, **kwargs):
+               justification, reason, **_):
         dbarchetype = Archetype.get_unique(session, archetype, compel=True)
         if not dbarchetype.is_compileable:
             raise ArgumentError("{0} is not compileable.".format(dbarchetype))

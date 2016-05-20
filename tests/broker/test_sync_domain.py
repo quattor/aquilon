@@ -41,7 +41,7 @@ class TestSyncDomain(TestBrokerCommand):
     def testverifygitlog(self):
         kingdir = self.config.get("broker", "kingdir")
         command = ["log", "--no-color", "-n", "1", "ut-prod"]
-        (out, err) = self.gitcommand(command, cwd=kingdir)
+        out, _ = self.gitcommand(command, cwd=kingdir)
         self.matchoutput(out, "Justification: tcm=12345678", command)
 
 

@@ -17,7 +17,7 @@
 """Contains the logic for `aq add continent`."""
 
 from aquilon.aqdb.model import Hub, Continent
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.location import add_location
 
 
@@ -25,7 +25,7 @@ class CommandAddContinent(BrokerCommand):
 
     required_parameters = ["continent", "hub"]
 
-    def render(self, session, continent, hub, fullname, comments, **arguments):
+    def render(self, session, continent, hub, fullname, comments, **_):
         dbhub = Hub.get_unique(session, hub, compel=True)
         add_location(session, Continent, continent, dbhub, fullname=fullname,
                      comments=comments)

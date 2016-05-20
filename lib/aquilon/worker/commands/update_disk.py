@@ -20,7 +20,7 @@ from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Machine, Disk, VirtualDisk, Filesystem, Share
 from aquilon.aqdb.model.disk import controller_types
 from aquilon.utils import force_wwn
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.resources import find_resource
 from aquilon.worker.templates import Plenary, PlenaryCollection
 
@@ -31,7 +31,7 @@ class CommandUpdateDisk(BrokerCommand):
 
     def render(self, session, logger, machine, disk, controller, share,
                filesystem, resourcegroup, address, comments, size, boot,
-               snapshot, rename_to, wwn, bus_address, iops_limit, **kw):
+               snapshot, rename_to, wwn, bus_address, iops_limit, **_):
         dbmachine = Machine.get_unique(session, machine, compel=True)
         dbdisk = Disk.get_unique(session, device_name=disk, machine=dbmachine,
                                  compel=True)

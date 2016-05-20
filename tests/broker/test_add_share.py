@@ -118,7 +118,7 @@ class TestAddShare(TestBrokerCommand):
     def test_140_update_no_latency(self):
         command = ["update_share", "--share=test_share_1", "--latency_threshold=0",
                    "--comments=New share comments"]
-        out = self.commandtest(command)
+        self.noouttest(command)
 
     def test_141_verify_no_latency(self):
         command = ["show_share", "--share=test_share_1"]
@@ -140,7 +140,7 @@ class TestAddShare(TestBrokerCommand):
     def test_143_set_latency(self):
         command = ["update_share", "--share=test_share_1", "--latency_threshold=20",
                    "--comments=New share comments"]
-        out = self.commandtest(command)
+        self.noouttest(command)
 
     def test_144_verify_test_share_1(self):
         command = ["show_share", "--share=test_share_1"]

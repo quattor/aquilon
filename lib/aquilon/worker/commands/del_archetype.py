@@ -15,17 +15,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Archetype, Personality
+from aquilon.worker.broker import BrokerCommand
 
 
 class CommandDelArchetype(BrokerCommand):
 
     required_parameters = ["archetype"]
 
-    def render(self, session, archetype, **kwargs):
+    def render(self, session, archetype, **_):
         dbarch = Archetype.get_unique(session, archetype, compel=True)
 
         # Check dependencies

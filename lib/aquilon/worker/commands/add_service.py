@@ -17,7 +17,7 @@
 """Contains the logic for `aq add service`."""
 
 from aquilon.aqdb.model import Service
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
 
 
@@ -25,8 +25,7 @@ class CommandAddService(BrokerCommand):
 
     required_parameters = ["service"]
 
-    def render(self, session, logger, service, need_client_list, comments,
-               **arguments):
+    def render(self, session, logger, service, need_client_list, comments, **_):
         Service.get_unique(session, service, preclude=True)
         dbservice = Service(name=service, comments=comments,
                             need_client_list=need_client_list)

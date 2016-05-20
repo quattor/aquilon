@@ -52,7 +52,6 @@ class TestDelServiceAddress(TestBrokerCommand):
                          "found.", command)
 
     def testdelzebra3(self):
-        ip = self.net["zebra_vip"].usable[0]
         command = ["del", "service", "address", "--keep_dns",
                    "--hostname", "unittest20.aqd-unittest.ms.com",
                    "--name", "zebra3"]

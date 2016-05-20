@@ -45,19 +45,16 @@ class Personality(Base):
     name = Column(AqStr(64), nullable=False)
     archetype_id = Column(ForeignKey(Archetype.id), nullable=False)
 
-    cluster_required = Column(Boolean(name="%s_clstr_req_ck" % _TN),
-                              default=False, nullable=False)
+    cluster_required = Column(Boolean, default=False, nullable=False)
 
-    config_override = Column(Boolean(name="%s_config_override_ck" % _TN),
-                             default=False, nullable=False)
+    config_override = Column(Boolean, default=False, nullable=False)
 
     owner_eon_id = Column(ForeignKey(Grn.eon_id, name='%s_owner_grn_fk' % _TN),
                           nullable=False)
 
     host_environment_id = Column(ForeignKey(HostEnvironment.id), nullable=False)
 
-    staged = Column(Boolean(name="%s_staged_ck" % _TN), default=False,
-                    nullable=False)
+    staged = Column(Boolean, default=False, nullable=False)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))

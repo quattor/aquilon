@@ -17,7 +17,7 @@
 """Contains the logic for `aq update alias`."""
 
 from aquilon.aqdb.model import Alias, DnsEnvironment
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.dns import (create_target_if_needed,
                                            delete_target_if_needed)
 from aquilon.worker.dbwrappers.grn import lookup_grn
@@ -30,7 +30,7 @@ class CommandUpdateAlias(BrokerCommand):
 
     def render(self, session, logger, fqdn, dns_environment, target,
                target_environment, ttl, clear_ttl, grn, eon_id, clear_grn,
-               comments, **kwargs):
+               comments, **_):
         dbdns_env = DnsEnvironment.get_unique_or_default(session,
                                                          dns_environment)
 

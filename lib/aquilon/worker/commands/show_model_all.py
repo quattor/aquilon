@@ -24,7 +24,7 @@ from aquilon.aqdb.model import Model, Vendor
 
 class CommandShowModelAll(BrokerCommand):
 
-    def render(self, session, **arguments):
+    def render(self, session, **_):
         q = session.query(Model)
         q = q.join(Vendor)
         q = q.options(contains_eager('vendor'),

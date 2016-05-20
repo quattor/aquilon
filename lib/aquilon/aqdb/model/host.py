@@ -63,8 +63,7 @@ class Host(CompileableMixin, Base):
                           nullable=True)
 
     # something to retain the advertised status of the host
-    advertise_status = Column(Boolean(name="%s_advertise_status_valid_ck" % _TN),
-                              nullable=False, default=False)
+    advertise_status = Column(Boolean, nullable=False, default=False)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))

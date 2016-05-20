@@ -341,7 +341,7 @@ class TestParameterFeature(TestBrokerCommand):
         path = "testdefault"
         value = "hardware_newstring"
         cmd = UPD_CMD + ["--path", path, "--value", value, "--feature", HARDWAREFEATURE]
-        out = self.noouttest(cmd)
+        self.noouttest(cmd)
 
     def test_380_verify_hardware_feature(self):
         cmd = SHOW_CMD

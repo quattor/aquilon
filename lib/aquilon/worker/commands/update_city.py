@@ -29,7 +29,7 @@ class CommandUpdateCity(BrokerCommand):
     required_parameters = ["city"]
 
     def render(self, session, logger, city, timezone, fullname, campus,
-               default_dns_domain, comments, **arguments):
+               default_dns_domain, comments, **_):
         dbcity = get_location(session, city=city)
 
         # Updating machine templates is expensive, so only do that if needed

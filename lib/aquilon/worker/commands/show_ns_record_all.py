@@ -26,6 +26,6 @@ class CommandShowNsRecordAll(CommandShowNsRecord):
 
     required_parameters = []
 
-    def render(self, session, **arguments):
+    def render(self, session, **_):
         q = session.query(NsRecord).order_by(NsRecord.dns_domain)
         return SimpleNSRecordList(q.all())

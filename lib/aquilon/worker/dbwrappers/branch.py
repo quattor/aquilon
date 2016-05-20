@@ -179,7 +179,7 @@ def remove_branch(config, logger, dbbranch, dbauthor=None):
 
 def search_branch_query(config, session, cls, owner=None, compiler_version=None,
                         autosync=None, validated=None, used=None,
-                        compileable=None, **arguments):
+                        compileable=None, **_):
     q = session.query(cls)
     if owner:
         dbowner = get_user_principal(session, owner)

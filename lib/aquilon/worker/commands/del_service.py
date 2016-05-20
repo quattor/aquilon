@@ -26,7 +26,7 @@ class CommandDelService(BrokerCommand):
 
     required_parameters = ["service"]
 
-    def render(self, session, logger, service, **arguments):
+    def render(self, session, logger, service, **_):
         dbservice = Service.get_unique(session, service, compel=True)
 
         if dbservice.archetypes:

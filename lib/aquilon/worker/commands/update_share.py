@@ -28,7 +28,7 @@ class CommandUpdateShare(BrokerCommand):
     required_parameters = ["share"]
 
     def render(self, session, logger, share, latency_threshold,
-               comments, **arguments):
+               comments, **_):
 
         validate_nlist_key("share", share)
 

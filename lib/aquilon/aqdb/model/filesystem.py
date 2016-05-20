@@ -31,8 +31,7 @@ class Filesystem(Resource):
 
     blockdev = Column(String(255), nullable=False)
     fstype = Column(String(32), nullable=False)
-    mount = Column(Boolean(name="%s_mount_ck" % _TN),
-                   default=False, nullable=False)
+    mount = Column(Boolean, default=False, nullable=False)
     mountpoint = Column(String(255), nullable=False)
     mountoptions = Column(String(255), nullable=True)
     dumpfreq = Column(Integer)

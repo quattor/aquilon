@@ -18,12 +18,12 @@
 
 from aquilon.exceptions_ import NotFoundException
 from aquilon.aqdb.model import Grn
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 
 
 class CommandShowGrn(BrokerCommand):
 
-    def render(self, session, grn, eon_id, all, **arguments):
+    def render(self, session, grn, eon_id, all, **_):
         q = session.query(Grn)
         if grn:
             q = q.filter_by(grn=grn)

@@ -77,6 +77,6 @@ class CommandDelCluster(BrokerCommand):
 
     required_parameters = ["cluster"]
 
-    def render(self, session, logger, cluster, **arguments):
+    def render(self, session, logger, cluster, **_):
         dbcluster = Cluster.get_unique(session, cluster, compel=True)
         del_cluster(session, logger, dbcluster, self.config)

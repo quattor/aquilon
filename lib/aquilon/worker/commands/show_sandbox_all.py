@@ -24,7 +24,7 @@ from aquilon.aqdb.model import Sandbox
 
 class CommandShowSandboxAll(BrokerCommand):
 
-    def render(self, session, **arguments):
+    def render(self, session, **_):
         q = session.query(Sandbox)
         q = q.options(undefer('comments'),
                       joinedload('owner'))

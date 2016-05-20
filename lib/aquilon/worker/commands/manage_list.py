@@ -22,7 +22,7 @@ import re
 
 from aquilon.exceptions_ import ArgumentError, ProcessException
 from aquilon.aqdb.model import Domain, Sandbox
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
 from aquilon.worker.dbwrappers.feature import (model_features,
                                                personality_features,
@@ -125,7 +125,7 @@ class CommandManageList(BrokerCommand):
 
     required_parameters = ["list"]
 
-    def get_objects(self, session, list, **arguments):  # pylint: disable=W0613
+    def get_objects(self, session, list, **_):
         check_hostlist_size(self.command, self.config, list)
 
         dbhosts = hostlist_to_hosts(session, list)

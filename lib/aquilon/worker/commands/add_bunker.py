@@ -18,7 +18,7 @@
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Building, Bunker, Room
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.location import add_location
 
 
@@ -26,8 +26,7 @@ class CommandAddBunker(BrokerCommand):
 
     required_parameters = ["bunker"]
 
-    def render(self, session, bunker, room, building, fullname, comments,
-               **arguments):
+    def render(self, session, bunker, room, building, fullname, comments, **_):
         if room:
             dbparent = Room.get_unique(session, room, compel=True)
         elif building:

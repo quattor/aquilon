@@ -25,7 +25,7 @@ class CommandDelDisk(BrokerCommand):
 
     required_parameters = ["machine"]
 
-    def render(self, session, logger, machine, disk, all, **arguments):
+    def render(self, session, logger, machine, disk, all, **_):
         dbmachine = Machine.get_unique(session, machine, compel=True)
 
         plenaries = PlenaryCollection(logger=logger)

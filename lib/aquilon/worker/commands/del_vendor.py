@@ -25,7 +25,7 @@ class CommandDelVendor(BrokerCommand):
 
     required_parameters = ["vendor"]
 
-    def render(self, session, vendor, **arguments):
+    def render(self, session, vendor, **_):
         dbvendor = Vendor.get_unique(session, vendor, compel=True)
         if session.query(Model.id).filter_by(vendor=dbvendor).count():
             raise ArgumentError("Vendor %s is still in use by a model." %

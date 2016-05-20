@@ -28,8 +28,7 @@ class CommandCompileCluster(BrokerCommand):
     requires_readonly = True
 
     def render(self, session, logger, cluster, metacluster,
-               pancinclude, pancexclude, pancdebug, cleandeps,
-               **arguments):
+               pancinclude, pancexclude, pancdebug, cleandeps, **_):
         if cluster:
             # TODO: disallow metaclusters here
             dbcluster = Cluster.get_unique(session, cluster, compel=True)

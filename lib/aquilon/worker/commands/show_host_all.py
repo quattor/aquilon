@@ -25,7 +25,7 @@ from aquilon.worker.formats.list import StringAttributeList
 
 class CommandShowHostAll(BrokerCommand):
 
-    def render(self, session, **arguments):
+    def render(self, session, **_):
         q = session.query(Host)
         q = q.join(HardwareEntity, DnsRecord, (Fqdn, DnsRecord.fqdn_id == Fqdn.id),
                    DnsDomain)

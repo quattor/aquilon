@@ -27,7 +27,7 @@ from aquilon.worker.formats.list import StringAttributeList
 class CommandSearchModel(BrokerCommand):
     def render(self, session, model, vendor, machine_type, cpuname, cpuvendor,
                cpunum, nicmodel, nicvendor, memory, disktype, diskcontroller,
-               disksize, fullinfo, style, **arguments):
+               disksize, fullinfo, style, **_):
         q = session.query(Model)
 
         if model:

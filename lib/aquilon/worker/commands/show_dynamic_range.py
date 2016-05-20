@@ -21,12 +21,12 @@ from ipaddr import IPv4Address
 from aquilon.aqdb.model import DynamicStub, DnsEnvironment
 from aquilon.aqdb.model.network import get_net_id_from_ip
 
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.formats.dynamic_range import DynamicRange
 
 
 class CommandShowDynamicRange(BrokerCommand):
-    def render(self, session, fqdn, ip, dns_environment, **arguments):
+    def render(self, session, fqdn, ip, dns_environment, **_):
         dbdns_env = DnsEnvironment.get_unique_or_default(session,
                                                          dns_environment)
         if fqdn:

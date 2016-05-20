@@ -340,7 +340,7 @@ class TestAddNetworkDevice(TestBrokerCommand, VerifyNetworkDeviceMixin):
 
     def test_205_verify_reject_bad_model(self):
         command = "show network_device --network_device badmodel.aqd-unittest.ms.com"
-        out = self.notfoundtest(command.split(" "))
+        self.notfoundtest(command.split(" "))
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestAddNetworkDevice)

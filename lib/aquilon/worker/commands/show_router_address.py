@@ -20,7 +20,7 @@ from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.orm import undefer, joinedload, contains_eager
 
 from aquilon.exceptions_ import ArgumentError, NotFoundException
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.model import (RouterAddress, ARecord, Network,
                                 NetworkEnvironment)
 
@@ -29,7 +29,7 @@ class CommandShowRouterAddress(BrokerCommand):
 
     required_parameters = []
 
-    def render(self, session, ip, fqdn, all, network_environment, **arguments):
+    def render(self, session, ip, fqdn, all, network_environment, **_):
         dbnet_env = NetworkEnvironment.get_unique_or_default(session,
                                                              network_environment)
 

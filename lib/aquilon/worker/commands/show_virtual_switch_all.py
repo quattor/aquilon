@@ -25,7 +25,7 @@ class CommandShowVirtualSwitchAll(BrokerCommand):
 
     required_parameters = []
 
-    def render(self, session, all, **kwargs):
+    def render(self, session, all, **_):
         q = session.query(VirtualSwitch.name)
         q = q.order_by(VirtualSwitch.name)
         return StringAttributeList(q.all(), 'name')

@@ -68,10 +68,8 @@ class Cluster(CompileableMixin, Base):
     down_maint_threshold = Column(Integer, nullable=True)
     # Some clusters (e.g. grid) don't want fixed N+M down_hosts_threshold, but
     # use percentage goals (i.e. don't alert until 5% of the population dies)
-    down_hosts_percent = Column(Boolean(name="%s_down_hosts_ck" % _TN),
-                                default=False, nullable=True)
-    down_maint_percent = Column(Boolean(name="%s_maint_hosts_ck" % _TN),
-                                default=False, nullable=True)
+    down_hosts_percent = Column(Boolean, default=False, nullable=True)
+    down_maint_percent = Column(Boolean, default=False, nullable=True)
 
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))

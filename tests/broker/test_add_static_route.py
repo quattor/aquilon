@@ -129,7 +129,7 @@ class TestAddStaticRoute(MachineTestMixin, TestBrokerCommand):
 
     def test_210_make_unittest26(self):
         command = ["make", "--hostname", "unittest26.aqd-unittest.ms.com"]
-        (out, err) = self.successtest(command)
+        err = self.statustest(command)
         self.matchoutput(err, "3/3 compiled", command)
 
     def test_220_verify_unittest26(self):

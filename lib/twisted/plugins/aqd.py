@@ -139,9 +139,9 @@ class AQDMaker(object):
         progname = os.path.split(sys.argv[0])[1]
 
         if options["readonly"] or progname == 'aqd_readonly':
-           log.msg("Broker started with aqd symlink, "
-                   "setting config mode to readonly")
-           config.set('broker', 'mode', 'readonly')
+            log.msg("Broker started with aqd symlink, "
+                    "setting config mode to readonly")
+            config.set('broker', 'mode', 'readonly')
 
         # default mode
         if not config.has_option('broker', 'mode'):

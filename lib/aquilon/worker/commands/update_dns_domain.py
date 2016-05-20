@@ -16,16 +16,15 @@
 # limitations under the License.
 """Contains the logic for `aq update dns domain`."""
 
-
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.aqdb.model import DnsDomain
+from aquilon.worker.broker import BrokerCommand
 
 
 class CommandUpdateDnsDomain(BrokerCommand):
 
     required_parameters = ["dns_domain"]
 
-    def render(self, session, dns_domain, restricted, comments, **arguments):
+    def render(self, session, dns_domain, restricted, comments, **_):
         dbdns_domain = DnsDomain.get_unique(session, dns_domain, compel=True)
         if restricted is not None:
             dbdns_domain.restricted = restricted

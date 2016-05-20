@@ -17,10 +17,10 @@
 """Contains the logic for `aq del router address`."""
 
 from aquilon.exceptions_ import ArgumentError, NotFoundException
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
-from aquilon.worker.dbwrappers.dns import delete_dns_record
 from aquilon.aqdb.model import ARecord, NetworkEnvironment
 from aquilon.aqdb.model.network import get_net_id_from_ip
+from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.dbwrappers.dns import delete_dns_record
 from aquilon.worker.templates.base import Plenary, PlenaryCollection
 
 
@@ -29,7 +29,7 @@ class CommandDelRouterAddress(BrokerCommand):
     required_parameters = []
 
     def render(self, session, logger, dbuser,
-               ip, fqdn, network_environment, **arguments):
+               ip, fqdn, network_environment, **_):
         dbnet_env = NetworkEnvironment.get_unique_or_default(session,
                                                              network_environment)
         self.az.check_network_environment(dbuser, dbnet_env)

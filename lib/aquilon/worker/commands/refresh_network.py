@@ -21,7 +21,7 @@ from tempfile import mkdtemp
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.data_sync.qip import QIPRefresh
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.processes import run_command
 from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.locks import SyncKey
@@ -32,8 +32,7 @@ class CommandRefreshNetwork(BrokerCommand):
 
     required_parameters = []
 
-    def render(self, session, logger, building, dryrun, incremental,
-               **arguments):
+    def render(self, session, logger, building, dryrun, incremental, **_):
         if building:
             dbbuilding = get_location(session, building=building)
         else:

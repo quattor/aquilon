@@ -27,7 +27,7 @@ class CommandAddAddressAlias(BrokerCommand):
     required_parameters = ["fqdn", "target"]
 
     def render(self, session, logger, fqdn, dns_environment, target,
-               target_environment, ttl, grn, eon_id, comments, **kwargs):
+               target_environment, ttl, grn, eon_id, comments, **_):
 
         if not target_environment:
             target_environment = dns_environment

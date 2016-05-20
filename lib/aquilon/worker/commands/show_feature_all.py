@@ -26,7 +26,7 @@ class CommandShowFeatureAll(BrokerCommand):
 
     required_parameters = []
 
-    def render(self, session, **arguments):
+    def render(self, session, **_):
         q = session.query(Feature)
         q = q.options(undefer(Feature.comments),
                       subqueryload('owner_grn'),

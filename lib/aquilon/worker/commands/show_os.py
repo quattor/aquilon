@@ -19,12 +19,12 @@ from sqlalchemy.orm import contains_eager
 
 from aquilon.exceptions_ import NotFoundException
 from aquilon.aqdb.model import OperatingSystem, Archetype
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 
 
 class CommandShowOS(BrokerCommand):
 
-    def render(self, session, osname, osversion, archetype, **arguments):
+    def render(self, session, osname, osversion, archetype, **_):
         q = session.query(OperatingSystem)
         if osname:
             q = q.filter_by(name=osname)

@@ -16,16 +16,15 @@
 # limitations under the License.
 """Contains the logic for `aq show vlan`."""
 
-
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.aqdb.model import VlanInfo
+from aquilon.worker.broker import BrokerCommand
 
 
 class CommandShowVlanVlan(BrokerCommand):
 
     required_parameters = ["vlan"]
 
-    def render(self, session, vlan, **arguments):
+    def render(self, session, vlan, **_):
 
         q = session.query(VlanInfo)
         return q.filter_by(vlan_id=vlan)

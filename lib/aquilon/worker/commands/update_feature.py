@@ -25,7 +25,7 @@ from aquilon.worker.templates import PlenaryCollection
 class CommandUpdateFeature(BrokerCommand):
 
     def render(self, session, logger, feature, type, comments, grn, eon_id,
-               visibility, activation, deactivation, **arguments):
+               visibility, activation, deactivation, **_):
 
         cls = Feature.polymorphic_subclass(type, "Unknown feature type")
         dbfeature = cls.get_unique(session, name=feature, compel=True)

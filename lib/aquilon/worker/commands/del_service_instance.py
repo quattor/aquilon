@@ -26,7 +26,7 @@ class CommandDelServiceInstance(BrokerCommand):
 
     required_parameters = ["service", "instance"]
 
-    def render(self, session, logger, service, instance, **arguments):
+    def render(self, session, logger, service, instance, **_):
         dbservice = Service.get_unique(session, service, compel=True)
         dbsi = ServiceInstance.get_unique(session, service=dbservice,
                                           name=instance, compel=True)

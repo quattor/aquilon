@@ -16,7 +16,7 @@
 # limitations under the License.
 """Contains the logic for `aq compile`."""
 
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.host import hostname_to_host
 from aquilon.worker.templates import Plenary, TemplateDomain
 
@@ -26,9 +26,8 @@ class CommandCompileHostname(BrokerCommand):
     required_parameters = ["hostname"]
     requires_readonly = True
 
-    def render(self, session, logger, hostname,
-               pancinclude, pancexclude, pancdebug, cleandeps,
-               **arguments):
+    def render(self, session, logger, hostname, pancinclude, pancexclude,
+               pancdebug, cleandeps, **_):
         dbhost = hostname_to_host(session, hostname)
         if pancdebug:
             pancinclude = r'.*'

@@ -150,7 +150,7 @@ class TestRootAccess(TestBrokerCommand):
     def test_370_unmap_personality_user(self):
         command = ["revoke_root_access", "--user", "testuser2",
                    "--personality", "utunused/dev", "--justification", "tcm=12345678"]
-        (out, err) = self.successtest(command)
+        self.noouttest(command)
 
     def test_380_del_netgroup_stillmapped(self):
         command = ["del", "netgroup_whitelist", "--netgroup", "netgroup2"]
@@ -162,10 +162,10 @@ class TestRootAccess(TestBrokerCommand):
 
         command = ["revoke_root_access", "--netgroup", "netgroup2",
                    "--personality", "utunused/dev", "--justification", "tcm=12345678"]
-        (out, err) = self.successtest(command)
+        self.noouttest(command)
 
         command = ["del", "netgroup_whitelist", "--netgroup", "netgroup2"]
-        out = self.noouttest(command)
+        self.noouttest(command)
 
     def test_390_verify_personality(self):
         command = ["show", "personality", "--personality", "utunused/dev"]

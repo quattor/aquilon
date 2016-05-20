@@ -59,7 +59,7 @@ class CommandShowRequest(BrokerCommand):
 
     required_parameters = ["requestid"]
 
-    def render(self, request, debug, requestid=None, auditid=None, **arguments):
+    def render(self, request, debug, requestid=None, auditid=None, **_):
         status = self.catalog.get_request_status(auditid=auditid,
                                                  requestid=requestid)
         if not status:

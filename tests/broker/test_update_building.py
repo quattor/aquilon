@@ -36,7 +36,7 @@ class TestUpdateBuilding(TestBrokerCommand):
 
     def test_105_verifyupdateaddress(self):
         command = "show building --building tu"
-        out, err = self.successtest(command.split(" "))
+        out = self.commandtest(command.split(" "))
         self.matchoutput(out, "Building: tu", command)
         self.matchoutput(out, "Address: 24 Cherry Lane", command)
 

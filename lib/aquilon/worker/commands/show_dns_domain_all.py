@@ -19,14 +19,14 @@
 from sqlalchemy.orm import subqueryload, joinedload, lazyload, undefer
 
 from aquilon.aqdb.model import DnsDomain
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 
 
 class CommandShowDnsDomainAll(BrokerCommand):
 
     required_parameters = []
 
-    def render(self, session, **arguments):
+    def render(self, session, **_):
         q = session.query(DnsDomain)
         q = q.options(undefer('comments'),
                       subqueryload('dns_maps'),

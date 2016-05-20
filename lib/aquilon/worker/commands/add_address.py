@@ -17,7 +17,7 @@
 """Contains the logic for `aq add address`."""
 
 from aquilon.aqdb.model.network_environment import get_net_dns_env
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.dns import (grab_address,
                                            set_reverse_ptr)
 from aquilon.worker.dbwrappers.grn import lookup_grn

@@ -25,7 +25,7 @@ class CommandUpdateNetworkCompartment(BrokerCommand):
 
     required_parameters = ["network_compartment"]
 
-    def render(self, session, network_compartment, comments, **arguments):
+    def render(self, session, network_compartment, comments, **_):
         dbnet_comp = NetworkCompartment.get_unique(session, network_compartment,
                                                    compel=True)
         if comments is not None:

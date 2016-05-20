@@ -139,8 +139,7 @@ class Network(Base):
     router_ips = association_proxy("routers", "ip")
 
     __table_args__ = (UniqueConstraint(network_environment_id, ip),
-                      CheckConstraint(and_(cidr >= 1, cidr <= 32),
-                                      name="%s_cidr_ck" % _TN),
+                      CheckConstraint(and_(cidr >= 1, cidr <= 32)),
                       {'info': {'unique_fields': ['network_environment', 'ip'],
                                 'extra_search_fields': ['name', 'cidr']}})
 

@@ -28,8 +28,7 @@ class CommandAddCity(BrokerCommand):
     required_parameters = ["city", "timezone"]
 
     def render(self, session, logger, city, country, fullname, comments,
-               timezone, campus,
-               **arguments):
+               timezone, campus, **_):
         if country:
             dbparent = Country.get_unique(session, country, compel=True)
         else:

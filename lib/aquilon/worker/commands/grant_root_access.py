@@ -34,7 +34,7 @@ class CommandGrantRootAccess(BrokerCommand):
             obj.root_netgroups.append(dbnetgroup)
 
     def render(self, session, logger, username, netgroup, personality,
-               archetype, justification, user, reason, **arguments):
+               archetype, justification, user, reason, **_):
         validate_justification(user, justification, reason)
         dbobj = Personality.get_unique(session, name=personality,
                                        archetype=archetype, compel=True)

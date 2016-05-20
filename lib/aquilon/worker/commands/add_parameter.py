@@ -38,7 +38,7 @@ class CommandAddParameter(BrokerCommand):
 
     def render(self, session, logger, archetype, personality, personality_stage,
                feature, type, path, user, value=None, justification=None,
-               reason=None, **arguments):
+               reason=None, **_):
         dbpersonality = Personality.get_unique(session, name=personality,
                                                archetype=archetype, compel=True)
         if not dbpersonality.archetype.is_compileable:

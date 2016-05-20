@@ -16,17 +16,16 @@
 # limitations under the License.
 """Contains the logic for `aq del network_environment`."""
 
-
 from aquilon.exceptions_ import ArgumentError
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.aqdb.model import NetworkEnvironment, Network
+from aquilon.worker.broker import BrokerCommand
 
 
 class CommandDelNetworkEnvironment(BrokerCommand):
 
     required_parameters = ["network_environment"]
 
-    def render(self, session, network_environment, **arguments):
+    def render(self, session, network_environment, **_):
         dbnet_env = NetworkEnvironment.get_unique(session, network_environment,
                                                   compel=True)
 

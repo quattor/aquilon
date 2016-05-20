@@ -25,7 +25,7 @@ class CommandSearchParameterDefinitionArchetype(BrokerCommand):
 
     required_parameters = ["archetype"]
 
-    def render(self, session, archetype, template, **arguments):
+    def render(self, session, archetype, template, **_):
         dbarchetype = Archetype.get_unique(session, archetype, compel=True)
         q = session.query(ParamDefinition)
         q = q.join(ParamDefinition.holder.of_type(ArchetypeParamDef))

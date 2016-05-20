@@ -29,7 +29,7 @@ class TestUnbindClient(TestBrokerCommand):
     def test_100_bind_unmapped(self):
         command = ["bind_client", "--hostname=unittest02.one-nyp.ms.com",
                    "--service=unmapped", "--instance=instance1"]
-        (out, err) = self.successtest(command)
+        err = self.statustest(command)
         self.matchoutput(err,
                          "unittest02.one-nyp.ms.com adding binding for "
                          "service instance unmapped/instance1",
@@ -44,7 +44,7 @@ class TestUnbindClient(TestBrokerCommand):
     def test_110_bind_unmapped_unbuilt(self):
         command = ["bind_client", "--hostname=aquilon94.aqd-unittest.ms.com",
                    "--service=unmapped", "--instance=instance1"]
-        (out, err) = self.successtest(command)
+        err = self.statustest(command)
         self.matchoutput(err,
                          "aquilon94.aqd-unittest.ms.com adding binding for "
                          "service instance unmapped/instance1",
@@ -74,7 +74,7 @@ class TestUnbindClient(TestBrokerCommand):
     def test_130_unbind_unmapped_unbuilt(self):
         command = ["unbind_client", "--hostname=aquilon94.aqd-unittest.ms.com",
                    "--service=unmapped"]
-        (out, err) = self.successtest(command)
+        err = self.statustest(command)
         self.matchoutput(err,
                          "Warning: Host aquilon94.aqd-unittest.ms.com is "
                          "missing the following required services, please run "

@@ -30,7 +30,7 @@ class CommandDelNetworkDevice(BrokerCommand):
 
     required_parameters = ["network_device"]
 
-    def render(self, session, logger, network_device, **arguments):
+    def render(self, session, logger, network_device, **_):
         dbnetdev = NetworkDevice.get_unique(session, network_device, compel=True)
 
         check_only_primary_ip(dbnetdev)

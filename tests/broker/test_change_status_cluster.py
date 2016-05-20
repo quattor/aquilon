@@ -43,8 +43,7 @@ class TestChangeClusterStatus(TestBrokerCommand):
     def test_110_PromoteCluster(self):
         command = ["change_status", "--cluster", "utecl1",
                    "--buildstatus", "ready"]
-        out, err = self.successtest(command)
-        self.assertEmptyOut(out, command)
+        err = self.statustest(command)
         # FIXME: the number of changed templates is not deterministic, we have
         # to figure out why. Until then make the check less strict to allow
         # unrelated changes to be tested.
@@ -86,8 +85,7 @@ class TestChangeClusterStatus(TestBrokerCommand):
     def test_130_DemoteCluster(self):
         command = ["change_status", "--cluster", "utecl1",
                    "--buildstatus", "rebuild"]
-        out, err = self.successtest(command)
-        self.assertEmptyOut(out, command)
+        err = self.statustest(command)
         # FIXME: the number of changed templates is not deterministic, we have
         # to figure out why. Until then make the check less strict to allow
         # unrelated changes to be tested.

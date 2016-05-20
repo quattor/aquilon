@@ -28,7 +28,7 @@ class CommandUnbindPortGroup(BrokerCommand):
 
     required_parameters = ["virtual_switch"]
 
-    def render(self, session, logger, virtual_switch, networkip, tag, **kwargs):
+    def render(self, session, logger, virtual_switch, networkip, tag, **_):
         dbvswitch = VirtualSwitch.get_unique(session, virtual_switch,
                                              compel=True)
         if networkip:

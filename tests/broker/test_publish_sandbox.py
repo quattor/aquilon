@@ -74,7 +74,7 @@ class TestPublishSandbox(TestBrokerCommand):
     def testverifychangetest1(self):
         sandboxdir = os.path.join(self.sandboxdir, "changetest1")
         p = Popen(["/bin/rm", "-rf", sandboxdir], stdout=1, stderr=2)
-        rc = p.wait()
+        p.wait()
         self.successtest(["get", "--sandbox", "changetest1"])
         self.assertTrue(os.path.exists(sandboxdir))
         template = self.find_template("aquilon", "archetype", "base",
@@ -89,7 +89,7 @@ class TestPublishSandbox(TestBrokerCommand):
         src_dir = os.path.join(self.config.get("unittest", "datadir"),
                                "utsandbox")
         sandboxdir = os.path.join(self.sandboxdir, "utsandbox")
-        for root, dirs, files in os.walk(src_dir):
+        for root, _, files in os.walk(src_dir):
             relpath = root[len(src_dir) + 1:]
             dst_dir = os.path.join(sandboxdir, relpath)
             if not os.path.exists(dst_dir):
@@ -104,7 +104,7 @@ class TestPublishSandbox(TestBrokerCommand):
     def testpublishutsandbox(self):
         sandboxdir = os.path.join(self.sandboxdir, "utsandbox")
         command = ["publish", "--sandbox", "utsandbox"]
-        out, err = self.successtest(command, env=self.gitenv(), cwd=sandboxdir)
+        _, err = self.successtest(command, env=self.gitenv(), cwd=sandboxdir)
         self.matchoutput(err, "Updating the checked out copy of domain "
                          "unittest...", command)
         self.matchoutput(err, "Updating the checked out copy of domain "
@@ -120,8 +120,8 @@ class TestPublishSandbox(TestBrokerCommand):
 
     def testrebase(self):
         utsandboxdir = os.path.join(self.sandboxdir, "utsandbox")
-        (out, err) = self.gitcommand(["rev-list", "--skip=1", "--max-count=1",
-                                      "HEAD"], cwd=utsandboxdir)
+        self.gitcommand(["rev-list", "--skip=1", "--max-count=1", "HEAD"],
+                        cwd=utsandboxdir)
         self.ignoreoutputtest(["add", "sandbox", "--sandbox", "rebasetest",
                                "--start", "utsandbox"])
         sandboxdir = os.path.join(self.sandboxdir, "rebasetest")
@@ -155,8 +155,8 @@ class TestPublishSandbox(TestBrokerCommand):
 
     def testrebasetoomuch(self):
         utsandboxdir = os.path.join(self.sandboxdir, "utsandbox")
-        prod_head, err = self.gitcommand(["rev-parse", "origin/prod"],
-                                         cwd=utsandboxdir)
+        prod_head, _ = self.gitcommand(["rev-parse", "origin/prod"],
+                                       cwd=utsandboxdir)
         self.ignoreoutputtest(["add", "sandbox", "--sandbox", "rebasetest2",
                                "--start", "utsandbox"])
         sandboxdir = os.path.join(self.sandboxdir, "rebasetest2")

@@ -27,7 +27,7 @@ class CommandDelPersonalityPersonalityStage(BrokerCommand):
     required_parameters = ["personality", "archetype", "personality_stage"]
 
     def render(self, session, logger, personality, archetype,
-               personality_stage, **arguments):
+               personality_stage, **_):
         dbpersonality = Personality.get_unique(session, name=personality,
                                                archetype=archetype, compel=True)
         dbstage = dbpersonality.active_stage(personality_stage)

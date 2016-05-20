@@ -31,11 +31,11 @@ actions_schema = {
     "type": "object",
     "definitions": {
         "dependency_list": {
-                            "type": "array",
-                            "items": {
-                                "type": "string",
-                            },
-                            "uniqueItems": True,
+            "type": "array",
+            "items": {
+                "type": "string",
+            },
+            "uniqueItems": True,
         },
     },
     "patternProperties": {

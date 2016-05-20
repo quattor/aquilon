@@ -28,7 +28,7 @@ class CommandUpdateRack(BrokerCommand):
     required_parameters = ["rack"]
 
     def render(self, session, logger, rack, row, column, room, building, bunker,
-               fullname, default_dns_domain, comments, **arguments):
+               fullname, default_dns_domain, comments, **_):
         dbrack = get_location(session, rack=rack)
 
         if row is not None:

@@ -33,7 +33,7 @@ class CommandAddRequiredServiceOsname(BrokerCommand):
         dbos.required_services.append(dbservice)
 
     def render(self, session, service, archetype, osname, osversion,
-               justification, reason, user, **arguments):
+               justification, reason, user, **_):
         dbarchetype = Archetype.get_unique(session, archetype, compel=True)
         dbos = OperatingSystem.get_unique(session, name=osname,
                                           version=osversion,

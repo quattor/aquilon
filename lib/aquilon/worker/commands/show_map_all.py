@@ -28,7 +28,7 @@ class CommandShowMapAll(BrokerCommand):
 
     required_parameters = []
 
-    def render(self, session, style, **arguments):
+    def render(self, session, style, **_):
         q = session.query(Location)
         # Pre-load subclasses which have additional attributes
         q = q.with_polymorphic([Rack, City])

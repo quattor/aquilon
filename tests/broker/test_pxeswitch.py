@@ -46,7 +46,7 @@ class TestPxeswitch(TestBrokerCommand):
         # of the actual aii-installfe.  It would be better to have a fake
         # version of aii-installfe that returned output closer to the real
         # one.
-        (out, err) = self.successtest(command.split(" "))
+        err = self.statustest(command.split(" "))
         self.matchoutput(err, "--installlist", command)
         self.matchoutput(err, "--configurelist", command)
         self.matchclean(err, "--status", command)
@@ -65,7 +65,7 @@ class TestPxeswitch(TestBrokerCommand):
     def testinstallunittest00noconf(self):
         command = ["pxeswitch", "--hostname", "unittest00.one-nyp.ms.com",
                    "--install", "--noconfigure"]
-        (out, err) = self.successtest(command)
+        err = self.statustest(command)
         self.matchoutput(err, "--installlist", command)
         self.matchclean(err, "--configure", command)
         self.matchclean(err, "--status", command)
@@ -90,36 +90,36 @@ class TestPxeswitch(TestBrokerCommand):
 
     def testlocalbootunittest02(self):
         command = "pxeswitch --hostname unittest02.one-nyp.ms.com --localboot"
-        (out, err) = self.successtest(command.split(" "))
+        err = self.statustest(command.split(" "))
         self.matchoutput(err, "--configurelist", command)
         self.matchoutput(err, "--bootlist", command)
 
     def teststatusunittest02(self):
         command = "pxeswitch --hostname unittest02.one-nyp.ms.com --status"
-        (out, err) = self.successtest(command.split(" "))
+        err = self.statustest(command.split(" "))
         self.matchclean(err, "--configure", command)
         self.matchoutput(err, "--statuslist", command)
 
     def testfirmwareunittest02(self):
         command = "pxeswitch --hostname unittest02.one-nyp.ms.com --firmware"
-        (out, err) = self.successtest(command.split(" "))
+        err = self.statustest(command.split(" "))
         self.matchoutput(err, "--configurelist", command)
         self.matchoutput(err, "--firmwarelist", command)
 
     def testconfigureunittest02(self):
         command = "pxeswitch --hostname unittest02.one-nyp.ms.com"
-        (out, err) = self.successtest(command.split(" "))
+        err = self.statustest(command.split(" "))
         self.matchoutput(err, "--configurelist", command)
 
     def testblindbuildunittest02(self):
         command = "pxeswitch --hostname unittest02.one-nyp.ms.com --blindbuild"
-        (out, err) = self.successtest(command.split(" "))
+        err = self.statustest(command.split(" "))
         self.matchoutput(err, "--configurelist", command)
         self.matchoutput(err, "--livecdlist", command)
 
     def testrescueunittest02(self):
         command = "pxeswitch --hostname unittest02.one-nyp.ms.com --rescue"
-        (out, err) = self.successtest(command.split(" "))
+        err = self.statustest(command.split(" "))
         self.matchoutput(err, "--configurelist", command)
         self.matchoutput(err, "--rescuelist", command)
 
@@ -128,7 +128,7 @@ class TestPxeswitch(TestBrokerCommand):
                  "unittest00.One-Nyp.ms.com"]
         scratchfile = self.writescratch("pxeswitchlist", "\n".join(hosts))
         command = "pxeswitch --list %s" % scratchfile
-        (out, err) = self.successtest(command.split(" "))
+        err = self.statustest(command.split(" "))
         self.matchoutput(err, "--configurelist", command)
         # We would like to test more of the output... we need something
         # special for aii-shellfe however...
@@ -177,7 +177,7 @@ class TestPxeswitch(TestBrokerCommand):
                  "unittest00.one-nyp.ms.com"]
         scratchfile = self.writescratch("pxeswitchlist", "\n".join(hosts))
         command = "pxeswitch --list %s --blindbuild" % scratchfile
-        (out, err) = self.successtest(command.split(" "))
+        err = self.statustest(command.split(" "))
         self.matchoutput(err, "--configurelist", command)
         self.matchoutput(err, "--livecdlist", command)
 
@@ -186,7 +186,7 @@ class TestPxeswitch(TestBrokerCommand):
                  "unittest00.one-nyp.ms.com"]
         scratchfile = self.writescratch("pxeswitchlist", "\n".join(hosts))
         command = "pxeswitch --list %s --rescue" % scratchfile
-        (out, err) = self.successtest(command.split(" "))
+        err = self.statustest(command.split(" "))
         self.matchoutput(err, "--configurelist", command)
         self.matchoutput(err, "--rescuelist", command)
 
@@ -195,7 +195,7 @@ class TestPxeswitch(TestBrokerCommand):
                  "unittest00.one-nyp.ms.com"]
         scratchfile = self.writescratch("pxeswitchlist", "\n".join(hosts))
         command = "pxeswitch --list %s --rescue --noconfigure" % scratchfile
-        (out, err) = self.successtest(command.split(" "))
+        err = self.statustest(command.split(" "))
         self.matchclean(err, "--configurelist", command)
         self.matchoutput(err, "--rescuelist", command)
 
@@ -223,7 +223,7 @@ class TestPxeswitch(TestBrokerCommand):
     def testallowconfigureinstall(self):
         command = ["pxeswitch", "--hostname=unittest00.one-nyp.ms.com",
                    "--configure", "--install"]
-        (out, err) = self.successtest(command)
+        err = self.statustest(command)
         self.matchoutput(err, "--configurelist", command)
         self.matchoutput(err, "--installlist", command)
         self.matchclean(err, "--firmware", command)
@@ -234,7 +234,7 @@ class TestPxeswitch(TestBrokerCommand):
         scratchfile = self.writescratch("pxeswitchlist", "\n".join(hosts))
         command = ["pxeswitch", "--list", scratchfile,
                    "--configure", "--blindbuild"]
-        (out, err) = self.successtest(command)
+        err = self.statustest(command)
         self.matchoutput(err, "--configurelist", command)
         self.matchoutput(err, "--livecdlist", command)
         self.matchclean(err, "--firmware", command)
@@ -250,7 +250,6 @@ class TestPxeswitch(TestBrokerCommand):
         out = self.badrequesttest(command)
         self.matchoutput(out, "The number of hosts in list {0:d} can not be more "
                          "than {1:d}".format(len(hosts), hostlimit), command)
-
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestPxeswitch)

@@ -28,7 +28,7 @@ class CommandBindClientCluster(BrokerCommand):
     required_parameters = ["cluster", "service"]
 
     def render(self, session, logger, cluster, service, instance, force=False,
-               **arguments):
+               **_):
 
         dbcluster = Cluster.get_unique(session, cluster, compel=True)
         dbservice = Service.get_unique(session, service, compel=True)

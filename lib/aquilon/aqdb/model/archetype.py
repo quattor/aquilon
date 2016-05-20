@@ -35,8 +35,7 @@ class Archetype(Base):
     name = Column(AqStr(32), nullable=False, unique=True)
     outputdesc = Column(String(255), nullable=True)
 
-    is_compileable = Column(Boolean(name="%s_is_compileable_ck" % _TN),
-                            default=False, nullable=False)
+    is_compileable = Column(Boolean, default=False, nullable=False)
 
     cluster_type = Column(AqStr(32), nullable=True)
 

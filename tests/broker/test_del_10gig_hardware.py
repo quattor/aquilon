@@ -45,8 +45,7 @@ class TestDel10GigHardware(TestBrokerCommand):
             ip = nets[net_index].usable[usable_index]
             self.dsdb_expect_delete(ip)
 
-            (out, err) = self.successtest(command.split(" "))
-            self.assertEmptyOut(out, command)
+            self.statustest(command.split(" "))
         self.dsdb_verify()
 
     def test_300_delaux(self):

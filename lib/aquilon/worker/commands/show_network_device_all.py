@@ -24,7 +24,7 @@ from aquilon.aqdb.model import NetworkDevice, DnsRecord, DnsDomain, Fqdn
 
 class CommandShowNetworkDeviceAll(BrokerCommand):
 
-    def render(self, session, **arguments):
+    def render(self, session, **_):
         q = session.query(NetworkDevice)
 
         q = q.options(undefer('comments'),

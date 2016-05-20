@@ -30,10 +30,10 @@ class AqStr(sqlalchemy.types.TypeDecorator):
             return value
         return str(value).strip().lower()
 
-    def process_bind_param(self, value, engine):
+    def process_bind_param(self, value, engine):  # pylint: disable=W0613
         return self.normalize(value)
 
-    def process_result_value(self, value, engine):
+    def process_result_value(self, value, engine):  # pylint: disable=W0613
         if value is None:
             return value
         return str(value)

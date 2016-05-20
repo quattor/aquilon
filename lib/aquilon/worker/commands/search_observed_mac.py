@@ -16,9 +16,8 @@
 # limitations under the License.
 """Contains the logic for `aq search observed mac`."""
 
-
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
 from aquilon.aqdb.model import ObservedMac, NetworkDevice
+from aquilon.worker.broker import BrokerCommand
 
 
 class CommandSearchObservedMac(BrokerCommand):

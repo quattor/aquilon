@@ -36,7 +36,7 @@ class CommandBindFeature(BrokerCommand):
 
     def render(self, session, logger, feature, archetype, personality,
                personality_stage, model, vendor, interface, justification,
-               reason, user, **arguments):
+               reason, user, **_):
 
         # Binding a feature to a named interface makes sense in the scope of a
         # personality, but not for a whole archetype.

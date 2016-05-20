@@ -16,8 +16,7 @@
 # limitations under the License.
 """Contains the logic for `aq sync`."""
 
-
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.exceptions_ import ProcessException, ArgumentError
 from aquilon.aqdb.model import Domain
 from aquilon.worker.processes import sync_domain
@@ -27,7 +26,7 @@ class CommandSync(BrokerCommand):
 
     required_parameters = ["domain"]
 
-    def render(self, session, logger, domain, **arguments):
+    def render(self, session, logger, domain, **_):
         dbdomain = Domain.get_unique(session, domain, compel=True)
         if not dbdomain.tracked_branch:
             # Could check dbdomain.trackers and sync all of them...

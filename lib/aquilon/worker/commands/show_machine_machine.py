@@ -18,7 +18,7 @@
 
 from sqlalchemy.orm import joinedload, subqueryload, undefer
 
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.aqdb.column_types import AqStr
 from aquilon.aqdb.model import Machine
 
@@ -27,7 +27,7 @@ class CommandShowMachineMachine(BrokerCommand):
 
     required_parameters = ["machine"]
 
-    def render(self, session, machine, **arguments):
+    def render(self, session, machine, **_):
         machine = AqStr.normalize(machine)
         Machine.check_label(machine)
 

@@ -36,7 +36,7 @@ class CommandGet(BrokerCommand):
     requires_format = True
 
     # If updating this argument list also update CommandAddSandbox.
-    def render(self, session, logger, dbuser, sandbox, **arguments):
+    def render(self, session, logger, dbuser, sandbox, **_):
         if not dbuser:
             raise AuthorizationException("Cannot get a sandbox without"
                                          " an authenticated connection.")

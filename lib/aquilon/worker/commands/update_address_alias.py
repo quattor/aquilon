@@ -17,7 +17,7 @@
 """Contains the logic for `aq update address alias`."""
 
 from aquilon.aqdb.model import Fqdn, AddressAlias
-from aquilon.worker.broker import BrokerCommand  # pylint: disable=W0611
+from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.grn import lookup_grn
 from aquilon.exceptions_ import ArgumentError
 
@@ -28,7 +28,7 @@ class CommandUpdateAddressAlias(BrokerCommand):
 
     def render(self, session, logger, fqdn, target, ttl, clear_ttl, comments,
                dns_environment, target_environment, grn, eon_id, clear_grn,
-               **kwargs):
+               **_):
         if not target_environment:
             target_environment = dns_environment
 

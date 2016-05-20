@@ -29,7 +29,7 @@ class CommandAddArchetype(BrokerCommand):
     required_parameters = ["archetype"]
 
     def render(self, session, archetype, cluster_type, compilable,
-               description, comments, **kwargs):
+               description, comments, **_):
         validate_nlist_key('--archetype', archetype)
 
         def subclasses(cls):

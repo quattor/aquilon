@@ -98,7 +98,7 @@ class NetworkDeviceFormatter(HardwareEntityFormatter):
             skeleton.serial_no = hwent.serial_no
 
         self.redirect_proto(hwent.model, skeleton.model, indirect_attrs=False)
-        self.redirect_proto(hwent.location, skeleton.location,  indirect_attrs=False)
+        self.redirect_proto(hwent.location, skeleton.location, indirect_attrs=False)
 
         if indirect_attrs:
             for iface in sorted(hwent.interfaces, key=attrgetter('name')):

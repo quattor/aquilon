@@ -45,7 +45,7 @@ from aquilon.utils import chunk
 def create_host(session, logger, config, dbhw, dbarchetype, domain=None,
                 sandbox=None, buildstatus=None, personality=None,
                 personality_stage=None, osname=None, osversion=None, grn=None,
-                eon_id=None, comments=None, **kwargs):
+                eon_id=None, comments=None, **_):
     # Section in the config used to determin defaults for this archetype
     section = "archetype_" + dbarchetype.name
 

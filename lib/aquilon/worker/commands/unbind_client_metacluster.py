@@ -26,5 +26,5 @@ class CommandUnbindClientMetacluster(CommandUnbindClientHostname):
 
     required_parameters = ["metacluster", "service"]
 
-    def get_dbobj(self, session, metacluster=None, **arguments):
+    def get_dbobj(self, session, metacluster=None, **_):
         return MetaCluster.get_unique(session, metacluster, compel=True)
