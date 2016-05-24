@@ -79,6 +79,14 @@ class TestUpdateInterface(EventsTestMixin, TestBrokerCommand):
                         "--ip", newip])
         self.dsdb_verify()
 
+    def test_116_verify_server_plenary(self):
+        command = ["cat", "--service", "utsvc", "--instance", "utsi1"]
+        out = self.commandtest(command)
+        oldip = self.net["unknown0"].usable[0]
+        newip = self.net["unknown0"].usable[11]
+        self.matchoutput(out, '"%s"' % newip, command)
+        self.matchclean(out, '"%s"' % oldip, command)
+
     def test_120_update_ut3c5n10_eth2(self):
         self.notfoundtest(["update", "interface", "--interface", "eth2",
                            "--machine", "ut3c5n10", "--boot"])

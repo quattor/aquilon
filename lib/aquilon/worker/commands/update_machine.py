@@ -29,7 +29,8 @@ from aquilon.worker.dbwrappers.location import get_location
 from aquilon.worker.dbwrappers.resources import (find_resource,
                                                  get_resource_holder)
 from aquilon.worker.templates import (Plenary, PlenaryCollection,
-                                      PlenaryHostData)
+                                      PlenaryHostData,
+                                      PlenaryServiceInstanceToplevel)
 from aquilon.worker.processes import DSDBRunner
 
 _disk_map_re = re.compile(r'^([^/]+)/(?:([^/]+)/)?([^/]+):([^/]+)/(?:([^/]+)/)?([^/]+)$')
@@ -320,6 +321,10 @@ class CommandUpdateMachine(BrokerCommand):
             update_disk_backing_stores(dbmachine, None, None, remap_disk)
 
         if ip:
+            if dbmachine.host:
+                for srv in dbmachine.host.services_provided:
+                    si = srv.service_instance
+                    plenaries.append(PlenaryServiceInstanceToplevel.get_plenary(si))
             update_primary_ip(session, logger, dbmachine, ip)
 
         if dbmachine.location != old_location and dbmachine.host:
