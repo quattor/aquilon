@@ -196,6 +196,8 @@ vlan_types = storage, vmotion, user, unknown, vulcan-mgmt, transit
 auto_mac_start = 00:50:56:01:20:00
 auto_mac_end = 00:50:56:3f:ff:ff
 
+disk_controller_types = cciss, fibrechannel, flash, ide, nvme, sas, sata, scsi
+
 [tool_locations]
 dsdb = /ms/dist/aurora/PROJ/dsdb/5.0prod/bin/dsdb
 ssh = /ms/dist/sec/PROJ/openssh/prod/bin/ssh

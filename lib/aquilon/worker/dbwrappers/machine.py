@@ -24,7 +24,6 @@ from aquilon.exceptions_ import ArgumentError, AquilonError
 from aquilon.aqdb.types import CpuType
 from aquilon.aqdb.model import (Model, LocalDisk, VirtualDisk, Machine,
                                 VirtualMachine, Share, Filesystem)
-from aquilon.aqdb.model.disk import controller_types
 from aquilon.worker.dbwrappers.interface import (get_or_create_interface,
                                                  generate_mac, set_port_group)
 from aquilon.worker.dbwrappers.resources import find_resource
@@ -163,11 +162,6 @@ def add_disk(dbmachine, disk, controller, share=None, filesystem=None,
              resourcegroup=None, address=None, size=None, boot=None,
              snapshot=None, wwn=None, bus_address=None, iops_limit=None,
              comments=None):
-    if controller not in controller_types:
-        raise ArgumentError("%s is not a valid controller type, use one "
-                            "of: %s." %
-                            (controller, ", ".join(sorted(controller_types))))
-
     for dbdisk in dbmachine.disks:
         if dbdisk.device_name == disk:
             raise ArgumentError("{0} already has a disk named {1!s}."

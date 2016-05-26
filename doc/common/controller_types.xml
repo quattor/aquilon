@@ -7,6 +7,7 @@
     <member><literal>cciss</literal></member>
     <member><literal>flash</literal></member>
     <member><literal>fibrechannel</literal></member>
+    <member><literal>nvme</literal></member>
 </simplelist>
 
 <!-- vim: set ai sw=4: -->

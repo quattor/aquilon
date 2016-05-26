@@ -24,11 +24,14 @@ from datetime import datetime
 from sqlalchemy import Column, Integer, DateTime, Sequence, String, ForeignKey
 from sqlalchemy.orm import relation, backref, deferred, validates
 
-from aquilon.aqdb.column_types import Enum
+from aquilon.exceptions_ import ArgumentError
+from aquilon.config import Config
+from aquilon.aqdb.column_types import AqStr
 from aquilon.aqdb.model import Base, Model, Disk
-from aquilon.aqdb.model.disk import controller_types
 
 _TN = 'machine_specs'
+
+_config = Config()
 
 
 class MachineSpecs(Base):
@@ -50,7 +53,7 @@ class MachineSpecs(Base):
 
     disk_type = Column(String(64), nullable=False)
     disk_capacity = Column(Integer, nullable=False, default=36)
-    controller_type = Column(Enum(64, controller_types), nullable=False)
+    controller_type = Column(AqStr(64), nullable=False)
 
     nic_model_id = Column(ForeignKey(Model.id, name='%s_nic_model_fk' % _TN),
                           nullable=False, index=True)
@@ -67,6 +70,15 @@ class MachineSpecs(Base):
     @validates('disk_type')
     def validate_disk(self, key, value):  # pylint: disable=W0613
         Disk.polymorphic_subclass(value, "Invalid disk type")
+        return value
+
+    @validates('controller_type')
+    def validate_controller_type(self, key, value):  # pylint: disable=W0613
+        valid_values = [s.strip() for s in
+                        _config.get("broker", "disk_controller_types").split(",")]
+        if value not in valid_values:
+            raise ArgumentError("%s is not a valid controller type, use one "
+                                "of: %s." % (value, ", ".join(sorted(valid_values))))
         return value
 
     @property

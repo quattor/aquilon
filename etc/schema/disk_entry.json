@@ -10,7 +10,7 @@
 			"minimum": 0
 		},
 		"controller": {
-			"enum": [ "sata", "sas", "scsi", "cciss", "flash", "fibrechannel" ]
+			"enum": [ "sata", "sas", "scsi", "cciss", "flash", "fibrechannel", "ide", "nvme" ]
 		},
 		"boot": {
 			"type": "boolean"
