@@ -19,7 +19,6 @@
 import logging
 
 from sqlalchemy.exc import DatabaseError
-from sqlalchemy.orm import contains_eager
 from sqlalchemy.util import KeyedTuple
 
 from aquilon.exceptions_ import ArgumentError, PartialError
@@ -128,7 +127,6 @@ class UserSync(object):
             userset = set(userchunk)
             q = self.session.query(Personality)
             q = q.join(Personality.root_users)
-            q = q.options(contains_eager('root_users'))
             q = q.filter(User.id.in_(dbuser.id for dbuser in userchunk))
             for p in q:
                 for dbuser in userset & set(p.root_users):
