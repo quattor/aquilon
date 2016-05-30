@@ -58,7 +58,7 @@ class TestParameterConstraints(TestBrokerCommand):
                    "--path", "foo/test_rebuild_required", "--value", "test"]
         err = self.badrequesttest(command)
         self.searchoutput(err,
-                          r'Modifying parameter foo/test_rebuild_required value needs a host rebuild. '
+                          r'Modifying parameter test_rebuild_required value needs a host rebuild. '
                           r'There are hosts associated to the personality in non-ready state. '
                           r'Please set these host to status of rebuild to continue.',
                           command)
@@ -83,7 +83,7 @@ class TestParameterConstraints(TestBrokerCommand):
                    "--path", "foo/test_rebuild_required", "--value", "test"]
         err = self.badrequesttest(command)
         self.searchoutput(err,
-                          r'Modifying parameter foo/test_rebuild_required value needs a host rebuild. '
+                          r'Modifying parameter test_rebuild_required value needs a host rebuild. '
                           r'There are hosts associated to the personality in non-ready state. '
                           r'Please set these host to status of rebuild to continue.',
                           command)
@@ -114,7 +114,7 @@ class TestParameterConstraints(TestBrokerCommand):
                    "--path", "foo/test_rebuild_required", "--value", "test"]
         err = self.badrequesttest(command)
         self.searchoutput(err,
-                          r'Modifying parameter foo/test_rebuild_required value needs a host rebuild. '
+                          r'Modifying parameter test_rebuild_required value needs a host rebuild. '
                           r'There are hosts associated to the personality in non-ready state. '
                           r'Please set these host to status of rebuild to continue.',
                           command)
@@ -124,7 +124,7 @@ class TestParameterConstraints(TestBrokerCommand):
                    "--archetype", "aquilon", "--path", "foo/test_rebuild_required"]
         err = self.badrequesttest(command)
         self.searchoutput(err,
-                          r'Modifying parameter foo/test_rebuild_required value needs a host rebuild. '
+                          r'Modifying parameter test_rebuild_required value needs a host rebuild. '
                           r'There are hosts associated to the personality in non-ready state. '
                           r'Please set these host to status of rebuild to continue.',
                           command)
@@ -154,7 +154,7 @@ class TestParameterConstraints(TestBrokerCommand):
         command = ["show_parameter", "--personality", "utpers-dev",
                    "--archetype", "aquilon", "--personality_stage", "current"]
         out = self.commandtest(command)
-        self.matchoutput(out, '"function": "crash"', command)
+        self.matchoutput(out, 'function: "crash"', command)
 
         command = ["show_parameter", "--personality", "utpers-dev",
                    "--archetype", "aquilon", "--personality_stage", "next"]

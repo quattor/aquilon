@@ -124,20 +124,26 @@ class TestUnbindFeature(TestBrokerCommand):
         err = self.statustest(command)
         self.matchoutput(err, "Flush", command)
 
-    def test_160_unbind_interface_personality(self):
+    def test_141_check_param_exists(self):
+        command = ["show_parameter", "--personality", "compileserver",
+                   "--archetype", "aquilon"]
+        out = self.commandtest(command)
+        self.matchoutput(out, 'testparam: "abcd"', command)
+
+    def test_145_unbind_nic_model_2nd_interface(self):
         command = ["unbind", "feature", "--feature", "src_route",
                    "--personality", "compileserver", "--interface", "bond0",
                    "--justification", "tcm=12345678"]
         err = self.statustest(command)
         self.matchoutput(err, "Flushed 1/1 templates.", command)
 
-    def test_161_verify_show_feature(self):
+    def test_146_verify_show_feature(self):
         command = ["show", "feature", "--feature", "src_route",
                    "--type", "interface"]
         out = self.commandtest(command)
         self.searchclean(out, "Interface bond0", command)
 
-    def test_161_verify_show_host(self):
+    def test_146_verify_show_host(self):
         command = ["show", "host", "--hostname", "unittest21.aqd-unittest.ms.com"]
         out = self.commandtest(command)
         self.searchclean(out,
@@ -146,7 +152,13 @@ class TestUnbindFeature(TestBrokerCommand):
                          r'^    Template: features/interface/src_route',
                          command)
 
-    def test_161_verify_cat_personality(self):
+    def test_146_check_param_gone(self):
+        command = ["show_parameter", "--personality", "compileserver",
+                   "--archetype", "aquilon"]
+        out = self.commandtest(command)
+        self.matchclean(out, 'testparam', command)
+
+    def test_146_verify_cat_personality(self):
         command = ["cat", "--personality", "compileserver", "--pre_feature"]
         out = self.commandtest(command)
         self.matchclean(out, 'bond0', command)

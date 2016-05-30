@@ -19,13 +19,16 @@
 from datetime import datetime
 from six.moves import range  # pylint: disable=F0401
 
-from sqlalchemy import Column, Integer, DateTime, Sequence, ForeignKey
+from sqlalchemy import (Column, Integer, DateTime, Sequence, ForeignKey,
+                        UniqueConstraint)
 from sqlalchemy.orm import relation, backref, deferred
+from sqlalchemy.orm.collections import attribute_mapped_collection
 from sqlalchemy.ext.mutable import MutableDict
 
 from aquilon.exceptions_ import NotFoundException, ArgumentError, InternalError
 from aquilon.aqdb.column_types import JSONEncodedDict, AqStr
-from aquilon.aqdb.model import Base, PersonalityStage, ParamDefinition
+from aquilon.aqdb.model import (Base, PersonalityStage, ParamDefinition,
+                                ParamDefHolder)
 
 _TN = 'parameter'
 
@@ -49,10 +52,13 @@ class Parameter(Base):
     _instance_label = 'holder_name'
 
     id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
+    param_def_holder_id = Column(ForeignKey(ParamDefHolder.id), nullable=False)
     value = Column(MutableDict.as_mutable(JSONEncodedDict), nullable=False)
     creation_date = deferred(Column(DateTime, default=datetime.now,
                                     nullable=False))
     holder_type = Column(AqStr(16), nullable=False)
+
+    param_def_holder = relation(ParamDefHolder, innerjoin=True)
 
     __mapper_args__ = {'polymorphic_on': holder_type}
 
@@ -63,13 +69,6 @@ class Parameter(Base):
     @property
     def holder_object(self):  # pragma: no cover
         raise InternalError("Abstract base method called")
-
-    @staticmethod
-    def feature_path(dbfeature, path):
-        """
-        constructs the parameter path for feature namespace
-        """
-        return "/".join([dbfeature.cfg_path, path])
 
     def path_walk(self, path, vivify=False):
         """
@@ -149,6 +148,9 @@ class Parameter(Base):
         return route
 
     def get_path(self, path, compel=True):
+        if not path:
+            return self.value
+
         try:
             route = self.path_walk(path)
         except ParameterPathNotFound:
@@ -161,10 +163,14 @@ class Parameter(Base):
         index, value = route.pop()
         return value[index]
 
-    def get_feature_path(self, dbfeature, path, compel=True):
-        return self.get_path(Parameter.feature_path(dbfeature, path), compel)
-
     def set_path(self, path, value, update=False):
+        if not path:
+            if self.value and not update:
+                raise ArgumentError("Parameter value already exists.")
+            self.value = value
+            self.value.changed()  # pylint: disable=E1101
+            return
+
         try:
             route = self.path_walk(path, not update)
         except ParameterPathNotFound:
@@ -188,6 +194,11 @@ class Parameter(Base):
         self.value.changed()  # pylint: disable=E1101
 
     def del_path(self, path, compel=True):
+        if not path:
+            self.value = {}
+            self.value.changed()  # pylint: disable=E1101
+            return
+
         try:
             route = self.path_walk(path)
         except ParameterPathNotFound:
@@ -227,7 +238,8 @@ class Parameter(Base):
         return flattened
 
     def copy(self):
-        return self.__class__(value=self.value.copy())
+        return self.__class__(param_def_holder=self.param_def_holder,
+                              value=self.value.copy())
 
 
 class PersonalityParameter(Parameter):
@@ -235,13 +247,16 @@ class PersonalityParameter(Parameter):
 
     personality_stage_id = Column(ForeignKey(PersonalityStage.id,
                                              ondelete='CASCADE'),
-                                  nullable=True, unique=True)
+                                  nullable=True, index=True)
 
     personality_stage = relation(PersonalityStage,
-                                 backref=backref('parameter', uselist=False,
-                                                 cascade='all, delete-orphan'))
+                                 backref=backref('parameters',
+                                                 cascade='all, delete-orphan',
+                                                 collection_class=attribute_mapped_collection('param_def_holder')))
 
     __mapper_args__ = {'polymorphic_identity': 'personality'}
+    __extra_table_args__ = (UniqueConstraint('param_def_holder_id',
+                                             'personality_stage_id'),)
 
     @property
     def holder_name(self):

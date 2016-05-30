@@ -19,15 +19,14 @@
 from jsonschema import validate, ValidationError
 from six import iteritems
 
-from sqlalchemy.orm import contains_eager, joinedload, subqueryload, undefer
+from sqlalchemy.orm import joinedload, subqueryload, undefer
 from sqlalchemy.sql import or_
 
 from aquilon.exceptions_ import NotFoundException, ArgumentError
-from aquilon.aqdb.model import (Personality, PersonalityStage, Parameter,
-                                PersonalityParameter, FeatureLink, Host,
-                                ArchetypeParamDef, FeatureParamDef)
+from aquilon.aqdb.model import PersonalityStage, PersonalityParameter, Host
 from aquilon.aqdb.model.hostlifecycle import Ready, Almostready
 from aquilon.worker.formats.parameter_definition import ParamDefinitionFormatter
+from aquilon.worker.templates.base import Plenary
 
 
 def set_parameter(session, parameter, db_paramdef, path, value, update=False):
@@ -39,16 +38,10 @@ def set_parameter(session, parameter, db_paramdef, path, value, update=False):
     if db_paramdef.activation == 'rebuild':
         validate_rebuild_required(session, path, parameter.personality_stage)
 
-    if isinstance(db_paramdef.holder, FeatureParamDef):
-        path = Parameter.feature_path(db_paramdef.holder.feature, path)
     parameter.set_path(path, retval, update)
 
     if db_paramdef.schema:
-        base_path = db_paramdef.path
-        if isinstance(db_paramdef.holder, FeatureParamDef):
-            base_path = Parameter.feature_path(db_paramdef.holder.feature,
-                                               base_path)
-        new_value = parameter.get_path(base_path)
+        new_value = parameter.get_path(db_paramdef.path)
         try:
             validate(new_value, db_paramdef.schema)
         except ValidationError as err:
@@ -56,22 +49,31 @@ def set_parameter(session, parameter, db_paramdef, path, value, update=False):
 
 
 def del_all_feature_parameter(session, dblink):
-    # TODO: if the feature is bound to the whole archetype, then we should clean
-    # up all personalities here
-    if not dblink or not dblink.personality_stage or \
-       not dblink.personality_stage.parameter or \
-       not dblink.feature.param_def_holder:
+    dbstage = dblink.personality_stage
+    defholder = dblink.feature.param_def_holder
+
+    if not dbstage or not defholder:
         return
 
-    parameter = dblink.personality_stage.parameter
-    dbstage = dblink.personality_stage
-    for paramdef in dblink.feature.param_def_holder.param_definitions:
-        if paramdef.activation == 'rebuild':
-            validate_rebuild_required(session, paramdef.path, dbstage)
+    try:
+        parameter = dbstage.parameters[defholder]
+    except KeyError:
+        return
 
-        parameter.del_path(Parameter.feature_path(dblink.feature,
-                                                  paramdef.path),
-                           compel=False)
+    for link in dbstage.features:
+        # If the feature is still bound, then leave the parameters alone
+        if link.feature == dblink.feature and link != dblink:
+            break
+    else:
+        for paramdef in defholder.param_definitions:
+            if paramdef.activation != 'rebuild':
+                continue
+
+            value = parameter.get_path(paramdef.path, compel=False)
+            if value is not None:
+                validate_rebuild_required(session, paramdef.path, dbstage)
+
+        del dbstage.parameters[defholder]
 
 
 def validate_rebuild_required(session, path, dbstage):
@@ -93,21 +95,49 @@ def validate_rebuild_required(session, path, dbstage):
                             (path, dbstage, dbstage))
 
 
-def get_paramdef_for_parameter(path, param_def_holder):
-    if not param_def_holder:
-        return None
+def lookup_paramdef(holder_object, path, strict=True):
+    """
+    Return the definition belonging the given parameter path.
+
+    If the strict parameter is false, then the path may point inside a
+    JSON-typed definition.
+    """
+
+    if hasattr(holder_object, 'param_def_holder'):
+        # Feature
+        param_def_holder = holder_object.param_def_holder
+        if not param_def_holder:
+            raise NotFoundException("No parameter definitions found for {0:l}."
+                                    .format(holder_object))
+        rel_path = path
+    else:
+        # Archetype - the path in the parameter definition contains the name of
+        # the template, but the relative path we want to return should not
+        if "/" in path:
+            template, rel_path = path.split("/", 1)
+        else:
+            template, rel_path = path, ""
+
+        try:
+            param_def_holder = holder_object.param_def_holders[template]
+        except KeyError:
+            raise ArgumentError("Unknown parameter template %s." % template)
 
     for db_paramdef in param_def_holder.param_definitions:
-        if path == db_paramdef.path:
-            return db_paramdef
+        if rel_path == db_paramdef.path:
+            return db_paramdef, rel_path
 
-        # Allow "indexing into" JSON parameters
-        if db_paramdef.value_type != "json":
+        # Allow "indexing into" JSON parameters, but only if the path is not
+        # strictly for the definition
+        if strict or db_paramdef.value_type != "json":
             continue
-        if path.startswith(db_paramdef.path):
-            return db_paramdef
 
-    return None
+        if db_paramdef.path == "" or rel_path.startswith(db_paramdef.path + "/"):
+            return db_paramdef, rel_path
+
+    raise NotFoundException("Path {0!s} does not match any parameter "
+                            "definitions of {1:l}."
+                            .format(path, holder_object))
 
 
 def validate_required_parameter(param_def_holder, parameter):
@@ -119,14 +149,8 @@ def validate_required_parameter(param_def_holder, parameter):
         if (not param_def.required) or param_def.default is not None:
             continue
 
-        if isinstance(param_def_holder, FeatureParamDef):
-            path = parameter.feature_path(param_def_holder.feature,
-                                          param_def.path)
-        else:
-            path = param_def.path
-
         if parameter:
-            value = parameter.get_path(path, compel=False)
+            value = parameter.get_path(param_def.path, compel=False)
         else:
             value = None
 
@@ -136,23 +160,15 @@ def validate_required_parameter(param_def_holder, parameter):
     return errors
 
 
-def search_path_in_personas(session, path, param_def_holder):
+def search_path_in_personas(session, db_paramdef):
     q = session.query(PersonalityParameter)
-    q = q.join(PersonalityStage)
-    q = q.options(contains_eager('personality_stage'))
-    if isinstance(param_def_holder, ArchetypeParamDef):
-        q = q.join(Personality)
-        q = q.options(contains_eager('personality_stage.personality'))
-        q = q.filter_by(archetype=param_def_holder.archetype)
-    else:
-        q = q.join(FeatureLink)
-        q = q.filter_by(feature=param_def_holder.feature)
+    q = q.filter_by(param_def_holder=db_paramdef.holder)
+    q = q.options(joinedload('personality_stage'),
+                  joinedload('personality_stage.personality'))
 
     params = {}
 
-    if isinstance(param_def_holder, FeatureParamDef):
-        path = Parameter.feature_path(param_def_holder.feature, path)
-
+    path = db_paramdef.path
     for parameter in q:
         try:
             value = parameter.get_path(path)
@@ -170,40 +186,32 @@ def validate_personality_config(dbstage):
         parameters are also validated.
     """
     dbarchetype = dbstage.personality.archetype
-    parameter = dbstage.parameter
-
     error = []
 
     for param_def_holder in dbarchetype.param_def_holders.values():
+        parameter = dbstage.parameters.get(param_def_holder, None)
         error += validate_required_parameter(param_def_holder, parameter)
 
     # features for personalities
     for link in dbarchetype.features + dbstage.features:
-        if not link.feature.param_def_holder:
+        param_def_holder = link.feature.param_def_holder
+        if not param_def_holder:
             continue
 
-        tmp_error = validate_required_parameter(link.feature.param_def_holder,
-                                                parameter)
+        parameter = dbstage.parameters.get(param_def_holder, None)
+        tmp_error = validate_required_parameter(param_def_holder, parameter)
         if tmp_error:
             error.append("Feature Binding: %s" % link.feature)
             error += tmp_error
     return error
 
 
-def add_arch_paramdef_plenaries(session, dbarchetype, param_def_holder,
-                                plenaries):
-    # Do the import here, to avoid circles...
-    from aquilon.worker.templates.personality import (ParameterTemplate,
-                                                      PlenaryPersonalityParameter)
-
-    q = session.query(PersonalityStage)
-    q = q.join(Personality)
-    q = q.filter_by(archetype=dbarchetype)
-    q = q.options(contains_eager('personality'),
-                  joinedload('parameter'))
-    for dbstage in q:
-        ptmpl = ParameterTemplate(dbstage, param_def_holder)
-        plenaries.append(PlenaryPersonalityParameter.get_plenary(ptmpl))
+def add_arch_paramdef_plenaries(session, param_def_holder, plenaries):
+    q = session.query(PersonalityParameter)
+    q = q.filter_by(param_def_holder=param_def_holder)
+    q = q.options(joinedload('personality_stage'),
+                  joinedload('personality_stage.personality'))
+    plenaries.extend(Plenary.get_plenary(dbparam) for dbparam in q)
 
 
 def add_feature_paramdef_plenaries(session, dbfeature, plenaries):
@@ -216,7 +224,7 @@ def add_feature_paramdef_plenaries(session, dbfeature, plenaries):
     q = q.join(PersonalityStage.features)
     q = q.filter_by(feature=dbfeature)
     q = q.options(joinedload('personality'),
-                  joinedload('parameter'),
+                  subqueryload('parameters'),
                   subqueryload('features'),
                   joinedload('features.feature'),
                   undefer('features.feature.comments'),
@@ -234,8 +242,7 @@ def update_paramdef_schema(session, db_paramdef, schema):
     db_paramdef.schema = schema
 
     # Ensure that existing values do not conflict with the new schema
-    params = search_path_in_personas(session, db_paramdef.path,
-                                     db_paramdef.holder)
+    params = search_path_in_personas(session, db_paramdef)
     for param, value in iteritems(params):
         try:
             validate(value, schema)

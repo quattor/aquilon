@@ -17,7 +17,8 @@
 
 from collections import defaultdict
 
-from aquilon.aqdb.model import Parameter, Personality, ServiceMap
+from aquilon.aqdb.model import (ArchetypeParamDef, Parameter, Personality,
+                                ServiceMap)
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.formats.parameter import DiffData
 
@@ -53,12 +54,12 @@ class CommandShowDiff(BrokerCommand):
         """ pouplate data we are interesetd in seeing as part of diff """
         dbpersona = dbstage.personality
 
-        # parameters
-        params = {}
-
-        if dbstage.parameter:
-            params.update(Parameter.flatten(dbstage.parameter.value))
-        ret["Parameters"][dtype] = params
+        for param_def_holder, parameter in dbstage.parameters.items():
+            if isinstance(param_def_holder, ArchetypeParamDef):
+                desc = "Parameters for template %s" % param_def_holder.template
+            else:
+                desc = "Parameters for {0:l}".format(param_def_holder.feature)
+            ret[desc][dtype] = Parameter.flatten(parameter.value)
 
         # process features
         features = {fl.feature.name: True for fl in dbstage.features}

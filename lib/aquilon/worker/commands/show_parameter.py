@@ -16,7 +16,7 @@
 # limitations under the License.
 
 from aquilon.exceptions_ import NotFoundException
-from aquilon.aqdb.model import Personality, Parameter
+from aquilon.aqdb.model import Personality, ArchetypeParamDef, FeatureParamDef
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.formats.parameter import PersonalityProtoParameter
 
@@ -30,9 +30,6 @@ class CommandShowParameterPersonality(BrokerCommand):
         dbpersonality = Personality.get_unique(session, name=personality,
                                                archetype=archetype, compel=True)
         dbstage = dbpersonality.default_stage(personality_stage)
-        if not dbstage.parameter or not dbstage.parameter.value:
-            raise NotFoundException("No parameters found for {0:l}."
-                                    .format(dbstage))
 
         # Unfortunately, the raw and the protobuf formatters operate on
         # different data: the protobuf formatter groups the values per parameter
@@ -41,33 +38,49 @@ class CommandShowParameterPersonality(BrokerCommand):
         if style == 'proto':
             params = PersonalityProtoParameter()
 
-            param_definitions = None
-            for param in [dbstage.parameter]:
-                for param_def_holder in dbpersonality.archetype.param_def_holders.values():
-                    param_definitions = param_def_holder.param_definitions
-                    for param_def in param_definitions:
-                        value = param.get_path(param_def.path, compel=False)
-                        if value is not None:
-                            if param_def.value_type == "list":
-                                value = ",".join(value)
-                            params.append((param_def.path, param_def, value))
-
-                for link in dbstage.features:
-                    if not link.feature.param_def_holder:
+            for param_def_holder, param in dbstage.parameters.items():
+                param_definitions = param_def_holder.param_definitions
+                for param_def in param_definitions:
+                    # Backwards compatibility corner case - if the definition
+                    # covers the whole template but no values are set, then omit
+                    # it from the output
+                    if not param_def.path and not param.value:
                         continue
-                    param_definitions = link.feature.param_def_holder.param_definitions
-                    for param_def in param_definitions:
-                        path = Parameter.feature_path(link.feature,
-                                                      param_def.path)
-                        value = param.get_path(path, compel=False)
-                        if value is not None:
-                            if param_def.value_type == "list":
-                                value = ",".join(value)
-                            params.append((path, param_def, value))
+
+                    value = param.get_path(param_def.path, compel=False)
+                    if value is not None:
+                        if param_def.value_type == "list":
+                            value = ",".join(value)
+                        if isinstance(param_def_holder, FeatureParamDef):
+                            # Backwards compatibility path fixup
+                            path = "%s/%s" % (param_def_holder.feature.cfg_path,
+                                              param_def.path)
+                        else:
+                            # Backwards compatibility path fixup
+                            if param_def.path:
+                                path = "%s/%s" % (param_def_holder.template,
+                                                  param_def.path)
+                            else:
+                                path = param_def_holder.template
+
+                        params.append((path, param_def, value))
 
             if not params:
                 raise NotFoundException("No parameters found for {0:l}."
                                         .format(dbstage))
             return params
         else:
-            return [dbstage.parameter]
+            params = [param for param in dbstage.parameters.values()
+                      if param.value]
+            if not params:
+                raise NotFoundException("No parameters found for {0:l}."
+                                        .format(dbstage))
+
+            # List general parameters first sorted by template, then the feature
+            # parameters
+            params.sort(key=lambda x:
+                        (0, x.param_def_holder.template)
+                        if isinstance(x.param_def_holder, ArchetypeParamDef) else
+                        (1, x.param_def_holder.feature.name))
+
+            return params

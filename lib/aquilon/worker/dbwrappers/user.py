@@ -138,7 +138,7 @@ class UserSync(object):
                           undefer('stages.features.feature.comments'),
                           joinedload('stages.features.feature.param_def_holder'),
                           subqueryload('stages.features.feature.param_def_holder.param_definitions'),
-                          joinedload('stages.parameter'))
+                          subqueryload('stages.parameters'))
             for p in q:
                 for dbuser in userset & set(p.root_users):
                     p.root_users.remove(dbuser)

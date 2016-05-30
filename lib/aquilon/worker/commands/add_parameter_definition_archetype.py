@@ -15,10 +15,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from sqlalchemy.orm import contains_eager
+
 from aquilon.exceptions_ import ArgumentError, UnimplementedError
-from aquilon.aqdb.model import Archetype, ArchetypeParamDef, ParamDefinition
+from aquilon.aqdb.model import (Archetype, ArchetypeParamDef, ParamDefinition,
+                                Personality, PersonalityStage,
+                                PersonalityParameter)
 from aquilon.worker.broker import BrokerCommand
-from aquilon.worker.dbwrappers.change_management import validate_prod_archetype
 from aquilon.worker.dbwrappers.parameter import add_arch_paramdef_plenaries
 from aquilon.worker.templates import PlenaryCollection
 from aquilon.utils import validate_template_name
@@ -29,12 +32,17 @@ class CommandAddParameterDefintionArchetype(BrokerCommand):
     required_parameters = ["archetype", "template", "path", "value_type"]
 
     def render(self, session, logger, archetype, template, path, value_type,
-               schema, required, activation, default, description, user,
-               justification, reason, **_):
+               schema, required, activation, default, description, **_):
         validate_template_name(template, "template")
         dbarchetype = Archetype.get_unique(session, archetype, compel=True)
         if not dbarchetype.is_compileable:
             raise ArgumentError("{0} is not compileable.".format(dbarchetype))
+
+        if default is not None:
+            raise UnimplementedError("Archetype-wide parameter definitions "
+                                     "cannot have default values.")
+
+        plenaries = PlenaryCollection(logger=logger)
 
         try:
             holder = dbarchetype.param_def_holders[template]
@@ -42,39 +50,46 @@ class CommandAddParameterDefintionArchetype(BrokerCommand):
             holder = ArchetypeParamDef(template=template)
             dbarchetype.param_def_holders[template] = holder
 
+            # Create the parameter object for all existing personalities
+            q = session.query(PersonalityStage)
+            q = q.join(Personality)
+            q = q.filter_by(archetype=dbarchetype)
+            q = q.options(contains_eager('personality'))
+            for dbstage in q:
+                dbparam = PersonalityParameter(param_def_holder=holder,
+                                               personality_stage=dbstage,
+                                               value={})
+                session.add(dbparam)
+
+            add_arch_paramdef_plenaries(session, holder, plenaries)
+
         if not activation:
             activation = 'dispatch'
-        if activation == 'rebuild' and default is not None:
-            raise UnimplementedError("Setting a default value for a parameter "
-                                     "which requires rebuild would cause all "
-                                     "existing hosts to require a rebuild, "
-                                     "which is not supported.")
 
         if schema and value_type != "json":
             raise ArgumentError("Only JSON parameters may have a schema.")
 
         path = ParamDefinition.normalize_path(path)
 
-        if not (path == template or path.startswith(template + "/")):
+        if path == template:
+            # A structure template is always an nlist, so top-level parameter
+            # definitions must be JSON objects (dictionaries).
+            if value_type != "json":
+                raise ArgumentError("Only the JSON type can be used for "
+                                    "top-level parameter definitions.")
+            path = ""
+        elif path.startswith(template + "/"):
+            path = path[len(template) + 1:]
+        else:
             raise ArgumentError("The first component of the path must be "
                                 "the name of the template.")
 
-        ParamDefinition.get_unique(session, path=path, holder=holder,
-                                   preclude=True)
-
-        plenaries = PlenaryCollection(logger=logger)
-        if default is not None:
-            validate_prod_archetype(dbarchetype, user, justification, reason)
-            add_arch_paramdef_plenaries(session, dbarchetype, holder, plenaries)
+        holder.check_new_path(path)
 
         db_paramdef = ParamDefinition(path=path, holder=holder,
                                       value_type=value_type, schema=schema,
                                       required=required, activation=activation,
                                       description=description)
-        # Set default separately - validation in the model depends on the other
-        # attributes being already set
-        db_paramdef.default = default
-
         session.add(db_paramdef)
 
         session.flush()

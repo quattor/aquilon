@@ -15,9 +15,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from aquilon.exceptions_ import NotFoundException
-from aquilon.aqdb.model import Feature, ParamDefinition
+from aquilon.aqdb.model import Feature
 from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.dbwrappers.parameter import lookup_paramdef
 
 
 class CommandShowParameterDefinitionFeature(BrokerCommand):
@@ -27,11 +27,5 @@ class CommandShowParameterDefinitionFeature(BrokerCommand):
     def render(self, session, feature, type, path, **_):
         cls = Feature.polymorphic_subclass(type, "Unknown feature type")
         dbfeature = cls.get_unique(session, name=feature, compel=True)
-        if not dbfeature.param_def_holder:
-            raise NotFoundException("{0} does not have parameters."
-                                    .format(dbfeature))
-
-        db_paramdef = ParamDefinition.get_unique(session,
-                                                 holder=dbfeature.param_def_holder,
-                                                 path=path, compel=True)
+        db_paramdef, _ = lookup_paramdef(dbfeature, path)
         return db_paramdef

@@ -35,14 +35,14 @@ class TestCopyPersonality(VerifyGrnsMixin, TestBrokerCommand):
                         "--personality", "utunused/dev",
                         "--comments", "New personality comments"])
 
-    def test_110_add_utpersonality_clone(self):
+    def test_110_add_utunused_clone(self):
         command = ["add_personality", "--personality", "utunused-clone/dev",
                    "--archetype", "aquilon", "--copy_from", "utunused/dev"]
         out = self.statustest(command)
         self.matchoutput(out, "Personality aquilon/utunused/dev has "
                          "config_override set", command)
 
-    def test_111_verify_utpersonality_clone(self):
+    def test_111_verify_utunused_clone(self):
         command = ["show_personality", "--personality", "utunused-clone/dev",
                    "--archetype", "aquilon"]
         out = self.commandtest(command)
@@ -147,7 +147,10 @@ class TestCopyPersonality(VerifyGrnsMixin, TestBrokerCommand):
                    "--other", "utpers-dev-clone", "--other_stage", "next"]
         out = self.commandtest(command)
         self.matchoutput(out,
-                         "missing Parameters in Personality aquilon/utpers-dev@current:",
+                         "missing Parameters for template actions in Personality aquilon/utpers-dev@current:",
+                         command)
+        self.matchoutput(out,
+                         "missing Parameters for template foo in Personality aquilon/utpers-dev@current:",
                          command)
 
     def test_200_copy_missing_stage(self):

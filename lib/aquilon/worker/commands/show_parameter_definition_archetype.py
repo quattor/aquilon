@@ -15,9 +15,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from aquilon.exceptions_ import NotFoundException
-from aquilon.aqdb.model import Archetype, ParamDefinition
+from aquilon.aqdb.model import Archetype
 from aquilon.worker.broker import BrokerCommand
+from aquilon.worker.dbwrappers.parameter import lookup_paramdef
 
 
 class CommandShowParameterDefinitionArchetype(BrokerCommand):
@@ -26,12 +26,6 @@ class CommandShowParameterDefinitionArchetype(BrokerCommand):
 
     def render(self, session, archetype, path, **_):
         dbarchetype = Archetype.get_unique(session, archetype, compel=True)
-        for holder in dbarchetype.param_def_holders.values():
-            db_paramdef = ParamDefinition.get_unique(session, path=path,
-                                                     holder=holder)
-            if db_paramdef:
-                break
-        else:
-            raise NotFoundException("Parameter definition %s not found." % path)
+        db_paramdef, _ = lookup_paramdef(dbarchetype, path)
 
         return db_paramdef

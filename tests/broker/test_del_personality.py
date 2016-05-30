@@ -30,23 +30,29 @@ from broker.personalitytest import PersonalityTestMixin
 
 class TestDelPersonality(PersonalityTestMixin, TestBrokerCommand):
 
-    def test_100_del_utpersonality(self):
+    def test_010_verify_precond(self):
+        dir = os.path.join(self.config.get("broker", "plenarydir"),
+                           "aquilon", "personality", "utunused", "dev")
+        self.assertTrue(os.path.exists(dir),
+                        "Plenary directory '%s' does not exist" % dir)
+
+    def test_100_del_utunused(self):
         command = ["del_personality", "--personality=utunused/dev",
                    "--archetype=aquilon"]
         self.noouttest(command)
 
-    def test_105_verif_yplenary_dir(self):
+    def test_105_verify_plenary_gone(self):
         dir = os.path.join(self.config.get("broker", "plenarydir"),
-                           "aquilon", "personality", "utpersonality")
+                           "aquilon", "personality", "utunused", "dev")
         self.assertFalse(os.path.exists(dir),
                          "Plenary directory '%s' still exists" % dir)
 
-    def test_105_verify_utpersonality(self):
-        command = ["show_personality", "--personality=utpersonality",
+    def test_105_verify_utunused(self):
+        command = ["show_personality", "--personality=utunused/dev",
                    "--archetype=aquilon"]
         self.notfoundtest(command)
 
-    def test_110_del_eaipersonality(self):
+    def test_110_del_utpers_dev(self):
         command = ["del_personality", "--personality=utpers-dev",
                    "--archetype=aquilon"]
         self.noouttest(command)

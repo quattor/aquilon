@@ -16,9 +16,11 @@
 # limitations under the License.
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import ParamDefinition, Archetype
+from aquilon.aqdb.model import (ParamDefinition, Archetype,
+                                PersonalityParameter)
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.parameter import (search_path_in_personas,
+                                                 lookup_paramdef,
                                                  add_arch_paramdef_plenaries)
 from aquilon.worker.templates import PlenaryCollection
 
@@ -30,17 +32,11 @@ class CommandDelParameterDefintionArchetype(BrokerCommand):
     def render(self, session, logger, archetype, path, **_):
         dbarchetype = Archetype.get_unique(session, archetype, compel=True)
         path = ParamDefinition.normalize_path(path, strict=False)
-
-        for holder in dbarchetype.param_def_holders.values():
-            db_paramdef = ParamDefinition.get_unique(session, path=path,
-                                                     holder=holder)
-            if db_paramdef:
-                break
-        else:
-            raise ArgumentError("Parameter definition %s not found." % path)
+        db_paramdef, _ = lookup_paramdef(dbarchetype, path)
+        param_def_holder = db_paramdef.holder
 
         # Validate if this path is still being used
-        params = search_path_in_personas(session, path, db_paramdef.holder)
+        params = search_path_in_personas(session, db_paramdef)
         if params:
             holders = ["{0.holder_object:l}".format(param) for param in params]
             raise ArgumentError("Parameter with path {0} used by following and "
@@ -49,18 +45,18 @@ class CommandDelParameterDefintionArchetype(BrokerCommand):
 
         plenaries = PlenaryCollection(logger=logger)
 
-        param_def_holder = db_paramdef.holder
-        old_default = db_paramdef.default
         param_def_holder.param_definitions.remove(db_paramdef)
-
-        if old_default is not None or not param_def_holder.param_definitions:
-            add_arch_paramdef_plenaries(session, dbarchetype, param_def_holder,
-                                        plenaries)
 
         # This was the last definition for the given template - need to
         # clean up
         if not param_def_holder.param_definitions:
-            dbarchetype.param_def_holders.remove(param_def_holder)
+            add_arch_paramdef_plenaries(session, param_def_holder, plenaries)
+
+            q = session.query(PersonalityParameter)
+            q = q.filter_by(param_def_holder=param_def_holder)
+            # synchronize_session='evaluate' does not seem to work correctly
+            q.delete(synchronize_session='fetch')
+            del dbarchetype.param_def_holders[param_def_holder.template]
 
         session.flush()
 

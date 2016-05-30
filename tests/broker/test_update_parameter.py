@@ -40,7 +40,7 @@ class TestUpdateParameter(TestBrokerCommand):
         command = ["show_parameter", "--personality", "utpers-dev",
                    "--archetype", "aquilon", "--personality_stage", "next"]
         out = self.commandtest(command)
-        expected = '"testaction": { "command": "/bin/testaction", "user": "user2" }'
+        expected = 'testaction: { "command": "/bin/testaction", "user": "user2" }'
         self.check_match(out, expected, command)
 
     def test_110_upd_existing_path(self):
@@ -54,7 +54,7 @@ class TestUpdateParameter(TestBrokerCommand):
                    "--path", "actions/testaction/badpath", "--value", "badvalue"]
         err = self.notfoundtest(command)
         self.matchoutput(err,
-                         "No parameter of path=actions/testaction/badpath defined.",
+                         "No parameter of path=testaction/badpath defined.",
                          command)
 
     def test_200_upd_nonexisting_path(self):
@@ -63,7 +63,8 @@ class TestUpdateParameter(TestBrokerCommand):
                    "--path", "espinfo/badpath", "--value", "badvalue"]
         err = self.notfoundtest(command)
         self.matchoutput(err,
-                         "Parameter espinfo/badpath does not match any parameter definitions.",
+                         "Path espinfo/badpath does not match any parameter "
+                         "definitions of archetype aquilon.",
                          command)
 
 if __name__ == '__main__':

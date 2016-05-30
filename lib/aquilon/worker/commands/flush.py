@@ -264,7 +264,7 @@ class CommandFlush(BrokerCommand):
                 q = q.options(joinedload('personality'),
                               subqueryload('grns'),
                               subqueryload('features'),
-                              joinedload('parameter'),
+                              subqueryload('parameters'),
                               subqueryload('personality.root_users'),
                               subqueryload('personality.root_netgroups'))
                 progress = ProgressReport(logger, q.count(), "personality")

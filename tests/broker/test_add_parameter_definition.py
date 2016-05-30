@@ -117,8 +117,6 @@ class TestAddParameterDefinition(TestBrokerCommand):
                    "--path", "foo/" + path, "--template", "foo"]
             if "type" in params:
                 cmd.extend(["--value_type", params["type"]])
-            if "default" in params:
-                cmd.extend(["--default", params["default"]])
             if params.get("required", False):
                 cmd.append("--required")
             if "activation" in params:
@@ -133,7 +131,7 @@ class TestAddParameterDefinition(TestBrokerCommand):
                "--path", "foo/testrequired"]
         out = self.commandtest(cmd)
         self.output_equals(out, """
-            Parameter Definition: foo/testrequired [required]
+            Parameter Definition: testrequired [required]
               Type: string
               Template: foo
               Activation: dispatch
@@ -176,6 +174,11 @@ class TestAddParameterDefinition(TestBrokerCommand):
 
             self.noouttest(cmd)
 
+    def test_140_add_src_route_param(self):
+        self.noouttest(["add_parameter_definition",
+                        "--feature", "src_route", "--type", "interface",
+                        "--path", "testparam", "--value_type", "string"])
+
     def test_200_add_feature_all(self):
         for feature_type, features in param_features.items():
             for feature in features:
@@ -215,34 +218,52 @@ class TestAddParameterDefinition(TestBrokerCommand):
     def test_300_add_existing(self):
         cmd = ["add_parameter_definition", "--archetype", "aquilon",
                "--path=foo/teststring", "--value_type=string", "--description=blaah",
-               "--template=foo", "--required", "--default=default"]
+               "--template=foo", "--required"]
         err = self.badrequesttest(cmd)
         self.matchoutput(err,
-                         "Parameter Definition foo/teststring, parameter "
-                         "definition holder aquilon already exists.",
+                         "The path cannot be a strict subset or superset "
+                         "of an existing definition.",
+                         cmd)
+
+    def test_300_path_conflict_sub(self):
+        cmd = ["add_parameter_definition", "--archetype", "aquilon",
+               "--path", "foo/testjson/subpath", "--template", "foo",
+               "--value_type", "list"]
+        out = self.badrequesttest(cmd)
+        self.matchoutput(out,
+                         "The path cannot be a strict subset or superset "
+                         "of an existing definition.",
+                         cmd)
+
+    def test_300_path_conflict_super(self):
+        cmd = ["add_parameter_definition", "--archetype", "aquilon",
+               "--path", "foo", "--template", "foo",
+               "--value_type", "json"]
+        out = self.badrequesttest(cmd)
+        self.matchoutput(out,
+                         "The path cannot be a strict subset or superset "
+                         "of an existing definition.",
                          cmd)
 
     def test_300_add_feature_existing(self):
         cmd = ["add_parameter_definition", "--feature", "myfeature", "--type=host",
                "--path=teststring", "--value_type=string", "--description=blaah",
-               "--required", "--default=default"]
+               "--required"]
         err = self.badrequesttest(cmd)
         self.matchoutput(err,
-                         "Parameter Definition teststring, parameter "
-                         "definition holder myfeature already exists.",
+                         "The path cannot be a strict subset or superset "
+                         "of an existing definition.",
                          cmd)
 
-    def test_300_invalid_defaults(self):
-        for path, params in default_param_defs.items():
-            if "invalid_default" not in params:
-                continue
-
-            cmd = ["add_parameter_definition", "--archetype", "aquilon",
-                   "--path", "foo/" + path + "_invalid_default",
-                   "--value_type", params["type"],
-                   "--template", "foo", "--default", params["invalid_default"]]
-            out = self.badrequesttest(cmd)
-            self.matchoutput(out, "for default for path=foo/%s" % path, cmd)
+    def test_300_path_conflict_feature(self):
+        cmd = ["add_parameter_definition",
+               "--feature", "myfeature", "--type=host",
+               "--path=testjson/subpath", "--value_type=string"]
+        out = self.badrequesttest(cmd)
+        self.matchoutput(out,
+                         "The path cannot be a strict subset or superset "
+                         "of an existing definition.",
+                         cmd)
 
     def test_300_invalid_feature_defaults(self):
         for path, params in default_param_defs.items():
@@ -259,18 +280,19 @@ class TestAddParameterDefinition(TestBrokerCommand):
     def test_300_add_noncompileable_arch(self):
         cmd = ["add_parameter_definition", "--archetype", "windows",
                "--path=foo/testint", "--description=blaah",
-               "--template=foo", "--value_type=int", "--default=60"]
+               "--template=foo", "--value_type=int"]
         out = self.badrequesttest(cmd)
         self.matchoutput(out, "Archetype windows is not compileable.", cmd)
 
-    def test_300_add_rebuild_default(self):
+    def test_300_add_archetype_default(self):
         cmd = ["add_parameter_definition", "--archetype", "aquilon",
-               "--path=foo/test_rebuild_required_default", "--default=default",
-               "--template=foo", "--value_type=string", "--activation=rebuild"]
+               "--path=foo/test_arch_default", "--default=default",
+               "--template=foo", "--value_type=string"]
         out = self.unimplementederrortest(cmd)
-        self.matchoutput(out, "Setting a default value for a parameter which "
-                         "requires rebuild would cause all existing hosts to "
-                         "require a rebuild, which is not supported.", cmd)
+        self.matchoutput(out,
+                         "Archetype-wide parameter definitions cannot have "
+                         "default values.",
+                         cmd)
 
     def test_300_invalid_path(self):
         for path in ["!badchar", "@badchar", "#badchar", "$badchar", "%badchar", "^badchar",
@@ -282,20 +304,31 @@ class TestAddParameterDefinition(TestBrokerCommand):
                              "'%s' is not a valid value for a path component." % path,
                              cmd)
 
+    def test_300_wrong_toplevel_type(self):
+        cmd = ["add_parameter_definition", "--archetype", "aquilon",
+               "--path", "bad_toplevel_type", "--template", "bad_toplevel_type",
+               "--value_type", "list"]
+        out = self.badrequesttest(cmd)
+        self.matchoutput(out,
+                         "Only the JSON type can be used for top-level "
+                         "parameter definitions.",
+                         cmd)
+
     def test_300_show_bad_path(self):
         cmd = ["show_parameter_definition", "--archetype", "aquilon",
-               "--path", "path-does-not-exist"]
+               "--path", "foo/path-does-not-exist"]
         out = self.notfoundtest(cmd)
         self.matchoutput(out,
-                         "Parameter definition path-does-not-exist not found.",
+                         "Path foo/path-does-not-exist does not match any "
+                         "parameter definitions of archetype aquilon.",
                          cmd)
 
     def test_300_show_archetype_no_params(self):
         cmd = ["show_parameter_definition", "--archetype", "windows",
                "--path", "path-does-not-exist"]
-        out = self.notfoundtest(cmd)
+        out = self.badrequesttest(cmd)
         self.matchoutput(out,
-                         "Parameter definition path-does-not-exist not found.",
+                         "Unknown parameter template path-does-not-exist.",
                          cmd)
 
     def test_300_invalid_path_feature(self):
@@ -331,8 +364,9 @@ class TestAddParameterDefinition(TestBrokerCommand):
         cmd = ["show_parameter_definition", "--feature", "myfeature",
                "--type", "host", "--path", "path-does-not-exist"]
         out = self.notfoundtest(cmd)
-        self.matchoutput(out, "Parameter Definition path-does-not-exist, "
-                         "parameter definition holder myfeature not found.",
+        self.matchoutput(out,
+                         "Path path-does-not-exist does not match any "
+                         "parameter definitions of host feature myfeature.",
                          cmd)
 
     def test_300_show_feature_no_params(self):
@@ -340,7 +374,8 @@ class TestAddParameterDefinition(TestBrokerCommand):
                "--type", "host", "--path", "path-does-not-exist"]
         out = self.notfoundtest(cmd)
         self.matchoutput(out,
-                         "Host Feature pre_host_no_params does not have parameters.",
+                         "No parameter definitions found for host feature "
+                         "pre_host_no_params.",
                          cmd)
 
     def test_400_verify_all(self):
@@ -348,7 +383,7 @@ class TestAddParameterDefinition(TestBrokerCommand):
 
         out = self.commandtest(cmd)
         for path, params in default_param_defs.items():
-            pattern = "Parameter Definition: foo/" + path
+            pattern = "Parameter Definition: " + path
             if params.get("required", False):
                 pattern += r' \[required\]'
             pattern += r"\s*"
@@ -359,8 +394,6 @@ class TestAddParameterDefinition(TestBrokerCommand):
             else:
                 pattern += r"Type: string\s*"
             pattern += r"Template: foo\s*"
-            if "default" in params:
-                pattern += "Default: " + re.escape(params["default"]) + r"\s*"
             if "activation" in params:
                 pattern += "Activation: " + params["activation"] + r"\s*"
             else:
@@ -368,8 +401,8 @@ class TestAddParameterDefinition(TestBrokerCommand):
 
             self.searchoutput(out, pattern, cmd)
 
-        self.searchoutput(out, r'Parameter Definition: foo/startslash\s*', cmd)
-        self.searchoutput(out, r'Parameter Definition: foo/endslash\s*', cmd)
+        self.searchoutput(out, r'Parameter Definition: startslash\s*', cmd)
+        self.searchoutput(out, r'Parameter Definition: endslash\s*', cmd)
 
     def test_400_verify_all_proto(self):
         cmd = ["search_parameter_definition", "--archetype", "aquilon", "--format=proto"]
@@ -390,10 +423,7 @@ class TestAddParameterDefinition(TestBrokerCommand):
                 self.assertEqual(paramdef.value_type, params["type"])
             else:
                 self.assertEqual(paramdef.value_type, "string")
-            if "default" in params:
-                self.assertEqual(paramdef.default, params["default"])
-            else:
-                self.assertEqual(paramdef.default, "")
+            self.assertEqual(paramdef.default, "")
             self.assertEqual(paramdef.is_required,
                              params.get("required", False))
             if "activation" in params:

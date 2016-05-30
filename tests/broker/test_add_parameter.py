@@ -95,12 +95,12 @@ class TestAddParameter(VerifyGrnsMixin, PersonalityTestMixin,
                    "--personality_stage", "next", "--other_stage", "current"]
         out = self.commandtest(command)
         self.output_equals(out, """
-            Differences for Parameters:
-              missing Parameters in Personality aquilon/utpers-dev@current:
-                //espinfo/class
-                //espinfo/function
-                //espinfo/users/0
-                //espinfo/users/1
+            Differences for Parameters for template espinfo:
+              missing Parameters for template espinfo in Personality aquilon/utpers-dev@current:
+                //class
+                //function
+                //users/0
+                //users/1
             """, command)
 
     def test_120_promote_utpers_dev_basic(self):
@@ -128,48 +128,16 @@ class TestAddParameter(VerifyGrnsMixin, PersonalityTestMixin,
                           r'"users" = list\(\s*"someusers",\s*"otherusers"\s*\);',
                           command)
 
-    def test_125_cat_defaults_foo(self):
-        command = ["cat", "--personality", "utpers-dev", "--archetype", "aquilon",
-                   "--param_tmpl", "foo"]
-        out = self.commandtest(command)
-        self.matchoutput(out,
-                         'structure template personality/utpers-dev/foo;',
-                         command)
-        self.matchoutput(out, '"testboolean" = true;', command)
-        self.matchoutput(out, '"testfalsedefault" = false;', command)
-        self.matchoutput(out, '"testfloat" = 100.100;', command)
-        self.matchoutput(out, '"testint" = 60;', command)
-        self.matchoutput(out, '"teststring" = "default";', command)
-        self.searchoutput(out,
-                          r'"testjson" = nlist\(\s*'
-                          r'"key", "param_key",\s*'
-                          r'"values", list\(\s*0\s*\)\s*\);\s*',
-                          command)
-        self.searchoutput(out,
-                          r'"testlist" = list\(\s*"val1",\s*"val2"\s*\);',
-                          command)
-
-        self.matchclean(out, "testdefault", command)
-        self.matchclean(out, "testrequired", command)
-        self.matchclean(out, "test_rebuild_required", command)
-
-    def test_125_cat_defaults_windows(self):
-        command = ["cat", "--personality", "utpers-dev", "--archetype", "aquilon",
-                   "--param_tmpl", "windows"]
-        out = self.commandtest(command)
-        self.matchoutput(out,
-                         "structure template personality/utpers-dev/windows;",
-                         command)
-        self.searchoutput(out,
-                          r'"windows" = list\(\s*nlist\(\s*"day", "Sun",\s*"duration", 8,\s*"start", "08:00"\s*\)\s*\);',
-                          command)
-
     def test_130_validate(self):
         command = ["validate_parameter", "--personality", "utpers-dev"]
         out = self.badrequesttest(command)
         self.searchoutput(out,
                           r'Following required parameters have not been specified:\s*'
-                          r'Parameter Definition: foo/testrequired \[required\]\s*'
+                          r'Parameter Definition: windows \[required\]\s*'
+                          r'Type: json\s*'
+                          r'Template: windows\s*'
+                          r'Activation: dispatch\s*'
+                          r'Parameter Definition: testrequired \[required\]\s*'
                           r'Type: string\s*'
                           r'Template: foo',
                           command)
@@ -205,16 +173,16 @@ class TestAddParameter(VerifyGrnsMixin, PersonalityTestMixin,
                    "--archetype", "aquilon", "--personality_stage", "next"]
         out = self.commandtest(command)
         self.check_match(out,
-                         'espinfo: { '
-                         '"class": "INFRASTRUCTURE", '
-                         '"function": "crash", '
-                         '"users": [ "someusers", "otherusers" ] }',
+                         'Template: espinfo '
+                         'class: "INFRASTRUCTURE" '
+                         'function: "crash" '
+                         'users: [ "someusers", "otherusers" ]',
                          command)
         self.check_match(out,
-                         '"testaction": { "command": "/bin/testaction", "user": "user1" }',
+                         'testaction: { "command": "/bin/testaction", "user": "user1" }',
                          command)
         self.check_match(out,
-                         '"testaction2": { "command": "/bin/testaction2", "timeout": 100, "user": "user2" } }',
+                         'testaction2: { "command": "/bin/testaction2", "timeout": 100, "user": "user2" }',
                          command)
 
     def test_145_show_path_proto(self):
@@ -291,6 +259,9 @@ class TestAddParameter(VerifyGrnsMixin, PersonalityTestMixin,
         self.noouttest(["add_parameter", "--personality", "utpers-dev",
                         "--archetype", "aquilon", "--path", "foo/testrequired",
                         "--value", "set"])
+        self.noouttest(["add_parameter", "--personality", "utpers-dev",
+                        "--archetype", "aquilon", "--path", "windows/windows",
+                        "--value", '[{"duration": 8, "start": "08:00", "day": "Sun"}]'])
 
     def test_155_validate(self):
         command = ["validate_parameter", "--personality", "utpers-dev",
@@ -328,7 +299,7 @@ class TestAddParameter(VerifyGrnsMixin, PersonalityTestMixin,
                    "--path", "espinfo/function", "--value", "crash"]
         err = self.badrequesttest(command)
         self.matchoutput(err,
-                         "Parameter with path=espinfo/function already exists",
+                         "Parameter with path=function already exists",
                          command)
 
     def test_200_add_existing_json_path(self):
@@ -340,7 +311,7 @@ class TestAddParameter(VerifyGrnsMixin, PersonalityTestMixin,
                    "--path", "actions/testaction2", "--value", value]
         err = self.badrequesttest(command)
         self.matchoutput(err,
-                         "Parameter with path=actions/testaction2 already exists",
+                         "Parameter with path=testaction2 already exists",
                          command)
 
     def test_200_add_existing_leaf_path(self):
@@ -349,7 +320,7 @@ class TestAddParameter(VerifyGrnsMixin, PersonalityTestMixin,
                    "--path", "actions/testaction/user", "--value", "user1"]
         err = self.badrequesttest(command)
         self.matchoutput(err,
-                         "Parameter with path=actions/testaction/user already exists",
+                         "Parameter with path=testaction/user already exists",
                          command)
 
     def test_200_json_schema_validation(self):
@@ -359,6 +330,13 @@ class TestAddParameter(VerifyGrnsMixin, PersonalityTestMixin,
         err = self.badrequesttest(command)
         self.matchoutput(err, "Additional properties are not allowed", command)
 
+    def test_200_cat_bad_template(self):
+        command = ["cat", "--personality", "utpers-dev",
+                   "--archetype", "aquilon", "--param_tmpl", "bad-template"]
+        out = self.badrequesttest(command)
+        self.matchoutput(out, "Unknown parameter template bad-template.",
+                         command)
+
     def test_300_verify_diff(self):
         cmd = ["show_diff", "--archetype", "aquilon",
                "--personality", "utpers-dev", "--personality_stage", "next",
@@ -366,27 +344,39 @@ class TestAddParameter(VerifyGrnsMixin, PersonalityTestMixin,
 
         out = self.commandtest(cmd)
         self.searchoutput(out,
-                          r'Differences for Parameters:\s*'
-                          r'missing Parameters in Personality aquilon/utpers-prod:\s*'
-                          r'//actions/testaction/command\s*'
-                          r'//actions/testaction/user\s*'
-                          r'//actions/testaction2/command\s*'
-                          r'//actions/testaction2/timeout\s*'
-                          r'//actions/testaction2/user\s*'
-                          r'//espinfo/users/1\s*'
-                          r'//foo/testrequired\s*'
-                          r'//monitoring/metric/_20003/active\s*'
-                          r'//monitoring/metric/_20003/class\s*'
-                          r'//monitoring/metric/_20003/descr\s*'
-                          r'//monitoring/metric/_20003/latestonly\s*'
-                          r'//monitoring/metric/_20003/name\s*'
-                          r'//monitoring/metric/_20003/period\s*'
-                          r'//monitoring/metric/_20003/smooth/maxdiff\s*'
-                          r'//monitoring/metric/_20003/smooth/maxtime\s*'
-                          r'//monitoring/metric/_20003/smooth/typeString\s*'
-                          r'matching Parameters with different values:\s*'
-                          r'//espinfo/function value=crash, othervalue=development\s*'
-                          r'//espinfo/users/0 value=someusers, othervalue=IT / TECHNOLOGY',
+                          r'Differences for Parameters for template actions:\s*'
+                          r'missing Parameters for template actions in Personality aquilon/utpers-prod:\s*'
+                          r'//testaction/command\s*'
+                          r'//testaction/user\s*'
+                          r'//testaction2/command\s*'
+                          r'//testaction2/timeout\s*'
+                          r'//testaction2/user\s*',
+                          cmd)
+        self.searchoutput(out,
+                          r'Differences for Parameters for template espinfo:\s*'
+                          r'missing Parameters for template espinfo in Personality aquilon/utpers-prod:\s*'
+                          r'//users/1\s*'
+                          r'matching Parameters for template espinfo with different values:\s*'
+                          r'//function value=crash, othervalue=development\s*'
+                          r'//users/0 value=someusers, othervalue=IT / TECHNOLOGY',
+                          cmd)
+        self.searchoutput(out,
+                          r'Differences for Parameters for template foo:\s*'
+                          r'missing Parameters for template foo in Personality aquilon/utpers-prod:\s*'
+                          r'//testrequired\s*',
+                          cmd)
+        self.searchoutput(out,
+                          r'Differences for Parameters for template monitoring:\s*'
+                          r'missing Parameters for template monitoring in Personality aquilon/utpers-prod:\s*'
+                          r'//metric/_20003/active\s*'
+                          r'//metric/_20003/class\s*'
+                          r'//metric/_20003/descr\s*'
+                          r'//metric/_20003/latestonly\s*'
+                          r'//metric/_20003/name\s*'
+                          r'//metric/_20003/period\s*'
+                          r'//metric/_20003/smooth/maxdiff\s*'
+                          r'//metric/_20003/smooth/maxtime\s*'
+                          r'//metric/_20003/smooth/typeString\s*',
                           cmd)
 
     def test_310_search_parameter_espinfo(self):

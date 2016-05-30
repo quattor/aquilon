@@ -29,6 +29,10 @@ from .test_add_parameter_definition import default_param_defs
 
 class TestDelParameterDefinition(TestBrokerCommand):
 
+    def test_010_verify_precondition(self):
+        self.check_plenary_exists("aquilon", "personality", "utunused/dev",
+                                  "foo")
+
     def test_100_del_default(self):
         for path in default_param_defs:
             self.statustest(["del_parameter_definition", "--archetype", "aquilon",
@@ -44,8 +48,7 @@ class TestDelParameterDefinition(TestBrokerCommand):
         self.matchclean(out, "Template: foo", command)
 
     def test_105_verify_plenary_gone(self):
-        self.check_plenary_gone("aquilon", "personality", "utpersonality",
-                                "foo")
+        self.check_plenary_gone("aquilon", "personality", "utunused/dev", "foo")
 
     def test_110_del_feature(self):
         for path, params in default_param_defs.items():
@@ -79,8 +82,8 @@ class TestDelParameterDefinition(TestBrokerCommand):
                "--type", "host", "--path", "path-does-not-exist"]
         out = self.notfoundtest(cmd)
         self.matchoutput(out,
-                         "Parameter Definition path-does-not-exist, "
-                         "parameter definition holder myfeature not found.",
+                         "Path path-does-not-exist does not match any "
+                         "parameter definitions of host feature myfeature.",
                          cmd)
 
 if __name__ == '__main__':

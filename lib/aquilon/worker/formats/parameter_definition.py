@@ -46,11 +46,16 @@ class ParamDefinitionFormatter(ObjectFormatter):
 
     def fill_proto(self, paramdef, skeleton, embedded=True,
                    indirect_attrs=True):
-        skeleton.path = paramdef.path
         skeleton.value_type = paramdef.value_type
         skeleton.is_required = paramdef.required
         if hasattr(paramdef.holder, 'template'):
             skeleton.template = paramdef.holder.template
+            if paramdef.path:
+                skeleton.path = paramdef.holder.template + "/" + paramdef.path
+            else:
+                skeleton.path = paramdef.holder.template
+        else:
+            skeleton.path = paramdef.path
         if paramdef.default is not None:
             skeleton.default = paramdef.default
         if paramdef.description:

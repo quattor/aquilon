@@ -39,9 +39,7 @@ class CommandAddParameterDefintionFeature(BrokerCommand):
             raise ArgumentError("Only JSON parameters may have a schema.")
 
         path = ParamDefinition.normalize_path(path)
-
-        ParamDefinition.get_unique(session, path=path,
-                                   holder=dbfeature.param_def_holder, preclude=True)
+        dbfeature.param_def_holder.check_new_path(path)
 
         plenaries = PlenaryCollection(logger=logger)
 

@@ -27,7 +27,7 @@ from sqlalchemy.orm import relation, backref, deferred, validates
 from sqlalchemy.orm.collections import column_mapped_collection
 
 from aquilon.exceptions_ import ArgumentError, InternalError
-from aquilon.aqdb.column_types import AqStr, Enum, JSONEncodedDict
+from aquilon.aqdb.column_types import AqStr, EmptyStr, Enum, JSONEncodedDict
 from aquilon.aqdb.model import Base, Archetype, Feature
 from aquilon.aqdb.model.feature import _ACTIVATION_TYPE
 from aquilon.utils import (force_json, force_int, force_float, force_boolean,
@@ -64,6 +64,16 @@ class ParamDefHolder(Base):
     @property
     def holder_object(self):  # pragma: no cover
         raise InternalError("Abstract base method called")
+
+    def check_new_path(self, path):
+        # path is expected to be normalized
+        for db_paramdef in self.param_definitions:
+            if path == db_paramdef.path or \
+               not path or not db_paramdef.path or \
+               path.startswith(db_paramdef.path + "/") or \
+               db_paramdef.path.startswith(path + "/"):
+                raise ArgumentError("The path cannot be a strict subset or "
+                                    "superset of an existing definition.")
 
 
 class ArchetypeParamDef(ParamDefHolder):
@@ -126,7 +136,7 @@ class ParamDefinition(Base):
     _instance_label = 'path'
 
     id = Column(Integer, Sequence('%s_id_seq' % _TN), primary_key=True)
-    path = Column(String(255), nullable=False)
+    path = Column(EmptyStr(255), nullable=False)
     required = Column(Boolean, default=False, nullable=False)
     value_type = Column(Enum(16, _PATH_TYPES), nullable=False, default="string")
     schema = Column(JSONEncodedDict, nullable=True)

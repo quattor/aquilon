@@ -20,6 +20,7 @@ from aquilon.aqdb.model import ParamDefinition, Feature
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.change_management import validate_prod_feature
 from aquilon.worker.dbwrappers.parameter import (search_path_in_personas,
+                                                 lookup_paramdef,
                                                  add_feature_paramdef_plenaries)
 from aquilon.worker.templates import PlenaryCollection
 
@@ -32,17 +33,11 @@ class CommandDelParameterDefintionFeature(BrokerCommand):
                reason, **_):
         cls = Feature.polymorphic_subclass(type, "Unknown feature type")
         dbfeature = cls.get_unique(session, name=feature, compel=True)
-        if not dbfeature.param_def_holder:
-            raise ArgumentError("No parameter definitions found for {0:l}."
-                                .format(dbfeature))
-
         path = ParamDefinition.normalize_path(path, strict=False)
-        db_paramdef = ParamDefinition.get_unique(session, path=path,
-                                                 holder=dbfeature.param_def_holder,
-                                                 compel=True)
+        db_paramdef, _ = lookup_paramdef(dbfeature, path)
 
         # Validate if this path is still being used
-        params = search_path_in_personas(session, path, dbfeature.param_def_holder)
+        params = search_path_in_personas(session, db_paramdef)
         if params:
             holders = ["{0.holder_object:l}".format(param) for param in params]
             raise ArgumentError("Parameter with path {0} used by following and "
