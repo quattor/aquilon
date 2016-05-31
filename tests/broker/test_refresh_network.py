@@ -77,6 +77,24 @@ class TestRefreshNetwork(TestBrokerCommand):
                          "compartment to interior.ut" % (net.ip, net.prefixlen),
                          command)
 
+        net = self.net["refreshtest5"]
+        self.matchoutput(out,
+                         "Setting network refreshtest5 [%s/28] "
+                         "prefix length to 29" % net.ip,
+                         command)
+
+    def test_105_verify_plenary_update(self):
+        net = self.net["refreshtest3"]
+        command = ["cat", "--networkip", net.ip]
+        out = self.commandtest(command)
+        self.matchoutput(out, '"network_compartment/name" = "interior.ut";',
+                         command)
+
+        net = self.net["refreshtest5"]
+        command = ["cat", "--networkip", net.ip]
+        out = self.commandtest(command)
+        self.matchoutput(out, '"prefix_length" = 29;', command)
+
     # 110 sync up building np expecting no output
     def test_110_syncclean(self):
         command = "refresh network --building np"
