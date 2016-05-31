@@ -1,0 +1,29 @@
+Execution order
+---------------
+
+There are 3 sets of updates:
+
+- Audit table changes (Oracle only)
+- Schema fixes (Oracle only)
+- Parameter changes (Oracle & PostgreSQL)
+
+The 3 sets can be executed in any order. See the following sections for further
+details about the ordering inside the sets.
+
+
+Audit table upgrade notes
+-------------------------
+
+- convert_xtn_1.sql may be executed while the broker is still up and running
+- After bringing the broker down:
+  - Execute convert_xtn_merge.sql to merge the changes happened after the
+    initial conversion
+  - Execute convert_xtn_2.sql
+  - Execute convert_xtn_3.sql
+
+
+Parameter upgrade notes
+-----------------------
+
+- Execute parameters.sql/parameters.psql
+- Run "zz_clean_parameters.py --commit"
