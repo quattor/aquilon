@@ -114,6 +114,18 @@ class TestUpdateService(TestBrokerCommand):
         self.matchoutput(out, "Service: utsvc Instance: utsi2", command)
         self.matchoutput(out, "Maximum Client Count: Default (1000)", command)
 
+    def test_132_verifyupdateutsvcproto(self):
+        command = ["show_service", "--service", "utsvc", "--format", "proto"]
+        srv = self.protobuftest(command, expect=1)[0]
+        self.assertEqual(srv.name, "utsvc")
+        self.assertEqual(srv.default_max_clients, 1000)
+        self.assertEqual(len(srv.serviceinstances), 2)
+        for si in srv.serviceinstances:
+            if si.name == "utsi1":
+                self.assertEqual(si.max_clients, 900)
+            else:
+                self.assertEqual(si.max_clients, 0)
+
     def test_133_updateutsvc(self):
         command = "update service --service utsvc --max_clients 1100"
         self.noouttest(command.split(" "))

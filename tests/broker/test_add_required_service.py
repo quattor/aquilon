@@ -83,6 +83,15 @@ class TestAddRequiredService(TestBrokerCommand):
         self.noouttest(["search_personality", "--required_service", "afs",
                         "--environment_override", "prod"])
 
+    def test_105_check_personality_proto(self):
+        command = ["show_personality", "--personality", "utpers-dev",
+                   "--personality_stage", "next", "--format", "proto"]
+        personality = self.protobuftest(command, expect=1)[0]
+        self.assertEqual(len(personality.required_services), 1)
+        self.assertEqual(personality.required_services[0].service, 'afs')
+        self.assertEqual(personality.required_services[0].instance, '')
+        self.assertEqual(personality.required_services[0].host_environment, 'qa')
+
     def test_110_add_defaults(self):
         # Setup required services, as expected by the templates.
         for archetype, servicelist in archetype_required.items():

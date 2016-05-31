@@ -93,6 +93,8 @@ class ServiceInstanceFormatter(ObjectFormatter):
             si_msg = skeleton.serviceinstances.add()
 
         si_msg.name = si.name
+        if si.max_clients is not None:
+            si_msg.max_clients = si.max_clients
 
         if indirect_attrs:
             for srv in sorted(si.servers, key=attrgetter("position")):

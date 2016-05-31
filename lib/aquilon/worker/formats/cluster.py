@@ -59,6 +59,13 @@ class ClusterFormatter(CompileableFormatter):
             self.redirect_proto(cluster.virtual_switch,
                                 skeleton.virtual_switch)
 
+        if cluster.cluster_group:
+            for member in cluster.cluster_group.members:
+                if member == cluster:
+                    continue
+                gskel = skeleton.grouped_cluster.add()
+                gskel.name = member.name
+
     def format_raw(self, cluster, indent="", embedded=True,
                    indirect_attrs=True):
         details = [indent + "{0:c}: {0.name}".format(cluster)]
