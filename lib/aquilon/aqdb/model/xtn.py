@@ -42,7 +42,7 @@ class Xtn(Base):
     """ auditing information from command invocations """
     __tablename__ = 'xtn'
 
-    xtn_id = Column(GUID, primary_key=True)
+    id = Column(GUID, primary_key=True)
     username = Column(String(65), nullable=False, default='nobody')
     command = Column(String(64), nullable=False)
     # This column is *massively* redundant, but we're fully denormalized
@@ -57,8 +57,8 @@ class Xtn(Base):
     # Given that, we don't really *need* the foreign key, but we'll keep it
     # unless it proves otherwise cumbersome for performance (mainly insert).
 
-    __table_args__ = (Index('xtn_username_idx', username, oracle_compress=True),
-                      Index('xtn_command_idx', command, oracle_compress=True),
+    __table_args__ = (Index('xtn_username_idx', username, oracle_bitmap=True),
+                      Index('xtn_command_idx', command, oracle_bitmap=True),
                       Index('xtn_is_readonly_idx', is_readonly,
                             oracle_bitmap=True),
                       Index('xtn_start_time_idx', desc(start_time)),
@@ -103,13 +103,13 @@ class Xtn(Base):
 class XtnEnd(Base):
     """ A record of a completed command/transaction """
     __tablename__ = 'xtn_end'
-    xtn_id = Column(ForeignKey(Xtn.xtn_id), primary_key=True)
+    xtn_id = Column(ForeignKey(Xtn.id), primary_key=True)
     return_code = Column(Integer, nullable=False)
     end_time = Column(UTCDateTime(timezone=True),
                       default=utcnow, nullable=False)
 
     __table_args__ = (Index('xtn_end_return_code_idx', return_code,
-                            oracle_compress=True),
+                            oracle_bitmap=True),
                       {'oracle_compress': 'OLTP'})
 
 
@@ -117,15 +117,15 @@ class XtnDetail(Base):
     """ Key/Value argument pairs for executed commands """
     __tablename__ = 'xtn_detail'
 
-    xtn_id = Column(ForeignKey(Xtn.xtn_id), nullable=False)
+    xtn_id = Column(ForeignKey(Xtn.id), nullable=False)
     name = Column(String(255), nullable=False)
     # Note: Oracle has limits on the maximum size of all columns in an index, so
     # we cannot make this column too large.
     value = Column(String(3000), nullable=False)
 
     __table_args__ = (PrimaryKeyConstraint(xtn_id, name, value),
-                      Index('xtn_detail_name_idx', name, oracle_compress=True),
-                      Index('xtn_detail_value_idx', value, oracle_compress=True),
+                      Index('xtn_detail_name_idx', name, oracle_bitmap=True),
+                      Index('xtn_detail_value_idx', value, oracle_bitmap=True),
                       {'oracle_compress': 'OLTP'})
 
 Xtn.args = relationship(XtnDetail, lazy="joined", order_by=[XtnDetail.name])
@@ -159,7 +159,7 @@ def start_xtn(session, xtn_id, username, command, is_readonly, details, ignore):
 
     # TODO: (maybe) use sql inserts instead of objects to avoid added overhead?
     # We would be able to exploit executemany() for all the xtn_detail rows
-    x = Xtn(xtn_id=xtn_id, command=command, username=username,
+    x = Xtn(id=xtn_id, command=command, username=username,
             is_readonly=is_readonly)
     session.add(x)
 

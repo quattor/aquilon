@@ -20,13 +20,14 @@ import uuid
 
 from sqlalchemy.types import TypeDecorator, TypeEngine, CHAR
 from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.oracle import RAW
 
 
 class GUID(TypeDecorator):
     """ Platform-independent GUID type.
 
-        Uses Postgresql's UUID type, otherwise uses CHAR(32), storing as
-        stringified hex values. Based on a recipe found in
+        Uses Postgresql's UUID type, uses RAW(16) on Oracle, and otherwise uses
+        CHAR(32), storing as stringified hex values. Based on a recipe found in
         http://www.sqlalchemy.org/docs/core/types.html """
 
     impl = TypeEngine
@@ -34,23 +35,33 @@ class GUID(TypeDecorator):
     def load_dialect_impl(self, dialect):
         if dialect.name == 'postgresql':  # pragma: no cover
             return dialect.type_descriptor(UUID())
+        elif dialect.name == 'oracle':  # pragma: no cover
+            return dialect.type_descriptor(RAW(16))
         else:
             return dialect.type_descriptor(CHAR(32))
 
     def process_bind_param(self, value, dialect):
         if value is None:
             return value
-        elif dialect.name == 'postgresql':  # pragma: no cover
+
+        if dialect.name == 'postgresql':  # pragma: no cover
             return str(value)
+        elif dialect.name == 'oracle':  # pragma: no cover
+            if not isinstance(value, uuid.UUID):
+                return uuid.UUID(value).bytes
+            else:
+                return value.bytes
         else:
             if not isinstance(value, uuid.UUID):
-                return "%.32x" % uuid.UUID(value)
+                return uuid.UUID(value).hex
             else:
-                # hexstring
-                return "%.32x" % value
+                return value.hex
 
     def process_result_value(self, value, dialect):
         if value is None:
             return value
+
+        if dialect.name == 'oracle':  # pragma: no cover
+            return uuid.UUID(bytes=value)
         else:
             return uuid.UUID(value)

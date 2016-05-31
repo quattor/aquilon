@@ -48,7 +48,7 @@ class UserPrincipal(Base):
     role = relation(Role, innerjoin=True)
     realm = relation(Realm, innerjoin=True)
 
-    __table_args__ = (UniqueConstraint(name, realm_id),
+    __table_args__ = (UniqueConstraint(realm_id, name),
                       {'info': {'unique_fields': ['name', 'realm']}})
 
     def __str__(self):
