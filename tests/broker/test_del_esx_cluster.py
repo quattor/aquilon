@@ -51,6 +51,18 @@ class TestDelESXCluster(TestBrokerCommand):
                           r'\);',
                           command)
 
+    def test_105_verify_service_instance(self):
+        # The instance is selected randomly, so check both
+        command = ["cat", "--service", "esx_management_server",
+                   "--instance", "ut.a", "--server"]
+        out = self.commandtest(command)
+        self.matchclean(out, '"utecl1"', command)
+
+        command = ["cat", "--service", "esx_management_server",
+                   "--instance", "ut.b", "--server"]
+        out = self.commandtest(command)
+        self.matchclean(out, '"utecl1"', command)
+
     def test_110_del_utmc1(self):
         for i in range(2, 5):
             self.successtest(["del_esx_cluster", "--cluster=utecl%d" % i])

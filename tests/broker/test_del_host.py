@@ -44,6 +44,12 @@ class TestDelHost(VerifyNotificationsMixin, MachineTestMixin,
         command = "show host --hostname unittest02.one-nyp.ms.com"
         self.notfoundtest(command.split(" "))
 
+    def test_105_verify_service_plenary(self):
+        command = ["cat", "--service", "utsvc", "--instance", "utsi2",
+                   "--server"]
+        out = self.commandtest(command)
+        self.matchclean(out, "unittest02", command)
+
     def test_110_del_unittest00(self):
         self.dsdb_expect_delete(self.net["unknown0"].usable[2])
         command = "del host --hostname unittest00.one-nyp.ms.com"
