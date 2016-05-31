@@ -24,15 +24,14 @@ from sqlalchemy import (Column, Integer, DateTime, Sequence, String, Boolean,
 from sqlalchemy.orm import relation, backref, deferred, validates
 
 from aquilon.exceptions_ import ArgumentError
+from aquilon.config import Config
 from aquilon.utils import force_wwn
-from aquilon.aqdb.column_types import AqStr, Enum
+from aquilon.aqdb.column_types import AqStr
 from aquilon.aqdb.model import Base, Machine, DeviceLinkMixin
 
-# FIXME: this list should not be hardcoded here
-controller_types = ['cciss', 'ide', 'sas', 'sata', 'scsi', 'flash',
-                    'fibrechannel']
-
 _TN = 'disk'
+
+_config = Config()
 
 
 class Disk(DeviceLinkMixin, Base):
@@ -48,7 +47,7 @@ class Disk(DeviceLinkMixin, Base):
     disk_type = Column(String(64), nullable=False)
     capacity = Column(Integer, nullable=False)
     device_name = Column(AqStr(128), nullable=False, default='sda')
-    controller_type = Column(Enum(64, controller_types), nullable=False)
+    controller_type = Column(AqStr(64), nullable=False)
 
     address = Column(AqStr(16), nullable=True)
     wwn = Column(AqStr(32), nullable=True)
@@ -85,6 +84,15 @@ class Disk(DeviceLinkMixin, Base):
         if not self._address_re.match(value):
             raise ArgumentError("Disk address '%s' is not valid, it must "
                                 "match %s." % (value, self._address_re.pattern))
+        return value
+
+    @validates('controller_type')
+    def validate_controller_type(self, key, value):  # pylint: disable=W0613
+        valid_values = [s.strip() for s in
+                        _config.get("broker", "disk_controller_types").split(",")]
+        if value not in valid_values:
+            raise ArgumentError("%s is not a valid controller type, use one "
+                                "of: %s." % (value, ", ".join(sorted(valid_values))))
         return value
 
     @validates('wwn')

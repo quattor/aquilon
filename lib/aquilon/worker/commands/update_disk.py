@@ -18,7 +18,6 @@
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import Machine, Disk, VirtualDisk, Filesystem, Share
-from aquilon.aqdb.model.disk import controller_types
 from aquilon.utils import force_wwn
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.resources import find_resource
@@ -55,11 +54,6 @@ class CommandUpdateDisk(BrokerCommand):
             dbdisk.capacity = size
 
         if controller:
-            if controller not in controller_types:
-                raise ArgumentError("%s is not a valid controller type, use "
-                                    "one of: %s." %
-                                    (controller,
-                                     ", ".join(sorted(controller_types))))
             dbdisk.controller_type = controller
 
         if boot is not None:
