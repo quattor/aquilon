@@ -331,8 +331,6 @@ class QIPRefresh(object):
             in_use = True
 
         if not in_use:
-            self.plenaries.append(Plenary.get_plenary(dbnetwork))
-
             for router in dbnetwork.routers:
                 self.logger.client_info("Removing router {0:s} from "
                                         "{1:l}".format(router.ip, dbnetwork))
@@ -408,9 +406,15 @@ class QIPRefresh(object):
         qipnets = qipnetworks.values()
         heapq.heapify(qipnets)
 
+        prev_aqnet = None
         aqnet = heap_pop(aqnets)
         qipinfo = heap_pop(qipnets)
         while aqnet or qipinfo:
+            if aqnet and aqnet != prev_aqnet:
+                plenary = Plenary.get_plenary(aqnet)
+                self.plenaries.append(plenary)
+                prev_aqnet = aqnet
+
             # We have 3 cases regarding aqnet/qipinfo:
             # - One contains the other: this is a split or a merge
             # - aqnet.ip < qipinfo.address.ip (or there is no qipinfo): the
