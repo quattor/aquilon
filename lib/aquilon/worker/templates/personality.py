@@ -195,8 +195,7 @@ class PlenaryPersonalityPreFeature(Plenary):
         model_feat = []
         interface_feat = []
         pre_feat = []
-        dbpers = self.dbobj.personality
-        for link in dbpers.archetype.features + self.dbobj.features:
+        for link in self.dbobj.archetype.features + self.dbobj.features:
             if link.model:
                 model_feat.append(link)
                 continue
@@ -232,8 +231,7 @@ class PlenaryPersonalityPostFeature(Plenary):
 
     def body(self, lines):
         feat_tmpl = FeatureTemplate()
-        dbpers = self.dbobj.personality
-        for link in sorted(dbpers.archetype.features + self.dbobj.features,
+        for link in sorted(self.dbobj.archetype.features + self.dbobj.features,
                            key=attrgetter("feature.name")):
             if link.feature.post_personality:
                 helper_feature_template(self.dbobj, feat_tmpl, link, lines)

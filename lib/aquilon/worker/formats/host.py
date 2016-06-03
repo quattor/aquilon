@@ -23,8 +23,8 @@ from aquilon.aqdb.model import Host
 from aquilon.worker.formats.formatters import ObjectFormatter
 from aquilon.worker.formats.compileable import CompileableFormatter
 from aquilon.worker.formats.list import ListFormatter
-from aquilon.worker.dbwrappers.feature import (model_features,
-                                               personality_features)
+from aquilon.worker.dbwrappers.feature import (hardware_features,
+                                               host_features)
 
 
 class HostFormatter(CompileableFormatter):
@@ -120,12 +120,11 @@ class HostFormatter(CompileableFormatter):
             details.append(self.redirect_raw(host.virtual_switch,
                                              indent + "  "))
 
-        for feature in sorted(model_features(host.hardware_entity.model,
-                                             host.archetype,
-                                             host.personality_stage),
+        for feature in sorted(hardware_features(host.personality_stage,
+                                                host.hardware_entity.model),
                               key=attrgetter('name')):
             details.append(indent + "  {0:c}: {0.name}".format(feature))
-        (pre, post) = personality_features(host.personality_stage)
+        (pre, post) = host_features(host.personality_stage)
         for feature in sorted(pre, key=attrgetter('name')):
             details.append(indent + "  {0:c}: {0.name} [pre_personality]"
                            .format(feature))

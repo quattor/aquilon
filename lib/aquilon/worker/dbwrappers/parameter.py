@@ -188,21 +188,23 @@ def validate_personality_config(dbstage):
     dbarchetype = dbstage.personality.archetype
     error = []
 
+    # Validate archetype-wide parameters
     for param_def_holder in dbarchetype.param_def_holders.values():
         parameter = dbstage.parameters.get(param_def_holder, None)
         error += validate_required_parameter(param_def_holder, parameter)
 
-    # features for personalities
-    for link in dbarchetype.features + dbstage.features:
-        param_def_holder = link.feature.param_def_holder
-        if not param_def_holder:
-            continue
-
+    # Validate feature parameters
+    features = set(link.feature
+                   for link in dbstage.features + dbarchetype.features
+                   if link.feature.param_def_holder)
+    for dbfeature in features:
+        param_def_holder = dbfeature.param_def_holder
         parameter = dbstage.parameters.get(param_def_holder, None)
         tmp_error = validate_required_parameter(param_def_holder, parameter)
         if tmp_error:
-            error.append("Feature Binding: %s" % link.feature)
+            error.append("Feature Binding: %s" % dbfeature)
             error += tmp_error
+
     return error
 
 

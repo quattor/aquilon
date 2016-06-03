@@ -21,64 +21,55 @@ import os.path
 from sqlalchemy.orm import contains_eager
 
 from aquilon.exceptions_ import ArgumentError
-from aquilon.aqdb.model import FeatureLink, Personality, PersonalityStage
+from aquilon.aqdb.model import (FeatureLink, Personality, PersonalityStage,
+                                HardwareFeature, HostFeature, InterfaceFeature)
 from aquilon.worker.templates.domain import template_branch_basedir
 from aquilon.worker.templates.base import Plenary
 
 
-def model_features(dbmodel, dbarch, dbstage, interface_name=None):
+def hardware_features(dbstage, dbmodel):
     features = set()
-    for link in dbmodel.features:
-        if (link.archetype is None or link.archetype == dbarch) and \
-           (link.personality_stage is None or
-            link.personality_stage == dbstage) and \
-           (link.interface_name is None or link.interface_name == interface_name):
-            features.add(link.feature)
 
-    return features
+    for link in dbstage.features + dbstage.archetype.features:
+        if not isinstance(link.feature, HardwareFeature):
+            continue
+        if link.model != dbmodel:
+            continue
+
+        features.add(link.feature)
+
+    return frozenset(features)
 
 
-def personality_features(dbstage):
+def host_features(dbstage):
     pre = set()
     post = set()
-    for link in dbstage.archetype.features:
-        if link.model or link.interface_name:
+    for link in dbstage.features + dbstage.archetype.features:
+        if not isinstance(link.feature, HostFeature):
             continue
+
         if link.feature.post_personality:
             post.add(link.feature)
         else:
             pre.add(link.feature)
 
-    for link in dbstage.features:
-        if link.model or link.interface_name:
-            continue
-        if link.feature.post_personality:
-            post.add(link.feature)
-        else:
-            pre.add(link.feature)
-
-    return (pre, post)
+    return (frozenset(pre), frozenset(post))
 
 
-def interface_features(dbinterface, dbarch, dbstage):
+def interface_features(dbstage, dbinterface):
     features = set()
 
-    if dbinterface.model_allowed:
-        # Add features bound to the model
-        features.update(model_features(dbinterface.model, dbarch, dbstage,
-                                       dbinterface.name))
+    for link in dbstage.features + dbstage.archetype.features:
+        if not isinstance(link.feature, InterfaceFeature):
+            continue
+        if link.interface_name and link.interface_name != dbinterface.name:
+            continue
+        if link.model and link.model != dbinterface.model:
+            continue
 
-    if dbstage:
-        # Add features bound to the personality, if the interface name matches
-        for link in dbstage.features:
-            # Model features were handled above
-            if link.model:
-                continue
-            if link.interface_name != dbinterface.name:
-                continue
-            features.add(link.feature)
+        features.add(link.feature)
 
-    return features
+    return frozenset(features)
 
 
 def add_link(session, logger, dbfeature, params):

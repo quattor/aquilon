@@ -83,12 +83,10 @@ class PersonalityStageFormatter(PersonalityFormatter):
         for ng in personality.root_netgroups:
             details.append(indent + "  Root Access Netgroup: %s" % ng)
 
-        features = persst.features[:]
-        features.sort(key=attrgetter("feature.feature_type",
-                                     "feature.post_personality",
-                                     "feature.name"))
-
-        for link in features:
+        for link in sorted(persst.features,
+                           key=attrgetter("feature.feature_type",
+                                          "feature.post_personality",
+                                          "feature.name")):
             if link.feature.post_personality:
                 flagstr = " [post_personality]"
             elif link.feature.post_personality_allowed:
