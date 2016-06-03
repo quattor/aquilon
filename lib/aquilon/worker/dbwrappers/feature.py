@@ -18,12 +18,12 @@
 
 import os.path
 
-from sqlalchemy.orm import contains_eager
+from sqlalchemy.orm import contains_eager, subqueryload
 
 from aquilon.exceptions_ import ArgumentError
 from aquilon.aqdb.model import FeatureLink, Personality, PersonalityStage
+from aquilon.worker.templates import Plenary, PlenaryPersonality
 from aquilon.worker.templates.domain import template_branch_basedir
-from aquilon.worker.templates.base import Plenary
 
 
 def add_link(session, logger, dbfeature, params):
@@ -84,5 +84,8 @@ def get_affected_plenaries(session, plenaries, personality_stage=None,
         q = session.query(PersonalityStage)
         q = q.join(Personality)
         q = q.filter_by(archetype=archetype)
-        q = q.options(contains_eager('personality'))
+        q = q.options(contains_eager('personality'),
+                      subqueryload('personality.root_users'),
+                      subqueryload('personality.root_netgroups'))
+        q = q.options(PlenaryPersonality.query_options(load_personality=False))
         plenaries.extend(Plenary.get_plenary(dbobj) for dbobj in q)

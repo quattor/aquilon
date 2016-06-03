@@ -21,6 +21,7 @@ from operator import attrgetter
 from six import iteritems
 
 from sqlalchemy.inspection import inspect
+from sqlalchemy.orm import joinedload, lazyload, subqueryload
 
 from aquilon.exceptions_ import InternalError, IncompleteError
 from aquilon.aqdb.model import (Host, VlanInterface, BondingInterface,
@@ -92,6 +93,23 @@ class PlenaryHost(PlenaryCollection):
                                                   allow_incomplete=allow_incomplete))
         self.append(PlenaryHostData.get_plenary(dbhost,
                                                 allow_incomplete=allow_incomplete))
+
+    @classmethod
+    def query_options(cls, prefix=""):
+        return [subqueryload(prefix + "hardware_entity.interfaces"),
+                subqueryload(prefix + "hardware_entity.interfaces.assignments"),
+                joinedload(prefix + 'hardware_entity.interfaces.assignments.network'),
+                subqueryload(prefix + 'hardware_entity.interfaces.assignments.dns_records'),
+                joinedload(prefix + 'hardware_entity.model'),
+                joinedload(prefix + 'hardware_entity.location'),
+                subqueryload(prefix + 'hardware_entity.location.parents'),
+                subqueryload(prefix + "grns"),
+                joinedload(prefix + "resholder"),
+                subqueryload(prefix + "resholder.resources"),
+                subqueryload(prefix + "services_used"),
+                subqueryload(prefix + "services_provided"),
+                subqueryload(prefix + "_cluster"),
+                lazyload(prefix + "_cluster.host")]
 
 Plenary.handlers[Host] = PlenaryHost
 

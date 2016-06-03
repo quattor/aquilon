@@ -19,7 +19,7 @@
 from jsonschema import validate, ValidationError
 from six import iteritems
 
-from sqlalchemy.orm import joinedload, subqueryload
+from sqlalchemy.orm import joinedload
 from sqlalchemy.sql import or_
 
 from aquilon.exceptions_ import NotFoundException, ArgumentError
@@ -218,20 +218,15 @@ def add_arch_paramdef_plenaries(session, param_def_holder, plenaries):
 
 def add_feature_paramdef_plenaries(session, dbfeature, plenaries):
     # Do the import here, to avoid circles...
-    from aquilon.worker.templates.personality import (PlenaryPersonalityPreFeature,
+    from aquilon.worker.templates.personality import (PlenaryPersonality,
+                                                      PlenaryPersonalityPreFeature,
                                                       PlenaryPersonalityPostFeature)
 
     q = session.query(PersonalityStage)
 
     q = q.join(PersonalityStage.features)
     q = q.filter_by(feature=dbfeature)
-    q = q.options(joinedload('personality'),
-                  subqueryload('parameters'),
-                  subqueryload('features'),
-                  joinedload('features.feature'),
-                  joinedload('features.feature.param_def_holder'),
-                  subqueryload('features.feature.param_def_holder.param_definitions'),
-                  joinedload('features.model'))
+    q = q.options(PlenaryPersonality.query_options())
     for dbstage in q:
         plenaries.append(PlenaryPersonalityPreFeature.get_plenary(dbstage))
         plenaries.append(PlenaryPersonalityPostFeature.get_plenary(dbstage))

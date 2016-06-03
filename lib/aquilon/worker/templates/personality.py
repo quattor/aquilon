@@ -21,6 +21,7 @@ from operator import attrgetter
 from six import iteritems
 
 from sqlalchemy.inspection import inspect
+from sqlalchemy.orm import joinedload, subqueryload
 
 from aquilon.aqdb.model import PersonalityStage, PersonalityParameter
 from aquilon.worker.locks import NoLockKey, PlenaryKey
@@ -108,6 +109,19 @@ class PlenaryPersonality(PlenaryCollection):
         else:
             return PlenaryKey(personality=self.dbobj, logger=self.logger,
                               exclusive=exclusive)
+
+    @classmethod
+    def query_options(cls, prefix="", load_personality=True):
+        options = []
+        if load_personality:
+            options.append(joinedload(prefix + 'personality'))
+        return options + [subqueryload(prefix + 'parameters'),
+                          subqueryload(prefix + 'features'),
+                          subqueryload(prefix + 'grns'),
+                          joinedload(prefix + 'features.feature'),
+                          joinedload(prefix + 'features.feature.param_def_holder'),
+                          subqueryload(prefix + 'features.feature.param_def_holder.param_definitions'),
+                          joinedload(prefix + 'features.model')]
 
 Plenary.handlers[PersonalityStage] = PlenaryPersonality
 
