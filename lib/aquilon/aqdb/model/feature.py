@@ -263,3 +263,48 @@ class FeatureLink(Base):
                           personality_stage=self.personality_stage,
                           archetype=self.archetype,
                           interface_name=self.interface_name)
+
+
+def hardware_features(dbstage, dbmodel):
+    features = set()
+
+    for link in dbstage.features + dbstage.archetype.features:
+        if not isinstance(link.feature, HardwareFeature):
+            continue
+        if link.model != dbmodel:
+            continue
+
+        features.add(link.feature)
+
+    return frozenset(features)
+
+
+def host_features(dbstage):
+    pre = set()
+    post = set()
+    for link in dbstage.features + dbstage.archetype.features:
+        if not isinstance(link.feature, HostFeature):
+            continue
+
+        if link.feature.post_personality:
+            post.add(link.feature)
+        else:
+            pre.add(link.feature)
+
+    return (frozenset(pre), frozenset(post))
+
+
+def interface_features(dbstage, dbinterface):
+    features = set()
+
+    for link in dbstage.features + dbstage.archetype.features:
+        if not isinstance(link.feature, InterfaceFeature):
+            continue
+        if link.interface_name and link.interface_name != dbinterface.name:
+            continue
+        if link.model and link.model != dbinterface.model:
+            continue
+
+        features.add(link.feature)
+
+    return frozenset(features)

@@ -32,13 +32,12 @@ from aquilon.aqdb.model import (HardwareEntity, DnsEnvironment, DnsDomain, Fqdn,
                                 Personality, Domain, Machine, NetworkDevice,
                                 Disk, ChassisSlot, VirtualMachine)
 from aquilon.aqdb.model.dns_domain import parse_fqdn
+from aquilon.aqdb.model.feature import hardware_features, host_features
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
-from aquilon.worker.dbwrappers.feature import (hardware_features,
-                                               host_features,
-                                               check_feature_template)
+from aquilon.worker.dbwrappers.feature import check_feature_template
 from aquilon.worker.dbwrappers.grn import lookup_grn
 from aquilon.worker.dbwrappers.service_instance import check_no_provided_service
-from aquilon.worker.templates import (Plenary, PlenaryServiceInstanceServer)
+from aquilon.worker.templates import Plenary, PlenaryServiceInstanceServer
 from aquilon.utils import chunk
 
 

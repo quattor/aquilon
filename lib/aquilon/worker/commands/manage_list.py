@@ -22,11 +22,10 @@ import re
 
 from aquilon.exceptions_ import ArgumentError, ProcessException
 from aquilon.aqdb.model import Domain, Sandbox
+from aquilon.aqdb.model.feature import hardware_features, host_features
 from aquilon.worker.broker import BrokerCommand
 from aquilon.worker.dbwrappers.branch import get_branch_and_author
-from aquilon.worker.dbwrappers.feature import (hardware_features,
-                                               host_features,
-                                               check_feature_template)
+from aquilon.worker.dbwrappers.feature import check_feature_template
 from aquilon.worker.dbwrappers.host import (hostlist_to_hosts,
                                             check_hostlist_size,
                                             validate_branch_author)

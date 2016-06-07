@@ -20,11 +20,10 @@ from operator import attrgetter
 from six import iteritems
 
 from aquilon.aqdb.model import Host
+from aquilon.aqdb.model.feature import hardware_features, host_features
 from aquilon.worker.formats.formatters import ObjectFormatter
 from aquilon.worker.formats.compileable import CompileableFormatter
 from aquilon.worker.formats.list import ListFormatter
-from aquilon.worker.dbwrappers.feature import (hardware_features,
-                                               host_features)
 
 
 class HostFormatter(CompileableFormatter):

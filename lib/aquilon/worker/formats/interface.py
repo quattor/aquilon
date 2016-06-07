@@ -23,8 +23,8 @@ from aquilon.aqdb.model import (Interface, PublicInterface, ManagementInterface,
                                 BondingInterface, BridgeInterface,
                                 LoopbackInterface, VirtualInterface,
                                 PhysicalInterface)
+from aquilon.aqdb.model.feature import interface_features
 from aquilon.worker.formats.formatters import ObjectFormatter
-from aquilon.worker.dbwrappers.feature import interface_features
 
 
 class InterfaceFormatter(ObjectFormatter):
