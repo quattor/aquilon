@@ -116,7 +116,9 @@ class PlenaryHostData(StructurePlenary):
 
             ifdesc = {}
 
-            if dbinterface.master:
+            # Do not de-reference the relation unless needed, to avoid
+            # unnecessary queries
+            if dbinterface.master_id is not None:
                 ifdesc["bootproto"] = "none"
                 if isinstance(dbinterface.master, BondingInterface):
                     ifdesc["master"] = dbinterface.master.name

@@ -578,7 +578,7 @@ def assign_address(dbinterface, ip, dbnetwork, label=None, shared=False,
                    priority=None, logger=None):
     assert isinstance(dbinterface, Interface)
 
-    if dbinterface.master:
+    if dbinterface.master_id is not None:
         raise ArgumentError("Slave interfaces cannot hold addresses.")
 
     dbrack = dbinterface.hardware_entity.location.rack

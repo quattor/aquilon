@@ -245,7 +245,7 @@ class NetworkHostListFormatter(ListFormatter):
                 # database again
                 for iface in dbhwent.interfaces:
                     iface_by_id[iface.id] = iface
-                    if iface.master_id:
+                    if iface.master_id is not None:
                         slaves_by_id[iface.master_id].append(iface)
 
                 for iface in dbhwent.interfaces:
