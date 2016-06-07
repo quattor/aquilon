@@ -161,6 +161,7 @@ client_notifications = yes
 sharedata = /ms/dist/storage/etc/nasobjects.cdb
 default_domain_start = prod
 trash_branch = trash
+authorization_rules = aqd-authorization.conf
 authorization_error = Please contact an administrator for access.
 # See comments in aquilon.worker.resources.set_thread_pool_size
 twisted_thread_pool_size = 100

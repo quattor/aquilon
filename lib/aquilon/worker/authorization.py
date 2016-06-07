@@ -16,11 +16,14 @@
 # limitations under the License.
 """Authorization stub for simple authorization checks."""
 
-
 import re
 
+from six.moves.configparser import RawConfigParser  # pylint: disable=F0401
+
+from twisted.python import log
+
 from aquilon.exceptions_ import AuthorizationException
-from aquilon.config import Config
+from aquilon.config import Config, lookup_file_path
 
 host_re = re.compile(r'^host/(.+)@([^@]+)$')
 
@@ -33,7 +36,41 @@ class AuthorizationBroker(object):
 
     def __init__(self):
         self.__dict__ = self.__shared_state
+
+        # TODO: Make the initialization more explicit
+        if getattr(self, "config", None):
+            return
+
         self.config = Config()
+
+        self.action_whitelist = {}
+        self.role_whitelist = {}
+        self.default_allow = {}
+
+        authz_config = lookup_file_path(self.config.get("broker",
+                                                        "authorization_rules"))
+        log.msg("Reading authorization rules from " + authz_config)
+        rules = RawConfigParser()
+        rules.read(authz_config)
+
+        for section in rules.sections():
+            if section.startswith("action-"):
+                if not rules.has_option(section, "role_whitelist"):
+                    continue
+                action = section[7:]
+                roles = set(s.strip() for s in
+                            rules.get(section, "role_whitelist").split(","))
+                self.action_whitelist[action] = roles
+            elif section.startswith("role-"):
+                role = section[5:]
+                if rules.has_option(section, "allow_by_default") and \
+                   rules.getboolean(section, "allow_by_default"):
+                    self.default_allow[role] = True
+                if not rules.has_option(section, "actions"):
+                    continue
+                actions = set(s.strip() for s in
+                              rules.get(section, "actions").split(","))
+                self.role_whitelist[role] = actions
 
     def raise_auth_error(self, principal, action, resource):
         auth_msg = self.config.get("broker", "authorization_error")
@@ -57,404 +94,22 @@ class AuthorizationBroker(object):
             return True
         if dbuser.role.name == 'nobody':
             self.raise_auth_error(principal, action, resource)
-        # Right now, anybody in a group can do anything they want, except...
-        if action in ['add_archetype', 'update_archetype', 'del_archetype',
-                      'add_organization', 'del_organization',
-                      'add_grn', 'del_grn', 'update_grn',
-                      'add_vlan', 'del_vlan',
-                      'rollback', 'update_city']:
-            if dbuser.role.name not in ['engineering', 'aqd_admin']:
-                raise AuthorizationException(
-                    "Must have the engineering or aqd_admin role to %s." %
-                    action)
-        if action in ['add_vendor', 'del_vendor',
-                      'add_os', 'update_os', 'del_os',
-                      'add_model', 'update_model', 'del_model']:
-            if dbuser.role.name not in ['engineering', 'aqd_admin',
-                                        'network_engineering']:
-                raise AuthorizationException(
-                    "Must have the engineering, network_engineering or "
-                    "aqd_admin role to %s." % action)
-        if action in ['permission', 'update_realm',
-                      'grant_root_access', 'revoke_root_access']:
-            if dbuser.role.name not in ['aqd_admin', 'gatekeeper', 'secadmin']:
-                raise AuthorizationException(
-                    "Must have the gatekeeper or aqd_admin role to %s." %
-                    action)
-        if action in ['flush']:
-            if dbuser.role.name not in ['aqd_admin']:
-                raise AuthorizationException(
-                    "Must have the aqd_admin role to %s." % action)
-        if action in ['add_user', 'del_user', 'update_user']:
-            if dbuser.role.name not in ['aqd_admin']:
-                raise AuthorizationException(
-                    "Must have the aqd_admin role to %s." % action)
-        if dbuser.role.name == 'aqweb':
-            if action not in ['change_status']:
-                self.raise_auth_error(principal, action, resource)
-        if dbuser.role.name == 'winops':
-            if action not in ['add_host', 'add_host_prefix', 'add_windows_host',
-                              'make_cluster_cluster',
-                              'make_cluster_metacluster',
-                              'reconfigure', 'reconfigure_list',
-                              'reconfigure_membersof',
-                              'update_machine']:
-                self.raise_auth_error(principal, action, resource)
-        if dbuser.role.name == 'winops_server':
-            # Only need add/update_cluster for hacluster VCenters
-            if action not in ['add_windows_host', 'del_windows_host',
-                              'add_aurora_host',
-                              'add_alias', 'update_alias', 'del_alias',
-                              'add_machine',
-                              'add_host', 'add_host_prefix',
-                              'add_interface_hostname',
-                              'add_interface_machine',
-                              'add_interface_address',
-                              'add_address', 'del_address',
-                              'reconfigure', 'reconfigure_list',
-                              'reconfigure_membersof',
-                              'add_cluster', 'update_cluster',
-                              'make_cluster_cluster',
-                              'make_cluster_metacluster',
-                              'change_status', 'change_status_cluster',
-                              'change_status_metacluster',
-                              'add_service_instance', 'map_service',
-                              'bind_server', 'update_machine']:
-                self.raise_auth_error(principal, action, resource)
-        if dbuser.role.name == 'mssb_unixops':
-            if action not in ['add_machine', 'del_machine',
-                              'update_machine', 'update_machine_hostname',
-                              'add_interface_hostname',
-                              'add_interface_machine',
-                              'add_interface_address',
-                              'add_interface_chassis',
-                              'update_interface_hostname',
-                              'update_interface_machine',
-                              'del_interface', 'del_interface_address',
-                              'add_alias', 'update_alias', 'del_alias',
-                              'add_address', 'del_address',
-                              'add_host', 'add_host_prefix', 'del_host',
-                              'add_windows_host', 'del_windows_host',
-                              'add_manager', 'add_dynamic_range', 'add_disk',
-                              'add_auxiliary',
-                              'del_manager', 'del_auxiliary',
-                              'del_disk', 'del_disk_disk', 'update_disk',
-                              'add_filesystem', 'del_filesystem',
-                              'add_rack', 'add_rack_room', 'add_chassis',
-                              'del_rack', 'del_chassis',
-                              'map_grn', 'unmap_grn',
-                              'unmap_grn_clearall',
-                              'change_status']:
-                self.raise_auth_error(principal, action, resource)
-        if dbuser.role.name == 'spot_server':
-            if action not in ['add_machine', 'del_machine',
-                              'add_machine_prefix',
-                              'add_interface_hostname',
-                              'add_interface_machine',
-                              'add_interface_address',
-                              'del_interface', 'del_interface_address',
-                              'add_address', 'del_address',
-                              'add_host', 'add_host_prefix', 'del_host',
-                              'add_alias', 'del_alias',
-                              'make', 'make_cluster_cluster',
-                              'make_cluster_metacluster',
-                              'pxeswitch',
-                              'change_status',
-                              'update_machine', 'update_machine_hostname',
-                              'add_room', 'add_rack', 'add_rack_room',
-                              'add_disk', 'del_disk', 'del_disk_disk',
-                              'update_disk']:
-                self.raise_auth_error(principal, action, resource)
-        if dbuser.role.name == 'resource_pool':
-            if action not in ['add_address', 'del_address']:
-                self.raise_auth_error(principal, action, resource)
-        if dbuser.role.name == 'secadmin':
-            if action not in ['permission',
-                              'grant_root_access', 'revoke_root_access',
-                              'compile', 'compile_hostname',
-                              'compile_cluster', 'compile_metacluster',
-                              'compile_personality',
-                              'add_netgroup_whitelist',
-                              'del_netgroup_whitelist']:
-                self.raise_auth_error(principal, action, resource)
-        if dbuser.role.name == 'hpevelo':
-            if action not in ['reconfigure', 'reconfigure_list',
-                              'reconfigure_membersof',
-                              'pxeswitch', 'change_status',
-                              'add_disk', 'del_disk', 'del_disk_disk',
-                              'update_disk']:
-                self.raise_auth_error(principal, action, resource)
-        if dbuser.role.name == 'location_admin':
-            if action not in ['add_building', 'del_building',
-                              'add_city', 'del_city']:
-                self.raise_auth_error(principal, action, resource)
-        if dbuser.role.name == 'telco_operations':
-            if action not in ['add_rack', 'add_network_device',
-                              'add_switch',
-                              'update_rack', 'update_network_device',
-                              'update_switch',
-                              'del_rack', 'del_network_device',
-                              'del_switch',
-                              'add_interface_network_device',
-                              'add_interface_switch',
-                              'del_interface_network_device',
-                              'del_interface_switch',
-                              'update_interface_network_device',
-                              'update_interface_switch',
-                              'add_interface_address_network_device',
-                              'add_interface_address_switch',
-                              'del_interface_address_network_device',
-                              'del_interface_address_switch',
-                              'add_alias', 'del_alias',
-                              'refresh_network',
-                              'update_router_address']:
-                self.raise_auth_error(principal, action, resource)
-        if dbuser.role.name == 'network_engineering':
-            if action not in ['add_vendor', 'del_vendor',
-                              'add_os', 'update_os', 'del_os',
-                              'add_model', 'update_model', 'del_model',
-                              'add_rack', 'add_network_device',
-                              'add_switch',
-                              'update_rack', 'update_network_device',
-                              'update_switch',
-                              'del_rack', 'del_network_device', 'del_switch',
-                              'add_interface_network_device',
-                              'add_interface_switch',
-                              'del_interface_network_device',
-                              'del_interface_switch',
-                              'update_interface_network_device',
-                              'update_interface_switch',
-                              'add_interface_address_network_device',
-                              'add_interface_address_switch',
-                              'del_interface_address_network_device',
-                              'del_interface_address_switch',
-                              'add_alias', 'del_alias',
-                              'refresh_network',
-                              'update_router_address']:
-                self.raise_auth_error(principal, action, resource)
-        if dbuser.role.name == 'edc':
-            if action not in ['add_rack', 'add_machine',
-                              'add_host', 'add_host_prefix',
-                              'add_interface_machine',
-                              'add_interface_hostname',
-                              'add_interface_address',
-                              'add_alias', 'add_manager',
-                              'add_service_address',
-                              'del_service_address',
-                              'update_rack', 'update_machine', 'update_alias',
-                              'update_interface_hostname',
-                              'update_interface_machine',
-                              'del_rack', 'del_machine', 'del_host',
-                              'del_interface', 'del_interface_address',
-                              'del_alias', 'del_manager']:
-                self.raise_auth_error(principal, action, resource)
-        if dbuser.role.name == 'maintech':
-            if action not in ['pxeswitch', 'pxeswitch_list',
-                              'compile', 'compile_hostname', 'change_status',
-                              'update_interface_hostname',
-                              'update_interface_machine']:
-                self.raise_auth_error(principal, action, resource)
-        if dbuser.role.name == 'template_admin':
-            if action not in ['add_sandbox', 'del_sandbox',
-                              'manage', 'publish',
-                              'reconfigure', 'reconfigure_list',
-                              'reconfigure_membersof']:
-                self.raise_auth_error(principal, action, resource)
 
-        if dbuser.role.name == 'laf':
-            if action not in ['reconfigure', 'reconfigure_list',
-                              'reconfigure_membersof',
-                              'pxeswitch', 'pxeswitch_list',
-                              'add_reboot_intervention',
-                              'compile', 'compile_hostname',
-                              'compile_personality',
-                              'add_reboot_schedule',
-                              'del_reboot_intervention',
-                              'del_reboot_schedule',
-                              'map_grn', 'unmap_grn',
-                              'unmap_grn_clearall',
-                              'add_hostlink', 'del_hostlink',
-                              'add_personality', 'update_personality',
-                              'del_personality',
-                              'add_parameter', 'update_parameter',
-                              'del_parameter',
-                              'bind_feature', 'unbind_feature',
-                              'map_service',
-                              'add_required_service_personality',
-                              'del_required_service_personality',
-                              'del_personality_personality_stage',
-                              'promote', 'demote',
-                              'add_alias', 'del_alias', 'update_alias',
-                              'add_desk',
-                              'add_machine', 'add_machine_prefix',
-                              'add_host', 'add_host_prefix', 'add_windows_host']:
-                self.raise_auth_error(principal, action, resource)
+        # First process the per-action whitelist
+        if action in self.action_whitelist and \
+           dbuser.role.name not in self.action_whitelist[action] and \
+           dbuser.role.name != "aqd_admin":
+            self.raise_auth_error(principal, action, resource)
 
-        if dbuser.role.name == 'itsec':
-            if action not in ['pxeswitch', 'pxeswitch_list',
-                              'compile', 'compile_hostname',
-                              'change_status', 'make',
-                              'reconfigure',
-                              'reconfigure_list', 'reconfigure_membersof',
-                              'reconfigure_hostlist',
-                              'add_interface_machine',
-                              'add_interface_hostname',
-                              'add_interface_address',
-                              'update_interface_hostname',
-                              'update_interface_machine',
-                              'del_interface', 'del_interface_address',
-                              'add_disk', 'del_disk', 'del_disk_disk',
-                              'update_disk',
-                              'add_machine', 'del_machine',
-                              'update_machine', 'update_machine_hostname',
-                              'add_host', 'add_host_prefix', 'del_host',
-                              'add_alias', 'add_manager',
-                              'del_alias', 'del_manager']:
-                self.raise_auth_error(principal, action, resource)
+        if dbuser.role.name in self.default_allow or \
+           dbuser.role.name == "aqd_admin":
+            return True
 
-        if dbuser.role.name == 'sec_platform_eng':
-            if action not in ['add_address', 'del_address',
-                              'add_disk', 'update_disk', 'del_disk', 'del_disk_disk',
-                              'add_host', 'del_host',
-                              'add_interface_machine', 'update_interface',
-                              'del_interface_machine',
-                              'add_interface_address',
-                              'del_interface_address',
-                              'add_machine', 'update_machine', 'del_machine',
-                              'add_manager', 'del_manager',
-                              'manage',
-                              'reconfigure', 'reconfigure_list',
-                              'reconfigure_membersof',
-                              'make', 'change_status',
-                              'add_sandbox', 'del_sandbox',
-                              'publish', 'deploy',
-                              'compile', 'compile_hostname',
-                              'compile_cluster', 'compile_metacluster',
-                              'compile_personality',
-                              'bind_client', 'unbind_client',
-                              'rebind_client',
-                              'bind_server',
-                              'add_feature', 'update_feature', 'del_feature',
-                              'bind_feature', 'unbind_feature',
-                              'add_alias', 'del_alias',
-                              'map_service', 'unmap_service',
-                              'pxeswitch',
-                              'add_parameter', 'update_parameter', 'del_parameter',
-                              'add_parameter_definition',
-                              'update_parameter_definition',
-                              'del_parameter_definition',
-                              'add_personality', 'update_personality', 'del_personality',
-                              'add_service']:
-                self.raise_auth_error(principal, action, resource)
+        if dbuser.role.name in self.role_whitelist and \
+           action in self.role_whitelist[dbuser.role.name]:
+            return True
 
-        if dbuser.role.name == 'sec_platform_ops':
-            if action not in ['pxeswitch', 'pxeswitch_list',
-                              'compile', 'compile_hostname',
-                              'compile_cluster', 'compile_metacluster',
-                              'compile_personality',
-                              'change_status', 'make', 'reconfigure',
-                              'reconfigure_list', 'reconfigure_membersof',
-                              'add_interface_machine',
-                              'add_interface_hostname',
-                              'update_interface_hostname',
-                              'update_interface_machine',
-                              'del_interface',
-                              'add_interface_address',
-                              'del_interface_address',
-                              'add_disk', 'del_disk', 'del_disk_disk',
-                              'update_disk',
-                              'add_machine', 'del_machine',
-                              'update_machine', 'update_machine_hostname',
-                              'add_host', 'add_host_prefix', 'del_host',
-                              'add_alias', 'del_alias',
-                              'add_manager', 'del_manager']:
-                self.raise_auth_error(principal, action, resource)
-
-        if dbuser.role.name == 'unixops_l2':
-            if action not in ['add_host', 'add_host_prefix', 'add_windows_host',
-                              'del_host', 'del_windows_host',
-                              'compile', 'compile_hostname',
-                              'compile_cluster', 'compile_metacluster',
-                              'compile_personality',
-                              'reconfigure', 'reconfigure_membersof',
-                              'reconfigure_list', 'reconfigure_hostlist',
-                              'change_status',
-                              'pxeswitch', 'pxeswitch_list',
-                              'add_interface_chassis',
-                              'add_interface_hostname',
-                              'add_interface_machine',
-                              'add_interface_address',
-                              'del_interface',
-                              'del_interface_address',
-                              'add_reboot_intervention',
-                              'add_reboot_schedule',
-                              'del_reboot_intervention',
-                              'del_reboot_schedule',
-                              'update_interface_hostname',
-                              'update_interface_machine',
-                              'add_machine',
-                              'del_machine',
-                              'update_machine', 'update_machine_hostname',
-                              'add_cluster', 'update_cluster',
-                              'del_cluster',
-                              'add_esx_cluster', 'update_esx_cluster',
-                              'del_esx_cluster',
-                              'bind_esx_cluster_hostname',
-                              'rebind_esx_cluster_hostname',
-                              'cluster', 'uncluster',
-                              'change_status_cluster',
-                              'change_status_metacluster',
-                              'add_allowed_personality',
-                              'add_manager', 'add_dynamic_range', 'add_disk',
-                              'add_auxiliary',
-                              'del_manager', 'del_auxiliary',
-                              'del_disk', 'del_disk_disk', 'update_disk',
-                              'add_service_instance',
-                              'update_service_instance',
-                              'del_service_instance',
-                              'add_alias', 'del_alias',
-                              'update_alias',
-                              'add_filesystem',
-                              'del_filesystem',
-                              'poll_switch', 'poll_switch_switch',
-                              'poll_network_device',
-                              'poll_network_device_network_device',
-                              'add_rack', 'add_rack_room', 'add_chassis',
-                              'del_rack', 'del_chassis',
-                              'add_bunker', 'del_bunker',
-                              'add_address', 'del_address',
-                              'add_personality', 'update_personality',
-                              'del_personality',
-                              'add_parameter', 'update_parameter',
-                              'del_parameter', 'add_required_service',
-                              'add_service_address',
-                              'del_service_address',
-                              'add_resourcegroup',
-                              'del_resourcegroup',
-                              'add_required_service_personality',
-                              'bind_feature', 'unbind_feature',
-                              'validate_parameter',
-                              'add_hostlink', 'del_hostlink',
-                              'add_static_route',
-                              'del_static_route',
-                              'manage_hostname', 'manage_list',
-                              'manage_cluster',
-                              'map_grn', 'unmap_grn',
-                              'promote', 'demote',
-                              'unmap_grn_clearall',
-                              'make', 'make_cluster_cluster',
-                              'make_cluster_metacluster']:
-                self.raise_auth_error(principal, action, resource)
-        if dbuser.role.name == 'alias_manager':
-            if action not in ['add_alias', 'del_alias', 'update_alias']:
-                self.raise_auth_error(principal, action, resource)
-        if dbuser.role.name == 'webops':
-            if action not in ['add_address', 'del_address', 'update_address',
-                              'add_alias', 'del_alias', 'update_alias',
-                              'add_address_alias', 'del_address_alias',
-                              'update_address_alias']:
-                self.raise_auth_error(principal, action, resource)
-        return True
+        self.raise_auth_error(principal, action, resource)
 
     def _check_aquilonhost(self, principal, dbuser, resource):
         """ Return true if the incoming user is an aquilon host and this is
