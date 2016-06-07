@@ -118,6 +118,11 @@ class CommandFlush(BrokerCommand):
                                 addrs_by_iface.get(iface_id, None))
             set_committed_value(iface, "slaves",
                                 slaves_by_id.get(iface_id, None))
+            set_committed_value(iface, "master",
+                                interfaces_by_id.get(iface.master_id, None))
+            if hasattr(iface, "parent"):
+                set_committed_value(iface, "parent",
+                                    interfaces_by_id.get(iface.parent_id, None))
 
     def render(self, session, logger, services, personalities, machines,
                clusters, hosts, locations, resources, networks, network_devices,
