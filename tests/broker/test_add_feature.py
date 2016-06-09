@@ -77,11 +77,6 @@ default_features = {
             "activation": "reboot",
             "deactivation": "reboot",
         },
-        "interfacefeature": {
-            "visibility": "public",
-            "activation": "reboot",
-            "deactivation": "reboot",
-        },
         "shinynew": {
             "visibility": "public",
             "activation": "dispatch",

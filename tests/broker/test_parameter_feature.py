@@ -29,7 +29,6 @@ from broker.brokertest import TestBrokerCommand
 PERSONALITY = 'unixeng-test'
 ARCHETYPE = 'aquilon'
 HOSTFEATURE = 'hostfeature'
-INTERFACEFEATURE = 'interfacefeature'
 OTHER_PERSONALITY = 'utpers-dev'
 
 SHOW_CMD = ["show", "parameter", "--personality", PERSONALITY,
@@ -53,8 +52,9 @@ class TestParameterFeature(TestBrokerCommand):
         self.ignoreoutputtest(cmd)
 
     def test_070_bind_interface_feature(self):
-        cmd = ["bind_feature", "--feature", INTERFACEFEATURE,
-               "--personality", PERSONALITY, "--interface", "eth0"]
+        cmd = ["bind_feature", "--feature", "src_route",
+               "--personality", PERSONALITY, "--interface", "eth0",
+               "--justification", "tcm=12345678"]
         self.successtest(cmd)
 
     def test_090_verify_feature_proto_noerr(self):
@@ -158,7 +158,7 @@ class TestParameterFeature(TestBrokerCommand):
                           r'Type: string\s*',
                           cmd)
         self.searchoutput(out,
-                          r'Feature Binding: interfacefeature\s*'
+                          r'Feature Binding: src_route\s*'
                           r'Parameter Definition: testrequired \[required\]\s*'
                           r'Type: string\s*',
                           cmd)
@@ -174,19 +174,19 @@ class TestParameterFeature(TestBrokerCommand):
     def test_200_add_path_interface_feature(self):
         path = "testdefault"
         value = "interface_feature"
-        cmd = ADD_CMD + ["--path", path, "--value", value, "--feature", INTERFACEFEATURE]
+        cmd = ADD_CMD + ["--path", path, "--value", value, "--feature", "src_route"]
         self.noouttest(cmd)
 
         path = "testlist"
         value = "intf1,intf2"
-        cmd = ADD_CMD + ["--path", path, "--value", value, "--feature", INTERFACEFEATURE]
+        cmd = ADD_CMD + ["--path", path, "--value", value, "--feature", "src_route"]
         self.noouttest(cmd)
 
     def test_210_verify_interface_feature(self):
         cmd = SHOW_CMD
         out = self.commandtest(cmd)
         self.searchoutput(out,
-                          r'Interface Feature: interfacefeature\s*'
+                          r'Interface Feature: src_route\s*'
                           r'testdefault: "interface_feature"\s*'
                           r'testlist: \[\s*"intf1",\s*"intf2"\s*\]\s*',
                           cmd)
@@ -195,23 +195,23 @@ class TestParameterFeature(TestBrokerCommand):
         cmd = CAT_CMD + ["--pre_feature"]
         out = self.commandtest(cmd)
         self.searchoutput(out,
-                          r'"/system/features/interface/interfacefeature/testboolean" = true;\s*'
-                          r'"/system/features/interface/interfacefeature/testdefault" = "interface_feature";\s*'
-                          r'"/system/features/interface/interfacefeature/testfalsedefault" = false;\s*'
-                          r'"/system/features/interface/interfacefeature/testfloat" = 100\.100;\s*'
-                          r'"/system/features/interface/interfacefeature/testint" = 60;\s*'
-                          r'"/system/features/interface/interfacefeature/testjson" = nlist\(\s*'
+                          r'"/system/features/interface/src_route/testboolean" = true;\s*'
+                          r'"/system/features/interface/src_route/testdefault" = "interface_feature";\s*'
+                          r'"/system/features/interface/src_route/testfalsedefault" = false;\s*'
+                          r'"/system/features/interface/src_route/testfloat" = 100\.100;\s*'
+                          r'"/system/features/interface/src_route/testint" = 60;\s*'
+                          r'"/system/features/interface/src_route/testjson" = nlist\(\s*'
                           r'"key",\s*"param_key",\s*'
                           r'"values",\s*list\(\s*0\s*\)\s*\);\s*'
-                          r'"/system/features/interface/interfacefeature/testlist" = list\(\s*"intf1",\s*"intf2"\s*\);\s*'
-                          r'"/system/features/interface/interfacefeature/teststring" = "default";\s*',
+                          r'"/system/features/interface/src_route/testlist" = list\(\s*"intf1",\s*"intf2"\s*\);\s*'
+                          r'"/system/features/interface/src_route/teststring" = "default";\s*',
                           cmd)
 
     def test_260_add_existing(self):
         path = "testdefault"
         value = "interface_feature"
         cmd = ADD_CMD + ["--path", path, "--value", value,
-                         "--feature", INTERFACEFEATURE]
+                         "--feature", "src_route"]
         out = self.badrequesttest(cmd)
         self.matchoutput(out, "Parameter with path=testdefault already exists.", cmd)
 
@@ -233,8 +233,8 @@ class TestParameterFeature(TestBrokerCommand):
                               "features/hostfeature/testjson",
                               "features/hostfeature/testlist",
                               "features/hostfeature/teststring",
-                              "features/interface/interfacefeature/testlist",
-                              "features/interface/interfacefeature/testdefault",
+                              "features/interface/src_route/testlist",
+                              "features/interface/src_route/testdefault",
                               "windows/windows",
                              ]))
 
@@ -254,9 +254,9 @@ class TestParameterFeature(TestBrokerCommand):
                          'host1,host2')
         self.assertEqual(param_values['features/hostfeature/testdefault'],
                          'host_feature')
-        self.assertEqual(param_values['features/interface/interfacefeature/testlist'],
+        self.assertEqual(param_values['features/interface/src_route/testlist'],
                          'intf1,intf2')
-        self.assertEqual(param_values['features/interface/interfacefeature/testdefault'],
+        self.assertEqual(param_values['features/interface/src_route/testdefault'],
                          'interface_feature')
 
     def test_400_json_validation(self):
@@ -333,8 +333,8 @@ class TestParameterFeature(TestBrokerCommand):
                           r'//teststring\s*',
                           cmd)
         self.searchoutput(out,
-                          r'Differences for Parameters for interface feature interfacefeature:\s*'
-                          r'missing Parameters for interface feature interfacefeature in Personality aquilon/utpers-dev@current:\s*'
+                          r'Differences for Parameters for interface feature src_route:\s*'
+                          r'missing Parameters for interface feature src_route in Personality aquilon/utpers-dev@current:\s*'
                           r'//testdefault\s*'
                           r'//testlist/0\s*'
                           r'//testlist/1\s*',
@@ -405,12 +405,13 @@ class TestParameterFeature(TestBrokerCommand):
         self.ignoreoutputtest(cmd)
 
     def test_930_del_interface_feature_params(self):
-        cmd = DEL_CMD + ["--path=testdefault", "--feature", INTERFACEFEATURE]
+        cmd = DEL_CMD + ["--path=testdefault", "--feature", "src_route"]
         self.noouttest(cmd)
 
     def test_935_del_interface_feature(self):
-        cmd = ["unbind_feature", "--feature", INTERFACEFEATURE, "--interface", "eth0",
-               "--personality", PERSONALITY]
+        cmd = ["unbind_feature", "--feature", "src_route", "--interface", "eth0",
+               "--personality", PERSONALITY,
+               "--justification", "tcm=12345678"]
         self.ignoreoutputtest(cmd)
 
     def test_950_del_same_name_feature_parameter(self):
