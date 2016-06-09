@@ -365,12 +365,12 @@ class TestAddParameterDefinition(TestBrokerCommand):
                          cmd)
 
     def test_300_show_feature_no_params(self):
-        cmd = ["show_parameter_definition", "--feature", "pre_host_no_params",
+        cmd = ["show_parameter_definition", "--feature", "unused_no_params",
                "--type", "host", "--path", "path-does-not-exist"]
         out = self.notfoundtest(cmd)
         self.matchoutput(out,
                          "No parameter definitions found for host feature "
-                         "pre_host_no_params.",
+                         "unused_no_params.",
                          cmd)
 
     def test_400_verify_all(self):

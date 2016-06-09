@@ -165,10 +165,10 @@ class TestParameterFeature(TestBrokerCommand):
 
     def test_140_unbound_feature(self):
         command = ["add_parameter", "--personality", PERSONALITY,
-                   "--feature", "myfeature", "--path", "teststring",
+                   "--feature", "unused_no_params", "--path", "teststring",
                    "--value", "some_value"]
         out = self.badrequesttest(command)
-        self.matchoutput(out, "Host Feature myfeature is not bound to "
+        self.matchoutput(out, "Host Feature unused_no_params is not bound to "
                          "personality aquilon/unixeng-test@next.", command)
 
     def test_200_add_path_interface_feature(self):

@@ -73,15 +73,6 @@ class TestBindFeature(TestBrokerCommand):
                           r'"/metadata/features" = append\("features/pre_host/config"\);',
                           command)
 
-    def test_105_bind_archetype_param(self):
-        command = ["bind", "feature", "--feature", "pre_host_param",
-                   "--archetype", "aquilon",
-                   "--justification", "tcm=12345678"]
-        err = self.statustest(command)
-        self.verify_personality_flush(err, command)
-        # We can't easily check the number of templates that got refreshed since
-        # there's no easy way to query if "make" was run for a host or not
-
     def test_110_bind_personality(self):
         command = ["bind", "feature", "--feature", "post_host",
                    "--personality", "inventory"]
@@ -502,7 +493,7 @@ class TestBindFeature(TestBrokerCommand):
                          "stage.", command)
 
     def test_200_bind_model_no_justification(self):
-        command = ["bind", "feature", "--feature", "disable_ht",
+        command = ["bind", "feature", "--feature", "bios_setup",
                    "--model", "utmedium", "--archetype", "aquilon"]
         out = self.unauthorizedtest(command, auth=True, msgcheck=False)
         self.matchoutput(out,

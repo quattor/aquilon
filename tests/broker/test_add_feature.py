@@ -35,20 +35,15 @@ default_features = {
             "activation": "reboot",
             "deactivation": "reboot",
         },
-        "pre_host_param": {
-            "visibility": "public",
-            "activation": "reboot",
-            "deactivation": "reboot",
-        },
         "post_host": {
             "visibility": "public",
             "post_personality": True,
             "activation": "reboot",
             "deactivation": "reboot",
         },
-        "pre_host_no_params": {
+        "unused_no_params": {
             "visibility": "public",
-            "comments": "Feature which will not have any parameters",
+            "comments": "Unused feature which will not have any parameters",
             "activation": "reboot",
             "deactivation": "reboot",
         },
@@ -72,11 +67,6 @@ default_features = {
     "hardware": {
         "bios_setup": {
             "visibility": "public",
-            "activation": "reboot",
-            "deactivation": "reboot",
-        },
-        "disable_ht": {
-            "visibility": "owner_approved",
             "activation": "reboot",
             "deactivation": "reboot",
         },
