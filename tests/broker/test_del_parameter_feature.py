@@ -1,0 +1,52 @@
+#!/usr/bin/env python
+# -*- cpy-indent-level: 4; indent-tabs-mode: nil -*-
+# ex: set expandtab softtabstop=4 shiftwidth=4:
+#
+# Copyright (C) 2016  Contributor
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+"""Module for testing parameter support for features."""
+
+if __name__ == "__main__":
+    import utils
+    utils.import_depends()
+
+import unittest
+from broker.brokertest import TestBrokerCommand
+
+
+class TestDelParameterFeature(TestBrokerCommand):
+
+    def test_100_del_hw_params(self):
+        self.noouttest(["del_parameter", "--personality", "compileserver",
+                        "--archetype", "aquilon", "--feature", "bios_setup",
+                        "--path", "testdefault"])
+
+    def test_105_show_hw_param_gone(self):
+        command = ["show_parameter", "--personality", "compileserver",
+                   "--archetype", "aquilon"]
+        out = self.commandtest(command)
+        self.searchoutput(out,
+                          r'Hardware Feature: bios_setup\s*'
+                          r'testlist: \[\s*"hardware1",\s*"hardware2"\s*\]',
+                          command)
+
+    def test_105_cat_hw_param_gone(self):
+        command = ["cat", "--personality", "compileserver", "--archetype", "aquilon",
+                   "--pre_feature"]
+        out = self.commandtest(command)
+        self.matchclean(out, "bios_setup/testdefault", command)
+
+if __name__ == '__main__':
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestDelParameterFeature)
+    unittest.TextTestRunner(verbosity=2).run(suite)

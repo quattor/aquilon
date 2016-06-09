@@ -96,7 +96,7 @@ default_param_defs = {
 
 param_features = {
     "host": ["myfeature", "hostfeature"],
-    "hardware": ["hardwarefeature"],
+    "hardware": ["bios_setup"],
     "interface": ["interfacefeature"],
 }
 

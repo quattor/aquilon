@@ -79,7 +79,18 @@ class TestUnbindFeature(TestBrokerCommand):
         err = self.statustest(command)
         self.matchoutput(err, "Flushed 1/1 templates.", command)
 
-    def test_130_unbind_model(self):
+    def test_130_unbind_model_personality(self):
+        self.statustest(["unbind_feature", "--feature", "bios_setup",
+                         "--personality", "compileserver", "--archetype", "aquilon",
+                         "--model", "hs21-8853"])
+
+    def test_131_verify_params_gone(self):
+        command = ["show_parameter", "--personality", "compileserver",
+                   "--archetype", "aquilon"]
+        out = self.commandtest(command)
+        self.matchclean(out, "bios_setup", command)
+
+    def test_132_unbind_model_archetype(self):
         command = ["unbind", "feature", "--feature", "bios_setup",
                    "--model", "hs21-8853",
                    "--archetype", "aquilon",
@@ -87,25 +98,25 @@ class TestUnbindFeature(TestBrokerCommand):
         err = self.statustest(command)
         self.verify_personality_flush(err, command)
 
-    def test_131_verify_show_model(self):
+    def test_135_verify_show_model(self):
         command = ["show", "model", "--model", "hs21-8853"]
         out = self.commandtest(command)
         self.matchclean(out, "bios_setup", command)
 
-    def test_131_verify_show_feature(self):
+    def test_135_verify_show_feature(self):
         command = ["show", "feature", "--feature", "bios_setup",
                    "--type", "hardware"]
         out = self.commandtest(command)
         self.matchclean(out, "hs21-8853", command)
 
-    def test_131_verify_show_host(self):
+    def test_135_verify_show_host(self):
         command = ["show", "host", "--hostname", "unittest02.one-nyp.ms.com"]
         out = self.commandtest(command)
         # Make sure we don't match the feature listed as part of the model
         # definition (we don't do that now, but...)
         self.searchclean(out, r'^  Hardware Feature: bios_setup$', command)
 
-    def test_131_verify_cat_personality(self):
+    def test_135_verify_cat_personality(self):
         command = ["cat", "--personality", "compileserver", "--pre_feature"]
         out = self.commandtest(command)
         self.matchclean(out, "bios_setup", command)

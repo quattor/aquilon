@@ -80,11 +80,6 @@ default_features = {
             "activation": "reboot",
             "deactivation": "reboot",
         },
-        "hardwarefeature": {
-            "visibility": "public",
-            "activation": "reboot",
-            "deactivation": "reboot",
-        },
         "shinynew": {
             "visibility": "public",
             "activation": "reboot",

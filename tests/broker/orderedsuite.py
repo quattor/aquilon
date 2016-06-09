@@ -286,6 +286,9 @@ from .test_add_parameter import TestAddParameter
 from .test_del_parameter import TestDelParameter
 from .test_update_parameter import TestUpdateParameter
 from .test_parameter_feature import TestParameterFeature
+from .test_add_parameter_feature import TestAddParameterFeature
+from .test_del_parameter_feature import TestDelParameterFeature
+from .test_update_parameter_feature import TestUpdateParameterFeature
 from .test_add_parameter_definition import TestAddParameterDefinition
 from .test_del_parameter_definition import TestDelParameterDefinition
 from .test_update_parameter_definition import TestUpdateParameterDefinition
@@ -373,6 +376,7 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestUnbindClient, TestRebindClient, TestReconfigure,
                      TestChangeStatus, TestResetAdvertisedStatus,
                      TestBindFeature,
+                     TestAddParameterFeature,
                      TestParameterFeature,
                      TestJustification,
                      TestChooserConstraints,
@@ -421,6 +425,7 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestUpdateArchetype,
                      TestUpdateFeature,
                      TestUpdateParameterDefinition, TestUpdateParameter,
+                     TestUpdateParameterFeature,
                      TestUpdateMetaCluster, TestUpdateESXCluster,
                      TestUpdateCluster,
                      TestPxeswitch, TestManage, TestManageValidateBranch,
@@ -433,6 +438,7 @@ class BrokerTestSuite(unittest.TestSuite):
                      TestConsistency,
                      TestUmaskConstraints,
                      TestUnbindServer, TestUnmapService,
+                     TestDelParameterFeature,
                      TestUnbindFeature,
                      TestDel10GigHardware, TestDelVirtualHardware,
                      TestUnbindCluster, TestUncluster,
